@@ -1,0 +1,129 @@
+{
+  "equipment": [
+    {
+      "id": "cyber-eye-omega",
+      "name": "Кибер-глаз Omega",
+      "type": "implant",
+      "slot": "ocular",
+      "description": "Улучшает когнитивные способности",
+      "effects": {
+        "Intelligence": 15,
+        "Anxiety": 5
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 50,
+        "max": 150,
+        "default": 100
+      },
+      "modes": ["Стандартный", "Усиленный", "Экономный"],
+      "progressiveEffects": [
+        {
+          "attribute": "Intelligence",
+          "increment": 2,
+          "maxValue": 25,
+          "interval": 3
+        }
+      ]
+    },
+    {
+      "id": "smart-suit",
+      "name": "Умный костюм",
+      "type": "clothing",
+      "slot": "body",
+      "description": "Адаптивная одежда с сенсорами",
+      "effects": {
+        "Strength": 10,
+        "Empathy": -5
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 25,
+        "max": 125,
+        "default": 75
+      },
+      "progressiveEffects": [
+        {
+          "attribute": "Strength",
+          "increment": 1,
+          "maxValue": 15,
+          "interval": 5
+        }
+      ]
+    },
+    {
+      "id": "ar-glasses",
+      "name": "Голо-очки",
+      "type": "device",
+      "slot": "head",
+      "description": "Очки дополненной реальности",
+      "effects": {
+        "Intelligence": 5,
+        "Creativity": 8
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 10,
+        "max": 200,
+        "default": 100
+      }
+    },
+    {
+      "id": "neuro-enhancer-mk3",
+      "name": "Нейроусилитель MK-III",
+      "type": "implant",
+      "slot": "neural",
+      "description": "Продвинутый нейроимплант для усиления когнитивных функций",
+      "effects": {
+        "Intelligence": 15,
+        "Creativity": 10
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 75,
+        "max": 175,
+        "default": 125
+      },
+      "modes": ["Базовый", "Турбо", "Креативный"],
+      "progressiveEffects": [
+        {
+          "attribute": "Intelligence",
+          "increment": 3,
+          "maxValue": 30,
+          "interval": 2
+        },
+        {
+          "attribute": "Creativity",
+          "increment": 2,
+          "maxValue": 20,
+          "interval": 4
+        }
+      ]
+    },
+    {
+      "id": "neuro-enhancer",
+      "name": "Нейроусилитель",
+      "type": "implant",
+      "slot": "neural",
+      "description": "Улучшает когнитивные способности",
+      "effects": {
+        "Intelligence": 15,
+        "Anxiety": 5
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 50,
+        "max": 150,
+        "default": 100
+      },
+      "progressiveEffects": [
+        {
+          "attribute": "Intelligence",
+          "increment": 1,
+          "maxValue": 20,
+          "interval": 7
+        }
+      ]
+    }
+  ]
+}

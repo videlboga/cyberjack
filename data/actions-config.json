@@ -1,0 +1,174 @@
+{
+  "categories": {
+    "training": {
+      "title": "🎓 Обучение",
+      "description": "Развитие профессиональных навыков и компетенций",
+      "actions": {
+        "basic": {
+          "title": "Базовое обучение",
+          "cost": 1,
+          "description": "Стандартное обучение с гарантированным результатом",
+          "effects": {
+            "skills": { "technical": 1, "creative": 1 },
+            "states": { "engagement": 5 }
+          }
+        },
+        "intensive": {
+          "title": "Интенсивное обучение",
+          "cost": 2,
+          "description": "Ускоренное обучение с повышенной нагрузкой",
+          "effects": {
+            "skills": { "technical": 2, "creative": 1 },
+            "states": { "engagement": 10, "anxiety": 5 }
+          }
+        },
+        "neuro": {
+          "title": "Нейроулучшение",
+          "cost": 3,
+          "description": "Экспериментальное обучение с непредсказуемыми результатами",
+          "effects": {
+            "skills": { "technical": 3, "creative": 2 },
+            "states": { "engagement": 15, "anxiety": 10 }
+          },
+          "risk": 30,
+          "riskEffects": {
+            "states": { "burnout": 20, "mood": -15 }
+          }
+        }
+      }
+    },
+    "coaching": {
+      "title": "💪 Коучинг",
+      "description": "Развитие личностных качеств и мотивации",
+      "actions": {
+        "basic": {
+          "title": "Базовый коучинг",
+          "cost": 1,
+          "description": "Стандартная мотивационная сессия",
+          "effects": {
+            "states": { "mood": 10, "engagement": 5 }
+          }
+        },
+        "intensive": {
+          "title": "Интенсивный коучинг",
+          "cost": 2,
+          "description": "Глубокая работа с мотивацией и целями",
+          "effects": {
+            "states": { "mood": 20, "engagement": 10, "anxiety": 5 }
+          }
+        },
+        "extreme": {
+          "title": "Экстремальный коучинг",
+          "cost": 3,
+          "description": "Радикальные методы развития с высоким риском",
+          "effects": {
+            "states": { "mood": 30, "engagement": 20 }
+          },
+          "risk": 25,
+          "riskEffects": {
+            "states": { "anxiety": 25, "burnout": 10 }
+          }
+        }
+      }
+    },
+    "therapy": {
+      "title": "🧠 Терапия",
+      "description": "Работа с психологическим состоянием и стрессом",
+      "actions": {
+        "basic": {
+          "title": "Базовая терапия",
+          "cost": 1,
+          "description": "Стандартная психологическая поддержка",
+          "effects": {
+            "states": { "anxiety": -10, "mood": 5 }
+          }
+        },
+        "intensive": {
+          "title": "Интенсивная терапия",
+          "cost": 2,
+          "description": "Глубокая проработка психологических проблем",
+          "effects": {
+            "states": { "anxiety": -20, "burnout": -10, "mood": 10 }
+          }
+        },
+        "isolation": {
+          "title": "Изоляционная терапия",
+          "cost": 3,
+          "description": "Полная изоляция для восстановления, но с потерей вовлеченности",
+          "effects": {
+            "states": { "anxiety": -30, "burnout": -25, "engagement": -20, "mood": 15 }
+          }
+        }
+      }
+    },
+    "reward": {
+      "title": "🎁 Поощрение",
+      "description": "Мотивация через награды и признание",
+      "actions": {
+        "basic": {
+          "title": "Базовое поощрение",
+          "cost": 1,
+          "description": "Стандартное признание достижений",
+          "effects": {
+            "states": { "mood": 15, "engagement": 5 }
+          }
+        },
+        "premium": {
+          "title": "Премиальное поощрение",
+          "cost": 2,
+          "description": "Значительные бонусы и привилегии",
+          "effects": {
+            "states": { "mood": 25, "engagement": 15 }
+          }
+        },
+        "luxury": {
+          "title": "Люксовое поощрение",
+          "cost": 4,
+          "description": "Эксклюзивные награды с риском зависимости",
+          "effects": {
+            "states": { "mood": 40, "engagement": 25 }
+          },
+          "risk": 20,
+          "riskEffects": {
+            "attributes": { "ego": 1 },
+            "states": { "anxiety": 10 }
+          }
+        }
+      }
+    },
+    "rest": {
+      "title": "😴 Отдых",
+      "description": "Восстановление сил и предотвращение выгорания",
+      "actions": {
+        "basic": {
+          "title": "Базовый отдых",
+          "cost": 1,
+          "description": "Стандартный выходной день",
+          "effects": {
+            "states": { "burnout": -10, "mood": 5 }
+          }
+        },
+        "vacation": {
+          "title": "Творческий отпуск",
+          "cost": 3,
+          "description": "Длительный отдых с полным восстановлением, но потерей вовлеченности",
+          "effects": {
+            "states": { "burnout": -30, "anxiety": -15, "engagement": -25, "mood": 20 }
+          }
+        },
+        "retreat": {
+          "title": "Духовный ретрит",
+          "cost": 2,
+          "description": "Медитативный отдых с непредсказуемыми эффектами",
+          "effects": {
+            "states": { "burnout": -20, "anxiety": -10, "mood": 15 }
+          },
+          "risk": 15,
+          "riskEffects": {
+            "states": { "engagement": -15 }
+          }
+        }
+      }
+    }
+  }
+}

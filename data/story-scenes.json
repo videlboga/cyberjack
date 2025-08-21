@@ -1,0 +1,227 @@
+{
+  "storyPoints": {
+    "market_reputation": {
+      "name": "Репутация на рынке",
+      "description": "Ваша репутация среди торговцев талантами",
+      "defaultValue": 0,
+      "minValue": -100,
+      "maxValue": 100
+    },
+    "void_experience": {
+      "name": "Опыт в Void",
+      "description": "Количество успешных операций в зоне Void",
+      "defaultValue": 0,
+      "minValue": 0,
+      "maxValue": 50
+    },
+    "negotiation_skill": {
+      "name": "Навык переговоров",
+      "description": "Уровень мастерства в переговорах",
+      "defaultValue": 1,
+      "minValue": 1,
+      "maxValue": 10
+    },
+    "corporate_connections": {
+      "name": "Корпоративные связи",
+      "description": "Влияние в корпоративных кругах",
+      "defaultValue": 0,
+      "minValue": 0,
+      "maxValue": 20
+    }
+  },
+  "scenes": [
+    {
+      "id": "market_intro",
+      "title": "Добро пожаловать на Talent Exchange",
+      "description": "Многоэкранная сцена знакомства с рынком талантов",
+      "triggerConditions": [
+        {
+          "type": "story_point",
+          "pointId": "market_reputation",
+          "operator": ">=",
+          "value": 0
+        }
+      ],
+      "probability": 80,
+      "screens": [
+        {
+          "id": "entrance",
+          "title": "Вход в торговый зал",
+          "background": "/cyberpunk-market.png",
+          "description": "Вы входите в шумный торговый зал, где голографические профили талантов мерцают в воздухе",
+          "choices": [
+            {
+              "id": "browse_talents",
+              "text": "Просмотреть доступных талантов",
+              "consequences": [
+                { "type": "gain_credits", "amount": 0 },
+                { "type": "story_point_change", "pointId": "market_reputation", "change": 1 }
+              ],
+              "navigation": { "type": "goto_screen", "screenId": "talent_list" }
+            },
+            {
+              "id": "negotiate_price",
+              "text": "Попытаться договориться о цене",
+              "consequences": [
+                { "type": "talent_stat_change", "talentId": "current", "stat": "negotiation", "change": 1 },
+                { "type": "story_point_change", "pointId": "negotiation_skill", "change": 1 }
+              ],
+              "navigation": { "type": "goto_screen", "screenId": "negotiation" }
+            }
+          ]
+        },
+        {
+          "id": "talent_list",
+          "title": "Список доступных талантов",
+          "background": "/talent-profiles.png",
+          "description": "Перед вами отображается список доступных талантов с их характеристиками",
+          "choices": [
+            {
+              "id": "select_talent",
+              "text": "Выбрать таланта",
+              "consequences": [
+                {
+                  "type": "gain_talent",
+                  "talentData": { "name": "Случайный талант", "specialization": "Случайная", "rank": "B" }
+                },
+                { "type": "story_point_change", "pointId": "market_reputation", "change": 5 }
+              ],
+              "navigation": { "type": "end_scene" }
+            },
+            {
+              "id": "go_back",
+              "text": "Вернуться к входу",
+              "consequences": [],
+              "navigation": { "type": "goto_screen", "screenId": "entrance" }
+            }
+          ]
+        },
+        {
+          "id": "negotiation",
+          "title": "Переговоры",
+          "background": "/negotiation-scene.png",
+          "description": "Талант внимательно изучает ваше предложение, взвешивая все за и против",
+          "accessConditions": [
+            {
+              "type": "story_point",
+              "pointId": "negotiation_skill",
+              "operator": ">=",
+              "value": 2
+            }
+          ],
+          "choices": [
+            {
+              "id": "offer_bonus",
+              "text": "Предложить бонус к зарплате",
+              "consequences": [
+                { "type": "lose_credits", "amount": 200 },
+                { "type": "talent_stat_change", "talentId": "current", "stat": "mood", "change": 10 },
+                { "type": "story_point_change", "pointId": "negotiation_skill", "change": 2 },
+                { "type": "story_point_change", "pointId": "market_reputation", "change": 3 }
+              ],
+              "navigation": { "type": "end_scene" }
+            },
+            {
+              "id": "cancel_negotiation",
+              "text": "Отменить переговоры",
+              "consequences": [{ "type": "story_point_change", "pointId": "market_reputation", "change": -1 }],
+              "navigation": { "type": "goto_screen", "screenId": "entrance" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "void_rescue",
+      "title": "Спасательная операция в Void",
+      "description": "Опасная миссия по спасению талантов из зоны Void",
+      "triggerConditions": [
+        {
+          "type": "story_point",
+          "pointId": "void_experience",
+          "operator": ">=",
+          "value": 0
+        }
+      ],
+      "probability": 60,
+      "screens": [
+        {
+          "id": "approach",
+          "title": "Приближение к Void Border",
+          "background": "/void-space.png",
+          "description": "Ваш корабль медленно приближается к опасной зоне, где сканеры обнаружили сигнал бедствия",
+          "choices": [
+            {
+              "id": "scan_area",
+              "text": "Просканировать область",
+              "consequences": [
+                { "type": "gain_equipment", "equipmentId": "scanner_data" },
+                { "type": "story_point_change", "pointId": "void_experience", "change": 1 }
+              ],
+              "navigation": { "type": "goto_screen", "screenId": "rescue_operation" }
+            },
+            {
+              "id": "rush_in",
+              "text": "Немедленно начать спасательную операцию",
+              "consequences": [
+                { "type": "gain_credits", "amount": 100 },
+                { "type": "talent_stat_change", "talentId": "current", "stat": "anxiety", "change": 5 }
+              ],
+              "navigation": { "type": "goto_screen", "screenId": "dangerous_rescue" }
+            }
+          ]
+        },
+        {
+          "id": "rescue_operation",
+          "title": "Спасательная операция",
+          "background": "/rescue-scene.png",
+          "description": "Благодаря сканированию вы точно знаете где находятся выжившие",
+          "choices": [
+            {
+              "id": "successful_rescue",
+              "text": "Провести спасательную операцию",
+              "consequences": [
+                {
+                  "type": "gain_talent",
+                  "talentData": { "name": "Спасенный талант", "specialization": "Выживший", "rank": "A" }
+                },
+                { "type": "story_point_change", "pointId": "void_experience", "change": 5 }
+              ],
+              "navigation": { "type": "end_scene" }
+            }
+          ]
+        },
+        {
+          "id": "dangerous_rescue",
+          "title": "Опасное спасение",
+          "background": "/dangerous-void.png",
+          "description": "Без предварительного сканирования операция становится крайне рискованной",
+          "choices": [
+            {
+              "id": "risky_rescue",
+              "text": "Продолжить несмотря на риски",
+              "consequences": [
+                { "type": "lose_credits", "amount": 300 },
+                {
+                  "type": "gain_talent",
+                  "talentData": { "name": "Травмированный талант", "specialization": "Выживший", "rank": "C" }
+                },
+                { "type": "story_point_change", "pointId": "void_experience", "change": 2 }
+              ],
+              "navigation": { "type": "end_scene" }
+            },
+            {
+              "id": "abort_mission",
+              "text": "Прервать миссию",
+              "consequences": [
+                { "type": "talent_stat_change", "talentId": "current", "stat": "mood", "change": -5 },
+                { "type": "story_point_change", "pointId": "void_experience", "change": -1 }
+              ],
+              "navigation": { "type": "end_scene" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

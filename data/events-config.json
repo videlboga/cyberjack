@@ -1,0 +1,48 @@
+{
+  "events": [
+    {
+      "id": "event_001",
+      "title": "Солнечная буря",
+      "type": "Аномалия",
+      "probability": 15,
+      "effects": {
+        "global": {
+          "neuralPulses": -2,
+          "allTalents": {
+            "states": { "anxiety": 10, "mood": -5 }
+          }
+        }
+      },
+      "description": "Магнитная буря влияет на нейроинтерфейсы станции"
+    },
+    {
+      "id": "event_002",
+      "title": "Корпоративная вечеринка",
+      "type": "Социальное",
+      "probability": 25,
+      "effects": {
+        "global": {
+          "allTalents": {
+            "states": { "mood": 15, "engagement": 10, "burnout": -5 }
+          }
+        }
+      },
+      "description": "Общее мероприятие поднимает настроение всей команды"
+    },
+    {
+      "id": "event_003",
+      "title": "Технический сбой",
+      "type": "Кризис",
+      "probability": 10,
+      "effects": {
+        "global": {
+          "credits": -500,
+          "allTalents": {
+            "states": { "anxiety": 15, "engagement": -10 }
+          }
+        }
+      },
+      "description": "Сбой в системах станции требует экстренного ремонта"
+    }
+  ]
+}

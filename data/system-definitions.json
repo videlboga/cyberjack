@@ -1,0 +1,288 @@
+{
+  "attributes": [
+    {
+      "id": "strength",
+      "name": "Сила",
+      "description": "Физическая мощь и выносливость",
+      "category": "physical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "empathy",
+      "name": "Эмпатия",
+      "description": "Способность понимать и чувствовать других",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "intelligence",
+      "name": "Интеллект",
+      "description": "Когнитивные способности и обучаемость",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "creativity",
+      "name": "Креативность",
+      "description": "Творческие способности и инновационное мышление",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "temperament",
+      "name": "Темперамент",
+      "description": "Эмоциональная стабильность и самоконтроль",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "grit",
+      "name": "Упорство",
+      "description": "Настойчивость и стойкость перед трудностями",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "ego",
+      "name": "Эго",
+      "description": "Самооценка и уверенность в себе",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    }
+  ],
+  "states": [
+    {
+      "id": "mood",
+      "name": "Настроение",
+      "description": "Текущее эмоциональное состояние",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "mood"
+    },
+    {
+      "id": "anxiety",
+      "name": "Тревожность",
+      "description": "Уровень беспокойства и стресса",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "anxiety"
+    },
+    {
+      "id": "burnout",
+      "name": "Выгорание",
+      "description": "Эмоциональное истощение от работы",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "burnout"
+    },
+    {
+      "id": "engagement",
+      "name": "Вовлеченность",
+      "description": "Интерес и мотивация к работе",
+      "category": "motivational",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "engagement"
+    },
+    {
+      "id": "entitlement",
+      "name": "Притязания",
+      "description": "Ожидания и требования к условиям",
+      "category": "social",
+      "minValue": 0,
+      "maxValue": 5,
+      "colorType": "neutral"
+    },
+    {
+      "id": "insight",
+      "name": "Инсайт",
+      "description": "Понимание себя и ситуации",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 5,
+      "colorType": "neutral"
+    },
+    {
+      "id": "routine",
+      "name": "Рутина",
+      "description": "Привыкание к повторяющимся задачам",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 5,
+      "colorType": "neutral"
+    },
+    {
+      "id": "compliance",
+      "name": "Послушание",
+      "description": "Готовность следовать указаниям",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 5,
+      "colorType": "neutral"
+    },
+    {
+      "id": "neuroplasticity",
+      "name": "Нейропластичность",
+      "description": "Способность мозга к адаптации",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 5,
+      "colorType": "neutral"
+    },
+    {
+      "id": "endurance",
+      "name": "Выносливость",
+      "description": "Способность работать длительное время",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 5,
+      "colorType": "neutral"
+    },
+    {
+      "id": "cognitiveLoad",
+      "name": "Когнитивная нагрузка",
+      "description": "Умственная усталость от сложных задач",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 5,
+      "colorType": "neutral"
+    }
+  ],
+  "skills": [
+    {
+      "id": "office",
+      "name": "Офисная работа",
+      "description": "Навыки административной и офисной деятельности",
+      "category": "professional",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "negotiation",
+      "name": "Переговоры",
+      "description": "Умение вести переговоры и убеждать",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "technical",
+      "name": "Технические навыки",
+      "description": "Работа с техникой и технологиями",
+      "category": "technical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "vr",
+      "name": "VR/AR",
+      "description": "Навыки работы в виртуальной реальности",
+      "category": "technical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "field",
+      "name": "Полевая работа",
+      "description": "Навыки работы вне офиса, в поле",
+      "category": "practical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "etiquette",
+      "name": "Этикет",
+      "description": "Знание правил поведения и протокола",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "logistics",
+      "name": "Логистика",
+      "description": "Планирование и координация процессов",
+      "category": "organizational",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "medical",
+      "name": "Медицина",
+      "description": "Медицинские знания и навыки",
+      "category": "specialized",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "maintenance",
+      "name": "Обслуживание",
+      "description": "Ремонт и техническое обслуживание",
+      "category": "technical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "data",
+      "name": "Работа с данными",
+      "description": "Анализ и обработка информации",
+      "category": "analytical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "stage",
+      "name": "Сценические навыки",
+      "description": "Выступления и презентации",
+      "category": "creative",
+      "minValue": 1,
+      "maxValue": 10
+    }
+  ],
+  "actionCategories": [
+    {
+      "id": "training",
+      "name": "Обучение",
+      "icon": "🎓",
+      "description": "Развитие профессиональных навыков и компетенций",
+      "color": "blue"
+    },
+    {
+      "id": "coaching",
+      "name": "Коучинг",
+      "icon": "💪",
+      "description": "Развитие личностных качеств и мотивации",
+      "color": "green"
+    },
+    {
+      "id": "therapy",
+      "name": "Терапия",
+      "icon": "🧠",
+      "description": "Работа с психологическим состоянием и стрессом",
+      "color": "purple"
+    },
+    {
+      "id": "reward",
+      "name": "Поощрение",
+      "icon": "🎁",
+      "description": "Мотивация через награды и признание",
+      "color": "yellow"
+    },
+    {
+      "id": "rest",
+      "name": "Отдых",
+      "icon": "😴",
+      "description": "Восстановление сил и предотвращение выгорания",
+      "color": "cyan"
+    }
+  ]
+}

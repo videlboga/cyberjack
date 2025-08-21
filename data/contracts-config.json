@@ -1,0 +1,40 @@
+{
+  "available": [
+    {
+      "id": "contract_001",
+      "title": "Разработка мобильного приложения",
+      "client": "StartupTech",
+      "duration": 14,
+      "reward": 2500,
+      "reputation": 15,
+      "requirements": {
+        "skills": { "technical": 3, "creative": 2 },
+        "minRank": "C"
+      },
+      "kpi": [
+        { "name": "Качество кода", "target": 80, "current": 0 },
+        { "name": "Соблюдение сроков", "target": 90, "current": 0 },
+        { "name": "Удовлетворенность клиента", "target": 85, "current": 0 }
+      ],
+      "description": "Создание инновационного мобильного приложения для стартапа"
+    },
+    {
+      "id": "contract_002",
+      "title": "Ребрендинг компании",
+      "client": "Fashion House",
+      "duration": 21,
+      "reward": 3500,
+      "reputation": 25,
+      "requirements": {
+        "skills": { "creative": 4, "social": 3 },
+        "minRank": "B"
+      },
+      "kpi": [
+        { "name": "Креативность решения", "target": 90, "current": 0 },
+        { "name": "Соответствие бренду", "target": 85, "current": 0 },
+        { "name": "Влияние на продажи", "target": 75, "current": 0 }
+      ],
+      "description": "Полный ребрендинг модного дома с новой айдентикой"
+    }
+  ]
+}
