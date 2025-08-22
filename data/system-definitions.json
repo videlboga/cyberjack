@@ -68,31 +68,31 @@
       "colorType": "mood"
     },
     {
-      "id": "anxiety",
-      "name": "Тревожность",
-      "description": "Уровень беспокойства и стресса",
+      "id": "fear",
+      "name": "Страх",
+      "description": "Уровень страха и подчинения",
       "category": "emotional",
       "minValue": 0,
       "maxValue": 100,
-      "colorType": "anxiety"
+      "colorType": "fear"
     },
     {
-      "id": "burnout",
-      "name": "Выгорание",
-      "description": "Эмоциональное истощение от работы",
+      "id": "despair",
+      "name": "Отчаяние",
+      "description": "Эмоциональное истощение от пыток",
       "category": "emotional",
       "minValue": 0,
       "maxValue": 100,
-      "colorType": "burnout"
+      "colorType": "despair"
     },
     {
-      "id": "engagement",
-      "name": "Вовлеченность",
-      "description": "Интерес и мотивация к работе",
+      "id": "devotion",
+      "name": "Преданность",
+      "description": "Преданность и подчинение мастеру",
       "category": "motivational",
       "minValue": 0,
       "maxValue": 100,
-      "colorType": "engagement"
+      "colorType": "devotion"
     },
     {
       "id": "entitlement",
@@ -104,9 +104,9 @@
       "colorType": "neutral"
     },
     {
-      "id": "insight",
-      "name": "Инсайт",
-      "description": "Понимание себя и ситуации",
+      "id": "awareness",
+      "name": "Осознанность",
+      "description": "Понимание своего положения и подчинения",
       "category": "mental",
       "minValue": 0,
       "maxValue": 5,
@@ -131,9 +131,9 @@
       "colorType": "neutral"
     },
     {
-      "id": "neuroplasticity",
-      "name": "Нейропластичность",
-      "description": "Способность мозга к адаптации",
+      "id": "sensuality",
+      "name": "Чувственность",
+      "description": "Способность к сексуальным ощущениям",
       "category": "mental",
       "minValue": 0,
       "maxValue": 5,
@@ -149,9 +149,9 @@
       "colorType": "neutral"
     },
     {
-      "id": "cognitiveLoad",
-      "name": "Когнитивная нагрузка",
-      "description": "Умственная усталость от сложных задач",
+      "id": "sensory_overload",
+      "name": "Сенсорная перегрузка",
+      "description": "Перегрузка от интенсивных ощущений",
       "category": "mental",
       "minValue": 0,
       "maxValue": 5,
@@ -160,34 +160,34 @@
   ],
   "skills": [
     {
-      "id": "office",
-      "name": "Офисная работа",
-      "description": "Навыки административной и офисной деятельности",
-      "category": "professional",
+      "id": "maid",
+      "name": "Горничная",
+      "description": "Навыки домашнего обслуживания и ухода",
+      "category": "domestic",
       "minValue": 1,
       "maxValue": 10
     },
     {
-      "id": "negotiation",
-      "name": "Переговоры",
-      "description": "Умение вести переговоры и убеждать",
-      "category": "social",
+      "id": "cooking",
+      "name": "Кулинария",
+      "description": "Навыки приготовления пищи и обслуживания",
+      "category": "domestic",
       "minValue": 1,
       "maxValue": 10
     },
     {
-      "id": "technical",
-      "name": "Технические навыки",
-      "description": "Работа с техникой и технологиями",
+      "id": "neural_hacking",
+      "name": "Нейрохакерство",
+      "description": "Навыки работы с нейроимплантами и контролем",
       "category": "technical",
       "minValue": 1,
       "maxValue": 10
     },
     {
-      "id": "vr",
-      "name": "VR/AR",
-      "description": "Навыки работы в виртуальной реальности",
-      "category": "technical",
+      "id": "orgasm_control",
+      "name": "Контроль оргазмов",
+      "description": "Навыки контроля и управления оргазмами",
+      "category": "sexual",
       "minValue": 1,
       "maxValue": 10
     },

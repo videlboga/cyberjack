@@ -45,9 +45,9 @@ export default function TalentArchitectGDD() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Gamepad2 className="h-5 w-5" />
-                  Talent Architect
+                  Nexus Enslaver
                 </CardTitle>
-                <CardDescription>Этичная менеджмент-игра в сеттинге космической станции</CardDescription>
+                <CardDescription>NSFW игра с BDSM элементами в сеттинге космической станции</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -70,16 +70,16 @@ export default function TalentArchitectGDD() {
                 <div>
                   <h4 className="font-semibold mb-2">Роль игрока:</h4>
                   <p>
-                    Руководитель агентства талантов. Рекрутинг, развитие, поддержка психического здоровья, выполнение
-                    контрактов, рост репутации и статуса (от скваттера до CEO).
+                    Мастер активов на космической станции. Приобретение, тренировка, кондиционирование, управление
+                    имплантами, выполнение контрактов, рост репутации и статуса (от скваттера до CEO).
                   </p>
                 </div>
 
                 <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
                   <h4 className="font-semibold mb-2 text-amber-800">Ключевой баланс:</h4>
                   <p className="text-amber-700">
-                    Производительность vs забота — переработки и давление дают быстрые результаты, но ведут к
-                    тревожности/выгоранию и потере людей.
+                    Жесткость vs забота — пытки и давление дают быстрые результаты, но ведут к
+                    страху/отчаянию и потере активов.
                   </p>
                 </div>
               </CardContent>
@@ -126,15 +126,15 @@ export default function TalentArchitectGDD() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Источники талантов</CardTitle>
-                <CardDescription>Этичные аналоги «приобретения активов»</CardDescription>
+                <CardTitle>Источники активов</CardTitle>
+                <CardDescription>Способы приобретения активов</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {[
                     {
-                      name: "Talent Exchange (Core)",
-                      desc: "Биржа. 3–5 кандидатов/день. Видны 1–2 скрытых черт. Старт: низкая тревожность, высокий Ego.",
+                      name: "Asset Exchange (Core)",
+                      desc: "Аукцион. 3–5 активов/день. Видны 1–2 скрытых черт. Старт: низкий страх, высокий Ego.",
                       color: "bg-blue-100 border-blue-300",
                     },
                     {
@@ -505,10 +505,10 @@ export default function TalentArchitectGDD() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Talent Architect</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Nexus Enslaver</h1>
           <p className="text-xl text-gray-600">Game Design Document</p>
           <div className="flex gap-2 mt-4">
-            <Badge className="mt-2">Этичная менеджмент-игра</Badge>
+            <Badge className="mt-2">NSFW BDSM игра</Badge>
             <Link href="/game">
               <Button className="bg-green-600 hover:bg-green-700">🎮 Играть (Dev)</Button>
             </Link>

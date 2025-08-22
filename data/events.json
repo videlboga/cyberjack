@@ -2,41 +2,41 @@
   "anomalies": [
     {
       "id": "anom_1",
-      "title": "Временная аномалия",
-      "description": "Странные искажения времени в секторе B. Некоторые таланты могут получить дополнительные действия.",
+      "title": "Временная аномалия в Тени",
+      "description": "Странные искажения времени в Void Border. Некоторые активы могут получить дополнительные действия.",
       "probability": 0.1,
       "effects": {
         "global": { "neuralPulses": 2 },
         "talent": { "maxDailyActions": 1 }
       },
       "duration": 3,
-      "storyScenes": ["time_anomaly_discovery", "temporal_investigation"]
+      "storyScenes": ["void_anomaly_discovery", "temporal_investigation"]
     }
   ],
   "crises": [
     {
       "id": "crisis_1",
-      "title": "Системный сбой",
-      "description": "Критический сбой в системах станции. Все технические навыки временно снижены.",
+      "title": "Сбой имплантов",
+      "description": "Критический сбой в нейроимплантах. Все активы временно теряют контроль.",
       "probability": 0.05,
       "effects": {
-        "talent": { "skills": { "technical": -1, "data": -1 } }
+        "talent": { "skills": { "neural_hacking": -1, "orgasm_control": -1 } }
       },
       "duration": 2,
-      "storyScenes": ["system_failure_alert", "emergency_response", "repair_mission"]
+      "storyScenes": ["implant_failure_alert", "emergency_response", "repair_mission"]
     }
   ],
   "opportunities": [
     {
       "id": "opp_1",
-      "title": "Корпоративный визит",
-      "description": "Представители крупной корпорации посещают станцию. Возможность заключить выгодные контракты.",
+      "title": "Корпоративный аукцион",
+      "description": "Представители крупных корпораций посещают станцию для аукциона активов. Возможность заключить выгодные контракты.",
       "probability": 0.15,
       "effects": {
         "global": { "contractMultiplier": 1.5 }
       },
       "duration": 1,
-      "storyScenes": ["corporate_arrival", "business_meeting", "deal_negotiation"]
+      "storyScenes": ["corporate_arrival", "auction_preparation", "deal_negotiation"]
     }
   ]
 }

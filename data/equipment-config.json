@@ -2,13 +2,13 @@
   "equipment": [
     {
       "id": "cyber-eye-omega",
-      "name": "Кибер-глаз Omega",
+      "name": "Нейроимплант Omega",
       "type": "implant",
       "slot": "ocular",
-      "description": "Улучшает когнитивные способности",
+      "description": "Улучшает контроль и подчинение",
       "effects": {
         "Intelligence": 15,
-        "Anxiety": 5
+        "Fear": 5
       },
       "removable": false,
       "powerSettings": {
@@ -28,10 +28,10 @@
     },
     {
       "id": "smart-suit",
-      "name": "Умный костюм",
+      "name": "Сенсорный костюм",
       "type": "clothing",
       "slot": "body",
-      "description": "Адаптивная одежда с сенсорами",
+      "description": "Адаптивная одежда с сенсорами контроля",
       "effects": {
         "Strength": 10,
         "Empathy": -5
@@ -53,10 +53,10 @@
     },
     {
       "id": "ar-glasses",
-      "name": "Голо-очки",
+      "name": "Контрольные очки",
       "type": "device",
       "slot": "head",
-      "description": "Очки дополненной реальности",
+      "description": "Очки контроля и мониторинга",
       "effects": {
         "Intelligence": 5,
         "Creativity": 8
@@ -70,10 +70,10 @@
     },
     {
       "id": "neuro-enhancer-mk3",
-      "name": "Нейроусилитель MK-III",
+      "name": "Нейроимплант MK-III",
       "type": "implant",
       "slot": "neural",
-      "description": "Продвинутый нейроимплант для усиления когнитивных функций",
+      "description": "Продвинутый нейроимплант для усиления контроля",
       "effects": {
         "Intelligence": 15,
         "Creativity": 10

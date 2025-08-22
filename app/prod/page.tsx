@@ -2,15 +2,16 @@
 
 import React from "react"
 import { useState, useRef, useEffect } from "react"
-import { loadGameConfig, validateConfig } from "@/lib/config-loader"
+import { loadConfigsForEnvironment, initializeUnifiedDataSource } from "@/lib/config-sync"
 import type { GameConfig, GameAction, GameContract, GameEvent, GameEquipment } from "@/lib/types"
+import RegistrationModal from "./components/RegistrationModal"
 
-// Функция для генерации уникальных ID
-let idCounter = 0
-const generateUniqueId = (prefix: string = '') => {
-  idCounter++
-  return `${prefix}${Date.now()}-${idCounter}`
-}
+  // Функция для генерации уникальных ID
+  let idCounter = 0
+  const generateUniqueId = (prefix: string = '') => {
+    idCounter++
+    return `${prefix}${Date.now()}-${idCounter}`
+  }
 
 // Используем типы из lib/types.ts
 type Equipment = GameEquipment
@@ -36,9 +37,9 @@ interface Talent {
   role: string
   level: number
   mood: number
-  anxiety: number
-  burnout: number
-  engagement: number
+  fear: number
+  despair: number
+  devotion: number
   strength: number
   empathy: number
   intelligence: number
@@ -62,29 +63,29 @@ interface Talent {
   }
   states: {
     mood: number
-    anxiety: number
-    burnout: number
-    engagement: number
+    fear: number
+    despair: number
+    devotion: number
     entitlement: number
-    insight: number
+    awareness: number
     routine: number
     compliance: number
-    neuroplasticity: number
+    sensuality: number
     endurance: number
-    cognitiveLoad: number
+    sensory_overload: number
   }
   skills: {
-    office: number
-    negotiation: number
-    technical: number
-    vr: number
+    maid: number
+    cooking: number
+    neural_hacking: number
+    orgasm_control: number
     field: number
     etiquette: number
     logistics: number
     medical: number
     maintenance: number
     data: number
-    stage: number
+    dance: number
   }
   affinities: { [key: string]: number }
   stressors: { [key: string]: number }
@@ -129,9 +130,23 @@ export default function TalentArchitectProd() {
   const [configLoading, setConfigLoading] = useState(true)
   const [configError, setConfigError] = useState<string | null>(null)
   
+  // Состояние для регистрации
+  const [showRegistration, setShowRegistration] = useState(true)
+  const [currentUser, setCurrentUser] = useState<{ username: string; id: string } | null>(null)
+  
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null)
   const [neuralPulses, setNeuralPulses] = useState(100)
   const [credits, setCredits] = useState(5000)
+  
+  // Кастомный хук для управления кредитами с сохранением
+  const updateCredits = (newCredits: number | ((prev: number) => number)) => {
+    const updatedCredits = typeof newCredits === 'function' ? newCredits(credits) : newCredits
+    setCredits(updatedCredits)
+    // Обновляем баланс только если пользователь зарегистрирован
+    if (currentUser) {
+      updateUserBalance(updatedCredits)
+    }
+  }
   const [reputation, setReputation] = useState(75)
   const [currentDay, setCurrentDay] = useState(1)
   const [activeTab, setActiveTab] = useState("talents")
@@ -172,14 +187,11 @@ export default function TalentArchitectProd() {
     const loadConfig = async () => {
       try {
         setConfigLoading(true)
-        const config = await loadGameConfig()
-        const validation = validateConfig(config)
         
-        if (!validation.isValid) {
-          setConfigError(`Ошибки валидации: ${validation.errors.join(', ')}`)
-          return
-        }
+        // Инициализируем единый источник истины
+        initializeUnifiedDataSource()
         
+        const config = await loadConfigsForEnvironment('prod')
         setGameConfig(config)
       } catch (error) {
         setConfigError(error instanceof Error ? error.message : 'Неизвестная ошибка загрузки')
@@ -190,6 +202,129 @@ export default function TalentArchitectProd() {
     
     loadConfig()
   }, [])
+
+  // Проверка существующего пользователя при загрузке
+  useEffect(() => {
+    const savedUser = localStorage.getItem('currentUser')
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser)
+        setCurrentUser({ username: user.username, id: user.id })
+        setShowRegistration(false)
+        
+        // Восстанавливаем игровые ресурсы пользователя
+        updateCredits(user.account?.balance || 5000)
+        setNeuralPulses(100) // Сбрасываем каждый день
+        setReputation(75) // Базовое значение
+        setCurrentDay(1) // Начинаем с первого дня
+      } catch (error) {
+        console.error('Ошибка загрузки пользователя:', error)
+        localStorage.removeItem('currentUser')
+      }
+    }
+  }, [])
+
+  // Функция для обработки регистрации пользователя
+  const handleUserRegistration = (username: string, password: string) => {
+    console.log('🔐 Начинаем регистрацию/вход для:', username)
+    console.log('🔐 Пароль:', password ? '***' : 'пустой')
+    
+    // Получаем всех существующих пользователей
+    const allUsersStr = localStorage.getItem('allUsers')
+    console.log('📋 allUsers из localStorage:', allUsersStr)
+    const allUsers = JSON.parse(allUsersStr || '[]')
+    console.log('📋 Существующие пользователи:', allUsers)
+    
+    // Проверяем, существует ли пользователь
+    const existingUser = allUsers.find((user: any) => 
+      user.username.toLowerCase() === username.toLowerCase()
+    )
+    console.log('🔍 Найден существующий пользователь:', existingUser)
+
+    let currentUserData
+
+    if (existingUser) {
+      // Вход существующего пользователя
+      currentUserData = {
+        ...existingUser,
+        lastLogin: new Date().toISOString().split('T')[0]
+      }
+      
+      // Обновляем данные существующего пользователя
+      const updatedUsers = allUsers.map((user: any) => 
+        user.username.toLowerCase() === username.toLowerCase() ? currentUserData : user
+      )
+      localStorage.setItem('allUsers', JSON.stringify(updatedUsers))
+    } else {
+      // Регистрация нового пользователя
+      const userId = generateUniqueId('user-')
+      currentUserData = {
+        id: userId,
+        username: username,
+        password: password, // В реальном приложении пароль должен быть захеширован!
+        created: new Date().toISOString().split('T')[0],
+        lastLogin: new Date().toISOString().split('T')[0],
+        role: 'user' as const,
+        status: 'active' as const,
+        account: {
+          balance: 5000,
+          currency: 'credits',
+          transactions: []
+        },
+        assets: [],
+        equipment: [],
+        settings: {
+          theme: 'dark',
+          notifications: true,
+          autoAssign: false,
+          riskTolerance: 'medium'
+        }
+      }
+
+      // Добавляем нового пользователя в список всех пользователей
+      allUsers.push(currentUserData)
+      localStorage.setItem('allUsers', JSON.stringify(allUsers))
+      console.log('✅ Новый пользователь добавлен в allUsers:', currentUserData)
+    }
+
+    // Сохраняем текущего пользователя
+    localStorage.setItem('currentUser', JSON.stringify(currentUserData))
+    console.log('💾 Текущий пользователь сохранен:', currentUserData)
+    
+    setCurrentUser({ username, id: currentUserData.id })
+    setShowRegistration(false)
+    console.log('🎮 Игра начата для пользователя:', username)
+    
+    // Устанавливаем игровые ресурсы
+    updateCredits(currentUserData.account?.balance || 5000)
+    setNeuralPulses(100)
+    setReputation(75)
+    setCurrentDay(1)
+  }
+
+  // Функция для обновления баланса пользователя
+  const updateUserBalance = (newBalance: number) => {
+    if (!currentUser) return
+    
+    const savedUser = localStorage.getItem('currentUser')
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser)
+        user.account.balance = newBalance
+        user.lastLogin = new Date().toISOString().split('T')[0]
+        localStorage.setItem('currentUser', JSON.stringify(user))
+        
+        // Также обновляем в списке всех пользователей
+        const allUsers = JSON.parse(localStorage.getItem('allUsers') || '[]')
+        const updatedUsers = allUsers.map((u: any) => 
+          u.id === user.id ? user : u
+        )
+        localStorage.setItem('allUsers', JSON.stringify(updatedUsers))
+      } catch (error) {
+        console.error('Ошибка обновления баланса:', error)
+      }
+    }
+  }
 
   const [availableStatusEffects] = useState<StatusEffect[]>([
     {
@@ -682,7 +817,7 @@ export default function TalentArchitectProd() {
           setTalents((prev) => [...prev, newTalent])
           break
         case "lose_credits":
-          setCredits((prev) => Math.max(0, prev - effect.amount))
+          updateCredits((prev) => Math.max(0, prev - effect.amount))
           break
         case "change_reputation":
           setReputation((prev) => prev + effect.amount)
@@ -970,7 +1105,7 @@ export default function TalentArchitectProd() {
     choice.effects.forEach((effect) => {
       switch (effect.stat) {
         case "credits":
-          setCredits((prev) => Math.max(0, prev + effect.change))
+          updateCredits((prev) => Math.max(0, prev + effect.change))
           break
         case "reputation":
           setReputation((prev) => Math.max(0, Math.min(100, prev + effect.change)))
@@ -1944,7 +2079,7 @@ export default function TalentArchitectProd() {
       ]
     }
 
-    setCredits((prev) => prev - cost)
+    updateCredits((prev) => prev - cost)
     setTalents((prev) => [...prev, { ...finalTalent, id: `hired-${generateUniqueId()}` }])
     setMarketTalents((prev) => prev.filter((t) => t.id !== talent.id))
 
@@ -2059,9 +2194,16 @@ export default function TalentArchitectProd() {
         {/* Левая панель - Список талантов */}
         <div className="w-80 glass-panel border-r border-cyan-500/30 p-6 overflow-y-auto">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              Talent Architect
-            </h1>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                Nexus Enslaver
+              </h1>
+              {currentUser && (
+                <p className="text-sm text-gray-300 mt-1">
+                  Пользователь: <span className="text-cyan-300">{currentUser.username}</span>
+                </p>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-cyan-300">{neuralPulses} НП</span>
               <button
@@ -2072,16 +2214,44 @@ export default function TalentArchitectProd() {
               >
                 {personalWorkMode ? "Личная работа" : "Обычный режим"}
               </button>
+              {currentUser && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('currentUser')
+                      setCurrentUser(null)
+                      setShowRegistration(true)
+                    }}
+                    className="px-3 py-1 rounded text-sm bg-red-600 hover:bg-red-700 text-white transition-colors"
+                    title="Выйти из аккаунта"
+                  >
+                    Выход
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('allUsers')
+                      localStorage.removeItem('currentUser')
+                      setCurrentUser(null)
+                      setShowRegistration(true)
+                      console.log('🗑️ Все пользователи удалены')
+                    }}
+                    className="px-3 py-1 rounded text-sm bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+                    title="Очистить всех пользователей"
+                  >
+                    Очистить БД
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex flex-wrap gap-1 p-1 bg-gray-800/50 rounded-lg">
               {[
-                { id: "talents", label: "Таланты", icon: "👥" },
-                { id: "market", label: "Рынок", icon: "🏪" },
-                { id: "contracts", label: "Контракты", icon: "📋" },
-                { id: "events", label: "События", icon: "⚡" },
+                { id: "talents", label: "Активы", icon: "👥" },
+                { id: "market", label: "Аукцион", icon: "🏪" },
+                { id: "contracts", label: "Заказы", icon: "📋" },
+                { id: "events", label: "Аномалии", icon: "⚡" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -2131,21 +2301,21 @@ export default function TalentArchitectProd() {
 
           {activeTab === "market" && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-cyan-400">Рынок талантов</h2>
-              <p className="text-sm text-gray-300">Источники новых талантов и услуг</p>
+              <h2 className="text-xl font-bold text-cyan-400">Аукцион активов</h2>
+              <p className="text-sm text-gray-300">Источники новых активов и услуг</p>
 
               <div className="grid grid-cols-1 gap-3">
                 {[
                   {
                     id: "talent-exchange",
-                    name: "Talent Exchange (Core)",
-                    desc: "Биржа талантов в Core Sector. Высококачественные кандидаты с низкой тревожностью.",
+                    name: "Asset Exchange (Core)",
+                    desc: "Биржа активов в Core Sector. Высококачественные кандидаты с низким страхом.",
                     icon: "🏢",
                   },
                   {
                     id: "void-rescues",
                     name: "Void Rescues",
-                    desc: "Спасательные операции в Void Border. Риск аномалий, но уникальные таланты.",
+                    desc: "Спасательные операции в Void Border. Риск аномалий, но уникальные активы.",
                     icon: "🌌",
                   },
                   {
@@ -2157,7 +2327,7 @@ export default function TalentArchitectProd() {
                   {
                     id: "neural-forge",
                     name: "Neural Forge",
-                    desc: "Кастомизация талантов. Настройка аффинностей и базовых навыков.",
+                    desc: "Кастомизация активов. Настройка аффинностей и базовых навыков.",
                     icon: "🧠",
                   },
                 ].map((market) => (
@@ -2181,7 +2351,7 @@ export default function TalentArchitectProd() {
 
           {activeTab === "contracts" && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-green-400">Контракты</h2>
+              <h2 className="text-xl font-bold text-green-400">Заказы</h2>
               <p className="text-sm text-gray-300">Активные проекты и задания</p>
 
               <div className="space-y-3">
@@ -2204,7 +2374,7 @@ export default function TalentArchitectProd() {
 
           {activeTab === "events" && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-yellow-400">События</h2>
+              <h2 className="text-xl font-bold text-yellow-400">Аномалии</h2>
               <p className="text-sm text-gray-300">Происшествия на станции</p>
 
               <div className="space-y-3">
@@ -2582,6 +2752,8 @@ export default function TalentArchitectProd() {
                           value={item.powerLevel || 0}
                           onChange={(e) => updateEquipmentPower(item.id, Number.parseInt(e.target.value))}
                           className="w-full"
+                          aria-label="Уровень мощности оборудования"
+                          title="Регулировка мощности"
                         />
                       </div>
                     )}
@@ -2594,6 +2766,8 @@ export default function TalentArchitectProd() {
                           value={item.mode || "Eco"}
                           onChange={(e) => updateEquipmentMode(item.id, e.target.value)}
                           className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white"
+                          aria-label="Выбор режима работы оборудования"
+                          title="Режим работы"
                         >
                           <option value="Eco">Eco</option>
                           <option value="Performance">Performance</option>
@@ -2654,7 +2828,7 @@ export default function TalentArchitectProd() {
         </div>
       )}
 
-      {/* События */}
+              {/* Аномалии */}
       {currentEvent && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="glass-panel p-12 max-w-lg w-full text-center border border-cyan-500/50 rounded-lg">
@@ -2751,7 +2925,7 @@ export default function TalentArchitectProd() {
             <div className="p-6 overflow-y-auto max-h-[60vh]">
               {marketMode === "trade" && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">Ваши таланты для обмена:</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3">Ваши активы для обмена:</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {talents.map((talent) => (
                       <div key={talent.id} className="p-3 bg-gray-800 rounded border">
@@ -2811,6 +2985,8 @@ export default function TalentArchitectProd() {
                           onChange={(e) => e.target.value && tradeTalent(talent, e.target.value)}
                           className="flex-1 px-2 py-1 bg-gray-700 rounded text-sm"
                           defaultValue=""
+                          aria-label="Выбор таланта для обмена"
+                          title="Обмен талантами"
                         >
                           <option value="">Обменять на...</option>
                           {availableForTrade.map((talentId) => {
@@ -2884,6 +3060,13 @@ export default function TalentArchitectProd() {
           </div>
         </div>
       )}
+
+      {/* Модальное окно регистрации */}
+      <RegistrationModal
+        isOpen={showRegistration}
+        onClose={() => setShowRegistration(false)}
+        onRegister={handleUserRegistration}
+      />
     </div>
   )
 }

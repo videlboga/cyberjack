@@ -101,6 +101,154 @@ export interface EventsConfig {
   opportunities?: GameEvent[]
 }
 
+// Активы
+export interface AssetAttributes {
+  strength: number
+  empathy: number
+  intelligence: number
+  temperament: number
+  grit: number
+  ego: number
+  loyalty: number
+  obedience: number
+  resistance: number
+}
+
+export interface AssetSkills {
+  maid?: number
+  cooking?: number
+  neural_hacking?: number
+  orgasm_control?: number
+  field?: number
+  etiquette?: number
+  logistics?: number
+  medical?: number
+  maintenance?: number
+  data?: number
+  dance?: number
+  seduction?: number
+  interrogation?: number
+  surveillance?: number
+  [key: string]: number | undefined
+}
+
+export interface AssetPreferences {
+  work_type: string[]
+  environment: string[]
+  avoid: string[]
+}
+
+export interface AssetCondition {
+  health: number
+  mental_state: number
+  stress: number
+  fatigue: number
+}
+
+export interface AssetHistory {
+  created: string
+  last_training: string
+  assignments: number
+  success_rate: number
+}
+
+export interface GameAsset {
+  id: string
+  name: string
+  rank: 'Junior' | 'Middle' | 'Senior' | 'Elite'
+  avatar: string
+  price: number
+  specialization: string
+  description: string
+  status: 'available' | 'owned' | 'training' | 'assigned' | 'inactive'
+  owner: string | null
+  location: string
+  attributes: AssetAttributes
+  skills: AssetSkills
+  traits: string[]
+  preferences: AssetPreferences
+  condition: AssetCondition
+  history: AssetHistory
+}
+
+export interface AssetType {
+  name: string
+  description: string
+  priceRange: [number, number]
+  skillCap: number
+}
+
+export interface AssetsConfig {
+  assets: GameAsset[]
+  assetTypes: { [key: string]: AssetType }
+  skillCategories: { [key: string]: string[] }
+}
+
+// Пользователи
+export interface UserTransaction {
+  id: string
+  type: 'purchase' | 'income' | 'expense' | 'refund'
+  amount: number
+  description: string
+  date: string
+}
+
+export interface UserAccount {
+  balance: number
+  currency: string
+  transactions: UserTransaction[]
+}
+
+export interface UserAsset {
+  assetId: string
+  name: string
+  acquired: string
+  status: 'active' | 'training' | 'inactive'
+  location: string
+  currentAssignment: string | null
+}
+
+export interface UserEquipment {
+  itemId: string
+  name: string
+  type: string
+  slot: string
+  installed: string
+  status: 'active' | 'inactive' | 'damaged'
+}
+
+export interface UserSettings {
+  theme: string
+  notifications: boolean
+  autoAssign: boolean
+  riskTolerance: 'low' | 'medium' | 'high'
+}
+
+export interface GameUser {
+  id: string
+  username: string
+  email: string
+  role: string
+  status: 'active' | 'inactive' | 'banned'
+  created: string
+  lastLogin: string
+  account: UserAccount
+  assets: UserAsset[]
+  equipment: UserEquipment[]
+  settings: UserSettings
+}
+
+export interface UserRole {
+  name: string
+  permissions: string[]
+  description: string
+}
+
+export interface UsersConfig {
+  users: GameUser[]
+  userRoles: { [key: string]: UserRole }
+}
+
 // Рынок
 export interface MarketTalent {
   id: string
@@ -258,5 +406,6 @@ export interface GameConfig {
   market: MarketConfig
   equipment: EquipmentConfig
   system: SystemDefinitions
-  scenes: StoryScenesConfig
+  assets: AssetsConfig
+  users: UsersConfig
 }

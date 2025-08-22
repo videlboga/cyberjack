@@ -1,38 +1,38 @@
 {
   "categories": {
     "training": {
-      "title": "📚 Обучение",
-      "description": "Развитие профессиональных навыков и компетенций",
+      "title": "🎓 Тренировка",
+      "description": "Развитие навыков и подчинение активов",
       "actions": {
         "basic": {
-          "title": "Базовое обучение",
-          "description": "Стабильное повышение навыков без рисков",
+          "title": "Базовая тренировка",
+          "description": "Стандартная тренировка подчинения без рисков",
           "cost": 1,
           "risk": "low",
           "effects": {
-            "skills": { "office": 0.5, "technical": 0.3 },
-            "states": { "cognitiveLoad": 0.3, "insight": 0.2 }
+            "skills": { "maid": 0.5, "cooking": 0.3 },
+            "states": { "habit": 0.3, "awareness": 0.2 }
           },
           "memory": {
-            "type": "professional",
-            "summary": "Прошел обучение и улучшил навыки",
+            "type": "conditioned",
+            "summary": "Прошла базовую тренировку подчинения",
             "intensity": 2,
-            "tags": ["обучение", "развитие"]
+            "tags": ["тренировка", "подчинение"]
           }
         },
         "intensive": {
-          "title": "Интенсивное обучение",
-          "description": "Ускоренное развитие с повышенной нагрузкой",
+          "title": "Интенсивная тренировка",
+          "description": "Ускоренное подчинение с повышенной нагрузкой",
           "cost": 2,
           "risk": "medium",
           "effects": {
-            "skills": { "office": 1.2, "technical": 0.8 },
-            "states": { "insight": 0.5, "cognitiveLoad": 1.0, "burnout": 0.5, "anxiety": 0.3 }
+            "skills": { "maid": 1.2, "cooking": 0.8 },
+            "states": { "awareness": 0.5, "habit": 1.0, "despair": 0.5, "fear": 0.3 }
           }
         },
         "neural": {
-          "title": "Нейроулучшение",
-          "description": "Экспериментальное улучшение когнитивных способностей",
+          "title": "Нейроимплантация",
+          "description": "Экспериментальная имплантация фетишей и контроля",
           "cost": 3,
           "risk": "high",
           "probability": {
@@ -43,20 +43,20 @@
           "outcomes": {
             "success": {
               "attributes": { "intelligence": 0.5 },
-              "states": { "neuroplasticity": 1.0, "insight": 0.8 },
-              "skills": { "technical": 0.6 }
+              "states": { "sensuality": 1.0, "awareness": 0.8 },
+              "skills": { "neural_hacking": 0.6 }
             },
             "partial": {
               "attributes": { "intelligence": 0.3 },
-              "states": { "neuroplasticity": 0.5, "anxiety": 1.0, "cognitiveLoad": 0.8 }
+              "states": { "sensuality": 0.5, "fear": 1.0, "sensory_overload": 0.8 }
             },
             "failure": {
-              "states": { "cognitiveLoad": 1.5, "anxiety": 1.2, "mood": -0.8 },
+              "states": { "sensory_overload": 1.5, "fear": 1.2, "mood": -0.8 },
               "memory": {
                 "type": "traumatic",
-                "summary": "Неудачная нейроулучшение процедура",
+                "summary": "Неудачная имплантация нейрочипа",
                 "intensity": 5,
-                "tags": ["медицина", "неудача", "когнитивные нарушения"]
+                "tags": ["медицина", "неудача", "нейротравма"]
               }
             }
           }
@@ -64,25 +64,25 @@
       }
     },
     "coaching": {
-      "title": "🎯 Коучинг",
-      "description": "Развитие самопонимания и личностный рост",
+      "title": "💪 Психокондиционирование",
+      "description": "Развитие подчинения и личностная трансформация",
       "actions": {
         "basic": {
-          "title": "Стандартный коучинг",
-          "description": "Безопасное развитие самопонимания и вовлеченности",
+          "title": "Базовое кондиционирование",
+          "description": "Безопасное развитие подчинения и преданности",
           "cost": 1,
           "risk": "low",
           "effects": {
-            "states": { "insight": 0.5, "anxiety": -0.3, "engagement": 0.2, "neuroplasticity": 0.1 }
+            "states": { "awareness": 0.5, "fear": -0.3, "devotion": 0.2, "sensuality": 0.1 }
           }
         },
         "deep": {
-          "title": "Глубокий коучинг",
-          "description": "Интенсивная работа с внутренними барьерами",
+          "title": "Глубокое кондиционирование",
+          "description": "Интенсивная работа с внутренним сопротивлением",
           "cost": 2,
           "risk": "medium",
           "effects": {
-            "states": { "insight": 1.0, "engagement": 0.8, "neuroplasticity": 0.5, "anxiety": 0.4, "mood": -0.2 }
+            "states": { "awareness": 1.0, "devotion": 0.8, "sensuality": 0.5, "fear": 0.4, "mood": -0.2 }
           }
         },
         "extreme": {

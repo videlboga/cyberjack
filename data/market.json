@@ -2,12 +2,12 @@
   "talentExchange": [
     {
       "id": "market_1",
-      "name": "Алекс Новиков",
+      "name": "Алекс",
       "rank": "Junior",
-      "avatar": "👨‍💻",
+      "avatar": "👩‍💻",
       "price": 150,
-      "specialization": "Техническая поддержка",
-      "description": "Молодой специалист с хорошими техническими навыками",
+      "specialization": "Базовое подчинение",
+      "description": "Молодая актив с хорошими навыками обслуживания",
       "attributes": {
         "strength": 2,
         "empathy": 3,
@@ -17,27 +17,27 @@
         "ego": 2
       },
       "skills": {
-        "office": 2,
-        "negotiation": 1,
-        "technical": 4,
-        "vr": 3,
+        "maid": 2,
+        "cooking": 1,
+        "neural_hacking": 4,
+        "orgasm_control": 3,
         "field": 2,
         "etiquette": 2,
         "logistics": 2,
         "medical": 1,
         "maintenance": 3,
         "data": 3,
-        "stage": 1
+        "dance": 1
       }
     },
     {
       "id": "market_2",
-      "name": "Мария Волкова",
+      "name": "Мария",
       "rank": "Middle",
       "avatar": "👩‍💼",
       "price": 300,
-      "specialization": "Переговоры и этикет",
-      "description": "Опытный переговорщик с отличными социальными навыками",
+      "specialization": "Этикет и подчинение",
+      "description": "Опытная актив с отличными навыками обслуживания",
       "attributes": {
         "strength": 3,
         "empathy": 5,
@@ -47,29 +47,29 @@
         "ego": 2
       },
       "skills": {
-        "office": 4,
-        "negotiation": 5,
-        "technical": 2,
-        "vr": 2,
+        "maid": 4,
+        "cooking": 5,
+        "neural_hacking": 2,
+        "orgasm_control": 2,
         "field": 3,
         "etiquette": 5,
         "logistics": 3,
         "medical": 2,
         "maintenance": 1,
         "data": 2,
-        "stage": 4
+        "dance": 4
       }
     }
   ],
   "voidRescues": [
     {
       "id": "void_1",
-      "name": "Неизвестный сигнал",
+      "name": "Сигнал из Тени",
       "avatar": "🌌",
       "cost": 50,
       "risk": 70,
-      "description": "Слабый сигнал из глубин Void Border. Может быть выжившим с уникальными способностями.",
-      "potentialReward": "Высокие навыки выживания, возможные аномальные способности",
+      "description": "Слабый сигнал из глубин Void Border. Может быть актив с уникальными фетишами.",
+      "potentialReward": "Высокие навыки выживания, возможные экзотические фетиши",
       "attributes": { "strength": 4, "empathy": 2, "intelligence": 3, "temperament": 5, "grit": 5, "ego": 3 },
       "skills": {
         "field": 5,
@@ -84,19 +84,19 @@
         "data": 2,
         "stage": 1
       },
-      "anomaly": "Устойчивость к стрессу"
+      "anomaly": "Устойчивость к пыткам"
     }
   ],
   "corporateContracts": [
     {
       "id": "corp_1",
-      "companyName": "NexusCorp",
-      "programName": "Программа развития лидерства",
+      "companyName": "SlaveTech Inc.",
+      "programName": "Программа элитного кондиционирования",
       "cost": 400,
       "duration": 7,
-      "description": "Интенсивная программа подготовки управленческих кадров от ведущей корпорации.",
-      "requirements": ["Опыт работы в офисе", "Навыки переговоров"],
-      "benefits": ["Гарантированный Middle ранг", "Связи в корпорации", "Бонус к переговорам"],
+      "description": "Интенсивная программа подготовки элитных активов от ведущей корпорации.",
+      "requirements": ["Опыт подчинения", "Навыки обслуживания"],
+      "benefits": ["Гарантированный Middle ранг", "Связи в корпорации", "Бонус к подчинению"],
       "talentTemplate": {
         "name": "Выпускник NexusCorp",
         "avatar": "👔",
