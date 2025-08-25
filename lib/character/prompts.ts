@@ -1,6 +1,6 @@
 // Система промптов для AI
 
-import { Character, CharacterStats, CharacterFetish } from './types'
+import { Character, CharacterStats, CharacterFetish } from '../unified-entities'
 import { statsManager } from './stats'
 
 /**

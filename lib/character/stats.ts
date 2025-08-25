@@ -1,4 +1,4 @@
-import { CharacterStats, Character } from './types'
+import { CharacterStats, Character } from '../unified-entities'
 
 /**
  * Менеджер характеристик персонажей

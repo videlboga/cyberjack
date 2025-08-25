@@ -1,6 +1,6 @@
 // Система памяти для персонажей
 
-import { Character, CharacterMemory, MemoryEntry, SummaryEntry, EpisodicMemory, MemoryType } from './types'
+import { Character, CharacterMemory, MemoryEntry, SummaryEntry, MemoryType } from '../unified-entities'
 
 export class MemoryManager {
   private maxShortTerm = 20
