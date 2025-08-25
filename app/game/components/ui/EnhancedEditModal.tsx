@@ -62,7 +62,7 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
     onClose()
   }
 
-  // Рендеринг динамических объектов (атрибуты, навыки и т.д.)
+  // Рендеринг динамических объектов (атрибуты, фетиши и т.д.)
   const renderDynamicObject = (field: FieldConfig) => {
     const value = formData[field.name] || {}
     const config = field.dynamicConfig!
@@ -92,7 +92,7 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
         ...prev,
         [field.name]: {
           ...prev[field.name],
-          [newKey]: config.type === 'attributes' || config.type === 'skills' ? 1 : ''
+          [newKey]: config.type === 'attributes' || config.type === 'fetishes' ? 1 : ''
         }
       }))
     }
@@ -142,7 +142,7 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
                 </SelectContent>
               </Select>
 
-              {config.type === 'attributes' || config.type === 'skills' ? (
+              {config.type === 'attributes' || config.type === 'fetishes' ? (
                 <Input
                   type="number"
                   value={val as number}

@@ -1,0 +1,1699 @@
+{
+  "characters": [
+    {
+      "id": "asset_1",
+      "name": "Алексей",
+      "age": 20,
+      "archetype": "Чувственный художник",
+      "description": "Алексей Дмитриевич Морозов - Чувственный художник",
+      "dateTransformation": "2024-01-01",
+      "category": "Образовательные учреждения",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 4,
+          "Чувствительность": 9,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 7,
+          "Адаптивность": 8,
+          "Интеллект": 8
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 8,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 2,
+          "Зависимость": 8
+        }
+      },
+      "states": {
+        "Настроение": 90,
+        "Тревожность": 15,
+        "Выгорание": 23,
+        "Вовлеченность": 96,
+        "Чувство права": 38,
+        "Проницательность": 88,
+        "Рутина": 50,
+        "Послушание": 84,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "sensory_overload": 8
+      },
+      "traits": [
+        "curious",
+        "innocent",
+        "artistic",
+        "sensation_seeker",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 3,
+        "cooking": 3,
+        "neural_hacking": 1,
+        "orgasm_control": 1,
+        "field": 2,
+        "etiquette": 2,
+        "logistics": 3,
+        "medical": 2,
+        "maintenance": 2,
+        "data": 1,
+        "dance": 1,
+        "seduction": 1,
+        "interrogation": 1,
+        "surveillance": 2
+      },
+      "rank": "Senior",
+      "price": 175,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_2",
+      "name": "Альфа-001",
+      "age": 3,
+      "archetype": "Идеальный образец",
+      "description": "Альфа-001 (настоящее имя неизвестно) - Идеальный образец",
+      "dateTransformation": "2024-01-01",
+      "category": "Искусственно созданные",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 10,
+          "Гибкость": 9
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 5,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 5,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 4,
+          "Оптимизм": 6,
+          "Любопытство": 8
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 3,
+          "Зависимость": 8
+        }
+      },
+      "states": {
+        "Настроение": 80,
+        "Тревожность": 25,
+        "Выгорание": 17,
+        "Вовлеченность": 92,
+        "Чувство права": 22,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 76,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "sensory_overload": 9
+      },
+      "traits": [
+        "curious",
+        "innocent",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 2,
+        "neural_hacking": 1,
+        "orgasm_control": 3,
+        "field": 1,
+        "etiquette": 2,
+        "logistics": 2,
+        "medical": 1,
+        "maintenance": 3,
+        "data": 1,
+        "dance": 2,
+        "seduction": 3,
+        "interrogation": 1,
+        "surveillance": 1
+      },
+      "rank": "Junior",
+      "price": 200,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_3",
+      "name": "Анечка",
+      "age": 12,
+      "archetype": "Невинная овечка",
+      "description": "Анна (Анечка) - Невинная овечка",
+      "dateTransformation": "2024-01-01",
+      "category": "Выходцы из трущоб",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 4,
+          "Чувствительность": 9,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 7,
+          "Интеллект": 6
+        },
+        "social": {
+          "Общительность": 8,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 8,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 1,
+          "Сопротивляемость": 2,
+          "Зависимость": 9
+        }
+      },
+      "states": {
+        "Настроение": 90,
+        "Тревожность": 20,
+        "Выгорание": 23,
+        "Вовлеченность": 96,
+        "Чувство права": 30,
+        "Проницательность": 76,
+        "Рутина": 50,
+        "Послушание": 84,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "innocence": 10,
+        "curiosity": 10,
+        "tenderness": 9,
+        "attention": 9,
+        "trust": 10,
+        "submission": 8,
+        "play": 9,
+        "dependency": 8
+      },
+      "traits": [
+        "curious",
+        "innocent",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 1,
+        "cooking": 2,
+        "neural_hacking": 1,
+        "orgasm_control": 3,
+        "field": 1,
+        "etiquette": 1,
+        "logistics": 3,
+        "medical": 1,
+        "maintenance": 1,
+        "data": 2,
+        "dance": 1,
+        "seduction": 3,
+        "interrogation": 2,
+        "surveillance": 1
+      },
+      "rank": "Junior",
+      "price": 225,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "🐑",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_4",
+      "name": "Анечка",
+      "age": 30,
+      "archetype": "Карма",
+      "description": "Анна Сергеевна Козлова - Карма",
+      "dateTransformation": "2024-01-01",
+      "category": "Обитатели станции",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 8,
+          "Чувствительность": 5,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 3,
+          "Адаптивность": 4,
+          "Интеллект": 5
+        },
+        "social": {
+          "Общительность": 4,
+          "Эмпатия": 2,
+          "Доминантность": 7
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 3,
+          "Любопытство": 4
+        },
+        "special": {
+          "Сексуальная опытность": 6,
+          "Сопротивляемость": 7,
+          "Зависимость": 4
+        }
+      },
+      "states": {
+        "Настроение": 65,
+        "Тревожность": 35,
+        "Выгорание": 11,
+        "Вовлеченность": 76,
+        "Чувство права": 38,
+        "Проницательность": 70,
+        "Рутина": 50,
+        "Послушание": 44,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "submission": 3
+      },
+      "traits": [
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 3,
+        "cooking": 3,
+        "neural_hacking": 3,
+        "orgasm_control": 2,
+        "field": 3,
+        "etiquette": 2,
+        "logistics": 1,
+        "medical": 2,
+        "maintenance": 2,
+        "data": 1,
+        "dance": 2,
+        "seduction": 1,
+        "interrogation": 2,
+        "surveillance": 3
+      },
+      "rank": "Senior",
+      "price": 250,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_5",
+      "name": "Артём",
+      "age": 26,
+      "archetype": "Падшая звезда",
+      "description": "Артём Владимирович Соколов - Падшая звезда",
+      "dateTransformation": "2024-01-01",
+      "category": "Бывшие знаменитости",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 7,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 4,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 9,
+          "Эмпатия": 8,
+          "Доминантность": 5
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 5,
+          "Любопытство": 7
+        },
+        "special": {
+          "Сексуальная опытность": 7,
+          "Сопротивляемость": 5,
+          "Зависимость": 6
+        }
+      },
+      "states": {
+        "Настроение": 75,
+        "Тревожность": 30,
+        "Выгорание": 17,
+        "Вовлеченность": 88,
+        "Чувство права": 38,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 60,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {},
+      "traits": [
+        "playful",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 2,
+        "neural_hacking": 4,
+        "orgasm_control": 2,
+        "field": 1,
+        "etiquette": 2,
+        "logistics": 2,
+        "medical": 2,
+        "maintenance": 2,
+        "data": 3,
+        "dance": 2,
+        "seduction": 3,
+        "interrogation": 2,
+        "surveillance": 2
+      },
+      "rank": "Senior",
+      "price": 275,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_6",
+      "name": "Виктор",
+      "age": 35,
+      "archetype": "Научный экспериментатор",
+      "description": "Виктор Сергеевич Морозов - Научный экспериментатор",
+      "dateTransformation": "2024-01-01",
+      "category": "Бывшие сотрудники станции",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 7,
+          "Чувствительность": 6,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 7,
+          "Адаптивность": 8,
+          "Интеллект": 9
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 5,
+          "Доминантность": 7
+        },
+        "personality": {
+          "Самооценка": 7,
+          "Оптимизм": 6,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 6,
+          "Сопротивляемость": 6,
+          "Зависимость": 5
+        }
+      },
+      "states": {
+        "Настроение": 80,
+        "Тревожность": 15,
+        "Выгорание": 14,
+        "Вовлеченность": 96,
+        "Чувство права": 46,
+        "Проницательность": 94,
+        "Рутина": 50,
+        "Послушание": 44,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "curiosity": 9
+      },
+      "traits": [
+        "curious",
+        "sensation_seeker",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 1,
+        "cooking": 1,
+        "neural_hacking": 2,
+        "orgasm_control": 1,
+        "field": 3,
+        "etiquette": 1,
+        "logistics": 2,
+        "medical": 1,
+        "maintenance": 3,
+        "data": 2,
+        "dance": 1,
+        "seduction": 2,
+        "interrogation": 1,
+        "surveillance": 1
+      },
+      "rank": "Senior",
+      "price": 300,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_7",
+      "name": "Дмитрий",
+      "age": 24,
+      "archetype": "Любопытный программист",
+      "description": "Дмитрий Александрович Петров - Любопытный программист",
+      "dateTransformation": "2024-01-01",
+      "category": "Корпоративный мир",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 7,
+          "Гибкость": 4
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 8,
+          "Интеллект": 9
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 5,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 7,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 3,
+          "Зависимость": 7
+        }
+      },
+      "states": {
+        "Настроение": 85,
+        "Тревожность": 20,
+        "Выгорание": 20,
+        "Вовлеченность": 96,
+        "Чувство права": 38,
+        "Проницательность": 94,
+        "Рутина": 50,
+        "Послушание": 76,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "curiosity": 9
+      },
+      "traits": [
+        "curious",
+        "innocent",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 1,
+        "cooking": 1,
+        "neural_hacking": 4,
+        "orgasm_control": 2,
+        "field": 3,
+        "etiquette": 1,
+        "logistics": 2,
+        "medical": 1,
+        "maintenance": 3,
+        "data": 3,
+        "dance": 2,
+        "seduction": 1,
+        "interrogation": 2,
+        "surveillance": 1
+      },
+      "rank": "Senior",
+      "price": 325,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_8",
+      "name": "Елена",
+      "age": 28,
+      "archetype": "Падший ангел",
+      "description": "Елена Александровна Соколова - Падший ангел",
+      "dateTransformation": "2024-01-01",
+      "category": "Обитатели станции",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 7,
+          "Гибкость": 5
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 4,
+          "Адаптивность": 7,
+          "Интеллект": 9
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 9,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 4,
+          "Любопытство": 8
+        },
+        "special": {
+          "Сексуальная опытность": 4,
+          "Сопротивляемость": 5,
+          "Зависимость": 6
+        }
+      },
+      "states": {
+        "Настроение": 70,
+        "Тревожность": 30,
+        "Выгорание": 17,
+        "Вовлеченность": 92,
+        "Чувство права": 30,
+        "Проницательность": 94,
+        "Рутина": 50,
+        "Послушание": 76,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {},
+      "traits": [
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 1,
+        "neural_hacking": 4,
+        "orgasm_control": 2,
+        "field": 3,
+        "etiquette": 3,
+        "logistics": 3,
+        "medical": 2,
+        "maintenance": 2,
+        "data": 2,
+        "dance": 2,
+        "seduction": 3,
+        "interrogation": 2,
+        "surveillance": 3
+      },
+      "rank": "Senior",
+      "price": 350,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_9",
+      "name": "Мила",
+      "age": 23,
+      "archetype": "Эмпатическое зеркало",
+      "description": "Мила (предположительно) - Эмпатическое зеркало",
+      "dateTransformation": "2024-01-01",
+      "category": "Найденные в аномалии",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 9,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 2,
+          "Адаптивность": 6,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 10,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 4,
+          "Оптимизм": 5,
+          "Любопытство": 6
+        },
+        "special": {
+          "Сексуальная опытность": 3,
+          "Сопротивляемость": 3,
+          "Зависимость": 8
+        }
+      },
+      "states": {
+        "Настроение": 75,
+        "Тревожность": 40,
+        "Выгорание": 20,
+        "Вовлеченность": 84,
+        "Чувство права": 22,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 84,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {},
+      "traits": [
+        "addictive",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 3,
+        "neural_hacking": 1,
+        "orgasm_control": 1,
+        "field": 1,
+        "etiquette": 3,
+        "logistics": 1,
+        "medical": 2,
+        "maintenance": 3,
+        "data": 3,
+        "dance": 1,
+        "seduction": 1,
+        "interrogation": 1,
+        "surveillance": 2
+      },
+      "rank": "Senior",
+      "price": 375,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_10",
+      "name": "Екатерина",
+      "age": 19,
+      "archetype": "Адаптивная выживальщица",
+      "description": "Екатерина (Катя) - Адаптивная выживальщица",
+      "dateTransformation": "2024-01-01",
+      "category": "Выходцы из трущоб",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 8,
+          "Чувствительность": 7,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 10,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 6,
+          "Доминантность": 4
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 6,
+          "Любопытство": 7
+        },
+        "special": {
+          "Сексуальная опытность": 5,
+          "Сопротивляемость": 6,
+          "Зависимость": 6
+        }
+      },
+      "states": {
+        "Настроение": 80,
+        "Тревожность": 20,
+        "Выгорание": 11,
+        "Вовлеченность": 88,
+        "Чувство права": 30,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 68,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "curiosity": 7,
+        "submission": 5,
+        "dependency": 6
+      },
+      "traits": [
+        "curious",
+        "sensation_seeker",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 3,
+        "neural_hacking": 4,
+        "orgasm_control": 1,
+        "field": 3,
+        "etiquette": 3,
+        "logistics": 3,
+        "medical": 2,
+        "maintenance": 3,
+        "data": 3,
+        "dance": 2,
+        "seduction": 2,
+        "interrogation": 2,
+        "surveillance": 1
+      },
+      "rank": "Senior",
+      "price": 400,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_11",
+      "name": "Елизавета",
+      "age": 13,
+      "archetype": "Романтическая принцесса",
+      "description": "Елизавета (Лиза) - Романтическая принцесса",
+      "dateTransformation": "2024-01-01",
+      "category": "Выходцы из трущоб",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 4,
+          "Чувствительность": 9,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 7,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 8,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 8,
+          "Оптимизм": 10,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 1,
+          "Сопротивляемость": 2,
+          "Зависимость": 9
+        }
+      },
+      "states": {
+        "Настроение": 100,
+        "Тревожность": 15,
+        "Выгорание": 23,
+        "Вовлеченность": 96,
+        "Чувство права": 54,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 84,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "submission": 9,
+        "romantic_fantasies": 10,
+        "prince_dependency": 10,
+        "sensory_overload": 8,
+        "age_roles": 8
+      },
+      "traits": [
+        "romantic",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 3,
+        "cooking": 2,
+        "neural_hacking": 1,
+        "orgasm_control": 3,
+        "field": 2,
+        "etiquette": 3,
+        "logistics": 2,
+        "medical": 2,
+        "maintenance": 3,
+        "data": 1,
+        "dance": 2,
+        "seduction": 1,
+        "interrogation": 1,
+        "surveillance": 3
+      },
+      "rank": "Junior",
+      "price": 425,
+      "specialization": "Романтическое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "🌸",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_12",
+      "name": "Мария",
+      "age": 35,
+      "archetype": "Мать-защитница",
+      "description": "Мария Ивановна (фамилия неизвестна) - Мать-защитница",
+      "dateTransformation": "2024-01-01",
+      "category": "Выходцы из трущоб",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 7,
+          "Чувствительность": 8,
+          "Гибкость": 5
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 7,
+          "Интеллект": 5
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 9,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 6,
+          "Любопытство": 4
+        },
+        "special": {
+          "Сексуальная опытность": 4,
+          "Сопротивляемость": 4,
+          "Зависимость": 7
+        }
+      },
+      "states": {
+        "Настроение": 80,
+        "Тревожность": 20,
+        "Выгорание": 14,
+        "Вовлеченность": 76,
+        "Чувство права": 30,
+        "Проницательность": 70,
+        "Рутина": 50,
+        "Послушание": 76,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "tenderness": 8
+      },
+      "traits": [
+        "maternal",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 3,
+        "neural_hacking": 2,
+        "orgasm_control": 1,
+        "field": 1,
+        "etiquette": 1,
+        "logistics": 2,
+        "medical": 1,
+        "maintenance": 3,
+        "data": 1,
+        "dance": 2,
+        "seduction": 1,
+        "interrogation": 1,
+        "surveillance": 3
+      },
+      "rank": "Senior",
+      "price": 450,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_13",
+      "name": "Миша",
+      "age": 14,
+      "archetype": "Любопытный исследователь",
+      "description": "Михаил (Миша) - Любопытный исследователь",
+      "dateTransformation": "2024-01-01",
+      "category": "Выходцы из трущоб",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 6,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 7,
+          "Интеллект": 8
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 6,
+          "Доминантность": 4
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 8,
+          "Любопытство": 10
+        },
+        "special": {
+          "Сексуальная опытность": 1,
+          "Сопротивляемость": 4,
+          "Зависимость": 5
+        }
+      },
+      "states": {
+        "Настроение": 90,
+        "Тревожность": 20,
+        "Выгорание": 20,
+        "Вовлеченность": 100,
+        "Чувство права": 38,
+        "Проницательность": 88,
+        "Рутина": 50,
+        "Послушание": 68,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "curiosity": 10,
+        "submission": 6,
+        "dependency": 5,
+        "sensory_overload": 7
+      },
+      "traits": [
+        "curious",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 1,
+        "cooking": 3,
+        "neural_hacking": 3,
+        "orgasm_control": 2,
+        "field": 2,
+        "etiquette": 3,
+        "logistics": 1,
+        "medical": 2,
+        "maintenance": 1,
+        "data": 1,
+        "dance": 2,
+        "seduction": 2,
+        "interrogation": 1,
+        "surveillance": 3
+      },
+      "rank": "Middle",
+      "price": 475,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_14",
+      "name": "Ольга",
+      "age": 25,
+      "archetype": "Тёмная фея",
+      "description": "Ольга Дмитриевна Волкова - Тёмная фея",
+      "dateTransformation": "2024-01-01",
+      "category": "Корпоративный мир",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 6,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 5,
+          "Адаптивность": 7,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 8,
+          "Эмпатия": 5,
+          "Доминантность": 4
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 5,
+          "Любопытство": 8
+        },
+        "special": {
+          "Сексуальная опытность": 4,
+          "Сопротивляемость": 4,
+          "Зависимость": 5
+        }
+      },
+      "states": {
+        "Настроение": 75,
+        "Тревожность": 25,
+        "Выгорание": 20,
+        "Вовлеченность": 92,
+        "Чувство права": 38,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 68,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {},
+      "traits": [
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 2,
+        "neural_hacking": 4,
+        "orgasm_control": 1,
+        "field": 2,
+        "etiquette": 3,
+        "logistics": 1,
+        "medical": 1,
+        "maintenance": 2,
+        "data": 3,
+        "dance": 2,
+        "seduction": 1,
+        "interrogation": 2,
+        "surveillance": 1
+      },
+      "rank": "Senior",
+      "price": 500,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_15",
+      "name": "Алиса",
+      "age": 22,
+      "archetype": "Игривая невидимка",
+      "description": "Алиса (предположительно) - Игривая невидимка",
+      "dateTransformation": "2024-01-01",
+      "category": "Найденные в аномалии",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 9,
+          "Гибкость": 7
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 8,
+          "Интеллект": 8
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 8,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 7,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 4,
+          "Зависимость": 6
+        }
+      },
+      "states": {
+        "Настроение": 85,
+        "Тревожность": 20,
+        "Выгорание": 20,
+        "Вовлеченность": 96,
+        "Чувство права": 30,
+        "Проницательность": 88,
+        "Рутина": 50,
+        "Послушание": 76,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "curiosity": 9,
+        "sensory_overload": 5
+      },
+      "traits": [
+        "curious",
+        "playful",
+        "sensation_seeker",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 3,
+        "cooking": 1,
+        "neural_hacking": 2,
+        "orgasm_control": 3,
+        "field": 2,
+        "etiquette": 1,
+        "logistics": 3,
+        "medical": 2,
+        "maintenance": 2,
+        "data": 1,
+        "dance": 2,
+        "seduction": 2,
+        "interrogation": 1,
+        "surveillance": 1
+      },
+      "rank": "Senior",
+      "price": 525,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_16",
+      "name": "Сергей",
+      "age": 28,
+      "archetype": "Искатель ощущений",
+      "description": "Сергей Игоревич Волков - Искатель ощущений",
+      "dateTransformation": "2024-01-01",
+      "category": "Выходцы из трущоб",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 9,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 6,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 7,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 5,
+          "Сопротивляемость": 3,
+          "Зависимость": 8
+        }
+      },
+      "states": {
+        "Настроение": 85,
+        "Тревожность": 20,
+        "Выгорание": 20,
+        "Вовлеченность": 96,
+        "Чувство права": 30,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 76,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "curiosity": 9,
+        "sensory_overload": 8
+      },
+      "traits": [
+        "curious",
+        "addictive",
+        "sensation_seeker",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 2,
+        "cooking": 2,
+        "neural_hacking": 1,
+        "orgasm_control": 1,
+        "field": 1,
+        "etiquette": 3,
+        "logistics": 2,
+        "medical": 1,
+        "maintenance": 1,
+        "data": 2,
+        "dance": 1,
+        "seduction": 2,
+        "interrogation": 1,
+        "surveillance": 2
+      },
+      "rank": "Senior",
+      "price": 550,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    },
+    {
+      "id": "asset_17",
+      "name": "Лилия/Лилит",
+      "age": 24,
+      "archetype": "Падший ангел",
+      "description": "Лилия/Лилит (две личности) - Падший ангел",
+      "dateTransformation": "2024-01-01",
+      "category": "Найденные в аномалии",
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 8,
+          "Гибкость": 7
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 3,
+          "Адаптивность": 5,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 4,
+          "Оптимизм": 7,
+          "Любопытство": 6
+        },
+        "special": {
+          "Сексуальная опытность": 3,
+          "Сопротивляемость": 3,
+          "Зависимость": 7
+        }
+      },
+      "states": {
+        "Настроение": 85,
+        "Тревожность": 35,
+        "Выгорание": 17,
+        "Вовлеченность": 84,
+        "Чувство права": 22,
+        "Проницательность": 82,
+        "Рутина": 50,
+        "Послушание": 84,
+        "Нейропластичность": 80,
+        "Когнитивная нагрузка": 40
+      },
+      "fetishes": {
+        "submission": 1
+      },
+      "traits": [
+        "innocent",
+        "loyal",
+        "quick_learner"
+      ],
+      "preferences": {
+        "work_type": [
+          "service",
+          "technical"
+        ],
+        "environment": [
+          "clean",
+          "quiet"
+        ],
+        "avoid": [
+          "violence",
+          "chaos"
+        ]
+      },
+      "skills": {
+        "maid": 3,
+        "cooking": 3,
+        "neural_hacking": 3,
+        "orgasm_control": 3,
+        "field": 3,
+        "etiquette": 2,
+        "logistics": 1,
+        "medical": 2,
+        "maintenance": 1,
+        "data": 1,
+        "dance": 1,
+        "seduction": 3,
+        "interrogation": 2,
+        "surveillance": 3
+      },
+      "rank": "Senior",
+      "price": 575,
+      "specialization": "Базовое подчинение",
+      "status": "available",
+      "owner": null,
+      "location": "talent_exchange",
+      "avatar": "👤",
+      "deleted": false,
+      "deletedAt": null
+    }
+  ],
+  "templates": {},
+  "config": {
+    "skillCategories": {
+      "maid": {
+        "name": "Горничная",
+        "description": "Навыки обслуживания"
+      },
+      "cooking": {
+        "name": "Кулинария",
+        "description": "Приготовление пищи"
+      },
+      "neural_hacking": {
+        "name": "Нейрохакерство",
+        "description": "Взлом нейроинтерфейсов"
+      },
+      "orgasm_control": {
+        "name": "Контроль оргазма",
+        "description": "Управление оргазмом"
+      },
+      "field": {
+        "name": "Полевые работы",
+        "description": "Работа в полевых условиях"
+      },
+      "etiquette": {
+        "name": "Этикет",
+        "description": "Правила поведения"
+      },
+      "logistics": {
+        "name": "Логистика",
+        "description": "Управление ресурсами"
+      },
+      "medical": {
+        "name": "Медицина",
+        "description": "Медицинские навыки"
+      },
+      "maintenance": {
+        "name": "Техобслуживание",
+        "description": "Ремонт оборудования"
+      },
+      "data": {
+        "name": "Работа с данными",
+        "description": "Обработка информации"
+      },
+      "dance": {
+        "name": "Танцы",
+        "description": "Хореографические навыки"
+      },
+      "seduction": {
+        "name": "Соблазнение",
+        "description": "Искусство соблазнения"
+      },
+      "interrogation": {
+        "name": "Допрос",
+        "description": "Техники допроса"
+      },
+      "surveillance": {
+        "name": "Наблюдение",
+        "description": "Слежка и наблюдение"
+      }
+    }
+  }
+}

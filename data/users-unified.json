@@ -1,0 +1,55 @@
+{
+  "users": [
+    {
+      "id": "user-1755994583086-1",
+      "username": "TestUser",
+      "role": "user",
+      "status": "active",
+      "created": "2025-08-24",
+      "lastLogin": "2025-08-24",
+      "account": {
+        "balance": 5000,
+        "currency": "credits",
+        "transactions": []
+      },
+      "assets": [],
+      "equipment": [],
+      "settings": {
+        "theme": "dark",
+        "notifications": true,
+        "autoAssign": false,
+        "riskTolerance": "medium"
+      }
+    }
+  ],
+  "userRoles": {
+    "admin": {
+      "name": "Administrator",
+      "permissions": [
+        "all"
+      ],
+      "description": "Полный доступ к системе"
+    },
+    "user": {
+      "name": "User",
+      "permissions": [
+        "view_assets",
+        "edit_own_assets",
+        "view_market",
+        "make_purchases"
+      ],
+      "description": "Стандартный пользователь"
+    },
+    "trader": {
+      "name": "Trader",
+      "permissions": [
+        "view_assets",
+        "edit_own_assets",
+        "view_market",
+        "make_purchases",
+        "sell_assets"
+      ],
+      "description": "Торговец активами"
+    }
+  }
+}

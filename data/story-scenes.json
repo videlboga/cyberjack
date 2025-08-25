@@ -3,30 +3,46 @@
     "market_reputation": {
       "name": "Репутация на рынке",
       "description": "Ваша репутация среди торговцев талантами",
+      "value": 0,
       "defaultValue": 0,
       "minValue": -100,
-      "maxValue": 100
+      "maxValue": 100,
+      "type": "numeric",
+      "category": "story",
+      "tags": ["market", "reputation", "trading"]
     },
     "void_experience": {
       "name": "Опыт в Void",
       "description": "Количество успешных операций в зоне Void",
+      "value": 0,
       "defaultValue": 0,
       "minValue": 0,
-      "maxValue": 50
+      "maxValue": 50,
+      "type": "numeric",
+      "category": "skill",
+      "tags": ["void", "experience", "danger"]
     },
     "negotiation_skill": {
       "name": "Навык переговоров",
       "description": "Уровень мастерства в переговорах",
+      "value": 1,
       "defaultValue": 1,
       "minValue": 1,
-      "maxValue": 10
+      "maxValue": 10,
+      "type": "numeric",
+      "category": "skill",
+      "tags": ["negotiation", "skill", "social"]
     },
     "corporate_connections": {
       "name": "Корпоративные связи",
       "description": "Влияние в корпоративных кругах",
+      "value": 0,
       "defaultValue": 0,
       "minValue": 0,
-      "maxValue": 20
+      "maxValue": 20,
+      "type": "numeric",
+      "category": "relationship",
+      "tags": ["corporate", "connections", "influence"]
     }
   },
   "scenes": [

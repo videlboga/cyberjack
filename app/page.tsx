@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +27,8 @@ const sections = [
   { id: "stats", title: "Характеристики", icon: BarChart3, color: "bg-orange-500" },
   { id: "psychology", title: "Психо-профиль", icon: Brain, color: "bg-pink-500" },
   { id: "actions", title: "Действия", icon: Cog, color: "bg-teal-500" },
-  { id: "skills", title: "Навыки и трейты", icon: Users, color: "bg-indigo-500" },
+  { id: "character-ai", title: "Взаимодействия", icon: Brain, color: "bg-cyan-500" },
+  { id: "fetishes", title: "Фетиши и предпочтения", icon: Users, color: "bg-indigo-500" },
   { id: "economy", title: "Экономика", icon: DollarSign, color: "bg-yellow-500" },
   { id: "events", title: "События и риски", icon: AlertTriangle, color: "bg-red-500" },
   { id: "technical", title: "Техническая часть", icon: Code, color: "bg-gray-500" },
@@ -35,6 +36,17 @@ const sections = [
 
 export default function TalentArchitectGDD() {
   const [activeSection, setActiveSection] = useState("concept")
+  const [characterAIConfig, setCharacterAIConfig] = useState(null)
+
+  // Загружаем конфигурацию Character AI
+  useEffect(() => {
+    if (activeSection === "character-ai") {
+      fetch('/api/character-ai-config')
+        .then(res => res.json())
+        .then(data => setCharacterAIConfig(data))
+        .catch(err => console.error('Ошибка загрузки конфигурации Character AI:', err))
+    }
+  }, [activeSection])
 
   const renderContent = () => {
     switch (activeSection) {
@@ -339,6 +351,179 @@ export default function TalentArchitectGDD() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+
+      case "character-ai":
+        return (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  Иерархия взаимодействий
+                </CardTitle>
+                <CardDescription>Реальная конфигурация системы взаимодействий</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!characterAIConfig ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Загрузка конфигурации...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Статус системы */}
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold mb-2 text-blue-800">Статус системы</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">Конфигурация:</span>
+                          <Badge className="ml-2 bg-green-100 text-green-800">Загружена</Badge>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Действий:</span>
+                          <Badge className="ml-2 bg-blue-100 text-blue-800">{Object.keys(characterAIConfig.actions || {}).length}</Badge>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Инструментов:</span>
+                          <Badge className="ml-2 bg-purple-100 text-purple-800">{Object.keys(characterAIConfig.tools || {}).length}</Badge>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Поз:</span>
+                          <Badge className="ml-2 bg-orange-100 text-orange-800">{Object.keys(characterAIConfig.poses || {}).length}</Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Действия */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Действия ({Object.keys(characterAIConfig.actions || {}).length})</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(characterAIConfig.actions || {}).map(([id, action]: [string, any]) => (
+                          <div key={id} className="p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-3">
+                              <span className="text-2xl">{action.icon}</span>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-semibold">{action.name}</h4>
+                                  <Badge variant="outline" className="text-xs">{action.category}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-2">{action.description}</p>
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">Интенсивность:</span>
+                                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                      <div 
+                                        className="bg-cyan-500 h-2 rounded-full" 
+                                        style={{ width: `${(action.intensity / 10) * 100}%` }}
+                                      ></div>
+                                    </div>
+                                    <span className="text-xs text-gray-500">{action.intensity}/10</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">Стоимость:</span>
+                                    <Badge variant="outline" className="text-xs">{action.cost} НП</Badge>
+                                  </div>
+                                  {action.cooldown > 0 && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-gray-500">КД:</span>
+                                      <Badge variant="outline" className="text-xs">{action.cooldown}с</Badge>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Инструменты */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Инструменты ({Object.keys(characterAIConfig.tools || {}).length})</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(characterAIConfig.tools || {}).map(([id, tool]: [string, any]) => (
+                          <div key={id} className="p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-3">
+                              <span className="text-2xl">{tool.icon}</span>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-semibold">{tool.name}</h4>
+                                  <Badge variant="outline" className="text-xs">{tool.type}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-2">{tool.description}</p>
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">Интенсивность:</span>
+                                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                      <div 
+                                        className="bg-purple-500 h-2 rounded-full" 
+                                        style={{ width: `${(tool.intensity / 10) * 100}%` }}
+                                      ></div>
+                                    </div>
+                                    <span className="text-xs text-gray-500">{tool.intensity}/10</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">Длительность:</span>
+                                    <Badge variant="outline" className="text-xs">{tool.duration}с</Badge>
+                                  </div>
+                                  {tool.cooldown > 0 && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-gray-500">КД:</span>
+                                      <Badge variant="outline" className="text-xs">{tool.cooldown}с</Badge>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Позы */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Позы ({Object.keys(characterAIConfig.poses || {}).length})</h4>
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-800 mb-2">
+                          Позы отображаются в игровых режимах для избежания дублирования.
+                        </p>
+                        <div className="flex gap-2">
+                          <Link href="/game">
+                            <Button variant="outline" size="sm">
+                              🎮 Управление позами в игре
+                            </Button>
+                          </Link>
+                          <Link href="/prod">
+                            <Button variant="outline" size="sm">
+                              🚀 Использование поз в продакшн
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ссылки */}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2">Быстрые ссылки</h4>
+                      <div className="flex gap-2">
+                        <Link href="/prod">
+                          <Button variant="outline" size="sm">
+                            🚀 Открыть продакшн
+                          </Button>
+                        </Link>
+                        <Link href="/game">
+                          <Button variant="outline" size="sm">
+                            🎮 Открыть игру
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

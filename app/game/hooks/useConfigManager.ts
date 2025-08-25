@@ -1,19 +1,27 @@
 import { useState, useCallback } from 'react'
 import { saveConfigToFile } from '@/lib/config-sync'
+import { syncConfigToFiles } from '@/lib/sync-utils'
+import { syncLegacyToUnifiedConfig } from '@/lib/unified-config-adapter'
 
 export interface ConfigState {
+  assets: any
   actions: any
-  market: any
   contracts: any
   events: any
+  market: any
   equipment: any
   system: any
-  assets: any
   users: any
 }
 
 export const useConfigManager = (initialConfigs: ConfigState) => {
   const [configs, setConfigs] = useState<ConfigState>(initialConfigs)
+
+  // Функция для обновления конфигураций извне
+  const updateConfigs = useCallback((newConfigs: ConfigState) => {
+    console.log('🔄 Обновляем configs в useConfigManager:', newConfigs)
+    setConfigs(newConfigs)
+  }, [])
 
   const updateConfig = useCallback((configType: keyof ConfigState, data: any) => {
     setConfigs(prev => ({
@@ -53,6 +61,24 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
             item.id === itemId ? updatedItem : item
           )
         }
+      } else if (currentConfig.assets && Array.isArray(currentConfig.assets)) {
+        // Специальная обработка для assets конфига
+        updatedConfig = {
+          ...currentConfig,
+          assets: currentConfig.assets.map((item: any) => 
+            item.id === itemId ? updatedItem : item
+          )
+        }
+        console.log(`💎 Обновлен актив ${itemId}, теперь ${updatedConfig.assets.length} активов`)
+      } else if (currentConfig.users && Array.isArray(currentConfig.users)) {
+        // Специальная обработка для users конфига
+        updatedConfig = {
+          ...currentConfig,
+          users: currentConfig.users.map((item: any) => 
+            item.id === itemId ? updatedItem : item
+          )
+        }
+        console.log(`👥 Обновлен пользователь ${itemId}, теперь ${updatedConfig.users.length} пользователей`)
       } else {
         return prev
       }
@@ -65,6 +91,8 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
       // Сохраняем изменения
       try {
         saveConfigToFile(configType, updatedConfig)
+        // Синхронизируем с файлами
+        syncConfigToFiles(configType, updatedConfig)
       } catch (error) {
         console.error(`Ошибка сохранения при обновлении ${configType}:`, error)
       }
@@ -78,6 +106,11 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
     newItem: any,
     category?: string
   ) => {
+    // Генерируем уникальный ID для новых активов
+    if (configType === 'assets' && !newItem.id) {
+      newItem.id = `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    }
+    
     console.log(`➕ Добавление новой сущности: ${configType}`, newItem)
     
     setConfigs(prev => {
@@ -141,10 +174,13 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
       
       console.log('🔄 Новое состояние configs:', newConfigs)
       console.log(`📦 Обновленный конфиг для ${configType}:`, updatedConfig)
+      console.log(`🔍 Проверяем assets в новом состоянии:`, newConfigs.assets?.assets?.length || 0, 'активов')
       
       // Сохраняем изменения
       try {
         saveConfigToFile(configType, updatedConfig)
+        // Синхронизируем с файлами
+        syncConfigToFiles(configType, updatedConfig)
         console.log(`✅ Сущность добавлена в ${configType}`)
       } catch (error) {
         console.error(`❌ Ошибка сохранения при добавлении ${configType}:`, error)
@@ -247,6 +283,17 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
       try {
         saveConfigToFile(configType, updatedConfig)
         console.log(`✅ Сущность ${itemId} помечена как удаленная`)
+        
+        // Синхронизируем изменения обратно в unified конфигурацию для персонажей
+        if (configType === 'assets') {
+          const newConfigs = {
+            ...prev,
+            [configType]: updatedConfig
+          }
+          syncLegacyToUnifiedConfig(newConfigs).catch(error => {
+            console.error('❌ Ошибка синхронизации с unified конфигурацией:', error)
+          })
+        }
       } catch (error) {
         console.error(`❌ Ошибка сохранения при удалении ${configType}:`, error)
       }
@@ -274,7 +321,8 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
     updateConfigItem,
     addConfigItem,
     removeConfigItem,
-    exportConfig
+    exportConfig,
+    updateConfigs
   }
 }
 

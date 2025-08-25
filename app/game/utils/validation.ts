@@ -43,7 +43,269 @@ export const validationRules = {
 }
 
 // Функция валидации поля
-export const validateField = (value: any, rules: ValidationRule[]): string | null => {
+export const validateField = (field: any, value: any): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+  
+  // Проверка обязательности
+  if (field.required && (value === null || value === undefined || value === '')) {
+    errors.push(`${field.label} обязательно для заполнения`)
+  }
+  
+  // Проверка минимальной длины для строк
+  if (field.minLength && typeof value === 'string' && value.length < field.minLength) {
+    errors.push(`${field.label} должно содержать минимум ${field.minLength} символов`)
+  }
+  
+  // Проверка максимальной длины для строк
+  if (field.maxLength && typeof value === 'string' && value.length > field.maxLength) {
+    errors.push(`${field.label} не должно превышать ${field.maxLength} символов`)
+  }
+  
+  // Проверка минимального значения для чисел
+  if (field.min !== undefined && typeof value === 'number' && value < field.min) {
+    errors.push(`${field.label} не может быть меньше ${field.min}`)
+  }
+  
+  // Проверка максимального значения для чисел
+  if (field.max !== undefined && typeof value === 'number' && value > field.max) {
+    errors.push(`${field.label} не может быть больше ${field.max}`)
+  }
+  
+  // Проверка опций для select
+  if (field.type === 'select' && field.options && !field.options.includes(value)) {
+    errors.push(`${field.label} должно быть одним из: ${field.options.join(', ')}`)
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция валидации формы
+export const validateForm = (fields: any[], formData: any): { isValid: boolean; errors: string[]; fieldErrors: Record<string, string[]> } => {
+  const errors: string[] = []
+  const fieldErrors: Record<string, string[]> = {}
+  
+  fields.forEach(field => {
+    const value = formData[field.name]
+    const validation = validateField(field, value)
+    
+    if (!validation.isValid) {
+      errors.push(...validation.errors)
+      fieldErrors[field.name] = validation.errors
+    }
+  })
+  
+  return {
+    isValid: errors.length === 0,
+    errors,
+    fieldErrors
+  }
+}
+
+// Функция валидации email
+export const validateEmail = (email: string): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  
+  if (!email || email.trim() === '') {
+    errors.push('Email не может быть пустым')
+  } else {
+    // Дополнительные проверки для более строгой валидации
+    if (email.includes('..') || email.startsWith('.') || email.endsWith('.')) {
+      errors.push('Некорректный формат email')
+    } else if (!emailRegex.test(email)) {
+      errors.push('Некорректный формат email')
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция валидации числа
+export const validateNumber = (value: number, options: { min?: number; max?: number; integer?: boolean }): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+  
+  if (typeof value !== 'number' || isNaN(value)) {
+    errors.push('Значение должно быть числом')
+    return { isValid: false, errors }
+  }
+  
+  if (options.min !== undefined && value < options.min) {
+    errors.push(`Значение не может быть меньше ${options.min}`)
+  }
+  
+  if (options.max !== undefined && value > options.max) {
+    errors.push(`Значение не может быть больше ${options.max}`)
+  }
+  
+  if (options.integer && !Number.isInteger(value)) {
+    errors.push('Значение должно быть целым числом')
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция валидации строки
+export const validateString = (value: string, options: { minLength?: number; maxLength?: number; required?: boolean; pattern?: RegExp }): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+  
+  if (options.required && (value === null || value === undefined || value === '')) {
+    errors.push('Поле обязательно для заполнения')
+  }
+  
+  if (options.minLength && value.length < options.minLength) {
+    errors.push(`Минимальная длина: ${options.minLength} символов`)
+  }
+  
+  if (options.maxLength && value.length > options.maxLength) {
+    errors.push(`Максимальная длина: ${options.maxLength} символов`)
+  }
+  
+  if (options.pattern && !options.pattern.test(value)) {
+    errors.push('Значение не соответствует требуемому формату')
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция валидации select
+export const validateSelect = (value: any, options: { options: string[]; multiple?: boolean }): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+  
+  if (options.multiple) {
+    if (!Array.isArray(value)) {
+      errors.push('Значение должно быть массивом')
+    } else {
+      const invalidValues = value.filter(v => !options.options.includes(v))
+      if (invalidValues.length > 0) {
+        errors.push(`Недопустимые значения: ${invalidValues.join(', ')}`)
+      }
+    }
+  } else {
+    if (!options.options.includes(value)) {
+      errors.push(`Значение должно быть одним из: ${options.options.join(', ')}`)
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция валидации динамического объекта
+export const validateDynamicObject = (value: any, config: any): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+  
+  if (typeof value !== 'object' || value === null) {
+    errors.push('Значение должно быть объектом')
+    return { isValid: false, errors }
+  }
+  
+  // Проверяем, что все ключи входят в допустимые опции
+  const invalidKeys = Object.keys(value).filter(key => !config.options.includes(key))
+  if (invalidKeys.length > 0) {
+    errors.push(`Недопустимые ключи: ${invalidKeys.join(', ')}`)
+  }
+  
+  // Проверяем значения
+  Object.entries(value).forEach(([key, val]) => {
+    if (config.min !== undefined && val < config.min) {
+      errors.push(`${key}: значение не может быть меньше ${config.min}`)
+    }
+    if (config.max !== undefined && val > config.max) {
+      errors.push(`${key}: значение не может быть больше ${config.max}`)
+    }
+  })
+  
+  // Проверяем минимальное количество ключей
+  if (config.minKeys && Object.keys(value).length < config.minKeys) {
+    errors.push(`Минимальное количество ключей: ${config.minKeys}`)
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция валидации динамического массива
+export const validateDynamicArray = (value: any[], config: any): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = []
+  
+  if (!Array.isArray(value)) {
+    errors.push('Значение должно быть массивом')
+    return { isValid: false, errors }
+  }
+  
+  // Проверяем, что все элементы входят в допустимые опции
+  const invalidItems = value.filter(item => !config.options.includes(item))
+  if (invalidItems.length > 0) {
+    errors.push(`Недопустимые элементы: ${invalidItems.join(', ')}`)
+  }
+  
+  // Проверяем минимальное количество элементов
+  if (config.minItems && value.length < config.minItems) {
+    errors.push(`Минимальное количество элементов: ${config.minItems}`)
+  }
+  
+  // Проверяем максимальное количество элементов
+  if (config.maxItems && value.length > config.maxItems) {
+    errors.push(`Максимальное количество элементов: ${config.maxItems}`)
+  }
+  
+  // Проверяем уникальность
+  if (config.unique) {
+    const duplicates = value.filter((item, index) => value.indexOf(item) !== index)
+    if (duplicates.length > 0) {
+      errors.push(`Дублирующиеся элементы: ${[...new Set(duplicates)].join(', ')}`)
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция получения ошибок валидации
+export const getValidationErrors = (fields: any[], formData: any, options?: { groupByField?: boolean }): any => {
+  const validation = validateForm(fields, formData)
+  
+  if (options?.groupByField) {
+    return validation.fieldErrors
+  }
+  
+  return validation.errors
+}
+
+// Функция валидации объекта
+export const validateObject = (data: any, schema: ValidationSchema): Record<string, string> => {
+  const errors: Record<string, string> = {}
+  
+  for (const [fieldName, rules] of Object.entries(schema)) {
+    const error = validateFieldRules(data[fieldName], rules)
+    if (error) {
+      errors[fieldName] = error
+    }
+  }
+  
+  return errors
+}
+
+// Функция валидации поля по правилам
+export const validateFieldRules = (value: any, rules: ValidationRule[]): string | null => {
   for (const rule of rules) {
     switch (rule.type) {
       case 'required':
@@ -91,20 +353,6 @@ export const validateField = (value: any, rules: ValidationRule[]): string | nul
   }
   
   return null
-}
-
-// Функция валидации объекта
-export const validateObject = (data: any, schema: ValidationSchema): Record<string, string> => {
-  const errors: Record<string, string> = {}
-  
-  for (const [fieldName, rules] of Object.entries(schema)) {
-    const error = validateField(data[fieldName], rules)
-    if (error) {
-      errors[fieldName] = error
-    }
-  }
-  
-  return errors
 }
 
 // Специфичные схемы валидации для игровых сущностей
@@ -272,12 +520,6 @@ export const validateJSON = (jsonString: string): { valid: boolean; error?: stri
   } catch (error) {
     return { valid: false, error: error instanceof Error ? error.message : 'Неверный формат JSON' }
   }
-}
-
-// Функция для валидации email
-export const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
 }
 
 // Функция для валидации URL

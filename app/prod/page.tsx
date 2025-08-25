@@ -2,9 +2,19 @@
 
 import React from "react"
 import { useState, useRef, useEffect } from "react"
-import { loadConfigsForEnvironment, initializeUnifiedDataSource } from "@/lib/config-sync"
-import type { GameConfig, GameAction, GameContract, GameEvent, GameEquipment } from "@/lib/types"
+import { loadUnifiedConfigWithAdapter } from "@/lib/unified-config-adapter"
+import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/types"
 import RegistrationModal from "./components/RegistrationModal"
+import { personalWorkIntegration } from "@/lib/character/personal-work-integration"
+
+import { useCharacterAI } from "./hooks/useCharacterAI"
+import { ActionToolPanel } from "./components/ActionToolPanel"
+import { CharacterChat } from "./components/CharacterChat"
+import { CharacterAdapter } from "@/lib/character/character-adapter"
+import { OpenRouterDebugPanel } from './components/OpenRouterDebugPanel'
+import { Button } from "@/components/ui/button"
+import { StatNotification } from "@/components/ui/stat-notification"
+import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
 
   // Функция для генерации уникальных ID
   let idCounter = 0
@@ -105,7 +115,7 @@ interface Contract {
   deadline?: number
 }
 
-interface GameEvent {
+interface LocalGameEvent {
   id: string
   title: string
   description: string
@@ -133,6 +143,7 @@ export default function TalentArchitectProd() {
   // Состояние для регистрации
   const [showRegistration, setShowRegistration] = useState(true)
   const [currentUser, setCurrentUser] = useState<{ username: string; id: string } | null>(null)
+  const [showCharacterPanel, setShowCharacterPanel] = useState(false)
   
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null)
   const [neuralPulses, setNeuralPulses] = useState(100)
@@ -151,7 +162,7 @@ export default function TalentArchitectProd() {
   const [currentDay, setCurrentDay] = useState(1)
   const [activeTab, setActiveTab] = useState("talents")
   const [editMode, setEditMode] = useState(false)
-  const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null)
+  const [currentEvent, setCurrentEvent] = useState<LocalGameEvent | null>(null)
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({})
   const [hoveredAction, setHoveredAction] = useState<string | null>(null)
@@ -161,7 +172,7 @@ export default function TalentArchitectProd() {
   const [selectedImplant, setSelectedImplant] = useState<Equipment | null>(null)
   const [showStatusEffects, setShowStatusEffects] = useState(false)
   const [showEquipmentPanel, setShowEquipmentPanel] = useState(false)
-  const [collapsedCategories, setCollapsedCategories] = useState<{ [key: string]: boolean }>({})
+
 
   const [personalWorkMode, setPersonalWorkMode] = useState(false)
   const [showInteractionPanel, setShowInteractionPanel] = useState(false)
@@ -182,18 +193,66 @@ export default function TalentArchitectProd() {
   const [isChatDragging, setIsChatDragging] = useState(false)
   const [chatDragOffset, setChatDragOffset] = useState({ x: 0, y: 0 })
 
+  // Character AI состояния
+  const [characterAIConfig, setCharacterAIConfig] = useState<CharacterAIConfig | null>(null)
+  const [showCharacterAIPanel, setShowCharacterAIPanel] = useState(false)
+  const [showActionToolPanel, setShowActionToolPanel] = useState(false)
+  const [showCharacterChat, setShowCharacterChat] = useState(false)
+  const [showOpenRouterDebug, setShowOpenRouterDebug] = useState(false)
+  
+  // Состояние для уведомлений об изменениях характеристик
+  const [statChanges, setStatChanges] = useState<Array<{ stat: string; change: number; timestamp: number }>>([])
+
+  // Инициализация Character AI - всегда вызываем хук, но с пустой конфигурацией если не загружена
+  const characterAI = useCharacterAI({
+    characterAIConfig: characterAIConfig || {
+      actions: {},
+      tools: {},
+      poses: {},
+      poseChangeConditions: {},
+      quickActions: {},
+      interactiveAreas: {},
+      llmPrompts: {
+        basePrompt: "",
+        characteristicInterpretations: {},
+        fetishResponses: {}
+      }
+    },
+    characterStates: selectedTalent?.states || {},
+    characterAttributes: selectedTalent?.attributes || {},
+    characterFetishes: selectedTalent?.affinities || {},
+    userEquipment: selectedTalent?.equippedItems?.map(item => item.id) || [],
+    currentPose: "standing_normal",
+    geminiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY
+  })
+
   // Загрузка конфигурации при монтировании компонента
   useEffect(() => {
     const loadConfig = async () => {
       try {
         setConfigLoading(true)
         
-        // Инициализируем единый источник истины
-        initializeUnifiedDataSource()
-        
-        const config = await loadConfigsForEnvironment('prod')
+        console.log('🔄 Начинаем загрузку конфигурации в prod...')
+        const config = await loadUnifiedConfigWithAdapter()
+        console.log('✅ Конфигурация загружена в prod:', config)
+        console.log('📊 Активы из конфигурации:', config.assets?.assets)
+        console.log('📊 Количество активов:', config.assets?.assets?.length)
         setGameConfig(config)
+        
+        // Загружаем конфигурацию Character AI
+        console.log('🔍 Проверяем Character AI в config:', config.characterAI)
+        if (config.characterAI) {
+          console.log('🤖 Загружаем конфигурацию Character AI:', config.characterAI)
+          console.log('🤖 Character AI actions:', Object.keys(config.characterAI.actions || {}))
+          console.log('🤖 Character AI tools:', Object.keys(config.characterAI.tools || {}))
+          console.log('🤖 Character AI poses:', Object.keys(config.characterAI.poses || {}))
+          setCharacterAIConfig(config.characterAI)
+        } else {
+          console.log('❌ Character AI конфигурация не найдена в config')
+          console.log('🔍 Доступные ключи в config:', Object.keys(config))
+        }
       } catch (error) {
+        console.error('❌ Ошибка загрузки конфигурации в prod:', error)
         setConfigError(error instanceof Error ? error.message : 'Неизвестная ошибка загрузки')
       } finally {
         setConfigLoading(false)
@@ -202,6 +261,79 @@ export default function TalentArchitectProd() {
     
     loadConfig()
   }, [])
+
+  // Заполнение talents из конфигурации
+  useEffect(() => {
+    if (gameConfig?.assets?.assets) {
+      console.log('🔄 Заполняем talents из конфигурации...')
+      const talentsFromConfig = gameConfig.assets.assets.map(asset => {
+        console.log('📊 Обрабатываем актив:', asset.name, asset.attributes)
+        
+        // Правильно маппим атрибуты согласно эталонной системе характеристик
+        const mappedAttributes = {
+          // Физические характеристики
+          endurance: asset.attributes.endurance || 0,
+          sensitivity: asset.attributes.sensitivity || 0,
+          flexibility: asset.attributes.flexibility || 0,
+          
+          // Психологические характеристики
+          emotionalStability: asset.attributes.emotional_stability || 0,
+          adaptability: asset.attributes.adaptability || 0,
+          intelligence: asset.attributes.intelligence || 0,
+          
+          // Социальные характеристики
+          sociability: asset.attributes.sociability || 0,
+          empathy: asset.attributes.empathy || 0,
+          dominance: asset.attributes.dominance || 0,
+          
+          // Личностные характеристики
+          selfEsteem: asset.attributes.self_esteem || 0,
+          optimism: asset.attributes.optimism || 0,
+          curiosity: asset.attributes.curiosity || 0,
+          
+          // Специальные характеристики
+          sexualExperience: asset.attributes.sexual_experience || 0,
+          resistance: asset.attributes.resistance || 0,
+          dependency: asset.attributes.dependency || 0,
+        }
+        
+        // Создаем состояния на основе атрибутов или используем дефолтные (шкала 0-100)
+        const mappedStates = {
+          mood: 75,
+          anxiety: 25,
+          burnout: 20,
+          engagement: 80,
+          entitlement: 30,
+          insight: 70,
+          routine: 50,
+          compliance: 60,
+          neuroplasticity: 80,
+          cognitiveLoad: 40,
+        }
+        
+        return {
+          id: asset.id,
+          name: asset.name,
+          role: asset.specialization,
+          level: asset.rank === 'Junior' ? 3 : asset.rank === 'Middle' ? 5 : 7,
+          attributes: mappedAttributes,
+          states: mappedStates,
+          skills: asset.skills,
+          status: "available",
+          memories: [],
+          experience: 0,
+          statusEffects: [],
+          affinities: asset.fetishes || {},
+          stressors: {},
+          equippedItems: [],
+          inventory: [],
+        }
+      })
+      console.log('✅ Talents заполнены из конфигурации:', talentsFromConfig)
+      console.log('📊 Пример атрибутов первого таланта:', talentsFromConfig[0]?.attributes)
+      setTalents(talentsFromConfig)
+    }
+  }, [gameConfig])
 
   // Проверка существующего пользователя при загрузке
   useEffect(() => {
@@ -225,7 +357,7 @@ export default function TalentArchitectProd() {
   }, [])
 
   // Функция для обработки регистрации пользователя
-  const handleUserRegistration = (username: string, password: string) => {
+  const handleUserRegistration = async (username: string, password: string) => {
     console.log('🔐 Начинаем регистрацию/вход для:', username)
     console.log('🔐 Пароль:', password ? '***' : 'пустой')
     
@@ -285,6 +417,58 @@ export default function TalentArchitectProd() {
       allUsers.push(currentUserData)
       localStorage.setItem('allUsers', JSON.stringify(allUsers))
       console.log('✅ Новый пользователь добавлен в allUsers:', currentUserData)
+      
+      // Синхронизируем с файлом users-unified.json
+      try {
+        const response = await fetch('/api/sync-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            configType: 'users',
+            data: { users: allUsers }
+          })
+        })
+        
+        if (response.ok) {
+          console.log('✅ Пользователи синхронизированы с файлом')
+        } else {
+          console.error('❌ Ошибка синхронизации пользователей:', response.statusText)
+        }
+              } catch (error) {
+          console.error('❌ Ошибка при синхронизации пользователей:', error)
+        }
+    }
+
+    if (existingUser) {
+      // Обновляем данные существующего пользователя
+      const updatedUsers = allUsers.map((user: any) => 
+        user.username.toLowerCase() === username.toLowerCase() ? currentUserData : user
+      )
+      localStorage.setItem('allUsers', JSON.stringify(updatedUsers))
+      
+      // Синхронизируем обновленные данные с файлом
+      try {
+        const response = await fetch('/api/sync-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            configType: 'users',
+            data: { users: updatedUsers }
+          })
+        })
+        
+        if (response.ok) {
+          console.log('✅ Обновленные пользователи синхронизированы с файлом')
+        } else {
+          console.error('❌ Ошибка синхронизации обновленных пользователей:', response.statusText)
+        }
+      } catch (error) {
+        console.error('❌ Ошибка при синхронизации обновленных пользователей:', error)
+      }
     }
 
     // Сохраняем текущего пользователя
@@ -303,7 +487,7 @@ export default function TalentArchitectProd() {
   }
 
   // Функция для обновления баланса пользователя
-  const updateUserBalance = (newBalance: number) => {
+  const updateUserBalance = async (newBalance: number) => {
     if (!currentUser) return
     
     const savedUser = localStorage.getItem('currentUser')
@@ -320,6 +504,28 @@ export default function TalentArchitectProd() {
           u.id === user.id ? user : u
         )
         localStorage.setItem('allUsers', JSON.stringify(updatedUsers))
+        
+        // Синхронизируем обновленные данные с файлом
+        try {
+          const response = await fetch('/api/sync-data', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              configType: 'users',
+              data: { users: updatedUsers }
+            })
+          })
+          
+          if (response.ok) {
+            console.log('✅ Баланс пользователя синхронизирован с файлом')
+          } else {
+            console.error('❌ Ошибка синхронизации баланса:', response.statusText)
+          }
+        } catch (error) {
+          console.error('❌ Ошибка при синхронизации баланса:', error)
+        }
       } catch (error) {
         console.error('Ошибка обновления баланса:', error)
       }
@@ -446,131 +652,7 @@ export default function TalentArchitectProd() {
   const [currentScene, setCurrentScene] = useState<any>(null)
   const [showStoryScene, setShowStoryScene] = useState(false)
 
-  const [talents, setTalents] = useState<Talent[]>([
-    {
-      id: "1",
-      name: "Алекс Нова",
-      role: "Системный Архитектор",
-      level: 5,
-      attributes: { strength: 80, empathy: 70, intelligence: 95, creativity: 75, temperament: 65, grit: 85, ego: 45 },
-      states: {
-        mood: 85,
-        anxiety: 20,
-        burnout: 15,
-        engagement: 90,
-        entitlement: 25,
-        insight: 80,
-        routine: 60,
-        compliance: 70,
-        neuroplasticity: 85,
-        endurance: 75,
-        cognitiveLoad: 30,
-      },
-      skills: {
-        office: 85,
-        negotiation: 70,
-        technical: 95,
-        vr: 80,
-        field: 40,
-        etiquette: 65,
-        logistics: 60,
-        medical: 30,
-        maintenance: 25,
-        data: 90,
-        stage: 50,
-      },
-      status: "available",
-      memories: ["Успешно завершил проект по ИИ", "Получил повышение"],
-      experience: 2400,
-      statusEffects: [],
-      affinities: {},
-      stressors: {},
-      equippedItems: [],
-      inventory: [],
-    },
-    {
-      id: "2",
-      name: "Зара Кибер",
-      role: "Нейро-хакер",
-      level: 4,
-      attributes: { strength: 60, empathy: 85, intelligence: 90, creativity: 95, temperament: 80, grit: 70, ego: 35 },
-      states: {
-        mood: 75,
-        anxiety: 35,
-        burnout: 25,
-        engagement: 85,
-        entitlement: 20,
-        insight: 90,
-        routine: 40,
-        compliance: 60,
-        neuroplasticity: 95,
-        endurance: 65,
-        cognitiveLoad: 45,
-      },
-      skills: {
-        office: 50,
-        negotiation: 85,
-        technical: 90,
-        vr: 95,
-        field: 70,
-        etiquette: 40,
-        logistics: 55,
-        medical: 60,
-        maintenance: 45,
-        data: 85,
-        stage: 75,
-      },
-      status: "available",
-      memories: ["Взломала защищенную сеть", "Создала новый алгоритм шифрования"],
-      experience: 1800,
-      statusEffects: [],
-      affinities: {},
-      stressors: {},
-      equippedItems: [],
-      inventory: [],
-    },
-    {
-      id: "3",
-      name: "Макс Вектор",
-      role: "Боевой Инженер",
-      level: 6,
-      attributes: { strength: 95, empathy: 50, intelligence: 75, creativity: 60, temperament: 40, grit: 95, ego: 70 },
-      states: {
-        mood: 80,
-        anxiety: 15,
-        burnout: 20,
-        engagement: 95,
-        entitlement: 40,
-        insight: 60,
-        routine: 85,
-        compliance: 80,
-        neuroplasticity: 50,
-        endurance: 95,
-        cognitiveLoad: 20,
-      },
-      skills: {
-        office: 30,
-        negotiation: 45,
-        technical: 80,
-        vr: 60,
-        field: 95,
-        etiquette: 25,
-        logistics: 85,
-        medical: 70,
-        maintenance: 90,
-        data: 40,
-        stage: 35,
-      },
-      status: "available",
-      memories: ["Защитил станцию от пиратов", "Модернизировал системы безопасности"],
-      experience: 3200,
-      statusEffects: [],
-      affinities: {},
-      stressors: {},
-      equippedItems: [],
-      inventory: [],
-    },
-  ])
+  const [talents, setTalents] = useState<Talent[]>([])
 
   // Используем конфигурацию оборудования из JSON
   const [globalInventory, setGlobalInventory] = useState<Equipment[]>(
@@ -598,152 +680,11 @@ export default function TalentArchitectProd() {
     }
   }, [gameConfig])
 
-  const [actionCategories] = useState<ActionCategory[]>([
-    {
-      id: "training",
-      name: "Обучение",
-      icon: "📚",
-      actions: [
-        {
-          id: "basic-training",
-          name: "Базовое обучение",
-          description: "Стабильное повышение навыков без рисков",
-          cost: 10,
-          effects: { intelligence: 5, experience: 50 },
-        },
-        {
-          id: "intensive-training",
-          name: "Интенсивное обучение",
-          description: "Быстрое развитие, но повышает тревожность",
-          cost: 20,
-          effects: { intelligence: 12, experience: 100 },
-          sideEffects: { anxiety: 10 },
-        },
-        {
-          id: "neuro-enhancement",
-          name: "Нейроулучшение",
-          description: "Экспериментальная процедура с непредсказуемыми результатами",
-          cost: 30,
-          effects: { intelligence: 20, experience: 150 },
-          risk: {
-            chance: 30,
-            positiveOutcome: { intelligence: 35, creativity: 15 },
-            negativeOutcome: { anxiety: 25, mood: -15 },
-          },
-        },
-      ],
-    },
-    {
-      id: "coaching",
-      name: "Коучинг",
-      icon: "🎯",
-      actions: [
-        {
-          id: "basic-coaching",
-          name: "Базовый коучинг",
-          description: "Мягкое улучшение настроения и мотивации",
-          cost: 8,
-          effects: { mood: 10, engagement: 8 },
-        },
-        {
-          id: "intensive-coaching",
-          name: "Интенсивный коучинг",
-          description: "Сильное повышение мотивации, но может вызвать стресс",
-          cost: 15,
-          effects: { mood: 20, engagement: 18 },
-          sideEffects: { anxiety: 8 },
-        },
-        {
-          id: "extreme-coaching",
-          name: "Экстремальный коучинг",
-          description: "Мощный прорыв или серьезная психологическая травма",
-          cost: 25,
-          effects: { mood: 30, engagement: 25, strength: 10 },
-          risk: {
-            chance: 25,
-            positiveOutcome: { mood: 50, engagement: 40, strength: 10 },
-            negativeOutcome: { anxiety: 30, mood: -20 },
-          },
-        },
-      ],
-    },
-    {
-      id: "therapy",
-      name: "Терапия",
-      icon: "🌟",
-      actions: [
-        {
-          id: "basic-therapy",
-          name: "Базовая терапия",
-          description: "Снижение тревожности и стресса",
-          cost: 12,
-          effects: { anxiety: -15, mood: 8 },
-        },
-        {
-          id: "deep-therapy",
-          name: "Глубокая терапия",
-          description: "Серьезная работа с психологическими проблемами",
-          cost: 25,
-          effects: { anxiety: -30, burnout: -20, mood: 15 },
-          sideEffects: { engagement: -10 },
-        },
-        {
-          id: "creative-leave",
-          name: "Творческий отпуск",
-          description: "Полное восстановление от выгорания, но потеря вовлеченности",
-          cost: 20,
-          effects: { burnout: -50, creativity: 15 },
-          sideEffects: { engagement: -25 },
-        },
-      ],
-    },
-    {
-      id: "rewards",
-      name: "Поощрение",
-      icon: "🎁",
-      actions: [
-        {
-          id: "basic-reward",
-          name: "Базовое поощрение",
-          description: "Небольшая премия для поднятия настроения",
-          cost: 5,
-          effects: { mood: 12, engagement: 5 },
-        },
-        {
-          id: "luxury-reward",
-          name: "Роскошное поощрение",
-          description: "Дорогой подарок, сильно повышающий мотивацию",
-          cost: 15,
-          effects: { mood: 25, engagement: 20, empathy: 5 },
-        },
-      ],
-    },
-    {
-      id: "rest",
-      name: "Отдых",
-      icon: "😴",
-      actions: [
-        {
-          id: "basic-rest",
-          name: "Базовый отдых",
-          description: "Короткий перерыв для восстановления сил",
-          cost: 3,
-          effects: { burnout: -10, mood: 5 },
-        },
-        {
-          id: "extended-rest",
-          name: "Продленный отдых",
-          description: "Длительный отпуск для полного восстановления",
-          cost: 10,
-          effects: { burnout: -30, anxiety: -15, mood: 15 },
-          sideEffects: { engagement: -15 },
-        },
-      ],
-    },
-  ])
+
+
 
   // Используем конфигурацию событий из JSON
-  const [events] = useState<GameEvent[]>(
+  const [events] = useState<LocalGameEvent[]>(
     gameConfig?.events?.events?.map(event => ({
       ...event,
       type: "neutral" // По умолчанию
@@ -881,66 +822,40 @@ export default function TalentArchitectProd() {
     return "bg-red-400"
   }
 
-  const getEffectiveStats = React.useCallback(
-    (talent: Talent) => {
-      const baseStats: { [key: string]: number } = {
-        // Атрибуты
-        strength: talent.attributes.strength,
-        empathy: talent.attributes.empathy,
-        intelligence: talent.attributes.intelligence,
-        creativity: talent.attributes.creativity,
-        temperament: talent.attributes.temperament,
-        grit: talent.attributes.grit,
-        ego: talent.attributes.ego,
-        // Состояния
-        mood: talent.states.mood,
-        anxiety: talent.states.anxiety,
-        burnout: talent.states.burnout,
-        engagement: talent.states.engagement,
-        entitlement: talent.states.entitlement,
-        insight: talent.states.insight,
-        routine: talent.states.routine,
-        compliance: talent.states.compliance,
-        neuroplasticity: talent.states.neuroplasticity,
-        endurance: talent.states.endurance,
-        cognitiveLoad: talent.states.cognitiveLoad,
-      }
+  const getAttributeDisplayName = (stat: string): string => {
+    const displayNames: { [key: string]: string } = {
+      // Физические характеристики
+      endurance: 'ВЫНОСЛИВОСТЬ',
+      sensitivity: 'ЧУВСТВИТЕЛЬНОСТЬ',
+      flexibility: 'ГИБКОСТЬ',
+      
+      // Психологические характеристики
+      emotionalStability: 'ЭМОЦИОНАЛЬНАЯ СТАБИЛЬНОСТЬ',
+      adaptability: 'АДАПТИВНОСТЬ',
+      intelligence: 'ИНТЕЛЛЕКТ',
+      
+      // Социальные характеристики
+      sociability: 'ОБЩИТЕЛЬНОСТЬ',
+      empathy: 'ЭМПАТИЯ',
+      dominance: 'ДОМИНАНТНОСТЬ',
+      
+      // Личностные характеристики
+      selfEsteem: 'САМООЦЕНКА',
+      optimism: 'ОПТИМИЗМ',
+      curiosity: 'ЛЮБОПЫТСТВО',
+      
+      // Специальные характеристики
+      sexualExperience: 'СЕКСУАЛЬНАЯ ОПЫТНОСТЬ',
+      resistance: 'СОПРОТИВЛЯЕМОСТЬ',
+      dependency: 'ЗАВИСИМОСТЬ',
+      fetishSensitivity: 'ЧУВСТВИТЕЛЬНОСТЬ К ФЕТИШАМ',
+      fetishDiscovery: 'ГОТОВНОСТЬ К ОТКРЫТИЯМ'
+    }
+    
+    return displayNames[stat] || stat.toUpperCase()
+  }
 
-      try {
-        // Применяем эффекты от включенной экипировки
-        const enabledEquipment = globalInventory.filter(
-          (item) => item.enabled && item.settings?.targetTalents?.includes(talent.id),
-        )
 
-        for (const item of enabledEquipment) {
-          const multiplier = item.settings?.effectMultiplier || 1.0
-          const powerMultiplier = item.powerLevel ? item.powerLevel / 100 : 1.0
-
-          for (const [stat, value] of Object.entries(item.effects)) {
-            const statKey = stat.toLowerCase()
-            if (statKey in baseStats) {
-              baseStats[statKey] += Math.round(value * multiplier * powerMultiplier)
-            }
-          }
-        }
-
-        // Применяем эффекты от статусных эффектов
-        for (const effect of talent.statusEffects) {
-          for (const [stat, value] of Object.entries(effect.effects)) {
-            const statKey = stat.toLowerCase()
-            if (statKey in baseStats) {
-              baseStats[statKey] += value
-            }
-          }
-        }
-      } catch (error) {
-        console.error("[v0] Error calculating effective stats:", error)
-      }
-
-      return baseStats
-    },
-    [globalInventory],
-  )
 
   const applyStatusEffect = (talentId: string, effectTemplate: StatusEffect) => {
     setTalents((prev) =>
@@ -1024,82 +939,7 @@ export default function TalentArchitectProd() {
     }
   }
 
-  const performAction = (actionId: string, categoryId: string) => {
-    if (!selectedTalent) return
 
-    const category = actionCategories.find((c) => c.id === categoryId)
-    const action = category?.actions.find((a) => a.id === actionId)
-    if (!action || neuralPulses < action.cost) return
-
-    setNeuralPulses((prev) => prev - action.cost)
-
-    const updatedTalents = talents.map((talent) => {
-      if (talent.id === selectedTalent.id) {
-        const newTalent = { ...talent }
-
-        // Применяем основные эффекты
-        Object.entries(action.effects).forEach(([stat, value]) => {
-          if (stat in newTalent) {
-            ;(newTalent as any)[stat] = Math.max(0, Math.min(100, (newTalent as any)[stat] + value))
-          }
-        })
-
-        // Применяем побочные эффекты
-        if (action.sideEffects) {
-          Object.entries(action.sideEffects).forEach(([stat, value]) => {
-            if (stat in newTalent) {
-              ;(newTalent as any)[stat] = Math.max(0, Math.min(100, (newTalent as any)[stat] + value))
-            }
-          })
-        }
-
-        // Обрабатываем риск
-        if (action.risk && Math.random() * 100 < action.risk.chance) {
-          if (action.risk.positiveOutcome) {
-            Object.entries(action.risk.positiveOutcome).forEach(([stat, value]) => {
-              if (stat in newTalent) {
-                ;(newTalent as any)[stat] = Math.max(0, Math.min(100, (newTalent as any)[stat] + value))
-              }
-            })
-          }
-
-          if (action.risk.negativeOutcome) {
-            Object.entries(action.risk.negativeOutcome).forEach(([stat, value]) => {
-              if (stat in newTalent) {
-                ;(newTalent as any)[stat] = Math.max(0, Math.min(100, (newTalent as any)[stat] + value))
-              }
-            })
-          }
-        }
-
-        if (Math.random() < 0.3) {
-          // 30% шанс получить состояние
-          const possibleEffects = availableStatusEffects.filter((effect) => {
-            if (categoryId === "training" && effect.source === "training") return true
-            if (categoryId === "coaching" && effect.source === "coaching") return true
-            if (categoryId === "therapy" && effect.source === "therapy") return true
-            if (actionId.includes("intensive") && effect.name.includes("перегрузка")) return true
-            return false
-          })
-
-          if (possibleEffects.length > 0) {
-            const randomEffect = possibleEffects[Math.floor(Math.random() * possibleEffects.length)]
-            // Применяем эффект через функцию applyStatusEffect после обновления состояния
-            setTimeout(() => applyStatusEffect(selectedTalent.id, randomEffect), 100)
-          }
-        }
-
-        // Добавляем воспоминание
-        newTalent.memories = [...newTalent.memories.slice(-4), `Выполнил: ${action.name}`]
-
-        return newTalent
-      }
-      return talent
-    })
-
-    setTalents(updatedTalents)
-    setSelectedTalent(updatedTalents.find((t) => t.id === selectedTalent.id) || null)
-  }
 
   const handleEventChoice = (choice: { text: string; effects: { stat: string; change: number }[] }) => {
     choice.effects.forEach((effect) => {
@@ -1150,22 +990,7 @@ export default function TalentArchitectProd() {
   }
 
   const getTooltipContent = (actionKey: string) => {
-    // Ищем действие по всем категориям вместо разбора ключа
-    for (const category of actionCategories) {
-      const action = category.actions.find((a) => actionKey === `${category.id}-${a.id}`)
-      if (action) {
-        return {
-          description: action.description,
-          effects: Object.entries(action.effects)
-            .map(([stat, value]) => `${stat} ${value > 0 ? "+" : ""}${value}`)
-            .join(", "),
-          sideEffects: action.sideEffects
-            ? Object.entries(action.sideEffects).map(([stat, value]) => `${stat} ${value > 0 ? "+" : ""}${value}`)
-            : null,
-          risk: action.risk ? `${action.risk.chance}% шанс непредсказуемого исхода` : null,
-        }
-      }
-    }
+    // Старая система действий удалена
     return null
   }
 
@@ -1363,12 +1188,7 @@ export default function TalentArchitectProd() {
     }))
   })) : []
 
-  const toggleCategory = (categoryId: string) => {
-    setCollapsedCategories((prev) => ({
-      ...prev,
-      [categoryId]: !prev[categoryId],
-    }))
-  }
+
 
   const getEquipmentRarityColor = (rarity: string) => {
     switch (rarity) {
@@ -1463,7 +1283,7 @@ export default function TalentArchitectProd() {
       "3": "/data-analyst-floating-screens.png",
     }
 
-    if (personalWorkMode && selectedTalent?.id === talent.id) {
+    if (selectedTalent?.id === talent.id) {
       // Портреты в зависимости от выбранного инструмента
       if (selectedTool === "marker") {
         return `/placeholder.svg?height=600&width=400&query=cyberpunk+character+drawing+on+holographic+tablet+creative+workspace`
@@ -1609,7 +1429,8 @@ export default function TalentArchitectProd() {
 
   const memoizedEffectiveStats = React.useMemo(() => {
     if (!selectedTalent) return null
-    return getEffectiveStats(selectedTalent)
+    // Используем новую систему Character AI
+    return CharacterAdapter.getEffectiveStats(selectedTalent)
   }, [selectedTalent, globalInventory])
 
   React.useEffect(() => {
@@ -1624,7 +1445,37 @@ export default function TalentArchitectProd() {
   }, [isDragging, dragOffset])
 
   const generateTalentContext = (talent: Talent) => {
-    const effectiveStats = getEffectiveStats(talent)
+    // Проверяем, что talent и его свойства существуют
+    if (!talent || !talent.attributes || !talent.states) {
+      console.warn('Talent or its properties are undefined in generateTalentContext:', talent)
+      return {
+        name: talent?.name || 'Unknown',
+        role: talent?.role || 'Unknown',
+        level: talent?.level || 1,
+        baseStats: {
+          strength: 0,
+          empathy: 0,
+          intelligence: 0,
+          creativity: 0,
+        },
+        effectiveStats: CharacterAdapter.getEffectiveStats(talent || {} as any),
+        mentalState: {
+          mood: 0,
+          anxiety: 0,
+          burnout: 0,
+          engagement: 0,
+        },
+        statusEffects: [],
+        activeEquipment: [],
+        recentMemories: [],
+        interactionType: selectedInteractionType,
+        selectedTool,
+        currentDay,
+        neuralPulses,
+      }
+    }
+
+    const effectiveStats = CharacterAdapter.getEffectiveStats(talent)
     const activeEquipment = globalInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
 
     return {
@@ -1632,25 +1483,25 @@ export default function TalentArchitectProd() {
       role: talent.role,
       level: talent.level,
       baseStats: {
-        strength: talent.attributes.strength,
-        empathy: talent.attributes.empathy,
-        intelligence: talent.attributes.intelligence,
-        creativity: talent.attributes.creativity,
+        strength: talent.attributes.strength || 0,
+        empathy: talent.attributes.empathy || 0,
+        intelligence: talent.attributes.intelligence || 0,
+        creativity: talent.attributes.creativity || 0,
       },
       effectiveStats,
       mentalState: {
-        mood: talent.states.mood,
-        anxiety: talent.states.anxiety,
-        burnout: talent.states.burnout,
-        engagement: talent.states.engagement,
+        mood: talent.states.mood || 0,
+        anxiety: talent.states.anxiety || 0,
+        burnout: talent.states.burnout || 0,
+        engagement: talent.states.engagement || 0,
       },
-      statusEffects: talent.statusEffects.map((effect) => ({
+      statusEffects: talent.statusEffects?.map((effect) => ({
         name: effect.name,
         type: effect.type,
         description: effect.description,
         duration: effect.duration,
         effects: effect.effects,
-      })),
+      })) || [],
       activeEquipment: activeEquipment.map((eq) => ({
         name: eq.name,
         type: eq.type,
@@ -1659,7 +1510,7 @@ export default function TalentArchitectProd() {
         powerLevel: eq.powerLevel,
         mode: eq.mode,
       })),
-      recentMemories: talent.memories.slice(-3),
+      recentMemories: talent.memories?.slice(-3) || [],
       interactionType: selectedInteractionType,
       selectedTool,
       currentDay,
@@ -1681,65 +1532,88 @@ export default function TalentArchitectProd() {
     setCurrentMessage("")
     setIsProcessing(true)
 
-    // Симуляция отправки данных в LLM
-    const contextData = generateTalentContext(selectedTalent)
+    try {
+      // Сначала пробуем Character AI для анализа сообщения
+      let characterAIResponse = null
+      try {
+        characterAIResponse = await characterAI.analyzeMessage(message)
+        console.log('Character AI анализ:', characterAIResponse)
+      } catch (error) {
+        console.log('Character AI недоступен, используем fallback')
+      }
 
-    // Заглушка ответа LLM с имитацией обработки
-    setTimeout(
-      () => {
-        const responses = {
-          "personal-learning": [
-            `Отлично, ${selectedTalent.name}! Учитывая ваш высокий интеллект (${contextData.effectiveStats.intelligence}), предлагаю углубиться в квантовые алгоритмы. Ваше текущее настроение (${contextData.mentalState.mood}%) идеально для сложных концепций.
-            `,
-            `Вижу, что у вас активен ${contextData.activeEquipment[0]?.name || "базовый режим"}. Это поможет нам лучше усваивать материал. Начнем с основ?`,
-            `Ваш уровень тревожности (${contextData.mentalState.anxiety}%) в норме для обучения. Можем перейти к практическим упражнениям.`,
-          ],
-          "coaching-session": [
-            `${selectedTalent.name}, ваша вовлеченность на уровне ${contextData.mentalState.engagement}% - это отличная база для роста! Что вас больше всего мотивирует в работе?`,
-            `Замечаю признаки ${contextData.statusEffects[0]?.name || "стабильного состояния"}. Давайте используем это для достижения ваших целей.`,
-            `Ваши недавние достижения: "${contextData.recentMemories[contextData.recentMemories.length - 1]}". Как мы можем развить этот успех?`,
-          ],
-          therapy: [
-            `Понимаю, ${selectedTalent.name}. Уровень выгорания ${contextData.mentalState.burnout}% требует внимания. Расскажите, что вас больше всего беспокоит?`,
-            `Ваша эмпатия (${contextData.effectiveStats.empathy}) - это ваша сила. Как мы можем использовать её для самопомощи?`,
-            `Давайте поработаем с тревожностью. Текущий уровень ${contextData.mentalState.anxiety}% можно снизить специальными техниками.`,
-          ],
-          "creative-work": [
-            `Ваша креативность на уровне ${contextData.effectiveStats.creativity}! Какой проект вдохновляет вас больше всего сейчас?`,
-            `${contextData.activeEquipment.length > 0 ? `С ${contextData.activeEquipment[0].name} ваши творческие возможности расширяются.` : "Даже без дополнительного оборудования ваш потенциал огромен."} Что хотите создать?`,
-            `Настроение ${contextData.mentalState.mood}% отлично подходит для творчества. Начнем с мозгового штурма?`,
-          ],
-          meditation: [
-            `Прекрасно, ${selectedTalent.name}. Ваше текущее состояние: тревожность ${contextData.mentalState.anxiety}%, настроение ${contextData.mentalState.mood}%. Начнем с дыхательных практик.`,
-            `Чувствую напряжение от ${contextData.statusEffects.filter((e) => e.type === "debuff").length} негативных эффектов. Медитация поможет их нейтрализовать.`,
-            `Сосредоточьтесь на своем дыхании. Ваш интеллект ${contextData.effectiveStats.intelligence} поможет глубже понять процесс осознанности.`,
-          ],
-        }
+      // Используем реальную AI-систему персонажей
+      const contextData = generateTalentContext(selectedTalent)
+      
+      const response = await personalWorkIntegration.processMessage({
+        talentId: selectedTalent.id,
+        message,
+        context: contextData,
+        interactionType: selectedInteractionType,
+        selectedTool,
+        equipment: globalInventory.filter(item => 
+          item.enabled && item.targetTalents?.includes(selectedTalent.id)
+        )
+      })
 
-        const responseOptions = responses[selectedInteractionType as keyof typeof responses] || [
-          `Понимаю вас, ${selectedTalent.name}. Ваши текущие показатели: интеллект ${contextData.effectiveStats.intelligence}, креативность ${contextData.effectiveStats.creativity}. Как могу помочь?`,
-        ]
+      // Объединяем ответы от обеих систем
+      let finalResponse = response.message
+      if (characterAIResponse && characterAIResponse.response) {
+        finalResponse = `${characterAIResponse.response}\n\n${response.message}`
+      }
 
-        const assistantMessage = {
-          id: generateUniqueId(),
-          role: "assistant" as const,
-          content: responseOptions[Math.floor(Math.random() * responseOptions.length)],
-          timestamp: new Date(),
-        }
+      const assistantMessage = {
+        id: generateUniqueId(),
+        role: "assistant" as const,
+        content: finalResponse,
+        timestamp: new Date(),
+      }
 
-        setChatMessages((prev) => [...prev, assistantMessage])
-        setIsProcessing(false)
+      setChatMessages((prev) => [...prev, assistantMessage])
+      
+      // Применяем изменения от обеих систем
+      if (response.changes) {
+        applyAIChanges(selectedTalent.id, response.changes)
+      }
+      
+      // Применяем изменения от Character AI
+      if (characterAIResponse && characterAIResponse.statChanges) {
+        console.log('Применяем изменения от Character AI:', characterAIResponse.statChanges)
+        
+        // Добавляем уведомления об изменениях характеристик
+        const newChanges = Object.entries(characterAIResponse.statChanges).map(([stat, change]) => ({
+          stat,
+          change,
+          timestamp: Date.now()
+        }));
+        
+        setStatChanges(prev => [...prev, ...newChanges]);
+        
+        // Удаляем уведомления через 5 секунд
+        setTimeout(() => {
+          setStatChanges(prev => prev.filter(change => 
+            !newChanges.some(newChange => newChange.timestamp === change.timestamp)
+          ));
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Ошибка AI-системы:', error)
+      
+      // Fallback на заглушку
+      const contextData = generateTalentContext(selectedTalent)
+      const fallbackMessage = `Понимаю вас, ${selectedTalent.name}. Ваши текущие показатели: интеллект ${contextData.effectiveStats.intelligence}, креативность ${contextData.effectiveStats.creativity}. Как могу помочь?`
+      
+      const assistantMessage = {
+        id: generateUniqueId(),
+        role: "assistant" as const,
+        content: fallbackMessage,
+        timestamp: new Date(),
+      }
 
-        // Имитация получения JSON с изменениями (30% шанс)
-        if (Math.random() < 0.3) {
-          setTimeout(() => {
-            const changes = generateRandomChanges()
-            applyLLMChanges(changes)
-          }, 1000)
-        }
-      },
-      1500 + Math.random() * 1000,
-    )
+      setChatMessages((prev) => [...prev, assistantMessage])
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const generateRandomChanges = () => {
@@ -1768,31 +1642,37 @@ export default function TalentArchitectProd() {
     return possibleChanges[Math.floor(Math.random() * possibleChanges.length)]
   }
 
-  const applyLLMChanges = (change: any) => {
-    if (!selectedTalent) return
-
+  const applyAIChanges = (talentId: string, changes: any) => {
     setTalents((prev) =>
       prev.map((talent) => {
-        if (talent.id === selectedTalent.id) {
+        if (talent.id === talentId) {
+          // Если есть обновленный Talent от Character AI, используем его
+          if (changes.updatedTalent) {
+            return changes.updatedTalent
+          }
+          
+          // Иначе применяем изменения вручную
           const updatedTalent = { ...talent }
 
-          switch (change.type) {
-            case "stat":
-              const currentValue = (updatedTalent as any)[change.stat]
-              ;(updatedTalent as any)[change.stat] = Math.max(0, Math.min(100, currentValue + change.change))
-              break
-
-            case "status_effect":
-              const existingEffect = updatedTalent.statusEffects.find((e) => e.name === change.effect.name)
-              if (!existingEffect) {
-                updatedTalent.statusEffects = [...updatedTalent.statusEffects, change.effect]
+          // Применяем изменения характеристик
+          if (changes.statChanges) {
+            Object.entries(changes.statChanges).forEach(([stat, change]) => {
+              if (stat in updatedTalent) {
+                const currentValue = (updatedTalent as any)[stat]
+                ;(updatedTalent as any)[stat] = Math.max(0, Math.min(100, currentValue + (change as number)))
               }
-              break
-
-            case "memory":
-              updatedTalent.memories = [...updatedTalent.memories.slice(-4), change.memory]
-              break
+            })
           }
+
+          // Применяем эмоциональные изменения
+          if (changes.emotionalChange) {
+            // Обновляем настроение на основе эмоционального изменения
+            const moodChange = Math.round(changes.emotionalChange * 10)
+            updatedTalent.mood = Math.max(0, Math.min(100, updatedTalent.mood + moodChange))
+          }
+
+          // Добавляем воспоминание о взаимодействии
+          updatedTalent.memories = [...updatedTalent.memories.slice(-4), `Взаимодействие с AI: ${selectedInteractionType}`]
 
           return updatedTalent
         }
@@ -1807,7 +1687,7 @@ export default function TalentArchitectProd() {
     const changeMessage = {
       id: (Date.now() + 2).toString(),
       role: "assistant" as const,
-      content: `✨ Применены изменения: ${change.type === "stat" ? `${change.stat} ${change.change > 0 ? "+" : ""}${change.change}` : change.type === "status_effect" ? `добавлен эффект "${change.effect.name}"` : "добавлено воспоминание"}`,
+      content: `✨ AI применил изменения: ${changes.emotionalChange ? `эмоциональное состояние ${changes.emotionalChange > 0 ? "+" : ""}${Math.round(changes.emotionalChange * 10)}` : "обновлены характеристики"}`,
       timestamp: new Date(),
     }
 
@@ -1851,7 +1731,21 @@ export default function TalentArchitectProd() {
     { id: "scanner", name: "Сканер", icon: "🔍", description: "Анализ состояния" },
     { id: "calibrator", name: "Калибратор", icon: "⚙️", description: "Настройка оборудования" },
     { id: "stimulator", name: "Стимулятор", icon: "⚡", description: "Воздействие на состояние" },
+    // Новые инструменты для работы с персонажами
+    { id: "communicator", name: "Коммуникатор", icon: "💬", description: "Прямое общение с персонажем" },
+    { id: "fetish_analyzer", name: "Анализатор фетишей", icon: "🔬", description: "Анализ предпочтений и чувствительности" },
+    { id: "quick_actions", name: "Быстрые действия", icon: "⚡", description: "Быстрые взаимодействия" },
   ]
+
+  const getFetishAreas = (talentId: string) => {
+    // Базовые области для фетишей (можно расширить)
+    return [
+      { id: "neck", name: "Шея", x: 45, y: 30, width: 10, height: 8, description: "Область шеи и горла" },
+      { id: "chest", name: "Грудь", x: 40, y: 35, width: 20, height: 12, description: "Область груди" },
+      { id: "waist", name: "Талия", x: 42, y: 47, width: 16, height: 8, description: "Область талии" },
+      { id: "thighs", name: "Бедра", x: 35, y: 55, width: 30, height: 15, description: "Область бедер" },
+    ]
+  }
 
   const getInteractiveAreas = (talent: Talent) => {
     const areas = [
@@ -1868,6 +1762,10 @@ export default function TalentArchitectProd() {
         description: "Рабочая область для рисования",
       },
     ]
+
+    // Добавляем области для фетишей
+    const fetishAreas = getFetishAreas(talent.id)
+    areas.push(...fetishAreas)
 
     // Добавляем области в зависимости от экипировки
     const activeEquipment = globalInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
@@ -1930,6 +1828,62 @@ export default function TalentArchitectProd() {
           duration: 2,
           effects: { intelligence: 8, anxiety: -3 },
         })
+        break
+      case "communicator":
+        // Прямое общение с персонажем через область
+        if (selectedInteractionType) {
+          const contextData = generateTalentContext(talent)
+          const message = `Взаимодействие с областью ${area.name}`
+          
+          // Используем Character AI для анализа взаимодействия
+          if (characterAI) {
+            characterAI.analyzeMessage(message).then(analysis => {
+              console.log('Character AI анализ взаимодействия:', analysis)
+            }).catch(error => {
+              console.log('Character AI недоступен для анализа')
+            })
+          }
+          
+          // Используем AI-систему для генерации ответа
+          personalWorkIntegration.processMessage({
+            talentId: talent.id,
+            message,
+            context: contextData,
+            interactionType: selectedInteractionType,
+            selectedTool,
+            equipment: globalInventory.filter(item => 
+              item.enabled && item.targetTalents?.includes(talent.id)
+            )
+          }).then(response => {
+            if (response.changes) {
+              applyAIChanges(talent.id, response.changes)
+            }
+          }).catch(error => {
+            console.error('Ошибка коммуникации:', error)
+          })
+        }
+        break
+      case "fetish_analyzer":
+        // Анализ фетишей для области
+        console.log(`[v0] Анализ фетишей для области ${area.name}`)
+        // Интеграция с Character AI для анализа фетишей
+        if (characterAI) {
+          characterAI.analyzeMessage(`Анализ фетишей в области ${area.name}`).then(analysis => {
+            console.log('Character AI анализ фетишей:', analysis)
+          }).catch(error => {
+            console.log('Character AI недоступен для анализа фетишей')
+          })
+        }
+        break
+      case "quick_actions":
+        // Быстрые действия для области
+        console.log(`[v0] Быстрые действия для области ${area.name}`)
+        // Интеграция с Character AI для быстрых действий
+        if (characterAI) {
+          characterAI.executeQuickAction("area_interaction").catch(error => {
+            console.log('Character AI недоступен для быстрых действий')
+          })
+        }
         break
     }
   }
@@ -2038,6 +1992,12 @@ export default function TalentArchitectProd() {
     setMarketMode("random")
     setMarketTalents(generateRandomTalents(sectionId))
     setShowMarketModal(true)
+  }
+
+  const openStationEntity = (entityId: string) => {
+    // Здесь будет логика открытия сущности станции
+    // Пока просто показываем сюжетную сцену
+    triggerStoryScene(entityId)
   }
 
   const refreshMarketTalents = () => {
@@ -2206,42 +2166,6 @@ export default function TalentArchitectProd() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-cyan-300">{neuralPulses} НП</span>
-              <button
-                onClick={() => setPersonalWorkMode(!personalWorkMode)}
-                className={`px-3 py-1 rounded text-sm transition-colors ${
-                  personalWorkMode ? "bg-purple-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
-              >
-                {personalWorkMode ? "Личная работа" : "Обычный режим"}
-              </button>
-              {currentUser && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem('currentUser')
-                      setCurrentUser(null)
-                      setShowRegistration(true)
-                    }}
-                    className="px-3 py-1 rounded text-sm bg-red-600 hover:bg-red-700 text-white transition-colors"
-                    title="Выйти из аккаунта"
-                  >
-                    Выход
-                  </button>
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem('allUsers')
-                      localStorage.removeItem('currentUser')
-                      setCurrentUser(null)
-                      setShowRegistration(true)
-                      console.log('🗑️ Все пользователи удалены')
-                    }}
-                    className="px-3 py-1 rounded text-sm bg-orange-600 hover:bg-orange-700 text-white transition-colors"
-                    title="Очистить всех пользователей"
-                  >
-                    Очистить БД
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
@@ -2249,9 +2173,7 @@ export default function TalentArchitectProd() {
             <div className="flex flex-wrap gap-1 p-1 bg-gray-800/50 rounded-lg">
               {[
                 { id: "talents", label: "Активы", icon: "👥" },
-                { id: "market", label: "Аукцион", icon: "🏪" },
-                { id: "contracts", label: "Заказы", icon: "📋" },
-                { id: "events", label: "Аномалии", icon: "⚡" },
+                { id: "station", label: "Станция", icon: "🏢" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -2299,100 +2221,46 @@ export default function TalentArchitectProd() {
             </div>
           )}
 
-          {activeTab === "market" && (
+          {activeTab === "station" && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-cyan-400">Аукцион активов</h2>
-              <p className="text-sm text-gray-300">Источники новых активов и услуг</p>
+              <h2 className="text-xl font-bold text-cyan-400">Станция</h2>
+              <p className="text-sm text-gray-300">Сущности станции и их сюжетные сцены</p>
 
               <div className="grid grid-cols-1 gap-3">
                 {[
-                  {
-                    id: "talent-exchange",
-                    name: "Asset Exchange (Core)",
-                    desc: "Биржа активов в Core Sector. Высококачественные кандидаты с низким страхом.",
-                    icon: "🏢",
-                  },
-                  {
-                    id: "void-rescues",
-                    name: "Void Rescues",
-                    desc: "Спасательные операции в Void Border. Риск аномалий, но уникальные активы.",
-                    icon: "🌌",
-                  },
-                  {
-                    id: "corporate-contracts",
-                    name: "Corporate Contracts",
-                    desc: "Корпоративные программы развития. Кандидаты прикреплены к проектам.",
-                    icon: "🏛️",
-                  },
-                  {
-                    id: "neural-forge",
-                    name: "Neural Forge",
-                    desc: "Кастомизация активов. Настройка аффинностей и базовых навыков.",
-                    icon: "🧠",
-                  },
-                ].map((market) => (
-                  <div key={market.id} className="p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl">{market.icon}</span>
-                      <h3 className="font-semibold text-white">{market.name}</h3>
+                  // Здесь будут отображаться сущности, добавленные через dev панель
+                ].length > 0 ? (
+                  [
+                    // Здесь будут отображаться сущности, добавленные через dev панель
+                  ].map((entity) => (
+                    <div key={entity.id} className="p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-white">{entity.name}</h3>
+                          <span className="text-xs text-gray-400 capitalize">{entity.type}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-300 mb-3">{entity.desc}</p>
+                      <button
+                        onClick={() => openStationEntity(entity.id)}
+                        className="w-full px-3 py-2 bg-cyan-600 hover:bg-cyan-700 rounded text-sm"
+                      >
+                        Открыть
+                      </button>
                     </div>
-                    <p className="text-sm text-gray-300 mb-3">{market.desc}</p>
-                    <button
-                      onClick={() => openMarketSection(market.id)}
-                      className="w-full px-3 py-2 bg-cyan-600 hover:bg-cyan-700 rounded text-sm"
-                    >
-                      Просмотреть кандидатов
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "contracts" && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-green-400">Заказы</h2>
-              <p className="text-sm text-gray-300">Активные проекты и задания</p>
-
-              <div className="space-y-3">
-                {contracts.map((contract) => (
-                  <div key={contract.id} className="p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-white">{contract.title}</h3>
-                      <span className="text-green-400 font-semibold">{contract.reward} кредитов</span>
-                    </div>
-                    <p className="text-sm text-gray-300 mb-3">{contract.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">Дедлайн: {contract.deadline} дней</span>
-                      <button className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm">Назначить</button>
+                  ))
+                ) : (
+                  <div className="p-8 bg-gray-800/30 border border-gray-600 rounded-lg text-center">
+                    <div className="text-gray-400 mb-2">🏢</div>
+                    <h3 className="text-lg font-semibold text-white mb-2">Нет сущностей станции</h3>
+                    <p className="text-sm text-gray-300 mb-4">
+                      Сущности станции нужно добавить через панель разработчика
+                    </p>
+                    <div className="text-xs text-gray-500">
+                      Перейдите в dev панель → раздел "Станция" → "Добавить сущность"
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "events" && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-yellow-400">Аномалии</h2>
-              <p className="text-sm text-gray-300">Происшествия на станции</p>
-
-              <div className="space-y-3">
-                {events.map((event) => (
-                  <div key={event.id} className="p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl">{event.icon}</span>
-                      <h3 className="font-semibold text-white">{event.title}</h3>
-                    </div>
-                    <p className="text-sm text-gray-300 mb-3">{event.description}</p>
-                    <button
-                      onClick={() => setCurrentEvent(event)}
-                      className="w-full px-3 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-sm"
-                    >
-                      Реагировать
-                    </button>
-                  </div>
-                ))}
+                )}
               </div>
             </div>
           )}
@@ -2420,20 +2288,28 @@ export default function TalentArchitectProd() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-6 gap-3 mb-3">
-                {memoizedEffectiveStats &&
-                  Object.entries(memoizedEffectiveStats).map(([stat, value]) => (
-                    <div key={stat} className="space-y-1">
-                      <div className="text-xs text-gray-400 uppercase tracking-wide truncate">{stat}</div>
-                      <div className="w-full bg-gray-700 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full transition-all duration-300 ${getBarColor(value)}`}
-                          style={{ width: `${Math.min((value / 100) * 100, 100)}%` }}
-                        />
-                      </div>
-                      <div className="text-xs text-center text-gray-300">{value}</div>
-                    </div>
-                  ))}
+              {/* Компактная панель основных характеристик */}
+              <div className="mb-3">
+                <div className="text-xs text-gray-400 mb-2">Основные характеристики:</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {memoizedEffectiveStats && 
+                    Object.entries(memoizedEffectiveStats)
+                      .filter(([stat]) => ['mood', 'anxiety', 'engagement'].includes(stat))
+                      .map(([stat, value]) => (
+                        <div key={stat} className="flex items-center gap-2 p-2 bg-gray-700/50 rounded">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs text-gray-300 truncate">{getAttributeDisplayName(stat)}</div>
+                            <div className="w-full bg-gray-600 rounded-full h-1 mt-1">
+                              <div
+                                className={`h-1 rounded-full transition-all duration-300 ${getBarColor(value)}`}
+                                style={{ width: `${Math.min((value / 100) * 100, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-300 font-medium">{value}</div>
+                        </div>
+                      ))}
+                </div>
               </div>
 
               {/* Воспоминания */}
@@ -2456,8 +2332,8 @@ export default function TalentArchitectProd() {
                 className="w-full h-full object-cover"
               />
 
-              {/* Интерактивные области в режиме личной работы */}
-              {personalWorkMode && selectedTool && (
+              {/* Интерактивные области */}
+              {selectedTool && (
                 <div className="absolute inset-0">
                   {getInteractiveAreas(selectedTalent).map((area) => (
                     <div
@@ -2482,7 +2358,7 @@ export default function TalentArchitectProd() {
         </div>
 
         {/* Правая панель управления */}
-        {!personalWorkMode && selectedTalent && (
+        {selectedTalent && (
           <div className="w-96 glass-panel border-l border-cyan-500/30 p-6 overflow-y-auto">
             {/* Экипировка и состояния */}
             <div className="space-y-6">
@@ -2512,47 +2388,7 @@ export default function TalentArchitectProd() {
                 </div>
               </div>
 
-              {/* Взаимодействия */}
-              <div>
-                <h3 className="text-lg font-semibold text-yellow-400 mb-3">Взаимодействия</h3>
-                <div className="space-y-2">
-                  {actionCategories.map((category) => (
-                    <div key={category.id} className="border border-gray-600 rounded">
-                      <button
-                        onClick={() => toggleCategory(category.id)}
-                        className="w-full p-3 text-left flex items-center justify-between hover:bg-gray-700/50"
-                      >
-                        <span className="flex items-center gap-2">
-                          <span>{category.icon}</span>
-                          <span className="text-white">{category.name}</span>
-                        </span>
-                        <span className="text-gray-400">{collapsedCategories[category.id] ? "▼" : "▲"}</span>
-                      </button>
-
-                      {!collapsedCategories[category.id] && (
-                        <div className="p-2 space-y-1">
-                          {category.actions.map((action) => (
-                            <button
-                              key={action.id}
-                              ref={(el) => (buttonRefs.current[`${category.id}-${action.id}`] = el)}
-                              onClick={() => performAction(action.id, category.id)}
-                              onMouseEnter={(e) => handleMouseEnter(`${category.id}-${action.id}`, e)}
-                              onMouseLeave={handleMouseLeave}
-                              disabled={neuralPulses < action.cost}
-                              className="w-full p-2 text-left rounded text-sm bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex justify-between items-center"
-                            >
-                              <span className="text-white">{action.name}</span>
-                              <span className="text-cyan-400">{action.cost} НП</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Управление оборудованием */}
+              {/* Оборудование */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-purple-400">Оборудование</h3>
@@ -2563,7 +2399,7 @@ export default function TalentArchitectProd() {
                     Управление ({globalInventory.filter((item) => item.enabled).length})
                   </button>
                 </div>
-                <div className="text-sm text-gray-300">
+                <div className="text-sm text-gray-300 mb-3">
                   Активно:{" "}
                   {
                     globalInventory.filter((item) => item.enabled && item.targetTalents?.includes(selectedTalent.id))
@@ -2571,64 +2407,90 @@ export default function TalentArchitectProd() {
                   }{" "}
                   предметов
                 </div>
+                
+                {/* Список активного оборудования */}
+                <div className="space-y-2">
+                  {globalInventory
+                    .filter((item) => item.enabled && item.targetTalents?.includes(selectedTalent.id))
+                    .map((item) => (
+                      <div key={item.id} className="p-3 bg-gray-800/50 border border-gray-600 rounded">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-white">{item.name}</span>
+                          <span className="text-xs text-gray-400">{item.type}</span>
+                        </div>
+                        <p className="text-xs text-gray-300 mb-2">{item.description}</p>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-cyan-400">Мощность: {item.powerLevel}%</span>
+                          {item.mode && <span className="text-purple-400">Режим: {item.mode}</span>}
+                        </div>
+                      </div>
+                    ))}
+                </div>
               </div>
+
+
             </div>
           </div>
         )}
       </div>
 
       {/* Плавающая панель в режиме личной работы */}
-      {personalWorkMode && !showInteractionPanel && (
-        <div
-          className="fixed glass-panel border border-cyan-500/50 rounded-lg p-4 z-50 cursor-move"
-          style={{ left: floatingPanelPosition.x, top: floatingPanelPosition.y }}
-          onMouseDown={handlePanelMouseDown}
-        >
-          <h3 className="text-lg font-semibold text-cyan-400 mb-3">Личная работа</h3>
-          <div className="space-y-2">
-            {[
-              { id: "personal-learning", name: "Личное обучение", icon: "📚" },
-              { id: "coaching-session", name: "Коучинг-сессия", icon: "🎯" },
-              { id: "therapy", name: "Терапия", icon: "🌟" },
-              { id: "creative-work", name: "Творческая работа", icon: "🎨" },
-              { id: "meditation", name: "Медитация", icon: "🧘" },
-            ].map((type) => (
-              <button
-                key={type.id}
-                onClick={() => {
-                  setSelectedInteractionType(type.id)
-                  setShowInteractionPanel(true)
-                  setShowLLMChat(true)
-                }}
-                className="w-full p-2 text-left rounded bg-gray-700 hover:bg-gray-600 flex items-center gap-2"
-              >
-                <span>{type.icon}</span>
-                <span className="text-white">{type.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Character AI панели */}
+      {characterAIConfig && selectedTalent && (
+        <>
+          {/* Панель действий и инструментов */}
+          {showActionToolPanel && (
+            <ActionToolPanel
+              characterAI={characterAI}
+              selectedTalent={selectedTalent}
+              onClose={() => setShowActionToolPanel(false)}
+            />
+          )}
+          
+          {/* Чат с персонажем */}
+          {showCharacterChat && (
+            <CharacterChat
+              characterAI={characterAI}
+              selectedTalent={selectedTalent}
+              onClose={() => setShowCharacterChat(false)}
+            />
+          )}
+        </>
       )}
 
-      {/* Панель инструментов в режиме личной работы */}
-      {personalWorkMode && showInteractionPanel && (
+      {/* Панель управления Character AI */}
+      {characterAIConfig && selectedTalent && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-panel border border-cyan-500/50 rounded-lg p-4 z-50">
           <div className="flex items-center gap-4">
             <div className="flex gap-2">
-              {interactiveTools.map((tool) => (
-                <button
-                  key={tool.id}
-                  onClick={() => setSelectedTool(selectedTool === tool.id ? null : tool.id)}
-                  className={`p-2 rounded transition-colors ${
-                    selectedTool === tool.id ? "bg-cyan-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
-                  title={tool.description}
-                >
-                  {tool.icon} {tool.name}
-                </button>
-              ))}
+              <button
+                onClick={() => {
+                  setShowActionToolPanel(!showActionToolPanel)
+                }}
+                className={`px-3 py-2 rounded text-sm transition-colors ${
+                  showActionToolPanel ? "bg-cyan-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                🤖 Действия и инструменты
+              </button>
+              <button
+                onClick={() => {
+                  setShowCharacterChat(!showCharacterChat)
+                }}
+                className={`px-3 py-2 rounded text-sm transition-colors ${
+                  showCharacterChat ? "bg-cyan-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                💬 Чат с персонажем
+              </button>
             </div>
-            <div className="border-l border-gray-600 pl-4">
+            <div className="border-l border-gray-600 pl-4 flex gap-2">
+              <button
+                onClick={() => setShowCharacterPanel(!showCharacterPanel)}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+              >
+                {showCharacterPanel ? "Скрыть" : "Показать"} характеристики
+              </button>
               <button
                 onClick={() => setShowEquipmentPanel(true)}
                 className="px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm"
@@ -2641,7 +2503,7 @@ export default function TalentArchitectProd() {
       )}
 
       {/* Чат с LLM */}
-      {showLLMChat && selectedTalent && selectedInteractionType && (
+      {showLLMChat && selectedTalent && (
         <div
           className="fixed glass-panel border border-cyan-500/50 rounded-lg z-50 w-96 h-96 flex flex-col"
           style={{ left: chatPosition.x, top: chatPosition.y }}
@@ -3061,11 +2923,46 @@ export default function TalentArchitectProd() {
         </div>
       )}
 
+
+
       {/* Модальное окно регистрации */}
       <RegistrationModal
         isOpen={showRegistration}
         onClose={() => setShowRegistration(false)}
         onRegister={handleUserRegistration}
+      />
+
+      {/* Кнопка отладки OpenRouter */}
+      <div className="fixed top-4 right-4 z-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowOpenRouterDebug(!showOpenRouterDebug)}
+          className="bg-black/50 border-white/20 text-white hover:bg-black/70"
+        >
+          {showOpenRouterDebug ? '🔴' : '🟢'} OpenRouter Debug
+        </Button>
+      </div>
+
+      {/* Отладочная панель OpenRouter */}
+      <OpenRouterDebugPanel 
+        isVisible={showOpenRouterDebug}
+        onToggle={() => setShowOpenRouterDebug(false)}
+      />
+
+      {/* Уведомления об изменениях характеристик */}
+      <StatNotification 
+        changes={statChanges}
+        onRemove={(timestamp) => {
+          setStatChanges(prev => prev.filter(change => change.timestamp !== timestamp));
+        }}
+      />
+
+      {/* Улучшенная перетаскиваемая панель характеристик */}
+      <CharacterStatsPanel 
+        talent={selectedTalent}
+        isVisible={showCharacterPanel}
+        onClose={() => setShowCharacterPanel(false)}
       />
     </div>
   )

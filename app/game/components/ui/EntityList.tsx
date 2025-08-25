@@ -14,6 +14,7 @@ export interface EntityListProps {
   onEdit?: (entity: any) => void
   onDelete?: (entityId: string) => void
   onView?: (entity: any) => void
+  onManageAssets?: (user: any) => void
   onAdd?: () => void
   title?: string
   className?: string
@@ -27,6 +28,7 @@ export const EntityList: React.FC<EntityListProps> = ({
   onEdit,
   onDelete,
   onView,
+  onManageAssets,
   onAdd,
   title,
   className = "",
@@ -290,6 +292,7 @@ export const EntityList: React.FC<EntityListProps> = ({
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
+              onManageAssets={onManageAssets}
               showActions={showActions}
               className={viewMode === 'list' ? 'flex-row items-center' : ''}
             />

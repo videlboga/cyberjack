@@ -1,0 +1,104 @@
+#!/usr/bin/env node
+
+console.log('🔄 Создаем скрипт для очистки localStorage...');
+
+const script = `
+// Скрипт для очистки localStorage и обновления данных
+// Выполните этот код в консоли браузера
+
+console.log('🧹 Очищаем localStorage...');
+
+// Очищаем все данные конфигурации
+localStorage.removeItem('config_assets');
+localStorage.removeItem('config_contracts');
+localStorage.removeItem('config_actions');
+localStorage.removeItem('config_events');
+localStorage.removeItem('config_market');
+localStorage.removeItem('config_equipment');
+localStorage.removeItem('config_system');
+localStorage.removeItem('config_users');
+
+console.log('✅ localStorage очищен!');
+console.log('🔄 Перезагружаем страницу...');
+
+// Перезагружаем страницу
+setTimeout(() => window.location.reload(), 1000);
+`;
+
+const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Очистка localStorage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .button { background: #dc3545; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .button:hover { background: #c82333; }
+        .info { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Очистка localStorage</h1>
+        
+        <div class="info">
+            <p><strong>Что делает этот инструмент:</strong></p>
+            <ul>
+                <li>Удаляет все сохраненные конфигурации из localStorage</li>
+                <li>Заставляет приложение загрузить данные из файлов</li>
+                <li>Синхронизирует данные между dev и prod режимами</li>
+            </ul>
+        </div>
+        
+        <p>Нажмите кнопку ниже для очистки localStorage и перезагрузки страницы:</p>
+        
+        <button class="button" onclick="clearLocalStorage()">🧹 Очистить localStorage</button>
+        
+        <div class="info">
+            <p><strong>Альтернативно:</strong></p>
+            <p>Откройте консоль браузера (F12) и выполните:</p>
+            <code>localStorage.clear(); window.location.reload();</code>
+        </div>
+    </div>
+    
+    <script>
+        function clearLocalStorage() {
+            console.log('🧹 Очищаем localStorage...');
+            
+            // Очищаем все данные конфигурации
+            localStorage.removeItem('config_assets');
+            localStorage.removeItem('config_contracts');
+            localStorage.removeItem('config_actions');
+            localStorage.removeItem('config_events');
+            localStorage.removeItem('config_market');
+            localStorage.removeItem('config_equipment');
+            localStorage.removeItem('config_system');
+            localStorage.removeItem('config_users');
+            
+            console.log('✅ localStorage очищен!');
+            console.log('🔄 Перезагружаем страницу...');
+            
+            // Перезагружаем страницу
+            setTimeout(() => window.location.reload(), 1000);
+        }
+    </script>
+</body>
+</html>`;
+
+const fs = require('fs');
+const path = require('path');
+
+const outputPath = path.join(__dirname, '../public/clear-localstorage.html');
+fs.writeFileSync(outputPath, html);
+
+console.log('✅ Создан файл clear-localstorage.html');
+console.log('📁 Путь:', outputPath);
+console.log('');
+console.log('📋 Инструкция:');
+console.log('1. Откройте http://localhost:3000/clear-localstorage.html');
+console.log('2. Нажмите кнопку "Очистить localStorage"');
+console.log('3. Или выполните в консоли браузера: localStorage.clear(); window.location.reload();');
+console.log('');
+console.log('🎯 После этого данные будут загружаться из файлов, а не из localStorage!');
+

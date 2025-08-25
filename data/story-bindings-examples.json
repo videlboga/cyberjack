@@ -1,0 +1,179 @@
+{
+  "auction_bindings": [
+    {
+      "id": "auction_basic_1",
+      "eventType": "auction",
+      "sceneId": "market_intro",
+      "conditions": [],
+      "probability": 30,
+      "priority": 1,
+      "isBaseChance": true,
+      "metadata": {
+        "source": "example",
+        "createdAt": "2025-08-22T21:00:00.000Z",
+        "lastModified": "2025-08-22T21:00:00.000Z"
+      }
+    },
+    {
+      "id": "auction_high_value_1",
+      "eventType": "auction",
+      "sceneId": "corporate_auction",
+      "conditions": [
+        {
+          "id": "condition_1",
+          "type": "asset",
+          "field": "any_asset_price",
+          "operator": ">",
+          "value": 1000,
+          "description": "Наличие актива стоимостью более 1000 кредитов"
+        }
+      ],
+      "probability": 60,
+      "priority": 2,
+      "isBaseChance": false,
+      "metadata": {
+        "source": "example",
+        "createdAt": "2025-08-22T21:00:00.000Z",
+        "lastModified": "2025-08-22T21:00:00.000Z"
+      }
+    },
+    {
+      "id": "auction_rich_player_1",
+      "eventType": "auction",
+      "sceneId": "elite_auction",
+      "conditions": [
+        {
+          "id": "condition_2",
+          "type": "player",
+          "field": "balance",
+          "operator": ">",
+          "value": 5000,
+          "description": "Баланс игрока более 5000 кредитов"
+        },
+        {
+          "id": "condition_3",
+          "type": "asset",
+          "field": "owned_assets_count",
+          "operator": ">=",
+          "value": 3,
+          "description": "Владение 3 или более активами"
+        }
+      ],
+      "probability": 80,
+      "priority": 3,
+      "isBaseChance": false,
+      "metadata": {
+        "source": "example",
+        "createdAt": "2025-08-22T21:00:00.000Z",
+        "lastModified": "2025-08-22T21:00:00.000Z"
+      }
+    }
+  ],
+  "anomaly_bindings": [
+    {
+      "id": "anomaly_basic_1",
+      "eventType": "anomaly",
+      "sceneId": "void_anomaly",
+      "conditions": [],
+      "probability": 20,
+      "priority": 1,
+      "isBaseChance": true,
+      "metadata": {
+        "source": "example",
+        "createdAt": "2025-08-22T21:00:00.000Z",
+        "lastModified": "2025-08-22T21:00:00.000Z"
+      }
+    },
+    {
+      "id": "anomaly_experienced_1",
+      "eventType": "anomaly",
+      "sceneId": "void_anomaly",
+      "conditions": [
+        {
+          "id": "condition_4",
+          "type": "game_state",
+          "field": "void_experience",
+          "operator": ">",
+          "value": 5,
+          "description": "Опыт в Void более 5 операций"
+        }
+      ],
+      "probability": 50,
+      "priority": 2,
+      "isBaseChance": false,
+      "metadata": {
+        "source": "example",
+        "createdAt": "2025-08-22T21:00:00.000Z",
+        "lastModified": "2025-08-22T21:00:00.000Z"
+      }
+    },
+    {
+      "id": "anomaly_high_risk_1",
+      "eventType": "anomaly",
+      "sceneId": "dangerous_anomaly",
+      "conditions": [
+        {
+          "id": "condition_5",
+          "type": "player",
+          "field": "balance",
+          "operator": "<",
+          "value": 1000,
+          "description": "Баланс игрока менее 1000 кредитов"
+        },
+        {
+          "id": "condition_6",
+          "type": "asset",
+          "field": "owned_assets_count",
+          "operator": "<",
+          "value": 2,
+          "description": "Владение менее 2 активов"
+        }
+      ],
+      "probability": 70,
+      "priority": 3,
+      "isBaseChance": false,
+      "metadata": {
+        "source": "example",
+        "createdAt": "2025-08-22T21:00:00.000Z",
+        "lastModified": "2025-08-22T21:00:00.000Z"
+      }
+    }
+  ],
+  "examples": {
+    "auction_scenarios": [
+      {
+        "name": "Базовый аукцион",
+        "description": "Стандартный аукцион с базовой вероятностью 30%",
+        "bindings": ["auction_basic_1"]
+      },
+      {
+        "name": "Аукцион высоких цен",
+        "description": "Срабатывает при наличии дорогого актива (>1000 кредитов)",
+        "bindings": ["auction_high_value_1"]
+      },
+      {
+        "name": "Элитный аукцион",
+        "description": "Для богатых игроков с множественными активами",
+        "bindings": ["auction_rich_player_1"]
+      }
+    ],
+    "anomaly_scenarios": [
+      {
+        "name": "Базовая аномалия",
+        "description": "Стандартная аномалия с базовой вероятностью 20%",
+        "bindings": ["anomaly_basic_1"]
+      },
+      {
+        "name": "Аномалия для опытных",
+        "description": "Срабатывает при наличии опыта в Void (>5 операций)",
+        "bindings": ["anomaly_experienced_1"]
+      },
+      {
+        "name": "Опасная аномалия",
+        "description": "Для игроков в сложном положении (мало денег и активов)",
+        "bindings": ["anomaly_high_risk_1"]
+      }
+    ]
+  }
+}
+

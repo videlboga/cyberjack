@@ -1,0 +1,466 @@
+{
+  "equipment": [
+    {
+      "id": "cyber-eye-omega",
+      "name": "Нейроимплант Omega",
+      "type": "implant",
+      "slot": "ocular",
+      "description": "Улучшает контроль и подчинение",
+      "effects": {
+        "Intelligence": 15,
+        "Fear": 5
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 50,
+        "max": 150,
+        "default": 100
+      },
+      "modes": [
+        "Стандартный",
+        "Усиленный",
+        "Экономный"
+      ],
+      "progressiveEffects": [
+        {
+          "attribute": "Intelligence",
+          "increment": 2,
+          "maxValue": 25,
+          "interval": 3
+        }
+      ]
+    },
+    {
+      "id": "smart-suit",
+      "name": "Сенсорный костюм",
+      "type": "clothing",
+      "slot": "body",
+      "description": "Адаптивная одежда с сенсорами контроля",
+      "effects": {
+        "Strength": 10,
+        "Empathy": -5
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 25,
+        "max": 125,
+        "default": 75
+      },
+      "progressiveEffects": [
+        {
+          "attribute": "Strength",
+          "increment": 1,
+          "maxValue": 15,
+          "interval": 5
+        }
+      ]
+    },
+    {
+      "id": "ar-glasses",
+      "name": "Контрольные очки",
+      "type": "device",
+      "slot": "head",
+      "description": "Очки контроля и мониторинга",
+      "effects": {
+        "Intelligence": 5,
+        "Creativity": 8
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 10,
+        "max": 200,
+        "default": 100
+      }
+    },
+    {
+      "id": "neuro-enhancer-mk3",
+      "name": "Нейроимплант MK-III",
+      "type": "implant",
+      "slot": "neural",
+      "description": "Продвинутый нейроимплант для усиления контроля",
+      "effects": {
+        "Intelligence": 15,
+        "Creativity": 10
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 75,
+        "max": 175,
+        "default": 125
+      },
+      "modes": [
+        "Базовый",
+        "Турбо",
+        "Креативный"
+      ],
+      "progressiveEffects": [
+        {
+          "attribute": "Intelligence",
+          "increment": 3,
+          "maxValue": 30,
+          "interval": 2
+        },
+        {
+          "attribute": "Creativity",
+          "increment": 2,
+          "maxValue": 20,
+          "interval": 4
+        }
+      ]
+    },
+    {
+      "id": "neuro-enhancer",
+      "name": "Нейроусилитель",
+      "type": "implant",
+      "slot": "neural",
+      "description": "Улучшает когнитивные способности",
+      "effects": {
+        "Intelligence": 15,
+        "Anxiety": 5
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 50,
+        "max": 150,
+        "default": 100
+      },
+      "progressiveEffects": [
+        {
+          "attribute": "Intelligence",
+          "increment": 1,
+          "maxValue": 20,
+          "interval": 7
+        }
+      ]
+    },
+    {
+      "id": "shibari-chest-binding",
+      "name": "Классическая обвязка груди",
+      "type": "bondage",
+      "slot": "body",
+      "description": "Сложная веревочная обвязка, создающая узор на груди",
+      "materials": ["натуральная пеньковая веревка", "синтетические волокна"],
+      "technique": [
+        "Основной узел на спине",
+        "Перекрестные узоры на груди",
+        "Завязки вокруг талии"
+      ],
+      "effects": {
+        "movement_restriction": 0.8,
+        "aesthetic_pleasure": 0.9,
+        "psychological_impact": 0.7
+      },
+      "safety": {
+        "padding_required": true,
+        "quick_release": true,
+        "adjustable_tightness": true
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 0,
+        "max": 100,
+        "default": 50
+      }
+    },
+    {
+      "id": "steel-handcuffs",
+      "name": "Стальные наручники",
+      "type": "restraint",
+      "slot": "hands",
+      "description": "Классические стальные наручники с замком",
+      "materials": ["нержавеющая сталь", "кожаные прокладки"],
+      "features": [
+        "Регулируемый размер",
+        "Защита от травм",
+        "Быстрое освобождение",
+        "Совместимость с другими устройствами"
+      ],
+      "effects": {
+        "movement_restriction": 0.9,
+        "psychological_impact": 0.6,
+        "submission": 0.7
+      },
+      "safety": {
+        "quick_release": true,
+        "adjustable_size": true,
+        "padded": true
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 0,
+        "max": 100,
+        "default": 75
+      }
+    },
+    {
+      "id": "electronic-collar",
+      "name": "Электронный ошейник",
+      "type": "restraint",
+      "slot": "neck",
+      "description": "Ошейник с электронной стимуляцией и GPS-отслеживанием",
+      "materials": ["кожа", "электронные компоненты", "GPS-модуль"],
+      "features": [
+        "Электронная стимуляция",
+        "GPS-отслеживание",
+        "Микрофон и динамик",
+        "Мониторинг состояния"
+      ],
+      "effects": {
+        "control": 0.9,
+        "submission": 0.8,
+        "fear": 0.6
+      },
+      "safety": {
+        "adjustable_intensity": true,
+        "emergency_release": true,
+        "health_monitoring": true
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 0,
+        "max": 200,
+        "default": 100
+      },
+      "modes": [
+        "Мониторинг",
+        "Стимуляция",
+        "Наказание",
+        "Поощрение"
+      ]
+    },
+    {
+      "id": "experimental-table",
+      "name": "Экспериментальный стол",
+      "type": "furniture",
+      "slot": "station",
+      "description": "Специальный стол с креплениями для конечностей и встроенными устройствами",
+      "materials": ["нержавеющая сталь", "кожаные ремни", "электроника"],
+      "features": [
+        "Регулируемые позиции",
+        "Множественные крепления",
+        "Встроенные устройства",
+        "Система безопасности"
+      ],
+      "effects": {
+        "immobilization": 1.0,
+        "accessibility": 0.9,
+        "psychological_impact": 0.8
+      },
+      "safety": {
+        "emergency_release": true,
+        "position_limits": true,
+        "monitoring": true
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 0,
+        "max": 150,
+        "default": 75
+      }
+    },
+    {
+      "id": "vibrator-advanced",
+      "name": "Продвинутый вибратор",
+      "type": "stimulation",
+      "slot": "intimate",
+      "description": "Многофункциональный вибратор с различными режимами",
+      "materials": ["медицинский силикон", "электроника", "аккумулятор"],
+      "features": [
+        "Множественные режимы",
+        "Дистанционное управление",
+        "Программируемые паттерны",
+        "Сенсоры обратной связи"
+      ],
+      "effects": {
+        "pleasure": 0.9,
+        "arousal": 0.8,
+        "sensitivity": 0.7
+      },
+      "safety": {
+        "adjustable_intensity": true,
+        "auto_shutdown": true,
+        "waterproof": true
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 0,
+        "max": 200,
+        "default": 100
+      },
+      "modes": [
+        "Пульсация",
+        "Волна",
+        "Случайный",
+        "Программируемый"
+      ]
+    },
+    {
+      "id": "electro-stimulator",
+      "name": "Электростимулятор",
+      "type": "stimulation",
+      "slot": "body",
+      "description": "Устройство для электрической стимуляции нервных окончаний",
+      "materials": ["электроды", "электроника", "гель-проводник"],
+      "features": [
+        "Регулируемая интенсивность",
+        "Различные паттерны",
+        "Безопасные электроды",
+        "Мониторинг реакции"
+      ],
+      "effects": {
+        "stimulation": 0.9,
+        "pain": 0.6,
+        "pleasure": 0.7
+      },
+      "safety": {
+        "intensity_limits": true,
+        "emergency_stop": true,
+        "skin_monitoring": true
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 0,
+        "max": 300,
+        "default": 100
+      },
+      "modes": [
+        "Мягкий",
+        "Средний",
+        "Интенсивный",
+        "Экстремальный"
+      ]
+    },
+    {
+      "id": "blindfold-sensory",
+      "name": "Сенсорная повязка",
+      "type": "sensory",
+      "slot": "head",
+      "description": "Повязка на глаза с дополнительными сенсорами",
+      "materials": ["мягкая ткань", "сенсоры", "электроника"],
+      "features": [
+        "Полная светонепроницаемость",
+        "Сенсоры движения глаз",
+        "Интеграция с другими устройствами",
+        "Комфортная посадка"
+      ],
+      "effects": {
+        "sensory_deprivation": 0.9,
+        "vulnerability": 0.8,
+        "focus": 0.7
+      },
+      "safety": {
+        "quick_removal": true,
+        "breathable": true,
+        "adjustable": true
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 0,
+        "max": 100,
+        "default": 50
+      }
+    },
+    {
+      "id": "gag-advanced",
+      "name": "Продвинутый кляп",
+      "type": "sensory",
+      "slot": "mouth",
+      "description": "Кляп с дополнительными функциями и сенсорами",
+      "materials": ["медицинский силикон", "сенсоры", "электроника"],
+      "features": [
+        "Регулируемый размер",
+        "Сенсоры слюноотделения",
+        "Интеграция с вибрацией",
+        "Безопасное дыхание"
+      ],
+      "effects": {
+        "speech_restriction": 0.9,
+        "submission": 0.7,
+        "vulnerability": 0.8
+      },
+      "safety": {
+        "breathing_ensured": true,
+        "quick_release": true,
+        "adjustable_size": true
+      },
+      "removable": true,
+      "powerSettings": {
+        "min": 0,
+        "max": 150,
+        "default": 75
+      }
+    },
+    {
+      "id": "neuro-stimulator",
+      "name": "Нейростимулятор",
+      "type": "experimental",
+      "slot": "neural",
+      "description": "Экспериментальное устройство для прямой стимуляции нервной системы",
+      "materials": ["микроэлектроды", "нейроинтерфейс", "компьютер"],
+      "features": [
+        "Прямая стимуляция мозга",
+        "Программируемые паттерны",
+        "Мониторинг активности",
+        "Безопасные протоколы"
+      ],
+      "effects": {
+        "neural_control": 0.9,
+        "pleasure": 0.8,
+        "pain": 0.7
+      },
+      "safety": {
+        "intensity_limits": true,
+        "emergency_shutdown": true,
+        "continuous_monitoring": true
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 0,
+        "max": 500,
+        "default": 100
+      },
+      "modes": [
+        "Стимуляция удовольствия",
+        "Стимуляция боли",
+        "Контроль движений",
+        "Эмоциональная регуляция"
+      ]
+    },
+    {
+      "id": "hormone-injector",
+      "name": "Гормональный инъектор",
+      "type": "experimental",
+      "slot": "body",
+      "description": "Автоматический инъектор для введения гормональных препаратов",
+      "materials": ["медицинская сталь", "микронасос", "сенсоры"],
+      "features": [
+        "Автоматические инъекции",
+        "Программируемые дозы",
+        "Мониторинг уровня гормонов",
+        "Безопасные протоколы"
+      ],
+      "effects": {
+        "hormonal_control": 0.9,
+        "mood_modification": 0.8,
+        "behavior_change": 0.7
+      },
+      "safety": {
+        "dose_limits": true,
+        "emergency_stop": true,
+        "health_monitoring": true
+      },
+      "removable": false,
+      "powerSettings": {
+        "min": 0,
+        "max": 200,
+        "default": 50
+      },
+      "modes": [
+        "Окситоцин",
+        "Эндорфины",
+        "Адреналин",
+        "Прогестерон"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "events": [
+    {
+      "id": "anom_1",
+      "title": "Временная аномалия в Тени",
+      "description": "Странные искажения времени в Void Border. Некоторые активы могут получить дополнительные действия.",
+      "type": "anomaly",
+      "probability": 0.1,
+      "effects": {
+        "global": {
+          "neuralPulses": 2
+        },
+        "talent": {
+          "maxDailyActions": 1
+        }
+      },
+      "duration": 3,
+      "storyScenes": [
+        "void_anomaly_discovery",
+        "temporal_investigation"
+      ]
+    },
+    {
+      "id": "crisis_1",
+      "title": "Сбой имплантов",
+      "description": "Критический сбой в нейроимплантах. Все активы временно теряют контроль.",
+      "type": "crisis",
+      "probability": 0.05,
+      "effects": {
+        "talent": {
+          "skills": {
+            "neural_hacking": -1,
+            "orgasm_control": -1
+          }
+        }
+      },
+      "duration": 2,
+      "storyScenes": [
+        "implant_failure_alert",
+        "emergency_response",
+        "repair_mission"
+      ]
+    },
+    {
+      "id": "event_001",
+      "title": "Солнечная буря",
+      "type": "anomaly",
+      "probability": 0.15,
+      "effects": {
+        "global": {
+          "neuralPulses": -2,
+          "allTalents": {
+            "states": {
+              "anxiety": 10,
+              "mood": -5
+            }
+          }
+        }
+      },
+      "description": "Магнитная буря влияет на нейроинтерфейсы станции"
+    },
+    {
+      "id": "event_002",
+      "title": "Корпоративная вечеринка",
+      "type": "opportunity",
+      "probability": 0.25,
+      "effects": {
+        "global": {
+          "allTalents": {
+            "states": {
+              "mood": 15,
+              "engagement": 10,
+              "burnout": -5
+            }
+          }
+        }
+      },
+      "description": "Общее мероприятие поднимает настроение всей команды"
+    },
+    {
+      "id": "event_003",
+      "title": "Технический сбой",
+      "type": "crisis",
+      "probability": 0.10,
+      "effects": {
+        "global": {
+          "credits": -500,
+          "allTalents": {
+            "states": {
+              "anxiety": 15,
+              "engagement": -10
+            }
+          }
+        }
+      },
+      "description": "Сбой в системах станции требует экстренного ремонта"
+    }
+  ],
+  "config": {
+    "settings": {},
+    "conditions": [],
+    "risks": []
+  }
+}

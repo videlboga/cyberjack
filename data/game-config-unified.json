@@ -1,0 +1,2605 @@
+{
+  "characters": {
+    "characters": [
+      {
+        "id": "market_1",
+        "name": "Алекс",
+        "archetype": "default",
+        "description": "Молодая актив с хорошими навыками обслуживания",
+        "stats": {
+          "physical": {
+            "endurance": 0.2,
+            "sensitivity": 5,
+            "flexibility": 0.2
+          },
+          "psychological": {
+            "emotionalStability": 5,
+            "adaptability": 0.3,
+            "intelligence": 0.4
+          },
+          "social": {
+            "sociability": 0.3,
+            "empathy": 0.3,
+            "dominance": 0.2
+          },
+          "personality": {
+            "selfEsteem": 0.2,
+            "optimism": 5,
+            "curiosity": 5
+          },
+          "special": {
+            "sexualExperience": 5,
+            "resistance": 5,
+            "dependency": 5,
+            "fetishSensitivity": 5,
+            "fetishDiscovery": 5
+          }
+        },
+        "fetishes": {
+          "primary": [],
+          "secondary": [],
+          "discovered": [],
+          "hidden": []
+        },
+        "emotionalState": "neutral",
+        "createdAt": "2025-08-24T13:08:26.280Z",
+        "lastInteraction": "2025-08-24T13:08:26.280Z",
+        "totalInteractions": 0,
+        "communicationStyle": "neutral"
+      },
+      {
+        "id": "market_2",
+        "name": "Мария",
+        "archetype": "default",
+        "description": "Опытная актив с отличными навыками обслуживания",
+        "stats": {
+          "physical": {
+            "endurance": 0.3,
+            "sensitivity": 5,
+            "flexibility": 0.3
+          },
+          "psychological": {
+            "emotionalStability": 5,
+            "adaptability": 0.5,
+            "intelligence": 0.3
+          },
+          "social": {
+            "sociability": 0.5,
+            "empathy": 0.5,
+            "dominance": 0.2
+          },
+          "personality": {
+            "selfEsteem": 0.2,
+            "optimism": 5,
+            "curiosity": 5
+          },
+          "special": {
+            "sexualExperience": 5,
+            "resistance": 5,
+            "dependency": 5,
+            "fetishSensitivity": 5,
+            "fetishDiscovery": 5
+          }
+        },
+        "fetishes": {
+          "primary": [],
+          "secondary": [],
+          "discovered": [],
+          "hidden": []
+        },
+        "emotionalState": "neutral",
+        "createdAt": "2025-08-24T13:08:26.280Z",
+        "lastInteraction": "2025-08-24T13:08:26.280Z",
+        "totalInteractions": 0,
+        "communicationStyle": "neutral"
+      },
+      {
+        "id": "void_1",
+        "name": "Сигнал из Тени",
+        "archetype": "void_rescue",
+        "description": "Спасённый из пустоты: Слабый сигнал из глубин Void Border. Может быть актив с уникальными фетишами.",
+        "stats": {
+          "physical": {
+            "endurance": 0.4,
+            "sensitivity": 5,
+            "flexibility": 0.4
+          },
+          "psychological": {
+            "emotionalStability": 5,
+            "adaptability": 0.2,
+            "intelligence": 0.3
+          },
+          "social": {
+            "sociability": 0.2,
+            "empathy": 0.2,
+            "dominance": 0.3
+          },
+          "personality": {
+            "selfEsteem": 0.3,
+            "optimism": 5,
+            "curiosity": 5
+          },
+          "special": {
+            "sexualExperience": 5,
+            "resistance": 5,
+            "dependency": 5,
+            "fetishSensitivity": 5,
+            "fetishDiscovery": 5
+          }
+        },
+        "fetishes": {
+          "primary": [],
+          "secondary": [],
+          "discovered": [],
+          "hidden": []
+        },
+        "emotionalState": "neutral",
+        "createdAt": "2025-08-24T13:08:26.280Z",
+        "lastInteraction": "2025-08-24T13:08:26.280Z",
+        "totalInteractions": 0,
+        "communicationStyle": "neutral"
+      },
+      {
+        "id": "corp_1",
+        "name": "Корпоративный 1",
+        "archetype": "corporate_contract",
+        "description": "Корпоративный контракт: Интенсивная программа подготовки элитных активов от ведущей корпорации.",
+        "stats": {
+          "physical": {
+            "endurance": 5,
+            "sensitivity": 5,
+            "flexibility": 5
+          },
+          "psychological": {
+            "emotionalStability": 5,
+            "adaptability": 5,
+            "intelligence": 5
+          },
+          "social": {
+            "sociability": 5,
+            "empathy": 5,
+            "dominance": 5
+          },
+          "personality": {
+            "selfEsteem": 5,
+            "optimism": 5,
+            "curiosity": 5
+          },
+          "special": {
+            "sexualExperience": 5,
+            "resistance": 5,
+            "dependency": 5,
+            "fetishSensitivity": 5,
+            "fetishDiscovery": 5
+          }
+        },
+        "fetishes": {
+          "primary": [],
+          "secondary": [],
+          "discovered": [],
+          "hidden": []
+        },
+        "emotionalState": "neutral",
+        "createdAt": "2025-08-24T13:08:26.280Z",
+        "lastInteraction": "2025-08-24T13:08:26.280Z",
+        "totalInteractions": 0,
+        "communicationStyle": "neutral"
+      }
+    ],
+    "templates": {
+      "talentExchange": {
+        "name": "Биржа талантов",
+        "description": "Базовый шаблон для персонажей с биржи талантов",
+        "archetype": "talent_exchange"
+      },
+      "voidRescues": {
+        "name": "Спасение из пустоты",
+        "description": "Базовый шаблон для спасённых персонажей",
+        "archetype": "void_rescue"
+      },
+      "corporateContracts": {
+        "name": "Корпоративные контракты",
+        "description": "Базовый шаблон для корпоративных персонажей",
+        "archetype": "corporate_contract"
+      }
+    },
+    "config": {
+      "skillCategories": {
+        "service": {
+          "name": "Обслуживание",
+          "description": "Навыки обслуживания и ухода",
+          "skills": [
+            "maid",
+            "cooking",
+            "massage",
+            "cleaning"
+          ]
+        },
+        "technical": {
+          "name": "Технические",
+          "description": "Технические и интеллектуальные навыки",
+          "skills": [
+            "neural_hacking",
+            "programming",
+            "analysis",
+            "research"
+          ]
+        }
+      },
+      "fetishCategories": {
+        "power": {
+          "name": "Власть и контроль",
+          "description": "Фетиши, связанные с властью и контролем",
+          "fetishes": [
+            "submission",
+            "obedience",
+            "domination",
+            "control"
+          ]
+        },
+        "restraint": {
+          "name": "Ограничения",
+          "description": "Фетиши, связанные с ограничениями и связыванием",
+          "fetishes": [
+            "bondage",
+            "cuffs",
+            "chains",
+            "cages"
+          ]
+        }
+      }
+    }
+  },
+  "actions": {
+    "actions": [
+      {
+        "id": "training-basic",
+        "category": "training",
+        "title": "Базовая тренировка",
+        "description": "Стандартная тренировка подчинения без рисков",
+        "cost": 1,
+        "risk": "low",
+        "effects": {
+          "skills": {
+            "maid": 0.5,
+            "cooking": 0.3
+          },
+          "states": {
+            "habit": 0.3,
+            "awareness": 0.2
+          }
+        },
+        "memory": {
+          "type": "conditioned",
+          "summary": "Прошла базовую тренировку подчинения",
+          "intensity": 2,
+          "tags": [
+            "тренировка",
+            "подчинение"
+          ]
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "training-intensive",
+        "category": "training",
+        "title": "Интенсивная тренировка",
+        "description": "Ускоренное подчинение с повышенной нагрузкой",
+        "cost": 2,
+        "risk": "medium",
+        "effects": {
+          "skills": {
+            "maid": 1.2,
+            "cooking": 0.8
+          },
+          "states": {
+            "awareness": 0.5,
+            "habit": 1,
+            "despair": 0.5,
+            "fear": 0.3
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "training-neural",
+        "category": "training",
+        "title": "Нейроимплантация",
+        "description": "Экспериментальная имплантация фетишей и контроля",
+        "cost": 3,
+        "risk": "high",
+        "probability": {
+          "success": 0.4,
+          "partial": 0.4,
+          "failure": 0.2
+        },
+        "outcomes": {
+          "success": {
+            "attributes": {
+              "intelligence": 0.5
+            },
+            "states": {
+              "sensuality": 1,
+              "awareness": 0.8
+            },
+            "skills": {
+              "neural_hacking": 0.6
+            }
+          },
+          "partial": {
+            "attributes": {
+              "intelligence": 0.3
+            },
+            "states": {
+              "sensuality": 0.5,
+              "fear": 1,
+              "sensory_overload": 0.8
+            }
+          },
+          "failure": {
+            "states": {
+              "sensory_overload": 1.5,
+              "fear": 1.2,
+              "mood": -0.8
+            },
+            "memory": {
+              "type": "traumatic",
+              "summary": "Неудачная имплантация нейрочипа",
+              "intensity": 5,
+              "tags": [
+                "медицина",
+                "неудача",
+                "нейротравма"
+              ]
+            }
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "coaching-basic",
+        "category": "coaching",
+        "title": "Базовое кондиционирование",
+        "description": "Безопасное развитие подчинения и преданности",
+        "cost": 1,
+        "risk": "low",
+        "effects": {
+          "states": {
+            "awareness": 0.5,
+            "fear": -0.3,
+            "devotion": 0.2,
+            "sensuality": 0.1
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "coaching-deep",
+        "category": "coaching",
+        "title": "Глубокое кондиционирование",
+        "description": "Интенсивная работа с внутренним сопротивлением",
+        "cost": 2,
+        "risk": "medium",
+        "effects": {
+          "states": {
+            "awareness": 1,
+            "devotion": 0.8,
+            "sensuality": 0.5,
+            "fear": 0.4,
+            "mood": -0.2
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "coaching-extreme",
+        "category": "coaching",
+        "title": "Экстремальный коучинг",
+        "description": "Радикальные методы трансформации личности",
+        "cost": 3,
+        "risk": "high",
+        "probability": {
+          "success": 0.7,
+          "failure": 0.3
+        },
+        "outcomes": {
+          "success": {
+            "states": {
+              "mood": 1.5,
+              "engagement": 1.2,
+              "insight": 0.8,
+              "neuroplasticity": 0.6
+            },
+            "memory": {
+              "type": "positive",
+              "summary": "Прорыв в экстремальном коучинге!",
+              "intensity": 5,
+              "tags": [
+                "прорыв",
+                "трансформация"
+              ]
+            }
+          },
+          "failure": {
+            "states": {
+              "anxiety": 2,
+              "mood": -1,
+              "burnout": 0.8
+            },
+            "memory": {
+              "type": "traumatic",
+              "summary": "Травматичный опыт экстремального коучинга",
+              "intensity": 4,
+              "tags": [
+                "травма",
+                "стресс",
+                "неудача"
+              ]
+            }
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "therapy-basic",
+        "category": "therapy",
+        "title": "Стандартная терапия",
+        "description": "Работа с психологическим состоянием, удаляет травмы",
+        "cost": 2,
+        "risk": "low",
+        "effects": {
+          "states": {
+            "anxiety": -1,
+            "burnout": -0.5,
+            "mood": 0.3
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "therapy-intensive",
+        "category": "therapy",
+        "title": "Интенсивная терапия",
+        "description": "Глубокая проработка психологических проблем",
+        "cost": 3,
+        "risk": "medium",
+        "effects": {
+          "states": {
+            "anxiety": -1.5,
+            "burnout": -1,
+            "mood": 0.8,
+            "engagement": -0.3
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "therapy-crisis",
+        "category": "therapy",
+        "title": "Кризисное вмешательство",
+        "description": "Экстренная помощь при критическом состоянии",
+        "cost": 2,
+        "risk": "variable",
+        "outcomes": {
+          "success": {
+            "states": {
+              "anxiety": -1.5,
+              "burnout": -1.2,
+              "mood": 0.8,
+              "engagement": -0.5
+            },
+            "skills": {
+              "office": -0.2
+            }
+          },
+          "failure": {
+            "states": {
+              "anxiety": 0.5,
+              "entitlement": 0.3
+            }
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "reward-basic",
+        "category": "reward",
+        "title": "Стандартное поощрение",
+        "description": "Мотивация через признание достижений",
+        "cost": 1,
+        "risk": "low",
+        "effects": {
+          "states": {
+            "mood": 1,
+            "engagement": 0.5,
+            "entitlement": 0.2
+          }
+        },
+        "memory": {
+          "type": "positive",
+          "summary": "Получил поощрение за хорошую работу",
+          "intensity": 3,
+          "tags": [
+            "поощрение",
+            "признание"
+          ]
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "reward-bonus",
+        "category": "reward",
+        "title": "Денежная премия",
+        "description": "Материальное поощрение за выдающиеся результаты",
+        "cost": 2,
+        "effects": {
+          "states": {
+            "mood": 1.5,
+            "engagement": 0.8,
+            "entitlement": 0.5
+          },
+          "credits": 50
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "reward-promotion",
+        "category": "reward",
+        "title": "Повышение статуса",
+        "description": "Признание профессионального роста",
+        "cost": 3,
+        "effects": {
+          "states": {
+            "mood": 2,
+            "engagement": 1.2,
+            "entitlement": 0.8,
+            "ego": 0.3
+          },
+          "rank_up": true
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "rest-basic",
+        "category": "rest",
+        "title": "Обычный отдых",
+        "description": "Стандартное восстановление сил",
+        "cost": 1,
+        "risk": "low",
+        "effects": {
+          "states": {
+            "burnout": -1,
+            "cognitiveLoad": -1,
+            "endurance": 0.5,
+            "mood": 0.3
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "rest-sabbatical",
+        "category": "rest",
+        "title": "Творческий отпуск",
+        "description": "Длительное отстранение для полного восстановления",
+        "cost": 3,
+        "risk": "medium",
+        "effects": {
+          "states": {
+            "burnout": -5,
+            "cognitiveLoad": -5,
+            "endurance": 1.5,
+            "mood": 0.8,
+            "engagement": -5
+          },
+          "skills": {
+            "office": -0.3,
+            "technical": -0.2
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      },
+      {
+        "id": "rest-vacation",
+        "category": "rest",
+        "title": "Отпуск с активностями",
+        "description": "Восстановление через новые впечатления",
+        "cost": 2,
+        "risk": "low",
+        "effects": {
+          "states": {
+            "burnout": -1.5,
+            "mood": 1,
+            "neuroplasticity": 0.3,
+            "engagement": 0.2
+          }
+        },
+        "metadata": {
+          "source": "merged",
+          "createdAt": "2025-08-22T20:58:05.637Z",
+          "lastModified": "2025-08-22T20:58:05.637Z"
+        }
+      }
+    ],
+    "categories": {
+      "training": {
+        "title": "🎓 Тренировка",
+        "description": "Развитие навыков и подчинение активов",
+        "actions": {
+          "basic": {
+            "title": "Базовая тренировка",
+            "description": "Стандартная тренировка подчинения без рисков",
+            "cost": 1,
+            "risk": "low",
+            "effects": {
+              "skills": {
+                "maid": 0.5,
+                "cooking": 0.3
+              },
+              "states": {
+                "habit": 0.3,
+                "awareness": 0.2
+              }
+            },
+            "memory": {
+              "type": "conditioned",
+              "summary": "Прошла базовую тренировку подчинения",
+              "intensity": 2,
+              "tags": [
+                "тренировка",
+                "подчинение"
+              ]
+            }
+          },
+          "intensive": {
+            "title": "Интенсивная тренировка",
+            "description": "Ускоренное подчинение с повышенной нагрузкой",
+            "cost": 2,
+            "risk": "medium",
+            "effects": {
+              "skills": {
+                "maid": 1.2,
+                "cooking": 0.8
+              },
+              "states": {
+                "awareness": 0.5,
+                "habit": 1,
+                "despair": 0.5,
+                "fear": 0.3
+              }
+            }
+          },
+          "neural": {
+            "title": "Нейроимплантация",
+            "description": "Экспериментальная имплантация фетишей и контроля",
+            "cost": 3,
+            "risk": "high",
+            "probability": {
+              "success": 0.4,
+              "partial": 0.4,
+              "failure": 0.2
+            },
+            "outcomes": {
+              "success": {
+                "attributes": {
+                  "intelligence": 0.5
+                },
+                "states": {
+                  "sensuality": 1,
+                  "awareness": 0.8
+                },
+                "skills": {
+                  "neural_hacking": 0.6
+                }
+              },
+              "partial": {
+                "attributes": {
+                  "intelligence": 0.3
+                },
+                "states": {
+                  "sensuality": 0.5,
+                  "fear": 1,
+                  "sensory_overload": 0.8
+                }
+              },
+              "failure": {
+                "states": {
+                  "sensory_overload": 1.5,
+                  "fear": 1.2,
+                  "mood": -0.8
+                },
+                "memory": {
+                  "type": "traumatic",
+                  "summary": "Неудачная имплантация нейрочипа",
+                  "intensity": 5,
+                  "tags": [
+                    "медицина",
+                    "неудача",
+                    "нейротравма"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "coaching": {
+        "title": "💪 Психокондиционирование",
+        "description": "Развитие подчинения и личностная трансформация",
+        "actions": {
+          "basic": {
+            "title": "Базовое кондиционирование",
+            "description": "Безопасное развитие подчинения и преданности",
+            "cost": 1,
+            "risk": "low",
+            "effects": {
+              "states": {
+                "awareness": 0.5,
+                "fear": -0.3,
+                "devotion": 0.2,
+                "sensuality": 0.1
+              }
+            }
+          },
+          "deep": {
+            "title": "Глубокое кондиционирование",
+            "description": "Интенсивная работа с внутренним сопротивлением",
+            "cost": 2,
+            "risk": "medium",
+            "effects": {
+              "states": {
+                "awareness": 1,
+                "devotion": 0.8,
+                "sensuality": 0.5,
+                "fear": 0.4,
+                "mood": -0.2
+              }
+            }
+          },
+          "extreme": {
+            "title": "Экстремальный коучинг",
+            "description": "Радикальные методы трансформации личности",
+            "cost": 3,
+            "risk": "high",
+            "probability": {
+              "success": 0.7,
+              "failure": 0.3
+            },
+            "outcomes": {
+              "success": {
+                "states": {
+                  "mood": 1.5,
+                  "engagement": 1.2,
+                  "insight": 0.8,
+                  "neuroplasticity": 0.6
+                },
+                "memory": {
+                  "type": "positive",
+                  "summary": "Прорыв в экстремальном коучинге!",
+                  "intensity": 5,
+                  "tags": [
+                    "прорыв",
+                    "трансформация"
+                  ]
+                }
+              },
+              "failure": {
+                "states": {
+                  "anxiety": 2,
+                  "mood": -1,
+                  "burnout": 0.8
+                },
+                "memory": {
+                  "type": "traumatic",
+                  "summary": "Травматичный опыт экстремального коучинга",
+                  "intensity": 4,
+                  "tags": [
+                    "травма",
+                    "стресс",
+                    "неудача"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "therapy": {
+        "title": "🏥 Терапия",
+        "description": "Работа с психологическим состоянием и травмами",
+        "actions": {
+          "basic": {
+            "title": "Стандартная терапия",
+            "description": "Работа с психологическим состоянием, удаляет травмы",
+            "cost": 2,
+            "risk": "low",
+            "effects": {
+              "states": {
+                "anxiety": -1,
+                "burnout": -0.5,
+                "mood": 0.3
+              }
+            },
+            "special": "remove_traumatic_memories_30"
+          },
+          "intensive": {
+            "title": "Интенсивная терапия",
+            "description": "Глубокая проработка психологических проблем",
+            "cost": 3,
+            "risk": "medium",
+            "effects": {
+              "states": {
+                "anxiety": -1.5,
+                "burnout": -1,
+                "mood": 0.8,
+                "engagement": -0.3
+              }
+            },
+            "special": "remove_traumatic_memories_60"
+          },
+          "crisis": {
+            "title": "Кризисное вмешательство",
+            "description": "Экстренная помощь при критическом состоянии",
+            "cost": 2,
+            "risk": "variable",
+            "condition": "anxiety > 3 || burnout > 3",
+            "outcomes": {
+              "success": {
+                "states": {
+                  "anxiety": -1.5,
+                  "burnout": -1.2,
+                  "mood": 0.8,
+                  "engagement": -0.5
+                },
+                "skills": {
+                  "office": -0.2
+                }
+              },
+              "failure": {
+                "states": {
+                  "anxiety": 0.5,
+                  "entitlement": 0.3
+                }
+              }
+            }
+          }
+        }
+      },
+      "reward": {
+        "title": "🎁 Поощрение",
+        "description": "Мотивация и признание достижений",
+        "actions": {
+          "basic": {
+            "title": "Стандартное поощрение",
+            "description": "Мотивация через признание достижений",
+            "cost": 1,
+            "risk": "low",
+            "effects": {
+              "states": {
+                "mood": 1,
+                "engagement": 0.5,
+                "entitlement": 0.2
+              }
+            },
+            "memory": {
+              "type": "positive",
+              "summary": "Получил поощрение за хорошую работу",
+              "intensity": 3,
+              "tags": [
+                "поощрение",
+                "признание"
+              ]
+            }
+          },
+          "bonus": {
+            "title": "Денежная премия",
+            "description": "Материальное поощрение за выдающиеся результаты",
+            "cost": 2,
+            "effects": {
+              "states": {
+                "mood": 1.5,
+                "engagement": 0.8,
+                "entitlement": 0.5
+              },
+              "credits": 50
+            }
+          },
+          "promotion": {
+            "title": "Повышение статуса",
+            "description": "Признание профессионального роста",
+            "cost": 3,
+            "effects": {
+              "states": {
+                "mood": 2,
+                "engagement": 1.2,
+                "entitlement": 0.8,
+                "ego": 0.3
+              },
+              "rank_up": true
+            }
+          }
+        }
+      },
+      "rest": {
+        "title": "😴 Отдых",
+        "description": "Восстановление сил и снятие нагрузки",
+        "actions": {
+          "basic": {
+            "title": "Обычный отдых",
+            "description": "Стандартное восстановление сил",
+            "cost": 1,
+            "risk": "low",
+            "effects": {
+              "states": {
+                "burnout": -1,
+                "cognitiveLoad": -1,
+                "endurance": 0.5,
+                "mood": 0.3
+              }
+            }
+          },
+          "sabbatical": {
+            "title": "Творческий отпуск",
+            "description": "Длительное отстранение для полного восстановления",
+            "cost": 3,
+            "risk": "medium",
+            "effects": {
+              "states": {
+                "burnout": -5,
+                "cognitiveLoad": -5,
+                "endurance": 1.5,
+                "mood": 0.8,
+                "engagement": -5
+              },
+              "skills": {
+                "office": -0.3,
+                "technical": -0.2
+              }
+            }
+          },
+          "vacation": {
+            "title": "Отпуск с активностями",
+            "description": "Восстановление через новые впечатления",
+            "cost": 2,
+            "risk": "low",
+            "effects": {
+              "states": {
+                "burnout": -1.5,
+                "mood": 1,
+                "neuroplasticity": 0.3,
+                "engagement": 0.2
+              }
+            }
+          }
+        }
+      }
+    },
+    "config": {
+      "settings": {},
+      "conditions": [],
+      "risks": []
+    }
+  },
+  "events": {
+    "events": [
+      {
+        "id": "anom_1",
+        "title": "Временная аномалия в Тени",
+        "description": "Странные искажения времени в Void Border. Некоторые активы могут получить дополнительные действия.",
+        "probability": 0.1,
+        "effects": {
+          "global": {
+            "neuralPulses": 2
+          },
+          "talent": {
+            "maxDailyActions": 1
+          }
+        },
+        "duration": 3,
+        "storyScenes": [
+          "void_anomaly_discovery",
+          "temporal_investigation"
+        ]
+      },
+      {
+        "id": "crisis_1",
+        "title": "Сбой имплантов",
+        "description": "Критический сбой в нейроимплантах. Все активы временно теряют контроль.",
+        "probability": 0.05,
+        "effects": {
+          "talent": {
+            "skills": {
+              "neural_hacking": -1,
+              "orgasm_control": -1
+            }
+          }
+        },
+        "duration": 2,
+        "storyScenes": [
+          "implant_failure_alert",
+          "emergency_response",
+          "repair_mission"
+        ]
+      }
+    ],
+    "config": {
+      "events": [
+        {
+          "id": "event_001",
+          "title": "Солнечная буря",
+          "type": "Аномалия",
+          "probability": 15,
+          "effects": {
+            "global": {
+              "neuralPulses": -2,
+              "allTalents": {
+                "states": {
+                  "anxiety": 10,
+                  "mood": -5
+                }
+              }
+            }
+          },
+          "description": "Магнитная буря влияет на нейроинтерфейсы станции"
+        },
+        {
+          "id": "event_002",
+          "title": "Корпоративная вечеринка",
+          "type": "Социальное",
+          "probability": 25,
+          "effects": {
+            "global": {
+              "allTalents": {
+                "states": {
+                  "mood": 15,
+                  "engagement": 10,
+                  "burnout": -5
+                }
+              }
+            }
+          },
+          "description": "Общее мероприятие поднимает настроение всей команды"
+        },
+        {
+          "id": "event_003",
+          "title": "Технический сбой",
+          "type": "Кризис",
+          "probability": 10,
+          "effects": {
+            "global": {
+              "credits": -500,
+              "allTalents": {
+                "states": {
+                  "anxiety": 15,
+                  "engagement": -10
+                }
+              }
+            }
+          },
+          "description": "Сбой в системах станции требует экстренного ремонта"
+        }
+      ],
+      "settings": {},
+      "conditions": [],
+      "risks": []
+    }
+  },
+  "system": {
+    "attributes": [
+      {
+        "id": "strength",
+        "name": "Сила",
+        "description": "Физическая мощь и выносливость",
+        "category": "physical",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "empathy",
+        "name": "Эмпатия",
+        "description": "Способность понимать и чувствовать других",
+        "category": "social",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "intelligence",
+        "name": "Интеллект",
+        "description": "Когнитивные способности и обучаемость",
+        "category": "mental",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "creativity",
+        "name": "Креативность",
+        "description": "Творческие способности и инновационное мышление",
+        "category": "mental",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "temperament",
+        "name": "Темперамент",
+        "description": "Эмоциональная стабильность и самоконтроль",
+        "category": "mental",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "grit",
+        "name": "Упорство",
+        "description": "Настойчивость и стойкость перед трудностями",
+        "category": "mental",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "ego",
+        "name": "Эго",
+        "description": "Самооценка и уверенность в себе",
+        "category": "social",
+        "minValue": 1,
+        "maxValue": 10
+      }
+    ],
+    "states": [
+      {
+        "id": "mood",
+        "name": "Настроение",
+        "description": "Текущее эмоциональное состояние",
+        "category": "emotional",
+        "minValue": 0,
+        "maxValue": 100,
+        "colorType": "mood"
+      },
+      {
+        "id": "fear",
+        "name": "Страх",
+        "description": "Уровень страха и подчинения",
+        "category": "emotional",
+        "minValue": 0,
+        "maxValue": 100,
+        "colorType": "fear"
+      },
+      {
+        "id": "despair",
+        "name": "Отчаяние",
+        "description": "Эмоциональное истощение от пыток",
+        "category": "emotional",
+        "minValue": 0,
+        "maxValue": 100,
+        "colorType": "despair"
+      },
+      {
+        "id": "devotion",
+        "name": "Преданность",
+        "description": "Преданность и подчинение мастеру",
+        "category": "motivational",
+        "minValue": 0,
+        "maxValue": 100,
+        "colorType": "devotion"
+      },
+      {
+        "id": "entitlement",
+        "name": "Притязания",
+        "description": "Ожидания и требования к условиям",
+        "category": "social",
+        "minValue": 0,
+        "maxValue": 5,
+        "colorType": "neutral"
+      },
+      {
+        "id": "awareness",
+        "name": "Осознанность",
+        "description": "Понимание своего положения и подчинения",
+        "category": "mental",
+        "minValue": 0,
+        "maxValue": 5,
+        "colorType": "neutral"
+      },
+      {
+        "id": "routine",
+        "name": "Рутина",
+        "description": "Привыкание к повторяющимся задачам",
+        "category": "behavioral",
+        "minValue": 0,
+        "maxValue": 5,
+        "colorType": "neutral"
+      },
+      {
+        "id": "compliance",
+        "name": "Послушание",
+        "description": "Готовность следовать указаниям",
+        "category": "behavioral",
+        "minValue": 0,
+        "maxValue": 5,
+        "colorType": "neutral"
+      },
+      {
+        "id": "sensuality",
+        "name": "Чувственность",
+        "description": "Способность к сексуальным ощущениям",
+        "category": "mental",
+        "minValue": 0,
+        "maxValue": 5,
+        "colorType": "neutral"
+      },
+      {
+        "id": "endurance",
+        "name": "Выносливость",
+        "description": "Способность работать длительное время",
+        "category": "physical",
+        "minValue": 0,
+        "maxValue": 5,
+        "colorType": "neutral"
+      },
+      {
+        "id": "sensory_overload",
+        "name": "Сенсорная перегрузка",
+        "description": "Перегрузка от интенсивных ощущений",
+        "category": "mental",
+        "minValue": 0,
+        "maxValue": 5,
+        "colorType": "neutral"
+      }
+    ],
+    "skills": [
+      {
+        "id": "maid",
+        "name": "Горничная",
+        "description": "Навыки домашнего обслуживания и ухода",
+        "category": "domestic",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "cooking",
+        "name": "Кулинария",
+        "description": "Навыки приготовления пищи и обслуживания",
+        "category": "domestic",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "neural_hacking",
+        "name": "Нейрохакерство",
+        "description": "Навыки работы с нейроимплантами и контролем",
+        "category": "technical",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "orgasm_control",
+        "name": "Контроль оргазмов",
+        "description": "Навыки контроля и управления оргазмами",
+        "category": "sexual",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "field",
+        "name": "Полевая работа",
+        "description": "Навыки работы вне офиса, в поле",
+        "category": "practical",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "etiquette",
+        "name": "Этикет",
+        "description": "Знание правил поведения и протокола",
+        "category": "social",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "logistics",
+        "name": "Логистика",
+        "description": "Планирование и координация процессов",
+        "category": "organizational",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "medical",
+        "name": "Медицина",
+        "description": "Медицинские знания и навыки",
+        "category": "specialized",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "maintenance",
+        "name": "Обслуживание",
+        "description": "Ремонт и техническое обслуживание",
+        "category": "technical",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "data",
+        "name": "Работа с данными",
+        "description": "Анализ и обработка информации",
+        "category": "analytical",
+        "minValue": 1,
+        "maxValue": 10
+      },
+      {
+        "id": "stage",
+        "name": "Сценические навыки",
+        "description": "Выступления и презентации",
+        "category": "creative",
+        "minValue": 1,
+        "maxValue": 10
+      }
+    ],
+    "actionCategories": [
+      {
+        "id": "training",
+        "name": "Обучение",
+        "icon": "🎓",
+        "description": "Развитие профессиональных навыков и компетенций",
+        "color": "blue"
+      },
+      {
+        "id": "coaching",
+        "name": "Коучинг",
+        "icon": "💪",
+        "description": "Развитие личностных качеств и мотивации",
+        "color": "green"
+      },
+      {
+        "id": "therapy",
+        "name": "Терапия",
+        "icon": "🧠",
+        "description": "Работа с психологическим состоянием и стрессом",
+        "color": "purple"
+      },
+      {
+        "id": "reward",
+        "name": "Поощрение",
+        "icon": "🎁",
+        "description": "Мотивация через награды и признание",
+        "color": "yellow"
+      },
+      {
+        "id": "rest",
+        "name": "Отдых",
+        "icon": "😴",
+        "description": "Восстановление сил и предотвращение выгорания",
+        "color": "cyan"
+      }
+    ]
+  },
+  "equipment": {
+    "equipment": [
+      {
+        "id": "cyber-eye-omega",
+        "name": "Нейроимплант Omega",
+        "type": "implant",
+        "slot": "ocular",
+        "description": "Улучшает контроль и подчинение",
+        "effects": {
+          "Intelligence": 15,
+          "Fear": 5
+        },
+        "removable": false,
+        "powerSettings": {
+          "min": 50,
+          "max": 150,
+          "default": 100
+        },
+        "modes": [
+          "Стандартный",
+          "Усиленный",
+          "Экономный"
+        ],
+        "progressiveEffects": [
+          {
+            "attribute": "Intelligence",
+            "increment": 2,
+            "maxValue": 25,
+            "interval": 3
+          }
+        ]
+      },
+      {
+        "id": "smart-suit",
+        "name": "Сенсорный костюм",
+        "type": "clothing",
+        "slot": "body",
+        "description": "Адаптивная одежда с сенсорами контроля",
+        "effects": {
+          "Strength": 10,
+          "Empathy": -5
+        },
+        "removable": true,
+        "powerSettings": {
+          "min": 25,
+          "max": 125,
+          "default": 75
+        },
+        "progressiveEffects": [
+          {
+            "attribute": "Strength",
+            "increment": 1,
+            "maxValue": 15,
+            "interval": 5
+          }
+        ]
+      },
+      {
+        "id": "ar-glasses",
+        "name": "Контрольные очки",
+        "type": "device",
+        "slot": "head",
+        "description": "Очки контроля и мониторинга",
+        "effects": {
+          "Intelligence": 5,
+          "Creativity": 8
+        },
+        "removable": true,
+        "powerSettings": {
+          "min": 10,
+          "max": 200,
+          "default": 100
+        }
+      },
+      {
+        "id": "neuro-enhancer-mk3",
+        "name": "Нейроимплант MK-III",
+        "type": "implant",
+        "slot": "neural",
+        "description": "Продвинутый нейроимплант для усиления контроля",
+        "effects": {
+          "Intelligence": 15,
+          "Creativity": 10
+        },
+        "removable": false,
+        "powerSettings": {
+          "min": 75,
+          "max": 175,
+          "default": 125
+        },
+        "modes": [
+          "Базовый",
+          "Турбо",
+          "Креативный"
+        ],
+        "progressiveEffects": [
+          {
+            "attribute": "Intelligence",
+            "increment": 3,
+            "maxValue": 30,
+            "interval": 2
+          },
+          {
+            "attribute": "Creativity",
+            "increment": 2,
+            "maxValue": 20,
+            "interval": 4
+          }
+        ]
+      },
+      {
+        "id": "neuro-enhancer",
+        "name": "Нейроусилитель",
+        "type": "implant",
+        "slot": "neural",
+        "description": "Улучшает когнитивные способности",
+        "effects": {
+          "Intelligence": 15,
+          "Anxiety": 5
+        },
+        "removable": false,
+        "powerSettings": {
+          "min": 50,
+          "max": 150,
+          "default": 100
+        },
+        "progressiveEffects": [
+          {
+            "attribute": "Intelligence",
+            "increment": 1,
+            "maxValue": 20,
+            "interval": 7
+          }
+        ]
+      }
+    ]
+  },
+  "contracts": {
+    "available": [
+      {
+        "id": "ctr_001",
+        "client": "SlaveTech Inc.",
+        "title": "Тренировка актива с имплантом контроля оргазмов",
+        "description": "Требуется подготовка актива с имплантированным чипом контроля оргазмов для корпоративного клиента.",
+        "requirements": {
+          "skills": {
+            "orgasm_control": 3,
+            "neural_hacking": 2
+          },
+          "minRank": "C"
+        },
+        "reward": 800,
+        "deadline": 5,
+        "kpi": [
+          {
+            "name": "Подчинение",
+            "weight": 0.6,
+            "current": 0,
+            "target": 100
+          },
+          {
+            "name": "Контроль",
+            "weight": 0.4,
+            "current": 0,
+            "target": 100
+          }
+        ],
+        "assignedTalents": [],
+        "status": "available",
+        "storyScenes": {
+          "onAccept": [
+            "contract_briefing",
+            "implant_intro"
+          ],
+          "onProgress": [
+            "training_challenge",
+            "implant_glitch"
+          ],
+          "onComplete": [
+            "client_demo",
+            "client_feedback"
+          ],
+          "onFail": [
+            "implant_failure",
+            "deadline_missed"
+          ]
+        }
+      },
+      {
+        "id": "ctr_002",
+        "client": "Neural Elite",
+        "title": "Подготовка элитного актива",
+        "description": "Тренировка высококлассного актива с премиум имплантами для VIP клиента.",
+        "requirements": {
+          "skills": {
+            "etiquette": 2,
+            "dance": 1
+          },
+          "minRank": "C"
+        },
+        "reward": 500,
+        "deadline": 3,
+        "kpi": [
+          {
+            "name": "Элегантность",
+            "weight": 0.8,
+            "current": 0,
+            "target": 100
+          },
+          {
+            "name": "Подчинение",
+            "weight": 0.2,
+            "current": 0,
+            "target": 100
+          }
+        ],
+        "assignedTalents": [],
+        "status": "available",
+        "storyScenes": {
+          "onAccept": [
+            "client_meeting",
+            "requirements_assessment"
+          ],
+          "onProgress": [
+            "training_session",
+            "resistance_handling"
+          ],
+          "onComplete": [
+            "final_demo",
+            "client_satisfaction"
+          ],
+          "onFail": [
+            "training_failure",
+            "contract_termination"
+          ]
+        }
+      }
+    ]
+  },
+  "storyScenes": {
+    "storyPoints": {
+      "market_reputation": {
+        "name": "Репутация на рынке",
+        "description": "Ваша репутация среди торговцев талантами",
+        "value": 0,
+        "defaultValue": 0,
+        "minValue": -100,
+        "maxValue": 100,
+        "type": "numeric",
+        "category": "story",
+        "tags": [
+          "market",
+          "reputation",
+          "trading"
+        ]
+      },
+      "void_experience": {
+        "name": "Опыт в Void",
+        "description": "Количество успешных операций в зоне Void",
+        "value": 0,
+        "defaultValue": 0,
+        "minValue": 0,
+        "maxValue": 50,
+        "type": "numeric",
+        "category": "skill",
+        "tags": [
+          "void",
+          "experience",
+          "danger"
+        ]
+      },
+      "negotiation_skill": {
+        "name": "Навык переговоров",
+        "description": "Уровень мастерства в переговорах",
+        "value": 1,
+        "defaultValue": 1,
+        "minValue": 1,
+        "maxValue": 10,
+        "type": "numeric",
+        "category": "skill",
+        "tags": [
+          "negotiation",
+          "skill",
+          "social"
+        ]
+      },
+      "corporate_connections": {
+        "name": "Корпоративные связи",
+        "description": "Влияние в корпоративных кругах",
+        "value": 0,
+        "defaultValue": 0,
+        "minValue": 0,
+        "maxValue": 20,
+        "type": "numeric",
+        "category": "relationship",
+        "tags": [
+          "corporate",
+          "connections",
+          "influence"
+        ]
+      }
+    },
+    "scenes": [
+      {
+        "id": "market_intro",
+        "title": "Добро пожаловать на Talent Exchange",
+        "description": "Многоэкранная сцена знакомства с рынком талантов",
+        "triggerConditions": [
+          {
+            "type": "story_point",
+            "pointId": "market_reputation",
+            "operator": ">=",
+            "value": 0
+          }
+        ],
+        "probability": 80,
+        "screens": [
+          {
+            "id": "entrance",
+            "title": "Вход в торговый зал",
+            "background": "/cyberpunk-market.png",
+            "description": "Вы входите в шумный торговый зал, где голографические профили талантов мерцают в воздухе",
+            "choices": [
+              {
+                "id": "browse_talents",
+                "text": "Просмотреть доступных талантов",
+                "consequences": [
+                  {
+                    "type": "gain_credits",
+                    "amount": 0
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "market_reputation",
+                    "change": 1
+                  }
+                ],
+                "navigation": {
+                  "type": "goto_screen",
+                  "screenId": "talent_list"
+                }
+              },
+              {
+                "id": "negotiate_price",
+                "text": "Попытаться договориться о цене",
+                "consequences": [
+                  {
+                    "type": "talent_stat_change",
+                    "talentId": "current",
+                    "stat": "negotiation",
+                    "change": 1
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "negotiation_skill",
+                    "change": 1
+                  }
+                ],
+                "navigation": {
+                  "type": "goto_screen",
+                  "screenId": "negotiation"
+                }
+              }
+            ]
+          },
+          {
+            "id": "talent_list",
+            "title": "Список доступных талантов",
+            "background": "/talent-profiles.png",
+            "description": "Перед вами отображается список доступных талантов с их характеристиками",
+            "choices": [
+              {
+                "id": "select_talent",
+                "text": "Выбрать таланта",
+                "consequences": [
+                  {
+                    "type": "gain_talent",
+                    "talentData": {
+                      "name": "Случайный талант",
+                      "specialization": "Случайная",
+                      "rank": "B"
+                    }
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "market_reputation",
+                    "change": 5
+                  }
+                ],
+                "navigation": {
+                  "type": "end_scene"
+                }
+              },
+              {
+                "id": "go_back",
+                "text": "Вернуться к входу",
+                "consequences": [],
+                "navigation": {
+                  "type": "goto_screen",
+                  "screenId": "entrance"
+                }
+              }
+            ]
+          },
+          {
+            "id": "negotiation",
+            "title": "Переговоры",
+            "background": "/negotiation-scene.png",
+            "description": "Талант внимательно изучает ваше предложение, взвешивая все за и против",
+            "accessConditions": [
+              {
+                "type": "story_point",
+                "pointId": "negotiation_skill",
+                "operator": ">=",
+                "value": 2
+              }
+            ],
+            "choices": [
+              {
+                "id": "offer_bonus",
+                "text": "Предложить бонус к зарплате",
+                "consequences": [
+                  {
+                    "type": "lose_credits",
+                    "amount": 200
+                  },
+                  {
+                    "type": "talent_stat_change",
+                    "talentId": "current",
+                    "stat": "mood",
+                    "change": 10
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "negotiation_skill",
+                    "change": 2
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "market_reputation",
+                    "change": 3
+                  }
+                ],
+                "navigation": {
+                  "type": "end_scene"
+                }
+              },
+              {
+                "id": "cancel_negotiation",
+                "text": "Отменить переговоры",
+                "consequences": [
+                  {
+                    "type": "story_point_change",
+                    "pointId": "market_reputation",
+                    "change": -1
+                  }
+                ],
+                "navigation": {
+                  "type": "goto_screen",
+                  "screenId": "entrance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "void_rescue",
+        "title": "Спасательная операция в Void",
+        "description": "Опасная миссия по спасению талантов из зоны Void",
+        "triggerConditions": [
+          {
+            "type": "story_point",
+            "pointId": "void_experience",
+            "operator": ">=",
+            "value": 0
+          }
+        ],
+        "probability": 60,
+        "screens": [
+          {
+            "id": "approach",
+            "title": "Приближение к Void Border",
+            "background": "/void-space.png",
+            "description": "Ваш корабль медленно приближается к опасной зоне, где сканеры обнаружили сигнал бедствия",
+            "choices": [
+              {
+                "id": "scan_area",
+                "text": "Просканировать область",
+                "consequences": [
+                  {
+                    "type": "gain_equipment",
+                    "equipmentId": "scanner_data"
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "void_experience",
+                    "change": 1
+                  }
+                ],
+                "navigation": {
+                  "type": "goto_screen",
+                  "screenId": "rescue_operation"
+                }
+              },
+              {
+                "id": "rush_in",
+                "text": "Немедленно начать спасательную операцию",
+                "consequences": [
+                  {
+                    "type": "gain_credits",
+                    "amount": 100
+                  },
+                  {
+                    "type": "talent_stat_change",
+                    "talentId": "current",
+                    "stat": "anxiety",
+                    "change": 5
+                  }
+                ],
+                "navigation": {
+                  "type": "goto_screen",
+                  "screenId": "dangerous_rescue"
+                }
+              }
+            ]
+          },
+          {
+            "id": "rescue_operation",
+            "title": "Спасательная операция",
+            "background": "/rescue-scene.png",
+            "description": "Благодаря сканированию вы точно знаете где находятся выжившие",
+            "choices": [
+              {
+                "id": "successful_rescue",
+                "text": "Провести спасательную операцию",
+                "consequences": [
+                  {
+                    "type": "gain_talent",
+                    "talentData": {
+                      "name": "Спасенный талант",
+                      "specialization": "Выживший",
+                      "rank": "A"
+                    }
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "void_experience",
+                    "change": 5
+                  }
+                ],
+                "navigation": {
+                  "type": "end_scene"
+                }
+              }
+            ]
+          },
+          {
+            "id": "dangerous_rescue",
+            "title": "Опасное спасение",
+            "background": "/dangerous-void.png",
+            "description": "Без предварительного сканирования операция становится крайне рискованной",
+            "choices": [
+              {
+                "id": "risky_rescue",
+                "text": "Продолжить несмотря на риски",
+                "consequences": [
+                  {
+                    "type": "lose_credits",
+                    "amount": 300
+                  },
+                  {
+                    "type": "gain_talent",
+                    "talentData": {
+                      "name": "Травмированный талант",
+                      "specialization": "Выживший",
+                      "rank": "C"
+                    }
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "void_experience",
+                    "change": 2
+                  }
+                ],
+                "navigation": {
+                  "type": "end_scene"
+                }
+              },
+              {
+                "id": "abort_mission",
+                "text": "Прервать миссию",
+                "consequences": [
+                  {
+                    "type": "talent_stat_change",
+                    "talentId": "current",
+                    "stat": "mood",
+                    "change": -5
+                  },
+                  {
+                    "type": "story_point_change",
+                    "pointId": "void_experience",
+                    "change": -1
+                  }
+                ],
+                "navigation": {
+                  "type": "end_scene"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "users": {
+    "users": [
+      {
+        "id": "user_1",
+        "username": "Master_Control",
+        "email": "master@nexus.com",
+        "role": "admin",
+        "status": "active",
+        "created": "2024-01-01",
+        "lastLogin": "2024-01-25",
+        "account": {
+          "balance": 2500,
+          "currency": "credits",
+          "transactions": [
+            {
+              "id": "tx_1",
+              "type": "purchase",
+              "amount": -150,
+              "description": "Покупка актива: Алекс",
+              "date": "2024-01-15"
+            },
+            {
+              "id": "tx_2",
+              "type": "income",
+              "amount": 500,
+              "description": "Выполнение контракта",
+              "date": "2024-01-20"
+            }
+          ]
+        },
+        "assets": [
+          {
+            "assetId": "asset_1",
+            "name": "Алекс",
+            "acquired": "2024-01-15",
+            "status": "active",
+            "location": "estate",
+            "currentAssignment": null
+          }
+        ],
+        "equipment": [
+          {
+            "itemId": "implant_1",
+            "name": "Neural Interface",
+            "type": "implant",
+            "slot": "neural",
+            "installed": "2024-01-10",
+            "status": "active"
+          },
+          {
+            "itemId": "device_1",
+            "name": "Control Terminal",
+            "type": "device",
+            "slot": "external",
+            "installed": "2024-01-05",
+            "status": "active"
+          }
+        ],
+        "settings": {
+          "theme": "dark",
+          "notifications": true,
+          "autoAssign": false,
+          "riskTolerance": "medium"
+        }
+      },
+      {
+        "id": "user_2",
+        "username": "Slave_Trader",
+        "email": "trader@void.com",
+        "role": "user",
+        "status": "active",
+        "created": "2024-01-10",
+        "lastLogin": "2024-01-24",
+        "account": {
+          "balance": 1200,
+          "currency": "credits",
+          "transactions": [
+            {
+              "id": "tx_3",
+              "type": "purchase",
+              "amount": -300,
+              "description": "Покупка актива: Мария",
+              "date": "2024-01-18"
+            }
+          ]
+        },
+        "assets": [
+          {
+            "assetId": "asset_2",
+            "name": "Мария",
+            "acquired": "2024-01-18",
+            "status": "training",
+            "location": "facility",
+            "currentAssignment": "training_program_1"
+          }
+        ],
+        "equipment": [],
+        "settings": {
+          "theme": "dark",
+          "notifications": true,
+          "autoAssign": true,
+          "riskTolerance": "high"
+        }
+      }
+    ],
+    "userRoles": {
+      "admin": {
+        "name": "Administrator",
+        "permissions": [
+          "all"
+        ],
+        "description": "Полный доступ к системе"
+      },
+      "user": {
+        "name": "User",
+        "permissions": [
+          "view_assets",
+          "edit_own_assets",
+          "view_market",
+          "make_purchases"
+        ],
+        "description": "Стандартный пользователь"
+      },
+      "trader": {
+        "name": "Trader",
+        "permissions": [
+          "view_assets",
+          "edit_own_assets",
+          "view_market",
+          "make_purchases",
+          "sell_assets"
+        ],
+        "description": "Торговец активами"
+      }
+    }
+  },
+  "characterAI": {
+    "actionCategories": {
+      "punishment": {
+        "id": "punishment",
+        "name": "Наказание",
+        "icon": "⚡",
+        "description": "Действия наказания и дисциплины",
+        "color": "red"
+      },
+      "reward": {
+        "id": "reward",
+        "name": "Поощрение",
+        "icon": "💝",
+        "description": "Действия поощрения и награды",
+        "color": "green"
+      },
+      "stimulation": {
+        "id": "stimulation",
+        "name": "Стимуляция",
+        "icon": "🎯",
+        "description": "Действия стимуляции и возбуждения",
+        "color": "purple"
+      },
+      "intimate": {
+        "id": "intimate",
+        "name": "Интимные",
+        "icon": "💕",
+        "description": "Интимные действия",
+        "color": "pink"
+      }
+    },
+    "toolCategories": {
+      "electrical": {
+        "id": "electrical",
+        "name": "Электрические",
+        "icon": "⚡",
+        "description": "Электрические инструменты",
+        "color": "yellow"
+      },
+      "mechanical": {
+        "id": "mechanical",
+        "name": "Механические",
+        "icon": "⚙️",
+        "description": "Механические инструменты",
+        "color": "blue"
+      },
+      "thermal": {
+        "id": "thermal",
+        "name": "Тепловые",
+        "icon": "🔥",
+        "description": "Тепловые инструменты",
+        "color": "orange"
+      }
+    },
+    "actions": {
+      "hit_hand": {
+        "id": "hit_hand",
+        "name": "Ударить рукой",
+        "description": "Удар рукой по телу",
+        "icon": "👊",
+        "category": "punishment",
+        "intensity": 5,
+        "cost": 1,
+        "effects": {
+          "physical": {
+            "pain": 2,
+            "sensitivity": 1
+          },
+          "emotional": {
+            "fear": 1,
+            "obedience": 1
+          }
+        }
+      },
+      "hit_whip": {
+        "id": "hit_whip",
+        "name": "Ударить плетью",
+        "description": "Удар плетью по телу",
+        "icon": "🪢",
+        "category": "punishment",
+        "intensity": 7,
+        "cost": 2,
+        "effects": {
+          "physical": {
+            "pain": 3,
+            "sensitivity": 2
+          },
+          "emotional": {
+            "fear": 2,
+            "obedience": 2
+          }
+        }
+      },
+      "stroke_hand": {
+        "id": "stroke_hand",
+        "name": "Погладить рукой",
+        "description": "Нежное поглаживание рукой",
+        "icon": "🤚",
+        "category": "reward",
+        "intensity": 3,
+        "cost": 1,
+        "effects": {
+          "physical": {
+            "pleasure": 1,
+            "sensitivity": 1
+          },
+          "emotional": {
+            "trust": 1,
+            "devotion": 1
+          }
+        }
+      },
+      "stroke_glove": {
+        "id": "stroke_glove",
+        "name": "Погладить перчаткой",
+        "description": "Поглаживание пушистой перчаткой",
+        "icon": "🧤",
+        "category": "reward",
+        "intensity": 4,
+        "cost": 1,
+        "effects": {
+          "physical": {
+            "pleasure": 2,
+            "sensitivity": 2
+          },
+          "emotional": {
+            "trust": 1,
+            "devotion": 1
+          }
+        }
+      },
+      "tickle_brush": {
+        "id": "tickle_brush",
+        "name": "Щекотать щёткой",
+        "description": "Щекотание щёткой",
+        "icon": "🪮",
+        "category": "stimulation",
+        "intensity": 4,
+        "cost": 1,
+        "effects": {
+          "physical": {
+            "pleasure": 1,
+            "sensitivity": 2
+          },
+          "emotional": {
+            "trust": 1
+          }
+        }
+      },
+      "tickle_feather": {
+        "id": "tickle_feather",
+        "name": "Щекотать пером",
+        "description": "Щекотание пером",
+        "icon": "🪶",
+        "category": "stimulation",
+        "intensity": 3,
+        "cost": 1,
+        "effects": {
+          "physical": {
+            "pleasure": 1,
+            "sensitivity": 1
+          },
+          "emotional": {
+            "trust": 1
+          }
+        }
+      },
+      "lick": {
+        "id": "lick",
+        "name": "Лизнуть",
+        "description": "Лизание тела",
+        "icon": "👅",
+        "category": "intimate",
+        "intensity": 6,
+        "cost": 2,
+        "effects": {
+          "physical": {
+            "pleasure": 2,
+            "arousal": 2
+          },
+          "emotional": {
+            "trust": 1,
+            "devotion": 1
+          }
+        }
+      },
+      "penetrate": {
+        "id": "penetrate",
+        "name": "Вставить член",
+        "description": "Проникновение",
+        "icon": "🍆",
+        "category": "intimate",
+        "intensity": 8,
+        "cost": 3,
+        "effects": {
+          "physical": {
+            "pleasure": 3,
+            "arousal": 3
+          },
+          "emotional": {
+            "trust": 2,
+            "devotion": 2
+          }
+        }
+      }
+    },
+    "tools": {
+      "shocker": {
+        "id": "shocker",
+        "name": "Шокер",
+        "category": "electrical",
+        "description": "Электрический шокер",
+        "icon": "⚡",
+        "baseIntensity": 5,
+        "maxIntensity": 10,
+        "effects": {
+          "physical": {
+            "pain": 2,
+            "sensitivity": 1
+          },
+          "emotional": {
+            "fear": 2,
+            "obedience": 1
+          }
+        },
+        "intensityMultiplier": {
+          "pain": 0.5,
+          "fear": 0.3
+        }
+      },
+      "vibrator": {
+        "id": "vibrator",
+        "name": "Вибратор",
+        "category": "mechanical",
+        "description": "Механический вибратор",
+        "icon": "📳",
+        "baseIntensity": 4,
+        "maxIntensity": 8,
+        "effects": {
+          "physical": {
+            "pleasure": 3,
+            "sensitivity": 2
+          },
+          "emotional": {
+            "arousal": 2,
+            "devotion": 1
+          }
+        },
+        "intensityMultiplier": {
+          "pleasure": 0.4,
+          "arousal": 0.3
+        }
+      },
+      "ice_cube": {
+        "id": "ice_cube",
+        "name": "Ледяной кубик",
+        "category": "thermal",
+        "description": "Ледяной кубик для стимуляции",
+        "icon": "🧊",
+        "baseIntensity": 3,
+        "maxIntensity": 6,
+        "effects": {
+          "physical": {
+            "sensitivity": 2,
+            "shock": 1
+          },
+          "emotional": {
+            "surprise": 1,
+            "alertness": 1
+          }
+        },
+        "intensityMultiplier": {
+          "sensitivity": 0.3,
+          "shock": 0.2
+        }
+      },
+      "hot_wax": {
+        "id": "hot_wax",
+        "name": "Горячий воск",
+        "category": "thermal",
+        "description": "Горячий воск для стимуляции",
+        "icon": "🕯️",
+        "baseIntensity": 6,
+        "maxIntensity": 9,
+        "effects": {
+          "physical": {
+            "pain": 2,
+            "sensitivity": 2
+          },
+          "emotional": {
+            "fear": 1,
+            "obedience": 1
+          }
+        },
+        "intensityMultiplier": {
+          "pain": 0.4,
+          "sensitivity": 0.3
+        }
+      },
+      "clamps": {
+        "id": "clamps",
+        "name": "Зажимы",
+        "category": "mechanical",
+        "description": "Зажимы для сосков",
+        "icon": "📎",
+        "baseIntensity": 4,
+        "maxIntensity": 7,
+        "effects": {
+          "physical": {
+            "pain": 1,
+            "sensitivity": 3
+          },
+          "emotional": {
+            "submission": 1,
+            "obedience": 1
+          }
+        },
+        "intensityMultiplier": {
+          "pain": 0.3,
+          "sensitivity": 0.5
+        }
+      }
+    },
+    "poses": {
+      "standing": {
+        "id": "standing",
+        "name": "Поставить на ноги",
+        "description": "Персонаж стоит прямо",
+        "icon": "🧍",
+        "category": "standing",
+        "effects": {
+          "physical": {
+            "comfort": 1
+          }
+        }
+      },
+      "kneeling": {
+        "id": "kneeling",
+        "name": "Поставить на колени",
+        "description": "Персонаж стоит на коленях",
+        "icon": "🦵",
+        "category": "kneeling",
+        "effects": {
+          "emotional": {
+            "submission": 1
+          }
+        }
+      },
+      "all_fours": {
+        "id": "all_fours",
+        "name": "Поставить на четвереньки",
+        "description": "Персонаж на четвереньках",
+        "icon": "🐕",
+        "category": "kneeling",
+        "effects": {
+          "emotional": {
+            "submission": 2
+          },
+          "physical": {
+            "accessibility": 1
+          }
+        }
+      },
+      "lying_back": {
+        "id": "lying_back",
+        "name": "Положить на спину",
+        "description": "Персонаж лежит на спине",
+        "icon": "🛏️",
+        "category": "lying",
+        "effects": {
+          "physical": {
+            "comfort": 2,
+            "accessibility": 2
+          }
+        }
+      }
+    },
+    "llmPrompts": {
+      "basePrompt": "Ты - персонаж в NSFW игре с элементами БДСМ. Реагируй естественно на действия пользователя. Анализируй сообщения на наличие команд и действий.",
+      "characteristicInterpretations": {
+        "trust": "Доверие к пользователю",
+        "fear": "Страх перед пользователем",
+        "obedience": "Степень подчинения",
+        "devotion": "Преданность",
+        "pleasure": "Удовольствие",
+        "pain": "Боль",
+        "arousal": "Возбуждение"
+      },
+      "commandKeywords": {
+        "hit": [
+          "удар",
+          "ударить",
+          "шлепнуть",
+          "побить"
+        ],
+        "stroke": [
+          "погладить",
+          "ласкать",
+          "нежно"
+        ],
+        "tickle": [
+          "щекотать",
+          "щекочу"
+        ],
+        "lick": [
+          "лизать",
+          "лизнуть",
+          "облизать"
+        ],
+        "penetrate": [
+          "вставить",
+          "войти",
+          "проникнуть"
+        ],
+        "pose": [
+          "встать",
+          "лечь",
+          "сесть",
+          "колени",
+          "четвереньки"
+        ]
+      }
+    }
+  }
+}

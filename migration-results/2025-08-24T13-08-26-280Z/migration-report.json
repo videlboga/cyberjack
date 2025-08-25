@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-08-24T13:08:26.281Z",
+  "summary": {
+    "totalCharactersMigrated": 4,
+    "talentExchangeCount": 2,
+    "voidRescuesCount": 1,
+    "corporateContractsCount": 1
+  },
+  "details": {
+    "talentExchange": [
+      {
+        "id": "market_1",
+        "name": "Алекс",
+        "migrated": true
+      },
+      {
+        "id": "market_2",
+        "name": "Мария",
+        "migrated": true
+      }
+    ],
+    "voidRescues": [
+      {
+        "id": "void_1",
+        "name": "Сигнал из Тени",
+        "migrated": true
+      }
+    ],
+    "corporateContracts": [
+      {
+        "id": "corp_1",
+        "migrated": true
+      }
+    ]
+  }
+}

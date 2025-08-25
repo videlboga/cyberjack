@@ -3,6 +3,7 @@ import type {
   ContractsConfig,
   EventsConfig,
   MarketConfig,
+  CharacterConfig,
   EquipmentConfig,
   SystemDefinitions,
   StoryScenesConfig,
@@ -17,17 +18,19 @@ export async function loadGameConfig(): Promise<GameConfig> {
       contracts,
       events,
       market,
+      characters,
       equipment,
       system,
       scenes
     ] = await Promise.all([
-      import('../data/actions.json'),
-      import('../data/contracts.json'),
-      import('../data/events.json'),
+      import('../data/actions-unified.json'),
+      import('../data/contracts-unified.json'),
+      import('../data/events-unified.json'),
       import('../data/market.json'),
-      import('../data/equipment-config.json'),
-      import('../data/system-definitions.json'),
-      import('../data/story-scenes.json')
+      import('../data/characters-unified.json'),
+      import('../data/equipment-unified.json'),
+      import('../data/system-unified.json'),
+      import('../data/story-scenes-unified.json')
     ])
 
     return {
@@ -35,6 +38,7 @@ export async function loadGameConfig(): Promise<GameConfig> {
       contracts: contracts.default as ContractsConfig,
       events: events.default as EventsConfig,
       market: market.default as MarketConfig,
+      characters: characters.default as CharactersConfig,
       equipment: equipment.default as EquipmentConfig,
       system: system.default as SystemDefinitions,
       scenes: scenes.default as StoryScenesConfig

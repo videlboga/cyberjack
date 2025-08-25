@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
+import { SceneBindingManager } from './SceneBindingManager'
+import { SceneEventBinding } from '@/lib/story-binding-types'
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -36,28 +38,65 @@ import {
   Eye,
   Square,
   Play,
-  Pause
+  Pause,
+  Package,
+  Target,
+  AlertTriangle,
+  Building,
+  Zap,
+  Users,
+  Gamepad2,
+  Star
 } from "lucide-react"
 
 // Кастомные узлы для React Flow
 const SceneNode = ({ data, isConnectable }: any) => {
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'market': return <Package className="h-4 w-4 mr-2 text-blue-600" />
+      case 'auction': return <Target className="h-4 w-4 mr-2 text-purple-600" />
+      case 'anomaly': return <AlertTriangle className="h-4 w-4 mr-2 text-red-600" />
+      case 'contract': return <Building className="h-4 w-4 mr-2 text-green-600" />
+      case 'void_rescue': return <Zap className="h-4 w-4 mr-2 text-yellow-600" />
+      case 'corporate': return <Users className="h-4 w-4 mr-2 text-indigo-600" />
+      case 'training': return <Gamepad2 className="h-4 w-4 mr-2 text-orange-600" />
+      case 'therapy': return <Star className="h-4 w-4 mr-2 text-pink-600" />
+      default: return <FileText className="h-4 w-4 mr-2 text-blue-600" />
+    }
+  }
+
+  const getBorderColor = (type: string) => {
+    switch (type) {
+      case 'market': return 'border-blue-400'
+      case 'auction': return 'border-purple-400'
+      case 'anomaly': return 'border-red-400'
+      case 'contract': return 'border-green-400'
+      case 'void_rescue': return 'border-yellow-400'
+      case 'corporate': return 'border-indigo-400'
+      case 'training': return 'border-orange-400'
+      case 'therapy': return 'border-pink-400'
+      default: return 'border-blue-400'
+    }
+  }
+
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-blue-400">
+    <div className={`px-4 py-2 shadow-md rounded-md bg-white border-2 ${getBorderColor(data.type)}`}>
       <div className="flex items-center">
-        <FileText className="h-4 w-4 mr-2 text-blue-600" />
+        {getIcon(data.type)}
         <div className="ml-2">
-          <div className="text-lg font-bold text-blue-600">{data.label}</div>
+          <div className="text-lg font-bold text-gray-800">{data.label}</div>
           <div className="text-gray-500 text-sm">{data.description}</div>
+          <Badge variant="outline" className="mt-1">{data.type || 'scene'}</Badge>
         </div>
       </div>
 
       <div className="flex">
         <div
-          className="w-4 h-4 absolute top-1/2 -left-2 bg-blue-400 border-4 border-white rounded-full"
+          className="w-4 h-4 absolute top-1/2 -left-2 bg-gray-400 border-4 border-white rounded-full"
           style={{ transform: 'translate(-50%, -50%)' }}
         />
         <div
-          className="w-4 h-4 absolute top-1/2 -right-2 bg-blue-400 border-4 border-white rounded-full"
+          className="w-4 h-4 absolute top-1/2 -right-2 bg-gray-400 border-4 border-white rounded-full"
           style={{ transform: 'translate(50%, -50%)' }}
         />
       </div>
@@ -135,6 +174,8 @@ export const StoryEditor: React.FC<StoryEditorProps> = ({
   const [selectedNode, setSelectedNode] = useState<Node | null>(null)
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
+  const [activeTab, setActiveTab] = useState<'editor' | 'bindings'>('editor')
+  const [sceneBindings, setSceneBindings] = useState<SceneEventBinding[]>([])
 
   // Определяем типы узлов
   const nodeTypes: NodeTypes = useMemo(() => ({
@@ -363,6 +404,45 @@ export const StoryEditor: React.FC<StoryEditorProps> = ({
             />
           </div>
 
+          {selectedNode.type === 'scene' && (
+            <>
+              <div>
+                <Label htmlFor="type">Тип события</Label>
+                <Select
+                  value={selectedNode.data.type || 'custom'}
+                  onValueChange={(value) => updateNode(selectedNode.id, { type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="market">Рынок</SelectItem>
+                    <SelectItem value="auction">Аукцион</SelectItem>
+                    <SelectItem value="anomaly">Аномалии</SelectItem>
+                    <SelectItem value="contract">Контракты</SelectItem>
+                    <SelectItem value="void_rescue">Спасение в Void</SelectItem>
+                    <SelectItem value="corporate">Корпоративные</SelectItem>
+                    <SelectItem value="training">Тренировки</SelectItem>
+                    <SelectItem value="therapy">Терапия</SelectItem>
+                    <SelectItem value="reward">Награды</SelectItem>
+                    <SelectItem value="punishment">Наказания</SelectItem>
+                    <SelectItem value="custom">Пользовательский</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="probability">Вероятность (%)</Label>
+                <Input
+                  id="probability"
+                  type="number"
+                  value={selectedNode.data.probability || 0}
+                  onChange={(e) => updateNode(selectedNode.id, { probability: parseInt(e.target.value) })}
+                  placeholder="0-100"
+                />
+              </div>
+            </>
+          )}
+
           {selectedNode.type === 'screen' && (
             <div>
               <Label htmlFor="background">Фон</Label>
@@ -568,50 +648,88 @@ export const StoryEditor: React.FC<StoryEditorProps> = ({
         </div>
       </div>
 
+      {/* Вкладки */}
+      <div className="border-b px-4">
+        <div className="flex space-x-1">
+          <Button
+            variant={activeTab === 'editor' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('editor')}
+          >
+            <FileText className="h-3 w-3 mr-1" />
+            Редактор
+          </Button>
+          <Button
+            variant={activeTab === 'bindings' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('bindings')}
+          >
+            <Target className="h-3 w-3 mr-1" />
+            Привязки
+          </Button>
+        </div>
+      </div>
+
       {/* Основная область */}
       <div className="flex-1 flex">
-        {/* React Flow канвас */}
-        <div className="flex-1">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onEdgeClick={onEdgeClick}
-            nodeTypes={nodeTypes}
-            fitView
-            attributionPosition="top-right"
-          >
-            <MiniMap />
-            <Controls />
-            <Background color="#aaa" gap={16} />
-          </ReactFlow>
-        </div>
+        {activeTab === 'editor' ? (
+          <>
+            {/* React Flow канвас */}
+            <div className="flex-1">
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeClick={onNodeClick}
+                onEdgeClick={onEdgeClick}
+                nodeTypes={nodeTypes}
+                fitView
+                attributionPosition="top-right"
+              >
+                <MiniMap />
+                <Controls />
+                <Background color="#aaa" gap={16} />
+              </ReactFlow>
+            </div>
 
-        {/* Панель редактирования */}
-        <div className="w-80 border-l p-4 overflow-y-auto">
-          <ScrollArea className="h-full">
-            {selectedNode && renderNodeEditor()}
-            {selectedEdge && renderEdgeEditor()}
-            {!selectedNode && !selectedEdge && (
-              <div className="text-center text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="mb-2">Выберите узел или связь для редактирования</p>
-                <div className="text-sm space-y-2">
-                  <p><strong>Управление:</strong></p>
-                  <ul className="text-left space-y-1">
-                    <li>• Перетаскивайте узлы</li>
-                    <li>• Соединяйте узлы линиями</li>
-                    <li>• Кликайте для выбора</li>
-                    <li>• Используйте колесо мыши для масштабирования</li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </ScrollArea>
-        </div>
+            {/* Панель редактирования */}
+            <div className="w-80 border-l p-4 overflow-y-auto">
+              <ScrollArea className="h-full">
+                {selectedNode && renderNodeEditor()}
+                {selectedEdge && renderEdgeEditor()}
+                {!selectedNode && !selectedEdge && (
+                  <div className="text-center text-muted-foreground">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="mb-2">Выберите узел или связь для редактирования</p>
+                    <div className="text-sm space-y-2">
+                      <p><strong>Управление:</strong></p>
+                      <ul className="text-left space-y-1">
+                        <li>• Перетаскивайте узлы</li>
+                        <li>• Соединяйте узлы линиями</li>
+                        <li>• Кликайте для выбора</li>
+                        <li>• Используйте колесо мыши для масштабирования</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          </>
+        ) : (
+          /* Вкладка привязок */
+          <div className="flex-1 p-4">
+            <ScrollArea className="h-full">
+              <SceneBindingManager
+                sceneId={storyData?.id || 'new-scene'}
+                sceneType={storyData?.type === 'auction' ? 'auction' : 'anomaly'}
+                bindings={sceneBindings}
+                onBindingsChange={setSceneBindings}
+              />
+            </ScrollArea>
+          </div>
+        )}
       </div>
     </div>
   )

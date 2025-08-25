@@ -295,43 +295,284 @@ export const createNewConfigItem = (configType: keyof typeof configSchemas) => {
   return newItem
 }
 
-// Функция для валидации конфигурации
-export const validateConfig = (config: any, configType: keyof typeof configSchemas): string[] => {
-  const schema = getConfigSchema(configType)
+// Типы для конфигурации
+export interface ConfigValidationResult {
+  isValid: boolean
+  errors: string[]
+}
+
+export interface ConfigDiff {
+  added: string[]
+  changed: string[]
+  removed: string[]
+}
+
+export interface RequiredFieldsResult {
+  isValid: boolean
+  missingFields: string[]
+}
+
+// Функция валидации конфигурации
+export const validateConfig = (config: any): ConfigValidationResult => {
   const errors: string[] = []
-
-  schema.fields.forEach(field => {
-    if (field.required && (!config[field.name] || config[field.name] === '')) {
-      errors.push(`${field.label} обязательно для заполнения`)
+  
+  // Проверяем базовую структуру
+  if (!config || typeof config !== 'object') {
+    errors.push('Конфигурация должна быть объектом')
+    return { isValid: false, errors }
+  }
+  
+  // Проверяем наличие основных секций
+  const requiredSections = ['actions', 'assets', 'equipment', 'events', 'contracts', 'market']
+  requiredSections.forEach(section => {
+    if (!config[section]) {
+      errors.push(`Отсутствует секция: ${section}`)
     }
+  })
+  
+  // Проверяем структуру действий
+  if (config.actions) {
+    if (!config.actions.categories) {
+      errors.push('Отсутствует categories в actions')
+    } else {
+      Object.entries(config.actions.categories).forEach(([categoryName, category]: [string, any]) => {
+        if (!category.title) {
+          errors.push(`Отсутствует title в категории ${categoryName}`)
+        }
+        if (!category.actions) {
+          errors.push(`Отсутствует actions в категории ${categoryName}`)
+        } else {
+          Object.entries(category.actions).forEach(([actionName, action]: [string, any]) => {
+            if (!action.title) {
+              errors.push(`Отсутствует title в действии ${actionName}`)
+            }
+            if (typeof action.cost !== 'number') {
+              errors.push(`Некорректный cost в действии ${actionName}`)
+            }
+          })
+        }
+      })
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
 
-    if (config[field.name] !== undefined && config[field.name] !== null) {
-      switch (field.type) {
-        case 'number':
-          if (isNaN(Number(config[field.name]))) {
-            errors.push(`${field.label} должно быть числом`)
-          }
-          break
-        case 'array':
-          if (!Array.isArray(config[field.name])) {
-            errors.push(`${field.label} должно быть массивом`)
-          }
-          break
-        case 'object':
-          if (typeof config[field.name] !== 'object' || Array.isArray(config[field.name])) {
-            errors.push(`${field.label} должно быть объектом`)
-          }
-          break
-        case 'select':
-          if (field.options && !field.options.includes(config[field.name])) {
-            errors.push(`${field.label} должно быть одним из: ${field.options.join(', ')}`)
-          }
-          break
+// Функция объединения конфигураций
+export const mergeConfigs = (baseConfig: any, overrideConfig: any): any => {
+  const result = { ...baseConfig }
+  
+  const mergeDeep = (target: any, source: any): any => {
+    for (const key in source) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        if (!target[key]) {
+          target[key] = {}
+        }
+        mergeDeep(target[key], source[key])
+      } else {
+        target[key] = source[key]
+      }
+    }
+    return target
+  }
+  
+  return mergeDeep(result, overrideConfig)
+}
+
+// Функция валидации сущности
+export const validateEntity = (entity: any, entityType: string): ConfigValidationResult => {
+  const errors: string[] = []
+  
+  // Базовые проверки
+  if (!entity) {
+    errors.push('Сущность не может быть пустой')
+    return { isValid: false, errors }
+  }
+  
+  // Проверяем обязательные поля в зависимости от типа
+  switch (entityType) {
+    case 'assets':
+      if (!entity.id) errors.push('ID обязателен для актива')
+      if (!entity.name) errors.push('Имя обязательно для актива')
+      if (!entity.rank) errors.push('Ранг обязателен для актива')
+      if (entity.price === undefined) errors.push('Цена обязательна для актива')
+      else if (typeof entity.price !== 'number') errors.push('Цена должна быть числом')
+      else if (entity.price < 0) errors.push('Цена не может быть отрицательной')
+      else if (entity.price > 100000) errors.push('Цена не может превышать 100,000')
+      break
+      
+    case 'actions':
+      if (!entity.title) errors.push('Название обязательно для действия')
+      if (!entity.description) errors.push('Описание обязательно для действия')
+      if (typeof entity.cost !== 'number') errors.push('Стоимость должна быть числом')
+      if (entity.cost < 0) errors.push('Стоимость не может быть отрицательной')
+      break
+      
+    case 'equipment':
+      if (!entity.id) errors.push('ID обязателен для оборудования')
+      if (!entity.name) errors.push('Название обязательно для оборудования')
+      if (!entity.type) errors.push('Тип обязателен для оборудования')
+      if (!entity.slot) errors.push('Слот обязателен для оборудования')
+      break
+      
+    default:
+      if (!entity.id) errors.push('ID обязателен')
+      if (!entity.name && !entity.title) errors.push('Название обязательно')
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// Функция очистки конфигурации
+export const sanitizeConfig = (config: any): any => {
+  const sanitizeValue = (value: any): any => {
+    if (typeof value === 'string') {
+      // Удаляем потенциально опасные теги
+      const sanitized = value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      
+      // Нормализуем числовые строки
+      if (/^\d+(\.\d+)?$/.test(sanitized)) {
+        return parseFloat(sanitized)
+      }
+      
+      return sanitized
+    }
+    
+    if (Array.isArray(value)) {
+      return value.map(sanitizeValue).filter(v => v !== null && v !== undefined && v !== '')
+    }
+    
+    if (value && typeof value === 'object') {
+      const result: any = {}
+      for (const [key, val] of Object.entries(value)) {
+        const sanitized = sanitizeValue(val)
+        if (sanitized !== null && sanitized !== undefined && sanitized !== '') {
+          result[key] = sanitized
+        }
+      }
+      return Object.keys(result).length > 0 ? result : undefined
+    }
+    
+    // Нормализуем числа с плавающей точкой
+    if (typeof value === 'number' && Number.isInteger(value)) {
+      return value
+    }
+    
+    return value
+  }
+  
+  return sanitizeValue(config)
+}
+
+// Функция получения различий между конфигурациями
+export const getConfigDiff = (oldConfig: any, newConfig: any): ConfigDiff => {
+  const added: string[] = []
+  const changed: string[] = []
+  const removed: string[] = []
+  
+  const getPaths = (obj: any, prefix: string = ''): string[] => {
+    const paths: string[] = []
+    
+    for (const [key, value] of Object.entries(obj)) {
+      const path = prefix ? `${prefix}.${key}` : key
+      
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        paths.push(...getPaths(value, path))
+      } else {
+        paths.push(path)
+      }
+    }
+    
+    return paths
+  }
+  
+  const getObjectPaths = (obj: any, prefix: string = ''): string[] => {
+    const paths: string[] = []
+    
+    for (const [key, value] of Object.entries(obj)) {
+      const path = prefix ? `${prefix}.${key}` : key
+      
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        paths.push(path)
+        paths.push(...getObjectPaths(value, path))
+      }
+    }
+    
+    return paths
+  }
+  
+  const getValue = (obj: any, path: string): any => {
+    return path.split('.').reduce((current, key) => current?.[key], obj)
+  }
+  
+  const oldPaths = getPaths(oldConfig)
+  const newPaths = getPaths(newConfig)
+  const oldObjectPaths = getObjectPaths(oldConfig)
+  const newObjectPaths = getObjectPaths(newConfig)
+  
+  // Находим добавленные пути
+  newPaths.forEach(path => {
+    if (!oldPaths.includes(path)) {
+      added.push(path)
+    }
+  })
+  
+  // Находим удаленные пути
+  oldPaths.forEach(path => {
+    if (!newPaths.includes(path)) {
+      removed.push(path)
+    }
+  })
+  
+  // Находим измененные пути
+  oldPaths.forEach(path => {
+    if (newPaths.includes(path)) {
+      const oldValue = getValue(oldConfig, path)
+      const newValue = getValue(newConfig, path)
+      
+      if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+        changed.push(path)
       }
     }
   })
+  
+  // Добавляем объекты в соответствующие списки
+  newObjectPaths.forEach(path => {
+    if (!oldObjectPaths.includes(path) && !added.includes(path)) {
+      added.push(path)
+    }
+  })
+  
+  oldObjectPaths.forEach(path => {
+    if (!newObjectPaths.includes(path) && !removed.includes(path)) {
+      removed.push(path)
+    }
+  })
+  
+  return { added, changed, removed }
+}
 
-  return errors
+// Функция проверки обязательных полей
+export const validateRequiredFields = (entity: any, requiredFields: string[]): RequiredFieldsResult => {
+  const missingFields: string[] = []
+  
+  requiredFields.forEach(field => {
+    const value = entity[field]
+    if (value === null || value === undefined || value === '') {
+      missingFields.push(field)
+    }
+  })
+  
+  return {
+    isValid: missingFields.length === 0,
+    missingFields
+  }
 }
 
 // Функция для экспорта конфигурации

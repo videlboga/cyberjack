@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Принудительная очистка данных</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e293b, #7c3aed);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+        }
+        button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #dc2626;
+        }
+        .success {
+            color: #10b981;
+            margin-top: 20px;
+        }
+        .info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .warning {
+            background: rgba(245, 101, 101, 0.1);
+            border: 1px solid #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Принудительная очистка данных</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Внимание!</strong><br>
+            Это действие удалит ВСЕ данные из localStorage и sessionStorage.
+        </div>
+
+        <div class="info">
+            <strong>📊 Текущие данные в localStorage:</strong>
+            <div id="current-data">Загрузка...</div>
+        </div>
+
+        <button onclick="clearAllStorage()">🗑️ Очистить ВСЕ данные</button>
+        <button onclick="clearConfigOnly()">📦 Очистить только конфигурации</button>
+        
+        <div id="result"></div>
+        
+        <div style="margin-top: 30px;">
+            <button onclick="window.location.href='/prod'">🔄 Перейти на Prod</button>
+            <button onclick="window.location.href='/game'">🎮 Перейти на Game</button>
+        </div>
+    </div>
+
+    <script>
+        function displayCurrentData() {
+            const dataDiv = document.getElementById('current-data');
+            const keys = Object.keys(localStorage);
+            
+            if (keys.length === 0) {
+                dataDiv.innerHTML = '<em>localStorage пуст</em>';
+                return;
+            }
+            
+            let html = '<ul style="text-align: left; max-height: 200px; overflow-y: auto;">';
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                const size = new Blob([value]).size;
+                html += `<li><strong>${key}</strong>: ${size} байт</li>`;
+            });
+            html += '</ul>';
+            dataDiv.innerHTML = html;
+        }
+
+        function clearAllStorage() {
+            const beforeCount = localStorage.length;
+            
+            // Очищаем localStorage
+            localStorage.clear();
+            
+            // Очищаем sessionStorage
+            sessionStorage.clear();
+            
+            // Очищаем indexedDB (если есть)
+            if (window.indexedDB) {
+                indexedDB.databases().then(databases => {
+                    databases.forEach(db => {
+                        indexedDB.deleteDatabase(db.name);
+                    });
+                });
+            }
+            
+            document.getElementById('result').innerHTML = 
+                `<div class="success">✅ Очищено! Удалено ${beforeCount} ключей из localStorage</div>`;
+            
+            displayCurrentData();
+            
+            // Перезагружаем страницу через 2 секунды
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+
+        function clearConfigOnly() {
+            const configKeys = Object.keys(localStorage).filter(key => 
+                key.includes('config') || 
+                key.includes('assets') || 
+                key.includes('characters') || 
+                key.includes('contracts') ||
+                key.includes('events') ||
+                key.includes('actions') ||
+                key.includes('equipment') ||
+                key.includes('users') ||
+                key.includes('system') ||
+                key.includes('game') ||
+                key.includes('unified')
+            );
+            
+            configKeys.forEach(key => localStorage.removeItem(key));
+            
+            document.getElementById('result').innerHTML = 
+                `<div class="success">✅ Очищены конфигурации! Удалено ${configKeys.length} ключей</div>`;
+            
+            displayCurrentData();
+        }
+
+        // Отображаем текущие данные при загрузке
+        displayCurrentData();
+    </script>
+</body>
+</html>
+
+
+
+
+

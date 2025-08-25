@@ -55,6 +55,126 @@
       "category": "social",
       "minValue": 1,
       "maxValue": 10
+    },
+    {
+      "id": "endurance",
+      "name": "Выносливость",
+      "description": "Способность выдерживать физические нагрузки и длительные эксперименты",
+      "category": "physical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "sensitivity",
+      "name": "Чувствительность",
+      "description": "Восприимчивость к физическим и эмоциональным воздействиям",
+      "category": "physical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "flexibility",
+      "name": "Гибкость",
+      "description": "Физическая гибкость и способность принимать различные позы",
+      "category": "physical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "emotional_stability",
+      "name": "Эмоциональная стабильность",
+      "description": "Способность контролировать эмоции и сохранять психическое равновесие",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "adaptability",
+      "name": "Адаптивность",
+      "description": "Способность приспосабливаться к новым условиям и ситуациям",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "sociability",
+      "name": "Общительность",
+      "description": "Способность и желание общаться с другими людьми",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "dominance",
+      "name": "Доминантность",
+      "description": "Стремление к лидерству и контролю над ситуацией",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "self_esteem",
+      "name": "Самооценка",
+      "description": "Восприятие собственной ценности и достоинства",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "optimism",
+      "name": "Оптимизм",
+      "description": "Вера в лучшее будущее и положительный взгляд на жизнь",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "curiosity",
+      "name": "Любопытство",
+      "description": "Стремление к новым знаниям и опыту",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "sexual_experience",
+      "name": "Сексуальная опытность",
+      "description": "Опыт в интимных отношениях и сексуальных практиках",
+      "category": "sexual",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "resistance",
+      "name": "Сопротивляемость",
+      "description": "Способность сопротивляться принуждению и манипуляциям",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "dependency",
+      "name": "Зависимость",
+      "description": "Склонность к формированию эмоциональных и физических зависимостей",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "loyalty",
+      "name": "Лояльность",
+      "description": "Преданность и верность хозяину",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "obedience",
+      "name": "Покорность",
+      "description": "Способность подчиняться и следовать приказам",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
     }
   ],
   "states": [
@@ -95,12 +215,183 @@
       "colorType": "devotion"
     },
     {
+      "id": "trust",
+      "name": "Доверие",
+      "description": "Уровень доверия к хозяину",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "trust"
+    },
+    {
+      "id": "relationship",
+      "name": "Отношения",
+      "description": "Уровень близости отношений с хозяином",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "relationship"
+    },
+    {
+      "id": "pleasure",
+      "name": "Удовольствие",
+      "description": "Уровень получаемого удовольствия",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "pleasure"
+    },
+    {
+      "id": "pain",
+      "name": "Боль",
+      "description": "Уровень испытываемой боли",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "pain"
+    },
+    {
+      "id": "arousal",
+      "name": "Возбуждение",
+      "description": "Уровень сексуального возбуждения",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "arousal"
+    },
+    {
+      "id": "stress",
+      "name": "Стресс",
+      "description": "Уровень психологического стресса",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "stress"
+    },
+    {
+      "id": "anxiety",
+      "name": "Тревожность",
+      "description": "Уровень тревоги и беспокойства",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "anxiety"
+    },
+    {
+      "id": "happiness",
+      "name": "Счастье",
+      "description": "Уровень счастья и удовлетворенности",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "happiness"
+    },
+    {
+      "id": "sadness",
+      "name": "Грусть",
+      "description": "Уровень грусти и печали",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "sadness"
+    },
+    {
+      "id": "anger",
+      "name": "Гнев",
+      "description": "Уровень гнева и раздражения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "anger"
+    },
+    {
+      "id": "shame",
+      "name": "Стыд",
+      "description": "Уровень стыда и смущения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "shame"
+    },
+    {
+      "id": "guilt",
+      "name": "Вина",
+      "description": "Уровень чувства вины",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "guilt"
+    },
+    {
+      "id": "pride",
+      "name": "Гордость",
+      "description": "Уровень гордости и самоуважения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "pride"
+    },
+    {
+      "id": "humiliation",
+      "name": "Унижение",
+      "description": "Уровень чувства унижения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "humiliation"
+    },
+    {
+      "id": "submission",
+      "name": "Подчинение",
+      "description": "Уровень подчинения и покорности",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "submission"
+    },
+    {
+      "id": "dominance",
+      "name": "Доминирование",
+      "description": "Уровень стремления к доминированию",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "dominance"
+    },
+    {
+      "id": "vulnerability",
+      "name": "Уязвимость",
+      "description": "Уровень чувства уязвимости",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "vulnerability"
+    },
+    {
+      "id": "confidence",
+      "name": "Уверенность",
+      "description": "Уровень уверенности в себе",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "confidence"
+    },
+    {
+      "id": "helplessness",
+      "name": "Беспомощность",
+      "description": "Уровень чувства беспомощности",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "helplessness"
+    },
+    {
       "id": "entitlement",
       "name": "Притязания",
       "description": "Ожидания и требования к условиям",
       "category": "social",
       "minValue": 0,
-      "maxValue": 5,
+      "maxValue": 100,
       "colorType": "neutral"
     },
     {
@@ -109,7 +400,7 @@
       "description": "Понимание своего положения и подчинения",
       "category": "mental",
       "minValue": 0,
-      "maxValue": 5,
+      "maxValue": 100,
       "colorType": "neutral"
     },
     {
@@ -118,7 +409,7 @@
       "description": "Привыкание к повторяющимся задачам",
       "category": "behavioral",
       "minValue": 0,
-      "maxValue": 5,
+      "maxValue": 100,
       "colorType": "neutral"
     },
     {
@@ -127,7 +418,7 @@
       "description": "Готовность следовать указаниям",
       "category": "behavioral",
       "minValue": 0,
-      "maxValue": 5,
+      "maxValue": 100,
       "colorType": "neutral"
     },
     {
@@ -136,7 +427,7 @@
       "description": "Способность к сексуальным ощущениям",
       "category": "mental",
       "minValue": 0,
-      "maxValue": 5,
+      "maxValue": 100,
       "colorType": "neutral"
     },
     {
@@ -145,7 +436,7 @@
       "description": "Способность работать длительное время",
       "category": "physical",
       "minValue": 0,
-      "maxValue": 5,
+      "maxValue": 100,
       "colorType": "neutral"
     },
     {
@@ -154,8 +445,35 @@
       "description": "Перегрузка от интенсивных ощущений",
       "category": "mental",
       "minValue": 0,
-      "maxValue": 5,
+      "maxValue": 100,
       "colorType": "neutral"
+    },
+    {
+      "id": "fatigue",
+      "name": "Усталость",
+      "description": "Уровень физической и умственной усталости",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "fatigue"
+    },
+    {
+      "id": "health",
+      "name": "Здоровье",
+      "description": "Общее состояние здоровья",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "health"
+    },
+    {
+      "id": "mental_state",
+      "name": "Психическое состояние",
+      "description": "Общее психическое состояние",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "mental"
     }
   ],
   "skills": [
@@ -240,12 +558,369 @@
       "maxValue": 10
     },
     {
+      "id": "dance",
+      "name": "Танцы",
+      "description": "Навыки танцевального искусства",
+      "category": "creative",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "seduction",
+      "name": "Соблазнение",
+      "description": "Навыки соблазнения и привлечения",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "interrogation",
+      "name": "Допрос",
+      "description": "Навыки проведения допросов и получения информации",
+      "category": "specialized",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "surveillance",
+      "name": "Наблюдение",
+      "description": "Навыки скрытого наблюдения и слежки",
+      "category": "specialized",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
       "id": "stage",
       "name": "Сценические навыки",
       "description": "Выступления и презентации",
       "category": "creative",
       "minValue": 1,
       "maxValue": 10
+    },
+    {
+      "id": "massage",
+      "name": "Массаж",
+      "description": "Навыки массажа и релаксации",
+      "category": "physical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "bondage",
+      "name": "Бондаж",
+      "description": "Навыки связывания и ограничения",
+      "category": "sexual",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "roleplay",
+      "name": "Ролевые игры",
+      "description": "Навыки участия в ролевых играх",
+      "category": "sexual",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "communication",
+      "name": "Коммуникация",
+      "description": "Навыки эффективного общения",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "leadership",
+      "name": "Лидерство",
+      "description": "Навыки руководства и управления",
+      "category": "social",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "problem_solving",
+      "name": "Решение проблем",
+      "description": "Навыки анализа и решения сложных задач",
+      "category": "analytical",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "creativity",
+      "name": "Креативность",
+      "description": "Творческие навыки и воображение",
+      "category": "creative",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "adaptability",
+      "name": "Адаптивность",
+      "description": "Навыки быстрой адаптации к новым условиям",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "stress_management",
+      "name": "Управление стрессом",
+      "description": "Навыки контроля и снижения стресса",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    },
+    {
+      "id": "self_control",
+      "name": "Самоконтроль",
+      "description": "Навыки контроля своих эмоций и поведения",
+      "category": "mental",
+      "minValue": 1,
+      "maxValue": 10
+    }
+  ],
+  "fetishes": [
+    {
+      "id": "bdsm",
+      "name": "БДСМ",
+      "description": "Доминирование и подчинение",
+      "category": "power",
+      "intensity": 0.5,
+      "triggers": ["dominance", "submission", "control"],
+      "responses": ["Подчинение", "Доминирование", "Контроль"]
+    },
+    {
+      "id": "humiliation",
+      "name": "Унижение",
+      "description": "Получение удовольствия от унижения",
+      "category": "psychological",
+      "intensity": 0.3,
+      "triggers": ["insults", "degradation", "shame"],
+      "responses": ["Стыд", "Унижение", "Смущение"]
+    },
+    {
+      "id": "bondage",
+      "name": "Связывание",
+      "description": "Ограничение движений",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["restraints", "immobilization", "helplessness"],
+      "responses": ["Беспомощность", "Уязвимость", "Зависимость"]
+    },
+    {
+      "id": "masochism",
+      "name": "Мазохизм",
+      "description": "Получение удовольствия от боли",
+      "category": "physical",
+      "intensity": 0.6,
+      "triggers": ["pain", "punishment", "suffering"],
+      "responses": ["Боль", "Страдание", "Наказание"]
+    },
+    {
+      "id": "sadism",
+      "name": "Садизм",
+      "description": "Получение удовольствия от причинения боли",
+      "category": "physical",
+      "intensity": 0.2,
+      "triggers": ["inflicting_pain", "control", "power"],
+      "responses": ["Контроль", "Власть", "Доминирование"]
+    },
+    {
+      "id": "voyeurism",
+      "name": "Вуайеризм",
+      "description": "Получение удовольствия от наблюдения",
+      "category": "psychological",
+      "intensity": 0.3,
+      "triggers": ["watching", "exhibitionism", "privacy"],
+      "responses": ["Наблюдение", "Скрытность", "Возбуждение"]
+    },
+    {
+      "id": "exhibitionism",
+      "name": "Эксгибиционизм",
+      "description": "Получение удовольствия от демонстрации",
+      "category": "psychological",
+      "intensity": 0.4,
+      "triggers": ["exposure", "attention", "shame"],
+      "responses": ["Демонстрация", "Внимание", "Стыд"]
+    },
+    {
+      "id": "roleplay",
+      "name": "Ролевые игры",
+      "description": "Игра в различные роли",
+      "category": "psychological",
+      "intensity": 0.5,
+      "triggers": ["fantasy", "acting", "transformation"],
+      "responses": ["Фантазия", "Перевоплощение", "Игра"]
+    },
+    {
+      "id": "sensory_deprivation",
+      "name": "Сенсорная депривация",
+      "description": "Лишение чувств",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["blindfold", "earplugs", "isolation"],
+      "responses": ["Неопределенность", "Зависимость", "Концентрация"]
+    },
+    {
+      "id": "sensory_overload",
+      "name": "Сенсорная перегрузка",
+      "description": "Избыточная стимуляция чувств",
+      "category": "physical",
+      "intensity": 0.3,
+      "triggers": ["intense_stimulation", "multiple_senses", "overwhelm"],
+      "responses": ["Перегрузка", "Потеря контроля", "Экстаз"]
+    },
+    {
+      "id": "electricity",
+      "name": "Электричество",
+      "description": "Электрическая стимуляция",
+      "category": "physical",
+      "intensity": 0.6,
+      "triggers": ["electric_shock", "stimulation", "control"],
+      "responses": ["Шок", "Стимуляция", "Контроль"]
+    },
+    {
+      "id": "vibration",
+      "name": "Вибрация",
+      "description": "Вибрационная стимуляция",
+      "category": "physical",
+      "intensity": 0.5,
+      "triggers": ["vibrating_toys", "rhythm", "stimulation"],
+      "responses": ["Вибрация", "Ритм", "Стимуляция"]
+    },
+    {
+      "id": "temperature",
+      "name": "Температура",
+      "description": "Температурные воздействия",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["hot", "cold", "contrast"],
+      "responses": ["Жар", "Холод", "Контраст"]
+    },
+    {
+      "id": "pressure",
+      "name": "Давление",
+      "description": "Давление и сжатие",
+      "category": "physical",
+      "intensity": 0.3,
+      "triggers": ["compression", "weight", "restriction"],
+      "responses": ["Сжатие", "Ограничение", "Давление"]
+    },
+    {
+      "id": "tickling",
+      "name": "Щекотка",
+      "description": "Щекотка и легкие прикосновения",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["light_touch", "tickling", "laughter"],
+      "responses": ["Смех", "Щекотка", "Нежность"]
+    },
+    {
+      "id": "feet",
+      "name": "Фут-фетиш",
+      "description": "Фетиш на ноги и ступни",
+      "category": "body_part",
+      "intensity": 0.3,
+      "triggers": ["feet", "toes", "foot_massage"],
+      "responses": ["Чувствительность ног", "Массаж ступней", "Возбуждение"]
+    },
+    {
+      "id": "hands",
+      "name": "Хенд-фетиш",
+      "description": "Фетиш на руки",
+      "category": "body_part",
+      "intensity": 0.3,
+      "triggers": ["hands", "fingers", "hand_massage"],
+      "responses": ["Чувствительность рук", "Массаж рук", "Возбуждение"]
+    },
+    {
+      "id": "breasts",
+      "name": "Брест-фетиш",
+      "description": "Фетиш на грудь",
+      "category": "body_part",
+      "intensity": 0.5,
+      "triggers": ["breasts", "nipples", "breast_play"],
+      "responses": ["Чувствительность груди", "Стимуляция сосков", "Возбуждение"]
+    },
+    {
+      "id": "anal",
+      "name": "Анал-фетиш",
+      "description": "Фетиш на анальную область",
+      "category": "body_part",
+      "intensity": 0.4,
+      "triggers": ["anal_stimulation", "penetration", "sphincter"],
+      "responses": ["Анальная стимуляция", "Проникновение", "Возбуждение"]
+    },
+    {
+      "id": "latex",
+      "name": "Латекс",
+      "description": "Фетиш на латексную одежду",
+      "category": "material",
+      "intensity": 0.4,
+      "triggers": ["latex_clothing", "tight_fit", "shiny_surface"],
+      "responses": ["Латекс", "Обтягивающая одежда", "Возбуждение"]
+    },
+    {
+      "id": "leather",
+      "name": "Кожа",
+      "description": "Фетиш на кожаную одежду",
+      "category": "material",
+      "intensity": 0.3,
+      "triggers": ["leather_clothing", "texture", "smell"],
+      "responses": ["Кожа", "Текстура", "Запах"]
+    },
+    {
+      "id": "silk",
+      "name": "Шёлк",
+      "description": "Фетиш на шёлковые ткани",
+      "category": "material",
+      "intensity": 0.3,
+      "triggers": ["silk_fabric", "smooth_texture", "luxury"],
+      "responses": ["Шёлк", "Гладкость", "Роскошь"]
+    },
+    {
+      "id": "rope",
+      "name": "Верёвки",
+      "description": "Фетиш на верёвки и связывание",
+      "category": "material",
+      "intensity": 0.4,
+      "triggers": ["rope_bondage", "knots", "restriction"],
+      "responses": ["Связывание", "Узлы", "Ограничение"]
+    },
+    {
+      "id": "uniform",
+      "name": "Униформа",
+      "description": "Фетиш на униформу",
+      "category": "clothing",
+      "intensity": 0.4,
+      "triggers": ["uniform", "authority", "professional"],
+      "responses": ["Униформа", "Авторитет", "Профессионализм"]
+    },
+    {
+      "id": "age_play",
+      "name": "Возрастные роли",
+      "description": "Игра в роли разных возрастов",
+      "category": "roleplay",
+      "intensity": 0.3,
+      "triggers": ["age_difference", "innocence", "maturity"],
+      "responses": ["Невинность", "Зрелость", "Ролевая игра"]
+    },
+    {
+      "id": "pregnancy",
+      "name": "Беременность",
+      "description": "Фетиш на беременность",
+      "category": "physiological",
+      "intensity": 0.3,
+      "triggers": ["pregnant_belly", "maternal_instincts", "fertility"],
+      "responses": ["Беременность", "Материнские инстинкты", "Плодовитость"]
+    },
+    {
+      "id": "lactation",
+      "name": "Лактация",
+      "description": "Фетиш на грудное вскармливание",
+      "category": "physiological",
+      "intensity": 0.2,
+      "triggers": ["breastfeeding", "milk", "nurturing"],
+      "responses": ["Кормление", "Молоко", "Забота"]
     }
   ],
   "actionCategories": [
@@ -283,6 +958,41 @@
       "icon": "😴",
       "description": "Восстановление сил и предотвращение выгорания",
       "color": "cyan"
+    },
+    {
+      "id": "physical",
+      "name": "Физическое воздействие",
+      "icon": "💪",
+      "description": "Физические действия и воздействия",
+      "color": "red"
+    },
+    {
+      "id": "emotional",
+      "name": "Эмоциональное воздействие",
+      "icon": "💭",
+      "description": "Эмоциональные манипуляции и воздействия",
+      "color": "purple"
+    },
+    {
+      "id": "intimate",
+      "name": "Интимное взаимодействие",
+      "icon": "💕",
+      "description": "Интимные действия и стимуляция",
+      "color": "pink"
+    },
+    {
+      "id": "punishment",
+      "name": "Наказание",
+      "icon": "⚡",
+      "description": "Наказания и дисциплинарные меры",
+      "color": "orange"
+    },
+    {
+      "id": "bdsm",
+      "name": "БДСМ",
+      "icon": "🔗",
+      "description": "Доминирование и подчинение",
+      "color": "dark"
     }
   ]
 }

@@ -1,0 +1,102 @@
+{
+  "available": [
+    {
+      "id": "ctr_001",
+      "client": "SlaveTech Inc.",
+      "title": "Тренировка актива с имплантом контроля оргазмов",
+      "description": "Требуется подготовка актива с имплантированным чипом контроля оргазмов для корпоративного клиента.",
+      "requirements": {
+        "skills": {
+          "orgasm_control": 3,
+          "neural_hacking": 2
+        },
+        "minRank": "C"
+      },
+      "reward": 800,
+      "deadline": 5,
+      "kpi": [
+        {
+          "name": "Подчинение",
+          "weight": 0.6,
+          "current": 0,
+          "target": 100
+        },
+        {
+          "name": "Контроль",
+          "weight": 0.4,
+          "current": 0,
+          "target": 100
+        }
+      ],
+      "assignedTalents": [],
+      "status": "available",
+      "storyScenes": {
+        "onAccept": [
+          "contract_briefing",
+          "implant_intro"
+        ],
+        "onProgress": [
+          "training_challenge",
+          "implant_glitch"
+        ],
+        "onComplete": [
+          "client_demo",
+          "client_feedback"
+        ],
+        "onFail": [
+          "implant_failure",
+          "deadline_missed"
+        ]
+      }
+    },
+    {
+      "id": "ctr_002",
+      "client": "Neural Elite",
+      "title": "Подготовка элитного актива",
+      "description": "Тренировка высококлассного актива с премиум имплантами для VIP клиента.",
+      "requirements": {
+        "skills": {
+          "etiquette": 2,
+          "dance": 1
+        },
+        "minRank": "C"
+      },
+      "reward": 500,
+      "deadline": 3,
+      "kpi": [
+        {
+          "name": "Элегантность",
+          "weight": 0.8,
+          "current": 0,
+          "target": 100
+        },
+        {
+          "name": "Подчинение",
+          "weight": 0.2,
+          "current": 0,
+          "target": 100
+        }
+      ],
+      "assignedTalents": [],
+      "status": "available",
+      "storyScenes": {
+        "onAccept": [
+          "client_meeting",
+          "requirements_assessment"
+        ],
+        "onProgress": [
+          "training_session",
+          "resistance_handling"
+        ],
+        "onComplete": [
+          "final_demo",
+          "client_satisfaction"
+        ],
+        "onFail": [
+          "training_failure",
+          "contract_termination"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "characters": [
+    {
+      "id": "market_1",
+      "name": "Алекс",
+      "archetype": "default",
+      "description": "Молодая актив с хорошими навыками обслуживания",
+      "stats": {
+        "physical": {
+          "endurance": 0.2,
+          "sensitivity": 5,
+          "flexibility": 0.2
+        },
+        "psychological": {
+          "emotionalStability": 5,
+          "adaptability": 0.3,
+          "intelligence": 0.4
+        },
+        "social": {
+          "sociability": 0.3,
+          "empathy": 0.3,
+          "dominance": 0.2
+        },
+        "personality": {
+          "selfEsteem": 0.2,
+          "optimism": 5,
+          "curiosity": 5
+        },
+        "special": {
+          "sexualExperience": 5,
+          "resistance": 5,
+          "dependency": 5,
+          "fetishSensitivity": 5,
+          "fetishDiscovery": 5
+        }
+      },
+      "fetishes": {
+        "primary": [],
+        "secondary": [],
+        "discovered": [],
+        "hidden": []
+      },
+      "emotionalState": "neutral",
+      "createdAt": "2025-08-24T13:08:26.280Z",
+      "lastInteraction": "2025-08-24T13:08:26.280Z",
+      "totalInteractions": 0,
+      "communicationStyle": "neutral"
+    },
+    {
+      "id": "market_2",
+      "name": "Мария",
+      "archetype": "default",
+      "description": "Опытная актив с отличными навыками обслуживания",
+      "stats": {
+        "physical": {
+          "endurance": 0.3,
+          "sensitivity": 5,
+          "flexibility": 0.3
+        },
+        "psychological": {
+          "emotionalStability": 5,
+          "adaptability": 0.5,
+          "intelligence": 0.3
+        },
+        "social": {
+          "sociability": 0.5,
+          "empathy": 0.5,
+          "dominance": 0.2
+        },
+        "personality": {
+          "selfEsteem": 0.2,
+          "optimism": 5,
+          "curiosity": 5
+        },
+        "special": {
+          "sexualExperience": 5,
+          "resistance": 5,
+          "dependency": 5,
+          "fetishSensitivity": 5,
+          "fetishDiscovery": 5
+        }
+      },
+      "fetishes": {
+        "primary": [],
+        "secondary": [],
+        "discovered": [],
+        "hidden": []
+      },
+      "emotionalState": "neutral",
+      "createdAt": "2025-08-24T13:08:26.280Z",
+      "lastInteraction": "2025-08-24T13:08:26.280Z",
+      "totalInteractions": 0,
+      "communicationStyle": "neutral"
+    },
+    {
+      "id": "void_1",
+      "name": "Сигнал из Тени",
+      "archetype": "void_rescue",
+      "description": "Спасённый из пустоты: Слабый сигнал из глубин Void Border. Может быть актив с уникальными фетишами.",
+      "stats": {
+        "physical": {
+          "endurance": 0.4,
+          "sensitivity": 5,
+          "flexibility": 0.4
+        },
+        "psychological": {
+          "emotionalStability": 5,
+          "adaptability": 0.2,
+          "intelligence": 0.3
+        },
+        "social": {
+          "sociability": 0.2,
+          "empathy": 0.2,
+          "dominance": 0.3
+        },
+        "personality": {
+          "selfEsteem": 0.3,
+          "optimism": 5,
+          "curiosity": 5
+        },
+        "special": {
+          "sexualExperience": 5,
+          "resistance": 5,
+          "dependency": 5,
+          "fetishSensitivity": 5,
+          "fetishDiscovery": 5
+        }
+      },
+      "fetishes": {
+        "primary": [],
+        "secondary": [],
+        "discovered": [],
+        "hidden": []
+      },
+      "emotionalState": "neutral",
+      "createdAt": "2025-08-24T13:08:26.280Z",
+      "lastInteraction": "2025-08-24T13:08:26.280Z",
+      "totalInteractions": 0,
+      "communicationStyle": "neutral"
+    },
+    {
+      "id": "corp_1",
+      "name": "Корпоративный 1",
+      "archetype": "corporate_contract",
+      "description": "Корпоративный контракт: Интенсивная программа подготовки элитных активов от ведущей корпорации.",
+      "stats": {
+        "physical": {
+          "endurance": 5,
+          "sensitivity": 5,
+          "flexibility": 5
+        },
+        "psychological": {
+          "emotionalStability": 5,
+          "adaptability": 5,
+          "intelligence": 5
+        },
+        "social": {
+          "sociability": 5,
+          "empathy": 5,
+          "dominance": 5
+        },
+        "personality": {
+          "selfEsteem": 5,
+          "optimism": 5,
+          "curiosity": 5
+        },
+        "special": {
+          "sexualExperience": 5,
+          "resistance": 5,
+          "dependency": 5,
+          "fetishSensitivity": 5,
+          "fetishDiscovery": 5
+        }
+      },
+      "fetishes": {
+        "primary": [],
+        "secondary": [],
+        "discovered": [],
+        "hidden": []
+      },
+      "emotionalState": "neutral",
+      "createdAt": "2025-08-24T13:08:26.280Z",
+      "lastInteraction": "2025-08-24T13:08:26.280Z",
+      "totalInteractions": 0,
+      "communicationStyle": "neutral"
+    }
+  ],
+  "templates": {
+    "talentExchange": {
+      "name": "Биржа талантов",
+      "description": "Базовый шаблон для персонажей с биржи талантов",
+      "archetype": "talent_exchange"
+    },
+    "voidRescues": {
+      "name": "Спасение из пустоты",
+      "description": "Базовый шаблон для спасённых персонажей",
+      "archetype": "void_rescue"
+    },
+    "corporateContracts": {
+      "name": "Корпоративные контракты",
+      "description": "Базовый шаблон для корпоративных персонажей",
+      "archetype": "corporate_contract"
+    }
+  },
+  "config": {
+    "skillCategories": {
+      "service": {
+        "name": "Обслуживание",
+        "description": "Навыки обслуживания и ухода",
+        "skills": [
+          "maid",
+          "cooking",
+          "massage",
+          "cleaning"
+        ]
+      },
+      "technical": {
+        "name": "Технические",
+        "description": "Технические и интеллектуальные навыки",
+        "skills": [
+          "neural_hacking",
+          "programming",
+          "analysis",
+          "research"
+        ]
+      }
+    },
+    "fetishCategories": {
+      "power": {
+        "name": "Власть и контроль",
+        "description": "Фетиши, связанные с властью и контролем",
+        "fetishes": [
+          "submission",
+          "obedience",
+          "domination",
+          "control"
+        ]
+      },
+      "restraint": {
+        "name": "Ограничения",
+        "description": "Фетиши, связанные с ограничениями и связыванием",
+        "fetishes": [
+          "bondage",
+          "cuffs",
+          "chains",
+          "cages"
+        ]
+      }
+    }
+  }
+}

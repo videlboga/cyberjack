@@ -26,14 +26,14 @@ export async function loadConfigsForEnvironment(environment: 'dev' | 'prod'): Pr
       assets,
       users
     ] = await Promise.all([
-      import('../data/actions.json'),
-      import('../data/contracts.json'),
-      import('../data/events.json'),
+      import('../data/actions-unified.json'),
+      import('../data/contracts-unified.json'),
+      import('../data/events-unified.json'),
       import('../data/market.json'),
-      import('../data/equipment-config.json'),
-      import('../data/system-definitions.json'),
+      import('../data/equipment-unified.json'),
+      import('../data/system-unified.json'),
       import('../data/assets.json'),
-      import('../data/users.json')
+      import('../data/users-unified.json')
     ])
 
     const baseConfig = {

@@ -2,15 +2,16 @@ import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2, Eye } from "lucide-react"
+import { Edit, Trash2, Eye, Package } from "lucide-react"
 import { getRankColor, getEventTypeColor, getContractTypeColor, formatPrice, formatTime } from '../../utils/entityHelpers'
 
 export interface EntityCardProps {
   entity: any
-  type: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action'
+  type: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action' | 'user'
   onEdit?: (entity: any) => void
   onDelete?: (entityId: string) => void
   onView?: (entity: any) => void
+  onManageAssets?: (user: any) => void
   showActions?: boolean
   className?: string
 }
@@ -21,6 +22,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
   onEdit,
   onDelete,
   onView,
+  onManageAssets,
   showActions = true,
   className = ""
 }) => {
@@ -263,6 +265,37 @@ export const EntityCard: React.FC<EntityCardProps> = ({
           </>
         )
 
+      case 'user':
+        return (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <Badge variant={entity.status === 'active' ? 'default' : 'secondary'}>
+                {entity.status === 'active' ? 'Активен' : entity.status === 'inactive' ? 'Неактивен' : 'Заблокирован'}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                {entity.role}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-2">
+              {entity.email}
+            </p>
+            <div className="space-y-2">
+              <div className="text-sm text-muted-foreground">
+                Баланс: {formatPrice(entity.account?.balance || 0)}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Активов: {entity.assets?.length || 0}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Оборудования: {entity.equipment?.length || 0}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Создан: {new Date(entity.created).toLocaleDateString()}
+              </div>
+            </div>
+          </>
+        )
+
       default:
         return (
           <p className="text-sm text-muted-foreground">
@@ -323,6 +356,20 @@ export const EntityCard: React.FC<EntityCardProps> = ({
                   className="h-8 w-8 p-0 hover:bg-destructive/10 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+              {type === 'user' && onManageAssets && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onManageAssets(entity)
+                  }}
+                  className="h-8 w-8 p-0 hover:bg-blue-100 text-blue-600 hover:text-blue-700"
+                  title="Управление активами"
+                >
+                  <Package className="h-4 w-4" />
                 </Button>
               )}
             </div>

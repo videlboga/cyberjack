@@ -12,7 +12,7 @@ export interface FieldConfig {
   description?: string
   defaultValue?: any
   dynamicConfig?: {
-    type: 'attributes' | 'skills' | 'effects' | 'states' | 'preferences' | 'condition' | 'history'
+    type: 'attributes' | 'fetishes' | 'effects' | 'states' | 'preferences' | 'condition' | 'history'
     subType?: string
     options?: string[]
     min?: number
@@ -22,7 +22,7 @@ export interface FieldConfig {
 
 // Базовые поля для всех сущностей
 export const baseFields: FieldConfig[] = [
-  { name: 'id', type: 'text', label: 'ID', required: true, placeholder: 'Введите уникальный ID' }
+  // ID генерируется автоматически, не показываем в форме
 ]
 
 // Конфигурации для разных типов сущностей
@@ -31,35 +31,51 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
     ...baseFields,
     { name: 'name', type: 'text', label: 'Имя', required: true, placeholder: 'Введите имя актива' },
     { name: 'description', type: 'textarea', label: 'Описание', required: true, placeholder: 'Опишите актив' },
-    { name: 'rank', type: 'select', label: 'Ранг', options: ['Junior', 'Middle', 'Senior', 'Elite'], required: true },
+    { name: 'rank', type: 'select', label: 'Качество', options: ['Junior', 'Middle', 'Senior'], required: true },
     { name: 'price', type: 'number', label: 'Цена', required: true, min: 0, max: 10000 },
     { name: 'specialization', type: 'text', label: 'Специализация', required: false, placeholder: 'Специализация' },
-    { name: 'avatar', type: 'text', label: 'Аватар (эмодзи)', required: false, placeholder: '👩‍💻' },
-    { name: 'status', type: 'select', label: 'Статус', options: ['available', 'owned', 'training', 'assigned', 'inactive'], required: true },
-    { name: 'location', type: 'text', label: 'Местоположение', required: false, placeholder: 'talent_exchange' },
-    { name: 'owner', type: 'text', label: 'Владелец', required: false, placeholder: 'ID владельца' },
     { 
       name: 'attributes', 
       type: 'dynamic-object', 
       label: 'Атрибуты', 
       required: false, 
-      description: 'Базовые характеристики актива',
+      description: 'Базовые характеристики подопытного',
       dynamicConfig: {
         type: 'attributes',
-        options: ['strength', 'empathy', 'intelligence', 'temperament', 'grit', 'ego', 'loyalty', 'obedience', 'resistance'],
-        min: 1,
+        options: [
+          // Физические характеристики (0-10)
+          'endurance', 'sensitivity', 'flexibility',
+          // Психологические характеристики (0-10)
+          'emotional_stability', 'adaptability', 'intelligence',
+          // Социальные характеристики (0-10)
+          'sociability', 'empathy', 'dominance',
+          // Личностные характеристики (0-10)
+          'self_esteem', 'optimism', 'curiosity',
+          // Специальные характеристики (0-10)
+          'sexual_experience', 'resistance', 'dependency'
+        ],
+        min: 0,
         max: 10
       }
     },
     { 
-      name: 'skills', 
+      name: 'fetishes', 
       type: 'dynamic-object', 
-      label: 'Навыки', 
+      label: 'Фетиши', 
       required: false, 
-      description: 'Профессиональные навыки',
+      description: 'Сексуальные предпочтения подопытного',
       dynamicConfig: {
-        type: 'skills',
-        options: ['maid', 'cooking', 'neural_hacking', 'orgasm_control', 'field', 'etiquette', 'logistics', 'medical', 'maintenance', 'data', 'dance', 'seduction', 'interrogation', 'surveillance'],
+        type: 'fetishes',
+        options: [
+          // Основные фетиши
+          'innocence', 'curiosity', 'tenderness', 'attention',
+          'trust', 'submission', 'play', 'dependency',
+          'romantic_fantasies', 'prince_dependency', 'sensory_overload',
+          'age_roles', 'bdsm', 'humiliation', 'masochism',
+          'sadism', 'voyeurism', 'exhibitionism', 'roleplay',
+          'bondage', 'sensory_deprivation', 'electricity',
+          'vibration', 'temperature', 'pressure', 'tickling'
+        ],
         min: 0,
         max: 10
       }
@@ -69,10 +85,19 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       type: 'dynamic-array', 
       label: 'Черты характера', 
       required: false, 
-      description: 'Особенности личности',
+      description: 'Особенности личности подопытного',
       dynamicConfig: {
         type: 'preferences',
-        options: ['loyal', 'quick_learner', 'tech_savvy', 'creative', 'analytical', 'social', 'introverted', 'extroverted', 'resilient', 'sensitive']
+        options: [
+          'loyal', 'quick_learner', 'tech_savvy', 'creative', 
+          'analytical', 'social', 'introverted', 'extroverted', 
+          'resilient', 'sensitive', 'submissive', 'resistant', 
+          'curious', 'fearful', 'determined', 'romantic', 
+          'dreamy', 'innocent', 'trusting', 'playful',
+          'artistic', 'feminine', 'academic', 'ghostly',
+          'maternal', 'protective', 'dark_fairy', 'addictive',
+          'sensation_seeker', 'survivor', 'adaptive'
+        ]
       }
     },
     { 
@@ -84,7 +109,13 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       dynamicConfig: {
         type: 'preferences',
         subType: 'work_type',
-        options: ['service', 'technical', 'creative', 'analytical', 'social', 'physical']
+        options: [
+          'service', 'technical', 'creative', 'analytical', 
+          'social', 'physical', 'romantic', 'artistic',
+          'academic', 'mystical', 'leadership', 'reflection',
+          'maternal', 'protective', 'dark', 'addictive',
+          'sensation', 'survival', 'adaptive'
+        ]
       }
     },
     { 
@@ -95,7 +126,12 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       description: 'Текущее состояние',
       dynamicConfig: {
         type: 'condition',
-        options: ['health', 'mental_state', 'stress', 'fatigue'],
+        options: [
+          // Состояния (0-100)
+          'mood', 'anxiety', 'burnout', 'engagement',
+          'entitlement', 'insight', 'routine', 'compliance',
+          'neuroplasticity', 'cognitiveLoad'
+        ],
         min: 0,
         max: 100
       }

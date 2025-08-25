@@ -17,13 +17,14 @@ import { SyncStatus } from "./components/ui/SyncStatus"
 
 // Импортируем конфигурации и утилиты синхронизации
 import { loadConfigsForEnvironment, getConfigStats } from "@/lib/config-sync"
-import actionsConfigData from "../../data/actions.json"
+import actionsConfigData from "../../data/actions-unified.json"
 import marketConfigData from "../../data/market.json"
-import contractsConfigData from "../../data/contracts.json"
-import eventsConfigData from "../../data/events.json"
-import equipmentConfigData from "../../data/equipment-config.json"
-import systemDefinitionsData from "../../data/system-definitions.json"
-import storyScenesData from "../../data/story-scenes.json"
+import contractsConfigData from "../../data/contracts-unified.json"
+import eventsConfigData from "../../data/events-unified.json"
+import charactersConfigData from "../../data/characters-unified.json"
+import equipmentConfigData from "../../data/equipment-unified.json"
+import systemDefinitionsData from "../../data/system-unified.json"
+import storyScenesData from "../../data/story-scenes-unified.json"
 
 // Функция для генерации уникальных ID
 let idCounter = 0
@@ -46,6 +47,7 @@ const NexusEnslaverGame = () => {
     market: marketConfigData || { talentExchange: [], voidRescues: [], corporateContracts: [] },
     contracts: contractsConfigData || { available: [] },
     events: eventsConfigData || { anomalies: [], crises: [], opportunities: [] },
+    characters: charactersConfigData || { characters: [] },
     equipment: equipmentConfigData || { equipment: [] },
     system: systemDefinitionsData || {},
     scenes: storyScenesData || { scenes: [] },

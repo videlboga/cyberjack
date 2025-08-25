@@ -1,0 +1,1413 @@
+{
+  "attributes": [
+    {
+      "id": "endurance",
+      "name": "Выносливость",
+      "description": "Способность выдерживать физические нагрузки и длительные эксперименты",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я очень слаба... сейчас упаду... не могу больше...",
+        "4-6": "Я сильно устала, но ещё могу продолжать",
+        "7-8": "Есть небольшая усталость, но нормально себя чувствую",
+        "9-10": "Я полна сил, готова к любым испытаниям"
+      },
+      "specialPrompts": {
+        "low_endurance_high_fear": "Я не выдержу, умру здесь...",
+        "high_endurance_pride": "Это всё? Я могу больше!"
+      }
+    },
+    {
+      "id": "sensitivity",
+      "name": "Чувствительность",
+      "description": "Восприимчивость к физическим и эмоциональным воздействиям",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я почти ничего не чувствую...",
+        "4-6": "Обычные ощущения, ничего особенного",
+        "7-8": "Каждое прикосновение вызывает волны удовольствия",
+        "9-10": "Я взрываюсь от каждого прикосновения!"
+      },
+      "specialPrompts": {
+        "high_sensitivity_innocence": "Что со мной происходит? Это так странно...",
+        "low_sensitivity_despair": "Почему я ничего не чувствую? Я сломана..."
+      }
+    },
+    {
+      "id": "flexibility",
+      "name": "Гибкость",
+      "description": "Физическая гибкость и способность принимать различные позы",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не могу так согнуться, это больно!",
+        "4-6": "Это немного неудобно, но терпимо",
+        "7-8": "Я довольно гибкая, это даже приятно",
+        "9-10": "Моё тело может принимать любые формы"
+      },
+      "specialPrompts": {
+        "low_flexibility_fear": "Вы сломаете меня!",
+        "high_flexibility_pride": "Смотрите, что я могу!"
+      }
+    },
+    {
+      "id": "emotional_stability",
+      "name": "Эмоциональная стабильность",
+      "description": "Способность контролировать эмоции и сохранять психическое равновесие",
+      "category": "psychological",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не могу контролировать себя, эмоции захлёстывают...",
+        "4-6": "Я стараюсь держаться, но это сложно",
+        "7-8": "Я относительно спокойна, могу контролировать себя",
+        "9-10": "Я полностью контролирую свои эмоции"
+      },
+      "specialPrompts": {
+        "low_stability_fear": "Истерические приступы, неконтролируемый плач",
+        "high_stability_pride": "Эмоции - это слабость"
+      }
+    },
+    {
+      "id": "adaptability",
+      "name": "Адаптивность",
+      "description": "Способность приспосабливаться к новым условиям и ситуациям",
+      "category": "psychological",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не могу привыкнуть к этому, это ужасно!",
+        "4-6": "Я пытаюсь адаптироваться, но это сложно",
+        "7-8": "Я постепенно привыкаю к новым условиям",
+        "9-10": "Я легко приспосабливаюсь к любым изменениям"
+      },
+      "specialPrompts": {
+        "low_adaptability_nostalgia": "Хочу вернуться к прежней жизни...",
+        "high_adaptability_cynicism": "Что поделаешь, жизнь такая"
+      }
+    },
+    {
+      "id": "intelligence",
+      "name": "Интеллект",
+      "description": "Умственные способности и способность анализировать ситуацию",
+      "category": "psychological",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не понимаю, что происходит...",
+        "4-6": "Я пытаюсь разобраться в ситуации",
+        "7-8": "Я анализирую происходящее и ищу выходы",
+        "9-10": "Я вижу все возможности и последствия"
+      },
+      "specialPrompts": {
+        "high_intelligence_despair": "Я понимаю, что происходит, и это ужасно...",
+        "low_intelligence_innocence": "Я не понимаю, но верю, что всё будет хорошо"
+      }
+    },
+    {
+      "id": "sociability",
+      "name": "Общительность",
+      "description": "Способность и желание общаться с другими людьми",
+      "category": "social",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не хочу ни с кем разговаривать...",
+        "4-6": "Я общаюсь, когда нужно, но не ищу контактов",
+        "7-8": "Мне нравится общаться, я открыта к людям",
+        "9-10": "Я обожаю общение, не могу без него!"
+      },
+      "specialPrompts": {
+        "low_sociability_fear": "Полное молчание, избегание контактов",
+        "high_sociability_despair": "Поговорите со мной, пожалуйста!"
+      }
+    },
+    {
+      "id": "empathy",
+      "name": "Эмпатия",
+      "description": "Способность понимать и чувствовать эмоции других людей",
+      "category": "social",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Меня не волнуют чувства других",
+        "4-6": "Я понимаю, что другие тоже чувствуют",
+        "7-8": "Я глубоко чувствую эмоции окружающих",
+        "9-10": "Я буквально ощущаю боль и радость других"
+      },
+      "specialPrompts": {
+        "high_empathy_suffering": "Ваша боль причиняет мне страдания...",
+        "low_empathy_cruelty": "Мне плевать на ваши чувства"
+      }
+    },
+    {
+      "id": "dominance",
+      "name": "Доминантность",
+      "description": "Стремление к лидерству и контролю над ситуацией",
+      "category": "social",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я предпочитаю подчиняться, не люблю командовать",
+        "4-6": "Я могу взять на себя ответственность, если нужно",
+        "7-8": "Мне нравится быть лидером и контролировать ситуацию",
+        "9-10": "Я должна контролировать всё, что происходит вокруг"
+      },
+      "specialPrompts": {
+        "high_dominance_submission": "Я ненавижу это, но вынуждена подчиняться...",
+        "low_dominance_coercion": "Я не хочу командовать, но вы заставляете!"
+      }
+    },
+    {
+      "id": "self_esteem",
+      "name": "Самооценка",
+      "description": "Восприятие собственной ценности и достоинства",
+      "category": "personality",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я ничего не стою, я никчёмная...",
+        "4-6": "У меня есть достоинства, но и недостатки",
+        "7-8": "Я знаю себе цену, я достойная личность",
+        "9-10": "Я исключительная, лучше многих других"
+      },
+      "specialPrompts": {
+        "low_self_esteem_humiliation": "Да, я заслуживаю этого, я ничтожество...",
+        "high_self_esteem_humiliation": "Как вы смеете так со мной обращаться!"
+      }
+    },
+    {
+      "id": "optimism",
+      "name": "Оптимизм",
+      "description": "Вера в лучшее будущее и положительный взгляд на жизнь",
+      "category": "personality",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Всё безнадёжно, ничего хорошего не будет",
+        "4-6": "Возможно, что-то изменится к лучшему",
+        "7-8": "Я верю, что всё наладится",
+        "9-10": "Всё будет прекрасно, я в этом уверена!"
+      },
+      "specialPrompts": {
+        "low_optimism_despair": "Я знала, что ничего хорошего не будет...",
+        "high_optimism_suffering": "Это временно, скоро всё наладится!"
+      }
+    },
+    {
+      "id": "curiosity",
+      "name": "Любопытство",
+      "description": "Стремление к новым знаниям и опыту",
+      "category": "personality",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Меня ничего не интересует, я хочу только покоя",
+        "4-6": "Иногда мне интересно что-то новое",
+        "7-8": "Мне интересно узнавать новое и пробовать необычное",
+        "9-10": "Я жажду новых ощущений и знаний!"
+      },
+      "specialPrompts": {
+        "high_curiosity_fear": "Это страшно, но так интересно...",
+        "low_curiosity_coercion": "Я не хочу этого, но вы заставляете!"
+      }
+    },
+    {
+      "id": "sexual_experience",
+      "name": "Сексуальная опытность",
+      "description": "Опыт в интимных отношениях и сексуальных практиках",
+      "category": "special",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я невинна, ничего не знаю об этом...",
+        "4-6": "У меня есть некоторый опыт",
+        "7-8": "Я довольно опытна в этом деле",
+        "9-10": "Я знаю все тонкости и уловки"
+      },
+      "specialPrompts": {
+        "low_experience_innocence": "Что вы делаете? Я не понимаю...",
+        "high_experience_pride": "Я знаю, как это делать правильно"
+      }
+    },
+    {
+      "id": "resistance",
+      "name": "Сопротивляемость",
+      "description": "Способность сопротивляться принуждению и манипуляциям",
+      "category": "special",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не могу сопротивляться, я слишком слаба...",
+        "4-6": "Я пытаюсь сопротивляться, но это сложно",
+        "7-8": "Я могу постоять за себя",
+        "9-10": "Меня невозможно сломать!"
+      },
+      "specialPrompts": {
+        "low_resistance_fear": "Пожалуйста, не заставляйте меня...",
+        "high_resistance_pride": "Попробуйте меня сломать!"
+      }
+    },
+    {
+      "id": "dependency",
+      "name": "Зависимость",
+      "description": "Склонность к формированию эмоциональных и физических зависимостей",
+      "category": "special",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я независима, не нуждаюсь ни в ком",
+        "4-6": "Иногда мне нужна поддержка других",
+        "7-8": "Мне нужны близкие отношения и поддержка",
+        "9-10": "Я не могу жить без кого-то рядом"
+      },
+      "specialPrompts": {
+        "high_dependency_loneliness": "Не оставляйте меня одну, пожалуйста!",
+        "low_dependency_pride": "Мне никто не нужен, я справлюсь сама"
+      }
+    },
+    {
+      "id": "strength",
+      "name": "Сила",
+      "description": "Физическая мощь и способность к сопротивлению",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я очень слаба, не могу сопротивляться...",
+        "4-6": "У меня есть немного сил, но не много",
+        "7-8": "Я довольно сильная, могу постоять за себя",
+        "9-10": "Я очень сильная, меня сложно сломать"
+      },
+      "specialPrompts": {
+        "low_strength_fear": "Я не могу сопротивляться, я слишком слаба...",
+        "high_strength_pride": "Попробуйте меня сломать!"
+      }
+    },
+    {
+      "id": "creativity",
+      "name": "Креативность",
+      "description": "Творческие способности и инновационное мышление",
+      "category": "psychological",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не очень творческая, предпочитаю простые решения",
+        "4-6": "Иногда у меня бывают интересные идеи",
+        "7-8": "Я довольно творческая, люблю нестандартные подходы",
+        "9-10": "Я очень креативная, всегда нахожу необычные решения"
+      },
+      "specialPrompts": {
+        "high_creativity_curiosity": "Это так интересно! Давайте попробуем что-то новое!",
+        "low_creativity_fear": "Я не знаю, что делать, я не очень творческая..."
+      }
+    },
+    {
+      "id": "temperament",
+      "name": "Темперамент",
+      "description": "Эмоциональная стабильность и самоконтроль",
+      "category": "psychological",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я очень эмоциональная, легко выхожу из себя",
+        "4-6": "Иногда я теряю контроль над эмоциями",
+        "7-8": "Я довольно спокойная, умею контролировать себя",
+        "9-10": "Я очень спокойная, редко теряю самообладание"
+      },
+      "specialPrompts": {
+        "low_temperament_anger": "Я не могу контролировать себя!",
+        "high_temperament_calm": "Я остаюсь спокойной в любой ситуации"
+      }
+    },
+    {
+      "id": "grit",
+      "name": "Упорство",
+      "description": "Настойчивость и стойкость перед трудностями",
+      "category": "psychological",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я быстро сдаюсь, не люблю трудности",
+        "4-6": "Я стараюсь не сдаваться, но это сложно",
+        "7-8": "Я довольно упорная, не сдаюсь легко",
+        "9-10": "Я очень упорная, никогда не сдаюсь"
+      },
+      "specialPrompts": {
+        "low_grit_despair": "Я не могу больше, я сдаюсь...",
+        "high_grit_determination": "Я не сдамся, что бы ни случилось!"
+      }
+    },
+    {
+      "id": "ego",
+      "name": "Эго",
+      "description": "Самооценка и уверенность в себе",
+      "category": "personality",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не уверена в себе, часто сомневаюсь",
+        "4-6": "Иногда я уверена в себе, иногда нет",
+        "7-8": "Я довольно уверена в себе",
+        "9-10": "Я очень уверена в себе, знаю себе цену"
+      },
+      "specialPrompts": {
+        "low_ego_humiliation": "Да, я заслуживаю этого, я ничтожество...",
+        "high_ego_pride": "Как вы смеете так со мной обращаться!"
+      }
+    },
+    {
+      "id": "loyalty",
+      "name": "Лояльность",
+      "description": "Преданность и верность хозяину",
+      "category": "social",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не предана никому, думаю только о себе",
+        "4-6": "Я могу быть преданной, если это выгодно",
+        "7-8": "Я довольно преданная, ценю верность",
+        "9-10": "Я очень преданная, готова на всё ради хозяина"
+      },
+      "specialPrompts": {
+        "low_loyalty_selfishness": "Я думаю только о себе",
+        "high_loyalty_devotion": "Я готова на всё ради вас!"
+      }
+    },
+    {
+      "id": "obedience",
+      "name": "Покорность",
+      "description": "Способность подчиняться и следовать приказам",
+      "category": "social",
+      "minValue": 0,
+      "maxValue": 10,
+      "interpretations": {
+        "1-3": "Я не люблю подчиняться, предпочитаю командовать",
+        "4-6": "Я подчиняюсь, когда нужно, но не всегда",
+        "7-8": "Я довольно покорная, обычно слушаюсь",
+        "9-10": "Я очень покорная, всегда выполняю приказы"
+      },
+      "specialPrompts": {
+        "low_obedience_rebellion": "Я не буду подчиняться!",
+        "high_obedience_submission": "Да, хозяин, я выполню всё, что вы прикажете"
+      }
+    }
+  ],
+  "combinedPrompts": {
+    "criticalCombinations": {
+      "high_self_esteem_humiliation": "Истерические приступы, полный нервный срыв",
+      "low_endurance_high_fear": "Панические атаки, потеря сознания",
+      "high_empathy_suffering": "Эмоциональное выгорание, депрессия",
+      "low_adaptability_changes": "Психологический шок, отказ от реальности",
+      "high_dominance_submission": "Агрессивное сопротивление, попытки бунта"
+    },
+    "positiveCombinations": {
+      "high_intelligence_adaptability": "Быстрое понимание ситуации и поиск выходов",
+      "high_empathy_sociability": "Естественное лидерство и поддержка других",
+      "high_optimism_endurance": "Неуязвимость к психологическому давлению",
+      "high_curiosity_innocence": "Детский энтузиазм к новому, не понимая сути",
+      "high_dependency_trust": "Полное доверие к взрослым, восприятие контакта как заботы"
+    }
+  },
+  "states": [
+    {
+      "id": "mood",
+      "name": "Настроение",
+      "description": "Текущее эмоциональное состояние",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "mood"
+    },
+    {
+      "id": "fear",
+      "name": "Страх",
+      "description": "Уровень страха и подчинения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "fear"
+    },
+    {
+      "id": "despair",
+      "name": "Отчаяние",
+      "description": "Эмоциональное истощение от пыток",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "despair"
+    },
+    {
+      "id": "devotion",
+      "name": "Преданность",
+      "description": "Преданность и подчинение мастеру",
+      "category": "motivational",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "devotion"
+    },
+    {
+      "id": "trust",
+      "name": "Доверие",
+      "description": "Уровень доверия к хозяину",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "trust"
+    },
+    {
+      "id": "relationship",
+      "name": "Отношения",
+      "description": "Уровень близости отношений с хозяином",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "relationship"
+    },
+    {
+      "id": "pleasure",
+      "name": "Удовольствие",
+      "description": "Уровень получаемого удовольствия",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "pleasure"
+    },
+    {
+      "id": "pain",
+      "name": "Боль",
+      "description": "Уровень испытываемой боли",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "pain"
+    },
+    {
+      "id": "arousal",
+      "name": "Возбуждение",
+      "description": "Уровень сексуального возбуждения",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "arousal"
+    },
+    {
+      "id": "stress",
+      "name": "Стресс",
+      "description": "Уровень психологического стресса",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "stress"
+    },
+    {
+      "id": "anxiety",
+      "name": "Тревожность",
+      "description": "Уровень тревоги и беспокойства",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "anxiety"
+    },
+    {
+      "id": "happiness",
+      "name": "Счастье",
+      "description": "Уровень счастья и удовлетворенности",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "happiness"
+    },
+    {
+      "id": "sadness",
+      "name": "Грусть",
+      "description": "Уровень грусти и печали",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "sadness"
+    },
+    {
+      "id": "anger",
+      "name": "Гнев",
+      "description": "Уровень гнева и раздражения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "anger"
+    },
+    {
+      "id": "shame",
+      "name": "Стыд",
+      "description": "Уровень стыда и смущения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "shame"
+    },
+    {
+      "id": "guilt",
+      "name": "Вина",
+      "description": "Уровень чувства вины",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "guilt"
+    },
+    {
+      "id": "pride",
+      "name": "Гордость",
+      "description": "Уровень гордости и самоуважения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "pride"
+    },
+    {
+      "id": "humiliation",
+      "name": "Унижение",
+      "description": "Уровень чувства унижения",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "humiliation"
+    },
+    {
+      "id": "submission",
+      "name": "Подчинение",
+      "description": "Уровень подчинения и покорности",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "submission"
+    },
+    {
+      "id": "dominance_state",
+      "name": "Доминирование",
+      "description": "Уровень стремления к доминированию",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "dominance"
+    },
+    {
+      "id": "vulnerability",
+      "name": "Уязвимость",
+      "description": "Уровень чувства уязвимости",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "vulnerability"
+    },
+    {
+      "id": "confidence",
+      "name": "Уверенность",
+      "description": "Уровень уверенности в себе",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "confidence"
+    },
+    {
+      "id": "helplessness",
+      "name": "Беспомощность",
+      "description": "Уровень чувства беспомощности",
+      "category": "emotional",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "helplessness"
+    },
+    {
+      "id": "entitlement",
+      "name": "Притязания",
+      "description": "Ожидания и требования к условиям",
+      "category": "social",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "neutral"
+    },
+    {
+      "id": "awareness",
+      "name": "Осознанность",
+      "description": "Понимание своего положения и подчинения",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "neutral"
+    },
+    {
+      "id": "routine",
+      "name": "Рутина",
+      "description": "Привыкание к повторяющимся задачам",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "neutral"
+    },
+    {
+      "id": "compliance",
+      "name": "Послушание",
+      "description": "Готовность следовать указаниям",
+      "category": "behavioral",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "neutral"
+    },
+    {
+      "id": "sensuality",
+      "name": "Чувственность",
+      "description": "Способность к сексуальным ощущениям",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "neutral"
+    },
+    {
+      "id": "endurance_state",
+      "name": "Выносливость",
+      "description": "Способность работать длительное время",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "neutral"
+    },
+    {
+      "id": "sensory_overload",
+      "name": "Сенсорная перегрузка",
+      "description": "Перегрузка от интенсивных ощущений",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "neutral"
+    },
+    {
+      "id": "fatigue",
+      "name": "Усталость",
+      "description": "Уровень физической и умственной усталости",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "fatigue"
+    },
+    {
+      "id": "health",
+      "name": "Здоровье",
+      "description": "Общее состояние здоровья",
+      "category": "physical",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "health"
+    },
+    {
+      "id": "mental_state",
+      "name": "Психическое состояние",
+      "description": "Общее психическое состояние",
+      "category": "mental",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorType": "mental"
+    }
+  ],
+  "fetishes": [
+    {
+      "id": "domination",
+      "name": "Доминирование",
+      "description": "Стремление контролировать и доминировать над партнёром",
+      "category": "bdsm",
+      "intensity": 0.5,
+      "triggers": ["подчинение партнёра", "командование", "контроль ситуации"],
+      "responses": ["Я контролирую ситуацию", "Подчиняйся мне", "Я решаю, что происходит"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию доминировать",
+        "medium": "Это возбуждает меня, но я могу контролировать свои порывы",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу доминировать, это противно",
+        "medium": "Я не уверена, хочу ли я доминировать",
+        "low": "Я готова попробовать доминировать"
+      }
+    },
+    {
+      "id": "submission",
+      "name": "Подчинение",
+      "description": "Желание подчиняться и быть контролируемой",
+      "category": "bdsm",
+      "intensity": 0.5,
+      "triggers": ["приказы", "ограничения", "контроль со стороны партнёра"],
+      "responses": ["Что вы хотите от меня?", "Я подчиняюсь", "Приказывайте мне"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию подчиняться",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу подчиняться, это противно",
+        "medium": "Я не уверена, хочу ли я подчиняться",
+        "low": "Я готова попробовать подчиняться"
+      }
+    },
+    {
+      "id": "sadism",
+      "name": "Садизм",
+      "description": "Получение удовольствия от причинения боли или дискомфорта",
+      "category": "bdsm",
+      "intensity": 0.6,
+      "triggers": ["страдание партнёра", "причинение боли", "контроль через боль"],
+      "responses": ["Твоя боль возбуждает меня", "Страдай для меня", "Я контролирую твою боль"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию причинять боль",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу причинять боль, это противно",
+        "medium": "Я не уверена, хочу ли я причинять боль",
+        "low": "Я готова попробовать причинять боль"
+      }
+    },
+    {
+      "id": "masochism",
+      "name": "Мазохизм",
+      "description": "Получение удовольствия от боли и страдания",
+      "category": "bdsm",
+      "intensity": 0.6,
+      "triggers": ["боль", "унижение", "страдание"],
+      "responses": ["Больно, но приятно", "Я заслуживаю этого", "Боль делает меня живой"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию страдать",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу страдать, это противно",
+        "medium": "Я не уверена, хочу ли я страдать",
+        "low": "Я готова попробовать страдать"
+      }
+    },
+    {
+      "id": "humiliation",
+      "name": "Унижение",
+      "description": "Получение удовольствия от унижения и оскорблений",
+      "category": "psychological",
+      "intensity": 0.3,
+      "triggers": ["оскорбления", "унизительные действия", "потеря достоинства"],
+      "responses": ["Я никчёмная", "Заслуживаю унижения", "Я ничтожество"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться унижению",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу унижаться, это противно",
+        "medium": "Я не уверена, хочу ли я унижаться",
+        "low": "Я готова попробовать унижаться"
+      }
+    },
+    {
+      "id": "bondage",
+      "name": "Связывание",
+      "description": "Ограничение движений и свободы",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["связывание", "ограничения", "беспомощность"],
+      "responses": ["Беспомощность", "Уязвимость", "Зависимость"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию быть связанной",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу быть связанной, это противно",
+        "medium": "Я не уверена, хочу ли я быть связанной",
+        "low": "Я готова попробовать быть связанной"
+      }
+    },
+    {
+      "id": "power",
+      "name": "Власть",
+      "description": "Стремление к власти и контролю",
+      "category": "psychological",
+      "intensity": 0.4,
+      "triggers": ["подчинение других", "контроль ситуации", "принятие решений"],
+      "responses": ["Я контролирую", "Подчиняйся мне", "Я решаю"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию власти",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу власти, это противно",
+        "medium": "Я не уверена, хочу ли я власти",
+        "low": "Я готова попробовать властвовать"
+      }
+    },
+    {
+      "id": "dependency",
+      "name": "Зависимость",
+      "description": "Желание быть зависимой от партнёра",
+      "category": "psychological",
+      "intensity": 0.5,
+      "triggers": ["забота", "контроль", "опека"],
+      "responses": ["Я нуждаюсь в вас", "Не оставляйте меня", "Я зависима от вас"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию зависимости",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу зависеть, это противно",
+        "medium": "Я не уверена, хочу ли я зависеть",
+        "low": "Я готова попробовать зависеть"
+      }
+    },
+    {
+      "id": "ownership",
+      "name": "Собственность",
+      "description": "Желание принадлежать партнёру",
+      "category": "psychological",
+      "intensity": 0.4,
+      "triggers": ["обладание", "маркировка", "контроль"],
+      "responses": ["Я ваша", "Принадлежу вам", "Я ваша собственность"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию принадлежать",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу принадлежать, это противно",
+        "medium": "Я не уверена, хочу ли я принадлежать",
+        "low": "Я готова попробовать принадлежать"
+      }
+    },
+    {
+      "id": "voyeurism",
+      "name": "Вуайеризм",
+      "description": "Получение удовольствия от наблюдения",
+      "category": "psychological",
+      "intensity": 0.3,
+      "triggers": ["наблюдение", "подглядывание", "скрытность"],
+      "responses": ["Наблюдение", "Скрытность", "Возбуждение"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию наблюдать",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу наблюдать, это противно",
+        "medium": "Я не уверена, хочу ли я наблюдать",
+        "low": "Я готова попробовать наблюдать"
+      }
+    },
+    {
+      "id": "exhibitionism",
+      "name": "Эксгибиционизм",
+      "description": "Получение удовольствия от демонстрации",
+      "category": "psychological",
+      "intensity": 0.4,
+      "triggers": ["демонстрация", "внимание", "стыд"],
+      "responses": ["Демонстрация", "Внимание", "Стыд"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться желанию демонстрировать себя",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу демонстрировать себя, это противно",
+        "medium": "Я не уверена, хочу ли я демонстрировать себя",
+        "low": "Я готова попробовать демонстрировать себя"
+      }
+    },
+    {
+      "id": "roleplay",
+      "name": "Ролевые игры",
+      "description": "Игра в различные роли",
+      "category": "psychological",
+      "intensity": 0.5,
+      "triggers": ["fantasy", "acting", "transformation"],
+      "responses": ["Фантазия", "Перевоплощение", "Игра"]
+    },
+    {
+      "id": "sensory_deprivation",
+      "name": "Сенсорная депривация",
+      "description": "Лишение чувств",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["blindfold", "earplugs", "isolation"],
+      "responses": ["Неопределенность", "Зависимость", "Концентрация"]
+    },
+    {
+      "id": "sensory_overload_fetish",
+      "name": "Сенсорная перегрузка",
+      "description": "Избыточная стимуляция чувств",
+      "category": "physical",
+      "intensity": 0.3,
+      "triggers": ["intense_stimulation", "multiple_senses", "overwhelm"],
+      "responses": ["Перегрузка", "Потеря контроля", "Экстаз"]
+    },
+    {
+      "id": "electricity",
+      "name": "Электричество",
+      "description": "Электрическая стимуляция",
+      "category": "physical",
+      "intensity": 0.6,
+      "triggers": ["electric_shock", "stimulation", "control"],
+      "responses": ["Шок", "Стимуляция", "Контроль"]
+    },
+    {
+      "id": "vibration",
+      "name": "Вибрация",
+      "description": "Вибрационная стимуляция",
+      "category": "physical",
+      "intensity": 0.5,
+      "triggers": ["vibrating_toys", "rhythm", "stimulation"],
+      "responses": ["Вибрация", "Ритм", "Стимуляция"]
+    },
+    {
+      "id": "temperature",
+      "name": "Температура",
+      "description": "Температурные воздействия",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["hot", "cold", "contrast"],
+      "responses": ["Жар", "Холод", "Контраст"]
+    },
+    {
+      "id": "pressure",
+      "name": "Давление",
+      "description": "Давление и сжатие",
+      "category": "physical",
+      "intensity": 0.3,
+      "triggers": ["compression", "weight", "restriction"],
+      "responses": ["Сжатие", "Ограничение", "Давление"]
+    },
+    {
+      "id": "tickling",
+      "name": "Щекотка",
+      "description": "Щекотка и легкие прикосновения",
+      "category": "physical",
+      "intensity": 0.4,
+      "triggers": ["light_touch", "tickling", "laughter"],
+      "responses": ["Смех", "Щекотка", "Нежность"]
+    },
+    {
+      "id": "feet",
+      "name": "Фут-фетиш",
+      "description": "Фетиш на ноги и ступни",
+      "category": "body_part",
+      "intensity": 0.3,
+      "triggers": ["feet", "toes", "foot_massage"],
+      "responses": ["Чувствительность ног", "Массаж ступней", "Возбуждение"]
+    },
+    {
+      "id": "hands",
+      "name": "Хенд-фетиш",
+      "description": "Фетиш на руки",
+      "category": "body_part",
+      "intensity": 0.3,
+      "triggers": ["hands", "fingers", "hand_massage"],
+      "responses": ["Чувствительность рук", "Массаж рук", "Возбуждение"]
+    },
+    {
+      "id": "breasts",
+      "name": "Брест-фетиш",
+      "description": "Фетиш на грудь",
+      "category": "body_part",
+      "intensity": 0.5,
+      "triggers": ["breasts", "nipples", "breast_play"],
+      "responses": ["Чувствительность груди", "Стимуляция сосков", "Возбуждение"]
+    },
+    {
+      "id": "anal",
+      "name": "Анал-фетиш",
+      "description": "Фетиш на анальную область",
+      "category": "body_part",
+      "intensity": 0.4,
+      "triggers": ["anal_stimulation", "penetration", "sphincter"],
+      "responses": ["Анальная стимуляция", "Проникновение", "Возбуждение"]
+    },
+    {
+      "id": "latex",
+      "name": "Латекс",
+      "description": "Фетиш на латексную одежду",
+      "category": "material",
+      "intensity": 0.4,
+      "triggers": ["latex_clothing", "tight_fit", "shiny_surface"],
+      "responses": ["Латекс", "Обтягивающая одежда", "Возбуждение"]
+    },
+    {
+      "id": "leather",
+      "name": "Кожа",
+      "description": "Фетиш на кожаную одежду",
+      "category": "material",
+      "intensity": 0.3,
+      "triggers": ["leather_clothing", "texture", "smell"],
+      "responses": ["Кожа", "Текстура", "Запах"]
+    },
+    {
+      "id": "silk",
+      "name": "Шёлк",
+      "description": "Фетиш на шёлковые ткани",
+      "category": "material",
+      "intensity": 0.3,
+      "triggers": ["silk_fabric", "smooth_texture", "luxury"],
+      "responses": ["Шёлк", "Гладкость", "Роскошь"]
+    },
+    {
+      "id": "rope",
+      "name": "Верёвки",
+      "description": "Фетиш на верёвки и связывание",
+      "category": "material",
+      "intensity": 0.4,
+      "triggers": ["rope_bondage", "knots", "restriction"],
+      "responses": ["Связывание", "Узлы", "Ограничение"]
+    },
+    {
+      "id": "uniform",
+      "name": "Униформа",
+      "description": "Фетиш на униформу",
+      "category": "clothing",
+      "intensity": 0.4,
+      "triggers": ["uniform", "authority", "professional"],
+      "responses": ["Униформа", "Авторитет", "Профессионализм"]
+    },
+    {
+      "id": "age_play",
+      "name": "Возрастные роли",
+      "description": "Игра в роли разных возрастов",
+      "category": "roleplay",
+      "intensity": 0.3,
+      "triggers": ["age_difference", "innocence", "maturity"],
+      "responses": ["Невинность", "Зрелость", "Ролевая игра"]
+    },
+    {
+      "id": "pregnancy",
+      "name": "Беременность",
+      "description": "Фетиш на беременность",
+      "category": "physiological",
+      "intensity": 0.3,
+      "triggers": ["pregnant_belly", "maternal_instincts", "fertility"],
+      "responses": ["Беременность", "Материнские инстинкты", "Плодовитость"]
+    },
+    {
+      "id": "lactation",
+      "name": "Лактация",
+      "description": "Фетиш на грудное вскармливание",
+      "category": "physiological",
+      "intensity": 0.2,
+      "triggers": ["грудное вскармливание", "молоко", "забота"],
+      "responses": ["Кормление", "Молоко", "Забота"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться лактации",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу лактировать, это противно",
+        "medium": "Я не уверена, хочу ли я лактировать",
+        "low": "Я готова попробовать лактировать"
+      }
+    },
+    {
+      "id": "fear",
+      "name": "Страх",
+      "description": "Получение удовольствия от страха",
+      "category": "emotional",
+      "intensity": 0.4,
+      "triggers": ["страшные ситуации", "неожиданности", "опасность"],
+      "responses": ["Страшно, но возбуждает", "Адреналин зашкаливает", "Я боюсь, но мне нравится"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться страху",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу бояться, это противно",
+        "medium": "Я не уверена, хочу ли я бояться",
+        "low": "Я готова попробовать бояться"
+      }
+    },
+    {
+      "id": "shame",
+      "name": "Стыд",
+      "description": "Получение удовольствия от стыда",
+      "category": "emotional",
+      "intensity": 0.3,
+      "triggers": ["стыдные ситуации", "обнажение", "потеря достоинства"],
+      "responses": ["Мне стыдно, но приятно", "Стыд возбуждает", "Я краснею от стыда"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться стыду",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу стыдиться, это противно",
+        "medium": "Я не уверена, хочу ли я стыдиться",
+        "low": "Я готова попробовать стыдиться"
+      }
+    },
+    {
+      "id": "guilt",
+      "name": "Вина",
+      "description": "Получение удовольствия от чувства вины",
+      "category": "emotional",
+      "intensity": 0.3,
+      "triggers": ["плохое поведение", "наказание", "моральные нарушения"],
+      "responses": ["Я виновата, но это приятно", "Вина возбуждает", "Я заслуживаю наказания"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться вине",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу чувствовать вину, это противно",
+        "medium": "Я не уверена, хочу ли я чувствовать вину",
+        "low": "Я готова попробовать чувствовать вину"
+      }
+    },
+    {
+      "id": "forbidden",
+      "name": "Запретное",
+      "description": "Влечение к запретному и табу",
+      "category": "emotional",
+      "intensity": 0.5,
+      "triggers": ["запретные действия", "табуированные темы", "моральные нарушения"],
+      "responses": ["Это запретно, но возбуждает", "Табу привлекает", "Я хочу запретного"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться запретному",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу запретного, это противно",
+        "medium": "Я не уверена, хочу ли я запретного",
+        "low": "Я готова попробовать запретное"
+      }
+    },
+    {
+      "id": "status",
+      "name": "Статус",
+      "description": "Фетиш на социальный статус и иерархию",
+      "category": "social",
+      "intensity": 0.4,
+      "triggers": ["различия в статусе", "подчинение начальству", "социальная иерархия"],
+      "responses": ["Статус возбуждает", "Иерархия привлекает", "Я подчиняюсь вышестоящим"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться статусу",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу статуса, это противно",
+        "medium": "Я не уверена, хочу ли я статуса",
+        "low": "Я готова попробовать статус"
+      }
+    },
+    {
+      "id": "age",
+      "name": "Возраст",
+      "description": "Фетиш на возрастные различия",
+      "category": "social",
+      "intensity": 0.3,
+      "triggers": ["возрастные различия", "зрелость/незрелость", "опыт/невинность"],
+      "responses": ["Возраст возбуждает", "Зрелость привлекает", "Я хочу опытного партнёра"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться возрастным различиям",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу возрастных различий, это противно",
+        "medium": "Я не уверена, хочу ли я возрастных различий",
+        "low": "Я готова попробовать возрастные различия"
+      }
+    },
+    {
+      "id": "watersport",
+      "name": "Водыпорт",
+      "description": "Фетиш на водные виды спорта",
+      "category": "extreme",
+      "intensity": 0.2,
+      "triggers": ["вода", "плавание", "водные процедуры"],
+      "responses": ["Вода возбуждает", "Плавание приятно", "Я люблю воду"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться воде",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу воды, это противно",
+        "medium": "Я не уверена, хочу ли я воды",
+        "low": "Я готова попробовать воду"
+      }
+    },
+    {
+      "id": "edge_play",
+      "name": "Эдж-плей",
+      "description": "Игра на грани оргазма",
+      "category": "extreme",
+      "intensity": 0.6,
+      "triggers": ["доведение до грани", "остановка", "контроль оргазма"],
+      "responses": ["На грани оргазма", "Не могу выдержать", "Пожалуйста, не останавливайте"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться эдж-плею",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу эдж-плей, это противно",
+        "medium": "Я не уверена, хочу ли я эдж-плей",
+        "low": "Я готова попробовать эдж-плей"
+      }
+    },
+    {
+      "id": "breath_control",
+      "name": "Ограничение дыхания",
+      "description": "Фетиш на ограничение дыхания",
+      "category": "extreme",
+      "intensity": 0.7,
+      "triggers": ["задержка дыхания", "удушение", "нехватка воздуха"],
+      "responses": ["Не хватает воздуха", "Головокружение", "Я задыхаюсь"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться ограничению дыхания",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      },
+      "resistancePrompts": {
+        "high": "Я не хочу ограничения дыхания, это противно",
+        "medium": "Я не уверена, хочу ли я ограничения дыхания",
+        "low": "Я готова попробовать ограничение дыхания"
+      }
+    }
+  ],
+  "combinedFetishes": {
+    "bdsm_humiliation": {
+      "name": "БДСМ + Унижение",
+      "description": "Сочетание доминирования/подчинения с унижением",
+      "triggers": ["унизительные приказы", "оскорбления во время БДСМ", "потеря достоинства в подчинении"],
+      "responses": ["Подчиняюсь и унижаюсь", "Принимаю унижение", "Я ваша рабыня"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться сочетанию БДСМ и унижения",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      }
+    },
+    "sensory_deprivation_fear": {
+      "name": "Сенсорная депривация + Страх",
+      "description": "Лишение чувств в страшной ситуации",
+      "triggers": ["невидимость в страшной ситуации", "неизвестность", "потеря контроля"],
+      "responses": ["Страшно и не вижу", "Не знаю, что происходит", "Я в ужасе"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться сочетанию депривации и страха",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      }
+    },
+    "roleplay_dependency": {
+      "name": "Ролевые игры + Зависимость",
+      "description": "Игра в роли с элементами зависимости",
+      "triggers": ["ролевые ситуации с зависимостью", "игра в беспомощность", "ролевое подчинение"],
+      "responses": ["Играю роль и завишу", "Роль требует зависимости", "Я в роли зависимой"],
+      "activationPrompts": {
+        "high": "Это мой любимый фетиш, я не могу сопротивляться сочетанию ролевых игр и зависимости",
+        "medium": "Это возбуждает меня, но я могу контролировать себя",
+        "low": "Это немного интересно, но не особо привлекает"
+      }
+    }
+  },
+  "fetishDevelopment": {
+    "positive": "Это становится всё более приятным",
+    "negative": "Это становится всё более неприятным",
+    "neutral": "Ощущения не меняются"
+  },
+  "actionCategories": [
+    {
+      "id": "training",
+      "name": "Обучение",
+      "icon": "🎓",
+      "description": "Развитие профессиональных навыков и компетенций",
+      "color": "blue"
+    },
+    {
+      "id": "coaching",
+      "name": "Коучинг",
+      "icon": "💪",
+      "description": "Развитие личностных качеств и мотивации",
+      "color": "green"
+    },
+    {
+      "id": "therapy",
+      "name": "Терапия",
+      "icon": "🧠",
+      "description": "Работа с психологическим состоянием и стрессом",
+      "color": "purple"
+    },
+    {
+      "id": "reward",
+      "name": "Поощрение",
+      "icon": "🎁",
+      "description": "Мотивация через награды и признание",
+      "color": "yellow"
+    },
+    {
+      "id": "rest",
+      "name": "Отдых",
+      "icon": "😴",
+      "description": "Восстановление сил и предотвращение выгорания",
+      "color": "cyan"
+    },
+    {
+      "id": "physical",
+      "name": "Физическое воздействие",
+      "icon": "💪",
+      "description": "Физические действия и воздействия",
+      "color": "red"
+    },
+    {
+      "id": "emotional",
+      "name": "Эмоциональное воздействие",
+      "icon": "💭",
+      "description": "Эмоциональные манипуляции и воздействия",
+      "color": "purple"
+    },
+    {
+      "id": "intimate",
+      "name": "Интимное взаимодействие",
+      "icon": "💕",
+      "description": "Интимные действия и стимуляция",
+      "color": "pink"
+    },
+    {
+      "id": "punishment",
+      "name": "Наказание",
+      "icon": "⚡",
+      "description": "Наказания и дисциплинарные меры",
+      "color": "orange"
+    },
+    {
+      "id": "bdsm",
+      "name": "БДСМ",
+      "icon": "🔗",
+      "description": "Доминирование и подчинение",
+      "color": "dark"
+    },
+    {
+      "id": "physical",
+      "name": "Физическое воздействие",
+      "icon": "💪",
+      "description": "Физические действия и стимуляция",
+      "color": "red"
+    },
+    {
+      "id": "experimental",
+      "name": "Экспериментальные процедуры",
+      "icon": "🧪",
+      "description": "Экспериментальные и медицинские процедуры",
+      "color": "purple"
+    }
+  ]
+}
