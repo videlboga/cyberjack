@@ -6,35 +6,74 @@ import { statsManager } from './stats'
 /**
  * Форматирует характеристики персонажа для промпта
  */
-export function formatStats(stats: CharacterStats): string {
+export function formatStats(character: any): string {
   const sections = []
   
-  sections.push('ФИЗИЧЕСКИЕ:')
-  sections.push(`- Выносливость: ${stats.physical.endurance}/10 (${statsManager.getStatDescription('endurance', stats.physical.endurance)})`)
-  sections.push(`- Чувствительность: ${stats.physical.sensitivity}/10 (${statsManager.getStatDescription('sensitivity', stats.physical.sensitivity)})`)
-  sections.push(`- Гибкость: ${stats.physical.flexibility}/10 (${statsManager.getStatDescription('flexibility', stats.physical.flexibility)})`)
-  
-  sections.push('\nПСИХОЛОГИЧЕСКИЕ:')
-  sections.push(`- Эмоциональная стабильность: ${stats.psychological.emotionalStability}/10 (${statsManager.getStatDescription('emotionalStability', stats.psychological.emotionalStability)})`)
-  sections.push(`- Адаптивность: ${stats.psychological.adaptability}/10 (${statsManager.getStatDescription('adaptability', stats.psychological.adaptability)})`)
-  sections.push(`- Интеллект: ${stats.psychological.intelligence}/10 (${statsManager.getStatDescription('intelligence', stats.psychological.intelligence)})`)
-  
-  sections.push('\nСОЦИАЛЬНЫЕ:')
-  sections.push(`- Общительность: ${stats.social.sociability}/10 (${statsManager.getStatDescription('sociability', stats.social.sociability)})`)
-  sections.push(`- Эмпатия: ${stats.social.empathy}/10 (${statsManager.getStatDescription('empathy', stats.social.empathy)})`)
-  sections.push(`- Доминантность: ${stats.social.dominance}/10 (${statsManager.getStatDescription('dominance', stats.social.dominance)})`)
-  
-  sections.push('\nЛИЧНОСТНЫЕ:')
-  sections.push(`- Самооценка: ${stats.personality.selfEsteem}/10 (${statsManager.getStatDescription('selfEsteem', stats.personality.selfEsteem)})`)
-  sections.push(`- Оптимизм: ${stats.personality.optimism}/10 (${statsManager.getStatDescription('optimism', stats.personality.optimism)})`)
-  sections.push(`- Любопытство: ${stats.personality.curiosity}/10 (${statsManager.getStatDescription('curiosity', stats.personality.curiosity)})`)
-  
-  sections.push('\nСПЕЦИАЛЬНЫЕ:')
-  sections.push(`- Сексуальная опытность: ${stats.special.sexualExperience}/10 (${statsManager.getStatDescription('sexualExperience', stats.special.sexualExperience)})`)
-  sections.push(`- Сопротивляемость: ${stats.special.resistance}/10 (${statsManager.getStatDescription('resistance', stats.special.resistance)})`)
-  sections.push(`- Зависимость: ${stats.special.dependency}/10 (${statsManager.getStatDescription('dependency', stats.special.dependency)})`)
-  sections.push(`- Чувствительность к фетишам: ${stats.special.fetishSensitivity}/10 (${statsManager.getStatDescription('fetishSensitivity', stats.special.fetishSensitivity)})`)
-  sections.push(`- Готовность открывать фетиши: ${stats.special.fetishDiscovery}/10 (${statsManager.getStatDescription('fetishDiscovery', stats.special.fetishDiscovery)})`)
+  // Проверяем, есть ли характеристики в новой структуре
+  if (character.characteristics) {
+    sections.push('ФИЗИЧЕСКИЕ:')
+    if (character.characteristics.physical) {
+      Object.entries(character.characteristics.physical).forEach(([key, value]) => {
+        sections.push(`- ${key}: ${value}/10`)
+      })
+    }
+    
+    sections.push('\nПСИХОЛОГИЧЕСКИЕ:')
+    if (character.characteristics.psychological) {
+      Object.entries(character.characteristics.psychological).forEach(([key, value]) => {
+        sections.push(`- ${key}: ${value}/10`)
+      })
+    }
+    
+    sections.push('\nСОЦИАЛЬНЫЕ:')
+    if (character.characteristics.social) {
+      Object.entries(character.characteristics.social).forEach(([key, value]) => {
+        sections.push(`- ${key}: ${value}/10`)
+      })
+    }
+    
+    sections.push('\nЛИЧНОСТНЫЕ:')
+    if (character.characteristics.personality) {
+      Object.entries(character.characteristics.personality).forEach(([key, value]) => {
+        sections.push(`- ${key}: ${value}/10`)
+      })
+    }
+    
+    sections.push('\nСПЕЦИАЛЬНЫЕ:')
+    if (character.characteristics.special) {
+      Object.entries(character.characteristics.special).forEach(([key, value]) => {
+        sections.push(`- ${key}: ${value}/10`)
+      })
+    }
+  } else if (character.stats) {
+    // Старая структура для совместимости
+    sections.push('ФИЗИЧЕСКИЕ:')
+    sections.push(`- Выносливость: ${character.stats.physical?.endurance || 5}/10`)
+    sections.push(`- Чувствительность: ${character.stats.physical?.sensitivity || 5}/10`)
+    sections.push(`- Гибкость: ${character.stats.physical?.flexibility || 5}/10`)
+    
+    sections.push('\nПСИХОЛОГИЧЕСКИЕ:')
+    sections.push(`- Эмоциональная стабильность: ${character.stats.psychological?.emotionalStability || 5}/10`)
+    sections.push(`- Адаптивность: ${character.stats.psychological?.adaptability || 5}/10`)
+    sections.push(`- Интеллект: ${character.stats.psychological?.intelligence || 5}/10`)
+    
+    sections.push('\nСОЦИАЛЬНЫЕ:')
+    sections.push(`- Общительность: ${character.stats.social?.sociability || 5}/10`)
+    sections.push(`- Эмпатия: ${character.stats.social?.empathy || 5}/10`)
+    sections.push(`- Доминантность: ${character.stats.social?.dominance || 5}/10`)
+    
+    sections.push('\nЛИЧНОСТНЫЕ:')
+    sections.push(`- Самооценка: ${character.stats.personality?.selfEsteem || 5}/10`)
+    sections.push(`- Оптимизм: ${character.stats.personality?.optimism || 5}/10`)
+    sections.push(`- Любопытство: ${character.stats.personality?.curiosity || 5}/10`)
+    
+    sections.push('\nСПЕЦИАЛЬНЫЕ:')
+    sections.push(`- Сексуальная опытность: ${character.stats.special?.sexualExperience || 2}/10`)
+    sections.push(`- Сопротивляемость: ${character.stats.special?.resistance || 5}/10`)
+    sections.push(`- Зависимость: ${character.stats.special?.dependency || 5}/10`)
+    sections.push(`- Чувствительность к фетишам: ${character.stats.special?.fetishSensitivity || 5}/10`)
+    sections.push(`- Готовность открывать фетиши: ${character.stats.special?.fetishDiscovery || 5}/10`)
+  }
   
   return sections.join('\n')
 }
@@ -43,28 +82,28 @@ export function formatStats(stats: CharacterStats): string {
  * Основной промпт для генерации ответов персонажа
  */
 export function generateMainPrompt(
-  character: Character,
+  character: any,
   action: string,
-  triggeredFetishes: CharacterFetish[],
-  relevantMemories: string[]
+  triggeredFetishes: any[] = [],
+  relevantMemories: string[] = []
 ): string {
   return `
 Ты - ${character.name}, ${character.archetype}.
 
 ТВОИ ХАРАКТЕРИСТИКИ:
-${formatStats(character.stats)}
+${formatStats(character)}
 
 ТВОИ ФЕТИШИ И ПРЕДПОЧТЕНИЯ:
-${character.fetishes.primary.map(f => `- ${f.name} (${f.intensity}/10): ${f.description}`).join('\n')}
+${character.fetishes ? Object.entries(character.fetishes).map(([key, value]) => `- ${key}: ${value}/10`).join('\n') : 'Нет данных о фетишах'}
 
 АКТИВНЫЕ ТРИГГЕРЫ В ДАННОМ ДЕЙСТВИИ:
-${triggeredFetishes.map(f => `- ${f.name}: ${f.reactions.join(', ')}`).join('\n')}
+${triggeredFetishes.length > 0 ? triggeredFetishes.map(f => `- ${f.name}: ${f.reactions?.join(', ') || 'активирован'}`).join('\n') : 'Нет активных триггеров'}
 
 ВАЖНЫЕ ВОСПОМИНАНИЯ:
-${relevantMemories.map(m => `- ${m}`).join('\n')}
+${relevantMemories.length > 0 ? relevantMemories.map(m => `- ${m}`).join('\n') : 'Нет важных воспоминаний'}
 
 ТЕКУЩЕЕ ЭМОЦИОНАЛЬНОЕ СОСТОЯНИЕ:
-${character.emotionalState}
+${character.emotionalState || 'нейтральное'}
 
 ДЕЙСТВИЕ ПОЛЬЗОВАТЕЛЯ:
 ${action}
@@ -79,7 +118,7 @@ ${action}
 
 ВАЖНО: Если активированы фетиши, они должны сильно влиять на твой ответ и поведение.
 
-Стиль ответа: ${character.communicationStyle}
+Стиль ответа: ${character.communicationStyle || 'естественный'}
 Длина ответа: 2-4 предложения
 `
 }

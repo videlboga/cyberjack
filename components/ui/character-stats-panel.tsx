@@ -305,7 +305,39 @@ function getStatDisplayName(stat: string): string {
     routine: 'Рутина',
     compliance: 'Послушание',
     neuroplasticity: 'Нейропластичность',
-    cognitiveLoad: 'Когнитивная нагрузка'
+    cognitiveLoad: 'Когнитивная нагрузка',
+    
+    // Дополнительные состояния
+    fear: 'Страх',
+    despair: 'Отчаяние',
+    devotion: 'Преданность',
+    trust: 'Доверие',
+    relationship: 'Отношения',
+    pleasure: 'Удовольствие',
+    pain: 'Боль',
+    arousal: 'Возбуждение',
+    stress: 'Стресс',
+    happiness: 'Счастье',
+    sadness: 'Грусть',
+    anger: 'Гнев',
+    shame: 'Стыд',
+    guilt: 'Вина',
+    pride: 'Гордость',
+    humiliation: 'Унижение',
+    vulnerability: 'Уязвимость',
+    confidence: 'Уверенность',
+    helplessness: 'Беспомощность',
+    submission: 'Подчинение',
+    dominance_state: 'Доминирование',
+    fatigue: 'Усталость',
+    health: 'Здоровье',
+    endurance_state: 'Выносливость',
+    sensuality: 'Чувственность',
+    awareness: 'Осознанность',
+    sensory_overload: 'Сенсорная перегрузка',
+    mental_state: 'Психическое состояние',
+    strength: 'Сила',
+    creativity: 'Креативность'
   };
   
   return displayNames[stat] || stat;

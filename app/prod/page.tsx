@@ -15,6 +15,7 @@ import { OpenRouterDebugPanel } from './components/OpenRouterDebugPanel'
 import { Button } from "@/components/ui/button"
 import { StatNotification } from "@/components/ui/stat-notification"
 import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
+import { Toaster } from "@/components/ui/toaster"
 
   // Функция для генерации уникальных ID
   let idCounter = 0
@@ -1657,42 +1658,89 @@ export default function TalentArchitectProd() {
           // Применяем изменения характеристик
           if (changes.statChanges) {
             Object.entries(changes.statChanges).forEach(([stat, change]) => {
-              if (stat in updatedTalent) {
+              // Проверяем, есть ли характеристика в attributes
+              if (updatedTalent.attributes && stat in updatedTalent.attributes) {
+                const currentValue = updatedTalent.attributes[stat]
+                updatedTalent.attributes[stat] = Math.max(0, Math.min(100, currentValue + (change as number)))
+              }
+              // Проверяем, есть ли характеристика в states
+              else if (updatedTalent.states && stat in updatedTalent.states) {
+                const currentValue = updatedTalent.states[stat]
+                updatedTalent.states[stat] = Math.max(0, Math.min(100, currentValue + (change as number)))
+              }
+              // Проверяем, есть ли характеристика в корне объекта
+              else if (stat in updatedTalent) {
                 const currentValue = (updatedTalent as any)[stat]
                 ;(updatedTalent as any)[stat] = Math.max(0, Math.min(100, currentValue + (change as number)))
               }
             })
           }
 
-          // Применяем эмоциональные изменения
+          // Применяем эмоциональные изменения из emotionalContent
+          if (changes.emotionalContent) {
+            // Обновляем настроение на основе pleasure
+            if (changes.emotionalContent.pleasure) {
+              const moodChange = Math.round(changes.emotionalContent.pleasure * 20)
+              if (updatedTalent.states) {
+                updatedTalent.states.mood = Math.max(0, Math.min(100, updatedTalent.states.mood + moodChange))
+              }
+            }
+            
+            // Обновляем страх на основе fear
+            if (changes.emotionalContent.fear) {
+              const fearChange = Math.round(changes.emotionalContent.fear * 20)
+              if (updatedTalent.states) {
+                updatedTalent.states.anxiety = Math.max(0, Math.min(100, updatedTalent.states.anxiety + fearChange))
+              }
+            }
+            
+            // Обновляем возбуждение на основе arousal
+            if (changes.emotionalContent.arousal) {
+              const arousalChange = Math.round(changes.emotionalContent.arousal * 20)
+              if (updatedTalent.states) {
+                updatedTalent.states.engagement = Math.max(0, Math.min(100, updatedTalent.states.engagement + arousalChange))
+              }
+            }
+          }
+
+          // Применяем эмоциональные изменения (legacy)
           if (changes.emotionalChange) {
-            // Обновляем настроение на основе эмоционального изменения
             const moodChange = Math.round(changes.emotionalChange * 10)
             updatedTalent.mood = Math.max(0, Math.min(100, updatedTalent.mood + moodChange))
           }
 
+          // Добавляем фетиши если они активировались
+          if (changes.fetishTriggers && changes.fetishTriggers.length > 0) {
+            if (!updatedTalent.activeFetishes) {
+              updatedTalent.activeFetishes = []
+            }
+            changes.fetishTriggers.forEach((fetish: string) => {
+              if (!updatedTalent.activeFetishes.includes(fetish)) {
+                updatedTalent.activeFetishes.push(fetish)
+              }
+            })
+          }
+
           // Добавляем воспоминание о взаимодействии
-          updatedTalent.memories = [...updatedTalent.memories.slice(-4), `Взаимодействие с AI: ${selectedInteractionType}`]
+          const interactionMemory = `Чат с AI: ${changes.response ? 'получен ответ' : 'взаимодействие'}`
+          updatedTalent.memories = [...updatedTalent.memories.slice(-4), interactionMemory]
 
           return updatedTalent
         }
         return talent
       }),
     )
-
-    // Обновляем выбранного таланта
-    setSelectedTalent((prev) => (prev ? { ...prev, ...talents.find((t) => t.id === prev.id) } : null))
-
-    // Показываем уведомление об изменениях
-    const changeMessage = {
-      id: (Date.now() + 2).toString(),
-      role: "assistant" as const,
-      content: `✨ AI применил изменения: ${changes.emotionalChange ? `эмоциональное состояние ${changes.emotionalChange > 0 ? "+" : ""}${Math.round(changes.emotionalChange * 10)}` : "обновлены характеристики"}`,
-      timestamp: new Date(),
-    }
-
-    setChatMessages((prev) => [...prev, changeMessage])
   }
+
+  // Синхронизируем selectedTalent с обновленными talents
+  useEffect(() => {
+    if (selectedTalent) {
+      const updatedTalent = talents.find((t) => t.id === selectedTalent.id)
+      if (updatedTalent) {
+        setSelectedTalent(updatedTalent)
+      }
+    }
+  }, [talents, selectedTalent?.id])
 
   const handleChatMouseDown = (e: React.MouseEvent) => {
     setIsChatDragging(true)
@@ -2453,6 +2501,7 @@ export default function TalentArchitectProd() {
               characterAI={characterAI}
               selectedTalent={selectedTalent}
               onClose={() => setShowCharacterChat(false)}
+              applyAIChanges={applyAIChanges}
             />
           )}
         </>
@@ -2964,6 +3013,9 @@ export default function TalentArchitectProd() {
         isVisible={showCharacterPanel}
         onClose={() => setShowCharacterPanel(false)}
       />
+
+      {/* Система уведомлений */}
+      <Toaster />
     </div>
   )
 }

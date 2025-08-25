@@ -275,6 +275,37 @@ const NexusEnslaverGame = () => {
           }
         }
         break
+      case 'characters':
+        baseEntity = {
+          id: `character-${Date.now()}`,
+          name: 'Новый персонаж',
+          age: 18,
+          archetype: 'Базовый архетип',
+          description: 'Описание персонажа',
+          category: 'Выходцы из трущоб',
+          rank: 'Junior',
+          price: 100,
+          specialization: 'Базовое подчинение',
+          avatar: '👤',
+          characteristics: {},
+          states: {},
+          fetishes: {},
+          traits: [],
+          preferences: {},
+          skills: {},
+          prompts: {
+            base: '',
+            characteristicInterpretations: {
+              physical: {},
+              psychological: {},
+              social: {},
+              personality: {},
+              special: {}
+            },
+            situational: []
+          }
+        }
+        break
       default:
         baseEntity = {}
     }
@@ -535,6 +566,7 @@ const NexusEnslaverGame = () => {
       events: 'events',
       equipment: 'equipment',
       assets: 'assets',
+      characters: 'characters',
       users: 'users',
       scenes: 'scenes',
       categories: 'categories',
@@ -555,7 +587,8 @@ const NexusEnslaverGame = () => {
       contracts: 'Контракты',
       events: 'События',
       equipment: 'Оборудование',
-      assets: 'Активы',
+      assets: 'Персонажи',
+      characters: 'Персонажи',
       users: 'Пользователи',
       scenes: 'Сцены',
       categories: 'Категории',
@@ -677,7 +710,7 @@ const NexusEnslaverGame = () => {
               <TabsList className="grid w-full grid-cols-6 lg:grid-cols-7 h-12 bg-muted/50 p-1 rounded-lg">
                 <TabsTrigger value="assets" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Активы
+                  Персонажи
                 </TabsTrigger>
                 <TabsTrigger value="users" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -709,14 +742,14 @@ const NexusEnslaverGame = () => {
             {/* Таб Активы */}
             <TabsContent value="assets" className="space-y-6">
               <EntityList
-                entities={getEntitiesList('assets')}
-                entityType="asset"
-                configType="assets"
-                onEdit={(entity) => handleEdit(entity, 'assets')}
-                onDelete={(id) => handleDelete(id, 'assets')}
+                entities={getEntitiesList('characters')}
+                entityType="character"
+                configType="characters"
+                onEdit={(entity) => handleEdit(entity, 'characters')}
+                onDelete={(id) => handleDelete(id, 'characters')}
                 onView={(entity) => handleViewCharacterStats(entity)}
-                onAdd={() => handleAdd('assets')}
-                title="Активы"
+                onAdd={() => handleAdd('characters')}
+                title="Персонажи (Активы)"
               />
             </TabsContent>
 

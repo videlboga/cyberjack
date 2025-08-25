@@ -1,18 +1,26 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Talent } from '@/lib/types'
+import { useToast } from '@/hooks/use-toast'
+
+interface Talent {
+  id: string
+  name: string
+  [key: string]: any
+}
 
 interface CharacterChatProps {
   characterAI: any
   selectedTalent: Talent
   onClose: () => void
+  applyAIChanges: (talentId: string, changes: any) => void
 }
 
-export function CharacterChat({ characterAI, selectedTalent, onClose }: CharacterChatProps) {
+export function CharacterChat({ characterAI, selectedTalent, onClose, applyAIChanges }: CharacterChatProps) {
   const [messages, setMessages] = useState<Array<{ id: string; role: "user" | "assistant"; content: string; timestamp: Date }>>([])
   const [currentMessage, setCurrentMessage] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
+  const { toast } = useToast()
   const [position, setPosition] = useState(() => {
     // Центрируем чат при первом открытии
     if (typeof window !== 'undefined') {
@@ -69,6 +77,147 @@ export function CharacterChat({ characterAI, selectedTalent, onClose }: Characte
       // Применяем изменения от анализа
       if (analysis.statChanges && Object.keys(analysis.statChanges).length > 0) {
         console.log('Изменения от Character AI:', analysis.statChanges)
+        
+        // Применяем изменения к персонажу
+        applyAIChanges(selectedTalent.id, analysis)
+        
+        // Формируем сообщение об изменениях
+        let changeDescription = []
+        
+        if (analysis.statChanges) {
+          const statNames: { [key: string]: string } = {
+            mood: 'настроение',
+            anxiety: 'тревожность',
+            fear: 'страх',
+            despair: 'отчаяние',
+            devotion: 'преданность',
+            strength: 'сила',
+            empathy: 'эмпатия',
+            intelligence: 'интеллект',
+            creativity: 'креативность',
+            endurance: 'выносливость',
+            sensitivity: 'чувствительность',
+            flexibility: 'гибкость',
+            emotionalStability: 'эмоциональная стабильность',
+            adaptability: 'адаптивность',
+            sociability: 'общительность',
+            dominance: 'доминантность',
+            selfEsteem: 'самооценка',
+            optimism: 'оптимизм',
+            curiosity: 'любопытство',
+            sexualExperience: 'сексуальный опыт',
+            resistance: 'сопротивляемость',
+            dependency: 'зависимость',
+            trust: 'доверие',
+            burnout: 'выгорание',
+            engagement: 'вовлеченность',
+            entitlement: 'чувство права',
+            insight: 'проницательность',
+            routine: 'рутина',
+            compliance: 'послушание',
+            neuroplasticity: 'нейропластичность',
+            cognitiveLoad: 'когнитивная нагрузка',
+            stress: 'стресс',
+            happiness: 'счастье',
+            sadness: 'грусть',
+            anger: 'гнев',
+            shame: 'стыд',
+            guilt: 'вина',
+            pride: 'гордость',
+            humiliation: 'унижение',
+            vulnerability: 'уязвимость',
+            confidence: 'уверенность',
+            helplessness: 'беспомощность',
+            submission: 'подчинение',
+            dominance_state: 'доминирование',
+            fatigue: 'усталость',
+            health: 'здоровье',
+            endurance_state: 'выносливость',
+            sensuality: 'чувственность',
+            awareness: 'осознанность',
+            sensory_overload: 'сенсорная перегрузка',
+            mental_state: 'психическое состояние',
+            relationship: 'отношения',
+            pleasure: 'удовольствие',
+            pain: 'боль',
+            arousal: 'возбуждение'
+          }
+          
+          changeDescription.push(`Характеристики: ${Object.entries(analysis.statChanges).map(([stat, change]) => {
+            const statName = statNames[stat] || stat
+            return `${statName} ${(change as number) > 0 ? '+' : ''}${change}`
+          }).join(', ')}`)
+        }
+        
+        if (analysis.emotionalContent) {
+          const emotions = Object.entries(analysis.emotionalContent)
+            .filter(([_, value]) => (value as number) > 0.1)
+            .map(([emotion, value]) => {
+              const emotionNames: { [key: string]: string } = {
+                threat: 'угроза',
+                pleasure: 'удовольствие',
+                pain: 'боль',
+                fear: 'страх',
+                arousal: 'возбуждение'
+              }
+              const emotionName = emotionNames[emotion] || emotion
+              return `${emotionName}: ${Math.round((value as number) * 100)}%`
+            })
+          if (emotions.length > 0) {
+            changeDescription.push(`Эмоции: ${emotions.join(', ')}`)
+          }
+        }
+        
+        if (analysis.fetishTriggers && analysis.fetishTriggers.length > 0) {
+          const fetishNames: { [key: string]: string } = {
+            bondage: 'бондаж',
+            submission: 'подчинение',
+            dominance: 'доминирование',
+            shyness: 'застенчивость',
+            embarrassment: 'смущение',
+            reassurance: 'успокоение',
+            dominance_submission: 'доминирование-подчинение',
+            bdsm: 'БДСМ',
+            humiliation: 'унижение',
+            masochism: 'мазохизм',
+            sadism: 'садизм',
+            voyeurism: 'вуайеризм',
+            exhibitionism: 'эксгибиционизм',
+            fetishism: 'фетишизм',
+            transvestism: 'трансвестизм',
+            pedophilia: 'педофилия',
+            zoophilia: 'зоофилия',
+            necrophilia: 'некрофилия',
+            coprophilia: 'копрофилия',
+            urophilia: 'урофилия',
+            klismaphilia: 'клизмафилия',
+            asphyxiophilia: 'асфиксиофилия',
+            infantilism: 'инфантилизм',
+            ageplay: 'возрастные игры',
+            petplay: 'игры с животными',
+            roleplay: 'ролевые игры',
+            power_exchange: 'обмен властью',
+            sensory_deprivation: 'сенсорная депривация',
+            impact_play: 'игры с ударами',
+            knife_play: 'игры с ножами',
+            fire_play: 'игры с огнем',
+            wax_play: 'игры с воском',
+            ice_play: 'игры со льдом',
+            electro_play: 'электроигры',
+            breath_play: 'игры с дыханием',
+            edge_play: 'экстремальные игры'
+          }
+          
+          const translatedFetishes = analysis.fetishTriggers.map((fetish: string) => fetishNames[fetish] || fetish)
+          changeDescription.push(`Активированы фетиши: ${translatedFetishes.join(', ')}`)
+        }
+        
+        // Показываем уведомление
+        toast({
+          title: `✨ ${selectedTalent.name}`,
+          description: changeDescription.join(' | '),
+          duration: 3000,
+        })
       }
     } catch (error) {
       console.error('Ошибка Character AI:', error)

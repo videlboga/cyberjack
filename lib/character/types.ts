@@ -12,6 +12,9 @@ export interface Character {
   fetishes: CharacterFetishes
   emotionalState: string
   
+  // Система промтов
+  prompts: CharacterPrompts
+  
   // Метаданные
   createdAt: string
   lastInteraction: string
@@ -197,6 +200,46 @@ export interface FetishInfluence {
   responseModifier: string
 }
 
+export interface CharacterPrompts {
+  base: string                    // Базовый промт
+  characteristicInterpretations: CharacteristicInterpretations  // Интерпретации характеристик
+  situational: SituationalPrompt[]  // Ситуативные промты с условиями
+}
+
+export interface CharacteristicInterpretations {
+  physical: Record<string, string>      // Интерпретации физических характеристик
+  psychological: Record<string, string> // Интерпретации психологических характеристик
+  social: Record<string, string>        // Интерпретации социальных характеристик
+  personality: Record<string, string>   // Интерпретации личностных характеристик
+  special: Record<string, string>       // Интерпретации специальных характеристик
+}
+
+export interface SituationalPrompt {
+  id: string
+  name: string
+  description: string
+  conditions: PromptCondition[]
+  prompt: string
+  priority: number  // Приоритет (1-10, где 10 - высший)
+  isActive: boolean
+}
+
+export interface PromptCondition {
+  type: 'parameter_combination' | 'user_action' | 'multiple'
+  parameters?: {
+    stat?: string
+    operator: 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'between'
+    value: number | [number, number]
+  }[]
+  userActions?: string[]
+  multipleConditions?: {
+    logic: 'AND' | 'OR'
+    conditions: PromptCondition[]
+  }
+  emotionalState?: string[]
+  fetishTriggers?: string[]
+}
+
 // Утилиты для работы с типами
 export function createEmptyCharacter(id: string, name: string, archetype: string): Character {
   return {
@@ -244,6 +287,17 @@ export function createEmptyCharacter(id: string, name: string, archetype: string
       secondary: [],
       discovered: [],
       hidden: []
+    },
+    prompts: {
+      base: '',
+      characteristicInterpretations: {
+        physical: {},
+        psychological: {},
+        social: {},
+        personality: {},
+        special: {}
+      },
+      situational: []
     },
     emotionalState: 'спокойный',
     communicationStyle: 'нейтральный',

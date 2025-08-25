@@ -186,68 +186,112 @@ export class CharacterAdapter {
    * Получает эффективные характеристики персонажа
    */
   static getEffectiveStats(character: any): any {
-    // Проверяем, является ли character объектом типа Character с полем stats
-    if (!character || !character.stats) {
-      console.warn('Character or character.stats is undefined, returning default stats')
-      // Возвращаем дефолтные характеристики
+    // Проверяем, является ли character объектом с полями attributes и states
+    if (!character) {
+      console.warn('Character is undefined, returning default stats')
+      return this.getDefaultStats()
+    }
+
+    // Если у персонажа есть поле stats (новая система)
+    if (character.stats) {
       return {
         // Физические характеристики
-        endurance: 0,
-        sensitivity: 0,
-        flexibility: 0,
+        endurance: (character.stats.physical?.endurance || 0) * 10,
+        sensitivity: (character.stats.physical?.sensitivity || 0) * 10,
+        flexibility: (character.stats.physical?.flexibility || 0) * 10,
         
         // Психологические характеристики
-        emotionalStability: 0,
-        adaptability: 0,
-        intelligence: 0,
+        emotionalStability: (character.stats.psychological?.emotionalStability || 0) * 10,
+        adaptability: (character.stats.psychological?.adaptability || 0) * 10,
+        intelligence: (character.stats.psychological?.intelligence || 0) * 10,
         
         // Социальные характеристики
-        sociability: 0,
-        empathy: 0,
-        dominance: 0,
+        sociability: (character.stats.social?.sociability || 0) * 10,
+        empathy: (character.stats.social?.empathy || 0) * 10,
+        dominance: (character.stats.social?.dominance || 0) * 10,
         
         // Личностные характеристики
-        selfEsteem: 0,
-        optimism: 0,
-        curiosity: 0,
+        selfEsteem: (character.stats.personality?.selfEsteem || 0) * 10,
+        optimism: (character.stats.personality?.optimism || 0) * 10,
+        curiosity: (character.stats.personality?.curiosity || 0) * 10,
         
         // Специальные характеристики
-        sexualExperience: 0,
-        resistance: 0,
-        dependency: 0,
-        fetishSensitivity: 0,
-        fetishDiscovery: 0
+        sexualExperience: (character.stats.special?.sexualExperience || 0) * 10,
+        resistance: (character.stats.special?.resistance || 0) * 10,
+        dependency: (character.stats.special?.dependency || 0) * 10,
+        fetishSensitivity: (character.stats.special?.fetishSensitivity || 0) * 10,
+        fetishDiscovery: (character.stats.special?.fetishDiscovery || 0) * 10
       }
     }
 
-    // Возвращаем характеристики в новой системе Character AI
+    // Если у персонажа есть поля attributes и states (текущая система)
+    if (character.attributes && character.states) {
+      return {
+        // Физические характеристики
+        endurance: character.attributes.endurance || 0,
+        sensitivity: character.attributes.sensitivity || 0,
+        flexibility: character.attributes.flexibility || 0,
+        
+        // Психологические характеристики
+        emotionalStability: character.attributes.emotionalStability || 0,
+        adaptability: character.attributes.adaptability || 0,
+        intelligence: character.attributes.intelligence || 0,
+        
+        // Социальные характеристики
+        sociability: character.attributes.sociability || 0,
+        empathy: character.attributes.empathy || 0,
+        dominance: character.attributes.dominance || 0,
+        
+        // Личностные характеристики
+        selfEsteem: character.attributes.selfEsteem || 0,
+        optimism: character.attributes.optimism || 0,
+        curiosity: character.attributes.curiosity || 0,
+        
+        // Специальные характеристики
+        sexualExperience: character.attributes.sexualExperience || 0,
+        resistance: character.attributes.resistance || 0,
+        dependency: character.attributes.dependency || 0,
+        fetishSensitivity: 50, // Дефолтное значение
+        fetishDiscovery: 50    // Дефолтное значение
+      }
+    }
+
+    // Если ничего не подходит, возвращаем дефолтные характеристики
+    console.warn('Character structure not recognized, returning default stats')
+    return this.getDefaultStats()
+  }
+
+  /**
+   * Возвращает дефолтные характеристики
+   */
+  private static getDefaultStats(): any {
     return {
       // Физические характеристики
-      endurance: (character.stats.physical?.endurance || 0) * 10,      // Выносливость
-      sensitivity: (character.stats.physical?.sensitivity || 0) * 10,  // Чувствительность
-      flexibility: (character.stats.physical?.flexibility || 0) * 10,  // Гибкость
+      endurance: 50,
+      sensitivity: 50,
+      flexibility: 50,
       
       // Психологические характеристики
-      emotionalStability: (character.stats.psychological?.emotionalStability || 0) * 10,  // Эмоциональная стабильность
-      adaptability: (character.stats.psychological?.adaptability || 0) * 10,              // Адаптивность
-      intelligence: (character.stats.psychological?.intelligence || 0) * 10,              // Интеллект
+      emotionalStability: 50,
+      adaptability: 50,
+      intelligence: 50,
       
       // Социальные характеристики
-      sociability: (character.stats.social?.sociability || 0) * 10,    // Общительность
-      empathy: (character.stats.social?.empathy || 0) * 10,            // Эмпатия
-      dominance: (character.stats.social?.dominance || 0) * 10,        // Доминантность
+      sociability: 50,
+      empathy: 50,
+      dominance: 50,
       
       // Личностные характеристики
-      selfEsteem: (character.stats.personality?.selfEsteem || 0) * 10, // Самооценка
-      optimism: (character.stats.personality?.optimism || 0) * 10,     // Оптимизм
-      curiosity: (character.stats.personality?.curiosity || 0) * 10,   // Любопытство
+      selfEsteem: 50,
+      optimism: 50,
+      curiosity: 50,
       
       // Специальные характеристики
-      sexualExperience: (character.stats.special?.sexualExperience || 0) * 10,  // Сексуальная опытность
-      resistance: (character.stats.special?.resistance || 0) * 10,              // Сопротивляемость
-      dependency: (character.stats.special?.dependency || 0) * 10,              // Зависимость
-      fetishSensitivity: (character.stats.special?.fetishSensitivity || 0) * 10, // Чувствительность к фетишам
-      fetishDiscovery: (character.stats.special?.fetishDiscovery || 0) * 10     // Готовность открывать новые фетиши
+      sexualExperience: 50,
+      resistance: 50,
+      dependency: 50,
+      fetishSensitivity: 50,
+      fetishDiscovery: 50
     }
   }
   
@@ -268,3 +312,4 @@ export class CharacterAdapter {
     }
   }
 }
+

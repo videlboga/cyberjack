@@ -12,7 +12,7 @@ export interface FieldConfig {
   description?: string
   defaultValue?: any
   dynamicConfig?: {
-    type: 'attributes' | 'fetishes' | 'effects' | 'states' | 'preferences' | 'condition' | 'history'
+    type: 'attributes' | 'fetishes' | 'effects' | 'states' | 'preferences' | 'condition' | 'history' | 'characteristics' | 'skills'
     subType?: string
     options?: string[]
     min?: number
@@ -302,6 +302,67 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         options: ['continue', 'accept', 'decline', 'investigate', 'escape']
       }
     }
+  ],
+
+  characters: [
+    // Основные поля
+    { name: 'name', type: 'text', label: 'Имя', required: true },
+    { name: 'age', type: 'number', label: 'Возраст', required: true, min: 18, max: 100 },
+    { name: 'archetype', type: 'text', label: 'Архетип', required: true },
+    { name: 'description', type: 'textarea', label: 'Описание', required: false },
+    { name: 'category', type: 'text', label: 'Категория', required: false },
+    { name: 'rank', type: 'select', label: 'Ранг', options: ['Junior', 'Senior', 'Expert', 'Master'], required: false },
+    { name: 'price', type: 'number', label: 'Цена', required: false, min: 0 },
+    { name: 'specialization', type: 'text', label: 'Специализация', required: false },
+    { name: 'avatar', type: 'text', label: 'Аватар (эмодзи)', required: false },
+    
+    // Характеристики
+    {
+      name: 'characteristics',
+      type: 'dynamic-object',
+      label: 'Характеристики',
+      dynamicConfig: { type: 'characteristics', options: ['endurance', 'sensitivity', 'flexibility', 'emotionalStability', 'adaptability', 'intelligence', 'sociability', 'empathy', 'dominance', 'selfEsteem', 'optimism', 'curiosity', 'sexualExperience', 'resistance', 'dependency', 'fetishSensitivity', 'fetishDiscovery'], min: 0, max: 10 }
+    },
+    
+    // Состояния
+    {
+      name: 'states',
+      type: 'dynamic-object',
+      label: 'Состояния',
+      dynamicConfig: { type: 'states', options: ['mood', 'anxiety', 'burnout', 'engagement', 'entitlement', 'insight', 'routine', 'obedience', 'neuroplasticity', 'cognitiveLoad'], min: 0, max: 100 }
+    },
+    
+    // Фетиши
+    {
+      name: 'fetishes',
+      type: 'dynamic-object',
+      label: 'Фетиши',
+      dynamicConfig: { type: 'fetishes', options: ['innocence', 'curiosity', 'submission', 'sensory_overload', 'dependency', 'humiliation', 'control', 'pain', 'pleasure', 'bondage', 'roleplay', 'voyeurism', 'exhibitionism'], min: 0, max: 10 }
+    },
+    
+    // Черты характера
+    {
+      name: 'traits',
+      type: 'dynamic-array',
+      label: 'Черты характера',
+      dynamicConfig: { type: 'preferences', options: ['loyal', 'quick_learner', 'curious', 'innocent', 'artistic', 'sensation_seeker', 'analytical', 'creative', 'practical', 'emotional', 'logical', 'intuitive', 'extroverted', 'introverted', 'ambitious', 'content', 'adventurous', 'cautious'] }
+    },
+    
+    // Предпочтения
+    {
+      name: 'preferences',
+      type: 'dynamic-object',
+      label: 'Предпочтения',
+      dynamicConfig: { type: 'preferences', subType: 'work_type', options: ['service', 'technical', 'creative', 'analytical', 'physical', 'social', 'solitary', 'leadership', 'support'] }
+    },
+    
+    // Навыки
+    {
+      name: 'skills',
+      type: 'dynamic-object',
+      label: 'Навыки',
+      dynamicConfig: { type: 'skills', options: ['maid', 'cooking', 'neural_hacking', 'orgasm_control', 'field', 'etiquette', 'logistics', 'medical', 'maintenance', 'data', 'dance', 'seduction', 'interrogation', 'surveillance'], min: 0, max: 10 }
+    }
   ]
 }
 
@@ -336,6 +397,8 @@ export const getEntityDisplayName = (entityType: string): string => {
     action: 'действие',
     assets: 'актив',
     asset: 'актив',
+    characters: 'персонажа',
+    character: 'персонажа',
     users: 'пользователя',
     user: 'пользователя',
     market: 'товар',

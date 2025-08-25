@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Trash2, Save } from "lucide-react"
 import { FieldConfig, getFieldConfig, getEntityDisplayName } from "@/lib/field-configs"
+import { PromptManager } from './PromptManager'
 
 interface EnhancedEditModalProps {
   isOpen: boolean
@@ -88,11 +89,13 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
 
     const handleAddKey = () => {
       const newKey = config.options?.[0] || 'new_key'
+      const defaultValue = config.type === 'attributes' || config.type === 'fetishes' || config.type === 'characteristics' || config.type === 'skills' ? 1 : 
+                          config.type === 'condition' || config.type === 'states' ? 50 : ''
       setFormData((prev: Record<string, any>) => ({
         ...prev,
         [field.name]: {
           ...prev[field.name],
-          [newKey]: config.type === 'attributes' || config.type === 'fetishes' ? 1 : ''
+          [newKey]: defaultValue
         }
       }))
     }
@@ -158,6 +161,24 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
                   onChange={(e) => handleDynamicChange(key, Number(e.target.value))}
                   min={0}
                   max={100}
+                  className="flex-1"
+                />
+              ) : config.type === 'characteristics' ? (
+                <Input
+                  type="number"
+                  value={val as number}
+                  onChange={(e) => handleDynamicChange(key, Number(e.target.value))}
+                  min={0}
+                  max={10}
+                  className="flex-1"
+                />
+              ) : config.type === 'skills' ? (
+                <Input
+                  type="number"
+                  value={val as number}
+                  onChange={(e) => handleDynamicChange(key, Number(e.target.value))}
+                  min={0}
+                  max={10}
                   className="flex-1"
                 />
               ) : (
@@ -474,6 +495,16 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
 
   const basicFields = fields.filter(f => ['text', 'textarea', 'number', 'select', 'slider', 'switch'].includes(f.type))
   const advancedFields = fields.filter(f => ['object', 'array', 'dynamic-object', 'dynamic-array'].includes(f.type))
+  
+  // Специальная обработка для персонажей - три вкладки
+  const isCharacter = entityType === 'characters' || entityType === 'character'
+  const characterBasicFields = isCharacter ? fields.filter(f => ['text', 'textarea', 'number', 'select'].includes(f.type)) : basicFields
+  const characterPromptFields = isCharacter ? [
+    { name: 'basePrompt', type: 'textarea' as const, label: 'Базовый промт', required: false, placeholder: 'Базовый промт для Character AI' },
+    { name: 'characteristicInterpretations', type: 'textarea' as const, label: 'Интерпретации характеристик', required: false, placeholder: 'Описание влияния характеристик на поведение' },
+    { name: 'situationalPrompts', type: 'textarea' as const, label: 'Ситуативные промты', required: false, placeholder: 'Промты для различных ситуаций' }
+  ] : []
+  const characterAdvancedFields = isCharacter ? fields.filter(f => ['dynamic-object', 'dynamic-array'].includes(f.type)) : advancedFields
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -485,7 +516,27 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
         </DialogHeader>
 
         <div className="space-y-6">
-          {advancedFields.length > 0 ? (
+          {isCharacter ? (
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basic">Основные поля</TabsTrigger>
+                <TabsTrigger value="prompts">Промты</TabsTrigger>
+                <TabsTrigger value="advanced">Характеристики</TabsTrigger>
+              </TabsList>
+              <TabsContent value="basic" className="space-y-4">
+                {characterBasicFields.map(renderField)}
+              </TabsContent>
+              <TabsContent value="prompts" className="space-y-4">
+                <PromptManager 
+                  character={formData} 
+                  onUpdate={(updates) => setFormData(updates)} 
+                />
+              </TabsContent>
+              <TabsContent value="advanced" className="space-y-4">
+                {characterAdvancedFields.map(renderField)}
+              </TabsContent>
+            </Tabs>
+          ) : advancedFields.length > 0 ? (
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="basic">Основные поля</TabsTrigger>
