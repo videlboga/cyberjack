@@ -83,3 +83,82 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Large files and media
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.webp
+*.svg
+*.ico
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.bz2
+*.xz
+
+# Obsidian vault with large reference files
+obsidiabvault/
+obsidiabvault/**/*.jpg
+obsidiabvault/**/*.jpeg
+obsidiabvault/**/*.png
+obsidiabvault/**/*.gif
+obsidiabvault/**/*.bmp
+obsidiabvault/**/*.tiff
+obsidiabvault/**/*.webp
+obsidiabvault/**/*.svg
+obsidiabvault/**/*.ico
+obsidiabvault/**/*.mp4
+obsidiabvault/**/*.avi
+obsidiabvault/**/*.mov
+obsidiabvault/**/*.wmv
+obsidiabvault/**/*.flv
+obsidiabvault/**/*.webm
+obsidiabvault/**/*.mp3
+obsidiabvault/**/*.wav
+obsidiabvault/**/*.flac
+obsidiabvault/**/*.aac
+obsidiabvault/**/*.ogg
+obsidiabvault/**/*.zip
+obsidiabvault/**/*.rar
+obsidiabvault/**/*.7z
+obsidiabvault/**/*.tar
+obsidiabvault/**/*.gz
+obsidiabvault/**/*.bz2
+obsidiabvault/**/*.xz
+
+# Generated files and backups
+backups/
+migration-results/
+*.backup
+*.bak
+*.tmp
+*.temp
+
+# Large model files
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+
+# Test results and reports
+__tests__/results/
+test-results/
+*.test-results.json
