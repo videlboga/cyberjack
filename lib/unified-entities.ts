@@ -466,6 +466,86 @@ export interface CharacterStats {
   special: { [key: string]: number }
 }
 
+// ===== ДОПОЛНИТЕЛЬНЫЕ ТИПЫ =====
+
+export interface MessageAnalysis {
+  emotionalState: string
+  intent: string
+  intensity: number
+  triggers: string[]
+  context: { [key: string]: any }
+}
+
+export interface LLMPrompt {
+  system: string
+  user: string
+  assistant?: string
+  context?: { [key: string]: any }
+}
+
+export interface CharacterAIConfig {
+  actions: { [key: string]: any }
+  emotions: { [key: string]: any }
+  fetishes: { [key: string]: any }
+  settings: { [key: string]: any }
+}
+
+// ===== ПОЗЫ И ИНТЕРАКТИВНЫЕ ЭЛЕМЕНТЫ =====
+
+export interface Pose {
+  id: string
+  name: string
+  description: string
+  category: string
+  requirements?: { [key: string]: any }
+  effects?: { [key: string]: any }
+}
+
+export interface PoseChangeCondition {
+  id: string
+  name: string
+  description: string
+  conditions: { [key: string]: any }
+  probability: number
+  effects?: { [key: string]: any }
+}
+
+export interface InteractiveAction {
+  id: string
+  name: string
+  description: string
+  category: string
+  requirements?: { [key: string]: any }
+  effects?: { [key: string]: any }
+}
+
+export interface InteractiveTool {
+  id: string
+  name: string
+  description: string
+  category: string
+  requirements?: { [key: string]: any }
+  effects?: { [key: string]: any }
+}
+
+// ===== ДОПОЛНИТЕЛЬНЫЕ ТИПЫ =====
+
+export type FetishCategory = 'power' | 'physical' | 'psychological' | 'material' | 'body_part' | 'physiological' | 'special'
+
+export enum EmotionalState {
+  CALM = 'calm',
+  EXCITED = 'excited',
+  FEARFUL = 'fearful',
+  ANGRY = 'angry',
+  SAD = 'sad',
+  HAPPY = 'happy',
+  AROUSED = 'aroused',
+  SUBMISSIVE = 'submissive',
+  DOMINANT = 'dominant',
+  CONFUSED = 'confused',
+  NEUTRAL = 'neutral'
+}
+
 // ===== АЛИАСЫ ДЛЯ ОБРАТНОЙ СОВМЕСТИМОСТИ =====
 
 export type GameAction = Action

@@ -1,4 +1,4 @@
-import { Pose, PoseChangeCondition, InteractiveAction, InteractiveTool } from '../types';
+import { Pose, PoseChangeCondition, InteractiveAction, InteractiveTool } from '../unified-entities';
 
 export class PoseManagementService {
   private poses: { [key: string]: Pose } = {};

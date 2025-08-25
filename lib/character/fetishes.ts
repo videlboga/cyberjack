@@ -1,4 +1,4 @@
-import { Character, CharacterFetish, FetishCategory, FetishAnalysis, FetishInfluence } from './types'
+import { Character, CharacterFetish, FetishCategory, FetishAnalysis, FetishInfluence } from '../unified-entities'
 import { statsManager } from './stats'
 
 /**

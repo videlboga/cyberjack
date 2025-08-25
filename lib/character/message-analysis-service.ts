@@ -1,4 +1,4 @@
-import { MessageAnalysis, LLMPrompt } from '../types';
+import { MessageAnalysis, LLMPrompt } from '../unified-entities';
 import { PromptSystem } from './prompt-system';
 import { formatCharacteristicsForPrompt } from './characteristic-interpretations';
 

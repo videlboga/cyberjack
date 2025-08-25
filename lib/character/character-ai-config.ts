@@ -1,4 +1,4 @@
-import { CharacterAIConfig } from '../types'
+import { CharacterAIConfig } from '../unified-entities'
 
 /**
  * Конфигурация системы Character AI с примерами данных

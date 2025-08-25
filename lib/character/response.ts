@@ -1,4 +1,4 @@
-import { Character, CharacterResponse, ImpactAnalysis, FetishAnalysis, EmotionalState } from './types'
+import { Character, CharacterResponse, ImpactAnalysis, FetishAnalysis, EmotionalState } from '../unified-entities'
 import { statsManager } from './stats'
 import { fetishManager } from './fetishes'
 

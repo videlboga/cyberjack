@@ -1,5 +1,5 @@
 import { CharacterAIService } from './ai-service'
-import { Character, CharacterResponse, EmotionalState } from './types'
+import { Character, CharacterResponse, EmotionalState } from '../unified-entities'
 import { CharacterAdapter } from './character-adapter'
 import { 
   CharacterState, 

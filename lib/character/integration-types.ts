@@ -1,4 +1,4 @@
-import { Character, CharacterResponse, ImpactAnalysis, FetishAnalysis, EmotionalState } from './types'
+import { Character, CharacterResponse, ImpactAnalysis, FetishAnalysis, EmotionalState } from '../unified-entities'
 
 /**
  * Расширенное состояние персонажа для интеграции с режимом "Личная работа"
