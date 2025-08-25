@@ -1,12 +1,11 @@
-import type { UnifiedGameConfig } from './unified-types'
-import type { GameConfig } from './types'
+import type { GameConfig } from './unified-entities'
 import { saveConfigToFile } from './config-sync'
 
 /**
  * Адаптер для преобразования unified конфигурации в старую структуру
  * для обеспечения совместимости с существующим кодом
  */
-export function adaptUnifiedToLegacyConfig(unifiedConfig: UnifiedGameConfig): GameConfig {
+export function adaptUnifiedToLegacyConfig(unifiedConfig: GameConfig): GameConfig {
   console.log('🔄 Адаптируем unified конфигурацию к legacy структуре...')
   console.log('📊 Исходные персонажи:', unifiedConfig.characters.characters.length)
   console.log('📊 Первый персонаж:', unifiedConfig.characters.characters[0])

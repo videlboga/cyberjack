@@ -134,23 +134,11 @@ export interface Character {
   states: CharacterStates
   fetishes: CharacterFetishes
   
-  // Структурированные характеристики (для совместимости с characters-unified.json)
-  characteristics?: {
-    physical?: { [key: string]: number }
-    psychological?: { [key: string]: number }
-    social?: { [key: string]: number }
-    personality?: { [key: string]: number }
-    special?: { [key: string]: number }
-  }
-  
   // Расширенные данные (опционально)
   traits?: string[]
   preferences?: CharacterPreferences
   condition?: CharacterCondition
   history?: CharacterHistory
-  skills?: { [key: string]: number }
-  deleted?: boolean
-  deletedAt?: string | null
   
   // Метаданные
   metadata: CharacterMetadata
@@ -255,7 +243,7 @@ export interface EventsConfig {
 // ===== КОНТРАКТЫ =====
 
 export interface ContractRequirement {
-  skills: Partial<{ [key: string]: number }>
+  skills: Partial<CharacterSkills>
   minRank: CharacterRank
 }
 

@@ -1,5 +1,5 @@
 // Унифицированный загрузчик конфигураций для оптимизированной системы
-import { UnifiedGameConfig, Character, Action, Event, Contract, Equipment, StoryScene, User } from './unified-types'
+import { GameConfig, Character, Action, Event, Contract, Equipment, StoryScene, User } from './unified-entities'
 
 // Кэш для загруженных конфигураций
 let configCache: UnifiedGameConfig | null = null
@@ -7,7 +7,7 @@ let lastLoadTime: number = 0
 const CACHE_DURATION = 0 // Отключаем кэш для dev
 
 // Загрузка унифицированной конфигурации
-export async function loadUnifiedConfig(): Promise<UnifiedGameConfig> {
+export async function loadUnifiedConfig(): Promise<GameConfig> {
   const now = Date.now()
   
   // Проверяем кэш (отключен для dev)

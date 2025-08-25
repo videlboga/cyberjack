@@ -8,7 +8,7 @@ import {
   FetishAnalysis,
   FetishInfluence,
   CharacterFetish
-} from './types'
+} from '../unified-entities'
 import { MemoryManager } from './memory'
 import { StatsManager } from './stats'
 import { FetishManager } from './fetishes'
