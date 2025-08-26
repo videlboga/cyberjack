@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
-import { AssetAttribute, PlayerAttribute } from '@/lib/types'
+import { AssetAttribute, PlayerAttribute } from '@/lib/unified-entities'
 import { AttributeParser } from '@/lib/condition-utils'
 
 interface AttributeSelectorProps {

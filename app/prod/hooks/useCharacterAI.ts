@@ -11,7 +11,7 @@ import {
   PoseChangeCondition,
   MessageAnalysis,
   LLMPrompt
-} from '@/lib/types';
+} from '@/lib/unified-entities';
 
 interface UseCharacterAIProps {
   characterAIConfig: CharacterAIConfig;

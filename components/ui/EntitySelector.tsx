@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
-import { Asset, User } from '@/lib/types'
+import { Character as Asset, User } from '@/lib/unified-entities'
 
 interface EntitySelectorProps {
   entityType: "asset" | "player" | "scene"

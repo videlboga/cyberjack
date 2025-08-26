@@ -556,3 +556,36 @@ export type GameUser = User
 export type GameEquipment = Equipment
 export type Talent = Character
 export type UnifiedGameConfig = GameConfig
+
+// ===== ДОПОЛНИТЕЛЬНЫЕ ТИПЫ ДЛЯ CHARACTER AI =====
+
+export interface InteractiveArea {
+  id: string
+  name: string
+  description: string
+  category: string
+  availableActions: string[]
+  availableTools: string[]
+  requirements?: { [key: string]: any }
+}
+
+export interface QuickAction {
+  id: string
+  name: string
+  description: string
+  actionId: string
+  intensity: number
+  cooldown: number
+  requirements?: { [key: string]: any }
+}
+
+// Расширяем CharacterAIConfig для поддержки всех необходимых полей
+export interface CharacterAIConfig {
+  actions: { [key: string]: any }
+  emotions: { [key: string]: any }
+  fetishes: { [key: string]: any }
+  settings: { [key: string]: any }
+  poses?: { [key: string]: any }
+  tools?: { [key: string]: any }
+  poseChangeConditions?: { [key: string]: any }
+}

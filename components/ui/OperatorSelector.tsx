@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
-import { Operator } from '@/lib/types'
+import { Operator } from '@/lib/unified-entities'
 import { AttributeParser, ConditionValidator } from '@/lib/condition-utils'
 
 interface OperatorSelectorProps {

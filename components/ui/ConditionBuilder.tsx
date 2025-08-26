@@ -16,9 +16,9 @@ import {
   PlayerCondition, 
   SceneChoiceCondition, 
   StoryPointCondition,
-  Asset,
+  Character as Asset,
   User
-} from '@/lib/types'
+} from '@/lib/unified-entities'
 import { 
   AttributeParser,
   ConditionValidator,
