@@ -579,6 +579,29 @@ const UnifiedGamePage = () => {
                 </CardContent>
               </Card>
 
+              {/* Condition Builder */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Settings className="h-5 w-5" />
+                    <span>Condition построитель</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Создание и тестирование условий для игровой логики
+                    </p>
+                    <Link href="/game-unified/condition-builder">
+                      <Button className="w-full">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Открыть Condition построитель
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Sync Status */}
               <Card>
                 <CardHeader>
