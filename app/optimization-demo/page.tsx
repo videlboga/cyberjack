@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Users, Zap, Calendar, FileText, Wrench, BookOpen, User, TrendingUp, Database, CheckCircle } from "lucide-react"
 import { UnifiedEntityList } from '../game/components/ui/UnifiedEntityList'
 import { loadUnifiedConfig, getConfigStats } from '@/lib/unified-config-loader'
-import { UnifiedGameConfig, Character, Action, Event, Contract, Equipment, StoryScene, User as UserType } from '@/lib/unified-types'
+import { GameConfig as UnifiedGameConfig, Character, Action, Event, Contract, Equipment, StoryScene, User as UserType } from '@/lib/unified-entities'
 
 export default function OptimizationDemo() {
   const [config, setConfig] = useState<UnifiedGameConfig | null>(null)

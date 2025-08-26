@@ -2,8 +2,8 @@ import {
   StorySceneBinding, 
   StorySceneCondition, 
   SimplifiedStoryScene,
-  GameAsset,
-  GameUser,
+  Character as GameAsset,
+  User as GameUser,
   GameConfig
 } from './types'
 

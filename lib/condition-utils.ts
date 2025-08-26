@@ -1,5 +1,5 @@
 import { 
-  Asset, 
+  Character as Asset, 
   User, 
   StoryScene, 
   AssetAttribute, 

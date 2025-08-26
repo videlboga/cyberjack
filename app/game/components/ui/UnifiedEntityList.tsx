@@ -16,9 +16,10 @@ import {
   Contract, 
   Equipment, 
   StoryScene, 
-  User,
-  EntityType 
-} from '@/lib/unified-types'
+  User
+} from '@/lib/unified-entities'
+
+type EntityType = 'character' | 'action' | 'event' | 'contract' | 'equipment' | 'storyScene' | 'user'
 
 export interface UnifiedEntityListProps {
   entities: (Character | Action | Event | Contract | Equipment | StoryScene | User)[]

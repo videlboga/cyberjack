@@ -8,7 +8,7 @@ import type {
   SystemDefinitions,
   StoryScenesConfig,
   GameConfig
-} from './types'
+} from './unified-entities'
 
 // Загрузка всех конфигураций
 export async function loadGameConfig(): Promise<GameConfig> {

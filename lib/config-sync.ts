@@ -8,7 +8,7 @@ import type {
   AssetsConfig,
   UsersConfig,
   GameConfig
-} from './types'
+} from './unified-entities'
 
 // Универсальная функция для загрузки конфигураций
 export async function loadConfigsForEnvironment(environment: 'dev' | 'prod'): Promise<GameConfig> {

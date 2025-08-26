@@ -10,10 +10,21 @@ import {
   Contract, 
   Equipment, 
   StoryScene, 
-  User,
-  EntityType,
-  EntityCardProps 
-} from '@/lib/unified-types'
+  User
+} from '@/lib/unified-entities'
+
+// Типы для компонента
+type EntityType = 'character' | 'action' | 'event' | 'contract' | 'equipment' | 'storyScene' | 'user'
+
+interface EntityCardProps {
+  entity: Character | Action | Event | Contract | Equipment | StoryScene | User
+  type: EntityType
+  onEdit?: (entity: any) => void
+  onDelete?: (entity: any) => void
+  onView?: (entity: any) => void
+  showActions?: boolean
+  className?: string
+}
 
 // Утилиты для форматирования
 const formatPrice = (price: number) => `${price.toLocaleString()} ₽`
