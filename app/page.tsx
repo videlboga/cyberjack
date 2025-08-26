@@ -512,7 +512,7 @@ export default function TalentArchitectGDD() {
                       <div className="flex gap-2 flex-wrap">
                         <Link href="/game-unified">
                           <Button variant="default" size="sm">
-                            🎮 Единая игра (NEW)
+                            ⚙️ Единая админка (NEW)
                           </Button>
                         </Link>
                         <Link href="/prod">
