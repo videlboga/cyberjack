@@ -3,7 +3,7 @@
 import React from "react"
 import { useState, useRef, useEffect } from "react"
 import { loadUnifiedConfigWithAdapter } from "@/lib/unified-config-adapter"
-import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/types"
+import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/unified-entities"
 import RegistrationModal from "./components/RegistrationModal"
 import { personalWorkIntegration } from "@/lib/character/personal-work-integration"
 

@@ -32,7 +32,7 @@ export async function loadConfigsForEnvironment(environment: 'dev' | 'prod'): Pr
       import('../data/market.json'),
       import('../data/equipment-unified.json'),
       import('../data/system-unified.json'),
-      import('../data/assets.json'),
+      import('../data/assets-from-characters.json'),
       import('../data/users-unified.json')
     ])
 

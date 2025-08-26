@@ -11,7 +11,7 @@ import {
   Asset,
   User,
   GameState
-} from '@/lib/types'
+} from '@/lib/unified-entities'
 import { 
   ConditionUtils,
   ConditionEvaluator

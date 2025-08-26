@@ -346,6 +346,7 @@ export interface Condition {
 export interface GameConfig {
   // Основные сущности
   characters: Character[]
+  assets?: Character[] // Алиас для обратной совместимости
   actions: ActionsConfig
   contracts: ContractsConfig
   events: EventsConfig
@@ -353,6 +354,9 @@ export interface GameConfig {
   users: UsersConfig
   storyScenes: StoryScene[]
   conditions: Condition[]
+  
+  // Character AI конфигурация
+  characterAI?: CharacterAIConfig
   
   // Системные настройки
   system: { [key: string]: any }
@@ -379,7 +383,14 @@ export interface MemoryEntry {
   relatedCharacters?: string[]
 }
 
-export type MemoryType = 'conversation' | 'action' | 'event' | 'emotion' | 'relationship'
+// Определяем MemoryType как тип
+type MemoryType = 'conversation' | 'action' | 'event' | 'emotion' | 'relationship'
+
+// Экспортируем MemoryType явно
+export { MemoryType }
+
+// Также экспортируем как тип
+export type { MemoryType as MemoryTypeType }
 
 export interface SummaryEntry {
   period: string
@@ -530,7 +541,14 @@ export interface InteractiveTool {
 
 // ===== ДОПОЛНИТЕЛЬНЫЕ ТИПЫ =====
 
-export type FetishCategory = 'power' | 'physical' | 'psychological' | 'material' | 'body_part' | 'physiological' | 'special'
+// Определяем FetishCategory как тип
+type FetishCategory = 'power' | 'physical' | 'psychological' | 'material' | 'body_part' | 'physiological' | 'special'
+
+// Экспортируем FetishCategory явно
+export { FetishCategory }
+
+// Также экспортируем как тип
+export type { FetishCategory as FetishCategoryType }
 
 export enum EmotionalState {
   CALM = 'calm',
@@ -588,4 +606,11 @@ export interface CharacterAIConfig {
   poses?: { [key: string]: any }
   tools?: { [key: string]: any }
   poseChangeConditions?: { [key: string]: any }
+  quickActions?: { [key: string]: any }
+  interactiveAreas?: { [key: string]: any }
+  llmPrompts?: {
+    basePrompt: string
+    characteristicInterpretations: { [key: string]: any }
+    fetishResponses: { [key: string]: any }
+  }
 }
