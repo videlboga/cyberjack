@@ -1,4 +1,4 @@
-import { Character, CharacterStats, CharacterFetishes, CharacterFetish, FetishCategory } from '../character/types'
+import { Character, CharacterStats, CharacterFetishes, CharacterFetish, FetishCategory } from '../unified-entities'
 
 /**
  * Миграция от старой системы Talent к новой системе Character AI

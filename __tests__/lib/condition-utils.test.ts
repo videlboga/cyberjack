@@ -4,48 +4,66 @@ import {
   ConditionEvaluator, 
   ConditionUtils 
 } from '@/lib/condition-utils'
-import { Asset, User, AssetCondition, PlayerCondition, GameState } from '@/lib/types'
+import { Character, User, CharacterCondition, PlayerCondition, GameState } from '@/lib/unified-entities'
 
 // Тестовые данные
-const testAsset: Asset = {
+const testAsset: Character = {
   id: "asset_1",
   name: "Алекс",
-  rank: "Junior",
-  avatar: "👩‍💻",
-  price: 150,
-  specialization: "Базовое подчинение",
+  archetype: "Junior",
   description: "Молодая актив с хорошими навыками обслуживания",
+  rank: "C",
   status: "available",
-  owner: null,
   location: "talent_exchange",
+  source: "market",
   attributes: {
     strength: 2,
-    empathy: 3,
+    endurance: 3,
     intelligence: 4,
+    creativity: 3,
     temperament: 3,
     grit: 3,
-    ego: 2,
-    loyalty: 1,
+    empathy: 3,
+    ego: 2
+  },
+  states: {
+    mood: 70,
+    stress: 15,
     obedience: 2,
-    resistance: 1
+    awareness: 3,
+    devotion: 1,
+    sensuality: 2,
+    sensory_overload: 0
   },
-  skills: {
-    maid: 2,
-    cooking: 1,
-    neural_hacking: 4,
-    orgasm_control: 3,
-    field: 2,
-    etiquette: 2,
-    logistics: 2,
-    medical: 1,
-    maintenance: 3,
-    data: 3,
-    dance: 1,
-    seduction: 2,
-    interrogation: 1,
-    surveillance: 2
+  fetishes: {
+    bdsm: 2,
+    humiliation: 1,
+    masochism: 1,
+    sadism: 0,
+    voyeurism: 1,
+    exhibitionism: 1,
+    roleplay: 2,
+    bondage: 2,
+    sensory_deprivation: 1,
+    sensory_overload: 0,
+    electricity: 0,
+    vibration: 1,
+    temperature: 1,
+    pressure: 1,
+    tickling: 1,
+    feet: 0,
+    hands: 1,
+    breasts: 1,
+    anal: 0,
+    latex: 1,
+    leather: 1,
+    silk: 1,
+    rope: 2,
+    uniform: 2,
+    age_play: 0,
+    pregnancy: 0,
+    lactation: 0
   },
-  traits: ["loyal", "quick_learner", "tech_savvy"],
   preferences: {
     work_type: ["service", "technical"],
     environment: ["clean", "quiet"],
@@ -57,12 +75,8 @@ const testAsset: Asset = {
     stress: 15,
     fatigue: 20
   },
-  history: {
-    created: "2024-01-15",
-    last_training: "2024-01-20",
-    assignments: 3,
-    success_rate: 0.85
-  }
+  createdAt: "2024-01-15",
+  totalInteractions: 0
 }
 
 const testUser: User = {
@@ -177,9 +191,9 @@ describe('AttributeParser', () => {
 })
 
 describe('ConditionValidator', () => {
-  describe('validateAssetCondition', () => {
-    it('должен валидировать корректное условие на актив', () => {
-      const condition: AssetCondition = {
+  describe('validateCharacterCondition', () => {
+    it('должен валидировать корректное условие на персонажа', () => {
+      const condition: CharacterCondition = {
         id: "test",
         type: "asset_condition",
         name: "Тест",
@@ -192,13 +206,13 @@ describe('ConditionValidator', () => {
         }
       }
       
-      expect(ConditionValidator.validateAssetCondition(condition)).toBe(true)
+      expect(ConditionValidator.validateCharacterCondition(condition)).toBe(true)
     })
 
     it('должен отклонять условие с невалидным атрибутом', () => {
-      const condition: AssetCondition = {
+      const condition: CharacterCondition = {
         id: "test",
-        type: "asset_condition",
+        type: "character_condition",
         name: "Тест",
         description: "Тестовое условие",
         target: {
@@ -209,13 +223,13 @@ describe('ConditionValidator', () => {
         }
       }
       
-      expect(ConditionValidator.validateAssetCondition(condition)).toBe(false)
+      expect(ConditionValidator.validateCharacterCondition(condition)).toBe(false)
     })
 
     it('должен отклонять условие с невалидным оператором', () => {
-      const condition: AssetCondition = {
+      const condition: CharacterCondition = {
         id: "test",
-        type: "asset_condition",
+        type: "character_condition",
         name: "Тест",
         description: "Тестовое условие",
         target: {
@@ -226,7 +240,7 @@ describe('ConditionValidator', () => {
         }
       }
       
-      expect(ConditionValidator.validateAssetCondition(condition)).toBe(false)
+      expect(ConditionValidator.validateCharacterCondition(condition)).toBe(false)
     })
   })
 
@@ -272,11 +286,11 @@ describe('ConditionValidator', () => {
 })
 
 describe('ConditionEvaluator', () => {
-  describe('evaluateAssetCondition', () => {
+  describe('evaluateCharacterCondition', () => {
     it('должен правильно вычислять условие на силу', () => {
-      const condition: AssetCondition = {
+      const condition: CharacterCondition = {
         id: "test",
-        type: "asset_condition",
+        type: "character_condition",
         name: "Тест",
         description: "Тестовое условие",
         target: {
@@ -287,14 +301,14 @@ describe('ConditionEvaluator', () => {
         }
       }
       
-      const result = ConditionEvaluator.evaluateAssetCondition(condition, [testAsset], testUser)
+      const result = ConditionEvaluator.evaluateCharacterCondition(condition, [testAsset], testUser)
       expect(result).toBe(false) // strength = 2, не >= 3
     })
 
     it('должен правильно вычислять условие на интеллект', () => {
-      const condition: AssetCondition = {
+      const condition: CharacterCondition = {
         id: "test",
-        type: "asset_condition",
+        type: "character_condition",
         name: "Тест",
         description: "Тестовое условие",
         target: {
@@ -305,14 +319,14 @@ describe('ConditionEvaluator', () => {
         }
       }
       
-      const result = ConditionEvaluator.evaluateAssetCondition(condition, [testAsset], testUser)
+      const result = ConditionEvaluator.evaluateCharacterCondition(condition, [testAsset], testUser)
       expect(result).toBe(true) // intelligence = 4, >= 3
     })
 
     it('должен правильно вычислять условие на трейты', () => {
-      const condition: AssetCondition = {
+      const condition: CharacterCondition = {
         id: "test",
-        type: "asset_condition",
+        type: "character_condition",
         name: "Тест",
         description: "Тестовое условие",
         target: {
@@ -323,14 +337,14 @@ describe('ConditionEvaluator', () => {
         }
       }
       
-      const result = ConditionEvaluator.evaluateAssetCondition(condition, [testAsset], testUser)
+      const result = ConditionEvaluator.evaluateCharacterCondition(condition, [testAsset], testUser)
       expect(result).toBe(true) // traits содержит "loyal"
     })
 
     it('должен правильно вычислять условие на принадлежащие активы', () => {
-      const condition: AssetCondition = {
+      const condition: CharacterCondition = {
         id: "test",
-        type: "asset_condition",
+        type: "character_condition",
         name: "Тест",
         description: "Тестовое условие",
         target: {
@@ -341,7 +355,7 @@ describe('ConditionEvaluator', () => {
         }
       }
       
-      const result = ConditionEvaluator.evaluateAssetCondition(condition, [testAsset], testUser)
+      const result = ConditionEvaluator.evaluateCharacterCondition(condition, [testAsset], testUser)
       expect(result).toBe(true) // owned asset имеет strength = 2, >= 1
     })
   })
@@ -421,10 +435,10 @@ describe('ConditionUtils', () => {
   })
 
   describe('getConditionDescription', () => {
-    it('должен генерировать описание для условия на актив', () => {
-      const condition: AssetCondition = {
+    it('должен генерировать описание для условия на персонажа', () => {
+      const condition: CharacterCondition = {
         id: "test",
-        type: "asset_condition",
+        type: "character_condition",
         name: "Тест",
         description: "Тестовое условие",
         target: {
@@ -436,7 +450,7 @@ describe('ConditionUtils', () => {
       }
       
       const description = ConditionUtils.getConditionDescription(condition)
-      expect(description).toBe("Любой актив Сила больше или равно 3")
+      expect(description).toBe("Любой персонаж Сила больше или равно 3")
     })
 
     it('должен генерировать описание для условия на игрока', () => {

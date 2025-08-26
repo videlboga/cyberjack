@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { loadUnifiedConfigWithAdapter } from "@/lib/unified-config-adapter"
 import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/unified-entities"
 import RegistrationModal from "./components/RegistrationModal"
@@ -204,15 +204,16 @@ export default function TalentArchitectProd() {
   // Состояние для уведомлений об изменениях характеристик
   const [statChanges, setStatChanges] = useState<Array<{ stat: string; change: number; timestamp: number }>>([])
 
-  // Инициализация Character AI - всегда вызываем хук, но с пустой конфигурацией если не загружена
+  // Инициализация Character AI - всегда вызываем хук, но передаем пустую конфигурацию если нет данных
   const characterAI = useCharacterAI({
     characterAIConfig: characterAIConfig || {
       actions: {},
       tools: {},
       poses: {},
       poseChangeConditions: {},
-      quickActions: {},
-      interactiveAreas: {},
+      emotions: {},
+      fetishes: {},
+      settings: {},
       llmPrompts: {
         basePrompt: "",
         characteristicInterpretations: {},
@@ -262,6 +263,8 @@ export default function TalentArchitectProd() {
     
     loadConfig()
   }, [])
+
+
 
   // Заполнение talents из конфигурации
   useEffect(() => {
@@ -1537,7 +1540,7 @@ export default function TalentArchitectProd() {
       // Сначала пробуем Character AI для анализа сообщения
       let characterAIResponse = null
       try {
-        characterAIResponse = await characterAI.analyzeMessage(message)
+        characterAIResponse = characterAI ? await characterAI.analyzeMessage(message) : null
         console.log('Character AI анализ:', characterAIResponse)
       } catch (error) {
         console.log('Character AI недоступен, используем fallback')
@@ -1885,7 +1888,7 @@ export default function TalentArchitectProd() {
           
           // Используем Character AI для анализа взаимодействия
           if (characterAI) {
-            characterAI.analyzeMessage(message).then(analysis => {
+            characterAI?.analyzeMessage(message).then(analysis => {
               console.log('Character AI анализ взаимодействия:', analysis)
             }).catch(error => {
               console.log('Character AI недоступен для анализа')

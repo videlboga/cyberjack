@@ -15,8 +15,7 @@ import {
   XCircle
 } from 'lucide-react'
 
-import { QuickAction, QuickActionCategory, PREDEFINED_QUICK_ACTIONS } from '@/lib/types/actions'
-import { CharacterPose, PoseCategory } from '@/lib/types/character'
+import { QuickAction, QuickActionCategory, PREDEFINED_QUICK_ACTIONS, CharacterPose, PoseCategory } from '@/lib/unified-entities'
 
 interface QuickActionPanelProps {
   onQuickActionExecute: (action: QuickAction) => void

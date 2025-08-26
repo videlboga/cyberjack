@@ -326,19 +326,40 @@ export interface StoryScene {
 
 // ===== УСЛОВИЯ (Condition) =====
 
-export interface Condition {
+export interface BaseCondition {
   id: string
   name: string
   description: string
   type: string
-  
-  // Логика
   operator: string
+  value?: any
+  secondValue?: any
+}
+
+export interface Condition extends BaseCondition {
   conditions: { [key: string]: any }
-  
-  // Результат
   effects?: { [key: string]: any }
   actions?: string[]
+}
+
+export interface CharacterCondition extends BaseCondition {
+  type: 'asset'
+  targetCharacter: string
+  stat: string
+  parameters: { [key: string]: any }
+}
+
+export interface UserCondition extends BaseCondition {
+  type: 'player'
+  targetUser: string
+  stat: string
+  parameters: { [key: string]: any }
+}
+
+export interface CompoundCondition extends BaseCondition {
+  type: 'compound'
+  logic: 'AND' | 'OR'
+  conditions: Condition[]
 }
 
 // ===== КОНФИГУРАЦИЯ ИГРЫ (GameConfig) =====
@@ -383,14 +404,18 @@ export interface MemoryEntry {
   relatedCharacters?: string[]
 }
 
-// Определяем MemoryType как тип
-type MemoryType = 'conversation' | 'action' | 'event' | 'emotion' | 'relationship'
-
-// Экспортируем MemoryType явно
-export { MemoryType }
-
-// Также экспортируем как тип
-export type { MemoryType as MemoryTypeType }
+// Определяем MemoryType как enum для совместимости с использованием вида MemoryType.X
+export enum MemoryType {
+  INTERACTION = 'interaction',
+  EMOTION = 'emotion',
+  FETISH = 'fetish',
+  TRAUMA = 'trauma',
+  PLEASURE = 'pleasure',
+  CONVERSATION = 'conversation',
+  ACTION = 'action',
+  EVENT = 'event',
+  RELATIONSHIP = 'relationship'
+}
 
 export interface SummaryEntry {
   period: string
@@ -415,14 +440,28 @@ export interface CharacteristicInterpretations {
 
 export interface SituationalPrompt {
   id: string
+  name: string
+  description: string
   condition: PromptCondition
   prompt: string
   priority: number
+  isActive: boolean
 }
 
 export interface PromptCondition {
-  type: string
-  parameters: { [key: string]: any }
+  type: 'parameter_combination' | 'user_action' | 'multiple'
+  parameters?: {
+    stat?: string
+    operator: 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'between'
+    value: number | [number, number]
+  }[]
+  userActions?: string[]
+  multipleConditions?: {
+    logic: 'AND' | 'OR'
+    conditions: PromptCondition[]
+  }
+  emotionalState?: string[]
+  fetishTriggers?: string[]
 }
 
 export interface CharacterResponse {
@@ -541,14 +580,22 @@ export interface InteractiveTool {
 
 // ===== ДОПОЛНИТЕЛЬНЫЕ ТИПЫ =====
 
-// Определяем FetishCategory как тип
-type FetishCategory = 'power' | 'physical' | 'psychological' | 'material' | 'body_part' | 'physiological' | 'special'
-
-// Экспортируем FetishCategory явно
-export { FetishCategory }
-
-// Также экспортируем как тип
-export type { FetishCategory as FetishCategoryType }
+// Определяем FetishCategory как enum для совместимости с использованием вида FetishCategory.X
+export enum FetishCategory {
+  DOMINATION = 'domination',
+  HUMILIATION = 'humiliation',
+  DEPENDENCY = 'dependency',
+  SENSORY = 'sensory',
+  ROLEPLAY = 'roleplay',
+  PHYSICAL = 'physical',
+  PSYCHOLOGICAL = 'psychological',
+  SOCIAL = 'social',
+  POWER = 'power',
+  MATERIAL = 'material',
+  BODY_PART = 'body_part',
+  PHYSIOLOGICAL = 'physiological',
+  SPECIAL = 'special'
+}
 
 export enum EmotionalState {
   CALM = 'calm',
@@ -574,6 +621,12 @@ export type GameUser = User
 export type GameEquipment = Equipment
 export type Talent = Character
 export type UnifiedGameConfig = GameConfig
+
+// ===== ДОПОЛНИТЕЛЬНЫЕ ТИПЫ ДЛЯ СОВМЕСТИМОСТИ =====
+
+export type AssetCondition = CharacterCondition
+export type PlayerCondition = UserCondition
+export type Asset = Character
 
 // ===== ДОПОЛНИТЕЛЬНЫЕ ТИПЫ ДЛЯ CHARACTER AI =====
 

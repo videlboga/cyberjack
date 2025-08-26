@@ -37,7 +37,7 @@ interface StatusEffect {
 }
 
 // Импортируем новые типы Character
-import { Character } from '@/lib/character/types'
+import { Character } from '@/lib/unified-entities'
 
 // Старый интерфейс Talent удалён - используем Character
 

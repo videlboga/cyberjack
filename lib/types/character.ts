@@ -1,5 +1,8 @@
 // Типы для системы характеристик активов
 
+// Импортируем из unified-entities
+import { MemoryType, FetishCategory } from '../unified-entities'
+
 export interface CharacterStats {
   // Физические характеристики
   endurance: number        // Выносливость (0-10)
@@ -51,14 +54,7 @@ export interface CharacterFetish {
   lastTriggered?: Date        // Когда последний раз активировался
 }
 
-export enum FetishCategory {
-  BDSM = 'bdsm',
-  ROLEPLAY = 'roleplay',
-  PSYCHOLOGICAL = 'psychological',
-  SENSORY = 'sensory',
-  BODY_PARTS = 'body_parts',
-  EQUIPMENT = 'equipment'
-}
+
 
 export interface CharacterPose {
   id: string
@@ -96,15 +92,7 @@ export interface CharacterMemory {
   triggers: string[]          // Что может вызвать эту память
 }
 
-export enum MemoryType {
-  INTERACTION = 'interaction',
-  PAIN = 'pain',
-  PLEASURE = 'pleasure',
-  HUMILIATION = 'humiliation',
-  PRAISE = 'praise',
-  FEAR = 'fear',
-  TRUST = 'trust'
-}
+
 
 export interface CharacterState {
   currentPose: CharacterPose | null

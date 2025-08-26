@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -25,15 +25,15 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true)
     setDragOffset({
       x: e.clientX - position.x,
       y: e.clientY - position.y,
     })
-  }
+  }, [position])
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       const newX = e.clientX - dragOffset.x
       const newY = e.clientY - dragOffset.y
@@ -42,16 +42,16 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
       const maxX = window.innerWidth - 320 // w-80 = 320px
       const maxY = window.innerHeight - 400 // примерная высота панели
       
-      setPosition({
+      setPosition(prev => ({
         x: Math.max(0, Math.min(newX, maxX)),
         y: Math.max(0, Math.min(newY, maxY)),
-      })
+      }))
     }
-  }
+  }, [isDragging, dragOffset])
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false)
-  }
+  }, [])
 
   useEffect(() => {
     if (isDragging) {
@@ -62,30 +62,48 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
         document.removeEventListener('mouseup', handleMouseUp)
       }
     }
-  }, [isDragging, dragOffset])
+  }, [isDragging, handleMouseMove, handleMouseUp])
 
   if (!isVisible || !talent) return null
 
-  const getMoodColor = (mood: number) => {
+  const getMoodColor = useCallback((mood: number) => {
     if (mood >= 80) return "text-green-400"
     if (mood >= 60) return "text-yellow-400"
     if (mood >= 40) return "text-orange-400"
     return "text-red-400"
-  }
+  }, [])
 
-  const getMoodIcon = (mood: number) => {
+  const getMoodIcon = useCallback((mood: number) => {
     if (mood >= 80) return "😊"
     if (mood >= 60) return "🙂"
     if (mood >= 40) return "😐"
     return "😞"
-  }
+  }, [])
 
-  const getStatColor = (value: number) => {
+  const getStatColor = useCallback((value: number) => {
     if (value >= 80) return "text-green-400"
     if (value >= 60) return "text-blue-400"
     if (value >= 40) return "text-yellow-400"
     return "text-red-400"
-  }
+  }, [])
+
+  // Мемоизируем вычисления характеристик
+  const characterStats = useMemo(() => {
+    if (!talent) return null
+    
+    return {
+      attributes: talent.attributes || {},
+      states: talent.states || {},
+      fetishes: talent.fetishes || [],
+      memories: talent.memories || [],
+      statusEffects: talent.statusEffects || []
+    }
+  }, [talent])
+
+  // Мемоизируем вычисления настроения
+  const moodValue = useMemo(() => {
+    return talent.states?.mood || talent.mood || 0
+  }, [talent.states?.mood, talent.mood])
 
   return (
     <div 
@@ -110,11 +128,11 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-300">Настроение</span>
-            <span className={`text-sm font-bold ${getMoodColor(talent.states?.mood || talent.mood || 0)}`}>
-              {getMoodIcon(talent.states?.mood || talent.mood || 0)} {talent.states?.mood || talent.mood || 0}%
+            <span className={`text-sm font-bold ${getMoodColor(moodValue)}`}>
+              {getMoodIcon(moodValue)} {moodValue}%
             </span>
           </div>
-          <Progress value={talent.states?.mood || talent.mood || 0} className="h-2" />
+          <Progress value={moodValue} className="h-2" />
         </div>
 
         <Separator className="bg-slate-600 mb-4" />
@@ -124,103 +142,103 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
           <h4 className="text-sm font-semibold text-gray-300 mb-3">Характеристики</h4>
           <div className="space-y-2">
             {/* Атрибуты */}
-            {talent.attributes && (
+            {characterStats?.attributes && (
               <>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Сила</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.attributes.strength || 0)}`}>
-                    {talent.attributes.strength || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.strength || 0)}`}>
+                    {characterStats.attributes.strength || 0}
                   </span>
                 </div>
-                <Progress value={talent.attributes.strength || 0} className="h-1" />
+                <Progress value={characterStats.attributes.strength || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Эмпатия</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.attributes.empathy || 0)}`}>
-                    {talent.attributes.empathy || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.empathy || 0)}`}>
+                    {characterStats.attributes.empathy || 0}
                   </span>
                 </div>
-                <Progress value={talent.attributes.empathy || 0} className="h-1" />
+                <Progress value={characterStats.attributes.empathy || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Интеллект</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.attributes.intelligence || 0)}`}>
-                    {talent.attributes.intelligence || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.intelligence || 0)}`}>
+                    {characterStats.attributes.intelligence || 0}
                   </span>
                 </div>
-                <Progress value={talent.attributes.intelligence || 0} className="h-1" />
+                <Progress value={characterStats.attributes.intelligence || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Креативность</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.attributes.creativity || 0)}`}>
-                    {talent.attributes.creativity || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.creativity || 0)}`}>
+                    {characterStats.attributes.creativity || 0}
                   </span>
                 </div>
-                <Progress value={talent.attributes.creativity || 0} className="h-1" />
+                <Progress value={characterStats.attributes.creativity || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Темперамент</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.attributes.temperament || 0)}`}>
-                    {talent.attributes.temperament || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.temperament || 0)}`}>
+                    {characterStats.attributes.temperament || 0}
                   </span>
                 </div>
-                <Progress value={talent.attributes.temperament || 0} className="h-1" />
+                <Progress value={characterStats.attributes.temperament || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Стойкость</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.attributes.grit || 0)}`}>
-                    {talent.attributes.grit || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.grit || 0)}`}>
+                    {characterStats.attributes.grit || 0}
                   </span>
                 </div>
-                <Progress value={talent.attributes.grit || 0} className="h-1" />
+                <Progress value={characterStats.attributes.grit || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Эго</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.attributes.ego || 0)}`}>
-                    {talent.attributes.ego || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.ego || 0)}`}>
+                    {characterStats.attributes.ego || 0}
                   </span>
                 </div>
-                <Progress value={talent.attributes.ego || 0} className="h-1" />
+                <Progress value={characterStats.attributes.ego || 0} className="h-1" />
               </>
             )}
             
             {/* Состояния */}
-            {talent.states && (
+            {characterStats?.states && (
               <>
                 <Separator className="bg-slate-600 my-2" />
                 <h5 className="text-xs font-semibold text-gray-400 mb-2">Состояния</h5>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Настроение</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.states.mood || 0)}`}>
-                    {talent.states.mood || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.states.mood || 0)}`}>
+                    {characterStats.states.mood || 0}
                   </span>
                 </div>
-                <Progress value={talent.states.mood || 0} className="h-1" />
+                <Progress value={characterStats.states.mood || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Тревожность</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.states.anxiety || 0)}`}>
-                    {talent.states.anxiety || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.states.anxiety || 0)}`}>
+                    {characterStats.states.anxiety || 0}
                   </span>
                 </div>
-                <Progress value={talent.states.anxiety || 0} className="h-1" />
+                <Progress value={characterStats.states.anxiety || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Выгорание</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.states.burnout || 0)}`}>
-                    {talent.states.burnout || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.states.burnout || 0)}`}>
+                    {characterStats.states.burnout || 0}
                   </span>
                 </div>
-                <Progress value={talent.states.burnout || 0} className="h-1" />
+                <Progress value={characterStats.states.burnout || 0} className="h-1" />
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Вовлеченность</span>
-                  <span className={`text-xs font-medium ${getStatColor(talent.states.engagement || 0)}`}>
-                    {talent.states.engagement || 0}
+                  <span className={`text-xs font-medium ${getStatColor(characterStats.states.engagement || 0)}`}>
+                    {characterStats.states.engagement || 0}
                   </span>
                 </div>
-                <Progress value={talent.states.engagement || 0} className="h-1" />
+                <Progress value={characterStats.states.engagement || 0} className="h-1" />
               </>
             )}
           </div>
@@ -229,11 +247,11 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
         <Separator className="bg-slate-600 mb-4" />
 
         {/* Фетиши */}
-        {talent.fetishes && talent.fetishes.length > 0 && (
+        {characterStats?.fetishes && characterStats.fetishes.length > 0 && (
           <div className="mb-4">
             <h4 className="text-sm font-semibold text-gray-300 mb-3">Фетиши</h4>
             <div className="space-y-2">
-              {talent.fetishes.map((fetish: any, index: number) => (
+              {characterStats.fetishes.map((fetish: any, index: number) => (
                 <div key={index} className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">{fetish.name}</span>
                   <div className="flex items-center gap-2">
@@ -251,11 +269,11 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
         <Separator className="bg-slate-600 mb-4" />
 
         {/* Последние воспоминания */}
-        {talent.memories && talent.memories.length > 0 && (
+        {characterStats?.memories && characterStats.memories.length > 0 && (
           <div className="mb-4">
             <h4 className="text-sm font-semibold text-gray-300 mb-3">Последние воспоминания</h4>
             <div className="space-y-1">
-              {talent.memories.slice(-3).map((memory: string, index: number) => (
+              {characterStats.memories.slice(-3).map((memory: string, index: number) => (
                 <div key={index} className="text-xs text-gray-400 bg-slate-700/50 p-2 rounded">
                   {memory}
                 </div>
@@ -265,11 +283,11 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
         )}
 
         {/* Статусные эффекты */}
-        {talent.statusEffects && talent.statusEffects.length > 0 && (
+        {characterStats?.statusEffects && characterStats.statusEffects.length > 0 && (
           <div>
             <h4 className="text-sm font-semibold text-gray-300 mb-3">Статусные эффекты</h4>
             <div className="flex flex-wrap gap-1">
-              {talent.statusEffects.map((effect: any, index: number) => (
+              {characterStats.statusEffects.map((effect: any, index: number) => (
                 <Badge 
                   key={index} 
                   variant={effect.type === 'buff' ? 'default' : 'destructive'}

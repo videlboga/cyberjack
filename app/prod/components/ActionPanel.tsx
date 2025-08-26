@@ -16,7 +16,7 @@ import {
   Zap as ZapIcon
 } from 'lucide-react'
 
-import { Action, ToolType, ActionCategory, PREDEFINED_ACTIONS, BODY_AREAS } from '@/lib/types/actions'
+import { Action, ToolType, ActionCategory, PREDEFINED_ACTIONS, BODY_AREAS } from '@/lib/unified-entities'
 
 interface ActionPanelProps {
   selectedTool: ToolType | null

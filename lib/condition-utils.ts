@@ -14,7 +14,7 @@ import {
   CompoundCondition,
   GameState,
   SceneHistory
-} from './types'
+} from './unified-entities'
 
 /**
  * Парсер атрибутов для извлечения значений из сущностей

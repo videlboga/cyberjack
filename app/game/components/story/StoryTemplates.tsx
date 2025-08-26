@@ -26,7 +26,7 @@ import {
   Search
 } from "lucide-react"
 
-import { StoryTemplate, StoryScene, StoryScreen, StoryChoice, StoryTrigger } from '@/lib/types'
+import { StoryTemplate, StoryScene, StoryScreen, StoryChoice, StoryTrigger } from '@/lib/unified-entities'
 
 // Готовые шаблоны для разных типов событий
 const defaultTemplates: StoryTemplate[] = [

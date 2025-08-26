@@ -76,13 +76,19 @@ export function useCharacterAI({
   const [lastTool, setLastTool] = useState<string | null>(null);
   const [cooldowns, setCooldowns] = useState<{ [key: string]: number }>({});
   
-  // Инициализация сервисов - всегда создаем сервисы
+  // Инициализация сервисов - создаем только один раз
   const [messageAnalysisService] = useState(() => {
     console.log('🔑 Gemini API Key:', geminiApiKey ? 'Установлен' : 'Не установлен');
     return geminiApiKey ? new MessageAnalysisService(geminiApiKey) : null;
   });
   
   const [poseManagementService] = useState(() => {
+    // Создаем сервис только если есть конфигурация
+    if (!characterAIConfig?.poses && !characterAIConfig?.actions && !characterAIConfig?.tools) {
+      console.log('🎭 PoseManagementService: пропускаем инициализацию (пустая конфигурация)');
+      return null;
+    }
+    
     console.log('🎭 PoseManagementService init with config:', {
       poses: Object.keys(characterAIConfig?.poses || {}),
       actions: Object.keys(characterAIConfig?.actions || {}),

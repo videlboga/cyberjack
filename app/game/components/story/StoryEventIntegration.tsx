@@ -31,7 +31,7 @@ import {
   Eye
 } from "lucide-react"
 
-import { StoryScene, GameEvent, StoryTrigger, TriggerCondition } from '@/lib/types'
+import { StoryScene, Event as GameEvent, StoryTrigger, TriggerCondition } from '@/lib/unified-entities'
 
 interface StoryEventIntegrationProps {
   storyScenes: StoryScene[]

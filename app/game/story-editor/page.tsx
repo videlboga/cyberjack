@@ -30,10 +30,10 @@ import { SimpleStoryEditor } from "../components/story/SimpleStoryEditor"
 import { StationEntitiesManager } from "../components/story/StationEntitiesManager"
 import { convertToSimpleFormat } from "@/lib/simple-story-utils"
 import { SimpleStoryConfig } from "@/lib/simple-story-types"
-import { Asset, User, GameState } from "@/lib/types"
+import { Character as Asset, User, GameState } from "@/lib/unified-entities"
 
 // Импортируем данные
-import storyScenesData from "../../../data/story-scenes.json"
+import storyScenesData from "../../../data/story-scenes-unified.json"
 import stationEntitiesData from "../../../data/station-entities.json"
 
 // Тестовые данные для демонстрации системы условий

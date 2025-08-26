@@ -24,7 +24,7 @@ import {
   PowerOff
 } from 'lucide-react'
 
-import { Equipment, EquipmentCategory, EquipmentSettings } from '@/lib/types/character'
+import { Equipment, EquipmentCategory, EquipmentSettings } from '@/lib/unified-entities'
 
 interface EquipmentPanelProps {
   equipment: Equipment[]

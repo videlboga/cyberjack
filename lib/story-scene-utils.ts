@@ -5,7 +5,7 @@ import {
   Character as GameAsset,
   User as GameUser,
   GameConfig
-} from './types'
+} from './unified-entities'
 
 /**
  * Утилиты для работы с упрощенной системой сюжетных сцен

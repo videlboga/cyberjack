@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { Character } from '@/lib/character/types'
+import { Character } from '@/lib/unified-entities'
 import { loadUnifiedConfigWithAdapter } from '@/lib/unified-config-adapter'
 
 interface GameConfig {

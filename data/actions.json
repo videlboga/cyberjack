@@ -1,0 +1,404 @@
+{
+  "categories": {
+    "training": {
+      "title": "🎓 Тренировка",
+      "description": "Обучение и развитие навыков",
+      "actions": {
+        "training-basic": {
+          "title": "Базовая тренировка",
+          "description": "Стандартная тренировка подчинения без рисков",
+          "cost": 1,
+          "risk": "low",
+          "effects": {
+            "skills": {
+              "maid": 0.5,
+              "cooking": 0.3
+            },
+            "states": {
+              "habit": 0.3,
+              "awareness": 0.2
+            }
+          },
+          "memory": {
+            "type": "conditioned",
+            "summary": "Прошла базовую тренировку подчинения",
+            "intensity": 2,
+            "tags": [
+              "тренировка",
+              "подчинение"
+            ]
+          }
+        },
+        "training-intensive": {
+          "title": "Интенсивная тренировка",
+          "description": "Ускоренное подчинение с повышенной нагрузкой",
+          "cost": 2,
+          "risk": "medium",
+          "effects": {
+            "skills": {
+              "maid": 1.2,
+              "cooking": 0.8
+            },
+            "states": {
+              "awareness": 0.5,
+              "habit": 1,
+              "despair": 0.5,
+              "fear": 0.3
+            }
+          }
+        },
+        "training-neural": {
+          "title": "Нейроимплантация",
+          "description": "Экспериментальная имплантация фетишей и контроля",
+          "cost": 3,
+          "risk": "high",
+          "probability": {
+            "success": 0.4,
+            "partial": 0.4,
+            "failure": 0.2
+          },
+          "outcomes": {
+            "success": {
+              "attributes": {
+                "intelligence": 0.5
+              },
+              "states": {
+                "sensuality": 1,
+                "awareness": 0.8
+              },
+              "skills": {
+                "neural_hacking": 0.6
+              }
+            },
+            "partial": {
+              "attributes": {
+                "intelligence": 0.3
+              },
+              "states": {
+                "sensuality": 0.5,
+                "fear": 1,
+                "sensory_overload": 0.8
+              }
+            },
+            "failure": {
+              "states": {
+                "sensory_overload": 1.5,
+                "fear": 1.2,
+                "mood": -0.8
+              },
+              "memory": {
+                "type": "traumatic",
+                "summary": "Неудачная имплантация нейрочипа",
+                "intensity": 5,
+                "tags": [
+                  "медицина",
+                  "неудача",
+                  "нейротравма"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "coaching": {
+      "title": "🎯 Коучинг",
+      "description": "Психологическое кондиционирование и развитие",
+      "actions": {
+        "coaching-basic": {
+          "title": "Базовое кондиционирование",
+          "description": "Безопасное развитие подчинения и преданности",
+          "cost": 1,
+          "risk": "low",
+          "effects": {
+            "states": {
+              "awareness": 0.5,
+              "fear": -0.3,
+              "devotion": 0.2,
+              "sensuality": 0.1
+            }
+          }
+        },
+        "coaching-deep": {
+          "title": "Глубокое кондиционирование",
+          "description": "Интенсивная работа с внутренним сопротивлением",
+          "cost": 2,
+          "risk": "medium",
+          "effects": {
+            "states": {
+              "awareness": 1,
+              "devotion": 0.8,
+              "sensuality": 0.5,
+              "fear": 0.4,
+              "mood": -0.2
+            }
+          }
+        },
+        "coaching-extreme": {
+          "title": "Экстремальный коучинг",
+          "description": "Радикальные методы трансформации личности",
+          "cost": 3,
+          "risk": "high",
+          "probability": {
+            "success": 0.7,
+            "failure": 0.3
+          },
+          "outcomes": {
+            "success": {
+              "states": {
+                "mood": 1.5,
+                "engagement": 1.2,
+                "insight": 0.8,
+                "neuroplasticity": 0.6
+              },
+              "memory": {
+                "type": "positive",
+                "summary": "Прорыв в экстремальном коучинге!",
+                "intensity": 5,
+                "tags": [
+                  "прорыв",
+                  "трансформация"
+                ]
+              }
+            },
+            "failure": {
+              "states": {
+                "anxiety": 2,
+                "mood": -1,
+                "burnout": -1.5,
+                "mood": 1,
+                "neuroplasticity": 0.3,
+                "engagement": 0.2
+              }
+            }
+          }
+        }
+      }
+    },
+    "bdsm": {
+      "title": "🔗 БДСМ",
+      "description": "Доминирование, подчинение и контроль",
+      "actions": {
+        "bondage-basic": {
+          "title": "Базовая обвязка",
+          "description": "Простое связывание для ограничения движений",
+          "cost": 2,
+          "risk": "low",
+          "requiredEquipment": ["shibari-chest-binding", "steel-handcuffs"],
+          "effects": {
+            "states": {
+              "submission": 0.5,
+              "vulnerability": 0.6,
+              "arousal": 0.3
+            }
+          },
+          "memory": {
+            "type": "conditioned",
+            "summary": "Была связана и ограничена в движениях",
+            "intensity": 3,
+            "tags": ["связывание", "подчинение", "ограничение"]
+          }
+        },
+        "bondage-advanced": {
+          "title": "Продвинутая обвязка",
+          "description": "Сложная обвязка с эстетическими элементами",
+          "cost": 3,
+          "risk": "medium",
+          "requiredEquipment": ["shibari-chest-binding", "experimental-table"],
+          "effects": {
+            "states": {
+              "submission": 0.8,
+              "vulnerability": 0.9,
+              "arousal": 0.6,
+              "aesthetic_pleasure": 0.7
+            }
+          },
+          "memory": {
+            "type": "conditioned",
+            "summary": "Была красиво связана в сложной обвязке",
+            "intensity": 4,
+            "tags": ["обвязка", "эстетика", "подчинение"]
+          }
+        },
+        "collar-training": {
+          "title": "Тренировка с ошейником",
+          "description": "Обучение подчинению через электронный ошейник",
+          "cost": 2,
+          "risk": "medium",
+          "requiredEquipment": ["electronic-collar"],
+          "effects": {
+            "states": {
+              "submission": 0.7,
+              "fear": 0.4,
+              "control": 0.6
+            }
+          },
+          "memory": {
+            "type": "conditioned",
+            "summary": "Прошла тренировку с электронным ошейником",
+            "intensity": 4,
+            "tags": ["ошейник", "контроль", "подчинение"]
+          }
+        },
+        "sensory-deprivation": {
+          "title": "Сенсорная депривация",
+          "description": "Лишение зрения и слуха для усиления других чувств",
+          "cost": 2,
+          "risk": "low",
+          "requiredEquipment": ["blindfold-sensory", "gag-advanced"],
+          "effects": {
+            "states": {
+              "vulnerability": 0.8,
+              "focus": 0.6,
+              "sensory_enhancement": 0.7
+            }
+          },
+          "memory": {
+            "type": "experiential",
+            "summary": "Испытала сенсорную депривацию",
+            "intensity": 3,
+            "tags": ["депривация", "уязвимость", "фокус"]
+          }
+        }
+      }
+    },
+    "physical": {
+      "title": "💪 Физическое воздействие",
+      "description": "Физические действия и стимуляция",
+      "actions": {
+        "vibration-therapy": {
+          "title": "Вибрационная терапия",
+          "description": "Стимуляция через вибрационные устройства",
+          "cost": 2,
+          "risk": "low",
+          "requiredEquipment": ["vibrator-advanced"],
+          "effects": {
+            "states": {
+              "arousal": 0.6,
+              "pleasure": 0.5,
+              "sensitivity": 0.4
+            }
+          },
+          "memory": {
+            "type": "experiential",
+            "summary": "Испытала вибрационную стимуляцию",
+            "intensity": 3,
+            "tags": ["вибрация", "стимуляция", "удовольствие"]
+          }
+        },
+        "electro-stimulation": {
+          "title": "Электростимуляция",
+          "description": "Электрическая стимуляция нервных окончаний",
+          "cost": 3,
+          "risk": "medium",
+          "requiredEquipment": ["electro-stimulator"],
+          "effects": {
+            "states": {
+              "arousal": 0.8,
+              "pain": 0.4,
+              "pleasure": 0.7,
+              "focus": 0.5
+            }
+          },
+          "memory": {
+            "type": "experiential",
+            "summary": "Испытала электростимуляцию",
+            "intensity": 4,
+            "tags": ["электростимуляция", "боль", "удовольствие"]
+          }
+        },
+        "temperature-play": {
+          "title": "Температурные игры",
+          "description": "Использование горячих и холодных предметов",
+          "cost": 1,
+          "risk": "low",
+          "effects": {
+            "states": {
+              "sensitivity": 0.5,
+              "arousal": 0.4,
+              "focus": 0.3
+            }
+          },
+          "memory": {
+            "type": "experiential",
+            "summary": "Испытала температурные воздействия",
+            "intensity": 2,
+            "tags": ["температура", "чувствительность", "фокус"]
+          }
+        }
+      }
+    },
+    "experimental": {
+      "title": "🧪 Экспериментальные процедуры",
+      "description": "Экспериментальные и медицинские процедуры",
+      "actions": {
+        "neural-stimulation": {
+          "title": "Нейростимуляция",
+          "description": "Прямая стимуляция нервной системы",
+          "cost": 4,
+          "risk": "high",
+          "requiredEquipment": ["neuro-stimulator"],
+          "probability": {
+            "success": 0.6,
+            "partial": 0.3,
+            "failure": 0.1
+          },
+          "outcomes": {
+            "success": {
+              "states": {
+                "neural_control": 0.8,
+                "pleasure": 0.7,
+                "focus": 0.6
+              }
+            },
+            "partial": {
+              "states": {
+                "neural_control": 0.4,
+                "pain": 0.5,
+                "confusion": 0.3
+              }
+            },
+            "failure": {
+              "states": {
+                "pain": 0.8,
+                "confusion": 0.6,
+                "fear": 0.7
+              }
+            }
+          },
+          "memory": {
+            "type": "traumatic",
+            "summary": "Прошла экспериментальную нейростимуляцию",
+            "intensity": 5,
+            "tags": ["нейростимуляция", "эксперимент", "контроль"]
+          }
+        },
+        "hormone-therapy": {
+          "title": "Гормональная терапия",
+          "description": "Введение гормональных препаратов для изменения поведения",
+          "cost": 3,
+          "risk": "medium",
+          "requiredEquipment": ["hormone-injector"],
+          "effects": {
+            "states": {
+              "mood_modification": 0.6,
+              "behavior_change": 0.5,
+              "dependency": 0.4
+            }
+          },
+          "memory": {
+            "type": "conditioned",
+            "summary": "Получила гормональную терапию",
+            "intensity": 4,
+            "tags": ["гормоны", "терапия", "зависимость"]
+          }
+        }
+      }
+    }
+  },
+  "config": {
+    "settings": {},
+    "conditions": [],
+    "risks": []
+  }
+}

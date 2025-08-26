@@ -13,7 +13,7 @@ import {
   saveMergedData,
   validateMergedData 
 } from '../lib/migration-utils'
-import { UnifiedGameConfig } from '../lib/unified-types'
+import { GameConfig } from '../lib/unified-entities'
 
 async function main() {
   console.log('🚀 Запуск миграции данных...')
@@ -32,7 +32,7 @@ async function main() {
     console.log('✅ Миграция выполнена успешно!')
     console.log('📊 Статистика:')
     
-    const data = migrationResult.data as UnifiedGameConfig
+    const data = migrationResult.data as GameConfig
     
     // Выводим статистику
     console.log(`  👥 Персонажи: ${data.characters?.characters?.length || 0}`)
@@ -94,7 +94,7 @@ async function main() {
   }
 }
 
-async function createMigrationReport(data: UnifiedGameConfig, migrationResult: any) {
+async function createMigrationReport(data: GameConfig, migrationResult: any) {
   // Подготавливаем статистику по источникам персонажей
   const characterSources = data.characters?.characters?.reduce((acc, char) => {
     const source = char.metadata?.source || 'unknown'

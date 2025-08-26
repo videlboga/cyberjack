@@ -2,9 +2,10 @@
 import { GameConfig, Character, Action, Event, Contract, Equipment, StoryScene, User } from './unified-entities'
 
 // Кэш для загруженных конфигураций
-let configCache: UnifiedGameConfig | null = null
+let configCache: GameConfig | null = null
 let lastLoadTime: number = 0
-const CACHE_DURATION = 0 // Отключаем кэш для dev
+// В дев-режиме включим небольшой кэш, чтобы уменьшить задержку первичной загрузки
+const CACHE_DURATION = process.env.NODE_ENV === 'development' ? 3000 : 0
 
 // Загрузка унифицированной конфигурации
 export async function loadUnifiedConfig(): Promise<GameConfig> {
@@ -16,8 +17,7 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
     return configCache
   }
   
-  // Принудительно очищаем кэш для dev
-  configCache = null
+  // В проде кэш может жить, в деве очищаем только при истечении CACHE_DURATION
   
   try {
     console.log('🔄 Загружаем унифицированную конфигурацию...')
@@ -45,7 +45,7 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
       import('../data/game-config-unified.json').catch(() => ({ default: {} }))
     ])
     
-    const config: UnifiedGameConfig = {
+    const config: GameConfig = {
       characters: charactersData.default,
       actions: actionsData.default,
       events: eventsData.default,
@@ -85,7 +85,7 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
 }
 
 // Валидация унифицированной конфигурации
-export function validateUnifiedConfig(config: UnifiedGameConfig): { isValid: boolean; warnings: string[] } {
+export function validateUnifiedConfig(config: GameConfig): { isValid: boolean; warnings: string[] } {
   const warnings: string[] = []
   
   // Проверяем обязательные секции
@@ -145,24 +145,24 @@ export function validateUnifiedConfig(config: UnifiedGameConfig): { isValid: boo
 }
 
 // Утилиты для работы с персонажами
-export function getCharactersBySource(config: UnifiedGameConfig, source: string): Character[] {
+export function getCharactersBySource(config: GameConfig, source: string): Character[] {
   return config.characters.characters.filter(char => char.metadata.source === source)
 }
 
-export function getCharactersByRank(config: UnifiedGameConfig, rank: string): Character[] {
+export function getCharactersByRank(config: GameConfig, rank: string): Character[] {
   return config.characters.characters.filter(char => char.rank === rank)
 }
 
-export function getCharactersByStatus(config: UnifiedGameConfig, status: string): Character[] {
+export function getCharactersByStatus(config: GameConfig, status: string): Character[] {
   return config.characters.characters.filter(char => char.status === status)
 }
 
-export function getCharacterById(config: UnifiedGameConfig, id: string): Character | undefined {
+export function getCharacterById(config: GameConfig, id: string): Character | undefined {
   return config.characters.characters.find(char => char.id === id)
 }
 
 // Утилиты для работы с действиями
-export function getActionsByCategory(config: UnifiedGameConfig, category: string): Action[] {
+export function getActionsByCategory(config: GameConfig, category: string): Action[] {
   const categoryData = config.actions.categories?.[category]
   if (!categoryData?.actions) return []
   
@@ -173,7 +173,7 @@ export function getActionsByCategory(config: UnifiedGameConfig, category: string
   }))
 }
 
-export function getActionById(config: UnifiedGameConfig, id: string): Action | undefined {
+export function getActionById(config: GameConfig, id: string): Action | undefined {
   for (const [categoryKey, category] of Object.entries(config.actions.categories || {})) {
     if (category.actions?.[id]) {
       return {
@@ -187,43 +187,43 @@ export function getActionById(config: UnifiedGameConfig, id: string): Action | u
 }
 
 // Утилиты для работы с событиями
-export function getEventsByType(config: UnifiedGameConfig, type: string): Event[] {
+export function getEventsByType(config: GameConfig, type: string): Event[] {
   return config.events.events.filter(event => event.type === type)
 }
 
-export function getEventById(config: UnifiedGameConfig, id: string): Event | undefined {
+export function getEventById(config: GameConfig, id: string): Event | undefined {
   return config.events.events.find(event => event.id === id)
 }
 
 // Утилиты для работы с контрактами
-export function getContractsByClient(config: UnifiedGameConfig, client: string): Contract[] {
+export function getContractsByClient(config: GameConfig, client: string): Contract[] {
   return config.contracts.contracts.filter(contract => contract.client === client)
 }
 
-export function getContractById(config: UnifiedGameConfig, id: string): Contract | undefined {
+export function getContractById(config: GameConfig, id: string): Contract | undefined {
   return config.contracts.contracts.find(contract => contract.id === id)
 }
 
 // Утилиты для работы с оборудованием
-export function getEquipmentByType(config: UnifiedGameConfig, type: string): Equipment[] {
+export function getEquipmentByType(config: GameConfig, type: string): Equipment[] {
   return config.equipment.equipment.filter(item => item.type === type)
 }
 
-export function getEquipmentById(config: UnifiedGameConfig, id: string): Equipment | undefined {
+export function getEquipmentById(config: GameConfig, id: string): Equipment | undefined {
   return config.equipment.equipment.find(item => item.id === id)
 }
 
 // Утилиты для работы с пользователями
-export function getUsersByRole(config: UnifiedGameConfig, role: string): User[] {
+export function getUsersByRole(config: GameConfig, role: string): User[] {
   return config.users.users.filter(user => user.role === role)
 }
 
-export function getUserById(config: UnifiedGameConfig, id: string): User | undefined {
+export function getUserById(config: GameConfig, id: string): User | undefined {
   return config.users.users.find(user => user.id === id)
 }
 
 // Утилиты для поиска
-export function searchCharacters(config: UnifiedGameConfig, query: string): Character[] {
+export function searchCharacters(config: GameConfig, query: string): Character[] {
   const lowerQuery = query.toLowerCase()
   return config.characters.characters.filter(char => 
     char.name.toLowerCase().includes(lowerQuery) ||
@@ -232,7 +232,7 @@ export function searchCharacters(config: UnifiedGameConfig, query: string): Char
   )
 }
 
-export function searchActions(config: UnifiedGameConfig, query: string): Action[] {
+export function searchActions(config: GameConfig, query: string): Action[] {
   const lowerQuery = query.toLowerCase()
   const results: Action[] = []
   
@@ -255,7 +255,7 @@ export function searchActions(config: UnifiedGameConfig, query: string): Action[
   return results
 }
 
-export function searchEvents(config: UnifiedGameConfig, query: string): Event[] {
+export function searchEvents(config: GameConfig, query: string): Event[] {
   const lowerQuery = query.toLowerCase()
   return config.events.events.filter(event => 
     event.title.toLowerCase().includes(lowerQuery) ||
@@ -265,7 +265,7 @@ export function searchEvents(config: UnifiedGameConfig, query: string): Event[] 
 }
 
 // Утилиты для статистики
-export function getConfigStats(config: UnifiedGameConfig) {
+export function getConfigStats(config: GameConfig) {
   return {
     characters: {
       total: config.characters.characters.length,
@@ -329,12 +329,12 @@ export function clearConfigCache() {
 }
 
 // Экспорт конфигурации
-export function exportConfig(config: UnifiedGameConfig): string {
+export function exportConfig(config: GameConfig): string {
   return JSON.stringify(config, null, 2)
 }
 
 // Сравнение конфигураций
-export function compareConfigs(config1: UnifiedGameConfig, config2: UnifiedGameConfig): {
+export function compareConfigs(config1: GameConfig, config2: GameConfig): {
   characters: { added: number; removed: number; modified: number }
   actions: { added: number; removed: number; modified: number }
   events: { added: number; removed: number; modified: number }

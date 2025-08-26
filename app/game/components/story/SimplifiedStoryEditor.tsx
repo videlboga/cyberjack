@@ -28,7 +28,7 @@ import {
   StorySceneCondition,
   StoryScreen,
   StoryChoice
-} from '@/lib/types'
+} from '@/lib/unified-entities'
 import { StorySceneUtils } from '@/lib/story-scene-utils'
 
 interface SimplifiedStoryEditorProps {

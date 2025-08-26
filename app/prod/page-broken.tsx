@@ -10,7 +10,7 @@ import CharacterPanel from "./components/CharacterPanel"
 import { useCharacterAI } from "./hooks/useCharacterAI"
 import { ActionToolPanel } from "./components/ActionToolPanel"
 import { CharacterChat } from "./components/CharacterChat"
-import { Character } from '@/lib/character/types'
+import { Character } from '@/lib/unified-entities'
 
 // Функция для генерации уникальных ID
 let idCounter = 0

@@ -1,5 +1,8 @@
 // Основные типы данных для системы персонажей
 
+// Импортируем из unified-entities
+import { MemoryType, FetishCategory } from '../unified-entities'
+
 export interface Character {
   id: string
   name: string
@@ -86,15 +89,7 @@ export interface MemoryEntry {
   context?: any
 }
 
-export enum MemoryType {
-  INTERACTION = 'interaction',
-  EVENT = 'event',
-  EMOTION = 'emotion',
-  PHYSICAL = 'physical',
-  FETISH = 'fetish',
-  TRAUMA = 'trauma',
-  PLEASURE = 'pleasure'
-}
+
 
 export interface SummaryEntry {
   id: string
@@ -134,16 +129,7 @@ export interface CharacterFetish {
   lastTriggered?: string   // Последняя активация
 }
 
-export enum FetishCategory {
-  DOMINATION = 'domination',      // Доминирование/подчинение
-  HUMILIATION = 'humiliation',    // Унижение
-  DEPENDENCY = 'dependency',      // Зависимость
-  SENSORY = 'sensory',           // Сенсорные
-  ROLEPLAY = 'roleplay',         // Ролевые игры
-  PHYSICAL = 'physical',         // Физические
-  PSYCHOLOGICAL = 'psychological', // Психологические
-  SOCIAL = 'social'             // Социальные роли
-}
+
 
 export enum EmotionalState {
   EXCITED = 'excited',

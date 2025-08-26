@@ -1,4 +1,4 @@
-import { Character, CharacterStats } from './types'
+import { Character, CharacterStats } from '../unified-entities'
 
 /**
  * Адаптер для совместимости Character с старым кодом Talent

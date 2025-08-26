@@ -1,4 +1,4 @@
-import { Character, CharacterPrompts, SituationalPrompt, PromptCondition, CharacteristicInterpretations } from './types'
+import { Character, CharacterPrompts, SituationalPrompt, PromptCondition, CharacteristicInterpretations } from '../unified-entities'
 
 /**
  * Система управления промтами для персонажей

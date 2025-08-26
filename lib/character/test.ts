@@ -2,7 +2,7 @@
 
 import { CharacterAIService } from './ai-service.js'
 import { createEmptyCharacter } from './types.js'
-import charactersData from '../../data/characters.json' assert { type: 'json' }
+import charactersData from '../../data/characters-unified.json' assert { type: 'json' }
 
 async function testCharacterSystem() {
   console.log('🧪 Тестирование системы персонажей...')

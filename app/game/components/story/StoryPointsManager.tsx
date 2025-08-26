@@ -30,7 +30,7 @@ import {
   Asset,
   User,
   GameState
-} from '@/lib/types'
+} from '@/lib/unified-entities'
 import { 
   ConditionUtils as Utils,
   ConditionEvaluator as Evaluator,
