@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StatNotification } from "@/components/ui/stat-notification"
 import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
 import { Toaster } from "@/components/ui/toaster"
+import Link from "next/link"
 
 // Icons
 import { 
@@ -552,6 +553,29 @@ const UnifiedGamePage = () => {
                     configs={configs}
                     onEdit={openModal}
                   />
+                </CardContent>
+              </Card>
+
+              {/* Story Editor */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <FileText className="h-5 w-5" />
+                    <span>Story редактор</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Редактирование сцен, историй и шаблонов для игровых событий
+                    </p>
+                    <Link href="/game-unified/story-editor">
+                      <Button className="w-full">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Открыть Story редактор
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
 
