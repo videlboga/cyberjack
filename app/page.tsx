@@ -509,15 +509,20 @@ export default function TalentArchitectGDD() {
                     {/* Ссылки */}
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="font-semibold mb-2">Быстрые ссылки</h4>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
+                        <Link href="/game-unified">
+                          <Button variant="default" size="sm">
+                            🎮 Единая игра (NEW)
+                          </Button>
+                        </Link>
                         <Link href="/prod">
                           <Button variant="outline" size="sm">
-                            🚀 Открыть продакшн
+                            🚀 Продакшн
                           </Button>
                         </Link>
                         <Link href="/game">
                           <Button variant="outline" size="sm">
-                            🎮 Открыть игру
+                            🎮 Старая игра
                           </Button>
                         </Link>
                       </div>
