@@ -19,7 +19,6 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
 
   // Функция для обновления конфигураций извне
   const updateConfigs = useCallback((newConfigs: ConfigState) => {
-    console.log('🔄 Обновляем configs в useConfigManager:', newConfigs)
     setConfigs(newConfigs)
   }, [])
 
@@ -69,7 +68,7 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
             item.id === itemId ? updatedItem : item
           )
         }
-        console.log(`💎 Обновлен актив ${itemId}, теперь ${updatedConfig.assets.length} активов`)
+
       } else if (currentConfig.users && Array.isArray(currentConfig.users)) {
         // Специальная обработка для users конфига
         updatedConfig = {
@@ -78,7 +77,7 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
             item.id === itemId ? updatedItem : item
           )
         }
-        console.log(`👥 Обновлен пользователь ${itemId}, теперь ${updatedConfig.users.length} пользователей`)
+
       } else {
         return prev
       }
@@ -111,12 +110,8 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
       newItem.id = `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     }
     
-    console.log(`➕ Добавление новой сущности: ${configType}`, newItem)
-    
     setConfigs(prev => {
-      console.log('🔄 Текущее состояние configs для добавления:', prev)
       const currentConfig = prev[configType]
-      console.log(`📦 Текущий конфиг для ${configType}:`, currentConfig)
       let updatedConfig
       
       if (category && currentConfig[category]) {
@@ -125,25 +120,25 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
           ...currentConfig,
           [category]: [...currentConfig[category], newItem]
         }
-        console.log(`📝 Добавлен в категорию ${category}`)
+
       } else if (Array.isArray(currentConfig)) {
         // Добавляем элемент в массив
         updatedConfig = [...currentConfig, newItem]
-        console.log(`📝 Добавлен в массив, теперь ${updatedConfig.length} элементов`)
+
       } else if (currentConfig.users && Array.isArray(currentConfig.users)) {
         // Специальная обработка для users конфига
         updatedConfig = {
           ...currentConfig,
           users: [...currentConfig.users, newItem]
         }
-        console.log(`👥 Добавлен пользователь, теперь ${updatedConfig.users.length} пользователей`)
+
       } else if (currentConfig.assets && Array.isArray(currentConfig.assets)) {
         // Специальная обработка для assets конфига
         updatedConfig = {
           ...currentConfig,
           assets: [...currentConfig.assets, newItem]
         }
-        console.log(`💎 Добавлен актив, теперь ${updatedConfig.assets.length} активов`)
+
       } else {
         // Универсальная обработка для всех остальных конфигов
         const arrayKeys = Object.keys(currentConfig).filter(key => 

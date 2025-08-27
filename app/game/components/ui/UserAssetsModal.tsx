@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -111,6 +111,9 @@ export const UserAssetsModal: React.FC<UserAssetsModalProps> = ({
             <User className="h-5 w-5" />
             Управление активами пользователя: {user?.username}
           </DialogTitle>
+          <DialogDescription>
+            Управляйте активами и оборудованием пользователя. Добавляйте и удаляйте активы, которые будут доступны пользователю в игре.
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="assets" className="w-full">

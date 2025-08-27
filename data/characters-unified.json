@@ -96,7 +96,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_2",
@@ -192,7 +334,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_3",
@@ -295,7 +579,149 @@
       "location": "talent_exchange",
       "avatar": "🐑",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_4",
@@ -389,7 +815,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_5",
@@ -482,7 +1050,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_6",
@@ -578,7 +1288,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_7",
@@ -674,7 +1526,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_8",
@@ -766,7 +1760,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_9",
@@ -859,7 +1995,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_10",
@@ -957,7 +2235,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_11",
@@ -1056,7 +2476,149 @@
       "location": "talent_exchange",
       "avatar": "🌸",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_12",
@@ -1151,7 +2713,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_13",
@@ -1249,7 +2953,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_14",
@@ -1341,7 +3187,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_15",
@@ -1439,7 +3427,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_16",
@@ -1537,7 +3667,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_17",
@@ -1632,7 +3904,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_алексей_дмитриевич_морозов",
@@ -1725,7 +4139,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_альфа-001_(настоящее_имя_неизвестно)",
@@ -1821,7 +4377,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_анна_(анечка)",
@@ -1917,7 +4615,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_анна_сергеевна_козлова",
@@ -2013,7 +4853,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_артём_владимирович_соколов",
@@ -2106,7 +5088,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_виктор_сергеевич_морозов",
@@ -2199,7 +5323,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_дмитрий_александрович_петров",
@@ -2292,7 +5558,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_елена_александровна_соколова",
@@ -2388,7 +5796,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_мила_(предположительно)",
@@ -2484,7 +6034,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_екатерина_(катя)",
@@ -2580,7 +6272,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_елизавета_(лиза)",
@@ -2673,7 +6507,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_мария_ивановна_(фамилия_неизвестна)",
@@ -2769,7 +6745,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_михаил_(миша)",
@@ -2862,7 +6980,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_ольга_дмитриевна_волкова",
@@ -2958,7 +7218,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_алиса_(предположительно)",
@@ -3054,7 +7456,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_сергей_игоревич_волков",
@@ -3147,7 +7691,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     },
     {
       "id": "asset_лилия/лилит_(две_личности)",
@@ -3243,7 +7929,149 @@
       "location": "talent_exchange",
       "avatar": "👤",
       "deleted": false,
-      "deletedAt": null
+      "deletedAt": null,
+      "knowledge": {
+        "physical": {
+          "Выносливость": {
+            "level": "unknown"
+          },
+          "Чувствительность": {
+            "level": "unknown"
+          },
+          "Гибкость": {
+            "level": "unknown"
+          }
+        },
+        "psychological": {
+          "Эмоциональная стабильность": {
+            "level": "unknown"
+          },
+          "Адаптивность": {
+            "level": "unknown"
+          },
+          "Интеллект": {
+            "level": "unknown"
+          }
+        },
+        "social": {
+          "Общительность": {
+            "level": "unknown"
+          },
+          "Эмпатия": {
+            "level": "unknown"
+          },
+          "Доминантность": {
+            "level": "unknown"
+          }
+        },
+        "personality": {
+          "Самооценка": {
+            "level": "unknown"
+          },
+          "Оптимизм": {
+            "level": "unknown"
+          },
+          "Любопытство": {
+            "level": "unknown"
+          }
+        },
+        "special": {
+          "Сексуальная опытность": {
+            "level": "unknown"
+          },
+          "Сопротивляемость": {
+            "level": "unknown"
+          },
+          "Зависимость": {
+            "level": "unknown"
+          }
+        }
+      },
+      "analysisHistory": [],
+      "availableAnalysisMethods": [
+        {
+          "id": "basic_scan",
+          "name": "Базовое сканирование",
+          "cost": 50,
+          "time": 5,
+          "risk": "low",
+          "accuracy": 0.7,
+          "reveals": [
+            "physical"
+          ],
+          "effects": {
+            "stressIncrease": 2,
+            "trustDecrease": 1,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "psychological_test",
+          "name": "Психологическое тестирование",
+          "cost": 100,
+          "time": 15,
+          "risk": "low",
+          "accuracy": 0.6,
+          "reveals": [
+            "psychological",
+            "social"
+          ],
+          "effects": {
+            "stressIncrease": 5,
+            "trustDecrease": 3,
+            "healthImpact": 0
+          }
+        },
+        {
+          "id": "sensory_research",
+          "name": "Сенсорное исследование",
+          "cost": 300,
+          "time": 30,
+          "risk": "medium",
+          "accuracy": 0.8,
+          "reveals": [
+            "physical",
+            "special"
+          ],
+          "effects": {
+            "stressIncrease": 10,
+            "trustDecrease": 8,
+            "healthImpact": 2
+          }
+        },
+        {
+          "id": "deep_immersion",
+          "name": "Глубокая иммерсия",
+          "cost": 1000,
+          "time": 480,
+          "risk": "high",
+          "accuracy": 0.95,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 20,
+            "trustDecrease": 15,
+            "healthImpact": 5
+          }
+        },
+        {
+          "id": "personal_work",
+          "name": "Личная работа",
+          "cost": 0,
+          "time": 0,
+          "risk": "medium",
+          "accuracy": 0.4,
+          "reveals": [
+            "all"
+          ],
+          "effects": {
+            "stressIncrease": 0,
+            "trustDecrease": 0,
+            "healthImpact": 0
+          }
+        }
+      ]
     }
   ],
   "templates": {},

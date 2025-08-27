@@ -13,7 +13,7 @@ import type {
 // Универсальная функция для загрузки конфигураций
 export async function loadConfigsForEnvironment(environment: 'dev' | 'prod'): Promise<GameConfig> {
   try {
-    console.log(`🔄 Загружаем конфигурации для ${environment} режима...`)
+
     
     // Загружаем базовые конфигурации из файлов
     const [
@@ -48,28 +48,22 @@ export async function loadConfigsForEnvironment(environment: 'dev' | 'prod'): Pr
     }
 
     // Универсальная загрузка из localStorage для всех режимов
-    console.log('🔍 Проверяем localStorage для всех конфигураций...')
-    
     const configTypes = ['actions', 'contracts', 'events', 'market', 'equipment', 'system', 'assets', 'users'] as const
-    
+
     for (const configType of configTypes) {
       const savedData = localStorage.getItem(`config_${configType}`)
-      console.log(`🔍 localStorage для ${configType}:`, savedData ? 'есть данные' : 'нет данных')
-      
+
       if (savedData) {
         try {
           const parsedData = JSON.parse(savedData)
-          console.log(`📦 Загружена сохраненная конфигурация ${configType} из localStorage:`, parsedData)
-          
+
           // Проверяем, есть ли удаленные элементы
           if (parsedData.users && Array.isArray(parsedData.users)) {
             const deletedUsers = parsedData.users.filter((user: any) => user.deleted)
-            console.log(`🗑️ Найдено ${deletedUsers.length} удаленных пользователей:`, deletedUsers)
           }
-          
+
           if (parsedData.assets && Array.isArray(parsedData.assets)) {
             const deletedAssets = parsedData.assets.filter((asset: any) => asset.deleted)
-            console.log(`🗑️ Найдено ${deletedAssets.length} удаленных активов:`, deletedAssets)
           }
           
           baseConfig[configType] = parsedData
@@ -81,13 +75,12 @@ export async function loadConfigsForEnvironment(environment: 'dev' | 'prod'): Pr
     
     // Специальная обработка для пользователей - синхронизируем с prod режимом
     const allUsers = localStorage.getItem('allUsers')
-    console.log('🔍 Проверяем allUsers в localStorage:', allUsers ? 'есть данные' : 'нет данных')
+
     
     if (allUsers) {
       try {
         const prodUsers = JSON.parse(allUsers)
-        console.log('👥 Найдены пользователи из prod режима:', prodUsers.length)
-        console.log('👥 Список пользователей:', prodUsers.map((u: any) => u.username))
+
         
         // Преобразуем пользователей из prod формата в dev формат
         const devUsers = prodUsers.map((user: any) => ({

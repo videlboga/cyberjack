@@ -31,7 +31,7 @@ const generateUniqueId = (prefix: string = '') => {
 
 const NexusEnslaverGame = () => {
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const [activeTab, setActiveTab] = useState("entities")
+  const [activeTab, setActiveTab] = useState("characters-users")
   const [activeSubTab, setActiveSubTab] = useState("assets")
   const [configStats, setConfigStats] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
@@ -487,12 +487,9 @@ const NexusEnslaverGame = () => {
                 name: character.name,
                 description: character.description,
                 archetype: character.archetype,
-                attributes: character.attributes,
-                states: character.states,
+                stats: character.stats,
                 fetishes: character.fetishes,
-                knowledge: character.knowledge,
-                analysisHistory: character.analysisHistory,
-                availableAnalysisMethods: character.availableAnalysisMethods,
+                emotionalState: character.emotionalState,
                 type: 'character',
                 ...character
               })
@@ -785,25 +782,25 @@ const NexusEnslaverGame = () => {
               </div>
               
               <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50 p-1 rounded-lg">
-                <TabsTrigger value="entities" className="flex items-center gap-2">
+                <TabsTrigger value="characters-users" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Сущности
+                  Персонажи и Пользователи
                 </TabsTrigger>
-                <TabsTrigger value="config" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Конфигурация
+                <TabsTrigger value="game-world" className="flex items-center gap-2">
+                  <Building className="h-4 w-4" />
+                  Игровой Мир
                 </TabsTrigger>
-                <TabsTrigger value="gameplay" className="flex items-center gap-2">
-                  <Zap className="h-4 w-4" />
-                  Игровая логика
+                <TabsTrigger value="content" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Контент
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            {/* Группа Сущности */}
-            <TabsContent value="entities" className="space-y-6">
+            {/* Основная группа: Персонажи и Пользователи */}
+            <TabsContent value="characters-users" className="space-y-6">
               <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 rounded-lg mb-4">
+                <TabsList className="grid w-full grid-cols-4 bg-muted/30 p-1 rounded-lg">
                   <TabsTrigger value="assets" className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     Персонажи
@@ -812,24 +809,32 @@ const NexusEnslaverGame = () => {
                     <User className="h-4 w-4" />
                     Пользователи
                   </TabsTrigger>
+                  <TabsTrigger value="attributes" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Атрибуты персонажей
+                  </TabsTrigger>
+                  <TabsTrigger value="user-attributes" className="flex items-center gap-2">
+                    <Cog className="h-4 w-4" />
+                    Атрибуты пользователей
+                  </TabsTrigger>
                 </TabsList>
 
-                {/* Подтаб Персонажи */}
-                <TabsContent value="assets" className="space-y-6">
-              <EntityList
-                entities={getEntitiesList('characters')}
-                entityType="character"
-                configType="characters"
-                onEdit={(entity) => handleEdit(entity, 'characters')}
-                onDelete={(id) => handleDelete(id, 'characters')}
-                onView={(entity) => handleViewCharacterStats(entity)}
-                onAdd={() => handleAdd('characters')}
-                title="Персонажи (Активы)"
-              />
+                {/* Вложенный таб: Персонажи */}
+                <TabsContent value="assets" className="space-y-6 mt-6">
+                  <EntityList
+                    entities={getEntitiesList('characters')}
+                    entityType="character"
+                    configType="characters"
+                    onEdit={(entity) => handleEdit(entity, 'characters')}
+                    onDelete={(id) => handleDelete(id, 'characters')}
+                    onView={(entity) => handleViewCharacterStats(entity)}
+                    onAdd={() => handleAdd('characters')}
+                    title="Персонажи (Активы)"
+                  />
                 </TabsContent>
 
-                {/* Подтаб Пользователи */}
-                <TabsContent value="users" className="space-y-6">
+                {/* Вложенный таб: Пользователи */}
+                <TabsContent value="users" className="space-y-6 mt-6">
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -850,90 +855,70 @@ const NexusEnslaverGame = () => {
                         onManageAssets={handleManageUserAssets}
                         onAdd={undefined}
                         title=""
-                  />
-                </CardContent>
-              </Card>
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-
-            {/* Группа Конфигурация */}
-            <TabsContent value="config" className="space-y-6">
-              <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-1 rounded-lg mb-4">
-                  <TabsTrigger value="attributes" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Атрибуты персонажей
-                  </TabsTrigger>
-                  <TabsTrigger value="user-attributes" className="flex items-center gap-2">
-                    <Cog className="h-4 w-4" />
-                    Атрибуты пользователей
-                  </TabsTrigger>
-                  <TabsTrigger value="items" className="flex items-center gap-2">
-                    <Package className="h-4 w-4" />
-                    Предметы
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Подтаб Атрибуты персонажей */}
-                <TabsContent value="attributes" className="space-y-6">
-              <div className="space-y-6">
-                {Object.entries(getGroupedAttributes()).map(([category, entities]) => (
-                  <Card key={category}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        {category === 'attributes' && <User className="h-5 w-5" />}
-                        {category === 'states' && <BarChart className="h-5 w-5" />}
-                        {category === 'fetishes' && <Star className="h-5 w-5" />}
-                        {category === 'resources' && <Cog className="h-5 w-5" />}
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </CardTitle>
-                      <CardDescription>
-                        {entities.length} элементов
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <EntityList
-                        entities={entities}
-                        entityType="attribute"
-                        configType="system"
-                        onEdit={(entity) => handleEdit(entity, 'system')}
-                        onDelete={(id) => handleDelete(id, 'system')}
-                        onAdd={() => handleAdd('system')}
-                        title=""
-                        compact
                       />
                     </CardContent>
                   </Card>
-                ))}
-              </div>
                 </TabsContent>
 
-                {/* Подтаб Атрибуты пользователей */}
-                <TabsContent value="user-attributes" className="space-y-6">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Cog className="h-5 w-5" />
-                      Атрибуты пользователей
-                    </CardTitle>
-                    <CardDescription>
-                      Управление характеристиками пользователей. Эти атрибуты влияют на взаимодействие с персонажами и развитие сюжета.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {/* Лидерские качества */}
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-lg">Лидерские качества</CardTitle>
+                {/* Вложенный таб: Атрибуты персонажей */}
+                <TabsContent value="attributes" className="space-y-6 mt-6">
+                  <div className="space-y-6">
+                    {Object.entries(getGroupedAttributes()).map(([category, entities]) => (
+                      <Card key={category}>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            {category === 'attributes' && <User className="h-5 w-5" />}
+                            {category === 'states' && <BarChart className="h-5 w-5" />}
+                            {category === 'fetishes' && <Star className="h-5 w-5" />}
+                            {category === 'resources' && <Cog className="h-5 w-5" />}
+                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                          </CardTitle>
+                          <CardDescription>
+                            {entities.length} элементов
+                          </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Лидерство</label>
-                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
-                            <div className="flex justify-between text-xs text-muted-foreground">
+                        <CardContent>
+                          <EntityList
+                            entities={entities}
+                            entityType="attribute"
+                            configType="system"
+                            onEdit={(entity) => handleEdit(entity, 'system')}
+                            onDelete={(id) => handleDelete(id, 'system')}
+                            onAdd={() => handleAdd('system')}
+                            title=""
+                            compact
+                          />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                {/* Вложенный таб: Атрибуты пользователей */}
+                <TabsContent value="user-attributes" className="space-y-6 mt-6">
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Cog className="h-5 w-5" />
+                          Атрибуты пользователей
+                        </CardTitle>
+                        <CardDescription>
+                          Управление характеристиками пользователей. Эти атрибуты влияют на взаимодействие с персонажами и развитие сюжета.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {/* Лидерские качества */}
+                          <Card>
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-lg">Лидерские качества</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">Лидерство</label>
+                                <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                                <div className="flex justify-between text-xs text-muted-foreground">
                               <span>1</span><span>5</span><span>10</span>
                             </div>
                           </div>
@@ -1080,43 +1065,10 @@ const NexusEnslaverGame = () => {
                   </CardContent>
                 </Card>
               </div>
-                </TabsContent>
-
-                {/* Подтаб Предметы */}
-                <TabsContent value="items" className="space-y-6">
-                  <EntityList
-                    entities={getEntitiesList('equipment')}
-                    entityType="equipment"
-                    configType="equipment"
-                    onEdit={(entity) => handleEdit(entity, 'equipment')}
-                    onDelete={(id) => handleDelete(id, 'equipment')}
-                    onAdd={() => handleAdd('equipment')}
-                    title="Оборудование и предметы"
-                  />
-                </TabsContent>
-              </Tabs>
             </TabsContent>
 
-            {/* Группа Игровая логика */}
-            <TabsContent value="gameplay" className="space-y-6">
-              <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-1 rounded-lg mb-4">
-                  <TabsTrigger value="station" className="flex items-center gap-2">
-                    <Building className="h-4 w-4" />
-                    Станция
-                  </TabsTrigger>
-                  <TabsTrigger value="story-editor" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Сюжетный редактор
-                  </TabsTrigger>
-                  <TabsTrigger value="interactions" className="flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    Взаимодействия
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Подтаб Станция */}
-                <TabsContent value="station" className="space-y-6">
+            {/* Таб Станция */}
+            <TabsContent value="station" className="space-y-6">
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -1130,7 +1082,7 @@ const NexusEnslaverGame = () => {
                           Управление сущностями станции. Добавляйте новые сущности для отображения в prod версии и сюжетном редакторе.
                         </CardDescription>
                       </div>
-                      <Button onClick={(e) => { e.preventDefault(); handleAdd('station'); }}>
+                      <Button onClick={() => handleAdd('station')}>
                         <Plus className="h-4 w-4 mr-2" />
                         Добавить сущность
                       </Button>
@@ -1149,47 +1101,150 @@ const NexusEnslaverGame = () => {
                   </CardContent>
                 </Card>
               </div>
-                </TabsContent>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
 
-                {/* Подтаб Сюжетный редактор */}
-                <TabsContent value="story-editor" className="space-y-6">
-                  <Card>
+        {/* Основная группа: Игровой Мир */}
+        <TabsContent value="game-world" className="space-y-6">
+          <Tabs value={activeSubTab === "station" || activeSubTab === "items" ? activeSubTab : "station"} onValueChange={setActiveSubTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 rounded-lg">
+              <TabsTrigger value="station" className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                Станция
+              </TabsTrigger>
+              <TabsTrigger value="items" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Предметы
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Вложенный таб: Станция */}
+            <TabsContent value="station" className="space-y-6 mt-6">
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building className="h-5 w-5" />
+                          Сущности станции
+                        </CardTitle>
+                        <CardDescription>
+                          Управление сущностями станции. Добавляйте новые сущности для отображения в prod версии и сюжетном редакторе.
+                        </CardDescription>
+                      </div>
+                      <Button onClick={() => handleAdd('station')}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Добавить сущность
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <EntityList
+                      entities={getEntitiesList('station')}
+                      entityType="station"
+                      configType="station"
+                      onEdit={(entity) => handleEdit(entity, 'station')}
+                      onDelete={(id) => handleDelete(id, 'station')}
+                      onAdd={undefined}
+                      title=""
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+
+
+            {/* Вложенный таб: Предметы */}
+            <TabsContent value="items" className="space-y-6 mt-6">
+              <div className="space-y-6">
+                {Object.entries(getGroupedItems()).map(([category, entities]) => (
+                  <Card key={category}>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Сюжетный редактор
+                        {category === 'implants' && <Wrench className="h-5 w-5" />}
+                        {category === 'clothing' && <Users className="h-5 w-5" />}
+                        {category === 'devices' && <Package className="h-5 w-5" />}
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
                       </CardTitle>
                       <CardDescription>
-                        Визуальный редактор для создания и редактирования сюжетных сцен
+                        {entities.length} элементов
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <p className="text-muted-foreground">
-                          Используйте специализированный редактор для создания сложных сюжетных сцен с множественными экранами,
-                          выборами и условиями. Редактор поддерживает визуальное редактирование узлов и связей.
-                        </p>
-                        <div className="flex gap-2">
-                          <Button asChild>
-                            <Link href="/game/story-editor">
-                              <FileText className="h-4 w-4 mr-2" />
-                              Открыть редактор
-                            </Link>
-                          </Button>
-                          <Button variant="outline" asChild>
-                            <Link href="/game/story-editor?mode=visual">
-                              <Eye className="h-4 w-4 mr-2" />
-                              Визуальный режим
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
+                      <EntityList
+                        entities={entities}
+                        entityType="equipment"
+                        configType="equipment"
+                        onEdit={(entity) => handleEdit(entity, 'equipment')}
+                        onDelete={(id) => handleDelete(id, 'equipment')}
+                        onAdd={() => handleAdd('equipment')}
+                        title=""
+                        compact
+                      />
                     </CardContent>
                   </Card>
-                </TabsContent>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
 
-                {/* Подтаб Взаимодействия */}
-                <TabsContent value="interactions" className="space-y-6">
+        {/* Основная группа: Контент */}
+        <TabsContent value="content" className="space-y-6">
+          <Tabs value={activeSubTab === "story-editor" || activeSubTab === "interactions" ? activeSubTab : "story-editor"} onValueChange={setActiveSubTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 rounded-lg">
+              <TabsTrigger value="story-editor" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Сюжетный редактор
+              </TabsTrigger>
+              <TabsTrigger value="interactions" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Взаимодействия
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Вложенный таб: Сюжетный редактор */}
+            <TabsContent value="story-editor" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Сюжетный редактор
+                  </CardTitle>
+                  <CardDescription>
+                    Визуальный редактор для создания и редактирования сюжетных сцен
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-muted-foreground">
+                      Используйте специализированный редактор для создания сложных сюжетных сцен с множественными экранами, 
+                      выборами и условиями. Редактор поддерживает визуальное редактирование узлов и связей.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button asChild>
+                        <Link href="/game/story-editor">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Открыть редактор
+                        </Link>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <Link href="/game/story-editor?mode=visual">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Визуальный режим
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Таб Взаимодействия */}
+            <TabsContent value="interactions" className="space-y-6">
               {!characterAIConfig ? (
                 <Card>
                   <CardHeader>
@@ -1269,7 +1324,7 @@ const NexusEnslaverGame = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={(e) => { e.preventDefault(); handleEdit(category, 'action-category'); }}
+                                  onClick={() => handleEdit(category, 'action-category')}
                                   className="h-6 w-6 p-0"
                                 >
                                   <Settings className="h-3 w-3" />
@@ -1277,7 +1332,7 @@ const NexusEnslaverGame = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={(e) => { e.preventDefault(); handleAdd('action', { category: id }); }}
+                                  onClick={() => handleAdd('action', { category: id })}
                                   className="h-6 w-6 p-0"
                                 >
                                   <Plus className="h-3 w-3" />
@@ -1296,7 +1351,7 @@ const NexusEnslaverGame = () => {
                         ))}
                         <Button
                           variant="outline"
-                          onClick={(e) => { e.preventDefault(); handleAdd('action-category'); }}
+                          onClick={() => handleAdd('action-category')}
                           className="h-full min-h-[80px] glass-panel border border-dashed border-cyan-500/30 hover:border-cyan-500/50"
                         >
                           <Plus className="h-4 w-4 mr-2" />
@@ -1343,7 +1398,7 @@ const NexusEnslaverGame = () => {
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          onClick={(e) => { e.preventDefault(); handleEdit(action, 'action'); }}
+                                          onClick={() => handleEdit(action, 'action')}
                                           className="h-5 w-5 p-0"
                                         >
                                           <Settings className="h-2.5 w-2.5" />
@@ -1351,7 +1406,7 @@ const NexusEnslaverGame = () => {
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          onClick={(e) => { e.preventDefault(); deleteCharacterAIItem('actions', id); }}
+                                          onClick={() => deleteCharacterAIItem('actions', id)}
                                           className="h-5 w-5 p-0 text-red-400 hover:text-red-300"
                                         >
                                           <X className="h-2.5 w-2.5" />
@@ -1413,7 +1468,7 @@ const NexusEnslaverGame = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={(e) => { e.preventDefault(); handleEdit(pose, 'pose'); }}
+                                  onClick={() => handleEdit(pose, 'pose')}
                                   className="h-5 w-5 p-0"
                                 >
                                   <Settings className="h-2.5 w-2.5" />
@@ -1421,7 +1476,7 @@ const NexusEnslaverGame = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={(e) => { e.preventDefault(); deleteCharacterAIItem('poses', id); }}
+                                  onClick={() => deleteCharacterAIItem('poses', id)}
                                   className="h-5 w-5 p-0 text-red-400 hover:text-red-300"
                                 >
                                   <X className="h-2.5 w-2.5" />
@@ -1452,7 +1507,7 @@ const NexusEnslaverGame = () => {
                         ))}
                         <Button
                           variant="outline"
-                          onClick={(e) => { e.preventDefault(); handleAdd('pose'); }}
+                          onClick={() => handleAdd('pose')}
                           className="h-full min-h-[80px] glass-panel border border-dashed border-orange-500/30 hover:border-orange-500/50"
                         >
                           <Plus className="h-4 w-4 mr-2" />
@@ -1484,7 +1539,7 @@ const NexusEnslaverGame = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={(e) => { e.preventDefault(); handleEdit(category, 'tool-category'); }}
+                                  onClick={() => handleEdit(category, 'tool-category')}
                                   className="h-6 w-6 p-0"
                                 >
                                   <Settings className="h-3 w-3" />
@@ -1492,7 +1547,7 @@ const NexusEnslaverGame = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={(e) => { e.preventDefault(); handleAdd('tool', { category: id }); }}
+                                  onClick={() => handleAdd('tool', { category: id })}
                                   className="h-6 w-6 p-0"
                                 >
                                   <Plus className="h-3 w-3" />
@@ -1566,7 +1621,7 @@ const NexusEnslaverGame = () => {
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          onClick={(e) => { e.preventDefault(); deleteCharacterAIItem('tools', id); }}
+                                          onClick={() => deleteCharacterAIItem('tools', id)}
                                           className="h-5 w-5 p-0 text-red-400 hover:text-red-300"
                                         >
                                           <X className="h-2.5 w-2.5" />
@@ -1653,7 +1708,7 @@ const NexusEnslaverGame = () => {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={(e) => { e.preventDefault(); deleteCharacterAIItem('poses', id); }}
+                                      onClick={() => deleteCharacterAIItem('poses', id)}
                                       className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
                                     >
                                       <X className="h-3 w-3" />
@@ -1688,12 +1743,11 @@ const NexusEnslaverGame = () => {
                   </Card>
                 </div>
               )}
-                </TabsContent>
-              </Tabs>
             </TabsContent>
           </Tabs>
+        </div>
 
-          {/* Модальное окно редактирования */}
+        {/* Модальное окно редактирования */}
           <EnhancedEditModal
             isOpen={modalState.isOpen}
             onClose={closeModal}
@@ -1702,7 +1756,6 @@ const NexusEnslaverGame = () => {
             onSave={handleSave}
             isNew={modalState.isNew}
           />
-                  </div>
 
         {/* Модальное окно управления активами пользователя */}
         <UserAssetsModal

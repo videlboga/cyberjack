@@ -1,47 +1,56 @@
 {
   "users": [
     {
-      "id": "user-1756287094000-1",
-      "name": "videlboga",
+      "id": "user-1755903020796-1",
+      "username": "videlboga",
       "email": "videlboga@example.com",
-      "characters": ["asset_1"],
-      "equipment": [],
-      "contracts": [],
-      "attributes": {
-        "leadership": 7,
-        "charisma": 8,
-        "strategic_thinking": 6,
-        "decision_making": 7,
-        "empathy": 6,
-        "patience": 5,
-        "adaptability": 8,
-        "resilience": 9,
-        "technical_knowledge": 7,
-        "business_acumen": 6,
-        "negotiation": 8,
-        "risk_assessment": 6,
-        "dominant_style": 7,
-        "nurturing_approach": 5,
-        "strict_discipline": 8,
-        "creative_freedom": 6
+      "role": "user",
+      "status": "active",
+      "created": "2025-08-22",
+      "lastLogin": "2025-08-27",
+      "account": {
+        "balance": 5000,
+        "currency": "credits",
+        "transactions": []
       },
-      "stats": {
-        "totalCharacters": 0,
-        "activeCharacters": 0,
-        "completedContracts": 0,
-        "totalCredits": 5000,
-        "reputation": 60,
-        "stationRank": "Новичок",
-        "achievements": [],
-        "totalPlayTime": 0,
-        "lastActive": "2025-01-27T12:00:00Z"
-      },
-      "preferences": {},
+      "characters": [
+        "asset_3"
+      ],
+      "userEquipment": [
+        "neuro-enhancer"
+      ],
+      "attributes": {},
+      "stats": {},
+      "assets": [
+        {
+          "assetId": "asset_3",
+          "name": "Анна (Анечка)",
+          "acquired": "2025-08-27T13:18:59.465Z",
+          "status": "active",
+          "location": "inventory",
+          "currentAssignment": null
+        }
+      ],
+      "equipment": [
+        {
+          "itemId": "neuro-enhancer",
+          "name": "Нейроусилитель",
+          "type": "device",
+          "slot": "neural",
+          "installed": "2025-08-27T18:29:28.515Z",
+          "status": "active"
+        }
+      ],
       "settings": {
         "theme": "dark",
         "notifications": true,
         "autoAssign": false,
         "riskTolerance": "medium"
+      },
+      "preferences": {
+        "autoSave": true,
+        "soundEnabled": true,
+        "animationsEnabled": true
       }
     }
   ],

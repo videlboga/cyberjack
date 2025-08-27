@@ -78,22 +78,14 @@ export function useCharacterAI({
   
   // Инициализация сервисов - создаем только один раз
   const [messageAnalysisService] = useState(() => {
-    console.log('🔑 Gemini API Key:', geminiApiKey ? 'Установлен' : 'Не установлен');
     return geminiApiKey ? new MessageAnalysisService(geminiApiKey) : null;
   });
   
   const [poseManagementService] = useState(() => {
     // Создаем сервис только если есть конфигурация
     if (!characterAIConfig?.poses && !characterAIConfig?.actions && !characterAIConfig?.tools) {
-      console.log('🎭 PoseManagementService: пропускаем инициализацию (пустая конфигурация)');
       return null;
     }
-    
-    console.log('🎭 PoseManagementService init with config:', {
-      poses: Object.keys(characterAIConfig?.poses || {}),
-      actions: Object.keys(characterAIConfig?.actions || {}),
-      tools: Object.keys(characterAIConfig?.tools || {})
-    });
     return new PoseManagementService(
       characterAIConfig?.poses || {},
       characterAIConfig?.poseChangeConditions || {},
@@ -104,12 +96,7 @@ export function useCharacterAI({
 
   // Обновляем сервисы при изменении конфигурации
   useEffect(() => {
-    console.log('🔄 CharacterAI config changed:', {
-      hasConfig: !!characterAIConfig,
-      actions: Object.keys(characterAIConfig?.actions || {}),
-      tools: Object.keys(characterAIConfig?.tools || {}),
-      poses: Object.keys(characterAIConfig?.poses || {})
-    });
+    // Конфигурация обновлена
   }, [characterAIConfig]);
 
   // Функция для добавления записи в историю поз
@@ -155,7 +142,7 @@ export function useCharacterAI({
     setLastAction(actionId);
     
     // Здесь можно добавить логику применения эффектов действия
-    console.log(`Выполняется действие: ${action.name} с интенсивностью ${intensity}${area ? ` в области ${area}` : ''}`);
+
   }, [characterAIConfig.actions, setCooldown]);
 
   // Использование инструмента
@@ -180,7 +167,7 @@ export function useCharacterAI({
     setLastTool(toolId);
     
     // Здесь можно добавить логику применения эффектов инструмента
-    console.log(`Используется инструмент: ${tool.name} с интенсивностью ${intensity} на ${duration}с${area ? ` в области ${area}` : ''}`);
+
   }, [characterAIConfig.tools, setCooldown]);
 
   // Смена позы
@@ -201,7 +188,7 @@ export function useCharacterAI({
     setCurrentPose(poseId);
     addPoseHistory(poseId, force ? 'Принудительная смена' : 'Добровольная смена');
     
-    console.log(`Смена позы: ${oldPose} -> ${poseId}`);
+
     return true;
   }, [currentPose, characterAIConfig.poses, addPoseHistory]);
 
@@ -236,10 +223,8 @@ export function useCharacterAI({
         await useTool(quickAction.action.target, quickAction.action.parameters?.intensity || 5, quickAction.action.parameters?.duration || 30);
         break;
       case 'command':
-        console.log(`Выполняется команда: ${quickAction.action.target}`);
         break;
       case 'message':
-        console.log(`Отправляется сообщение: ${quickAction.action.target}`);
         break;
     }
   }, [characterAIConfig.quickActions, cooldowns, setCooldown, changePose, executeAction, useTool]);

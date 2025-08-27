@@ -234,25 +234,13 @@ export default function TalentArchitectProd() {
     const loadConfig = async () => {
       try {
         setConfigLoading(true)
-        
-        console.log('🔄 Начинаем загрузку конфигурации в prod...')
+
         const config = await loadUnifiedConfigV2()
-        console.log('✅ Конфигурация загружена в prod:', config)
-        console.log('📊 Активы из конфигурации:', config.assets?.assets)
-        console.log('📊 Количество активов:', config.assets?.assets?.length)
         setGameConfig(config)
-        
+
         // Загружаем конфигурацию Character AI
-        console.log('🔍 Проверяем Character AI в config:', config.characterAI)
         if (config.characterAI) {
-          console.log('🤖 Загружаем конфигурацию Character AI:', config.characterAI)
-          console.log('🤖 Character AI actions:', Object.keys(config.characterAI.actions || {}))
-          console.log('🤖 Character AI tools:', Object.keys(config.characterAI.tools || {}))
-          console.log('🤖 Character AI poses:', Object.keys(config.characterAI.poses || {}))
           setCharacterAIConfig(config.characterAI)
-        } else {
-          console.log('❌ Character AI конфигурация не найдена в config')
-          console.log('🔍 Доступные ключи в config:', Object.keys(config))
         }
       } catch (error) {
         console.error('❌ Ошибка загрузки конфигурации в prod:', error)
@@ -269,19 +257,45 @@ export default function TalentArchitectProd() {
 
   // Заполнение talents из конфигурации (только привязанные к пользователю персонажи)
   useEffect(() => {
-    if (gameConfig?.assets?.assets && currentUser) {
-      console.log('🔄 Заполняем talents из конфигурации для пользователя:', currentUser.username)
-
+    if (gameConfig?.assets?.assets && currentUser && gameConfig?.equipment?.equipment && gameConfig.equipment.equipment.length > 0) {
       // Получаем привязанных персонажей пользователя
       let userCharacters: string[] = []
+
       if (gameConfig.users?.users) {
         // Ищем пользователя сначала по ID, потом по имени (для обратной совместимости)
-        const userData = gameConfig.users.users.find((u: any) =>
+        let userData = gameConfig.users.users.find((u: any) =>
           u.id === currentUser.id || u.name === currentUser.username || u.username === currentUser.username
         )
+
+        // Если не нашли, попробуем найти по всем возможным полям
+        if (!userData) {
+          userData = gameConfig.users.users.find((u: any) => {
+            const matches = []
+            if (u.id === currentUser.id) matches.push('id')
+            if (u.name === currentUser.username) matches.push('name')
+            if (u.username === currentUser.username) matches.push('username')
+            if (u.email === currentUser.username) matches.push('email')
+            return matches.length > 0
+          })
+        }
         userCharacters = userData?.characters || []
-        console.log('👤 Найден пользователь в БД:', userData?.name || userData?.username)
-        console.log('👤 Привязанные персонажи пользователя:', userCharacters)
+        const userEquipmentIds = userData?.userEquipment || []
+
+        console.log('🔧 Данные пользователя:', userData)
+        console.log('🎯 userEquipmentIds:', userEquipmentIds)
+        console.log('🎯 gameConfig.equipment.equipment:', gameConfig?.equipment?.equipment?.length || 'undefined')
+
+        // Фильтруем оборудование по принадлежности пользователю
+        const userEquipmentList = userEquipmentIds.length > 0
+          ? gameConfig.equipment.equipment.filter((equipment: any) => userEquipmentIds.includes(equipment.id))
+          : []
+
+        console.log('🎯 Отфильтрованное оборудование:', userEquipmentList.map((eq: any) => eq.id))
+        console.log('🎯 Количество отфильтрованного оборудования:', userEquipmentList.length)
+
+        setUserEquipment(userEquipmentList)
+        setFilteredInventory(userEquipmentList)
+
       }
 
       // Фильтруем активы по привязанным персонажам
@@ -289,10 +303,7 @@ export default function TalentArchitectProd() {
         ? gameConfig.assets.assets.filter((asset: any) => userCharacters.includes(asset.id))
         : [] // Если нет привязанных персонажей, показываем пустой список
 
-      console.log('📊 Отфильтрованные активы:', filteredAssets.map((a: any) => a.name))
-
       const talentsFromConfig = filteredAssets.map(asset => {
-        console.log('📊 Обрабатываем актив:', asset.name, asset.attributes)
         
         // Правильно маппим атрибуты согласно эталонной системе характеристик
         const mappedAttributes = {
@@ -354,11 +365,10 @@ export default function TalentArchitectProd() {
           inventory: [],
         }
       })
-      console.log('✅ Talents заполнены из конфигурации:', talentsFromConfig)
-      console.log('📊 Пример атрибутов первого таланта:', talentsFromConfig[0]?.attributes)
+
       setTalents(talentsFromConfig)
     }
-  }, [gameConfig])
+  }, [gameConfig, currentUser])
 
   // Проверка существующего пользователя при загрузке
   useEffect(() => {
@@ -698,6 +708,10 @@ export default function TalentArchitectProd() {
     gameConfig?.equipment.equipment || []
   )
 
+  // Фильтруем оборудование по принадлежности пользователю
+  const [userEquipment, setUserEquipment] = useState<Equipment[]>([])
+  const [filteredInventory, setFilteredInventory] = useState<Equipment[]>([])
+
   // Используем конфигурацию контрактов из JSON
   const [contracts, setContracts] = useState<Contract[]>(
     gameConfig?.contracts?.available?.map(contract => ({
@@ -710,6 +724,8 @@ export default function TalentArchitectProd() {
   // Обновляем состояния при изменении конфигурации
   useEffect(() => {
     if (gameConfig) {
+      console.log('🔧 Устанавливаем globalInventory из gameConfig')
+      console.log('🔧 gameConfig.equipment.equipment:', gameConfig.equipment?.equipment?.length || 'undefined')
       setGlobalInventory(gameConfig.equipment.equipment || [])
       setContracts(gameConfig.contracts?.available?.map(contract => ({
         ...contract,
@@ -1313,7 +1329,7 @@ export default function TalentArchitectProd() {
   }
 
   const getPortraitImage = (talent: Talent) => {
-    const activeEquipment = globalInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
+    const activeEquipment = filteredInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
 
     // Base portraits for each talent
     const basePortraits: Record<string, string> = {
@@ -1471,7 +1487,7 @@ export default function TalentArchitectProd() {
     // Используем новую систему Character AI
     // return CharacterAdapter.getEffectiveStats(selectedTalent) // Адаптер удален
     return selectedTalent
-  }, [selectedTalent, globalInventory])
+  }, [selectedTalent])
 
   React.useEffect(() => {
     if (isDragging) {
@@ -1516,7 +1532,7 @@ export default function TalentArchitectProd() {
     }
 
     const effectiveStats = CharacterAdapter.getEffectiveStats(talent)
-    const activeEquipment = globalInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
+    const activeEquipment = filteredInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
 
     return {
       name: talent.name,
@@ -1591,7 +1607,7 @@ export default function TalentArchitectProd() {
         context: contextData,
         interactionType: selectedInteractionType,
         selectedTool,
-        equipment: globalInventory.filter(item => 
+        equipment: filteredInventory.filter(item =>
           item.enabled && item.targetTalents?.includes(selectedTalent.id)
         )
       })
@@ -1855,7 +1871,7 @@ export default function TalentArchitectProd() {
     areas.push(...fetishAreas)
 
     // Добавляем области в зависимости от экипировки
-    const activeEquipment = globalInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
+    const activeEquipment = filteredInventory.filter((item) => item.enabled && item.targetTalents?.includes(talent.id))
 
     if (activeEquipment.some((eq) => eq.type === "device" && eq.slot === "head")) {
       areas.push({
@@ -1938,7 +1954,7 @@ export default function TalentArchitectProd() {
             context: contextData,
             interactionType: selectedInteractionType,
             selectedTool,
-            equipment: globalInventory.filter(item => 
+            equipment: filteredInventory.filter(item =>
               item.enabled && item.targetTalents?.includes(talent.id)
             )
           }).then(response => {
@@ -2488,13 +2504,13 @@ export default function TalentArchitectProd() {
                     onClick={() => setShowEquipmentPanel(true)}
                     className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
                   >
-                    Управление ({globalInventory.filter((item) => item.enabled).length})
+                    Управление ({filteredInventory.filter((item) => item.enabled).length})
                   </button>
                 </div>
                 <div className="text-sm text-gray-300 mb-3">
                   Активно:{" "}
                   {
-                    globalInventory.filter((item) => item.enabled && item.targetTalents?.includes(selectedTalent.id))
+                    filteredInventory.filter((item) => item.enabled && item.targetTalents?.includes(selectedTalent.id))
                       .length
                   }{" "}
                   предметов
@@ -2502,7 +2518,7 @@ export default function TalentArchitectProd() {
                 
                 {/* Список активного оборудования */}
                 <div className="space-y-2">
-                  {globalInventory
+                  {filteredInventory
                     .filter((item) => item.enabled && item.targetTalents?.includes(selectedTalent.id))
                     .map((item) => (
                       <div key={item.id} className="p-3 bg-gray-800/50 border border-gray-600 rounded">
@@ -2661,7 +2677,7 @@ export default function TalentArchitectProd() {
             </div>
 
             <div className="space-y-4">
-              {globalInventory.map((item) => (
+              {filteredInventory.map((item) => (
                 <div key={item.id} className="border border-gray-600 rounded-lg p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">

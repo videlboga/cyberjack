@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check localStorage</title>
+</head>
+<body>
+    <h1>localStorage Contents</h1>
+    <h2>allUsers:</h2>
+    <pre id="allUsers"></pre>
+    <h2>currentUser:</h2>
+    <pre id="currentUser"></pre>
+    <h2>All localStorage keys:</h2>
+    <pre id="allKeys"></pre>
+
+    <script>
+        function displayData() {
+            // Показываем allUsers
+            const allUsers = localStorage.getItem('allUsers');
+            document.getElementById('allUsers').textContent = allUsers || 'null';
+
+            // Показываем currentUser
+            const currentUser = localStorage.getItem('currentUser');
+            document.getElementById('currentUser').textContent = currentUser || 'null';
+
+            // Показываем все ключи
+            const allKeys = Object.keys(localStorage);
+            document.getElementById('allKeys').textContent = allKeys.join('\n');
+        }
+
+        displayData();
+    </script>
+</body>
+</html>
+

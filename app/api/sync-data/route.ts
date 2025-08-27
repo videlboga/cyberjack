@@ -5,9 +5,10 @@ import path from 'path'
 export async function POST(request: NextRequest) {
   try {
     const { configType, data } = await request.json()
-    
-    console.log(`🔄 Синхронизируем ${configType} с файлами...`)
-    
+
+    console.log(`🎯 API: Получен запрос ${configType}`)
+    console.log(`📦 API: Данные:`, JSON.stringify(data, null, 2))
+
     const dataDir = path.join(process.cwd(), 'data')
     
     switch (configType) {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
         }
         
         fs.writeFileSync(charactersPath, JSON.stringify(updatedCharacters, null, 2))
-        console.log(`✅ Синхронизировано ${mergedCharacters.length} персонажей в characters-unified.json (было ${existingCharacters.length}, добавлено ${newCharacters.length})`)
+
         break
         
       case 'contracts':
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
         }
         
         fs.writeFileSync(contractsPath, JSON.stringify(updatedContracts, null, 2))
-        console.log(`✅ Синхронизировано ${data.available.length} контрактов в contracts-unified.json`)
+
         break
         
       case 'actions':
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
         }
         
         fs.writeFileSync(actionsPath, JSON.stringify(updatedActions, null, 2))
-        console.log(`✅ Синхронизировано ${(data.actions || []).length} действий в actions-unified.json`)
+
         break
         
       case 'events':
@@ -128,42 +129,63 @@ export async function POST(request: NextRequest) {
         }
         
         fs.writeFileSync(eventsPath, JSON.stringify(updatedEvents, null, 2))
-        console.log(`✅ Синхронизировано ${allEvents.length} событий в events-unified.json`)
+
         break
         
       case 'users':
         // Синхронизируем с users-unified.json
         const usersPath = path.join(dataDir, 'users-unified.json')
         const usersData = JSON.parse(fs.readFileSync(usersPath, 'utf8'))
-        
+
+        console.log(`👥 API: Обрабатываем ${data.users.length} пользователей`)
+        data.users.forEach((user: any, index: number) => {
+          console.log(`  ${index + 1}. Пользователь ${user.id}: characters=${user.characters?.length || 0}, userEquipment=${user.userEquipment?.length || 0}`)
+        })
+
         const updatedUsers = {
           ...usersData,
-          users: data.users.map((user: any) => ({
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-            created: user.created,
-            lastLogin: user.lastLogin,
-            account: user.account || {
-              balance: 0,
-              currency: 'credits',
-              transactions: []
-            },
-            assets: user.assets || [],
-            equipment: user.equipment || [],
-            settings: user.settings || {
-              theme: 'dark',
-              notifications: true,
-              autoAssign: false,
-              riskTolerance: 'medium'
+          users: data.users.map((user: any) => {
+            console.log(`🔄 API: Обрабатываем пользователя ${user.id}`)
+            console.log(`   - Characters: ${user.characters?.length || 0}`)
+            console.log(`   - UserEquipment: ${user.userEquipment?.length || 0} [${user.userEquipment?.join(', ') || 'пусто'}]`)
+
+            return {
+              id: user.id,
+              name: user.name,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              status: user.status,
+              created: user.created,
+              lastLogin: user.lastLogin,
+              account: user.account || {
+                balance: 0,
+                currency: 'credits',
+                transactions: []
+              },
+              characters: user.characters || [],
+              userEquipment: user.userEquipment || [],
+              attributes: user.attributes || {},
+              stats: user.stats || {},
+              assets: user.assets || [],
+              equipment: user.equipment || [],
+              settings: user.settings || {
+                theme: 'dark',
+                notifications: true,
+                autoAssign: false,
+                riskTolerance: 'medium'
+              },
+              preferences: user.preferences || {
+                autoSave: true,
+                soundEnabled: true,
+                animationsEnabled: true
+              }
             }
-          }))
+          })
         }
-        
+
         fs.writeFileSync(usersPath, JSON.stringify(updatedUsers, null, 2))
-        console.log(`✅ Синхронизировано ${data.users.length} пользователей в users-unified.json`)
+        console.log(`✅ API: Синхронизация пользователей завершена`)
         break
         
       case 'game-config-unified':
@@ -177,7 +199,7 @@ export async function POST(request: NextRequest) {
         }
         
         fs.writeFileSync(gameConfigPath, JSON.stringify(updatedGameConfig, null, 2))
-        console.log(`✅ Синхронизирована Character AI конфигурация в game-config-unified.json`)
+
         break
         
       default:
@@ -203,7 +225,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    console.log('🔄 Синхронизируем все данные из localStorage с файлами...')
+
     
     // Здесь можно добавить логику для получения данных из localStorage
     // и синхронизации всех типов конфигураций

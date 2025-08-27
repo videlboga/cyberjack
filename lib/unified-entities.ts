@@ -1,6 +1,9 @@
 // ===== ЕДИНАЯ СИСТЕМА ТИПОВ CYBERJACK =====
 // Объединяет все типы из lib/types.ts, lib/unified-types.ts, lib/character/types.ts
 
+// ===== СИСТЕМА АНАЛИЗА ХАРАКТЕРИСТИК =====
+// Экспортируем основные типы анализа для использования в других модулях
+
 // ===== БАЗОВЫЕ ТИПЫ =====
 
 export type CharacterRank = 'F-' | 'F' | 'F+' | 'D-' | 'D' | 'D+' | 'C-' | 'C' | 'C+' | 'B-' | 'B' | 'B+' | 'A-' | 'A' | 'A+' | 'S-' | 'S' | 'S+'
@@ -17,77 +20,201 @@ export type EventTrigger = 'daily' | 'weekly' | 'monthly' | 'conditional' | 'ran
 // ===== ХАРАКТЕРИСТИКИ ПЕРСОНАЖА =====
 
 export interface CharacterAttributes {
-  // Физические (1-10)
-  strength: number      // Физическая сила и выносливость
-  endurance: number     // Общая выносливость
-  
-  // Ментальные (1-10)
-  intelligence: number  // Когнитивные способности
-  creativity: number    // Творческие способности
-  temperament: number   // Эмоциональная стабильность
-  grit: number         // Упорство и стойкость
-  
-  // Социальные (1-10)
-  empathy: number      // Способность понимать других
-  ego: number          // Самооценка и уверенность
+  // Физические характеристики (0-10)
+  physical: {
+    Выносливость: number     // Способность выдерживать физические нагрузки
+    Чувствительность: number // Восприимчивость к физическим воздействиям
+    Гибкость: number         // Физическая гибкость и способность принимать позы
+  }
+
+  // Психологические характеристики (0-10)
+  psychological: {
+    "Эмоциональная стабильность": number // Способность контролировать эмоции
+    Адаптивность: number                // Способность приспосабливаться к изменениям
+    Интеллект: number                  // Умственные способности и анализ ситуации
+  }
+
+  // Социальные характеристики (0-10)
+  social: {
+    Общительность: number    // Способность и желание общаться
+    Эмпатия: number         // Способность понимать эмоции других
+    Доминантность: number   // Стремление к лидерству и контролю
+  }
+
+  // Личностные характеристики (0-10)
+  personality: {
+    Самооценка: number     // Восприятие собственной ценности
+    Оптимизм: number      // Вера в лучшее будущее
+    Любопытство: number   // Стремление к новым знаниям и опыту
+  }
+
+  // Специальные характеристики (0-10)
+  special: {
+    "Сексуальная опытность": number // Опыт в интимных отношениях
+    Сопротивляемость: number        // Способность сопротивляться принуждению
+    Зависимость: number             // Склонность к формированию зависимостей
+  }
 }
 
 export interface CharacterStates {
-  // Эмоциональные (0-100)
-  mood: number         // Общее настроение
-  stress: number       // Уровень стресса (объединяет fear + despair)
-  
-  // Поведенческие (0-5)
-  obedience: number    // Послушание (объединяет compliance + habit)
-  awareness: number    // Понимание ситуации
-  
-  // Специальные (0-5)
-  devotion: number     // Преданность мастеру
-  sensuality: number   // Чувственность
-  sensory_overload: number // Сенсорная перегрузка
+  // Эмоциональные состояния (0-100)
+  "Настроение": number         // Общее эмоциональное состояние
+  "Тревожность": number        // Уровень тревоги и беспокойства
+  "Выгорание": number          // Эмоциональное истощение
+  "Вовлеченность": number      // Степень вовлеченности в деятельность
+  "Чувство права": number      // Уверенность в собственной правоте
+  "Проницательность": number   // Способность понимать скрытые мотивы
+  "Рутина": number             // Привычка к повторяющимся действиям
+  "Послушание": number         // Готовность выполнять приказы
+  "Нейропластичность": number  // Способность мозга адаптироваться
+  "Когнитивная нагрузка": number // Уровень умственной нагрузки
+}
+
+// ===== СИСТЕМА АНАЛИЗА ХАРАКТЕРИСТИК =====
+
+export type KnowledgeLevel = 'unknown' | 'approximate' | 'detailed' | 'precise'
+export type AnalysisMethod = 'basic_scan' | 'psychological_test' | 'sensory_research' | 'deep_immersion' | 'personal_work'
+
+export interface CharacteristicKnowledge {
+  level: KnowledgeLevel
+  value?: number
+  accuracy?: number // погрешность в пунктах
+  lastAnalyzed?: Date
+  analysisMethod?: AnalysisMethod
+}
+
+export interface CharacterAttributeKnowledge {
+  physical: {
+    Выносливость: CharacteristicKnowledge
+    Чувствительность: CharacteristicKnowledge
+    Гибкость: CharacteristicKnowledge
+  }
+  psychological: {
+    "Эмоциональная стабильность": CharacteristicKnowledge
+    Адаптивность: CharacteristicKnowledge
+    Интеллект: CharacteristicKnowledge
+  }
+  social: {
+    Общительность: CharacteristicKnowledge
+    Эмпатия: CharacteristicKnowledge
+    Доминантность: CharacteristicKnowledge
+  }
+  personality: {
+    Самооценка: CharacteristicKnowledge
+    Оптимизм: CharacteristicKnowledge
+    Любопытство: CharacteristicKnowledge
+  }
+  special: {
+    "Сексуальная опытность": CharacteristicKnowledge
+    Сопротивляемость: CharacteristicKnowledge
+    Зависимость: CharacteristicKnowledge
+  }
+}
+
+export interface AnalysisMethodInfo {
+  id: AnalysisMethod
+  name: string
+  cost: number
+  time: number // в минутах
+  risk: 'low' | 'medium' | 'high'
+  accuracy: number // базовая точность
+  reveals: string[] // какие характеристики раскрывает
+  effects: {
+    stressIncrease: number
+    trustDecrease: number
+    healthImpact: number
+  }
+}
+
+export interface AnalysisSession {
+  id: string
+  characterId: string
+  method: AnalysisMethod
+  startTime: Date
+  endTime?: Date
+  cost: number
+  results: {
+    characteristics: Partial<CharacterAttributes>
+    knowledge: Partial<CharacterAttributeKnowledge>
+  }
+  consequences: {
+    stressIncrease: number
+    trustDecrease: number
+    healthImpact: number
+  }
 }
 
 export interface CharacterFetishes {
+  // ===== ОСНОВНЫЕ БДСМ-ФЕТИШИ =====
   // Власть и контроль
-  bdsm: number         // БДСМ
-  humiliation: number  // Унижение
-  masochism: number    // Мазохизм
-  sadism: number       // Садизм
-  
-  // Психологические
-  voyeurism: number    // Вуайеризм
-  exhibitionism: number // Эксгибиционизм
-  roleplay: number     // Ролевые игры
-  
-  // Физические воздействия
-  bondage: number      // Связывание
-  sensory_deprivation: number // Сенсорная депривация
-  sensory_overload: number // Сенсорная перегрузка
-  electricity: number  // Электричество
-  vibration: number    // Вибрация
-  temperature: number  // Температура
-  pressure: number     // Давление
-  tickling: number     // Щекотка
-  
-  // Части тела
-  feet: number         // Фут-фетиш
-  hands: number        // Хенд-фетиш
-  breasts: number      // Брест-фетиш
-  anal: number         // Анал-фетиш
-  
-  // Материалы
-  latex: number        // Латекс
-  leather: number      // Кожа
-  silk: number         // Шёлк
-  rope: number         // Верёвки
-  
-  // Специальные
-  uniform: number      // Униформа
-  age_play: number     // Возрастные роли
-  
-  // Физиологические
-  pregnancy: number    // Беременность
-  lactation: number    // Лактация
+  bdsm: number                    // БДСМ в целом
+  humiliation: number            // Унижение и деградация
+  masochism: number              // Получение удовольствия от боли
+  sadism: number                 // Причинение боли и страданий
+  domination: number             // Доминирование и контроль
+  submission: number             // Подчинение и покорность
+
+  // ===== ПСИХОЛОГИЧЕСКИЕ ФЕТИШИ =====
+  voyeurism: number              // Вуайеризм (подглядывание)
+  exhibitionism: number          // Эксгибиционизм (публичное обнажение)
+  roleplay: number               // Ролевые игры
+  fear: number                   // Страх и ужас
+  shame: number                  // Стыд и смущение
+  guilt: number                  // Чувство вины
+  forbidden: number              // Запретное и табу
+  dependency: number             // Зависимость от партнера
+  ownership: number              // Желание принадлежать
+
+  // ===== СЕНСОРНЫЕ ФЕТИШИ =====
+  // Сенсорные воздействия
+  sensory_deprivation: number    // Лишение чувств
+  sensory_overload: number       // Сенсорная перегрузка
+  tickling: number               // Щекотка
+  vibration: number              // Вибрации
+  electricity: number            // Электричество
+  temperature: number            // Температурные воздействия
+  pressure: number               // Давление и сжатие
+  water_sports: number           // Водные виды спорта
+
+  // ===== ФЕТИШИ ЧАСТЕЙ ТЕЛА =====
+  feet: number                   // Фут-фетиш (ноги)
+  hands: number                  // Хенд-фетиш (руки)
+  breasts: number                // Брест-фетиш (грудь)
+  anal: number                   // Анал-фетиш
+  neck: number                   // Фетиш шеи
+  ears: number                   // Фетиш ушей
+  fingers: number                // Фетиш пальцев
+  toes: number                   // Фетиш пальцев ног
+
+  // ===== МАТЕРИАЛЬНЫЕ ФЕТИШИ =====
+  latex: number                  // Латекс
+  leather: number                // Кожа
+  silk: number                   // Шелк и атлас
+  rope: number                   // Веревки и связывание
+  bondage: number                // Связывание в целом
+
+  // ===== СОЦИАЛЬНЫЕ И СТАТУСНЫЕ ФЕТИШИ =====
+  uniform: number                // Униформа и профессиональная одежда
+  age_play: number               // Возрастные роли
+  status: number                 // Социальный статус
+  hierarchy: number              // Социальная иерархия
+
+  // ===== ФИЗИОЛОГИЧЕСКИЕ ФЕТИШИ =====
+  pregnancy: number              // Беременность
+  lactation: number              // Лактация
+  menstruation: number           // Менструация
+
+  // ===== ЭКСТРЕМАЛЬНЫЕ ФЕТИШИ =====
+  edge_play: number              // Игра на грани (оргазма, сознания)
+  breath_play: number            // Ограничение дыхания
+  extreme_pain: number           // Экстремальная боль
+  transformation: number         // Трансформация тела
+
+  // ===== ГРУППОВЫЕ И СПЕЦИАЛЬНЫЕ ФЕТИШИ =====
+  group_sex: number              // Групповой секс
+  public_play: number            // Публичные игры
+  objectification: number        // Овеществление
+  dehumanization: number         // Дегуманизация
 }
 
 export interface CharacterPreferences {
@@ -124,7 +251,14 @@ export interface Character {
   fetishes: CharacterFetishes
   preferences: CharacterPreferences
   condition: CharacterCondition
-  
+
+  // Система анализа характеристик
+  knowledge?: CharacterAttributeKnowledge
+  analysisHistory?: AnalysisSession[]
+
+  // Методы анализа
+  availableAnalysisMethods?: AnalysisMethodInfo[]
+
   // AI система (из Character AI)
   memory?: CharacterMemory
   prompts?: CharacterPrompts
