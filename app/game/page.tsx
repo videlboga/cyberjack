@@ -50,6 +50,9 @@ const NexusEnslaverGame = () => {
     isOpen: false,
     user: null
   })
+
+  // Состояние для управления персонажами пользователей
+  const [selectedUserForCharacters, setSelectedUserForCharacters] = useState<string | null>(null)
   
   // Загружаем конфигурации асинхронно
   const [configs, setConfigs] = useState<any>({
@@ -343,15 +346,55 @@ const NexusEnslaverGame = () => {
 
   const handleSaveUserAssets = (userId: string, assets: any[], equipment: any[]) => {
     console.log('💾 Сохраняем активы пользователя:', userId, assets, equipment)
-    
+
     // Обновляем пользователя с новыми активами и оборудованием
     const updatedUser = {
       ...userAssetsModalState.user,
       assets,
       equipment
     }
-    
+
     updateConfigItem('users', userId, updatedUser)
+  }
+
+  // Функции для управления персонажами пользователей
+  const handleAssignCharacter = (userId: string, characterId: string) => {
+    console.log('🔗 Привязываем персонажа к пользователю:', userId, characterId)
+
+    const user = getEntitiesList('users').find((u: any) => u.id === userId)
+    if (!user) {
+      console.error('❌ Пользователь не найден:', userId)
+      return
+    }
+
+    const currentCharacters = user.characters || []
+    if (currentCharacters.includes(characterId)) {
+      console.log('⚠️ Персонаж уже привязан к пользователю')
+      return
+    }
+
+    const updatedCharacters = [...currentCharacters, characterId]
+    const updatedUser = { ...user, characters: updatedCharacters }
+
+    updateConfigItem('users', userId, updatedUser)
+    console.log('✅ Персонаж успешно привязан')
+  }
+
+  const handleUnassignCharacter = (userId: string, characterId: string) => {
+    console.log('🔗 Отвязываем персонажа от пользователя:', userId, characterId)
+
+    const user = getEntitiesList('users').find((u: any) => u.id === userId)
+    if (!user) {
+      console.error('❌ Пользователь не найден:', userId)
+      return
+    }
+
+    const currentCharacters = user.characters || []
+    const updatedCharacters = currentCharacters.filter((id: string) => id !== characterId)
+    const updatedUser = { ...user, characters: updatedCharacters }
+
+    updateConfigItem('users', userId, updatedUser)
+    console.log('✅ Персонаж успешно отвязан')
   }
 
   // Получение списка сущностей для каждого типа
@@ -718,7 +761,11 @@ const NexusEnslaverGame = () => {
                 </TabsTrigger>
                 <TabsTrigger value="attributes" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
-                  Атрибуты
+                  Атрибуты персонажей
+                </TabsTrigger>
+                <TabsTrigger value="user-attributes" className="flex items-center gap-2">
+                  <Cog className="h-4 w-4" />
+                  Атрибуты пользователей
                 </TabsTrigger>
                 <TabsTrigger value="station" className="flex items-center gap-2">
                   <Building className="h-4 w-4" />
@@ -762,10 +809,10 @@ const NexusEnslaverGame = () => {
                     Пользователи
                   </CardTitle>
                   <CardDescription>
-                    Пользователи создаются через регистрацию в prod режиме. Здесь отображаются все зарегистрированные пользователи.
+                    Управление пользователями, их атрибутами и привязкой персонажей. Пользователи создаются через регистрацию в prod режиме.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
                   <EntityList
                     entities={getEntitiesList('users')}
                     entityType="user"
@@ -776,6 +823,107 @@ const NexusEnslaverGame = () => {
                     onAdd={undefined}
                     title=""
                   />
+
+                  {/* Управление персонажами пользователей */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Управление персонажами пользователей</CardTitle>
+                      <CardDescription>
+                        Привязывайте персонажей к пользователям. Только привязанные персонажи будут доступны пользователю в prod режиме.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex gap-4">
+                          <select
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            value={selectedUserForCharacters || ''}
+                            onChange={(e) => setSelectedUserForCharacters(e.target.value || null)}
+                          >
+                            <option value="">Выберите пользователя</option>
+                            {getEntitiesList('users').map((user: any) => (
+                              <option key={user.id} value={user.id}>
+                                {user.name} ({user.characters?.length || 0} персонажей)
+                              </option>
+                            ))}
+                          </select>
+                          <Button
+                            onClick={() => setSelectedUserForCharacters(null)}
+                            variant="outline"
+                          >
+                            Очистить
+                          </Button>
+                        </div>
+
+                        {selectedUserForCharacters && (
+                          <div className="space-y-4">
+                            <div className="border rounded-lg p-4">
+                              <h4 className="font-medium mb-3">Привязанные персонажи:</h4>
+                              <div className="space-y-2">
+                                {(() => {
+                                  const user = getEntitiesList('users').find((u: any) => u.id === selectedUserForCharacters);
+                                  const userCharacters = user?.characters || [];
+                                  return userCharacters.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                      {userCharacters.map((charId: string) => {
+                                        const character = configs?.assets?.assets?.find((c: any) => c.id === charId);
+                                        return character ? (
+                                          <Badge key={charId} variant="secondary" className="flex items-center gap-1">
+                                            {character.name}
+                                            <X
+                                              className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                              onClick={() => handleUnassignCharacter(selectedUserForCharacters, charId)}
+                                            />
+                                          </Badge>
+                                        ) : (
+                                          <Badge key={charId} variant="destructive">
+                                            Не найден (ID: {charId})
+                                          </Badge>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <p className="text-muted-foreground text-sm">Нет привязанных персонажей</p>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+
+                            <div className="border rounded-lg p-4">
+                              <h4 className="font-medium mb-3">Доступные персонажи:</h4>
+                              <div className="space-y-2">
+                                {(() => {
+                                  const user = getEntitiesList('users').find((u: any) => u.id === selectedUserForCharacters);
+                                  const userCharacters = user?.characters || [];
+                                  const availableCharacters = configs?.assets?.assets?.filter((c: any) =>
+                                    !userCharacters.includes(c.id)
+                                  ) || [];
+
+                                  return availableCharacters.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                      {availableCharacters.map((character: any) => (
+                                        <div key={character.id} className="flex items-center justify-between p-2 border rounded">
+                                          <span className="text-sm">{character.name}</span>
+                                          <Button
+                                            size="sm"
+                                            onClick={() => handleAssignCharacter(selectedUserForCharacters, character.id)}
+                                          >
+                                            Привязать
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-muted-foreground text-sm">Все персонажи уже привязаны</p>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -811,6 +959,179 @@ const NexusEnslaverGame = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            </TabsContent>
+
+            {/* Таб Атрибуты пользователей */}
+            <TabsContent value="user-attributes" className="space-y-6">
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Cog className="h-5 w-5" />
+                      Атрибуты пользователей
+                    </CardTitle>
+                    <CardDescription>
+                      Управление характеристиками пользователей. Эти атрибуты влияют на взаимодействие с персонажами и развитие сюжета.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {/* Лидерские качества */}
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg">Лидерские качества</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Лидерство</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Харизма</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Стратегическое мышление</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Принятие решений</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Психологические качества */}
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg">Психологические качества</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Эмпатия</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Терпение</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Адаптивность</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Стойкость</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Специфические навыки */}
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg">Специфические навыки</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Технические знания</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Бизнес-понимание</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Переговоры</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Оценка рисков</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>1</span><span>5</span><span>10</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Личные предпочтения */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg">Личные предпочтения</CardTitle>
+                        <CardDescription>
+                          Стиль управления персонажами и подход к их развитию
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Доминирующий стиль</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>Мягкий</span><span>Строгий</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Заботливый подход</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>Жесткий</span><span>Заботливый</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Строгая дисциплина</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>Свободный</span><span>Дисциплинированный</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Творческая свобода</label>
+                            <input type="range" min="1" max="10" defaultValue="5" className="w-full" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>Консервативный</span><span>Творческий</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
 

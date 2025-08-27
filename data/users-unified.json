@@ -2,18 +2,41 @@
   "users": [
     {
       "id": "user-1755994583086-1",
-      "username": "TestUser",
-      "role": "user",
-      "status": "active",
-      "created": "2025-08-24",
-      "lastLogin": "2025-08-24",
-      "account": {
-        "balance": 5000,
-        "currency": "credits",
-        "transactions": []
-      },
-      "assets": [],
+      "name": "TestUser",
+      "email": "test@example.com",
+      "characters": ["asset_1", "asset_2", "asset_3"],
       "equipment": [],
+      "contracts": [],
+      "attributes": {
+        "leadership": 6,
+        "charisma": 7,
+        "strategic_thinking": 5,
+        "decision_making": 6,
+        "empathy": 4,
+        "patience": 5,
+        "adaptability": 7,
+        "resilience": 8,
+        "technical_knowledge": 6,
+        "business_acumen": 5,
+        "negotiation": 7,
+        "risk_assessment": 5,
+        "dominant_style": 6,
+        "nurturing_approach": 4,
+        "strict_discipline": 7,
+        "creative_freedom": 5
+      },
+      "stats": {
+        "totalCharacters": 0,
+        "activeCharacters": 0,
+        "completedContracts": 0,
+        "totalCredits": 5000,
+        "reputation": 50,
+        "stationRank": "Новичок",
+        "achievements": [],
+        "totalPlayTime": 0,
+        "lastActive": "2025-08-24T12:00:00Z"
+      },
+      "preferences": {},
       "settings": {
         "theme": "dark",
         "notifications": true,

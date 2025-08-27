@@ -286,18 +286,67 @@ export interface EquipmentConfig {
   equipment: Equipment[]
 }
 
+// ===== АТРИБУТЫ ПОЛЬЗОВАТЕЛЯ =====
+
+export interface UserAttributes {
+  // Лидерские качества (1-10)
+  leadership: number      // Лидерские способности
+  charisma: number        // Харизма
+  strategic_thinking: number // Стратегическое мышление
+  decision_making: number // Принятие решений
+
+  // Психологические качества (1-10)
+  empathy: number         // Эмпатия
+  patience: number        // Терпение
+  adaptability: number    // Адаптивность
+  resilience: number      // Стойкость
+
+  // Специфические навыки (1-10)
+  technical_knowledge: number // Технические знания
+  business_acumen: number     // Бизнес-понимание
+  negotiation: number         // Переговоры
+  risk_assessment: number     // Оценка рисков
+
+  // Личные предпочтения (1-10)
+  dominant_style: number      // Доминирующий стиль управления
+  nurturing_approach: number  // Заботливый подход
+  strict_discipline: number   // Строгая дисциплина
+  creative_freedom: number    // Творческая свобода
+}
+
+export interface UserStats {
+  // Статистика игрока
+  totalCharacters: number    // Общее количество персонажей
+  activeCharacters: number   // Активных персонажей
+  completedContracts: number // Выполненных контрактов
+  totalCredits: number       // Общий заработок
+
+  // Репутация и статус
+  reputation: number         // Репутация (0-100)
+  stationRank: string        // Ранг на станции
+  achievements: string[]     // Достижения
+
+  // Игровое время
+  totalPlayTime: number      // Общее время игры (в минутах)
+  lastActive: string         // Последняя активность
+}
+
 // ===== ПОЛЬЗОВАТЕЛИ (User) =====
 
 export interface User {
   id: string
   name: string
   email: string
-  
+
   // Игровые данные
-  characters: string[]
+  characters: string[]      // Привязанные персонажи
   equipment: string[]
   contracts: string[]
-  
+
+  // Атрибуты и статистика
+  attributes: UserAttributes
+  stats: UserStats
+
   // Настройки
   preferences: { [key: string]: any }
   settings: { [key: string]: any }

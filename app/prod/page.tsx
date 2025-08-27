@@ -266,11 +266,27 @@ export default function TalentArchitectProd() {
 
 
 
-  // Заполнение talents из конфигурации
+  // Заполнение talents из конфигурации (только привязанные к пользователю персонажи)
   useEffect(() => {
-    if (gameConfig?.assets?.assets) {
-      console.log('🔄 Заполняем talents из конфигурации...')
-      const talentsFromConfig = gameConfig.assets.assets.map(asset => {
+    if (gameConfig?.assets?.assets && currentUser) {
+      console.log('🔄 Заполняем talents из конфигурации для пользователя:', currentUser.username)
+
+      // Получаем привязанных персонажей пользователя
+      let userCharacters: string[] = []
+      if (gameConfig.users?.users) {
+        const userData = gameConfig.users.users.find((u: any) => u.id === currentUser.id)
+        userCharacters = userData?.characters || []
+        console.log('👤 Привязанные персонажи пользователя:', userCharacters)
+      }
+
+      // Фильтруем активы по привязанным персонажам
+      const filteredAssets = userCharacters.length > 0
+        ? gameConfig.assets.assets.filter((asset: any) => userCharacters.includes(asset.id))
+        : [] // Если нет привязанных персонажей, показываем пустой список
+
+      console.log('📊 Отфильтрованные активы:', filteredAssets.map((a: any) => a.name))
+
+      const talentsFromConfig = filteredAssets.map(asset => {
         console.log('📊 Обрабатываем актив:', asset.name, asset.attributes)
         
         // Правильно маппим атрибуты согласно эталонной системе характеристик
