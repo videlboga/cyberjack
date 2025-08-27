@@ -1,0 +1,51 @@
+{
+  "templates": [
+    {
+      "id": "basic_scene",
+      "name": "Базовая сцена",
+      "description": "Простая сцена с одним персонажем",
+      "template": {
+        "id": "",
+        "name": "",
+        "description": "",
+        "characterId": "",
+        "location": "",
+        "actions": [],
+        "conditions": [],
+        "effects": []
+      }
+    },
+    {
+      "id": "interaction_scene",
+      "name": "Сцена взаимодействия",
+      "description": "Сцена с взаимодействием между персонажами",
+      "template": {
+        "id": "",
+        "name": "",
+        "description": "",
+        "characterId": "",
+        "targetCharacterId": "",
+        "location": "",
+        "actions": [],
+        "conditions": [],
+        "effects": []
+      }
+    },
+    {
+      "id": "training_scene",
+      "name": "Сцена тренировки",
+      "description": "Сцена тренировки персонажа",
+      "template": {
+        "id": "",
+        "name": "",
+        "description": "",
+        "characterId": "",
+        "trainerId": "",
+        "trainingType": "",
+        "actions": [],
+        "conditions": [],
+        "effects": []
+      }
+    }
+  ]
+}

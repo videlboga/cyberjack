@@ -26,12 +26,12 @@ import {
 // Game Components
 import { ActionToolPanel } from "@/app/prod/components/ActionToolPanel"
 import { CharacterChat } from "@/app/prod/components/CharacterChat"
-import { CharacterPanel } from "@/app/prod/components/CharacterPanel"
-import { EquipmentPanel } from "@/app/prod/components/EquipmentPanel"
+import CharacterPanel from "@/app/prod/components/CharacterPanel"
+import EquipmentPanel from "@/app/prod/components/EquipmentPanel"
 import { PoseDisplay } from "@/app/prod/components/PoseDisplay"
 import { CategoryDisplay } from "@/app/prod/components/CategoryDisplay"
 import { HierarchicalActionMenu } from "@/app/prod/components/HierarchicalActionMenu"
-import { RegistrationModal } from "@/app/prod/components/RegistrationModal"
+import RegistrationModal from "@/app/prod/components/RegistrationModal"
 import { OpenRouterDebugPanel } from "@/app/prod/components/OpenRouterDebugPanel"
 
 // Game UI Components

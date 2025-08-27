@@ -1,0 +1,50 @@
+{
+  "examples": [
+    {
+      "id": "example_1",
+      "name": "Первая встреча",
+      "description": "Пример простой истории о первой встрече",
+      "story": {
+        "id": "first_meeting",
+        "name": "Первая встреча",
+        "description": "Персонаж впервые встречает нового персонажа",
+        "scenes": [
+          {
+            "id": "scene_1",
+            "name": "Встреча",
+            "description": "Два персонажа встречаются впервые",
+            "characterId": "character_1",
+            "targetCharacterId": "character_2",
+            "location": "talent_exchange",
+            "actions": ["greet", "introduce"],
+            "conditions": [],
+            "effects": ["relationship_start"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "example_2",
+      "name": "Тренировка",
+      "description": "Пример истории о тренировке",
+      "story": {
+        "id": "training_session",
+        "name": "Тренировка",
+        "description": "Персонаж проходит тренировку",
+        "scenes": [
+          {
+            "id": "scene_1",
+            "name": "Начало тренировки",
+            "description": "Тренер начинает тренировку",
+            "characterId": "character_1",
+            "trainerId": "trainer_1",
+            "trainingType": "physical",
+            "actions": ["start_training"],
+            "conditions": [],
+            "effects": ["training_started"]
+          }
+        ]
+      }
+    }
+  ]
+}

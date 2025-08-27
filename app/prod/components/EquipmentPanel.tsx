@@ -8,17 +8,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { 
-  Handcuffs, 
-  Collar, 
+  Lock, 
+  Circle, 
   Zap, 
   Thermometer, 
-  Vibrate, 
-  Whip, 
+  Waves, 
+  Scissors, 
   Brush, 
   Shirt, 
   Table, 
-  Cross, 
-  Chair,
+  Plus, 
+  Square,
   Settings,
   Power,
   PowerOff
@@ -36,17 +36,17 @@ interface EquipmentPanelProps {
 const getEquipmentIcon = (category: EquipmentCategory) => {
   switch (category) {
     case EquipmentCategory.HANDCUFFS:
-      return <Handcuffs className="w-4 h-4" />
+      return <Lock className="w-4 h-4" />
     case EquipmentCategory.COLLAR:
-      return <Collar className="w-4 h-4" />
+      return <Circle className="w-4 h-4" />
     case EquipmentCategory.VIBRATOR:
-      return <Vibrate className="w-4 h-4" />
+      return <Waves className="w-4 h-4" />
     case EquipmentCategory.ELECTROSTIM:
       return <Zap className="w-4 h-4" />
     case EquipmentCategory.THERMO:
       return <Thermometer className="w-4 h-4" />
     case EquipmentCategory.WHIP:
-      return <Whip className="w-4 h-4" />
+      return <Scissors className="w-4 h-4" />
     case EquipmentCategory.BRUSH:
       return <Brush className="w-4 h-4" />
     case EquipmentCategory.UNIFORM:
@@ -56,9 +56,9 @@ const getEquipmentIcon = (category: EquipmentCategory) => {
     case EquipmentCategory.TABLE:
       return <Table className="w-4 h-4" />
     case EquipmentCategory.CROSS:
-      return <Cross className="w-4 h-4" />
+      return <Plus className="w-4 h-4" />
     case EquipmentCategory.CHAIR:
-      return <Chair className="w-4 h-4" />
+      return <Square className="w-4 h-4" />
     default:
       return <Settings className="w-4 h-4" />
   }

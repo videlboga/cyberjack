@@ -667,3 +667,20 @@ export interface CharacterAIConfig {
     fetishResponses: { [key: string]: any }
   }
 }
+
+// ===== EQUIPMENT CATEGORIES =====
+
+export enum EquipmentCategory {
+  HANDCUFFS = 'handcuffs',
+  COLLAR = 'collar',
+  VIBRATOR = 'vibrator',
+  ELECTROSTIM = 'electrostim',
+  THERMO = 'thermo',
+  WHIP = 'whip',
+  BRUSH = 'brush',
+  UNIFORM = 'uniform',
+  BDSM_SUIT = 'bdsm_suit',
+  TABLE = 'table',
+  CROSS = 'cross',
+  CHAIR = 'chair'
+}
