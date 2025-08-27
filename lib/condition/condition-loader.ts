@@ -557,3 +557,4 @@ export function clearConditionCache(): void {
   conditionCache.clear()
   console.log('🧹 Кэш Condition данных очищен')
 }
+

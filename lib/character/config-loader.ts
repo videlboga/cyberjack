@@ -202,3 +202,4 @@ export async function getCharacterAIConfigForCharacter(characterId: string): Pro
     return null
   }
 }
+

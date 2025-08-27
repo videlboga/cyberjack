@@ -126,3 +126,4 @@ const getEntityTypeLabel = (type: string) => {
 }
 
 export default EntitySelector
+

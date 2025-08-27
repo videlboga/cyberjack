@@ -90,3 +90,4 @@ async function testCharacterAIConfigLoader() {
 
 // Запуск теста
 testCharacterAIConfigLoader();
+
