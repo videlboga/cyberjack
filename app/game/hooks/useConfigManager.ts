@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { saveConfigToFile } from '@/lib/config-sync'
 import { syncConfigToFiles } from '@/lib/sync-utils'
-import { syncLegacyToUnifiedConfig } from '@/lib/unified-config-adapter'
+// import { syncLegacyToUnifiedConfig } from '@/lib/unified-config-adapter' // Удален
 
 export interface ConfigState {
   assets: any
@@ -284,16 +284,7 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
         saveConfigToFile(configType, updatedConfig)
         console.log(`✅ Сущность ${itemId} помечена как удаленная`)
         
-        // Синхронизируем изменения обратно в unified конфигурацию для персонажей
-        if (configType === 'assets') {
-          const newConfigs = {
-            ...prev,
-            [configType]: updatedConfig
-          }
-          syncLegacyToUnifiedConfig(newConfigs).catch(error => {
-            console.error('❌ Ошибка синхронизации с unified конфигурацией:', error)
-          })
-        }
+        // Синхронизация с unified конфигурацией удалена (адаптер больше не используется)
       } catch (error) {
         console.error(`❌ Ошибка сохранения при удалении ${configType}:`, error)
       }

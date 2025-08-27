@@ -2,7 +2,7 @@
 
 import React from "react"
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
-import { loadUnifiedConfigWithAdapter } from "@/lib/unified-config-adapter"
+import { loadUnifiedConfigV2 } from "@/lib/unified-config-loader"
 import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/unified-entities"
 import { useCharacterAIV2 } from "@/app/prod/hooks/useCharacterAI-v2"
 
@@ -198,7 +198,7 @@ const UnifiedGamePage = () => {
       try {
         console.log('🔄 Загружаем конфигурации...')
         
-        const loadedConfigs = await loadUnifiedConfigWithAdapter()
+        const loadedConfigs = await loadUnifiedConfigV2()
         console.log('✅ Конфигурации загружены:', loadedConfigs)
         setConfigs(loadedConfigs)
         

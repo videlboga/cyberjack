@@ -2,7 +2,7 @@
 
 import React from "react"
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
-import { loadUnifiedConfigWithAdapter } from "@/lib/unified-config-adapter"
+import { loadUnifiedConfigV2 } from "@/lib/unified-config-loader"
 import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/unified-entities"
 import RegistrationModal from "./components/RegistrationModal"
 import { personalWorkIntegration } from "@/lib/character/personal-work-integration"
@@ -10,7 +10,7 @@ import { personalWorkIntegration } from "@/lib/character/personal-work-integrati
 import { useCharacterAI } from "./hooks/useCharacterAI"
 import { ActionToolPanel } from "./components/ActionToolPanel"
 import { CharacterChat } from "./components/CharacterChat"
-import { CharacterAdapter } from "@/lib/character/character-adapter"
+// import { CharacterAdapter } from "@/lib/character/character-adapter" // Удален
 import { OpenRouterDebugPanel } from './components/OpenRouterDebugPanel'
 import { Button } from "@/components/ui/button"
 import { StatNotification } from "@/components/ui/stat-notification"
@@ -235,7 +235,7 @@ export default function TalentArchitectProd() {
         setConfigLoading(true)
         
         console.log('🔄 Начинаем загрузку конфигурации в prod...')
-        const config = await loadUnifiedConfigWithAdapter()
+        const config = await loadUnifiedConfigV2()
         console.log('✅ Конфигурация загружена в prod:', config)
         console.log('📊 Активы из конфигурации:', config.assets?.assets)
         console.log('📊 Количество активов:', config.assets?.assets?.length)
@@ -1434,7 +1434,8 @@ export default function TalentArchitectProd() {
   const memoizedEffectiveStats = React.useMemo(() => {
     if (!selectedTalent) return null
     // Используем новую систему Character AI
-    return CharacterAdapter.getEffectiveStats(selectedTalent)
+    // return CharacterAdapter.getEffectiveStats(selectedTalent) // Адаптер удален
+    return selectedTalent
   }, [selectedTalent, globalInventory])
 
   React.useEffect(() => {

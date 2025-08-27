@@ -1,6 +1,6 @@
 import { CharacterAIService } from './ai-service'
 import { Character, CharacterResponse, EmotionalState } from '../unified-entities'
-import { CharacterAdapter } from './character-adapter'
+// import { CharacterAdapter } from './character-adapter' // Удален
 import { 
   CharacterState, 
   CharacterInteraction, 
@@ -228,7 +228,8 @@ export class PersonalWorkIntegration {
         affinities: context.fetishes || {}
       }
       
-      const character = CharacterAdapter.talentToCharacter(talent)
+      // const character = CharacterAdapter.talentToCharacter(talent) // Адаптер удален
+      const character = talent as Character
 
       // Создаем состояние персонажа
       const characterState: CharacterState = {
@@ -271,7 +272,7 @@ export class PersonalWorkIntegration {
       const emotionalChange = this.calculateEmotionalChange(result.characterResponse)
       
       // Обновляем Talent на основе изменений в Character
-      CharacterAdapter.updateTalentFromCharacter(talent, character)
+      // CharacterAdapter.updateTalentFromCharacter(talent, character) // Адаптер удален
       
       return {
         message: result.characterResponse.response,

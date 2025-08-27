@@ -19,7 +19,7 @@ import { SyncStatus } from "./components/ui/SyncStatus"
 import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
 
 // Импортируем конфигурации и утилиты синхронизации
-import { loadUnifiedConfigWithAdapter } from "@/lib/unified-config-adapter"
+import { loadUnifiedConfigV2 } from "@/lib/unified-config-loader"
 
 
 // Функция для генерации уникальных ID
@@ -73,7 +73,7 @@ const NexusEnslaverGame = () => {
       try {
         console.log('🔄 Загружаем конфигурации...')
         
-        const loadedConfigs = await loadUnifiedConfigWithAdapter()
+        const loadedConfigs = await loadUnifiedConfigV2()
         console.log('✅ Конфигурации загружены:', loadedConfigs)
         setConfigs(loadedConfigs)
       } catch (error) {
