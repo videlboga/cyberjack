@@ -761,11 +761,7 @@ const NexusEnslaverGame = () => {
                 </TabsTrigger>
                 <TabsTrigger value="attributes" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
-                  Атрибуты персонажей
-                </TabsTrigger>
-                <TabsTrigger value="user-attributes" className="flex items-center gap-2">
-                  <Cog className="h-4 w-4" />
-                  Атрибуты пользователей
+                  Атрибуты
                 </TabsTrigger>
                 <TabsTrigger value="station" className="flex items-center gap-2">
                   <Building className="h-4 w-4" />
@@ -962,8 +958,8 @@ const NexusEnslaverGame = () => {
               </div>
             </TabsContent>
 
-            {/* Таб Атрибуты пользователей */}
-            <TabsContent value="user-attributes" className="space-y-6">
+            {/* Таб Станция */}
+            <TabsContent value="station" className="space-y-6">
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -1130,42 +1126,6 @@ const NexusEnslaverGame = () => {
                         </div>
                       </CardContent>
                     </Card>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            {/* Таб Станция */}
-            <TabsContent value="station" className="space-y-6">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <Building className="h-5 w-5" />
-                          Сущности станции
-                        </CardTitle>
-                        <CardDescription>
-                          Управление сущностями станции. Добавляйте новые сущности для отображения в prod версии и сюжетном редакторе.
-                        </CardDescription>
-                      </div>
-                      <Button onClick={() => handleAdd('station')}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Добавить сущность
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <EntityList
-                      entities={getEntitiesList('station')}
-                      entityType="station"
-                      configType="station"
-                      onEdit={(entity) => handleEdit(entity, 'station')}
-                      onDelete={(id) => handleDelete(id, 'station')}
-                      onAdd={undefined}
-                      title=""
-                    />
                   </CardContent>
                 </Card>
               </div>

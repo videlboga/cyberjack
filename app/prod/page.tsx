@@ -145,6 +145,7 @@ export default function TalentArchitectProd() {
   const [showRegistration, setShowRegistration] = useState(true)
   const [currentUser, setCurrentUser] = useState<{ username: string; id: string } | null>(null)
   const [showCharacterPanel, setShowCharacterPanel] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
   
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null)
   const [neuralPulses, setNeuralPulses] = useState(100)
@@ -274,8 +275,12 @@ export default function TalentArchitectProd() {
       // Получаем привязанных персонажей пользователя
       let userCharacters: string[] = []
       if (gameConfig.users?.users) {
-        const userData = gameConfig.users.users.find((u: any) => u.id === currentUser.id)
+        // Ищем пользователя сначала по ID, потом по имени (для обратной совместимости)
+        const userData = gameConfig.users.users.find((u: any) =>
+          u.id === currentUser.id || u.name === currentUser.username || u.username === currentUser.username
+        )
         userCharacters = userData?.characters || []
+        console.log('👤 Найден пользователь в БД:', userData?.name || userData?.username)
         console.log('👤 Привязанные персонажи пользователя:', userCharacters)
       }
 
@@ -501,6 +506,20 @@ export default function TalentArchitectProd() {
     
     // Устанавливаем игровые ресурсы
     updateCredits(currentUserData.account?.balance || 5000)
+    setNeuralPulses(100)
+    setReputation(75)
+    setCurrentDay(1)
+  }
+
+  // Функция выхода
+  const handleLogout = () => {
+    console.log('🚪 Выход пользователя:', currentUser?.username)
+    localStorage.removeItem('currentUser')
+    setCurrentUser(null)
+    setShowRegistration(true)
+    setShowLogoutModal(false)
+    // Сбрасываем игровые ресурсы
+    setCredits(5000)
     setNeuralPulses(100)
     setReputation(75)
     setCurrentDay(1)
@@ -2228,7 +2247,12 @@ export default function TalentArchitectProd() {
               </h1>
               {currentUser && (
                 <p className="text-sm text-gray-300 mt-1">
-                  Пользователь: <span className="text-cyan-300">{currentUser.username}</span>
+                  Пользователь: <button
+                    onClick={() => setShowLogoutModal(true)}
+                    className="text-cyan-300 hover:text-cyan-200 underline cursor-pointer"
+                  >
+                    {currentUser.username}
+                  </button>
                 </p>
               )}
             </div>
@@ -3033,6 +3057,32 @@ export default function TalentArchitectProd() {
         isVisible={showCharacterPanel}
         onClose={() => setShowCharacterPanel(false)}
       />
+
+      {/* Модалка выхода */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-white mb-4">Выход из системы</h3>
+            <p className="text-gray-300 mb-6">
+              Вы действительно хотите выйти из аккаунта <span className="text-cyan-300">{currentUser?.username}</span>?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleLogout}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors"
+              >
+                Выйти
+              </button>
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors"
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Система уведомлений */}
       <Toaster />
