@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ConditionBuilder } from '@/components/ui/ConditionBuilder'
+import { ConditionBuilder } from '@/components/unified/builders/ConditionBuilder'
 import { 
   Condition, 
   AssetCondition, 

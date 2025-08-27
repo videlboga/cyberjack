@@ -22,14 +22,13 @@ import {
   Save,
   RotateCcw
 } from "lucide-react"
-import { ConditionBuilder } from "@/components/ui/ConditionBuilder"
+import { ConditionBuilder } from "@/components/unified/builders/ConditionBuilder"
 import { 
   Condition, 
   AssetCondition, 
   PlayerCondition,
   Asset,
-  User,
-  GameState
+  User
 } from '@/lib/unified-entities'
 import { 
   ConditionUtils as Utils,
@@ -87,7 +86,7 @@ interface StoryPointsManagerProps {
   // Новые пропсы для универсальной системы условий
   assets?: Asset[]
   users?: User[]
-  gameState?: GameState
+  gameState?: any
 }
 
 export function StoryPointsManager({
@@ -863,12 +862,17 @@ export function StoryPointsManager({
                 </div>
               </div>
 
-              <ConditionBuilder
-                condition={selectedUniversalCondition}
-                onConditionChange={updateUniversalCondition}
-                assets={assets}
-                users={users}
-              />
+              {selectedUniversalCondition && (
+                <ConditionBuilder
+                  condition={selectedUniversalCondition}
+                  onConditionChange={updateUniversalCondition}
+                  assets={assets}
+                  users={users}
+                  fields={[]}
+                  data={selectedUniversalCondition}
+                  onDataChange={updateUniversalCondition}
+                />
+              )}
 
               {gameState && (
                 <div className="space-y-2">

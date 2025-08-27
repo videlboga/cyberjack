@@ -38,7 +38,7 @@ import {
 } from '@/lib/condition/condition-loader'
 
 // Импорты компонентов
-import { ConditionBuilder } from '@/components/ui/ConditionBuilder'
+import { ConditionBuilder } from '@/components/unified/builders/ConditionBuilder'
 
 // Типы
 import { Condition, Character as Asset, User } from '@/lib/unified-entities'
