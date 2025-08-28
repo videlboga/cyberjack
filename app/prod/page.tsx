@@ -1,8 +1,10 @@
 "use client"
 
 import React from "react"
+
+console.log('📄 prod/page.tsx загружен')
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
-import { loadUnifiedConfigV2 } from "@/lib/unified-config-loader"
+import { useUnifiedConfig } from "@/lib/hooks/useUnifiedConfig-v1"
 import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/unified-entities"
 import RegistrationModal from "./components/RegistrationModal"
 import { personalWorkIntegration } from "@/lib/character/personal-work-integration"
@@ -136,20 +138,111 @@ interface ActionCategory {
 // Используем типы из lib/types.ts
 type Action = GameAction
 
+// Временные тестовые данные для работы без загрузки конфигурации
+const mockGameConfig: GameConfig = {
+    characters: [
+      {
+        id: "test_asset_1",
+        name: "Тестовый Актив 1",
+        archetype: "default",
+        description: "Тестовый персонаж для проверки функциональности",
+        attributes: {
+          physical: { Выносливость: 0.8, Сила: 0.7 },
+          mental: { Интеллект: 0.9, Харизма: 0.6 }
+        },
+        states: { "Настроение": 0.8, "Здоровье": 1.0 },
+        skills: ["test_skill_1"],
+        fetishes: ["test_fetish_1"],
+        statusEffects: [],
+        equippedItems: [],
+        inventory: []
+      }
+    ],
+    actions: {},
+    events: [],
+    contracts: [],
+    equipment: [],
+    system: {},
+    storyScenes: {},
+    users: [
+      {
+        id: "test_user_1",
+        username: "testuser",
+        role: "user",
+        status: "active",
+        created: "2024-01-01",
+        lastLogin: "2024-01-01",
+        account: { balance: 1000, currency: "credits", transactions: [] },
+        characters: ["test_asset_1"],
+        userEquipment: []
+      }
+    ],
+    market: {},
+    assets: [],
+    characterAI: {
+      actions: {},
+      tools: {},
+      poses: {},
+      llmPrompts: {
+        basePrompt: "Ты - AI помощник в BDSM игре",
+        characteristicInterpretations: {},
+        fetishResponses: {}
+      }
+    }
+  }
+
 export default function TalentArchitectProd() {
   const [gameConfig, setGameConfig] = useState<GameConfig | null>(null)
   const [configLoading, setConfigLoading] = useState(true)
   const [configError, setConfigError] = useState<string | null>(null)
-  
+
+  // Подключаем модульную загрузку конфига (должна вызываться ДО любых ранних return)
+  const { config: unifiedConfig, loading: unifiedLoading, error: unifiedError } = useUnifiedConfig()
+  useEffect(() => {
+    if (unifiedConfig) {
+      setGameConfig(unifiedConfig)
+      if ((unifiedConfig as any).characterAI) setCharacterAIConfig((unifiedConfig as any).characterAI)
+    }
+    setConfigLoading(unifiedLoading)
+    setConfigError(unifiedError)
+  }, [unifiedConfig, unifiedLoading, unifiedError])
+
   // Состояние для регистрации
-  const [showRegistration, setShowRegistration] = useState(true)
+  const [showRegistration, setShowRegistration] = useState(false)
   const [currentUser, setCurrentUser] = useState<{ username: string; id: string } | null>(null)
   const [showCharacterPanel, setShowCharacterPanel] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
-  
+
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null)
   const [neuralPulses, setNeuralPulses] = useState(100)
   const [credits, setCredits] = useState(5000)
+
+  // Используем только реальную конфигурацию (берём напрямую из хука, пока локальный стейт не успел обновиться)
+  const effectiveGameConfig = gameConfig ?? unifiedConfig ?? null
+  const getUsersArray = (cfg: any) => {
+    if (!cfg) return [] as any[]
+    const u = (cfg as any).users
+    return Array.isArray(u) ? u : (u?.users ?? [])
+  }
+  const getEquipmentArray = (cfg: any) => {
+    if (!cfg) return [] as any[]
+    const e = (cfg as any).equipment
+    return Array.isArray(e) ? e : (e?.equipment ?? [])
+  }
+  const getCharactersArray = (cfg: any) => {
+    if (!cfg) return [] as any[]
+    const c = (cfg as any).characters
+    return Array.isArray(c) ? c : (c?.characters ?? [])
+  }
+
+  console.log('🎯 Используемая конфигурация:', {
+    characters: getCharactersArray(effectiveGameConfig).length,
+    users: getUsersArray(effectiveGameConfig).length,
+    equipment: getEquipmentArray(effectiveGameConfig).length
+  })
+  
+  // Признак загрузки, используем в основном JSX
+  const isLoadingConfig = unifiedLoading || !effectiveGameConfig
   
   // Кастомный хук для управления кредитами с сохранением
   const updateCredits = (newCredits: number | ((prev: number) => number)) => {
@@ -229,47 +322,40 @@ export default function TalentArchitectProd() {
     geminiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY
   })
 
-  // Загрузка конфигурации при монтировании компонента
-  useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        setConfigLoading(true)
-
-        const config = await loadUnifiedConfigV2()
-        setGameConfig(config)
-
-        // Загружаем конфигурацию Character AI
-        if (config.characterAI) {
-          setCharacterAIConfig(config.characterAI)
-        }
-      } catch (error) {
-        console.error('❌ Ошибка загрузки конфигурации в prod:', error)
-        setConfigError(error instanceof Error ? error.message : 'Неизвестная ошибка загрузки')
-      } finally {
-        setConfigLoading(false)
-      }
-    }
-    
-    loadConfig()
-  }, [])
+  // (удалено дублирующее объявление useUnifiedConfig)
 
 
 
   // Заполнение talents из конфигурации (только привязанные к пользователю персонажи)
   useEffect(() => {
-    if (gameConfig?.assets?.assets && currentUser && gameConfig?.equipment?.equipment && gameConfig.equipment.equipment.length > 0) {
-      // Получаем привязанных персонажей пользователя
-      let userCharacters: string[] = []
+    const charactersArr = getCharactersArray(effectiveGameConfig)
+    const usersArr = getUsersArray(effectiveGameConfig)
+    const equipmentArr = getEquipmentArray(effectiveGameConfig)
+    console.log('🎯 useEffect для talents:', {
+      hasCharacters: charactersArr.length > 0,
+      charactersCount: charactersArr.length,
+      hasCurrentUser: !!currentUser,
+      currentUser: currentUser ? { id: currentUser.id, username: currentUser.username } : null,
+      hasEquipment: equipmentArr.length > 0,
+      equipmentCount: equipmentArr.length,
+      firstCharacterName: charactersArr[0]?.name || 'none',
+      firstUserName: usersArr[0]?.username || usersArr[0]?.name || 'none'
+    })
 
-      if (gameConfig.users?.users) {
-        // Ищем пользователя сначала по ID, потом по имени (для обратной совместимости)
-        let userData = gameConfig.users.users.find((u: any) =>
-          u.id === currentUser.id || u.name === currentUser.username || u.username === currentUser.username
+    if (charactersArr.length > 0) {
+      // Получаем привязанных персонажей пользователя (если пользователь существует)
+      let userCharacters: string[] = []
+      let userEquipmentList: any[] = []
+
+      if (currentUser && usersArr.length > 0) {
+        // Ищем пользователя сначала по ID/username/email (для обратной совместимости)
+        let userData = usersArr.find((u: any) =>
+          u.id === currentUser.id || u.name === currentUser.username || u.username === currentUser.username || u.email === currentUser.username
         )
 
         // Если не нашли, попробуем найти по всем возможным полям
         if (!userData) {
-          userData = gameConfig.users.users.find((u: any) => {
+          userData = usersArr.find((u: any) => {
             const matches = []
             if (u.id === currentUser.id) matches.push('id')
             if (u.name === currentUser.username) matches.push('name')
@@ -283,11 +369,11 @@ export default function TalentArchitectProd() {
 
         console.log('🔧 Данные пользователя:', userData)
         console.log('🎯 userEquipmentIds:', userEquipmentIds)
-        console.log('🎯 gameConfig.equipment.equipment:', gameConfig?.equipment?.equipment?.length || 'undefined')
+        console.log('🎯 equipmentArr:', equipmentArr.length)
 
         // Фильтруем оборудование по принадлежности пользователю
-        const userEquipmentList = userEquipmentIds.length > 0
-          ? gameConfig.equipment.equipment.filter((equipment: any) => userEquipmentIds.includes(equipment.id))
+        userEquipmentList = userEquipmentIds.length > 0
+          ? equipmentArr.filter((eq: any) => userEquipmentIds.includes(eq.id))
           : []
 
         console.log('🎯 Отфильтрованное оборудование:', userEquipmentList.map((eq: any) => eq.id))
@@ -295,42 +381,44 @@ export default function TalentArchitectProd() {
 
         setUserEquipment(userEquipmentList)
         setFilteredInventory(userEquipmentList)
-
+      } else {
+        setUserEquipment([])
+        setFilteredInventory([])
       }
 
-      // Фильтруем активы по привязанным персонажам
+      // Фильтруем активы строго по привязанным персонажам пользователя
       const filteredAssets = userCharacters.length > 0
-        ? gameConfig.assets.assets.filter((asset: any) => userCharacters.includes(asset.id))
-        : [] // Если нет привязанных персонажей, показываем пустой список
+        ? charactersArr.filter((asset: any) => userCharacters.includes(asset.id))
+        : []
 
       const talentsFromConfig = filteredAssets.map(asset => {
-        
+        const attr = (asset as any)?.attributes ?? {}
         // Правильно маппим атрибуты согласно эталонной системе характеристик
         const mappedAttributes = {
           // Физические характеристики
-          endurance: asset.attributes.endurance || 0,
-          sensitivity: asset.attributes.sensitivity || 0,
-          flexibility: asset.attributes.flexibility || 0,
+          endurance: attr.endurance || 0,
+          sensitivity: attr.sensitivity || 0,
+          flexibility: attr.flexibility || 0,
           
           // Психологические характеристики
-          emotionalStability: asset.attributes.emotional_stability || 0,
-          adaptability: asset.attributes.adaptability || 0,
-          intelligence: asset.attributes.intelligence || 0,
+          emotionalStability: attr.emotional_stability || 0,
+          adaptability: attr.adaptability || 0,
+          intelligence: attr.intelligence || 0,
           
           // Социальные характеристики
-          sociability: asset.attributes.sociability || 0,
-          empathy: asset.attributes.empathy || 0,
-          dominance: asset.attributes.dominance || 0,
+          sociability: attr.sociability || 0,
+          empathy: attr.empathy || 0,
+          dominance: attr.dominance || 0,
           
           // Личностные характеристики
-          selfEsteem: asset.attributes.self_esteem || 0,
-          optimism: asset.attributes.optimism || 0,
-          curiosity: asset.attributes.curiosity || 0,
+          selfEsteem: attr.self_esteem || 0,
+          optimism: attr.optimism || 0,
+          curiosity: attr.curiosity || 0,
           
           // Специальные характеристики
-          sexualExperience: asset.attributes.sexual_experience || 0,
-          resistance: asset.attributes.resistance || 0,
-          dependency: asset.attributes.dependency || 0,
+          sexualExperience: attr.sexual_experience || 0,
+          resistance: attr.resistance || 0,
+          dependency: attr.dependency || 0,
         }
         
         // Создаем состояния на основе атрибутов или используем дефолтные (шкала 0-100)
@@ -723,11 +811,11 @@ export default function TalentArchitectProd() {
 
   // Обновляем состояния при изменении конфигурации
   useEffect(() => {
-    if (gameConfig) {
+    if (effectiveGameConfig) {
       console.log('🔧 Устанавливаем globalInventory из gameConfig')
-      console.log('🔧 gameConfig.equipment.equipment:', gameConfig.equipment?.equipment?.length || 'undefined')
-      setGlobalInventory(gameConfig.equipment.equipment || [])
-      setContracts(gameConfig.contracts?.available?.map(contract => ({
+      console.log('🔧 effectiveGameConfig.equipment.equipment:', effectiveGameConfig.equipment?.equipment?.length || 'undefined')
+      setGlobalInventory(effectiveGameConfig.equipment.equipment || [])
+      setContracts(effectiveGameConfig.contracts?.available?.map(contract => ({
         ...contract,
         progress: 0,
         difficulty: "medium"
@@ -1223,25 +1311,28 @@ export default function TalentArchitectProd() {
     return icons[categoryId] || "⚡"
   }
 
-  // Используем конфигурацию из JSON файлов
-  const actionsConfig = gameConfig ? Object.entries(gameConfig.actions?.categories || {}).map(([categoryId, category]) => ({
-    id: categoryId,
-    name: category.title,
-    icon: getCategoryIcon(categoryId),
-    actions: Object.entries(category.actions).map(([actionId, action]) => ({
-      id: `${categoryId}-${actionId}`,
-      name: action.title,
-      description: action.description,
-      cost: action.cost,
-      effects: action.effects,
-      sideEffects: action.riskEffects,
-      risk: action.probability ? {
-        chance: action.probability.failure * 100,
-        positiveOutcome: action.outcomes?.success?.states || {},
-        negativeOutcome: action.outcomes?.failure?.states || {}
-      } : undefined
+  // Используем конфигурацию из JSON файлов с useMemo для правильного порядка инициализации
+  const actionsConfig = useMemo(() => {
+    if (!effectiveGameConfig) return []
+    return Object.entries(effectiveGameConfig.actions?.categories || {}).map(([categoryId, category]) => ({
+      id: categoryId,
+      name: category.title,
+      icon: getCategoryIcon(categoryId),
+      actions: Object.entries(category.actions).map(([actionId, action]) => ({
+        id: `${categoryId}-${actionId}`,
+        name: action.title,
+        description: action.description,
+        cost: action.cost,
+        effects: action.effects,
+        sideEffects: action.riskEffects,
+        risk: action.probability ? {
+          chance: action.probability.failure * 100,
+          positiveOutcome: action.outcomes?.success?.states || {},
+          negativeOutcome: action.outcomes?.failure?.states || {}
+        } : undefined
+      }))
     }))
-  })) : []
+  }, [effectiveGameConfig])
 
 
 
@@ -2201,18 +2292,29 @@ export default function TalentArchitectProd() {
     )
   }
 
-  // Обработка состояния загрузки
-  if (configLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-white mb-2">Загрузка конфигурации...</h2>
-          <p className="text-gray-400">Инициализация игровых данных</p>
-        </div>
-      </div>
-    )
-  }
+  // Логирование состояния загрузки
+  console.log('🔄 Рендеринг компонента - configLoading:', configLoading)
+  console.log('🔄 Рендеринг компонента - configError:', configError)
+  console.log('🔄 Рендеринг компонента - gameConfig:', !!gameConfig)
+  console.log('🔄 Рендеринг компонента - gameConfig details:', gameConfig ? {
+    characters: gameConfig.characters?.length || 0,
+    users: gameConfig.users?.length || 0
+  } : 'null')
+
+
+
+  // Временно отключаем загрузку конфигурации для тестирования
+  // if (configLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+  //         <h2 className="text-2xl font-bold text-white mb-2">Загрузка конфигурации...</h2>
+  //         <p className="text-gray-400">Инициализация игровых данных</p>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   // Обработка ошибок загрузки
   if (configError) {
@@ -2233,8 +2335,8 @@ export default function TalentArchitectProd() {
     )
   }
 
-  // Проверка наличия конфигурации
-  if (!gameConfig) {
+  // Проверка наличия конфигурации - теперь с mock данными это не должно происходить
+  if (!gameConfig && !configLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
         <div className="text-center">
@@ -2246,8 +2348,39 @@ export default function TalentArchitectProd() {
     )
   }
 
+  // Временная отладочная версия
+  if (configLoading || !gameConfig) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-white mb-2">Загрузка конфигурации...</h2>
+          <p className="text-gray-400 mb-4">Загружаем игровые данные</p>
+          <div className="text-left bg-gray-800 p-4 rounded max-w-md">
+            <p className="text-sm text-cyan-300">Отладочная информация:</p>
+            <p className="text-sm text-gray-300">configLoading: {configLoading ? 'true' : 'false'}</p>
+            <p className="text-sm text-gray-300">gameConfig: {gameConfig ? 'загружен' : 'null'}</p>
+            <p className="text-sm text-gray-300">characters: {effectiveGameConfig?.characters?.length || 0}</p>
+            <p className="text-sm text-gray-300">users: {effectiveGameConfig?.users?.length || 0}</p>
+            <p className="text-sm text-gray-300">firstCharacter: {effectiveGameConfig?.characters?.[0]?.name || 'none'}</p>
+            <p className="text-sm text-gray-300">firstUser: {effectiveGameConfig?.users?.[0]?.username || 'none'}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative overflow-hidden">
+      {isLoadingConfig && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+            <h2 className="text-xl font-bold text-white mb-2">Загрузка конфигурации...</h2>
+            <p className="text-gray-300">Загружаем игровые данные</p>
+          </div>
+        </div>
+      )}
       <div
         className="absolute inset-0 opacity-20 bg-cover bg-center"
         style={{ backgroundImage: "url(/futuristic-space-station.png)" }}

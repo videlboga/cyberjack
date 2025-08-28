@@ -135,9 +135,9 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
       icon: "💪",
       isState: false, // Характеристики по шкале 0-10
       stats: {
-        endurance: attributes.endurance || 0,
-        sensitivity: attributes.sensitivity || 0,
-        flexibility: attributes.flexibility || 0,
+        endurance: attributes.endurance ?? 0,
+        sensitivity: attributes.sensitivity ?? 0,
+        flexibility: attributes.flexibility ?? 0,
       }
     },
     psychological: {
@@ -145,9 +145,9 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
       icon: "🧠",
       isState: false, // Характеристики по шкале 0-10
       stats: {
-        emotionalStability: attributes.emotionalStability || 0,
-        adaptability: attributes.adaptability || 0,
-        intelligence: attributes.intelligence || 0,
+        emotionalStability: attributes.emotionalStability ?? 0,
+        adaptability: attributes.adaptability ?? 0,
+        intelligence: attributes.intelligence ?? 0,
       }
     },
     social: {
@@ -155,9 +155,9 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
       icon: "👥", 
       isState: false, // Характеристики по шкале 0-10
       stats: {
-        sociability: attributes.sociability || 0,
-        empathy: attributes.empathy || 0,
-        dominance: attributes.dominance || 0,
+        sociability: attributes.sociability ?? 0,
+        empathy: attributes.empathy ?? 0,
+        dominance: attributes.dominance ?? 0,
       }
     },
     personal: {
@@ -165,9 +165,9 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
       icon: "🌟",
       isState: false, // Характеристики по шкале 0-10
       stats: {
-        selfEsteem: attributes.selfEsteem || 0,
-        optimism: attributes.optimism || 0,
-        curiosity: attributes.curiosity || 0,
+        selfEsteem: attributes.selfEsteem ?? 0,
+        optimism: attributes.optimism ?? 0,
+        curiosity: attributes.curiosity ?? 0,
       }
     },
     special: {
@@ -175,9 +175,9 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
       icon: "⭐",
       isState: false, // Характеристики по шкале 0-10
       stats: {
-        sexualExperience: attributes.sexualExperience || 0,
-        resistance: attributes.resistance || 0,
-        dependency: attributes.dependency || 0,
+        sexualExperience: attributes.sexualExperience ?? 0,
+        resistance: attributes.resistance ?? 0,
+        dependency: attributes.dependency ?? 0,
       }
     },
     states: {
@@ -234,7 +234,8 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
                   {Object.entries(category.stats).map(([statKey, value]) => {
                     const numValue = typeof value === 'number' ? value : 0;
                     const maxValue = category.isState ? 100 : 10;
-                    const displayValue = category.isState ? numValue : numValue;
+                    const isHidden = !category.isState && numValue === 0;
+                    const displayValue = category.isState ? numValue : (isHidden ? '❓' : numValue);
                     
                     return (
                       <div key={statKey} className="p-2 bg-gray-800/50 rounded border border-gray-600">
@@ -250,11 +251,11 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
                               </div>
                             </div>
                           </div>
-                          <span className={`text-sm font-bold ${getStatColor(numValue, category.isState)}`}>
+                          <span className={`text-sm font-bold ${isHidden ? 'text-gray-500' : getStatColor(numValue, category.isState)}`}>
                             {displayValue}/{maxValue}
                           </span>
                         </div>
-                        <Progress value={category.isState ? numValue : numValue * 10} className="h-1" />
+                        <Progress value={category.isState ? numValue : (isHidden ? 0 : numValue * 10)} className={`h-1 ${isHidden ? 'opacity-30' : ''}`} />
                       </div>
                     );
                   })}

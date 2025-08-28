@@ -345,54 +345,61 @@ export function useCharacterAI({
 
   // Проверки доступности
   const canExecuteAction = useCallback((actionId: string): boolean => {
-    const action = characterAIConfig.actions[actionId];
+    const action = characterAIConfig?.actions?.[actionId];
     if (!action) return false;
 
     // Проверяем кулдаун
     if (cooldowns[actionId]) return false;
 
-    // Проверяем требования
-    const requirements = action.requirements;
-    if (requirements.trustLevel && characterStates.trust < requirements.trustLevel) return false;
-    if (requirements.relationshipLevel && characterStates.relationship < requirements.relationshipLevel) return false;
-    if (requirements.equipment) {
-      const hasEquipment = requirements.equipment.some(equip => userEquipment.includes(equip));
+    // Проверяем требования (безопасно при отсутствии полей)
+    const requirements: any = action.requirements || {};
+    const trust = Number(characterStates?.trust ?? 0);
+    const relationship = Number(characterStates?.relationship ?? 0);
+    if (typeof requirements.trustLevel === 'number' && trust < requirements.trustLevel) return false;
+    if (typeof requirements.relationshipLevel === 'number' && relationship < requirements.relationshipLevel) return false;
+    if (Array.isArray(requirements.equipment) && requirements.equipment.length > 0) {
+      const hasEquipment = requirements.equipment.some((equip: string) => userEquipment?.includes(equip));
       if (!hasEquipment) return false;
     }
 
     return true;
-  }, [characterAIConfig.actions, cooldowns, characterStates, userEquipment]);
+  }, [characterAIConfig?.actions, cooldowns, characterStates, userEquipment]);
 
   const canUseTool = useCallback((toolId: string): boolean => {
-    const tool = characterAIConfig.tools[toolId];
+    const tool = characterAIConfig?.tools?.[toolId];
     if (!tool) return false;
 
     // Проверяем кулдаун
     if (cooldowns[toolId]) return false;
 
-    // Проверяем требования
-    const requirements = tool.requirements;
-    if (requirements.equipment) {
-      const hasEquipment = requirements.equipment.some(equip => userEquipment.includes(equip));
+    // Проверяем требования (безопасно)
+    const requirements: any = tool.requirements || {};
+    if (Array.isArray(requirements.equipment) && requirements.equipment.length > 0) {
+      const hasEquipment = requirements.equipment.some((equip: string) => userEquipment?.includes(equip));
       if (!hasEquipment) return false;
     }
-    if (requirements.powerLevel && characterStates.power < requirements.powerLevel) return false;
+    const power = Number(characterStates?.power ?? 0);
+    if (typeof requirements.powerLevel === 'number' && power < requirements.powerLevel) return false;
 
     return true;
-  }, [characterAIConfig.tools, cooldowns, characterStates, userEquipment]);
+  }, [characterAIConfig?.tools, cooldowns, characterStates, userEquipment]);
 
   const canChangePose = useCallback((poseId: string): boolean => {
-    const pose = characterAIConfig.poses[poseId];
+    const pose = characterAIConfig?.poses?.[poseId];
     if (!pose) return false;
 
-    const requirements = pose.requirements;
-    if (requirements.flexibility && characterAttributes.flexibility < requirements.flexibility) return false;
-    if (requirements.strength && characterAttributes.strength < requirements.strength) return false;
-    if (requirements.trustLevel && characterStates.trust < requirements.trustLevel) return false;
-    if (requirements.relationshipLevel && characterStates.relationship < requirements.relationshipLevel) return false;
+    const requirements: any = pose.requirements || {};
+    const flexibility = Number(characterAttributes?.flexibility ?? 0);
+    const strength = Number(characterAttributes?.strength ?? 0);
+    const trust = Number(characterStates?.trust ?? 0);
+    const relationship = Number(characterStates?.relationship ?? 0);
+    if (typeof requirements.flexibility === 'number' && flexibility < requirements.flexibility) return false;
+    if (typeof requirements.strength === 'number' && strength < requirements.strength) return false;
+    if (typeof requirements.trustLevel === 'number' && trust < requirements.trustLevel) return false;
+    if (typeof requirements.relationshipLevel === 'number' && relationship < requirements.relationshipLevel) return false;
 
     return true;
-  }, [characterAIConfig.poses, characterAttributes, characterStates]);
+  }, [characterAIConfig?.poses, characterAttributes, characterStates]);
 
   // Получение доступных данных
   const getAvailableActions = useCallback((): InteractiveAction[] => {

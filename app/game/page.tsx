@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sun, Moon, Settings, FileCode, Plus, X } from "lucide-react"
-import { Users, Building, FileText, Zap, BarChart, Wrench, User, Cog, BookOpen, Film, Target, Package, Star, Eye } from "lucide-react"
+import { Sun, Moon, Settings, FileCode, Plus, X, Eye, Search, Zap } from "lucide-react"
+import { Users, Building, FileText, BarChart, Wrench, User, Cog, BookOpen, Film, Target, Package, Star } from "lucide-react"
 import Link from "next/link"
 
 // Импортируем наши новые компоненты и хуки
@@ -17,9 +17,29 @@ import { UserAssetsModal } from "./components/ui/UserAssetsModal"
 import { EntityList } from "./components/ui/EntityList"
 import { SyncStatus } from "./components/ui/SyncStatus"
 import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
+import CharacterAnalysisPanel from "./components/ui/CharacterAnalysisPanel"
+import UserKnowledgePanel from "./components/ui/UserKnowledgePanel"
 
 // Импортируем конфигурации и утилиты синхронизации
 import { loadUnifiedConfigV2 } from "@/lib/unified-config-loader"
+
+// Импортируем систему анализа характеристик
+import {
+  getCharacteristicDisplayValue,
+  getKnowledgeLevelIcon,
+  getKnowledgeLevelColor,
+  calculateAnalysisProgress,
+  initializeHiddenCharacteristics,
+  ANALYSIS_METHODS,
+  getAvailableAnalysisMethods,
+  createAnalysisSession,
+  type AnalysisMethod
+} from "@/lib/character-analysis"
+
+import {
+  type PlayerKnowledge,
+  type PlayerCharacterKnowledge
+} from "@/lib/unified-entities"
 
 
 // Функция для генерации уникальных ID
@@ -39,6 +59,15 @@ const NexusEnslaverGame = () => {
   // Состояние для отображения характеристик персонажа
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null)
   const [showCharacterStats, setShowCharacterStats] = useState(false)
+
+  // Состояние для системы анализа характеристик
+  const [selectedAnalysisMethod, setSelectedAnalysisMethod] = useState<AnalysisMethod | null>(null)
+  const [analysisSession, setAnalysisSession] = useState<any>(null)
+  const [showAnalysisPanel, setShowAnalysisPanel] = useState(false)
+
+  // Состояние для панели знаний пользователя
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [showUserKnowledgePanel, setShowUserKnowledgePanel] = useState(false)
 
   // Используем наши новые хуки
   const { modalState, openModal, closeModal } = useModal()
@@ -77,7 +106,29 @@ const NexusEnslaverGame = () => {
         
         const loadedConfigs = await loadUnifiedConfigV2()
 
-        setConfigs(loadedConfigs)
+        // Нормализуем под ожидаемую dev-структуру UI (вложенные разделы)
+        const normalized = {
+          assets: { assets: Array.isArray((loadedConfigs as any)?.assets?.assets) ? (loadedConfigs as any).assets.assets : [] },
+          actions: { categories: (loadedConfigs as any)?.actions?.categories || {} },
+          contracts: { available: Array.isArray((loadedConfigs as any)?.contracts) ? (loadedConfigs as any).contracts : ((loadedConfigs as any)?.contracts?.available || []) },
+          events: {
+            anomalies: (loadedConfigs as any)?.events?.anomalies || [],
+            crises: (loadedConfigs as any)?.events?.crises || [],
+            opportunities: (loadedConfigs as any)?.events?.opportunities || []
+          },
+          characters: { characters: Array.isArray((loadedConfigs as any)?.characters) ? (loadedConfigs as any).characters : [] },
+          equipment: { equipment: Array.isArray((loadedConfigs as any)?.equipment) ? (loadedConfigs as any).equipment : [] },
+          system: (loadedConfigs as any)?.system || {},
+          users: { users: Array.isArray((loadedConfigs as any)?.users) ? (loadedConfigs as any).users : [] },
+          station: (loadedConfigs as any)?.station || { stationEntities: {} },
+          characterAI: (loadedConfigs as any)?.characterAI || null,
+          storyScenes: (loadedConfigs as any)?.storyScenes || []
+        }
+
+        setConfigs(normalized)
+        if ((loadedConfigs as any)?.characterAI) {
+          setCharacterAIConfig((loadedConfigs as any).characterAI)
+        }
       } catch (error) {
         console.error('❌ Ошибка загрузки конфигураций:', error)
       } finally {
@@ -324,12 +375,274 @@ const NexusEnslaverGame = () => {
 
   const handleSave = (data: any) => {
 
-    
+
     if (modalState.isNew) {
       addConfigItem(modalState.type as any, data)
     } else {
       updateConfigItem(modalState.type as any, data.id, data)
     }
+  }
+
+  // ===== ФУНКЦИИ СИСТЕМЫ АНАЛИЗА ХАРАКТЕРИСТИК =====
+
+  // Функция для получения знаний игрока о персонаже
+  const getPlayerCharacterKnowledge = (playerId: string, characterId: string): PlayerCharacterKnowledge | null => {
+    const players = getEntitiesList('users')
+    const player = players.find((p: any) => p.id === playerId)
+
+    if (!player || !player.characterKnowledge) {
+      return null
+    }
+
+    return player.characterKnowledge[characterId] || null
+  }
+
+  // Функция для обновления знаний игрока о персонаже
+  const updatePlayerCharacterKnowledge = (playerId: string, characterId: string, knowledgeData: Partial<PlayerCharacterKnowledge>) => {
+    const players = getEntitiesList('users')
+    const player = players.find((p: any) => p.id === playerId)
+
+    if (!player) {
+      console.error('❌ Игрок не найден:', playerId)
+      return
+    }
+
+    // Инициализируем систему знаний, если её нет
+    if (!player.characterKnowledge) {
+      player.characterKnowledge = {}
+    }
+
+    // Получаем или создаем знания о персонаже
+    if (!player.characterKnowledge[characterId]) {
+      const characters = getEntitiesList('characters')
+      const character = characters.find((c: any) => c.id === characterId)
+
+      if (!character) {
+        console.error('❌ Персонаж не найден:', characterId)
+        return
+      }
+
+      player.characterKnowledge[characterId] = {
+        characterId: characterId,
+        knowledge: initializeHiddenCharacteristics(character.characteristics),
+        analysisHistory: [],
+        lastAnalyzed: undefined,
+        analysisCount: 0
+      }
+    }
+
+    // Обновляем знания
+    Object.assign(player.characterKnowledge[characterId], knowledgeData)
+
+    // Сохраняем обновления
+    updateConfigItem('users', playerId, player)
+
+    console.log('✅ Знания игрока обновлены:', {
+      playerId,
+      characterId,
+      knowledgeCategories: Object.keys(player.characterKnowledge[characterId].knowledge)
+    })
+  }
+
+  // Функция для проверки и инициализации знаний игрока о персонаже
+  const ensurePlayerHasCharacterKnowledge = (playerId: string, character: any) => {
+    if (!character.characteristics) {
+      console.error('❌ У персонажа нет характеристик:', character.id)
+      return null
+    }
+
+    let playerKnowledge = getPlayerCharacterKnowledge(playerId, character.id)
+
+    if (!playerKnowledge) {
+      console.log('🔧 Создаем систему знаний для игрока:', playerId, 'о персонаже:', character.name)
+      updatePlayerCharacterKnowledge(playerId, character.id, {
+        knowledge: initializeHiddenCharacteristics(character.characteristics),
+        analysisHistory: []
+      })
+      playerKnowledge = getPlayerCharacterKnowledge(playerId, character.id)
+    }
+
+    return playerKnowledge
+  }
+
+  const handleStartAnalysis = (character: any, method: AnalysisMethod) => {
+    if (!character) return
+
+    try {
+      // Проверяем существование метода
+      if (!ANALYSIS_METHODS[method]) {
+        throw new Error(`Метод анализа "${method}" не найден в системе`)
+      }
+
+      // Получаем текущего пользователя (первого из списка)
+      const users = getEntitiesList('users')
+      const currentUser = users[0] // В будущем нужно добавить систему выбора пользователя
+
+      if (!currentUser) {
+        throw new Error('Пользователь не найден')
+      }
+
+      console.log('🔬 Попытка анализа персонажа:', {
+        character: character.name,
+        characterId: character.id,
+        player: currentUser.username,
+        method: method,
+        availableMethods: Object.keys(ANALYSIS_METHODS)
+      })
+
+      // Проверяем и инициализируем знания игрока о персонаже
+      const playerKnowledge = ensurePlayerHasCharacterKnowledge(currentUser.id, character)
+
+      if (!playerKnowledge) {
+        throw new Error('Не удалось инициализировать знания игрока о персонаже')
+      }
+
+      const session = createAnalysisSession(character.id, method)
+      setAnalysisSession(session)
+      setSelectedAnalysisMethod(method)
+      setSelectedCharacter({
+        ...character,
+        playerKnowledge: playerKnowledge // Добавляем знания игрока в объект персонажа для компонента
+      })
+      setShowAnalysisPanel(true)
+
+      console.log('🔬 Начат анализ персонажа:', {
+        character: character.name,
+        method: method,
+        cost: session.cost,
+        time: ANALYSIS_METHODS[method]?.time || 'unknown',
+        playerKnowledgeCategories: Object.keys(playerKnowledge.knowledge)
+      })
+    } catch (error) {
+      console.error('❌ Ошибка при запуске анализа:', error)
+      alert(`Ошибка при запуске анализа: ${error}`)
+    }
+  }
+
+  const handleCompleteAnalysis = async () => {
+    if (!analysisSession || !selectedCharacter || !selectedAnalysisMethod) return
+
+    try {
+      // Получаем текущего пользователя
+      const users = getEntitiesList('users')
+      const currentUser = users[0]
+
+      if (!currentUser) {
+        throw new Error('Пользователь не найден')
+      }
+
+      // Имитируем процесс анализа
+      console.log('⚡ Выполняется анализ...', {
+        session: analysisSession.id,
+        character: selectedCharacter.name,
+        player: currentUser.username,
+        method: selectedAnalysisMethod
+      })
+
+      // Получаем текущие знания игрока о персонаже
+      const playerKnowledge = selectedCharacter.playerKnowledge
+      if (!playerKnowledge) {
+        throw new Error('Знания игрока о персонаже не найдены')
+      }
+
+      // Обновляем знания игрока (имитация результатов)
+      const updatedKnowledge = { ...playerKnowledge.knowledge }
+      const methodInfo = ANALYSIS_METHODS[selectedAnalysisMethod]
+
+      if (!methodInfo) {
+        throw new Error(`Unknown analysis method: ${selectedAnalysisMethod}`)
+      }
+
+      // Раскрываем характеристики в зависимости от метода
+      methodInfo.reveals.forEach(category => {
+        if ((category === 'physical' || category === 'all') && updatedKnowledge.physical) {
+          Object.keys(updatedKnowledge.physical).forEach(char => {
+            if (updatedKnowledge.physical[char].level === 'unknown') {
+              updatedKnowledge.physical[char] = {
+                level: 'approximate',
+                value: selectedCharacter.characteristics?.physical?.[char] || 0,
+                accuracy: 2,
+                lastAnalyzed: new Date(),
+                analysisMethod: selectedAnalysisMethod
+              }
+            }
+          })
+        }
+        if ((category === 'psychological' || category === 'all') && updatedKnowledge.psychological) {
+          Object.keys(updatedKnowledge.psychological).forEach(char => {
+            if (updatedKnowledge.psychological[char].level === 'unknown') {
+              updatedKnowledge.psychological[char] = {
+                level: 'approximate',
+                value: selectedCharacter.characteristics?.psychological?.[char] || 0,
+                accuracy: 2,
+                lastAnalyzed: new Date(),
+                analysisMethod: selectedAnalysisMethod
+              }
+            }
+          })
+        }
+        // Аналогично для других категорий...
+      })
+
+      // Обновляем знания игрока
+      updatePlayerCharacterKnowledge(currentUser.id, selectedCharacter.id, {
+        knowledge: updatedKnowledge,
+        analysisHistory: [...playerKnowledge.analysisHistory, analysisSession],
+        lastAnalyzed: new Date(),
+        analysisCount: playerKnowledge.analysisCount + 1
+      })
+
+      console.log('✅ Анализ завершен:', {
+        character: selectedCharacter.name,
+        player: currentUser.username,
+        method: selectedAnalysisMethod,
+        results: updatedKnowledge
+      })
+
+      setAnalysisSession(null)
+      setSelectedAnalysisMethod(null)
+      setShowAnalysisPanel(false)
+
+    } catch (error) {
+      console.error('❌ Ошибка при анализе:', error)
+    }
+  }
+
+  const handleCancelAnalysis = () => {
+    setAnalysisSession(null)
+    setSelectedAnalysisMethod(null)
+    setShowAnalysisPanel(false)
+  }
+
+  // ===== ФУНКЦИИ ДЛЯ ПАНЕЛИ ЗНАНИЙ ПОЛЬЗОВАТЕЛЯ =====
+
+  const handleViewUserKnowledge = (user: any) => {
+    setSelectedUser(user)
+    setShowUserKnowledgePanel(true)
+
+    console.log('👁️ Открываем панель знаний пользователя:', user.username)
+  }
+
+  const handleCloseUserKnowledgePanel = () => {
+    setSelectedUser(null)
+    setShowUserKnowledgePanel(false)
+  }
+
+  // ===== ФУНКЦИИ ДЛЯ РАБОТЫ С ИНСТРУМЕНТАМИ АНАЛИЗА =====
+
+  const handleStartToolAnalysis = (character: any, tool: any) => {
+    if (!character) return
+
+    console.log('🔧 Начат анализ с инструментом:', {
+      character: character.name,
+      tool: tool.name,
+      cost: tool.cost,
+      time: tool.speed
+    })
+
+    // Имитация использования инструмента
+    // В реальной игре здесь будет интеграция с экономикой и временем
+    alert(`Инструмент "${tool.name}" использован на персонаже "${character.name}"\n\nСтоимость: ${tool.cost} кредитов\nВремя: ${tool.speed} минут\n\nФункционал в разработке!`)
   }
 
   const handleManageUserAssets = (user: any) => {
@@ -436,7 +749,8 @@ const NexusEnslaverGame = () => {
 
   // Получение списка сущностей для каждого типа
   const getEntitiesList = (configType: string, subType?: string) => {
-    const config = (managedConfigs as any)[configType]
+    // Берём данные сначала из managedConfigs, если они ещё не обновились — из raw configs
+    const config = (managedConfigs as any)[configType] ?? (configs as any)[configType]
     
     switch (configType) {
       case 'actions':
@@ -466,9 +780,21 @@ const NexusEnslaverGame = () => {
         }
         return actionsList
       case 'assets':
-        // Для активов - возвращаем список всех активов из assets.json, исключая удаленные
+        // Для активов - возвращаем список из assets.json; если пусто, используем персонажей как источник активов
         const assetsList = Array.isArray(config?.assets) ? config.assets.filter((asset: any) => !asset.deleted) : []
-        return assetsList
+        if (assetsList.length > 0) return assetsList
+        // Fallback: берем из characters-unified.json
+        const charactersCfg = (managedConfigs as any)?.characters
+        const charactersArr: any[] = Array.isArray(charactersCfg?.characters) ? charactersCfg.characters : []
+        return charactersArr
+          .filter((character: any) => !character.deleted)
+          .map((character: any) => ({
+            id: character.id,
+            name: character.name,
+            rank: character.rank,
+            type: 'character',
+            ...character
+          }))
       case 'users':
         // Для пользователей - возвращаем список всех пользователей, исключая удаленные
         const allUsers = Array.isArray(config?.users) ? config.users : []
@@ -513,8 +839,11 @@ const NexusEnslaverGame = () => {
       case 'equipment':
         // Для предметов - возвращаем все оборудование с категоризацией
         const equipmentList: any[] = []
-        if (Array.isArray(config?.equipment)) {
-          config.equipment.filter((item: any) => !item.deleted).forEach((item: any) => {
+        const eqArray: any[] = Array.isArray(config?.equipment)
+          ? config.equipment
+          : (Array.isArray((configs as any)?.equipment?.equipment) ? (configs as any).equipment.equipment : [])
+        if (Array.isArray(eqArray)) {
+          eqArray.filter((item: any) => !item.deleted).forEach((item: any) => {
             equipmentList.push({
               ...item,
               type: item.category || 'device',
@@ -823,8 +1152,10 @@ const NexusEnslaverGame = () => {
                 onEdit={(entity) => handleEdit(entity, 'characters')}
                 onDelete={(id) => handleDelete(id, 'characters')}
                 onView={(entity) => handleViewCharacterStats(entity)}
+                onAnalyze={handleStartAnalysis}
                 onAdd={() => handleAdd('characters')}
                 title="Персонажи (Активы)"
+                currentUser={getEntitiesList('users')[0]} // Передаем текущего пользователя
               />
                 </TabsContent>
 
@@ -848,6 +1179,7 @@ const NexusEnslaverGame = () => {
                         onEdit={(entity) => handleEdit(entity, 'users')}
                         onDelete={(id) => handleDelete(id, 'users')}
                         onManageAssets={handleManageUserAssets}
+                        onViewKnowledge={handleViewUserKnowledge}
                         onAdd={undefined}
                         title=""
                   />
@@ -1720,6 +2052,25 @@ const NexusEnslaverGame = () => {
             talent={selectedCharacter}
             isVisible={showCharacterStats}
             onClose={handleCloseCharacterStats}
+          />
+        )}
+
+        {/* Панель анализа характеристик */}
+        {showAnalysisPanel && selectedCharacter && analysisSession && (
+          <CharacterAnalysisPanel
+            character={selectedCharacter}
+            onStartAnalysis={handleStartAnalysis}
+            onStartToolAnalysis={handleStartToolAnalysis}
+            onClose={handleCancelAnalysis}
+          />
+        )}
+
+        {/* Панель знаний пользователя */}
+        {showUserKnowledgePanel && selectedUser && (
+          <UserKnowledgePanel
+            user={selectedUser}
+            characters={getEntitiesList('characters')}
+            onClose={handleCloseUserKnowledgePanel}
           />
         )}
       </div>

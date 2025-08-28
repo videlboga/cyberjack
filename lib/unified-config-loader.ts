@@ -1,110 +1,158 @@
 import type { GameConfig } from './unified-entities'
 
-// Кэш для конфигураций
-let configCache: GameConfig | null = null
-let cacheTimestamp = 0
-const CACHE_DURATION = 5 * 60 * 1000 // 5 минут
+console.log('📦 unified-config-loader.ts загружен')
+
+// Кэш отключен для отладки
+// let configCache: GameConfig | null = null
+// let cacheTimestamp = 0
+// const CACHE_DURATION = 5 * 60 * 1000 // 5 минут
 
 // Загрузка унифицированной конфигурации версии 2
 export async function loadUnifiedConfigV2(): Promise<GameConfig> {
+  console.log('🚀 loadUnifiedConfigV2 вызвана')
   const now = Date.now()
-  
-  // Проверяем кэш
-  if (configCache && (now - cacheTimestamp) < CACHE_DURATION) {
-    console.log('📋 Используем кэшированную конфигурацию')
-    return configCache
-  }
-  
+
+  // Временно отключаем кэширование для отладки
+  // if (configCache && (now - cacheTimestamp) < CACHE_DURATION) {
+  //   console.log('📋 Используем кэшированную конфигурацию')
+  //   return configCache
+  // }
+
   try {
     console.log('🔄 Загружаем унифицированную конфигурацию v2...')
-    
-    // Загружаем все файлы параллельно с обработкой ошибок
-    const [
-      charactersData,
-      actionsData,
-      eventsData,
-      contractsData,
-      equipmentData,
-      systemData,
-      storyScenesData,
-      usersData,
-      characterAIData,
-      marketData,
-      assetsData
-    ] = await Promise.all([
-      import('../data/characters-unified.json').catch(() => ({ 
-        default: { characters: [], templates: {}, config: {} } 
-      })),
-      import('../data/actions-unified.json').catch(() => ({ 
-        default: { actions: [], categories: {}, config: {} } 
-      })),
-      import('../data/events-unified.json').catch(() => ({ 
-        default: { events: [], config: {} } 
-      })),
-      import('../data/contracts-unified.json').catch(() => ({ 
-        default: { contracts: [], config: {} } 
-      })),
-      import('../data/equipment-unified.json').catch(() => ({ 
-        default: { equipment: [], config: {} } 
-      })),
-      import('../data/system-unified.json').catch(() => ({ 
-        default: { attributes: [], states: [], fetishes: [] } 
-      })),
-      import('../data/story-scenes-unified.json').catch(() => ({ 
-        default: { scenes: [], config: {} } 
-      })),
-      import('../data/users-unified.json').catch(() => ({ 
-        default: { users: [], config: {} } 
-      })),
-      import('../data/game-config-unified.json').catch(() => ({ 
-        default: {} 
-      })),
-      import('../data/market.json').catch(() => ({ 
-        default: { talentExchange: [], voidRescues: [], corporateContracts: [] } 
-      })),
-      import('../data/assets-from-characters.json').catch(() => ({ 
-        default: [] 
-      }))
+    console.log('⏰ Текущее время:', new Date().toISOString())
+
+    // Загружаем реальные данные из JSON файлов
+    console.log('📂 Загружаем данные из JSON файлов...')
+
+    const [charactersData, usersData, equipmentData, gameUnifiedData] = await Promise.all([
+      import('../data/characters-unified.json'),
+      import('../data/users-unified.json'),
+      import('../data/equipment-unified.json'),
+      import('../data/game-config-unified.json').catch(() => null as any)
     ])
-    
-    const config: GameConfig = {
-      characters: charactersData.default,
-      actions: actionsData.default,
-      events: eventsData.default,
-      contracts: contractsData.default,
-      equipment: equipmentData.default,
-      system: systemData.default,
-      storyScenes: storyScenesData.default,
-      users: usersData.default,
-      market: marketData.default,
-      assets: assetsData.default,
-      characterAI: characterAIData.default.characterAI || { 
-        actions: {}, 
-        tools: {}, 
-        poses: {}, 
-        llmPrompts: { 
-          basePrompt: "", 
-          characteristicInterpretations: {}, 
-          fetishResponses: {} 
-        } 
+
+    const realCharacters = charactersData.default.characters || []
+    const realUsers = usersData.default.users || []
+    const realEquipment = equipmentData.default.equipment || []
+
+    console.log('📊 Реальные данные загружены:', {
+      characters: realCharacters.length,
+      users: realUsers.length,
+      equipment: realEquipment.length
+    })
+
+    // Попробуем получить Character AI конфигурацию из объединённого файла,
+    // а если её нет — используем встроенную дефолтную
+    let characterAIFromFile: any = (gameUnifiedData as any)?.default?.characterAI || null
+    if (!characterAIFromFile) {
+      try {
+        const { characterAIConfig } = await import('./character/character-ai-config')
+        characterAIFromFile = characterAIConfig
+      } catch (_) {
+        characterAIFromFile = { actions: {}, tools: {}, poses: {} }
       }
     }
-    
-    // Валидируем конфигурацию
-    const validation = validateUnifiedConfig(config)
-    if (!validation.isValid) {
-      console.warn('⚠️ Проблемы с конфигурацией:', validation.errors)
-    } else {
-      console.log('✅ Конфигурация загружена успешно')
+
+    // Создаем базовую конфигурацию с объединенными данными
+    const config: GameConfig = {
+      characters: realCharacters.length > 0 ? realCharacters : [
+        {
+          id: "test_asset_1",
+          name: "Тестовый Актив 1",
+          archetype: "default",
+          description: "Тестовый персонаж для проверки функциональности",
+          attributes: {
+            physical: { Выносливость: 0.8, Сила: 0.7 },
+            mental: { Интеллект: 0.9, Харизма: 0.6 }
+          },
+          states: { "Настроение": 0.8, "Здоровье": 1.0 },
+          skills: ["test_skill_1"],
+          fetishes: ["test_fetish_1"],
+          statusEffects: [],
+          equippedItems: [],
+          inventory: []
+        }
+      ], // Реальные или тестовые персонажи
+      actions: {}, // (в проде используем characterAI.actions; общий actions пока не требуется)
+      events: [
+        {
+          id: "test_event_1",
+          title: "Тестовое событие",
+          description: "Тестовое событие для проверки",
+          type: "test",
+          effects: []
+        }
+      ], // Тестовые события
+      contracts: [
+        {
+          id: "test_contract_1",
+          title: "Тестовый контракт",
+          description: "Тестовый контракт для проверки",
+          requirements: { skills: {} },
+          rewards: { credits: 100 }
+        }
+      ], // Тестовые контракты
+      equipment: realEquipment.length > 0 ? realEquipment : [
+        {
+          id: "test_equipment_1",
+          name: "Тестовое оборудование",
+          description: "Тестовое оборудование для проверки",
+          type: "tool",
+          category: "general",
+          stats: { power: 50, energyConsumption: 10 },
+          enabled: true,
+          targetTalents: [],
+          powerLevel: 50,
+          maxPowerLevel: 100,
+          mode: "standard",
+          activeMode: "standard",
+          energyConsumption: 10,
+          lastUsed: Date.now(),
+          cooldownTime: 5000
+        }
+      ], // Реальное или тестовое оборудование
+      system: {}, // Заглушка для system
+      storyScenes: {
+        test_scene: {
+          name: "Тестовая сцена",
+          description: "Тестовая сюжетная сцена",
+          value: 50,
+          defaultValue: 50,
+          minValue: 0,
+          maxValue: 100,
+          type: "numeric"
+        }
+      }, // Тестовые сюжетные сцены
+      users: realUsers.length > 0 ? realUsers : [
+        {
+          id: "test_user_1",
+          username: "testuser",
+          role: "user",
+          status: "active",
+          created: "2024-01-01",
+          lastLogin: "2024-01-01",
+          account: { balance: 1000, currency: "credits", transactions: [] },
+          characters: ["test_asset_1"],
+          userEquipment: ["test_equipment_1"]
+        }
+      ], // Реальные или тестовые пользователи
+      market: {}, // Заглушка для рынка
+      assets: [], // Заглушка для активов
+      characterAI: characterAIFromFile
     }
-    
-    // Обновляем кэш
-    configCache = config
-    cacheTimestamp = now
-    
+
+    console.log('✅ Конфигурация создана с объединенными данными')
+
+    // Кэш отключен для отладки
+    // configCache = config
+    // cacheTimestamp = now
+
+    console.log('🎯 Возвращаем конфигурацию')
     return config
   } catch (error) {
     console.error('❌ Ошибка загрузки конфигурации:', error)
+    console.error('📋 Детали ошибки:', error instanceof Error ? error.stack : String(error))
     throw new Error('Не удалось загрузить конфигурацию игры')
   }
 }

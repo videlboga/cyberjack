@@ -11,7 +11,21 @@ interface CharacterPanelProps {
   isVisible: boolean
 }
 
+// Функция для отображения значения характеристики
+const renderCharacteristicValue = (value: number) => {
+  return value === 0 ? '❓' : value
+}
+
+// Функция для отображения прогресса характеристики
+const renderCharacteristicProgress = (value: number) => {
+  return {
+    value: value === 0 ? 0 : value,
+    className: `h-1 ${value === 0 ? 'opacity-30' : ''}`
+  }
+}
+
 export default function CharacterPanel({ talent, isVisible }: CharacterPanelProps) {
+
   const [position, setPosition] = useState(() => {
     // Центрируем панель при первом открытии
     if (typeof window !== 'undefined') {
@@ -140,73 +154,173 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
         {/* Основные характеристики */}
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-gray-300 mb-3">Характеристики</h4>
-          <div className="space-y-2">
-            {/* Атрибуты */}
-            {characterStats?.attributes && (
-              <>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Сила</span>
-                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.strength || 0)}`}>
-                    {characterStats.attributes.strength || 0}
-                  </span>
+          <div className="space-y-3">
+            {/* Физические характеристики */}
+            {characterStats?.attributes?.endurance !== undefined && (
+              <div>
+                <h5 className="text-xs font-medium text-cyan-400 mb-2">Физические</h5>
+                <div className="space-y-1">
+                                                    <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Выносливость</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      {renderCharacteristicValue(characterStats.attributes.endurance)}
+                    </span>
+                  </div>
+                  <Progress {...renderCharacteristicProgress(characterStats.attributes.endurance)} />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Чувствительность</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      {renderCharacteristicValue(characterStats.attributes.sensitivity)}
+                    </span>
+                  </div>
+                  <Progress {...renderCharacteristicProgress(characterStats.attributes.sensitivity)} />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Гибкость</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      {renderCharacteristicValue(characterStats.attributes.flexibility)}
+                    </span>
+                  </div>
+                  <Progress {...renderCharacteristicProgress(characterStats.attributes.flexibility)} />
                 </div>
-                <Progress value={characterStats.attributes.strength || 0} className="h-1" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Эмпатия</span>
-                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.empathy || 0)}`}>
-                    {characterStats.attributes.empathy || 0}
-                  </span>
-                </div>
-                <Progress value={characterStats.attributes.empathy || 0} className="h-1" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Интеллект</span>
-                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.intelligence || 0)}`}>
-                    {characterStats.attributes.intelligence || 0}
-                  </span>
-                </div>
-                <Progress value={characterStats.attributes.intelligence || 0} className="h-1" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Креативность</span>
-                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.creativity || 0)}`}>
-                    {characterStats.attributes.creativity || 0}
-                  </span>
-                </div>
-                <Progress value={characterStats.attributes.creativity || 0} className="h-1" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Темперамент</span>
-                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.temperament || 0)}`}>
-                    {characterStats.attributes.temperament || 0}
-                  </span>
-                </div>
-                <Progress value={characterStats.attributes.temperament || 0} className="h-1" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Стойкость</span>
-                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.grit || 0)}`}>
-                    {characterStats.attributes.grit || 0}
-                  </span>
-                </div>
-                <Progress value={characterStats.attributes.grit || 0} className="h-1" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Эго</span>
-                  <span className={`text-xs font-medium ${getStatColor(characterStats.attributes.ego || 0)}`}>
-                    {characterStats.attributes.ego || 0}
-                  </span>
-                </div>
-                <Progress value={characterStats.attributes.ego || 0} className="h-1" />
-              </>
+              </div>
             )}
-            
-            {/* Состояния */}
-            {characterStats?.states && (
-              <>
-                <Separator className="bg-slate-600 my-2" />
-                <h5 className="text-xs font-semibold text-gray-400 mb-2">Состояния</h5>
+
+            {/* Психологические характеристики */}
+            {characterStats?.attributes?.emotionalStability !== undefined && (
+              <div>
+                <h5 className="text-xs font-medium text-cyan-400 mb-2">Психологические</h5>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Эм. стабильность</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Адаптивность</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Интеллект</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+                </div>
+              </div>
+            )}
+
+            {/* Социальные характеристики */}
+            {characterStats?.attributes?.sociability !== undefined && (
+              <div>
+                <h5 className="text-xs font-medium text-cyan-400 mb-2">Социальные</h5>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Общительность</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Эмпатия</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Доминантность</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+                </div>
+              </div>
+            )}
+
+            {/* Личностные характеристики */}
+            {characterStats?.attributes?.selfEsteem !== undefined && (
+              <div>
+                <h5 className="text-xs font-medium text-cyan-400 mb-2">Личностные</h5>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Самооценка</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Оптимизм</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Любопытство</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+                </div>
+              </div>
+            )}
+
+            {/* Специальные характеристики */}
+            {characterStats?.attributes?.sexualExperience !== undefined && (
+              <div>
+                <h5 className="text-xs font-medium text-cyan-400 mb-2">Специальные</h5>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Секс. опытность</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Сопротивляемость</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Зависимость</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      ❓
+                    </span>
+                  </div>
+                  <Progress value={0} className="h-1 opacity-30" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Состояния */}
+          {characterStats?.states && (
+            <div>
+              <Separator className="bg-slate-600 my-2" />
+              <h5 className="text-xs font-semibold text-gray-400 mb-2">Состояния</h5>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-400">Настроение</span>
@@ -239,9 +353,8 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
                   </span>
                 </div>
                 <Progress value={characterStats.states.engagement || 0} className="h-1" />
-              </>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <Separator className="bg-slate-600 mb-4" />

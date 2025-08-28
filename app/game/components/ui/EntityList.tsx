@@ -9,16 +9,19 @@ import { searchInConfig, getConfigStats } from '../../utils/configHelpers'
 
 export interface EntityListProps {
   entities: any[]
-  entityType: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action' | 'asset' | 'user'
+  entityType: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action' | 'asset' | 'character' | 'user'
   configType: keyof typeof searchInConfig
   onEdit?: (entity: any) => void
   onDelete?: (entityId: string) => void
   onView?: (entity: any) => void
   onManageAssets?: (user: any) => void
+  onAnalyze?: (character: any) => void
+  onViewKnowledge?: (user: any) => void // Просмотр знаний пользователя
   onAdd?: () => void
   title?: string
   className?: string
   showActions?: boolean
+  currentUser?: any // Текущий пользователь для отображения его знаний
 }
 
 export const EntityList: React.FC<EntityListProps> = ({
@@ -29,10 +32,13 @@ export const EntityList: React.FC<EntityListProps> = ({
   onDelete,
   onView,
   onManageAssets,
+  onAnalyze,
+  onViewKnowledge,
   onAdd,
   title,
   className = "",
-  showActions = true
+  showActions = true,
+  currentUser
 }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
@@ -293,8 +299,11 @@ export const EntityList: React.FC<EntityListProps> = ({
               onDelete={onDelete}
               onView={onView}
               onManageAssets={onManageAssets}
+              onAnalyze={onAnalyze}
+              onViewKnowledge={onViewKnowledge}
               showActions={showActions}
               className={viewMode === 'list' ? 'flex-row items-center' : ''}
+              currentUser={currentUser}
             />
           ))}
         </div>

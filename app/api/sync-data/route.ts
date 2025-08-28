@@ -148,6 +148,7 @@ export async function POST(request: NextRequest) {
             console.log(`🔄 API: Обрабатываем пользователя ${user.id}`)
             console.log(`   - Characters: ${user.characters?.length || 0}`)
             console.log(`   - UserEquipment: ${user.userEquipment?.length || 0} [${user.userEquipment?.join(', ') || 'пусто'}]`)
+            console.log(`   - CharacterKnowledge: ${Object.keys(user.characterKnowledge || {}).length} персонажей`)
 
             return {
               id: user.id,
@@ -179,7 +180,8 @@ export async function POST(request: NextRequest) {
                 autoSave: true,
                 soundEnabled: true,
                 animationsEnabled: true
-              }
+              },
+              characterKnowledge: user.characterKnowledge || {}
             }
           })
         }

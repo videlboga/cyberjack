@@ -3,11 +3,10 @@
     {
       "id": "user-1755903020796-1",
       "username": "videlboga",
-      "email": "videlboga@example.com",
       "role": "user",
       "status": "active",
       "created": "2025-08-22",
-      "lastLogin": "2025-08-27",
+      "lastLogin": "2025-08-28",
       "account": {
         "balance": 5000,
         "currency": "credits",
@@ -17,15 +16,15 @@
         "asset_3"
       ],
       "userEquipment": [
-        "neuro-enhancer"
+        "shibari-chest-binding"
       ],
       "attributes": {},
       "stats": {},
       "assets": [
         {
           "assetId": "asset_3",
-          "name": "Анна (Анечка)",
-          "acquired": "2025-08-27T13:18:59.465Z",
+          "name": "Анечка",
+          "acquired": "2025-08-28T23:12:10.718Z",
           "status": "active",
           "location": "inventory",
           "currentAssignment": null
@@ -33,11 +32,11 @@
       ],
       "equipment": [
         {
-          "itemId": "neuro-enhancer",
-          "name": "Нейроусилитель",
+          "itemId": "shibari-chest-binding",
+          "name": "Классическая обвязка груди",
           "type": "device",
-          "slot": "neural",
-          "installed": "2025-08-27T18:29:28.515Z",
+          "slot": "body",
+          "installed": "2025-08-28T23:12:17.475Z",
           "status": "active"
         }
       ],
@@ -51,7 +50,8 @@
         "autoSave": true,
         "soundEnabled": true,
         "animationsEnabled": true
-      }
+      },
+      "characterKnowledge": {}
     }
   ],
   "userRoles": {

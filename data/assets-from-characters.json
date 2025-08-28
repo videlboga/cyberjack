@@ -11,23 +11,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 4,
-        "sensitivity": 9,
-        "flexibility": 8,
-        "emotional_stability": 7,
-        "adaptability": 8,
-        "intelligence": 8,
-        "sociability": 7,
-        "empathy": 9,
-        "dominance": 2,
-        "self_esteem": 6,
-        "optimism": 8,
-        "curiosity": 9,
-        "sexual_experience": 2,
-        "resistance": 2,
-        "dependency": 8
-      },
       "skills": {
         "maid": 3,
         "cooking": 3,
@@ -86,6 +69,33 @@
         "category": "Образовательные учреждения",
         "archetype": "Чувственный художник",
         "source_file": "Алексей_Феминный_Студент.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 4,
+          "Чувствительность": 9,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 7,
+          "Адаптивность": 8,
+          "Интеллект": 8
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 8,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 2,
+          "Зависимость": 8
+        }
       }
     },
     {
@@ -99,23 +109,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 6,
-        "sensitivity": 10,
-        "flexibility": 9,
-        "emotional_stability": 5,
-        "adaptability": 8,
-        "intelligence": 7,
-        "sociability": 6,
-        "empathy": 5,
-        "dominance": 3,
-        "self_esteem": 4,
-        "optimism": 6,
-        "curiosity": 8,
-        "sexual_experience": 2,
-        "resistance": 3,
-        "dependency": 8
-      },
       "skills": {
         "maid": 2,
         "cooking": 2,
@@ -172,6 +165,33 @@
         "category": "Искусственно созданные",
         "archetype": "Идеальный образец",
         "source_file": "Альфа_001.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 10,
+          "Гибкость": 9
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 5,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 5,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 4,
+          "Оптимизм": 6,
+          "Любопытство": 8
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 3,
+          "Зависимость": 8
+        }
       }
     },
     {
@@ -185,23 +205,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 4,
-        "sensitivity": 9,
-        "flexibility": 8,
-        "emotional_stability": 6,
-        "adaptability": 7,
-        "intelligence": 6,
-        "sociability": 8,
-        "empathy": 9,
-        "dominance": 2,
-        "self_esteem": 5,
-        "optimism": 8,
-        "curiosity": 9,
-        "sexual_experience": 1,
-        "resistance": 2,
-        "dependency": 9
-      },
       "skills": {
         "maid": 1,
         "cooking": 2,
@@ -265,6 +268,33 @@
         "category": "Выходцы из трущоб",
         "archetype": "Невинная овечка",
         "source_file": "Анечка_Невинная_Овечка.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 4,
+          "Чувствительность": 9,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 7,
+          "Интеллект": 6
+        },
+        "social": {
+          "Общительность": 8,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 8,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 1,
+          "Сопротивляемость": 2,
+          "Зависимость": 9
+        }
       }
     },
     {
@@ -278,23 +308,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 8,
-        "sensitivity": 5,
-        "flexibility": 6,
-        "emotional_stability": 3,
-        "adaptability": 4,
-        "intelligence": 5,
-        "sociability": 4,
-        "empathy": 2,
-        "dominance": 7,
-        "self_esteem": 6,
-        "optimism": 3,
-        "curiosity": 4,
-        "sexual_experience": 6,
-        "resistance": 7,
-        "dependency": 4
-      },
       "skills": {
         "maid": 3,
         "cooking": 3,
@@ -349,6 +362,33 @@
         "category": "Обитатели станции",
         "archetype": "Карма",
         "source_file": "Анна_Козлова.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 8,
+          "Чувствительность": 5,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 3,
+          "Адаптивность": 4,
+          "Интеллект": 5
+        },
+        "social": {
+          "Общительность": 4,
+          "Эмпатия": 2,
+          "Доминантность": 7
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 3,
+          "Любопытство": 4
+        },
+        "special": {
+          "Сексуальная опытность": 6,
+          "Сопротивляемость": 7,
+          "Зависимость": 4
+        }
       }
     },
     {
@@ -362,23 +402,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 6,
-        "sensitivity": 7,
-        "flexibility": 8,
-        "emotional_stability": 4,
-        "adaptability": 8,
-        "intelligence": 7,
-        "sociability": 9,
-        "empathy": 8,
-        "dominance": 5,
-        "self_esteem": 6,
-        "optimism": 5,
-        "curiosity": 7,
-        "sexual_experience": 7,
-        "resistance": 5,
-        "dependency": 6
-      },
       "skills": {
         "maid": 2,
         "cooking": 2,
@@ -432,6 +455,33 @@
         "category": "Бывшие знаменитости",
         "archetype": "Падшая звезда",
         "source_file": "Артём_Актёр.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 7,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 4,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 9,
+          "Эмпатия": 8,
+          "Доминантность": 5
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 5,
+          "Любопытство": 7
+        },
+        "special": {
+          "Сексуальная опытность": 7,
+          "Сопротивляемость": 5,
+          "Зависимость": 6
+        }
       }
     },
     {
@@ -445,23 +495,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 7,
-        "sensitivity": 6,
-        "flexibility": 6,
-        "emotional_stability": 7,
-        "adaptability": 8,
-        "intelligence": 9,
-        "sociability": 6,
-        "empathy": 5,
-        "dominance": 7,
-        "self_esteem": 7,
-        "optimism": 6,
-        "curiosity": 9,
-        "sexual_experience": 6,
-        "resistance": 6,
-        "dependency": 5
-      },
       "skills": {
         "maid": 1,
         "cooking": 1,
@@ -518,6 +551,33 @@
         "category": "Бывшие сотрудники станции",
         "archetype": "Научный экспериментатор",
         "source_file": "Виктор_Злодей_Лаборант.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 7,
+          "Чувствительность": 6,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 7,
+          "Адаптивность": 8,
+          "Интеллект": 9
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 5,
+          "Доминантность": 7
+        },
+        "personality": {
+          "Самооценка": 7,
+          "Оптимизм": 6,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 6,
+          "Сопротивляемость": 6,
+          "Зависимость": 5
+        }
       }
     },
     {
@@ -531,23 +591,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 5,
-        "sensitivity": 7,
-        "flexibility": 4,
-        "emotional_stability": 6,
-        "adaptability": 8,
-        "intelligence": 9,
-        "sociability": 6,
-        "empathy": 5,
-        "dominance": 3,
-        "self_esteem": 6,
-        "optimism": 7,
-        "curiosity": 9,
-        "sexual_experience": 2,
-        "resistance": 3,
-        "dependency": 7
-      },
       "skills": {
         "maid": 1,
         "cooking": 1,
@@ -604,6 +647,33 @@
         "category": "Корпоративный мир",
         "archetype": "Любопытный программист",
         "source_file": "Дмитрий_Гик.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 7,
+          "Гибкость": 4
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 8,
+          "Интеллект": 9
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 5,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 7,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 3,
+          "Зависимость": 7
+        }
       }
     },
     {
@@ -617,23 +687,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 6,
-        "sensitivity": 7,
-        "flexibility": 5,
-        "emotional_stability": 4,
-        "adaptability": 7,
-        "intelligence": 9,
-        "sociability": 6,
-        "empathy": 9,
-        "dominance": 3,
-        "self_esteem": 5,
-        "optimism": 4,
-        "curiosity": 8,
-        "sexual_experience": 4,
-        "resistance": 5,
-        "dependency": 6
-      },
       "skills": {
         "maid": 2,
         "cooking": 1,
@@ -686,6 +739,33 @@
         "category": "Обитатели станции",
         "archetype": "Падший ангел",
         "source_file": "Елена_Соколова.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 7,
+          "Гибкость": 5
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 4,
+          "Адаптивность": 7,
+          "Интеллект": 9
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 9,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 4,
+          "Любопытство": 8
+        },
+        "special": {
+          "Сексуальная опытность": 4,
+          "Сопротивляемость": 5,
+          "Зависимость": 6
+        }
       }
     },
     {
@@ -699,23 +779,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 5,
-        "sensitivity": 9,
-        "flexibility": 6,
-        "emotional_stability": 2,
-        "adaptability": 6,
-        "intelligence": 7,
-        "sociability": 7,
-        "empathy": 10,
-        "dominance": 2,
-        "self_esteem": 4,
-        "optimism": 5,
-        "curiosity": 6,
-        "sexual_experience": 3,
-        "resistance": 3,
-        "dependency": 8
-      },
       "skills": {
         "maid": 2,
         "cooking": 3,
@@ -769,6 +832,33 @@
         "category": "Найденные в аномалии",
         "archetype": "Эмпатическое зеркало",
         "source_file": "Зеркало_Мила.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 9,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 2,
+          "Адаптивность": 6,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 10,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 4,
+          "Оптимизм": 5,
+          "Любопытство": 6
+        },
+        "special": {
+          "Сексуальная опытность": 3,
+          "Сопротивляемость": 3,
+          "Зависимость": 8
+        }
       }
     },
     {
@@ -782,23 +872,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 8,
-        "sensitivity": 7,
-        "flexibility": 8,
-        "emotional_stability": 6,
-        "adaptability": 10,
-        "intelligence": 7,
-        "sociability": 6,
-        "empathy": 6,
-        "dominance": 4,
-        "self_esteem": 5,
-        "optimism": 6,
-        "curiosity": 7,
-        "sexual_experience": 5,
-        "resistance": 6,
-        "dependency": 6
-      },
       "skills": {
         "maid": 2,
         "cooking": 3,
@@ -857,6 +930,33 @@
         "category": "Выходцы из трущоб",
         "archetype": "Адаптивная выживальщица",
         "source_file": "Катя_Крыса.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 8,
+          "Чувствительность": 7,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 10,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 6,
+          "Доминантность": 4
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 6,
+          "Любопытство": 7
+        },
+        "special": {
+          "Сексуальная опытность": 5,
+          "Сопротивляемость": 6,
+          "Зависимость": 6
+        }
       }
     },
     {
@@ -870,23 +970,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 4,
-        "sensitivity": 9,
-        "flexibility": 8,
-        "emotional_stability": 7,
-        "adaptability": 8,
-        "intelligence": 7,
-        "sociability": 8,
-        "empathy": 9,
-        "dominance": 2,
-        "self_esteem": 8,
-        "optimism": 10,
-        "curiosity": 9,
-        "sexual_experience": 1,
-        "resistance": 2,
-        "dependency": 9
-      },
       "skills": {
         "maid": 3,
         "cooking": 2,
@@ -946,6 +1029,33 @@
         "category": "Выходцы из трущоб",
         "archetype": "Романтическая принцесса",
         "source_file": "Лиза_Мечтательница.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 4,
+          "Чувствительность": 9,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 7,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 8,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 8,
+          "Оптимизм": 10,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 1,
+          "Сопротивляемость": 2,
+          "Зависимость": 9
+        }
       }
     },
     {
@@ -959,23 +1069,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 7,
-        "sensitivity": 8,
-        "flexibility": 5,
-        "emotional_stability": 6,
-        "adaptability": 7,
-        "intelligence": 5,
-        "sociability": 6,
-        "empathy": 9,
-        "dominance": 3,
-        "self_esteem": 5,
-        "optimism": 6,
-        "curiosity": 4,
-        "sexual_experience": 4,
-        "resistance": 4,
-        "dependency": 7
-      },
       "skills": {
         "maid": 2,
         "cooking": 3,
@@ -1031,6 +1124,33 @@
         "category": "Выходцы из трущоб",
         "archetype": "Мать-защитница",
         "source_file": "Мария_Сирота.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 7,
+          "Чувствительность": 8,
+          "Гибкость": 5
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 7,
+          "Интеллект": 5
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 9,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 6,
+          "Любопытство": 4
+        },
+        "special": {
+          "Сексуальная опытность": 4,
+          "Сопротивляемость": 4,
+          "Зависимость": 7
+        }
       }
     },
     {
@@ -1044,23 +1164,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 5,
-        "sensitivity": 6,
-        "flexibility": 8,
-        "emotional_stability": 6,
-        "adaptability": 7,
-        "intelligence": 8,
-        "sociability": 7,
-        "empathy": 6,
-        "dominance": 4,
-        "self_esteem": 6,
-        "optimism": 8,
-        "curiosity": 10,
-        "sexual_experience": 1,
-        "resistance": 4,
-        "dependency": 5
-      },
       "skills": {
         "maid": 1,
         "cooking": 3,
@@ -1119,6 +1222,33 @@
         "category": "Выходцы из трущоб",
         "archetype": "Любопытный исследователь",
         "source_file": "Миша_Любопытный.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 6,
+          "Гибкость": 8
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 7,
+          "Интеллект": 8
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 6,
+          "Доминантность": 4
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 8,
+          "Любопытство": 10
+        },
+        "special": {
+          "Сексуальная опытность": 1,
+          "Сопротивляемость": 4,
+          "Зависимость": 5
+        }
       }
     },
     {
@@ -1132,23 +1262,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 5,
-        "sensitivity": 6,
-        "flexibility": 6,
-        "emotional_stability": 5,
-        "adaptability": 7,
-        "intelligence": 7,
-        "sociability": 8,
-        "empathy": 5,
-        "dominance": 4,
-        "self_esteem": 6,
-        "optimism": 5,
-        "curiosity": 8,
-        "sexual_experience": 4,
-        "resistance": 4,
-        "dependency": 5
-      },
       "skills": {
         "maid": 2,
         "cooking": 2,
@@ -1201,6 +1314,33 @@
         "category": "Корпоративный мир",
         "archetype": "Тёмная фея",
         "source_file": "Ольга_Секретарша.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 6,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 5,
+          "Адаптивность": 7,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 8,
+          "Эмпатия": 5,
+          "Доминантность": 4
+        },
+        "personality": {
+          "Самооценка": 6,
+          "Оптимизм": 5,
+          "Любопытство": 8
+        },
+        "special": {
+          "Сексуальная опытность": 4,
+          "Сопротивляемость": 4,
+          "Зависимость": 5
+        }
       }
     },
     {
@@ -1214,23 +1354,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 5,
-        "sensitivity": 9,
-        "flexibility": 7,
-        "emotional_stability": 6,
-        "adaptability": 8,
-        "intelligence": 8,
-        "sociability": 6,
-        "empathy": 8,
-        "dominance": 3,
-        "self_esteem": 5,
-        "optimism": 7,
-        "curiosity": 9,
-        "sexual_experience": 2,
-        "resistance": 4,
-        "dependency": 6
-      },
       "skills": {
         "maid": 3,
         "cooking": 1,
@@ -1289,6 +1412,33 @@
         "category": "Найденные в аномалии",
         "archetype": "Игривая невидимка",
         "source_file": "Призрак_Алиса.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 9,
+          "Гибкость": 7
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 8,
+          "Интеллект": 8
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 8,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 7,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 2,
+          "Сопротивляемость": 4,
+          "Зависимость": 6
+        }
       }
     },
     {
@@ -1302,23 +1452,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 5,
-        "sensitivity": 9,
-        "flexibility": 6,
-        "emotional_stability": 6,
-        "adaptability": 8,
-        "intelligence": 7,
-        "sociability": 7,
-        "empathy": 6,
-        "dominance": 3,
-        "self_esteem": 5,
-        "optimism": 7,
-        "curiosity": 9,
-        "sexual_experience": 5,
-        "resistance": 3,
-        "dependency": 8
-      },
       "skills": {
         "maid": 2,
         "cooking": 2,
@@ -1377,6 +1510,33 @@
         "category": "Выходцы из трущоб",
         "archetype": "Искатель ощущений",
         "source_file": "Сергей_Наркоман.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 5,
+          "Чувствительность": 9,
+          "Гибкость": 6
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 6,
+          "Адаптивность": 8,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 7,
+          "Эмпатия": 6,
+          "Доминантность": 3
+        },
+        "personality": {
+          "Самооценка": 5,
+          "Оптимизм": 7,
+          "Любопытство": 9
+        },
+        "special": {
+          "Сексуальная опытность": 5,
+          "Сопротивляемость": 3,
+          "Зависимость": 8
+        }
       }
     },
     {
@@ -1390,23 +1550,6 @@
       "status": "available",
       "owner": null,
       "location": "talent_exchange",
-      "attributes": {
-        "endurance": 6,
-        "sensitivity": 8,
-        "flexibility": 7,
-        "emotional_stability": 3,
-        "adaptability": 5,
-        "intelligence": 7,
-        "sociability": 6,
-        "empathy": 9,
-        "dominance": 2,
-        "self_esteem": 4,
-        "optimism": 7,
-        "curiosity": 6,
-        "sexual_experience": 3,
-        "resistance": 3,
-        "dependency": 7
-      },
       "skills": {
         "maid": 3,
         "cooking": 3,
@@ -1462,6 +1605,33 @@
         "category": "Найденные в аномалии",
         "archetype": "Падший ангел",
         "source_file": "Эхо_Лилия_Лилит.md"
+      },
+      "characteristics": {
+        "physical": {
+          "Выносливость": 6,
+          "Чувствительность": 8,
+          "Гибкость": 7
+        },
+        "psychological": {
+          "Эмоциональная стабильность": 3,
+          "Адаптивность": 5,
+          "Интеллект": 7
+        },
+        "social": {
+          "Общительность": 6,
+          "Эмпатия": 9,
+          "Доминантность": 2
+        },
+        "personality": {
+          "Самооценка": 4,
+          "Оптимизм": 7,
+          "Любопытство": 6
+        },
+        "special": {
+          "Сексуальная опытность": 3,
+          "Сопротивляемость": 3,
+          "Зависимость": 7
+        }
       }
     }
   ]

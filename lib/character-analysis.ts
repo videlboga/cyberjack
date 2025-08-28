@@ -11,6 +11,8 @@ import {
   AnalysisSession
 } from './unified-entities'
 
+import { ANALYSIS_TOOLS, type AnalysisTool, type AnalysisToolType } from './analysis-tools'
+
 // ===== КОНСТАНТЫ АНАЛИЗА =====
 
 export const ANALYSIS_METHODS: Record<AnalysisMethod, AnalysisMethodInfo> = {
@@ -97,33 +99,41 @@ export function initializeHiddenCharacteristics(attributes: CharacterAttributes)
     level: 'unknown'
   })
 
-  return {
-    physical: {
-      Выносливость: createUnknownKnowledge(),
-      Чувствительность: createUnknownKnowledge(),
-      Гибкость: createUnknownKnowledge()
-    },
-    psychological: {
-      "Эмоциональная стабильность": createUnknownKnowledge(),
-      Адаптивность: createUnknownKnowledge(),
-      Интеллект: createUnknownKnowledge()
-    },
-    social: {
-      Общительность: createUnknownKnowledge(),
-      Эмпатия: createUnknownKnowledge(),
-      Доминантность: createUnknownKnowledge()
-    },
-    personality: {
-      Самооценка: createUnknownKnowledge(),
-      Оптимизм: createUnknownKnowledge(),
-      Любопытство: createUnknownKnowledge()
-    },
-    special: {
-      "Сексуальная опытность": createUnknownKnowledge(),
-      Сопротивляемость: createUnknownKnowledge(),
-      Зависимость: createUnknownKnowledge()
-    }
+  const result: any = {}
+
+  // Инициализируем знания для всех категорий характеристик
+  if (attributes.physical) {
+    result.physical = {}
+    Object.keys(attributes.physical).forEach(key => {
+      result.physical[key] = createUnknownKnowledge()
+    })
   }
+  if (attributes.psychological) {
+    result.psychological = {}
+    Object.keys(attributes.psychological).forEach(key => {
+      result.psychological[key] = createUnknownKnowledge()
+    })
+  }
+  if (attributes.social) {
+    result.social = {}
+    Object.keys(attributes.social).forEach(key => {
+      result.social[key] = createUnknownKnowledge()
+    })
+  }
+  if (attributes.personality) {
+    result.personality = {}
+    Object.keys(attributes.personality).forEach(key => {
+      result.personality[key] = createUnknownKnowledge()
+    })
+  }
+  if (attributes.special) {
+    result.special = {}
+    Object.keys(attributes.special).forEach(key => {
+      result.special[key] = createUnknownKnowledge()
+    })
+  }
+
+  return result as CharacterAttributeKnowledge
 }
 
 /**
@@ -223,6 +233,10 @@ export function createAnalysisSession(
   method: AnalysisMethod
 ): AnalysisSession {
   const methodInfo = ANALYSIS_METHODS[method]
+
+  if (!methodInfo) {
+    throw new Error(`Unknown analysis method: ${method}`)
+  }
 
   return {
     id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

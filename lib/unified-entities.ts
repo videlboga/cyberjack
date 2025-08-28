@@ -83,31 +83,23 @@ export interface CharacteristicKnowledge {
   analysisMethod?: AnalysisMethod
 }
 
+// Знания игрока о конкретном персонаже
+export interface PlayerCharacterKnowledge {
+  characterId: string
+  knowledge: CharacterAttributeKnowledge
+  analysisHistory: AnalysisSession[]
+  lastAnalyzed?: Date
+  analysisCount?: number
+}
+
+// Знания игрока обо всех персонажах
+export interface PlayerKnowledge {
+  [characterId: string]: PlayerCharacterKnowledge
+}
+
 export interface CharacterAttributeKnowledge {
-  physical: {
-    Выносливость: CharacteristicKnowledge
-    Чувствительность: CharacteristicKnowledge
-    Гибкость: CharacteristicKnowledge
-  }
-  psychological: {
-    "Эмоциональная стабильность": CharacteristicKnowledge
-    Адаптивность: CharacteristicKnowledge
-    Интеллект: CharacteristicKnowledge
-  }
-  social: {
-    Общительность: CharacteristicKnowledge
-    Эмпатия: CharacteristicKnowledge
-    Доминантность: CharacteristicKnowledge
-  }
-  personality: {
-    Самооценка: CharacteristicKnowledge
-    Оптимизм: CharacteristicKnowledge
-    Любопытство: CharacteristicKnowledge
-  }
-  special: {
-    "Сексуальная опытность": CharacteristicKnowledge
-    Сопротивляемость: CharacteristicKnowledge
-    Зависимость: CharacteristicKnowledge
+  [key: string]: {
+    [key: string]: CharacteristicKnowledge
   }
 }
 
@@ -209,6 +201,29 @@ export interface CharacterFetishes {
   breath_play: number            // Ограничение дыхания
   extreme_pain: number           // Экстремальная боль
   transformation: number         // Трансформация тела
+
+  // ===== ДОПОЛНИТЕЛЬНЫЕ ФЕТИШИ ИЗ OBSIDIAN =====
+  // Новые сенсорные фетиши
+  scent: number                  // Фетиш запахов
+  taste: number                  // Фетиш вкусов
+  texture: number                // Фетиш текстур
+
+  // Новые телесные фетиши
+  hair: number                   // Фетиш волос
+  eyes: number                   // Фетиш глаз
+  lips: number                   // Фетиш губ
+  nails: number                  // Фетиш ногтей
+
+  // Новые психологические фетиши
+  obedience: number              // Повиновение и послушание
+  defiance: number               // Неповиновение и сопротивление
+  teasing: number                // Дразнение и провокация
+  anticipation: number           // Предвкушение и ожидание
+
+  // Новые социальные фетиши
+  authority: number              // Авторитет и власть
+  equality: number               // Равенство и партнерство
+  rivalry: number                // Соперничество и конкуренция
 
   // ===== ГРУППОВЫЕ И СПЕЦИАЛЬНЫЕ ФЕТИШИ =====
   group_sex: number              // Групповой секс
