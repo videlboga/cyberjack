@@ -2564,7 +2564,13 @@
         "devotion": "Преданность",
         "pleasure": "Удовольствие",
         "pain": "Боль",
-        "arousal": "Возбуждение"
+        "arousal": "Возбуждение",
+        "sensitivity": "Чувствительность тела",
+        "comfort": "Комфорт позы",
+        "accessibility": "Доступность тела",
+        "submission": "Подчинение",
+        "surprise": "Удивление",
+        "alertness": "Бдительность"
       },
       "commandKeywords": {
         "hit": [
@@ -2599,7 +2605,39 @@
           "колени",
           "четвереньки"
         ]
-      }
+      },
+      "actionPrompts": {
+        "hit_hand": "ударяю ладонью",
+        "hit_whip": "ударяю плетью",
+        "stroke_hand": "поглаживаю рукой",
+        "stroke_glove": "поглаживаю пушистой перчаткой",
+        "tickle_brush": "щекочу щёткой",
+        "tickle_feather": "щекочу пером",
+        "lick": "лизну",
+        "penetrate": "вставляю член"
+      },
+      "toolPrompts": {
+        "shocker": "прикасаюсь шокером",
+        "vibrator": "прикасаюсь вибратором",
+        "ice_cube": "прикасаюсь ледяным кубиком",
+        "hot_wax": "капаю горячим воском",
+        "clamps": "закрепляю зажимы"
+      },
+      "areaPrompts": {
+        "head": "голову",
+        "neck": "шею",
+        "chest": "грудь",
+        "stomach": "живот",
+        "arms": "руки",
+        "hands": "ладони",
+        "thighs": "бёдра",
+        "feet": "ступни",
+        "back": "спину",
+        "butt": "ягодицы",
+        "genitals": "гениталии",
+        "full_body": "всё тело"
+      },
+      "responseTemplate": "Он {actionPrompt} мне {areaPrompt}. Я чувствую {statChanges}."
     }
   }
 }

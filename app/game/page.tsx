@@ -108,7 +108,7 @@ const NexusEnslaverGame = () => {
 
         // Нормализуем под ожидаемую dev-структуру UI (вложенные разделы)
         const normalized = {
-          assets: { assets: Array.isArray((loadedConfigs as any)?.assets?.assets) ? (loadedConfigs as any).assets.assets : [] },
+          assets: { assets: Array.isArray((loadedConfigs as any)?.characters) ? (loadedConfigs as any).characters : [] },
           actions: { categories: (loadedConfigs as any)?.actions?.categories || {} },
           contracts: { available: Array.isArray((loadedConfigs as any)?.contracts) ? (loadedConfigs as any).contracts : ((loadedConfigs as any)?.contracts?.available || []) },
           events: {
@@ -780,10 +780,7 @@ const NexusEnslaverGame = () => {
         }
         return actionsList
       case 'assets':
-        // Для активов - возвращаем список из assets.json; если пусто, используем персонажей как источник активов
-        const assetsList = Array.isArray(config?.assets) ? config.assets.filter((asset: any) => !asset.deleted) : []
-        if (assetsList.length > 0) return assetsList
-        // Fallback: берем из characters-unified.json
+        // Для активов - используем персонажей из unified-конфига
         const charactersCfg = (managedConfigs as any)?.characters
         const charactersArr: any[] = Array.isArray(charactersCfg?.characters) ? charactersCfg.characters : []
         return charactersArr

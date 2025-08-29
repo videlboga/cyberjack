@@ -319,7 +319,8 @@ export default function TalentArchitectProd() {
     characterFetishes: selectedTalent?.affinities || {},
     userEquipment: selectedTalent?.equippedItems?.map(item => item.id) || [],
     currentPose: "standing_normal",
-    geminiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY
+    geminiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+    onSendMessage: sendMessageToLLM
   })
 
   // (удалено дублирующее объявление useUnifiedConfig)

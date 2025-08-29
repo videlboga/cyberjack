@@ -21,6 +21,7 @@ interface UseCharacterAIProps {
   userEquipment: string[];
   currentPose: string;
   geminiApiKey?: string;
+  onSendMessage?: (message: string) => void;
 }
 
 interface UseCharacterAIReturn {
@@ -68,7 +69,8 @@ export function useCharacterAI({
   characterFetishes,
   userEquipment,
   currentPose: initialPose,
-  geminiApiKey
+  geminiApiKey,
+  onSendMessage
 }: UseCharacterAIProps): UseCharacterAIReturn {
   const [currentPose, setCurrentPose] = useState(initialPose);
   const [poseHistory, setPoseHistory] = useState<Array<{ poseId: string; timestamp: number; reason: string }>>([]);
@@ -120,6 +122,51 @@ export function useCharacterAI({
     }, duration * 1000);
   }, []);
 
+  // Универсальная агрегация эффектов -> плоские изменения статов
+  const aggregateEffects = (effects: any, multiplier: number): Record<string, number> => {
+    const result: Record<string, number> = {}
+    if (!effects) return result
+    const stack = [{ key: '', value: effects }]
+    while (stack.length) {
+      const { key, value } = stack.pop() as any
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        for (const [k, v] of Object.entries(value)) {
+          stack.push({ key: key ? `${key}.${k}` : k, value: v })
+        }
+      } else if (typeof value === 'number') {
+        // храним по конечному ключу (последний сегмент)
+        const flatKey = key.split('.').pop() as string
+        result[flatKey] = (result[flatKey] || 0) + value * multiplier
+      }
+    }
+    return result
+  }
+
+  // Форматирование сообщения для чата
+  const formatChatMessage = useCallback((actionPrompt: string, areaPrompt: string, statChanges: Record<string, number>): string => {
+    const llmPrompts = characterAIConfig.llmPrompts
+    if (!llmPrompts?.responseTemplate) {
+      return `${actionPrompt} ${areaPrompt}.`
+    }
+
+    const statDescriptions: string[] = []
+    for (const [stat, change] of Object.entries(statChanges)) {
+      if (change !== 0) {
+        const interpretation = llmPrompts.characteristicInterpretations?.[stat] || stat
+        const sign = change > 0 ? '+' : ''
+        statDescriptions.push(`${interpretation} ${sign}${change}`)
+      }
+    }
+
+    const statChangesText = statDescriptions.length > 0 ? statDescriptions.join(', ') : 'незначительные изменения'
+    const template = llmPrompts.responseTemplate
+      .replace('{actionPrompt}', actionPrompt)
+      .replace('{areaPrompt}', areaPrompt)
+      .replace('{statChanges}', `я чувствую ${statChangesText}`)
+
+    return template
+  }, [characterAIConfig.llmPrompts])
+
   // Выполнение действия
   const executeAction = useCallback(async (actionId: string, intensity: number, area?: string) => {
     const action = characterAIConfig.actions[actionId];
@@ -140,10 +187,22 @@ export function useCharacterAI({
     }
 
     setLastAction(actionId);
-    
-    // Здесь можно добавить логику применения эффектов действия
 
-  }, [characterAIConfig.actions, setCooldown]);
+    // Применяем эффекты (мультипликатор завязываем на интенсивность 1..10)
+    const multiplier = Math.max(1, Math.min(10, intensity)) / 10
+    const statChanges = aggregateEffects((action as any).effects, multiplier)
+    console.log('⚡ Применены эффекты действия:', { actionId, intensity, area, statChanges })
+
+    // Отправляем сообщение в чат
+    if (onSendMessage) {
+      const actionPrompt = characterAIConfig.llmPrompts?.actionPrompts?.[actionId] || action.name || actionId
+      const areaPrompt = characterAIConfig.llmPrompts?.areaPrompts?.[area || 'full_body'] || (area || 'всё тело')
+      const chatMessage = formatChatMessage(actionPrompt, areaPrompt, statChanges)
+      console.log('💬 Отправка сообщения в чат:', chatMessage)
+      onSendMessage(chatMessage)
+    }
+
+  }, [characterAIConfig.actions, characterAIConfig.llmPrompts, setCooldown, aggregateEffects, formatChatMessage, onSendMessage]);
 
   // Использование инструмента
   const useTool = useCallback(async (toolId: string, intensity: number, duration: number, area?: string) => {
@@ -165,10 +224,25 @@ export function useCharacterAI({
     }
 
     setLastTool(toolId);
-    
-    // Здесь можно добавить логику применения эффектов инструмента
 
-  }, [characterAIConfig.tools, setCooldown]);
+    // Применяем эффекты инструмента с учетом базовой/макс интенсивности
+    const base = Number((tool as any).baseIntensity ?? 5)
+    const max = Number((tool as any).maxIntensity ?? 10)
+    const clamped = Math.max(1, Math.min(10, intensity))
+    const multiplier = max > 0 ? (clamped / max) : (clamped / 10)
+    const statChanges = aggregateEffects((tool as any).effects, multiplier)
+    console.log('🛠️ Применены эффекты инструмента:', { toolId, intensity: clamped, duration, area, statChanges })
+
+    // Отправляем сообщение в чат
+    if (onSendMessage) {
+      const toolPrompt = characterAIConfig.llmPrompts?.toolPrompts?.[toolId] || tool.name || toolId
+      const areaPrompt = characterAIConfig.llmPrompts?.areaPrompts?.[area || 'full_body'] || (area || 'всё тело')
+      const chatMessage = formatChatMessage(toolPrompt, areaPrompt, statChanges)
+      console.log('💬 Отправка сообщения в чат:', chatMessage)
+      onSendMessage(chatMessage)
+    }
+
+  }, [characterAIConfig.tools, characterAIConfig.llmPrompts, setCooldown, aggregateEffects, formatChatMessage, onSendMessage]);
 
   // Смена позы
   const changePose = useCallback(async (poseId: string, force: boolean = false): Promise<boolean> => {
