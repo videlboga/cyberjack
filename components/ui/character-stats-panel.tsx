@@ -33,6 +33,21 @@ export function CharacterStatsPanel({ talent, isVisible, onClose, onUpdateCharac
   const [hasChanges, setHasChanges] = useState(false)
   const [editedTalent, setEditedTalent] = useState<any>(talent)
 
+  // Переключение режима редактирования
+  const toggleEditMode = () => {
+    if (isEditMode && hasChanges) {
+      // Если есть изменения, спросить о сохранении
+      if (confirm('Есть несохраненные изменения. Сохранить их?')) {
+        handleSave()
+      } else {
+        // Отменить изменения
+        setEditedTalent(talent)
+        setHasChanges(false)
+      }
+    }
+    setIsEditMode(!isEditMode)
+  }
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
     setDragOffset({
@@ -191,8 +206,9 @@ export function CharacterStatsPanel({ talent, isVisible, onClose, onUpdateCharac
   if (!isVisible || !talent) return null;
 
   // Безопасное получение данных с проверками
-  const attributes = editedTalent.attributes || {};
-  const states = editedTalent.states || {};
+  const currentTalent = isEditMode ? editedTalent : talent;
+  const attributes = currentTalent.attributes || {};
+  const states = currentTalent.states || {};
 
   // Эталонная система характеристик согласно документации
   const categories = {
@@ -256,7 +272,7 @@ export function CharacterStatsPanel({ talent, isVisible, onClose, onUpdateCharac
       name: "Фетиши",
       icon: "💋",
       isState: false, // Фетиши по шкале 0-10
-      stats: editedTalent.fetishes || {}
+      stats: currentTalent.fetishes || {}
     }
   };
 
@@ -271,11 +287,18 @@ export function CharacterStatsPanel({ talent, isVisible, onClose, onUpdateCharac
       >
         <div className="flex items-center justify-between flex-1">
           <h3 className="font-semibold text-cyan-400 flex items-center gap-2">
-            <span className="text-2xl">📊</span>
-            <span>Характеристики {editedTalent.name || 'Персонажа'}</span>
+            <span className="text-2xl">{isEditMode ? '✏️' : '📊'}</span>
+            <span>
+              {isEditMode ? 'Редактирование' : 'Характеристики'} {currentTalent.name || 'Персонажа'}
+            </span>
             {hasChanges && (
               <Badge variant="outline" className="text-xs text-orange-400 border-orange-400">
                 Изменения не сохранены
+              </Badge>
+            )}
+            {isEditMode && (
+              <Badge variant="outline" className="text-xs text-green-400 border-green-400">
+                Режим редактирования
               </Badge>
             )}
           </h3>
@@ -305,10 +328,10 @@ export function CharacterStatsPanel({ talent, isVisible, onClose, onUpdateCharac
                 </>
               ) : null}
               <Button
-                onClick={() => setIsEditMode(!isEditMode)}
+                onClick={toggleEditMode}
                 size="sm"
                 variant="ghost"
-                className="h-6 w-6 p-0 text-cyan-400 hover:text-cyan-300"
+                className={`h-6 w-6 p-0 hover:text-cyan-300 ${isEditMode ? 'text-green-400' : 'text-cyan-400'}`}
               >
                 <Edit className="h-3 w-3" />
               </Button>
@@ -396,6 +419,7 @@ export function CharacterStatsPanel({ talent, isVisible, onClose, onUpdateCharac
                             />
                             <div className="flex justify-between text-xs text-muted-foreground mt-1">
                               <span>0</span>
+                              <span className="font-medium text-cyan-400">{numValue}</span>
                               <span>{maxValue}</span>
                             </div>
                           </div>
