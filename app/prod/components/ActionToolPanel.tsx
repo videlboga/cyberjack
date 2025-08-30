@@ -6,12 +6,16 @@ interface ActionToolPanelProps {
   characterAI: any; // Используем any для совместимости с useCharacterAI
   selectedTalent: any; // Используем any для совместимости с Talent
   onClose: () => void;
+  onToolModeChange?: (toolId: string | null, intensity?: number) => void;
+  onActionModeChange?: (actionId: string | null, intensity?: number) => void;
 }
 
 export function ActionToolPanel({
   characterAI,
   selectedTalent,
-  onClose
+  onClose,
+  onToolModeChange,
+  onActionModeChange
 }: ActionToolPanelProps) {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
@@ -58,27 +62,17 @@ export function ActionToolPanel({
     setSelectedTool(tool.id);
   };
 
-  const handleActionExecute = async () => {
-    if (selectedAction && characterAI?.executeAction) {
-      const action = actions[selectedAction];
-      if (action) {
-        await characterAI.executeAction(action.id, actionIntensity[0]);
-        console.log(`Выполнено действие: ${action.name}`);
-        setSelectedAction(null);
-      }
-    }
-  };
+  // убрали отдельные кнопки, выбор карточки включает режим
 
-  const handleToolExecute = async () => {
-    if (selectedTool && characterAI?.useTool) {
-      const tool = tools[selectedTool];
-      if (tool) {
-        await characterAI.useTool(tool.id, toolIntensity[0], toolDuration[0]);
-        console.log(`Использован инструмент: ${tool.name}`);
-        setSelectedTool(null);
-      }
-    }
-  };
+  // Включение/выключение режима инструмента
+  const handleToolToggle = async () => {
+    if (!selectedTool) return
+    const tool = tools[selectedTool]
+    if (!tool) return
+    // Включаем ТОЛЬКО режим (без немедленного применения). Применение начнётся при удержании на зоне.
+    console.log(`Режим инструмента включён: ${tool.name}`)
+    onToolModeChange?.(tool.id, toolIntensity[0])
+  }
 
   const handlePoseClick = async (pose: any) => {
     if (characterAI?.changePose) {
@@ -99,7 +93,7 @@ export function ActionToolPanel({
   })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [activeTab, setActiveTab] = useState('actions')
+  const [activeTab, setActiveTab] = useState('tools')
   const [openCategory, setOpenCategory] = useState<string | null>(null)
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -262,18 +256,18 @@ export function ActionToolPanel({
                       {openCategory === categoryId && (
                         <div className="space-y-2 ml-4">
                         {categoryActions.map(([id, action]: [string, any]) => (
-                          <div key={id} className="p-3 bg-gray-800 rounded border border-gray-600">
+                          <div
+                            key={id}
+                            className={`p-3 bg-gray-800 rounded border hover:bg-gray-700/60 cursor-pointer ${selectedAction === id ? 'border-cyan-500' : 'border-gray-600'}`}
+                            onClick={() => {
+                              console.log(`🎯 Выбор действия: ${action.name} (${id}) с интенсивностью ${actionIntensity[0]}`)
+                              setSelectedAction(id)
+                              onActionModeChange?.(id, actionIntensity[0])
+                              console.log(`✅ Режим действия выбран: ${action.name}`)
+                            }}
+                          >
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-white font-medium">{action.icon} {action.name}</span>
-                              <button
-                                onClick={() => {
-                                  setSelectedAction(id)
-                                  handleActionExecute()
-                                }}
-                                className="px-3 py-1 bg-cyan-600 hover:bg-cyan-700 rounded text-sm"
-                              >
-                                Выполнить
-                              </button>
                             </div>
                             <p className="text-sm text-gray-300">{action.description}</p>
                           </div>
@@ -312,18 +306,18 @@ export function ActionToolPanel({
                       {openCategory === categoryId && (
                         <div className="space-y-2 ml-4">
                         {categoryTools.map(([id, tool]: [string, any]) => (
-                          <div key={id} className="p-3 bg-gray-800 rounded border border-gray-600">
+                          <div
+                            key={id}
+                            className={`p-3 bg-gray-800 rounded border hover:bg-gray-700/60 cursor-pointer ${selectedTool === id ? 'border-purple-500' : 'border-gray-600'}`}
+                            onClick={() => {
+                              console.log(`🎯 Выбор инструмента: ${tool.name} (${id}) с интенсивностью ${toolIntensity[0]}`)
+                              setSelectedTool(id)
+                              onToolModeChange?.(id, toolIntensity[0])
+                              console.log(`✅ Режим инструмента выбран: ${tool.name}`)
+                            }}
+                          >
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-white font-medium">{tool.icon} {tool.name}</span>
-                              <button
-                                onClick={() => {
-                                  setSelectedTool(id)
-                                  handleToolExecute()
-                                }}
-                                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
-                              >
-                                Использовать
-                              </button>
                             </div>
                             <p className="text-sm text-gray-300">{tool.description}</p>
                           </div>

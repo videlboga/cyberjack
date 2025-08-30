@@ -108,7 +108,7 @@ const NexusEnslaverGame = () => {
 
         // Нормализуем под ожидаемую dev-структуру UI (вложенные разделы)
         const normalized = {
-          assets: { assets: Array.isArray((loadedConfigs as any)?.characters) ? (loadedConfigs as any).characters : [] },
+          assets: { assets: Array.isArray((loadedConfigs as any)?.assets?.assets) ? (loadedConfigs as any).assets.assets : [] },
           actions: { categories: (loadedConfigs as any)?.actions?.categories || {} },
           contracts: { available: Array.isArray((loadedConfigs as any)?.contracts) ? (loadedConfigs as any).contracts : ((loadedConfigs as any)?.contracts?.available || []) },
           events: {
@@ -780,7 +780,10 @@ const NexusEnslaverGame = () => {
         }
         return actionsList
       case 'assets':
-        // Для активов - используем персонажей из unified-конфига
+        // Для активов - возвращаем список из assets.json; если пусто, используем персонажей как источник активов
+        const assetsList = Array.isArray(config?.assets) ? config.assets.filter((asset: any) => !asset.deleted) : []
+        if (assetsList.length > 0) return assetsList
+        // Fallback: берем из characters-unified.json
         const charactersCfg = (managedConfigs as any)?.characters
         const charactersArr: any[] = Array.isArray(charactersCfg?.characters) ? charactersCfg.characters : []
         return charactersArr
@@ -932,28 +935,17 @@ const NexusEnslaverGame = () => {
         
         return storyEntities
       case 'system':
-        // Обрабатываем структуру system-definitions.json с категоризацией
+        // Обрабатываем system из разных источников (unified или system-definitions.json)
+        const sys = config ?? (configs as any)?.system ?? {}
+        const attributes = Array.isArray(sys.attributes) ? sys.attributes : ((sys?.definitions?.attributes) || [])
+        const states = Array.isArray(sys.states) ? sys.states : ((sys?.definitions?.states) || [])
+        const fetishes = Array.isArray(sys.fetishes) ? sys.fetishes : ((sys?.definitions?.fetishes) || [])
+        const resources = Array.isArray(sys.resources) ? sys.resources : ((sys?.definitions?.resources) || [])
         const systemList: any[] = []
-        if (config?.attributes) {
-          config.attributes.filter((attr: any) => !attr.deleted).forEach((attr: any) => {
-            systemList.push({ ...attr, type: 'attribute', category: 'attributes' })
-          })
-        }
-        if (config?.states) {
-          config.states.filter((state: any) => !state.deleted).forEach((state: any) => {
-            systemList.push({ ...state, type: 'state', category: 'states' })
-          })
-        }
-        if (config?.fetishes) {
-          config.fetishes.filter((fetish: any) => !fetish.deleted).forEach((fetish: any) => {
-            systemList.push({ ...fetish, type: 'fetish', category: 'fetishes' })
-          })
-        }
-        if (config?.resources) {
-          config.resources.filter((resource: any) => !resource.deleted).forEach((resource: any) => {
-            systemList.push({ ...resource, type: 'resource', category: 'resources' })
-          })
-        }
+        attributes.filter((a: any) => !a?.deleted).forEach((a: any) => systemList.push({ ...a, type: 'attribute', category: 'attributes' }))
+        states.filter((s: any) => !s?.deleted).forEach((s: any) => systemList.push({ ...s, type: 'state', category: 'states' }))
+        fetishes.filter((f: any) => !f?.deleted).forEach((f: any) => systemList.push({ ...f, type: 'fetish', category: 'fetishes' }))
+        resources.filter((r: any) => !r?.deleted).forEach((r: any) => systemList.push({ ...r, type: 'resource', category: 'resources' }))
         return systemList
       default:
         return []

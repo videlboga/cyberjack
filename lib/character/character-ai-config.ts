@@ -12,6 +12,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Легкий шлепок по лицу',
       icon: '👋',
       category: 'physical',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 3 },
       intensity: 3,
       cost: 5,
       effects: {
@@ -30,6 +33,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Шлепок по ягодицам',
       icon: '🍑',
       category: 'physical',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 3 },
       intensity: 4,
       cost: 8,
       effects: {
@@ -48,6 +54,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Удар плетью по телу',
       icon: '⚡',
       category: 'physical',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 2 },
       intensity: 7,
       cost: 15,
       effects: {
@@ -69,6 +78,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Похвалить персонажа',
       icon: '🌟',
       category: 'emotional',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 3 },
       intensity: 2,
       cost: 3,
       effects: {
@@ -83,6 +95,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Унизить персонажа',
       icon: '😔',
       category: 'emotional',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 2 },
       intensity: 5,
       cost: 10,
       effects: {
@@ -102,6 +117,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Нежное поглаживание',
       icon: '💕',
       category: 'intimate',
+      modes: ['click','hold'],
+      effectRate: { perClick: 1, perSecond: 1 },
+      llmTrigger: { seconds: 10 },
       intensity: 2,
       cost: 5,
       effects: {
@@ -119,6 +137,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Страстный поцелуй',
       icon: '💋',
       category: 'intimate',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 2 },
       intensity: 4,
       cost: 8,
       effects: {
@@ -138,6 +159,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Наказать за непослушание',
       icon: '⚡',
       category: 'punishment',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 2 },
       intensity: 6,
       cost: 12,
       effects: {
@@ -158,6 +182,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Наградить за хорошее поведение',
       icon: '🎁',
       category: 'reward',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 3 },
       intensity: 3,
       cost: 6,
       effects: {
@@ -177,6 +204,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Нежное поглаживание для чувствительных персонажей',
       icon: '🤗',
       category: 'gentle',
+      modes: ['click','hold'],
+      effectRate: { perClick: 1, perSecond: 1 },
+      llmTrigger: { seconds: 10 },
       intensity: 2,
       cost: 3,
       effects: {
@@ -196,6 +226,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Похвала в романтическом стиле',
       icon: '🌹',
       category: 'romantic',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 3 },
       intensity: 3,
       cost: 5,
       effects: {
@@ -215,6 +248,9 @@ export const characterAIConfig: CharacterAIConfig = {
       description: 'Вдохновить на творчество',
       icon: '🎨',
       category: 'artistic',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 3 },
       intensity: 4,
       cost: 7,
       effects: {
@@ -233,9 +269,13 @@ export const characterAIConfig: CharacterAIConfig = {
     vibrator: {
       id: 'vibrator',
       name: 'Вибратор',
+      prompt: 'вибрирует',
       description: 'Вибрационное устройство',
       icon: '📳',
       type: 'vibration',
+      modes: ['hold'],
+      effectRate: { perSecond: 1 },
+      llmTrigger: { seconds: 10 },
       intensity: 5,
       duration: 30,
       effects: {
@@ -254,9 +294,13 @@ export const characterAIConfig: CharacterAIConfig = {
     electro_stim: {
       id: 'electro_stim',
       name: 'Электростимулятор',
+      prompt: 'бьёт током',
       description: 'Электрическая стимуляция',
       icon: '⚡',
       type: 'electricity',
+      modes: ['hold'],
+      effectRate: { perSecond: 1 },
+      llmTrigger: { seconds: 10 },
       intensity: 7,
       duration: 20,
       effects: {
@@ -275,9 +319,13 @@ export const characterAIConfig: CharacterAIConfig = {
     ice_cube: {
       id: 'ice_cube',
       name: 'Ледяной кубик',
+      prompt: 'проводит ледяным кубиком',
       description: 'Холодная стимуляция',
       icon: '🧊',
       type: 'temperature',
+      modes: ['hold'],
+      effectRate: { perSecond: 1 },
+      llmTrigger: { seconds: 10 },
       intensity: 4,
       duration: 15,
       effects: {
@@ -294,9 +342,13 @@ export const characterAIConfig: CharacterAIConfig = {
     hot_wax: {
       id: 'hot_wax',
       name: 'Горячий воск',
+      prompt: 'капаeт горячим воском',
       description: 'Горячий воск на кожу',
       icon: '🕯️',
       type: 'temperature',
+      modes: ['click'],
+      effectRate: { perClick: 1 },
+      llmTrigger: { clicks: 2 },
       intensity: 6,
       duration: 25,
       effects: {
@@ -315,9 +367,13 @@ export const characterAIConfig: CharacterAIConfig = {
     pressure_point: {
       id: 'pressure_point',
       name: 'Точка давления',
+      prompt: 'нажимает на чувствительные точки',
       description: 'Давление на чувствительные точки',
       icon: '🖐️',
       type: 'pressure',
+      modes: ['click','hold'],
+      effectRate: { perClick: 1, perSecond: 1 },
+      llmTrigger: { seconds: 10 },
       intensity: 3,
       duration: 10,
       effects: {
@@ -335,9 +391,13 @@ export const characterAIConfig: CharacterAIConfig = {
     feather: {
       id: 'feather',
       name: 'Перо',
+      prompt: 'щекочет пером',
       description: 'Щекотка пером',
       icon: '🪶',
       type: 'stimulation',
+      modes: ['click','hold'],
+      effectRate: { perClick: 1, perSecond: 1 },
+      llmTrigger: { seconds: 10 },
       intensity: 2,
       duration: 20,
       effects: {
@@ -440,6 +500,7 @@ export const characterAIConfig: CharacterAIConfig = {
     face: {
       id: 'face',
       name: 'Лицо',
+      prompt: 'лицо',
       description: 'Область лица и головы',
       x: 45,
       y: 20,
@@ -457,6 +518,7 @@ export const characterAIConfig: CharacterAIConfig = {
     neck: {
       id: 'neck',
       name: 'Шея',
+      prompt: 'шею',
       description: 'Область шеи и горла',
       x: 45,
       y: 32,
@@ -474,6 +536,7 @@ export const characterAIConfig: CharacterAIConfig = {
     chest: {
       id: 'chest',
       name: 'Грудь',
+      prompt: 'грудь',
       description: 'Область груди',
       x: 40,
       y: 40,
@@ -491,6 +554,7 @@ export const characterAIConfig: CharacterAIConfig = {
     nipples: {
       id: 'nipples',
       name: 'Соски',
+      prompt: 'соски',
       description: 'Чувствительные соски',
       x: 42,
       y: 42,
@@ -508,6 +572,7 @@ export const characterAIConfig: CharacterAIConfig = {
     waist: {
       id: 'waist',
       name: 'Талия',
+      prompt: 'талию',
       description: 'Область талии',
       x: 42,
       y: 55,
@@ -525,6 +590,7 @@ export const characterAIConfig: CharacterAIConfig = {
     buttocks: {
       id: 'buttocks',
       name: 'Ягодицы',
+      prompt: 'ягодицы',
       description: 'Область ягодиц',
       x: 40,
       y: 65,
@@ -542,6 +608,7 @@ export const characterAIConfig: CharacterAIConfig = {
     genitals: {
       id: 'genitals',
       name: 'Гениталии',
+      prompt: 'гениталии',
       description: 'Интимная область',
       x: 42,
       y: 77,

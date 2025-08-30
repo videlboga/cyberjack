@@ -43,6 +43,30 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
     scrollToBottom()
   }, [messages])
 
+  // Принимаем автосообщения от CharacterAI (инструменты/действия) и прогоняем через AI-анализ
+  useEffect(() => {
+    const handler = async (e: any) => {
+      const content = e?.detail?.content
+      if (!content) return
+      try {
+        const analysis = await characterAI?.analyzeMessage?.(content, selectedTalent)
+        const reply = (analysis && analysis.response) ? analysis.response : content
+        const m = { id: generateUniqueId(), role: 'assistant' as const, content: reply, timestamp: new Date() }
+        setMessages(prev => [...prev, m])
+        if (analysis) {
+          applyAIChanges(selectedTalent.id, analysis)
+        }
+      } catch (err) {
+        const m = { id: generateUniqueId(), role: 'assistant' as const, content, timestamp: new Date() }
+        setMessages(prev => [...prev, m])
+      }
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('characterAI:autoMessage', handler as any)
+      return () => window.removeEventListener('characterAI:autoMessage', handler as any)
+    }
+  }, [characterAI, selectedTalent, applyAIChanges])
+
   const generateUniqueId = () => {
     return Math.random().toString(36).substr(2, 9)
   }

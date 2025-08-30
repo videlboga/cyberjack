@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { MessageAnalysisService } from '@/lib/character/message-analysis-service';
 import { PoseManagementService } from '@/lib/character/pose-management-service';
 import { 
@@ -21,7 +21,6 @@ interface UseCharacterAIProps {
   userEquipment: string[];
   currentPose: string;
   geminiApiKey?: string;
-  onSendMessage?: (message: string) => void;
 }
 
 interface UseCharacterAIReturn {
@@ -42,6 +41,10 @@ interface UseCharacterAIReturn {
   // Действия
   executeAction: (actionId: string, intensity: number, area?: string) => Promise<void>;
   useTool: (toolId: string, intensity: number, duration: number, area?: string) => Promise<void>;
+  startToolUse: (toolId: string, intensity: number, area?: string) => Promise<void>;
+  stopToolUse: () => void;
+  startActionUse: (actionId: string, intensity: number, area?: string) => void;
+  stopActionUse: () => void;
   changePose: (poseId: string, force?: boolean) => Promise<boolean>;
   executeQuickAction: (actionId: string) => Promise<void>;
   analyzeMessage: (message: string, selectedCharacter?: any) => Promise<MessageAnalysis>;
@@ -69,14 +72,16 @@ export function useCharacterAI({
   characterFetishes,
   userEquipment,
   currentPose: initialPose,
-  geminiApiKey,
-  onSendMessage
+  geminiApiKey
 }: UseCharacterAIProps): UseCharacterAIReturn {
   const [currentPose, setCurrentPose] = useState(initialPose);
   const [poseHistory, setPoseHistory] = useState<Array<{ poseId: string; timestamp: number; reason: string }>>([]);
   const [lastAction, setLastAction] = useState<string | null>(null);
   const [lastTool, setLastTool] = useState<string | null>(null);
   const [cooldowns, setCooldowns] = useState<{ [key: string]: number }>({});
+  const autoMessageTimers = useRef<{ intervalId: any; stopId: any } | null>(null)
+  const activeToolRef = useRef<{ toolId: string; area?: string; intensity: number; clickCount: number; startAt: number; intervals?: any } | null>(null)
+  const activeActionRef = useRef<{ actionId: string; area?: string; intensity: number; clickCount: number; startAt: number } | null>(null)
   
   // Инициализация сервисов - создаем только один раз
   const [messageAnalysisService] = useState(() => {
@@ -142,31 +147,6 @@ export function useCharacterAI({
     return result
   }
 
-  // Форматирование сообщения для чата
-  const formatChatMessage = useCallback((actionPrompt: string, areaPrompt: string, statChanges: Record<string, number>): string => {
-    const llmPrompts = characterAIConfig.llmPrompts
-    if (!llmPrompts?.responseTemplate) {
-      return `${actionPrompt} ${areaPrompt}.`
-    }
-
-    const statDescriptions: string[] = []
-    for (const [stat, change] of Object.entries(statChanges)) {
-      if (change !== 0) {
-        const interpretation = llmPrompts.characteristicInterpretations?.[stat] || stat
-        const sign = change > 0 ? '+' : ''
-        statDescriptions.push(`${interpretation} ${sign}${change}`)
-      }
-    }
-
-    const statChangesText = statDescriptions.length > 0 ? statDescriptions.join(', ') : 'незначительные изменения'
-    const template = llmPrompts.responseTemplate
-      .replace('{actionPrompt}', actionPrompt)
-      .replace('{areaPrompt}', areaPrompt)
-      .replace('{statChanges}', `я чувствую ${statChangesText}`)
-
-    return template
-  }, [characterAIConfig.llmPrompts])
-
   // Выполнение действия
   const executeAction = useCallback(async (actionId: string, intensity: number, area?: string) => {
     const action = characterAIConfig.actions[actionId];
@@ -191,22 +171,19 @@ export function useCharacterAI({
     // Применяем эффекты (мультипликатор завязываем на интенсивность 1..10)
     const multiplier = Math.max(1, Math.min(10, intensity)) / 10
     const statChanges = aggregateEffects((action as any).effects, multiplier)
-    console.log('⚡ Применены эффекты действия:', { actionId, intensity, area, statChanges })
+    const areaPrompt = (characterAIConfig.interactiveAreas as any)?.[area || '']?.prompt
+    const actionPrompt = (action as any)?.prompt || action.name
+    const feeling = buildFeelingPrompt(statChanges)
+    const chatText = areaPrompt
+      ? `Он ${actionPrompt} мне ${areaPrompt}. ${feeling}`
+      : `Он ${actionPrompt}. ${feeling}`
+    console.log('⚡ Применены эффекты действия:', { actionId, intensity, area, statChanges, chatText })
 
-    // Отправляем сообщение в чат
-    if (onSendMessage) {
-      const actionPrompt = characterAIConfig.llmPrompts?.actionPrompts?.[actionId] || action.name || actionId
-      const areaPrompt = characterAIConfig.llmPrompts?.areaPrompts?.[area || 'full_body'] || (area || 'всё тело')
-      const chatMessage = formatChatMessage(actionPrompt, areaPrompt, statChanges)
-      console.log('💬 Отправка сообщения в чат:', chatMessage)
-      onSendMessage(chatMessage)
-    }
-
-  }, [characterAIConfig.actions, characterAIConfig.llmPrompts, setCooldown, aggregateEffects, formatChatMessage, onSendMessage]);
+  }, [characterAIConfig.actions, setCooldown, aggregateEffects]);
 
   // Использование инструмента
   const useTool = useCallback(async (toolId: string, intensity: number, duration: number, area?: string) => {
-    const tool = characterAIConfig.tools[toolId];
+    const tool = characterAIConfig?.tools?.[toolId];
     if (!tool) {
       console.error(`Инструмент ${toolId} не найден`);
       return;
@@ -231,22 +208,236 @@ export function useCharacterAI({
     const clamped = Math.max(1, Math.min(10, intensity))
     const multiplier = max > 0 ? (clamped / max) : (clamped / 10)
     const statChanges = aggregateEffects((tool as any).effects, multiplier)
-    console.log('🛠️ Применены эффекты инструмента:', { toolId, intensity: clamped, duration, area, statChanges })
+    const areaPrompt = (characterAIConfig.interactiveAreas as any)?.[area || '']?.prompt
+    const toolPrompt = (tool as any)?.prompt || tool.name
+    const feeling = buildFeelingPrompt(statChanges)
+    const chatText = areaPrompt
+      ? `Он ${toolPrompt} мне ${areaPrompt}. ${feeling}`
+      : `Он ${toolPrompt}. ${feeling}`
+    console.log('🛠️ Применены эффекты инструмента:', { toolId, intensity: clamped, duration, area, statChanges, chatText })
 
-    // Отправляем сообщение в чат
-    if (onSendMessage) {
-      const toolPrompt = characterAIConfig.llmPrompts?.toolPrompts?.[toolId] || tool.name || toolId
-      const areaPrompt = characterAIConfig.llmPrompts?.areaPrompts?.[area || 'full_body'] || (area || 'всё тело')
-      const chatMessage = formatChatMessage(toolPrompt, areaPrompt, statChanges)
-      console.log('💬 Отправка сообщения в чат:', chatMessage)
-      onSendMessage(chatMessage)
+    // Автосообщения каждые 10 сек на протяжении duration
+    if (typeof window !== 'undefined') {
+      const dispatchAuto = () => {
+        try {
+          const event = new CustomEvent('characterAI:autoMessage', { detail: { content: chatText } })
+          window.dispatchEvent(event)
+        } catch (_) {}
+      }
+      // Сброс прежних таймеров
+      if (autoMessageTimers.current) {
+        clearInterval(autoMessageTimers.current.intervalId)
+        clearTimeout(autoMessageTimers.current.stopId)
+      }
+      const intervalId = setInterval(dispatchAuto, 10000)
+      const stopId = setTimeout(() => {
+        clearInterval(intervalId)
+        autoMessageTimers.current = null
+      }, Math.max(1, duration) * 1000)
+      autoMessageTimers.current = { intervalId, stopId }
+      // Мгновенное первое сообщение (опционально)
+      dispatchAuto()
     }
 
-  }, [characterAIConfig.tools, characterAIConfig.llmPrompts, setCooldown, aggregateEffects, formatChatMessage, onSendMessage]);
+  }, [characterAIConfig.tools, setCooldown, aggregateEffects]);
+
+  // Запуск непрерывного режима инструмента (без траектории, только нажатие/удержание)
+  const startToolUse = useCallback(async (toolId: string, intensity: number, area?: string) => {
+    const tool = characterAIConfig?.tools?.[toolId]
+    if (!tool) return
+    const modes: string[] = Array.isArray((tool as any).modes) ? (tool as any).modes : ['click']
+    const effectRate: any = (tool as any).effectRate || {}
+    const llmTrigger: any = (tool as any).llmTrigger || {}
+
+    console.log('🔧 StartToolUse - конфигурация:', { toolId, modes, effectRate, llmTrigger })
+
+    const clamped = Math.max(1, Math.min(10, intensity))
+    const max = Number((tool as any).maxIntensity ?? 10)
+    const multiplier = max > 0 ? (clamped / max) : (clamped / 10)
+
+    const areaPrompt = (characterAIConfig.interactiveAreas as any)?.[area || '']?.prompt
+    const toolPrompt = (tool as any)?.prompt || tool.name
+
+    const toolTick = () => {
+      const statChanges = aggregateEffects((tool as any).effects, multiplier)
+      const feeling = buildFeelingPrompt(statChanges)
+      const chatText = areaPrompt ? `Он ${toolPrompt} мне ${areaPrompt}. ${feeling}` : `Он ${toolPrompt}. ${feeling}`
+      console.log('🛠️ Применены эффекты инструмента:', { toolId, intensity: clamped, area, statChanges, chatText })
+    }
+
+    // Сбрасываем прежние интервалы, если есть
+    if (autoMessageTimers.current) {
+      clearInterval(autoMessageTimers.current.intervalId)
+      clearTimeout(autoMessageTimers.current.stopId)
+      autoMessageTimers.current = null
+    }
+
+    // Регистрируем активное состояние
+    const state: any = { toolId, area, intensity: clamped, clickCount: 0, startAt: Date.now(), intervals: {} }
+    activeToolRef.current = state
+
+    // Click модель
+    if (modes.includes('click') && typeof effectRate.perClick === 'number') {
+      state.clickCount += 1
+      toolTick()
+      if (typeof llmTrigger.clicks === 'number' && state.clickCount % llmTrigger.clicks === 0) {
+        try {
+          const event = new CustomEvent('characterAI:autoMessage', { detail: { content: areaPrompt ? `Он ${toolPrompt} мне ${areaPrompt}.` : `Он ${toolPrompt}.` } })
+          window.dispatchEvent(event)
+        } catch {}
+      }
+    }
+
+    // Hold модель: применяем раз в секунду, отправляем LLM по таймеру
+    if (modes.includes('hold') && typeof effectRate.perSecond === 'number' && typeof window !== 'undefined') {
+      const perSecondInterval = setInterval(toolTick, 1000)
+      let llmInterval: any = null
+      if (typeof llmTrigger.seconds === 'number' && llmTrigger.seconds > 0) {
+        llmInterval = setInterval(() => {
+          try {
+            const event = new CustomEvent('characterAI:autoMessage', { detail: { content: areaPrompt ? `Он ${toolPrompt} мне ${areaPrompt}.` : `Он ${toolPrompt}.` } })
+            window.dispatchEvent(event)
+          } catch {}
+        }, llmTrigger.seconds * 1000)
+      }
+      state.intervals = { perSecondInterval, llmInterval }
+    }
+  }, [characterAIConfig?.tools, characterAIConfig?.interactiveAreas, aggregateEffects])
+
+  // Остановка непрерывного режима инструмента
+  const stopToolUse = useCallback(() => {
+    const ref: any = activeToolRef.current
+    activeToolRef.current = null
+    if (autoMessageTimers.current) {
+      clearInterval(autoMessageTimers.current.intervalId)
+      clearTimeout(autoMessageTimers.current.stopId)
+      autoMessageTimers.current = null
+    }
+    if (ref?.intervals) {
+      clearInterval(ref.intervals.perSecondInterval)
+      if (ref.intervals.llmInterval) clearInterval(ref.intervals.llmInterval)
+    }
+  }, [])
+
+  // Непрерывный режим для действий (hold) и клик-счетчик (click)
+  const startActionUse = useCallback((actionId: string, intensity: number, area?: string) => {
+    const action = characterAIConfig?.actions?.[actionId]
+    if (!action) return
+    const modes: string[] = Array.isArray(action.modes) ? action.modes : ['click']
+    const effectRate = action.effectRate || {}
+    const llmTrigger = action.llmTrigger || {}
+
+    console.log('⚡ StartActionUse - конфигурация:', { actionId, modes, effectRate, llmTrigger })
+
+    // инициализируем состояние
+    activeActionRef.current = { actionId, intensity, area, clickCount: 0, startAt: Date.now() }
+
+    const sendLLM = () => {
+      const areaPrompt = (characterAIConfig.interactiveAreas as any)?.[area || '']?.prompt
+      const name = (action as any)?.prompt || action.name
+      const chatText = areaPrompt ? `Он ${name} мне ${areaPrompt}.` : `Он ${name}.`
+      try {
+        const event = new CustomEvent('characterAI:autoMessage', { detail: { content: chatText } })
+        window.dispatchEvent(event)
+      } catch {}
+    }
+
+    // click-модель: применяем разово и учитываем триггеры
+    if (modes.includes('click') && typeof effectRate.perClick === 'number') {
+      executeAction(actionId, intensity, area)
+      activeActionRef.current.clickCount += 1
+      if (typeof llmTrigger.clicks === 'number' && activeActionRef.current.clickCount % llmTrigger.clicks === 0) {
+        sendLLM()
+      }
+    }
+
+    // hold-модель: таймер по секундам
+    if (modes.includes('hold') && typeof effectRate.perSecond === 'number') {
+      if (typeof window !== 'undefined') {
+        const perSecondInterval = setInterval(() => {
+          executeAction(actionId, intensity, area)
+        }, 1000)
+        // LLM каждые llmTrigger.seconds
+        let llmInterval: any = null
+        if (typeof llmTrigger.seconds === 'number' && llmTrigger.seconds > 0) {
+          llmInterval = setInterval(() => sendLLM(), llmTrigger.seconds * 1000)
+        }
+        // остановка привязана к stopActionUse
+        ;(activeActionRef.current as any).intervals = { perSecondInterval, llmInterval }
+      }
+    }
+  }, [characterAIConfig?.actions, executeAction])
+
+  const stopActionUse = useCallback(() => {
+    const ref: any = activeActionRef.current
+    activeActionRef.current = null
+    if (ref?.intervals) {
+      clearInterval(ref.intervals.perSecondInterval)
+      if (ref.intervals.llmInterval) clearInterval(ref.intervals.llmInterval)
+    }
+  }, [])
+
+  // Генератор короткого промта ощущений на основе изменений статов
+  const buildFeelingPrompt = (changes: Record<string, number>): string => {
+    const phrases: string[] = []
+    const addByLevel = (value: number | undefined, tiers: Array<{ t: number; text: string }>) => {
+      if (typeof value !== 'number' || value <= 0) return
+      const abs = Math.abs(value)
+      for (let i = tiers.length - 1; i >= 0; i--) {
+        if (abs >= tiers[i].t) { phrases.push(tiers[i].text); break }
+      }
+    }
+
+    // Эмоции/состояния
+    addByLevel(changes.fear, [
+      { t: 0.8, text: 'я очень боюсь!!' },
+      { t: 0.5, text: 'мне страшно' },
+      { t: 0.2, text: 'мне неспокойно…' },
+    ])
+    addByLevel(changes.arousal, [
+      { t: 0.8, text: 'я на грани, так возбуждена!' },
+      { t: 0.5, text: 'я сильно возбуждаюсь' },
+      { t: 0.2, text: 'меня это возбуждает…' },
+    ])
+    addByLevel(changes.pleasure, [
+      { t: 0.8, text: 'это невероятно приятно!' },
+      { t: 0.5, text: 'мне очень приятно' },
+      { t: 0.2, text: 'мне приятно…' },
+    ])
+    addByLevel(changes.pain, [
+      { t: 0.8, text: 'очень больно!!' },
+      { t: 0.5, text: 'мне больно' },
+      { t: 0.2, text: 'немного больно…' },
+    ])
+    addByLevel(changes.anxiety, [
+      { t: 0.8, text: 'паника…' },
+      { t: 0.5, text: 'тревожно' },
+      { t: 0.2, text: 'есть лёгкая тревога…' },
+    ])
+    addByLevel(changes.submission, [
+      { t: 0.8, text: 'хочу подчиняться полностью' },
+      { t: 0.5, text: 'чувствую себя покорной' },
+      { t: 0.2, text: 'становлюсь покорнее…' },
+    ])
+
+    // Сенсорные/когнитивные
+    addByLevel(changes.sensitivity, [
+      { t: 0.5, text: 'чувствительность растёт' },
+      { t: 0.2, text: 'становится чувствительнее…' },
+    ])
+    addByLevel(changes.cognitiveLoad, [
+      { t: 0.8, text: 'мысли путаются…' },
+      { t: 0.5, text: 'мне сложно думать' },
+      { t: 0.2, text: 'немного сложнее сосредоточиться…' },
+    ])
+
+    if (phrases.length === 0) return 'Я чувствую изменения внутри.'
+    return phrases.slice(0, 2).join(', ')
+  }
 
   // Смена позы
   const changePose = useCallback(async (poseId: string, force: boolean = false): Promise<boolean> => {
-    const pose = characterAIConfig.poses[poseId];
+    const pose = characterAIConfig?.poses?.[poseId];
     if (!pose) {
       console.error(`Поза ${poseId} не найдена`);
       return false;
@@ -268,7 +459,7 @@ export function useCharacterAI({
 
   // Выполнение быстрого действия
   const executeQuickAction = useCallback(async (actionId: string) => {
-    const quickAction = characterAIConfig.quickActions[actionId];
+    const quickAction = (characterAIConfig.quickActions || {})[actionId];
     if (!quickAction) {
       console.error(`Быстрое действие ${actionId} не найдено`);
       return;
@@ -281,7 +472,7 @@ export function useCharacterAI({
     }
 
     // Устанавливаем кулдаун
-    if (quickAction.requirements.cooldown) {
+    if (quickAction.requirements?.cooldown) {
       setCooldown(actionId, quickAction.requirements.cooldown);
     }
 
@@ -317,7 +508,7 @@ export function useCharacterAI({
         fetishTriggers: [],
         statChanges: {},
         response: "Я слушаю вас... (ИИ недоступен)"
-      };
+      } as any;
     }
 
     try {
@@ -335,9 +526,68 @@ export function useCharacterAI({
       // Получаем базовый промт персонажа из unified конфигурации
       const characterBasePrompt = selectedCharacter?.prompt?.character || 
         selectedCharacter?.description || 
-        characterAIConfig.llmPrompts.basePrompt;
+        characterAIConfig?.llmPrompts?.basePrompt || '';
       
-      const llmPrompt: LLMPrompt = {
+      // Составляем контекст текущего взаимодействия (инструменты/действия прямо сейчас)
+      const currentInteraction: Array<{
+        type: 'action' | 'tool'
+        id: string
+        name: string
+        area?: string
+        intensity: number
+        mode: 'click' | 'hold'
+        elapsedSec?: number
+        effectPreview?: Record<string, number>
+        feelingHint?: string
+      }> = []
+
+      // Активное действие (hold/click)
+      if (activeActionRef.current) {
+        const { actionId, intensity, area, startAt } = activeActionRef.current
+        const actionCfg: any = characterAIConfig?.actions?.[actionId]
+        if (actionCfg) {
+          const multiplier = Math.max(1, Math.min(10, intensity)) / 10
+          const effectPreview = aggregateEffects(actionCfg.effects, multiplier)
+          const mode: 'click' | 'hold' = (activeActionRef.current as any).intervals?.perSecondInterval ? 'hold' : 'click'
+          currentInteraction.push({
+            type: 'action',
+            id: actionId,
+            name: actionCfg?.prompt || actionCfg?.name || actionId,
+            area,
+            intensity,
+            mode,
+            elapsedSec: startAt ? Math.floor((Date.now() - startAt) / 1000) : undefined,
+            effectPreview,
+            feelingHint: buildFeelingPrompt(effectPreview)
+          })
+        }
+      }
+
+      // Активный инструмент (hold/click)
+      if (activeToolRef.current) {
+        const { toolId, intensity, area, startAt } = activeToolRef.current
+        const toolCfg: any = characterAIConfig?.tools?.[toolId]
+        if (toolCfg) {
+          const max = Number(toolCfg?.maxIntensity ?? 10)
+          const clamped = Math.max(1, Math.min(10, intensity))
+          const multiplier = max > 0 ? (clamped / max) : (clamped / 10)
+          const effectPreview = aggregateEffects(toolCfg.effects, multiplier)
+          const mode: 'click' | 'hold' = activeToolRef.current.intervals?.perSecondInterval ? 'hold' : 'click'
+          currentInteraction.push({
+            type: 'tool',
+            id: toolId,
+            name: toolCfg?.prompt || toolCfg?.name || toolId,
+            area,
+            intensity: clamped,
+            mode,
+            elapsedSec: startAt ? Math.floor((Date.now() - startAt) / 1000) : undefined,
+            effectPreview,
+            feelingHint: buildFeelingPrompt(effectPreview)
+          })
+        }
+      }
+
+      const llmPrompt: any = {
         basePrompt: characterBasePrompt,
         characterContext: {
           name: characterName,
@@ -360,7 +610,8 @@ export function useCharacterAI({
           pose: currentPose,
           emotionalState: characterStates.mood ? `Настроение: ${characterStates.mood}` : "Спокойный",
           activeFetishes: Object.entries(characterFetishes).filter(([_, value]) => (value as number) > 0.3).map(([key, _]) => key)
-        }
+        },
+        currentInteraction
       };
 
       console.log('🔧 === ФОРМИРОВАНИЕ КОНТЕКСТА ===');
@@ -379,6 +630,18 @@ export function useCharacterAI({
       console.log('📤 Отправляем запрос к ИИ...');
       const result = await messageAnalysisService.analyzeMessage(message, llmPrompt, characterStates);
       console.log('📥 Получен ответ от ИИ:', result);
+
+      // Немедленно применяем смену позы из команд ИИ, если есть
+      try {
+        const nextPose: string | undefined = (result as any)?.commands?.poseChange;
+        if (nextPose && typeof nextPose === 'string') {
+          console.log('🧍 Запрошена смена позы от ИИ:', nextPose);
+          const ok = await changePose(nextPose, true);
+          console.log('✅ Смена позы результат:', { ok, pose: nextPose });
+        }
+      } catch (e) {
+        console.warn('⚠️ Не удалось применить смену позы:', e);
+      }
       
       return result;
     } catch (error) {
@@ -389,12 +652,13 @@ export function useCharacterAI({
         fetishTriggers: [],
         statChanges: {},
         response: "Извините, произошла ошибка при обработке сообщения. Попробуйте еще раз."
-      };
+      } as any;
     }
   }, [messageAnalysisService, characterAIConfig, userEquipment, currentPose]);
 
   // Проверка автоматических смен позы
   const checkAutomaticPoseChanges = useCallback(async () => {
+    if (!poseManagementService) return;
     const validConditions = poseManagementService.checkPoseChangeConditions(
       currentPose,
       characterStates,
@@ -410,8 +674,9 @@ export function useCharacterAI({
 
     for (const { condition, probability, reason } of validConditions) {
       if (Math.random() < probability) {
-        await changePose(condition.targetPose);
-        addPoseHistory(condition.targetPose, reason);
+        const target = (condition as any).targetPose;
+        await changePose(target);
+        addPoseHistory(target, reason);
         break; // Применяем только первое подходящее условие
       }
     }
@@ -477,24 +742,28 @@ export function useCharacterAI({
 
   // Получение доступных данных
   const getAvailableActions = useCallback((): InteractiveAction[] => {
-    return Object.values(characterAIConfig.actions).filter(action => canExecuteAction(action.id));
-  }, [characterAIConfig.actions, canExecuteAction]);
+    const actions = characterAIConfig?.actions || {};
+    return Object.values(actions).filter((action: any) => action?.id && canExecuteAction(action.id));
+  }, [characterAIConfig?.actions, canExecuteAction]);
 
   const getAvailableTools = useCallback((): InteractiveTool[] => {
-    return Object.values(characterAIConfig.tools).filter(tool => canUseTool(tool.id));
-  }, [characterAIConfig.tools, canUseTool]);
+    const tools = characterAIConfig?.tools || {};
+    return Object.values(tools).filter((tool: any) => tool?.id && canUseTool(tool.id));
+  }, [characterAIConfig?.tools, canUseTool]);
 
   const getAvailablePoses = useCallback((): Pose[] => {
+    if (!poseManagementService) return [] as Pose[];
     return poseManagementService.getAvailablePoses(characterAttributes, characterStates, userEquipment);
   }, [poseManagementService, characterAttributes, characterStates, userEquipment]);
 
   const getInteractiveAreas = useCallback((): InteractiveArea[] => {
-    return Object.values(characterAIConfig.interactiveAreas);
+    return Object.values(characterAIConfig.interactiveAreas || {});
   }, [characterAIConfig.interactiveAreas]);
 
   const getQuickActions = useCallback((): QuickAction[] => {
-    return Object.values(characterAIConfig.quickActions).filter(action => !cooldowns[action.id]);
-  }, [characterAIConfig.quickActions, cooldowns]);
+    const quick = characterAIConfig?.quickActions || {};
+    return Object.values(quick).filter((action: any) => action?.id && !cooldowns[action.id]);
+  }, [characterAIConfig?.quickActions, cooldowns]);
 
   // Автоматическая проверка смены позы каждые 30 секунд
   useEffect(() => {
@@ -520,6 +789,10 @@ export function useCharacterAI({
     // Действия
     executeAction,
     useTool,
+    startToolUse,
+    stopToolUse,
+    startActionUse,
+    stopActionUse,
     changePose,
     executeQuickAction,
     analyzeMessage,

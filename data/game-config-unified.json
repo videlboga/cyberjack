@@ -2260,6 +2260,15 @@
         "category": "punishment",
         "intensity": 7,
         "cost": 2,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.3
+        },
+        "llmTrigger": {
+          "clicks": 2,
+          "seconds": 6
+        },
         "effects": {
           "physical": {
             "pain": 3,
@@ -2279,6 +2288,15 @@
         "category": "reward",
         "intensity": 3,
         "cost": 1,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.6
+        },
+        "llmTrigger": {
+          "clicks": 3,
+          "seconds": 8
+        },
         "effects": {
           "physical": {
             "pleasure": 1,
@@ -2298,6 +2316,15 @@
         "category": "reward",
         "intensity": 4,
         "cost": 1,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.7
+        },
+        "llmTrigger": {
+          "clicks": 2,
+          "seconds": 7
+        },
         "effects": {
           "physical": {
             "pleasure": 2,
@@ -2317,6 +2344,15 @@
         "category": "stimulation",
         "intensity": 4,
         "cost": 1,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.8
+        },
+        "llmTrigger": {
+          "clicks": 2,
+          "seconds": 5
+        },
         "effects": {
           "physical": {
             "pleasure": 1,
@@ -2335,6 +2371,15 @@
         "category": "stimulation",
         "intensity": 3,
         "cost": 1,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.9
+        },
+        "llmTrigger": {
+          "clicks": 3,
+          "seconds": 4
+        },
         "effects": {
           "physical": {
             "pleasure": 1,
@@ -2353,6 +2398,15 @@
         "category": "intimate",
         "intensity": 6,
         "cost": 2,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.4
+        },
+        "llmTrigger": {
+          "clicks": 2,
+          "seconds": 10
+        },
         "effects": {
           "physical": {
             "pleasure": 2,
@@ -2372,6 +2426,15 @@
         "category": "intimate",
         "intensity": 8,
         "cost": 3,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.3
+        },
+        "llmTrigger": {
+          "clicks": 1,
+          "seconds": 12
+        },
         "effects": {
           "physical": {
             "pleasure": 3,
@@ -2393,6 +2456,15 @@
         "icon": "⚡",
         "baseIntensity": 5,
         "maxIntensity": 10,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.5
+        },
+        "llmTrigger": {
+          "clicks": 3,
+          "seconds": 5
+        },
         "effects": {
           "physical": {
             "pain": 2,
@@ -2416,6 +2488,15 @@
         "icon": "📳",
         "baseIntensity": 4,
         "maxIntensity": 8,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.8
+        },
+        "llmTrigger": {
+          "clicks": 2,
+          "seconds": 8
+        },
         "effects": {
           "physical": {
             "pleasure": 3,
@@ -2439,6 +2520,15 @@
         "icon": "🧊",
         "baseIntensity": 3,
         "maxIntensity": 6,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.3
+        },
+        "llmTrigger": {
+          "clicks": 4,
+          "seconds": 10
+        },
         "effects": {
           "physical": {
             "sensitivity": 2,
@@ -2462,6 +2552,15 @@
         "icon": "🕯️",
         "baseIntensity": 6,
         "maxIntensity": 9,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.2
+        },
+        "llmTrigger": {
+          "clicks": 5,
+          "seconds": 12
+        },
         "effects": {
           "physical": {
             "pain": 2,
@@ -2485,6 +2584,15 @@
         "icon": "📎",
         "baseIntensity": 4,
         "maxIntensity": 7,
+        "modes": ["click", "hold"],
+        "effectRate": {
+          "perClick": 1,
+          "perSecond": 0.4
+        },
+        "llmTrigger": {
+          "clicks": 3,
+          "seconds": 15
+        },
         "effects": {
           "physical": {
             "pain": 1,
@@ -2564,13 +2672,7 @@
         "devotion": "Преданность",
         "pleasure": "Удовольствие",
         "pain": "Боль",
-        "arousal": "Возбуждение",
-        "sensitivity": "Чувствительность тела",
-        "comfort": "Комфорт позы",
-        "accessibility": "Доступность тела",
-        "submission": "Подчинение",
-        "surprise": "Удивление",
-        "alertness": "Бдительность"
+        "arousal": "Возбуждение"
       },
       "commandKeywords": {
         "hit": [
@@ -2605,39 +2707,7 @@
           "колени",
           "четвереньки"
         ]
-      },
-      "actionPrompts": {
-        "hit_hand": "ударяю ладонью",
-        "hit_whip": "ударяю плетью",
-        "stroke_hand": "поглаживаю рукой",
-        "stroke_glove": "поглаживаю пушистой перчаткой",
-        "tickle_brush": "щекочу щёткой",
-        "tickle_feather": "щекочу пером",
-        "lick": "лизну",
-        "penetrate": "вставляю член"
-      },
-      "toolPrompts": {
-        "shocker": "прикасаюсь шокером",
-        "vibrator": "прикасаюсь вибратором",
-        "ice_cube": "прикасаюсь ледяным кубиком",
-        "hot_wax": "капаю горячим воском",
-        "clamps": "закрепляю зажимы"
-      },
-      "areaPrompts": {
-        "head": "голову",
-        "neck": "шею",
-        "chest": "грудь",
-        "stomach": "живот",
-        "arms": "руки",
-        "hands": "ладони",
-        "thighs": "бёдра",
-        "feet": "ступни",
-        "back": "спину",
-        "butt": "ягодицы",
-        "genitals": "гениталии",
-        "full_body": "всё тело"
-      },
-      "responseTemplate": "Он {actionPrompt} мне {areaPrompt}. Я чувствую {statChanges}."
+      }
     }
   }
 }

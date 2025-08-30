@@ -210,3 +210,7 @@ export default function CharacterAnalysisPanel({ character, onClose }: Character
   )
 }
 
+
+
+
+

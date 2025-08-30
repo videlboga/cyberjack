@@ -274,6 +274,15 @@ export default function TalentArchitectProd() {
   const [selectedInteractionType, setSelectedInteractionType] = useState<string | null>(null)
   const [showLLMChat, setShowLLMChat] = useState(false)
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
+  const [activeToolIntensity, setActiveToolIntensity] = useState<number>(5)
+  const [selectedActionMode, setSelectedActionMode] = useState<string | null>(null)
+  const [activeActionIntensity, setActiveActionIntensity] = useState<number>(5)
+
+  useEffect(() => {
+    console.log('🧰 Режим инструмента:', selectedTool || 'выключен', 'интенсивность:', activeToolIntensity)
+    console.log('⚡ Режим действия:', selectedActionMode || 'выключен', 'интенсивность:', activeActionIntensity)
+    console.log('🎯 Должны отображаться зоны:', !!(selectedTool || selectedActionMode) && !!selectedTalent)
+  }, [selectedTool, selectedActionMode, activeToolIntensity, activeActionIntensity, selectedTalent])
   const [interactiveAreas, setInteractiveAreas] = useState<{ [key: string]: boolean }>({})
   const [floatingPanelPosition, setFloatingPanelPosition] = useState({ x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
@@ -319,8 +328,7 @@ export default function TalentArchitectProd() {
     characterFetishes: selectedTalent?.affinities || {},
     userEquipment: selectedTalent?.equippedItems?.map(item => item.id) || [],
     currentPose: "standing_normal",
-    geminiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-    onSendMessage: sendMessageToLLM
+    geminiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY
   })
 
   // (удалено дублирующее объявление useUnifiedConfig)
@@ -2575,9 +2583,17 @@ export default function TalentArchitectProd() {
               />
 
               {/* Интерактивные области */}
-              {selectedTool && (
-                <div className="absolute inset-0">
-                  {getInteractiveAreas(selectedTalent).map((area) => (
+              {(selectedTool || selectedActionMode) && selectedTalent && (() => {
+                const areas = getInteractiveAreas(selectedTalent)
+                console.log('🎯 Отображение интерактивных зон:', {
+                  selectedTool,
+                  selectedActionMode,
+                  areasCount: areas.length,
+                  areas: areas.map(a => ({ id: a.id, name: a.name }))
+                })
+                return (
+                  <div className="absolute inset-0 z-50 pointer-events-auto">
+                    {areas.map((area) => (
                     <div
                       key={area.id}
                       className={`absolute border-2 border-cyan-400 bg-cyan-400/20 cursor-pointer transition-all hover:bg-cyan-400/40 ${
@@ -2589,12 +2605,55 @@ export default function TalentArchitectProd() {
                         width: `${area.width}%`,
                         height: `${area.height}%`,
                       }}
-                      onClick={() => handleAreaClick(area.id, selectedTalent)}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        console.log('🎯 MouseDown на зоне:', area.id, { selectedTool, selectedActionMode, activeToolIntensity, activeActionIntensity })
+                        // старт непрерывного воздействия выбранным инструментом
+                        try {
+                          if (selectedTool) {
+                            console.log('🔧 Запуск startToolUse:', selectedTool, activeToolIntensity, area.id)
+                            characterAI?.startToolUse?.(selectedTool as any, activeToolIntensity, area.id)
+                          }
+                          if (selectedActionMode) {
+                            console.log('⚡ Запуск startActionUse:', selectedActionMode, activeActionIntensity, area.id)
+                            characterAI?.startActionUse?.(selectedActionMode as any, activeActionIntensity, area.id)
+                          }
+                        } catch (error) {
+                          console.error('❌ Ошибка при запуске:', error)
+                        }
+                      }}
+                      onMouseUp={(e) => {
+                        e.preventDefault()
+                        console.log('🖱️ MouseUp на зоне:', area.id)
+                        try {
+                          console.log('🛑 Остановка инструментов и действий')
+                          characterAI?.stopToolUse?.()
+                          characterAI?.stopActionUse?.()
+                        } catch (error) {
+                          console.error('❌ Ошибка при остановке:', error)
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.preventDefault()
+                        console.log('👋 MouseLeave зоны:', area.id)
+                        try {
+                          console.log('🛑 Остановка по уходу с зоны')
+                          characterAI?.stopToolUse?.()
+                          characterAI?.stopActionUse?.()
+                        } catch (error) {
+                          console.error('❌ Ошибка при остановке по уходу:', error)
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        e.preventDefault()
+                        console.log('👆 MouseEnter зоны:', area.id)
+                      }}
                       title={area.description}
                     />
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )
+              })()}
             </div>
           )}
         </div>
@@ -2686,6 +2745,14 @@ export default function TalentArchitectProd() {
               characterAI={characterAI}
               selectedTalent={selectedTalent}
               onClose={() => setShowActionToolPanel(false)}
+              onToolModeChange={(toolId, intensity) => {
+                setSelectedTool(toolId)
+                if (typeof intensity === 'number') setActiveToolIntensity(intensity)
+              }}
+              onActionModeChange={(actionId, intensity) => {
+                setSelectedActionMode(actionId)
+                if (typeof intensity === 'number') setActiveActionIntensity(intensity)
+              }}
             />
           )}
           

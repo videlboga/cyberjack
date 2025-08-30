@@ -763,3 +763,7 @@ export function calculateToolRisk(tool: AnalysisTool, userSkill: number = 1): nu
   return Math.max(0.05, risk)
 }
 
+
+
+
+

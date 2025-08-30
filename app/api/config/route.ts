@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { loadUnifiedConfigV2 } from '@/lib/unified-config-loader'
+import { writeFile } from 'fs/promises'
+import path from 'path'
 
 export async function GET() {
   try {
@@ -13,6 +15,53 @@ export async function GET() {
         equipmentCount: (config as any).equipment?.length || 0,
       }
     })
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    }, { status: 500 })
+  }
+}
+
+// POST /api/config — сохранение изменений в конфигурационные JSON файлы
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const { target, data } = body || {}
+
+    if (!target || !data) {
+      return NextResponse.json({ success: false, error: 'Missing target or data' }, { status: 400 })
+    }
+
+    // Разрешённые цели сохранения (минимально необходимый безопасный список)
+    const targetMap: Record<string, string> = {
+      'characters': path.join(process.cwd(), 'data', 'characters-unified.json'),
+      'characterAI': path.join(process.cwd(), 'lib', 'character', 'character-ai-config.ts'),
+      'game': path.join(process.cwd(), 'data', 'game-config-unified.json'),
+    }
+
+    const filePath = targetMap[target]
+    if (!filePath) {
+      return NextResponse.json({ success: false, error: 'Unsupported target' }, { status: 400 })
+    }
+
+    // Для JSON файлов — пишем prettified JSON
+    if (filePath.endsWith('.json')) {
+      const json = JSON.stringify(data, null, 2)
+      await writeFile(filePath, json, 'utf-8')
+      return NextResponse.json({ success: true })
+    }
+
+    // Для TS конфига character-ai — ожидаем поле raw (полный текст файла)
+    if (filePath.endsWith('.ts')) {
+      if (typeof data?.raw !== 'string') {
+        return NextResponse.json({ success: false, error: 'Expected data.raw (string) for TS target' }, { status: 400 })
+      }
+      await writeFile(filePath, data.raw, 'utf-8')
+      return NextResponse.json({ success: true })
+    }
+
+    return NextResponse.json({ success: false, error: 'Unhandled target type' }, { status: 400 })
   } catch (error) {
     return NextResponse.json({
       success: false,
