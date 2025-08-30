@@ -13,6 +13,8 @@ import Link from "next/link"
 // Импортируем наши новые компоненты и хуки
 import { useModal } from "./hooks/useModal"
 import { useConfigManager } from "./hooks/useConfigManager"
+import { saveConfigToFile } from '@/lib/config-sync'
+import { syncConfigToFiles } from '@/lib/sync-utils'
 import { EnhancedEditModal } from "./components/ui/EnhancedEditModal"
 import { UserAssetsModal } from "./components/ui/UserAssetsModal"
 import { EntityList } from "./components/ui/EntityList"
@@ -76,7 +78,8 @@ const NexusEnslaverGame = () => {
     equipment: { equipment: [] },
     system: {},
     users: { users: [] },
-    station: { stationEntities: {} }
+    station: { stationEntities: {} },
+    characterAI: { poses: {}, actions: {}, tools: {}, emotions: {}, fetishes: {} }
   })
 
   // Состояние для Character AI конфигурации
@@ -362,6 +365,28 @@ const NexusEnslaverGame = () => {
       addConfigItem(modalState.type as any, data)
     } else {
       updateConfigItem(modalState.type as any, data.id, data)
+
+      // Если это персонаж и у него есть poses, сохраняем их в characterAI
+      if (modalState.type === 'characters' && data.poses) {
+        setConfigs(prev => ({
+          ...prev,
+          characterAI: {
+            ...prev.characterAI,
+            poses: data.poses
+          }
+        }))
+        // Сохраняем poses в файл
+        try {
+          const updatedCharacterAI = {
+            ...configs.characterAI,
+            poses: data.poses
+          }
+          saveConfigToFile('characterAI', updatedCharacterAI)
+          syncConfigToFiles('characterAI', updatedCharacterAI)
+        } catch (error) {
+          console.error('Ошибка сохранения poses:', error)
+        }
+      }
     }
   }
 
@@ -625,6 +650,7 @@ const NexusEnslaverGame = () => {
                 analysisHistory: character.analysisHistory,
                 availableAnalysisMethods: character.availableAnalysisMethods,
                 type: 'character',
+                poses: configs.characterAI?.poses || {},
                 ...character
               })
             })

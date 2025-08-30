@@ -145,8 +145,8 @@ export async function loadUnifiedConfigV2(): Promise<GameConfig> {
       assets: [], // Заглушка для активов
       characterAI: {
         ...characterAIFromFile,
-        poses: realPoses,
-        poseChangeConditions: realPoseConditions
+        poses: characterAIFromFile?.poses || realPoses,
+        poseChangeConditions: characterAIFromFile?.poseChangeConditions || realPoseConditions
       }
     }
 

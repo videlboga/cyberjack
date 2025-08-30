@@ -752,6 +752,8 @@ export interface ActiveZone {
   availableTools: string[] // доступные инструменты для этой зоны
   sensitivity: number // чувствительность зоны (1-10)
   category: 'touch' | 'pressure' | 'temperature' | 'electrical' | 'visual' | 'auditory'
+  zoneKey?: string // ключ зоны для системы взаимодействий
+  promptName?: string // название зоны для промптов
   requirements?: {
     equipment?: string[] // требуемое оборудование
     attributes?: { [key: string]: number } // требуемые характеристики

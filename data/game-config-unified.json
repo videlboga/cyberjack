@@ -2260,7 +2260,10 @@
         "category": "punishment",
         "intensity": 7,
         "cost": 2,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.3
@@ -2288,7 +2291,10 @@
         "category": "reward",
         "intensity": 3,
         "cost": 1,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.6
@@ -2316,7 +2322,10 @@
         "category": "reward",
         "intensity": 4,
         "cost": 1,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.7
@@ -2344,7 +2353,10 @@
         "category": "stimulation",
         "intensity": 4,
         "cost": 1,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.8
@@ -2371,7 +2383,10 @@
         "category": "stimulation",
         "intensity": 3,
         "cost": 1,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.9
@@ -2398,7 +2413,10 @@
         "category": "intimate",
         "intensity": 6,
         "cost": 2,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.4
@@ -2426,7 +2444,10 @@
         "category": "intimate",
         "intensity": 8,
         "cost": 3,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.3
@@ -2456,7 +2477,10 @@
         "icon": "⚡",
         "baseIntensity": 5,
         "maxIntensity": 10,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.5
@@ -2488,7 +2512,10 @@
         "icon": "📳",
         "baseIntensity": 4,
         "maxIntensity": 8,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.8
@@ -2520,7 +2547,10 @@
         "icon": "🧊",
         "baseIntensity": 3,
         "maxIntensity": 6,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.3
@@ -2552,7 +2582,10 @@
         "icon": "🕯️",
         "baseIntensity": 6,
         "maxIntensity": 9,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.2
@@ -2584,7 +2617,10 @@
         "icon": "📎",
         "baseIntensity": 4,
         "maxIntensity": 7,
-        "modes": ["click", "hold"],
+        "modes": [
+          "click",
+          "hold"
+        ],
         "effectRate": {
           "perClick": 1,
           "perSecond": 0.4
@@ -2610,57 +2646,15 @@
       }
     },
     "poses": {
-      "standing": {
-        "id": "standing",
-        "name": "Поставить на ноги",
-        "description": "Персонаж стоит прямо",
-        "icon": "🧍",
+      "pose_1756570627518": {
+        "id": "pose_1756570627518",
+        "name": "Новая поза",
+        "description": "Описание позы",
         "category": "standing",
-        "effects": {
-          "physical": {
-            "comfort": 1
-          }
-        }
-      },
-      "kneeling": {
-        "id": "kneeling",
-        "name": "Поставить на колени",
-        "description": "Персонаж стоит на коленях",
-        "icon": "🦵",
-        "category": "kneeling",
-        "effects": {
-          "emotional": {
-            "submission": 1
-          }
-        }
-      },
-      "all_fours": {
-        "id": "all_fours",
-        "name": "Поставить на четвереньки",
-        "description": "Персонаж на четвереньках",
-        "icon": "🐕",
-        "category": "kneeling",
-        "effects": {
-          "emotional": {
-            "submission": 2
-          },
-          "physical": {
-            "accessibility": 1
-          }
-        }
-      },
-      "lying_back": {
-        "id": "lying_back",
-        "name": "Положить на спину",
-        "description": "Персонаж лежит на спине",
-        "icon": "🛏️",
-        "category": "lying",
-        "effects": {
-          "physical": {
-            "comfort": 2,
-            "accessibility": 2
-          }
-        }
+        "key": "standing",
+        "angles": [],
+        "requirements": {},
+        "effects": {}
       }
     },
     "llmPrompts": {
@@ -2707,6 +2701,70 @@
           "колени",
           "четвереньки"
         ]
+      }
+    },
+    "poseChangeConditions": {
+      "fear_response": {
+        "id": "fear_response",
+        "name": "Реакция на страх",
+        "description": "Автоматическая смена позы при высоком уровне страха",
+        "type": "automatic",
+        "probability": 0.8,
+        "conditions": {
+          "states": {
+            "fear": {
+              "operator": ">",
+              "value": 70
+            }
+          }
+        },
+        "targetPose": "kneeling_submissive",
+        "effects": {
+          "states": {
+            "submission": 15
+          }
+        }
+      },
+      "pleasure_response": {
+        "id": "pleasure_response",
+        "name": "Реакция на удовольствие",
+        "description": "Изменение позы при высоком уровне удовольствия",
+        "type": "automatic",
+        "probability": 0.6,
+        "conditions": {
+          "states": {
+            "pleasure": {
+              "operator": ">",
+              "value": 75
+            }
+          }
+        },
+        "targetPose": "standing_basic",
+        "effects": {
+          "states": {
+            "arousal": 10
+          }
+        }
+      },
+      "command_kneeling": {
+        "id": "command_kneeling",
+        "name": "Команда встать на колени",
+        "description": "Смена позы по команде пользователя",
+        "type": "command",
+        "probability": 1,
+        "conditions": {
+          "userActions": {
+            "recentActions": [
+              "command_kneel"
+            ]
+          }
+        },
+        "targetPose": "kneeling_submissive",
+        "effects": {
+          "states": {
+            "obedience": 10
+          }
+        }
       }
     }
   }

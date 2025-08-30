@@ -224,20 +224,35 @@ export async function POST(request: NextRequest) {
         console.log('✅ Characters синхронизированы с файлом')
         break
 
+      case 'characterAI':
+        // Синхронизируем Character AI конфигурацию с game-config-unified.json
+        const characterAIPath = path.join(dataDir, 'game-config-unified.json')
+        const characterAIData = JSON.parse(fs.readFileSync(characterAIPath, 'utf8'))
+
+        const updatedCharacterAI = {
+          ...characterAIData,
+          characterAI: data
+        }
+
+        fs.writeFileSync(characterAIPath, JSON.stringify(updatedCharacterAI, null, 2))
+        console.log('✅ CharacterAI синхронизирован с файлом')
+
+        break
+
       case 'game-config-unified':
         // Синхронизируем Character AI конфигурацию с game-config-unified.json
         const gameConfigPath = path.join(dataDir, 'game-config-unified.json')
         const gameConfigData = JSON.parse(fs.readFileSync(gameConfigPath, 'utf8'))
-        
+
         const updatedGameConfig = {
           ...gameConfigData,
           characterAI: data.characterAI
         }
-        
+
         fs.writeFileSync(gameConfigPath, JSON.stringify(updatedGameConfig, null, 2))
 
         break
-        
+
       default:
         return NextResponse.json(
           { error: `Неизвестный тип конфигурации: ${configType}` },

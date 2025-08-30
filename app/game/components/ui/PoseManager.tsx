@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,6 +27,7 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
   const [editingPose, setEditingPose] = useState<Pose | null>(null)
   const [editingAngle, setEditingAngle] = useState<PoseAngle | null>(null)
   const [editingZone, setEditingZone] = useState<ActiveZone | null>(null)
+  const [editingZones, setEditingZones] = useState<ActiveZone[] | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   const handleCreatePose = () => {
@@ -49,6 +50,10 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
     onUpdatePoses(updatedPoses)
     setEditingPose(null)
     setIsCreateDialogOpen(false)
+    // Обновляем локальное состояние для немедленного отображения
+    if (selectedPose?.id === pose.id) {
+      setSelectedPose(pose)
+    }
   }
 
   const handleDeletePose = (poseId: string) => {
@@ -61,6 +66,35 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
   }
 
   const handleCreateAngle = () => {
+    if (!selectedPose) return
+
+    const newAngle: PoseAngle = {
+      id: `angle_${Date.now()}`,
+      name: 'Новый ракурс',
+      description: 'Описание ракурса',
+      mediaUrl: '',
+      mediaType: 'image',
+      activeZones: []
+    }
+
+    const updatedPose = {
+      ...selectedPose,
+      angles: [...selectedPose.angles, newAngle]
+    }
+    handleSavePose(updatedPose)
+    // Не устанавливаем editingAngle, чтобы диалог не открывался автоматически
+  }
+
+  const handleEditAngle = (angle: PoseAngle) => {
+    setEditingAngle(angle)
+  }
+
+  const handleEditZones = (angle: PoseAngle) => {
+    setEditingZones(angle.activeZones || [])
+    setEditingAngle(angle)
+  }
+
+  const handleCreateAndEditAngle = () => {
     if (!selectedPose) return
 
     const newAngle: PoseAngle = {
@@ -124,7 +158,7 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
                   <CardTitle className="text-lg">{pose.name}</CardTitle>
                   <CardDescription>{pose.description}</CardDescription>
                 </div>
-                <Badge variant="outline">{pose.category}</Badge>
+                <Badge variant="outline">{pose.angles.length} ракурсов</Badge>
               </div>
             </CardHeader>
             <CardContent>
@@ -171,7 +205,7 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
                 <CardTitle>{selectedPose.name}</CardTitle>
                 <CardDescription>{selectedPose.description}</CardDescription>
               </div>
-              <Button onClick={handleCreateAngle}>
+              <Button onClick={handleCreateAndEditAngle}>
                 <Plus className="h-4 w-4 mr-2" />
                 Добавить ракурс
               </Button>
@@ -206,13 +240,23 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-lg">{angle.name}</CardTitle>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditingAngle(angle)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditZones(angle)}
+                              title="Редактировать зоны"
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditAngle(angle)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                         <CardDescription>{angle.description}</CardDescription>
                       </CardHeader>
@@ -302,6 +346,41 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
           angle={editingAngle}
           onSave={(updatedAngle) => {
             if (!selectedPose) return
+            const angleIndex = selectedPose.angles.findIndex(a => a.id === updatedAngle.id)
+            const updatedAngles = [...selectedPose.angles]
+
+            if (angleIndex >= 0) {
+              // Обновляем существующий ракурс
+              updatedAngles[angleIndex] = updatedAngle
+            } else {
+              // Добавляем новый ракурс
+              updatedAngles.push(updatedAngle)
+            }
+
+            const updatedPose = {
+              ...selectedPose,
+              angles: updatedAngles
+            }
+            handleSavePose(updatedPose)
+            setSelectedPose(updatedPose) // Обновляем локальное состояние
+            setEditingAngle(null)
+          }}
+          onCancel={() => setEditingAngle(null)}
+          open={!!editingAngle}
+          onEditZones={handleEditZones}
+        />
+      )}
+
+      {/* Визуальный редактор зон */}
+      {editingZones !== null && editingAngle && (
+        <ZoneEditor
+          angle={editingAngle}
+          onSave={(zones) => {
+            if (!selectedPose) return
+            const updatedAngle = {
+              ...editingAngle,
+              activeZones: zones
+            }
             const updatedPose = {
               ...selectedPose,
               angles: selectedPose.angles.map(a =>
@@ -309,10 +388,15 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
               )
             }
             handleSavePose(updatedPose)
+            setSelectedPose(updatedPose) // Обновляем локальное состояние
+            setEditingZones(null)
             setEditingAngle(null)
           }}
-          onCancel={() => setEditingAngle(null)}
-          open={!!editingAngle}
+          onCancel={() => {
+            setEditingZones(null)
+            setEditingAngle(null)
+          }}
+          open={editingZones !== null}
         />
       )}
 
@@ -322,11 +406,22 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
           zone={editingZone}
           onSave={(updatedZone) => {
             if (!editingAngle) return
+            const existingZoneIndex = editingAngle.activeZones.findIndex(z => z.id === updatedZone.id)
+            const updatedZones = [...editingAngle.activeZones]
+
+            if (existingZoneIndex >= 0) {
+              // Обновляем существующую зону
+              updatedZones[existingZoneIndex] = updatedZone
+            } else {
+              // Добавляем новую зону
+              updatedZones.push(updatedZone)
+            }
+
             const updatedAngle = {
               ...editingAngle,
-              activeZones: [...editingAngle.activeZones, updatedZone]
+              activeZones: updatedZones
             }
-            setEditingAngle(updatedAngle)
+            setEditedAngle(updatedAngle)
             setEditingZone(null)
           }}
           onCancel={() => setEditingZone(null)}
@@ -401,25 +496,7 @@ const PoseEditDialog: React.FC<PoseEditDialogProps> = ({
             />
           </div>
 
-          <div>
-            <Label htmlFor="pose-category">Категория</Label>
-            <Select
-              value={editedPose.category}
-              onValueChange={(value) => setEditedPose({...editedPose, category: value})}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="standing">Стоя</SelectItem>
-                <SelectItem value="sitting">Сидя</SelectItem>
-                <SelectItem value="kneeling">На коленях</SelectItem>
-                <SelectItem value="lying">Лёжа</SelectItem>
-                <SelectItem value="bound">Связанная</SelectItem>
-                <SelectItem value="special">Специальная</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Категория скрыта - используется только для внутренней организации */}
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onCancel}>
@@ -441,22 +518,44 @@ interface AngleEditDialogProps {
   onSave: (angle: PoseAngle) => void
   onCancel: () => void
   open: boolean
+  onEditZones?: (angle: PoseAngle) => void
 }
 
 const AngleEditDialog: React.FC<AngleEditDialogProps> = ({
   angle,
   onSave,
   onCancel,
-  open
+  open,
+  onEditZones
 }) => {
   const [editedAngle, setEditedAngle] = useState<PoseAngle>(angle)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   useEffect(() => {
     setEditedAngle(angle)
+    setSelectedFile(null)
   }, [angle])
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      // Создаем URL для предварительного просмотра
+      const fileUrl = URL.createObjectURL(file)
+      setEditedAngle({...editedAngle, mediaUrl: fileUrl})
+    }
+  }
+
   const handleSave = () => {
-    onSave(editedAngle)
+    // Если файл был выбран, сохраняем его как blob URL
+    if (selectedFile) {
+      const fileUrl = URL.createObjectURL(selectedFile)
+      const updatedAngle = {...editedAngle, mediaUrl: fileUrl}
+      onSave(updatedAngle)
+    } else {
+      onSave(editedAngle)
+    }
+    setSelectedFile(null)
   }
 
   return (
@@ -510,23 +609,109 @@ const AngleEditDialog: React.FC<AngleEditDialogProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="angle-media">URL медиа</Label>
-            <Input
-              id="angle-media"
-              value={editedAngle.mediaUrl}
-              onChange={(e) => setEditedAngle({...editedAngle, mediaUrl: e.target.value})}
-              placeholder="https://example.com/image.jpg"
-            />
+            <Label htmlFor="angle-media">Медиа файл</Label>
+            <div className="space-y-2">
+              <Input
+                type="file"
+                accept="image/*,video/*"
+                onChange={handleFileChange}
+                className="cursor-pointer"
+              />
+              <div className="text-sm text-muted-foreground">
+                Или введите URL:
+              </div>
+              <Input
+                id="angle-media"
+                value={editedAngle.mediaUrl.startsWith('blob:') ? '' : editedAngle.mediaUrl}
+                onChange={(e) => setEditedAngle({...editedAngle, mediaUrl: e.target.value})}
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
           </div>
 
+          {/* Предварительный просмотр */}
+          {editedAngle.mediaUrl && (
+            <div>
+              <Label>Предварительный просмотр</Label>
+              <div className="mt-2 border rounded-lg p-2 bg-muted/20 relative">
+                <div className="relative w-full h-32 overflow-hidden rounded">
+                  {editedAngle.mediaType === 'video' ? (
+                    <video
+                      src={editedAngle.mediaUrl}
+                      className="w-full h-full object-cover"
+                      controls
+                    />
+                  ) : (
+                    <img
+                      src={editedAngle.mediaUrl}
+                      alt={editedAngle.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+
+                  {/* Визуализация активных зон */}
+                  {editedAngle.activeZones.map((zone) => (
+                    <div
+                      key={zone.id}
+                      className="absolute border-2 border-cyan-400 bg-cyan-400/20 cursor-pointer hover:bg-cyan-400/40 transition-all"
+                      style={{
+                        left: `${zone.x}%`,
+                        top: `${zone.y}%`,
+                        width: `${zone.width}%`,
+                        height: `${zone.height}%`,
+                      }}
+                      title={`${zone.name} (${zone.category})`}
+                    >
+                      <div className="absolute -top-6 left-0 bg-black/70 text-white text-xs px-1 py-0.5 rounded whitespace-nowrap">
+                        {zone.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Активные зоны */}
           <div>
-            <Label htmlFor="angle-thumbnail">URL миниатюры</Label>
-            <Input
-              id="angle-thumbnail"
-              value={editedAngle.thumbnailUrl || ''}
-              onChange={(e) => setEditedAngle({...editedAngle, thumbnailUrl: e.target.value})}
-              placeholder="https://example.com/thumbnail.jpg"
-            />
+            <div className="flex items-center justify-between">
+              <Label>Активные зоны</Label>
+              <div className="flex gap-2">
+                              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEditZones?.(editedAngle)}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Визуальный редактор
+              </Button>
+                <Badge variant="outline" className="text-xs">
+                  {editedAngle.activeZones.length} зон
+                </Badge>
+              </div>
+            </div>
+
+            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+              {editedAngle.activeZones.length > 0 ? (
+                editedAngle.activeZones.map((zone) => (
+                  <div key={zone.id} className="flex items-center justify-between p-2 border rounded">
+                    <div>
+                      <div className="font-medium text-sm">{zone.promptName || zone.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Ключ: {zone.zoneKey} • {zone.category}
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {zone.sensitivity}/10
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground text-sm py-4">
+                  Нет активных зон. Нажмите "Визуальный редактор" для создания.
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
@@ -537,6 +722,299 @@ const AngleEditDialog: React.FC<AngleEditDialogProps> = ({
               Сохранить
             </Button>
           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// Компонент визуального редактора зон
+interface ZoneEditorProps {
+  angle: PoseAngle
+  onSave: (zones: ActiveZone[]) => void
+  onCancel: () => void
+  open: boolean
+}
+
+const ZoneEditor: React.FC<ZoneEditorProps> = ({
+  angle,
+  onSave,
+  onCancel,
+  open
+}) => {
+  const [zones, setZones] = useState<ActiveZone[]>(angle.activeZones || [])
+  const [selectedZone, setSelectedZone] = useState<ActiveZone | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
+  const [dragStart, setDragStart] = useState<{ x: number, y: number } | null>(null)
+
+  const imageRef = useRef<HTMLImageElement>(null)
+
+  const handleImageClick = (event: React.MouseEvent<HTMLImageElement>) => {
+    if (!isCreating || !imageRef.current) return
+
+    const rect = imageRef.current.getBoundingClientRect()
+    const x = ((event.clientX - rect.left) / rect.width) * 100
+    const y = ((event.clientY - rect.top) / rect.height) * 100
+
+    const newZone: ActiveZone = {
+      id: `zone_${Date.now()}`,
+      name: 'Новая зона',
+      description: 'Описание зоны',
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+      width: 20,
+      height: 20,
+      availableActions: [],
+      availableTools: [],
+      sensitivity: 5,
+      category: 'touch',
+      zoneKey: `zone_${Date.now()}`, // Ключ для системы взаимодействий
+      promptName: 'зона' // Название для промптов
+    }
+
+    setZones([...zones, newZone])
+    setSelectedZone(newZone)
+    setIsCreating(false)
+  }
+
+  const handleZoneClick = (zone: ActiveZone, event: React.MouseEvent) => {
+    event.stopPropagation()
+    setSelectedZone(zone)
+  }
+
+  const updateZone = (updatedZone: ActiveZone) => {
+    setZones(zones.map(z => z.id === updatedZone.id ? updatedZone : z))
+    setSelectedZone(updatedZone)
+  }
+
+  const deleteZone = (zoneId: string) => {
+    setZones(zones.filter(z => z.id !== zoneId))
+    if (selectedZone?.id === zoneId) {
+      setSelectedZone(null)
+    }
+  }
+
+  const handleSave = () => {
+    onSave(zones)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+        <DialogHeader>
+          <DialogTitle>Визуальный редактор активных зон</DialogTitle>
+          <DialogDescription>
+            Кликните "Создать зону" и затем кликните на изображении, чтобы создать активную зону
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex gap-6 h-[600px]">
+          {/* Левая панель - изображение с зонами */}
+          <div className="flex-1 flex flex-col">
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant={isCreating ? "default" : "outline"}
+                onClick={() => setIsCreating(!isCreating)}
+              >
+                {isCreating ? "Отмена создания" : "Создать зону"}
+              </Button>
+              <Button variant="outline" onClick={() => setSelectedZone(null)}>
+                Снять выделение
+              </Button>
+            </div>
+
+            <div className="flex-1 border rounded-lg overflow-hidden relative bg-muted/20">
+              {angle.mediaUrl ? (
+                <>
+                  <img
+                    ref={imageRef}
+                    src={angle.mediaUrl}
+                    alt={angle.name}
+                    className="w-full h-full object-contain cursor-crosshair"
+                    onClick={handleImageClick}
+                  />
+
+                  {/* Активные зоны */}
+                  {zones.map((zone) => (
+                    <div
+                      key={zone.id}
+                      className={`absolute border-2 cursor-pointer transition-all ${
+                        selectedZone?.id === zone.id
+                          ? 'border-primary bg-primary/20 scale-105'
+                          : 'border-cyan-400 bg-cyan-400/20 hover:bg-cyan-400/30'
+                      }`}
+                      style={{
+                        left: `${zone.x}%`,
+                        top: `${zone.y}%`,
+                        width: `${zone.width}%`,
+                        height: `${zone.height}%`,
+                      }}
+                      onClick={(e) => handleZoneClick(zone, e)}
+                      title={`${zone.name} (${zone.zoneKey})`}
+                    >
+                      <div className="absolute -top-8 left-0 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                        {zone.promptName || zone.name}
+                      </div>
+                      {selectedZone?.id === zone.id && (
+                        <div className="absolute -bottom-8 left-0 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                          Ключ: {zone.zoneKey}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <div className="text-4xl mb-2">📷</div>
+                    <p>Изображение не загружено</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Правая панель - настройки выбранной зоны */}
+          <div className="w-80 border rounded-lg p-4 overflow-y-auto">
+            {selectedZone ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Настройки зоны</h3>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteZone(selectedZone.id)}
+                  >
+                    Удалить
+                  </Button>
+                </div>
+
+                <div>
+                  <Label htmlFor="zone-name">Название для промптов</Label>
+                  <Input
+                    id="zone-name"
+                    value={selectedZone.promptName || selectedZone.name}
+                    onChange={(e) => updateZone({...selectedZone, promptName: e.target.value})}
+                    placeholder="например: 'шея', 'грудь', 'бедро'"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="zone-key">Ключ зоны</Label>
+                  <Input
+                    id="zone-key"
+                    value={selectedZone.zoneKey || selectedZone.id}
+                    onChange={(e) => updateZone({...selectedZone, zoneKey: e.target.value})}
+                    placeholder="например: 'neck', 'chest', 'thigh'"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ключ используется системой взаимодействий
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="zone-description">Описание</Label>
+                  <Textarea
+                    id="zone-description"
+                    value={selectedZone.description}
+                    onChange={(e) => updateZone({...selectedZone, description: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="zone-category">Категория</Label>
+                  <Select
+                    value={selectedZone.category}
+                    onValueChange={(value: ActiveZone['category']) =>
+                      updateZone({...selectedZone, category: value})
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="touch">Прикосновение</SelectItem>
+                      <SelectItem value="pressure">Давление</SelectItem>
+                      <SelectItem value="temperature">Температура</SelectItem>
+                      <SelectItem value="electrical">Электричество</SelectItem>
+                      <SelectItem value="visual">Визуальный</SelectItem>
+                      <SelectItem value="auditory">Аудио</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Позиция X (%)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={Math.round(selectedZone.x)}
+                      onChange={(e) => updateZone({...selectedZone, x: Number(e.target.value)})}
+                    />
+                  </div>
+                  <div>
+                    <Label>Позиция Y (%)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={Math.round(selectedZone.y)}
+                      onChange={(e) => updateZone({...selectedZone, y: Number(e.target.value)})}
+                    />
+                  </div>
+                  <div>
+                    <Label>Ширина (%)</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={Math.round(selectedZone.width)}
+                      onChange={(e) => updateZone({...selectedZone, width: Number(e.target.value)})}
+                    />
+                  </div>
+                  <div>
+                    <Label>Высота (%)</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={Math.round(selectedZone.height)}
+                      onChange={(e) => updateZone({...selectedZone, height: Number(e.target.value)})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Чувствительность (1-10)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={selectedZone.sensitivity}
+                    onChange={(e) => updateZone({...selectedZone, sensitivity: Number(e.target.value)})}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-8">
+                <div className="text-4xl mb-2">👆</div>
+                <p>Выберите зону для редактирования</p>
+                <p className="text-sm mt-2">Или создайте новую зону</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button onClick={handleSave}>
+            Сохранить зоны
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

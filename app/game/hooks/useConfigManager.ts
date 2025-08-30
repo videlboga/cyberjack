@@ -12,6 +12,7 @@ export interface ConfigState {
   equipment: any
   system: any
   users: any
+  characterAI?: any
 }
 
 export const useConfigManager = (initialConfigs: ConfigState) => {
@@ -73,9 +74,19 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
         // Специальная обработка для users конфига
         updatedConfig = {
           ...currentConfig,
-          users: currentConfig.users.map((item: any) => 
+          users: currentConfig.users.map((item: any) =>
             item.id === itemId ? updatedItem : item
           )
+        }
+
+      } else if (configType === 'characterAI' && currentConfig.poses) {
+        // Специальная обработка для poses в characterAI
+        updatedConfig = {
+          ...currentConfig,
+          poses: {
+            ...currentConfig.poses,
+            [itemId]: updatedItem
+          }
         }
 
       } else {
