@@ -2597,19 +2597,22 @@ export default function TalentArchitectProd() {
               <CharacterPortrait
                 characterId={selectedTalent.id}
                 characterName={selectedTalent.name}
-                currentPose={selectedTalent.currentPose}
-                currentAngle={selectedTalent.currentAngle}
-                availableAngles={selectedTalent.currentPose?.angles || []}
+                currentPose={characterAI?.currentPose ? characterAI.characterAIConfig?.poses?.[characterAI.currentPose] : undefined}
+                currentAngle={characterAI?.currentAngle || undefined}
+                availableAngles={characterAI?.currentPose && characterAI?.characterAIConfig?.poses?.[characterAI.currentPose]?.angles || []}
                 onAngleChange={(angle) => {
-                  // Обновление текущего ракурса
-                  setSelectedTalent(prev => prev ? {
-                    ...prev,
-                    currentAngle: angle
-                  } : null)
+                  if (characterAI?.changeAngle) {
+                    characterAI.changeAngle(angle.id);
+                  }
                 }}
                 onZoneClick={(zone) => {
                   console.log('🎯 Клик по зоне:', zone.id, zone.name)
-                  // Здесь можно добавить логику для обработки клика по зоне
+                  // Передаем клик по зоне в ActionToolPanel через глобальное состояние
+                  if (selectedTool && characterAI?.useTool) {
+                    characterAI.useTool(selectedTool, zone.id, activeToolIntensity, toolDuration)
+                  } else if (selectedActionMode && characterAI?.executeAction) {
+                    characterAI.executeAction(selectedActionMode, zone.id, activeActionIntensity)
+                  }
                 }}
                 showControls={true}
                 className="w-full h-full"

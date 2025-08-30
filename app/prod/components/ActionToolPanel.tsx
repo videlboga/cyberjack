@@ -30,12 +30,11 @@ export function ActionToolPanel({
   const actionCategories = characterAI?.characterAIConfig?.actionCategories || {};
   const toolCategories = characterAI?.characterAIConfig?.toolCategories || {};
   
-  // Используем poseManagementService для получения поз, чтобы избежать дублирования
-  const poses = characterAI?.poseManagementService ? 
-    Object.values(characterAI.poseManagementService.getAllPoses()) as any[] :
-    Object.values(characterAI?.characterAIConfig?.poses || {}) as any[];
-  
-  const currentPose = characterAI?.currentPose || 'standing_normal';
+  // Получаем позы из characterAIConfig
+  const poses = Object.values(characterAI?.characterAIConfig?.poses || {}) as any[];
+
+  const currentPose = characterAI?.currentPose || null;
+  const currentAngle = characterAI?.currentAngle;
   
   // Проверяем, что конфигурация загружена
   const isConfigLoaded = characterAI?.characterAIConfig && 
@@ -78,6 +77,33 @@ export function ActionToolPanel({
     if (characterAI?.changePose) {
       await characterAI.changePose(pose.id);
       console.log(`Смена позы: ${pose.name}`);
+    }
+  };
+
+  const handleZoneClick = async (zone: any) => {
+    console.log('🎯 Клик по зоне:', zone.name, zone.id);
+
+    // Если выбран инструмент, применяем его к зоне
+    if (selectedTool && characterAI?.useTool) {
+      const tool = tools[selectedTool];
+      if (tool) {
+        console.log(`🔧 Применение инструмента ${tool.name} к зоне ${zone.name}`);
+        await characterAI.useTool(selectedTool, zone.id, toolIntensity[0], toolDuration[0]);
+      }
+    }
+
+    // Если выбрано действие, применяем его к зоне
+    else if (selectedAction && characterAI?.executeAction) {
+      const action = Object.values(actions).find((a: any) => a.id === selectedAction);
+      if (action) {
+        console.log(`⚡ Выполнение действия ${action.name} на зоне ${zone.name}`);
+        await characterAI.executeAction(selectedAction, zone.id, actionIntensity[0]);
+      }
+    }
+
+    // Если ничего не выбрано, показываем информацию о зоне
+    else {
+      console.log(`ℹ️ Информация о зоне ${zone.name}:`, zone);
     }
   };
 
@@ -333,23 +359,89 @@ export function ActionToolPanel({
             {activeTab === 'poses' && (
               <div className="space-y-4">
                 <div className="text-sm text-gray-400 mb-2">Выберите позу:</div>
+
+                {/* Текущая поза и ракурс */}
+                {(currentPose || currentAngle) && (
+                  <div className="p-3 bg-cyan-900/30 border border-cyan-500/50 rounded space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-cyan-400">🎯</span>
+                      <span className="text-white font-medium">Текущая поза:</span>
+                      <span className="text-cyan-300">
+                        {poses.find(p => p.id === currentPose)?.name || currentPose}
+                      </span>
+                    </div>
+                    {currentAngle && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-purple-400">📷</span>
+                        <span className="text-white font-medium">Текущий ракурс:</span>
+                        <span className="text-purple-300">
+                          {currentAngle.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Список поз */}
                 {poses.length > 0 ? (
                   <div className="space-y-2">
                     {poses.map((pose: any) => (
-                      <div key={pose.id} className="p-3 bg-gray-800 rounded border border-gray-600">
-                        <div className="flex items-center justify-between">
-                          <span className="text-white font-medium">{pose.icon} {pose.name}</span>
+                      <div key={pose.id} className={`p-3 bg-gray-800 rounded border hover:bg-gray-700/60 cursor-pointer ${
+                        currentPose === pose.id ? 'border-cyan-500 bg-cyan-900/20' : 'border-gray-600'
+                      }`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-white font-medium">{pose.icon || '🧘'} {pose.name}</span>
                           {currentPose === pose.id && (
-                            <span className="text-xs text-cyan-400">Текущая</span>
+                            <span className="text-xs text-cyan-400 bg-cyan-500/20 px-2 py-1 rounded">Текущая</span>
                           )}
                         </div>
                         <p className="text-sm text-gray-300 mb-2">{pose.description}</p>
-                        <button
-                          onClick={() => handlePoseClick(pose)}
-                          className="w-full px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm"
-                        >
-                          Принять позу
-                        </button>
+
+                        {/* Информация о ракурсах */}
+                        {pose.angles && pose.angles.length > 0 && (
+                          <div className="text-xs text-gray-400 mb-2">
+                            📷 {pose.angles.length} ракурс{pose.angles.length === 1 ? '' : pose.angles.length < 5 ? 'а' : 'ов'}
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handlePoseClick(pose)}
+                            className="flex-1 px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm transition-colors"
+                            disabled={currentPose === pose.id}
+                          >
+                            {currentPose === pose.id ? '✓ Текущая' : 'Принять позу'}
+                          </button>
+
+                          {/* Кнопки быстрого выбора ракурса */}
+                          {currentPose === pose.id && pose.angles && pose.angles.length > 1 && (
+                            <div className="flex gap-1">
+                              {pose.angles.slice(0, 3).map((angle, index) => (
+                                <button
+                                  key={angle.id}
+                                  onClick={() => {
+                                    if (characterAI?.changeAngle) {
+                                      characterAI.changeAngle(angle.id);
+                                    }
+                                  }}
+                                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                                    currentAngle?.id === angle.id
+                                      ? 'bg-purple-600 text-white'
+                                      : 'bg-purple-800 hover:bg-purple-700 text-gray-300'
+                                  }`}
+                                  title={angle.name}
+                                >
+                                  {index + 1}
+                                </button>
+                              ))}
+                              {pose.angles.length > 3 && (
+                                <span className="px-2 py-1 text-xs text-gray-500 self-center">
+                                  +{pose.angles.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -357,8 +449,22 @@ export function ActionToolPanel({
                   <div className="text-center text-gray-400 py-8">
                     <div className="text-4xl mb-2">🧘</div>
                     <p>Позы не настроены</p>
+                    <p className="text-xs mt-2">Настройте позы в разделе "Персонажи" → редактирование → "Позы"</p>
                   </div>
                 )}
+
+                {/* Настройки дефолтной позы */}
+                <div className="mt-6 p-3 bg-gray-800/50 rounded border border-gray-600">
+                  <h4 className="text-sm font-medium text-white mb-3">⚙️ Настройки позы</h4>
+                  <div className="space-y-2">
+                    <div className="text-xs text-gray-400">
+                      Дефолтная поза устанавливается автоматически при смене персонажа
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Первый ракурс позы будет выбран автоматически
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

@@ -74,8 +74,40 @@ export function useCharacterAI({
   currentPose: initialPose,
   geminiApiKey
 }: UseCharacterAIProps): UseCharacterAIReturn {
-  const [currentPose, setCurrentPose] = useState(initialPose);
   const [poseHistory, setPoseHistory] = useState<Array<{ poseId: string; timestamp: number; reason: string }>>([]);
+  const [currentPose, setCurrentPose] = useState(initialPose);
+  const [currentAngle, setCurrentAngle] = useState<PoseAngle | null>(null);
+
+  // Функция для добавления записи в историю поз
+  const addPoseHistory = useCallback((poseId: string, reason: string) => {
+    setPoseHistory(prev => [
+      { poseId, timestamp: Date.now(), reason },
+      ...prev.slice(0, 9) // Оставляем только последние 10 записей
+    ]);
+  }, []);
+
+  // Автоматический выбор дефолтной позы при изменении конфигурации
+  useEffect(() => {
+    if (characterAIConfig?.poses && Object.keys(characterAIConfig.poses).length > 0 && !currentPose) {
+      // Выбираем первую доступную позу как дефолтную
+      const firstPoseId = Object.keys(characterAIConfig.poses)[0];
+      console.log('🎯 useCharacterAI: Автоматический выбор дефолтной позы:', firstPoseId);
+      setCurrentPose(firstPoseId);
+      addPoseHistory(firstPoseId, 'Дефолтная поза при инициализации');
+    }
+  }, [characterAIConfig?.poses, currentPose, addPoseHistory]);
+
+  // Автоматический выбор первого ракурса при смене позы
+  useEffect(() => {
+    if (currentPose && characterAIConfig?.poses?.[currentPose]) {
+      const pose = characterAIConfig.poses[currentPose];
+      if (pose.angles && pose.angles.length > 0 && !currentAngle) {
+        const firstAngle = pose.angles[0];
+        console.log('📷 useCharacterAI: Автоматический выбор первого ракурса:', firstAngle.name);
+        setCurrentAngle(firstAngle);
+      }
+    }
+  }, [currentPose, characterAIConfig?.poses, currentAngle]);
   const [lastAction, setLastAction] = useState<string | null>(null);
   const [lastTool, setLastTool] = useState<string | null>(null);
   const [cooldowns, setCooldowns] = useState<{ [key: string]: number }>({});
@@ -113,14 +145,6 @@ export function useCharacterAI({
   useEffect(() => {
     // Конфигурация обновлена
   }, [characterAIConfig]);
-
-  // Функция для добавления записи в историю поз
-  const addPoseHistory = useCallback((poseId: string, reason: string) => {
-    setPoseHistory(prev => [
-      { poseId, timestamp: Date.now(), reason },
-      ...prev.slice(0, 9) // Оставляем только последние 10 записей
-    ]);
-  }, []);
 
   // Функция для установки кулдауна
   const setCooldown = useCallback((actionId: string, duration: number) => {
@@ -460,7 +484,15 @@ export function useCharacterAI({
     const oldPose = currentPose;
     setCurrentPose(poseId);
     addPoseHistory(poseId, force ? 'Принудительная смена' : 'Добровольная смена');
-    
+
+    // Автоматически выбираем первый ракурс позы
+    if (pose.angles && pose.angles.length > 0) {
+      const firstAngle = pose.angles[0];
+      console.log(`📷 Автоматический выбор первого ракурса для позы ${poseId}:`, firstAngle.name);
+      setCurrentAngle(firstAngle);
+    } else {
+      setCurrentAngle(null);
+    }
 
     return true;
   }, [currentPose, characterAIConfig.poses, addPoseHistory]);
@@ -802,6 +834,7 @@ export function useCharacterAI({
   return {
     // Состояние
     currentPose,
+    currentAngle,
     poseHistory,
     lastAction,
     lastTool,
@@ -822,6 +855,16 @@ export function useCharacterAI({
     startActionUse,
     stopActionUse,
     changePose,
+    changeAngle: (angleId: string) => {
+      if (currentPose && characterAIConfig?.poses?.[currentPose]) {
+        const pose = characterAIConfig.poses[currentPose];
+        const angle = pose.angles?.find(a => a.id === angleId);
+        if (angle) {
+          setCurrentAngle(angle);
+          console.log(`📷 Смена ракурса: ${angle.name}`);
+        }
+      }
+    },
     executeQuickAction,
     analyzeMessage,
     
