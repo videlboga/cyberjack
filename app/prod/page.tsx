@@ -11,6 +11,7 @@ import { personalWorkIntegration } from "@/lib/character/personal-work-integrati
 
 import { useCharacterAI } from "./hooks/useCharacterAI"
 import { ActionToolPanel } from "./components/ActionToolPanel"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { CharacterChat } from "./components/CharacterChat"
 // import { CharacterAdapter } from "@/lib/character/character-adapter" // Удален
 import { OpenRouterDebugPanel } from './components/OpenRouterDebugPanel'
@@ -221,8 +222,6 @@ export default function TalentArchitectProd() {
   const [showRegistration, setShowRegistration] = useState(false)
   const [currentUser, setCurrentUser] = useState<{ username: string; id: string } | null>(null)
   const [showCharacterPanel, setShowCharacterPanel] = useState(false)
-  const [showLeftPanel, setShowLeftPanel] = useState(false)
-  const [showRightPanel, setShowRightPanel] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null)
@@ -313,6 +312,8 @@ export default function TalentArchitectProd() {
   const [characterAIConfig, setCharacterAIConfig] = useState<CharacterAIConfig | null>(null)
   const [showCharacterAIPanel, setShowCharacterAIPanel] = useState(false)
   const [showActionToolPanel, setShowActionToolPanel] = useState(false)
+  const [leftPanelOpen, setLeftPanelOpen] = useState(false)
+  const [rightPanelOpen, setRightPanelOpen] = useState(false)
   const [showCharacterChat, setShowCharacterChat] = useState(false)
   const [showOpenRouterDebug, setShowOpenRouterDebug] = useState(false)
   
@@ -2416,36 +2417,68 @@ export default function TalentArchitectProd() {
       />
 
       <div className="relative z-10 flex h-screen">
-        {/* Кнопки управления панелями */}
-        <div className="absolute top-4 left-4 z-20 flex gap-2">
+        {/* Постоянные закладки-рычаги на краях экрана */}
+        {!leftPanelOpen && (
           <button
-            onClick={() => setShowLeftPanel(!showLeftPanel)}
-            className={`p-3 glass-panel border border-cyan-500/30 rounded-lg hover:bg-cyan-500/10 transition-all duration-300 ${
-              showLeftPanel ? 'bg-cyan-500/20' : 'bg-gray-800/50'
-            }`}
-            title={showLeftPanel ? 'Скрыть левую панель' : 'Показать левую панель'}
+            onClick={() => setLeftPanelOpen(true)}
+            className="fixed left-0 top-1/2 -translate-y-1/2 rotate-90 z-40 px-3 py-1 glass-panel border border-cyan-500/50 text-xs text-cyan-200 hover:text-white"
+            aria-label="Открыть активы"
           >
-            <span className="text-cyan-300">◀</span>
+            Активы
           </button>
+        )}
+        {!rightPanelOpen && (
+          <button
+            onClick={() => setRightPanelOpen(true)}
+            className="fixed right-0 top-1/2 -translate-y-1/2 -rotate-90 z-40 px-3 py-1 glass-panel border border-cyan-500/50 text-xs text-cyan-200 hover:text-white"
+            aria-label="Открыть панель управления"
+          >
+            Панель
+          </button>
+        )}
+        {/* Кнопки открытия панелей */}
+        <div className="fixed top-4 left-4 z-50 flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLeftPanelOpen(true)}
+            className="bg-black/50 border-white/20 text-white hover:bg-black/70"
+          >
+            ☰ Активы
+          </Button>
+          {selectedTalent && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRightPanelOpen(true)}
+              className="bg-black/50 border-white/20 text-white hover:bg-black/70"
+            >
+              ⚙️ Панель
+            </Button>
+          )}
         </div>
 
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
-          <button
-            onClick={() => setShowRightPanel(!showRightPanel)}
-            className={`p-3 glass-panel border border-cyan-500/30 rounded-lg hover:bg-cyan-500/10 transition-all duration-300 ${
-              showRightPanel ? 'bg-cyan-500/20' : 'bg-gray-800/50'
-            }`}
-            title={showRightPanel ? 'Скрыть правую панель' : 'Показать правую панель'}
+        {/* Левая панель - выезжающая */}
+        <Sheet open={leftPanelOpen} onOpenChange={setLeftPanelOpen}>
+          <SheetContent
+            side="left"
+            className="glass-panel border-r border-cyan-500/30 w-96 p-0"
+            onInteractOutside={() => setLeftPanelOpen(false)}
           >
-            <span className="text-cyan-300">▶</span>
-          </button>
-        </div>
-
-        {/* Левая панель - Список талантов */}
-        <div className={`fixed left-0 top-0 h-full z-10 transition-all duration-300 ${
-          showLeftPanel ? 'translate-x-0' : '-translate-x-full'
-        }`}>
-          <div className="w-80 h-full glass-panel border-r border-cyan-500/30 p-6 overflow-y-auto">
+            {/* Закладка-рычаг для закрытия */}
+            <div className="absolute -right-4 top-1/2 -translate-y-1/2 z-50">
+              <button
+                onClick={() => setLeftPanelOpen(false)}
+                className="rotate-90 px-3 py-1 glass-panel border border-cyan-500/50 text-xs text-cyan-200 hover:text-white"
+                aria-label="Скрыть левую панель"
+              >
+                Активы
+              </button>
+            </div>
+            <SheetHeader>
+              <SheetTitle>Список активов и станция</SheetTitle>
+            </SheetHeader>
+            <div className="p-6 overflow-y-auto h-full">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
@@ -2562,8 +2595,9 @@ export default function TalentArchitectProd() {
               </div>
             </div>
           )}
-          </div>
-        </div>
+            </div>
+          </SheetContent>
+        </Sheet>
 
         {/* Центральная область */}
         <div className="flex-1 flex flex-col">
@@ -2624,7 +2658,15 @@ export default function TalentArchitectProd() {
 
           {/* Портрет */}
           {selectedTalent && (
-            <div className="flex-1 relative overflow-hidden">
+            <div
+              className="flex-1 relative overflow-hidden"
+              onClickCapture={(e) => {
+                if (e.target === e.currentTarget) {
+                  if (rightPanelOpen) setRightPanelOpen(false)
+                  if (leftPanelOpen) setLeftPanelOpen(false)
+                }
+              }}
+            >
               <CharacterPortrait
                 characterId={selectedTalent.id}
                 characterName={selectedTalent.name}
@@ -2654,72 +2696,184 @@ export default function TalentArchitectProd() {
           )}
         </div>
 
-        {/* Правая панель - Действия и инструменты (выезжающая) */}
-        <div className={`fixed right-0 top-0 h-full z-10 transition-all duration-300 ${
-          showRightPanel ? 'translate-x-0' : 'translate-x-full'
-        }`}>
-          <div className="w-96 h-full glass-panel border-l border-cyan-500/30 p-6 overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-cyan-400">Действия и инструменты</h2>
+        {/* Правая панель управления - выезжающая */}
+        <Sheet open={rightPanelOpen} onOpenChange={setRightPanelOpen}>
+          <SheetContent
+            side="right"
+            className="glass-panel border-l border-cyan-500/30 w-96 p-0"
+            onInteractOutside={() => setRightPanelOpen(false)}
+          >
+            {/* Закладка-рычаг для закрытия */}
+            <div className="absolute -left-4 top-1/2 -translate-y-1/2 z-50">
+              <button
+                onClick={() => setRightPanelOpen(false)}
+                className="-rotate-90 px-3 py-1 glass-panel border border-cyan-500/50 text-xs text-cyan-200 hover:text-white"
+                aria-label="Скрыть правую панель"
+              >
+                Панель
+              </button>
             </div>
-
+            <SheetHeader>
+              <SheetTitle>Панель управления персонажем</SheetTitle>
+            </SheetHeader>
             {selectedTalent && (
-              <div className="space-y-6">
-                {/* Кнопки быстрого доступа */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setShowActionToolPanel(true)}
-                    className="p-4 glass-panel border border-cyan-500/30 rounded-lg hover:bg-cyan-500/10 transition-colors"
-                  >
-                    <div className="text-center">
-                      <div className="text-2xl mb-2">⚡</div>
-                      <div className="text-sm font-medium text-white">Действия</div>
+            <div className="space-y-6 p-6 overflow-y-auto h-full">
+              {/* Состояния */}
+              <div>
+                <h3 className="text-lg font-semibold text-green-400 mb-3">Состояния</h3>
+                <div className="space-y-2">
+                  {selectedTalent.statusEffects.map((effect) => (
+                    <div key={effect.id} className={`p-3 rounded border ${getStatusEffectColor(effect.type)}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">
+                          {effect.icon} {effect.name}
+                        </span>
+                        {effect.removable && (
+                          <button
+                            onClick={() => removeStatusEffect(selectedTalent.id, effect.id)}
+                            className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-xs"
+                          >
+                            Снять
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-300 mt-1">{effect.description}</p>
+                      <p className="text-xs text-gray-400">Осталось: {effect.duration} дней</p>
                     </div>
-                  </button>
-                  <button
-                    onClick={() => setShowCharacterPanel(true)}
-                    className="p-4 glass-panel border border-cyan-500/30 rounded-lg hover:bg-cyan-500/10 transition-colors"
-                  >
-                    <div className="text-center">
-                      <div className="text-2xl mb-2">📊</div>
-                      <div className="text-sm font-medium text-white">Характеристики</div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Компактная информация о персонаже */}
-                <div className="glass-panel border border-cyan-500/30 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-white">{selectedTalent.name}</h3>
-                    <span className="text-sm text-cyan-300">Ур. {selectedTalent.level}</span>
-                  </div>
-
-                  {/* Основные характеристики */}
-                  <div className="space-y-2">
-                    {memoizedEffectiveStats &&
-                      Object.entries(memoizedEffectiveStats)
-                        .filter(([stat]) => ['mood', 'anxiety', 'engagement'].includes(stat))
-                        .map(([stat, value]) => (
-                          <div key={stat} className="flex items-center gap-3">
-                            <div className="flex-1 min-w-0">
-                              <div className="text-xs text-gray-300 truncate">{getAttributeDisplayName(stat)}</div>
-                              <div className="w-full bg-gray-600 rounded-full h-1 mt-1">
-                                <div
-                                  className={`h-1 rounded-full transition-all duration-300 ${getBarColor(value)}`}
-                                  style={{ width: `${Math.min((value / 100) * 100, 100)}%` }}
-                                />
-                              </div>
-                            </div>
-                            <div className="text-xs text-gray-300 font-medium">{value}</div>
-                          </div>
-                        ))}
-                  </div>
+                  ))}
                 </div>
               </div>
+
+              {/* Оборудование */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-purple-400">Оборудование</h3>
+                  <button
+                    onClick={() => setShowEquipmentPanel(true)}
+                    className="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm"
+                  >
+                    Управление ({filteredInventory.filter((item) => item.enabled).length})
+                  </button>
+                </div>
+                <div className="text-sm text-gray-300 mb-3">
+                  Активно:{" "}
+                  {
+                    filteredInventory.filter((item) => item.enabled && item.targetTalents?.includes(selectedTalent.id))
+                      .length
+                  }{" "}
+                  предметов
+                </div>
+                
+                {/* Список активного оборудования */}
+                <div className="space-y-2">
+                  {filteredInventory
+                    .filter((item) => item.enabled && item.targetTalents?.includes(selectedTalent.id))
+                    .map((item) => (
+                      <div key={item.id} className="p-3 bg-gray-800/50 border border-gray-600 rounded">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-white">{item.name}</span>
+                          <span className="text-xs text-gray-400">{item.type}</span>
+                        </div>
+                        <p className="text-xs text-gray-300 mb-2">{item.description}</p>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-cyan-400">Мощность: {item.powerLevel}%</span>
+                          {item.mode && <span className="text-purple-400">Режим: {item.mode}</span>}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+
+            </div>
             )}
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Плавающая панель в режиме личной работы */}
+      {/* Character AI панели */}
+      {characterAIConfig && selectedTalent && (
+        <>
+          {/* Панель действий и инструментов */}
+          {showActionToolPanel && (
+            <ActionToolPanel
+              characterAI={characterAI}
+              selectedTalent={selectedTalent}
+              onClose={() => setShowActionToolPanel(false)}
+              onToolModeChange={(toolId, intensity) => {
+                setSelectedTool(toolId)
+                if (typeof intensity === 'number') setActiveToolIntensity(intensity)
+              }}
+              onActionModeChange={(actionId, intensity) => {
+                setSelectedActionMode(actionId)
+                if (typeof intensity === 'number') setActiveActionIntensity(intensity)
+              }}
+            />
+          )}
+          
+          {/* Чат с персонажем */}
+          {showCharacterChat && (
+            <CharacterChat
+              characterAI={characterAI}
+              selectedTalent={selectedTalent}
+              onClose={() => setShowCharacterChat(false)}
+              applyAIChanges={applyAIChanges}
+            />
+          )}
+        </>
+      )}
+
+      {/* Панель управления Character AI */}
+      {characterAIConfig && selectedTalent && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 glass-panel border border-cyan-500/50 rounded-lg p-4 z-50">
+          <div className="flex items-center gap-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowActionToolPanel(!showActionToolPanel)
+                }}
+                className={`px-3 py-2 rounded text-sm transition-colors ${
+                  showActionToolPanel ? "bg-cyan-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                🤖 Действия и инструменты
+              </button>
+              <button
+                onClick={() => {
+                  setShowCharacterChat(!showCharacterChat)
+                }}
+                className={`px-3 py-2 rounded text-sm transition-colors ${
+                  showCharacterChat ? "bg-cyan-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                💬 Чат с персонажем
+              </button>
+            </div>
+            <div className="border-l border-gray-600 pl-4 flex gap-2">
+              <button
+                onClick={() => setShowCharacterPanel(!showCharacterPanel)}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
+              >
+                {showCharacterPanel ? "Скрыть" : "Показать"} характеристики
+              </button>
+              <button
+                onClick={() => setShowEquipmentPanel(true)}
+                className="px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm"
+              >
+                Настройки оборудования
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
+      {/* Чат с LLM */}
+      {showLLMChat && selectedTalent && (
+        <div
+          className="fixed glass-panel border border-cyan-500/50 rounded-lg z-50 w-96 h-96 flex flex-col"
+          style={{ left: chatPosition.x, top: chatPosition.y }}
+        >
           <div
             className="p-3 border-b border-gray-600 cursor-move flex items-center justify-between"
             onMouseDown={handleChatMouseDown}
