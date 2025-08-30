@@ -145,7 +145,13 @@ export class MessageAnalysisService {
   "fetishTriggers": ["bondage", "submission"],
   "commands": {
     "poseChange": "kneeling",
+    "poseKey": "kneeling",
     "action": "submit"
+  },
+  "poseAnalysis": {
+    "detectedPose": "kneeling",
+    "confidence": 0.8,
+    "context": "submissive_request"
   }
 }
 `;
@@ -512,21 +518,77 @@ ${interactionText}
    */
   extractCommands(message: string): {
     poseCommands: string[];
+    poseKey?: string;
     actionCommands: string[];
     toolCommands: string[];
   } {
-    const poseKeywords = ['встань', 'сядь', 'ляг', 'встань на колени', 'поклонись'];
+    const poseMappings = {
+      // Стоячие позы
+      'standing': ['встань', 'стой', 'встать', 'стоять'],
+      'standing_tall': ['выпрямись', 'вытянись'],
+
+      // Сидячие позы
+      'sitting': ['сядь', 'сядь', 'сесть', 'сидеть'],
+      'sitting_formal': ['сядь прямо', 'сиди прямо'],
+
+      // Лежачие позы
+      'lying': ['ляг', 'лечь', 'ложись', 'лежать'],
+      'lying_spread': ['разведи ноги', 'раздвинь ноги'],
+
+      // Преклоненные позы
+      'kneeling': ['на колени', 'встань на колени', 'поклонись', 'колени'],
+      'kneeling_submissive': ['преклони колени', 'смиренно'],
+
+      // Связанные позы
+      'bound_hands': ['свяжи руки', 'руки за спину'],
+      'bound_legs': ['свяжи ноги', 'ноги вместе'],
+
+      // Специальные позы
+      'all_fours': ['на четвереньки', 'четвереньки'],
+      'presenting': ['представься', 'покажи себя'],
+      'begging': ['умоляй', 'проси'],
+      'crawling': ['ползи', 'на карачках']
+    };
+
     const actionKeywords = ['трогай', 'целуй', 'ласкай', 'наказывай', 'хвали'];
     const toolKeywords = ['вибрация', 'электричество', 'свяжи', 'ограничь'];
-    
+
     const words = message.toLowerCase();
-    
-    const poseCommands = poseKeywords.filter(keyword => words.includes(keyword));
+
+    // Анализируем сообщение на наличие команд поз
+    let detectedPoseKey: string | null = null;
+    for (const [poseKey, keywords] of Object.entries(poseMappings)) {
+      if (keywords.some(keyword => words.includes(keyword) || message.toLowerCase().includes(keyword))) {
+        detectedPoseKey = poseKey;
+        break;
+      }
+    }
+
+    // Дополнительный анализ контекста для определения позы
+    if (!detectedPoseKey) {
+      const contextMappings = {
+        'kneeling': ['пожалуйста', 'прошу', 'умоляю', 'смиренно', 'преклоняюсь'],
+        'submissive': ['подчиняюсь', 'твой', 'твоя', 'слуга', 'рабыня'],
+        'aroused': ['возбуждена', 'заведена', 'готова', 'желаю'],
+        'fearful': ['боюсь', 'страшно', 'ужас', 'паника'],
+        'pain_response': ['больно', 'боль', 'страдания', 'муки']
+      };
+
+      for (const [poseKey, contexts] of Object.entries(contextMappings)) {
+        if (contexts.some(context => message.toLowerCase().includes(context))) {
+          detectedPoseKey = poseKey;
+          break;
+        }
+      }
+    }
+
+    const poseCommands = detectedPoseKey ? [detectedPoseKey] : [];
     const actionCommands = actionKeywords.filter(keyword => words.includes(keyword));
     const toolCommands = toolKeywords.filter(keyword => words.includes(keyword));
-    
+
     return {
       poseCommands,
+      poseKey: detectedPoseKey || undefined,
       actionCommands,
       toolCommands
     };

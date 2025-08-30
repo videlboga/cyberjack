@@ -1,0 +1,379 @@
+{
+  "poses": {
+    "standing_basic": {
+      "id": "standing_basic",
+      "name": "Основная стойка",
+      "description": "Базовая стоячая поза с естественным положением тела",
+      "category": "standing",
+      "key": "standing",
+      "angles": [
+        {
+          "id": "standing_front",
+          "name": "Спереди",
+          "description": "Вид спереди, показывает лицо и тело в анфас",
+          "mediaUrl": "/images/poses/standing/front.jpg",
+          "mediaType": "image",
+          "thumbnailUrl": "/images/poses/standing/front_thumb.jpg",
+          "activeZones": [
+            {
+              "id": "face",
+              "name": "Лицо",
+              "description": "Область лица для нежных прикосновений",
+              "x": 40,
+              "y": 10,
+              "width": 20,
+              "height": 15,
+              "availableActions": ["touch", "kiss", "stroke"],
+              "availableTools": ["feather", "soft_brush"],
+              "sensitivity": 8,
+              "category": "touch"
+            },
+            {
+              "id": "chest",
+              "name": "Грудь",
+              "description": "Область груди для интенсивных воздействий",
+              "x": 35,
+              "y": 25,
+              "width": 30,
+              "height": 20,
+              "availableActions": ["massage", "squeeze"],
+              "availableTools": ["vibrator", "electrodes"],
+              "sensitivity": 9,
+              "category": "pressure"
+            },
+            {
+              "id": "thighs",
+              "name": "Бедра",
+              "description": "Внутренняя поверхность бедер",
+              "x": 30,
+              "y": 60,
+              "width": 40,
+              "height": 25,
+              "availableActions": ["stroke", "spank"],
+              "availableTools": ["whip", "paddle"],
+              "sensitivity": 7,
+              "category": "touch"
+            }
+          ]
+        },
+        {
+          "id": "standing_side",
+          "name": "Сбоку",
+          "description": "Боковой вид, подчеркивает изгибы тела",
+          "mediaUrl": "/images/poses/standing/side.jpg",
+          "mediaType": "image",
+          "thumbnailUrl": "/images/poses/standing/side_thumb.jpg",
+          "activeZones": [
+            {
+              "id": "neck_side",
+              "name": "Шея сбоку",
+              "description": "Боковая поверхность шеи",
+              "x": 60,
+              "y": 15,
+              "width": 15,
+              "height": 10,
+              "availableActions": ["kiss", "bite"],
+              "availableTools": ["teeth", "collar"],
+              "sensitivity": 9,
+              "category": "touch"
+            },
+            {
+              "id": "waist",
+              "name": "Талия",
+              "description": "Область талии и живота",
+              "x": 45,
+              "y": 35,
+              "width": 25,
+              "height": 20,
+              "availableActions": ["hug", "squeeze"],
+              "availableTools": ["belt", "rope"],
+              "sensitivity": 6,
+              "category": "pressure"
+            }
+          ]
+        },
+        {
+          "id": "standing_back",
+          "name": "Сзади",
+          "description": "Вид сзади, акцент на спину и ягодицы",
+          "mediaUrl": "/images/poses/standing/back.jpg",
+          "mediaType": "image",
+          "thumbnailUrl": "/images/poses/standing/back_thumb.jpg",
+          "activeZones": [
+            {
+              "id": "back",
+              "name": "Спина",
+              "description": "Верхняя часть спины",
+              "x": 30,
+              "y": 20,
+              "width": 40,
+              "height": 30,
+              "availableActions": ["massage", "scratch"],
+              "availableTools": ["whip", "paddle"],
+              "sensitivity": 7,
+              "category": "touch"
+            },
+            {
+              "id": "buttocks",
+              "name": "Ягодицы",
+              "description": "Область ягодиц",
+              "x": 35,
+              "y": 55,
+              "width": 30,
+              "height": 20,
+              "availableActions": ["spank", "squeeze"],
+              "availableTools": ["paddle", "vibrator"],
+              "sensitivity": 8,
+              "category": "pressure"
+            }
+          ]
+        }
+      ],
+      "requirements": {
+        "flexibility": 3,
+        "strength": 2
+      },
+      "effects": {
+        "physical": {
+          "endurance": 5
+        },
+        "emotional": {
+          "confidence": 3
+        }
+      }
+    },
+    "kneeling_submissive": {
+      "id": "kneeling_submissive",
+      "name": "Покорная поза на коленях",
+      "description": "Поза глубокого подчинения и покорности",
+      "category": "kneeling",
+      "key": "kneeling",
+      "angles": [
+        {
+          "id": "kneeling_front",
+          "name": "Спереди",
+          "description": "Вид спереди, показывает лицо и руки в покорной позе",
+          "mediaUrl": "/images/poses/kneeling/front.jpg",
+          "mediaType": "image",
+          "thumbnailUrl": "/images/poses/kneeling/front_thumb.jpg",
+          "activeZones": [
+            {
+              "id": "kneeling_face",
+              "name": "Лицо на коленях",
+              "description": "Лицо в позе глубокого подчинения",
+              "x": 40,
+              "y": 20,
+              "width": 20,
+              "height": 15,
+              "availableActions": ["stroke", "command"],
+              "availableTools": ["collar", "leash"],
+              "sensitivity": 10,
+              "category": "touch"
+            },
+            {
+              "id": "kneeling_hands",
+              "name": "Руки на коленях",
+              "description": "Руки сложены в покорной позе",
+              "x": 30,
+              "y": 50,
+              "width": 40,
+              "height": 15,
+              "availableActions": ["bind", "spank"],
+              "availableTools": ["rope", "handcuffs"],
+              "sensitivity": 7,
+              "category": "touch"
+            }
+          ]
+        },
+        {
+          "id": "kneeling_side",
+          "name": "Сбоку",
+          "description": "Боковой вид коленопреклоненной позы",
+          "mediaUrl": "/images/poses/kneeling/side.jpg",
+          "mediaType": "image",
+          "thumbnailUrl": "/images/poses/kneeling/side_thumb.jpg",
+          "activeZones": [
+            {
+              "id": "kneeling_posture",
+              "name": "Поза",
+              "description": "Общая поза подчинения",
+              "x": 35,
+              "y": 30,
+              "width": 30,
+              "height": 50,
+              "availableActions": ["command", "reward"],
+              "availableTools": ["whip", "treat"],
+              "sensitivity": 8,
+              "category": "visual"
+            }
+          ]
+        }
+      ],
+      "requirements": {
+        "flexibility": 5,
+        "strength": 3
+      },
+      "effects": {
+        "physical": {
+          "endurance": -2
+        },
+        "emotional": {
+          "submission": 8,
+          "humiliation": 5
+        },
+        "fetish": {
+          "submission": 10,
+          "humiliation": 7
+        }
+      }
+    },
+    "all_fours": {
+      "id": "all_fours",
+      "name": "На четвереньках",
+      "description": "Поза на четвереньках, максимально уязвимая и покорная",
+      "category": "special",
+      "key": "all_fours",
+      "angles": [
+        {
+          "id": "all_fours_back",
+          "name": "Вид сзади",
+          "description": "Задний вид позы на четвереньках",
+          "mediaUrl": "/images/poses/all_fours/back.jpg",
+          "mediaType": "image",
+          "thumbnailUrl": "/images/poses/all_fours/back_thumb.jpg",
+          "activeZones": [
+            {
+              "id": "exposed_back",
+              "name": "Открытая спина",
+              "description": "Полностью открытая спина в уязвимой позе",
+              "x": 25,
+              "y": 15,
+              "width": 50,
+              "height": 40,
+              "availableActions": ["whip", "spank", "mount"],
+              "availableTools": ["whip", "paddle", "belt"],
+              "sensitivity": 9,
+              "category": "touch"
+            },
+            {
+              "id": "exposed_genitals",
+              "name": "Интимная область",
+              "description": "Полностью открытая интимная область",
+              "x": 40,
+              "y": 50,
+              "width": 20,
+              "height": 25,
+              "availableActions": ["penetrate", "stimulate"],
+              "availableTools": ["vibrator", "dildo"],
+              "sensitivity": 10,
+              "category": "touch"
+            }
+          ]
+        },
+        {
+          "id": "all_fours_side",
+          "name": "Вид сбоку",
+          "description": "Боковой вид позы на четвереньках",
+          "mediaUrl": "/images/poses/all_fours/side.jpg",
+          "mediaType": "image",
+          "thumbnailUrl": "/images/poses/all_fours/side_thumb.jpg",
+          "activeZones": [
+            {
+              "id": "side_exposure",
+              "name": "Боковое обнажение",
+              "description": "Боковой вид открытого тела",
+              "x": 30,
+              "y": 25,
+              "width": 40,
+              "height": 50,
+              "availableActions": ["spank", "grope"],
+              "availableTools": ["hand", "paddle"],
+              "sensitivity": 8,
+              "category": "touch"
+            }
+          ]
+        }
+      ],
+      "requirements": {
+        "flexibility": 7,
+        "strength": 4
+      },
+      "effects": {
+        "physical": {
+          "endurance": -3
+        },
+        "emotional": {
+          "humiliation": 9,
+          "vulnerability": 8
+        },
+        "fetish": {
+          "humiliation": 10,
+          "submission": 9,
+          "objectification": 8
+        }
+      }
+    }
+  },
+  "poseChangeConditions": {
+    "fear_response": {
+      "id": "fear_response",
+      "name": "Реакция на страх",
+      "description": "Автоматическая смена позы при высоком уровне страха",
+      "type": "automatic",
+      "probability": 0.8,
+      "conditions": {
+        "states": {
+          "fear": {
+            "operator": ">",
+            "value": 70
+          }
+        }
+      },
+      "targetPose": "kneeling_submissive",
+      "effects": {
+        "states": {
+          "submission": 15
+        }
+      }
+    },
+    "pleasure_response": {
+      "id": "pleasure_response",
+      "name": "Реакция на удовольствие",
+      "description": "Изменение позы при высоком уровне удовольствия",
+      "type": "automatic",
+      "probability": 0.6,
+      "conditions": {
+        "states": {
+          "pleasure": {
+            "operator": ">",
+            "value": 75
+          }
+        }
+      },
+      "targetPose": "standing_basic",
+      "effects": {
+        "states": {
+          "arousal": 10
+        }
+      }
+    },
+    "command_kneeling": {
+      "id": "command_kneeling",
+      "name": "Команда встать на колени",
+      "description": "Смена позы по команде пользователя",
+      "type": "command",
+      "probability": 1.0,
+      "conditions": {
+        "userActions": {
+          "recentActions": ["command_kneel"]
+        }
+      },
+      "targetPose": "kneeling_submissive",
+      "effects": {
+        "states": {
+          "obedience": 10
+        }
+      }
+    }
+  }
+}

@@ -25,21 +25,25 @@ export async function loadUnifiedConfigV2(): Promise<GameConfig> {
     // Загружаем реальные данные из JSON файлов
     console.log('📂 Загружаем данные из JSON файлов...')
 
-    const [charactersData, usersData, equipmentData, gameUnifiedData] = await Promise.all([
+    const [charactersData, usersData, equipmentData, posesData, gameUnifiedData] = await Promise.all([
       import('../data/characters-unified.json'),
       import('../data/users-unified.json'),
       import('../data/equipment-unified.json'),
+      import('../data/poses-unified.json').catch(() => ({ default: { poses: {}, poseChangeConditions: {} } })),
       import('../data/game-config-unified.json').catch(() => null as any)
     ])
 
     const realCharacters = charactersData.default.characters || []
     const realUsers = usersData.default.users || []
     const realEquipment = equipmentData.default.equipment || []
+    const realPoses = posesData.default.poses || {}
+    const realPoseConditions = posesData.default.poseChangeConditions || {}
 
     console.log('📊 Реальные данные загружены:', {
       characters: realCharacters.length,
       users: realUsers.length,
-      equipment: realEquipment.length
+      equipment: realEquipment.length,
+      poses: Object.keys(realPoses).length
     })
 
     // Попробуем получить Character AI конфигурацию из объединённого файла,
@@ -139,7 +143,11 @@ export async function loadUnifiedConfigV2(): Promise<GameConfig> {
       ], // Реальные или тестовые пользователи
       market: {}, // Заглушка для рынка
       assets: [], // Заглушка для активов
-      characterAI: characterAIFromFile
+      characterAI: {
+        ...characterAIFromFile,
+        poses: realPoses,
+        poseChangeConditions: realPoseConditions
+      }
     }
 
     console.log('✅ Конфигурация создана с объединенными данными')

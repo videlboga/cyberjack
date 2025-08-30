@@ -1,4 +1,4 @@
-import { Pose, PoseChangeCondition, InteractiveAction, InteractiveTool } from '../unified-entities';
+import { Pose, PoseChangeCondition, InteractiveAction, InteractiveTool, PoseAngle, ActiveZone } from '../unified-entities';
 
 export class PoseManagementService {
   private poses: { [key: string]: Pose } = {};
@@ -490,5 +490,116 @@ export class PoseManagementService {
    */
   getConditionsByType(type: string): PoseChangeCondition[] {
     return Object.values(this.poseChangeConditions).filter(condition => condition.type === type);
+  }
+
+  /**
+   * Получает доступные ракурсы для позы
+   */
+  getPoseAngles(poseId: string): PoseAngle[] {
+    const pose = this.poses[poseId];
+    return pose?.angles || [];
+  }
+
+  /**
+   * Получает ракурс по ID
+   */
+  getPoseAngle(poseId: string, angleId: string): PoseAngle | null {
+    const pose = this.poses[poseId];
+    return pose?.angles.find(angle => angle.id === angleId) || null;
+  }
+
+  /**
+   * Получает активные зоны для ракурса
+   */
+  getActiveZones(poseId: string, angleId: string): ActiveZone[] {
+    const angle = this.getPoseAngle(poseId, angleId);
+    return angle?.activeZones || [];
+  }
+
+  /**
+   * Получает активную зону по ID
+   */
+  getActiveZone(poseId: string, angleId: string, zoneId: string): ActiveZone | null {
+    const zones = this.getActiveZones(poseId, angleId);
+    return zones.find(zone => zone.id === zoneId) || null;
+  }
+
+  /**
+   * Проверяет доступность ракурса для персонажа
+   */
+  isAngleAvailable(poseId: string, angleId: string, characterAttributes: { [key: string]: number }, equipment: string[]): boolean {
+    const angle = this.getPoseAngle(poseId, angleId);
+    if (!angle) return false;
+
+    // Проверяем требования к характеристикам
+    if (angle.requirements?.attributes) {
+      for (const [attr, requiredValue] of Object.entries(angle.requirements.attributes)) {
+        if ((characterAttributes[attr] || 0) < requiredValue) {
+          return false;
+        }
+      }
+    }
+
+    // Проверяем требования к оборудованию
+    if (angle.requirements?.equipment) {
+      const hasRequiredEquipment = angle.requirements.equipment.every(eq =>
+        equipment.includes(eq)
+      );
+      if (!hasRequiredEquipment) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Получает доступные ракурсы для позы и персонажа
+   */
+  getAvailableAngles(poseId: string, characterAttributes: { [key: string]: number }, equipment: string[]): PoseAngle[] {
+    const pose = this.poses[poseId];
+    if (!pose) return [];
+
+    return pose.angles.filter(angle =>
+      this.isAngleAvailable(poseId, angle.id, characterAttributes, equipment)
+    );
+  }
+
+  /**
+   * Получает доступные активные зоны для ракурса и персонажа
+   */
+  getAvailableActiveZones(poseId: string, angleId: string, characterAttributes: { [key: string]: number }, characterStates: { [key: string]: number }, equipment: string[]): ActiveZone[] {
+    const zones = this.getActiveZones(poseId, angleId);
+    return zones.filter(zone => {
+      // Проверяем требования к характеристикам
+      if (zone.requirements?.attributes) {
+        for (const [attr, requiredValue] of Object.entries(zone.requirements.attributes)) {
+          if ((characterAttributes[attr] || 0) < requiredValue) {
+            return false;
+          }
+        }
+      }
+
+      // Проверяем требования к состояниям
+      if (zone.requirements?.states) {
+        for (const [state, requiredValue] of Object.entries(zone.requirements.states)) {
+          if ((characterStates[state] || 0) < requiredValue) {
+            return false;
+          }
+        }
+      }
+
+      // Проверяем требования к оборудованию
+      if (zone.requirements?.equipment) {
+        const hasRequiredEquipment = zone.requirements.equipment.every(eq =>
+          equipment.includes(eq)
+        );
+        if (!hasRequiredEquipment) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 }

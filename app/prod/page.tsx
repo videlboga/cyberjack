@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { StatNotification } from "@/components/ui/stat-notification"
 import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
 import { Toaster } from "@/components/ui/toaster"
+import { CharacterPortrait } from "./components/CharacterPortrait"
 
   // Функция для генерации уникальных ID
   let idCounter = 0
@@ -2584,84 +2585,28 @@ export default function TalentArchitectProd() {
           {/* Портрет */}
           {selectedTalent && (
             <div className="flex-1 relative overflow-hidden">
-              <img
-                src={getPortraitImage(selectedTalent) || "/placeholder.svg"}
-                alt={`Портрет ${selectedTalent.name}`}
-                className="w-full h-full object-cover"
+              <CharacterPortrait
+                characterId={selectedTalent.id}
+                characterName={selectedTalent.name}
+                currentPose={selectedTalent.currentPose}
+                currentAngle={selectedTalent.currentAngle}
+                availableAngles={selectedTalent.currentPose?.angles || []}
+                onAngleChange={(angle) => {
+                  // Обновление текущего ракурса
+                  setSelectedTalent(prev => prev ? {
+                    ...prev,
+                    currentAngle: angle
+                  } : null)
+                }}
+                onZoneClick={(zone) => {
+                  console.log('🎯 Клик по зоне:', zone.id, zone.name)
+                  // Здесь можно добавить логику для обработки клика по зоне
+                }}
+                showControls={true}
+                className="w-full h-full"
               />
 
-              {/* Интерактивные области */}
-              {(selectedTool || selectedActionMode) && selectedTalent && (() => {
-                const areas = getInteractiveAreas(selectedTalent)
-                console.log('🎯 Отображение интерактивных зон:', {
-                  selectedTool,
-                  selectedActionMode,
-                  areasCount: areas.length,
-                  areas: areas.map(a => ({ id: a.id, name: a.name }))
-                })
-                return (
-                  <div className="absolute inset-0 z-50 pointer-events-auto">
-                    {areas.map((area) => (
-                    <div
-                      key={area.id}
-                      className={`absolute border-2 border-cyan-400 bg-cyan-400/20 cursor-pointer transition-all hover:bg-cyan-400/40 ${
-                        interactiveAreas[area.id] ? "animate-pulse" : ""
-                      }`}
-                      style={{
-                        left: `${area.x}%`,
-                        top: `${area.y}%`,
-                        width: `${area.width}%`,
-                        height: `${area.height}%`,
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault()
-                        console.log('🎯 MouseDown на зоне:', area.id, { selectedTool, selectedActionMode, activeToolIntensity, activeActionIntensity })
-                        // старт непрерывного воздействия выбранным инструментом
-                        try {
-                          if (selectedTool) {
-                            console.log('🔧 Запуск startToolUse:', selectedTool, activeToolIntensity, area.id)
-                            characterAI?.startToolUse?.(selectedTool as any, activeToolIntensity, area.id)
-                          }
-                          if (selectedActionMode) {
-                            console.log('⚡ Запуск startActionUse:', selectedActionMode, activeActionIntensity, area.id)
-                            characterAI?.startActionUse?.(selectedActionMode as any, activeActionIntensity, area.id)
-                          }
-                        } catch (error) {
-                          console.error('❌ Ошибка при запуске:', error)
-                        }
-                      }}
-                      onMouseUp={(e) => {
-                        e.preventDefault()
-                        console.log('🖱️ MouseUp на зоне:', area.id)
-                        try {
-                          console.log('🛑 Остановка инструментов и действий')
-                          characterAI?.stopToolUse?.()
-                          characterAI?.stopActionUse?.()
-                        } catch (error) {
-                          console.error('❌ Ошибка при остановке:', error)
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        e.preventDefault()
-                        console.log('👋 MouseLeave зоны:', area.id)
-                        try {
-                          console.log('🛑 Остановка по уходу с зоны')
-                          characterAI?.stopToolUse?.()
-                          characterAI?.stopActionUse?.()
-                        } catch (error) {
-                          console.error('❌ Ошибка при остановке по уходу:', error)
-                        }
-                      }}
-                      onMouseEnter={(e) => {
-                        e.preventDefault()
-                        console.log('👆 MouseEnter зоны:', area.id)
-                      }}
-                      title={area.description}
-                    />
-                    ))}
-                  </div>
-                )
-              })()}
+
             </div>
           )}
         </div>

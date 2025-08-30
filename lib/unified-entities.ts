@@ -740,13 +740,56 @@ export interface CharacterAIConfig {
 
 // ===== ПОЗЫ И ИНТЕРАКТИВНЫЕ ЭЛЕМЕНТЫ =====
 
+export interface ActiveZone {
+  id: string
+  name: string
+  description: string
+  x: number // координата X (0-100%)
+  y: number // координата Y (0-100%)
+  width: number // ширина зоны (0-100%)
+  height: number // высота зоны (0-100%)
+  availableActions: string[] // доступные действия для этой зоны
+  availableTools: string[] // доступные инструменты для этой зоны
+  sensitivity: number // чувствительность зоны (1-10)
+  category: 'touch' | 'pressure' | 'temperature' | 'electrical' | 'visual' | 'auditory'
+  requirements?: {
+    equipment?: string[] // требуемое оборудование
+    attributes?: { [key: string]: number } // требуемые характеристики
+    states?: { [key: string]: number } // требуемые состояния
+  }
+}
+
+export interface PoseAngle {
+  id: string
+  name: string
+  description: string
+  mediaUrl: string // путь к изображению/видео
+  mediaType: 'image' | 'video' | 'gif'
+  thumbnailUrl?: string // миниатюра для превью
+  activeZones: ActiveZone[] // активные зоны для этого ракурса
+  requirements?: {
+    equipment?: string[] // требуемое оборудование для этого ракурса
+    attributes?: { [key: string]: number } // требуемые характеристики
+  }
+}
+
 export interface Pose {
   id: string
   name: string
   description: string
   category: string
-  requirements?: { [key: string]: any }
-  effects?: { [key: string]: any }
+  key: string // ключ для системы анализа сообщений
+  angles: PoseAngle[] // массив ракурсов
+  requirements?: {
+    flexibility?: number
+    strength?: number
+    [key: string]: any
+  }
+  effects?: {
+    physical?: { [key: string]: number }
+    emotional?: { [key: string]: number }
+    fetish?: { [key: string]: number }
+  }
 }
 
 export interface PoseChangeCondition {

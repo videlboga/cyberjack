@@ -14,6 +14,7 @@ import { Plus, Trash2, Save } from "lucide-react"
 import { FieldConfig, getFieldConfig, getEntityDisplayName } from "@/lib/field-configs"
 import { PromptManager } from './PromptManager'
 import { CharacterEditor } from './CharacterEditor'
+import { PoseManager } from './PoseManager'
 
 interface EnhancedEditModalProps {
   isOpen: boolean
@@ -519,10 +520,11 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
         <div className="space-y-6">
           {isCharacter ? (
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="basic">Основные поля</TabsTrigger>
                 <TabsTrigger value="prompts">Промты</TabsTrigger>
                 <TabsTrigger value="advanced">Характеристики</TabsTrigger>
+                <TabsTrigger value="poses">Позы</TabsTrigger>
               </TabsList>
               <TabsContent value="basic" className="space-y-4">
                 {characterBasicFields.map(renderField)}
@@ -538,6 +540,12 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
                   character={formData}
                   onUpdateCharacter={setFormData}
                   showSaveButton={false}
+                />
+              </TabsContent>
+              <TabsContent value="poses" className="space-y-4">
+                <PoseManager
+                  poses={formData.poses || {}}
+                  onUpdatePoses={(poses) => setFormData({...formData, poses})}
                 />
               </TabsContent>
             </Tabs>
