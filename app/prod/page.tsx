@@ -202,7 +202,16 @@ export default function TalentArchitectProd() {
   useEffect(() => {
     if (unifiedConfig) {
       setGameConfig(unifiedConfig)
-      if ((unifiedConfig as any).characterAI) setCharacterAIConfig((unifiedConfig as any).characterAI)
+      if ((unifiedConfig as any).characterAI) {
+        console.log('🔄 prod/page: Установка characterAIConfig:', {
+          poses: Object.keys((unifiedConfig as any).characterAI.poses || {}),
+          actions: Object.keys((unifiedConfig as any).characterAI.actions || {}),
+          tools: Object.keys((unifiedConfig as any).characterAI.tools || {})
+        })
+        setCharacterAIConfig((unifiedConfig as any).characterAI)
+      } else {
+        console.log('🔄 prod/page: characterAI отсутствует в unifiedConfig')
+      }
     }
     setConfigLoading(unifiedLoading)
     setConfigError(unifiedError)

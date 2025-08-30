@@ -90,14 +90,22 @@ export function useCharacterAI({
   
   const [poseManagementService] = useState(() => {
     // Создаем сервис только если есть конфигурация
-    if (!characterAIConfig?.poses && !characterAIConfig?.actions && !characterAIConfig?.tools) {
+    if (!characterAIConfig) {
+      console.log('🔄 useCharacterAI: characterAIConfig отсутствует, PoseManagementService не создан')
       return null;
     }
+
+    console.log('🔄 useCharacterAI: Создание PoseManagementService с данными:', {
+      poses: Object.keys(characterAIConfig.poses || {}),
+      actions: Object.keys(characterAIConfig.actions || {}),
+      tools: Object.keys(characterAIConfig.tools || {})
+    })
+
     return new PoseManagementService(
-      characterAIConfig?.poses || {},
-      characterAIConfig?.poseChangeConditions || {},
-      characterAIConfig?.actions || {},
-      characterAIConfig?.tools || {}
+      characterAIConfig.poses || {},
+      characterAIConfig.poseChangeConditions || {},
+      characterAIConfig.actions || {},
+      characterAIConfig.tools || {}
     );
   });
 

@@ -2652,7 +2652,32 @@
         "description": "Описание позы",
         "category": "standing",
         "key": "standing",
-        "angles": [],
+        "angles": [
+          {
+            "id": "angle_1756570837545",
+            "name": "Новый ракурс",
+            "description": "Описание ракурса",
+            "mediaUrl": "blob:http://localhost:3000/9195826b-22a3-49fa-92a4-680a7a6022ec",
+            "mediaType": "image",
+            "activeZones": [
+              {
+                "id": "zone_1756570845758",
+                "name": "Новая зона",
+                "description": "Описание зоны",
+                "x": 44.062050786548696,
+                "y": 37.767349225245,
+                "width": 20,
+                "height": 20,
+                "availableActions": [],
+                "availableTools": [],
+                "sensitivity": 5,
+                "category": "touch",
+                "zoneKey": "zone_1756570845758",
+                "promptName": "зона"
+              }
+            ]
+          }
+        ],
         "requirements": {},
         "effects": {}
       }
