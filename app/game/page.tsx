@@ -638,22 +638,23 @@ const NexusEnslaverGame = () => {
       }
       setConfigs(updatedConfigs)
 
-      // Сохраняем в JSON файл
-      const fs = require('fs')
-      const path = require('path')
-      const dataDir = path.join(process.cwd(), 'data')
-      const charactersPath = path.join(dataDir, 'characters-unified.json')
+      // Сохраняем через API
+      const response = await fetch('/api/sync-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'characters',
+          data: [updatedCharacter]
+        }),
+      })
 
-      const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
-      const characterIndex = charactersData.characters.findIndex((c: any) => c.id === updatedCharacter.id)
-
-      if (characterIndex >= 0) {
-        charactersData.characters[characterIndex] = updatedCharacter
-        fs.writeFileSync(charactersPath, JSON.stringify(charactersData, null, 2))
-
+      if (response.ok) {
         console.log('✅ Персонаж успешно сохранен:', updatedCharacter.name)
       } else {
-        console.error('❌ Персонаж не найден для сохранения')
+        const errorData = await response.json()
+        console.error('❌ Ошибка при сохранении персонажа:', errorData)
       }
     } catch (error) {
       console.error('❌ Ошибка при сохранении персонажа:', error)
@@ -2088,6 +2089,7 @@ const NexusEnslaverGame = () => {
             talent={selectedCharacter}
             isVisible={showCharacterStats}
             onClose={handleCloseCharacterStats}
+            onUpdateCharacter={handleUpdateCharacter}
           />
         )}
 

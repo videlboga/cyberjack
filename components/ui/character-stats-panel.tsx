@@ -3,15 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ChevronDown, ChevronRight, Info } from 'lucide-react';
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { ChevronDown, ChevronRight, Info, Edit, Save, RotateCcw } from 'lucide-react';
 
 interface CharacterStatsPanelProps {
   talent: any;
   isVisible: boolean;
   onClose: () => void;
+  onUpdateCharacter?: (updatedCharacter: any) => void;
 }
 
-export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterStatsPanelProps) {
+export function CharacterStatsPanel({ talent, isVisible, onClose, onUpdateCharacter }: CharacterStatsPanelProps) {
   const [position, setPosition] = useState(() => {
     // Центрируем панель при первом открытии
     if (typeof window !== 'undefined') {
@@ -25,6 +29,9 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [openCategory, setOpenCategory] = useState<string>('physical'); // Только один раздел открыт
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false)
+  const [editedTalent, setEditedTalent] = useState<any>(talent)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
@@ -65,9 +72,68 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
     }
   }, [isDragging, dragOffset])
 
+  // Синхронизируем editedTalent при изменении talent
+  useEffect(() => {
+    setEditedTalent(talent)
+    setHasChanges(false)
+  }, [talent])
+
   const toggleCategory = (category: string) => {
     setOpenCategory(openCategory === category ? '' : category);
   };
+
+  // Обновление характеристики
+  const updateCharacteristic = (category: string, statKey: string, value: number) => {
+    const updated = {
+      ...editedTalent,
+      attributes: {
+        ...editedTalent.attributes,
+        [statKey]: value
+      }
+    }
+    setEditedTalent(updated)
+    setHasChanges(true)
+  }
+
+  // Обновление состояния
+  const updateState = (stateKey: string, value: number) => {
+    const updated = {
+      ...editedTalent,
+      states: {
+        ...editedTalent.states,
+        [stateKey]: value
+      }
+    }
+    setEditedTalent(updated)
+    setHasChanges(true)
+  }
+
+  // Обновление фетиша
+  const updateFetish = (fetishKey: string, value: number) => {
+    const updated = {
+      ...editedTalent,
+      fetishes: {
+        ...editedTalent.fetishes,
+        [fetishKey]: value
+      }
+    }
+    setEditedTalent(updated)
+    setHasChanges(true)
+  }
+
+  // Сохранение изменений
+  const handleSave = () => {
+    if (onUpdateCharacter) {
+      onUpdateCharacter(editedTalent)
+      setHasChanges(false)
+    }
+  }
+
+  // Сброс изменений
+  const handleReset = () => {
+    setEditedTalent(talent)
+    setHasChanges(false)
+  }
 
   const getStatColor = (value: number, isState: boolean = false) => {
     const maxValue = isState ? 100 : 10;
@@ -125,8 +191,8 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
   if (!isVisible || !talent) return null;
 
   // Безопасное получение данных с проверками
-  const attributes = talent.attributes || {};
-  const states = talent.states || {};
+  const attributes = editedTalent.attributes || {};
+  const states = editedTalent.states || {};
 
   // Эталонная система характеристик согласно документации
   const categories = {
@@ -185,6 +251,12 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
       icon: "📊",
       isState: true, // Состояния по шкале 0-100
       stats: states
+    },
+    fetishes: {
+      name: "Фетиши",
+      icon: "💋",
+      isState: false, // Фетиши по шкале 0-10
+      stats: editedTalent.fetishes || {}
     }
   };
 
@@ -197,10 +269,52 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
         className="p-3 border-b border-gray-600 flex items-center justify-between"
         onMouseDown={handleMouseDown}
       >
-        <h3 className="font-semibold text-cyan-400 flex items-center gap-2">
-          <span className="text-2xl">📊</span>
-          <span>Характеристики {talent.name || 'Персонажа'}</span>
-        </h3>
+        <div className="flex items-center justify-between flex-1">
+          <h3 className="font-semibold text-cyan-400 flex items-center gap-2">
+            <span className="text-2xl">📊</span>
+            <span>Характеристики {editedTalent.name || 'Персонажа'}</span>
+            {hasChanges && (
+              <Badge variant="outline" className="text-xs text-orange-400 border-orange-400">
+                Изменения не сохранены
+              </Badge>
+            )}
+          </h3>
+          {onUpdateCharacter && (
+            <div className="flex items-center gap-1">
+              {isEditMode ? (
+                <>
+                  {hasChanges && (
+                    <Button
+                      onClick={handleReset}
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 text-orange-400 hover:text-orange-300"
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleSave}
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
+                    disabled={!hasChanges}
+                  >
+                    <Save className="h-3 w-3" />
+                  </Button>
+                </>
+              ) : null}
+              <Button
+                onClick={() => setIsEditMode(!isEditMode)}
+                size="sm"
+                variant="ghost"
+                className="h-6 w-6 p-0 text-cyan-400 hover:text-cyan-300"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
         <button onClick={onClose} className="text-gray-400 hover:text-white">
           ✕
         </button>
@@ -251,11 +365,43 @@ export function CharacterStatsPanel({ talent, isVisible, onClose }: CharacterSta
                               </div>
                             </div>
                           </div>
-                          <span className={`text-sm font-bold ${isHidden ? 'text-gray-500' : getStatColor(numValue, category.isState)}`}>
-                            {displayValue}/{maxValue}
-                          </span>
+                          {isEditMode && onUpdateCharacter ? (
+                            <Badge variant="secondary" className="text-xs">
+                              {displayValue}/{maxValue}
+                            </Badge>
+                          ) : (
+                            <span className={`text-sm font-bold ${isHidden ? 'text-gray-500' : getStatColor(numValue, category.isState)}`}>
+                              {displayValue}/{maxValue}
+                            </span>
+                          )}
                         </div>
-                        <Progress value={category.isState ? numValue : (isHidden ? 0 : numValue * 10)} className={`h-1 ${isHidden ? 'opacity-30' : ''}`} />
+
+                        {isEditMode && onUpdateCharacter ? (
+                          <div className="mt-2">
+                            <Slider
+                              value={[numValue]}
+                              onValueChange={(newValue) => {
+                                if (category.isState) {
+                                  updateState(statKey, newValue[0])
+                                } else if (categoryKey === 'fetishes') {
+                                  updateFetish(statKey, newValue[0])
+                                } else {
+                                  updateCharacteristic(categoryKey, statKey, newValue[0])
+                                }
+                              }}
+                              max={maxValue}
+                              min={0}
+                              step={1}
+                              className="w-full"
+                            />
+                            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                              <span>0</span>
+                              <span>{maxValue}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <Progress value={category.isState ? numValue : (isHidden ? 0 : numValue * 10)} className={`h-1 ${isHidden ? 'opacity-30' : ''}`} />
+                        )}
                       </div>
                     );
                   })}
@@ -338,7 +484,17 @@ function getStatDisplayName(stat: string): string {
     sensory_overload: 'Сенсорная перегрузка',
     mental_state: 'Психическое состояние',
     strength: 'Сила',
-    creativity: 'Креативность'
+    creativity: 'Креативность',
+
+    // Фетиши
+    innocence: 'Невинность',
+    curiosity: 'Любопытство',
+    tenderness: 'Нежность',
+    attention: 'Внимание',
+    trust: 'Доверие',
+    submission: 'Подчинение',
+    play: 'Игра',
+    dependency: 'Зависимость'
   };
   
   return displayNames[stat] || stat;
