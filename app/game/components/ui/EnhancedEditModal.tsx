@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Trash2, Save } from "lucide-react"
 import { FieldConfig, getFieldConfig, getEntityDisplayName } from "@/lib/field-configs"
 import { PromptManager } from './PromptManager'
+import { CharacterEditor } from './CharacterEditor'
 
 interface EnhancedEditModalProps {
   isOpen: boolean
@@ -527,13 +528,30 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
                 {characterBasicFields.map(renderField)}
               </TabsContent>
               <TabsContent value="prompts" className="space-y-4">
-                <PromptManager 
-                  character={formData} 
-                  onUpdate={(updates) => setFormData(updates)} 
+                <PromptManager
+                  character={formData}
+                  onUpdate={(updates) => setFormData(updates)}
                 />
               </TabsContent>
               <TabsContent value="advanced" className="space-y-4">
-                {characterAdvancedFields.map(renderField)}
+                <CharacterEditor
+                  character={formData}
+                  onUpdateCharacter={setFormData}
+                  showSaveButton={false}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : characterAdvancedFields.length > 0 ? (
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="basic">Основные поля</TabsTrigger>
+                <TabsTrigger value="advanced">Дополнительные поля</TabsTrigger>
+              </TabsList>
+              <TabsContent value="basic" className="space-y-4">
+                {basicFields.map(renderField)}
+              </TabsContent>
+              <TabsContent value="advanced" className="space-y-4">
+                {advancedFields.map(renderField)}
               </TabsContent>
             </Tabs>
           ) : advancedFields.length > 0 ? (
