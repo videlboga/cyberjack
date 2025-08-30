@@ -190,10 +190,10 @@ export async function POST(request: NextRequest) {
         console.log(`✅ API: Синхронизация пользователей завершена`)
         break
 
-      case 'characters':
-        // Синхронизируем с characters-unified.json
-        const charactersPath = path.join(dataDir, 'characters-unified.json')
-        const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
+                  case 'characters':
+              // Синхронизируем с characters-unified.json
+              charactersPath = path.join(dataDir, 'characters-unified.json')
+              charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
 
         console.log(`👤 API: Синхронизируем ${data.characters?.length || 0} персонажей`)
 

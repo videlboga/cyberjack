@@ -7,12 +7,13 @@ import { getRankColor, getEventTypeColor, getContractTypeColor, formatPrice, for
 
 export interface EntityCardProps {
   entity: any
-  type: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action' | 'asset' | 'character' | 'user'
+  type: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action' | 'asset' | 'character' | 'user' | 'station'
   onEdit?: (entity: any) => void
   onDelete?: (entityId: string) => void
   onView?: (entity: any) => void
   onManageAssets?: (user: any) => void
   onAnalyze?: (character: any) => void
+  onConfigure?: (character: any) => void
   onViewKnowledge?: (user: any) => void // Просмотр знаний пользователя
   showActions?: boolean
   className?: string
@@ -27,6 +28,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
   onView,
   onManageAssets,
   onAnalyze,
+  onConfigure,
   onViewKnowledge,
   showActions = true,
   className = "",
@@ -527,6 +529,20 @@ export const EntityCard: React.FC<EntityCardProps> = ({
                   title="Анализ характеристик"
                 >
                   <Search className="h-4 w-4" />
+                </Button>
+              )}
+              {type === 'character' && onConfigure && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onConfigure(entity)
+                  }}
+                  className="h-8 w-8 p-0 hover:bg-blue-100 text-blue-600 hover:text-blue-700"
+                  title="Настройка персонажа"
+                >
+                  <Edit className="h-4 w-4" />
                 </Button>
               )}
             </div>

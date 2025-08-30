@@ -614,6 +614,52 @@ const NexusEnslaverGame = () => {
     setShowAnalysisPanel(false)
   }
 
+  // Функция для открытия панели настройки персонажа
+  const handleConfigureCharacter = (character: any) => {
+    setSelectedCharacter(character)
+    setShowAnalysisPanel(true)
+  }
+
+  // Функция для обновления персонажа
+  const handleUpdateCharacter = async (updatedCharacter: any) => {
+    try {
+      // Обновляем локальное состояние
+      setSelectedCharacter(updatedCharacter)
+
+      // Обновляем в конфигурации
+      const updatedConfigs = {
+        ...configs,
+        characters: {
+          ...configs.characters,
+          characters: configs.characters.characters.map((char: any) =>
+            char.id === updatedCharacter.id ? updatedCharacter : char
+          )
+        }
+      }
+      setConfigs(updatedConfigs)
+
+      // Сохраняем в JSON файл
+      const fs = require('fs')
+      const path = require('path')
+      const dataDir = path.join(process.cwd(), 'data')
+      const charactersPath = path.join(dataDir, 'characters-unified.json')
+
+      const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
+      const characterIndex = charactersData.characters.findIndex((c: any) => c.id === updatedCharacter.id)
+
+      if (characterIndex >= 0) {
+        charactersData.characters[characterIndex] = updatedCharacter
+        fs.writeFileSync(charactersPath, JSON.stringify(charactersData, null, 2))
+
+        console.log('✅ Персонаж успешно сохранен:', updatedCharacter.name)
+      } else {
+        console.error('❌ Персонаж не найден для сохранения')
+      }
+    } catch (error) {
+      console.error('❌ Ошибка при сохранении персонажа:', error)
+    }
+  }
+
   // ===== ФУНКЦИИ ДЛЯ ПАНЕЛИ ЗНАНИЙ ПОЛЬЗОВАТЕЛЯ =====
 
   const handleViewUserKnowledge = (user: any) => {
@@ -1142,6 +1188,7 @@ const NexusEnslaverGame = () => {
                 onDelete={(id) => handleDelete(id, 'characters')}
                 onView={(entity) => handleViewCharacterStats(entity)}
                 onAnalyze={handleStartAnalysis}
+                onConfigure={handleConfigureCharacter}
                 onAdd={() => handleAdd('characters')}
                 title="Персонажи (Активы)"
                 currentUser={getEntitiesList('users')[0]} // Передаем текущего пользователя
@@ -2045,12 +2092,11 @@ const NexusEnslaverGame = () => {
         )}
 
         {/* Панель анализа характеристик */}
-        {showAnalysisPanel && selectedCharacter && analysisSession && (
+        {showAnalysisPanel && selectedCharacter && (
           <CharacterAnalysisPanel
             character={selectedCharacter}
-            onStartAnalysis={handleStartAnalysis}
-            onStartToolAnalysis={handleStartToolAnalysis}
-            onClose={handleCancelAnalysis}
+            onUpdateCharacter={handleUpdateCharacter}
+            onClose={() => setShowAnalysisPanel(false)}
           />
         )}
 

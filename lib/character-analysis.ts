@@ -11,6 +11,9 @@ import {
   AnalysisSession
 } from './unified-entities'
 
+// Экспортируем типы для использования в других модулях
+export type { AnalysisMethod, AnalysisMethodInfo, AnalysisSession }
+
 import { ANALYSIS_TOOLS, type AnalysisTool, type AnalysisToolType } from './analysis-tools'
 
 // ===== КОНСТАНТЫ АНАЛИЗА =====

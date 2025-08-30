@@ -9,13 +9,14 @@ import { searchInConfig, getConfigStats } from '../../utils/configHelpers'
 
 export interface EntityListProps {
   entities: any[]
-  entityType: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action' | 'asset' | 'character' | 'user'
+  entityType: 'talent' | 'attribute' | 'skill' | 'contract' | 'event' | 'equipment' | 'storyPoint' | 'scene' | 'market' | 'action' | 'asset' | 'character' | 'user' | 'station'
   configType: keyof typeof searchInConfig
   onEdit?: (entity: any) => void
   onDelete?: (entityId: string) => void
   onView?: (entity: any) => void
   onManageAssets?: (user: any) => void
   onAnalyze?: (character: any) => void
+  onConfigure?: (character: any) => void
   onViewKnowledge?: (user: any) => void // Просмотр знаний пользователя
   onAdd?: () => void
   title?: string
@@ -33,6 +34,7 @@ export const EntityList: React.FC<EntityListProps> = ({
   onView,
   onManageAssets,
   onAnalyze,
+  onConfigure,
   onViewKnowledge,
   onAdd,
   title,
@@ -300,6 +302,7 @@ export const EntityList: React.FC<EntityListProps> = ({
               onView={onView}
               onManageAssets={onManageAssets}
               onAnalyze={onAnalyze}
+              onConfigure={onConfigure}
               onViewKnowledge={onViewKnowledge}
               showActions={showActions}
               className={viewMode === 'list' ? 'flex-row items-center' : ''}
