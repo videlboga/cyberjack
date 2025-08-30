@@ -523,10 +523,18 @@ export function useCharacterAI({
       const characterStates = selectedCharacter?.states || {};
       const characterFetishes = selectedCharacter?.fetishes || {};
       
-      // Получаем базовый промт персонажа из unified конфигурации
-      const characterBasePrompt = selectedCharacter?.prompt?.character || 
+      // Получаем базовый промт персонажа из unified конфигурации (приоритет нашей системы промтов)
+      const characterBasePrompt = selectedCharacter?.prompts?.base ||
+        selectedCharacter?.prompt?.character || 
         selectedCharacter?.description || 
         characterAIConfig?.llmPrompts?.basePrompt || '';
+
+      // Безопасные промты персонажа (нужны для PromptSystem)
+      const characterPrompts = selectedCharacter?.prompts || {
+        base: characterBasePrompt,
+        characteristicInterpretations: {},
+        situational: []
+      };
       
       // Составляем контекст текущего взаимодействия (инструменты/действия прямо сейчас)
       const currentInteraction: Array<{
@@ -589,6 +597,18 @@ export function useCharacterAI({
 
       const llmPrompt: any = {
         basePrompt: characterBasePrompt,
+        // Полный объект персонажа для PromptSystem
+        character: {
+          id: selectedCharacter?.id || 'unknown',
+          name: characterName,
+          archetype: characterRole,
+          description: selectedCharacter?.description || characterBasePrompt || '',
+          prompts: characterPrompts,
+          // Поддерживаем обе возможные схемы, чтобы не падать
+          characteristics: (selectedCharacter as any)?.characteristics || {},
+          attributes: selectedCharacter?.attributes || {},
+          states: characterStates
+        },
         characterContext: {
           name: characterName,
           role: characterRole,

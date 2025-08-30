@@ -460,6 +460,14 @@ export default function TalentArchitectProd() {
           stressors: {},
           equippedItems: [],
           inventory: [],
+          // Данные системы промтов
+          prompts: (asset as any)?.prompts || {
+            base: (asset as any)?.prompt?.character || '',
+            characteristicInterpretations: {},
+            situational: []
+          },
+          // Полные характеристики в виде категорий для PromptSystem
+          characteristics: (asset as any)?.characteristics || {},
         }
       })
 

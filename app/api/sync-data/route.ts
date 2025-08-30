@@ -189,7 +189,41 @@ export async function POST(request: NextRequest) {
         fs.writeFileSync(usersPath, JSON.stringify(updatedUsers, null, 2))
         console.log(`✅ API: Синхронизация пользователей завершена`)
         break
-        
+
+      case 'characters':
+        // Синхронизируем с characters-unified.json
+        const charactersPath = path.join(dataDir, 'characters-unified.json')
+        const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
+
+        console.log(`👤 API: Синхронизируем ${data.characters?.length || 0} персонажей`)
+
+        // Обновляем или добавляем персонажей
+        if (!charactersData.characters) {
+          charactersData.characters = []
+        }
+
+        // Находим и обновляем каждого персонажа из data
+        data.characters.forEach((character: any, index: number) => {
+          console.log(`  ${index + 1}. Персонаж ${character.id}: ${character.name}`)
+          console.log(`     - Has prompts: ${!!character.prompts}`)
+          console.log(`     - Prompts keys: ${character.prompts ? Object.keys(character.prompts).join(', ') : 'none'}`)
+
+          const existingIndex = charactersData.characters.findIndex((c: any) => c.id === character.id)
+          if (existingIndex >= 0) {
+            // Обновляем существующего персонажа
+            charactersData.characters[existingIndex] = character
+            console.log(`🔄 Обновлен персонаж: ${character.name} (${character.id})`)
+          } else {
+            // Добавляем нового персонажа
+            charactersData.characters.push(character)
+            console.log(`➕ Добавлен новый персонаж: ${character.name} (${character.id})`)
+          }
+        })
+
+        fs.writeFileSync(charactersPath, JSON.stringify(charactersData, null, 2))
+        console.log('✅ Characters синхронизированы с файлом')
+        break
+
       case 'game-config-unified':
         // Синхронизируем Character AI конфигурацию с game-config-unified.json
         const gameConfigPath = path.join(dataDir, 'game-config-unified.json')

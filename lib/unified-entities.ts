@@ -640,7 +640,7 @@ export interface SituationalPrompt {
   id: string
   name: string
   description: string
-  condition: PromptCondition
+  conditions: PromptCondition[]
   prompt: string
   priority: number
   isActive: boolean

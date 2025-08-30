@@ -1,5 +1,4 @@
 import { PromptSystem } from './prompt-system';
-import { formatCharacteristicsForPrompt } from './characteristic-interpretations';
 
 // Персонализированные базовые промты персонажей
 const CHARACTER_BASE_PROMPTS: { [key: string]: string } = {
@@ -58,12 +57,10 @@ export class MessageAnalysisService {
   private apiKey: string;
   private baseUrl: string = 'https://openrouter.ai/api/v1/chat/completions';
   private model: string;
-  private promptSystem: PromptSystem;
 
   constructor(apiKey: string, model: string = 'google/gemini-2.5-flash-lite') {
     this.apiKey = apiKey;
     this.model = model;
-    this.promptSystem = new PromptSystem();
   }
 
   /**
@@ -162,29 +159,39 @@ export class MessageAnalysisService {
   }
 
   /**
-   * Строит промт для генерации ответа персонажа (Этап 2 - LLaMA)
+   * Строит промт для генерации ответа персонажа (Этап 2 - GLM 4.5)
    */
   private buildCharacterResponsePrompt(
     message: string,
     characterContext: any,
     analysis: any
   ): string {
+    const fullCharacter = characterContext.character;
     const character = characterContext.characterContext as { name: string; personality?: string; currentState?: string };
     const characteristics = (characterContext.characteristics || {}) as Record<string, { value: number; interpretation: string }>
     const fetishes = (characterContext.fetishes || {}) as Record<string, { intensity: number }>
-    
-    // Удаляем старые переменные - они будут переобъявлены ниже
-    
-    // Формируем активные фетиши
-    const activeFetishes = Object.entries(fetishes as Record<string, { intensity: number }>)
-      .filter(([_, f]) => f.intensity > 0.3)
-      .map(([key, f]) => `${key}: ${f.intensity}`)
-      .join(', ');
-    
+
+    // Используем PromptSystem для генерации активных промтов
+    const promptContext = {
+      userAction: message,
+      emotionalState: analysis?.emotionalContent ? [this.getEmotionalStateFromAnalysis(analysis.emotionalContent)] : [],
+      triggeredFetishes: analysis?.fetishTriggers || [],
+      currentStats: characterContext?.character?.states || {}
+    };
+
+
+
+    // Получаем активные промты через PromptSystem
+    const activePrompts = PromptSystem.getActivePrompts(fullCharacter, promptContext);
+    console.log('📋 Активные промты:', {
+      baseLength: activePrompts.base.length,
+      interpretationsLength: activePrompts.characteristicInterpretations.length,
+      situationalCount: activePrompts.situational.length
+    });
+
     // Формируем события из анализа
     const events = [] as string[];
     if (analysis.statChanges && Object.keys(analysis.statChanges).length > 0) {
-      // Оставляем только активные изменения для читаемости
       const active = Object.fromEntries(Object.entries(analysis.statChanges).filter(([_, v]) => Math.abs(Number(v)) >= 0.2))
       if (Object.keys(active).length > 0) {
         events.push(`Изменения характеристик: ${JSON.stringify(active)}`);
@@ -196,7 +203,7 @@ export class MessageAnalysisService {
     if (analysis.commands && Object.keys(analysis.commands).length > 0) {
       events.push(`Получены приказы: ${JSON.stringify(analysis.commands)}`);
     }
-    
+
     const eventsText = events.length > 0 ? events.join('\n') : 'Нет особых событий';
 
     // ВСТАВЛЯЕМ БЛОК ТЕКУЩЕГО ВЗАИМОДЕЙСТВИЯ (tools/actions сейчас)
@@ -227,29 +234,44 @@ export class MessageAnalysisService {
           return `- ${parts}`
         }).join('\n')
       : 'Прямого воздействия сейчас нет'
-    
-    // Оптимизируем промпт для GLM 4.5
-    const activeCharacteristics = Object.entries(characteristics)
-      .filter(([key, ch]) => Math.abs(ch.value) > 0.1)
-      .slice(0, 6) // Ограничиваем до 6 активных характеристик
 
-    const characteristicsText = activeCharacteristics.length > 0
-      ? activeCharacteristics.map(([key, ch]) => `${key}: ${ch.interpretation}`).join(', ')
-      : 'Все характеристики в норме'
+    // Используем комбинированный промт из PromptSystem
+    let finalPrompt = activePrompts.combined;
 
-    const prompt = `${this.getCharacterBasePrompt(character.name)}
+    // Добавляем текущую ситуацию, если её нет в комбинированном промте
+    if (!finalPrompt.includes('Сейчас происходит:')) {
+      finalPrompt += `
 
 Сейчас происходит:
 ${interactionText}
 
-Активные характеристики: ${characteristicsText}
-События: ${eventsText}
-Сообщение: "${message}"
+События: ${eventsText}`;
+    }
 
-Отвечай кратко: 1-3 предложения.`;
+    // Добавляем сообщение пользователя
+    finalPrompt += `
 
-    console.log('🎭 Промт для генерации ответа персонажа:', prompt);
-    return prompt;
+Сообщение пользователя: "${message}"
+
+Отвечай естественно и в характере. Используй активные промты для формирования ответа.`;
+
+    console.log('🎭 Финальный промт для генерации ответа персонажа:', finalPrompt);
+    return finalPrompt;
+  }
+
+  /**
+   * Определяет эмоциональное состояние из анализа
+   */
+  private getEmotionalStateFromAnalysis(emotionalContent: any): string {
+    const { threat, pleasure, pain, fear, arousal } = emotionalContent;
+
+    if (arousal > 0.7) return 'возбужденный';
+    if (fear > 0.6) return 'испуганный';
+    if (pain > 0.5) return 'страдающий';
+    if (pleasure > 0.6) return 'удовлетворенный';
+    if (threat > 0.5) return 'напряженный';
+
+    return 'спокойный';
   }
 
   /**

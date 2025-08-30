@@ -1,4 +1,4 @@
-import { Character, CharacterPrompts, SituationalPrompt, PromptCondition, CharacteristicInterpretations } from '../unified-entities'
+import { Character, CharacterPrompts, SituationalPrompt, PromptCondition, CharacteristicInterpretations, CharacterAttributes } from '../unified-entities'
 
 /**
  * Система управления промтами для персонажей
@@ -175,43 +175,93 @@ ${character.description || 'Описание персонажа'}
     const interpretations = character.prompts.characteristicInterpretations
     const sections = []
 
+    // Получаем значения характеристик для определения диапазонов
+    const getCharacteristicValue = (category: string, statName: string): number => {
+      const categoryAttrs = character.attributes?.[category as keyof CharacterAttributes] as any
+      if (categoryAttrs && typeof categoryAttrs === 'object' && statName in categoryAttrs) {
+        return categoryAttrs[statName] as number
+      }
+      return 5 // среднее значение по умолчанию
+    }
+
+    // Функция для получения интерпретации по диапазону
+    const getInterpretationForRange = (category: string, statName: string): string => {
+      const value = getCharacteristicValue(category, statName)
+      let rangeKey = '_medium' // по умолчанию средний диапазон
+
+      if (value <= 3) {
+        rangeKey = '_low'
+      } else if (value >= 8) {
+        rangeKey = '_high'
+      }
+
+      const interpretationKey = `${statName}${rangeKey}`
+      const categoryInterpretations = interpretations[category as keyof CharacteristicInterpretations]
+      return categoryInterpretations?.[interpretationKey] || categoryInterpretations?.[statName] || ''
+    }
+
     // Физические характеристики
-    if (Object.keys(interpretations.physical).length > 0) {
+    if (character.attributes?.physical) {
       sections.push('ФИЗИЧЕСКИЕ ХАРАКТЕРИСТИКИ:')
-      Object.entries(interpretations.physical).forEach(([key, value]) => {
-        sections.push(`- ${key}: ${value}`)
+      Object.keys(character.attributes.physical).forEach(statName => {
+        const interpretation = getInterpretationForRange('physical', statName)
+        if (interpretation) {
+          const value = getCharacteristicValue('physical', statName)
+          const range = value <= 3 ? '(низкая)' : value >= 8 ? '(высокая)' : '(средняя)'
+          sections.push(`- ${statName} ${range}: ${interpretation}`)
+        }
       })
     }
 
     // Психологические характеристики
-    if (Object.keys(interpretations.psychological).length > 0) {
+    if (character.attributes?.psychological) {
       sections.push('\nПСИХОЛОГИЧЕСКИЕ ХАРАКТЕРИСТИКИ:')
-      Object.entries(interpretations.psychological).forEach(([key, value]) => {
-        sections.push(`- ${key}: ${value}`)
+      Object.keys(character.attributes.psychological).forEach(statName => {
+        const interpretation = getInterpretationForRange('psychological', statName)
+        if (interpretation) {
+          const value = getCharacteristicValue('psychological', statName)
+          const range = value <= 3 ? '(низкая)' : value >= 8 ? '(высокая)' : '(средняя)'
+          sections.push(`- ${statName} ${range}: ${interpretation}`)
+        }
       })
     }
 
     // Социальные характеристики
-    if (Object.keys(interpretations.social).length > 0) {
+    if (character.attributes?.social) {
       sections.push('\nСОЦИАЛЬНЫЕ ХАРАКТЕРИСТИКИ:')
-      Object.entries(interpretations.social).forEach(([key, value]) => {
-        sections.push(`- ${key}: ${value}`)
+      Object.keys(character.attributes.social).forEach(statName => {
+        const interpretation = getInterpretationForRange('social', statName)
+        if (interpretation) {
+          const value = getCharacteristicValue('social', statName)
+          const range = value <= 3 ? '(низкая)' : value >= 8 ? '(высокая)' : '(средняя)'
+          sections.push(`- ${statName} ${range}: ${interpretation}`)
+        }
       })
     }
 
     // Личностные характеристики
-    if (Object.keys(interpretations.personality).length > 0) {
+    if (character.attributes?.personality) {
       sections.push('\nЛИЧНОСТНЫЕ ХАРАКТЕРИСТИКИ:')
-      Object.entries(interpretations.personality).forEach(([key, value]) => {
-        sections.push(`- ${key}: ${value}`)
+      Object.keys(character.attributes.personality).forEach(statName => {
+        const interpretation = getInterpretationForRange('personality', statName)
+        if (interpretation) {
+          const value = getCharacteristicValue('personality', statName)
+          const range = value <= 3 ? '(низкая)' : value >= 8 ? '(высокая)' : '(средняя)'
+          sections.push(`- ${statName} ${range}: ${interpretation}`)
+        }
       })
     }
 
     // Специальные характеристики
-    if (Object.keys(interpretations.special).length > 0) {
+    if (character.attributes?.special) {
       sections.push('\nСПЕЦИАЛЬНЫЕ ХАРАКТЕРИСТИКИ:')
-      Object.entries(interpretations.special).forEach(([key, value]) => {
-        sections.push(`- ${key}: ${value}`)
+      Object.keys(character.attributes.special).forEach(statName => {
+        const interpretation = getInterpretationForRange('special', statName)
+        if (interpretation) {
+          const value = getCharacteristicValue('special', statName)
+          const range = value <= 3 ? '(низкая)' : value >= 8 ? '(высокая)' : '(средняя)'
+          sections.push(`- ${statName} ${range}: ${interpretation}`)
+        }
       })
     }
 
