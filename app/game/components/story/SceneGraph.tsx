@@ -55,6 +55,7 @@ type StoryPointsMap = {
   }
 }
 
+
 // Кастомный узел для сцены с тёмным стилем и инлайн-редактированием
 const SceneNode = ({ data }: any) => {
   const getIcon = () => {
