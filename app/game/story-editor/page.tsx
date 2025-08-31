@@ -188,6 +188,7 @@ const demoGameState: GameState = {
 
 export default function StoryEditorPage() {
   const [storyData, setStoryData] = useState<SimpleStoryConfig>(() => {
+    // начальное состояние – из json, затем перезапишем из localStorage (клиент)
     const converted = convertToSimpleFormat(storyScenesData)
     return {
       ...converted,
@@ -204,6 +205,20 @@ export default function StoryEditorPage() {
     equipment: [],
     stationEntities: storyData.stationEntities || {}
   }
+
+  // Подхватываем сохранённые данные из localStorage при монтировании на клиенте
+  useEffect(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('cyberjack-simple-story-data') : null
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        setStoryData(parsed)
+        setHasUnsavedChanges(false)
+      }
+    } catch (e) {
+      console.error('Ошибка чтения localStorage:', e)
+    }
+  }, [])
 
   // Обработчики изменений
   const handleStoryDataChange = (newData: SimpleStoryConfig) => {
@@ -357,7 +372,22 @@ export default function StoryEditorPage() {
           <TabsContent value="simple" className="h-full m-0">
             <SimpleStoryEditor
               storyData={storyData}
-              onSave={handleStoryDataChange}
+              onSave={(newData) => {
+                // Сохраняем немедленно и снимаем флаг несохранённых изменений
+                try {
+                  setStoryData(newData)
+                  localStorage.setItem('cyberjack-simple-story-data', JSON.stringify(newData))
+                  setHasUnsavedChanges(false)
+                  // Небольшой тост
+                  const notification = document.createElement('div')
+                  notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50'
+                  notification.textContent = 'Изменения сохранены'
+                  document.body.appendChild(notification)
+                  setTimeout(() => document.body.removeChild(notification), 2000)
+                } catch (e) {
+                  console.error('Ошибка при сохранении данных:', e)
+                }
+              }}
               gameEntities={gameEntities}
             />
           </TabsContent>

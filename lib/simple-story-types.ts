@@ -53,14 +53,45 @@ export interface SimpleScene {
   conditions?: SimpleCondition[]
   probability?: number // 0-100, если не указано - всегда показывать
   
-  // Содержимое сцены
+  // Содержимое сцены (legacy)
   content: {
     text: string
     background?: string
     music?: string
+    backgroundFile?: File // Для хранения загруженного файла
   }
   
-  // Выборы игрока
+  // Выборы игрока (legacy)
+  choices: SimpleChoice[]
+
+  // Многоэкранная сцена (новое)
+  startScreenId?: string
+  screens?: SimpleScreen[]
+
+  // Позиционирование узлов на графе (опционально)
+  layout?: {
+    x?: number
+    y?: number
+    entryPosition?: { x: number; y: number }
+    choicePositions?: {
+      [choiceId: string]: { x: number; y: number }
+    }
+    screenPositions?: {
+      [screenId: string]: { x: number; y: number }
+    }
+  }
+}
+
+export interface SimpleScreen {
+  id: string
+  title?: string
+  description?: string
+  content: {
+    text: string
+    background?: string
+    music?: string
+    backgroundFile?: File
+  }
   choices: SimpleChoice[]
 }
 
@@ -78,6 +109,7 @@ export interface SimpleChoice {
   // Куда переходим
   nextScene?: string // ID следующей сцены
   endScene?: boolean // Завершить сцену
+  nextScreenId?: string // ID следующего экрана в текущей сцене
 }
 
 // Упрощенные эффекты - основаны на реальных действиях в игре
