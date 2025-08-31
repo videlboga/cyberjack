@@ -16,7 +16,7 @@ import ReactFlow, {
   MarkerType,
   Position,
   Handle,
-  NodeChange,
+  NodeChange
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 
@@ -383,22 +383,35 @@ interface SceneGraphProps {
   onSceneSelect: (scene: SimpleScene) => void
   selectedSceneId: string
   onUpdateScene?: (sceneId: string, updates: Partial<SimpleScene>) => void
-  onUpdateChoice?: (sceneId: string, choiceIndex: number, updates: any) => void
-  onChoiceSelect?: (sceneId: string, choiceIndex: number) => void
+  onUpdateChoice?: (sceneId: string, screenIndex: number, choiceIndex: number, updates: any) => void
+  onChoiceSelect?: (sceneId: string, screenIndex: number, choiceIndex: number) => void
   onEntrySelect?: (sceneId: string) => void
   onScreenSelect?: (sceneId: string, screenIndex: number) => void
   storyPoints?: StoryPointsMap
   mode?: 'global' | 'scene'
   onAddScene?: (position: { x: number; y: number }) => void
-  onAddChoice?: (sceneId: string, position: { x: number; y: number }) => void
   onAddScreen?: (sceneId: string, position: { x: number; y: number }) => void
-  addMode?: 'screen' | 'choice'
   onDeleteScene?: (sceneId: string) => void
   stationEntitiesForSelect?: Array<{ id: string; name: string }>
 }
 
-export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateScene, onUpdateChoice, onChoiceSelect, onEntrySelect, onScreenSelect, storyPoints, mode = 'scene', onAddScene, onAddChoice, onAddScreen, addMode = 'choice', onDeleteScene, stationEntitiesForSelect = [] }: SceneGraphProps) {
+export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateScene, onUpdateChoice, onChoiceSelect, onEntrySelect, onScreenSelect, storyPoints, mode = 'scene', onAddScene, onAddScreen, onDeleteScene, stationEntitiesForSelect = [] }: SceneGraphProps): JSX.Element {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+
+  const parseChoiceNodeId = (id: string): { sceneId: string; screenIndex: number; choiceIndex: number } | null => {
+    const parts = id.split('_')
+    const screenIdxPos = parts.lastIndexOf('screen')
+    const choiceIdxPos = parts.lastIndexOf('choice')
+    if (screenIdxPos !== -1 && choiceIdxPos !== -1 && choiceIdxPos === screenIdxPos + 2) {
+      const sceneId = parts.slice(0, screenIdxPos).join('_')
+      const screenIndex = parseInt(parts[screenIdxPos + 1])
+      const choiceIndex = parseInt(parts[choiceIdxPos + 1])
+      if (!Number.isNaN(screenIndex) && !Number.isNaN(choiceIndex)) {
+        return { sceneId, screenIndex, choiceIndex }
+      }
+    }
+    return null
+  }
 
   // Создание узлов и связей на основе сцен
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
@@ -489,93 +502,91 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
         })
       }
 
-      // Создаем узлы для выборов и связи
-      scene.choices.forEach((choice, choiceIndex) => {
-        const choiceNodeId = `${scene.id}_choice_${choiceIndex}`
-        const choiceNode: Node = {
-          id: choiceNodeId,
-          type: 'choice',
-          position: {
-            x: scene.layout?.choicePositions?.[choice.id]?.x ?? (sceneNode.position.x + 250),
-            y: scene.layout?.choicePositions?.[choice.id]?.y ?? (sceneNode.position.y + choiceIndex * 80 - (scene.choices.length - 1) * 40)
-          },
-          data: {
+      // Создаем узлы для выборов и связь экран -> выбор, вместо глобального списка сценических выборов
+      (screens || []).forEach((screen, screenIdx) => {
+        (screen.choices || []).forEach((choice, choiceIndex) => {
+          const choiceNodeId = `${scene.id}_screen_${screenIdx}_choice_${choiceIndex}`
+          const baseX = scene.layout?.screenPositions?.[screen.id]?.x ?? (sceneNode.position.x + 260 + screenIdx * 260)
+          const baseY = scene.layout?.screenPositions?.[screen.id]?.y ?? sceneNode.position.y
+          const savedChoicePos = scene.layout?.choicePositions?.[choice.id]
+          const posX = savedChoicePos?.x ?? (baseX + 220)
+          const posY = savedChoicePos?.y ?? (baseY + choiceIndex * 80)
+
+          const choiceNode: Node = {
             id: choiceNodeId,
-            label: choice.text,
-            effectsCount: choice.effects.length,
-            nextScene: choice.nextScene,
-            scenesForSelect: scenes.map(s => ({ id: s.id, title: s.title })),
-            storyPointsForSelect: storyPoints ? Object.entries(storyPoints).map(([id, sp]) => ({ id, name: sp.name })) : [],
-            onUpdateChoice: (updates: any) => onUpdateChoice && onUpdateChoice(scene.id, choiceIndex, updates)
+            type: 'choice',
+            position: { x: posX, y: posY },
+            data: {
+              id: choiceNodeId,
+              label: choice.text,
+              effectsCount: (choice.effects || []).length,
+              nextScene: choice.nextScene,
+              scenesForSelect: scenes.map(s => ({ id: s.id, title: s.title })),
+              storyPointsForSelect: storyPoints ? Object.entries(storyPoints).map(([id, sp]) => ({ id, name: sp.name })) : [],
+              onUpdateChoice: (updates: any) => onUpdateChoice && onUpdateChoice(scene.id, screenIdx, choiceIndex, updates)
+            }
           }
-        }
-        nodes.push(choiceNode)
+          nodes.push(choiceNode)
 
-        // Связь к выбору: в режиме scene из первого экрана, если есть, иначе из entry; в глобальном — из узла сцены
-        const choiceSourceId = mode === 'scene'
-          ? (screens && screens.length > 0 ? `${scene.id}_screen_0` : `${scene.id}_entry`)
-          : scene.id
-        edges.push({
-          id: `edge_${choiceSourceId}_to_${choiceNodeId}`,
-          source: choiceSourceId,
-          target: choiceNodeId,
-          type: 'smoothstep',
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-          },
-          style: { stroke: '#8b5cf6', strokeWidth: 2 }
-        })
+          // Связь экран -> выбор
+          edges.push({
+            id: `edge_${scene.id}_screen_${screenIdx}_to_${choiceNodeId}`,
+            source: `${scene.id}_screen_${screenIdx}`,
+            target: choiceNodeId,
+            type: 'smoothstep',
+            markerEnd: { type: MarkerType.ArrowClosed },
+            style: { stroke: '#8b5cf6', strokeWidth: 2 }
+          })
 
-        // Связь от выбора к следующей сцене/экрану
-        if (choice.nextScene) {
-          // Если в режиме одной сцены — отображаем целевую сцену как приглушённый узел
-          if (mode === 'scene' && selectedSceneId && choice.nextScene !== scene.id) {
-            const targetScene = scenes.find((s) => s.id === choice.nextScene)
-            if (targetScene && !nodes.find((n) => n.id === targetScene.id)) {
-              nodes.push({
-                id: targetScene.id,
-                type: 'scene',
-                position: {
-                  x: sceneNode.position.x + 520,
-                  y: sceneNode.position.y,
-                },
-                data: {
+          // Связь от выбора к следующей сцене
+          if (choice.nextScene) {
+            if (mode === 'scene' && selectedSceneId && choice.nextScene !== scene.id) {
+              const targetScene = scenes.find((s) => s.id === choice.nextScene)
+              if (targetScene && !nodes.find((n) => n.id === targetScene.id)) {
+                nodes.push({
                   id: targetScene.id,
-                  label: targetScene.title,
-                  description: targetScene.description,
-                  choicesCount: targetScene.choices.length,
-                  probability: targetScene.probability,
-                  sceneType: 'normal',
-                  onUpdateScene: undefined,
-                },
-                style: { opacity: 0.6 }
+                  type: 'scene',
+                  position: { x: sceneNode.position.x + 520, y: sceneNode.position.y },
+                  data: {
+                    id: targetScene.id,
+                    label: targetScene.title,
+                    description: targetScene.description,
+                    choicesCount: targetScene.choices.length,
+                    probability: targetScene.probability,
+                    sceneType: 'normal',
+                    onUpdateScene: undefined,
+                  },
+                  style: { opacity: 0.6 }
+                })
+              }
+            }
+            edges.push({
+              id: `edge_${choiceNodeId}_to_${choice.nextScene}`,
+              source: choiceNodeId,
+              target: choice.nextScene,
+              type: 'smoothstep',
+              markerEnd: { type: MarkerType.ArrowClosed },
+              style: { stroke: '#10b981', strokeWidth: 2 },
+              label: choice.text.length > 15 ? choice.text.substring(0, 15) + '...' : choice.text
+            })
+          }
+
+          // Связь от выбора к экрану
+          if (choice.nextScreenId) {
+            const idx = (scene.screens || []).findIndex(s => s.id === choice.nextScreenId)
+            if (idx >= 0) {
+              edges.push({
+                id: `edge_${choiceNodeId}_to_screen_${choice.nextScreenId}`,
+                source: choiceNodeId,
+                target: `${scene.id}_screen_${idx}`,
+                type: 'smoothstep',
+                markerEnd: { type: MarkerType.ArrowClosed },
+                style: { stroke: '#22c55e', strokeWidth: 2 }
               })
             }
           }
-          edges.push({
-            id: `edge_${choiceNodeId}_to_${choice.nextScene}`,
-            source: choiceNodeId,
-            target: choice.nextScene,
-            type: 'smoothstep',
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-            },
-            style: { stroke: '#10b981', strokeWidth: 2 },
-            label: choice.text.length > 15 ? choice.text.substring(0, 15) + '...' : choice.text
-          })
-        }
-        if (choice.nextScreenId) {
-          edges.push({
-            id: `edge_${choiceNodeId}_to_screen_${choice.nextScreenId}`,
-            source: choiceNodeId,
-            target: `${scene.id}_screen_${(scene.screens || []).findIndex(s => s.id === choice.nextScreenId)}`,
-            type: 'smoothstep',
-            markerEnd: { type: MarkerType.ArrowClosed },
-            style: { stroke: '#22c55e', strokeWidth: 2 }
-          })
-        }
+        })
       })
-    })
 
     // Не отображаем сюжетные точки на графе — редактируются в панели
 
@@ -606,15 +617,19 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
       return
     }
     if (nodeId.includes('_choice_')) {
-      const splitIdx = nodeId.lastIndexOf('_choice_')
-      if (splitIdx > 0) {
-        const sceneId = nodeId.substring(0, splitIdx)
-        const idxStr = nodeId.substring(splitIdx + 8)
-        const choiceIndex = parseInt(idxStr)
-        if (!Number.isNaN(choiceIndex)) {
+      // формат: <sceneId>_screen_<screenIdx>_choice_<choiceIdx>
+      const parts = nodeId.split('_')
+      const screenIdxPos = parts.lastIndexOf('screen')
+      const choiceIdxPos = parts.lastIndexOf('choice')
+      if (screenIdxPos !== -1 && choiceIdxPos !== -1 && choiceIdxPos === screenIdxPos + 2) {
+        const screenIndex = parseInt(parts[screenIdxPos + 1])
+        const choiceIndex = parseInt(parts[choiceIdxPos + 1])
+        const sceneId = parts.slice(0, screenIdxPos).join('_')
+        if (!Number.isNaN(screenIndex) && !Number.isNaN(choiceIndex)) {
           const sceneOfChoice = scenes.find((s) => s.id === sceneId)
-          const choice = sceneOfChoice?.choices[choiceIndex]
-          if (sceneOfChoice && choice) {
+          const screen = sceneOfChoice?.screens?.[screenIndex]
+          const choice = screen?.choices?.[choiceIndex]
+          if (sceneOfChoice && screen && choice) {
             const layout = sceneOfChoice.layout || {}
             const choicePositions = { ...(layout.choicePositions || {}) }
             choicePositions[choice.id] = { x: pos.x, y: pos.y }
@@ -674,31 +689,28 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
         // Условные ручки: story_point -> choice (условие выбора)
         if (params.targetHandle === 'cond' && target.includes('_choice_') && source.startsWith('sp_')) {
           const spId = source.substring(3)
-          const [sceneId, idxStr] = target.split('_choice_')
-          const choiceIndex = parseInt(idxStr)
-          if (!Number.isNaN(choiceIndex)) {
-            const scene = scenes.find(s => s.id === sceneId)
-            const choice = scene?.choices[choiceIndex]
+          const parsed = parseChoiceNodeId(target)
+          if (parsed) {
+            const scene = scenes.find(s => s.id === parsed.sceneId)
+            const choice = scene?.screens?.[parsed.screenIndex]?.choices?.[parsed.choiceIndex]
             const existing = (choice?.conditions || []).some((c: any) => c.entityType === 'story_point' && (c.entityId === spId || c.pointId === spId))
             if (!existing) {
               const newConds = [...(choice?.conditions || []), { entityType: 'story_point', entityId: spId, property: 'value', operator: '>=', value: 1 }]
-              onUpdateChoice && onUpdateChoice(sceneId, choiceIndex, { conditions: newConds })
+              onUpdateChoice && onUpdateChoice(parsed.sceneId, parsed.screenIndex, parsed.choiceIndex, { conditions: newConds })
             }
           }
         }
         // Если соединяем выбор -> сцена, обновляем nextScene
         if (source.includes('_choice_')) {
-          const [sceneId, idxStr] = source.split('_choice_')
-          const choiceIndex = parseInt(idxStr)
-          if (!Number.isNaN(choiceIndex)) {
+          const parsed = parseChoiceNodeId(source)
+          if (parsed) {
             if (target.includes('_screen_')) {
-              // Выбор → экран внутри сцены
               const screenIdx = parseInt(target.split('_screen_')[1])
-              const scene = scenes.find(s => s.id === sceneId)
+              const scene = scenes.find(s => s.id === parsed.sceneId)
               const screen = scene?.screens?.[screenIdx]
-              onUpdateChoice && onUpdateChoice(sceneId, choiceIndex, { nextScreenId: screen?.id, nextScene: undefined })
+              onUpdateChoice && onUpdateChoice(parsed.sceneId, parsed.screenIndex, parsed.choiceIndex, { nextScreenId: screen?.id, nextScene: undefined })
             } else {
-              onUpdateChoice && onUpdateChoice(sceneId, choiceIndex, { nextScene: target, nextScreenId: undefined })
+              onUpdateChoice && onUpdateChoice(parsed.sceneId, parsed.screenIndex, parsed.choiceIndex, { nextScene: target, nextScreenId: undefined })
             }
           }
         } else if (source.startsWith('sp_')) {
@@ -727,21 +739,19 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
     (edgesToDelete: Edge[]) => {
       edgesToDelete.forEach((edge) => {
         if (edge.source && edge.source.includes('_choice_')) {
-          const [sceneId, idxStr] = edge.source.split('_choice_')
-          const choiceIndex = parseInt(idxStr)
-          if (!Number.isNaN(choiceIndex)) {
-            onUpdateChoice && onUpdateChoice(sceneId, choiceIndex, { nextScene: undefined, nextScreenId: undefined })
+          const parsed = parseChoiceNodeId(edge.source)
+          if (parsed) {
+            onUpdateChoice && onUpdateChoice(parsed.sceneId, parsed.screenIndex, parsed.choiceIndex, { nextScene: undefined, nextScreenId: undefined })
           }
         } else if (edge.source && edge.source.startsWith('sp_') && edge.target && edge.target.includes('_choice_')) {
           // Удаление связи sp -> choice: удаляем условие у выбора
           const spId = edge.source.substring(3)
-          const [sceneId, idxStr] = (edge.target || '').split('_choice_')
-          const choiceIndex = parseInt(idxStr)
-          if (!Number.isNaN(choiceIndex)) {
-            const scene = scenes.find(s => s.id === sceneId)
-            const choice = scene?.choices[choiceIndex]
+          const parsed = parseChoiceNodeId(edge.target)
+          if (parsed) {
+            const scene = scenes.find(s => s.id === parsed.sceneId)
+            const choice = scene?.screens?.[parsed.screenIndex]?.choices?.[parsed.choiceIndex]
             const filtered = (choice?.conditions || []).filter((c: any) => !(c.entityType === 'story_point' && (c.entityId === spId || c.pointId === spId)))
-            onUpdateChoice && onUpdateChoice(sceneId, choiceIndex, { conditions: filtered })
+            onUpdateChoice && onUpdateChoice(parsed.sceneId, parsed.screenIndex, parsed.choiceIndex, { conditions: filtered })
           }
         } else if (edge.source && edge.source.startsWith('sp_')) {
           // Удаление связи сюжетная точка -> сцена: убираем условие из сцены
@@ -764,39 +774,36 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
   const onEdgeUpdate = useCallback(
     (oldEdge: Edge, newConnection: Connection) => {
       if (oldEdge.source && oldEdge.source.includes('_choice_')) {
-        const [sceneId, idxStr] = oldEdge.source.split('_choice_')
-        const choiceIndex = parseInt(idxStr)
-        if (!Number.isNaN(choiceIndex)) {
+        const parsed = parseChoiceNodeId(oldEdge.source)
+        if (parsed) {
           const newTarget = newConnection.target
           if (newTarget && newTarget.includes('_screen_')) {
             const screenIdx = parseInt(newTarget.split('_screen_')[1])
-            const scene = scenes.find(s => s.id === sceneId)
+            const scene = scenes.find(s => s.id === parsed.sceneId)
             const screen = scene?.screens?.[screenIdx]
-            onUpdateChoice && onUpdateChoice(sceneId, choiceIndex, { nextScreenId: screen?.id, nextScene: undefined })
+            onUpdateChoice && onUpdateChoice(parsed.sceneId, parsed.screenIndex, parsed.choiceIndex, { nextScreenId: screen?.id, nextScene: undefined })
           } else {
-            onUpdateChoice && onUpdateChoice(sceneId, choiceIndex, { nextScene: newTarget || undefined, nextScreenId: undefined })
+            onUpdateChoice && onUpdateChoice(parsed.sceneId, parsed.screenIndex, parsed.choiceIndex, { nextScene: newTarget || undefined, nextScreenId: undefined })
           }
         }
       } else if (oldEdge.source && oldEdge.source.startsWith('sp_') && oldEdge.target && oldEdge.target.includes('_choice_')) {
         // Переподключение условия sp -> другой choice
         const spId = oldEdge.source.substring(3)
-        const [oldSceneId, oldIdxStr] = oldEdge.target.split('_choice_')
-        const oldChoiceIndex = parseInt(oldIdxStr)
-        if (!Number.isNaN(oldChoiceIndex)) {
-          const oldScene = scenes.find(s => s.id === oldSceneId)
-          const filtered = (oldScene?.choices[oldChoiceIndex].conditions || []).filter((c: any) => !(c.entityType === 'story_point' && (c.entityId === spId || c.pointId === spId)))
-          onUpdateChoice && onUpdateChoice(oldSceneId, oldChoiceIndex, { conditions: filtered })
+        const oldParsed = parseChoiceNodeId(oldEdge.target as string)
+        if (oldParsed) {
+          const oldScene = scenes.find(s => s.id === oldParsed.sceneId)
+          const filtered = (oldScene?.screens?.[oldParsed.screenIndex]?.choices?.[oldParsed.choiceIndex]?.conditions || []).filter((c: any) => !(c.entityType === 'story_point' && (c.entityId === spId || c.pointId === spId)))
+          onUpdateChoice && onUpdateChoice(oldParsed.sceneId, oldParsed.screenIndex, oldParsed.choiceIndex, { conditions: filtered })
         }
         if (newConnection.target && newConnection.target.includes('_choice_')) {
-          const [newSceneId, newIdxStr] = newConnection.target.split('_choice_')
-          const newChoiceIndex = parseInt(newIdxStr)
-          if (!Number.isNaN(newChoiceIndex)) {
-            const newScene = scenes.find(s => s.id === newSceneId)
-            const newChoice = newScene?.choices[newChoiceIndex]
+          const newParsed = parseChoiceNodeId(newConnection.target)
+          if (newParsed) {
+            const newScene = scenes.find(s => s.id === newParsed.sceneId)
+            const newChoice = newScene?.screens?.[newParsed.screenIndex]?.choices?.[newParsed.choiceIndex]
             const exists = (newChoice?.conditions || []).some((c: any) => c.entityType === 'story_point' && (c.entityId === spId || c.pointId === spId))
             if (!exists) {
               const updated = [...(newChoice?.conditions || []), { entityType: 'story_point', entityId: spId, property: 'value', operator: '>=', value: 1 }]
-              onUpdateChoice && onUpdateChoice(newSceneId, newChoiceIndex, { conditions: updated })
+              onUpdateChoice && onUpdateChoice(newParsed.sceneId, newParsed.screenIndex, newParsed.choiceIndex, { conditions: updated })
             }
           }
         }
@@ -854,27 +861,18 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
         }
       }
     } else if (node.type === 'choice') {
-      // Узел выбора: уведомляем родителя
-      const id = node.id // format: <sceneId>_choice_<index>
-      const splitIdx = id.lastIndexOf('_choice_')
-      if (splitIdx > 0) {
-        const sceneId = id.substring(0, splitIdx)
-        const idxStr = id.substring(splitIdx + 8)
-        const choiceIndex = parseInt(idxStr)
-        if (!Number.isNaN(choiceIndex)) {
-          onChoiceSelect && onChoiceSelect(sceneId, choiceIndex)
-        }
-      }
-    } else if (node.type === 'choice') {
-      // Узел выбора: уведомляем родителя
-      const id = node.id // format: <sceneId>_choice_<index>
-      const splitIdx = id.lastIndexOf('_choice_')
-      if (splitIdx > 0) {
-        const sceneId = id.substring(0, splitIdx)
-        const idxStr = id.substring(splitIdx + 8)
-        const choiceIndex = parseInt(idxStr)
-        if (!Number.isNaN(choiceIndex)) {
-          onChoiceSelect && onChoiceSelect(sceneId, choiceIndex)
+      // Узел выбора: формат id теперь <sceneId>_screen_<screenIdx>_choice_<choiceIdx>
+      const id = node.id
+      const parts = id.split('_')
+      // ищем подстроки: ... _screen_<screenIdx>_choice_<choiceIdx>
+      const screenIdxPos = parts.lastIndexOf('screen')
+      const choiceIdxPos = parts.lastIndexOf('choice')
+      if (screenIdxPos !== -1 && choiceIdxPos !== -1 && choiceIdxPos === screenIdxPos + 2) {
+        const screenIndex = parseInt(parts[screenIdxPos + 1])
+        const choiceIndex = parseInt(parts[choiceIdxPos + 1])
+        const sceneId = parts.slice(0, screenIdxPos).join('_')
+        if (!Number.isNaN(screenIndex) && !Number.isNaN(choiceIndex)) {
+          onChoiceSelect && onChoiceSelect(sceneId, screenIndex, choiceIndex)
         }
       }
     }
@@ -899,7 +897,7 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
             Граф переходов сцен
           </CardTitle>
           <div className="text-sm text-neutral-400">
-            Перетаскивайте узлы для лучшего расположения. Синие связи - выборы, зеленые - переходы к сценам.
+            Перетащите узлы для лучшего расположения. Синие связи - выборы, зеленые - переходы к сценам.
           </div>
         </CardHeader>
         <CardContent className="p-0 h-full">
@@ -947,11 +945,7 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
               const flowY = (e.clientY - bounds.top - translateY) / scale
               const pos = { x: flowX, y: flowY }
               if (mode === 'scene' && selectedSceneId) {
-                if (addMode === 'screen') {
-                  onAddScreen && onAddScreen(selectedSceneId, pos)
-                } else {
-                  onAddChoice && onAddChoice(selectedSceneId, pos)
-                }
+                onAddScreen && onAddScreen(selectedSceneId, pos)
               } else {
                 onAddScene && onAddScene(pos)
               }
