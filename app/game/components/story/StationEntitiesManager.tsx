@@ -26,12 +26,18 @@ import {
 import { StationEntity } from '@/lib/simple-story-types'
 
 interface StationEntitiesManagerProps {
-  entities: { [key: string]: StationEntity }
-  onUpdate: (entities: { [key: string]: StationEntity }) => void
+  entities: StationEntity[]
+  onUpdate: (entities: StationEntity[]) => void
   scenes: Array<{ id: string; title: string }>
 }
 
 export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEntitiesManagerProps) {
+  console.log('🎯 StationEntitiesManager received:', {
+    entitiesCount: entities.length,
+    entities: entities,
+    scenesCount: scenes.length
+  })
+
   const [selectedEntity, setSelectedEntity] = useState<StationEntity | null>(null)
   const [editingEntity, setEditingEntity] = useState<StationEntity | null>(null)
 
@@ -44,12 +50,9 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
       description: 'Описание новой сущности',
       isActive: true
     }
-    
-    const updatedEntities = {
-      ...entities,
-      [newEntity.id]: newEntity
-    }
-    
+
+    const updatedEntities = [...entities, newEntity]
+
     onUpdate(updatedEntities)
     setSelectedEntity(newEntity)
     setEditingEntity(newEntity)
@@ -57,23 +60,22 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
 
   // Обновление сущности
   const updateEntity = (entityId: string, updates: Partial<StationEntity>) => {
-    const updatedEntities = {
-      ...entities,
-      [entityId]: { ...entities[entityId], ...updates }
-    }
+    const updatedEntities = entities.map(entity =>
+      entity.id === entityId ? { ...entity, ...updates } : entity
+    )
     onUpdate(updatedEntities)
-    
+
     if (selectedEntity?.id === entityId) {
-      setSelectedEntity(updatedEntities[entityId])
+      const updatedEntity = updatedEntities.find(entity => entity.id === entityId)
+      setSelectedEntity(updatedEntity || null)
     }
   }
 
   // Удаление сущности
   const deleteEntity = (entityId: string) => {
-    const updatedEntities = { ...entities }
-    delete updatedEntities[entityId]
+    const updatedEntities = entities.filter(entity => entity.id !== entityId)
     onUpdate(updatedEntities)
-    
+
     if (selectedEntity?.id === entityId) {
       setSelectedEntity(null)
       setEditingEntity(null)
@@ -127,16 +129,16 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
         {/* Левая панель - список сущностей */}
         <div className="w-1/3 border-r p-4">
           <div className="mb-4">
-            <h3 className="font-semibold">Сущности ({Object.keys(entities).length})</h3>
+            <h3 className="font-semibold">Сущности ({entities.length})</h3>
           </div>
-          
+
           <ScrollArea className="h-full">
             <div className="space-y-2">
-              {Object.entries(entities).map(([id, entity]) => (
-                <Card 
-                  key={id} 
+              {entities.map((entity) => (
+                <Card
+                  key={entity.id}
                   className={`cursor-pointer transition-colors ${
-                    selectedEntity?.id === id ? 'border-primary bg-primary/5' : ''
+                    selectedEntity?.id === entity.id ? 'border-primary bg-primary/5' : ''
                   }`}
                   onClick={() => setSelectedEntity(entity)}
                 >
@@ -168,12 +170,12 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
                           )}
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          deleteEntity(id)
+                          deleteEntity(entity.id)
                         }}
                       >
                         <Trash2 className="h-4 w-4" />

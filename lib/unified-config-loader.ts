@@ -25,12 +25,13 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
     // Загружаем реальные данные из JSON файлов
     console.log('📂 Загружаем данные из JSON файлов...')
 
-    const [charactersData, usersData, equipmentData, posesData, stationEntitiesData, gameUnifiedData] = await Promise.all([
+    const [charactersData, usersData, equipmentData, posesData, stationEntitiesData, storyScenesData, gameUnifiedData] = await Promise.all([
       import('../data/characters-unified.json'),
       import('../data/users-unified.json'),
       import('../data/equipment-unified.json'),
       import('../data/poses-unified.json').catch(() => ({ default: { poses: {}, poseChangeConditions: {} } })),
       import('../data/station-entities.json').catch(() => ({ default: {} })),
+      import('../data/story-scenes-unified.json').catch(() => ({ default: { storyPoints: {}, scenes: [] } })),
       import('../data/game-config-unified.json').catch(() => null as any)
     ])
 
@@ -40,13 +41,16 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
     const realPoses = posesData.default.poses || {}
     const realPoseConditions = posesData.default.poseChangeConditions || {}
     const realStationEntities = stationEntitiesData.default || {}
+    const realStoryScenes = storyScenesData.default || { storyPoints: {}, scenes: [] }
 
     console.log('📊 Реальные данные загружены:', {
       characters: realCharacters.length,
       users: realUsers.length,
       equipment: realEquipment.length,
       poses: Object.keys(realPoses).length,
-      stationEntities: Object.keys(realStationEntities).length
+      stationEntities: Object.keys(realStationEntities).length,
+      storyScenes: realStoryScenes.scenes?.length || 0,
+      storyPoints: Object.keys(realStoryScenes.storyPoints || {}).length
     })
 
     // Попробуем получить Character AI конфигурацию из объединённого файла,
@@ -120,17 +124,7 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
         }
       ], // Реальное или тестовое оборудование
       system: {}, // Заглушка для system
-      storyScenes: {
-        test_scene: {
-          name: "Тестовая сцена",
-          description: "Тестовая сюжетная сцена",
-          value: 50,
-          defaultValue: 50,
-          minValue: 0,
-          maxValue: 100,
-          type: "numeric"
-        }
-      }, // Тестовые сюжетные сцены
+      storyScenes: realStoryScenes, // Реальные сюжетные сцены и точки
       users: realUsers.length > 0 ? realUsers : [
         {
           id: "test_user_1",

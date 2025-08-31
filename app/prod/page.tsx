@@ -254,7 +254,8 @@ export default function TalentArchitectProd() {
   const getStationArray = (cfg: any) => {
     if (!cfg) return [] as any[]
     const s = (cfg as any).station?.stationEntities
-    return Array.isArray(s) ? s : []
+    // Конвертируем объект в массив, если он объект
+    return Array.isArray(s) ? s : (s ? Object.values(s) : [])
   }
 
   console.log('🎯 Используемая конфигурация:', {
@@ -876,56 +877,165 @@ export default function TalentArchitectProd() {
     })) || []
   )
 
+  // Загружаем сцены из конфигурации
   useEffect(() => {
-    // В реальном приложении это будет загрузка из story-scenes.json
-    const mockScenes = [
-      {
-        id: "void-rescue-1",
-        title: "Спасение в Пустоте",
-        description: "Вы обнаружили сигнал бедствия в опасном секторе Void Border",
-        image: "/cyberpunk-void-rescue.png",
-        category: "void-rescues",
-        choices: [
-          {
-            id: "rescue",
-            text: "Организовать спасательную операцию",
-            cost: 2000,
-            outcomes: [
-              {
-                probability: 0.7,
-                effects: [{ type: "add_talent", talent: "rescued_specialist" }],
-                description: "Успешно спасли специалиста",
-              },
-              {
-                probability: 0.3,
-                effects: [{ type: "lose_credits", amount: 1000 }],
-                description: "Операция провалилась",
-              },
-            ],
-          },
-          {
-            id: "ignore",
-            text: "Проигнорировать сигнал",
-            outcomes: [
-              {
-                probability: 1.0,
-                effects: [{ type: "change_reputation", amount: -5 }],
-                description: "Репутация пострадала",
-              },
-            ],
-          },
-        ],
-      },
-    ]
-    setStoryScenes(mockScenes)
-  }, [])
+    if (effectiveGameConfig?.storyScenes && Array.isArray(effectiveGameConfig.storyScenes.scenes)) {
+      console.log('🎭 Загружаем сцены из конфигурации:', effectiveGameConfig.storyScenes.scenes.length)
+      setStoryScenes(effectiveGameConfig.storyScenes.scenes)
+    } else {
+      // Fallback для старых данных - простые сцены для сущностей станции
+      const mockScenes = [
+        {
+          id: "market_intro",
+          title: "Добро пожаловать на Talent Exchange",
+          description: "Вы входите в основной рынок талантов станции",
+          image: "/cyberpunk-market.png",
+          choices: [
+            {
+              id: "browse",
+              text: "Просмотреть талантов",
+              outcomes: [
+                {
+                  probability: 1.0,
+                  effects: [{ type: "change_reputation", amount: 2 }],
+                  description: "Вы изучили рынок",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "auction_intro",
+          title: "Корпоративный аукцион",
+          description: "Элитный аукцион для корпоративных клиентов",
+          image: "/cyberpunk-auction.png",
+          choices: [
+            {
+              id: "participate",
+              text: "Участвовать в торгах",
+              cost: 500,
+              outcomes: [
+                {
+                  probability: 0.6,
+                  effects: [{ type: "gain_credits", amount: 200 }],
+                  description: "Вы выиграли торги",
+                },
+                {
+                  probability: 0.4,
+                  effects: [{ type: "lose_credits", amount: 500 }],
+                  description: "Торги проиграны",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "void_rescue",
+          title: "Спасательная операция в Void",
+          description: "Опасная миссия по спасению талантов из зоны Void",
+          image: "/void-space.png",
+          choices: [
+            {
+              id: "rescue",
+              text: "Организовать спасательную операцию",
+              cost: 1500,
+              outcomes: [
+                {
+                  probability: 0.7,
+                  effects: [{ type: "add_talent", talent: "rescued_specialist" }],
+                  description: "Успешно спасли специалиста",
+                },
+                {
+                  probability: 0.3,
+                  effects: [{ type: "lose_credits", amount: 1000 }],
+                  description: "Операция провалилась",
+                },
+              ],
+            },
+            {
+              id: "ignore",
+              text: "Проигнорировать сигнал",
+              outcomes: [
+                {
+                  probability: 1.0,
+                  effects: [{ type: "change_reputation", amount: -5 }],
+                  description: "Репутация пострадала",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "neural_hub_intro",
+          title: "Neural Hub",
+          description: "Технологический центр станции",
+          image: "/neural-hub.png",
+          choices: [
+            {
+              id: "research",
+              text: "Провести исследование",
+              cost: 300,
+              outcomes: [
+                {
+                  probability: 1.0,
+                  effects: [{ type: "gain_credits", amount: 100 }],
+                  description: "Исследование завершено",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "solar_storm_default",
+          title: "Солнечная буря",
+          description: "Магнитная буря влияет на нейроинтерфейсы станции",
+          image: "/solar-storm.png",
+          choices: [
+            {
+              id: "wait",
+              text: "Дождаться окончания бури",
+              outcomes: [
+                {
+                  probability: 1.0,
+                  effects: [{ type: "change_reputation", amount: -2 }],
+                  description: "Буря закончилась",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "corporate_party_default",
+          title: "Корпоративная вечеринка",
+          description: "Общее мероприятие поднимает настроение команды",
+          image: "/corporate-party.png",
+          choices: [
+            {
+              id: "participate",
+              text: "Участвовать в мероприятии",
+              outcomes: [
+                {
+                  probability: 1.0,
+                  effects: [{ type: "change_reputation", amount: 3 }],
+                  description: "Мероприятие прошло успешно",
+                },
+              ],
+            },
+          ],
+        },
+      ]
+      setStoryScenes(mockScenes)
+    }
+  }, [effectiveGameConfig])
 
-  const triggerStoryScene = (category: string, context?: any) => {
-    const availableScenes = storyScenes.filter((scene) => scene.category === category)
-    if (availableScenes.length > 0) {
-      const randomScene = availableScenes[Math.floor(Math.random() * availableScenes.length)]
-      setCurrentScene({ ...randomScene, context })
+  const triggerStoryScene = (sceneId: string, context?: any) => {
+    // Ищем сцену по ID в storyScenes
+    const scene = storyScenes.find((scene) => scene.id === sceneId)
+    if (scene) {
+      setCurrentScene({ ...scene, context })
       setShowStoryScene(true)
+    } else {
+      console.warn(`Сцена с ID "${sceneId}" не найдена`)
     }
   }
 
@@ -945,9 +1055,14 @@ export default function TalentArchitectProd() {
         case "lose_credits":
           updateCredits((prev) => Math.max(0, prev - effect.amount))
           break
+        case "gain_credits":
+          updateCredits((prev) => prev + effect.amount)
+          break
         case "change_reputation":
           setReputation((prev) => prev + effect.amount)
           break
+        default:
+          console.log(`Неизвестный эффект: ${effect.type}`, effect)
       }
     })
 
@@ -2231,9 +2346,31 @@ export default function TalentArchitectProd() {
   }
 
   const openStationEntity = (entityId: string) => {
-    // Здесь будет логика открытия сущности станции
-    // Пока просто показываем сюжетную сцену
-    triggerStoryScene(entityId)
+    // Находим сущность станции по ID
+    const entities = getStationArray(effectiveGameConfig)
+    const entity = entities.find((e) => e.id === entityId)
+
+    if (entity) {
+      // Выбираем сцену: defaultSceneId или customSceneId на основе вероятности
+      let sceneId = entity.defaultSceneId
+
+      if (entity.customSceneId && entity.probability) {
+        // Проверяем вероятность запуска кастомной сцены
+        const random = Math.random() * 100
+        if (random <= entity.probability) {
+          sceneId = entity.customSceneId
+        }
+      }
+
+      if (sceneId) {
+        console.log(`🏭 Открываем сущность станции "${entity.name}" со сценой: ${sceneId}`)
+        triggerStoryScene(sceneId, { entity })
+      } else {
+        console.warn(`⚠️ У сущности "${entity.name}" нет defaultSceneId`)
+      }
+    } else {
+      console.warn(`⚠️ Сущность станции с ID "${entityId}" не найдена`)
+    }
   }
 
   const refreshMarketTalents = () => {
@@ -2570,12 +2707,8 @@ export default function TalentArchitectProd() {
               <p className="text-sm text-gray-300">Сущности станции и их сюжетные сцены</p>
 
               <div className="grid grid-cols-1 gap-3">
-                {[
-                  // Здесь будут отображаться сущности, добавленные через dev панель
-                ].length > 0 ? (
-                  [
-                    // Здесь будут отображаться сущности, добавленные через dev панель
-                  ].map((entity) => (
+                {getStationArray(effectiveGameConfig).length > 0 ? (
+                  getStationArray(effectiveGameConfig).map((entity) => (
                     <div key={entity.id} className="p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="flex-1">
@@ -2583,7 +2716,7 @@ export default function TalentArchitectProd() {
                           <span className="text-xs text-gray-400 capitalize">{entity.type}</span>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-300 mb-3">{entity.desc}</p>
+                      <p className="text-sm text-gray-300 mb-3">{entity.description}</p>
                       <button
                         onClick={() => openStationEntity(entity.id)}
                         className="w-full px-3 py-2 bg-cyan-600 hover:bg-cyan-700 rounded text-sm"

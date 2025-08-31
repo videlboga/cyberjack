@@ -190,9 +190,13 @@ export default function StoryEditorPage() {
   const [storyData, setStoryData] = useState<SimpleStoryConfig>(() => {
     // начальное состояние – из json, затем перезапишем из localStorage (клиент)
     const converted = convertToSimpleFormat(storyScenesData)
+    // Конвертируем stationEntities в массив, если он объект
+    const stationEntitiesArray = Array.isArray(stationEntitiesData)
+      ? stationEntitiesData
+      : Object.values(stationEntitiesData || {})
     return {
       ...converted,
-      stationEntities: stationEntitiesData
+      stationEntities: stationEntitiesArray
     }
   })
   const [activeTab, setActiveTab] = useState<'simple' | 'station'>('simple')
@@ -203,7 +207,7 @@ export default function StoryEditorPage() {
     assets: demoAssets,
     users: [demoUser],
     equipment: [],
-    stationEntities: storyData.stationEntities || {}
+    stationEntities: Array.isArray(storyData.stationEntities) ? storyData.stationEntities : []
   }
 
   // Подхватываем сохранённые данные из localStorage при монтировании на клиенте
@@ -212,6 +216,10 @@ export default function StoryEditorPage() {
       const raw = typeof window !== 'undefined' ? localStorage.getItem('cyberjack-simple-story-data') : null
       if (raw) {
         const parsed = JSON.parse(raw)
+        // Конвертируем stationEntities в массив, если он объект
+        if (parsed.stationEntities && !Array.isArray(parsed.stationEntities)) {
+          parsed.stationEntities = Object.values(parsed.stationEntities)
+        }
         setStoryData(parsed)
         setHasUnsavedChanges(false)
       }
@@ -389,17 +397,43 @@ export default function StoryEditorPage() {
           </TabsContent>
 
           <TabsContent value="station" className="h-full m-0">
-            <StationEntitiesManager
-              entities={storyData.stationEntities || {}}
-              onUpdate={(stationEntities) => {
-                setStoryData(prev => ({
-                  ...prev,
-                  stationEntities
-                }))
-                setHasUnsavedChanges(true)
-              }}
-              scenes={storyData.scenes.map(scene => ({ id: scene.id, title: scene.title }))}
-            />
+            {(() => {
+              console.log('🔍 DEBUG StationEntitiesManager:', {
+                stationEntities: storyData.stationEntities,
+                isArray: Array.isArray(storyData.stationEntities),
+                length: Array.isArray(storyData.stationEntities) ? storyData.stationEntities.length : 0,
+                scenesCount: storyData.scenes.length
+              })
+              return (
+                <StationEntitiesManager
+                  entities={Array.isArray(storyData.stationEntities) ? storyData.stationEntities : []}
+                  onUpdate={(stationEntities) => {
+                    // Сохраняем немедленно, как в SimpleStoryEditor
+                    const newData = {
+                      ...storyData,
+                      stationEntities
+                    }
+                    try {
+                      setStoryData(newData)
+                      localStorage.setItem('cyberjack-simple-story-data', JSON.stringify(newData))
+                      setHasUnsavedChanges(false)
+                      // Небольшой тост об успешном сохранении
+                      const notification = document.createElement('div')
+                      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50'
+                      notification.textContent = 'Изменения сохранены'
+                      document.body.appendChild(notification)
+                      setTimeout(() => document.body.removeChild(notification), 2000)
+                    } catch (e) {
+                      console.error('Ошибка при сохранении данных:', e)
+                      // В случае ошибки помечаем изменения как несохраненные
+                      setStoryData(newData)
+                      setHasUnsavedChanges(true)
+                    }
+                  }}
+                  scenes={storyData.scenes.map(scene => ({ id: scene.id, title: scene.title }))}
+                />
+              )
+            })()}
           </TabsContent>
 
 
