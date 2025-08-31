@@ -83,33 +83,12 @@ const SceneNode = ({ data }: any) => {
       <div className="flex items-start">
         {getIcon()}
         <div className="ml-2 flex-1">
-          <Input
-            value={data.label}
-            onChange={(e) => data.onUpdateScene && data.onUpdateScene({ title: e.target.value })}
-            className="h-7 text-xs bg-white/10 border-white/20 text-neutral-100 placeholder:text-neutral-300/60"
-            placeholder="Название сцены"
-          />
-          <Input
-            value={data.description}
-            onChange={(e) => data.onUpdateScene && data.onUpdateScene({ description: e.target.value })}
-            className="h-7 mt-2 text-xs bg-white/10 border-white/20 text-neutral-100 placeholder:text-neutral-300/60"
-            placeholder="Описание"
-          />
+          <div className="text-xs text-neutral-300 font-semibold truncate" title={data.label}>{data.label || 'Без названия'}</div>
+          <div className="text-[11px] text-neutral-400 truncate" title={data.description}>{data.description || '—'}</div>
           <div className="flex gap-2 mt-2 items-center">
             <Badge variant="outline" className="text-xs border-white/20 text-neutral-200">
               {data.choicesCount} выборов
             </Badge>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-neutral-400">%</span>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                value={data.probability ?? ''}
-                onChange={(e) => data.onUpdateScene && data.onUpdateScene({ probability: e.target.value ? parseInt(e.target.value) : undefined })}
-                className="h-7 w-16 text-xs bg-white/10 border-white/20 text-neutral-100"
-              />
-            </div>
           </div>
         </div>
       </div>
@@ -348,12 +327,31 @@ const ScreenNode = ({ data }: any) => {
 
 const EntryNode = ({ data }: any) => {
   return (
-    <div className="relative px-3 py-2 shadow-md rounded-lg bg-neutral-900/80 text-neutral-100 border-2 border-amber-400 min-w-[220px]">
-      <div className="text-xs text-neutral-300 mb-1">Точка входа</div>
-      <div className="text-[11px] text-neutral-400">Вероятность</div>
-      <Input value={data.probability ?? ''} type="number" min={0} max={100} onChange={(e) => data.onUpdateScene && data.onUpdateScene({ probability: e.target.value ? parseInt(e.target.value) : undefined })} className="h-7 text-xs bg-white/10 border-white/20 text-neutral-100" />
-      <div className="text-[11px] text-neutral-400 mt-1">Условия запуска</div>
-      <div className="text-[11px] text-neutral-500">настраиваются в панели</div>
+    <div className="relative px-3 py-2 shadow-md rounded-lg bg-neutral-900/80 text-neutral-100 border-2 border-amber-400 min-w-[260px] max-w-[420px]">
+      <div className="flex items-start justify-between mb-1">
+        <div className="text-xs text-neutral-300">Точка входа</div>
+        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => data.onDeleteScene && data.onDeleteScene()} title="Удалить сцену" aria-label="Удалить сцену">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+      <Input
+        value={data.title || ''}
+        onChange={(e) => data.onUpdateScene && data.onUpdateScene({ title: e.target.value })}
+        className="h-7 text-xs bg-white/10 border-white/20 text-neutral-100"
+        placeholder="Название сцены"
+      />
+      <Input
+        value={data.description || ''}
+        onChange={(e) => data.onUpdateScene && data.onUpdateScene({ description: e.target.value })}
+        className="h-7 mt-2 text-xs bg-white/10 border-white/20 text-neutral-100"
+        placeholder="Описание"
+      />
+      <div className="mt-2">
+        <div className="text-[11px] text-neutral-400">Вероятность</div>
+        <Input value={data.probability ?? ''} type="number" min={0} max={100} onChange={(e) => data.onUpdateScene && data.onUpdateScene({ probability: e.target.value ? parseInt(e.target.value) : undefined })} className="h-7 text-xs bg-white/10 border-white/20 text-neutral-100" />
+      </div>
+      <div className="text-[11px] text-neutral-400 mt-2">Условия запуска</div>
+      <div className="text-[11px] text-neutral-500">Подключите сюжетные точки к этой ноде для условий</div>
       <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-amber-400" />
     </div>
   )
@@ -429,7 +427,10 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
         },
         data: {
           probability: scene.probability,
+          title: scene.title,
+          description: scene.description,
           onUpdateScene: (updates: Partial<SimpleScene>) => onUpdateScene && onUpdateScene(scene.id, updates),
+          onDeleteScene: () => onDeleteScene && onDeleteScene(scene.id),
         }
       })
 
