@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { loadUnifiedConfigV2 } from '@/lib/unified-config-loader'
+import { loadUnifiedConfig } from '@/lib/unified-config-loader'
 import { writeFile } from 'fs/promises'
 import path from 'path'
 
 export async function GET() {
   try {
-    const config = await loadUnifiedConfigV2()
+    const config = await loadUnifiedConfig()
     return NextResponse.json({
       success: true,
       config,
@@ -13,6 +13,7 @@ export async function GET() {
         charactersCount: config.characters?.length || 0,
         usersCount: (config as any).users?.length || 0,
         equipmentCount: (config as any).equipment?.length || 0,
+        stationEntitiesCount: (config as any).station?.stationEntities?.length || 0,
       }
     })
   } catch (error) {

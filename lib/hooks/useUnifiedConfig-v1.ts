@@ -31,7 +31,13 @@ export function useUnifiedConfig(): UseUnifiedConfigResult {
         equipment: Array.isArray(raw?.equipment) ? raw.equipment : (raw?.equipment?.equipment ?? []),
         contracts: Array.isArray(raw?.contracts) ? raw.contracts : (raw?.contracts?.available ?? []),
         storyScenes: Array.isArray(raw?.storyScenes) ? raw.storyScenes : (raw?.storyScenes?.scenes ?? []),
-        actions: raw?.actions ?? {}
+        actions: raw?.actions ?? {},
+        station: raw?.station ? {
+          ...raw.station,
+          stationEntities: Array.isArray(raw.station.stationEntities)
+            ? raw.station.stationEntities
+            : (raw.station.stationEntities ? Object.values(raw.station.stationEntities) : [])
+        } : { stationEntities: [] }
       }
       setConfig(normalized as GameConfig)
     } catch (err) {

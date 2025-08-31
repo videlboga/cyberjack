@@ -12,6 +12,7 @@ export interface ConfigState {
   equipment: any
   system: any
   users: any
+  station: any
   characterAI?: any
 }
 
@@ -20,6 +21,11 @@ export const useConfigManager = (initialConfigs: ConfigState) => {
 
   // Функция для обновления конфигураций извне
   const updateConfigs = useCallback((newConfigs: ConfigState) => {
+    console.log('🔧 useConfigManager: updating configs with:', {
+      hasStation: !!newConfigs.station,
+      stationEntitiesCount: newConfigs.station?.stationEntities ? Object.keys(newConfigs.station.stationEntities).length : 0,
+      newConfigsKeys: Object.keys(newConfigs)
+    })
     setConfigs(newConfigs)
   }, [])
 

@@ -7,9 +7,9 @@ console.log('📦 unified-config-loader.ts загружен')
 // let cacheTimestamp = 0
 // const CACHE_DURATION = 5 * 60 * 1000 // 5 минут
 
-// Загрузка унифицированной конфигурации версии 2
-export async function loadUnifiedConfigV2(): Promise<GameConfig> {
-  console.log('🚀 loadUnifiedConfigV2 вызвана')
+// Загрузка унифицированной конфигурации
+export async function loadUnifiedConfig(): Promise<GameConfig> {
+  console.log('🚀 loadUnifiedConfig вызвана')
   const now = Date.now()
 
   // Временно отключаем кэширование для отладки

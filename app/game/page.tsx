@@ -25,7 +25,7 @@ import UserKnowledgePanel from "./components/ui/UserKnowledgePanel"
 
 
 // Импортируем конфигурации и утилиты синхронизации
-import { loadUnifiedConfigV2 } from "@/lib/unified-config-loader"
+import { loadUnifiedConfig } from "@/lib/unified-config-loader"
 
 
 
@@ -90,11 +90,12 @@ const NexusEnslaverGame = () => {
 
   // Загружаем конфигурации при монтировании компонента
   useEffect(() => {
+    console.log('🚀 Starting loadConfigs useEffect')
     const loadConfigs = async () => {
       try {
-
-        
-        const loadedConfigs = await loadUnifiedConfigV2()
+        console.log('📡 Calling loadUnifiedConfig...')
+        const loadedConfigs = await loadUnifiedConfig()
+        console.log('✅ loadUnifiedConfig returned:', loadedConfigs)
 
         // Нормализуем под ожидаемую dev-структуру UI (вложенные разделы)
         const normalized = {
@@ -115,7 +116,15 @@ const NexusEnslaverGame = () => {
           storyScenes: (loadedConfigs as any)?.storyScenes || []
         }
 
+        console.log('📦 Loaded configs from unified loader:', {
+          hasStation: !!normalized.station,
+          stationEntitiesCount: normalized.station?.stationEntities ? Object.keys(normalized.station.stationEntities).length : 0,
+          normalizedKeys: Object.keys(normalized),
+          stationData: normalized.station
+        })
+        console.log('🔄 Setting configs...')
         setConfigs(normalized)
+        console.log('✅ Configs set successfully')
         if ((loadedConfigs as any)?.characterAI) {
           setCharacterAIConfig((loadedConfigs as any).characterAI)
         }
@@ -213,23 +222,34 @@ const NexusEnslaverGame = () => {
   // Обновляем managedConfigs когда загружаются новые конфигурации
   useEffect(() => {
     if (!isLoading && configs) {
-
+      console.log('🔄 Updating managedConfigs with:', {
+        hasStation: !!configs.station,
+        stationEntitiesCount: configs.station?.stationEntities ? Object.keys(configs.station.stationEntities).length : 0,
+        configsKeys: Object.keys(configs),
+        stationData: configs.station
+      })
       updateConfigs(configs)
+      console.log('✅ managedConfigs updated')
     }
   }, [configs, isLoading])
 
   // Обновляем статистику при изменении конфигураций
   useEffect(() => {
     if (!isLoading) {
+      // Исправляем подсчёт stationEntities - это массив, а не объект
+      const stationCount = Array.isArray(managedConfigs.station?.stationEntities)
+        ? managedConfigs.station.stationEntities.length
+        : Object.keys(managedConfigs.station?.stationEntities || {}).length
       const stats = {
         assets: managedConfigs.assets?.assets?.length || 0,
+        station: stationCount,
         contracts: managedConfigs.contracts?.available?.length || 0,
         actions: Object.keys(managedConfigs.actions?.categories || {}).length,
         events: (managedConfigs.events?.anomalies?.length || 0) + (managedConfigs.events?.crises?.length || 0) + (managedConfigs.events?.opportunities?.length || 0),
         equipment: managedConfigs.equipment?.equipment?.length || 0,
-        users: managedConfigs.users?.users?.length || 0,
-        station: Object.keys(managedConfigs.station?.stationEntities || {}).length
+        users: managedConfigs.users?.users?.length || 0
       }
+      console.log('📊 Updating stats:', { stationCount, stats })
       setConfigStats(stats)
     }
   }, [managedConfigs, isLoading])
@@ -761,24 +781,56 @@ const NexusEnslaverGame = () => {
         const stationList: any[] = []
         // Сначала пробуем managedConfigs, потом configs
         const stationData = config?.station || (configs as any)?.station || {}
+        console.log('🔍 Station data debug:', {
+          configStation: config?.station,
+          configsStation: (configs as any)?.station,
+          stationData,
+          hasStationEntities: !!stationData.stationEntities,
+          isArray: Array.isArray(stationData.stationEntities),
+          stationEntitiesCount: Array.isArray(stationData.stationEntities)
+            ? stationData.stationEntities.length
+            : (stationData.stationEntities ? Object.keys(stationData.stationEntities).length : 0)
+        })
         if (stationData.stationEntities) {
-          Object.entries(stationData.stationEntities).forEach(([id, entity]: [string, any]) => {
-            if (!entity.deleted) {
-              stationList.push({
-                id,
-                name: entity.name,
-                description: entity.description,
-                type: entity.type,
-                isActive: entity.isActive,
-                defaultSceneId: entity.defaultSceneId,
-                probability: entity.probability,
-                customSceneId: entity.customSceneId,
-                icon: entity.icon,
-                ...entity
-              })
-            }
-          })
+          if (Array.isArray(stationData.stationEntities)) {
+            // stationEntities - массив
+            stationData.stationEntities.forEach((entity: any, index: number) => {
+              if (!entity.deleted) {
+                stationList.push({
+                  id: entity.id || `station-${index}`,
+                  name: entity.name,
+                  description: entity.description,
+                  type: entity.type,
+                  isActive: entity.isActive,
+                  defaultSceneId: entity.defaultSceneId,
+                  probability: entity.probability,
+                  customSceneId: entity.customSceneId,
+                  icon: entity.icon,
+                  ...entity
+                })
+              }
+            })
+          } else {
+            // stationEntities - объект (старый формат)
+            Object.entries(stationData.stationEntities).forEach(([id, entity]: [string, any]) => {
+              if (!entity.deleted) {
+                stationList.push({
+                  id,
+                  name: entity.name,
+                  description: entity.description,
+                  type: entity.type,
+                  isActive: entity.isActive,
+                  defaultSceneId: entity.defaultSceneId,
+                  probability: entity.probability,
+                  customSceneId: entity.customSceneId,
+                  icon: entity.icon,
+                  ...entity
+                })
+              }
+            })
+          }
         }
+        console.log('📋 Station entities list:', stationList)
         return stationList
       case 'scenes':
         // Для сюжетной системы - возвращаем сцены, экраны и сюжетные точки
@@ -966,7 +1018,7 @@ const NexusEnslaverGame = () => {
             <div className="ml-auto flex items-center space-x-3">
               {/* Stats Overview */}
               <div className="hidden lg:flex items-center space-x-2">
-                {Object.entries(configStats).slice(0, 3).map(([key, count]) => (
+                {Object.entries(configStats).slice(0, 4).map(([key, count]) => (
                   <div key={key} className="flex items-center space-x-1 px-2 py-1 rounded-md bg-muted/50">
                     <span className="text-xs font-medium text-muted-foreground">{key}</span>
                     <Badge variant="secondary" className="text-xs px-1.5 py-0.5">

@@ -202,6 +202,12 @@ export default function TalentArchitectProd() {
   const { config: unifiedConfig, loading: unifiedLoading, error: unifiedError } = useUnifiedConfig()
   useEffect(() => {
     if (unifiedConfig) {
+      console.log('🔧 DEBUG: unifiedConfig received:', {
+        hasStation: !!unifiedConfig.station,
+        stationKeys: unifiedConfig.station ? Object.keys(unifiedConfig.station) : 'no station',
+        stationEntities: unifiedConfig.station?.stationEntities ? Object.keys(unifiedConfig.station.stationEntities) : 'no stationEntities',
+        fullConfig: unifiedConfig
+      })
       setGameConfig(unifiedConfig)
       if ((unifiedConfig as any).characterAI) {
         console.log('🔄 prod/page: Установка characterAIConfig:', {
@@ -245,11 +251,17 @@ export default function TalentArchitectProd() {
     const c = (cfg as any).characters
     return Array.isArray(c) ? c : (c?.characters ?? [])
   }
+  const getStationArray = (cfg: any) => {
+    if (!cfg) return [] as any[]
+    const s = (cfg as any).station?.stationEntities
+    return Array.isArray(s) ? s : []
+  }
 
   console.log('🎯 Используемая конфигурация:', {
     characters: getCharactersArray(effectiveGameConfig).length,
     users: getUsersArray(effectiveGameConfig).length,
-    equipment: getEquipmentArray(effectiveGameConfig).length
+    equipment: getEquipmentArray(effectiveGameConfig).length,
+    station: getStationArray(effectiveGameConfig).length
   })
   
   // Признак загрузки, используем в основном JSX
