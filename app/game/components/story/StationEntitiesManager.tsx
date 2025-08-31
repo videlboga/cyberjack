@@ -251,15 +251,15 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
                   <CardContent className="space-y-4">
                     <div>
                       <Label>Дефолтная сцена</Label>
-                      <Select 
-                        value={selectedEntity.defaultSceneId || ''} 
-                        onValueChange={(value) => updateEntity(selectedEntity.id, { defaultSceneId: value || undefined })}
+                      <Select
+                        value={selectedEntity.defaultSceneId || '__none__'}
+                        onValueChange={(value) => updateEntity(selectedEntity.id, { defaultSceneId: value === '__none__' ? undefined : value })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Выберите дефолтную сцену" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Нет дефолтной сцены</SelectItem>
+                          <SelectItem value="__none__">Нет дефолтной сцены</SelectItem>
                           {scenes.map(scene => (
                             <SelectItem key={scene.id} value={scene.id}>{scene.title}</SelectItem>
                           ))}
@@ -290,15 +290,15 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
                     {selectedEntity.probability && (
                       <div>
                         <Label>Кастомная сцена</Label>
-                        <Select 
-                          value={selectedEntity.customSceneId || ''} 
-                          onValueChange={(value) => updateEntity(selectedEntity.id, { customSceneId: value || undefined })}
+                        <Select
+                          value={selectedEntity.customSceneId || '__none__'}
+                          onValueChange={(value) => updateEntity(selectedEntity.id, { customSceneId: value === '__none__' ? undefined : value })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Выберите кастомную сцену" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Нет кастомной сцены</SelectItem>
+                            <SelectItem value="__none__">Нет кастомной сцены</SelectItem>
                             {scenes.map(scene => (
                               <SelectItem key={scene.id} value={scene.id}>{scene.title}</SelectItem>
                             ))}

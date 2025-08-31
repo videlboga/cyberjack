@@ -759,8 +759,9 @@ const NexusEnslaverGame = () => {
       case 'station':
         // Для сущностей станции - возвращаем список всех сущностей
         const stationList: any[] = []
-        if (config?.stationEntities) {
-          Object.entries(config.stationEntities).forEach(([id, entity]: [string, any]) => {
+        const stationConfig = configs.station || {}
+        if (stationConfig.stationEntities) {
+          Object.entries(stationConfig.stationEntities).forEach(([id, entity]: [string, any]) => {
             if (!entity.deleted) {
               stationList.push({
                 id,
@@ -771,6 +772,7 @@ const NexusEnslaverGame = () => {
                 defaultSceneId: entity.defaultSceneId,
                 probability: entity.probability,
                 customSceneId: entity.customSceneId,
+                icon: entity.icon,
                 ...entity
               })
             }
