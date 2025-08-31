@@ -1113,7 +1113,7 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                               ))}
                             </div>
                           </>
-                        ) ) : (
+                        )) : (
                           <>
                             {(() => {
                               const choice = selectedScene.choices[selectedChoiceIndex]
