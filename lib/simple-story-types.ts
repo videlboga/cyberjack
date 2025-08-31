@@ -49,6 +49,8 @@ export interface SimpleScene {
   id: string
   title: string
   description: string
+  // Привязка к сущности станции (опционально)
+  stationEntityId?: string
   
   // Когда показывать сцену
   conditions?: SimpleCondition[]

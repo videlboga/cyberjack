@@ -745,6 +745,7 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                       } catch (_) {}
                     }}
                     onDeleteScene={(sceneId) => deleteScene(sceneId)}
+                    stationEntitiesForSelect={(gameEntities.stationEntities || []).map((e: any) => ({ id: e.id, name: e.name }))}
                     onUpdateChoice={(sceneId, choiceIndex, updates) => {
                       setData(prev => ({
                         ...prev,

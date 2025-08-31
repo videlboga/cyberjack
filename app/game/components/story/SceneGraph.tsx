@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import {
   FileText,
   GitBranch,
@@ -350,6 +351,19 @@ const EntryNode = ({ data }: any) => {
         <div className="text-[11px] text-neutral-400">Вероятность</div>
         <Input value={data.probability ?? ''} type="number" min={0} max={100} onChange={(e) => data.onUpdateScene && data.onUpdateScene({ probability: e.target.value ? parseInt(e.target.value) : undefined })} className="h-7 text-xs bg-white/10 border-white/20 text-neutral-100" />
       </div>
+      <div className="mt-2">
+        <Label className="text-[11px] text-neutral-400">Сущность станции</Label>
+        <Select value={data.stationEntityId || ''} onValueChange={(v) => data.onUpdateScene && data.onUpdateScene({ stationEntityId: v })}>
+          <SelectTrigger className="h-7 text-xs bg-white/10 border-white/20 text-neutral-100">
+            <SelectValue placeholder="Не выбрано" />
+          </SelectTrigger>
+          <SelectContent>
+            {(data.stationEntitiesForSelect || []).map((e: any) => (
+              <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="text-[11px] text-neutral-400 mt-2">Условия запуска</div>
       <div className="text-[11px] text-neutral-500">Подключите сюжетные точки к этой ноде для условий</div>
       <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-amber-400" />
@@ -380,9 +394,10 @@ interface SceneGraphProps {
   onAddScreen?: (sceneId: string, position: { x: number; y: number }) => void
   addMode?: 'screen' | 'choice'
   onDeleteScene?: (sceneId: string) => void
+  stationEntitiesForSelect?: Array<{ id: string; name: string }>
 }
 
-export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateScene, onUpdateChoice, onChoiceSelect, onEntrySelect, onScreenSelect, storyPoints, mode = 'scene', onAddScene, onAddChoice, onAddScreen, addMode = 'choice', onDeleteScene }: SceneGraphProps) {
+export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateScene, onUpdateChoice, onChoiceSelect, onEntrySelect, onScreenSelect, storyPoints, mode = 'scene', onAddScene, onAddChoice, onAddScreen, addMode = 'choice', onDeleteScene, stationEntitiesForSelect = [] }: SceneGraphProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
 
   // Создание узлов и связей на основе сцен
@@ -429,6 +444,8 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
           probability: scene.probability,
           title: scene.title,
           description: scene.description,
+          stationEntityId: (scene as any).stationEntityId,
+          stationEntitiesForSelect,
           onUpdateScene: (updates: Partial<SimpleScene>) => onUpdateScene && onUpdateScene(scene.id, updates),
           onDeleteScene: () => onDeleteScene && onDeleteScene(scene.id),
         }
