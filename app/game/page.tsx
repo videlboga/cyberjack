@@ -55,6 +55,9 @@ const NexusEnslaverGame = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [showUserKnowledgePanel, setShowUserKnowledgePanel] = useState(false)
 
+  // Состояние для выбранного персонажа
+  const [selectedCharacter, setSelectedCharacter] = useState<any>(null)
+
   // Используем наши новые хуки
   const { modalState, openModal, closeModal } = useModal()
   
@@ -344,6 +347,20 @@ const NexusEnslaverGame = () => {
           }
         }
         break
+      case 'station':
+        baseEntity = {
+          id: `station-${Date.now()}`,
+          name: 'Новая сущность станции',
+          type: 'market',
+          description: 'Описание новой сущности станции',
+          icon: '/icons/default-station.svg',
+          defaultSceneId: 'default_scene',
+          probability: 20,
+          customSceneId: 'custom_scene',
+          isActive: true,
+          metadata: {}
+        }
+        break
       default:
         baseEntity = {}
     }
@@ -363,6 +380,34 @@ const NexusEnslaverGame = () => {
 
     if (modalState.isNew) {
       addConfigItem(modalState.type as any, data)
+
+      // Если это новая сущность станции, сохраняем её в station
+      if (modalState.type === 'station') {
+        setConfigs(prev => ({
+          ...prev,
+          station: {
+            ...prev.station,
+            stationEntities: {
+              ...prev.station.stationEntities,
+              [data.id]: data
+            }
+          }
+        }))
+        // Сохраняем stationEntities в файл
+        try {
+          const updatedStation = {
+            ...configs.station,
+            stationEntities: {
+              ...configs.station.stationEntities,
+              [data.id]: data
+            }
+          }
+          saveConfigToFile('station', updatedStation)
+          syncConfigToFiles('station', updatedStation)
+        } catch (error) {
+          console.error('Ошибка сохранения новой stationEntities:', error)
+        }
+      }
     } else {
       updateConfigItem(modalState.type as any, data.id, data)
 
@@ -385,6 +430,34 @@ const NexusEnslaverGame = () => {
           syncConfigToFiles('characterAI', updatedCharacterAI)
         } catch (error) {
           console.error('Ошибка сохранения poses:', error)
+        }
+      }
+
+      // Если это сущность станции, сохраняем её в station
+      if (modalState.type === 'station') {
+        setConfigs(prev => ({
+          ...prev,
+          station: {
+            ...prev.station,
+            stationEntities: {
+              ...prev.station.stationEntities,
+              [data.id]: data
+            }
+          }
+        }))
+        // Сохраняем stationEntities в файл
+        try {
+          const updatedStation = {
+            ...configs.station,
+            stationEntities: {
+              ...configs.station.stationEntities,
+              [data.id]: data
+            }
+          }
+          saveConfigToFile('station', updatedStation)
+          syncConfigToFiles('station', updatedStation)
+        } catch (error) {
+          console.error('Ошибка сохранения stationEntities:', error)
         }
       }
     }

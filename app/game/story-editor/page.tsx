@@ -195,7 +195,7 @@ export default function StoryEditorPage() {
       stationEntities: stationEntitiesData
     }
   })
-  const [activeTab, setActiveTab] = useState<'simple' | 'storypoints' | 'station'>('simple')
+  const [activeTab, setActiveTab] = useState<'simple' | 'station'>('simple')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   
   // Игровые сущности для условий
@@ -353,14 +353,10 @@ export default function StoryEditorPage() {
       <div className="flex-1">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-[calc(100vh-4rem)]">
           <div className="border-b px-4">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="simple" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Редактор сцен
-              </TabsTrigger>
-              <TabsTrigger value="storypoints" className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                Сюжетные точки
               </TabsTrigger>
               <TabsTrigger value="station" className="flex items-center gap-2">
                 <Building className="h-4 w-4" />
@@ -406,55 +402,7 @@ export default function StoryEditorPage() {
             />
           </TabsContent>
 
-          <TabsContent value="storypoints" className="h-full m-0 p-4">
-            <div className="h-full flex flex-col">
-              <div className="mb-4">
-                <h2 className="text-2xl font-bold mb-2">Сюжетные точки</h2>
-                <p className="text-muted-foreground">
-                  Управляйте сюжетными точками, которые влияют на показ сцен
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(storyData.storyPoints).map(([id, point]) => (
-                  <Card key={id}>
-                    <CardHeader>
-                      <CardTitle className="text-lg">{point.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-3">{point.description}</p>
-                      <div className="space-y-2">
-                        <div>
-                          <Label>Текущее значение</Label>
-                          <Input 
-                            type="number"
-                            value={point.value} 
-                            onChange={(e) => {
-                              setStoryData(prev => ({
-                                ...prev,
-                                storyPoints: {
-                                  ...prev.storyPoints,
-                                  [id]: { ...point, value: parseInt(e.target.value) }
-                                }
-                              }))
-                            }}
-                            min={point.minValue}
-                            max={point.maxValue}
-                          />
-                        </div>
-                        <div>
-                          <Label>Диапазон</Label>
-                          <div className="text-sm text-muted-foreground">
-                            {point.minValue} - {point.maxValue}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
+
         </Tabs>
       </div>
     </div>

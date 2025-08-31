@@ -14,6 +14,7 @@ export interface StationEntity {
   name: string
   type: 'market' | 'auction' | 'contract' | 'anomaly' | 'event' | 'location'
   description: string
+  icon?: string // URL иконки или путь к изображению
   defaultSceneId?: string // ID дефолтной сцены
   probability?: number // Вероятность показа кастомной сцены
   customSceneId?: string // ID кастомной сцены (если probability сработала)
