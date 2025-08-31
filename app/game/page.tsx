@@ -759,9 +759,10 @@ const NexusEnslaverGame = () => {
       case 'station':
         // Для сущностей станции - возвращаем список всех сущностей
         const stationList: any[] = []
-        const stationConfig = configs.station || {}
-        if (stationConfig.stationEntities) {
-          Object.entries(stationConfig.stationEntities).forEach(([id, entity]: [string, any]) => {
+        // Сначала пробуем managedConfigs, потом configs
+        const stationData = config?.station || (configs as any)?.station || {}
+        if (stationData.stationEntities) {
+          Object.entries(stationData.stationEntities).forEach(([id, entity]: [string, any]) => {
             if (!entity.deleted) {
               stationList.push({
                 id,

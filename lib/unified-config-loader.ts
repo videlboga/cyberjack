@@ -25,11 +25,12 @@ export async function loadUnifiedConfigV2(): Promise<GameConfig> {
     // Загружаем реальные данные из JSON файлов
     console.log('📂 Загружаем данные из JSON файлов...')
 
-    const [charactersData, usersData, equipmentData, posesData, gameUnifiedData] = await Promise.all([
+    const [charactersData, usersData, equipmentData, posesData, stationEntitiesData, gameUnifiedData] = await Promise.all([
       import('../data/characters-unified.json'),
       import('../data/users-unified.json'),
       import('../data/equipment-unified.json'),
       import('../data/poses-unified.json').catch(() => ({ default: { poses: {}, poseChangeConditions: {} } })),
+      import('../data/station-entities.json').catch(() => ({ default: {} })),
       import('../data/game-config-unified.json').catch(() => null as any)
     ])
 
@@ -38,12 +39,14 @@ export async function loadUnifiedConfigV2(): Promise<GameConfig> {
     const realEquipment = equipmentData.default.equipment || []
     const realPoses = posesData.default.poses || {}
     const realPoseConditions = posesData.default.poseChangeConditions || {}
+    const realStationEntities = stationEntitiesData.default || {}
 
     console.log('📊 Реальные данные загружены:', {
       characters: realCharacters.length,
       users: realUsers.length,
       equipment: realEquipment.length,
-      poses: Object.keys(realPoses).length
+      poses: Object.keys(realPoses).length,
+      stationEntities: Object.keys(realStationEntities).length
     })
 
     // Попробуем получить Character AI конфигурацию из объединённого файла,
@@ -141,6 +144,9 @@ export async function loadUnifiedConfigV2(): Promise<GameConfig> {
           userEquipment: ["test_equipment_1"]
         }
       ], // Реальные или тестовые пользователи
+      station: {
+        stationEntities: realStationEntities
+      }, // Реальные сущности станции
       market: {}, // Заглушка для рынка
       assets: [], // Заглушка для активов
       characterAI: {

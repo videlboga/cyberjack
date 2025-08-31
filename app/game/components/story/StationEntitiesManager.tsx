@@ -243,10 +243,10 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
                   </CardContent>
                 </Card>
 
-                {/* Сюжетные сцены */}
+                                {/* Привязанные сцены */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Сюжетные сцены</CardTitle>
+                    <CardTitle>Привязанные сцены</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
@@ -269,46 +269,32 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
                         Эта сцена будет показана при запуске сущности
                       </p>
                     </div>
-                    
+
+                    {/* Список всех привязанных сцен */}
                     <div>
-                      <Label>Вероятность кастомной сцены (%)</Label>
-                      <Input 
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={selectedEntity.probability || ''} 
-                        onChange={(e) => updateEntity(selectedEntity.id, { 
-                          probability: e.target.value ? parseInt(e.target.value) : undefined
-                        })}
-                        placeholder="0-100"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Если вероятность сработает, будет показана кастомная сцена вместо дефолтной
-                      </p>
-                    </div>
-                    
-                    {selectedEntity.probability && (
-                      <div>
-                        <Label>Кастомная сцена</Label>
-                        <Select
-                          value={selectedEntity.customSceneId || '__none__'}
-                          onValueChange={(value) => updateEntity(selectedEntity.id, { customSceneId: value === '__none__' ? undefined : value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите кастомную сцену" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="__none__">Нет кастомной сцены</SelectItem>
-                            {scenes.map(scene => (
-                              <SelectItem key={scene.id} value={scene.id}>{scene.title}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Эта сцена будет показана с вероятностью {selectedEntity.probability}%
-                        </p>
+                      <Label>Все привязанные сцены</Label>
+                      <div className="space-y-2 mt-2">
+                        {selectedEntity.defaultSceneId && (
+                          <div className="flex items-center justify-between p-2 border rounded">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">Дефолтная</Badge>
+                              <span className="text-sm">{scenes.find(s => s.id === selectedEntity.defaultSceneId)?.title || 'Неизвестная сцена'}</span>
+                            </div>
+                            <Button size="sm" variant="outline" onClick={() => {
+                              // Здесь можно добавить навигацию в редактор сцен
+                              console.log('Перейти к сцене:', selectedEntity.defaultSceneId)
+                            }}>
+                              Редактировать
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Здесь можно добавить логику для отображения сцен, привязанных через точки входа */}
+                        <div className="text-sm text-muted-foreground">
+                          Сцены, привязанные через точки входа, будут отображаться здесь
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
 

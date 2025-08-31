@@ -573,10 +573,15 @@ export interface GameConfig {
   users: UsersConfig
   storyScenes: StoryScene[]
   conditions: Condition[]
-  
+
+  // Сущности станции
+  station?: {
+    stationEntities: { [key: string]: any }
+  }
+
   // Character AI конфигурация
   characterAI?: CharacterAIConfig
-  
+
   // Системные настройки
   system: { [key: string]: any }
   ui: { [key: string]: any }
