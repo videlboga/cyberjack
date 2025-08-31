@@ -45,9 +45,6 @@ export class AttributeParser {
       assignments: asset.history.assignments,
       success_rate: asset.history.success_rate,
       
-      // Трейты (массив)
-      traits: asset.traits,
-      
       // Предпочтения (массивы)
       work_type: asset.preferences.work_type,
       environment: asset.preferences.environment,
@@ -130,7 +127,7 @@ export class AttributeParser {
 
     // Массивы
     const arrayAttributes = [
-      "traits", "work_type", "environment", "avoid"
+      "work_type", "environment", "avoid"
     ]
 
     if (numericAttributes.includes(attribute)) {
@@ -302,8 +299,8 @@ export class ConditionValidator {
       "rank", "price", "status", "location", "specialization",
       // История
       "assignments", "success_rate",
-      // Трейты и предпочтения
-      "traits", "work_type", "environment", "avoid"
+      // Предпочтения
+      "work_type", "environment", "avoid"
     ]
     
     return validAttributes.includes(attribute)
@@ -722,8 +719,6 @@ export class ConditionUtils {
       assignments: "Задания",
       success_rate: "Успешность",
       
-      // Трейты и предпочтения
-      traits: "Трейты",
       work_type: "Тип работы",
       environment: "Окружение",
       avoid: "Избегает",

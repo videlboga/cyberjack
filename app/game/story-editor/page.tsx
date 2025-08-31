@@ -404,34 +404,101 @@ export default function StoryEditorPage() {
                 length: Array.isArray(storyData.stationEntities) ? storyData.stationEntities.length : 0,
                 scenesCount: storyData.scenes.length
               })
+              const entitiesArray = Array.isArray(storyData.stationEntities) ? storyData.stationEntities : []
               return (
-                <StationEntitiesManager
-                  entities={Array.isArray(storyData.stationEntities) ? storyData.stationEntities : []}
-                  onUpdate={(stationEntities) => {
-                    // Сохраняем немедленно, как в SimpleStoryEditor
-                    const newData = {
-                      ...storyData,
-                      stationEntities
-                    }
-                    try {
-                      setStoryData(newData)
-                      localStorage.setItem('cyberjack-simple-story-data', JSON.stringify(newData))
-                      setHasUnsavedChanges(false)
-                      // Небольшой тост об успешном сохранении
-                      const notification = document.createElement('div')
-                      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50'
-                      notification.textContent = 'Изменения сохранены'
-                      document.body.appendChild(notification)
-                      setTimeout(() => document.body.removeChild(notification), 2000)
-                    } catch (e) {
-                      console.error('Ошибка при сохранении данных:', e)
-                      // В случае ошибки помечаем изменения как несохраненные
-                      setStoryData(newData)
-                      setHasUnsavedChanges(true)
-                    }
-                  }}
-                  scenes={storyData.scenes.map(scene => ({ id: scene.id, title: scene.title }))}
-                />
+                <div className="h-full flex flex-col">
+                  <div className="border-b px-4 py-2 flex items-center justify-between gap-2">
+                    <div className="text-sm text-neutral-400">Сущностей: {entitiesArray.length}</div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            await fetch('/api/config', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ target: 'stationEntities', data: Object.fromEntries(entitiesArray.map((e: any) => [e.id, e])) })
+                            })
+                            const notification = document.createElement('div')
+                            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50'
+                            notification.textContent = 'Сущности станции синхронизированы с прод'
+                            document.body.appendChild(notification)
+                            setTimeout(() => document.body.removeChild(notification), 2000)
+                          } catch (err) {
+                            console.error('Ошибка синхронизации станций:', err)
+                          }
+                        }}
+                      >
+                        Синхронизировать станции
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            let storyPoints: any = undefined
+                            try {
+                              const res = await fetch('/api/config')
+                              const cfg = await res.json()
+                              storyPoints = (cfg && (cfg as any).storyPoints) ? (cfg as any).storyPoints : undefined
+                            } catch {}
+
+                            await fetch('/api/config', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ target: 'storyScenes', data: storyPoints ? { scenes: storyData.scenes, storyPoints } : { scenes: storyData.scenes } })
+                            })
+                            const notification = document.createElement('div')
+                            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50'
+                            notification.textContent = 'Сюжетные сцены синхронизированы с прод'
+                            document.body.appendChild(notification)
+                            setTimeout(() => document.body.removeChild(notification), 2000)
+                          } catch (err) {
+                            console.error('Ошибка синхронизации сцен:', err)
+                          }
+                        }}
+                      >
+                        Синхронизировать сцены
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    <StationEntitiesManager
+                      entities={entitiesArray}
+                      onUpdate={async (stationEntities) => {
+                        // Сохраняем немедленно, как в SimpleStoryEditor
+                        const newData = {
+                          ...storyData,
+                          stationEntities
+                        }
+                        try {
+                          setStoryData(newData)
+                          localStorage.setItem('cyberjack-simple-story-data', JSON.stringify(newData))
+                          setHasUnsavedChanges(false)
+                          // Пишем в файл данных, чтобы прод видел те же сущности
+                          await fetch('/api/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ target: 'stationEntities', data: Object.fromEntries(stationEntities.map((e: any) => [e.id, e])) })
+                          }).catch(() => {})
+                          // Небольшой тост об успешном сохранении
+                          const notification = document.createElement('div')
+                          notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50'
+                          notification.textContent = 'Изменения сохранены'
+                          document.body.appendChild(notification)
+                          setTimeout(() => document.body.removeChild(notification), 2000)
+                        } catch (e) {
+                          console.error('Ошибка при сохранении данных:', e)
+                          // В случае ошибки помечаем изменения как несохраненные
+                          setStoryData(newData)
+                          setHasUnsavedChanges(true)
+                        }
+                      }}
+                      scenes={storyData.scenes.map(scene => ({ id: scene.id, title: scene.title }))}
+                    />
+                  </div>
+                </div>
               )
             })()}
           </TabsContent>

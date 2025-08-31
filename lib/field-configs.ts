@@ -80,26 +80,7 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         max: 10
       }
     },
-    { 
-      name: 'traits', 
-      type: 'dynamic-array', 
-      label: 'Черты характера', 
-      required: false, 
-      description: 'Особенности личности подопытного',
-      dynamicConfig: {
-        type: 'preferences',
-        options: [
-          'loyal', 'quick_learner', 'tech_savvy', 'creative', 
-          'analytical', 'social', 'introverted', 'extroverted', 
-          'resilient', 'sensitive', 'submissive', 'resistant', 
-          'curious', 'fearful', 'determined', 'romantic', 
-          'dreamy', 'innocent', 'trusting', 'playful',
-          'artistic', 'feminine', 'academic', 'ghostly',
-          'maternal', 'protective', 'dark_fairy', 'addictive',
-          'sensation_seeker', 'survivor', 'adaptive'
-        ]
-      }
-    },
+    
     { 
       name: 'preferences', 
       type: 'dynamic-object', 
@@ -340,13 +321,7 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       dynamicConfig: { type: 'fetishes', options: ['innocence', 'curiosity', 'submission', 'sensory_overload', 'dependency', 'humiliation', 'control', 'pain', 'pleasure', 'bondage', 'roleplay', 'voyeurism', 'exhibitionism'], min: 0, max: 10 }
     },
     
-    // Черты характера
-    {
-      name: 'traits',
-      type: 'dynamic-array',
-      label: 'Черты характера',
-      dynamicConfig: { type: 'preferences', options: ['loyal', 'quick_learner', 'curious', 'innocent', 'artistic', 'sensation_seeker', 'analytical', 'creative', 'practical', 'emotional', 'logical', 'intuitive', 'extroverted', 'introverted', 'ambitious', 'content', 'adventurous', 'cautious'] }
-    },
+    
     
     // Предпочтения
     {

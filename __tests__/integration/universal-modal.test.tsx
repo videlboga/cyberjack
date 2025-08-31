@@ -25,16 +25,6 @@ jest.mock('@/lib/field-configs', () => ({
             min: 1,
             max: 10
           }
-        },
-        { 
-          name: 'traits', 
-          type: 'dynamic-array', 
-          label: 'Черты характера', 
-          required: false,
-          dynamicConfig: {
-            type: 'preferences',
-            options: ['loyal', 'quick_learner', 'tech_savvy']
-          }
         }
       ],
       actions: [
@@ -167,25 +157,7 @@ describe('Universal Modal Integration', () => {
       expect(valueInput).toHaveValue(5)
     })
 
-    it('должен корректно обрабатывать динамические массивы', async () => {
-      const user = userEvent.setup()
-      render(<EnhancedEditModal {...defaultProps} entityType="assets" />)
-      
-      // Переключаемся на вкладку дополнительных полей
-      const advancedTab = screen.getByText('Дополнительные поля')
-      await user.click(advancedTab)
-      
-      // Добавляем черту характера
-      const addButtons = screen.getAllByText('Добавить')
-      await user.click(addButtons[1]) // Вторая кнопка для массива
-      
-      // Выбираем черту
-      const traitSelect = screen.getByDisplayValue('loyal')
-      await user.click(traitSelect)
-      
-      // Проверяем, что черта добавлена
-      expect(screen.getByDisplayValue('loyal')).toBeInTheDocument()
-    })
+    // Динамические массивы для traits удалены
   })
 
   describe('Интеграция с валидацией', () => {
@@ -239,7 +211,7 @@ describe('Universal Modal Integration', () => {
           strength: 7,
           empathy: 4
         },
-        traits: ['loyal', 'quick_learner']
+        
       }
       
       render(<EnhancedEditModal {...defaultProps} initialData={initialData} />)

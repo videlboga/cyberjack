@@ -1,11 +1,10 @@
 {
   "station_001": {
     "id": "station_001",
-    "name": "Talent Exchange",
+    "name": "Отдел снабжения",
     "type": "market",
-    "description": "Основной рынок талантов на станции. Здесь можно найти и приобрести активы различных рангов.",
-    "icon": "/icons/market.svg",
-    "defaultSceneId": "market_intro",
+    "description": "Основное место для торговли активами",
+    "defaultSceneId": "scene_1756641423654",
     "probability": 20,
     "customSceneId": "market_special_event",
     "isActive": true,
@@ -13,86 +12,6 @@
       "location": "Core Sector",
       "security_level": "high",
       "traffic": "heavy"
-    }
-  },
-  "station_002": {
-    "id": "station_002",
-    "name": "Корпоративный аукцион",
-    "type": "auction",
-    "description": "Элитный аукцион для корпоративных клиентов. Здесь продаются самые ценные активы.",
-    "icon": "/icons/auction.svg",
-    "defaultSceneId": "auction_intro",
-    "probability": 15,
-    "customSceneId": "auction_corporate_bidding",
-    "isActive": true,
-    "metadata": {
-      "location": "Core Sector",
-      "security_level": "maximum",
-      "access_level": "corporate_only"
-    }
-  },
-  "station_003": {
-    "id": "station_003",
-    "name": "Void Border",
-    "type": "location",
-    "description": "Опасная граница с аномальной зоной. Здесь можно найти выживших талантов, но это крайне рискованно.",
-    "icon": "/icons/void-border.svg",
-    "defaultSceneId": "void_rescue",
-    "probability": 30,
-    "customSceneId": "void_anomaly_discovery",
-    "isActive": true,
-    "metadata": {
-      "location": "Void Border",
-      "security_level": "none",
-      "danger_level": "extreme"
-    }
-  },
-  "station_004": {
-    "id": "station_004",
-    "name": "Neural Hub",
-    "type": "location",
-    "description": "Технологический центр станции. Здесь можно найти специалистов по нейроинтерфейсам.",
-    "icon": "/icons/neural-hub.svg",
-    "defaultSceneId": "neural_hub_intro",
-    "probability": 25,
-    "customSceneId": "neural_hub_breakthrough",
-    "isActive": true,
-    "metadata": {
-      "location": "Neural Hub",
-      "security_level": "medium",
-      "tech_level": "advanced"
-    }
-  },
-  "station_005": {
-    "id": "station_005",
-    "name": "Солнечная буря",
-    "type": "anomaly",
-    "description": "Магнитная буря влияет на нейроинтерфейсы станции. Все активы временно теряют контроль.",
-    "icon": "/icons/solar-storm.svg",
-    "defaultSceneId": "solar_storm_default",
-    "probability": 10,
-    "customSceneId": "solar_storm_intense",
-    "isActive": false,
-    "metadata": {
-      "duration": "3_days",
-      "intensity": "moderate",
-      "affected_systems": ["neural_interfaces", "communications"]
-    }
-  },
-  "station_006": {
-    "id": "station_006",
-    "name": "Корпоративная вечеринка",
-    "type": "event",
-    "description": "Общее мероприятие поднимает настроение всей команды. Возможность для социального взаимодействия.",
-    "icon": "/icons/corporate-party.svg",
-    "defaultSceneId": "corporate_party_default",
-    "probability": 35,
-    "customSceneId": "corporate_party_exclusive",
-    "isActive": true,
-    "metadata": {
-      "duration": "1_day",
-      "mood_boost": "high",
-      "social_opportunities": true
     }
   }
 }

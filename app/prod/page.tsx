@@ -829,6 +829,7 @@ export default function TalentArchitectProd() {
   ])
 
   const [storyScenes, setStoryScenes] = useState<any[]>([])
+  const [pendingSceneLaunch, setPendingSceneLaunch] = useState<{ id: string; context?: any } | null>(null)
   const [currentScene, setCurrentScene] = useState<any>(null)
   const [showStoryScene, setShowStoryScene] = useState(false)
 
@@ -865,6 +866,47 @@ export default function TalentArchitectProd() {
       })) || [])
     }
   }, [gameConfig])
+
+  // Если сцена была запрошена до загрузки конфигурации — доинициализируем и переключим на реальный первый экран
+  useEffect(() => {
+    const scenesFromConfig: any[] | undefined = (effectiveGameConfig as any)?.storyScenes?.scenes
+    if (pendingSceneLaunch && Array.isArray(scenesFromConfig) && scenesFromConfig.length > 0) {
+      const entity = pendingSceneLaunch.context?.entity
+      const candidateIds: string[] = Array.from(new Set([
+        entity?.defaultSceneId,
+        entity?.customSceneId,
+        pendingSceneLaunch.id,
+      ].filter(Boolean))) as string[]
+
+      for (const id of candidateIds) {
+        const found = scenesFromConfig.find((s: any) => s.id === id)
+        if (found) {
+          const screens = (found as any).screens as any[] | undefined
+          const startScreenId = (found as any).startScreenId as string | undefined
+          const activeScreenId = screens && screens.length > 0 ? (startScreenId || screens[0].id) : undefined
+          setCurrentScene({ ...found, context: pendingSceneLaunch.context, activeScreenId })
+          setShowStoryScene(true)
+          setPendingSceneLaunch(null)
+          return
+        }
+      }
+      // Не нашли ни одной — сбрасываем отложенный запуск (покажется entity-фолбек при явном клике)
+      setPendingSceneLaunch(null)
+    }
+  }, [effectiveGameConfig?.storyScenes])
+
+  // Гарантируем старт с первого экрана, даже если activeScreenId не успели проставить
+  useEffect(() => {
+    if (currentScene && (currentScene as any).screens && (currentScene as any).screens.length > 0) {
+      const anyScene: any = currentScene
+      if (!anyScene.activeScreenId) {
+        const firstId = anyScene.startScreenId || anyScene.screens[0]?.id
+        if (firstId) {
+          setCurrentScene({ ...anyScene, activeScreenId: firstId })
+        }
+      }
+    }
+  }, [currentScene])
 
 
 
@@ -1029,29 +1071,116 @@ export default function TalentArchitectProd() {
   }, [effectiveGameConfig])
 
   const triggerStoryScene = (sceneId: string, context?: any) => {
-    // Ищем сцену по ID в storyScenes
-    const scene = storyScenes.find((scene) => scene.id === sceneId)
-    if (scene) {
-      setCurrentScene({ ...scene, context })
-      setShowStoryScene(true)
-    } else {
-      console.warn(`Сцена с ID "${sceneId}" не найдена`)
+    // Пытаемся найти сцену: сначала по переданному id, затем по customSceneId сущности
+    const entity = context?.entity
+    const candidateIds: string[] = Array.from(new Set([
+      entity?.defaultSceneId,
+      entity?.customSceneId,
+      sceneId,
+    ].filter(Boolean))) as string[]
+
+    // 1) Ищем в локальном состоянии
+    for (const id of candidateIds) {
+      const found = storyScenes.find((s) => s.id === id)
+      if (found) {
+        const screens = (found as any).screens as any[] | undefined
+        const startScreenId = (found as any).startScreenId as string | undefined
+        const activeScreenId = screens && screens.length > 0 ? (startScreenId || screens[0].id) : undefined
+        setCurrentScene({ ...found, context, activeScreenId })
+        setShowStoryScene(true)
+        return
+      }
     }
+
+    // 2) Если не нашли — ищем в конфигурации (может быть ещё не успели скопировать в state)
+    const configScenes: any[] | undefined = (effectiveGameConfig as any)?.storyScenes?.scenes
+    if (Array.isArray(configScenes) && configScenes.length > 0) {
+      for (const id of candidateIds) {
+        const found = configScenes.find((s: any) => s.id === id)
+        if (found) {
+          const screens = (found as any).screens as any[] | undefined
+          const startScreenId = (found as any).startScreenId as string | undefined
+          const activeScreenId = screens && screens.length > 0 ? (startScreenId || screens[0].id) : undefined
+          setCurrentScene({ ...found, context, activeScreenId })
+          setShowStoryScene(true)
+          return
+        }
+      }
+      // Если конфигурация есть, но id не найден — откроем фолбек ниже
+    } else {
+      // Конфигурация ещё не успела подгрузиться — просто отложим запуск и выйдем, без показа фолбека
+      setPendingSceneLaunch({ id: sceneId, context })
+      return
+    }
+    // Универсальный фолбек: автогенерируем сцену на основе сущности станции/контекста
+    const fallbackScene = {
+      id: sceneId,
+      title: entity?.name || 'Сцена',
+      description: entity?.description || 'Сюжетная сцена пока не описана.',
+      image: entity?.icon || undefined,
+      screens: [
+        {
+          id: 'start',
+          title: entity?.name || 'Начало',
+          description: entity?.description || 'Сюжетная сцена пока не описана.',
+          choices: [
+            {
+              id: 'continue',
+              text: 'Продолжить',
+              navigation: { type: 'end_scene' }
+            }
+          ]
+        }
+      ]
+    }
+    setCurrentScene({ ...fallbackScene, context, activeScreenId: 'start' })
+    setShowStoryScene(true)
   }
 
   const handleSceneChoice = (choice: any) => {
-    const outcome = choice.outcomes[Math.floor(Math.random() * choice.outcomes.length)]
+    // Унифицируем навигацию: поддерживаем как старую модель (nextScreenId/nextScene/effects), так и новую (navigation)
+    const current = currentScene as any
+    const screens: any[] | undefined = current?.screens
+    const navigation = (choice as any).navigation as { type?: string; screenId?: string } | undefined
+    const effectsArray = (choice.outcomes?.[0]?.effects || choice.effects || []) as any[]
+    const hasEndEffect = effectsArray.some((e: any) => e?.type === 'end_scene')
+
+    if (screens && screens.length > 0) {
+      // Новая модель навигации
+      if (navigation?.type === 'goto_screen' && navigation.screenId) {
+        setCurrentScene((prev: any) => ({ ...prev, activeScreenId: navigation.screenId }))
+        return
+      }
+      if (navigation?.type === 'end_scene' || hasEndEffect) {
+        setShowStoryScene(false)
+        setCurrentScene(null)
+        return
+      }
+      // Старая модель навигации
+      if ((choice as any).nextScreenId) {
+        setCurrentScene((prev: any) => ({ ...prev, activeScreenId: (choice as any).nextScreenId }))
+        return
+      }
+      if ((choice as any).nextScene) {
+        setShowStoryScene(false)
+        setCurrentScene(null)
+        triggerStoryScene((choice as any).nextScene)
+        return
+      }
+    }
+
+    const outcome = choice.outcomes?.[Math.floor(Math.random() * (choice.outcomes?.length || 1))] || { effects: [] }
 
     // Применяем эффекты исхода
-    outcome.effects.forEach((effect: any) => {
+    (outcome.effects || []).forEach((effect: any) => {
       switch (effect.type) {
-        case "add_talent":
-          // Добавляем нового таланта
+        case "add_talent": {
           const newTalent = generateRandomTalent()
           newTalent.name = "Спасенный Специалист"
           newTalent.memories = ["Спасен из Void Border"]
           setTalents((prev) => [...prev, newTalent])
           break
+        }
         case "lose_credits":
           updateCredits((prev) => Math.max(0, prev - effect.amount))
           break
@@ -2351,16 +2480,8 @@ export default function TalentArchitectProd() {
     const entity = entities.find((e) => e.id === entityId)
 
     if (entity) {
-      // Выбираем сцену: defaultSceneId или customSceneId на основе вероятности
-      let sceneId = entity.defaultSceneId
-
-      if (entity.customSceneId && entity.probability) {
-        // Проверяем вероятность запуска кастомной сцены
-        const random = Math.random() * 100
-        if (random <= entity.probability) {
-          sceneId = entity.customSceneId
-        }
-      }
+      // Всегда запускаем дефолтную сцену сущности
+      const sceneId = entity.defaultSceneId
 
       if (sceneId) {
         console.log(`🏭 Открываем сущность станции "${entity.name}" со сценой: ${sceneId}`)
@@ -3390,46 +3511,62 @@ export default function TalentArchitectProd() {
       )}
 
       {showStoryScene && currentScene && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-cyan-500/30 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-2xl font-bold text-white">{currentScene.title}</h2>
-                <button onClick={() => setShowStoryScene(false)} className="text-gray-400 hover:text-white">
-                  ✕
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-0 md:p-4">
+          <div className="relative bg-black md:bg-gray-900 border border-cyan-500/30 rounded-none md:rounded-lg w-full h-full md:max-w-[1200px] md:max-h-[90vh] md:overflow-hidden">
+            {/* Close */}
+            <button onClick={() => setShowStoryScene(false)} className="absolute top-3 right-3 z-[2] text-white/80 hover:text-white bg-black/40 backdrop-blur px-2 py-1 rounded">
+              ✕
+            </button>
 
-              {currentScene.image && (
-                <div className="mb-4">
-                  <img
-                    src={currentScene.image || "/placeholder.svg"}
-                    alt={currentScene.title}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                </div>
-              )}
-
-              <p className="text-gray-300 mb-6">{currentScene.description}</p>
-
-              <div className="space-y-3">
-                {currentScene.choices.map((choice: any) => (
-                  <button
-                    key={choice.id}
-                    onClick={() => handleSceneChoice(choice)}
-                    className="w-full p-4 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-left transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-white">{choice.text}</span>
-                      {choice.cost && <span className="text-yellow-400">{choice.cost} кредитов</span>}
-                    </div>
-                    {choice.outcomes && (
-                      <div className="mt-2 text-sm text-gray-400">Возможные исходы: {choice.outcomes.length}</div>
+              {(() => {
+                const anyScene: any = currentScene as any
+                const screens: any[] | undefined = anyScene?.screens
+                const activeScreen = screens && screens.length > 0
+                  ? (screens.find((s: any) => s.id === anyScene.activeScreenId) || screens[0])
+                  : undefined
+                const bg = activeScreen?.content?.background
+                  || activeScreen?.background
+                  || anyScene?.content?.background
+                  || anyScene?.background
+                  || anyScene?.image
+                if (!bg) return null
+                const isVideo = typeof bg === 'string' && (bg.startsWith('data:video') || /\.(mp4|webm|ogg)(\?.*)?$/i.test(bg))
+                return (
+                  <div className="relative w-full h-full">
+                    {isVideo ? (
+                      <video src={bg} className="w-full h-full object-cover bg-black" autoPlay muted loop playsInline />
+                    ) : (
+                      <img src={bg} alt={activeScreen?.title || currentScene.title} className="w-full h-full object-cover bg-black" />
                     )}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    <div className="absolute inset-x-0 bottom-0 z-[1] p-4 md:p-6">
+                      <div className="backdrop-blur-lg bg-black/60 border border-white/20 rounded-xl p-3 md:p-4 shadow-lg">
+                        <h3 className="text-white font-semibold mb-2">{activeScreen?.title || currentScene.title}</h3>
+                        <p className="text-gray-200 text-sm md:text-base mb-3">
+                          {activeScreen?.description || activeScreen?.content?.text || (currentScene as any).description}
+                        </p>
+                        <div className="space-y-3">
+                          {(() => {
+                            const choices = activeScreen?.choices || (currentScene as any).choices || []
+                            return choices.map((choice: any) => (
+                              <button
+                                key={choice.id}
+                                onClick={() => handleSceneChoice(choice)}
+                                className="w-full p-3 md:p-4 bg-white/10 hover:bg-white/15 border border-white/20 rounded-lg text-left transition-colors text-white"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span>{choice.text}</span>
+                                  {choice.cost && <span className="text-yellow-300">{choice.cost} кредитов</span>}
+                                </div>
+                              </button>
+                            ))
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            
           </div>
         </div>
       )}

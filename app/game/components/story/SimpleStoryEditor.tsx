@@ -55,7 +55,6 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
   const [selectedScene, setSelectedScene] = useState<SimpleScene | null>(null)
   const [editingScene, setEditingScene] = useState<SimpleScene | null>(null)
   const [activeTab, setActiveTab] = useState<'scenes' | 'storypoints' | 'graph' | 'preview'>('graph')
-  const [graphAddMode, setGraphAddMode] = useState<'screen' | 'choice'>('choice')
   const [showNodePanel, setShowNodePanel] = useState(false)
   const [showConditionsPanel, setShowConditionsPanel] = useState(false)
   const [showBackgroundPanel, setShowBackgroundPanel] = useState(false)
@@ -746,23 +745,27 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                     }}
                     onDeleteScene={(sceneId) => deleteScene(sceneId)}
                     stationEntitiesForSelect={(gameEntities.stationEntities || []).map((e: any) => ({ id: e.id, name: e.name }))}
-                    onUpdateChoice={(sceneId, choiceIndex, updates) => {
+                    onUpdateChoice={(sceneId, screenIndex, choiceIndex, updates) => {
                       setData(prev => ({
                         ...prev,
                         scenes: prev.scenes.map(scene => {
                           if (scene.id !== sceneId) return scene
-                          const newChoices = [...scene.choices]
-                          newChoices[choiceIndex] = { ...newChoices[choiceIndex], ...updates }
-                          return { ...scene, choices: newChoices }
+                          const screens = [...(scene.screens || [])]
+                          const screen = screens[screenIndex]
+                          if (!screen) return scene
+                          const choices = [...(screen.choices || [])]
+                          choices[choiceIndex] = { ...choices[choiceIndex], ...updates }
+                          screens[screenIndex] = { ...screen, choices }
+                          return { ...scene, screens }
                         })
                       }))
                     }}
-                    onChoiceSelect={(sceneId, idx) => {
+                    onChoiceSelect={(sceneId, screenIndex, idx) => {
                       const s = data.scenes.find(s => s.id === sceneId)
                       if (!s) return
                       setSelectedScene(s)
+                      setSelectedScreenIndex(screenIndex)
                       setSelectedChoiceIndex(idx)
-                      setSelectedScreenIndex(null)
                       setShowNodePanel(true)
                     }}
                     onEntrySelect={(sceneId) => {
@@ -785,7 +788,7 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                     storyPoints={data.storyPoints as any}
                     mode="scene"
                     onAddScene={(pos) => createSceneAtPosition(pos)}
-                    onAddChoice={(sceneId, pos) => addChoiceAtPosition(sceneId, pos)}
+                    
                     onAddScreen={(sceneId, pos) => {
                       const newScreen: SimpleScreen = {
                         id: `screen_${Date.now()}`,
@@ -805,7 +808,6 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                         })
                       }))
                     }}
-                    addMode={graphAddMode}
                   />
 
                   {/* Плавающая панель выбора сцен */}
@@ -827,15 +829,6 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
 
                   {/* Плавающие действия */}
                   <div className="fixed bottom-4 right-4 flex gap-2 pointer-events-auto" style={{ zIndex: 10000 }}>
-                    <Select value={graphAddMode} onValueChange={(v: any) => setGraphAddMode(v)}>
-                      <SelectTrigger className="h-8 w-40 bg-neutral-900/70 border-white/10 text-neutral-100">
-                        <SelectValue placeholder="Режим добавления" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="choice">Добавлять выбор</SelectItem>
-                        <SelectItem value="screen">Добавлять экран</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <Button size="sm" onClick={createNewScene}>
                       <Plus className="h-4 w-4 mr-1" />
                       Новая сцена
@@ -865,305 +858,238 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                               const screen = (selectedScene.screens || [])[selectedScreenIndex]
                               if (!screen) return null
                               return (
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                   <div>
                                     <Label>Заголовок экрана</Label>
-                                    <Input value={screen.title || ''} onChange={(e) => {
-                                      const idx = selectedScreenIndex
-                                      setData(prev => ({
-                                        ...prev,
-                                        scenes: prev.scenes.map(s => {
-                                          if (s.id !== selectedScene.id) return s
-                                          const screens = [...(s.screens || [])]
-                                          const current = screens[idx]
-                                          screens[idx] = { ...current, title: e.target.value }
-                                          return { ...s, screens }
-                                        })
-                                      }))
-                                    }} />
-                                  </div>
-                                  <div>
-                                    <Label>Текст</Label>
-                                    <Textarea value={screen.content.text} onChange={(e) => {
-                                      const idx = selectedScreenIndex
-                                      setData(prev => ({
-                                        ...prev,
-                                        scenes: prev.scenes.map(s => {
-                                          if (s.id !== selectedScene.id) return s
-                                          const screens = [...(s.screens || [])]
-                                          const current = screens[idx]
-                                          screens[idx] = { ...current, content: { ...current.content, text: e.target.value } }
-                                          return { ...s, screens }
-                                        })
-                                      }))
-                                    }} />
-                                  </div>
-                                  <div>
-                                    <Label>Фон</Label>
-                                    <div className="flex items-center gap-2">
-                                      <input type="file" accept="image/*,video/*" id={`panel-screen-bg-${screen.id}`} className="hidden" onChange={(e) => {
-                                        const file = e.target.files?.[0]
-                                        if (file) {
-                                          const url = URL.createObjectURL(file)
-                                          const idx = selectedScreenIndex
-                                          setData(prev => ({
-                                            ...prev,
-                                            scenes: prev.scenes.map(s => {
-                                              if (s.id !== selectedScene.id) return s
-                                              const screens = [...(s.screens || [])]
-                                              const current = screens[idx]
-                                              screens[idx] = { ...current, content: { ...current.content, background: url, backgroundFile: file as any } }
-                                              return { ...s, screens }
-                                            })
-                                          }))
-                                        }
-                                      }} aria-label="Выберите фон экрана" />
-                                      <Button size="sm" variant="outline" onClick={() => document.getElementById(`panel-screen-bg-${screen.id}`)?.click()}>Выбрать</Button>
-                                      {screen.content.background && (
-                                        <Button size="sm" variant="destructive" onClick={() => {
-                                          const idx = selectedScreenIndex
-                                          setData(prev => ({
-                                            ...prev,
-                                            scenes: prev.scenes.map(s => {
-                                              if (s.id !== selectedScene.id) return s
-                                              const screens = [...(s.screens || [])]
-                                              const current = screens[idx]
-                                              screens[idx] = { ...current, content: { ...current.content, background: undefined, backgroundFile: undefined as any } }
-                                              return { ...s, screens }
-                                            })
-                                          }))
-                                        }}>Очистить</Button>
-                                      )}
-                                    </div>
-                                    {screen.content.background && (
-                                      <div className="mt-2 rounded overflow-hidden bg-black/30">
-                                        {String(screen.content.background).match(/\.(mp4|webm|ogg)$/i) ? (
-                                          <video src={screen.content.background} className="w-full h-40 object-cover" controls />
-                                        ) : (
-                                          <img src={screen.content.background} className="w-full h-40 object-cover" alt="Фон экрана" />
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                      <Label>Выборы экрана</Label>
-                                      <Button size="sm" variant="outline" onClick={() => {
-                                        const idx = selectedScreenIndex
-                                        const newChoice: SimpleChoice = { id: `choice_${Date.now()}`, text: 'Новый выбор', effects: [] }
+                                    <Input
+                                      value={screen.title || ''}
+                                      onChange={(e) => {
+                                        const title = e.target.value
                                         setData(prev => ({
                                           ...prev,
                                           scenes: prev.scenes.map(s => {
                                             if (s.id !== selectedScene.id) return s
                                             const screens = [...(s.screens || [])]
-                                            const current = screens[idx]
-                                            screens[idx] = { ...current, choices: [...current.choices, newChoice] }
+                                            screens[selectedScreenIndex] = { ...screen, title }
                                             return { ...s, screens }
                                           })
                                         }))
-                                      }}>Добавить</Button>
-                                    </div>
-                                    <div className="flex justify-end">
-                                      <Button size="sm" variant="destructive" onClick={() => deleteScreen(selectedScene.id, selectedScreenIndex)}>Удалить экран</Button>
-                                    </div>
-                                    {(screen.choices || []).map((choice, cIdx) => (
-                                      <div key={choice.id} className="p-3 rounded-lg border border-white/10 bg-white/5">
-                                        <div className="flex items-center gap-2">
-                                          <Input value={choice.text} onChange={(e) => {
-                                            const idx = selectedScreenIndex
-                                            setData(prev => ({
-                                              ...prev,
-                                              scenes: prev.scenes.map(s => {
-                                                if (s.id !== selectedScene.id) return s
-                                                const screens = [...(s.screens || [])]
-                                                const current = screens[idx]
-                                                const newChoices = [...current.choices]
-                                                newChoices[cIdx] = { ...choice, text: e.target.value }
-                                                screens[idx] = { ...current, choices: newChoices }
-                                                return { ...s, screens }
-                                              })
-                                            }))
-                                          }} />
-                                          <Button size="sm" variant="ghost" onClick={() => deleteScreenChoice(selectedScene.id, selectedScreenIndex, cIdx)}>
-                                            <Trash2 className="h-4 w-4" />
-                                          </Button>
-                                        </div>
-                                        <div className="text-xs text-neutral-400 mt-2">Эффекты</div>
-                                        <div className="mt-2 space-y-2">
-                                          {choice.effects.map((effect, effectIndex) => (
-                                            <EffectEditor key={effectIndex} effect={effect as any} onChange={(updatedEffect) => {
-                                              const idx = selectedScreenIndex
-                                              setData(prev => ({
-                                                ...prev,
-                                                scenes: prev.scenes.map(s => {
-                                                  if (s.id !== selectedScene.id) return s
-                                                  const screens = [...(s.screens || [])]
-                                                  const current = screens[idx]
-                                                  const newChoices = [...current.choices]
-                                                  const newEffects = [...choice.effects]
-                                                  newEffects[effectIndex] = updatedEffect
-                                                  newChoices[cIdx] = { ...choice, effects: newEffects }
-                                                  screens[idx] = { ...current, choices: newChoices }
-                                                  return { ...s, screens }
-                                                })
-                                              }))
-                                            }} onRemove={() => {
-                                              const idx = selectedScreenIndex
-                                              setData(prev => ({
-                                                ...prev,
-                                                scenes: prev.scenes.map(s => {
-                                                  if (s.id !== selectedScene.id) return s
-                                                  const screens = [...(s.screens || [])]
-                                                  const current = screens[idx]
-                                                  const newChoices = [...current.choices]
-                                                  const newEffects = choice.effects.filter((_, i) => i !== effectIndex)
-                                                  newChoices[cIdx] = { ...choice, effects: newEffects }
-                                                  screens[idx] = { ...current, choices: newChoices }
-                                                  return { ...s, screens }
-                                                })
-                                              }))
-                                            }} />
-                                          ))}
-                                          <Button size="sm" variant="outline" onClick={() => {
-                                            const idx = selectedScreenIndex
-                                            setData(prev => ({
-                                              ...prev,
-                                              scenes: prev.scenes.map(s => {
-                                                if (s.id !== selectedScene.id) return s
-                                                const screens = [...(s.screens || [])]
-                                                const current = screens[idx]
-                                                const newChoices = [...current.choices]
-                                                newChoices[cIdx] = { ...choice, effects: [...choice.effects, { type: 'change_story_point' }] as any }
-                                                screens[idx] = { ...current, choices: newChoices }
-                                                return { ...s, screens }
-                                              })
-                                            }))
-                                          }}>Добавить эффект</Button>
-                                        </div>
-                                      </div>
-                                    ))}
+                                      }}
+                                      placeholder="Заголовок"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label>Текст</Label>
+                                    <Textarea
+                                      value={screen.content?.text || ''}
+                                      onChange={(e) => {
+                                        const text = e.target.value
+                                        setData(prev => ({
+                                          ...prev,
+                                          scenes: prev.scenes.map(s => {
+                                            if (s.id !== selectedScene.id) return s
+                                            const screens = [...(s.screens || [])]
+                                            screens[selectedScreenIndex] = { ...screen, content: { ...screen.content, text } }
+                                            return { ...s, screens }
+                                          })
+                                        }))
+                                      }}
+                                      rows={3}
+                                      placeholder="Текст экрана"
+                                    />
+                                  </div>
+
+                                  <div className="flex items-center justify-between">
+                                    <Label className="font-medium">Выборы на экране</Label>
+                                    <Button size="sm" onClick={() => {
+                                      const newScreenId = `screen_${Date.now() + 1}`
+                                      const newChoiceId = `choice_${Date.now()}`
+                                      const newScreen: SimpleScreen = {
+                                        id: newScreenId,
+                                        title: 'Новый экран',
+                                        description: '',
+                                        content: { text: 'Текст экрана...' },
+                                        choices: []
+                                      }
+                                      const newChoice: SimpleChoice = {
+                                        id: newChoiceId,
+                                        text: 'Новый выбор',
+                                        effects: [],
+                                        nextScreenId: newScreenId
+                                      }
+                                      setData(prev => ({
+                                        ...prev,
+                                        scenes: prev.scenes.map(s => {
+                                          if (s.id !== selectedScene.id) return s
+                                          const screens = [...(s.screens || [])]
+                                          const current = screens[selectedScreenIndex]
+                                          if (!current) return s
+                                          const updatedCurrent: SimpleScreen = { ...current, choices: [...(current.choices || []), newChoice] }
+                                          screens[selectedScreenIndex] = updatedCurrent
+                                          const layout = s.layout || {}
+                                          const basePos = layout.screenPositions?.[current.id] || { x: (layout.x ?? 0) + 520, y: (layout.y ?? 0) }
+                                          const screenPositions = { ...(layout.screenPositions || {}), [newScreen.id]: { x: basePos.x + 260, y: basePos.y } }
+                                          return { ...s, screens: [...screens, newScreen], startScreenId: s.startScreenId || screens[0]?.id || newScreen.id, layout: { ...layout, screenPositions } }
+                                        })
+                                      }))
+                                    }}>
+                                      Добавить выбор
+                                    </Button>
+                                  </div>
+
+                                <div className="space-y-3">
+                                    {(screen.choices || []).length === 0 ? (
+                                      <div className="text-sm text-neutral-400">Нет выборов</div>
+                                    ) : (
+                                      screen.choices.map((choice, cIdx) => (
+                                        <Card key={choice.id}>
+                                          <CardHeader className="pb-2">
+                                            <div className="flex items-center justify-between">
+                                              <CardTitle className="text-sm">Выбор {cIdx + 1}</CardTitle>
+                                              <div className="flex gap-1">
+                                                <Button size="sm" variant="outline" onClick={() => {
+                                                  const linkedId = choice.nextScreenId
+                                                  setData(prev => ({
+                                                    ...prev,
+                                                    scenes: prev.scenes.map(s => {
+                                                      if (s.id !== selectedScene.id) return s
+                                                      let screens = [...(s.screens || [])]
+                                                      const current = screens[selectedScreenIndex]
+                                                      if (!current) return s
+                                                      const newChoices = current.choices.filter((_, i) => i !== cIdx)
+                                                      if (linkedId) {
+                                                        screens = screens.filter(scr => scr.id !== linkedId)
+                                                        const layout = s.layout || {}
+                                                        const screenPositions = { ...(layout.screenPositions || {}) }
+                                                        delete screenPositions[linkedId]
+                                                        const newCurrent = { ...current, choices: newChoices }
+                                                        screens[selectedScreenIndex] = newCurrent
+                                                        return { ...s, screens, layout: { ...layout, screenPositions } }
+                                                      }
+                                                      screens[selectedScreenIndex] = { ...current, choices: newChoices }
+                                                      return { ...s, screens }
+                                                    })
+                                                  }))
+                                                }}>Удалить</Button>
+                                              </div>
+                                            </div>
+                                          </CardHeader>
+                                          <CardContent className="space-y-3">
+                                            <div>
+                                              <Label>Текст выбора</Label>
+                                              <Input
+                                                value={choice.text}
+                                                onChange={(e) => {
+                                                  const text = e.target.value
+                                                  setData(prev => ({
+                                                    ...prev,
+                                                    scenes: prev.scenes.map(s => {
+                                                      if (s.id !== selectedScene.id) return s
+                                                      const screens = [...(s.screens || [])]
+                                                      const current = screens[selectedScreenIndex]
+                                                      if (!current) return s
+                                                      const choices = [...(current.choices || [])]
+                                                      choices[cIdx] = { ...choice, text }
+                                                      screens[selectedScreenIndex] = { ...current, choices }
+                                                      return { ...s, screens }
+                                                    })
+                                                  }))
+                                                }}
+                                              />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                              <div className="flex items-center justify-between">
+                                                <Label className="font-medium">Эффекты</Label>
+                                                <Button size="sm" variant="outline" onClick={() => {
+                                                  const newEffect: SimpleEffect = { type: 'gain_credits', creditsChange: 0 }
+                                                  setData(prev => ({
+                                                    ...prev,
+                                                    scenes: prev.scenes.map(s => {
+                                                      if (s.id !== selectedScene.id) return s
+                                                      const screens = [...(s.screens || [])]
+                                                      const current = screens[selectedScreenIndex]
+                                                      if (!current) return s
+                                                      const choices = [...(current.choices || [])]
+                                                      choices[cIdx] = { ...choice, effects: [...(choice.effects || []), newEffect] }
+                                                      screens[selectedScreenIndex] = { ...current, choices }
+                                                      return { ...s, screens }
+                                                    })
+                                                  }))
+                                                }}>Добавить эффект</Button>
+                                              </div>
+
+                                              {(choice.effects || []).map((effect, eIdx) => (
+                                                <EffectEditor
+                                                  key={eIdx}
+                                                  effect={effect}
+                                                  onChange={(updated) => {
+                                                    setData(prev => ({
+                                                      ...prev,
+                                                      scenes: prev.scenes.map(s => {
+                                                        if (s.id !== selectedScene.id) return s
+                                                        let screens = [...(s.screens || [])]
+                                                        const current = screens[selectedScreenIndex]
+                                                        if (!current) return s
+                                                        const choices = [...(current.choices || [])]
+                                                        const updatedEffects = [...(choice.effects || [])]
+                                                        updatedEffects[eIdx] = updated
+                                                        let updatedChoice: SimpleChoice = { ...choice, effects: updatedEffects }
+                                                        if (updated.type === 'end_scene' && choice.nextScreenId) {
+                                                          const linkedId = choice.nextScreenId
+                                                          screens = screens.filter(scr => scr.id !== linkedId)
+                                                          const layout = s.layout || {}
+                                                          const screenPositions = { ...(layout.screenPositions || {}) }
+                                                          delete screenPositions[linkedId]
+                                                          updatedChoice = { ...updatedChoice, nextScreenId: undefined }
+                                                          const newCurrent = { ...current, choices: choices.map((ch, idx) => idx === cIdx ? updatedChoice : ch) }
+                                                          const newScreens = [...screens]
+                                                          newScreens[selectedScreenIndex] = newCurrent
+                                                          return { ...s, screens: newScreens, layout: { ...layout, screenPositions } }
+                                                        }
+                                                        const newCurrent = { ...current, choices: choices.map((ch, idx) => idx === cIdx ? updatedChoice : ch) }
+                                                        screens[selectedScreenIndex] = newCurrent
+                                                        return { ...s, screens }
+                                                      })
+                                                    }))
+                                                  }}
+                                                  onRemove={() => {
+                                                    setData(prev => ({
+                                                      ...prev,
+                                                      scenes: prev.scenes.map(s => {
+                                                        if (s.id !== selectedScene.id) return s
+                                                        const screens = [...(s.screens || [])]
+                                                        const current = screens[selectedScreenIndex]
+                                                        if (!current) return s
+                                                        const choices = [...(current.choices || [])]
+                                                        const newEffects = (choice.effects || []).filter((_, i) => i !== eIdx)
+                                                        choices[cIdx] = { ...choice, effects: newEffects }
+                                                        screens[selectedScreenIndex] = { ...current, choices }
+                                                        return { ...s, screens }
+                                                      })
+                                                    }))
+                                                  }}
+                                                />
+                                              ))}
+                                            </div>
+
+                                            <div className="text-[11px] text-neutral-400">
+                                              Цель: {choice.nextScreenId ? `экран ${choice.nextScreenId}` : (choice.nextScene ? `сцена ${choice.nextScene}` : 'не задана')}
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+                                      ))
+                                    )}
                                   </div>
                                 </div>
                               )
                             })()
                           ) : (
-                          <>
-                            <div>
-                              <Label>Название сцены</Label>
-                              <Input value={selectedScene.title} onChange={(e) => updateScene(selectedScene.id, { title: e.target.value })} />
-                            </div>
-                            <div>
-                              <Label>Описание</Label>
-                              <Textarea value={selectedScene.description} onChange={(e) => updateScene(selectedScene.id, { description: e.target.value })} />
-                            </div>
-                            <div>
-                              <Label>Вероятность показа (%)</Label>
-                              <Input type="number" min={0} max={100} value={selectedScene.probability || ''} onChange={(e) => updateScene(selectedScene.id, { probability: e.target.value ? parseInt(e.target.value) : undefined })} />
-                            </div>
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between">
-                                <Label>Выборы</Label>
-                                <Button size="sm" variant="outline" onClick={() => addChoice(selectedScene.id)}>
-                                  <Plus className="h-4 w-4 mr-1" />Добавить
-                                </Button>
-                              </div>
-                              {selectedScene.choices.map((choice, choiceIndex) => (
-                                <div key={choice.id} className="p-3 rounded-lg border border-white/10 bg-white/5">
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      value={choice.text}
-                                      onChange={(e) => {
-                                        const newChoices = [...selectedScene.choices]
-                                        newChoices[choiceIndex] = { ...choice, text: e.target.value }
-                                        updateScene(selectedScene.id, { choices: newChoices })
-                                      }}
-                                    />
-                                    <Button size="sm" variant="ghost" onClick={() => deleteSceneChoice(selectedScene.id, choiceIndex)}>
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                  <div className="text-xs text-neutral-400 mt-2">Эффекты</div>
-                                  <div className="mt-2 space-y-2">
-                                    {choice.effects.map((effect, effectIndex) => (
-                                      <EffectEditor
-                                        key={effectIndex}
-                                        effect={effect as any}
-                                        onChange={(updatedEffect) => {
-                                          const newChoices = [...selectedScene.choices]
-                                          const newEffects = [...choice.effects]
-                                          newEffects[effectIndex] = updatedEffect
-                                          newChoices[choiceIndex] = { ...choice, effects: newEffects }
-                                          updateScene(selectedScene.id, { choices: newChoices })
-                                        }}
-                                        onRemove={() => {
-                                          const newChoices = [...selectedScene.choices]
-                                          const newEffects = choice.effects.filter((_, i) => i !== effectIndex)
-                                          newChoices[choiceIndex] = { ...choice, effects: newEffects }
-                                          updateScene(selectedScene.id, { choices: newChoices })
-                                        }}
-                                      />
-                                    ))}
-                                    <Button size="sm" variant="outline" onClick={() => {
-                                      const newChoices = [...selectedScene.choices]
-                                      newChoices[choiceIndex] = { ...choice, effects: [...choice.effects, { type: 'change_story_point' }] as any }
-                                      updateScene(selectedScene.id, { choices: newChoices })
-                                    }}>Добавить эффект</Button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        )) : (
-                          <>
-                            {(() => {
-                              const choice = selectedScene.choices[selectedChoiceIndex]
-                              if (!choice) return null
-                              return (
-                                <div className="space-y-3">
-                                  <div>
-                                    <Label>Текст выбора</Label>
-                                    <div className="flex items-center gap-2">
-                                      <Input value={choice.text} onChange={(e) => {
-                                        const newChoices = [...selectedScene.choices]
-                                        newChoices[selectedChoiceIndex] = { ...choice, text: e.target.value }
-                                        updateScene(selectedScene.id, { choices: newChoices })
-                                      }} />
-                                      <Button size="sm" variant="ghost" onClick={() => deleteSceneChoice(selectedScene.id, selectedChoiceIndex)}>
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <div className="text-xs text-neutral-400">Эффекты</div>
-                                    {choice.effects.map((effect, effectIndex) => (
-                                      <EffectEditor
-                                        key={effectIndex}
-                                        effect={effect as any}
-                                        onChange={(updatedEffect) => {
-                                          const newChoices = [...selectedScene.choices]
-                                          const newEffects = [...choice.effects]
-                                          newEffects[effectIndex] = updatedEffect
-                                          newChoices[selectedChoiceIndex] = { ...choice, effects: newEffects }
-                                          updateScene(selectedScene.id, { choices: newChoices })
-                                        }}
-                                        onRemove={() => {
-                                          const newChoices = [...selectedScene.choices]
-                                          const newEffects = choice.effects.filter((_, i) => i !== effectIndex)
-                                          newChoices[selectedChoiceIndex] = { ...choice, effects: newEffects }
-                                          updateScene(selectedScene.id, { choices: newChoices })
-                                        }}
-                                      />
-                                    ))}
-                                    <Button size="sm" variant="outline" onClick={() => {
-                                      const newChoices = [...selectedScene.choices]
-                                      newChoices[selectedChoiceIndex] = { ...choice, effects: [...choice.effects, { type: 'change_story_point' }] as any }
-                                      updateScene(selectedScene.id, { choices: newChoices })
-                                    }}>Добавить эффект</Button>
-                                  </div>
-                                </div>
-                              )
-                            })()}
-                          </>
+                            <div className="text-sm text-neutral-400">Выберите экран на графе</div>
+                          )
+                        ) : (
+                          <div className="text-sm text-neutral-400">Выберите узел выбора на графе</div>
                         )}
                       </div>
                     </div>
@@ -1229,8 +1155,12 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                             onChange={(e) => {
                               const file = e.target.files?.[0]
                               if (file) {
-                                const url = URL.createObjectURL(file)
-                                updateScene(selectedScene.id, { content: { ...selectedScene.content, backgroundFile: file as any, background: url } })
+                                const reader = new FileReader()
+                                reader.onload = () => {
+                                  const dataUrl = reader.result as string
+                                  updateScene(selectedScene.id, { content: { ...selectedScene.content, background: dataUrl } })
+                                }
+                                reader.readAsDataURL(file)
                               }
                             }}
                             className="hidden"
@@ -1238,10 +1168,8 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                             aria-label="Выберите фон"
                           />
                           <Button size="sm" variant="outline" onClick={() => document.getElementById(`graph-bg-upload-${selectedScene.id}-graph`)?.click()}>Выбрать файл</Button>
-                          {selectedScene.content.backgroundFile && (
-                            <span className="text-xs text-neutral-300">{(selectedScene.content as any).backgroundFile.name}</span>
-                          )}
-                          <Button size="sm" variant="destructive" onClick={() => updateScene(selectedScene.id, { content: { ...selectedScene.content, background: undefined, backgroundFile: undefined as any } })}>Очистить</Button>
+                          {/* Показывать имя файла не можем надёжно после перезагрузки для data URL */}
+                          <Button size="sm" variant="destructive" onClick={() => updateScene(selectedScene.id, { content: { ...selectedScene.content, background: undefined } })}>Очистить</Button>
                         </div>
                         {selectedScene.content.background && (
                           <div className="rounded-lg overflow-hidden bg-black/30">

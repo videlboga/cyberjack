@@ -39,6 +39,10 @@ export async function POST(request: Request) {
       'characters': path.join(process.cwd(), 'data', 'characters-unified.json'),
       'characterAI': path.join(process.cwd(), 'lib', 'character', 'character-ai-config.ts'),
       'game': path.join(process.cwd(), 'data', 'game-config-unified.json'),
+      // Сохранение сущностей станции из редактора
+      'stationEntities': path.join(process.cwd(), 'data', 'station-entities.json'),
+      // Сохранение сюжетных сцен
+      'storyScenes': path.join(process.cwd(), 'data', 'story-scenes-unified.json'),
     }
 
     const filePath = targetMap[target]

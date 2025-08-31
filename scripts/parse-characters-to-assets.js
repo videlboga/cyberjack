@@ -151,36 +151,8 @@ function extractFetishes(text) {
 
 // Функция для извлечения черт характера из текста
 function extractTraits(text) {
-  const traits = [];
-  
-  // Ищем черты характера в разделе "Общий характер" и "Особенности поведения"
-  const characterSection = text.match(/### Общий характер([\s\S]*?)(?=###|$)/);
-  const behaviorSection = text.match(/### Особенности поведения([\s\S]*?)(?=###|$)/);
-  
-  const combinedText = (characterSection ? characterSection[1] : '') + (behaviorSection ? behaviorSection[1] : '');
-  
-  // Определяем черты на основе ключевых слов
-  if (combinedText.includes('любопытн') || combinedText.includes('интерес')) traits.push('curious');
-  if (combinedText.includes('доверчив') || combinedText.includes('доверяет')) traits.push('trusting');
-  if (combinedText.includes('невинн') || combinedText.includes('невинная')) traits.push('innocent');
-  if (combinedText.includes('романтичн') || combinedText.includes('мечтательн')) traits.push('romantic');
-  if (combinedText.includes('игрив') || combinedText.includes('игра')) traits.push('playful');
-  if (combinedText.includes('художественн') || combinedText.includes('творческ')) traits.push('artistic');
-  if (combinedText.includes('феминн') || combinedText.includes('женственн')) traits.push('feminine');
-  if (combinedText.includes('академическ') || combinedText.includes('студент')) traits.push('academic');
-  if (combinedText.includes('призрак') || combinedText.includes('невидимк')) traits.push('ghostly');
-  if (combinedText.includes('материнск') || combinedText.includes('защитниц')) traits.push('maternal');
-  if (combinedText.includes('защитн') || combinedText.includes('защищает')) traits.push('protective');
-  if (combinedText.includes('тёмн') || combinedText.includes('фея')) traits.push('dark_fairy');
-  if (combinedText.includes('наркоман') || combinedText.includes('зависим')) traits.push('addictive');
-  if (combinedText.includes('ощущен') || combinedText.includes('искатель')) traits.push('sensation_seeker');
-  if (combinedText.includes('выживальщиц') || combinedText.includes('адаптивн')) traits.push('survivor');
-  if (combinedText.includes('адаптивн') || combinedText.includes('приспосабливается')) traits.push('adaptive');
-  
-  // Базовые черты
-  traits.push('loyal', 'quick_learner');
-  
-  return traits;
+  // Черты характера больше не используются
+  return [];
 }
 
 // Функция для создания состояний на основе характеристик

@@ -23,7 +23,7 @@ export interface CharacterData {
   location: string
   attributes: Record<string, number>
   skills: Record<string, number>
-  traits?: string[]
+  // traits удалены
   preferences?: any
   condition?: any
   history?: any
@@ -63,7 +63,7 @@ export async function mergeCharacterData(): Promise<MigrationResult> {
             location: asset.location,
             attributes: asset.attributes,
             skills: asset.skills,
-            traits: asset.traits,
+            // traits удалены
             preferences: asset.preferences,
             condition: asset.condition,
             history: asset.history,
@@ -121,7 +121,7 @@ export async function mergeCharacterData(): Promise<MigrationResult> {
             location: 'void_border',
             attributes: rescue.attributes,
             skills: rescue.skills,
-            traits: rescue.anomaly ? [rescue.anomaly] : [],
+            // traits удалены
             metadata: {
               source: 'void',
               createdAt: new Date().toISOString(),

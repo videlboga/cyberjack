@@ -24,16 +24,6 @@ jest.mock('@/lib/field-configs', () => ({
             min: 1,
             max: 10
           }
-        },
-        { 
-          name: 'traits', 
-          type: 'dynamic-array', 
-          label: 'Черты характера', 
-          required: false,
-          dynamicConfig: {
-            type: 'preferences',
-            options: ['loyal', 'quick_learner', 'tech_savvy']
-          }
         }
       ],
       actions: [
@@ -162,14 +152,15 @@ describe('EnhancedEditModal', () => {
   })
 
   describe('Динамические объекты', () => {
-    it('должен отображать кнопку добавления для динамических объектов', () => {
+    it('должен отображать кнопку добавления для динамических объектов', async () => {
+      const user = userEvent.setup()
       render(<EnhancedEditModal {...defaultProps} />)
       
-      // Переключаемся на вкладку дополнительных полей
       const advancedTab = screen.getByText('Дополнительные поля')
-      fireEvent.click(advancedTab)
+      await user.click(advancedTab)
       
-      expect(screen.getByText('Добавить')).toBeInTheDocument()
+      const addButtons = await screen.findAllByText('Добавить')
+      expect(addButtons.length).toBeGreaterThan(0)
     })
 
     it('должен добавлять новые ключи в динамические объекты', async () => {
@@ -180,42 +171,15 @@ describe('EnhancedEditModal', () => {
       const advancedTab = screen.getByText('Дополнительные поля')
       await user.click(advancedTab)
       
-      const addButton = screen.getByText('Добавить')
-      await user.click(addButton)
+      const addButtons = await screen.findAllByText('Добавить')
+      await user.click(addButtons[0])
       
       // Проверяем, что появился select для выбора ключа
       expect(screen.getByDisplayValue('strength')).toBeInTheDocument()
     })
   })
 
-  describe('Динамические массивы', () => {
-    it('должен отображать кнопку добавления для динамических массивов', () => {
-      render(<EnhancedEditModal {...defaultProps} />)
-      
-      // Переключаемся на вкладку дополнительных полей
-      const advancedTab = screen.getByText('Дополнительные поля')
-      fireEvent.click(advancedTab)
-      
-      // Ищем кнопки добавления для массивов
-      const addButtons = screen.getAllByText('Добавить')
-      expect(addButtons.length).toBeGreaterThan(0)
-    })
-
-    it('должен добавлять новые элементы в динамические массивы', async () => {
-      const user = userEvent.setup()
-      render(<EnhancedEditModal {...defaultProps} />)
-      
-      // Переключаемся на вкладку дополнительных полей
-      const advancedTab = screen.getByText('Дополнительные поля')
-      await user.click(advancedTab)
-      
-      const addButtons = screen.getAllByText('Добавить')
-      await user.click(addButtons[1]) // Вторая кнопка для массива
-      
-      // Проверяем, что появился select для выбора элемента
-      expect(screen.getByDisplayValue('loyal')).toBeInTheDocument()
-    })
-  })
+  // Блок динамических массивов удален (traits больше не используются)
 
   describe('Валидация', () => {
     it('должен показывать обязательные поля как обязательные', () => {

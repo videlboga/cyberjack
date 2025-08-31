@@ -30,7 +30,10 @@ export function useUnifiedConfig(): UseUnifiedConfigResult {
         users: Array.isArray(raw?.users) ? raw.users : (raw?.users?.users ?? []),
         equipment: Array.isArray(raw?.equipment) ? raw.equipment : (raw?.equipment?.equipment ?? []),
         contracts: Array.isArray(raw?.contracts) ? raw.contracts : (raw?.contracts?.available ?? []),
-        storyScenes: Array.isArray(raw?.storyScenes) ? raw.storyScenes : (raw?.storyScenes?.scenes ?? []),
+        // Храним storyScenes как объект с полем scenes (ожидается прод-страницей)
+        storyScenes: Array.isArray(raw?.storyScenes)
+          ? { scenes: raw.storyScenes }
+          : (raw?.storyScenes ?? { scenes: [] }),
         actions: raw?.actions ?? {},
         station: raw?.station ? {
           ...raw.station,

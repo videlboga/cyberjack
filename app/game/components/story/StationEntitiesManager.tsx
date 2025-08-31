@@ -253,23 +253,36 @@ export function StationEntitiesManager({ entities, onUpdate, scenes }: StationEn
                   <CardContent className="space-y-4">
                     <div>
                       <Label>Дефолтная сцена</Label>
-                      <Select
-                        value={selectedEntity.defaultSceneId || '__none__'}
-                        onValueChange={(value) => updateEntity(selectedEntity.id, { defaultSceneId: value === '__none__' ? undefined : value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите дефолтную сцену" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="__none__">Нет дефолтной сцены</SelectItem>
-                          {scenes.map(scene => (
-                            <SelectItem key={scene.id} value={scene.id}>{scene.title}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Эта сцена будет показана при запуске сущности
-                      </p>
+                      {(() => {
+                        const currentId = selectedEntity.defaultSceneId
+                        const isValid = !currentId || scenes.some(s => s.id === currentId)
+                        return (
+                          <div>
+                            <Select
+                              value={currentId || '__none__'}
+                              onValueChange={(value) => updateEntity(selectedEntity.id, { defaultSceneId: value === '__none__' ? undefined : value })}
+                            >
+                              <SelectTrigger className={!isValid ? 'border-red-500' : undefined}>
+                                <SelectValue placeholder="Выберите дефолтную сцену" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="__none__">Нет дефолтной сцены</SelectItem>
+                                {scenes.map(scene => (
+                                  <SelectItem key={scene.id} value={scene.id}>{scene.title}</SelectItem>
+                                ))}
+                                {!isValid && currentId && (
+                                  <SelectItem value={currentId} disabled>
+                                    ⚠ Не найдена: {currentId}
+                                  </SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                            <p className={`text-xs mt-1 ${!isValid ? 'text-red-500' : 'text-muted-foreground'}`}>
+                              {!isValid ? 'Выбранная сцена отсутствует в конфигурации. Выберите существующую.' : 'Эта сцена будет показана при запуске сущности'}
+                            </p>
+                          </div>
+                        )
+                      })()}
                     </div>
 
                     {/* Список всех привязанных сцен */}
