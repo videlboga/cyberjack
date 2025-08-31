@@ -935,7 +935,8 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
               const viewport = root.querySelector('.react-flow__viewport') as HTMLElement | null
               let translateX = 0, translateY = 0, scale = 1
               if (viewport && viewport.style.transform) {
-                const m = viewport.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)\s*scale\(([-\d.]+)\)/)
+                const re = new RegExp('translate\\(([-\\d.]+)px,\\s*([-\\d.]+)px\\)\\s*scale\\(([-\\d.]+)\\)')
+                const m = viewport.style.transform.match(re)
                 if (m) {
                   translateX = parseFloat(m[1]) || 0
                   translateY = parseFloat(m[2]) || 0
