@@ -39,6 +39,7 @@ import {
   Star,
   Monitor
 } from "lucide-react"
+import { Trash2 } from "lucide-react"
 
 import { SimpleScene, SimpleScreen } from '@/lib/simple-story-types'
 
@@ -69,6 +70,16 @@ const SceneNode = ({ data }: any) => {
 
   return (
     <div className={`relative px-4 py-3 shadow-md rounded-xl bg-neutral-800/80 text-neutral-100 border ${getBorderColor()} min-w-[260px] max-w-[360px]`}>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="absolute top-1 right-1 h-6 w-6 p-0"
+        onClick={() => data.onDeleteScene && data.onDeleteScene()}
+        aria-label="Удалить сцену"
+        title="Удалить сцену"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
       <div className="flex items-start">
         {getIcon()}
         <div className="ml-2 flex-1">
@@ -370,9 +381,10 @@ interface SceneGraphProps {
   onAddChoice?: (sceneId: string, position: { x: number; y: number }) => void
   onAddScreen?: (sceneId: string, position: { x: number; y: number }) => void
   addMode?: 'screen' | 'choice'
+  onDeleteScene?: (sceneId: string) => void
 }
 
-export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateScene, onUpdateChoice, onChoiceSelect, onEntrySelect, onScreenSelect, storyPoints, mode = 'scene', onAddScene, onAddChoice, onAddScreen, addMode = 'choice' }: SceneGraphProps) {
+export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateScene, onUpdateChoice, onChoiceSelect, onEntrySelect, onScreenSelect, storyPoints, mode = 'scene', onAddScene, onAddChoice, onAddScreen, addMode = 'choice', onDeleteScene }: SceneGraphProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
 
   // Создание узлов и связей на основе сцен
@@ -400,12 +412,12 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
           choicesCount: scene.choices.length,
           probability: scene.probability,
           sceneType: sceneIndex === 0 ? 'start' : scene.choices.some(choice => !choice.nextScene) ? 'end' : 'normal',
-          onUpdateScene: (updates: Partial<SimpleScene>) => onUpdateScene && onUpdateScene(scene.id, updates)
+          onUpdateScene: (updates: Partial<SimpleScene>) => onUpdateScene && onUpdateScene(scene.id, updates),
+          onDeleteScene: () => onDeleteScene && onDeleteScene(scene.id)
         }
       }
-      if (mode !== 'scene') {
-        nodes.push(sceneNode)
-      }
+      // Показываем узел сцены и в режиме scene, и в глобальном
+      nodes.push(sceneNode)
 
       // Точка входа сцены (показываем всегда в режиме scene; в глобальном тоже допустимо)
       nodes.push({
@@ -878,6 +890,13 @@ export function SceneGraph({ scenes, onSceneSelect, selectedSceneId, onUpdateSce
             edges={edges}
             onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
+            onNodesDelete={(deleted) => {
+              deleted.forEach((n) => {
+                if (scenes.find((s) => s.id === n.id)) {
+                  onDeleteScene && onDeleteScene(n.id)
+                }
+              })
+            }}
             onNodeDragStart={onNodeDragStart}
             onNodeDragStop={onNodeDragStop}
             onEdgesDelete={onEdgesDeleteCb}

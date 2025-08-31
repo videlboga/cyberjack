@@ -672,283 +672,11 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
         {/* Убираем левую колонку: максимум места под граф */}
         <div className="flex-1">
           <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="scenes">Редактирование</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="storypoints">Сюжетные точки</TabsTrigger>
                 <TabsTrigger value="graph">Граф сцен</TabsTrigger>
                 <TabsTrigger value="preview">Предпросмотр</TabsTrigger>
               </TabsList>
-
-              <TabsContent value="scenes" className="mt-4">
-                {selectedScene ? (
-                  <ScrollArea className="h-[calc(100vh-200px)]">
-                  <div className="space-y-6">
-                    {/* Основная информация о сцене */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Основная информация</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <Label>Название сцены</Label>
-                          <Input 
-                            value={selectedScene.title} 
-                            onChange={(e) => updateScene(selectedScene.id, { title: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <Label>Описание</Label>
-                          <Textarea 
-                            value={selectedScene.description} 
-                            onChange={(e) => updateScene(selectedScene.id, { description: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <Label>Текст сцены</Label>
-                          <Textarea
-                            value={selectedScene.content.text}
-                            onChange={(e) => updateScene(selectedScene.id, {
-                              content: { ...selectedScene.content, text: e.target.value }
-                            })}
-                          />
-                        </div>
-
-                        {/* Загрузка фонового изображения */}
-                        <div>
-                          <Label>Фоновое изображение</Label>
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0]
-                                  if (file) {
-                                    updateScene(selectedScene.id, {
-                                      content: {
-                                        ...selectedScene.content,
-                                        backgroundFile: file,
-                                        background: URL.createObjectURL(file)
-                                      }
-                                    })
-                                  }
-                                }}
-                                className="hidden"
-                                id={`background-upload-${selectedScene.id}-details`}
-                                aria-label="Выберите фоновое изображение для сцены"
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => document.getElementById(`background-upload-${selectedScene.id}-details`)?.click()}
-                              >
-                                <Upload className="h-4 w-4 mr-2" />
-                                Выбрать файл
-                              </Button>
-                              {selectedScene.content.backgroundFile && (
-                                <span className="text-sm text-muted-foreground">
-                                  {selectedScene.content.backgroundFile.name}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Предпросмотр фона */}
-                            {selectedScene.content.background && (
-                              <div className="relative">
-                                <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
-                                  <img
-                                    src={selectedScene.content.background}
-                                    alt="Фон сцены"
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="sm"
-                                  className="absolute top-2 right-2"
-                                  onClick={() => {
-                                    updateScene(selectedScene.id, {
-                                      content: {
-                                        ...selectedScene.content,
-                                        background: undefined,
-                                        backgroundFile: undefined
-                                      }
-                                    })
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Вероятность показа (%)</Label>
-                          <Input 
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={selectedScene.probability || ''} 
-                            onChange={(e) => updateScene(selectedScene.id, { 
-                              probability: e.target.value ? parseInt(e.target.value) : undefined
-                            })}
-                            placeholder="Оставьте пустым для 100%"
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Условия показа сцены */}
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <CardTitle>Условия показа сцены</CardTitle>
-                          <Button 
-                            size="sm" 
-                            onClick={() => {
-                              const newCondition: SimpleCondition = {
-                                entityType: 'asset',
-                                property: 'rank',
-                                operator: '>=',
-                                value: 'C'
-                              }
-                              updateScene(selectedScene.id, { 
-                                conditions: [...(selectedScene.conditions || []), newCondition]
-                              })
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Добавить условие
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        {selectedScene.conditions?.map((condition, index) => (
-                          <ConditionEditor
-                            key={index}
-                            condition={condition}
-                            onChange={(updatedCondition) => {
-                              const newConditions = [...(selectedScene.conditions || [])]
-                              newConditions[index] = updatedCondition
-                              updateScene(selectedScene.id, { conditions: newConditions })
-                            }}
-                            onRemove={() => {
-                              const newConditions = selectedScene.conditions?.filter((_, i) => i !== index)
-                              updateScene(selectedScene.id, { conditions: newConditions })
-                            }}
-                          />
-                        ))}
-                        {(!selectedScene.conditions || selectedScene.conditions.length === 0) && (
-                          <p className="text-sm text-muted-foreground">
-                            Нет условий - сцена показывается всегда
-                          </p>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* Выборы */}
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <CardTitle>Выборы игрока</CardTitle>
-                          <Button 
-                            size="sm" 
-                            onClick={() => addChoice(selectedScene.id)}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Добавить выбор
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {selectedScene.choices.map((choice, choiceIndex) => (
-                            <Card key={choice.id} className="border-dashed">
-                              <CardHeader className="pb-2">
-                                <div className="flex items-center justify-between">
-                                  <CardTitle className="text-sm">Выбор {choiceIndex + 1}</CardTitle>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => deleteSceneChoice(selectedScene.id, choiceIndex)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="space-y-4">
-                                <div>
-                                  <Label>Текст выбора</Label>
-                                  <Input 
-                                    value={choice.text} 
-                                    onChange={(e) => {
-                                      const newChoices = [...selectedScene.choices]
-                                      newChoices[choiceIndex] = { ...choice, text: e.target.value }
-                                      updateScene(selectedScene.id, { choices: newChoices })
-                                    }}
-                                  />
-                                </div>
-                                
-                                {/* Эффекты выбора */}
-                                <div>
-                                  <div className="flex items-center justify-between mb-2">
-                                    <Label>Эффекты</Label>
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
-                                      onClick={() => {
-                                        const newEffect: SimpleEffect = {
-                                          type: 'change_story_point'
-                                        }
-                                        const newChoices = [...selectedScene.choices]
-                                        newChoices[choiceIndex] = { 
-                                          ...choice, 
-                                          effects: [...choice.effects, newEffect]
-                                        }
-                                        updateScene(selectedScene.id, { choices: newChoices })
-                                      }}
-                                    >
-                                      <Plus className="h-4 w-4 mr-1" />
-                                      Добавить эффект
-                                    </Button>
-                                  </div>
-                                  
-                                  {choice.effects.map((effect, effectIndex) => (
-                                    <EffectEditor
-                                      key={effectIndex}
-                                      effect={effect}
-                                      onChange={(updatedEffect) => {
-                                        const newChoices = [...selectedScene.choices]
-                                        const newEffects = [...choice.effects]
-                                        newEffects[effectIndex] = updatedEffect
-                                        newChoices[choiceIndex] = { ...choice, effects: newEffects }
-                                        updateScene(selectedScene.id, { choices: newChoices })
-                                      }}
-                                      onRemove={() => {
-                                        const newChoices = [...selectedScene.choices]
-                                        const newEffects = choice.effects.filter((_, i) => i !== effectIndex)
-                                        newChoices[choiceIndex] = { ...choice, effects: newEffects }
-                                        updateScene(selectedScene.id, { choices: newChoices })
-                                      }}
-                                    />
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  </ScrollArea>
-                ) : (
-                  <div className="h-[calc(100vh-200px)] flex items-center justify-center text-muted-foreground">
-                    Выберите или создайте сцену для редактирования
-                  </div>
-                )}
-              </TabsContent>
 
               <TabsContent value="storypoints" className="mt-4">
                 <ScrollArea className="h-[calc(100vh-200px)]">
@@ -1004,7 +732,19 @@ export function SimpleStoryEditor({ storyData, onSave, gameEntities }: SimpleSto
                       setShowNodePanel(true)
                     }}
                     selectedSceneId={selectedScene ? selectedScene.id : ''}
-                    onUpdateScene={(sceneId, updates) => updateScene(sceneId, updates)}
+                    onUpdateScene={(sceneId, updates) => {
+                      // Сохраняем немедленно, чтобы видеть изменения названия/описания сразу и устойчиво
+                      const next = {
+                        ...data,
+                        scenes: data.scenes.map(s => s.id === sceneId ? { ...s, ...updates } : s)
+                      }
+                      setData(next)
+                      try {
+                        const persisted = { ...storyData, scenes: next.scenes }
+                        onSave(persisted)
+                      } catch (_) {}
+                    }}
+                    onDeleteScene={(sceneId) => deleteScene(sceneId)}
                     onUpdateChoice={(sceneId, choiceIndex, updates) => {
                       setData(prev => ({
                         ...prev,
