@@ -756,6 +756,7 @@ export interface ActiveZone {
   availableActions: string[] // доступные действия для этой зоны
   availableTools: string[] // доступные инструменты для этой зоны
   sensitivity: number // чувствительность зоны (1-10)
+  anatomyId?: string // ссылка на элемент анатомии из system-unified.json
   category: 'touch' | 'pressure' | 'temperature' | 'electrical' | 'visual' | 'auditory'
   zoneKey?: string // ключ зоны для системы взаимодействий
   promptName?: string // название зоны для промптов

@@ -204,6 +204,68 @@ export const validateSelect = (value: any, options: { options: string[]; multipl
   }
 }
 
+// ===== Доменные проверки поз/анатомии =====
+import systemConfig from '@/data/system-unified.json'
+
+export type ValidationError = { field?: string; message: string }
+
+export const validateAnatomyList = (anatomy: any): { isValid: boolean; errors: ValidationError[] } => {
+  const errors: ValidationError[] = []
+  if (!Array.isArray(anatomy)) {
+    return { isValid: false, errors: [{ message: 'Анатомия должна быть массивом' }] }
+  }
+  for (const item of anatomy) {
+    if (typeof item !== 'string' || item.trim() === '') {
+      errors.push({ message: 'Элементы анатомии должны быть строками' })
+    }
+  }
+  return { isValid: errors.length === 0, errors }
+}
+
+export const validateActiveZoneDomain = (zone: any): { isValid: boolean; errors: ValidationError[] } => {
+  const errors: ValidationError[] = []
+
+  // Координаты и размеры в диапазоне [0,100]
+  const numInRange = (v: any, min: number, max: number) => typeof v === 'number' && !isNaN(v) && v >= min && v <= max
+  if (!numInRange(zone.x, 0, 100)) errors.push({ field: 'x', message: 'X должен быть в диапазоне 0-100' })
+  if (!numInRange(zone.y, 0, 100)) errors.push({ field: 'y', message: 'Y должен быть в диапазоне 0-100' })
+  if (!numInRange(zone.width, 1, 100)) errors.push({ field: 'width', message: 'Ширина должна быть 1-100' })
+  if (!numInRange(zone.height, 1, 100)) errors.push({ field: 'height', message: 'Высота должна быть 1-100' })
+
+  // Чувствительность 1..10 (целое)
+  if (!(typeof zone.sensitivity === 'number' && Number.isInteger(zone.sensitivity) && zone.sensitivity >= 1 && zone.sensitivity <= 10)) {
+    errors.push({ field: 'sensitivity', message: 'Чувствительность должна быть целым числом 1-10' })
+  }
+
+  // anatomyId должен быть из справочника анатомии (для поз — выбирается из списка)
+  const allowedAnatomy: string[] = (systemConfig as any)?.anatomy || []
+  if (zone.anatomyId && !allowedAnatomy.includes(zone.anatomyId)) {
+    errors.push({ field: 'anatomyId', message: `Анатомия недопустима: ${zone.anatomyId}` })
+  }
+
+  // Категория зоны
+  const allowedCategories = ['touch', 'pressure', 'temperature', 'electrical', 'visual', 'auditory']
+  if (!allowedCategories.includes(zone.category)) {
+    errors.push({ field: 'category', message: 'Недопустимая категория зоны' })
+  }
+
+  return { isValid: errors.length === 0, errors }
+}
+
+export const validatePoseAngleDomain = (angle: any): { isValid: boolean; errors: ValidationError[] } => {
+  const errors: ValidationError[] = []
+  if (!Array.isArray(angle?.activeZones)) {
+    return { isValid: false, errors: [{ message: 'activeZones должен быть массивом' }] }
+  }
+  angle.activeZones.forEach((z: any, idx: number) => {
+    const res = validateActiveZoneDomain(z)
+    if (!res.isValid) {
+      res.errors.forEach(e => errors.push({ field: `activeZones[${idx}].${e.field || ''}`.replace(/\.$/, ''), message: e.message }))
+    }
+  })
+  return { isValid: errors.length === 0, errors }
+}
+
 // Функция валидации динамического объекта
 export const validateDynamicObject = (value: any, config: any): { isValid: boolean; errors: string[] } => {
   const errors: string[] = []

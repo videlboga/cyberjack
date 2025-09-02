@@ -21,8 +21,9 @@ interface EnhancedEditModalProps {
   onClose: () => void
   onSave: (data: any) => void
   entityType: string
-  initialData?: any
   isNew?: boolean
+  initialData?: any
+  onSaveSuccess?: (savedData: any) => void // Callback для обновления состояния после успешного сохранения
 }
 
 
@@ -38,10 +39,13 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
   onSave,
   entityType,
   initialData,
-  isNew = false
+  isNew = false,
+  onSaveSuccess
 }) => {
   const [formData, setFormData] = useState<any>({})
   const [activeTab, setActiveTab] = useState('basic')
+  const [isSaved, setIsSaved] = useState(false) // Состояние для отслеживания сохранения
+  const [updateCounter, setUpdateCounter] = useState(0) // Счетчик обновлений для принудительного перерендера
 
   // Динамически генерируем конфигурацию полей
   let fields = generateDynamicFieldConfig(entityType)
@@ -53,12 +57,21 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
     ]
   }
 
+  // Обновляем formData при изменении initialData
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData)
+      setIsSaved(false) // Сбрасываем флаг при открытии с новыми данными
+    }
+  }, [initialData])
+
+  // Сбрасываем флаг при открытии модалки
   useEffect(() => {
     if (isOpen) {
-      setFormData(initialData || {})
+      setIsSaved(false)
       setActiveTab('basic')
     }
-  }, [isOpen, initialData])
+  }, [isOpen])
 
   const handleInputChange = (fieldName: string, value: any) => {
     setFormData((prev: Record<string, any>) => ({
@@ -67,18 +80,91 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
     }))
   }
 
-  const handleSave = () => {
-    // Очищаем данные: включаем только объявленные поля
+  const handleSave = async () => {
+    // Очищаем данные, но не теряем динамические поля и id
     const sanitized: Record<string, any> = {}
+    // Всегда прокидываем id, если он есть в форме
+    if (formData.id) sanitized.id = formData.id
+
     fields.forEach((f) => {
-      if (f.type === 'text' || f.type === 'textarea') {
-        sanitized[f.name] = formData[f.name] ?? ''
-      } else if (f.type === 'number' || f.type === 'select') {
-        if (formData[f.name] !== undefined) sanitized[f.name] = formData[f.name]
+      const val = formData[f.name]
+      switch (f.type) {
+        case 'text':
+        case 'textarea':
+          sanitized[f.name] = val ?? ''
+          break
+        case 'number':
+        case 'select':
+          if (val !== undefined) sanitized[f.name] = val
+          break
+        case 'dynamic-object':
+        case 'object':
+          if (val !== undefined) sanitized[f.name] = val || {}
+          break
+        case 'dynamic-array':
+        case 'array':
+          if (val !== undefined) sanitized[f.name] = val || []
+          break
+        case 'slider':
+        case 'switch':
+          if (val !== undefined) sanitized[f.name] = val
+          break
+        default:
+          break
       }
     })
-    onSave(sanitized)
-    onClose()
+
+    // Для персонажей дополнительно убеждаемся, что ключевые разделы не потеряны
+    if (entityType === 'characters' || entityType === 'character') {
+      sanitized.attributes = sanitized.attributes ?? formData.attributes ?? {}
+      sanitized.states = sanitized.states ?? formData.states ?? formData.condition ?? {}
+      sanitized.fetishes = sanitized.fetishes ?? formData.fetishes ?? {}
+      sanitized.anatomy = sanitized.anatomy ?? formData.anatomy ?? []
+      // Имя и описание сохраняем, если присутствуют
+      if (formData.name && sanitized.name === undefined) sanitized.name = formData.name
+      if (formData.description && sanitized.description === undefined) sanitized.description = formData.description
+    }
+
+    console.log('💾 Модалка сохраняет:', {
+      original: formData,
+      sanitized,
+      hasAttributes: !!sanitized.attributes,
+      attributesKeys: Object.keys(sanitized.attributes || {}),
+      hasStates: !!sanitized.states,
+      statesKeys: Object.keys(sanitized.states || {}),
+      hasFetishes: !!sanitized.fetishes,
+      fetishesKeys: Object.keys(sanitized.fetishes || {})
+    })
+
+    // Вызываем onSave и ждем результата
+    try {
+      await onSave(sanitized)
+      
+      // Если есть callback для успешного сохранения, вызываем его
+      if (onSaveSuccess) {
+        onSaveSuccess(sanitized)
+      }
+      
+      // Обновляем локальное состояние модалки обновленными данными
+      setFormData(sanitized)
+      
+      // Устанавливаем флаг успешного сохранения
+      setIsSaved(true)
+      
+      // Увеличиваем счетчик обновлений для принудительного перерендера CharacterEditor
+      setUpdateCounter(prev => prev + 1)
+      
+      console.log('✅ Данные успешно сохранены, состояние модалки обновлено')
+      console.log('🔄 Новый formData:', sanitized)
+      console.log('🔄 Атрибуты персонажа:', sanitized.attributes)
+      console.log('🔄 Счетчик обновлений:', updateCounter + 1)
+      
+      // НЕ закрываем модалку автоматически - пользователь сам закроет
+      // onClose()
+    } catch (error) {
+      console.error('❌ Ошибка при сохранении:', error)
+      // В случае ошибки не закрываем модалку
+    }
   }
 
   // Рендеринг динамических объектов (атрибуты, фетиши и т.д.)
@@ -569,8 +655,12 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
               </TabsContent>
               <TabsContent value="advanced" className="space-y-4">
                 <CharacterEditor
+                  key={`character-${formData.id}-update-${updateCounter}`}
                   character={formData}
-                  onUpdateCharacter={setFormData}
+                  onUpdateCharacter={(updated) => {
+                    console.log('🔄 CharacterEditor обновил персонажа:', updated)
+                    setFormData(updated)
+                  }}
                   showSaveButton={false}
                 />
               </TabsContent>
@@ -616,13 +706,27 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
           )}
 
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>
-              Отмена
-            </Button>
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Сохранить
-            </Button>
+            {!isSaved ? (
+              <>
+                <Button variant="outline" onClick={onClose}>
+                  Отмена
+                </Button>
+                <Button onClick={handleSave}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Сохранить
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={onClose}>
+                  Закрыть
+                </Button>
+                <Button onClick={handleSave}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Сохранить снова
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </DialogContent>

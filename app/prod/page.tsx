@@ -17,9 +17,11 @@ import { CharacterChat } from "./components/CharacterChat"
 import { OpenRouterDebugPanel } from './components/OpenRouterDebugPanel'
 import { Button } from "@/components/ui/button"
 import { StatNotification } from "@/components/ui/stat-notification"
-import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
+// import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
+import CharacterPanel from "./components/CharacterPanel"
 import { Toaster } from "@/components/ui/toaster"
 import { CharacterPortrait } from "./components/CharacterPortrait"
+import systemConfig from '@/data/system-unified.json'
 
   // Функция для генерации уникальных ID
   let idCounter = 0
@@ -426,73 +428,86 @@ export default function TalentArchitectProd() {
         ? charactersArr.filter((asset: any) => userCharacters.includes(asset.id))
         : []
 
+      const allCharacters: any[] = Array.isArray((unifiedConfig as any)?.characters)
+        ? ((unifiedConfig as any)?.characters || [])
+        : (((unifiedConfig as any)?.characters?.characters) || [])
+      const characterById: Record<string, any> = Object.fromEntries(
+        (allCharacters || []).map((c: any) => [c.id, c])
+      )
+
       const talentsFromConfig = filteredAssets.map(asset => {
-        const attr = (asset as any)?.attributes ?? {}
-        // Правильно маппим атрибуты согласно эталонной системе характеристик
-        const mappedAttributes = {
-          // Физические характеристики
-          endurance: attr.endurance || 0,
-          sensitivity: attr.sensitivity || 0,
-          flexibility: attr.flexibility || 0,
-          
-          // Психологические характеристики
-          emotionalStability: attr.emotional_stability || 0,
-          adaptability: attr.adaptability || 0,
-          intelligence: attr.intelligence || 0,
-          
-          // Социальные характеристики
-          sociability: attr.sociability || 0,
-          empathy: attr.empathy || 0,
-          dominance: attr.dominance || 0,
-          
-          // Личностные характеристики
-          selfEsteem: attr.self_esteem || 0,
-          optimism: attr.optimism || 0,
-          curiosity: attr.curiosity || 0,
-          
-          // Специальные характеристики
-          sexualExperience: attr.sexual_experience || 0,
-          resistance: attr.resistance || 0,
-          dependency: attr.dependency || 0,
+        const canonical = characterById[(asset as any).id] || asset
+        const rawAttributes = (asset as any)?.attributes ?? {}
+        const rawStates = (asset as any)?.states ?? (asset as any)?.condition ?? {}
+        const rawFetishes = (asset as any)?.fetishes ?? {}
+        const baseAttributes = (canonical as any)?.attributes ?? rawAttributes
+        const baseStates = (canonical as any)?.states ?? (canonical as any)?.condition ?? rawStates
+        const baseFetishes = (canonical as any)?.fetishes ?? rawFetishes
+
+        // Нормализация ключей по system-unified.json: поддерживаем id ИЛИ русское name
+        const toIdMap = (items: any[]) => {
+          const ids = new Set<string>(items.map(i => String(i.id)))
+          const nameToId = new Map<string, string>()
+          for (const it of items) {
+            if (it?.name) nameToId.set(String(it.name).toLowerCase(), String(it.id))
+          }
+          return { ids, nameToId }
         }
-        
-        // Создаем состояния на основе атрибутов или используем дефолтные (шкала 0-100)
-        const mappedStates = {
-          mood: 75,
-          anxiety: 25,
-          burnout: 20,
-          engagement: 80,
-          entitlement: 30,
-          insight: 70,
-          routine: 50,
-          compliance: 60,
-          neuroplasticity: 80,
-          cognitiveLoad: 40,
+
+        const attrCfg: any[] = (systemConfig as any)?.attributes || []
+        const extraCfg: any[] = (systemConfig as any)?.attributes_extra || []
+        const stateCfg: any[] = (systemConfig as any)?.states || []
+        const fetishCfg: any[] = (systemConfig as any)?.fetishes || []
+
+        const attrMap = toIdMap([...attrCfg, ...extraCfg])
+        const stateMap = toIdMap(stateCfg)
+        const fetishMap = toIdMap(fetishCfg)
+
+        const normalizeByMap = (obj: Record<string, any>, map: { ids: Set<string>; nameToId: Map<string, string> }) => {
+          const out: Record<string, any> = {}
+          for (const [k, v] of Object.entries(obj || {})) {
+            const key = String(k)
+            if (map.ids.has(key)) {
+              out[key] = v
+              continue
+            }
+            const mapped = map.nameToId.get(key.toLowerCase())
+            if (mapped) {
+              out[mapped] = v
+              continue
+            }
+            // сохраняем и оригинальный ключ, чтобы не терять данные
+            out[key] = v
+          }
+          return out
         }
-        
+
+        const normalizedAttributes = normalizeByMap(baseAttributes as any, attrMap)
+        const normalizedStates = normalizeByMap(baseStates as any, stateMap)
+        const normalizedFetishes = normalizeByMap(baseFetishes as any, fetishMap)
+
         return {
-          id: asset.id,
-          name: asset.name,
-          role: asset.specialization,
-          level: asset.rank === 'Junior' ? 3 : asset.rank === 'Middle' ? 5 : 7,
-          attributes: mappedAttributes,
-          states: mappedStates,
-          skills: asset.skills,
-          status: "available",
-          memories: [],
-          experience: 0,
-          statusEffects: [],
-          affinities: asset.fetishes || {},
-          stressors: {},
-          equippedItems: [],
-          inventory: [],
-          // Данные системы промтов
+          id: (asset as any).id,
+          name: (asset as any).name,
+          role: (asset as any).specialization || (asset as any).role || '',
+          level: (asset as any).level || ((asset as any).rank === 'Junior' ? 3 : (asset as any).rank === 'Middle' ? 5 : 7),
+          attributes: normalizedAttributes,
+          states: normalizedStates,
+          fetishes: normalizedFetishes,
+          skills: (asset as any).skills || {},
+          status: 'available' as const,
+          memories: (asset as any).memories || [],
+          experience: (asset as any).experience || 0,
+          statusEffects: (asset as any).statusEffects || [],
+          affinities: normalizedFetishes,
+          stressors: (asset as any).stressors || {},
+          equippedItems: (asset as any).equippedItems || [],
+          inventory: (asset as any).inventory || [],
           prompts: (asset as any)?.prompts || {
             base: (asset as any)?.prompt?.character || '',
             characteristicInterpretations: {},
             situational: []
           },
-          // Полные характеристики в виде категорий для PromptSystem
           characteristics: (asset as any)?.characteristics || {},
         }
       })
@@ -3606,11 +3621,11 @@ export default function TalentArchitectProd() {
         }}
       />
 
-      {/* Улучшенная перетаскиваемая панель характеристик */}
-      <CharacterStatsPanel 
+      {/* Динамическая панель характеристик (сквозной конфиг) */}
+      {/* Заменяем старую CharacterStatsPanel на новую CharacterPanel */}
+      <CharacterPanel 
         talent={selectedTalent}
         isVisible={showCharacterPanel}
-        onClose={() => setShowCharacterPanel(false)}
       />
 
       {/* Модалка выхода */}

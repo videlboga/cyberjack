@@ -12,7 +12,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Pose, PoseAngle, ActiveZone } from "@/lib/unified-entities"
+import systemConfig from '@/data/system-unified.json'
 import { Plus, Edit, Trash2, Eye, Upload, Settings } from "lucide-react"
+import { validateActiveZoneDomain, validatePoseAngleDomain } from '@/app/game/utils/validation'
 
 interface PoseManagerProps {
   poses: { [key: string]: Pose }
@@ -128,6 +130,7 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
       availableActions: [],
       availableTools: [],
       sensitivity: 5,
+      anatomyId: undefined,
       category: 'touch'
     }
 
@@ -381,6 +384,12 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
               ...editingAngle,
               activeZones: zones
             }
+            // Валидация ракурса (включая зоны)
+            const v = validatePoseAngleDomain(updatedAngle)
+            if (!v.isValid) {
+              console.warn('Ошибки валидации зон:', v.errors)
+              return
+            }
             const updatedPose = {
               ...selectedPose,
               angles: selectedPose.angles.map(a =>
@@ -406,6 +415,12 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
           zone={editingZone}
           onSave={(updatedZone) => {
             if (!editingAngle) return
+            // Доп. валидация одной зоны перед добавлением
+            const zv = validateActiveZoneDomain(updatedZone)
+            if (!zv.isValid) {
+              console.warn('Ошибка валидации зоны:', zv.errors)
+              return
+            }
             const existingZoneIndex = editingAngle.activeZones.findIndex(z => z.id === updatedZone.id)
             const updatedZones = [...editingAngle.activeZones]
 
@@ -421,7 +436,7 @@ export const PoseManager: React.FC<PoseManagerProps> = ({
               ...editingAngle,
               activeZones: updatedZones
             }
-            setEditedAngle(updatedAngle)
+            setEditingAngle(updatedAngle)
             setEditingZone(null)
           }}
           onCancel={() => setEditingZone(null)}
@@ -660,7 +675,7 @@ const AngleEditDialog: React.FC<AngleEditDialogProps> = ({
                         width: `${zone.width}%`,
                         height: `${zone.height}%`,
                       }}
-                      title={`${zone.name} (${zone.category})`}
+                      title={`${zone.name} (${zone.zoneKey})`}
                     >
                       <div className="absolute -top-6 left-0 bg-black/70 text-white text-xs px-1 py-0.5 rounded whitespace-nowrap">
                         {zone.name}
@@ -698,7 +713,7 @@ const AngleEditDialog: React.FC<AngleEditDialogProps> = ({
                     <div>
                       <div className="font-medium text-sm">{zone.promptName || zone.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        Ключ: {zone.zoneKey} • {zone.category}
+                        Ключ: {zone.zoneKey} • {zone.category}{zone.anatomyId ? ` • анатомия: ${zone.anatomyId}` : ''}
                       </div>
                     </div>
                     <Badge variant="outline" className="text-xs">
@@ -923,23 +938,28 @@ const ZoneEditor: React.FC<ZoneEditorProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="zone-category">Категория</Label>
+                  <Label>Анатомия (привязка)</Label>
                   <Select
-                    value={selectedZone.category}
-                    onValueChange={(value: ActiveZone['category']) =>
-                      updateZone({...selectedZone, category: value})
-                    }
+                    value={selectedZone.anatomyId || ''}
+                    onValueChange={(v) => {
+                      const extra: any[] = ((systemConfig as any)?.attributes_extra) || []
+                      const aliases: Record<string, string> = { vulva: 'clitoris' }
+                      const key = aliases[v] || v
+                      const sens = extra.find((a: any) => typeof a.id === 'string' && a.id === `sensitivity_${key}`)
+                      const next: any = { ...selectedZone, anatomyId: v }
+                      if (sens) next.sensitivityAttribute = sens.id
+                      updateZone(next)
+                    }}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Выберите часть тела" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="touch">Прикосновение</SelectItem>
-                      <SelectItem value="pressure">Давление</SelectItem>
-                      <SelectItem value="temperature">Температура</SelectItem>
-                      <SelectItem value="electrical">Электричество</SelectItem>
-                      <SelectItem value="visual">Визуальный</SelectItem>
-                      <SelectItem value="auditory">Аудио</SelectItem>
+                      {(systemConfig as any).anatomy?.map((a: any) => (
+                        <SelectItem key={typeof a === 'string' ? a : a.id} value={typeof a === 'string' ? a : a.id}>
+                          {typeof a === 'string' ? a : (a.name || a.id)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1096,6 +1116,33 @@ const ZoneEditDialog: React.FC<ZoneEditDialogProps> = ({
               onChange={(e) => setEditedZone({...editedZone, description: e.target.value})}
               rows={3}
             />
+          </div>
+
+          <div>
+            <Label>Анатомия (привязка)</Label>
+            <Select
+              value={editedZone.anatomyId || ''}
+              onValueChange={(v) => {
+                const extra: any[] = ((systemConfig as any)?.attributes_extra) || []
+                const aliases: Record<string, string> = { vulva: 'clitoris' }
+                const key = aliases[v] || v
+                const sens = extra.find((a: any) => typeof a.id === 'string' && a.id === `sensitivity_${key}`)
+                const next: any = { ...editedZone, anatomyId: v }
+                if (sens) next.sensitivityAttribute = sens.id
+                setEditedZone(next)
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите часть тела" />
+              </SelectTrigger>
+              <SelectContent>
+                {(systemConfig as any).anatomy?.map((a: any) => (
+                  <SelectItem key={typeof a === 'string' ? a : a.id} value={typeof a === 'string' ? a : a.id}>
+                    {typeof a === 'string' ? a : (a.name || a.id)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

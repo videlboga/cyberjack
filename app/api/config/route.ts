@@ -15,12 +15,22 @@ export async function GET() {
         equipmentCount: (config as any).equipment?.length || 0,
         stationEntitiesCount: (config as any).station?.stationEntities?.length || 0,
       }
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     })
   } catch (error) {
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : String(error)
-    }, { status: 500 })
+    }, { status: 500, headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    } })
   }
 }
 

@@ -25,7 +25,7 @@ import UserKnowledgePanel from "./components/ui/UserKnowledgePanel"
 
 
 // Импортируем конфигурации и утилиты синхронизации
-import { loadUnifiedConfig } from "@/lib/unified-config-loader"
+// Клиентская страница: загружаем конфиг через API, а не через серверный загрузчик
 
 
 
@@ -93,9 +93,12 @@ const NexusEnslaverGame = () => {
     console.log('🚀 Starting loadConfigs useEffect')
     const loadConfigs = async () => {
       try {
-        console.log('📡 Calling loadUnifiedConfig...')
-        const loadedConfigs = await loadUnifiedConfig()
-        console.log('✅ loadUnifiedConfig returned:', loadedConfigs)
+        console.log('📡 Fetching /api/config...')
+        const res = await fetch('/api/config', { cache: 'no-store' })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = await res.json()
+        if (!data.success) throw new Error(data.error || 'Config load failed')
+        const loadedConfigs = data.config
 
         // Нормализуем под ожидаемую dev-структуру UI (вложенные разделы)
         const normalized = {
@@ -116,7 +119,7 @@ const NexusEnslaverGame = () => {
           storyScenes: (loadedConfigs as any)?.storyScenes || []
         }
 
-        console.log('📦 Loaded configs from unified loader:', {
+        console.log('📦 Loaded configs from API:', {
           hasStation: !!normalized.station,
           stationEntitiesCount: normalized.station?.stationEntities ? Object.keys(normalized.station.stationEntities).length : 0,
           normalizedKeys: Object.keys(normalized),
@@ -134,7 +137,7 @@ const NexusEnslaverGame = () => {
         setIsLoading(false)
       }
     }
-    
+
     loadConfigs()
   }, [])
 
@@ -395,9 +398,7 @@ const NexusEnslaverGame = () => {
     removeConfigItem(entityType as any, entityId)
   }
 
-  const handleSave = (data: any) => {
-
-
+  const handleSave = async (data: any) => {
     if (modalState.isNew) {
       addConfigItem(modalState.type as any, data)
 
@@ -431,6 +432,46 @@ const NexusEnslaverGame = () => {
     } else {
       updateConfigItem(modalState.type as any, data.id, data)
 
+      // Если сохраняем персонажа из модалки — синхронизируем файл characters-unified.json
+      if (modalState.type === 'characters') {
+        try {
+          const res = await fetch('/api/sync-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              configType: 'characters',
+              data: { characters: [data] }
+            })
+          })
+          if (!res.ok) throw new Error(`sync-data HTTP ${res.status}`)
+          console.log('✅ Персонаж сохранён (sync-data)')
+        } catch (err) {
+          console.warn('⚠️ sync-data недоступен, выполняю fallback /api/config:', err)
+          try {
+            const cfgRes = await fetch('/api/config', { cache: 'no-store' })
+            const cfgJson = await cfgRes.json()
+            const currentChars: any[] = Array.isArray(cfgJson?.config?.characters)
+              ? (cfgJson.config.characters || [])
+              : (cfgJson?.config?.characters?.characters || [])
+            const exists = currentChars.some((c: any) => c.id === data.id)
+            const merged = exists
+              ? currentChars.map((c: any) => c.id === data.id ? data : c)
+              : [...currentChars, data]
+            const fileShape = { characters: merged }
+            const saveRes = await fetch('/api/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ target: 'characters', data: fileShape })
+            })
+            if (!saveRes.ok) throw new Error(`config HTTP ${saveRes.status}`)
+            console.log('✅ Персонаж сохранён (fallback /api/config)')
+          } catch (e2) {
+            console.error('❌ Ошибка сохранения персонажа (оба метода):', e2)
+            throw e2 // Пробрасываем ошибку дальше
+          }
+        }
+      }
+
       // Если это персонаж и у него есть poses, сохраняем их в characterAI
       if (modalState.type === 'characters' && data.poses) {
         setConfigs(prev => ({
@@ -452,34 +493,6 @@ const NexusEnslaverGame = () => {
           console.error('Ошибка сохранения poses:', error)
         }
       }
-
-      // Если это сущность станции, сохраняем её в station
-      if (modalState.type === 'station') {
-        setConfigs(prev => ({
-          ...prev,
-          station: {
-            ...prev.station,
-            stationEntities: {
-              ...prev.station.stationEntities,
-              [data.id]: data
-            }
-          }
-        }))
-        // Сохраняем stationEntities в файл
-        try {
-          const updatedStation = {
-            ...configs.station,
-            stationEntities: {
-              ...configs.station.stationEntities,
-              [data.id]: data
-            }
-          }
-          saveConfigToFile('station', updatedStation)
-          syncConfigToFiles('station', updatedStation)
-        } catch (error) {
-          console.error('Ошибка сохранения stationEntities:', error)
-        }
-      }
     }
   }
 
@@ -499,38 +512,65 @@ const NexusEnslaverGame = () => {
   // Функция для обновления персонажа
   const handleUpdateCharacter = async (updatedCharacter: any) => {
     try {
+      // Находим существующего персонажа и глубоко мержим данные
+      const existingList: any[] = Array.isArray(configs.characters?.characters) ? configs.characters.characters : []
+      const base = existingList.find((c: any) => c.id === (updatedCharacter?.id || (selectedCharacter as any)?.id)) || {}
+      const mergedCharacter = {
+        ...base,
+        ...updatedCharacter,
+        id: updatedCharacter?.id ?? base?.id,
+        attributes: { ...(base.attributes || {}), ...(updatedCharacter?.attributes || {}) },
+        states: { ...(base.states || {}), ...(updatedCharacter?.states || {}) },
+        fetishes: { ...(base.fetishes || {}), ...(updatedCharacter?.fetishes || {}) },
+        anatomy: Array.isArray(updatedCharacter?.anatomy) ? updatedCharacter.anatomy : (base.anatomy || []),
+      }
+
       // Обновляем локальное состояние
-      setSelectedCharacter(updatedCharacter)
+      setSelectedCharacter(mergedCharacter)
 
       // Обновляем в конфигурации
       const updatedConfigs = {
         ...configs,
         characters: {
           ...configs.characters,
-          characters: configs.characters.characters.map((char: any) =>
-            char.id === updatedCharacter.id ? updatedCharacter : char
+          characters: existingList.map((char: any) =>
+            char.id === mergedCharacter.id ? mergedCharacter : char
           )
         }
       }
       setConfigs(updatedConfigs)
 
-      // Сохраняем через API
-      const response = await fetch('/api/sync-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'characters',
-          data: [updatedCharacter]
-        }),
-      })
-
-      if (response.ok) {
-        console.log('✅ Персонаж успешно сохранен:', updatedCharacter.name)
-      } else {
-        const errorData = await response.json()
-        console.error('❌ Ошибка при сохранении персонажа:', errorData)
+      // Сохраняем через API (с fallback на /api/config)
+      try {
+        const response = await fetch('/api/sync-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            configType: 'characters',
+            data: { characters: [mergedCharacter] }
+          }),
+        })
+        if (!response.ok) throw new Error(`sync-data HTTP ${response.status}`)
+        console.log('✅ Персонаж успешно сохранен (sync-data):', mergedCharacter.name)
+      } catch (primaryError) {
+        console.warn('⚠️ sync-data недоступен, пробую fallback /api/config:', primaryError)
+        // Читаем текущий конфиг и пишем через /api/config
+        const cfgRes = await fetch('/api/config', { cache: 'no-store' })
+        const cfgJson = await cfgRes.json()
+        const currentChars: any[] = Array.isArray(cfgJson?.config?.characters)
+          ? (cfgJson.config.characters || [])
+          : (cfgJson?.config?.characters?.characters || [])
+        const merged = currentChars.map((c: any) => c.id === mergedCharacter.id ? mergedCharacter : c)
+        const fileShape = { characters: merged }
+        const saveRes = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target: 'characters', data: fileShape })
+        })
+        if (!saveRes.ok) throw new Error(`config HTTP ${saveRes.status}`)
+        console.log('✅ Персонаж успешно сохранен (fallback /api/config):', mergedCharacter.name)
       }
     } catch (error) {
       console.error('❌ Ошибка при сохранении персонажа:', error)
@@ -1982,6 +2022,10 @@ const NexusEnslaverGame = () => {
             entityType={modalState.type ? getEntityType(modalState.type as keyof typeof configs) : 'entity'}
             onSave={handleSave}
             isNew={modalState.isNew}
+            onSaveSuccess={(savedData) => {
+              // Обновляем состояние модалки после успешного сохранения
+              console.log('🔄 Модалка обновлена после сохранения:', savedData)
+            }}
           />
                   </div>
 

@@ -4,6 +4,7 @@ import React, { useMemo } from 'react'
 import { UnifiedSelector } from './UnifiedSelector'
 import { AttributeSelectorProps, SelectorOption } from '../types'
 import { AttributeParser } from '@/lib/condition-utils'
+import systemConfig from '@/data/system-unified.json'
 
 export function AttributeSelector({
   entityType,
@@ -21,57 +22,18 @@ export function AttributeSelector({
 
     switch (entityType) {
       case "asset":
-        // Основные атрибуты
-        options.push(
-          { value: "strength", label: "Сила", category: "Основные атрибуты" },
-          { value: "empathy", label: "Эмпатия", category: "Основные атрибуты" },
-          { value: "intelligence", label: "Интеллект", category: "Основные атрибуты" },
-          { value: "temperament", label: "Темперамент", category: "Основные атрибуты" },
-          { value: "grit", label: "Стойкость", category: "Основные атрибуты" },
-          { value: "ego", label: "Эго", category: "Основные атрибуты" },
-          { value: "loyalty", label: "Лояльность", category: "Основные атрибуты" },
-          { value: "obedience", label: "Послушание", category: "Основные атрибуты" },
-          { value: "resistance", label: "Сопротивление", category: "Основные атрибуты" }
-        )
+        // Атрибуты из единого system-конфига
+        const sysAttrs = (systemConfig as any)?.attributes || []
+        const sysAttrsExtra = (systemConfig as any)?.attributes_extra || []
+        for (const a of [...sysAttrs, ...sysAttrsExtra]) {
+          options.push({ value: a.id, label: a.name || a.id, category: "Атрибуты" })
+        }
 
-        // Фетиши
-        options.push(
-          { value: "bdsm", label: "БДСМ", category: "Фетиши" },
-          { value: "humiliation", label: "Унижение", category: "Фетиши" },
-          { value: "masochism", label: "Мазохизм", category: "Фетиши" },
-          { value: "sadism", label: "Садизм", category: "Фетиши" },
-          { value: "voyeurism", label: "Вуайеризм", category: "Фетиши" },
-          { value: "exhibitionism", label: "Эксгибиционизм", category: "Фетиши" },
-          { value: "roleplay", label: "Ролевые игры", category: "Фетиши" },
-          { value: "bondage", label: "Связывание", category: "Фетиши" },
-          { value: "sensory_deprivation", label: "Сенсорная депривация", category: "Фетиши" },
-          { value: "sensory_overload", label: "Сенсорная перегрузка", category: "Фетиши" },
-          { value: "electricity", label: "Электричество", category: "Фетиши" },
-          { value: "vibration", label: "Вибрация", category: "Фетиши" },
-          { value: "temperature", label: "Температура", category: "Фетиши" },
-          { value: "pressure", label: "Давление", category: "Фетиши" },
-          { value: "tickling", label: "Щекотка", category: "Фетиши" },
-          { value: "feet", label: "Фут-фетиш", category: "Фетиши" },
-          { value: "hands", label: "Хенд-фетиш", category: "Фетиши" },
-          { value: "breasts", label: "Брест-фетиш", category: "Фетиши" },
-          { value: "anal", label: "Анал-фетиш", category: "Фетиши" },
-          { value: "latex", label: "Латекс", category: "Фетиши" },
-          { value: "leather", label: "Кожа", category: "Фетиши" },
-          { value: "silk", label: "Шёлк", category: "Фетиши" },
-          { value: "rope", label: "Верёвки", category: "Фетиши" },
-          { value: "uniform", label: "Униформа", category: "Фетиши" },
-          { value: "age_play", label: "Возрастные роли", category: "Фетиши" },
-          { value: "pregnancy", label: "Беременность", category: "Фетиши" },
-          { value: "lactation", label: "Лактация", category: "Фетиши" }
-        )
-
-        // Состояние
-        options.push(
-          { value: "health", label: "Здоровье", category: "Состояние" },
-          { value: "mental_state", label: "Психическое состояние", category: "Состояние" },
-          { value: "stress", label: "Стресс", category: "Состояние" },
-          { value: "fatigue", label: "Усталость", category: "Состояние" }
-        )
+        // Фетиши из единого конфига
+        const sysFetishes = (systemConfig as any)?.fetishes || []
+        for (const f of sysFetishes) {
+          options.push({ value: f.id, label: f.name || f.id, category: "Фетиши" })
+        }
 
         // Метаданные
         options.push(
@@ -81,8 +43,7 @@ export function AttributeSelector({
           { value: "location", label: "Местоположение", category: "Метаданные" },
           { value: "specialization", label: "Специализация", category: "Метаданные" }
         )
-
-        // История
+        // История (оставляем как было)
         options.push(
           { value: "assignments", label: "Задания", category: "История" },
           { value: "success_rate", label: "Успешность", category: "История" }

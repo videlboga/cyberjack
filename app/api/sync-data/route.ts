@@ -190,20 +190,21 @@ export async function POST(request: NextRequest) {
         console.log(`✅ API: Синхронизация пользователей завершена`)
         break
 
-                  case 'characters':
-              // Синхронизируем с characters-unified.json
-              charactersPath = path.join(dataDir, 'characters-unified.json')
-              charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
+      case 'characters': {
+        // Синхронизируем с characters-unified.json
+        const charactersPath = path.join(dataDir, 'characters-unified.json')
+        const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
 
         console.log(`👤 API: Синхронизируем ${data.characters?.length || 0} персонажей`)
 
         // Обновляем или добавляем персонажей
-        if (!charactersData.characters) {
-          charactersData.characters = []
+        if (!Array.isArray(charactersData.characters)) {
+          (charactersData as any).characters = []
         }
 
         // Находим и обновляем каждого персонажа из data
-        data.characters.forEach((character: any, index: number) => {
+        const incoming: any[] = Array.isArray((data as any)?.characters) ? (data as any).characters : []
+        incoming.forEach((character: any, index: number) => {
           console.log(`  ${index + 1}. Персонаж ${character.id}: ${character.name}`)
           console.log(`     - Has prompts: ${!!character.prompts}`)
           console.log(`     - Prompts keys: ${character.prompts ? Object.keys(character.prompts).join(', ') : 'none'}`)
@@ -223,6 +224,7 @@ export async function POST(request: NextRequest) {
         fs.writeFileSync(charactersPath, JSON.stringify(charactersData, null, 2))
         console.log('✅ Characters синхронизированы с файлом')
         break
+      }
 
       case 'characterAI':
         // Синхронизируем Character AI конфигурацию с game-config-unified.json

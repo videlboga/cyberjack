@@ -106,39 +106,25 @@ export class AttributeParser {
    * Определить тип атрибута
    */
   static getAttributeType(attribute: string): "numeric" | "string" | "boolean" | "array" {
-    // Числовые атрибуты
-    const numericAttributes = [
-      // Атрибуты активов
-      "strength", "empathy", "intelligence", "temperament", "grit", "ego", "loyalty", "obedience", "resistance",
-      // Навыки
-      "maid", "cooking", "neural_hacking", "orgasm_control", "field", "etiquette", "logistics", "medical", "maintenance", "data", "dance", "seduction", "interrogation", "surveillance",
-      // Состояние
-      "health", "mental_state", "stress", "fatigue",
-      // Метаданные
-      "price", "assignments", "success_rate",
-      // Атрибуты игрока
-      "balance", "assets_count", "owned_assets_count", "equipment_count"
-    ]
+    // Определяем тип по единому конфигу
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const sys = require('../data/system-unified.json')
+      const attrs = (sys?.attributes || [])
+      const attrsExtra = (sys?.attributes_extra || [])
+      const states = (sys?.states || [])
+      const numericIds = [...attrs, ...attrsExtra, ...states]
+        .filter((a: any) => typeof a?.minValue === 'number' && typeof a?.maxValue === 'number')
+        .map((a: any) => a.id)
+      if (numericIds.includes(attribute)) return 'numeric'
+    } catch {}
 
-    // Булевые атрибуты
-    const booleanAttributes = [
-      "has_equipment", "notifications", "autoAssign"
-    ]
-
-    // Массивы
-    const arrayAttributes = [
-      "work_type", "environment", "avoid"
-    ]
-
-    if (numericAttributes.includes(attribute)) {
-      return "numeric"
-    } else if (booleanAttributes.includes(attribute)) {
-      return "boolean"
-    } else if (arrayAttributes.includes(attribute)) {
-      return "array"
-    } else {
-      return "string"
-    }
+    // Фоллбэк по предопределённым типам
+    const booleanAttributes = ["has_equipment", "notifications", "autoAssign"]
+    const arrayAttributes = ["work_type", "environment", "avoid"]
+    if (booleanAttributes.includes(attribute)) return 'boolean'
+    if (arrayAttributes.includes(attribute)) return 'array'
+    return 'string'
   }
 
   /**
@@ -288,22 +274,23 @@ export class ConditionValidator {
    * Проверить, является ли атрибут валидным для активов
    */
   static isValidAssetAttribute(attribute: string): boolean {
-    const validAttributes = [
-      // Основные атрибуты
-      "strength", "empathy", "intelligence", "temperament", "grit", "ego", "loyalty", "obedience", "resistance",
-      // Навыки
-      "maid", "cooking", "neural_hacking", "orgasm_control", "field", "etiquette", "logistics", "medical", "maintenance", "data", "dance", "seduction", "interrogation", "surveillance",
-      // Состояние
-      "health", "mental_state", "stress", "fatigue",
-      // Метаданные
-      "rank", "price", "status", "location", "specialization",
-      // История
-      "assignments", "success_rate",
-      // Предпочтения
-      "work_type", "environment", "avoid"
-    ]
-    
-    return validAttributes.includes(attribute)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const sys = require('../data/system-unified.json')
+      const attrs = (sys?.attributes || []).map((a: any) => a.id)
+      const attrsExtra = (sys?.attributes_extra || []).map((a: any) => a.id)
+      const states = (sys?.states || []).map((s: any) => s.id)
+      // Навыки из категорий
+      const skillCats = (sys?.skills?.categories || {})
+      const skillIds: string[] = Object.values(skillCats).flatMap((cat: any) => cat?.skills || [])
+      const metadata = ["rank", "price", "status", "location", "specialization"]
+      const history = ["assignments", "success_rate"]
+      const prefs = ["work_type", "environment", "avoid"]
+      const valid = new Set<string>([...attrs, ...attrsExtra, ...states, ...skillIds, ...metadata, ...history, ...prefs])
+      return valid.has(attribute)
+    } catch {
+      return false
+    }
   }
 
   /**

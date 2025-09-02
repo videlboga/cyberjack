@@ -23,15 +23,8 @@
               "y": 10,
               "width": 20,
               "height": 15,
-              "availableActions": [
-                "touch",
-                "kiss",
-                "stroke"
-              ],
-              "availableTools": [
-                "feather",
-                "soft_brush"
-              ],
+              "availableActions": ["touch", "kiss", "stroke"],
+              "availableTools": ["feather", "soft_brush"],
               "sensitivity": 8,
               "category": "touch"
             },
@@ -43,14 +36,8 @@
               "y": 25,
               "width": 30,
               "height": 20,
-              "availableActions": [
-                "massage",
-                "squeeze"
-              ],
-              "availableTools": [
-                "vibrator",
-                "electrodes"
-              ],
+              "availableActions": ["massage", "squeeze"],
+              "availableTools": ["vibrator", "electrodes"],
               "sensitivity": 9,
               "category": "pressure"
             },
@@ -62,14 +49,8 @@
               "y": 60,
               "width": 40,
               "height": 25,
-              "availableActions": [
-                "stroke",
-                "spank"
-              ],
-              "availableTools": [
-                "whip",
-                "paddle"
-              ],
+              "availableActions": ["stroke", "spank"],
+              "availableTools": ["whip", "paddle"],
               "sensitivity": 7,
               "category": "touch"
             }
@@ -91,14 +72,8 @@
               "y": 15,
               "width": 15,
               "height": 10,
-              "availableActions": [
-                "kiss",
-                "bite"
-              ],
-              "availableTools": [
-                "teeth",
-                "collar"
-              ],
+              "availableActions": ["kiss", "bite"],
+              "availableTools": ["teeth", "collar"],
               "sensitivity": 9,
               "category": "touch"
             },
@@ -110,14 +85,8 @@
               "y": 35,
               "width": 25,
               "height": 20,
-              "availableActions": [
-                "hug",
-                "squeeze"
-              ],
-              "availableTools": [
-                "belt",
-                "rope"
-              ],
+              "availableActions": ["hug", "squeeze"],
+              "availableTools": ["belt", "rope"],
               "sensitivity": 6,
               "category": "pressure"
             }
@@ -139,14 +108,8 @@
               "y": 20,
               "width": 40,
               "height": 30,
-              "availableActions": [
-                "massage",
-                "scratch"
-              ],
-              "availableTools": [
-                "whip",
-                "paddle"
-              ],
+              "availableActions": ["massage", "scratch"],
+              "availableTools": ["whip", "paddle"],
               "sensitivity": 7,
               "category": "touch"
             },
@@ -158,14 +121,8 @@
               "y": 55,
               "width": 30,
               "height": 20,
-              "availableActions": [
-                "spank",
-                "squeeze"
-              ],
-              "availableTools": [
-                "paddle",
-                "vibrator"
-              ],
+              "availableActions": ["spank", "squeeze"],
+              "availableTools": ["paddle", "vibrator"],
               "sensitivity": 8,
               "category": "pressure"
             }
@@ -208,14 +165,8 @@
               "y": 20,
               "width": 20,
               "height": 15,
-              "availableActions": [
-                "stroke",
-                "command"
-              ],
-              "availableTools": [
-                "collar",
-                "leash"
-              ],
+              "availableActions": ["stroke", "command"],
+              "availableTools": ["collar", "leash"],
               "sensitivity": 10,
               "category": "touch"
             },
@@ -227,14 +178,8 @@
               "y": 50,
               "width": 40,
               "height": 15,
-              "availableActions": [
-                "bind",
-                "spank"
-              ],
-              "availableTools": [
-                "rope",
-                "handcuffs"
-              ],
+              "availableActions": ["bind", "spank"],
+              "availableTools": ["rope", "handcuffs"],
               "sensitivity": 7,
               "category": "touch"
             }
@@ -256,14 +201,8 @@
               "y": 30,
               "width": 30,
               "height": 50,
-              "availableActions": [
-                "command",
-                "reward"
-              ],
-              "availableTools": [
-                "whip",
-                "treat"
-              ],
+              "availableActions": ["command", "reward"],
+              "availableTools": ["whip", "treat"],
               "sensitivity": 8,
               "category": "visual"
             }
@@ -311,16 +250,8 @@
               "y": 15,
               "width": 50,
               "height": 40,
-              "availableActions": [
-                "whip",
-                "spank",
-                "mount"
-              ],
-              "availableTools": [
-                "whip",
-                "paddle",
-                "belt"
-              ],
+              "availableActions": ["whip", "spank", "mount"],
+              "availableTools": ["whip", "paddle", "belt"],
               "sensitivity": 9,
               "category": "touch"
             },
@@ -332,14 +263,8 @@
               "y": 50,
               "width": 20,
               "height": 25,
-              "availableActions": [
-                "penetrate",
-                "stimulate"
-              ],
-              "availableTools": [
-                "vibrator",
-                "dildo"
-              ],
+              "availableActions": ["penetrate", "stimulate"],
+              "availableTools": ["vibrator", "dildo"],
               "sensitivity": 10,
               "category": "touch"
             }
@@ -361,14 +286,8 @@
               "y": 25,
               "width": 40,
               "height": 50,
-              "availableActions": [
-                "spank",
-                "grope"
-              ],
-              "availableTools": [
-                "hand",
-                "paddle"
-              ],
+              "availableActions": ["spank", "grope"],
+              "availableTools": ["hand", "paddle"],
               "sensitivity": 8,
               "category": "touch"
             }
@@ -443,12 +362,10 @@
       "name": "Команда встать на колени",
       "description": "Смена позы по команде пользователя",
       "type": "command",
-      "probability": 1,
+      "probability": 1.0,
       "conditions": {
         "userActions": {
-          "recentActions": [
-            "command_kneel"
-          ]
+          "recentActions": ["command_kneel"]
         }
       },
       "targetPose": "kneeling_submissive",

@@ -1409,5 +1409,68 @@
       "description": "Экспериментальные и медицинские процедуры",
       "color": "purple"
     }
-  ]
+  ],
+  "attributes_extra": [
+    { "id": "sensitivity_nipples",   "name": "Чувствительность: соски",        "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_breasts",   "name": "Чувствительность: грудь",        "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_clitoris",  "name": "Чувствительность: клитор",       "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_penis",     "name": "Чувствительность: пенис",        "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_prostate",  "name": "Чувствительность: простата",     "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_anal",      "name": "Чувствительность: анальная зона","category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_neck",      "name": "Чувствительность: шея",          "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_ears",      "name": "Чувствительность: уши",          "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_thighs",    "name": "Чувствительность: бёдра",        "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_feet",      "name": "Чувствительность: ступни",       "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_face",      "name": "Чувствительность: лицо",         "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_hands",     "name": "Чувствительность: кисти",        "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_waist",     "name": "Чувствительность: талия",        "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_back",      "name": "Чувствительность: спина",        "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_buttocks",  "name": "Чувствительность: ягодицы",      "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_wings",     "name": "Чувствительность: крылья",       "category": "body_sensitivity", "minValue": 0, "maxValue": 10 },
+    { "id": "sensitivity_tentacles", "name": "Чувствительность: щупальца",     "category": "body_sensitivity", "minValue": 0, "maxValue": 10 }
+  ],
+  "anatomy": [
+    { "id": "vulva",     "name": "Вульва" },
+    { "id": "penis",     "name": "Пенис" },
+    { "id": "prostate",  "name": "Простата" },
+    { "id": "breasts",   "name": "Грудь" },
+    { "id": "nipples",   "name": "Соски" },
+    { "id": "uterus",    "name": "Матка" },
+    { "id": "anal",      "name": "Анальная зона" },
+    { "id": "face",      "name": "Лицо" },
+    { "id": "neck",      "name": "Шея" },
+    { "id": "ears",      "name": "Уши" },
+    { "id": "thighs",    "name": "Бёдра" },
+    { "id": "feet",      "name": "Ступни" },
+    { "id": "hands",     "name": "Кисти" },
+    { "id": "waist",     "name": "Талия" },
+    { "id": "back",      "name": "Спина" },
+    { "id": "buttocks",  "name": "Ягодицы" },
+    { "id": "wings",     "name": "Крылья" },
+    { "id": "tentacles", "name": "Щупальца" }
+  ],
+  "skills": {
+    "categories": {
+      "service": {
+        "name": "Обслуживание и уход",
+        "skills": ["maid", "massage", "aftercare", "tea_service"]
+      },
+      "control": {
+        "name": "Контроль и управление",
+        "skills": ["orgasm_control", "edging_control", "obedience_training", "protocols"]
+      },
+      "physical": {
+        "name": "Физическое воздействие",
+        "skills": ["impact_play", "rope_bondage", "predicament", "suspension_assist"]
+      },
+      "intimate": {
+        "name": "Интимная стимуляция",
+        "skills": ["vibration_play", "temperature_play", "breast_play", "anal_play"]
+      },
+      "psychological": {
+        "name": "Психологическое воздействие",
+        "skills": ["humiliation_play", "degradation_scripts", "roleplay_control", "objectification_rituals"]
+      }
+    }
+  }
 }

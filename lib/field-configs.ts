@@ -34,48 +34,33 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
     { name: 'rank', type: 'select', label: 'Качество', options: ['Junior', 'Middle', 'Senior'], required: true },
     { name: 'price', type: 'number', label: 'Цена', required: true, min: 0, max: 10000 },
     { name: 'specialization', type: 'text', label: 'Специализация', required: false, placeholder: 'Специализация' },
-    { 
-      name: 'attributes', 
-      type: 'dynamic-object', 
-      label: 'Атрибуты', 
-      required: false, 
+    {
+      name: 'attributes',
+      type: 'dynamic-object',
+      label: 'Атрибуты',
+      required: false,
       description: 'Базовые характеристики подопытного',
       dynamicConfig: {
         type: 'attributes',
+        // Берём список атрибутов из единого конфига
         options: [
-          // Физические характеристики (0-10)
-          'endurance', 'sensitivity', 'flexibility',
-          // Психологические характеристики (0-10)
-          'emotional_stability', 'adaptability', 'intelligence',
-          // Социальные характеристики (0-10)
-          'sociability', 'empathy', 'dominance',
-          // Личностные характеристики (0-10)
-          'self_esteem', 'optimism', 'curiosity',
-          // Специальные характеристики (0-10)
-          'sexual_experience', 'resistance', 'dependency'
+          ...(require('../data/system-unified.json')?.attributes || []).map((a: any) => a.id),
+          ...(require('../data/system-unified.json')?.attributes_extra || []).map((a: any) => a.id)
         ],
         min: 0,
         max: 10
       }
     },
-    { 
-      name: 'fetishes', 
-      type: 'dynamic-object', 
-      label: 'Фетиши', 
-      required: false, 
+    {
+      name: 'fetishes',
+      type: 'dynamic-object',
+      label: 'Фетиши',
+      required: false,
       description: 'Сексуальные предпочтения подопытного',
       dynamicConfig: {
         type: 'fetishes',
-        options: [
-          // Основные фетиши
-          'innocence', 'curiosity', 'tenderness', 'attention',
-          'trust', 'submission', 'play', 'dependency',
-          'romantic_fantasies', 'prince_dependency', 'sensory_overload',
-          'age_roles', 'bdsm', 'humiliation', 'masochism',
-          'sadism', 'voyeurism', 'exhibitionism', 'roleplay',
-          'bondage', 'sensory_deprivation', 'electricity',
-          'vibration', 'temperature', 'pressure', 'tickling'
-        ],
+        // Берём список фетишей из единого конфига
+        options: (require('../data/system-unified.json')?.fetishes || []).map((f: any) => f.id),
         min: 0,
         max: 10
       }
@@ -99,20 +84,16 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         ]
       }
     },
-    { 
-      name: 'condition', 
-      type: 'dynamic-object', 
-      label: 'Состояние', 
-      required: false, 
+    {
+      name: 'condition',
+      type: 'dynamic-object',
+      label: 'Состояние',
+      required: false,
       description: 'Текущее состояние',
       dynamicConfig: {
         type: 'condition',
-        options: [
-          // Состояния (0-100)
-          'mood', 'anxiety', 'burnout', 'engagement',
-          'entitlement', 'insight', 'routine', 'compliance',
-          'neuroplasticity', 'cognitiveLoad'
-        ],
+        // Список состояний из единого конфига
+        options: (require('../data/system-unified.json')?.states || []).map((s: any) => s.id),
         min: 0,
         max: 100
       }
@@ -302,7 +283,28 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       name: 'characteristics',
       type: 'dynamic-object',
       label: 'Характеристики',
-      dynamicConfig: { type: 'characteristics', options: ['endurance', 'sensitivity', 'flexibility', 'emotionalStability', 'adaptability', 'intelligence', 'sociability', 'empathy', 'dominance', 'selfEsteem', 'optimism', 'curiosity', 'sexualExperience', 'resistance', 'dependency', 'fetishSensitivity', 'fetishDiscovery'], min: 0, max: 10 }
+      dynamicConfig: {
+        type: 'characteristics',
+        // Используем список атрибутов из единого конфига
+        options: [
+          ...(require('../data/system-unified.json')?.attributes || []).map((a: any) => a.id),
+          ...(require('../data/system-unified.json')?.attributes_extra || []).map((a: any) => a.id)
+        ],
+        min: 0,
+        max: 10
+      }
+    },
+    {
+      name: 'anatomy',
+      type: 'dynamic-array',
+      label: 'Анатомия',
+      required: false,
+      description: 'Отметьте анатомические элементы персонажа. Можно добавлять новые.',
+      dynamicConfig: {
+        type: 'preferences',
+        options: (require('../data/system-unified.json')?.anatomy || []),
+        // Разрешаем добавление произвольных значений в UI (обрабатывается компонентом формы)
+      }
     },
     
     // Состояния
@@ -310,7 +312,12 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       name: 'states',
       type: 'dynamic-object',
       label: 'Состояния',
-      dynamicConfig: { type: 'states', options: ['mood', 'anxiety', 'burnout', 'engagement', 'entitlement', 'insight', 'routine', 'obedience', 'neuroplasticity', 'cognitiveLoad'], min: 0, max: 100 }
+      dynamicConfig: {
+        type: 'states',
+        options: (require('../data/system-unified.json')?.states || []).map((s: any) => s.id),
+        min: 0,
+        max: 100
+      }
     },
     
     // Фетиши
@@ -318,7 +325,12 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       name: 'fetishes',
       type: 'dynamic-object',
       label: 'Фетиши',
-      dynamicConfig: { type: 'fetishes', options: ['innocence', 'curiosity', 'submission', 'sensory_overload', 'dependency', 'humiliation', 'control', 'pain', 'pleasure', 'bondage', 'roleplay', 'voyeurism', 'exhibitionism'], min: 0, max: 10 }
+      dynamicConfig: {
+        type: 'fetishes',
+        options: (require('../data/system-unified.json')?.fetishes || []).map((f: any) => f.id),
+        min: 0,
+        max: 10
+      }
     },
     
     
@@ -336,7 +348,16 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       name: 'skills',
       type: 'dynamic-object',
       label: 'Навыки',
-      dynamicConfig: { type: 'skills', options: ['maid', 'cooking', 'neural_hacking', 'orgasm_control', 'field', 'etiquette', 'logistics', 'medical', 'maintenance', 'data', 'dance', 'seduction', 'interrogation', 'surveillance'], min: 0, max: 10 }
+      dynamicConfig: {
+        type: 'skills',
+        // Собираем список навыков из категорий единого конфига
+        options: Array.from(new Set(
+          Object.values(require('../data/system-unified.json')?.skills?.categories || {})
+            .flatMap((cat: any) => (cat as any).skills || [])
+        )),
+        min: 0,
+        max: 10
+      }
     }
   ]
 }

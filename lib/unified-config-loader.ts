@@ -1,4 +1,7 @@
+// @ts-nocheck
 import type { GameConfig } from './unified-entities'
+import { readFile } from 'fs/promises'
+import path from 'path'
 
 console.log('📦 unified-config-loader.ts загружен')
 
@@ -22,26 +25,45 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
     console.log('🔄 Загружаем унифицированную конфигурацию v2...')
     console.log('⏰ Текущее время:', new Date().toISOString())
 
-    // Загружаем реальные данные из JSON файлов
-    console.log('📂 Загружаем данные из JSON файлов...')
+    // Загружаем реальные данные из JSON файлов (через fs, чтобы не было кэша модулей)
+    console.log('📂 Загружаем данные из JSON файлов (fs.readFile)...')
 
-    const [charactersData, usersData, equipmentData, posesData, stationEntitiesData, storyScenesData, gameUnifiedData] = await Promise.all([
-      import('../data/characters-unified.json'),
-      import('../data/users-unified.json'),
-      import('../data/equipment-unified.json'),
-      import('../data/poses-unified.json').catch(() => ({ default: { poses: {}, poseChangeConditions: {} } })),
-      import('../data/station-entities.json').catch(() => ({ default: {} })),
-      import('../data/story-scenes-unified.json').catch(() => ({ default: { storyPoints: {}, scenes: [] } })),
-      import('../data/game-config-unified.json').catch(() => null as any)
+    const root = process.cwd()
+    const readJson = async (rel: string, fallback: any) => {
+      try {
+        const filePath = path.join(root, rel)
+        const raw = await readFile(filePath, 'utf-8')
+        return JSON.parse(raw)
+      } catch {
+        return fallback
+      }
+    }
+
+    const [
+      charactersData,
+      usersData,
+      equipmentData,
+      posesData,
+      stationEntitiesData,
+      storyScenesData,
+      gameUnifiedData
+    ] = await Promise.all([
+      readJson('data/characters-unified.json', { characters: [] }),
+      readJson('data/users-unified.json', { users: [] }),
+      readJson('data/equipment-unified.json', { equipment: [] }),
+      readJson('data/poses-unified.json', { poses: {}, poseChangeConditions: {} }),
+      readJson('data/station-entities.json', {}),
+      readJson('data/story-scenes-unified.json', { storyPoints: {}, scenes: [] }),
+      readJson('data/game-config-unified.json', null)
     ])
 
-    const realCharacters = charactersData.default.characters || []
-    const realUsers = usersData.default.users || []
-    const realEquipment = equipmentData.default.equipment || []
-    const realPoses = posesData.default.poses || {}
-    const realPoseConditions = posesData.default.poseChangeConditions || {}
-    const realStationEntities = stationEntitiesData.default || {}
-    const realStoryScenes = storyScenesData.default || { storyPoints: {}, scenes: [] }
+    const realCharacters = charactersData.characters || []
+    const realUsers = usersData.users || []
+    const realEquipment = equipmentData.equipment || []
+    const realPoses = posesData.poses || {}
+    const realPoseConditions = posesData.poseChangeConditions || {}
+    const realStationEntities = stationEntitiesData || {}
+    const realStoryScenes = storyScenesData || { storyPoints: {}, scenes: [] }
 
     console.log('📊 Реальные данные загружены:', {
       characters: realCharacters.length,
@@ -55,7 +77,7 @@ export async function loadUnifiedConfig(): Promise<GameConfig> {
 
     // Попробуем получить Character AI конфигурацию из объединённого файла,
     // а если её нет — используем встроенную дефолтную
-    let characterAIFromFile: any = (gameUnifiedData as any)?.default?.characterAI || null
+    let characterAIFromFile: any = (gameUnifiedData as any)?.characterAI || null
     if (!characterAIFromFile) {
       try {
         const { characterAIConfig } = await import('./character/character-ai-config')
