@@ -120,6 +120,8 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
       sanitized.states = sanitized.states ?? formData.states ?? formData.condition ?? {}
       sanitized.fetishes = sanitized.fetishes ?? formData.fetishes ?? {}
       sanitized.anatomy = sanitized.anatomy ?? formData.anatomy ?? []
+      // КРИТИЧНО: Сохраняем промты
+      sanitized.prompts = sanitized.prompts ?? formData.prompts ?? {}
       // Имя и описание сохраняем, если присутствуют
       if (formData.name && sanitized.name === undefined) sanitized.name = formData.name
       if (formData.description && sanitized.description === undefined) sanitized.description = formData.description
@@ -133,32 +135,35 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
       hasStates: !!sanitized.states,
       statesKeys: Object.keys(sanitized.states || {}),
       hasFetishes: !!sanitized.fetishes,
-      fetishesKeys: Object.keys(sanitized.fetishes || {})
+      fetishesKeys: Object.keys(sanitized.fetishes || {}),
+      hasPrompts: !!sanitized.prompts,
+      promptsKeys: Object.keys(sanitized.prompts || {}),
+      promptsContent: sanitized.prompts
     })
 
     // Вызываем onSave и ждем результата
     try {
       await onSave(sanitized)
-      
+
       // Если есть callback для успешного сохранения, вызываем его
       if (onSaveSuccess) {
         onSaveSuccess(sanitized)
       }
-      
+
       // Обновляем локальное состояние модалки обновленными данными
       setFormData(sanitized)
-      
+
       // Устанавливаем флаг успешного сохранения
       setIsSaved(true)
-      
+
       // Увеличиваем счетчик обновлений для принудительного перерендера CharacterEditor
       setUpdateCounter(prev => prev + 1)
-      
+
       console.log('✅ Данные успешно сохранены, состояние модалки обновлено')
       console.log('🔄 Новый formData:', sanitized)
       console.log('🔄 Атрибуты персонажа:', sanitized.attributes)
       console.log('🔄 Счетчик обновлений:', updateCounter + 1)
-      
+
       // НЕ закрываем модалку автоматически - пользователь сам закроет
       // onClose()
     } catch (error) {
@@ -193,7 +198,7 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
 
     const handleAddKey = () => {
       const newKey = config.options?.[0] || 'new_key'
-      const defaultValue = config.type === 'attributes' || config.type === 'fetishes' || config.type === 'characteristics' || config.type === 'skills' ? 1 : 
+      const defaultValue = config.type === 'attributes' || config.type === 'fetishes' || config.type === 'characteristics' || config.type === 'skills' ? 1 :
                           config.type === 'condition' || config.type === 'states' ? 50 : ''
       setFormData((prev: Record<string, any>) => ({
         ...prev,
@@ -615,7 +620,7 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
 
   const basicFields = fields.filter(f => ['text', 'textarea', 'number', 'select', 'slider', 'switch'].includes(f.type))
   const advancedFields = fields.filter(f => ['object', 'array', 'dynamic-object', 'dynamic-array'].includes(f.type))
-  
+
   // Специальная обработка для персонажей - три вкладки
   const isCharacter = entityType === 'characters' || entityType === 'character'
   const characterBasicFields = isCharacter ? fields.filter(f => ['text', 'textarea', 'number', 'select'].includes(f.type)) : basicFields

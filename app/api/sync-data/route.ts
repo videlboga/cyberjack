@@ -10,13 +10,13 @@ export async function POST(request: NextRequest) {
     console.log(`📦 API: Данные:`, JSON.stringify(data, null, 2))
 
     const dataDir = path.join(process.cwd(), 'data')
-    
+
     switch (configType) {
       case 'assets':
         // Синхронизируем с characters-unified.json
         const charactersPath = path.join(dataDir, 'characters-unified.json')
         const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf8'))
-        
+
         // Преобразуем assets в characters формат
         // Объединяем существующие и новые данные
         const existingCharacters = charactersData.characters || []
@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
             lastModified: new Date().toISOString()
           }
         }))
-        
+
         // Объединяем, заменяя существующие элементы с тем же ID
         const mergedCharacters = [...existingCharacters]
-        newCharacters.forEach(newChar => {
+        newCharacters.forEach((newChar: any) => {
           const existingIndex = mergedCharacters.findIndex(char => char.id === newChar.id)
           if (existingIndex >= 0) {
             // Обновляем существующий
@@ -61,21 +61,21 @@ export async function POST(request: NextRequest) {
             mergedCharacters.push(newChar)
           }
         })
-        
+
         const updatedCharacters = {
           ...charactersData,
           characters: mergedCharacters
         }
-        
+
         fs.writeFileSync(charactersPath, JSON.stringify(updatedCharacters, null, 2))
 
         break
-        
+
       case 'contracts':
         // Синхронизируем с contracts-unified.json
         const contractsPath = path.join(dataDir, 'contracts-unified.json')
         const contractsData = JSON.parse(fs.readFileSync(contractsPath, 'utf8'))
-        
+
         const updatedContracts = {
           ...contractsData,
           available: data.available.map((contract: any) => ({
@@ -92,46 +92,46 @@ export async function POST(request: NextRequest) {
             storyScenes: contract.storyScenes || {}
           }))
         }
-        
+
         fs.writeFileSync(contractsPath, JSON.stringify(updatedContracts, null, 2))
 
         break
-        
+
       case 'actions':
         // Синхронизируем с actions-unified.json
         const actionsPath = path.join(dataDir, 'actions-unified.json')
         const actionsData = JSON.parse(fs.readFileSync(actionsPath, 'utf8'))
-        
+
         const updatedActions = {
           ...actionsData,
           actions: data.actions || [],
           categories: data.categories || {}
         }
-        
+
         fs.writeFileSync(actionsPath, JSON.stringify(updatedActions, null, 2))
 
         break
-        
+
       case 'events':
         // Синхронизируем с events-unified.json
         const eventsPath = path.join(dataDir, 'events-unified.json')
         const eventsData = JSON.parse(fs.readFileSync(eventsPath, 'utf8'))
-        
+
         const allEvents = [
           ...(data.anomalies || []),
           ...(data.crises || []),
           ...(data.opportunities || [])
         ]
-        
+
         const updatedEvents = {
           ...eventsData,
           events: allEvents
         }
-        
+
         fs.writeFileSync(eventsPath, JSON.stringify(updatedEvents, null, 2))
 
         break
-        
+
       case 'users':
         // Синхронизируем с users-unified.json
         const usersPath = path.join(dataDir, 'users-unified.json')
@@ -209,6 +209,22 @@ export async function POST(request: NextRequest) {
           console.log(`     - Has prompts: ${!!character.prompts}`)
           console.log(`     - Prompts keys: ${character.prompts ? Object.keys(character.prompts).join(', ') : 'none'}`)
 
+          if (character.prompts) {
+            console.log(`     - Base prompt length: ${character.prompts.base?.length || 0}`)
+            console.log(`     - Characteristic interpretations: ${character.prompts.characteristicInterpretations ? Object.keys(character.prompts.characteristicInterpretations).join(', ') : 'none'}`)
+            console.log(`     - Situational prompts count: ${character.prompts.situational?.length || 0}`)
+
+            // Детальное логирование интерпретаций
+            if (character.prompts.characteristicInterpretations) {
+              Object.entries(character.prompts.characteristicInterpretations).forEach(([category, interpretations]: [string, any]) => {
+                if (interpretations && typeof interpretations === 'object') {
+                  const interpretationKeys = Object.keys(interpretations)
+                  console.log(`       - ${category}: ${interpretationKeys.length} интерпретаций [${interpretationKeys.join(', ')}]`)
+                }
+              })
+            }
+          }
+
           const existingIndex = charactersData.characters.findIndex((c: any) => c.id === character.id)
           if (existingIndex >= 0) {
             // Обновляем существующего персонажа
@@ -261,12 +277,12 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: `Данные ${configType} успешно синхронизированы` 
+
+    return NextResponse.json({
+      success: true,
+      message: `Данные ${configType} успешно синхронизированы`
     })
-    
+
   } catch (error) {
     console.error('❌ Ошибка синхронизации:', error)
     return NextResponse.json(
@@ -279,15 +295,15 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
 
-    
+
     // Здесь можно добавить логику для получения данных из localStorage
     // и синхронизации всех типов конфигураций
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Синхронизация всех данных завершена' 
+
+    return NextResponse.json({
+      success: true,
+      message: 'Синхронизация всех данных завершена'
     })
-    
+
   } catch (error) {
     console.error('❌ Ошибка синхронизации всех данных:', error)
     return NextResponse.json(

@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import systemConfig from '@/data/system-unified.json'
+import { getUniversalAttributeDisplayValue, getUniversalKnowledgeLevelIcon, getUniversalKnowledgeLevelColor } from '@/lib/universal-hidden-attributes'
 
 interface CharacterPanelProps {
   talent: any
@@ -55,11 +56,11 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
     if (isDragging) {
       const newX = e.clientX - dragOffset.x
       const newY = e.clientY - dragOffset.y
-      
+
       // Ограничиваем позицию границами экрана
       const maxX = window.innerWidth - PANEL_WIDTH
       const maxY = window.innerHeight - PANEL_HEIGHT
-      
+
       setPosition(prev => ({
         x: Math.max(0, Math.min(newX, maxX)),
         y: Math.max(0, Math.min(newY, maxY)),
@@ -107,7 +108,7 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
   // Мемоизируем вычисления характеристик
   const characterStats = useMemo(() => {
     if (!talent) return null
-    
+
     return {
       attributes: talent.attributes || {},
       states: talent.condition || talent.states || {},
@@ -130,11 +131,11 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
   if (!isVisible || !talent) return null
 
   return (
-    <div 
+    <div
       className={`fixed glass-panel border border-cyan-500/50 rounded-lg z-50 w-[${PANEL_WIDTH}px] max-h-[80vh] flex flex-col cursor-move`}
       style={{ left: position.x, top: position.y }}
     >
-      <div 
+      <div
         className="p-3 border-b border-gray-600 flex items-center justify-between"
         onMouseDown={handleMouseDown}
       >
@@ -158,15 +159,33 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
 
           <TabsContent value="overview">
             {/* Эмоциональное состояние */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-300">Настроение</span>
-                <span className={`text-sm font-bold ${getMoodColor(moodValue)}`}>
-                  {getMoodIcon(moodValue)} {moodValue}%
-                </span>
-              </div>
-              <Progress value={moodValue} className="h-2" />
-            </div>
+            {(() => {
+              const universalKnowledge = talent?.universalKnowledge
+              const moodKnowledge = universalKnowledge?.states?.['Настроение'] || universalKnowledge?.states?.mood
+              const moodLevel = moodKnowledge?.level || 'unknown'
+              const shouldShowMood = moodLevel !== 'unknown'
+
+              return (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-300">Настроение</span>
+                    <div className="flex items-center gap-1">
+                      <span className={`text-xs font-medium ${getUniversalKnowledgeLevelColor(moodLevel)}`}>
+                        {getUniversalKnowledgeLevelIcon(moodLevel)}
+                      </span>
+                      <span className={`text-sm font-bold ${shouldShowMood ? getMoodColor(moodValue) : 'text-gray-500'}`}>
+                        {shouldShowMood ? `${getMoodIcon(moodValue)} ${moodValue}%` : '❓'}
+                      </span>
+                    </div>
+                  </div>
+                  {shouldShowMood ? (
+                    <Progress value={moodValue} className="h-2" />
+                  ) : (
+                    <div className="h-2 bg-gray-700 rounded opacity-30"></div>
+                  )}
+                </div>
+              )
+            })()}
             <Separator className="bg-slate-600 my-4" />
 
             {/* Топ-5 характеристик и чувствительностей */}
@@ -175,11 +194,26 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
               const extraCfg: any[] = (systemConfig as any)?.attributes_extra || []
               const values = (characterStats?.attributes || {}) as Record<string, number>
 
-              const pickTop = (ids: string[], topN: number) => {
+              const pickTop = (ids: string[], topN: number, category: string) => {
+                const universalKnowledge = talent?.universalKnowledge
                 const items = ids
-                  .map(id => ({ id, name: (attrsCfg.concat(extraCfg).find(a => a.id === id)?.name) || id, value: values[id] ?? 0 }))
-                  .filter(x => (x.value ?? 0) > 0)
-                  .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
+                  .map(id => {
+                    const attr = attrsCfg.concat(extraCfg).find(a => a.id === id)
+                    const name = attr?.name || id
+                    const value = values[id] ?? 0
+                    const knowledge = universalKnowledge?.attributes?.[category]?.[id]
+                    const level = knowledge?.level || 'unknown'
+
+                    return {
+                      id,
+                      name,
+                      value,
+                      level,
+                      shouldShow: level !== 'unknown' && value > 0
+                    }
+                  })
+                  .filter(x => x.shouldShow)
+                  .sort((a, b) => b.value - a.value)
                   .slice(0, topN)
                 return items
               }
@@ -187,8 +221,8 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
               const baseIds = attrsCfg.map(a => a.id)
               const sensitivityIds = extraCfg.map(a => a.id)
 
-              const topBase = pickTop(baseIds, 5)
-              const topSens = pickTop(sensitivityIds, 5)
+              const topBase = pickTop(baseIds, 5, 'physical') // Основные характеристики из physical категории
+              const topSens = pickTop(sensitivityIds, 5, 'special') // Чувствительности из special категории
 
               return (
                 <div className="grid grid-cols-1 gap-4">
@@ -196,15 +230,21 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
                     <div>
                       <h4 className="text-sm font-semibold text-gray-300 mb-2">Топ‑5 характеристик</h4>
                       <div className="space-y-1">
-                        {topBase.map(item => (
-                          <div key={item.id} className="flex justify-between items-center">
-                            <span className="text-xs text-gray-400">{item.name}</span>
-                            <div className="flex items-center gap-2">
-                              <Progress value={item.value} className="w-24 h-1" />
-                              <span className="text-xs text-gray-300">{item.value}</span>
+                        {topBase.map(item => {
+                          const displayValue = item.level === 'unknown' ? '❓' : item.value.toString()
+                          const colorClass = getUniversalKnowledgeLevelColor(item.level)
+                          const icon = getUniversalKnowledgeLevelIcon(item.level)
+
+                          return (
+                            <div key={item.id} className="flex justify-between items-center">
+                              <span className="text-xs text-gray-400">{item.name}</span>
+                              <div className="flex items-center gap-1">
+                                <span className={`text-xs font-medium ${colorClass}`}>{icon}</span>
+                                <span className="text-xs text-gray-300">{displayValue}</span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   )}
@@ -212,15 +252,21 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
                     <div>
                       <h4 className="text-sm font-semibold text-gray-300 mb-2">Топ‑5 чувствительностей</h4>
                       <div className="space-y-1">
-                        {topSens.map(item => (
-                          <div key={item.id} className="flex justify-between items-center">
-                            <span className="text-xs text-gray-400">{item.name}</span>
-                            <div className="flex items-center gap-2">
-                              <Progress value={item.value} className="w-24 h-1" />
-                              <span className="text-xs text-gray-300">{item.value}</span>
+                        {topSens.map(item => {
+                          const displayValue = item.level === 'unknown' ? '❓' : item.value.toString()
+                          const colorClass = getUniversalKnowledgeLevelColor(item.level)
+                          const icon = getUniversalKnowledgeLevelIcon(item.level)
+
+                          return (
+                            <div key={item.id} className="flex justify-between items-center">
+                              <span className="text-xs text-gray-400">{item.name}</span>
+                              <div className="flex items-center gap-1">
+                                <span className={`text-xs font-medium ${colorClass}`}>{icon}</span>
+                                <span className="text-xs text-gray-300">{displayValue}</span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   )}
@@ -230,36 +276,85 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
           </TabsContent>
 
           <TabsContent value="stats">
-            {/* Характеристики из system-unified.json */}
+            {/* Характеристики из универсальной системы скрытых атрибутов */}
             <div className="mb-4">
               <h4 className="text-sm font-semibold text-gray-300 mb-3">Характеристики</h4>
               <div className="space-y-3">
                 {(() => {
                   const attrs: any[] = (systemConfig as any)?.attributes || []
                   const extra: any[] = (systemConfig as any)?.attributes_extra || []
-                  const byCat: Record<string, any[]> = {}
-                  for (const a of [...attrs, ...extra]) {
-                    const cat = a.category || 'other'
-                    if (!byCat[cat]) byCat[cat] = []
-                    byCat[cat].push(a)
+                  const universalKnowledge = talent?.universalKnowledge
+
+                  // Категории характеристик
+                  const categories = {
+                    physical: attrs.filter((a: any) => a.category === 'physical'),
+                    psychological: attrs.filter((a: any) => a.category === 'psychological'),
+                    social: attrs.filter((a: any) => a.category === 'social'),
+                    personality: attrs.filter((a: any) => a.category === 'personality'),
+                    special: attrs.filter((a: any) => a.category === 'special')
                   }
-                  return Object.entries(byCat).map(([cat, items]) => {
-                    const visible = items.filter((a: any) => ((characterStats?.attributes as any)?.[a.id] ?? 0) > 0)
-                    if (visible.length === 0) return null
+
+                  // Добавляем extra атрибуты
+                  extra.forEach((a: any) => {
+                    const cat = a.category || 'special'
+                    if (!categories[cat]) categories[cat] = []
+                    categories[cat].push(a)
+                  })
+
+                  return Object.entries(categories).map(([cat, items]) => {
+                    if (items.length === 0) return null
+
                     return (
                       <div key={cat}>
-                        <h5 className="text-xs font-medium text-cyan-400 mb-2">{cat}</h5>
+                        <h5 className="text-xs font-medium text-cyan-400 mb-2 capitalize">{cat}</h5>
                         <div className="space-y-1">
-                          {visible.map((a: any) => {
-                            const val = (characterStats?.attributes as any)?.[a.id] ?? 0
+                          {items.map((a: any) => {
                             const name = a.name || a.id
+
+                            // Получаем знания из универсальной системы
+                            let knowledge = null
+                            let actualValue = 0
+
+                            if (universalKnowledge?.attributes?.[cat]?.[a.id]) {
+                              knowledge = universalKnowledge.attributes[cat][a.id]
+                              // Получаем реальное значение для отображения
+                              const attrCat = cat === 'special' ? 'special' : cat
+                              // Используем русское название из system-unified.json
+                              const displayName = a.name || a.id
+                              actualValue = talent?.characteristics?.[attrCat]?.[displayName] || 0
+                            } else {
+                              // Fallback для совместимости - пробуем оба варианта
+                              const displayName = a.name || a.id
+                              actualValue = talent?.characteristics?.[cat]?.[displayName] ||
+                                          talent?.characteristics?.[cat]?.[a.id] || 0
+                            }
+
+                            const displayValue = knowledge
+                              ? getUniversalAttributeDisplayValue(knowledge, actualValue)
+                              : '❓'
+
+                            const level = knowledge?.level || 'unknown'
+                            const icon = getUniversalKnowledgeLevelIcon(level)
+                            const colorClass = getUniversalKnowledgeLevelColor(level)
+
+                            // Пропускаем нулевые атрибуты
+                            if (actualValue === 0) return null
+
                             return (
                               <div key={a.id}>
                                 <div className="flex justify-between items-center">
                                   <span className="text-xs text-gray-400">{name}</span>
-                                  <span className="text-xs font-medium text-gray-500">{renderCharacteristicValue(val)}</span>
+                                  <div className="flex items-center gap-1">
+                                    <span className={`text-xs font-medium ${colorClass}`}>{icon}</span>
+                                    <span className="text-xs font-medium text-gray-500">{displayValue}</span>
+                                  </div>
                                 </div>
-                                <Progress value={val} className="h-1" />
+                                {/* Показываем прогресс-бар только если уровень знания не 'unknown' */}
+                                {level !== 'unknown' ? (
+                                  <Progress value={actualValue} className="h-1" />
+                                ) : (
+                                  <div className="h-1 bg-gray-700 rounded opacity-30"></div>
+                                )}
                               </div>
                             )
                           })}
@@ -273,61 +368,150 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
           </TabsContent>
 
           <TabsContent value="states">
-            {/* Состояния */}
-            {characterStats?.states && (
-              <div>
-                <Separator className="bg-slate-600 my-2" />
-                <h5 className="text-xs font-semibold text-gray-400 mb-2">Состояния</h5>
-                {(((systemConfig as any)?.states) || [])
-                  .filter((s: any) => ((characterStats?.states as any)?.[s.id] ?? 0) > 0)
-                  .map((s: any) => {
-                    const val = (characterStats?.states as any)?.[s.id] ?? 0
-                    const name = s.name || s.id
-                    return (
-                      <div key={s.id}>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-400">{name}</span>
-                          <span className={`text-xs font-medium ${getStatColor(val)}`}>{val}</span>
+            {/* Состояния из универсальной системы */}
+            <div>
+              <h5 className="text-xs font-semibold text-gray-400 mb-2">Состояния</h5>
+              {(() => {
+                const states: any[] = (systemConfig as any)?.states || []
+                const universalKnowledge = talent?.universalKnowledge
+
+                return states.map((s: any) => {
+                  const name = s.name || s.id
+                  let knowledge = null
+                  let actualValue = 0
+
+                  // Получаем знания из универсальной системы
+                  if (universalKnowledge?.states?.[s.id]) {
+                    knowledge = universalKnowledge.states[s.id]
+                    actualValue = talent?.states?.[s.id] || 0
+                  } else {
+                    // Fallback для совместимости
+                    actualValue = talent?.states?.[s.id] || 0
+                  }
+
+                  const displayValue = knowledge
+                    ? getUniversalAttributeDisplayValue(knowledge, actualValue, 100)
+                    : '❓'
+
+                  const level = knowledge?.level || 'unknown'
+                  const icon = getUniversalKnowledgeLevelIcon(level)
+                  const colorClass = getUniversalKnowledgeLevelColor(level)
+
+                  // Пропускаем нулевые состояния
+                  if (actualValue === 0) return null
+
+                  return (
+                    <div key={s.id}>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-400">{name}</span>
+                        <div className="flex items-center gap-1">
+                          <span className={`text-xs font-medium ${colorClass}`}>{icon}</span>
+                          <span className={`text-xs font-medium ${getStatColor(actualValue)}`}>{displayValue}</span>
                         </div>
-                        <Progress value={val} className="h-1" />
                       </div>
-                    )
-                  })}
-              </div>
-            )}
+                      {/* Показываем прогресс-бар только если уровень знания не 'unknown' */}
+                      {level !== 'unknown' ? (
+                        <Progress value={actualValue} className="h-1" />
+                      ) : (
+                        <div className="h-1 bg-gray-700 rounded opacity-30"></div>
+                      )}
+                    </div>
+                  )
+                })
+              })()}
+            </div>
           </TabsContent>
 
           <TabsContent value="fetishes">
-            {/* Фетиши */}
-            {characterStats?.fetishes && (
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-gray-300 mb-3">Фетиши</h4>
-                <div className="space-y-2">
-                  {(((systemConfig as any)?.fetishes) || [])
-                    .map((f: any) => {
-                      const raw = (characterStats?.fetishes as any)?.[f.id]
-                      let val = 0
-                      if (typeof raw === 'number') {
-                        if (raw <= 1) val = Math.max(0, Math.min(1, raw))
-                        else if (raw <= 10) val = Math.max(0, Math.min(1, raw / 10))
-                        else if (raw <= 100) val = Math.max(0, Math.min(1, raw / 100))
-                        else val = 1
-                      }
-                      return { def: f, val }
-                    })
-                    .filter(({ val }: any) => val > 0)
-                    .map(({ def, val }: any) => (
-                      <div key={def.id} className="flex justify-between items-center">
-                        <span className="text-xs text-gray-400">{def.name || def.id}</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={val * 100} className="w-16 h-1" />
-                          <span className="text-xs text-purple-400">{Math.round(val * 100)}%</span>
+            {/* Фетиши из универсальной системы */}
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-gray-300 mb-3">Фетиши</h4>
+              <div className="space-y-2">
+                {(() => {
+                  const fetishes: any[] = (systemConfig as any)?.fetishes || []
+                  const universalKnowledge = talent?.universalKnowledge
+
+                  // Группируем фетиши по категориям
+                  const categories = {
+                    bdsm: fetishes.filter((f: any) => f.category === 'bdsm'),
+                    psychological: fetishes.filter((f: any) => f.category === 'psychological'),
+                    sensory: fetishes.filter((f: any) => f.category === 'sensory'),
+                    body_parts: fetishes.filter((f: any) => f.category === 'body_parts'),
+                    material: fetishes.filter((f: any) => f.category === 'material'),
+                    social: fetishes.filter((f: any) => f.category === 'social'),
+                    physiological: fetishes.filter((f: any) => f.category === 'physiological'),
+                    extreme: fetishes.filter((f: any) => f.category === 'extreme'),
+                    additional: fetishes.filter((f: any) => !f.category || f.category === 'additional')
+                  }
+
+                  return Object.entries(categories).map(([category, categoryFetishes]) => {
+                    if (categoryFetishes.length === 0) return null
+
+                    return (
+                      <div key={category}>
+                        <h5 className="text-xs font-medium text-purple-400 mb-2 capitalize">
+                          {category === 'bdsm' ? 'БДСМ' :
+                           category === 'psychological' ? 'Психологические' :
+                           category === 'sensory' ? 'Сенсорные' :
+                           category === 'body_parts' ? 'Телесные' :
+                           category === 'material' ? 'Материальные' :
+                           category === 'social' ? 'Социальные' :
+                           category === 'physiological' ? 'Физиологические' :
+                           category === 'extreme' ? 'Экстремальные' :
+                           category === 'additional' ? 'Дополнительные' : category}
+                        </h5>
+                        <div className="space-y-1">
+                          {categoryFetishes.map((f: any) => {
+                            const name = f.name || f.id
+                            let knowledge = null
+                            let actualValue = 0
+
+                            // Получаем знания из универсальной системы
+                            if (universalKnowledge?.fetishes?.[category]?.[f.id]) {
+                              knowledge = universalKnowledge.fetishes[category][f.id]
+                              actualValue = talent?.fetishes?.[f.id] || 0
+                            } else {
+                              // Fallback для совместимости
+                              actualValue = talent?.fetishes?.[f.id] || 0
+                            }
+
+                            // Преобразуем значение для отображения (0-10 -> 0-100%)
+                            const displayValue = knowledge
+                              ? getUniversalAttributeDisplayValue(knowledge, actualValue)
+                              : '❓'
+
+                            const level = knowledge?.level || 'unknown'
+                            const icon = getUniversalKnowledgeLevelIcon(level)
+                            const colorClass = getUniversalKnowledgeLevelColor(level)
+
+                            // Пропускаем нулевые фетиши
+                            if (actualValue === 0) return null
+
+                            return (
+                              <div key={f.id}>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-gray-400">{name}</span>
+                                  <div className="flex items-center gap-1">
+                                    <span className={`text-xs font-medium ${colorClass}`}>{icon}</span>
+                                    <span className="text-xs font-medium text-purple-400">{displayValue}</span>
+                                  </div>
+                                </div>
+                                {/* Показываем прогресс-бар только если уровень знания не 'unknown' */}
+                                {level !== 'unknown' ? (
+                                  <Progress value={actualValue * 10} className="h-1" />
+                                ) : (
+                                  <div className="h-1 bg-gray-700 rounded opacity-30"></div>
+                                )}
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
-                    ))}
-                </div>
+                    )
+                  })
+                })()}
               </div>
-            )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
@@ -354,8 +538,8 @@ export default function CharacterPanel({ talent, isVisible }: CharacterPanelProp
           <h4 className="text-sm font-semibold text-gray-300 mb-3">Статусные эффекты</h4>
           <div className="flex flex-wrap gap-1">
             {characterStats.statusEffects.map((effect: any, index: number) => (
-              <Badge 
-                key={index} 
+              <Badge
+                key={index}
                 variant={effect.type === 'buff' ? 'default' : 'destructive'}
                 className="text-xs"
               >

@@ -53,10 +53,19 @@ export function PromptManager({ character, onUpdate }: PromptManagerProps) {
 
 
   const updatePrompts = (updates: any) => {
-    onUpdate({
+    console.log('🔄 PromptManager.updatePrompts вызван с:', updates)
+    console.log('🔄 Текущие safePrompts:', safePrompts)
+
+    const newPrompts = { ...safePrompts, ...updates }
+    console.log('🔄 Новые промты после обновления:', newPrompts)
+
+    const updatedCharacter = {
       ...character,
-      prompts: { ...safePrompts, ...updates }
-    })
+      prompts: newPrompts
+    }
+    console.log('🔄 Обновленный персонаж для onUpdate:', updatedCharacter)
+
+    onUpdate(updatedCharacter)
   }
 
   const updateBasePrompt = (value: string) => {
@@ -64,6 +73,9 @@ export function PromptManager({ character, onUpdate }: PromptManagerProps) {
   }
 
   const updateCharacteristicInterpretation = (category: string, stat: string, value: string) => {
+    console.log('🎭 PromptManager.updateCharacteristicInterpretation вызван:', { category, stat, value })
+    console.log('🎭 Текущие characteristicInterpretations:', safePrompts.characteristicInterpretations)
+
     const updated = {
       ...safePrompts.characteristicInterpretations,
       [category]: {
@@ -71,6 +83,8 @@ export function PromptManager({ character, onUpdate }: PromptManagerProps) {
         [stat]: value
       }
     }
+    console.log('🎭 Обновленные characteristicInterpretations:', updated)
+
     updatePrompts({ characteristicInterpretations: updated })
   }
 
@@ -84,7 +98,7 @@ export function PromptManager({ character, onUpdate }: PromptManagerProps) {
       priority: 5,
       isActive: true
     }
-    
+
     updatePrompts({
       situational: [...safePrompts.situational, newPrompt]
     })
@@ -589,7 +603,7 @@ export function PromptManager({ character, onUpdate }: PromptManagerProps) {
                         />
 
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label>Приоритет</Label>
                         <Select
