@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { loadUnifiedConfig } from '@/lib/unified-config-loader'
+import { loadGameConfig } from '@/lib/simple-db-loader'
 import { writeFile } from 'fs/promises'
 import path from 'path'
 
 export async function GET() {
   try {
-    const config = await loadUnifiedConfig()
+    console.log('🔥 ПРОСТОЙ API: Используем единственный загрузчик')
+    const config = await loadGameConfig()
     return NextResponse.json({
       success: true,
       config,
@@ -84,5 +85,3 @@ export async function POST(request: Request) {
     }, { status: 500 })
   }
 }
-
-
