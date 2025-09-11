@@ -120,6 +120,8 @@ export const EnhancedEditModal: React.FC<EnhancedEditModalProps> = ({
       sanitized.states = sanitized.states ?? formData.states ?? formData.condition ?? {}
       sanitized.fetishes = sanitized.fetishes ?? formData.fetishes ?? {}
       sanitized.anatomy = sanitized.anatomy ?? formData.anatomy ?? []
+      // Сохраняем позы
+      sanitized.poses = sanitized.poses ?? formData.poses ?? {}
       // КРИТИЧНО: Сохраняем промты
       sanitized.prompts = sanitized.prompts ?? formData.prompts ?? {}
       // Имя и описание сохраняем, если присутствуют

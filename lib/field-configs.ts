@@ -65,18 +65,18 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         max: 10
       }
     },
-    
-    { 
-      name: 'preferences', 
-      type: 'dynamic-object', 
-      label: 'Предпочтения', 
-      required: false, 
+
+    {
+      name: 'preferences',
+      type: 'dynamic-object',
+      label: 'Предпочтения',
+      required: false,
       description: 'Предпочтения в работе',
       dynamicConfig: {
         type: 'preferences',
         subType: 'work_type',
         options: [
-          'service', 'technical', 'creative', 'analytical', 
+          'service', 'technical', 'creative', 'analytical',
           'social', 'physical', 'romantic', 'artistic',
           'academic', 'mystical', 'leadership', 'reflection',
           'maternal', 'protective', 'dark', 'addictive',
@@ -98,11 +98,11 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         max: 100
       }
     },
-    { 
-      name: 'history', 
-      type: 'dynamic-object', 
-      label: 'История', 
-      required: false, 
+    {
+      name: 'history',
+      type: 'dynamic-object',
+      label: 'История',
+      required: false,
       description: 'История работы',
       dynamicConfig: {
         type: 'history',
@@ -116,11 +116,11 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
     { name: 'description', type: 'textarea', label: 'Описание', required: true, placeholder: 'Опишите действие' },
     { name: 'cost', type: 'number', label: 'Стоимость', required: true, min: 0, max: 1000 },
     { name: 'risk', type: 'number', label: 'Риск (%)', required: false, min: 0, max: 100 },
-    { 
-      name: 'effects', 
-      type: 'dynamic-object', 
-      label: 'Эффекты', 
-      required: false, 
+    {
+      name: 'effects',
+      type: 'dynamic-object',
+      label: 'Эффекты',
+      required: false,
       description: 'Влияние на навыки и состояния',
       dynamicConfig: {
         type: 'effects',
@@ -128,11 +128,11 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         subType: 'skills'
       }
     },
-    { 
-      name: 'riskEffects', 
-      type: 'dynamic-object', 
-      label: 'Эффекты риска', 
-      required: false, 
+    {
+      name: 'riskEffects',
+      type: 'dynamic-object',
+      label: 'Эффекты риска',
+      required: false,
       description: 'Негативные эффекты при неудаче',
       dynamicConfig: {
         type: 'effects',
@@ -149,11 +149,11 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
     { name: 'type', type: 'select', label: 'Тип', options: ['implant', 'clothing', 'device'], required: true },
     { name: 'slot', type: 'select', label: 'Слот', options: ['ocular', 'body', 'head', 'neural'], required: true },
     { name: 'removable', type: 'switch', label: 'Съемное', required: false },
-    { 
-      name: 'effects', 
-      type: 'dynamic-object', 
-      label: 'Эффекты', 
-      required: false, 
+    {
+      name: 'effects',
+      type: 'dynamic-object',
+      label: 'Эффекты',
+      required: false,
       description: 'Влияние на характеристики',
       dynamicConfig: {
         type: 'effects',
@@ -162,11 +162,11 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         max: 50
       }
     },
-    { 
-      name: 'powerSettings', 
-      type: 'dynamic-object', 
-      label: 'Настройки мощности', 
-      required: false, 
+    {
+      name: 'powerSettings',
+      type: 'dynamic-object',
+      label: 'Настройки мощности',
+      required: false,
       description: 'Параметры энергопотребления',
       dynamicConfig: {
         type: 'preferences',
@@ -175,22 +175,22 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         max: 200
       }
     },
-    { 
-      name: 'modes', 
-      type: 'dynamic-array', 
-      label: 'Режимы работы', 
-      required: false, 
+    {
+      name: 'modes',
+      type: 'dynamic-array',
+      label: 'Режимы работы',
+      required: false,
       description: 'Доступные режимы',
       dynamicConfig: {
         type: 'preferences',
         options: ['Стандартный', 'Усиленный', 'Экономный', 'Турбо', 'Креативный', 'Базовый', 'AR', 'VR', 'Eco', 'Performance']
       }
     },
-    { 
-      name: 'progressiveEffects', 
-      type: 'dynamic-array', 
-      label: 'Прогрессивные эффекты', 
-      required: false, 
+    {
+      name: 'progressiveEffects',
+      type: 'dynamic-array',
+      label: 'Прогрессивные эффекты',
+      required: false,
       description: 'Эффекты, усиливающиеся со временем',
       dynamicConfig: {
         type: 'effects',
@@ -213,11 +213,11 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
     { name: 'description', type: 'textarea', label: 'Описание', required: true, placeholder: 'Опишите событие' },
     { name: 'probability', type: 'slider', label: 'Вероятность', min: 0, max: 1, step: 0.01, required: true },
     { name: 'duration', type: 'number', label: 'Длительность (дни)', required: true, min: 1, max: 30 },
-    { 
-      name: 'effects', 
-      type: 'dynamic-object', 
-      label: 'Эффекты', 
-      required: false, 
+    {
+      name: 'effects',
+      type: 'dynamic-object',
+      label: 'Эффекты',
+      required: false,
       description: 'Влияние события',
       dynamicConfig: {
         type: 'effects',
@@ -242,22 +242,22 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
     { name: 'title', type: 'text', label: 'Название', required: true, placeholder: 'Введите название сцены' },
     { name: 'description', type: 'textarea', label: 'Описание', required: true, placeholder: 'Опишите сцену' },
     { name: 'type', type: 'select', label: 'Тип', options: ['dialogue', 'action', 'choice', 'narrative'], required: true },
-    { 
-      name: 'characters', 
-      type: 'dynamic-array', 
-      label: 'Персонажи', 
-      required: false, 
+    {
+      name: 'characters',
+      type: 'dynamic-array',
+      label: 'Персонажи',
+      required: false,
       description: 'Участники сцены',
       dynamicConfig: {
         type: 'preferences',
         options: ['player', 'asset', 'npc', 'system']
       }
     },
-    { 
-      name: 'choices', 
-      type: 'dynamic-array', 
-      label: 'Выборы', 
-      required: false, 
+    {
+      name: 'choices',
+      type: 'dynamic-array',
+      label: 'Выборы',
+      required: false,
       description: 'Варианты выбора',
       dynamicConfig: {
         type: 'preferences',
@@ -277,7 +277,7 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
     { name: 'price', type: 'number', label: 'Цена', required: false, min: 0 },
     { name: 'specialization', type: 'text', label: 'Специализация', required: false },
     { name: 'avatar', type: 'text', label: 'Аватар (эмодзи)', required: false },
-    
+
     // Характеристики
     {
       name: 'characteristics',
@@ -306,7 +306,7 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         // Разрешаем добавление произвольных значений в UI (обрабатывается компонентом формы)
       }
     },
-    
+
     // Состояния
     {
       name: 'states',
@@ -319,7 +319,7 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         max: 100
       }
     },
-    
+
     // Фетиши
     {
       name: 'fetishes',
@@ -332,9 +332,9 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         max: 10
       }
     },
-    
-    
-    
+
+
+
     // Предпочтения
     {
       name: 'preferences',
@@ -342,7 +342,7 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
       label: 'Предпочтения',
       dynamicConfig: { type: 'preferences', subType: 'work_type', options: ['service', 'technical', 'creative', 'analytical', 'physical', 'social', 'solitary', 'leadership', 'support'] }
     },
-    
+
     // Навыки
     {
       name: 'skills',
@@ -358,6 +358,14 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
         min: 0,
         max: 10
       }
+    },
+    // Позы персонажа
+    {
+      name: 'poses',
+      type: 'object',
+      label: 'Позы',
+      required: false,
+      description: 'Позы и ракурсы для персонажа'
     }
   ]
 }
@@ -366,17 +374,17 @@ export const entityFieldConfigs: Record<string, FieldConfig[]> = {
 export const getFieldConfig = (entityType: string): FieldConfig[] => {
   // Убираем множественное число для поиска
   const normalizedType = entityType.replace(/s$/, '')
-  
+
   // Ищем точное совпадение
   if (entityFieldConfigs[entityType]) {
     return entityFieldConfigs[entityType]
   }
-  
+
   // Ищем без множественного числа
   if (entityFieldConfigs[normalizedType]) {
     return entityFieldConfigs[normalizedType]
   }
-  
+
   // Возвращаем базовую конфигурацию для неизвестных типов
   return [
     ...baseFields,

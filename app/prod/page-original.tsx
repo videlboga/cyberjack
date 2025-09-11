@@ -311,7 +311,7 @@ export default function TalentArchitectProd() {
 
   // Заполнение talents из конфигурации (только привязанные к пользователю персонажи)
   useEffect(() => {
-    if (gameConfig?.assets?.assets && currentUser && gameConfig?.equipment?.equipment && gameConfig.equipment.equipment.length > 0) {
+    if (gameConfig?.characters && currentUser && gameConfig?.equipment?.equipment && gameConfig.equipment.equipment.length > 0) {
       // Получаем привязанных персонажей пользователя
       let userCharacters: string[] = []
 
@@ -352,73 +352,73 @@ export default function TalentArchitectProd() {
 
       }
 
-      // Фильтруем активы по привязанным персонажам
-      const filteredAssets = userCharacters.length > 0
-        ? gameConfig.assets.assets.filter((asset: any) => userCharacters.includes(asset.id))
+      // Фильтруем персонажей по привязанным персонажам
+      const filteredCharacters = userCharacters.length > 0
+        ? gameConfig.characters.filter((character: any) => userCharacters.includes(character.id))
         : [] // Если нет привязанных персонажей, показываем пустой список
 
       
 
-      const talentsFromConfig = filteredAssets.map(asset => {
+      const talentsFromConfig = filteredCharacters.map(character => {
 
         // Получаем знания пользователя об этом персонаже
-        const characterKnowledge = getPlayerCharacterKnowledge(currentUser, asset.id, userCharacterKnowledge)
+        const characterKnowledge = getPlayerCharacterKnowledge(currentUser, character.id, userCharacterKnowledge)
 
         // Используем новую систему характеристик с учетом знаний пользователя
         const mappedAttributes = {
           // Физические характеристики
           endurance: characterKnowledge?.knowledge?.physical?.['Выносливость']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.physical['Выносливость'], asset.characteristics?.physical?.['Выносливость'] || 0, 'Выносливость')
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.physical['Выносливость'], character.characteristics?.physical?.['Выносливость'] || 0, 'Выносливость')
             : 0,
           sensitivity: characterKnowledge?.knowledge?.physical?.['Чувствительность']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.physical['Чувствительность'], asset.characteristics?.physical?.['Чувствительность'] || 0, 'Чувствительность')
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.physical['Чувствительность'], character.characteristics?.physical?.['Чувствительность'] || 0, 'Чувствительность')
             : 0,
           flexibility: characterKnowledge?.knowledge?.physical?.['Гибкость']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.physical['Гибкость'], asset.characteristics?.physical?.['Гибкость'] || 0, 'Гибкость')
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.physical['Гибкость'], character.characteristics?.physical?.['Гибкость'] || 0, 'Гибкость')
             : 0,
 
           // Психологические характеристики
           emotionalStability: characterKnowledge?.knowledge?.psychological?.['Эмоциональная стабильность']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.psychological['Эмоциональная стабильность'], asset.characteristics?.psychological?.['Эмоциональная стабильность'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.psychological['Эмоциональная стабильность'], character.characteristics?.psychological?.['Эмоциональная стабильность'] || 0)
             : 0,
           adaptability: characterKnowledge?.knowledge?.psychological?.['Адаптивность']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.psychological['Адаптивность'], asset.characteristics?.psychological?.['Адаптивность'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.psychological['Адаптивность'], character.characteristics?.psychological?.['Адаптивность'] || 0)
             : 0,
           intelligence: characterKnowledge?.knowledge?.psychological?.['Интеллект']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.psychological['Интеллект'], asset.characteristics?.psychological?.['Интеллект'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.psychological['Интеллект'], character.characteristics?.psychological?.['Интеллект'] || 0)
             : 0,
 
           // Социальные характеристики
           sociability: characterKnowledge?.knowledge?.social?.['Общительность']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.social['Общительность'], asset.characteristics?.social?.['Общительность'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.social['Общительность'], character.characteristics?.social?.['Общительность'] || 0)
             : 0,
           empathy: characterKnowledge?.knowledge?.social?.['Эмпатия']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.social['Эмпатия'], asset.characteristics?.social?.['Эмпатия'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.social['Эмпатия'], character.characteristics?.social?.['Эмпатия'] || 0)
             : 0,
           dominance: characterKnowledge?.knowledge?.social?.['Доминантность']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.social['Доминантность'], asset.characteristics?.social?.['Доминантность'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.social['Доминантность'], character.characteristics?.social?.['Доминантность'] || 0)
             : 0,
 
           // Личностные характеристики
           selfEsteem: characterKnowledge?.knowledge?.personality?.['Самооценка']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.personality['Самооценка'], asset.characteristics?.personality?.['Самооценка'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.personality['Самооценка'], character.characteristics?.personality?.['Самооценка'] || 0)
             : 0,
           optimism: characterKnowledge?.knowledge?.personality?.['Оптимизм']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.personality['Оптимизм'], asset.characteristics?.personality?.['Оптимизм'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.personality['Оптимизм'], character.characteristics?.personality?.['Оптимизм'] || 0)
             : 0,
           curiosity: characterKnowledge?.knowledge?.personality?.['Любопытство']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.personality['Любопытство'], asset.characteristics?.personality?.['Любопытство'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.personality['Любопытство'], character.characteristics?.personality?.['Любопытство'] || 0)
             : 0,
 
           // Специальные характеристики
           sexualExperience: characterKnowledge?.knowledge?.special?.['Сексуальная опытность']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.special['Сексуальная опытность'], asset.characteristics?.special?.['Сексуальная опытность'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.special['Сексуальная опытность'], character.characteristics?.special?.['Сексуальная опытность'] || 0)
             : 0,
           resistance: characterKnowledge?.knowledge?.special?.['Сопротивляемость']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.special['Сопротивляемость'], asset.characteristics?.special?.['Сопротивляемость'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.special['Сопротивляемость'], character.characteristics?.special?.['Сопротивляемость'] || 0)
             : 0,
           dependency: characterKnowledge?.knowledge?.special?.['Зависимость']
-            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.special['Зависимость'], asset.characteristics?.special?.['Зависимость'] || 0)
+            ? getCharacteristicDisplayValueForProd(characterKnowledge.knowledge.special['Зависимость'], character.characteristics?.special?.['Зависимость'] || 0)
             : 0,
         }
         
@@ -437,18 +437,18 @@ export default function TalentArchitectProd() {
         }
         
         return {
-          id: asset.id,
-          name: asset.name,
-          role: asset.specialization,
-          level: asset.rank === 'Junior' ? 3 : asset.rank === 'Middle' ? 5 : 7,
+          id: character.id,
+          name: character.name,
+          role: character.specialization,
+          level: character.rank === 'Junior' ? 3 : character.rank === 'Middle' ? 5 : 7,
           attributes: mappedAttributes,
           states: mappedStates,
-          skills: asset.skills,
+          skills: character.skills,
           status: "available",
           memories: [],
           experience: 0,
           statusEffects: [],
-          affinities: asset.fetishes || {},
+          affinities: character.fetishes || {},
           stressors: {},
           equippedItems: [],
           inventory: [],

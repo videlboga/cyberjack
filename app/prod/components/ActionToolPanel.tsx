@@ -24,33 +24,98 @@ export function ActionToolPanel({
   const [toolDuration, setToolDuration] = useState([30]);
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
 
-  // Получаем данные из characterAI
-  const actions = characterAI?.characterAIConfig?.actions || {};
-  const tools = characterAI?.characterAIConfig?.tools || {};
-  const actionCategories = characterAI?.characterAIConfig?.actionCategories || {};
-  const toolCategories = characterAI?.characterAIConfig?.toolCategories || {};
-  
-  // Получаем позы из characterAIConfig
-  const poses = Object.values(characterAI?.characterAIConfig?.poses || {}) as any[];
+  // Получаем данные из characterAI (новая структура из базы данных)
+  const actionCategoriesData = characterAI?.characterAIConfig?.actions || {};
+  const toolCategoriesData = characterAI?.characterAIConfig?.tools || {};
+
+  // Преобразуем в плоские структуры для совместимости с существующим кодом
+  const actions = Object.entries(actionCategoriesData).reduce((acc, [category, items]) => {
+    if (Array.isArray(items)) {
+      items.forEach(item => {
+        acc[item.id] = { ...item, category };
+      });
+    }
+    return acc;
+  }, {} as any);
+
+  const tools = Object.entries(toolCategoriesData).reduce((acc, [category, items]) => {
+    if (Array.isArray(items)) {
+      items.forEach(item => {
+        acc[item.id] = { ...item, category };
+      });
+    }
+    return acc;
+  }, {} as any);
+
+  // Создаем категории для отображения
+  const actionCategories = Object.keys(actionCategoriesData).reduce((acc, categoryKey) => {
+    const categoryItems = actionCategoriesData[categoryKey] || [];
+    if (Array.isArray(categoryItems) && categoryItems.length > 0) {
+      acc[categoryKey] = {
+        name: categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1),
+        icon: getCategoryIcon(categoryKey),
+        count: categoryItems.length
+      };
+    }
+    return acc;
+  }, {} as any);
+
+  const toolCategories = Object.keys(toolCategoriesData).reduce((acc, categoryKey) => {
+    const categoryItems = toolCategoriesData[categoryKey] || [];
+    if (Array.isArray(categoryItems) && categoryItems.length > 0) {
+      acc[categoryKey] = {
+        name: categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1),
+        icon: getCategoryIcon(categoryKey),
+        count: categoryItems.length
+      };
+    }
+    return acc;
+  }, {} as any);
+
+  // Получаем позы для выбранного персонажа из characterAIConfig
+  const characterPoses = selectedTalent?.id ? characterAI?.characterAIConfig?.poses?.[selectedTalent.id]?.poses : {};
+  const poses = Object.values(characterPoses || {}) as any[];
 
   const currentPose = characterAI?.currentPose || null;
   const currentAngle = characterAI?.currentAngle;
-  
+
+  // Функция для получения иконки категории
+  function getCategoryIcon(category: string): string {
+    const icons: Record<string, string> = {
+      bdsm: '🔗',
+      coaching: '🎯',
+      experimental: '🧪',
+      physical: '💪',
+      test: '🧪',
+      training: '🎓',
+      electrical: '⚡',
+      mechanical: '🔧',
+      thermal: '🔥'
+    };
+    return icons[category] || '📁';
+  }
+
   // Проверяем, что конфигурация загружена
-  const isConfigLoaded = characterAI?.characterAIConfig && 
-    characterAI.characterAIConfig.actions &&
-    Object.keys(characterAI.characterAIConfig.actions).length > 0;
-  
+  const isConfigLoaded = characterAI?.characterAIConfig &&
+    (Object.keys(actions).length > 0 || Object.keys(tools).length > 0);
+
   // Отладочная информация
   console.log('🔧 ActionToolPanel Debug:', {
     hasCharacterAI: !!characterAI,
     hasConfig: !!characterAI?.characterAIConfig,
-    hasActions: !!characterAI?.characterAIConfig?.actions,
-    actionsCount: characterAI?.characterAIConfig?.actions ? Object.keys(characterAI.characterAIConfig.actions).length : 0,
-    hasPoseManagementService: !!characterAI?.poseManagementService,
+    actionCategoriesDataKeys: Object.keys(actionCategoriesData),
+    toolCategoriesDataKeys: Object.keys(toolCategoriesData),
+    actionsCount: Object.keys(actions).length,
+    toolsCount: Object.keys(tools).length,
+    actionCategoriesCount: Object.keys(actionCategories).length,
+    toolCategoriesCount: Object.keys(toolCategories).length,
+    selectedTalentId: selectedTalent?.id,
+    hasCharacterPoses: !!characterPoses,
     posesCount: poses.length,
-    posesSource: characterAI?.poseManagementService ? 'poseManagementService' : 'characterAIConfig',
-    isConfigLoaded
+    posesSource: 'characterAIConfig.poses[characterId]',
+    isConfigLoaded,
+    characterAIConfigKeys: characterAI?.characterAIConfig ? Object.keys(characterAI.characterAIConfig) : [],
+    availableCharacterIds: characterAI?.characterAIConfig?.poses ? Object.keys(characterAI.characterAIConfig.poses) : []
   });
 
   const handleActionSelect = (action: any) => {
@@ -74,6 +139,10 @@ export function ActionToolPanel({
   }
 
   const handlePoseClick = async (pose: any) => {
+    if (!characterAI?.characterId) {
+      console.log('Нельзя сменить позу: персонаж не выбран');
+      return;
+    }
     if (characterAI?.changePose) {
       await characterAI.changePose(pose.id);
       console.log(`Смена позы: ${pose.name}`);
@@ -95,8 +164,8 @@ export function ActionToolPanel({
     // Если выбрано действие, применяем его к зоне
     else if (selectedAction && characterAI?.executeAction) {
       const action = Object.values(actions).find((a: any) => a.id === selectedAction);
-      if (action) {
-        console.log(`⚡ Выполнение действия ${action.name} на зоне ${zone.name}`);
+      if (action && typeof action === 'object' && 'name' in action) {
+        console.log(`⚡ Выполнение действия ${(action as any).name} на зоне ${zone.name}`);
         await characterAI.executeAction(selectedAction, zone.id, actionIntensity[0]);
       }
     }
@@ -134,11 +203,11 @@ export function ActionToolPanel({
     if (isDragging) {
       const newX = e.clientX - dragOffset.x
       const newY = e.clientY - dragOffset.y
-      
+
       // Ограничиваем позицию границами экрана
       const maxX = window.innerWidth - 384 // w-96 = 384px
       const maxY = window.innerHeight - 400 // примерная высота панели
-      
+
       setPosition({
         x: Math.max(0, Math.min(newX, maxX)),
         y: Math.max(0, Math.min(newY, maxY)),
@@ -162,11 +231,11 @@ export function ActionToolPanel({
   }, [isDragging, dragOffset])
 
   return (
-    <div 
+    <div
       className="fixed glass-panel border border-cyan-500/50 rounded-lg z-50 w-96 max-h-[80vh] flex flex-col cursor-move"
       style={{ left: position.x, top: position.y }}
     >
-      <div 
+      <div
         className="p-3 border-b border-gray-600 flex items-center justify-between"
         onMouseDown={handleMouseDown}
       >
@@ -195,8 +264,8 @@ export function ActionToolPanel({
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab 
-                    ? 'bg-cyan-600 text-white' 
+                  activeTab === tab
+                    ? 'bg-cyan-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
               >
@@ -260,21 +329,21 @@ export function ActionToolPanel({
               <div className="space-y-4">
                 <div className="text-sm text-gray-400 mb-2">Выберите действие:</div>
                 {Object.entries(actionCategories).map(([categoryId, category]: [string, any]) => {
-                  const categoryActions = Object.entries(actions).filter(([id, action]: [string, any]) => 
+                  const categoryActions = Object.entries(actions).filter(([id, action]: [string, any]) =>
                     action.category === categoryId
                   )
-                  
+
                   if (categoryActions.length === 0) return null
-                  
+
                   return (
                     <div key={categoryId} className="space-y-2">
-                      <div 
+                      <div
                         className="flex items-center gap-2 text-cyan-400 font-medium cursor-pointer hover:text-cyan-300"
                         onClick={() => setOpenCategory(openCategory === categoryId ? null : categoryId)}
                       >
                         <span>{category.icon}</span>
                         <span>{category.name}</span>
-                        <span className="text-xs text-gray-500">({categoryActions.length})</span>
+                        <span className="text-xs text-gray-500">({category.count || categoryActions.length})</span>
                         <span className="ml-auto text-xs">
                           {openCategory === categoryId ? '▲' : '▼'}
                         </span>
@@ -310,15 +379,15 @@ export function ActionToolPanel({
               <div className="space-y-4">
                 <div className="text-sm text-gray-400 mb-2">Выберите инструмент:</div>
                 {Object.entries(toolCategories).map(([categoryId, category]: [string, any]) => {
-                  const categoryTools = Object.entries(tools).filter(([id, tool]: [string, any]) => 
+                  const categoryTools = Object.entries(tools).filter(([id, tool]: [string, any]) =>
                     tool.category === categoryId
                   )
-                  
+
                   if (categoryTools.length === 0) return null
-                  
+
                   return (
                     <div key={categoryId} className="space-y-2">
-                      <div 
+                      <div
                         className="flex items-center gap-2 text-purple-400 font-medium cursor-pointer hover:text-purple-300"
                         onClick={() => setOpenCategory(openCategory === categoryId ? null : categoryId)}
                       >
@@ -383,10 +452,10 @@ export function ActionToolPanel({
                 )}
 
                 {/* Список поз */}
-                {poses.length > 0 ? (
+                {poses.length > 0 && characterAI?.characterId ? (
                   <div className="space-y-2">
-                    {poses.map((pose: any) => (
-                      <div key={pose.id} className={`p-3 bg-gray-800 rounded border hover:bg-gray-700/60 cursor-pointer ${
+                    {poses.map((pose: any, index: number) => (
+                      <div key={pose.id || `pose-${index}`} className={`p-3 bg-gray-800 rounded border hover:bg-gray-700/60 cursor-pointer ${
                         currentPose === pose.id ? 'border-cyan-500 bg-cyan-900/20' : 'border-gray-600'
                       }`}>
                         <div className="flex items-center justify-between mb-2">
@@ -416,9 +485,9 @@ export function ActionToolPanel({
                           {/* Кнопки быстрого выбора ракурса */}
                           {currentPose === pose.id && pose.angles && pose.angles.length > 1 && (
                             <div className="flex gap-1">
-                              {pose.angles.slice(0, 3).map((angle, index) => (
+                              {pose.angles.slice(0, 3).map((angle: any, index: number) => (
                                 <button
-                                  key={angle.id}
+                                  key={angle.id || `angle-${index}`}
                                   onClick={() => {
                                     if (characterAI?.changeAngle) {
                                       characterAI.changeAngle(angle.id);
@@ -448,8 +517,17 @@ export function ActionToolPanel({
                 ) : (
                   <div className="text-center text-gray-400 py-8">
                     <div className="text-4xl mb-2">🧘</div>
-                    <p>Позы не настроены</p>
-                    <p className="text-xs mt-2">Настройте позы в разделе "Персонажи" → редактирование → "Позы"</p>
+                    {!characterAI?.characterId ? (
+                      <>
+                        <p>Выберите персонажа</p>
+                        <p className="text-xs mt-2">Для работы с позами необходимо выбрать персонажа</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>Позы не настроены</p>
+                        <p className="text-xs mt-2">Настройте позы в разделе "Персонажи" → редактирование → "Позы"</p>
+                      </>
+                    )}
                   </div>
                 )}
 

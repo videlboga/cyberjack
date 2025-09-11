@@ -32,3 +32,60 @@ export const ANALYSIS_METHODS: Record<string, any> = {}
 export function analyzeCharacter() { return null }
 export function getAnalysisCost() { return 0 }
 export function getAnalysisTime() { return 0 }
+
+// ===== ФУНКЦИИ ДЛЯ ОТОБРАЖЕНИЯ УРОВНЕЙ ЗНАНИЙ =====
+// Добавлены для совместимости с UserKnowledgePanel
+
+export function calculateAnalysisProgress(knowledge: any): number {
+  if (!knowledge) return 0
+
+  const entries = Object.entries(knowledge)
+  if (entries.length === 0) return 0
+
+  const knownCount = entries.filter(([key, value]: [string, any]) =>
+    value && (value.level === 'known' || value.level === 'partial')
+  ).length
+
+  return Math.round((knownCount / entries.length) * 100)
+}
+
+export function getCharacteristicDisplayValue(knowledge: any, actualValue: number): string {
+  if (!knowledge) return '??'
+
+  switch (knowledge.level) {
+    case 'known':
+      return actualValue.toString()
+    case 'partial':
+      return `~${Math.round(actualValue)}`
+    case 'suspected':
+      return '??.?'
+    default:
+      return '??'
+  }
+}
+
+export function getKnowledgeLevelIcon(level: string): string {
+  switch (level) {
+    case 'known':
+      return '✅'
+    case 'partial':
+      return '🤔'
+    case 'suspected':
+      return '❓'
+    default:
+      return '❌'
+  }
+}
+
+export function getKnowledgeLevelColor(level: string): string {
+  switch (level) {
+    case 'known':
+      return 'text-green-400'
+    case 'partial':
+      return 'text-yellow-400'
+    case 'suspected':
+      return 'text-orange-400'
+    default:
+      return 'text-red-400'
+  }
+}

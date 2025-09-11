@@ -5,7 +5,6 @@ import path from 'path'
 
 export async function GET() {
   try {
-    console.log('🔥 ПРОСТОЙ API: Используем единственный загрузчик')
     const config = await loadGameConfig()
     return NextResponse.json({
       success: true,

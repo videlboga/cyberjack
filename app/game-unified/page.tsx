@@ -2,7 +2,7 @@
 
 import React from "react"
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
-import { loadUnifiedConfigV2 } from "@/lib/unified-config-loader"
+import { useUniversalConfig } from "@/hooks/useUniversalConfig"
 import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/unified-entities"
 import { useCharacterAIV2 } from "@/app/prod/hooks/useCharacterAI-v2"
 
@@ -17,10 +17,10 @@ import { Toaster } from "@/components/ui/toaster"
 import Link from "next/link"
 
 // Icons
-import { 
-  Sun, Moon, Settings, FileCode, Plus, X, Users, Building, FileText, 
-  Zap, BarChart, Wrench, User, Cog, BookOpen, Film, Target, Package, 
-  Star, Eye, MessageSquare, Heart, Shield, Zap as ZapIcon 
+import {
+  Sun, Moon, Settings, FileCode, Plus, X, Users, Building, FileText,
+  Zap, BarChart, Wrench, User, Cog, BookOpen, Film, Target, Package,
+  Star, Eye, MessageSquare, Heart, Shield, Zap as ZapIcon
 } from "lucide-react"
 
 // Game Components
@@ -39,7 +39,7 @@ import { useModal } from "@/app/game/hooks/useModal"
 import { useConfigManager } from "@/app/game/hooks/useConfigManager"
 import { EnhancedEditModal } from "@/app/game/components/ui/EnhancedEditModal"
 import { UserAssetsModal } from "@/app/game/components/ui/UserAssetsModal"
-import { EntityList } from "@/app/game/components/ui/EntityList"
+import { DatabaseEntityList } from "@/app/game/components/ui/DatabaseEntityList"
 import { SyncStatus } from "@/app/game/components/ui/SyncStatus"
 
 // Character AI
@@ -136,24 +136,24 @@ const UnifiedGamePage = () => {
   const [activeTab, setActiveTab] = useState("game")
   const [activeSubTab, setActiveSubTab] = useState("")
   const [showDebugPanel, setShowDebugPanel] = useState(false)
-  
+
   // Game state
   const [isLoading, setIsLoading] = useState(true)
   const [configStats, setConfigStats] = useState<Record<string, number>>({})
-  
+
   // Character state
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [showCharacterStats, setShowCharacterStats] = useState(false)
   const [characters, setCharacters] = useState<Character[]>([])
-  
+
   // Equipment and inventory
   const [userEquipment, setUserEquipment] = useState<string[]>([])
   const [equipment, setEquipment] = useState<GameEquipment[]>([])
-  
+
   // Character AI
   const [geminiApiKey, setGeminiApiKey] = useState<string>("")
   const [characterAIConfig, setCharacterAIConfig] = useState<CharacterAIConfig | null>(null)
-  
+
   // Modals
   const { modalState, openModal, closeModal } = useModal()
   const [userAssetsModalState, setUserAssetsModalState] = useState<{
@@ -163,11 +163,11 @@ const UnifiedGamePage = () => {
     isOpen: false,
     user: null
   })
-  
+
   // Registration
   const [isRegistered, setIsRegistered] = useState(false)
   const [showRegistrationModal, setShowRegistrationModal] = useState(false)
-  
+
   // Configurations
   const [configs, setConfigs] = useState<any>({
     assets: { assets: [] },
@@ -192,25 +192,43 @@ const UnifiedGamePage = () => {
     geminiApiKey
   })
 
+  // Подключаем универсальную загрузку конфига
+  const { config: universalConfig, loading: configLoading, error: configError, source } = useUniversalConfig()
+
   // Load configurations
   useEffect(() => {
-    const loadConfigs = async () => {
-      try {
-        console.log('🔄 Загружаем конфигурации...')
-        
-        const loadedConfigs = await loadUnifiedConfigV2()
-        console.log('✅ Конфигурации загружены:', loadedConfigs)
-        setConfigs(loadedConfigs)
-        
-        // Set Character AI config
-        if (loadedConfigs.characterAI) {
-          setCharacterAIConfig(loadedConfigs.characterAI)
-          console.log('✅ Character AI конфигурация загружена:', loadedConfigs.characterAI)
-        }
-        
-        // Initialize characters from config
-        if (loadedConfigs.characters?.characters) {
-          const initialCharacters = loadedConfigs.characters.characters.map((char: any) => ({
+    if (universalConfig) {
+      console.log('🔄 Загружаем конфигурации из источника:', source)
+      console.log('🔄 Структура конфигурации:', {
+        characters: Array.isArray(universalConfig.characters) ? universalConfig.characters.length : 'not array',
+        actions: universalConfig.actions,
+        contracts: Array.isArray(universalConfig.contracts) ? universalConfig.contracts.length : 'not array',
+        equipment: Array.isArray(universalConfig.equipment) ? universalConfig.equipment.length : 'not array'
+      })
+
+      // Нормализуем структуру данных для совместимости
+      const normalizedConfigs = {
+        characters: Array.isArray(universalConfig.characters) ? universalConfig.characters : (universalConfig.characters?.characters || []),
+        actions: universalConfig.actions || { categories: {} },
+        contracts: Array.isArray(universalConfig.contracts) ? universalConfig.contracts : (universalConfig.contracts?.available || []),
+        events: universalConfig.events || { anomalies: [], crises: [], opportunities: [] },
+        equipment: Array.isArray(universalConfig.equipment) ? universalConfig.equipment : (universalConfig.equipment?.equipment || []),
+        system: universalConfig.system || {},
+        users: Array.isArray(universalConfig.users) ? universalConfig.users : (universalConfig.users?.users || []),
+        station: universalConfig.station || { stationEntities: {} }
+      }
+
+      setConfigs(normalizedConfigs)
+
+      // Set Character AI config
+      if (universalConfig.characterAI) {
+        setCharacterAIConfig(universalConfig.characterAI)
+        console.log('✅ Character AI конфигурация загружена:', universalConfig.characterAI)
+      }
+
+      // Initialize characters from config
+      if (normalizedConfigs.characters && normalizedConfigs.characters.length > 0) {
+          const initialCharacters = normalizedConfigs.characters.map((char: any) => ({
             id: char.id,
             name: char.name,
             role: char.role || "Подчиненный",
@@ -273,22 +291,16 @@ const UnifiedGamePage = () => {
           setCharacters(initialCharacters)
           console.log('✅ Персонажи инициализированы:', initialCharacters)
         }
-        
+
         // Initialize equipment
-        if (loadedConfigs.equipment?.equipment) {
-          setEquipment(loadedConfigs.equipment.equipment)
-          console.log('✅ Оборудование загружено:', loadedConfigs.equipment.equipment)
+        if (normalizedConfigs.equipment && normalizedConfigs.equipment.length > 0) {
+          setEquipment(normalizedConfigs.equipment)
+          console.log('✅ Оборудование загружено:', normalizedConfigs.equipment)
         }
-        
-      } catch (error) {
-        console.error('❌ Ошибка загрузки конфигураций:', error)
-      } finally {
+
         setIsLoading(false)
-      }
     }
-    
-    loadConfigs()
-  }, [])
+  }, [universalConfig, source])
 
   // Character selection handler
   const handleCharacterSelect = (character: Character) => {
@@ -326,18 +338,18 @@ const UnifiedGamePage = () => {
       console.log('💬 Отправляем сообщение:', message)
       const analysis = await characterAI.analyzeMessage(message, selectedCharacter)
       console.log('📥 Получен анализ:', analysis)
-      
+
       // Handle response
       if (analysis.response) {
         console.log('🤖 Ответ персонажа:', analysis.response)
       }
-      
+
       // Handle stat changes
       if (analysis.statChanges && Object.keys(analysis.statChanges).length > 0) {
         console.log('📊 Изменения характеристик:', analysis.statChanges)
         // Update character stats here
       }
-      
+
     } catch (error) {
       console.error('❌ Ошибка отправки сообщения:', error)
     }
@@ -398,7 +410,7 @@ const UnifiedGamePage = () => {
               v2.0 Unified
             </Badge>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
@@ -407,7 +419,7 @@ const UnifiedGamePage = () => {
             >
               {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -415,7 +427,7 @@ const UnifiedGamePage = () => {
             >
               <Settings className="h-4 w-4" />
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -512,9 +524,12 @@ const UnifiedGamePage = () => {
                 </CardHeader>
                 <CardContent>
                   <CharacterChat
-                    selectedCharacter={selectedCharacter}
-                    onSendMessage={handleSendMessage}
+                    selectedTalent={selectedCharacter}
+                    onClose={() => setSelectedCharacter(null)}
                     characterAI={characterAI}
+                    applyAIChanges={(talentId, changes) => {
+                      console.log('AI Changes:', { talentId, changes })
+                    }}
                   />
                 </CardContent>
               </Card>
@@ -549,10 +564,43 @@ const UnifiedGamePage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <EntityList
-                    configs={configs}
-                    onEdit={openModal}
-                  />
+                  <div className="space-y-6">
+                    {/* Персонажи */}
+                    <DatabaseEntityList
+                      entities={configs.characters || []}
+                      type="character"
+                      title="Персонажи"
+                      onEdit={openModal}
+                      onRefresh={() => window.location.reload()}
+                    />
+
+                    {/* Действия */}
+                    <DatabaseEntityList
+                      entities={Object.values(configs.actions?.categories || {}).flat()}
+                      type="action"
+                      title="Действия"
+                      onEdit={openModal}
+                      onRefresh={() => window.location.reload()}
+                    />
+
+                    {/* Контракты */}
+                    <DatabaseEntityList
+                      entities={configs.contracts || []}
+                      type="contract"
+                      title="Контракты"
+                      onEdit={openModal}
+                      onRefresh={() => window.location.reload()}
+                    />
+
+                    {/* Оборудование */}
+                    <DatabaseEntityList
+                      entities={configs.equipment || []}
+                      type="equipment"
+                      title="Оборудование"
+                      onEdit={openModal}
+                      onRefresh={() => window.location.reload()}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 

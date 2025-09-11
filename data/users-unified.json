@@ -3,28 +3,36 @@
     {
       "id": "user-1755903020796-1",
       "username": "videlboga",
+      "email": null,
       "role": "user",
       "status": "active",
-      "created": "2025-08-22",
-      "lastLogin": "2025-08-28",
       "account": {
         "balance": 5000,
         "currency": "credits",
         "transactions": []
       },
       "characters": [
-        "asset_3"
+        "asset_3",
+        "asset_researcher_01"
       ],
       "userEquipment": [
-        "shibari-chest-binding"
+        "hormone-injector"
       ],
       "attributes": {},
       "stats": {},
       "assets": [
         {
-          "assetId": "asset_3",
           "name": "Анечка",
+          "status": "active",
+          "assetId": "asset_3",
           "acquired": "2025-08-28T23:12:10.718Z",
+          "location": "inventory",
+          "currentAssignment": null
+        },
+        {
+          "assetId": "asset_researcher_01",
+          "name": "Линь Сяо",
+          "acquired": "2025-09-10T15:04:14.388Z",
           "status": "active",
           "location": "inventory",
           "currentAssignment": null
@@ -32,11 +40,11 @@
       ],
       "equipment": [
         {
-          "itemId": "shibari-chest-binding",
-          "name": "Классическая обвязка груди",
+          "itemId": "hormone-injector",
+          "name": "Гормональный инъектор",
           "type": "device",
           "slot": "body",
-          "installed": "2025-08-28T23:12:17.475Z",
+          "installed": "2025-09-10T15:04:25.981Z",
           "status": "active"
         }
       ],

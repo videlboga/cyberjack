@@ -333,6 +333,60 @@ export async function POST(request: NextRequest) {
           count: data.events.length
         })
 
+      case 'poses':
+        // Сохраняем позы в character_ai_config
+        console.log('🔥 ПРОСТОЙ SYNC API: Сохраняем позы в БД')
+
+        if (data.poses && typeof data.poses === 'object') {
+          for (const [characterId, poses] of Object.entries(data.poses)) {
+            console.log(`🔥 ПРОСТОЙ SYNC API: Сохраняем позы для персонажа ${characterId}`)
+
+            try {
+              // Проверяем, существует ли запись для этого персонажа и типа poses
+              const existing = await pool.query(
+                'SELECT id FROM character_ai_config WHERE id = $1 AND config_type = $2',
+                [`${characterId}_poses`, 'poses']
+              )
+
+              const configData = {
+                ...poses,
+                updated_at: new Date().toISOString()
+              }
+
+              if (existing.rows.length > 0) {
+                // Обновляем существующую запись
+                await pool.query(`
+                  UPDATE character_ai_config
+                  SET config_data = $2, updated_at = CURRENT_TIMESTAMP
+                  WHERE id = $1 AND config_type = $3
+                `, [`${characterId}_poses`, JSON.stringify(configData), 'poses'])
+                console.log(`🔥 ПРОСТОЙ SYNC API: Обновлены позы для персонажа ${characterId}`)
+              } else {
+                // Создаем новую запись
+                await pool.query(`
+                  INSERT INTO character_ai_config (id, config_type, config_data)
+                  VALUES ($1, $2, $3)
+                `, [`${characterId}_poses`, 'poses', JSON.stringify(configData)])
+                console.log(`🔥 ПРОСТОЙ SYNC API: Созданы позы для персонажа ${characterId}`)
+              }
+            } catch (error) {
+              console.error(`❌ Ошибка сохранения поз для персонажа ${characterId}:`, error)
+              throw error
+            }
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: `Позы синхронизированы с БД`,
+            count: Object.keys(data.poses).length
+          })
+          } else {
+          console.error('❌ Неправильный формат данных поз')
+          return NextResponse.json({
+            error: 'Неправильный формат данных поз'
+          }, { status: 400 })
+        }
+
       case 'station':
       case 'characterAI':
       case 'system':
@@ -348,11 +402,11 @@ export async function POST(request: NextRequest) {
 
       default:
         console.log(`🔥 ПРОСТОЙ SYNC API: Неподдерживаемый тип ${configType}, пропускаем`)
-        return NextResponse.json({
-          success: true,
+    return NextResponse.json({
+      success: true,
           message: `${configType} пропущен (неподдерживаемый тип)`,
           count: 0
-        })
+    })
     }
   } catch (error) {
     console.error('❌ Ошибка синхронизации:', error)

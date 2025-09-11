@@ -33,13 +33,19 @@ export function useUniversalConfig(): UseUniversalConfigResult {
 
       console.log('🔄 useUniversalConfig: Запрос к:', apiUrl)
 
-      // Простой fetch запрос без сложной логики fallback
+      // Простой fetch запрос без сложной логики fallback с таймаутом
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 секунд таймаут
+
       const response = await fetch(apiUrl, {
         cache: 'no-store',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        signal: controller.signal
       })
+
+      clearTimeout(timeoutId)
 
       console.log('🔄 useUniversalConfig: Статус ответа:', response.status)
 
@@ -93,10 +99,13 @@ export function useUniversalConfig(): UseUniversalConfigResult {
 
       setConfig(normalized)
       setSource(data.source || 'database')
+      console.log('✅ useUniversalConfig: Источник данных установлен:', data.source || 'database')
 
     } catch (err) {
       console.error('❌ useUniversalConfig: Ошибка:', err)
-      const errorMessage = err instanceof Error ? err.message : String(err)
+      const errorMessage = err instanceof Error
+        ? (err.name === 'AbortError' ? 'Таймаут запроса (10 сек)' : err.message)
+        : String(err)
       setError(errorMessage)
 
       // В случае ошибки, попробуем загрузить fallback данные

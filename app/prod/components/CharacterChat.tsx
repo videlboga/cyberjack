@@ -17,6 +17,10 @@ interface CharacterChatProps {
 }
 
 export function CharacterChat({ characterAI, selectedTalent, onClose, applyAIChanges }: CharacterChatProps) {
+  // Проверяем, что selectedTalent существует
+  if (!selectedTalent) {
+    return null
+  }
   const [messages, setMessages] = useState<Array<{ id: string; role: "user" | "assistant"; content: string; timestamp: Date }>>([])
   const [currentMessage, setCurrentMessage] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
@@ -88,7 +92,7 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
     try {
       // Используем Character AI для анализа сообщения с данными выбранного персонажа
       const analysis = await characterAI.analyzeMessage(message, selectedTalent)
-      
+
       const assistantMessage = {
         id: generateUniqueId(),
         role: "assistant" as const,
@@ -97,17 +101,17 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
       }
 
       setMessages(prev => [...prev, assistantMessage])
-      
+
       // Применяем изменения от анализа
       if (analysis.statChanges && Object.keys(analysis.statChanges).length > 0) {
         console.log('Изменения от Character AI:', analysis.statChanges)
-        
+
         // Применяем изменения к персонажу
         applyAIChanges(selectedTalent.id, analysis)
-        
+
         // Формируем сообщение об изменениях
         let changeDescription = []
-        
+
         if (analysis.statChanges) {
           const statNames: { [key: string]: string } = {
             mood: 'настроение',
@@ -166,13 +170,13 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
             pain: 'боль',
             arousal: 'возбуждение'
           }
-          
+
           changeDescription.push(`Характеристики: ${Object.entries(analysis.statChanges).map(([stat, change]) => {
             const statName = statNames[stat] || stat
             return `${statName} ${(change as number) > 0 ? '+' : ''}${change}`
           }).join(', ')}`)
         }
-        
+
         if (analysis.emotionalContent) {
           const emotions = Object.entries(analysis.emotionalContent)
             .filter(([_, value]) => (value as number) > 0.1)
@@ -191,7 +195,7 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
             changeDescription.push(`Эмоции: ${emotions.join(', ')}`)
           }
         }
-        
+
         if (analysis.fetishTriggers && analysis.fetishTriggers.length > 0) {
           const fetishNames: { [key: string]: string } = {
             bondage: 'бондаж',
@@ -231,11 +235,11 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
             breath_play: 'игры с дыханием',
             edge_play: 'экстремальные игры'
           }
-          
+
           const translatedFetishes = analysis.fetishTriggers.map((fetish: string) => fetishNames[fetish] || fetish)
           changeDescription.push(`Активированы фетиши: ${translatedFetishes.join(', ')}`)
         }
-        
+
         // Показываем уведомление
         toast({
           title: `✨ ${selectedTalent.name}`,
@@ -245,7 +249,7 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
       }
     } catch (error) {
       console.error('Ошибка Character AI:', error)
-      
+
       const assistantMessage = {
         id: generateUniqueId(),
         role: "assistant" as const,
@@ -278,11 +282,11 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
     if (isDragging) {
       const newX = e.clientX - dragOffset.x
       const newY = e.clientY - dragOffset.y
-      
+
       // Ограничиваем позицию границами экрана
       const maxX = window.innerWidth - 384 // w-96 = 384px
       const maxY = window.innerHeight - 400 // примерная высота панели
-      
+
       setPosition({
         x: Math.max(0, Math.min(newX, maxX)),
         y: Math.max(0, Math.min(newY, maxY)),
@@ -306,11 +310,11 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
   }, [isDragging, dragOffset])
 
   return (
-    <div 
+    <div
       className="fixed glass-panel border border-cyan-500/50 rounded-lg z-50 w-96 max-h-[80vh] flex flex-col cursor-move"
       style={{ left: position.x, top: position.y }}
     >
-      <div 
+      <div
         className="p-3 border-b border-gray-600 flex items-center justify-between"
         onMouseDown={handleMouseDown}
       >
@@ -328,26 +332,26 @@ export function CharacterChat({ characterAI, selectedTalent, onClose, applyAICha
             Начните разговор с {selectedTalent.name}...
           </div>
         )}
-        
+
         {messages.map((message) => (
           <div
             key={message.id}
             className={`p-2 rounded text-sm ${
-              message.role === "user" 
-                ? "bg-cyan-600/20 text-cyan-100 ml-8" 
+              message.role === "user"
+                ? "bg-cyan-600/20 text-cyan-100 ml-8"
                 : "bg-gray-700/50 text-gray-100 mr-8"
             }`}
           >
             {message.content}
           </div>
         ))}
-        
+
         {isProcessing && (
           <div className="text-center text-gray-400 text-sm">
             {selectedTalent.name} печатает...
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 

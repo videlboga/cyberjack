@@ -565,7 +565,6 @@ export interface CompoundCondition extends BaseCondition {
 export interface GameConfig {
   // Основные сущности
   characters: Character[]
-  assets?: Character[] // Алиас для обратной совместимости
   actions: ActionsConfig
   contracts: ContractsConfig
   events: EventsConfig

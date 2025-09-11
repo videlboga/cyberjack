@@ -67,7 +67,7 @@ export interface StatusEffect {
 }
 
 export interface GameConfig {
-  assets: { assets: Talent[] };
+  characters: Talent[];
   equipment: { equipment: Equipment[] };
   users: { users: User[] };
   contracts: { available: any[] };
@@ -89,7 +89,6 @@ export interface User {
     transactions: any[];
   };
   characters: string[];
-  assets: string[];
   userEquipment: string[];
   characterKnowledge?: { [characterId: string]: any };
 }

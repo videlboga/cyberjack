@@ -4,10 +4,10 @@ export async function GET() {
   console.log('🧪 Тестовый маршрут вызван')
 
   try {
-    const { loadUnifiedConfigV2 } = await import('@/lib/unified-config-loader')
-    console.log('📚 Импорт loadUnifiedConfigV2 успешен')
+    const { loadGameConfig } = await import('@/lib/simple-db-loader')
+    console.log('📚 Импорт loadGameConfig успешен')
 
-    const config = await loadUnifiedConfigV2()
+    const config = await loadGameConfig()
     console.log('🎯 Конфигурация получена:', {
       characters: config.characters?.length || 0,
       users: config.users?.length || 0

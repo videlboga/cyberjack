@@ -2,9 +2,8 @@
 
 import React from "react"
 
-console.log('📄 prod/page.tsx загружен')
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
-import { useUnifiedConfig } from "@/lib/hooks/useUnifiedConfig-v1"
+import { useUniversalConfig } from "@/hooks/useUniversalConfig"
 import type { GameConfig, GameAction, GameContract, GameEquipment, CharacterAIConfig } from "@/lib/unified-entities"
 import RegistrationModal from "./components/RegistrationModal"
 import { personalWorkIntegration } from "@/lib/character/personal-work-integration"
@@ -14,7 +13,6 @@ import { ActionToolPanel } from "./components/ActionToolPanel"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { CharacterChat } from "./components/CharacterChat"
 // import { CharacterAdapter } from "@/lib/character/character-adapter" // Удален
-import { OpenRouterDebugPanel } from './components/OpenRouterDebugPanel'
 import { Button } from "@/components/ui/button"
 import { StatNotification } from "@/components/ui/stat-notification"
 // import { CharacterStatsPanel } from "@/components/ui/character-stats-panel"
@@ -196,30 +194,43 @@ const mockGameConfig: GameConfig = {
   }
 
 export default function TalentArchitectProd() {
-  const [gameConfig, setGameConfig] = useState<GameConfig | null>(null)
+  // Убираем промежуточное состояние gameConfig, используем напрямую effectiveGameConfig
   const [configLoading, setConfigLoading] = useState(true)
   const [configError, setConfigError] = useState<string | null>(null)
 
-  // Подключаем модульную загрузку конфига (должна вызываться ДО любых ранних return)
-  const { config: unifiedConfig, loading: unifiedLoading, error: unifiedError } = useUnifiedConfig()
+  // Подключаем универсальную загрузку конфига (должна вызываться ДО любых ранних return)
+  let unifiedConfig, unifiedLoading, unifiedError, source;
+  try {
+    const result = useUniversalConfig();
+    unifiedConfig = result.config;
+    unifiedLoading = result.loading;
+    unifiedError = result.error;
+    source = result.source;
+
+    // Логируем состояние загрузки
+    console.log('🔧 Prod page: useUniversalConfig result:', {
+      config: !!unifiedConfig,
+      loading: unifiedLoading,
+      error: unifiedError,
+      source
+    });
+  } catch (error) {
+    console.error('❌ Ошибка в useUniversalConfig:', error);
+    unifiedConfig = null;
+    unifiedLoading = false;
+    unifiedError = error instanceof Error ? error.message : String(error);
+    source = 'error';
+  }
   useEffect(() => {
     if (unifiedConfig) {
-      console.log('🔧 DEBUG: unifiedConfig received:', {
-        hasStation: !!unifiedConfig.station,
-        stationKeys: unifiedConfig.station ? Object.keys(unifiedConfig.station) : 'no station',
-        stationEntities: unifiedConfig.station?.stationEntities ? Object.keys(unifiedConfig.station.stationEntities) : 'no stationEntities',
-        fullConfig: unifiedConfig
+      console.log('🔧 Prod Debug: unifiedConfig загружен:', {
+        hasCharacterAI: !!(unifiedConfig as any).characterAI,
+        characterAIKeys: (unifiedConfig as any).characterAI ? Object.keys((unifiedConfig as any).characterAI) : [],
+        posesCount: (unifiedConfig as any).characterAI?.poses ? Object.keys((unifiedConfig as any).characterAI.poses).length : 0,
+        actionsCount: (unifiedConfig as any).characterAI?.actions ? Object.keys((unifiedConfig as any).characterAI.actions).length : 0
       })
-      setGameConfig(unifiedConfig)
       if ((unifiedConfig as any).characterAI) {
-        console.log('🔄 prod/page: Установка characterAIConfig:', {
-          poses: Object.keys((unifiedConfig as any).characterAI.poses || {}),
-          actions: Object.keys((unifiedConfig as any).characterAI.actions || {}),
-          tools: Object.keys((unifiedConfig as any).characterAI.tools || {})
-        })
         setCharacterAIConfig((unifiedConfig as any).characterAI)
-      } else {
-        console.log('🔄 prod/page: characterAI отсутствует в unifiedConfig')
       }
     }
     setConfigLoading(unifiedLoading)
@@ -237,7 +248,7 @@ export default function TalentArchitectProd() {
   const [credits, setCredits] = useState(5000)
 
   // Используем только реальную конфигурацию (берём напрямую из хука, пока локальный стейт не успел обновиться)
-  const effectiveGameConfig = gameConfig ?? unifiedConfig ?? null
+  const effectiveGameConfig = unifiedConfig ?? null
   const getUsersArray = (cfg: any) => {
     if (!cfg) return [] as any[]
     const u = (cfg as any).users
@@ -260,16 +271,19 @@ export default function TalentArchitectProd() {
     return Array.isArray(s) ? s : (s ? Object.values(s) : [])
   }
 
-  console.log('🎯 Используемая конфигурация:', {
-    characters: getCharactersArray(effectiveGameConfig).length,
-    users: getUsersArray(effectiveGameConfig).length,
-    equipment: getEquipmentArray(effectiveGameConfig).length,
-    station: getStationArray(effectiveGameConfig).length
+
+
+  // Признак загрузки, используем в основном JSX (с таймаутом)
+  const isLoadingConfig = unifiedLoading && !effectiveGameConfig && !unifiedError
+
+  // Дополнительная отладка
+  console.log('🔧 Prod page: isLoadingConfig calculation:', {
+    unifiedLoading,
+    effectiveGameConfig: !!effectiveGameConfig,
+    unifiedError,
+    isLoadingConfig
   })
-  
-  // Признак загрузки, используем в основном JSX
-  const isLoadingConfig = unifiedLoading || !effectiveGameConfig
-  
+
   // Кастомный хук для управления кредитами с сохранением
   const updateCredits = (newCredits: number | ((prev: number) => number)) => {
     const updatedCredits = typeof newCredits === 'function' ? newCredits(credits) : newCredits
@@ -305,9 +319,6 @@ export default function TalentArchitectProd() {
   const [activeActionIntensity, setActiveActionIntensity] = useState<number>(5)
 
   useEffect(() => {
-    console.log('🧰 Режим инструмента:', selectedTool || 'выключен', 'интенсивность:', activeToolIntensity)
-    console.log('⚡ Режим действия:', selectedActionMode || 'выключен', 'интенсивность:', activeActionIntensity)
-    console.log('🎯 Должны отображаться зоны:', !!(selectedTool || selectedActionMode) && !!selectedTalent)
   }, [selectedTool, selectedActionMode, activeToolIntensity, activeActionIntensity, selectedTalent])
   const [interactiveAreas, setInteractiveAreas] = useState<{ [key: string]: boolean }>({})
   const [floatingPanelPosition, setFloatingPanelPosition] = useState({ x: 100, y: 100 })
@@ -330,14 +341,13 @@ export default function TalentArchitectProd() {
   const [leftPanelOpen, setLeftPanelOpen] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
   const [showCharacterChat, setShowCharacterChat] = useState(false)
-  const [showOpenRouterDebug, setShowOpenRouterDebug] = useState(false)
-  
+
   // Состояние для уведомлений об изменениях характеристик
   const [statChanges, setStatChanges] = useState<Array<{ stat: string; change: number; timestamp: number }>>([])
 
-  // Инициализация Character AI - всегда вызываем хук, но передаем пустую конфигурацию если нет данных
+  // Инициализация Character AI - используем данные напрямую из unifiedConfig
   const characterAI = useCharacterAI({
-    characterAIConfig: characterAIConfig || {
+    characterAIConfig: unifiedConfig && (unifiedConfig as any)?.characterAI ? (unifiedConfig as any).characterAI : {
       actions: {},
       tools: {},
       poses: {},
@@ -351,13 +361,29 @@ export default function TalentArchitectProd() {
         fetishResponses: {}
       }
     },
+    characterId: selectedTalent?.id || undefined, // Передаем ID персонажа только если он выбран
     characterStates: selectedTalent?.states || {},
     characterAttributes: selectedTalent?.attributes || {},
     characterFetishes: selectedTalent?.affinities || {},
     userEquipment: selectedTalent?.equippedItems?.map(item => item.id) || [],
-    currentPose: "standing_normal",
+    currentPose: selectedTalent ? "standing" : "", // Устанавливаем позу только если персонаж выбран
     geminiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY
   })
+
+  // Логируем состояние characterAI для отладки
+  useEffect(() => {
+    if (unifiedConfig) {
+      console.log('🔧 Prod Debug: characterAI config после загрузки unifiedConfig:', {
+        hasUnifiedConfig: !!unifiedConfig,
+        hasCharacterAI: !!(unifiedConfig as any)?.characterAI,
+        characterAIKeys: (unifiedConfig as any)?.characterAI ? Object.keys((unifiedConfig as any).characterAI) : [],
+        posesCount: (unifiedConfig as any)?.characterAI?.poses ? Object.keys((unifiedConfig as any).characterAI.poses).length : 0,
+        unifiedLoading,
+        unifiedError,
+        source
+      })
+    }
+  }, [unifiedConfig, unifiedLoading, unifiedError, source])
 
   // (удалено дублирующее объявление useUnifiedConfig)
 
@@ -368,16 +394,15 @@ export default function TalentArchitectProd() {
     const charactersArr = getCharactersArray(effectiveGameConfig)
     const usersArr = getUsersArray(effectiveGameConfig)
     const equipmentArr = getEquipmentArray(effectiveGameConfig)
-    console.log('🎯 useEffect для talents:', {
-      hasCharacters: charactersArr.length > 0,
-      charactersCount: charactersArr.length,
-      hasCurrentUser: !!currentUser,
-      currentUser: currentUser ? { id: currentUser.id, username: currentUser.username } : null,
-      hasEquipment: equipmentArr.length > 0,
-      equipmentCount: equipmentArr.length,
-      firstCharacterName: charactersArr[0]?.name || 'none',
-      firstUserName: usersArr[0]?.username || usersArr[0]?.name || 'none'
-    })
+
+    // Отладочная информация
+    console.log('🔍 Отладка загрузки данных пользователя:')
+    console.log('📊 currentUser:', currentUser)
+    console.log('👥 usersArr.length:', usersArr.length)
+    console.log('👥 usersArr:', usersArr)
+    console.log('🎭 charactersArr.length:', charactersArr.length)
+    console.log('🔧 equipmentArr.length:', equipmentArr.length)
+    console.log('⚙️ effectiveGameConfig:', effectiveGameConfig ? 'загружен' : 'не загружен')
 
     if (charactersArr.length > 0) {
       // Получаем привязанных персонажей пользователя (если пользователь существует)
@@ -385,36 +410,42 @@ export default function TalentArchitectProd() {
       let userEquipmentList: any[] = []
 
       if (currentUser && usersArr.length > 0) {
+        console.log('🔍 Поиск пользователя в базе данных:')
+        console.log('🎯 Ищем пользователя с ID:', currentUser.id, 'username:', currentUser.username)
+
         // Ищем пользователя сначала по ID/username/email (для обратной совместимости)
         let userData = usersArr.find((u: any) =>
           u.id === currentUser.id || u.name === currentUser.username || u.username === currentUser.username || u.email === currentUser.username
         )
 
+        console.log('🔍 Первый поиск userData:', userData)
+
         // Если не нашли, попробуем найти по всем возможным полям
         if (!userData) {
+          console.log('🔍 Пользователь не найден, пробуем расширенный поиск...')
           userData = usersArr.find((u: any) => {
             const matches = []
             if (u.id === currentUser.id) matches.push('id')
             if (u.name === currentUser.username) matches.push('name')
             if (u.username === currentUser.username) matches.push('username')
             if (u.email === currentUser.username) matches.push('email')
+            console.log('🔍 Проверяем пользователя:', u.username, 'совпадения:', matches)
             return matches.length > 0
           })
         }
-        userCharacters = userData?.characters || []
-        const userEquipmentIds = userData?.userEquipment || []
 
-        console.log('🔧 Данные пользователя:', userData)
-        console.log('🎯 userEquipmentIds:', userEquipmentIds)
-        console.log('🎯 equipmentArr:', equipmentArr.length)
+        console.log('✅ Найденный userData:', userData)
+        userCharacters = userData?.characters || []
+        const userEquipmentIds = userData?.user_equipment || []
+
+        console.log('🎭 userCharacters:', userCharacters)
+        console.log('🔧 userEquipmentIds:', userEquipmentIds)
+
 
         // Фильтруем оборудование по принадлежности пользователю
         userEquipmentList = userEquipmentIds.length > 0
           ? equipmentArr.filter((eq: any) => userEquipmentIds.includes(eq.id))
           : []
-
-        console.log('🎯 Отфильтрованное оборудование:', userEquipmentList.map((eq: any) => eq.id))
-        console.log('🎯 Количество отфильтрованного оборудования:', userEquipmentList.length)
 
         setUserEquipment(userEquipmentList)
         setFilteredInventory(userEquipmentList)
@@ -514,7 +545,7 @@ export default function TalentArchitectProd() {
 
       setTalents(talentsFromConfig)
     }
-  }, [gameConfig, currentUser])
+  }, [effectiveGameConfig, currentUser])
 
   // Проверка существующего пользователя при загрузке
   useEffect(() => {
@@ -524,7 +555,7 @@ export default function TalentArchitectProd() {
         const user = JSON.parse(savedUser)
         setCurrentUser({ username: user.username, id: user.id })
         setShowRegistration(false)
-        
+
         // Восстанавливаем игровые ресурсы пользователя
         updateCredits(user.account?.balance || 5000)
         setNeuralPulses(100) // Сбрасываем каждый день
@@ -539,20 +570,15 @@ export default function TalentArchitectProd() {
 
   // Функция для обработки регистрации пользователя
   const handleUserRegistration = async (username: string, password: string) => {
-    console.log('🔐 Начинаем регистрацию/вход для:', username)
-    console.log('🔐 Пароль:', password ? '***' : 'пустой')
-    
+
     // Получаем всех существующих пользователей
     const allUsersStr = localStorage.getItem('allUsers')
-    console.log('📋 allUsers из localStorage:', allUsersStr)
     const allUsers = JSON.parse(allUsersStr || '[]')
-    console.log('📋 Существующие пользователи:', allUsers)
-    
+
     // Проверяем, существует ли пользователь
-    const existingUser = allUsers.find((user: any) => 
+    const existingUser = allUsers.find((user: any) =>
       user.username.toLowerCase() === username.toLowerCase()
     )
-    console.log('🔍 Найден существующий пользователь:', existingUser)
 
     let currentUserData
 
@@ -562,9 +588,9 @@ export default function TalentArchitectProd() {
         ...existingUser,
         lastLogin: new Date().toISOString().split('T')[0]
       }
-      
+
       // Обновляем данные существующего пользователя
-      const updatedUsers = allUsers.map((user: any) => 
+      const updatedUsers = allUsers.map((user: any) =>
         user.username.toLowerCase() === username.toLowerCase() ? currentUserData : user
       )
       localStorage.setItem('allUsers', JSON.stringify(updatedUsers))
@@ -597,8 +623,7 @@ export default function TalentArchitectProd() {
       // Добавляем нового пользователя в список всех пользователей
       allUsers.push(currentUserData)
       localStorage.setItem('allUsers', JSON.stringify(allUsers))
-      console.log('✅ Новый пользователь добавлен в allUsers:', currentUserData)
-      
+
       // Синхронизируем с файлом users-unified.json
       try {
         const response = await fetch('/api/sync-data', {
@@ -611,9 +636,8 @@ export default function TalentArchitectProd() {
             data: { users: allUsers }
           })
         })
-        
+
         if (response.ok) {
-          console.log('✅ Пользователи синхронизированы с файлом')
         } else {
           console.error('❌ Ошибка синхронизации пользователей:', response.statusText)
         }
@@ -624,11 +648,11 @@ export default function TalentArchitectProd() {
 
     if (existingUser) {
       // Обновляем данные существующего пользователя
-      const updatedUsers = allUsers.map((user: any) => 
+      const updatedUsers = allUsers.map((user: any) =>
         user.username.toLowerCase() === username.toLowerCase() ? currentUserData : user
       )
       localStorage.setItem('allUsers', JSON.stringify(updatedUsers))
-      
+
       // Синхронизируем обновленные данные с файлом
       try {
         const response = await fetch('/api/sync-data', {
@@ -641,9 +665,8 @@ export default function TalentArchitectProd() {
             data: { users: updatedUsers }
           })
         })
-        
+
         if (response.ok) {
-          console.log('✅ Обновленные пользователи синхронизированы с файлом')
         } else {
           console.error('❌ Ошибка синхронизации обновленных пользователей:', response.statusText)
         }
@@ -654,12 +677,10 @@ export default function TalentArchitectProd() {
 
     // Сохраняем текущего пользователя
     localStorage.setItem('currentUser', JSON.stringify(currentUserData))
-    console.log('💾 Текущий пользователь сохранен:', currentUserData)
-    
+
     setCurrentUser({ username, id: currentUserData.id })
     setShowRegistration(false)
-    console.log('🎮 Игра начата для пользователя:', username)
-    
+
     // Устанавливаем игровые ресурсы
     updateCredits(currentUserData.account?.balance || 5000)
     setNeuralPulses(100)
@@ -669,7 +690,6 @@ export default function TalentArchitectProd() {
 
   // Функция выхода
   const handleLogout = () => {
-    console.log('🚪 Выход пользователя:', currentUser?.username)
     localStorage.removeItem('currentUser')
     setCurrentUser(null)
     setShowRegistration(true)
@@ -684,7 +704,7 @@ export default function TalentArchitectProd() {
   // Функция для обновления баланса пользователя
   const updateUserBalance = async (newBalance: number) => {
     if (!currentUser) return
-    
+
     const savedUser = localStorage.getItem('currentUser')
     if (savedUser) {
       try {
@@ -692,14 +712,14 @@ export default function TalentArchitectProd() {
         user.account.balance = newBalance
         user.lastLogin = new Date().toISOString().split('T')[0]
         localStorage.setItem('currentUser', JSON.stringify(user))
-        
+
         // Также обновляем в списке всех пользователей
         const allUsers = JSON.parse(localStorage.getItem('allUsers') || '[]')
-        const updatedUsers = allUsers.map((u: any) => 
+        const updatedUsers = allUsers.map((u: any) =>
           u.id === user.id ? user : u
         )
         localStorage.setItem('allUsers', JSON.stringify(updatedUsers))
-        
+
         // Синхронизируем обновленные данные с файлом
         try {
           const response = await fetch('/api/sync-data', {
@@ -712,9 +732,8 @@ export default function TalentArchitectProd() {
               data: { users: updatedUsers }
             })
           })
-          
+
           if (response.ok) {
-            console.log('✅ Баланс пользователя синхронизирован с файлом')
           } else {
             console.error('❌ Ошибка синхронизации баланса:', response.statusText)
           }
@@ -850,29 +869,19 @@ export default function TalentArchitectProd() {
 
   const [talents, setTalents] = useState<Talent[]>([])
 
-  // Используем конфигурацию оборудования из JSON
-  const [globalInventory, setGlobalInventory] = useState<Equipment[]>(
-    gameConfig?.equipment.equipment || []
-  )
+  // Используем конфигурацию оборудования из БД
+  const [globalInventory, setGlobalInventory] = useState<Equipment[]>([])
 
   // Фильтруем оборудование по принадлежности пользователю
   const [userEquipment, setUserEquipment] = useState<Equipment[]>([])
   const [filteredInventory, setFilteredInventory] = useState<Equipment[]>([])
 
-  // Используем конфигурацию контрактов из JSON
-  const [contracts, setContracts] = useState<Contract[]>(
-    gameConfig?.contracts?.available?.map(contract => ({
-      ...contract,
-      progress: 0,
-      difficulty: "medium" // По умолчанию
-    })) || []
-  )
+  // Используем конфигурацию контрактов из БД
+  const [contracts, setContracts] = useState<Contract[]>([])
 
   // Обновляем состояния при изменении конфигурации
   useEffect(() => {
     if (effectiveGameConfig) {
-      console.log('🔧 Устанавливаем globalInventory из gameConfig')
-      console.log('🔧 effectiveGameConfig.equipment.equipment:', effectiveGameConfig.equipment?.equipment?.length || 'undefined')
       setGlobalInventory(effectiveGameConfig.equipment.equipment || [])
       setContracts(effectiveGameConfig.contracts?.available?.map(contract => ({
         ...contract,
@@ -880,7 +889,7 @@ export default function TalentArchitectProd() {
         difficulty: "medium"
       })) || [])
     }
-  }, [gameConfig])
+  }, [effectiveGameConfig])
 
   // Если сцена была запрошена до загрузки конфигурации — доинициализируем и переключим на реальный первый экран
   useEffect(() => {
@@ -926,18 +935,12 @@ export default function TalentArchitectProd() {
 
 
 
-  // Используем конфигурацию событий из JSON
-  const [events] = useState<LocalGameEvent[]>(
-    gameConfig?.events?.events?.map(event => ({
-      ...event,
-      type: "neutral" // По умолчанию
-    })) || []
-  )
+  // Используем конфигурацию событий из БД
+  const [events] = useState<LocalGameEvent[]>([])
 
   // Загружаем сцены из конфигурации
   useEffect(() => {
     if (effectiveGameConfig?.storyScenes && Array.isArray(effectiveGameConfig.storyScenes.scenes)) {
-      console.log('🎭 Загружаем сцены из конфигурации:', effectiveGameConfig.storyScenes.scenes.length)
       setStoryScenes(effectiveGameConfig.storyScenes.scenes)
     } else {
       // Fallback для старых данных - простые сцены для сущностей станции
@@ -1206,7 +1209,6 @@ export default function TalentArchitectProd() {
           setReputation((prev) => prev + effect.amount)
           break
         default:
-          console.log(`Неизвестный эффект: ${effect.type}`, effect)
       }
     })
 
@@ -1272,22 +1274,22 @@ export default function TalentArchitectProd() {
       endurance: 'ВЫНОСЛИВОСТЬ',
       sensitivity: 'ЧУВСТВИТЕЛЬНОСТЬ',
       flexibility: 'ГИБКОСТЬ',
-      
+
       // Психологические характеристики
       emotionalStability: 'ЭМОЦИОНАЛЬНАЯ СТАБИЛЬНОСТЬ',
       adaptability: 'АДАПТИВНОСТЬ',
       intelligence: 'ИНТЕЛЛЕКТ',
-      
+
       // Социальные характеристики
       sociability: 'ОБЩИТЕЛЬНОСТЬ',
       empathy: 'ЭМПАТИЯ',
       dominance: 'ДОМИНАНТНОСТЬ',
-      
+
       // Личностные характеристики
       selfEsteem: 'САМООЦЕНКА',
       optimism: 'ОПТИМИЗМ',
       curiosity: 'ЛЮБОПЫТСТВО',
-      
+
       // Специальные характеристики
       sexualExperience: 'СЕКСУАЛЬНАЯ ОПЫТНОСТЬ',
       resistance: 'СОПРОТИВЛЯЕМОСТЬ',
@@ -1295,7 +1297,7 @@ export default function TalentArchitectProd() {
       fetishSensitivity: 'ЧУВСТВИТЕЛЬНОСТЬ К ФЕТИШАМ',
       fetishDiscovery: 'ГОТОВНОСТЬ К ОТКРЫТИЯМ'
     }
-    
+
     return displayNames[stat] || stat.toUpperCase()
   }
 
@@ -1603,7 +1605,7 @@ export default function TalentArchitectProd() {
   const getCategoryIcon = (categoryId: string): string => {
     const icons: { [key: string]: string } = {
       training: "📚",
-      coaching: "🎯", 
+      coaching: "🎯",
       therapy: "🌟",
       work: "💼",
       rest: "😴",
@@ -1619,7 +1621,7 @@ export default function TalentArchitectProd() {
       id: categoryId,
       name: category.title,
       icon: getCategoryIcon(categoryId),
-      actions: Object.entries(category.actions).map(([actionId, action]) => ({
+      actions: Object.entries(category.actions || {}).map(([actionId, action]) => ({
         id: `${categoryId}-${actionId}`,
         name: action.title,
         description: action.description,
@@ -1985,14 +1987,12 @@ export default function TalentArchitectProd() {
       let characterAIResponse = null
       try {
         characterAIResponse = characterAI ? await characterAI.analyzeMessage(message) : null
-        console.log('Character AI анализ:', characterAIResponse)
       } catch (error) {
-        console.log('Character AI недоступен, используем fallback')
       }
 
       // Используем реальную AI-систему персонажей
       const contextData = generateTalentContext(selectedTalent)
-      
+
       const response = await personalWorkIntegration.processMessage({
         talentId: selectedTalent.id,
         message,
@@ -2018,39 +2018,38 @@ export default function TalentArchitectProd() {
       }
 
       setChatMessages((prev) => [...prev, assistantMessage])
-      
+
       // Применяем изменения от обеих систем
       if (response.changes) {
         applyAIChanges(selectedTalent.id, response.changes)
       }
-      
+
       // Применяем изменения от Character AI
       if (characterAIResponse && characterAIResponse.statChanges) {
-        console.log('Применяем изменения от Character AI:', characterAIResponse.statChanges)
-        
+
         // Добавляем уведомления об изменениях характеристик
         const newChanges = Object.entries(characterAIResponse.statChanges).map(([stat, change]) => ({
           stat,
           change,
           timestamp: Date.now()
         }));
-        
+
         setStatChanges(prev => [...prev, ...newChanges]);
-        
+
         // Удаляем уведомления через 5 секунд
         setTimeout(() => {
-          setStatChanges(prev => prev.filter(change => 
+          setStatChanges(prev => prev.filter(change =>
             !newChanges.some(newChange => newChange.timestamp === change.timestamp)
           ));
         }, 5000);
       }
     } catch (error) {
       console.error('Ошибка AI-системы:', error)
-      
+
       // Fallback на заглушку
       const contextData = generateTalentContext(selectedTalent)
       const fallbackMessage = `Понимаю вас, ${selectedTalent.name}. Ваши текущие показатели: интеллект ${contextData.effectiveStats.intelligence}, креативность ${contextData.effectiveStats.creativity}. Как могу помочь?`
-      
+
       const assistantMessage = {
         id: generateUniqueId(),
         role: "assistant" as const,
@@ -2098,7 +2097,7 @@ export default function TalentArchitectProd() {
           if (changes.updatedTalent) {
             return changes.updatedTalent
           }
-          
+
           // Иначе применяем изменения вручную
           const updatedTalent = { ...talent }
 
@@ -2132,7 +2131,7 @@ export default function TalentArchitectProd() {
                 updatedTalent.states.mood = Math.max(0, Math.min(100, updatedTalent.states.mood + moodChange))
               }
             }
-            
+
             // Обновляем страх на основе fear
             if (changes.emotionalContent.fear) {
               const fearChange = Math.round(changes.emotionalContent.fear * 20)
@@ -2140,7 +2139,7 @@ export default function TalentArchitectProd() {
                 updatedTalent.states.anxiety = Math.max(0, Math.min(100, updatedTalent.states.anxiety + fearChange))
               }
             }
-            
+
             // Обновляем возбуждение на основе arousal
             if (changes.emotionalContent.arousal) {
               const arousalChange = Math.round(changes.emotionalContent.arousal * 20)
@@ -2305,7 +2304,6 @@ export default function TalentArchitectProd() {
         break
       case "scanner":
         // Сканирование области
-        console.log(`[v0] Сканирование области ${area.name}`)
         break
       case "calibrator":
         if (areaId === "head" || areaId === "eyes") {
@@ -2329,16 +2327,14 @@ export default function TalentArchitectProd() {
         if (selectedInteractionType) {
           const contextData = generateTalentContext(talent)
           const message = `Взаимодействие с областью ${area.name}`
-          
+
           // Используем Character AI для анализа взаимодействия
           if (characterAI) {
             characterAI?.analyzeMessage(message).then(analysis => {
-              console.log('Character AI анализ взаимодействия:', analysis)
             }).catch(error => {
-              console.log('Character AI недоступен для анализа')
             })
           }
-          
+
           // Используем AI-систему для генерации ответа
           personalWorkIntegration.processMessage({
             talentId: talent.id,
@@ -2360,23 +2356,18 @@ export default function TalentArchitectProd() {
         break
       case "fetish_analyzer":
         // Анализ фетишей для области
-        console.log(`[v0] Анализ фетишей для области ${area.name}`)
         // Интеграция с Character AI для анализа фетишей
         if (characterAI) {
           characterAI.analyzeMessage(`Анализ фетишей в области ${area.name}`).then(analysis => {
-            console.log('Character AI анализ фетишей:', analysis)
           }).catch(error => {
-            console.log('Character AI недоступен для анализа фетишей')
           })
         }
         break
       case "quick_actions":
         // Быстрые действия для области
-        console.log(`[v0] Быстрые действия для области ${area.name}`)
         // Интеграция с Character AI для быстрых действий
         if (characterAI) {
           characterAI.executeQuickAction("area_interaction").catch(error => {
-            console.log('Character AI недоступен для быстрых действий')
           })
         }
         break
@@ -2499,7 +2490,6 @@ export default function TalentArchitectProd() {
       const sceneId = entity.defaultSceneId
 
       if (sceneId) {
-        console.log(`🏭 Открываем сущность станции "${entity.name}" со сценой: ${sceneId}`)
         triggerStoryScene(sceneId, { entity })
       } else {
         console.warn(`⚠️ У сущности "${entity.name}" нет defaultSceneId`)
@@ -2607,14 +2597,6 @@ export default function TalentArchitectProd() {
     )
   }
 
-  // Логирование состояния загрузки
-  console.log('🔄 Рендеринг компонента - configLoading:', configLoading)
-  console.log('🔄 Рендеринг компонента - configError:', configError)
-  console.log('🔄 Рендеринг компонента - gameConfig:', !!gameConfig)
-  console.log('🔄 Рендеринг компонента - gameConfig details:', gameConfig ? {
-    characters: gameConfig.characters?.length || 0,
-    users: gameConfig.users?.length || 0
-  } : 'null')
 
 
 
@@ -2639,8 +2621,8 @@ export default function TalentArchitectProd() {
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold text-white mb-2">Ошибка загрузки</h2>
           <p className="text-gray-400 mb-4">{configError}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg"
           >
             Перезагрузить
@@ -2650,8 +2632,8 @@ export default function TalentArchitectProd() {
     )
   }
 
-  // Проверка наличия конфигурации - теперь с mock данными это не должно происходить
-  if (!gameConfig && !configLoading) {
+  // Проверка наличия конфигурации - теперь с БД это не должно происходить
+  if (!effectiveGameConfig && !configLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
         <div className="text-center">
@@ -2664,7 +2646,7 @@ export default function TalentArchitectProd() {
   }
 
   // Временная отладочная версия
-  if (configLoading || !gameConfig) {
+  if (configLoading || !effectiveGameConfig) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
         <div className="text-center">
@@ -2673,8 +2655,9 @@ export default function TalentArchitectProd() {
           <p className="text-gray-400 mb-4">Загружаем игровые данные</p>
           <div className="text-left bg-gray-800 p-4 rounded max-w-md">
             <p className="text-sm text-cyan-300">Отладочная информация:</p>
-            <p className="text-sm text-gray-300">configLoading: {configLoading ? 'true' : 'false'}</p>
-            <p className="text-sm text-gray-300">gameConfig: {gameConfig ? 'загружен' : 'null'}</p>
+            <p className="text-sm text-gray-300">unifiedLoading: {unifiedLoading ? 'true' : 'false'}</p>
+            <p className="text-sm text-gray-300">unifiedError: {unifiedError || 'none'}</p>
+            <p className="text-sm text-gray-300">effectiveGameConfig: {effectiveGameConfig ? 'загружен' : 'null'}</p>
             <p className="text-sm text-gray-300">characters: {effectiveGameConfig?.characters?.length || 0}</p>
             <p className="text-sm text-gray-300">users: {effectiveGameConfig?.users?.length || 0}</p>
             <p className="text-sm text-gray-300">firstCharacter: {effectiveGameConfig?.characters?.[0]?.name || 'none'}</p>
@@ -2741,6 +2724,14 @@ export default function TalentArchitectProd() {
               ⚙️ Панель
             </Button>
           )}
+          {!currentUser && (
+            <Button
+              onClick={() => setShowRegistration(true)}
+              className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white text-sm px-3 py-1"
+            >
+              🔐 Войти
+            </Button>
+          )}
         </div>
 
         {/* Левая панель - выезжающая */}
@@ -2769,7 +2760,7 @@ export default function TalentArchitectProd() {
               <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 Nexus Enslaver
               </h1>
-              {currentUser && (
+              {currentUser ? (
                 <p className="text-sm text-gray-300 mt-1">
                   Пользователь: <button
                     onClick={() => setShowLogoutModal(true)}
@@ -2778,6 +2769,15 @@ export default function TalentArchitectProd() {
                     {currentUser.username}
                   </button>
                 </p>
+              ) : (
+                <div className="mt-2">
+                  <Button
+                    onClick={() => setShowRegistration(true)}
+                    className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white text-sm px-4 py-2"
+                  >
+                    🔐 Войти в игру
+                  </Button>
+                </div>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -2906,7 +2906,7 @@ export default function TalentArchitectProd() {
               <div className="mb-3">
                 <div className="text-xs text-gray-400 mb-2">Основные характеристики:</div>
                 <div className="grid grid-cols-3 gap-2">
-                  {memoizedEffectiveStats && 
+                  {memoizedEffectiveStats &&
                     Object.entries(memoizedEffectiveStats)
                       .filter(([stat]) => ['mood', 'anxiety', 'engagement'].includes(stat))
                       .map(([stat, value]) => (
@@ -2951,21 +2951,20 @@ export default function TalentArchitectProd() {
               <CharacterPortrait
                 characterId={selectedTalent.id}
                 characterName={selectedTalent.name}
-                currentPose={characterAI?.currentPose ? characterAI.characterAIConfig?.poses?.[characterAI.currentPose] : undefined}
+                currentPose={characterAI?.currentPose && characterAI?.characterAIConfig?.poses?.[selectedTalent.id]?.poses?.[characterAI.currentPose] ? characterAI.characterAIConfig.poses[selectedTalent.id].poses[characterAI.currentPose] : undefined}
                 currentAngle={characterAI?.currentAngle || undefined}
-                availableAngles={characterAI?.currentPose && characterAI?.characterAIConfig?.poses?.[characterAI.currentPose]?.angles || []}
+                availableAngles={characterAI?.currentPose && characterAI?.characterAIConfig?.poses?.[selectedTalent.id]?.poses?.[characterAI.currentPose]?.angles || []}
                 onAngleChange={(angle) => {
                   if (characterAI?.changeAngle) {
                     characterAI.changeAngle(angle.id);
                   }
                 }}
                 onZoneClick={(zone) => {
-                  console.log('🎯 Клик по зоне:', zone.id, zone.name)
                   // Передаем клик по зоне в ActionToolPanel через глобальное состояние
                   if (selectedTool && characterAI?.useTool) {
-                    characterAI.useTool(selectedTool, zone.id, activeToolIntensity, toolDuration)
+                    characterAI.useTool(selectedTool, activeToolIntensity, 5, zone.id)
                   } else if (selectedActionMode && characterAI?.executeAction) {
-                    characterAI.executeAction(selectedActionMode, zone.id, activeActionIntensity)
+                    characterAI.executeAction(selectedActionMode, activeActionIntensity, zone.id)
                   }
                 }}
                 showControls={true}
@@ -3044,7 +3043,7 @@ export default function TalentArchitectProd() {
                   }{" "}
                   предметов
                 </div>
-                
+
                 {/* Список активного оборудования */}
                 <div className="space-y-2">
                   {filteredInventory
@@ -3079,7 +3078,10 @@ export default function TalentArchitectProd() {
           {/* Панель действий и инструментов */}
           {showActionToolPanel && (
             <ActionToolPanel
-              characterAI={characterAI}
+              characterAI={{
+                ...characterAI,
+                characterAIConfig: characterAIConfig
+              }}
               selectedTalent={selectedTalent}
               onClose={() => setShowActionToolPanel(false)}
               onToolModeChange={(toolId, intensity) => {
@@ -3092,7 +3094,7 @@ export default function TalentArchitectProd() {
               }}
             />
           )}
-          
+
           {/* Чат с персонажем */}
           {showCharacterChat && (
             <CharacterChat
@@ -3581,7 +3583,7 @@ export default function TalentArchitectProd() {
                   </div>
                 )
               })()}
-            
+
           </div>
         </div>
       )}
@@ -3595,26 +3597,9 @@ export default function TalentArchitectProd() {
         onRegister={handleUserRegistration}
       />
 
-      {/* Кнопка отладки OpenRouter */}
-      <div className="fixed top-4 right-4 z-50">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowOpenRouterDebug(!showOpenRouterDebug)}
-          className="bg-black/50 border-white/20 text-white hover:bg-black/70"
-        >
-          {showOpenRouterDebug ? '🔴' : '🟢'} OpenRouter Debug
-        </Button>
-      </div>
-
-      {/* Отладочная панель OpenRouter */}
-      <OpenRouterDebugPanel 
-        isVisible={showOpenRouterDebug}
-        onToggle={() => setShowOpenRouterDebug(false)}
-      />
 
       {/* Уведомления об изменениях характеристик */}
-      <StatNotification 
+      <StatNotification
         changes={statChanges}
         onRemove={(timestamp) => {
           setStatChanges(prev => prev.filter(change => change.timestamp !== timestamp));
@@ -3623,7 +3608,7 @@ export default function TalentArchitectProd() {
 
       {/* Динамическая панель характеристик (сквозной конфиг) */}
       {/* Заменяем старую CharacterStatsPanel на новую CharacterPanel */}
-      <CharacterPanel 
+      <CharacterPanel
         talent={selectedTalent}
         isVisible={showCharacterPanel}
       />

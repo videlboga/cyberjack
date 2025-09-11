@@ -48,7 +48,7 @@ const NexusEnslaverGame = () => {
   const [activeSubTab, setActiveSubTab] = useState("assets")
   const [configStats, setConfigStats] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  
+
 
 
   // Состояние для панели знаний пользователя
@@ -60,7 +60,7 @@ const NexusEnslaverGame = () => {
 
   // Используем наши новые хуки
   const { modalState, openModal, closeModal } = useModal()
-  
+
   const [userAssetsModalState, setUserAssetsModalState] = useState<{
     isOpen: boolean
     user: any | null
@@ -70,7 +70,7 @@ const NexusEnslaverGame = () => {
   })
 
 
-  
+
   // Загружаем конфигурации асинхронно
   const [configs, setConfigs] = useState<any>({
     assets: { assets: [] },
@@ -110,7 +110,15 @@ const NexusEnslaverGame = () => {
             crises: (loadedConfigs as any)?.events?.crises || [],
             opportunities: (loadedConfigs as any)?.events?.opportunities || []
           },
-          characters: { characters: Array.isArray((loadedConfigs as any)?.characters) ? (loadedConfigs as any).characters : [] },
+          characters: {
+            characters: Array.isArray((loadedConfigs as any)?.characters)
+              ? (loadedConfigs as any).characters.map((character: any) => ({
+                  ...character,
+                  // Объединяем индивидуальные позы персонажа
+                  poses: (loadedConfigs as any)?.characterAI?.poses?.[character.id] || {}
+                }))
+              : []
+          },
           equipment: { equipment: Array.isArray((loadedConfigs as any)?.equipment) ? (loadedConfigs as any).equipment : [] },
           system: (loadedConfigs as any)?.system || {},
           users: { users: Array.isArray((loadedConfigs as any)?.users) ? (loadedConfigs as any).users : [] },
@@ -166,7 +174,7 @@ const NexusEnslaverGame = () => {
       const updatedConfigs = { ...configs, characterAI: newConfig }
       setConfigs(updatedConfigs)
       setCharacterAIConfig(newConfig)
-      
+
       // Синхронизируем с файлом через API
       const response = await fetch('/api/sync-data', {
         method: 'POST',
@@ -178,7 +186,7 @@ const NexusEnslaverGame = () => {
           data: { characterAI: newConfig }
         }),
       })
-      
+
       if (response.ok) {
 
         return true
@@ -194,29 +202,29 @@ const NexusEnslaverGame = () => {
 
   const addCharacterAIItem = async (type: 'actions' | 'tools' | 'poses', item: any) => {
     if (!characterAIConfig) return false
-    
+
     const newConfig = { ...characterAIConfig }
     const id = item.id || `new_${type}_${Date.now()}`
     newConfig[type][id] = { ...item, id }
-    
+
     return await saveCharacterAIConfig(newConfig)
   }
 
   const updateCharacterAIItem = async (type: 'actions' | 'tools' | 'poses', id: string, item: any) => {
     if (!characterAIConfig) return false
-    
+
     const newConfig = { ...characterAIConfig }
     newConfig[type][id] = { ...item, id }
-    
+
     return await saveCharacterAIConfig(newConfig)
   }
 
   const deleteCharacterAIItem = async (type: 'actions' | 'tools' | 'poses', id: string) => {
     if (!characterAIConfig) return false
-    
+
     const newConfig = { ...characterAIConfig }
     delete newConfig[type][id]
-    
+
     return await saveCharacterAIConfig(newConfig)
   }
 
@@ -229,12 +237,16 @@ const NexusEnslaverGame = () => {
         hasStation: !!configs.station,
         stationEntitiesCount: configs.station?.stationEntities ? Object.keys(configs.station.stationEntities).length : 0,
         configsKeys: Object.keys(configs),
+        hasCharacters: !!configs.characters?.characters,
+        charactersCount: configs.characters?.characters?.length || 0,
+        hasCharacterAI: !!configs.characterAI,
+        characterAIPosesCount: configs.characterAI?.poses ? Object.keys(configs.characterAI.poses).length : 0,
         stationData: configs.station
       })
       updateConfigs(configs)
       console.log('✅ managedConfigs updated')
     }
-  }, [configs, isLoading])
+  }, [configs, isLoading, updateConfigs])
 
   // Обновляем статистику при изменении конфигураций
   useEffect(() => {
@@ -259,15 +271,24 @@ const NexusEnslaverGame = () => {
 
   // Обработчики для модального окна
   const handleEdit = (entity: any, entityType: string) => {
-    openModal(entityType, entity)
+    // Для персонажей добавляем данные поз из characterAI
+    if (entityType === 'characters' && entity?.id) {
+      const characterWithPoses = {
+        ...entity,
+        poses: configs.characterAI?.poses?.[entity.id]?.poses || {}
+      }
+      openModal(entityType, characterWithPoses)
+    } else {
+      openModal(entityType, entity)
+    }
   }
 
   const handleAdd = (entityType: string, defaultData?: any) => {
 
-    
+
     // Создаем базовый объект в зависимости от типа
     let baseEntity: any = {}
-    
+
     switch (entityType) {
       case 'action-category':
         baseEntity = {
@@ -387,7 +408,7 @@ const NexusEnslaverGame = () => {
       default:
         baseEntity = {}
     }
-    
+
     // Объединяем с переданными данными
     const entityData = { ...baseEntity, ...defaultData }
     openModal(entityType, entityData, undefined, true)
@@ -472,25 +493,40 @@ const NexusEnslaverGame = () => {
         }
       }
 
-      // Если это персонаж и у него есть poses, сохраняем их в characterAI
+      // Если это персонаж и у него есть poses, сохраняем их в БД
       if (modalState.type === 'characters' && data.poses) {
-        setConfigs(prev => ({
-          ...prev,
-          characterAI: {
-            ...prev.characterAI,
-            poses: data.poses
-          }
-        }))
-        // Сохраняем poses в файл
         try {
-          const updatedCharacterAI = {
-            ...configs.characterAI,
-            poses: data.poses
+          console.log('🔄 Сохраняем позы персонажа в БД:', data.id)
+          const res = await fetch('/api/sync-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              configType: 'poses',
+              data: { poses: { [data.id]: data.poses } }
+            })
+          })
+          if (!res.ok) throw new Error(`sync-data HTTP ${res.status}`)
+          console.log('✅ Позы персонажа сохранены в БД')
+        } catch (err) {
+          console.warn('⚠️ sync-data недоступен для поз, выполняем fallback:', err)
+          // Fallback: сохраняем в файл
+          setConfigs(prev => ({
+            ...prev,
+            characterAI: {
+              ...prev.characterAI,
+              poses: data.poses
+            }
+          }))
+          try {
+            const updatedCharacterAI = {
+              ...configs.characterAI,
+              poses: data.poses
+            }
+            saveConfigToFile('characterAI', updatedCharacterAI)
+            syncConfigToFiles('characterAI', updatedCharacterAI)
+          } catch (error) {
+            console.error('❌ Ошибка сохранения poses (fallback):', error)
           }
-          saveConfigToFile('characterAI', updatedCharacterAI)
-          syncConfigToFiles('characterAI', updatedCharacterAI)
-        } catch (error) {
-          console.error('Ошибка сохранения poses:', error)
         }
       }
     }
@@ -683,21 +719,20 @@ const NexusEnslaverGame = () => {
         userEquipment: updatedUser.userEquipment
       })
 
-      fetch('/api/sync-data', {
-        method: 'POST',
+      fetch('/api/db/users', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          configType: 'users',
-          data: {
-            users: [updatedUser] // API ожидает массив пользователей
-          }
-        })
+        body: JSON.stringify(updatedUser) // API ожидает объект пользователя с id
       })
       .then(response => response.json())
       .then(result => {
-        // Конфигурация обновляется автоматически через updateConfigItem
+        console.log('✅ Пользователь обновлен в БД:', result)
+        // Очищаем кэш универсальной конфигурации
+        fetch('/api/db/config', { method: 'POST' })
+          .then(() => console.log('🗑️ Кэш конфигурации очищен'))
+          .catch(err => console.error('❌ Ошибка очистки кэша:', err))
       })
       .catch(error => {
         console.error('Ошибка синхронизации с сервером:', error)
@@ -714,7 +749,7 @@ const NexusEnslaverGame = () => {
   const getEntitiesList = (configType: string, subType?: string) => {
     // Берём данные сначала из managedConfigs, если они ещё не обновились — из raw configs
     const config = (managedConfigs as any)[configType] ?? (configs as any)[configType]
-    
+
     switch (configType) {
       case 'actions':
         // Для действий - возвращаем список всех действий
@@ -783,7 +818,7 @@ const NexusEnslaverGame = () => {
                 analysisHistory: character.analysisHistory,
                 availableAnalysisMethods: character.availableAnalysisMethods,
                 type: 'character',
-                poses: configs.characterAI?.poses || {},
+                poses: config.characterAI?.poses?.[character.id] || {},
                 ...character
               })
             })
@@ -875,7 +910,7 @@ const NexusEnslaverGame = () => {
       case 'scenes':
         // Для сюжетной системы - возвращаем сцены, экраны и сюжетные точки
         const storyEntities: any[] = []
-        
+
         // Добавляем сюжетные точки
         if (config?.storyPoints) {
           Object.entries(config.storyPoints).forEach(([pointId, point]: [string, any]) => {
@@ -892,7 +927,7 @@ const NexusEnslaverGame = () => {
             })
           })
         }
-        
+
         // Добавляем сцены
         if (config?.scenes) {
           config.scenes.forEach((scene: any) => {
@@ -909,7 +944,7 @@ const NexusEnslaverGame = () => {
             })
           })
         }
-        
+
         // Добавляем экраны из сцен
         if (config?.scenes) {
           config.scenes.forEach((scene: any) => {
@@ -931,7 +966,7 @@ const NexusEnslaverGame = () => {
             }
           })
         }
-        
+
         return storyEntities
       case 'system':
         // Обрабатываем system из разных источников (unified или system-definitions.json)
@@ -1001,13 +1036,13 @@ const NexusEnslaverGame = () => {
       fetishes: [],
       resources: []
     }
-    
+
     allAttributes.forEach((attr: any) => {
       if (grouped[attr.category]) {
         grouped[attr.category].push(attr)
       }
     })
-    
+
     return grouped
   }
 
@@ -1019,7 +1054,7 @@ const NexusEnslaverGame = () => {
       clothing: [],
       devices: []
     }
-    
+
     allItems.forEach((item: any) => {
       const category = item.category || 'devices'
       if (grouped[category]) {
@@ -1028,7 +1063,7 @@ const NexusEnslaverGame = () => {
         grouped.devices.push(item)
       }
     })
-    
+
     return grouped
   }
 
@@ -1054,7 +1089,7 @@ const NexusEnslaverGame = () => {
                 <SyncStatus isSynced={true} lastSync={new Date()} onSync={() => console.log('Синхронизация...')} />
               </div>
             </div>
-            
+
             <div className="ml-auto flex items-center space-x-3">
               {/* Stats Overview */}
               <div className="hidden lg:flex items-center space-x-2">
@@ -1067,7 +1102,7 @@ const NexusEnslaverGame = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Button
                   variant="ghost"
@@ -1100,7 +1135,7 @@ const NexusEnslaverGame = () => {
                   </p>
                 </div>
               </div>
-              
+
               <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50 p-1 rounded-lg">
                 <TabsTrigger value="entities" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
@@ -1608,7 +1643,7 @@ const NexusEnslaverGame = () => {
                             <p className="text-sm text-gray-400 mb-2">{category.description}</p>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-xs" style={{ color: category.color }}>
-                                {Object.keys(characterAIConfig.actions || {}).filter((actionId: string) => 
+                                {Object.keys(characterAIConfig.actions || {}).filter((actionId: string) =>
                                   characterAIConfig.actions[actionId]?.category === id
                                 ).length} действий
                               </Badge>
@@ -1639,12 +1674,12 @@ const NexusEnslaverGame = () => {
                     <CardContent>
                       <div className="space-y-4">
                         {Object.entries(characterAIConfig.actionCategories || {}).map(([categoryId, category]: [string, any]) => {
-                          const categoryActions = Object.entries(characterAIConfig.actions || {}).filter(([id, action]: [string, any]) => 
+                          const categoryActions = Object.entries(characterAIConfig.actions || {}).filter(([id, action]: [string, any]) =>
                             action.category === categoryId
                           )
-                          
+
                           if (categoryActions.length === 0) return null
-                          
+
                           return (
                             <div key={categoryId} className="space-y-2">
                               <div className="flex items-center gap-2 text-cyan-300 font-medium">
@@ -1684,8 +1719,8 @@ const NexusEnslaverGame = () => {
                                       <div className="flex items-center gap-2">
                                         <span className="text-xs text-gray-500">Интенсивность:</span>
                                         <div className="flex-1 bg-gray-200 rounded-full h-1">
-                                          <div 
-                                            className="bg-cyan-500 h-1 rounded-full" 
+                                          <div
+                                            className="bg-cyan-500 h-1 rounded-full"
                                             style={{ width: `${(action.intensity / 10) * 100}%` }}
                                           ></div>
                                         </div>
@@ -1755,8 +1790,8 @@ const NexusEnslaverGame = () => {
                                 <span className="text-xs text-gray-500">Сложность:</span>
                                 <div className="flex gap-1">
                                   {[...Array(5)].map((_, i) => (
-                                    <div 
-                                      key={i} 
+                                    <div
+                                      key={i}
                                       className={`w-2 h-2 rounded-full ${i < pose.difficulty ? 'bg-orange-500' : 'bg-gray-200'}`}
                                     />
                                   ))}
@@ -1823,7 +1858,7 @@ const NexusEnslaverGame = () => {
                             <p className="text-sm text-gray-400 mb-2">{category.description}</p>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-xs" style={{ color: category.color }}>
-                                {Object.keys(characterAIConfig.tools || {}).filter((toolId: string) => 
+                                {Object.keys(characterAIConfig.tools || {}).filter((toolId: string) =>
                                   characterAIConfig.tools[toolId]?.category === id
                                 ).length} инструментов
                               </Badge>
@@ -1854,12 +1889,12 @@ const NexusEnslaverGame = () => {
                     <CardContent>
                       <div className="space-y-4">
                         {Object.entries(characterAIConfig.toolCategories || {}).map(([categoryId, category]: [string, any]) => {
-                          const categoryTools = Object.entries(characterAIConfig.tools || {}).filter(([id, tool]: [string, any]) => 
+                          const categoryTools = Object.entries(characterAIConfig.tools || {}).filter(([id, tool]: [string, any]) =>
                             tool.category === categoryId
                           )
-                          
+
                           if (categoryTools.length === 0) return null
-                          
+
                           return (
                             <div key={categoryId} className="space-y-2">
                               <div className="flex items-center gap-2 text-purple-300 font-medium">
@@ -1899,8 +1934,8 @@ const NexusEnslaverGame = () => {
                                       <div className="flex items-center gap-2">
                                         <span className="text-xs text-gray-500">Интенсивность:</span>
                                         <div className="flex-1 bg-gray-200 rounded-full h-1">
-                                          <div 
-                                            className="bg-purple-500 h-1 rounded-full" 
+                                          <div
+                                            className="bg-purple-500 h-1 rounded-full"
                                             style={{ width: `${(tool.intensity / 10) * 100}%` }}
                                           ></div>
                                         </div>
@@ -1986,8 +2021,8 @@ const NexusEnslaverGame = () => {
                                   <span className="text-xs text-gray-500">Сложность:</span>
                                   <div className="flex gap-1">
                                     {[...Array(5)].map((_, i) => (
-                                      <div 
-                                        key={i} 
+                                      <div
+                                        key={i}
                                         className={`w-2 h-2 rounded-full ${i < pose.difficulty ? 'bg-orange-500' : 'bg-gray-200'}`}
                                       />
                                     ))}

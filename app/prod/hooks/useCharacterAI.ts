@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { MessageAnalysisService } from '@/lib/character/message-analysis-service';
 import { PoseManagementService } from '@/lib/character/pose-management-service';
-import { 
-  CharacterAIConfig, 
-  InteractiveAction, 
-  InteractiveTool, 
+import {
+  CharacterAIConfig,
+  InteractiveAction,
+  InteractiveTool,
   InteractiveArea,
   QuickAction,
   Pose,
@@ -15,6 +15,7 @@ import {
 
 interface UseCharacterAIProps {
   characterAIConfig: CharacterAIConfig;
+  characterId?: string; // ID персонажа для поиска индивидуальных поз
   characterStates: { [key: string]: number };
   characterAttributes: { [key: string]: number };
   characterFetishes: { [key: string]: number };
@@ -26,47 +27,50 @@ interface UseCharacterAIProps {
 interface UseCharacterAIReturn {
   // Состояние
   currentPose: string;
+  currentAngle: any;
   poseHistory: Array<{ poseId: string; timestamp: number; reason: string }>;
   lastAction: string | null;
   lastTool: string | null;
   cooldowns: { [key: string]: number };
-  
+
   // Конфигурация
   characterAIConfig: CharacterAIConfig;
-  
+
   // Сервисы
   messageAnalysisService: MessageAnalysisService | null;
   poseManagementService: PoseManagementService | null;
-  
+
   // Действия
   executeAction: (actionId: string, intensity: number, area?: string) => Promise<void>;
   useTool: (toolId: string, intensity: number, duration: number, area?: string) => Promise<void>;
   startToolUse: (toolId: string, intensity: number, area?: string) => Promise<void>;
   stopToolUse: () => void;
   startActionUse: (actionId: string, intensity: number, area?: string) => void;
+  changeAngle: (angleId: string) => void;
   stopActionUse: () => void;
   changePose: (poseId: string, force?: boolean) => Promise<boolean>;
   executeQuickAction: (actionId: string) => Promise<void>;
   analyzeMessage: (message: string, selectedCharacter?: any) => Promise<MessageAnalysis>;
-  
+
   // Проверки
   canExecuteAction: (actionId: string) => boolean;
   canUseTool: (toolId: string) => boolean;
   canChangePose: (poseId: string) => boolean;
-  
+
   // Получение данных
   getAvailableActions: () => InteractiveAction[];
   getAvailableTools: () => InteractiveTool[];
   getAvailablePoses: () => Pose[];
   getInteractiveAreas: () => InteractiveArea[];
   getQuickActions: () => QuickAction[];
-  
+
   // Автоматические проверки
   checkAutomaticPoseChanges: () => Promise<void>;
 }
 
 export function useCharacterAI({
   characterAIConfig,
+  characterId,
   characterStates,
   characterAttributes,
   characterFetishes,
@@ -88,38 +92,52 @@ export function useCharacterAI({
 
   // Автоматический выбор дефолтной позы при изменении конфигурации
   useEffect(() => {
-    if (characterAIConfig?.poses && Object.keys(characterAIConfig.poses).length > 0 && !currentPose) {
-      // Выбираем первую доступную позу как дефолтную
+    if (characterId && characterAIConfig?.poses?.[characterId]?.poses && Object.keys(characterAIConfig.poses[characterId].poses).length > 0 && !currentPose) {
+      // Выбираем первую доступную позу как дефолтную для конкретного персонажа
+      const characterPoses = characterAIConfig.poses[characterId].poses;
+      const firstPoseId = Object.keys(characterPoses)[0];
+      console.log('🎯 useCharacterAI: Автоматический выбор дефолтной позы:', firstPoseId, 'для персонажа:', characterId);
+      setCurrentPose(firstPoseId);
+      addPoseHistory(firstPoseId, 'Дефолтная поза при инициализации');
+    } else if (!characterId && characterAIConfig?.poses && Object.keys(characterAIConfig.poses).length > 0 && !currentPose) {
+      // Для глобальных поз выбираем первую доступную
       const firstPoseId = Object.keys(characterAIConfig.poses)[0];
-      console.log('🎯 useCharacterAI: Автоматический выбор дефолтной позы:', firstPoseId);
+      console.log('🎯 useCharacterAI: Автоматический выбор дефолтной позы:', firstPoseId, '(глобальная)');
       setCurrentPose(firstPoseId);
       addPoseHistory(firstPoseId, 'Дефолтная поза при инициализации');
     }
-  }, [characterAIConfig?.poses, currentPose, addPoseHistory]);
+  }, [characterId, characterAIConfig?.poses, currentPose, addPoseHistory]);
 
   // Автоматический выбор первого ракурса при смене позы
   useEffect(() => {
-    if (currentPose && characterAIConfig?.poses?.[currentPose]) {
-      const pose = characterAIConfig.poses[currentPose];
+    if (currentPose && characterId && characterAIConfig?.poses?.[characterId]?.poses?.[currentPose]) {
+      const pose = characterAIConfig.poses[characterId].poses[currentPose];
       if (pose.angles && pose.angles.length > 0 && !currentAngle) {
         const firstAngle = pose.angles[0];
         console.log('📷 useCharacterAI: Автоматический выбор первого ракурса:', firstAngle.name);
         setCurrentAngle(firstAngle);
       }
+    } else if (currentPose && !characterId && characterAIConfig?.poses?.[currentPose]) {
+      const pose = characterAIConfig.poses[currentPose];
+      if (pose.angles && pose.angles.length > 0 && !currentAngle) {
+        const firstAngle = pose.angles[0];
+        console.log('📷 useCharacterAI: Автоматический выбор первого ракурса:', firstAngle.name, '(глобальная поза)');
+        setCurrentAngle(firstAngle);
+      }
     }
-  }, [currentPose, characterAIConfig?.poses, currentAngle]);
+  }, [currentPose, characterId, characterAIConfig?.poses, currentAngle]);
   const [lastAction, setLastAction] = useState<string | null>(null);
   const [lastTool, setLastTool] = useState<string | null>(null);
   const [cooldowns, setCooldowns] = useState<{ [key: string]: number }>({});
   const autoMessageTimers = useRef<{ intervalId: any; stopId: any } | null>(null)
   const activeToolRef = useRef<{ toolId: string; area?: string; intensity: number; clickCount: number; startAt: number; intervals?: any } | null>(null)
   const activeActionRef = useRef<{ actionId: string; area?: string; intensity: number; clickCount: number; startAt: number } | null>(null)
-  
+
   // Инициализация сервисов - создаем только один раз
   const [messageAnalysisService] = useState(() => {
     return geminiApiKey ? new MessageAnalysisService(geminiApiKey) : null;
   });
-  
+
   const [poseManagementService] = useState(() => {
     // Создаем сервис только если есть конфигурация
     if (!characterAIConfig) {
@@ -149,7 +167,7 @@ export function useCharacterAI({
   // Функция для установки кулдауна
   const setCooldown = useCallback((actionId: string, duration: number) => {
     setCooldowns(prev => ({ ...prev, [actionId]: duration }));
-    
+
     setTimeout(() => {
       setCooldowns(prev => {
         const newCooldowns = { ...prev };
@@ -469,9 +487,17 @@ export function useCharacterAI({
 
   // Смена позы
   const changePose = useCallback(async (poseId: string, force: boolean = false): Promise<boolean> => {
-    const pose = characterAIConfig?.poses?.[poseId];
+    // Проверяем, что персонаж выбран
+    if (!characterId) {
+      console.error(`Нельзя сменить позу: персонаж не выбран`);
+      return false;
+    }
+
+    // Ищем позу для конкретного персонажа
+    const characterPoses = characterAIConfig?.poses?.[characterId]?.poses;
+    const pose = characterPoses?.[poseId];
     if (!pose) {
-      console.error(`Поза ${poseId} не найдена`);
+      console.error(`Поза ${poseId} не найдена для персонажа ${characterId}`);
       return false;
     }
 
@@ -539,7 +565,7 @@ export function useCharacterAI({
     console.log('🔍 Анализ сообщения:', message);
     console.log('🔧 MessageAnalysisService:', messageAnalysisService ? 'Доступен' : 'Недоступен');
     console.log('🎭 Выбранный персонаж:', selectedCharacter?.name || 'Не указан');
-    
+
     if (!messageAnalysisService) {
       console.warn('⚠️ MessageAnalysisService недоступен - возвращаем базовый ответ');
       return {
@@ -557,16 +583,16 @@ export function useCharacterAI({
       const characterPersonality = selectedCharacter?.personality || "Покорный и послушный";
       const characterRole = selectedCharacter?.role || "Подчиненный";
       const characterState = selectedCharacter?.currentState || "Готов к взаимодействию";
-      
+
       // Используем характеристики персонажа, если они есть
       const characterAttributes = selectedCharacter?.attributes || {};
       const characterStates = selectedCharacter?.states || {};
       const characterFetishes = selectedCharacter?.fetishes || {};
-      
+
       // Получаем базовый промт персонажа из unified конфигурации (приоритет нашей системы промтов)
       const characterBasePrompt = selectedCharacter?.prompts?.base ||
-        selectedCharacter?.prompt?.character || 
-        selectedCharacter?.description || 
+        selectedCharacter?.prompt?.character ||
+        selectedCharacter?.description ||
         characterAIConfig?.llmPrompts?.basePrompt || '';
 
       // Безопасные промты персонажа (нужны для PromptSystem)
@@ -575,7 +601,7 @@ export function useCharacterAI({
         characteristicInterpretations: {},
         situational: []
       };
-      
+
       // Составляем контекст текущего взаимодействия (инструменты/действия прямо сейчас)
       const currentInteraction: Array<{
         type: 'action' | 'tool'
@@ -702,7 +728,7 @@ export function useCharacterAI({
       } catch (e) {
         console.warn('⚠️ Не удалось применить смену позы:', e);
       }
-      
+
       return result;
     } catch (error) {
       console.error('❌ Ошибка анализа сообщения:', error);
@@ -784,7 +810,12 @@ export function useCharacterAI({
   }, [characterAIConfig?.tools, cooldowns, characterStates, userEquipment]);
 
   const canChangePose = useCallback((poseId: string): boolean => {
-    const pose = characterAIConfig?.poses?.[poseId];
+    // Проверяем, что персонаж выбран
+    if (!characterId) return false;
+
+    // Ищем позу для конкретного персонажа
+    const characterPoses = characterAIConfig?.poses?.[characterId]?.poses;
+    const pose = characterPoses?.[poseId];
     if (!pose) return false;
 
     const requirements: any = pose.requirements || {};
@@ -812,9 +843,11 @@ export function useCharacterAI({
   }, [characterAIConfig?.tools, canUseTool]);
 
   const getAvailablePoses = useCallback((): Pose[] => {
-    if (!poseManagementService) return [] as Pose[];
-    return poseManagementService.getAvailablePoses(characterAttributes, characterStates, userEquipment);
-  }, [poseManagementService, characterAttributes, characterStates, userEquipment]);
+    // Возвращаем позы для конкретного персонажа
+    if (!characterId) return [];
+    const characterPoses = characterAIConfig?.poses?.[characterId]?.poses;
+    return Object.values(characterPoses || {}) as Pose[];
+  }, [characterId, characterAIConfig?.poses]);
 
   const getInteractiveAreas = useCallback((): InteractiveArea[] => {
     return Object.values(characterAIConfig.interactiveAreas || {});
@@ -839,14 +872,14 @@ export function useCharacterAI({
     lastAction,
     lastTool,
     cooldowns,
-    
+
     // Конфигурация
     characterAIConfig,
-    
+
     // Сервисы
     messageAnalysisService,
     poseManagementService,
-    
+
     // Действия
     executeAction,
     useTool,
@@ -867,19 +900,19 @@ export function useCharacterAI({
     },
     executeQuickAction,
     analyzeMessage,
-    
+
     // Проверки
     canExecuteAction,
     canUseTool,
     canChangePose,
-    
+
     // Получение данных
     getAvailableActions,
     getAvailableTools,
     getAvailablePoses,
     getInteractiveAreas,
     getQuickActions,
-    
+
     // Автоматические проверки
     checkAutomaticPoseChanges
   };

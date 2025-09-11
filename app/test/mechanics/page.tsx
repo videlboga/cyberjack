@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useCharacterAI } from '../../prod/hooks/useCharacterAI'
-import { loadUnifiedConfigV2 } from '../../../lib/unified-config-loader'
+import { loadGameConfig } from '../../../lib/simple-db-loader'
 import { MessageAnalysisService } from '../../../lib/character/message-analysis-service'
 
 interface MechanicsTesterProps {}
@@ -45,7 +45,7 @@ export default function MechanicsTester({}: MechanicsTesterProps) {
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const cfg = await loadUnifiedConfigV2()
+        const cfg = await loadGameConfig()
         setConfig(cfg)
         const base = cfg?.characterAI?.llmPrompts?.basePrompt || ''
         setLlmBasePrompt(base)

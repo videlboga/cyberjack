@@ -6,11 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight, Star, Zap, Heart, Shield, Target } from 'lucide-react';
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
 } from '@/components/ui/tooltip';
 
 interface Pose {
@@ -90,12 +90,14 @@ export function PoseDisplay({
 
   const getPosesByCategory = () => {
     const grouped: Record<string, Pose[]> = {};
-    Object.values(poses).forEach(pose => {
-      if (!grouped[pose.category]) {
-        grouped[pose.category] = [];
-      }
-      grouped[pose.category].push(pose);
-    });
+    if (poses && typeof poses === 'object') {
+      Object.values(poses).forEach(pose => {
+        if (!grouped[pose.category]) {
+          grouped[pose.category] = [];
+        }
+        grouped[pose.category].push(pose);
+      });
+    }
     return grouped;
   };
 
@@ -116,12 +118,12 @@ export function PoseDisplay({
       <h3 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
         🎭 {title}
       </h3>
-      
+
       <div className="space-y-2">
-        {Object.entries(categories).map(([categoryId, category]) => {
+        {categories && typeof categories === 'object' ? Object.entries(categories).map(([categoryId, category]) => {
           const categoryPoses = posesByCategory[categoryId] || [];
           const isExpanded = expandedCategories.has(categoryId);
-          
+
           return (
             <Card key={categoryId} className="border border-gray-600 bg-gray-800/50 hover:border-gray-500 transition-colors">
               <Collapsible open={isExpanded} onOpenChange={() => toggleCategory(categoryId)}>
@@ -136,8 +138,8 @@ export function PoseDisplay({
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`text-xs ${getCategoryColor(category.color)}`}
                         >
                           {categoryPoses.length} поз
@@ -147,7 +149,7 @@ export function PoseDisplay({
                     </div>
                   </CardHeader>
                 </CollapsibleTrigger>
-                
+
                 <CollapsibleContent>
                   <CardContent className="pt-0">
                     <div className="grid grid-cols-1 gap-2">
@@ -207,16 +209,16 @@ export function PoseDisplay({
                                     <div>
                                       <p className="font-semibold text-orange-400">Требования:</p>
                                       <ul className="list-disc list-inside ml-2 text-xs">
-                                        {Object.entries(pose.requirements).map(([key, value]) => (
+                                        {pose.requirements && typeof pose.requirements === 'object' ? Object.entries(pose.requirements).map(([key, value]) => (
                                           <li key={key}>{key}: {value}</li>
-                                        ))}
+                                        )) : null}
                                       </ul>
                                     </div>
                                   )}
                                   {pose.effects && (
                                     <div>
                                       <p className="font-semibold text-cyan-400">Эффекты:</p>
-                                      {Object.entries(pose.effects).map(([effectType, effects]) => (
+                                      {pose.effects && typeof pose.effects === 'object' ? Object.entries(pose.effects).map(([effectType, effects]) => (
                                         <div key={effectType} className="mt-1">
                                           <div className="flex items-center gap-1 text-xs font-medium">
                                             {getEffectIcon(effectType)}
@@ -228,7 +230,7 @@ export function PoseDisplay({
                                             ))}
                                           </ul>
                                         </div>
-                                      ))}
+                                      )) : null}
                                     </div>
                                   )}
                                   {pose.tags && pose.tags.length > 0 && (
@@ -255,9 +257,8 @@ export function PoseDisplay({
               </Collapsible>
             </Card>
           );
-        })}
+        }) : null}
       </div>
     </div>
   );
 }
-

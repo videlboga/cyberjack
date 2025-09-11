@@ -130,10 +130,10 @@ export default function TalentArchitectProdNew() {
 
   // Загрузка талантов и оборудования
   React.useEffect(() => {
-    if (gameConfig?.assets?.assets && gameConfig?.equipment?.equipment && currentUser) {
+    if (gameConfig?.characters && gameConfig?.equipment?.equipment && currentUser) {
       // Загружаем таланты пользователя
-      const userTalents = gameConfig.assets.assets.filter(asset =>
-        currentUser.characters?.includes(asset.id) || currentUser.assets?.includes(asset.id)
+      const userTalents = gameConfig.characters.filter(character =>
+        currentUser.characters?.includes(character.id)
       );
       setTalents(userTalents);
 
