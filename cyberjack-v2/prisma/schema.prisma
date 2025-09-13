@@ -1,0 +1,416 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Пользователи
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Модификаторы для формул
+  modifiers String   @default("{}")
+
+  // Кредиты
+  credits   Int      @default(1000)
+
+  // Независимые копии персонажей
+  characterCopies CharacterCopy[]
+
+  // Знания о персонажах
+  characterKnowledge CharacterKnowledge[]
+
+  // Сессии
+  sessions Session[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// Персонажи (базовые)
+model Character {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  age         Int?
+  avatar      String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Характеристики
+  characteristics Characteristic[]
+
+  // Анатомия
+  anatomy CharacterAnatomy[]
+
+  // Позы
+  poses CharacterPose[]
+
+  // Промпты для ИИ
+  prompts String @default("{}")
+
+  // Копии у пользователей
+  copies CharacterCopy[]
+
+  // Знания пользователей
+  knowledge CharacterKnowledge[]
+
+  @@map("characters")
+}
+
+// Характеристики персонажа
+model Characteristic {
+  id                String   @id @default(cuid())
+  characterId       String
+  characteristicDefId String
+
+  // Текущее и базовое значение
+  currentValue      Float
+  baseValue         Float
+
+  // Система восстановления
+  recoveryRate      Float    @default(1.0)
+  shiftThreshold    Int      @default(60)    // минуты
+  shiftRate         Float    @default(0.1)
+  timeInAlteredState Int     @default(0)     // минуты
+
+  // Временные метки
+  lastChanged       DateTime @default(now())
+  lastRecovery      DateTime @default(now())
+
+  character         Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  definition        CharacteristicDefinition @relation(fields: [characteristicDefId], references: [id])
+
+  @@unique([characterId, characteristicDefId])
+  @@map("characteristics")
+}
+
+// Определения характеристик
+model CharacteristicDefinition {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?
+  minValue    Float    @default(0)
+  maxValue    Float    @default(100)
+  isActive    Boolean  @default(true)
+
+  // Характеристики персонажей
+  characteristics Characteristic[]
+
+  // Знания пользователей
+  knowledge CharacterKnowledge[]
+
+  @@map("characteristic_definitions")
+}
+
+// Анатомия персонажа
+model CharacterAnatomy {
+  id                String   @id @default(cuid())
+  characterId       String
+  anatomyDefId      String
+
+  hasPart           Boolean  @default(false)
+  sensitivity       Float    @default(50)  // 0-100
+
+  character         Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  definition        AnatomyDefinition @relation(fields: [anatomyDefId], references: [id])
+
+  @@unique([characterId, anatomyDefId])
+  @@map("character_anatomy")
+}
+
+// Определения анатомии
+model AnatomyDefinition {
+  id          String   @id @default(cuid())
+  name        String
+  category    String?
+  description String?
+  isActive    Boolean  @default(true)
+
+  // Анатомия персонажей
+  anatomy CharacterAnatomy[]
+
+  // Активные зоны
+  activeZones ActiveZone[]
+
+  @@map("anatomy_definitions")
+}
+
+// Позы персонажа
+model CharacterPose {
+  id          String   @id @default(cuid())
+  characterId String
+  poseDefId   String
+
+  // Настройки позы для конкретного персонажа
+  customSettings String @default("{}")
+
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  definition  PoseDefinition @relation(fields: [poseDefId], references: [id])
+
+  @@unique([characterId, poseDefId])
+  @@map("character_poses")
+}
+
+// Определения поз
+model PoseDefinition {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?
+
+  // Влияние на характеристики
+  effects     String   @default("{}")
+
+  // Условия применения
+  requirements String  @default("{}")
+
+  // Ракурсы
+  angles      PoseAngle[]
+
+  // Позы персонажей
+  poses       CharacterPose[]
+
+  isActive    Boolean  @default(true)
+
+  @@map("pose_definitions")
+}
+
+// Ракурсы поз
+model PoseAngle {
+  id          String   @id @default(cuid())
+  poseDefId   String
+  name        String
+  angle       String   // "front", "back", "side", etc.
+
+  // Медиа
+  media       String   @default("{}") // {images: [], videos: [], gifs: []}
+
+  // Активные зоны
+  zones       ActiveZone[]
+
+  pose        PoseDefinition @relation(fields: [poseDefId], references: [id], onDelete: Cascade)
+
+  @@map("pose_angles")
+}
+
+// Активные зоны
+model ActiveZone {
+  id          String   @id @default(cuid())
+  angleId     String
+  anatomyDefId String?
+
+  name        String
+  x           Float    // координаты на изображении
+  y           Float
+  width       Float
+  height      Float
+
+  // Связь с анатомией
+  anatomy     AnatomyDefinition? @relation(fields: [anatomyDefId], references: [id])
+  angle       PoseAngle @relation(fields: [angleId], references: [id], onDelete: Cascade)
+
+  @@map("active_zones")
+}
+
+// Действия/Инструменты
+model Action {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?
+
+  // Свойства действия
+  intensity   Float    @default(5)    // 0-100
+  cost        Int      @default(10)   // кредиты
+  duration    Int      @default(30)   // секунды
+
+  // Эффекты на характеристики
+  effects     String   @default("{}")
+
+  // Условия применения
+  requirements String  @default("{}")
+
+  isActive    Boolean  @default(true)
+
+  @@map("actions")
+}
+
+// Копии персонажей у пользователей
+model CharacterCopy {
+  id          String   @id @default(cuid())
+  userId      String
+  characterId String
+
+  // Настройки копии
+  settings    String   @default("{}")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, characterId])
+  @@map("character_copies")
+}
+
+// Знания пользователей о персонажах
+model CharacterKnowledge {
+  id                String   @id @default(cuid())
+  userId            String
+  characterId       String
+  characteristicDefId String?
+
+  // Уровень знания
+  level             KnowledgeLevel @default(UNKNOWN)
+  value             Float?
+  accuracy          Float?
+  lastRevealed      DateTime?
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  character         Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characteristic    CharacteristicDefinition? @relation(fields: [characteristicDefId], references: [id])
+
+  @@unique([userId, characterId, characteristicDefId])
+  @@map("character_knowledge")
+}
+
+enum KnowledgeLevel {
+  UNKNOWN
+  APPROXIMATE
+  DETAILED
+  PRECISE
+}
+
+// Сессии пользователей
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Сюжетные точки
+model StoryPoint {
+  id          String   @id @default(cuid())
+  name        String
+  type        StoryPointType
+  category    String?
+  description String?
+
+  // Значения
+  defaultValue Float?
+  minValue     Float?
+  maxValue     Float?
+
+  // Теги для организации (JSON массив)
+  tags        String   @default("[]")
+
+  isActive    Boolean  @default(true)
+
+  @@map("story_points")
+}
+
+enum StoryPointType {
+  NUMERIC
+  BOOLEAN
+  STRING
+}
+
+// Сцены
+model Scene {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  description String?
+
+  // Условия активации
+  triggerConditions String @default("{}")
+  probability       Float @default(100)
+
+  // Экраны сцены
+  screens     Screen[]
+
+  isActive    Boolean  @default(true)
+
+  @@map("scenes")
+}
+
+// Экраны сцены
+model Screen {
+  id          String   @id @default(cuid())
+  sceneId     String
+  name        String
+  description String?
+
+  // Контент экрана
+  content     String   @default("{}")
+
+  // Выборы
+  choices     Choice[]
+
+  // Условия доступа
+  accessConditions String @default("{}")
+
+  scene       Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@map("screens")
+}
+
+// Выборы в экранах
+model Choice {
+  id          String   @id @default(cuid())
+  screenId    String
+  text        String
+  description String?
+
+  // Последствия выбора
+  consequences String  @default("{}")
+
+  // Условия показа
+  showConditions String @default("{}")
+
+  screen      Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
+
+  @@map("choices")
+}
+
+// Сущности станции
+model StationEntity {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  description String?
+
+  // Связанные сцены
+  defaultSceneId String?
+  customSceneId  String?
+
+  // Настройки
+  probability Float    @default(20)
+  isActive    Boolean  @default(true)
+
+  // Метаданные
+  metadata    String   @default("{}")
+
+  @@map("station_entities")
+}

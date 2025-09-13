@@ -17,6 +17,7 @@ export function useUnifiedConfig(): UseUnifiedConfigResult {
 
   const refresh = useCallback(async () => {
     try {
+      console.log('🔄 useUnifiedConfig: Начинаем загрузку данных...')
       setLoading(true)
       setError(null)
       const res = await fetch('/api/config', { cache: 'no-store' })
@@ -42,8 +43,15 @@ export function useUnifiedConfig(): UseUnifiedConfigResult {
             : (raw.station.stationEntities ? Object.values(raw.station.stationEntities) : [])
         } : { stationEntities: [] }
       }
+      console.log('✅ useUnifiedConfig: Данные загружены:', {
+        characters: normalized.characters?.length || 0,
+        users: normalized.users?.length || 0,
+        equipment: normalized.equipment?.length || 0,
+        actions: Object.keys(normalized.actions?.categories || {}).length
+      })
       setConfig(normalized as GameConfig)
     } catch (err) {
+      console.error('❌ useUnifiedConfig: Ошибка загрузки:', err)
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
@@ -56,5 +64,3 @@ export function useUnifiedConfig(): UseUnifiedConfigResult {
 
   return { config, loading, error, refresh }
 }
-
-

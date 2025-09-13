@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Config Loading</title>
+</head>
+<body>
+    <h1>Test Config Loading</h1>
+    <div id="status">Loading...</div>
+    <div id="result"></div>
+
+    <script>
+        async function testConfigLoading() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+
+            try {
+                statusDiv.textContent = 'Making request to /api/db/config...';
+
+                const response = await fetch('/api/db/config', {
+                    cache: 'no-store',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                statusDiv.textContent = `Response status: ${response.status}`;
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                statusDiv.textContent = 'Success!';
+                resultDiv.innerHTML = `
+                    <h2>Config Data:</h2>
+                    <p>Success: ${data.success}</p>
+                    <p>Characters: ${data.config?.characters?.length || 0}</p>
+                    <p>Character AI: ${Object.keys(data.config?.characterAI || {}).length}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                statusDiv.textContent = `Error: ${error.message}`;
+                resultDiv.innerHTML = `<pre>${error.stack}</pre>`;
+            }
+        }
+
+        // Run test when page loads
+        testConfigLoading();
+    </script>
+</body>
+</html>

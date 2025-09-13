@@ -29,18 +29,18 @@ export function ActionToolPanel({
   const tools = characterAI?.characterAIConfig?.tools || {};
   const actionCategories = characterAI?.characterAIConfig?.actionCategories || {};
   const toolCategories = characterAI?.characterAIConfig?.toolCategories || {};
-  
+
   // Получаем позы из characterAIConfig
   const poses = Object.values(characterAI?.characterAIConfig?.poses || {}) as any[];
 
   const currentPose = characterAI?.currentPose || null;
   const currentAngle = characterAI?.currentAngle;
-  
+
   // Проверяем, что конфигурация загружена
-  const isConfigLoaded = characterAI?.characterAIConfig && 
+  const isConfigLoaded = characterAI?.characterAIConfig &&
     characterAI.characterAIConfig.actions &&
     Object.keys(characterAI.characterAIConfig.actions).length > 0;
-  
+
   // Отладочная информация
   console.log('🔧 ActionToolPanel Debug:', {
     hasCharacterAI: !!characterAI,
@@ -134,11 +134,11 @@ export function ActionToolPanel({
     if (isDragging) {
       const newX = e.clientX - dragOffset.x
       const newY = e.clientY - dragOffset.y
-      
+
       // Ограничиваем позицию границами экрана
       const maxX = window.innerWidth - 384 // w-96 = 384px
       const maxY = window.innerHeight - 400 // примерная высота панели
-      
+
       setPosition({
         x: Math.max(0, Math.min(newX, maxX)),
         y: Math.max(0, Math.min(newY, maxY)),
@@ -162,11 +162,11 @@ export function ActionToolPanel({
   }, [isDragging, dragOffset])
 
   return (
-    <div 
+    <div
       className="fixed glass-panel border border-cyan-500/50 rounded-lg z-50 w-96 max-h-[80vh] flex flex-col cursor-move"
       style={{ left: position.x, top: position.y }}
     >
-      <div 
+      <div
         className="p-3 border-b border-gray-600 flex items-center justify-between"
         onMouseDown={handleMouseDown}
       >
@@ -195,8 +195,8 @@ export function ActionToolPanel({
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab 
-                    ? 'bg-cyan-600 text-white' 
+                  activeTab === tab
+                    ? 'bg-cyan-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
               >
@@ -260,15 +260,15 @@ export function ActionToolPanel({
               <div className="space-y-4">
                 <div className="text-sm text-gray-400 mb-2">Выберите действие:</div>
                 {Object.entries(actionCategories).map(([categoryId, category]: [string, any]) => {
-                  const categoryActions = Object.entries(actions).filter(([id, action]: [string, any]) => 
+                  const categoryActions = Object.entries(actions).filter(([id, action]: [string, any]) =>
                     action.category === categoryId
                   )
-                  
+
                   if (categoryActions.length === 0) return null
-                  
+
                   return (
                     <div key={categoryId} className="space-y-2">
-                      <div 
+                      <div
                         className="flex items-center gap-2 text-cyan-400 font-medium cursor-pointer hover:text-cyan-300"
                         onClick={() => setOpenCategory(openCategory === categoryId ? null : categoryId)}
                       >
@@ -310,15 +310,15 @@ export function ActionToolPanel({
               <div className="space-y-4">
                 <div className="text-sm text-gray-400 mb-2">Выберите инструмент:</div>
                 {Object.entries(toolCategories).map(([categoryId, category]: [string, any]) => {
-                  const categoryTools = Object.entries(tools).filter(([id, tool]: [string, any]) => 
+                  const categoryTools = Object.entries(tools).filter(([id, tool]: [string, any]) =>
                     tool.category === categoryId
                   )
-                  
+
                   if (categoryTools.length === 0) return null
-                  
+
                   return (
                     <div key={categoryId} className="space-y-2">
-                      <div 
+                      <div
                         className="flex items-center gap-2 text-purple-400 font-medium cursor-pointer hover:text-purple-300"
                         onClick={() => setOpenCategory(openCategory === categoryId ? null : categoryId)}
                       >
