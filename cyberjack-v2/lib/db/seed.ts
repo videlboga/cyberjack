@@ -192,32 +192,30 @@ async function main() {
 
   // Создаем базовые действия
   await prisma.action.upsert({
-    where: { name: 'Нежные прикосновения' },
+    where: { id: 'soft-caresses' },
     update: {},
     create: {
+      id: 'soft-caresses',
       name: 'Нежные прикосновения',
       category: 'Ласки',
       description: 'Мягкие, нежные прикосновения',
       intensity: 20,
-      cost: 5,
-      duration: 60,
-      effects: { arousal: 10, mood: 5 },
+      formula: {},
       requirements: {},
       isActive: true
     }
   })
 
   await prisma.action.upsert({
-    where: { name: 'Интенсивные ласки' },
+    where: { id: 'intense-caresses' },
     update: {},
     create: {
+      id: 'intense-caresses',
       name: 'Интенсивные ласки',
       category: 'Ласки',
       description: 'Более интенсивные прикосновения',
       intensity: 60,
-      cost: 15,
-      duration: 120,
-      effects: { arousal: 25, energy: -10 },
+      formula: {},
       requirements: {},
       isActive: true
     }
@@ -225,9 +223,10 @@ async function main() {
 
   // Создаем тестового персонажа
   const testCharacter = await prisma.character.upsert({
-    where: { name: 'Тестовая персонаж' },
+    where: { id: 'test-character' },
     update: {},
     create: {
+      id: 'test-character',
       name: 'Тестовая персонаж',
       description: 'Тестовый персонаж для разработки',
       age: 25,

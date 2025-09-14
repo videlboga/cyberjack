@@ -5,21 +5,29 @@ import { ActionsSystem } from '../../../../../lib/core/actions/actions-system'
 
 export async function POST(request: NextRequest) {
   try {
-    const { characterId, actionId, userId, zoneId } = await request.json()
+    const { characterId, actionId, userId, zoneId, durationSeconds } = await request.json()
 
-    if (!characterId || !actionId || !userId) {
+    if (!characterId || !actionId || !userId || !durationSeconds) {
       return NextResponse.json(
-        { error: 'Missing required parameters' },
+        { error: 'Missing required parameters: characterId, actionId, userId, durationSeconds' },
+        { status: 400 }
+      )
+    }
+
+    if (durationSeconds <= 0) {
+      return NextResponse.json(
+        { error: 'Duration must be greater than 0' },
         { status: 400 }
       )
     }
 
     const actionsSystem = new ActionsSystem()
-    const result = await actionsSystem.executeAction(
+    const result = await actionsSystem.executeActionWithHold(
       characterId,
       actionId,
       userId,
-      zoneId
+      zoneId,
+      durationSeconds
     )
 
     return NextResponse.json(result)

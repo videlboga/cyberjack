@@ -286,18 +286,43 @@ model Action {
 
   // Свойства действия
   intensity   Float    @default(5)    // 0-100
-  cost        Int      @default(10)   // кредиты
-  duration    Int      @default(30)   // секунды
 
-  // Эффекты на характеристики
-  effects     Json     @default("{}")
+  // Формула для вычисления эффектов
+  formula     Json     @default("{}")
 
   // Условия применения
   requirements Json    @default("{}")
 
   isActive    Boolean  @default(true)
 
+  // Логи действий
+  actionLogs  ActionLog[]
+
   @@map("actions")
+}
+
+// Логи выполнения действий
+model ActionLog {
+  id          String   @id @default(cuid())
+  actionId    String
+  characterId String
+  userId      String
+  zoneId      String?
+
+  // Параметры выполнения
+  duration    Int      // секунды холда
+  intensity   Float    // интенсивность на момент выполнения
+  timestamp   DateTime @default(now())
+
+  // Результат выполнения
+  effects     Json     @default("{}") // примененные эффекты
+  success     Boolean  @default(true)
+  error       String?
+
+  // Связи
+  action      Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@map("action_logs")
 }
 
 // Копии персонажей у пользователей

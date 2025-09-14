@@ -2,15 +2,26 @@
 
 import { prisma } from '@/lib/db/client'
 import { CharacteristicsSystem } from '../characteristics/characteristics-system'
+import { FormulaSystem } from '../formulas/formula-system'
 import { ActionEffect, ActionResult } from '@/types/database'
+import { FormulaExecutionContext } from '../formulas/types/formula-context'
 
 export class ActionsSystem {
-  // Выполнить действие
-  async executeAction(
+  private formulaSystem: FormulaSystem
+  private characteristicsSystem: CharacteristicsSystem
+
+  constructor() {
+    this.formulaSystem = new FormulaSystem()
+    this.characteristicsSystem = new CharacteristicsSystem()
+  }
+
+  // Выполнить действие с холдом
+  async executeActionWithHold(
     characterId: string,
     actionId: string,
     userId: string,
-    zoneId?: string
+    zoneId: string | undefined,
+    durationSeconds: number
   ): Promise<ActionResult> {
     const action = await prisma.action.findUnique({
       where: { id: actionId }
@@ -54,29 +65,40 @@ export class ActionsSystem {
       throw new Error('Требования действия не выполнены')
     }
 
-    // Проверить кредиты пользователя
-    if (user.credits < action.cost) {
-      throw new Error('Недостаточно кредитов')
-    }
-
-    // Вычислить эффекты действия
-    const effects = await this.calculateEffects(action, character, user, zoneId)
+    // Вычислить эффекты действия через формулу
+    const effects = await this.calculateEffectsWithFormula(
+      action,
+      character,
+      user,
+      zoneId || '',
+      durationSeconds
+    )
 
     // Применить эффекты
     for (const effect of effects) {
-      await this.applyEffect(characterId, effect)
+      await this.characteristicsSystem.changeValue(
+        characterId,
+        effect.characteristicId,
+        effect.change,
+        effect.permanent || false
+      )
     }
 
-    // Списать кредиты
-    await this.deductCredits(userId, action.cost)
-
     // Создать запись о действии
-    await this.logAction(characterId, actionId, userId, effects)
+    await this.logAction(
+      actionId,
+      characterId,
+      userId,
+      zoneId,
+      durationSeconds,
+      action.intensity,
+      effects
+    )
 
     return {
       success: true,
       effects,
-      message: `Действие "${action.name}" выполнено`
+      message: `Действие "${action.name}" выполнено за ${durationSeconds}с`
     }
   }
 
@@ -134,43 +156,120 @@ export class ActionsSystem {
     }
   }
 
-  // Вычислить эффекты действия
-  private async calculateEffects(
+  // Вычислить эффекты действия через формулу
+  private async calculateEffectsWithFormula(
     action: any,
     character: any,
     user: any,
-    zoneId?: string
+    zoneId: string,
+    durationSeconds: number
   ): Promise<ActionEffect[]> {
     const effects: ActionEffect[] = []
-    const actionEffects = action.effects as Record<string, any>
 
-    for (const [characteristicId, effectData] of Object.entries(actionEffects)) {
-      let baseChange = effectData.change || 0
+    // Получить зону если указана
+    const zone = zoneId ? await this.getZone(zoneId) : null
 
-      // Модификатор от интенсивности действия
-      baseChange *= (action.intensity / 100)
+    // Создать контекст для формулы
+    const context: FormulaExecutionContext = {
+      character: {
+        id: character.id,
+        name: character.name,
+        characteristics: this.formatCharacterCharacteristics(character.characteristics),
+        anatomy: this.formatCharacterAnatomyForContext(character.anatomy)
+      },
+      user: {
+        id: user.id,
+        name: user.name,
+        modifiers: user.modifiers || {},
+        credits: user.credits || 0
+      },
+      action: {
+        id: action.id,
+        name: action.name,
+        intensity: action.intensity,
+        cost: 0, // больше не используется
+        duration: durationSeconds,
+        category: action.category,
+        effects: action.formula || {}
+      },
+      zone: zone ? {
+        id: zone.id,
+        name: zone.name,
+        sensitivity: this.getZoneSensitivity(zone, character.anatomy),
+        anatomy: {
+          id: zone.anatomyDefId || '',
+          name: zone.anatomy?.name || '',
+          category: zone.anatomy?.category || ''
+        },
+        coordinates: {
+          x: zone.x,
+          y: zone.y,
+          width: zone.width,
+          height: zone.height
+        }
+      } : undefined,
+      system: {
+        gameTime: 0, // TODO: получить из TimeSystem
+        realTime: Date.now(),
+        isActionHolding: true,
+        timeMultiplier: 1.0
+      }
+    }
 
-      // Модификатор от пользователя
-      const userModifier = user.modifiers[characteristicId] || 1
-      baseChange *= userModifier
+    // Выполнить формулу если она есть
+    if (action.formula && Object.keys(action.formula).length > 0) {
+      try {
+        const formulaResult = await this.formulaSystem.executeFormula(
+          action.formula,
+          context
+        )
 
-      // Модификатор от зоны (если есть)
-      if (zoneId) {
-        const zone = await this.getZone(zoneId)
-        if (zone?.anatomy) {
-          const anatomy = character.anatomy.find((a: any) => a.definition.id === zone.anatomy?.id)
-          if (anatomy) {
-            baseChange *= (anatomy.sensitivity / 100)
+        // Преобразовать результат формулы в эффекты
+        if (formulaResult.factors) {
+          for (const factor of formulaResult.factors) {
+            if (factor.category === 'input' && factor.name.includes('characteristic')) {
+              // Извлекаем ID характеристики из имени фактора
+              const charId = factor.name.split('.').pop() || 'mood'
+              effects.push({
+                characteristicId: charId,
+                change: factor.value * durationSeconds, // умножаем на время холда
+                permanent: false
+              })
+            }
           }
         }
+      } catch (error) {
+        console.error('Ошибка выполнения формулы:', error)
+        // Fallback к простым эффектам если формула не работает
+        return this.calculateSimpleEffects(action, character, user, zone, durationSeconds)
       }
-
-      effects.push({
-        characteristicId,
-        change: baseChange,
-        permanent: effectData.permanent || false
-      })
+    } else {
+      // Если формулы нет, используем простые эффекты
+      return this.calculateSimpleEffects(action, character, user, zone, durationSeconds)
     }
+
+    return effects
+  }
+
+  // Простые эффекты (fallback)
+  private calculateSimpleEffects(
+    action: any,
+    character: any,
+    user: any,
+    zone: any,
+    durationSeconds: number
+  ): ActionEffect[] {
+    const effects: ActionEffect[] = []
+
+    // Базовое изменение на основе интенсивности и времени
+    const baseChange = (action.intensity / 100) * durationSeconds
+
+    // Пример: повышаем настроение
+    effects.push({
+      characteristicId: 'mood',
+      change: baseChange,
+      permanent: false
+    })
 
     return effects
   }
@@ -185,47 +284,89 @@ export class ActionsSystem {
     })
   }
 
-  // Применить эффект
-  private async applyEffect(
-    characterId: string,
-    effect: ActionEffect
-  ): Promise<void> {
-    const characteristicsSystem = new CharacteristicsSystem()
-    await characteristicsSystem.changeValue(
-      characterId,
-      effect.characteristicId,
-      effect.change,
-      effect.permanent
-    )
+  // Форматировать характеристики персонажа для контекста
+  private formatCharacterCharacteristics(characteristics: any[]): Record<string, number> {
+    const formatted: Record<string, number> = {}
+
+    characteristics.forEach(char => {
+      const defId = char.characteristicDefId || char.definition?.id
+      if (defId) {
+        formatted[defId] = char.currentValue || 0
+      }
+    })
+
+    return formatted
   }
 
-  // Списать кредиты
-  private async deductCredits(userId: string, amount: number): Promise<void> {
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        credits: {
-          decrement: amount
+  // Форматировать анатомию персонажа для контекста (старый метод)
+  private formatCharacterAnatomy(anatomy: any[]): Record<string, { hasPart: boolean; sensitivity: number }> {
+    const formatted: Record<string, { hasPart: boolean; sensitivity: number }> = {}
+
+    anatomy.forEach(part => {
+      const defId = part.anatomyDefId || part.definition?.id
+      if (defId) {
+        formatted[defId] = {
+          hasPart: part.hasPart || false,
+          sensitivity: part.sensitivity || 0
         }
       }
     })
+
+    return formatted
+  }
+
+  // Форматировать анатомию персонажа для контекста формул (новый метод)
+  private formatCharacterAnatomyForContext(anatomy: any[]): Record<string, number> {
+    const formatted: Record<string, number> = {}
+
+    anatomy.forEach(part => {
+      const defId = part.anatomyDefId || part.definition?.id
+      if (defId) {
+        formatted[defId] = part.sensitivity || 0
+      }
+    })
+
+    return formatted
+  }
+
+  // Получить чувствительность зоны
+  private getZoneSensitivity(zone: any, characterAnatomy: any[]): number {
+    if (!zone.anatomyDefId) return 50 // средняя чувствительность по умолчанию
+
+    const anatomy = characterAnatomy.find(a =>
+      a.anatomyDefId === zone.anatomyDefId ||
+      a.definition?.id === zone.anatomyDefId
+    )
+
+    return anatomy ? anatomy.sensitivity || 50 : 50
   }
 
   // Записать действие в лог
   private async logAction(
-    characterId: string,
     actionId: string,
+    characterId: string,
     userId: string,
+    zoneId: string | undefined,
+    duration: number,
+    intensity: number,
     effects: ActionEffect[]
   ): Promise<void> {
-    // TODO: Создать таблицу для логов действий
-    console.log('Action logged:', {
-      characterId,
-      actionId,
-      userId,
-      effects,
-      timestamp: new Date()
-    })
+    try {
+      await prisma.actionLog.create({
+        data: {
+          actionId,
+          characterId,
+          userId,
+          zoneId: zoneId || null,
+          duration,
+          intensity,
+          effects: effects as any,
+          success: true
+        }
+      })
+    } catch (error) {
+      console.error('Ошибка записи лога действия:', error)
+    }
   }
 
   // Получить все действия
@@ -301,9 +442,7 @@ export class ActionsSystem {
     category: string
     description?: string
     intensity?: number
-    cost?: number
-    duration?: number
-    effects: Record<string, any>
+    formula?: any
     requirements: Record<string, any>
   }) {
     return await prisma.action.create({
@@ -312,9 +451,7 @@ export class ActionsSystem {
         category: actionData.category,
         description: actionData.description,
         intensity: actionData.intensity || 5,
-        cost: actionData.cost || 10,
-        duration: actionData.duration || 30,
-        effects: actionData.effects || {},
+        formula: actionData.formula || {},
         requirements: actionData.requirements || {}
       }
     })
@@ -328,9 +465,7 @@ export class ActionsSystem {
       category?: string
       description?: string
       intensity?: number
-      cost?: number
-      duration?: number
-      effects?: Record<string, any>
+      formula?: any
       requirements?: Record<string, any>
       isActive?: boolean
     }
