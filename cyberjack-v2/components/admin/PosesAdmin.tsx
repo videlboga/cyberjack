@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { PoseFormulasEditor } from './PoseFormulasEditor-v2'
+import { PoseFormulas } from '@/types/pose-formulas'
 
 interface PoseDefinition {
   id: string
@@ -37,6 +39,9 @@ export function PosesAdmin() {
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showFormulasEditor, setShowFormulasEditor] = useState(false)
+  const [editingPoseId, setEditingPoseId] = useState<string | null>(null)
+  const [editingPoseName, setEditingPoseName] = useState<string>('')
 
   const [formData, setFormData] = useState({
     name: '',
@@ -133,6 +138,41 @@ export function PosesAdmin() {
     })
     setEditingId(null)
     setShowForm(false)
+  }
+
+  const handleEditFormulas = (pose: PoseDefinition) => {
+    setEditingPoseId(pose.id)
+    setEditingPoseName(pose.name)
+    setShowFormulasEditor(true)
+  }
+
+  const handleSaveFormulas = async (formulas: PoseFormulas) => {
+    if (!editingPoseId) return
+
+    try {
+      const response = await fetch(`/api/poses/${editingPoseId}/formulas`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formulas)
+      })
+
+      if (!response.ok) {
+        throw new Error('Ошибка сохранения формул')
+      }
+
+      setShowFormulasEditor(false)
+      setEditingPoseId(null)
+      setEditingPoseName('')
+      await fetchPoses()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка сохранения формул')
+    }
+  }
+
+  const handleCancelFormulas = () => {
+    setShowFormulasEditor(false)
+    setEditingPoseId(null)
+    setEditingPoseName('')
   }
 
   if (loading) {
@@ -258,15 +298,24 @@ export function PosesAdmin() {
                     </p>
                   )}
                   <div className="mt-2 text-xs text-gray-500">
-                    <p>Ракурсы: {pose.angles.length}</p>
-                    <p>Активные зоны: {pose.angles.reduce((total, angle) => total + angle.zones.length, 0)}</p>
+                    <p>Ракурсы: {pose.angles?.length || 0}</p>
+                    <p>Активные зоны: {pose.angles?.reduce((total, angle) => total + (angle.zones?.length || 0), 0) || 0}</p>
                   </div>
                 </div>
                 <div className="flex gap-1 ml-2">
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => handleEditFormulas(pose)}
+                    title="Редактировать формулы"
+                  >
+                    🧮
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => handleEdit(pose)}
+                    title="Редактировать позу"
                   >
                     ✏️
                   </Button>
@@ -274,6 +323,7 @@ export function PosesAdmin() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleDelete(pose.id)}
+                    title="Удалить позу"
                   >
                     🗑️
                   </Button>
@@ -283,6 +333,16 @@ export function PosesAdmin() {
           ))
         )}
       </div>
+
+      {/* Редактор формул */}
+      {showFormulasEditor && editingPoseId && (
+        <PoseFormulasEditor
+          poseId={editingPoseId}
+          poseName={editingPoseName}
+          onSave={handleSaveFormulas}
+          onCancel={handleCancelFormulas}
+        />
+      )}
     </div>
   )
 }

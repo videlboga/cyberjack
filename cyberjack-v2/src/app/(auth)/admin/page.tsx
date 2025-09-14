@@ -10,6 +10,8 @@ import { AnatomyAdmin } from '@/components/admin/AnatomyAdmin'
 import { CharactersAdmin } from '@/components/admin/CharactersAdmin'
 import { UsersAdmin } from '@/components/admin/UsersAdmin'
 import { EquipmentAdmin } from '@/components/admin/EquipmentAdmin'
+import { StoryGraphEditor } from '@/components/admin/StoryGraphEditor'
+import { ScreenBasedStoryAdmin } from '@/components/admin/ScreenBasedStoryAdmin'
 import { Navbar } from '@/components/ui/navbar'
 
 export default function AdminPanel() {
@@ -31,7 +33,7 @@ export default function AdminPanel() {
           <TabsTrigger value="poses">Позы</TabsTrigger>
           <TabsTrigger value="anatomy">Анатомия</TabsTrigger>
           <TabsTrigger value="equipment">Оборудование</TabsTrigger>
-          <TabsTrigger value="story">Сюжет</TabsTrigger>
+          <TabsTrigger value="story-graph">Граф сюжета</TabsTrigger>
         </TabsList>
 
         <TabsContent value="characters" className="mt-6">
@@ -62,19 +64,8 @@ export default function AdminPanel() {
           <EquipmentAdmin />
         </TabsContent>
 
-        <TabsContent value="story" className="mt-6">
-          <div className="bg-white rounded-lg shadow-md p-6 border">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Сюжетный конструктор</h2>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                Создать сюжетную точку
-              </button>
-            </div>
-            <div className="text-center py-12 text-gray-500">
-              <p>Сюжетный конструктор будет здесь</p>
-              <p className="text-sm mt-2">Функция в разработке</p>
-            </div>
-          </div>
+        <TabsContent value="story-graph" className="mt-6">
+          <ScreenBasedStoryAdmin />
         </TabsContent>
       </Tabs>
       </div>

@@ -38,7 +38,7 @@ export async function POST(
   try {
     const { id } = await params
     const data = await request.json()
-    
+
     const userEquipment = await prisma.userEquipment.upsert({
       where: {
         userId_equipmentId: {

@@ -78,7 +78,7 @@ export async function PUT(
   try {
     const { id } = await params
     const data = await request.json()
-    
+
     const user = await prisma.user.update({
       where: { id },
       data: {

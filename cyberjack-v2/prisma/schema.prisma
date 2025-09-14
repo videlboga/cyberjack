@@ -33,6 +33,15 @@ model User {
   // Оборудование пользователя
   equipment UserEquipment[]
 
+  // Сюжетные точки пользователя
+  userStoryPoints UserStoryPoint[]
+
+  // Прогресс сцен пользователя
+  userSceneProgress UserSceneProgress[]
+
+  // История выборов пользователя
+  userChoiceHistory UserChoiceHistory[]
+
   // Сессии
   sessions Session[]
 
@@ -405,6 +414,9 @@ model StoryPoint {
 
   isActive    Boolean  @default(true)
 
+  // Значения пользователей
+  userValues  UserStoryPoint[]
+
   @@map("story_points")
 }
 
@@ -418,15 +430,31 @@ enum StoryPointType {
 model Scene {
   id          String   @id @default(cuid())
   name        String
-  type        String
   description String?
 
-  // Условия активации
+  // Связанная станция
+  stationId   String?
+  station     StationEntity? @relation("StationScenes", fields: [stationId], references: [id])
+
+  // Условия активации (вместо дефолтной сцены станции)
   triggerConditions Json @default("{}")
   probability       Float @default(100)
 
-  // Экраны сцены
-  screens     Screen[]
+  // Начальный экран сцены
+  startScreenId String?
+  startScreen   Screen? @relation("SceneStartScreen", fields: [startScreenId], references: [id])
+
+  // Все экраны сцены
+  screens     Screen[] @relation("SceneScreens")
+
+  // Прогресс пользователей
+  userProgress UserSceneProgress[]
+
+  // История выборов
+  choiceHistory UserChoiceHistory[]
+
+  // Станции, где эта сцена является дефолтной
+  stationsAsDefault StationEntity[] @relation("StationDefaultScene")
 
   isActive    Boolean  @default(true)
 
@@ -440,16 +468,32 @@ model Screen {
   name        String
   description String?
 
-  // Контент экрана
+  // Контент экрана (медиа, текст)
   content     Json     @default("{}")
 
-  // Выборы
-  choices     Choice[]
+  // Выборы (переходы к другим экранам)
+  choices     Choice[] @relation("ScreenChoices")
 
-  // Условия доступа
+  // Условия доступа к экрану
   accessConditions Json @default("{}")
 
-  scene       Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  // Является ли экран финальным (нет выборов)
+  isFinal     Boolean  @default(false)
+
+  // Позиция на графе
+  position    Json     @default("{}") // { x: number, y: number }
+
+  // История выборов
+  choiceHistory UserChoiceHistory[]
+
+  // Связи с сценой
+  scene       Scene    @relation("SceneScreens", fields: [sceneId], references: [id], onDelete: Cascade)
+
+  // Сцены, где этот экран является начальным
+  scenesAsStart Scene[] @relation("SceneStartScreen")
+
+  // Выборы, которые ведут к этому экрану
+  incomingChoices Choice[] @relation("ChoiceToScreen")
 
   @@map("screens")
 }
@@ -461,13 +505,20 @@ model Choice {
   text        String
   description String?
 
-  // Последствия выбора
+  // Переход к другому экрану
+  nextScreenId String?
+  nextScreen   Screen? @relation("ChoiceToScreen", fields: [nextScreenId], references: [id])
+
+  // Последствия выбора (изменения в БД пользователя)
   consequences Json    @default("{}")
 
-  // Условия показа
+  // Условия показа выбора
   showConditions Json  @default("{}")
 
-  screen      Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  // История выборов
+  choiceHistory UserChoiceHistory[]
+
+  screen      Screen   @relation("ScreenChoices", fields: [screenId], references: [id], onDelete: Cascade)
 
   @@map("choices")
 }
@@ -479,16 +530,18 @@ model StationEntity {
   type        String
   description String?
 
-  // Связанные сцены
+  // Дефолтная сцена станции
   defaultSceneId String?
-  customSceneId  String?
+  defaultScene   Scene? @relation("StationDefaultScene", fields: [defaultSceneId], references: [id])
 
   // Настройки
-  probability Float    @default(20)
   isActive    Boolean  @default(true)
 
   // Метаданные
   metadata    Json     @default("{}")
+
+  // Сцены, связанные с этой станцией
+  scenes      Scene[] @relation("StationScenes")
 
   @@map("station_entities")
 }
@@ -549,4 +602,83 @@ model UserEquipment {
 
   @@unique([userId, equipmentId])
   @@map("user_equipment")
+}
+
+// Значения сюжетных точек пользователей
+model UserStoryPoint {
+  id          String   @id @default(cuid())
+  userId      String
+  storyPointId String
+
+  // Значение сюжетной точки (может быть любым типом)
+  value       Json
+
+  // Метаданные
+  lastUpdated DateTime @default(now())
+  source      String?  // Откуда пришло изменение (choice, action, manual)
+
+  // Связи
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storyPoint  StoryPoint @relation(fields: [storyPointId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyPointId])
+  @@map("user_story_points")
+}
+
+// Прогресс прохождения сцен пользователями
+model UserSceneProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  sceneId     String
+
+  // Статус прохождения
+  status      SceneProgressStatus @default(NOT_STARTED)
+
+  // Текущий экран
+  currentScreenId String?
+
+  // Время начала и завершения
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  // Метаданные
+  metadata    Json     @default("{}")
+
+  // Связи
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scene       Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sceneId])
+  @@map("user_scene_progress")
+}
+
+enum SceneProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+  FAILED
+}
+
+// История выборов пользователей
+model UserChoiceHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  choiceId    String
+  sceneId     String
+  screenId    String
+
+  // Время выбора
+  chosenAt    DateTime @default(now())
+
+  // Контекст выбора
+  context     Json     @default("{}")
+
+  // Связи
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  choice      Choice   @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+  scene       Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  screen      Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
+
+  @@map("user_choice_history")
 }

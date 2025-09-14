@@ -1,6 +1,9 @@
 // lib/core/time/time-system.ts
 
 import { CharacteristicsSystem } from '../characteristics/characteristics-system'
+import { PoseFormulaSystem } from '../poses/pose-formula-system'
+import { ActivePosesSystem } from '../poses/active-poses-system'
+import { AutoPoseSystem } from '../poses/auto-pose-system'
 
 export class TimeSystem {
   private static instance: TimeSystem
@@ -93,6 +96,9 @@ export class TimeSystem {
   private async triggerRecovery(): Promise<void> {
     try {
       const characteristicsSystem = new CharacteristicsSystem()
+      const poseFormulaSystem = new PoseFormulaSystem()
+      const activePosesSystem = ActivePosesSystem.getInstance()
+      const autoPoseSystem = AutoPoseSystem.getInstance()
 
       // Получить всех персонажей
       const characters = await this.getAllCharacters()
@@ -108,11 +114,52 @@ export class TimeSystem {
           // Проверить сдвиг базового значения
           await characteristicsSystem.checkBaseShift(character.id, characteristic.characteristicDefId)
         }
+
+        // Применить эффекты активных поз
+        await this.applyPoseEffects(character.id, poseFormulaSystem, activePosesSystem)
       }
+
+      // Проверить и применить автоматические позы
+      await autoPoseSystem.checkAndApplyAutoPoses()
 
       console.log(`Время обновлено: ${this.getFormattedTime()}`)
     } catch (error) {
       console.error('Ошибка при восстановлении характеристик:', error)
+    }
+  }
+
+  // Применить эффекты активных поз
+  private async applyPoseEffects(
+    characterId: string,
+    poseFormulaSystem: PoseFormulaSystem,
+    activePosesSystem: ActivePosesSystem
+  ): Promise<void> {
+    try {
+      // Получить активные позы персонажа
+      const activePoses = await activePosesSystem.getActivePoses(characterId)
+
+      for (const poseStatus of activePoses) {
+        if (!poseStatus.isActive) continue
+
+        // Применить эффекты позы (каждую минуту)
+        const effectResults = await poseFormulaSystem.applyPoseEffects(
+          poseStatus.poseId,
+          characterId,
+          'system' // системный пользователь для автоматических эффектов
+        )
+
+        // Логируем результаты применения эффектов
+        if (effectResults.length > 0) {
+          console.log(`Применены эффекты позы ${poseStatus.poseId} для персонажа ${characterId}:`,
+            effectResults.map(r => `${r.target}: ${r.oldValue} → ${r.newValue}`).join(', '))
+        }
+
+        // Обновить длительность позы
+        const newDuration = poseStatus.duration + 1
+        await activePosesSystem.updatePoseDuration(characterId, poseStatus.poseId, newDuration)
+      }
+    } catch (error) {
+      console.error(`Ошибка при применении эффектов поз для персонажа ${characterId}:`, error)
     }
   }
 

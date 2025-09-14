@@ -12,7 +12,11 @@ export async function GET(request: NextRequest) {
         ...(category && { category })
       },
       include: {
-        angles: true,
+        angles: {
+          include: {
+            zones: true
+          }
+        },
         poses: {
           include: {
             character: {
@@ -25,7 +29,7 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        name: 'asc'
       }
     })
 

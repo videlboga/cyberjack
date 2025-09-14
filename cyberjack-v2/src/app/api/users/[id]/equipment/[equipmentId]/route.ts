@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const { id, equipmentId } = await params
     const data = await request.json()
-    
+
     const userEquipment = await prisma.userEquipment.update({
       where: {
         userId_equipmentId: {

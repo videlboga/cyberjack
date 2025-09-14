@@ -3,16 +3,22 @@
 import { prisma } from '@/lib/db/client'
 import { CharacteristicsSystem } from '../characteristics/characteristics-system'
 import { FormulaSystem } from '../formulas/formula-system'
+import { PoseFormulaSystem } from '../poses/pose-formula-system'
+import { ActivePosesSystem } from '../poses/active-poses-system'
 import { ActionEffect, ActionResult } from '@/types/database'
 import { FormulaExecutionContext } from '../formulas/types/formula-context'
 
 export class ActionsSystem {
   private formulaSystem: FormulaSystem
   private characteristicsSystem: CharacteristicsSystem
+  private poseFormulaSystem: PoseFormulaSystem
+  private activePosesSystem: ActivePosesSystem
 
   constructor() {
     this.formulaSystem = new FormulaSystem()
     this.characteristicsSystem = new CharacteristicsSystem()
+    this.poseFormulaSystem = new PoseFormulaSystem()
+    this.activePosesSystem = ActivePosesSystem.getInstance()
   }
 
   // Выполнить действие с холдом
@@ -51,12 +57,24 @@ export class ActionsSystem {
       throw new Error('Персонаж не найден')
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    })
+    // Получаем данные пользователя (или создаем системного)
+    let user: any
+    if (userId === 'system') {
+      // Создаем системного пользователя для автоматических операций
+      user = {
+        id: 'system',
+        name: 'System',
+        modifiers: {},
+        credits: 1000
+      }
+    } else {
+      user = await prisma.user.findUnique({
+        where: { id: userId }
+      })
 
-    if (!user) {
-      throw new Error('Пользователь не найден')
+      if (!user) {
+        throw new Error('Пользователь не найден')
+      }
     }
 
     // Проверить требования действия
@@ -169,6 +187,9 @@ export class ActionsSystem {
     // Получить зону если указана
     const zone = zoneId ? await this.getZone(zoneId) : null
 
+    // Применить модификаторы поз к действию
+    const modifiedAction = await this.applyPoseModifiersToAction(action, character.id, user.id)
+
     // Создать контекст для формулы
     const context: FormulaExecutionContext = {
       character: {
@@ -184,13 +205,13 @@ export class ActionsSystem {
         credits: user.credits || 0
       },
       action: {
-        id: action.id,
-        name: action.name,
-        intensity: action.intensity,
+        id: modifiedAction.id,
+        name: modifiedAction.name,
+        intensity: modifiedAction.intensity,
         cost: 0, // больше не используется
         duration: durationSeconds,
-        category: action.category,
-        effects: action.formula || {}
+        category: modifiedAction.category,
+        effects: modifiedAction.formula || {}
       },
       zone: zone ? {
         id: zone.id,
@@ -410,12 +431,24 @@ export class ActionsSystem {
       throw new Error('Персонаж не найден')
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    })
+    // Получаем данные пользователя (или создаем системного)
+    let user: any
+    if (userId === 'system') {
+      // Создаем системного пользователя для автоматических операций
+      user = {
+        id: 'system',
+        name: 'System',
+        modifiers: {},
+        credits: 1000
+      }
+    } else {
+      user = await prisma.user.findUnique({
+        where: { id: userId }
+      })
 
-    if (!user) {
-      throw new Error('Пользователь не найден')
+      if (!user) {
+        throw new Error('Пользователь не найден')
+      }
     }
 
     const allActions = await this.getAllActions()
@@ -482,5 +515,94 @@ export class ActionsSystem {
       where: { id: actionId },
       data: { isActive: false }
     })
+  }
+
+  // Применить модификаторы поз к действию
+  private async applyPoseModifiersToAction(
+    action: any,
+    characterId: string,
+    userId: string
+  ): Promise<any> {
+    try {
+      // Получить активные позы персонажа
+      const activePoses = await this.activePosesSystem.getActivePoses(characterId)
+
+      if (activePoses.length === 0) {
+        return action // Нет активных поз, возвращаем оригинальное действие
+      }
+
+      let modifiedAction = { ...action }
+
+      // Применить модификаторы от каждой активной позы
+      for (const poseStatus of activePoses) {
+        if (!poseStatus.isActive) continue
+
+        try {
+          const modifierResults = await this.poseFormulaSystem.applyPoseModifiers(
+            poseStatus.poseId,
+            action.id,
+            characterId,
+            userId
+          )
+
+          // Применить результаты модификаторов к действию
+          for (const modifierResult of modifierResults) {
+            if (!modifierResult.success) continue
+
+            switch (modifierResult.target) {
+              case 'intensity':
+                if (modifierResult.modifierId.includes('intensity')) {
+                  modifiedAction.intensity = Math.round(modifiedAction.intensity * modifierResult.multiplier)
+                  console.log(`Модификатор интенсивности от позы ${poseStatus.poseId}: ${action.intensity} → ${modifiedAction.intensity}`)
+                }
+                break
+              case 'cost':
+                if (modifierResult.modifierId.includes('cost')) {
+                  // У действий нет поля cost, но можно добавить в будущем
+                  console.log(`Модификатор стоимости от позы ${poseStatus.poseId}: множитель ${modifierResult.multiplier}`)
+                }
+                break
+              case 'duration':
+                if (modifierResult.modifierId.includes('duration')) {
+                  // Длительность модифицируется в контексте выполнения
+                  console.log(`Модификатор длительности от позы ${poseStatus.poseId}: множитель ${modifierResult.multiplier}`)
+                }
+                break
+              case 'effect':
+                if (modifierResult.modifierId.includes('effect')) {
+                  // Эффект модифицируется через формулу
+                  console.log(`Модификатор эффекта от позы ${poseStatus.poseId}: множитель ${modifierResult.multiplier}`)
+                }
+                break
+            }
+          }
+        } catch (error) {
+          console.error(`Ошибка применения модификаторов позы ${poseStatus.poseId}:`, error)
+        }
+      }
+
+      return modifiedAction
+    } catch (error) {
+      console.error('Ошибка применения модификаторов поз:', error)
+      return action // Возвращаем оригинальное действие в случае ошибки
+    }
+  }
+
+  // Получить модифицированные действия для персонажа
+  async getModifiedActionsForCharacter(characterId: string, userId: string) {
+    try {
+      const availableActions = await this.getAvailableActions(characterId, userId)
+      const modifiedActions = []
+
+      for (const action of availableActions) {
+        const modifiedAction = await this.applyPoseModifiersToAction(action, characterId, userId)
+        modifiedActions.push(modifiedAction)
+      }
+
+      return modifiedActions
+    } catch (error) {
+      console.error('Ошибка получения модифицированных действий:', error)
+      return []
+    }
   }
 }

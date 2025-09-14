@@ -41,7 +41,7 @@ export async function POST(
   try {
     const { id } = await params
     const data = await request.json()
-    
+
     const characterCopy = await prisma.characterCopy.upsert({
       where: {
         userId_characterId: {
@@ -87,7 +87,7 @@ export async function DELETE(
     const { id } = await params
     const { searchParams } = new URL(request.url)
     const characterId = searchParams.get('characterId')
-    
+
     if (!characterId) {
       return NextResponse.json(
         { error: 'Character ID is required' },
