@@ -5,35 +5,27 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
+    const rarity = searchParams.get('rarity')
 
-    const poses = await prisma.poseDefinition.findMany({
+    const equipment = await prisma.equipment.findMany({
       where: {
         isActive: true,
-        ...(category && { category })
+        ...(category && { category }),
+        ...(rarity && { rarity: rarity as any })
       },
       include: {
-        angles: true,
-        poses: {
-          include: {
-            character: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
-          }
-        }
+        relatedPose: true
       },
       orderBy: {
         createdAt: 'desc'
       }
     })
 
-    return NextResponse.json(poses)
+    return NextResponse.json(equipment)
   } catch (error) {
-    console.error('Error fetching poses:', error)
+    console.error('Error fetching equipment:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch poses' },
+      { error: 'Failed to fetch equipment' },
       { status: 500 }
     )
   }
@@ -43,22 +35,27 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    const pose = await prisma.poseDefinition.create({
+    const equipment = await prisma.equipment.create({
       data: {
         name: data.name,
         category: data.category,
         description: data.description,
-        effects: data.effects || {},
+        rarity: data.rarity || 'COMMON',
+        cost: data.cost || 100,
+        relatedPoseId: data.relatedPoseId,
         requirements: data.requirements || {},
         isActive: data.isActive !== undefined ? data.isActive : true
+      },
+      include: {
+        relatedPose: true
       }
     })
 
-    return NextResponse.json(pose)
+    return NextResponse.json(equipment)
   } catch (error) {
-    console.error('Error creating pose:', error)
+    console.error('Error creating equipment:', error)
     return NextResponse.json(
-      { error: 'Failed to create pose' },
+      { error: 'Failed to create equipment' },
       { status: 500 }
     )
   }

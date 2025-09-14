@@ -30,6 +30,9 @@ model User {
   // Знания о персонажах
   characterKnowledge CharacterKnowledge[]
 
+  // Оборудование пользователя
+  equipment UserEquipment[]
+
   // Сессии
   sessions Session[]
 
@@ -233,6 +236,9 @@ model PoseDefinition {
 
   // Позы персонажей
   poses       CharacterPose[]
+
+  // Связанное оборудование
+  relatedEquipment Equipment[]
 
   isActive    Boolean  @default(true)
 
@@ -485,4 +491,62 @@ model StationEntity {
   metadata    Json     @default("{}")
 
   @@map("station_entities")
+}
+
+// Оборудование (базовые определения)
+model Equipment {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?
+
+  // Свойства оборудования
+  rarity      EquipmentRarity @default(COMMON)
+  cost        Int      @default(100)  // стоимость в кредитах
+
+  // Связанная поза (если есть)
+  relatedPoseId String?
+  relatedPose   PoseDefinition? @relation(fields: [relatedPoseId], references: [id])
+
+  // Требования для использования
+  requirements Json     @default("{}")
+
+  // У пользователей
+  userEquipment UserEquipment[]
+
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("equipment")
+}
+
+enum EquipmentRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+// Оборудование пользователей
+model UserEquipment {
+  id          String   @id @default(cuid())
+  userId      String
+  equipmentId String
+
+  // Количество у пользователя
+  quantity    Int      @default(1)
+
+  // Настройки оборудования
+  settings    Json     @default("{}")
+
+  // Дата получения
+  acquiredAt  DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, equipmentId])
+  @@map("user_equipment")
 }

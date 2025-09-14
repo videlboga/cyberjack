@@ -8,6 +8,8 @@ import { ActionsAdmin } from '@/components/admin/ActionsAdmin'
 import { PosesAdmin } from '@/components/admin/PosesAdmin'
 import { AnatomyAdmin } from '@/components/admin/AnatomyAdmin'
 import { CharactersAdmin } from '@/components/admin/CharactersAdmin'
+import { UsersAdmin } from '@/components/admin/UsersAdmin'
+import { EquipmentAdmin } from '@/components/admin/EquipmentAdmin'
 import { Navbar } from '@/components/ui/navbar'
 
 export default function AdminPanel() {
@@ -21,17 +23,23 @@ export default function AdminPanel() {
       </div>
 
       <Tabs defaultValue="characters" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="characters">Персонажи</TabsTrigger>
+          <TabsTrigger value="users">Пользователи</TabsTrigger>
           <TabsTrigger value="characteristics">Характеристики</TabsTrigger>
           <TabsTrigger value="actions">Действия</TabsTrigger>
           <TabsTrigger value="poses">Позы</TabsTrigger>
           <TabsTrigger value="anatomy">Анатомия</TabsTrigger>
+          <TabsTrigger value="equipment">Оборудование</TabsTrigger>
           <TabsTrigger value="story">Сюжет</TabsTrigger>
         </TabsList>
 
         <TabsContent value="characters" className="mt-6">
           <CharactersAdmin />
+        </TabsContent>
+
+        <TabsContent value="users" className="mt-6">
+          <UsersAdmin />
         </TabsContent>
 
         <TabsContent value="characteristics" className="mt-6">
@@ -48,6 +56,10 @@ export default function AdminPanel() {
 
         <TabsContent value="anatomy" className="mt-6">
           <AnatomyAdmin />
+        </TabsContent>
+
+        <TabsContent value="equipment" className="mt-6">
+          <EquipmentAdmin />
         </TabsContent>
 
         <TabsContent value="story" className="mt-6">
