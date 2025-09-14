@@ -1,6 +1,36 @@
+"use client"
+
+import { useSession } from 'next-auth/react'
+import { Navbar } from '@/components/ui/navbar'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
 export default function HomePage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (session) {
+      const isAdmin = session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN'
+      router.push(isAdmin ? '/admin' : '/game')
+    } else {
+      router.push('/auth/signin')
+    }
+  }, [session, status, router])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navbar />
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
           <h1 className="text-6xl font-bold text-white mb-6">

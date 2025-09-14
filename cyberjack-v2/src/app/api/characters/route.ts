@@ -48,17 +48,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const character = await prisma.character.create({
-      data: {
-        name,
-        description,
-        age,
-        avatar,
-        isActive
+    const result = await prisma.$transaction(async (tx) => {
+      // Создаем персонажа
+      const character = await tx.character.create({
+        data: {
+          name,
+          description,
+          age,
+          avatar,
+          isActive
+        }
+      })
+
+      // Получаем все активные определения характеристик
+      const characteristicDefinitions = await tx.characteristicDefinition.findMany({
+        where: { isActive: true }
+      })
+
+      // Создаем характеристики для персонажа
+      if (characteristicDefinitions.length > 0) {
+        await tx.characteristic.createMany({
+          data: characteristicDefinitions.map(def => ({
+            characterId: character.id,
+            characteristicDefId: def.id,
+            currentValue: 50, // Значение по умолчанию
+            baseValue: 50,
+            recoveryRate: 1.0
+          }))
+        })
       }
+
+      return character
     })
 
-    return NextResponse.json(character, { status: 201 })
+    return NextResponse.json(result, { status: 201 })
   } catch (error) {
     console.error('Error creating character:', error)
     return NextResponse.json(

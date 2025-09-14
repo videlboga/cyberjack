@@ -12,7 +12,7 @@ export async function PATCH(
 
     if (typeof change !== 'number') {
       return NextResponse.json(
-        { error: 'Change must be a number' },
+        { error: 'Change value is required and must be a number' },
         { status: 400 }
       )
     }
@@ -29,7 +29,7 @@ export async function PATCH(
   } catch (error) {
     console.error('Error updating characteristic:', error)
     return NextResponse.json(
-      { error: 'Failed to update characteristic' },
+      { error: error instanceof Error ? error.message : 'Failed to update characteristic' },
       { status: 500 }
     )
   }
@@ -41,16 +41,16 @@ export async function GET(
 ) {
   try {
     const characteristicsSystem = new CharacteristicsSystem()
-    const value = await characteristicsSystem.getCurrentValue(
+    const currentValue = await characteristicsSystem.getCurrentValue(
       params.characterId,
       params.characteristicId
     )
 
-    return NextResponse.json({ value })
+    return NextResponse.json({ value: currentValue })
   } catch (error) {
-    console.error('Error getting characteristic:', error)
+    console.error('Error fetching characteristic value:', error)
     return NextResponse.json(
-      { error: 'Failed to get characteristic' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch characteristic value' },
       { status: 500 }
     )
   }

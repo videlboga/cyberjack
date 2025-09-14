@@ -1,3 +1,5 @@
+// app/api/anatomy/[id]/route.ts
+
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
 
@@ -6,22 +8,26 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const characteristic = await prisma.characteristicDefinition.findUnique({
-      where: { id: params.id }
+    const anatomy = await prisma.anatomyDefinition.findUnique({
+      where: { id: params.id },
+      include: {
+        anatomy: true,
+        activeZones: true
+      }
     })
 
-    if (!characteristic) {
+    if (!anatomy) {
       return NextResponse.json(
-        { error: 'Characteristic not found' },
+        { error: 'Anatomy not found' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(characteristic)
+    return NextResponse.json(anatomy)
   } catch (error) {
-    console.error('Error fetching characteristic:', error)
+    console.error('Error fetching anatomy:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch characteristic' },
+      { error: 'Failed to fetch anatomy' },
       { status: 500 }
     )
   }
@@ -33,25 +39,23 @@ export async function PUT(
 ) {
   try {
     const body = await request.json()
-    const { name, category, description, minValue, maxValue, isActive } = body
+    const { name, category, description, isActive } = body
 
-    const characteristic = await prisma.characteristicDefinition.update({
+    const anatomy = await prisma.anatomyDefinition.update({
       where: { id: params.id },
       data: {
         name,
         category,
         description,
-        minValue,
-        maxValue,
         isActive
       }
     })
 
-    return NextResponse.json(characteristic)
+    return NextResponse.json(anatomy)
   } catch (error) {
-    console.error('Error updating characteristic:', error)
+    console.error('Error updating anatomy:', error)
     return NextResponse.json(
-      { error: 'Failed to update characteristic' },
+      { error: 'Failed to update anatomy' },
       { status: 500 }
     )
   }
@@ -62,15 +66,16 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.characteristicDefinition.delete({
-      where: { id: params.id }
+    await prisma.anatomyDefinition.update({
+      where: { id: params.id },
+      data: { isActive: false }
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting characteristic:', error)
+    console.error('Error deleting anatomy:', error)
     return NextResponse.json(
-      { error: 'Failed to delete characteristic' },
+      { error: 'Failed to delete anatomy' },
       { status: 500 }
     )
   }

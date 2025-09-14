@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -19,7 +19,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Модификаторы для формул
-  modifiers String   @default("{}")
+  modifiers Json     @default("{}")
 
   // Кредиты
   credits   Int      @default(1000)
@@ -63,7 +63,7 @@ model Character {
   poses CharacterPose[]
 
   // Промпты для ИИ
-  prompts String @default("{}")
+  prompts Json @default("{}")
 
   // Копии у пользователей
   copies CharacterCopy[]
@@ -150,6 +150,9 @@ model AnatomyDefinition {
   // Активные зоны
   activeZones ActiveZone[]
 
+  // Персонализированные активные зоны
+  characterActiveZones CharacterActiveZone[]
+
   @@map("anatomy_definitions")
 }
 
@@ -160,13 +163,56 @@ model CharacterPose {
   poseDefId   String
 
   // Настройки позы для конкретного персонажа
-  customSettings String @default("{}")
+  customSettings Json   @default("{}")
+  isActive      Boolean @default(true)
 
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   definition  PoseDefinition @relation(fields: [poseDefId], references: [id])
 
+  // Персонализированные ракурсы
+  angles      CharacterPoseAngle[]
+
   @@unique([characterId, poseDefId])
   @@map("character_poses")
+}
+
+// Персонализированные ракурсы поз
+model CharacterPoseAngle {
+  id          String   @id @default(cuid())
+  characterPoseId String
+
+  // Название и описание ракурса
+  name        String
+  description String?
+
+  // Персонализированные медиа для этого ракурса
+  media       Json     @default("{}") // {files: [{id, url, type, filename}]}
+
+  // Персонализированные активные зоны
+  zones       CharacterActiveZone[]
+
+  characterPose CharacterPose @relation(fields: [characterPoseId], references: [id], onDelete: Cascade)
+
+  @@map("character_pose_angles")
+}
+
+// Персонализированные активные зоны
+model CharacterActiveZone {
+  id          String   @id @default(cuid())
+  characterAngleId String
+  anatomyDefId String?
+
+  name        String
+  x           Float    // координаты на изображении
+  y           Float
+  width       Float
+  height      Float
+
+  // Связь с анатомией
+  anatomy     AnatomyDefinition? @relation(fields: [anatomyDefId], references: [id])
+  characterAngle CharacterPoseAngle @relation(fields: [characterAngleId], references: [id], onDelete: Cascade)
+
+  @@map("character_active_zones")
 }
 
 // Определения поз
@@ -177,10 +223,10 @@ model PoseDefinition {
   description String?
 
   // Влияние на характеристики
-  effects     String   @default("{}")
+  effects     Json     @default("{}")
 
   // Условия применения
-  requirements String  @default("{}")
+  requirements Json    @default("{}")
 
   // Ракурсы
   angles      PoseAngle[]
@@ -201,10 +247,11 @@ model PoseAngle {
   angle       String   // "front", "back", "side", etc.
 
   // Медиа
-  media       String   @default("{}") // {images: [], videos: [], gifs: []}
+  media       Json     @default("{}") // {images: [], videos: [], gifs: []}
 
   // Активные зоны
   zones       ActiveZone[]
+
 
   pose        PoseDefinition @relation(fields: [poseDefId], references: [id], onDelete: Cascade)
 
@@ -243,10 +290,10 @@ model Action {
   duration    Int      @default(30)   // секунды
 
   // Эффекты на характеристики
-  effects     String   @default("{}")
+  effects     Json     @default("{}")
 
   // Условия применения
-  requirements String  @default("{}")
+  requirements Json    @default("{}")
 
   isActive    Boolean  @default(true)
 
@@ -260,7 +307,7 @@ model CharacterCopy {
   characterId String
 
   // Настройки копии
-  settings    String   @default("{}")
+  settings    Json     @default("{}")
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
@@ -322,8 +369,8 @@ model StoryPoint {
   minValue     Float?
   maxValue     Float?
 
-  // Теги для организации (JSON массив)
-  tags        String   @default("[]")
+  // Теги для организации
+  tags        String[]
 
   isActive    Boolean  @default(true)
 
@@ -344,7 +391,7 @@ model Scene {
   description String?
 
   // Условия активации
-  triggerConditions String @default("{}")
+  triggerConditions Json @default("{}")
   probability       Float @default(100)
 
   // Экраны сцены
@@ -363,13 +410,13 @@ model Screen {
   description String?
 
   // Контент экрана
-  content     String   @default("{}")
+  content     Json     @default("{}")
 
   // Выборы
   choices     Choice[]
 
   // Условия доступа
-  accessConditions String @default("{}")
+  accessConditions Json @default("{}")
 
   scene       Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
 
@@ -384,10 +431,10 @@ model Choice {
   description String?
 
   // Последствия выбора
-  consequences String  @default("{}")
+  consequences Json    @default("{}")
 
   // Условия показа
-  showConditions String @default("{}")
+  showConditions Json  @default("{}")
 
   screen      Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
 
@@ -410,7 +457,7 @@ model StationEntity {
   isActive    Boolean  @default(true)
 
   // Метаданные
-  metadata    String   @default("{}")
+  metadata    Json     @default("{}")
 
   @@map("station_entities")
 }

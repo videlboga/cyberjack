@@ -116,10 +116,13 @@ export class TimeSystem {
     }
   }
 
-  // Получить всех персонажей (заглушка, нужно будет заменить на реальный запрос)
+  // Получить всех персонажей
   private async getAllCharacters(): Promise<Array<{ id: string }>> {
-    // TODO: Заменить на реальный запрос к базе данных
-    return []
+    const { prisma } = await import('@/lib/db/client')
+    return await prisma.character.findMany({
+      where: { isActive: true },
+      select: { id: true }
+    })
   }
 
   // Получить состояние системы времени
@@ -170,4 +173,3 @@ export class TimeSystem {
     this.reset()
   }
 }
-

@@ -2,17 +2,12 @@
 
 import { User, Character, Characteristic, CharacteristicDefinition, CharacterAnatomy, AnatomyDefinition, CharacterPose, PoseDefinition, PoseAngle, ActiveZone, Action, CharacterCopy, CharacterKnowledge, Session, StoryPoint, Scene, Screen, Choice, StationEntity, UserRole, StoryPointType } from '@prisma/client'
 
-// Enum для уровней знаний
+// Enum для уровней знаний (соответствует Prisma схеме)
 export enum KnowledgeLevel {
   UNKNOWN = 'UNKNOWN',
-  NONE = 'NONE',
-  BASIC = 'BASIC',
-  INTERMEDIATE = 'INTERMEDIATE',
-  ADVANCED = 'ADVANCED',
-  EXPERT = 'EXPERT',
-  PRECISE = 'PRECISE',
+  APPROXIMATE = 'APPROXIMATE',
   DETAILED = 'DETAILED',
-  APPROXIMATE = 'APPROXIMATE'
+  PRECISE = 'PRECISE'
 }
 
 // Базовые типы из Prisma

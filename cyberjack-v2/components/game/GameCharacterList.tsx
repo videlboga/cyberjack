@@ -130,7 +130,7 @@ export function GameCharacterList({ onSelect, selectedId }: GameCharacterListPro
                         </span>
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div
-                            className="bg-blue-500 h-2 rounded-full"
+                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${char.currentValue}%` }}
                           ></div>
                         </div>

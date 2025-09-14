@@ -53,7 +53,7 @@ export function CharacteristicsAdmin() {
     e.preventDefault()
 
     try {
-      const url = editingId ? `/api/characteristics/${editingId}` : '/api/characteristics'
+      const url = editingId ? `/api/characteristics/definitions/${editingId}` : '/api/characteristics'
       const method = editingId ? 'PUT' : 'POST'
 
       const response = await fetch(url, {
@@ -92,11 +92,12 @@ export function CharacteristicsAdmin() {
     }
 
     try {
-      const response = await fetch(`/api/characteristics/${id}`, {
+      const response = await fetch(`/api/characteristics/definitions/${id}`, {
         method: 'DELETE'
       })
       if (!response.ok) {
-        throw new Error('Ошибка удаления характеристики')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Ошибка удаления характеристики')
       }
       await fetchCharacteristics()
     } catch (err) {
@@ -157,6 +158,7 @@ export function CharacteristicsAdmin() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Введите название характеристики"
                   required
                 />
               </div>
@@ -167,6 +169,7 @@ export function CharacteristicsAdmin() {
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Введите категорию"
                   required
                 />
               </div>
@@ -177,6 +180,7 @@ export function CharacteristicsAdmin() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Введите описание характеристики"
                 rows={3}
               />
             </div>
@@ -188,6 +192,7 @@ export function CharacteristicsAdmin() {
                   value={formData.minValue}
                   onChange={(e) => setFormData({ ...formData, minValue: Number(e.target.value) })}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0"
                   required
                 />
               </div>
@@ -198,6 +203,7 @@ export function CharacteristicsAdmin() {
                   value={formData.maxValue}
                   onChange={(e) => setFormData({ ...formData, maxValue: Number(e.target.value) })}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="100"
                   required
                 />
               </div>

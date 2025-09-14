@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 
 interface Message {
@@ -16,6 +17,7 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ characterId, characterName }: ChatPanelProps) {
+  const { data: session } = useSession()
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -51,7 +53,7 @@ export function ChatPanel({ characterId, characterName }: ChatPanelProps) {
         },
         body: JSON.stringify({
           message: inputMessage,
-          userId: 'test-user', // TODO: Get from auth context
+          userId: session?.user?.id || '',
           context: {}
         })
       })

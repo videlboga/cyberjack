@@ -61,6 +61,13 @@ cyberjack-v2/
 
 ## 🚀 Быстрый старт
 
+### ⚡ ОБЯЗАТЕЛЬНО: Используй скрипт перезапуска!
+```bash
+cd cyberjack-v2
+npm run restart
+```
+**НИКОГДА не используй `npm run dev` напрямую!**
+
 ### Установка:
 ```bash
 cd cyberjack-v2
@@ -70,16 +77,22 @@ npm install
 ### Настройка:
 1. Скопируйте `.env.example` в `.env`
 2. Настройте переменные окружения (особенно OpenRouter API ключи)
-3. Выполните миграции базы данных
+3. База данных синхронизируется автоматически при запуске
 
 ### Запуск:
 ```bash
-npm run dev
+npm run restart  # Чистый перезапуск на порту 3000
 ```
+
+### Проверка работы:
+- Главная: http://localhost:3000
+- Админ-панель: http://localhost:3000/admin
+- Игра: http://localhost:3000/game
+- База данных: http://localhost:3000/db
 
 ### Заполнение тестовыми данными:
 ```bash
-npx tsx scripts/seed-database.ts
+npm run db:seed
 ```
 
 ## 🔧 API
@@ -132,11 +145,36 @@ npx tsx scripts/test-all-functionality.ts
 
 ## 📝 Разработка
 
+### 🚨 ОБЯЗАТЕЛЬНЫЕ ПРАВИЛА:
+
+#### ✅ ВСЕГДА ДЕЛАЙ:
+- Используй `npm run restart` для перезапуска
+- Читай `CYBERJACK_v2_TECHNICAL_SPECIFICATION.md` перед изменениями
+- Проверяй соответствие спецификации
+- Исправляй ошибки TypeScript
+- Читай файлы перед редактированием
+
+#### ❌ НИКОГДА НЕ ДЕЛАЙ:
+- Не запускай `npm run dev` напрямую
+- Не хардкодь решения частных случаев
+- Не игнорируй архитектуру из спецификации
+- Не создавай файлы без проверки существующих
+
+### Полезные команды:
+```bash
+npm run restart          # Чистый перезапуск (ОБЯЗАТЕЛЬНО!)
+npm run dev:3000         # Запуск на порту 3000
+npm run db:push          # Синхронизация базы данных
+npm run db:studio        # Prisma Studio
+npx tsc --noEmit         # Проверка TypeScript
+```
+
 ### Соглашения:
 - TypeScript для всех файлов
 - Компоненты в PascalCase
 - API endpoints в kebab-case
 - База данных через Prisma
+- Используй `await params` в динамических маршрутах
 
 ### Структура коммитов:
 ```
@@ -146,6 +184,11 @@ docs: документация
 refactor: рефакторинг
 test: тесты
 ```
+
+### Документация:
+- `.cursorrules` - Правила для Cursor AI
+- `DEVELOPMENT_GUIDE.md` - Руководство разработчика
+- `CYBERJACK_v2_TECHNICAL_SPECIFICATION.md` - Техническая спецификация
 
 ## 🔗 Связь с оригинальным проектом
 

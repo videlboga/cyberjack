@@ -12,7 +12,7 @@ export class CharacterAIService {
   constructor(apiKey: string, baseUrl?: string, model?: string, model2?: string) {
     this.openRouterApiKey = apiKey
     this.baseUrl = baseUrl || 'https://openrouter.ai/api/v1'
-    this.model = model || 'deepseek/deepseek-chat-v3-0324'
+    this.model = model || 'z-ai/glm-4.5'
     this.model2 = model2 || 'google/gemini-2.5-flash-lite'
   }
 

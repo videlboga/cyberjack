@@ -1,10 +1,13 @@
 // app/(auth)/game/page.tsx
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { GameCharacterList } from '@/components/game/GameCharacterList'
 import { ChatPanel } from '@/components/game/ChatPanel'
+import { ActionsPanel } from '@/components/game/ActionsPanel'
+import { Navbar } from '@/components/ui/navbar'
 
 interface Character {
   id: string
@@ -24,12 +27,52 @@ interface Character {
 }
 
 export default function GameInterface() {
+  const { data: session } = useSession()
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [currentPose, setCurrentPose] = useState<string | null>(null)
   const [isActionHolding, setIsActionHolding] = useState(false)
+  const [gameTime, setGameTime] = useState({ gameTime: 0, formattedTime: '00:00', isRunning: false })
+
+  // Получаем текущее состояние времени
+  useEffect(() => {
+    const fetchTimeState = async () => {
+      try {
+        const response = await fetch('/api/time')
+        if (response.ok) {
+          const timeState = await response.json()
+          setGameTime(timeState)
+        }
+      } catch (error) {
+        console.error('Error fetching time state:', error)
+      }
+    }
+
+    fetchTimeState()
+    const interval = setInterval(fetchTimeState, 1000) // Обновляем каждую секунду
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleTimeAction = async (action: string, minutes?: number) => {
+    try {
+      const response = await fetch('/api/time', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, minutes })
+      })
+
+      if (response.ok) {
+        const timeState = await response.json()
+        setGameTime(timeState)
+      }
+    } catch (error) {
+      console.error('Error updating time:', error)
+    }
+  }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="container mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Игровой интерфейс</h1>
         <p className="text-gray-600">Взаимодействие с персонажами, выполнение действий и чат с ИИ</p>
@@ -58,57 +101,13 @@ export default function GameInterface() {
               </div>
 
               {/* Панель действий */}
-              <div className="bg-white rounded-lg shadow-md p-6 border">
-                <h2 className="text-xl font-semibold mb-4">Панель действий</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Button
-                    className="h-20 flex flex-col items-center justify-center"
-                    onMouseDown={() => setIsActionHolding(true)}
-                    onMouseUp={() => setIsActionHolding(false)}
-                    onMouseLeave={() => setIsActionHolding(false)}
-                  >
-                    <span className="text-2xl mb-1">👋</span>
-                    <span className="text-xs">Действие 1</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                    onMouseDown={() => setIsActionHolding(true)}
-                    onMouseUp={() => setIsActionHolding(false)}
-                    onMouseLeave={() => setIsActionHolding(false)}
-                  >
-                    <span className="text-2xl mb-1">💕</span>
-                    <span className="text-xs">Действие 2</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                    onMouseDown={() => setIsActionHolding(true)}
-                    onMouseUp={() => setIsActionHolding(false)}
-                    onMouseLeave={() => setIsActionHolding(false)}
-                  >
-                    <span className="text-2xl mb-1">🔥</span>
-                    <span className="text-xs">Действие 3</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-20 flex flex-col items-center justify-center"
-                    onMouseDown={() => setIsActionHolding(true)}
-                    onMouseUp={() => setIsActionHolding(false)}
-                    onMouseLeave={() => setIsActionHolding(false)}
-                  >
-                    <span className="text-2xl mb-1">⚡</span>
-                    <span className="text-xs">Действие 4</span>
-                  </Button>
-                </div>
-                {isActionHolding && (
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-blue-800 text-sm">
-                      ⏱️ Действие выполняется... Время идет в 60 раз быстрее
-                    </p>
-                  </div>
-                )}
-              </div>
+              <ActionsPanel
+                characterId={selectedCharacter.id}
+                userId={session?.user?.id || ''}
+                onActionStart={() => setIsActionHolding(true)}
+                onActionEnd={() => setIsActionHolding(false)}
+                isHolding={isActionHolding}
+              />
 
               {/* Чат */}
               <ChatPanel
@@ -133,24 +132,37 @@ export default function GameInterface() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="text-lg font-mono">
-              ⏰ Игровое время: <span className="font-bold">00:00</span>
+              ⏰ Игровое время: <span className="font-bold">{gameTime.formattedTime}</span>
             </div>
             <div className="text-sm text-gray-500">
-              {isActionHolding ? '⏱️ Время ускорено' : '⏸️ Время остановлено'}
+              {gameTime.isRunning ? '⏱️ Время ускорено' : '⏸️ Время остановлено'}
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleTimeAction('advance', 60)}
+            >
               +1 час
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleTimeAction('advance', 1440)}
+            >
               +1 день
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleTimeAction('reset')}
+            >
               Сбросить
             </Button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

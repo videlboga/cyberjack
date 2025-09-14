@@ -314,8 +314,8 @@ export class ActionsSystem {
         intensity: actionData.intensity || 5,
         cost: actionData.cost || 10,
         duration: actionData.duration || 30,
-        effects: JSON.stringify(actionData.effects || {}),
-        requirements: JSON.stringify(actionData.requirements || {})
+        effects: actionData.effects || {},
+        requirements: actionData.requirements || {}
       }
     })
   }
