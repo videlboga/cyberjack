@@ -11,7 +11,12 @@ export async function GET(
     const { id } = await params
     const characterPoses = await prisma.characterPose.findMany({
       where: { characterId: id },
-      include: {
+      select: {
+        id: true,
+        characterId: true,
+        poseDefId: true,
+        isActive: true,
+        customSettings: true,
         definition: {
           include: {
             angles: {
@@ -89,7 +94,12 @@ export async function POST(
         isActive: true,
         customSettings: {}
       },
-      include: {
+      select: {
+        id: true,
+        characterId: true,
+        poseDefId: true,
+        isActive: true,
+        customSettings: true,
         definition: {
           include: {
             angles: {

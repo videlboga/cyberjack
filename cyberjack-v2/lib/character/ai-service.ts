@@ -2,31 +2,170 @@
 
 import { prisma } from '@/lib/db/client'
 import { CharacterContext } from '@/types/game'
+import { PromptSystem } from './prompt-system'
+import { CharacterMemoryManager } from './memory-manager'
+import { CharacterResponseManager } from './response-manager'
+import { EnhancedMessageAnalyzer } from './enhanced-message-analyzer'
+import { ActionMessageSystemManager } from './action-message-system'
+import {
+  CharacterAIService as ICharacterAIService,
+  AIResponse,
+  MessageAnalysis,
+  PromptContext,
+  CharacterAIConfig,
+  CharacterAIMetrics
+} from '@/types/character-ai'
 
-export class CharacterAIService {
+export class CharacterAIService implements ICharacterAIService {
   private openRouterApiKey: string
   private baseUrl: string
   private model: string
   private model2: string
+  private config: CharacterAIConfig
+  private promptSystem: PromptSystem
+  private memoryManager: CharacterMemoryManager
+  private responseManager: CharacterResponseManager
+  private messageAnalyzer: EnhancedMessageAnalyzer
+  private actionMessageSystem: ActionMessageSystemManager
+  private metrics: CharacterAIMetrics
 
   constructor(apiKey: string, baseUrl?: string, model?: string, model2?: string) {
     this.openRouterApiKey = apiKey
     this.baseUrl = baseUrl || 'https://openrouter.ai/api/v1'
-    this.model = model || 'z-ai/glm-4.5'
-    this.model2 = model2 || 'google/gemini-2.5-flash-lite'
+    this.model = model || process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324'
+    this.model2 = model2 || process.env.OPENROUTER_MODEL_2 || 'google/gemini-2.5-flash-lite'
+
+    this.config = {
+      model: this.model,
+      model2: this.model2,
+      maxTokens: 500,
+      temperature: 0.8,
+      topP: 0.9,
+      frequencyPenalty: 0.1,
+      presencePenalty: 0.1,
+      maxMemoryItems: 1000,
+      memoryRetentionDays: 30,
+      responseQualityThreshold: 0.6,
+      enableResponseAnalysis: true,
+      enableMemoryManagement: true,
+      enablePromptOptimization: true
+    }
+
+    this.promptSystem = new PromptSystem()
+    this.memoryManager = new CharacterMemoryManager()
+    this.responseManager = new CharacterResponseManager()
+    this.messageAnalyzer = new EnhancedMessageAnalyzer()
+    this.actionMessageSystem = new ActionMessageSystemManager(this)
+
+    this.metrics = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      averageResponseTime: 0,
+      averageQuality: 0,
+      totalTokensUsed: 0,
+      totalCost: 0,
+      mostUsedTemplates: [],
+      errorRate: 0,
+      lastUpdated: new Date()
+    }
   }
 
   // Генерация ответа персонажа
   async generateResponse(
     characterId: string,
     userMessage: string,
-    context: CharacterContext
-  ): Promise<string> {
-    const character = await this.getCharacter(characterId)
-    const prompt = await this.buildPrompt(character, userMessage, context)
+    context: Partial<PromptContext>
+  ): Promise<AIResponse> {
+    const startTime = Date.now()
+    this.metrics.totalRequests++
 
-    const response = await this.callOpenRouter(prompt)
-    return response
+    try {
+      // Получаем полный контекст с динамическими промптами
+      const fullContext = await this.getCharacterContextWithDynamicPrompts(characterId, context.userId || '')
+
+      // Анализируем сообщение пользователя с расширенным анализом
+      console.log('🔍 Начинаем анализ сообщения в ai-service:', { userMessage, characterId, userId: context.userId })
+
+      const messageAnalysis = await this.messageAnalyzer.analyzeMessage(
+        userMessage,
+        characterId,
+        context.userId || ''
+      )
+
+      console.log('🔍 Анализ сообщения завершен:', {
+        message: userMessage,
+        characteristicInfluences: messageAnalysis.characteristicInfluences,
+        poseCommands: messageAnalysis.poseCommands,
+        actionTriggers: messageAnalysis.actionTriggers
+      })
+
+      // Обрабатываем результаты анализа сообщения
+      const characteristicChanges = await this.processMessageAnalysis(messageAnalysis, characterId, context.userId || '')
+
+      // Создаем воспоминание о взаимодействии
+      if (this.config.enableMemoryManagement) {
+        await this.memoryManager.createInteractionMemory(
+          characterId,
+          userMessage,
+          '', // Пока пустой ответ
+          fullContext.environment?.location || 'неизвестно'
+        )
+      }
+
+      // Генерируем ответ через response manager
+      const aiResponse = await this.responseManager.generateResponse(
+        characterId,
+        userMessage,
+        fullContext
+      )
+
+      // Добавляем изменения характеристик в метаданные
+      if (characteristicChanges.length > 0) {
+        aiResponse.metadata = {
+          ...aiResponse.metadata,
+          characteristicChanges
+        }
+      }
+
+      // Обновляем воспоминание с ответом
+      if (this.config.enableMemoryManagement) {
+        await this.memoryManager.createInteractionMemory(
+          characterId,
+          userMessage,
+          aiResponse.message,
+          fullContext.environment?.location || 'неизвестно'
+        )
+      }
+
+      // Обновляем метрики
+      this.updateMetrics(aiResponse, Date.now() - startTime)
+
+      return aiResponse
+    } catch (error) {
+      this.metrics.failedRequests++
+      this.updateErrorRate()
+
+      console.error('Ошибка при генерации ответа:', error)
+
+      // Возвращаем fallback ответ
+      return {
+        message: 'Извините, произошла ошибка при генерации ответа.',
+        characterId,
+        timestamp: new Date(),
+        metadata: {
+          emotion: 'neutral',
+          intent: 'error',
+          keywords: [],
+          sentiment: 'neutral',
+          responseTime: Date.now() - startTime,
+          quality: 0.1,
+          confidence: 0.1,
+          tokensUsed: 0,
+          cost: 0
+        }
+      }
+    }
   }
 
   // Получить персонажа
@@ -37,6 +176,21 @@ export class CharacterAIService {
         characteristics: {
           include: {
             definition: true
+          }
+        },
+        anatomy: {
+          include: {
+            definition: true
+          }
+        },
+        poses: {
+          include: {
+            definition: true,
+            angles: {
+              include: {
+                zones: true
+              }
+            }
           }
         }
       }
@@ -49,77 +203,123 @@ export class CharacterAIService {
     return character
   }
 
-  // Построение промпта
-  private async buildPrompt(
-    character: any,
-    userMessage: string,
-    context: CharacterContext
-  ): Promise<string> {
-    const characteristics = await this.getCharacterCharacteristics(character.id)
-    const recentActions = await this.getRecentActions(character.id)
-    const memory = await this.getCharacterMemory(character.id)
+  // Получить контекст персонажа
+  async getCharacterContext(characterId: string, userId: string): Promise<PromptContext> {
+    const character = await this.getCharacter(characterId)
+    const user = await this.getUser(userId)
 
-    return `
-Ты - ${character.name}, ${character.description || 'персонаж в игре'}
-
-Твои текущие характеристики:
-${this.formatCharacteristics(characteristics)}
-
-Последние действия: ${recentActions.join(', ') || 'нет'}
-
-Память: ${memory}
-
-Контекст:
-${context.lastAction ? `Последнее действие: ${context.lastAction}` : ''}
-${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
-
-Сообщение пользователя: "${userMessage}"
-
-Ответь как ${character.name}, учитывая свои характеристики и текущее состояние. Будь естественным и соответствуй своему характеру.
-    `.trim()
-  }
-
-  // Получить характеристики персонажа
-  private async getCharacterCharacteristics(characterId: string) {
-    const characteristics = await prisma.characteristic.findMany({
-      where: { characterId },
-      include: {
-        definition: true
-      }
-    })
-
-    return characteristics.map(char => ({
+    // Получаем характеристики
+    const characteristics = character.characteristics.map(char => ({
+      id: char.id,
       name: char.definition.name,
       category: char.definition.category,
-      value: char.currentValue,
-      baseValue: char.baseValue
+      currentValue: char.currentValue,
+      baseValue: char.baseValue,
+      isRevealed: true, // TODO: Реализовать систему раскрытия
+      revealedValue: char.currentValue,
+      accuracy: 100
     }))
-  }
 
-  // Получить последние действия
-  private async getRecentActions(characterId: string): Promise<string[]> {
-    // TODO: Реализовать получение последних действий
-    // Пока возвращаем заглушку
-    return []
-  }
+    // Получаем память
+    const memory = await this.memoryManager.getMemoryContext(characterId)
 
-  // Получить память персонажа
-  private async getCharacterMemory(characterId: string): Promise<string> {
-    // TODO: Реализовать систему памяти персонажа
-    // Пока возвращаем заглушку
-    return 'Нет особых воспоминаний'
-  }
+    // Получаем текущую позу
+    const currentPose = character.poses.find(pose => pose.isActive)
+    const poseContext = currentPose ? {
+      id: currentPose.id,
+      name: currentPose.definition.name,
+      category: currentPose.definition.category,
+      description: currentPose.definition.description,
+      currentAngle: currentPose.angles[0]?.name || 'default',
+      activeZones: currentPose.angles[0]?.zones.map(zone => ({
+        id: zone.id,
+        name: zone.name,
+        anatomyId: zone.anatomyDefId,
+        anatomyName: zone.anatomy?.name,
+        sensitivity: 50, // TODO: Добавить чувствительность в схему
+        isActive: true
+      })) || []
+    } : undefined
 
-  // Форматировать характеристики для промпта
-  private formatCharacteristics(characteristics: any[]): string {
-    if (characteristics.length === 0) {
-      return 'Характеристики не определены'
+    // Получаем последние действия (TODO: Реализовать)
+    const lastAction = undefined
+
+    // Получаем историю сессии (TODO: Реализовать)
+    const sessionHistory: any[] = []
+
+    // Создаем контекст окружения
+    const environment = {
+      timeOfDay: 'день',
+      location: 'комната',
+      atmosphere: 'интимная',
+      temperature: 'комфортная',
+      lighting: 'приглушенная',
+      sounds: ['тишина'],
+      smells: ['легкий аромат']
     }
 
-    return characteristics.map(char =>
-      `- ${char.name} (${char.category}): ${char.value}/100 (базовое: ${char.baseValue})`
-    ).join('\n')
+    return {
+      characterId,
+      userId,
+      message: '',
+      character: {
+        id: character.id,
+        name: character.name,
+        description: character.description,
+        age: character.age,
+        avatar: character.avatar
+      },
+      characteristics,
+      memory,
+      currentPose: poseContext,
+      lastAction,
+      userModifiers: user?.modifiers as Record<string, number> || {},
+      gameTime: Date.now(),
+      sessionHistory,
+      environment
+    }
   }
+
+  // Получить контекст персонажа с динамическими промптами
+  async getCharacterContextWithDynamicPrompts(characterId: string, userId: string): Promise<PromptContext> {
+    const context = await this.getCharacterContext(characterId, userId)
+
+    // Создаем динамические промпты на основе текущего состояния
+    if (this.config.enablePromptOptimization) {
+      try {
+        // Анализируем характеристики для определения контекста
+        const avgValue = context.characteristics.reduce((sum, char) => sum + char.currentValue, 0) / context.characteristics.length
+        let characteristicContext: 'high' | 'low' | 'extreme' | 'normal' = 'normal'
+
+        if (avgValue >= 80) {
+          characteristicContext = 'high'
+        } else if (avgValue <= 30) {
+          characteristicContext = 'low'
+        } else if (avgValue >= 90 || avgValue <= 10) {
+          characteristicContext = 'extreme'
+        }
+
+        // Создаем динамические промпты
+        await this.promptSystem.createCharacteristicPrompt(characterId, characteristicContext)
+        await this.promptSystem.createPosePrompt(characterId)
+        await this.promptSystem.createCombinedPrompt(characterId, 'interaction')
+      } catch (error) {
+        console.warn('Ошибка при создании динамических промптов:', error)
+      }
+    }
+
+    return context
+  }
+
+  // Получить пользователя
+  private async getUser(userId: string) {
+    if (!userId) return null
+
+    return await prisma.user.findUnique({
+      where: { id: userId }
+    })
+  }
+
 
   // Вызов OpenRouter API
   private async callOpenRouter(prompt: string): Promise<string> {
@@ -140,11 +340,11 @@ ${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
               content: prompt
             }
           ],
-          max_tokens: 500,
-          temperature: 0.8,
-          top_p: 0.9,
-          frequency_penalty: 0.1,
-          presence_penalty: 0.1
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          top_p: this.config.topP,
+          frequency_penalty: this.config.frequencyPenalty,
+          presence_penalty: this.config.presencePenalty
         })
       })
 
@@ -217,13 +417,8 @@ ${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
     return this.model
   }
 
-  // Анализ сообщения пользователя (использует вторую модель)
-  async analyzeMessage(userMessage: string): Promise<{
-    intent: string
-    emotion: string
-    keywords: string[]
-    sentiment: 'positive' | 'negative' | 'neutral'
-  }> {
+  // Анализ сообщения пользователя
+  async analyzeMessage(userMessage: string): Promise<MessageAnalysis> {
     const analysisPrompt = `
 Проанализируй следующее сообщение пользователя и верни JSON с анализом:
 
@@ -234,7 +429,11 @@ ${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
   "intent": "основное намерение пользователя",
   "emotion": "эмоциональное состояние",
   "keywords": ["ключевые", "слова"],
-  "sentiment": "positive|negative|neutral"
+  "sentiment": "positive|negative|neutral",
+  "complexity": 1-10,
+  "urgency": 1-10,
+  "requiresResponse": true/false,
+  "suggestedActions": ["действие1", "действие2"]
 }
     `.trim()
 
@@ -248,14 +447,14 @@ ${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
           'X-Title': 'CyberJack v2.0'
         },
         body: JSON.stringify({
-          model: this.model2, // Используем вторую модель для анализа
+          model: this.model2,
           messages: [
             {
               role: 'user',
               content: analysisPrompt
             }
           ],
-          max_tokens: 200,
+          max_tokens: 300,
           temperature: 0.3
         })
       })
@@ -273,19 +472,49 @@ ${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
 
       // Пытаемся распарсить JSON
       try {
-        return JSON.parse(content)
+        const parsed = JSON.parse(content)
+        return {
+          intent: parsed.intent || 'unknown',
+          emotion: parsed.emotion || 'neutral',
+          keywords: parsed.keywords || [],
+          sentiment: parsed.sentiment || 'neutral',
+          complexity: parsed.complexity || 5,
+          urgency: parsed.urgency || 5,
+          requiresResponse: parsed.requiresResponse !== false,
+          suggestedActions: parsed.suggestedActions || []
+        }
       } catch {
         // Если не удалось распарсить, попробуем найти JSON в markdown блоке
         const jsonMatch = content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
         if (jsonMatch) {
           try {
-            return JSON.parse(jsonMatch[1])
+            const parsed = JSON.parse(jsonMatch[1])
+            return {
+              intent: parsed.intent || 'unknown',
+              emotion: parsed.emotion || 'neutral',
+              keywords: parsed.keywords || [],
+              sentiment: parsed.sentiment || 'neutral',
+              complexity: parsed.complexity || 5,
+              urgency: parsed.urgency || 5,
+              requiresResponse: parsed.requiresResponse !== false,
+              suggestedActions: parsed.suggestedActions || []
+            }
           } catch {
             // Если и это не сработало, попробуем найти JSON без markdown
             const jsonMatch2 = content.match(/\{[\s\S]*\}/)
             if (jsonMatch2) {
               try {
-                return JSON.parse(jsonMatch2[0])
+                const parsed = JSON.parse(jsonMatch2[0])
+                return {
+                  intent: parsed.intent || 'unknown',
+                  emotion: parsed.emotion || 'neutral',
+                  keywords: parsed.keywords || [],
+                  sentiment: parsed.sentiment || 'neutral',
+                  complexity: parsed.complexity || 5,
+                  urgency: parsed.urgency || 5,
+                  requiresResponse: parsed.requiresResponse !== false,
+                  suggestedActions: parsed.suggestedActions || []
+                }
               } catch {
                 // Последняя попытка - вернуть дефолтные значения
               }
@@ -298,7 +527,11 @@ ${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
           intent: 'unknown',
           emotion: 'neutral',
           keywords: [],
-          sentiment: 'neutral' as const
+          sentiment: 'neutral',
+          complexity: 5,
+          urgency: 5,
+          requiresResponse: true,
+          suggestedActions: []
         }
       }
     } catch (error) {
@@ -307,8 +540,373 @@ ${context.currentPose ? `Текущая поза: ${context.currentPose}` : ''}
         intent: 'unknown',
         emotion: 'neutral',
         keywords: [],
-        sentiment: 'neutral' as const
+        sentiment: 'neutral',
+        complexity: 5,
+        urgency: 5,
+        requiresResponse: true,
+        suggestedActions: []
       }
     }
+  }
+
+  // Получить память персонажа
+  async getCharacterMemory(characterId: string, type?: any): Promise<any[]> {
+    return await this.memoryManager.getMemory(characterId, type)
+  }
+
+  // Добавить воспоминание персонажа
+  async addCharacterMemory(
+    characterId: string,
+    memory: Omit<any, 'id' | 'timestamp'>
+  ): Promise<any> {
+    return await this.memoryManager.addMemory(characterId, memory)
+  }
+
+  // Обновить промпты персонажа
+  async updateCharacterPrompts(characterId: string, prompts: Record<string, any>): Promise<void> {
+    await prisma.character.update({
+      where: { id: characterId },
+      data: { prompts }
+    })
+  }
+
+  // Получить промпты персонажа
+  async getCharacterPrompts(characterId: string): Promise<Record<string, any>> {
+    const character = await prisma.character.findUnique({
+      where: { id: characterId },
+      select: { prompts: true }
+    })
+
+    return (character?.prompts as Record<string, any>) || {}
+  }
+
+  // Обновление метрик
+  private updateMetrics(aiResponse: AIResponse, responseTime: number): void {
+    this.metrics.successfulRequests++
+    this.metrics.averageResponseTime =
+      (this.metrics.averageResponseTime * (this.metrics.successfulRequests - 1) + responseTime) /
+      this.metrics.successfulRequests
+    this.metrics.averageQuality =
+      (this.metrics.averageQuality * (this.metrics.successfulRequests - 1) + aiResponse.metadata.quality) /
+      this.metrics.successfulRequests
+    this.metrics.totalTokensUsed += aiResponse.metadata.tokensUsed
+    this.metrics.totalCost += aiResponse.metadata.cost
+    this.metrics.lastUpdated = new Date()
+  }
+
+  // Обновление процента ошибок
+  private updateErrorRate(): void {
+    this.metrics.errorRate = this.metrics.failedRequests / this.metrics.totalRequests
+  }
+
+  // Получить метрики
+  getMetrics(): CharacterAIMetrics {
+    return { ...this.metrics }
+  }
+
+  // Сбросить метрики
+  resetMetrics(): void {
+    this.metrics = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      averageResponseTime: 0,
+      averageQuality: 0,
+      totalTokensUsed: 0,
+      totalCost: 0,
+      mostUsedTemplates: [],
+      errorRate: 0,
+      lastUpdated: new Date()
+    }
+  }
+
+  // Получить конфигурацию
+  getConfig(): CharacterAIConfig {
+    return { ...this.config }
+  }
+
+  // Обновить конфигурацию
+  updateConfig(newConfig: Partial<CharacterAIConfig>): void {
+    this.config = { ...this.config, ...newConfig }
+  }
+
+  // Обработка результатов анализа сообщения
+  private async processMessageAnalysis(
+    analysis: MessageAnalysis,
+    characterId: string,
+    userId: string
+  ): Promise<any[]> {
+    const characteristicChanges: any[] = []
+
+    try {
+      // Обрабатываем команды поз
+      for (const poseCommand of analysis.poseCommands) {
+        if (poseCommand.confidence > 0.7) {
+          await this.executePoseCommand(characterId, poseCommand)
+        }
+      }
+
+      // Обрабатываем влияние на характеристики
+      for (const influence of analysis.characteristicInfluences) {
+        if (influence.confidence > 0.3) { // Понизили порог с 0.5 до 0.3
+          const change = await this.applyCharacteristicInfluence(characterId, influence)
+          if (change) {
+            characteristicChanges.push(change)
+          }
+        }
+      }
+
+      // Обрабатываем триггеры действий
+      for (const trigger of analysis.actionTriggers) {
+        if (trigger.confidence > 0.6) {
+          await this.executeActionTrigger(characterId, userId, trigger)
+        }
+      }
+
+      // Обрабатываем изменения настроения
+      for (const moodChange of analysis.moodChanges) {
+        if (moodChange.confidence > 0.5) {
+          await this.applyMoodChange(characterId, moodChange)
+        }
+      }
+
+      // Создаем воспоминания о фетиш-элементах
+      for (const fetish of analysis.fetishElements) {
+        if (fetish.confidence > 0.4) {
+          await this.memoryManager.createEmotionalMemory(
+            characterId,
+            fetish.type,
+            `Фетиш-элемент: ${fetish.type}`,
+            fetish.intensity
+          )
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при обработке анализа сообщения:', error)
+    }
+
+    return characteristicChanges
+  }
+
+  // Выполнение команды позы
+  private async executePoseCommand(characterId: string, poseCommand: PoseCommand): Promise<void> {
+    try {
+      // Находим позу по имени
+      const pose = await prisma.characterPose.findFirst({
+        where: {
+          characterId,
+          definition: {
+            name: {
+              contains: poseCommand.poseName,
+              mode: 'insensitive'
+            }
+          }
+        },
+        include: {
+          definition: true
+        }
+      })
+
+      if (pose) {
+        // Активируем позу (здесь должна быть логика активации позы)
+        console.log(`Активирована поза: ${pose.definition.name} для персонажа ${characterId}`)
+
+        // Создаем воспоминание
+        await this.memoryManager.addMemory(characterId, {
+          type: 'POSE_CHANGE' as any,
+          content: `Принята поза: ${pose.definition.name}`,
+          importance: 6,
+          tags: ['поза', poseCommand.poseName.toLowerCase()],
+          emotionalWeight: 4,
+          context: 'команда пользователя',
+          isActive: true
+        })
+      }
+    } catch (error) {
+      console.error('Ошибка при выполнении команды позы:', error)
+    }
+  }
+
+  // Применение влияния на характеристики
+  private async applyCharacteristicInfluence(
+    characterId: string,
+    influence: any
+  ): Promise<any> {
+    try {
+      console.log('🎯 Применяем влияние на характеристику:', {
+        characterId,
+        characteristicName: influence.characteristicName,
+        influence: influence.influence,
+        confidence: influence.confidence,
+        reason: influence.reason
+      })
+
+      // Находим характеристику
+      const characteristic = await prisma.characteristic.findFirst({
+        where: {
+          characterId,
+          definition: {
+            name: {
+              contains: influence.characteristicName,
+              mode: 'insensitive'
+            }
+          }
+        },
+        include: {
+          definition: true
+        }
+      })
+
+      if (characteristic) {
+        const oldValue = characteristic.currentValue
+        // Применяем изменение
+        const newValue = Math.max(0, Math.min(100,
+          characteristic.currentValue + influence.influence
+        ))
+
+        await prisma.characteristic.update({
+          where: { id: characteristic.id },
+          data: {
+            currentValue: newValue,
+            lastChanged: new Date()
+          }
+        })
+
+        console.log('✅ Характеристика изменена:', {
+          characteristicName: influence.characteristicName,
+          oldValue,
+          newValue,
+          change: influence.influence
+        })
+
+        // Создаем воспоминание
+        await this.memoryManager.createCharacteristicChangeMemory(
+          characterId,
+          influence.characteristicName,
+          characteristic.currentValue,
+          newValue,
+          influence.reason
+        )
+
+        // Возвращаем информацию об изменении
+        return {
+          name: influence.characteristicName,
+          oldValue,
+          newValue,
+          change: influence.influence
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при применении влияния на характеристику:', error)
+    }
+    return null
+  }
+
+  // Выполнение триггера действия
+  private async executeActionTrigger(
+    characterId: string,
+    userId: string,
+    trigger: any
+  ): Promise<void> {
+    try {
+      // Находим действие
+      const action = await prisma.action.findFirst({
+        where: {
+          name: {
+            contains: trigger.actionName,
+            mode: 'insensitive'
+          },
+          isActive: true
+        }
+      })
+
+      if (action) {
+        // Регистрируем действие в системе сообщений
+        await this.actionMessageSystem.registerAction(
+          characterId,
+          userId,
+          action.name,
+          trigger.intensity || 50,
+          trigger.targetZone
+        )
+      }
+    } catch (error) {
+      console.error('Ошибка при выполнении триггера действия:', error)
+    }
+  }
+
+  // Применение изменения настроения
+  private async applyMoodChange(characterId: string, moodChange: any): Promise<void> {
+    try {
+      // Создаем эмоциональное воспоминание
+      await this.memoryManager.createEmotionalMemory(
+        characterId,
+        moodChange.moodType,
+        moodChange.trigger,
+        Math.abs(moodChange.change)
+      )
+    } catch (error) {
+      console.error('Ошибка при применении изменения настроения:', error)
+    }
+  }
+
+  // Методы для работы с системой действий-сообщений
+
+  // Регистрация действия
+  async registerAction(
+    characterId: string,
+    userId: string,
+    actionName: string,
+    intensity: number,
+    targetZone?: string,
+    effects: any[] = []
+  ): Promise<void> {
+    await this.actionMessageSystem.registerAction(
+      characterId,
+      userId,
+      actionName,
+      intensity,
+      targetZone,
+      effects
+    )
+  }
+
+  // Получение истории действий
+  async getActionHistory(
+    characterId: string,
+    userId: string,
+    limit: number = 20
+  ): Promise<any[]> {
+    return await this.actionMessageSystem.getActionHistory(characterId, userId, limit)
+  }
+
+  // Получение статистики действий
+  async getActionStats(characterId: string, userId: string): Promise<any> {
+    return await this.actionMessageSystem.getActionStats(characterId, userId)
+  }
+
+  // Принудительная отправка сообщения о действиях
+  async forceSendActionMessage(characterId: string, userId: string): Promise<void> {
+    await this.actionMessageSystem.forceSendMessage(characterId, userId)
+  }
+
+  // Получение ожидающих действий
+  getPendingActions(characterId: string, userId: string): any[] {
+    return this.actionMessageSystem.getPendingActions(characterId, userId)
+  }
+
+  // Очистка ожидающих действий
+  clearPendingActions(characterId: string, userId: string): void {
+    this.actionMessageSystem.clearPendingActions(characterId, userId)
+  }
+
+  // Обновление конфигурации системы действий
+  updateActionMessageConfig(config: Partial<any>): void {
+    this.actionMessageSystem.updateConfig(config)
+  }
+
+  // Получение конфигурации системы действий
+  getActionMessageConfig(): any {
+    return this.actionMessageSystem.getConfig()
   }
 }

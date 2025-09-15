@@ -18,11 +18,12 @@ const updateStoryPointSchema = z.object({
 // GET /api/story/points/[id] - Получить сюжетную точку по ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const storyPoint = await prisma.storyPoint.findUnique({
-      where: { id: params.id }
+      where: { id: id }
     })
 
     if (!storyPoint) {
@@ -45,14 +46,15 @@ export async function GET(
 // PUT /api/story/points/[id] - Обновить сюжетную точку
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const validatedData = updateStoryPointSchema.parse(body)
 
     const storyPoint = await prisma.storyPoint.update({
-      where: { id: params.id },
+      where: { id: id },
       data: validatedData
     })
 
@@ -83,11 +85,12 @@ export async function PUT(
 // DELETE /api/story/points/[id] - Удалить сюжетную точку
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     await prisma.storyPoint.delete({
-      where: { id: params.id }
+      where: { id: id }
     })
 
     return NextResponse.json({ success: true })

@@ -45,6 +45,9 @@ model User {
   // Сессии
   sessions Session[]
 
+  // Сообщения чата
+  chatMessages ChatMessage[]
+
   @@map("users")
 }
 
@@ -82,6 +85,9 @@ model Character {
 
   // Знания пользователей
   knowledge CharacterKnowledge[]
+
+  // Сообщения чата
+  chatMessages ChatMessage[]
 
   @@map("characters")
 }
@@ -177,6 +183,7 @@ model CharacterPose {
   // Настройки позы для конкретного персонажа
   customSettings Json   @default("{}")
   isActive      Boolean @default(true)
+  isDefault     Boolean @default(false)  // Дефолтная поза персонажа
 
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   definition  PoseDefinition @relation(fields: [poseDefId], references: [id])
@@ -681,4 +688,21 @@ model UserChoiceHistory {
   screen      Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
 
   @@map("user_choice_history")
+}
+
+// Сообщения чата
+model ChatMessage {
+  id           String   @id @default(cuid())
+  content      String
+  senderId     String
+  characterId  String
+  messageType  String   @default("user") // "user" или "character"
+  emotionalTone String? // "positive", "negative", "neutral"
+  createdAt    DateTime @default(now())
+
+  // Связи
+  sender       User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  character    Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
 }

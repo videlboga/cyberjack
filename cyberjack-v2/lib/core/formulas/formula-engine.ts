@@ -72,6 +72,11 @@ export class FormulaEngine {
     context: FormulaExecutionContext,
     options: ExecutionOptions
   ): Promise<NodeResult> {
+    // Проверяем, что узел существует
+    if (!node) {
+      throw new Error('Formula node is null or undefined')
+    }
+
     const startTime = Date.now()
     const cacheKey = this.getCacheKey(node, context)
 
@@ -175,6 +180,10 @@ export class FormulaEngine {
     context: FormulaExecutionContext,
     options: ExecutionOptions
   ): Promise<NodeResult> {
+    if (!node.leftInput || !node.rightInput) {
+      throw new Error('Operator node must have both left and right inputs')
+    }
+
     const leftResult = await this.evaluateNode(node.leftInput, context, options)
     const rightResult = await this.evaluateNode(node.rightInput, context, options)
 
@@ -210,6 +219,10 @@ export class FormulaEngine {
     context: FormulaExecutionContext,
     options: ExecutionOptions
   ): Promise<NodeResult> {
+    if (!node.parameters || !Array.isArray(node.parameters)) {
+      throw new Error('Function node must have parameters array')
+    }
+
     const parameterResults = await Promise.all(
       node.parameters.map(param => this.evaluateNode(param, context, options))
     )
@@ -242,6 +255,10 @@ export class FormulaEngine {
     context: FormulaExecutionContext,
     options: ExecutionOptions
   ): Promise<NodeResult> {
+    if (!node.condition || !node.trueValue || !node.falseValue) {
+      throw new Error('Condition node must have condition, trueValue, and falseValue')
+    }
+
     const conditionResult = await this.evaluateNode(node.condition, context, options)
 
     if (conditionResult.dataType !== 'boolean') {

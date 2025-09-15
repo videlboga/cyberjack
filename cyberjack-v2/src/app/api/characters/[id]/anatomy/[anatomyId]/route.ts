@@ -5,16 +5,17 @@ import { prisma } from '@/lib/db/client'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string, anatomyId: string } }
+  { params }: { params: Promise<{ id: string, anatomyId: string }> }
 ) {
   try {
+    const { id, anatomyId } = await params
     const body = await request.json()
     const { hasPart, sensitivity } = body
 
     const characterAnatomy = await prisma.characterAnatomy.update({
       where: {
-        id: params.anatomyId,
-        characterId: params.id
+        id: anatomyId,
+        characterId: id
       },
       data: {
         ...(hasPart !== undefined && { hasPart }),
@@ -37,13 +38,14 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string, anatomyId: string } }
+  { params }: { params: Promise<{ id: string, anatomyId: string }> }
 ) {
   try {
+    const { id, anatomyId } = await params
     await prisma.characterAnatomy.delete({
       where: {
-        id: params.anatomyId,
-        characterId: params.id
+        id: anatomyId,
+        characterId: id
       }
     })
 

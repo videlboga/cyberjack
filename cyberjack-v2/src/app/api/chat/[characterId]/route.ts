@@ -5,10 +5,18 @@ import { CharacterAIService } from '../../../../../lib/character/ai-service'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { characterId: string } }
+  { params }: { params: Promise<{ characterId: string }> }
 ) {
   try {
     const { message, userId, context } = await request.json()
+    const { characterId } = await params
+
+    console.log('🤖 AI Chat Request:', {
+      characterId,
+      message,
+      userId,
+      context
+    })
 
     if (!message || !userId) {
       return NextResponse.json(
@@ -30,16 +38,26 @@ export async function POST(
     }
 
     const aiService = new CharacterAIService(apiKey, baseUrl, model, model2)
-    const response = await aiService.generateResponse(
-      params.characterId,
+    const aiResponse = await aiService.generateResponse(
+      characterId,
       message,
-      context || {}
+      {
+        userId,
+        ...context
+      }
     )
 
+    console.log('🤖 AI Response:', {
+      characterId,
+      response: aiResponse.message,
+      metadata: aiResponse.metadata
+    })
+
     return NextResponse.json({
-      response,
-      characterId: params.characterId,
-      timestamp: new Date()
+      response: aiResponse.message,
+      characterId,
+      timestamp: aiResponse.timestamp,
+      metadata: aiResponse.metadata
     })
   } catch (error) {
     console.error('Error generating AI response:', error)

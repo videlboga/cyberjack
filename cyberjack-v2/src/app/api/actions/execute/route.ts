@@ -5,7 +5,7 @@ import { ActionsSystem } from '../../../../../lib/core/actions/actions-system'
 
 export async function POST(request: NextRequest) {
   try {
-    const { characterId, actionId, userId, zoneId, durationSeconds } = await request.json()
+    const { characterId, actionId, userId, zoneId, durationSeconds, intensity } = await request.json()
 
     if (!characterId || !actionId || !userId || !durationSeconds) {
       return NextResponse.json(
@@ -22,11 +22,13 @@ export async function POST(request: NextRequest) {
     }
 
     const actionsSystem = new ActionsSystem()
-    const result = await actionsSystem.executeActionWithHold(
+
+    // Используем простую систему вместо сложных формул
+    const result = await actionsSystem.executeSimpleAction(
       characterId,
       actionId,
       userId,
-      zoneId,
+      intensity || 50, // Дефолтная интенсивность
       durationSeconds
     )
 

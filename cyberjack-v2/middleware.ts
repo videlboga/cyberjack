@@ -24,6 +24,7 @@ export default withAuth(
       return NextResponse.redirect(new URL('/game', req.url))
     }
 
+    // API endpoints проверяют авторизацию самостоятельно
     return NextResponse.next()
   },
   {
@@ -36,6 +37,7 @@ export default withAuth(
 export const config = {
   matcher: [
     '/admin/:path*',
+    '/api/admin/:path*',
     '/game/:path*',
     '/db/:path*',
     '/auth/signin'

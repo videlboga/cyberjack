@@ -9,7 +9,7 @@ export class TimeSystem {
   private static instance: TimeSystem
   private gameTime: number = 0 // минуты игрового времени
   private lastUpdate: number = Date.now()
-  private isRunning: boolean = false
+  private running: boolean = false
   private actionHoldStart: number | null = null
   private recoveryInterval: NodeJS.Timeout | null = null
 
@@ -35,14 +35,14 @@ export class TimeSystem {
   // Начать холд действия
   startActionHold(): void {
     this.actionHoldStart = Date.now()
-    this.isRunning = true
+    this.running = true
     this.startRecoveryTimer()
   }
 
   // Остановить холд действия
   stopActionHold(): void {
     this.actionHoldStart = null
-    this.isRunning = false
+    this.running = false
     this.stopRecoveryTimer()
   }
 
@@ -67,7 +67,7 @@ export class TimeSystem {
 
   // Обновить время (вызывается каждую секунду при холде)
   update(): void {
-    if (!this.isRunning || !this.actionHoldStart) return
+    if (!this.running || !this.actionHoldStart) return
 
     const now = Date.now()
     const deltaTime = (now - this.lastUpdate) / 1000 // секунды
@@ -172,12 +172,17 @@ export class TimeSystem {
     })
   }
 
+  // Проверить, запущена ли система
+  isRunning(): boolean {
+    return this.running
+  }
+
   // Получить состояние системы времени
   getState() {
     return {
       gameTime: this.gameTime,
       formattedTime: this.getFormattedTime(),
-      isRunning: this.isRunning,
+      isRunning: this.running,
       actionHoldStart: this.actionHoldStart ? new Date(this.actionHoldStart) : null,
       lastUpdate: new Date(this.lastUpdate)
     }
@@ -187,7 +192,7 @@ export class TimeSystem {
   reset(): void {
     this.gameTime = 0
     this.lastUpdate = Date.now()
-    this.isRunning = false
+    this.running = false
     this.actionHoldStart = null
     this.stopRecoveryTimer()
   }

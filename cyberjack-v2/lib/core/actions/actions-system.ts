@@ -5,6 +5,8 @@ import { CharacteristicsSystem } from '../characteristics/characteristics-system
 import { FormulaSystem } from '../formulas/formula-system'
 import { PoseFormulaSystem } from '../poses/pose-formula-system'
 import { ActivePosesSystem } from '../poses/active-poses-system'
+import { SimpleEffectsSystem } from './simple-effects-system'
+import { SimplePoseSystem } from '../poses/simple-pose-system'
 import { ActionEffect, ActionResult } from '@/types/database'
 import { FormulaExecutionContext } from '../formulas/types/formula-context'
 
@@ -13,12 +15,16 @@ export class ActionsSystem {
   private characteristicsSystem: CharacteristicsSystem
   private poseFormulaSystem: PoseFormulaSystem
   private activePosesSystem: ActivePosesSystem
+  private simpleEffectsSystem: SimpleEffectsSystem
+  private simplePoseSystem: SimplePoseSystem
 
   constructor() {
     this.formulaSystem = new FormulaSystem()
     this.characteristicsSystem = new CharacteristicsSystem()
     this.poseFormulaSystem = new PoseFormulaSystem()
     this.activePosesSystem = ActivePosesSystem.getInstance()
+    this.simpleEffectsSystem = new SimpleEffectsSystem()
+    this.simplePoseSystem = new SimplePoseSystem()
   }
 
   // Выполнить действие с холдом
@@ -240,22 +246,99 @@ export class ActionsSystem {
     // Выполнить формулу если она есть
     if (action.formula && Object.keys(action.formula).length > 0) {
       try {
-        const formulaResult = await this.formulaSystem.executeFormula(
-          action.formula,
-          context
-        )
+        // Логируем формулу для отладки
+        console.log('🔍 Формула действия:', JSON.stringify(action.formula, null, 2))
 
-        // Преобразовать результат формулы в эффекты
-        if (formulaResult.factors) {
-          for (const factor of formulaResult.factors) {
-            if (factor.category === 'input' && factor.name.includes('characteristic')) {
-              // Извлекаем ID характеристики из имени фактора
-              const charId = factor.name.split('.').pop() || 'mood'
-              effects.push({
-                characteristicId: charId,
-                change: factor.value * durationSeconds, // умножаем на время холда
-                permanent: false
-              })
+        // Проверяем, является ли это структурированной формулой или простыми эффектами
+        if (action.formula.rootNode) {
+          // Это новая структурированная формула
+          console.log('📊 Обрабатываем структурированную формулу')
+
+          const formulaResult = await this.formulaSystem.executeFormula(
+            action.formula,
+            context
+          )
+          console.log('📊 Результат формулы:', JSON.stringify(formulaResult, null, 2))
+
+          // Преобразовать результат формулы в эффекты
+          if (formulaResult.value && typeof formulaResult.value === 'object') {
+            // Новая структурированная формула возвращает эффекты в value
+            for (const [characteristicName, effectData] of Object.entries(formulaResult.value)) {
+              if (typeof effectData === 'object' && effectData !== null && 'change' in effectData) {
+                const effect = effectData as { change: any; permanent: any }
+
+                // Вычисляем изменение (если это формула, нужно выполнить ее)
+                let change = 0
+                if (typeof effect.change === 'number') {
+                  change = effect.change
+                } else if (effect.change && typeof effect.change === 'object' && effect.change.value !== undefined) {
+                  change = effect.change.value
+                }
+
+                // Находим ID характеристики по имени
+                const characteristic = await this.characteristicsSystem.getCharacteristicByName(
+                  characterId,
+                  characteristicName
+                )
+
+                if (characteristic) {
+                  // Применяем модификаторы интенсивности и пользователя
+                  const intensityMultiplier = action.intensity / 50 // Нормализуем к 50
+                  const userModifier = 1.0 // TODO: получить из user.modifiers
+                  const finalChange = change * intensityMultiplier * userModifier * durationSeconds
+
+                  effects.push({
+                    characteristicId: characteristic.id,
+                    change: finalChange,
+                    permanent: effect.permanent?.value || false
+                  })
+                } else {
+                  console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${characterId}`)
+                }
+              }
+            }
+          } else if (formulaResult.factors) {
+            // Старый формат через factors
+            for (const factor of formulaResult.factors) {
+              if (factor.category === 'input' && factor.name.includes('characteristic')) {
+                // Извлекаем ID характеристики из имени фактора
+                const charId = factor.name.split('.').pop() || 'mood'
+                effects.push({
+                  characteristicId: charId,
+                  change: factor.value * durationSeconds, // умножаем на время холда
+                  permanent: false
+                })
+              }
+            }
+          }
+        } else {
+          // Это простые эффекты (старый формат) - преобразуем на лету
+          console.log('📊 Обрабатываем простые эффекты (старый формат)')
+
+          for (const [characteristicName, effectData] of Object.entries(action.formula)) {
+            if (typeof effectData === 'object' && effectData !== null && 'change' in effectData) {
+              const effect = effectData as { change: number; permanent?: boolean }
+
+              // Находим ID характеристики по имени
+              const characteristic = await this.characteristicsSystem.getCharacteristicByName(
+                characterId,
+                characteristicName
+              )
+
+              if (characteristic) {
+                // Применяем модификаторы интенсивности и пользователя
+                const intensityMultiplier = action.intensity / 50 // Нормализуем к 50
+                const userModifier = 1.0 // TODO: получить из user.modifiers
+                const finalChange = effect.change * intensityMultiplier * userModifier * durationSeconds
+
+                effects.push({
+                  characteristicId: characteristic.id,
+                  change: finalChange,
+                  permanent: effect.permanent || false
+                })
+              } else {
+                console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${characterId}`)
+              }
             }
           }
         }
@@ -311,8 +394,11 @@ export class ActionsSystem {
 
     characteristics.forEach(char => {
       const defId = char.characteristicDefId || char.definition?.id
-      if (defId) {
+      const defName = char.definition?.name
+      if (defId && defName) {
+        // Добавляем и по ID, и по имени для совместимости
         formatted[defId] = char.currentValue || 0
+        formatted[defName] = char.currentValue || 0
       }
     })
 
@@ -603,6 +689,118 @@ export class ActionsSystem {
     } catch (error) {
       console.error('Ошибка получения модифицированных действий:', error)
       return []
+    }
+  }
+
+  // Простое выполнение действия без сложных формул
+  async executeSimpleAction(
+    characterId: string,
+    actionId: string,
+    userId: string,
+    intensity: number,
+    durationSeconds: number = 5
+  ): Promise<ActionResult> {
+    try {
+      console.log(`🎯 Выполняем простое действие: ${actionId}`)
+
+      // Получаем действие
+      const action = await prisma.action.findUnique({
+        where: { id: actionId }
+      })
+
+      if (!action) {
+        throw new Error('Действие не найдено')
+      }
+
+      // Получаем персонажа с характеристиками
+      const character = await prisma.character.findUnique({
+        where: { id: characterId },
+        include: {
+          characteristics: {
+            include: {
+              definition: true
+            }
+          }
+        }
+      })
+
+      if (!character) {
+        throw new Error('Персонаж не найден')
+      }
+
+      // Получаем пользователя
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      })
+
+      if (!user) {
+        throw new Error('Пользователь не найден')
+      }
+
+      // Вычисляем базовые эффекты действия
+      let effects = this.simpleEffectsSystem.calculateActionEffects(
+        action.category || 'physical',
+        intensity,
+        durationSeconds
+      )
+
+      // Применяем модификаторы пользователя
+      effects = this.simpleEffectsSystem.applyUserModifiers(effects, user.modifiers)
+
+      // Применяем модификаторы позы (пока без позы)
+      // TODO: Добавить получение текущей позы персонажа
+      // if (character.currentPose) {
+      //   effects = this.simplePoseSystem.applyPoseToAction(
+      //     effects,
+      //     action.category || 'physical',
+      //     character.currentPose.name
+      //   )
+      // }
+
+      // Применяем зависимости
+      const characterCharacteristics = this.formatCharacterCharacteristics(character.characteristics)
+      effects = this.simpleEffectsSystem.applyDependencies(effects, characterCharacteristics)
+
+      // Применяем эффекты к характеристикам
+      const appliedEffects: ActionEffect[] = []
+      for (const [characteristicName, effect] of Object.entries(effects)) {
+        // Находим характеристику напрямую
+        const characteristic = character.characteristics.find(
+          char => char.definition?.name === characteristicName
+        )
+
+        if (characteristic) {
+          const finalChange = effect.change * durationSeconds
+          await this.characteristicsSystem.changeValue(
+            characterId,
+            characteristic.characteristicDefId,
+            finalChange
+          )
+
+          appliedEffects.push({
+            characteristicId: characteristic.characteristicDefId,
+            change: finalChange,
+            permanent: effect.permanent
+          })
+
+          console.log(`📊 ${characteristicName}: ${finalChange > 0 ? '+' : ''}${finalChange}`)
+        } else {
+          console.log(`⚠️ Характеристика "${characteristicName}" не найдена`)
+        }
+      }
+
+      return {
+        success: true,
+        effects: appliedEffects,
+        message: `Действие "${action.name}" выполнено за ${durationSeconds}с`
+      }
+    } catch (error) {
+      console.error('❌ Ошибка выполнения простого действия:', error)
+      return {
+        success: false,
+        effects: [],
+        message: `Ошибка выполнения действия: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`
+      }
     }
   }
 }

@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CharacterPosesManager } from './CharacterPosesManager'
 import { CharacterAnatomyManager } from './CharacterAnatomyManager'
 import { CharacterCharacteristicsManager } from './CharacterCharacteristicsManager'
+import { CharacterPromptsManager } from './CharacterPromptsManager'
 
 interface Character {
   id: string
@@ -16,6 +17,7 @@ interface Character {
   isActive: boolean
   createdAt: string
   updatedAt: string
+  prompts?: any
   characteristics: Array<{
     id: string
     currentValue: number
@@ -169,10 +171,11 @@ export function CharactersAdmin() {
         </div>
 
         <Tabs defaultValue="characteristics" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="characteristics">Характеристики</TabsTrigger>
             <TabsTrigger value="poses">Позы</TabsTrigger>
             <TabsTrigger value="anatomy">Анатомия</TabsTrigger>
+            <TabsTrigger value="prompts">Промпты</TabsTrigger>
           </TabsList>
 
           <TabsContent value="characteristics" className="mt-6">
@@ -193,6 +196,13 @@ export function CharactersAdmin() {
             <CharacterAnatomyManager
               characterId={selectedCharacter.id}
               characterName={selectedCharacter.name}
+            />
+          </TabsContent>
+
+          <TabsContent value="prompts" className="mt-6">
+            <CharacterPromptsManager
+              character={selectedCharacter}
+              onUpdate={fetchCharacters}
             />
           </TabsContent>
         </Tabs>
@@ -348,7 +358,7 @@ export function CharactersAdmin() {
                               <span className="w-20 truncate">{char.definition.name}:</span>
                               <div className="flex-1 bg-gray-200 rounded-full h-2">
                                 <div
-                                  className="bg-blue-500 h-2 rounded-full"
+                                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                                   style={{ width: `${char.currentValue}%` }}
                                 ></div>
                               </div>

@@ -3,11 +3,12 @@ import { prisma } from '@/lib/db/client'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const equipment = await prisma.equipment.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         relatedPose: true,
         userEquipment: {
@@ -43,13 +44,14 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const data = await request.json()
 
     const equipment = await prisma.equipment.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         name: data.name,
         category: data.category,
@@ -77,11 +79,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     await prisma.equipment.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { isActive: false }
     })
 

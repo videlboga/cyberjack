@@ -5,9 +5,10 @@ import { CharacteristicsSystem } from '../../../../../../lib/core/characteristic
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { characterId: string, characteristicId: string } }
+  { params }: { params: Promise<{ characterId: string, characteristicId: string }> }
 ) {
   try {
+    const { characterId, characteristicId } = await params
     const { change, permanent } = await request.json()
 
     if (typeof change !== 'number') {
@@ -19,8 +20,8 @@ export async function PATCH(
 
     const characteristicsSystem = new CharacteristicsSystem()
     await characteristicsSystem.changeValue(
-      params.characterId,
-      params.characteristicId,
+      characterId,
+      characteristicId,
       change,
       permanent || false
     )
@@ -37,13 +38,14 @@ export async function PATCH(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { characterId: string, characteristicId: string } }
+  { params }: { params: Promise<{ characterId: string, characteristicId: string }> }
 ) {
   try {
+    const { characterId, characteristicId } = await params
     const characteristicsSystem = new CharacteristicsSystem()
     const currentValue = await characteristicsSystem.getCurrentValue(
-      params.characterId,
-      params.characteristicId
+      characterId,
+      characteristicId
     )
 
     return NextResponse.json({ value: currentValue })

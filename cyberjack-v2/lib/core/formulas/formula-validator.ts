@@ -56,6 +56,30 @@ export class FormulaValidator {
 
   // Синтаксическая валидация
   private validateSyntax(node: FormulaNode, errors: FormulaExecutionError[], warnings: FormulaExecutionError[]): void {
+    // Проверяем, что узел существует
+    if (!node) {
+      errors.push({
+        type: 'syntax',
+        message: 'Formula node is null or undefined',
+        nodeId: 'unknown',
+        severity: 'error',
+        code: 'NULL_NODE'
+      })
+      return
+    }
+
+    // Проверяем, что у узла есть тип
+    if (!node.type) {
+      errors.push({
+        type: 'syntax',
+        message: 'Formula node missing type property',
+        nodeId: node.id || 'unknown',
+        severity: 'error',
+        code: 'MISSING_NODE_TYPE'
+      })
+      return
+    }
+
     switch (node.type) {
       case 'value':
         this.validateValueNode(node, errors, warnings)
@@ -166,12 +190,16 @@ export class FormulaValidator {
     }
 
     // Валидируем дочерние узлы
-    this.validateSyntax(node.leftInput, errors, warnings)
-    this.validateSyntax(node.rightInput, errors, warnings)
+    if (node.leftInput) {
+      this.validateSyntax(node.leftInput, errors, warnings)
+    }
+    if (node.rightInput) {
+      this.validateSyntax(node.rightInput, errors, warnings)
+    }
 
     // Проверяем совместимость типов
-    const leftType = node.leftInput.dataType
-    const rightType = node.rightInput.dataType
+    const leftType = node.leftInput?.dataType || 'number'
+    const rightType = node.rightInput?.dataType || 'number'
 
     if (!this.areTypesCompatible(leftType, rightType, node.operator)) {
       errors.push({
@@ -209,20 +237,21 @@ export class FormulaValidator {
     }
 
     // Проверяем количество параметров
-    if (node.parameters.length < functionDef.requiredParams) {
+    const paramCount = node.parameters?.length || 0
+    if (paramCount < functionDef.requiredParams) {
       errors.push({
         type: 'syntax',
-        message: `Function ${node.functionName} requires at least ${functionDef.requiredParams} parameters, got ${node.parameters.length}`,
+        message: `Function ${node.functionName} requires at least ${functionDef.requiredParams} parameters, got ${paramCount}`,
         nodeId: node.id,
         severity: 'error',
         code: 'INSUFFICIENT_PARAMETERS'
       })
     }
 
-    if (node.parameters.length > functionDef.maxParams) {
+    if (paramCount > functionDef.maxParams) {
       errors.push({
         type: 'syntax',
-        message: `Function ${node.functionName} accepts at most ${functionDef.maxParams} parameters, got ${node.parameters.length}`,
+        message: `Function ${node.functionName} accepts at most ${functionDef.maxParams} parameters, got ${paramCount}`,
         nodeId: node.id,
         severity: 'warning',
         code: 'TOO_MANY_PARAMETERS'
@@ -230,22 +259,26 @@ export class FormulaValidator {
     }
 
     // Валидируем параметры
-    node.parameters.forEach((param: FormulaNode, index: number) => {
-      this.validateSyntax(param, errors, warnings)
+    if (node.parameters && Array.isArray(node.parameters)) {
+      node.parameters.forEach((param: FormulaNode, index: number) => {
+        if (param) {
+          this.validateSyntax(param, errors, warnings)
 
-      if (index < functionDef.parameterTypes.length) {
-        const expectedType = functionDef.parameterTypes[index]
-        if (param.dataType !== expectedType) {
-          errors.push({
-            type: 'semantic',
-            message: `Function parameter ${index + 1} type mismatch: expected ${expectedType}, got ${param.dataType}`,
-            nodeId: node.id,
-            severity: 'error',
-            code: 'PARAMETER_TYPE_MISMATCH'
-          })
+          if (index < functionDef.parameterTypes.length) {
+            const expectedType = functionDef.parameterTypes[index]
+            if (param.dataType !== expectedType) {
+              errors.push({
+                type: 'semantic',
+                message: `Function parameter ${index + 1} type mismatch: expected ${expectedType}, got ${param.dataType}`,
+                nodeId: node.id,
+                severity: 'error',
+                code: 'PARAMETER_TYPE_MISMATCH'
+              })
+            }
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   private validateConditionNode(node: any, errors: FormulaExecutionError[], warnings: FormulaExecutionError[]): void {
@@ -261,12 +294,18 @@ export class FormulaValidator {
     }
 
     // Валидируем дочерние узлы
-    this.validateSyntax(node.condition, errors, warnings)
-    this.validateSyntax(node.trueValue, errors, warnings)
-    this.validateSyntax(node.falseValue, errors, warnings)
+    if (node.condition) {
+      this.validateSyntax(node.condition, errors, warnings)
+    }
+    if (node.trueValue) {
+      this.validateSyntax(node.trueValue, errors, warnings)
+    }
+    if (node.falseValue) {
+      this.validateSyntax(node.falseValue, errors, warnings)
+    }
 
     // Проверяем тип условия
-    if (node.condition.dataType !== 'boolean') {
+    if (node.condition?.dataType !== 'boolean') {
       errors.push({
         type: 'semantic',
         message: 'Condition must evaluate to boolean',
@@ -277,7 +316,7 @@ export class FormulaValidator {
     }
 
     // Проверяем совместимость типов trueValue и falseValue
-    if (node.trueValue.dataType !== node.falseValue.dataType) {
+    if (node.trueValue?.dataType !== node.falseValue?.dataType) {
       errors.push({
         type: 'semantic',
         message: 'True and false values must have the same type',
@@ -290,6 +329,18 @@ export class FormulaValidator {
 
   // Семантическая валидация
   private validateSemantics(node: FormulaNode, errors: FormulaExecutionError[], warnings: FormulaExecutionError[]): void {
+    // Проверяем, что узел существует
+    if (!node) {
+      errors.push({
+        type: 'semantic',
+        message: 'Formula node is null or undefined in semantic validation',
+        nodeId: 'unknown',
+        severity: 'error',
+        code: 'NULL_NODE_SEMANTIC'
+      })
+      return
+    }
+
     // Проверяем логические ошибки
     if (node.type === 'operator') {
       this.validateOperatorSemantics(node, errors, warnings)
@@ -329,6 +380,18 @@ export class FormulaValidator {
   }
 
   private checkRecursionRecursive(node: FormulaNode, visited: Set<string>, errors: FormulaExecutionError[], warnings: FormulaExecutionError[]): void {
+    // Проверяем, что узел существует
+    if (!node) {
+      errors.push({
+        type: 'semantic',
+        message: 'Formula node is null or undefined in recursion check',
+        nodeId: 'unknown',
+        severity: 'error',
+        code: 'NULL_NODE_RECURSION'
+      })
+      return
+    }
+
     if (visited.has(node.id)) {
       errors.push({
         type: 'semantic',
@@ -343,16 +406,28 @@ export class FormulaValidator {
     visited.add(node.id)
 
     if (node.type === 'operator') {
-      this.checkRecursionRecursive(node.leftInput, visited, errors, warnings)
-      this.checkRecursionRecursive(node.rightInput, visited, errors, warnings)
-    } else if (node.type === 'function') {
+      if (node.leftInput) {
+        this.checkRecursionRecursive(node.leftInput, visited, errors, warnings)
+      }
+      if (node.rightInput) {
+        this.checkRecursionRecursive(node.rightInput, visited, errors, warnings)
+      }
+    } else if (node.type === 'function' && node.parameters && Array.isArray(node.parameters)) {
       node.parameters.forEach(param => {
-        this.checkRecursionRecursive(param, visited, errors, warnings)
+        if (param) {
+          this.checkRecursionRecursive(param, visited, errors, warnings)
+        }
       })
     } else if (node.type === 'condition') {
-      this.checkRecursionRecursive(node.condition, visited, errors, warnings)
-      this.checkRecursionRecursive(node.trueValue, visited, errors, warnings)
-      this.checkRecursionRecursive(node.falseValue, visited, errors, warnings)
+      if (node.condition) {
+        this.checkRecursionRecursive(node.condition, visited, errors, warnings)
+      }
+      if (node.trueValue) {
+        this.checkRecursionRecursive(node.trueValue, visited, errors, warnings)
+      }
+      if (node.falseValue) {
+        this.checkRecursionRecursive(node.falseValue, visited, errors, warnings)
+      }
     }
 
     visited.delete(node.id)
@@ -360,6 +435,18 @@ export class FormulaValidator {
 
   // Типовая валидация
   private validateTypes(node: FormulaNode, errors: FormulaExecutionError[], warnings: FormulaExecutionError[]): void {
+    // Проверяем, что узел существует
+    if (!node) {
+      errors.push({
+        type: 'semantic',
+        message: 'Formula node is null or undefined in type validation',
+        nodeId: 'unknown',
+        severity: 'error',
+        code: 'NULL_NODE_TYPE'
+      })
+      return
+    }
+
     const actualType = this.inferType(node)
 
     if (actualType !== node.dataType) {
@@ -374,6 +461,11 @@ export class FormulaValidator {
   }
 
   private inferType(node: FormulaNode): DataType {
+    // Проверяем, что узел существует
+    if (!node) {
+      return 'number' // Возвращаем дефолтный тип
+    }
+
     switch (node.type) {
       case 'value':
         return node.dataType
@@ -381,11 +473,11 @@ export class FormulaValidator {
         const variableDef = this.variableDefinitions.get(node.variablePath)
         return variableDef?.type || 'number'
       case 'operator':
-        return this.getOperatorReturnType(node.operator, node.leftInput.dataType, node.rightInput.dataType)
+        return this.getOperatorReturnType(node.operator, node.leftInput?.dataType || 'number', node.rightInput?.dataType || 'number')
       case 'function':
         return this.getFunctionReturnType(node.functionName)
       case 'condition':
-        return node.trueValue.dataType
+        return node.trueValue?.dataType || 'number'
       default:
         return 'number'
     }
@@ -393,6 +485,18 @@ export class FormulaValidator {
 
   // Контекстная валидация
   private validateContext(node: FormulaNode, context: FormulaExecutionContext, errors: FormulaExecutionError[], warnings: FormulaExecutionError[]): void {
+    // Проверяем, что узел существует
+    if (!node) {
+      errors.push({
+        type: 'semantic',
+        message: 'Formula node is null or undefined in context validation',
+        nodeId: 'unknown',
+        severity: 'error',
+        code: 'NULL_NODE_CONTEXT'
+      })
+      return
+    }
+
     if (node.type === 'variable') {
       const value = this.getContextValue(node.variablePath, context)
       if (value === undefined) {
@@ -408,21 +512,38 @@ export class FormulaValidator {
 
     // Рекурсивно проверяем дочерние узлы
     if (node.type === 'operator') {
-      this.validateContext(node.leftInput, context, errors, warnings)
-      this.validateContext(node.rightInput, context, errors, warnings)
-    } else if (node.type === 'function') {
+      if (node.leftInput) {
+        this.validateContext(node.leftInput, context, errors, warnings)
+      }
+      if (node.rightInput) {
+        this.validateContext(node.rightInput, context, errors, warnings)
+      }
+    } else if (node.type === 'function' && node.parameters && Array.isArray(node.parameters)) {
       node.parameters.forEach(param => {
-        this.validateContext(param, context, errors, warnings)
+        if (param) {
+          this.validateContext(param, context, errors, warnings)
+        }
       })
     } else if (node.type === 'condition') {
-      this.validateContext(node.condition, context, errors, warnings)
-      this.validateContext(node.trueValue, context, errors, warnings)
-      this.validateContext(node.falseValue, context, errors, warnings)
+      if (node.condition) {
+        this.validateContext(node.condition, context, errors, warnings)
+      }
+      if (node.trueValue) {
+        this.validateContext(node.trueValue, context, errors, warnings)
+      }
+      if (node.falseValue) {
+        this.validateContext(node.falseValue, context, errors, warnings)
+      }
     }
   }
 
   // Анализ производительности
   private analyzePerformance(node: FormulaNode): { complexity: number, estimatedExecutionTime: number, memoryUsage: number } {
+    // Проверяем, что узел существует
+    if (!node) {
+      return { complexity: 0, estimatedExecutionTime: 0, memoryUsage: 0 }
+    }
+
     const complexity = this.calculateComplexity(node)
     const estimatedExecutionTime = this.estimateExecutionTime(node)
     const memoryUsage = this.estimateMemoryUsage(node)
@@ -431,6 +552,11 @@ export class FormulaValidator {
   }
 
   private calculateComplexity(node: FormulaNode): number {
+    // Проверяем, что узел существует
+    if (!node) {
+      return 0
+    }
+
     let complexity = 1
 
     switch (node.type) {
@@ -438,7 +564,7 @@ export class FormulaValidator {
         complexity += this.calculateComplexity(node.leftInput) + this.calculateComplexity(node.rightInput)
         break
       case 'function':
-        complexity += node.parameters.reduce((sum, param) => sum + this.calculateComplexity(param), 0)
+        complexity += node.parameters?.reduce((sum, param) => sum + this.calculateComplexity(param), 0) || 0
         if (node.functionName === 'random') complexity += 10 // Random функции дороже
         break
       case 'condition':

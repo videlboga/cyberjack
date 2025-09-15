@@ -9,6 +9,7 @@ interface CharacterPose {
   characterId: string
   poseDefId: string
   isActive: boolean
+  isDefault?: boolean
   customSettings: Record<string, any>
   definition: {
     id: string
@@ -49,10 +50,13 @@ export function CharacterPosesManager({ characterId, characterName }: CharacterP
   const [error, setError] = useState<string | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedPose, setSelectedPose] = useState<CharacterPose | null>(null)
+  const [defaultPoseId, setDefaultPoseId] = useState<string | null>(null)
+  const [settingDefault, setSettingDefault] = useState<string | null>(null)
 
   useEffect(() => {
     fetchCharacterPoses()
     fetchAvailablePoses()
+    fetchDefaultPose()
   }, [characterId])
 
   const fetchCharacterPoses = async () => {
@@ -126,9 +130,48 @@ export function CharacterPosesManager({ characterId, characterName }: CharacterP
 
       if (response.ok) {
         await fetchCharacterPoses()
+        await fetchDefaultPose()
       }
     } catch (err) {
       setError('Ошибка удаления позы')
+    }
+  }
+
+  const fetchDefaultPose = async () => {
+    try {
+      const response = await fetch(`/api/admin/characters/${characterId}/default-pose`)
+      if (response.ok) {
+        const data = await response.json()
+        setDefaultPoseId(data.defaultPose?.id || null)
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки дефолтной позы:', err)
+    }
+  }
+
+  const setDefaultPose = async (poseId: string) => {
+    try {
+      setSettingDefault(poseId)
+      const response = await fetch(`/api/admin/characters/${characterId}/default-pose`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ poseId })
+      })
+
+      if (response.ok) {
+        setDefaultPoseId(poseId)
+        // Обновляем локальное состояние поз
+        setPoses(prev => prev.map(pose => ({
+          ...pose,
+          isDefault: pose.id === poseId
+        })))
+      } else {
+        setError('Ошибка установки дефолтной позы')
+      }
+    } catch (err) {
+      setError('Ошибка установки дефолтной позы')
+    } finally {
+      setSettingDefault(null)
     }
   }
 
@@ -185,6 +228,7 @@ export function CharacterPosesManager({ characterId, characterName }: CharacterP
         </div>
       )}
 
+
       {showAddForm && (
         <div className="mb-6 p-4 border rounded-lg bg-gray-50">
           <h3 className="text-lg font-medium mb-4">Добавить позу</h3>
@@ -234,6 +278,11 @@ export function CharacterPosesManager({ characterId, characterName }: CharacterP
                     >
                       {pose.isActive ? 'Активна' : 'Неактивна'}
                     </span>
+                    {defaultPoseId === pose.id && (
+                      <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                        Дефолтная
+                      </span>
+                    )}
                   </div>
                   {pose.definition.description && (
                     <p className="text-sm text-gray-600 mt-1">
@@ -254,6 +303,16 @@ export function CharacterPosesManager({ characterId, characterName }: CharacterP
                   >
                     📐
                   </Button>
+                  {defaultPoseId !== pose.id && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDefaultPose(pose.id)}
+                      disabled={settingDefault === pose.id || !pose.isActive || pose.angles?.length === 0}
+                    >
+                      {settingDefault === pose.id ? '⏳' : '⭐'}
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="outline"

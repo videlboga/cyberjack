@@ -73,9 +73,26 @@ export class FormulaSystem {
     context: FormulaExecutionContext,
     options?: any
   ): Promise<FormulaResult> {
+    // Проверяем базовую структуру формулы
+    if (!formula) {
+      throw new Error('Formula is null or undefined')
+    }
+
+    if (!formula.rootNode) {
+      throw new Error('Formula missing rootNode')
+    }
+
+    console.log('🔍 Выполняем формулу:', {
+      id: formula.id,
+      name: formula.name,
+      rootNodeType: formula.rootNode?.type,
+      rootNodeId: formula.rootNode?.id
+    })
+
     // Сначала валидируем формулу
     const validation = this.validateFormula(formula, context)
     if (!validation.isValid) {
+      console.error('❌ Валидация формулы не прошла:', validation.errors)
       throw new Error(`Formula validation failed: ${validation.errors.map(e => e.message).join(', ')}`)
     }
 

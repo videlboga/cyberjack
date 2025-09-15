@@ -17,6 +17,39 @@ export class CharacteristicsSystem {
     return characteristic?.currentValue || 0
   }
 
+  // Получить характеристику по имени
+  async getCharacteristicByName(characterId: string, characteristicName: string): Promise<{ id: string; name: string } | null> {
+    // Сначала ищем определение характеристики по имени
+    const characteristicDef = await prisma.characteristicDefinition.findFirst({
+      where: {
+        name: characteristicName
+      }
+    })
+
+    if (!characteristicDef) {
+      return null
+    }
+
+    // Проверяем, есть ли эта характеристика у персонажа
+    const characteristic = await prisma.characteristic.findUnique({
+      where: {
+        characterId_characteristicDefId: {
+          characterId,
+          characteristicDefId: characteristicDef.id
+        }
+      }
+    })
+
+    if (!characteristic) {
+      return null
+    }
+
+    return {
+      id: characteristicDef.id,
+      name: characteristicDef.name
+    }
+  }
+
   // Изменить значение характеристики
   async changeValue(
     characterId: string,
@@ -292,4 +325,3 @@ export class CharacteristicsSystem {
     }
   }
 }
-
