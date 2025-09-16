@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
       actionId,
       userId,
       intensity || 50, // Дефолтная интенсивность
-      durationSeconds
+      durationSeconds,
+      zoneId // Передаем zoneId для информации об анатомии
     )
 
     return NextResponse.json(result)

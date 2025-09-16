@@ -9,6 +9,11 @@ import { SimpleEffectsSystem } from './simple-effects-system'
 import { SimplePoseSystem } from '../poses/simple-pose-system'
 import { ActionEffect, ActionResult } from '@/types/database'
 import { FormulaExecutionContext } from '../formulas/types/formula-context'
+import { CharacterMemoryManager } from '../../character/memory-manager'
+import { MemoryType } from '@/types/character-ai'
+import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
+import { CharacterAIService } from '../../character/ai-service'
+import { CharacteristicInterpreter } from '../../character/characteristic-interpreter'
 
 export class ActionsSystem {
   private formulaSystem: FormulaSystem
@@ -17,6 +22,9 @@ export class ActionsSystem {
   private activePosesSystem: ActivePosesSystem
   private simpleEffectsSystem: SimpleEffectsSystem
   private simplePoseSystem: SimplePoseSystem
+  private memoryManager: CharacterMemoryManager
+  private aiService: CharacterAIService | null
+  private characteristicInterpreter: CharacteristicInterpreter
 
   constructor() {
     this.formulaSystem = new FormulaSystem()
@@ -25,6 +33,17 @@ export class ActionsSystem {
     this.activePosesSystem = ActivePosesSystem.getInstance()
     this.simpleEffectsSystem = new SimpleEffectsSystem()
     this.simplePoseSystem = new SimplePoseSystem()
+    this.memoryManager = new CharacterMemoryManager()
+    this.characteristicInterpreter = new CharacteristicInterpreter()
+
+    // Инициализируем AI сервис с API ключом из переменных окружения
+    const apiKey = process.env.OPENROUTER_API_KEY
+    if (!apiKey) {
+      console.warn('⚠️ OPENROUTER_API_KEY не найден в переменных окружения. AI функции будут недоступны.')
+      this.aiService = null as any
+    } else {
+      this.aiService = new CharacterAIService(apiKey)
+    }
   }
 
   // Выполнить действие с холдом
@@ -698,10 +717,17 @@ export class ActionsSystem {
     actionId: string,
     userId: string,
     intensity: number,
-    durationSeconds: number = 5
+    durationSeconds: number = 5,
+    zoneId?: string
   ): Promise<ActionResult> {
     try {
-      console.log(`🎯 Выполняем простое действие: ${actionId}`)
+      serverLogger.info(LogCategory.ACTIONS, 'Выполняем простое действие', {
+        actionId,
+        characterId,
+        userId,
+        intensity,
+        durationSeconds
+      })
 
       // Получаем действие
       const action = await prisma.action.findUnique({
@@ -783,11 +809,72 @@ export class ActionsSystem {
             permanent: effect.permanent
           })
 
-          console.log(`📊 ${characteristicName}: ${finalChange > 0 ? '+' : ''}${finalChange}`)
+          serverLogger.debug(LogCategory.CHARACTERISTICS, 'Характеристика изменена', {
+            characteristicName,
+            change: finalChange,
+            characterId
+          })
         } else {
-          console.log(`⚠️ Характеристика "${characteristicName}" не найдена`)
+          serverLogger.warn(LogCategory.CHARACTERISTICS, 'Характеристика не найдена', {
+            characteristicName,
+            characterId
+          })
         }
       }
+
+      // Создаем запись в ActionLog
+      await this.logAction(actionId, characterId, userId, zoneId, durationSeconds, intensity, appliedEffects)
+
+      // Получаем информацию об анатомической зоне, если указана
+      let anatomyInfo = ''
+      if (zoneId) {
+        try {
+          const zone = await prisma.characterActiveZone.findUnique({
+            where: { id: zoneId },
+            include: { anatomy: true }
+          })
+          if (zone?.anatomy) {
+            anatomyInfo = ` к ${zone.anatomy.name}`
+          }
+        } catch (error) {
+          console.warn('Не удалось получить информацию о зоне:', error)
+        }
+      }
+
+      // Создаем воспоминание о действии в системе памяти персонажа
+      try {
+        await this.memoryManager.addMemory(characterId, {
+          type: MemoryType.ACTION,
+          content: `Выполнено действие: "${action.name}"${anatomyInfo} (интенсивность: ${intensity}, длительность: ${durationSeconds}с)`,
+          importance: Math.min(10, intensity / 10 + 3),
+          tags: ['действие', action.category?.toLowerCase() || 'простое', action.name.toLowerCase()],
+          emotionalWeight: intensity / 20,
+          context: `Действие выполнено пользователем${anatomyInfo ? ` к ${anatomyInfo}` : ''}`,
+          isActive: true
+        })
+
+        // Создаем воспоминания об изменениях характеристик
+        for (const effect of appliedEffects) {
+          const characteristic = character.characteristics.find(
+            char => char.characteristicDefId === effect.characteristicId
+          )
+
+          if (characteristic) {
+            await this.memoryManager.createCharacteristicChangeMemory(
+              characterId,
+              characteristic.definition.name,
+              characteristic.currentValue - effect.change,
+              characteristic.currentValue,
+              `Действие "${action.name}" (интенсивность: ${intensity})`
+            )
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при создании воспоминаний:', error)
+      }
+
+      // Проверяем, нужно ли отправить ИИ-запрос
+      await this.checkAndTriggerAIResponse(characterId, action, appliedEffects, userId, zoneId)
 
       return {
         success: true,
@@ -802,5 +889,137 @@ export class ActionsSystem {
         message: `Ошибка выполнения действия: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`
       }
     }
+  }
+
+  // Проверка и запуск ИИ-ответа при применении действий
+  private async checkAndTriggerAIResponse(
+    characterId: string,
+    action: any,
+    effects: ActionEffect[],
+    userId: string,
+    zoneId?: string
+  ): Promise<void> {
+    try {
+      // Проверяем, доступен ли AI сервис
+      if (!this.aiService) {
+        serverLogger.warn(LogCategory.AI, 'AI сервис недоступен, пропускаем ИИ-запрос', {
+          characterId,
+          actionId: action.id,
+          actionName: action.name
+        })
+        return
+      }
+
+      serverLogger.info(LogCategory.AI, 'Начинаем проверку ИИ-триггера', {
+        characterId,
+        actionId: action.id,
+        actionName: action.name,
+        effectsCount: effects.length,
+        zoneId
+      })
+
+      // Получаем количество применений этого действия к персонажу
+      const actionCount = await this.getActionApplicationCount(characterId, action.id)
+
+      serverLogger.debug(LogCategory.AI, 'Проверяем необходимость ИИ-запроса', {
+        characterId,
+        actionId: action.id,
+        actionName: action.name,
+        actionCount,
+        effectsCount: effects.length
+      })
+
+      // Проверяем, нужно ли отправить ИИ-запрос (2-е, 5-е и далее каждое 5-е для тестирования)
+      const shouldTriggerAI = actionCount === 2 || actionCount >= 5 && actionCount % 5 === 0
+
+      serverLogger.debug(LogCategory.AI, 'Результат проверки триггера', {
+        characterId,
+        actionId: action.id,
+        actionCount,
+        shouldTriggerAI
+      })
+
+      if (shouldTriggerAI) {
+        serverLogger.info(LogCategory.AI, 'Запускаем автоматический ИИ-запрос после действия', {
+          characterId,
+          actionId: action.id,
+          actionName: action.name,
+          actionCount,
+          effectsCount: effects.length
+        })
+
+        // Создаем сообщение для ИИ с информацией о действии
+        const actionMessage = await this.createActionMessage(action, effects, actionCount, zoneId)
+
+        // Отправляем запрос в ИИ-систему
+        await this.aiService.generateResponse(characterId, actionMessage, {
+          userId,
+          actionContext: {
+            actionId: action.id,
+            actionName: action.name,
+            actionCount,
+            effects: effects.map(effect => ({
+              characteristicId: effect.characteristicId,
+              change: effect.change,
+              permanent: effect.permanent
+            }))
+          }
+        })
+      }
+    } catch (error) {
+      serverLogger.error(LogCategory.AI, 'Ошибка при запуске автоматического ИИ-запроса', {
+        characterId,
+        actionId: action.id,
+        error: error instanceof Error ? error.message : 'Неизвестная ошибка'
+      })
+    }
+  }
+
+  // Получение количества применений действия к персонажу
+  private async getActionApplicationCount(characterId: string, actionId: string): Promise<number> {
+    const count = await prisma.actionLog.count({
+      where: {
+        characterId,
+        actionId
+      }
+    })
+
+    serverLogger.debug(LogCategory.ACTIONS, 'Подсчет применений действия', {
+      characterId,
+      actionId,
+      count
+    })
+
+    return count
+  }
+
+  // Создание сообщения для ИИ о действии
+  private async createActionMessage(action: any, effects: ActionEffect[], actionCount: number, zoneId?: string): Promise<string> {
+    // Получаем информацию об анатомической зоне
+    let anatomyInfo = ''
+    if (zoneId) {
+      try {
+        const zone = await prisma.characterActiveZone.findUnique({
+          where: { id: zoneId },
+          include: { anatomy: true }
+        })
+        if (zone?.anatomy) {
+          anatomyInfo = ` к ${zone.anatomy.name}`
+        }
+      } catch (error) {
+        console.warn('Не удалось получить информацию о зоне для ИИ-сообщения:', error)
+      }
+    }
+
+    // Интерпретируем изменения характеристик в ощущения персонажа
+    const sensations = this.characteristicInterpreter.interpretCharacteristicChanges(
+      effects.map(effect => ({
+        characteristicId: effect.characteristicId,
+        change: effect.change,
+        permanent: effect.permanent
+      }))
+    )
+
+    return `К тебе было применено действие "${action.name}"${anatomyInfo} (${actionCount}-й раз). ${sensations} Как ты реагируешь на это действие?`
   }
 }

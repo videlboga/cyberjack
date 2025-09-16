@@ -88,6 +88,7 @@ export default function GameInterface() {
     chat: false
   })
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [chatRefreshTrigger, setChatRefreshTrigger] = useState(0)
 
   // Получаем текущее состояние времени
   useEffect(() => {
@@ -214,6 +215,9 @@ export default function GameInterface() {
             message: `Действие выполнено. Изменения: ${characteristicNames.join(', ')}`,
             timestamp: new Date()
           }])
+
+          // Обновляем чат для отображения возможных ИИ-ответов
+          setChatRefreshTrigger(prev => prev + 1)
         }
       }
     } catch (error) {
@@ -369,6 +373,7 @@ export default function GameInterface() {
                          actionInProgress: gameState.actionInProgress
                        }}
                        onNotification={(notification) => setNotifications(prev => [...prev, notification])}
+                       refreshTrigger={chatRefreshTrigger}
                      />
                    </div>
           </div>

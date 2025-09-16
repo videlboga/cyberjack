@@ -8,6 +8,7 @@ import {
   MemoryStats,
   MemoryContext
 } from '@/types/character-ai'
+import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
 
 export class CharacterMemoryManager implements MemoryManager {
   private readonly MAX_MEMORY_ITEMS = 1000
@@ -20,6 +21,13 @@ export class CharacterMemoryManager implements MemoryManager {
     characterId: string,
     memory: Omit<MemoryItem, 'id' | 'timestamp'>
   ): Promise<MemoryItem> {
+    serverLogger.info(LogCategory.MEMORY, 'Добавляем новое воспоминание', {
+      characterId,
+      memoryType: memory.type,
+      importance: memory.importance,
+      contentLength: memory.content.length
+    })
+
     const memoryItem: MemoryItem = {
       id: this.generateId(),
       ...memory,
@@ -32,6 +40,13 @@ export class CharacterMemoryManager implements MemoryManager {
     // Обновляем кэш
     await this.updateMemoryCache(characterId, memoryItem)
 
+    serverLogger.debug(LogCategory.MEMORY, 'Воспоминание успешно добавлено', {
+      characterId,
+      memoryId: memoryItem.id,
+      memoryType: memoryItem.type,
+      timestamp: memoryItem.timestamp
+    })
+
     return memoryItem
   }
 
@@ -41,8 +56,23 @@ export class CharacterMemoryManager implements MemoryManager {
     type?: MemoryType,
     limit: number = 50
   ): Promise<MemoryItem[]> {
+    serverLogger.debug(LogCategory.MEMORY, 'Получаем воспоминания персонажа', {
+      characterId,
+      memoryType: type,
+      limit
+    })
+
     const memories = await this.getMemoriesFromDatabase(characterId, type, limit)
-    return this.sortMemoriesByRelevance(memories)
+    const sortedMemories = this.sortMemoriesByRelevance(memories)
+
+    serverLogger.debug(LogCategory.MEMORY, 'Воспоминания получены и отсортированы', {
+      characterId,
+      totalMemories: memories.length,
+      returnedMemories: sortedMemories.length,
+      memoryTypes: [...new Set(sortedMemories.map(m => m.type))]
+    })
+
+    return sortedMemories
   }
 
   // Обновление воспоминания

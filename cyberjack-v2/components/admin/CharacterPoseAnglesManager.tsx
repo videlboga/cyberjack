@@ -72,7 +72,7 @@ export function CharacterPoseAnglesManager({ characterPoseId, poseName, characte
 
   const fetchCharacterAngles = async () => {
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles`)
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles`)
       if (response.ok) {
         const data = await response.json()
         setAngles(data)
@@ -84,7 +84,7 @@ export function CharacterPoseAnglesManager({ characterPoseId, poseName, characte
 
   const fetchAvailableAngles = async () => {
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/available-angles`)
+      const response = await fetch(`/api/character-poses/${characterPoseId}/available-angles`)
       if (response.ok) {
         const data = await response.json()
         setAvailableAngles(data)
@@ -98,7 +98,7 @@ export function CharacterPoseAnglesManager({ characterPoseId, poseName, characte
 
   const addAngleToCharacter = async (poseAngleId: string) => {
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles`, {
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ poseAngleId })
@@ -117,7 +117,7 @@ export function CharacterPoseAnglesManager({ characterPoseId, poseName, characte
 
   const updateAngle = async (angleId: string, updates: Partial<CharacterPoseAngle>) => {
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles/${angleId}`, {
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles/${angleId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
@@ -138,7 +138,7 @@ export function CharacterPoseAnglesManager({ characterPoseId, poseName, characte
     if (!confirm('Удалить ракурс у персонажа?')) return
 
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles/${angleId}`, {
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles/${angleId}`, {
         method: 'DELETE'
       })
 

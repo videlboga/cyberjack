@@ -9,12 +9,19 @@ import {
   PromptContext,
   ChatMessageMetadata
 } from '@/types/character-ai'
+import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
+import { CharacteristicInterpreter } from './characteristic-interpreter'
 
 export class CharacterResponseManager implements ResponseManager {
   private readonly MAX_RESPONSE_LENGTH = 500
   private readonly MIN_RESPONSE_LENGTH = 10
   private readonly QUALITY_THRESHOLD = 0.6
   private readonly CONFIDENCE_THRESHOLD = 0.7
+  private readonly characteristicInterpreter: CharacteristicInterpreter
+
+  constructor() {
+    this.characteristicInterpreter = new CharacteristicInterpreter()
+  }
 
   // Генерация ответа
   async generateResponse(
@@ -244,6 +251,13 @@ export class CharacterResponseManager implements ResponseManager {
       const systemPrompt = this.buildSystemPrompt(context)
       const userPrompt = this.buildUserPrompt(userMessage, context)
 
+      // Логируем системный промпт для отладки
+      serverLogger.debug(LogCategory.AI, 'Системный промпт для AI', {
+        systemPrompt,
+        characterId: context.characterId,
+        userId: context.userId
+      })
+
       // Вызываем AI API
       const response = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
@@ -289,17 +303,166 @@ export class CharacterResponseManager implements ResponseManager {
     const character = context.character
     const environment = context.environment
 
-    return `Ты ${character.name}, ${character.description || 'персонаж в игре'}.
+    // Логируем начало построения промпта
+    serverLogger.info(LogCategory.AI, 'Начинаем построение системного промпта', {
+      characterId: context.characterId,
+      characterName: character.name,
+      userId: context.userId,
+      characteristicsCount: context.characteristics?.length || 0,
+      hasMemory: !!context.memory,
+      hasCurrentPose: !!context.currentPose,
+      hasLastAction: !!context.lastAction
+    })
 
-Характеристики:
-${context.characteristics?.map(c => `- ${c.name}: ${c.currentValue}/${c.baseValue}`).join('\n') || 'Нет данных'}
+    // Создаем интерпретацию характеристик
+    const characteristicSummary = this.characteristicInterpreter.createCharacteristicSummary(
+      context.characteristics?.map(c => ({
+        name: c.name,
+        category: c.category || 'Неизвестно',
+        description: c.description,
+        currentValue: c.currentValue,
+        baseValue: c.baseValue,
+        recentChange: c.recentChange
+      })) || []
+    )
+
+    // Получаем ощущения от изменений характеристик
+    const characteristicSensations = this.characteristicInterpreter.interpretCharacteristicChangesAsSensations(
+      context.characteristics?.map(c => ({
+        name: c.name,
+        category: c.category || 'Неизвестно',
+        currentValue: c.currentValue,
+        baseValue: c.baseValue,
+        recentChange: c.recentChange
+      })) || []
+    )
+
+    let prompt = `Ты ${character.name}, ${character.description || 'персонаж в игре'}.
+
+Твое текущее состояние:
+- Эмоциональное состояние: ${characteristicSummary.emotionalState}
+- Общее настроение: ${characteristicSummary.overallMood}
+
+${characteristicSummary.dominantTraits.length > 0 ? `
+Топ-5 характеристик с максимальными значениями:
+${characteristicSummary.dominantTraits.map(trait => `- ${trait.name}: ${trait.interpretation}`).join('\n')}
+` : ''}
+
+${characteristicSensations.length > 0 ? `
+Ты чувствуешь изменения в своем состоянии:
+${characteristicSensations.map(sensation => `- ${sensation}`).join('\n')}
+` : ''}
+
+${characteristicSummary.behaviorGuidance && characteristicSummary.behaviorGuidance !== 'Поведение в пределах нормы' ? `
+Поведенческие особенности:
+${characteristicSummary.behaviorGuidance}
+` : ''}
 
 Текущая локация: ${environment?.location || 'неизвестно'}
-Время: ${environment?.time || 'неизвестно'}
+Время: ${environment?.timeOfDay || 'неизвестно'}`
+
+    // Добавляем информацию о текущей позе
+    if (context.currentPose) {
+      prompt += `
+
+Текущая поза: ${context.currentPose.name}
+Ракурс: ${context.currentPose.currentAngle}
+Описание позы: ${context.currentPose.description || 'Нет описания'}`
+    }
+
+    // Добавляем информацию о последнем действии
+    if (context.lastAction) {
+      prompt += `
+
+Последнее действие: ${context.lastAction.actionName}
+Интенсивность: ${context.lastAction.intensity}
+Длительность: ${context.lastAction.duration} секунд
+Время выполнения: ${new Date(context.lastAction.timestamp).toLocaleString('ru-RU')}`
+    }
+
+    // Добавляем информацию о памяти персонажа
+    if (context.memory) {
+      const recentMemories = context.memory.recent || []
+      const shortTermMemories = context.memory.shortTerm || []
+      const longTermMemories = context.memory.longTerm || []
+      const contextualMemories = context.memory.contextual || []
+
+      // Логируем информацию о памяти
+      serverLogger.debug(LogCategory.AI, 'Обрабатываем память персонажа', {
+        characterId: context.characterId,
+        recentMemoriesCount: recentMemories.length,
+        shortTermMemoriesCount: shortTermMemories.length,
+        longTermMemoriesCount: longTermMemories.length,
+        contextualMemoriesCount: contextualMemories.length,
+        totalMemories: recentMemories.length + shortTermMemories.length + longTermMemories.length + contextualMemories.length
+      })
+
+      if (recentMemories.length > 0 || shortTermMemories.length > 0) {
+        prompt += `
+
+Память о последних событиях:`
+
+        // Добавляем последние воспоминания (максимум 3)
+        const allRecentMemories = [...recentMemories, ...shortTermMemories]
+          .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+          .slice(0, 3)
+
+        allRecentMemories.forEach(memory => {
+          prompt += `
+- ${memory.content}`
+        })
+
+        // Логируем какие воспоминания добавлены в промпт
+        serverLogger.debug(LogCategory.AI, 'Добавлены воспоминания в промпт', {
+          characterId: context.characterId,
+          memoriesAdded: allRecentMemories.map(m => ({
+            content: m.content.substring(0, 100) + '...',
+            timestamp: m.timestamp,
+            type: m.type
+          }))
+        })
+      }
+    }
+
+    // Добавляем историю сессии и контекст диалога
+    if (context.sessionHistory && context.sessionHistory.length > 0) {
+      prompt += `
+
+Последние сообщения в чате:`
+      context.sessionHistory.slice(-3).forEach(msg => {
+        const speaker = msg.isUser ? 'Пользователь' : character.name
+        prompt += `\n${speaker}: ${msg.content}`
+      })
+    }
+
+    // Добавляем информацию о недавних изменениях характеристик (только если есть значительные изменения)
+    if (characteristicSensations.length > 0) {
+      prompt += `
+
+Ты чувствуешь изменения в своем состоянии:`
+      characteristicSensations.forEach(sensation => {
+        prompt += `\n- ${sensation}`
+      })
+    }
+
+    prompt += `
 
 Твоя личность: Загадочная и интригующая
 
-Отвечай кратко, естественно, в характере персонажа. Не упоминай, что ты в игре или AI.`
+Отвечай кратко, естественно, в характере персонажа. Учитывай текущую позу и последние действия. Не упоминай, что ты в игре или AI.`
+
+    // Логируем финальный промпт
+    serverLogger.info(LogCategory.AI, 'Системный промпт построен', {
+      characterId: context.characterId,
+      promptLength: prompt.length,
+      estimatedTokens: Math.ceil(prompt.length / 4),
+      hasMemory: !!context.memory,
+      hasCurrentPose: !!context.currentPose,
+      hasLastAction: !!context.lastAction,
+      hasSessionHistory: !!context.sessionHistory && context.sessionHistory.length > 0
+    })
+
+    return prompt
   }
 
   private buildUserPrompt(userMessage: string, context: PromptContext): string {

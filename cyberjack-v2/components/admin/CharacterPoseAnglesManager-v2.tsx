@@ -76,7 +76,7 @@ export function CharacterPoseAnglesManagerV2({ characterPoseId, poseName, charac
 
   const fetchCharacterAngles = async () => {
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles-v2`)
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles-v2`)
       if (response.ok) {
         const data = await response.json()
         setAngles(data)
@@ -90,7 +90,7 @@ export function CharacterPoseAnglesManagerV2({ characterPoseId, poseName, charac
 
   const createNewAngle = async () => {
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles-v2`, {
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles-v2`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -117,7 +117,7 @@ export function CharacterPoseAnglesManagerV2({ characterPoseId, poseName, charac
 
   const updateAngle = async (angleId: string, updates: Partial<CharacterPoseAngle>) => {
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles-v2/${angleId}`, {
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles-v2/${angleId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
@@ -138,7 +138,7 @@ export function CharacterPoseAnglesManagerV2({ characterPoseId, poseName, charac
     if (!confirm('Удалить ракурс?')) return
 
     try {
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles-v2/${angleId}`, {
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles-v2/${angleId}`, {
         method: 'DELETE'
       })
 
@@ -182,7 +182,7 @@ export function CharacterPoseAnglesManagerV2({ characterPoseId, poseName, charac
         formData.append('files', file)
       })
 
-      const response = await fetch(`/api/characters/poses/${characterPoseId}/angles-v2/${editingId}/upload`, {
+      const response = await fetch(`/api/character-poses/${characterPoseId}/angles-v2/${editingId}/upload`, {
         method: 'POST',
         body: formData
       })

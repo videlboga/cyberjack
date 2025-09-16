@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { FilterPanel, FilterConfig, FilterState, useFilters } from './FilterPanel-v2'
 
 interface CharacteristicDefinition {
   id: string
@@ -20,6 +21,60 @@ export function CharacteristicsAdmin() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
 
+  // Конфигурация фильтров
+  const [filterConfig, setFilterConfig] = useState<FilterConfig>({
+    search: {
+      placeholder: 'Поиск по названию или описанию...',
+      fields: ['name', 'description']
+    },
+    selects: {
+      category: {
+        label: 'Категория',
+        options: []
+      },
+      isActive: {
+        label: 'Статус',
+        options: [
+          { value: 'true', label: 'Активные' },
+          { value: 'false', label: 'Неактивные' }
+        ]
+      }
+    },
+    ranges: {
+      minValue: {
+        label: 'Минимальное значение',
+        min: 0,
+        max: 100
+      },
+      maxValue: {
+        label: 'Максимальное значение',
+        min: 0,
+        max: 100
+      }
+    },
+    sort: {
+      options: [
+        { value: 'name:asc', label: 'Название (А-Я)' },
+        { value: 'name:desc', label: 'Название (Я-А)' },
+        { value: 'category:asc', label: 'Категория (А-Я)' },
+        { value: 'category:desc', label: 'Категория (Я-А)' },
+        { value: 'minValue:asc', label: 'Мин. значение (по возрастанию)' },
+        { value: 'minValue:desc', label: 'Мин. значение (по убыванию)' },
+        { value: 'maxValue:asc', label: 'Макс. значение (по возрастанию)' },
+        { value: 'maxValue:desc', label: 'Макс. значение (по убыванию)' }
+      ],
+      defaultSort: 'name:asc'
+    }
+  })
+
+  // Состояние фильтров
+  const [filterState, setFilterState] = useState<FilterState>({
+    search: '',
+    selects: {},
+    ranges: {},
+    sort: 'name:asc'
+  })
+
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -32,6 +87,26 @@ export function CharacteristicsAdmin() {
   useEffect(() => {
     fetchCharacteristics()
   }, [])
+
+  // Обновляем опции категорий при загрузке характеристик
+  useEffect(() => {
+    if (characteristics.length > 0) {
+      const categories = [...new Set(characteristics.map(c => c.category))]
+        .sort()
+        .map(category => ({ value: category, label: category }))
+
+      setFilterConfig(prev => ({
+        ...prev,
+        selects: {
+          ...prev.selects,
+          category: {
+            ...prev.selects?.category,
+            options: categories
+          }
+        }
+      }))
+    }
+  }, [characteristics])
 
   const fetchCharacteristics = async () => {
     try {
@@ -118,6 +193,41 @@ export function CharacteristicsAdmin() {
     setShowForm(false)
   }
 
+  // Функция для получения значения поля объекта
+  const getItemValue = (item: CharacteristicDefinition, field: string) => {
+    switch (field) {
+      case 'name':
+      case 'category':
+      case 'description':
+        return item[field] || ''
+      case 'minValue':
+      case 'maxValue':
+        return item[field]
+      case 'isActive':
+        return item[field].toString()
+      default:
+        return ''
+    }
+  }
+
+  // Применяем фильтры
+  const filteredCharacteristics = useFilters(
+    characteristics,
+    filterState,
+    filterConfig,
+    getItemValue
+  )
+
+  // Сброс фильтров
+  const resetFilters = () => {
+    setFilterState({
+      search: '',
+      selects: {},
+      ranges: {},
+      sort: 'name:asc'
+    })
+  }
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 border">
@@ -132,7 +242,13 @@ export function CharacteristicsAdmin() {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Управление характеристиками</h2>
+        <div>
+          <h2 className="text-xl font-semibold">Управление характеристиками</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Всего: {characteristics.length} |
+            Показано: {filteredCharacteristics.length}
+          </p>
+        </div>
         <Button onClick={() => setShowForm(true)}>
           Создать характеристику
         </Button>
@@ -143,6 +259,15 @@ export function CharacteristicsAdmin() {
           <p className="text-red-800 text-sm">{error}</p>
         </div>
       )}
+
+      {/* Панель фильтров */}
+      <FilterPanel
+        config={filterConfig}
+        state={filterState}
+        onStateChange={setFilterState}
+        onReset={resetFilters}
+        className="mb-6"
+      />
 
       {showForm && (
         <div className="mb-6 p-4 border rounded-lg bg-gray-50">
@@ -232,13 +357,23 @@ export function CharacteristicsAdmin() {
       )}
 
       <div className="space-y-3">
-        {characteristics.length === 0 ? (
+        {filteredCharacteristics.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <p>Характеристики не найдены</p>
-            <p className="text-sm mt-2">Создайте первую характеристику</p>
+            <p>
+              {characteristics.length === 0
+                ? 'Характеристики не найдены'
+                : 'Нет характеристик, соответствующих фильтрам'
+              }
+            </p>
+            <p className="text-sm mt-2">
+              {characteristics.length === 0
+                ? 'Создайте первую характеристику'
+                : 'Попробуйте изменить параметры фильтрации'
+              }
+            </p>
           </div>
         ) : (
-          characteristics.map((characteristic) => (
+          filteredCharacteristics.map((characteristic) => (
             <div key={characteristic.id} className="p-4 border rounded-lg">
               <div className="flex justify-between items-start">
                 <div className="flex-1">

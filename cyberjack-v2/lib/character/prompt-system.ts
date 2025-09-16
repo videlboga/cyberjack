@@ -11,6 +11,7 @@ import {
   PromptVariableValidation
 } from '@/types/character-ai'
 import { PromptConstructors } from './prompt-constructors'
+import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
 
 export class PromptSystem implements PromptBuilder {
   private templates: Map<string, PromptTemplate> = new Map()
@@ -83,7 +84,7 @@ export class PromptSystem implements PromptBuilder {
         category: PromptCategory.CHARACTERISTICS,
         template: `Твои текущие характеристики:
 {{#each characteristics}}
-- {{name}} ({{category}}): {{currentValue}}/100{{#if isRevealed}} (раскрыто: {{revealedValue}} с точностью {{accuracy}}%){{/if}}
+- {{name}} ({{category}}): {{interpretation}}{{#if isRevealed}} (раскрыто: {{revealedValue}} с точностью {{accuracy}}%){{/if}}
 {{/each}}
 
 Эти характеристики влияют на твое поведение и реакции.`,
@@ -336,8 +337,16 @@ export class PromptSystem implements PromptBuilder {
 
   // Построение промпта на основе контекста
   async buildPrompt(context: PromptContext): Promise<string> {
+    serverLogger.info(LogCategory.AI, 'Начинаем построение промпта через PromptSystem', {
+      characterId: context.characterId,
+      userId: context.userId
+    })
+
     const character = await this.getCharacter(context.characterId)
     if (!character) {
+      serverLogger.error(LogCategory.AI, 'Персонаж не найден при построении промпта', {
+        characterId: context.characterId
+      })
       throw new Error('Персонаж не найден')
     }
 
@@ -345,6 +354,12 @@ export class PromptSystem implements PromptBuilder {
     const activeTemplates = Array.from(this.templates.values())
       .filter(template => template.isActive)
       .sort((a, b) => b.priority - a.priority)
+
+    serverLogger.debug(LogCategory.AI, 'Активные шаблоны для промпта', {
+      characterId: context.characterId,
+      activeTemplatesCount: activeTemplates.length,
+      templateIds: activeTemplates.map(t => t.id)
+    })
 
     const promptParts: string[] = []
 
@@ -354,13 +369,33 @@ export class PromptSystem implements PromptBuilder {
         const renderedTemplate = await this.renderTemplate(template, context, character)
         if (renderedTemplate.trim()) {
           promptParts.push(renderedTemplate)
+          serverLogger.debug(LogCategory.AI, 'Шаблон успешно отрендерен', {
+            characterId: context.characterId,
+            templateId: template.id,
+            templateCategory: template.category,
+            renderedLength: renderedTemplate.length
+          })
         }
       } catch (error) {
+        serverLogger.error(LogCategory.AI, 'Ошибка при рендеринге шаблона', {
+          characterId: context.characterId,
+          templateId: template.id,
+          error: error.message
+        })
         console.error(`Ошибка при рендеринге шаблона ${template.id}:`, error)
       }
     }
 
-    return promptParts.join('\n\n')
+    const finalPrompt = promptParts.join('\n\n')
+
+    serverLogger.info(LogCategory.AI, 'Промпт построен через PromptSystem', {
+      characterId: context.characterId,
+      finalPromptLength: finalPrompt.length,
+      estimatedTokens: Math.ceil(finalPrompt.length / 4),
+      templatesUsed: promptParts.length
+    })
+
+    return finalPrompt
   }
 
   // Рендеринг шаблона с переменными
@@ -413,6 +448,22 @@ export class PromptSystem implements PromptBuilder {
       case 'characterAppearance':
         return character.appearance || 'привлекательная внешность'
       case 'characteristics':
+        // Возвращаем характеристики с интерпретациями
+        if (context.characteristics) {
+          const { CharacteristicInterpreter } = await import('./characteristic-interpreter')
+          const interpreter = new CharacteristicInterpreter()
+
+          return context.characteristics.map(c => ({
+            ...c,
+            interpretation: interpreter.interpretCharacteristic(
+              c.name,
+              c.currentValue,
+              c.baseValue,
+              c.recentChange,
+              c.category
+            ).interpretation
+          }))
+        }
         return context.characteristics
       case 'memory':
         return context.memory

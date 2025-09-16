@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { SimpleFormulaBuilder } from './formulas/SimpleFormulaBuilder'
+import { FilterPanel, FilterConfig, FilterState, useFilters } from './FilterPanel-v2'
 
 interface Action {
   id: string
@@ -24,6 +25,53 @@ export function ActionsAdmin() {
   const [showFormulaBuilder, setShowFormulaBuilder] = useState(false)
   const [currentFormula, setCurrentFormula] = useState<string>('')
 
+  // Конфигурация фильтров
+  const [filterConfig, setFilterConfig] = useState<FilterConfig>({
+    search: {
+      placeholder: 'Поиск по названию или описанию...',
+      fields: ['name', 'description']
+    },
+    selects: {
+      category: {
+        label: 'Категория',
+        options: []
+      },
+      isActive: {
+        label: 'Статус',
+        options: [
+          { value: 'true', label: 'Активные' },
+          { value: 'false', label: 'Неактивные' }
+        ]
+      }
+    },
+    ranges: {
+      intensity: {
+        label: 'Интенсивность',
+        min: 0,
+        max: 100
+      }
+    },
+    sort: {
+      options: [
+        { value: 'name:asc', label: 'Название (А-Я)' },
+        { value: 'name:desc', label: 'Название (Я-А)' },
+        { value: 'category:asc', label: 'Категория (А-Я)' },
+        { value: 'category:desc', label: 'Категория (Я-А)' },
+        { value: 'intensity:asc', label: 'Интенсивность (по возрастанию)' },
+        { value: 'intensity:desc', label: 'Интенсивность (по убыванию)' }
+      ],
+      defaultSort: 'name:asc'
+    }
+  })
+
+  // Состояние фильтров
+  const [filterState, setFilterState] = useState<FilterState>({
+    search: '',
+    selects: {},
+    ranges: {},
+    sort: 'name:asc'
+  })
+
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -37,6 +85,26 @@ export function ActionsAdmin() {
   useEffect(() => {
     fetchActions()
   }, [])
+
+  // Обновляем опции категорий при загрузке действий
+  useEffect(() => {
+    if (actions.length > 0) {
+      const categories = [...new Set(actions.map(a => a.category))]
+        .sort()
+        .map(category => ({ value: category, label: category }))
+
+      setFilterConfig(prev => ({
+        ...prev,
+        selects: {
+          ...prev.selects,
+          category: {
+            ...prev.selects?.category,
+            options: categories
+          }
+        }
+      }))
+    }
+  }, [actions])
 
   const fetchActions = async () => {
     try {
@@ -150,6 +218,40 @@ export function ActionsAdmin() {
     }))
   }
 
+  // Функция для получения значения поля объекта
+  const getItemValue = (item: Action, field: string) => {
+    switch (field) {
+      case 'name':
+      case 'category':
+      case 'description':
+        return item[field] || ''
+      case 'intensity':
+        return item[field]
+      case 'isActive':
+        return item[field].toString()
+      default:
+        return ''
+    }
+  }
+
+  // Применяем фильтры
+  const filteredActions = useFilters(
+    actions,
+    filterState,
+    filterConfig,
+    getItemValue
+  )
+
+  // Сброс фильтров
+  const resetFilters = () => {
+    setFilterState({
+      search: '',
+      selects: {},
+      ranges: {},
+      sort: 'name:asc'
+    })
+  }
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 border">
@@ -164,7 +266,13 @@ export function ActionsAdmin() {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Управление действиями</h2>
+        <div>
+          <h2 className="text-xl font-semibold">Управление действиями</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Всего: {actions.length} |
+            Показано: {filteredActions.length}
+          </p>
+        </div>
         <Button onClick={() => setShowForm(true)}>
           Создать действие
         </Button>
@@ -186,6 +294,15 @@ export function ActionsAdmin() {
           <p className="text-red-800 text-sm">{error}</p>
         </div>
       )}
+
+      {/* Панель фильтров */}
+      <FilterPanel
+        config={filterConfig}
+        state={filterState}
+        onStateChange={setFilterState}
+        onReset={resetFilters}
+        className="mb-6"
+      />
 
       {showForm && (
         <div className="mb-6 p-4 border rounded-lg bg-gray-50">
@@ -336,13 +453,23 @@ export function ActionsAdmin() {
       )}
 
       <div className="space-y-3">
-        {actions.length === 0 ? (
+        {filteredActions.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <p>Действия не найдены</p>
-            <p className="text-sm mt-2">Создайте первое действие</p>
+            <p>
+              {actions.length === 0
+                ? 'Действия не найдены'
+                : 'Нет действий, соответствующих фильтрам'
+              }
+            </p>
+            <p className="text-sm mt-2">
+              {actions.length === 0
+                ? 'Создайте первое действие'
+                : 'Попробуйте изменить параметры фильтрации'
+              }
+            </p>
           </div>
         ) : (
-          actions.map((action) => (
+          filteredActions.map((action) => (
             <div key={action.id} className="p-4 border rounded-lg">
               <div className="flex justify-between items-start">
                 <div className="flex-1">

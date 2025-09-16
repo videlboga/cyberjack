@@ -27,9 +27,10 @@ interface ChatPanelProps {
     timestamp: Date
     data?: any
   }) => void
+  refreshTrigger?: number // Добавляем триггер для обновления
 }
 
-export function ChatPanel({ characterId, characterName, gameContext, onNotification }: ChatPanelProps) {
+export function ChatPanel({ characterId, characterName, gameContext, onNotification, refreshTrigger }: ChatPanelProps) {
   const { data: session } = useSession()
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
@@ -40,27 +41,64 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const loadChatHistory = async () => {
+    try {
+      const response = await fetch(`/api/chat/${characterId}/history`)
+      if (response.ok) {
+        const chatHistory = await response.json()
+        const formattedMessages: Message[] = chatHistory.map((msg: any) => ({
+          id: msg.id,
+          content: msg.content,
+          isUser: msg.messageType === 'user',
+          timestamp: new Date(msg.createdAt)
+        }))
+        setMessages(formattedMessages)
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки истории чата:', error)
+    }
+  }
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
+  // Загружаем сообщения из базы данных при монтировании
+  useEffect(() => {
+    if (characterId) {
+      loadChatHistory()
+    }
+  }, [characterId])
+
+  // Автоматическое обновление чата каждые 3 секунды
+  useEffect(() => {
+    if (!characterId) return
+
+    const interval = setInterval(() => {
+      loadChatHistory()
+    }, 3000) // Обновляем каждые 3 секунды
+
+    return () => clearInterval(interval)
+  }, [characterId])
+
+  // Обновление чата при изменении refreshTrigger
+  useEffect(() => {
+    if (refreshTrigger && characterId) {
+      loadChatHistory()
+    }
+  }, [refreshTrigger, characterId])
+
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputMessage,
-      isUser: true,
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, userMessage])
+    // Не добавляем сообщение пользователя сразу - оно будет добавлено из базы данных
+    const messageToSend = inputMessage
     setInputMessage('')
     setIsLoading(true)
 
     try {
       const requestData = {
-        message: inputMessage,
+        message: messageToSend,
         userId: session?.user?.id || '',
         context: {
           currentPose: gameContext?.currentPose,
@@ -88,14 +126,8 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
       const data = await response.json()
       console.log('💬 Received AI response:', data)
 
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: data.response,
-        isUser: false,
-        timestamp: new Date()
-      }
-
-      setMessages(prev => [...prev, aiMessage])
+      // Перезагружаем историю чата, чтобы получить новые сообщения из базы данных
+      await loadChatHistory()
 
       // Проверяем, есть ли изменения характеристик в метаданных
       if (data.metadata?.characteristicChanges && data.metadata.characteristicChanges.length > 0) {
@@ -118,13 +150,15 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
       }
     } catch (error) {
       console.error('Chat error:', error)
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: 'Извините, произошла ошибка при отправке сообщения.',
-        isUser: false,
-        timestamp: new Date()
+      // Показываем ошибку через уведомления
+      if (onNotification) {
+        onNotification({
+          id: Date.now(),
+          type: 'error',
+          message: 'Ошибка при отправке сообщения',
+          timestamp: new Date()
+        })
       }
-      setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
     }

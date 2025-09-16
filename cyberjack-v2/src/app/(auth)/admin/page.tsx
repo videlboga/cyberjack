@@ -12,6 +12,7 @@ import { UsersAdmin } from '@/components/admin/UsersAdmin'
 import { EquipmentAdmin } from '@/components/admin/EquipmentAdmin'
 import { StoryGraphEditor } from '@/components/admin/StoryGraphEditor'
 import { ScreenBasedStoryAdmin } from '@/components/admin/ScreenBasedStoryAdmin'
+import LogsViewer from '@/components/admin/LogsViewer'
 import { Navbar } from '@/components/ui/navbar'
 
 export default function AdminPanel() {
@@ -25,7 +26,7 @@ export default function AdminPanel() {
       </div>
 
       <Tabs defaultValue="characters" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="characters">Персонажи</TabsTrigger>
           <TabsTrigger value="users">Пользователи</TabsTrigger>
           <TabsTrigger value="characteristics">Характеристики</TabsTrigger>
@@ -34,6 +35,7 @@ export default function AdminPanel() {
           <TabsTrigger value="anatomy">Анатомия</TabsTrigger>
           <TabsTrigger value="equipment">Оборудование</TabsTrigger>
           <TabsTrigger value="story-graph">Граф сюжета</TabsTrigger>
+          <TabsTrigger value="logs">Логи</TabsTrigger>
         </TabsList>
 
         <TabsContent value="characters" className="mt-6">
@@ -66,6 +68,10 @@ export default function AdminPanel() {
 
         <TabsContent value="story-graph" className="mt-6">
           <ScreenBasedStoryAdmin />
+        </TabsContent>
+
+        <TabsContent value="logs" className="mt-6">
+          <LogsViewer />
         </TabsContent>
       </Tabs>
       </div>

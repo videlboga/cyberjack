@@ -46,6 +46,12 @@ export function Navbar() {
                     Админ-панель
                   </Link>
                   <Link
+                    href="/admin/logs"
+                    className="text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    Логи
+                  </Link>
+                  <Link
                     href="/db"
                     className="text-gray-600 hover:text-gray-900 transition-colors"
                   >

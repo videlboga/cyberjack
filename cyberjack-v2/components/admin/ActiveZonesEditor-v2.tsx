@@ -33,7 +33,7 @@ export function ActiveZonesEditor({
   // Загрузка активных зон
   const loadZones = async () => {
     try {
-      const response = await fetch(`/api/characters/poses/angles/${characterAngleId}/zones`)
+      const response = await fetch(`/api/character-poses/angles/${characterAngleId}/zones`)
       if (response.ok) {
         const data = await response.json()
         setZones(data)
@@ -65,7 +65,7 @@ export function ActiveZonesEditor({
 
       if (isNewZone) {
         // Создаем новую зону
-        const response = await fetch(`/api/characters/poses/angles/${characterAngleId}/zones`, {
+        const response = await fetch(`/api/character-poses/angles/${characterAngleId}/zones`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -89,7 +89,7 @@ export function ActiveZonesEditor({
         }
       } else {
         // Обновляем существующую зону
-        const response = await fetch(`/api/characters/poses/angles/${characterAngleId}/zones/${zone.id}`, {
+        const response = await fetch(`/api/character-poses/angles/${characterAngleId}/zones/${zone.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json'
@@ -140,7 +140,7 @@ export function ActiveZonesEditor({
         setSelectedZone(null)
       } else {
         // Для существующих зон удаляем через API
-        const response = await fetch(`/api/characters/poses/angles/${characterAngleId}/zones/${zoneId}`, {
+        const response = await fetch(`/api/character-poses/angles/${characterAngleId}/zones/${zoneId}`, {
           method: 'DELETE'
         })
 
