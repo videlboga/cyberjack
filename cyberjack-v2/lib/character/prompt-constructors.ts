@@ -53,18 +53,22 @@ export class PromptConstructors {
   // Конструктор комбинированных промптов
   async buildCombinedPrompt(
     characterId: string,
-    context: 'interaction' | 'action' | 'emotion' | 'general' = 'general'
+    context: 'interaction' | 'action' | 'emotion' | 'general' = 'general',
+    userId?: string
   ): Promise<PromptTemplate> {
     const characteristics = await this.getCharacterCharacteristics(characterId)
     const currentPose = await this.getCurrentPose(characterId)
     const activeZones = await this.getActiveZones(characterId, currentPose?.id)
+    const lastAction = userId ? await this.getLastAction(characterId, userId) : null
+    const sessionHistory = userId ? await this.getSessionHistory(characterId, userId) : []
 
     // Анализируем все компоненты
     const charAnalysis = this.analyzeCharacteristics(characteristics)
     const poseAnalysis = this.analyzePose(currentPose, activeZones)
+    const actionAnalysis = this.analyzeActions(lastAction, sessionHistory)
 
     // Создаем комбинированный промпт
-    const template = this.generateCombinedPrompt(charAnalysis, poseAnalysis, context)
+    const template = this.generateCombinedPrompt(charAnalysis, poseAnalysis, actionAnalysis, context)
 
     return template
   }
@@ -229,6 +233,58 @@ export class PromptConstructors {
     return analysis
   }
 
+  // Анализ действий
+  private analyzeActions(lastAction: any, sessionHistory: any[]) {
+    const analysis = {
+      lastAction: lastAction,
+      sessionHistory: sessionHistory,
+      recentActions: [] as any[],
+      actionPattern: 'none' as 'aggressive' | 'gentle' | 'mixed' | 'none',
+      intensity: 0,
+      frequency: 0,
+      dominantCategory: 'none' as string,
+      timeSinceLastAction: 0
+    }
+
+    if (!lastAction && sessionHistory.length === 0) return analysis
+
+    // Анализируем последнее действие
+    if (lastAction) {
+      analysis.timeSinceLastAction = lastAction.timeAgo
+      analysis.recentActions.push(lastAction)
+    }
+
+    // Анализируем историю сессии
+    if (sessionHistory.length > 0) {
+      analysis.recentActions.push(...sessionHistory.slice(0, 5)) // Последние 5 действий
+      analysis.frequency = sessionHistory.length
+
+      // Определяем доминирующую категорию
+      const categories = sessionHistory.reduce((acc, action) => {
+        acc[action.actionCategory] = (acc[action.actionCategory] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+
+      analysis.dominantCategory = Object.keys(categories).reduce((a, b) => 
+        categories[a] > categories[b] ? a : b, 'none'
+      )
+
+      // Определяем паттерн действий
+      const avgIntensity = sessionHistory.reduce((sum, action) => sum + action.intensity, 0) / sessionHistory.length
+      if (avgIntensity >= 70) {
+        analysis.actionPattern = 'aggressive'
+      } else if (avgIntensity <= 30) {
+        analysis.actionPattern = 'gentle'
+      } else {
+        analysis.actionPattern = 'mixed'
+      }
+
+      analysis.intensity = avgIntensity
+    }
+
+    return analysis
+  }
+
   // Генерация промпта на основе характеристик
   private generateCharacteristicPrompt(analysis: any, context: string): PromptTemplate {
     const template = this.buildCharacteristicTemplate(analysis, context)
@@ -269,14 +325,15 @@ export class PromptConstructors {
   private generateCombinedPrompt(
     charAnalysis: any,
     poseAnalysis: any,
+    actionAnalysis: any,
     context: string
   ): PromptTemplate {
-    const template = this.buildCombinedTemplate(charAnalysis, poseAnalysis, context)
+    const template = this.buildCombinedTemplate(charAnalysis, poseAnalysis, actionAnalysis, context)
 
     return {
       id: `combined-${context}-${Date.now()}`,
       name: `Комбинированный промпт (${context})`,
-      description: `Динамически созданный промпт на основе характеристик, позы и контекста`,
+      description: `Динамически созданный промпт на основе характеристик, позы, действий и контекста`,
       category: PromptCategory.INTERACTION,
       template: template,
       variables: this.getCombinedVariables(),
@@ -373,7 +430,7 @@ export class PromptConstructors {
   }
 
   // Построение комбинированного шаблона
-  private buildCombinedTemplate(charAnalysis: any, poseAnalysis: any, context: string): string {
+  private buildCombinedTemplate(charAnalysis: any, poseAnalysis: any, actionAnalysis: any, context: string): string {
     let template = `Твое текущее состояние:\n\n`
 
     // Характеристики
@@ -395,8 +452,29 @@ export class PromptConstructors {
       template += `\n`
     }
 
+    // Последние действия
+    if (actionAnalysis.lastAction) {
+      template += `Последнее действие: ${actionAnalysis.lastAction.actionName} (${actionAnalysis.lastAction.actionCategory})\n`
+      template += `- Интенсивность: ${actionAnalysis.lastAction.intensity}/100\n`
+      template += `- Время назад: ${this.formatTimeAgo(actionAnalysis.lastAction.timeAgo)}\n`
+      if (actionAnalysis.lastAction.effects && actionAnalysis.lastAction.effects.length > 0) {
+        template += `- Эффекты: ${actionAnalysis.lastAction.effects.map((e: any) => e.characteristicId).join(', ')}\n`
+      }
+      template += `\n`
+    }
+
+    // История сессии
+    if (actionAnalysis.sessionHistory.length > 0) {
+      template += `История сессии:\n`
+      template += `- Всего действий: ${actionAnalysis.frequency}\n`
+      template += `- Паттерн: ${this.getActionPatternDescription(actionAnalysis.actionPattern)}\n`
+      template += `- Доминирующая категория: ${actionAnalysis.dominantCategory}\n`
+      template += `- Средняя интенсивность: ${Math.round(actionAnalysis.intensity)}/100\n`
+      template += `\n`
+    }
+
     // Контекстные инструкции
-    template += this.getCombinedContextualInstructions(context, charAnalysis, poseAnalysis)
+    template += this.getCombinedContextualInstructions(context, charAnalysis, poseAnalysis, actionAnalysis)
 
     return template
   }
@@ -479,14 +557,53 @@ export class PromptConstructors {
   }
 
   // Получение комбинированных контекстных инструкций
-  private getCombinedContextualInstructions(context: string, charAnalysis: any, poseAnalysis: any): string {
-    const instructions = {
-      interaction: 'Взаимодействуй естественно, учитывая свои характеристики и текущую позу.',
-      action: 'Реагируй на действия, исходя из своего состояния и положения.',
-      emotion: 'Выражай эмоции согласно своим характеристикам и чувствуй позу.',
-      general: 'Веди себя согласно своему характеру и текущему состоянию.'
+  private getCombinedContextualInstructions(context: string, charAnalysis: any, poseAnalysis: any, actionAnalysis: any): string {
+    let instructions = {
+      interaction: 'Взаимодействуй естественно, учитывая свои характеристики, текущую позу и недавние действия.',
+      action: 'Реагируй на действия, исходя из своего состояния, положения и истории взаимодействий.',
+      emotion: 'Выражай эмоции согласно своим характеристикам, чувствуй позу и помни о недавних действиях.',
+      general: 'Веди себя согласно своему характеру, текущему состоянию и контексту взаимодействий.'
     }
-    return instructions[context] || 'Реагируй естественно.'
+
+    let baseInstruction = instructions[context] || 'Реагируй естественно.'
+
+    // Добавляем специфичные инструкции на основе анализа действий
+    if (actionAnalysis.lastAction) {
+      const timeAgo = this.formatTimeAgo(actionAnalysis.lastAction.timeAgo)
+      baseInstruction += ` Помни, что недавно (${timeAgo}) было выполнено действие "${actionAnalysis.lastAction.actionName}" с интенсивностью ${actionAnalysis.lastAction.intensity}/100.`
+    }
+
+    if (actionAnalysis.actionPattern !== 'none') {
+      baseInstruction += ` Твой партнер проявляет ${this.getActionPatternDescription(actionAnalysis.actionPattern)} подход.`
+    }
+
+    return baseInstruction
+  }
+
+  // Форматирование времени
+  private formatTimeAgo(timeAgo: number): string {
+    const seconds = Math.floor(timeAgo / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+
+    if (hours > 0) {
+      return `${hours} час${hours > 1 ? 'а' : ''} назад`
+    } else if (minutes > 0) {
+      return `${minutes} минут${minutes > 1 ? '' : 'у'} назад`
+    } else {
+      return `${seconds} секунд${seconds > 1 ? '' : 'у'} назад`
+    }
+  }
+
+  // Описание паттерна действий
+  private getActionPatternDescription(pattern: string): string {
+    const descriptions = {
+      aggressive: 'агрессивный',
+      gentle: 'нежный',
+      mixed: 'смешанный',
+      none: 'отсутствует'
+    }
+    return descriptions[pattern] || 'неопределенный'
   }
 
   // Переменные для промптов характеристик
@@ -626,5 +743,94 @@ export class PromptConstructors {
     ])
 
     return newPrompts
+  }
+
+  // Получение последнего действия
+  private async getLastAction(characterId: string, userId: string): Promise<any> {
+    try {
+      const lastAction = await prisma.actionLog.findFirst({
+        where: {
+          characterId,
+          userId
+        },
+        orderBy: {
+          timestamp: 'desc'
+        },
+        include: {
+          action: {
+            select: {
+              id: true,
+              name: true,
+              category: true,
+              description: true
+            }
+          }
+        }
+      })
+
+      if (!lastAction) return null
+
+      return {
+        id: lastAction.id,
+        actionId: lastAction.actionId,
+        actionName: lastAction.action.name,
+        actionCategory: lastAction.action.category,
+        actionDescription: lastAction.action.description,
+        intensity: lastAction.intensity,
+        duration: lastAction.duration,
+        effects: lastAction.effects,
+        createdAt: lastAction.timestamp,
+        timeAgo: Date.now() - lastAction.timestamp.getTime()
+      }
+    } catch (error) {
+      console.error('Ошибка при получении последнего действия:', error)
+      return null
+    }
+  }
+
+  // Получение истории сессии
+  private async getSessionHistory(characterId: string, userId: string): Promise<any[]> {
+    try {
+      // Получаем последние 10 действий за последний час
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+      
+      const sessionActions = await prisma.actionLog.findMany({
+        where: {
+          characterId,
+          userId,
+          timestamp: {
+            gte: oneHourAgo
+          }
+        },
+        orderBy: {
+          timestamp: 'desc'
+        },
+        take: 10,
+        include: {
+          action: {
+            select: {
+              id: true,
+              name: true,
+              category: true,
+              description: true
+            }
+          }
+        }
+      })
+
+      return sessionActions.map(action => ({
+        id: action.id,
+        actionName: action.action.name,
+        actionCategory: action.action.category,
+        intensity: action.intensity,
+        duration: action.duration,
+        effects: action.effects,
+        createdAt: action.timestamp,
+        timeAgo: Date.now() - action.timestamp.getTime()
+      }))
+    } catch (error) {
+      console.error('Ошибка при получении истории сессии:', error)
+      return []
+    }
   }
 }

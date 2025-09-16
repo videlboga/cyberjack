@@ -241,11 +241,11 @@ export class CharacterAIService implements ICharacterAIService {
       })) || []
     } : undefined
 
-    // Получаем последние действия (TODO: Реализовать)
-    const lastAction = undefined
+    // Получаем последние действия
+    const lastAction = await this.getLastAction(characterId, userId)
 
-    // Получаем историю сессии (TODO: Реализовать)
-    const sessionHistory: any[] = []
+    // Получаем историю сессии
+    const sessionHistory = await this.getSessionHistory(characterId, userId)
 
     // Создаем контекст окружения
     const environment = {
@@ -302,7 +302,7 @@ export class CharacterAIService implements ICharacterAIService {
         // Создаем динамические промпты
         await this.promptSystem.createCharacteristicPrompt(characterId, characteristicContext)
         await this.promptSystem.createPosePrompt(characterId)
-        await this.promptSystem.createCombinedPrompt(characterId, 'interaction')
+        await this.promptSystem.createCombinedPrompt(characterId, 'interaction', userId)
       } catch (error) {
         console.warn('Ошибка при создании динамических промптов:', error)
       }
@@ -908,5 +908,94 @@ export class CharacterAIService implements ICharacterAIService {
   // Получение конфигурации системы действий
   getActionMessageConfig(): any {
     return this.actionMessageSystem.getConfig()
+  }
+
+  // Получение последнего действия
+  private async getLastAction(characterId: string, userId: string): Promise<any> {
+    try {
+      const lastAction = await prisma.actionLog.findFirst({
+        where: {
+          characterId,
+          userId
+        },
+        orderBy: {
+          timestamp: 'desc'
+        },
+        include: {
+          action: {
+            select: {
+              id: true,
+              name: true,
+              category: true,
+              description: true
+            }
+          }
+        }
+      })
+
+      if (!lastAction) return null
+
+      return {
+        id: lastAction.id,
+        actionId: lastAction.actionId,
+        actionName: lastAction.action.name,
+        actionCategory: lastAction.action.category,
+        actionDescription: lastAction.action.description,
+        intensity: lastAction.intensity,
+        duration: lastAction.duration,
+        effects: lastAction.effects,
+        createdAt: lastAction.timestamp,
+        timeAgo: Date.now() - lastAction.timestamp.getTime()
+      }
+    } catch (error) {
+      console.error('Ошибка при получении последнего действия:', error)
+      return null
+    }
+  }
+
+  // Получение истории сессии
+  private async getSessionHistory(characterId: string, userId: string): Promise<any[]> {
+    try {
+      // Получаем последние 10 действий за последний час
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+      
+      const sessionActions = await prisma.actionLog.findMany({
+        where: {
+          characterId,
+          userId,
+          timestamp: {
+            gte: oneHourAgo
+          }
+        },
+        orderBy: {
+          timestamp: 'desc'
+        },
+        take: 10,
+        include: {
+          action: {
+            select: {
+              id: true,
+              name: true,
+              category: true,
+              description: true
+            }
+          }
+        }
+      })
+
+      return sessionActions.map(action => ({
+        id: action.id,
+        actionName: action.action.name,
+        actionCategory: action.action.category,
+        intensity: action.intensity,
+        duration: action.duration,
+        effects: action.effects,
+        createdAt: action.timestamp,
+        timeAgo: Date.now() - action.timestamp.getTime()
+      }))
+    } catch (error) {
+      console.error('Ошибка при получении истории сессии:', error)
+      return []
+    }
   }
 }
