@@ -11,6 +11,7 @@ import {
 } from '@/types/character-ai'
 import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
 import { CharacteristicInterpreter } from './characteristic-interpreter'
+import { getGlobalSystemPromptShort } from './global-system-prompt'
 
 export class CharacterResponseManager implements ResponseManager {
   private readonly MAX_RESPONSE_LENGTH = 500
@@ -337,7 +338,10 @@ export class CharacterResponseManager implements ResponseManager {
       })) || []
     )
 
-    let prompt = `Ты ${character.name}, ${character.description || 'персонаж в игре'}.
+    // Начинаем с глобального системного промпта
+    let prompt = getGlobalSystemPromptShort() + '\n\n'
+
+    prompt += `Ты ${character.name}, ${character.description || 'персонаж в игре'}.
 
 Твое текущее состояние:
 - Эмоциональное состояние: ${characteristicSummary.emotionalState}
@@ -449,7 +453,7 @@ ${characteristicSummary.behaviorGuidance}
 
 Твоя личность: Загадочная и интригующая
 
-Отвечай кратко, естественно, в характере персонажа. Учитывай текущую позу и последние действия. Не упоминай, что ты в игре или AI.`
+Отвечай кратко, естественно, в характере персонажа. Учитывай текущую позу и последние действия.`
 
     // Логируем финальный промпт
     serverLogger.info(LogCategory.AI, 'Системный промпт построен', {

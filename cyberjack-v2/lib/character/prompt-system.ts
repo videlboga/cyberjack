@@ -12,6 +12,7 @@ import {
 } from '@/types/character-ai'
 import { PromptConstructors } from './prompt-constructors'
 import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
+import { getGlobalSystemPromptShort } from './global-system-prompt'
 
 export class PromptSystem implements PromptBuilder {
   private templates: Map<string, PromptTemplate> = new Map()
@@ -246,20 +247,26 @@ export class PromptSystem implements PromptBuilder {
         name: 'Стиль ответа',
         description: 'Инструкции по стилю ответа',
         category: PromptCategory.RESPONSE_STYLE,
-        template: `Правила ответа:
+        template: `{{globalSystemPrompt}}
+
+Правила ответа:
 - Отвечай как {{characterName}}, оставаясь в характере
 - Будь естественным и эмоциональным
 - Учитывай свои характеристики и текущее состояние
-- Не упоминай, что ты в игре или ИИ
 - Реагируй на эмоции и намерения пользователя
 - Используй короткие, естественные фразы
-- Избегай сценических ремарок
 - Будь отзывчивым и живым
 
 Сообщение пользователя: "{{userMessage}}"
 
 Ответь как {{characterName}}:`,
         variables: [
+          {
+            name: 'globalSystemPrompt',
+            type: PromptVariableType.STRING,
+            required: true,
+            description: 'Глобальный системный промпт'
+          },
           {
             name: 'characterName',
             type: PromptVariableType.STRING,
@@ -479,6 +486,8 @@ export class PromptSystem implements PromptBuilder {
         return context.memory.emotional || []
       case 'userSentiment':
         return context.userModifiers.sentiment || 'neutral'
+      case 'globalSystemPrompt':
+        return getGlobalSystemPromptShort()
       default:
         return null
     }
