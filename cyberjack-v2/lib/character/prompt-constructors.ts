@@ -265,7 +265,7 @@ export class PromptConstructors {
         return acc
       }, {} as Record<string, number>)
 
-      analysis.dominantCategory = Object.keys(categories).reduce((a, b) => 
+      analysis.dominantCategory = Object.keys(categories).reduce((a, b) =>
         categories[a] > categories[b] ? a : b, 'none'
       )
 
@@ -793,7 +793,7 @@ export class PromptConstructors {
     try {
       // Получаем последние 10 действий за последний час
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-      
+
       const sessionActions = await prisma.actionLog.findMany({
         where: {
           characterId,

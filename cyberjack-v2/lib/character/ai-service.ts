@@ -958,7 +958,7 @@ export class CharacterAIService implements ICharacterAIService {
     try {
       // Получаем последние 10 действий за последний час
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-      
+
       const sessionActions = await prisma.actionLog.findMany({
         where: {
           characterId,
