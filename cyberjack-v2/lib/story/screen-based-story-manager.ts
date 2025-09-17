@@ -430,12 +430,21 @@ export class ScreenBasedStoryManager {
             break
 
           case 'change_credits':
-            if (consequence.creditsChange !== undefined) {
+            let creditsChange = consequence.creditsChange || 0
+
+            // Поддержка переменных для кредитов
+            if (consequence.creditsVariable) {
+              const variableValue = await this.getVariableValue(userId, consequence.creditsVariable, consequence)
+              const multiplier = consequence.creditsMultiplier || 1
+              creditsChange = variableValue * multiplier
+            }
+
+            if (creditsChange !== 0) {
               await prisma.user.update({
                 where: { id: userId },
                 data: {
                   credits: {
-                    increment: consequence.creditsChange
+                    increment: creditsChange
                   }
                 }
               })
@@ -562,10 +571,247 @@ export class ScreenBasedStoryManager {
               })
             }
             break
+
+          case 'buy_character':
+            if (consequence.buyCharacterId) {
+              const character = await prisma.character.findUnique({
+                where: { id: consequence.buyCharacterId }
+              })
+
+              if (character) {
+                const price = character.price || 500
+                const user = await prisma.user.findUnique({
+                  where: { id: userId }
+                })
+
+                if (user && user.credits >= price) {
+                  // Списываем кредиты
+                  await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                      credits: {
+                        decrement: price
+                      }
+                    }
+                  })
+
+                  // Добавляем копию персонажа
+                  await prisma.characterCopy.create({
+                    data: {
+                      userId,
+                      characterId: consequence.buyCharacterId,
+                      settings: {
+                        currentPose: 'default',
+                        currentAngle: 'front',
+                        lastPoseChange: new Date().toISOString()
+                      }
+                    }
+                  })
+                }
+              }
+            }
+            break
+
+          case 'sell_character':
+            if (consequence.sellCharacterCopyId) {
+              // Находим копию персонажа пользователя
+              const characterCopy = await prisma.characterCopy.findUnique({
+                where: { id: consequence.sellCharacterCopyId },
+                include: {
+                  character: true
+                }
+              })
+
+              if (characterCopy && characterCopy.userId === userId) {
+                // Берем цену из копии персонажа (может быть изменена в процессе игры)
+                const sellPrice = characterCopy.character.price || 500
+
+                // Удаляем копию персонажа
+                await prisma.characterCopy.delete({
+                  where: { id: consequence.sellCharacterCopyId }
+                })
+
+                // Добавляем кредиты
+                await prisma.user.update({
+                  where: { id: userId },
+                  data: {
+                    credits: {
+                      increment: sellPrice
+                    }
+                  }
+                })
+              }
+            }
+            break
+
+          case 'buy_equipment':
+            if (consequence.buyEquipmentId) {
+              const equipment = await prisma.equipment.findUnique({
+                where: { id: consequence.buyEquipmentId }
+              })
+
+              if (equipment) {
+                const price = equipment.cost || 100
+                const quantity = consequence.equipmentQuantity || 1
+                const totalPrice = price * quantity
+
+                const user = await prisma.user.findUnique({
+                  where: { id: userId }
+                })
+
+                if (user && user.credits >= totalPrice) {
+                  // Списываем кредиты
+                  await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                      credits: {
+                        decrement: totalPrice
+                      }
+                    }
+                  })
+
+                  // Добавляем оборудование
+                  await prisma.userEquipment.upsert({
+                    where: {
+                      userId_equipmentId: {
+                        userId,
+                        equipmentId: consequence.buyEquipmentId
+                      }
+                    },
+                    update: {
+                      quantity: {
+                        increment: quantity
+                      }
+                    },
+                    create: {
+                      userId,
+                      equipmentId: consequence.buyEquipmentId,
+                      quantity
+                    }
+                  })
+                }
+              }
+            }
+            break
+
+          case 'sell_equipment':
+            if (consequence.sellEquipmentId) {
+              const equipment = await prisma.equipment.findUnique({
+                where: { id: consequence.sellEquipmentId }
+              })
+
+              if (equipment) {
+                const price = equipment.cost || 100
+                const quantity = consequence.equipmentQuantity || 1
+                const sellPrice = Math.floor(price * 0.7) * quantity // 70% от цены покупки
+
+                // Проверяем наличие оборудования
+                const userEquipment = await prisma.userEquipment.findUnique({
+                  where: {
+                    userId_equipmentId: {
+                      userId,
+                      equipmentId: consequence.sellEquipmentId
+                    }
+                  }
+                })
+
+                if (userEquipment && userEquipment.quantity >= quantity) {
+                  // Уменьшаем количество оборудования
+                  await prisma.userEquipment.update({
+                    where: {
+                      userId_equipmentId: {
+                        userId,
+                        equipmentId: consequence.sellEquipmentId
+                      }
+                    },
+                    data: {
+                      quantity: {
+                        decrement: quantity
+                      }
+                    }
+                  })
+
+                  // Добавляем кредиты
+                  await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                      credits: {
+                        increment: sellPrice
+                      }
+                    }
+                  })
+                }
+              }
+            }
+            break
         }
       } catch (error) {
         console.error('Ошибка при применении последствия:', error)
       }
+    }
+  }
+
+  // Получить значение переменной для последствий
+  private async getVariableValue(userId: string, variableType: string, consequence: any): Promise<number> {
+    try {
+      switch (variableType) {
+        case 'character_price':
+          if (consequence.buyCharacterId) {
+            const character = await prisma.character.findUnique({
+              where: { id: consequence.buyCharacterId }
+            })
+            return character?.price || 500
+          }
+          return 0
+
+        case 'equipment_price':
+          if (consequence.buyEquipmentId) {
+            const equipment = await prisma.equipment.findUnique({
+              where: { id: consequence.buyEquipmentId }
+            })
+            return equipment?.cost || 100
+          }
+          return 0
+
+        case 'character_copy_price':
+          if (consequence.sellCharacterCopyId) {
+            const characterCopy = await prisma.characterCopy.findUnique({
+              where: { id: consequence.sellCharacterCopyId },
+              include: {
+                character: true
+              }
+            })
+            if (characterCopy) {
+              // Используем новую систему расчета цен
+              const { characterCopyPricingService } = await import('@/lib/core/pricing/character-copy-pricing')
+              const pricingResult = await characterCopyPricingService.calculateCopyPrice(
+                characterCopy.characterId,
+                userId
+              )
+              return pricingResult.finalPrice
+            }
+            return 500 // fallback к базовой цене
+          }
+          return 0
+
+        case 'character_copy_price_by_id':
+          if (consequence.characterId) {
+            // Рассчитываем цену копии персонажа по ID персонажа
+            const { characterCopyPricingService } = await import('@/lib/core/pricing/character-copy-pricing')
+            const pricingResult = await characterCopyPricingService.calculateCopyPrice(
+              consequence.characterId,
+              userId
+            )
+            return pricingResult.finalPrice
+          }
+          return 0
+
+        default:
+          return 0
+      }
+    } catch (error) {
+      console.error('Ошибка при получении значения переменной:', error)
+      return 0
     }
   }
 

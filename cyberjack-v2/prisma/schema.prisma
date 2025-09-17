@@ -24,6 +24,9 @@ model User {
   // Кредиты
   credits   Int      @default(1000)
 
+  // Игровое время (в минутах)
+  gameTime  Int      @default(0)
+
   // Независимые копии персонажей
   characterCopies CharacterCopy[]
 

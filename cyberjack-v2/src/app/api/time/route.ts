@@ -1,12 +1,23 @@
 // app/api/time/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { TimeSystem } from '../../../../lib/core/time/time-system'
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const timeSystem = TimeSystem.getInstance()
-    const state = timeSystem.getState()
+    const state = await timeSystem.getState(session.user.id)
 
     return NextResponse.json(state)
   } catch (error) {
@@ -20,6 +31,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { action, minutes } = await request.json()
     const timeSystem = TimeSystem.getInstance()
 
@@ -32,7 +52,7 @@ export async function POST(request: NextRequest) {
         break
       case 'advance':
         if (typeof minutes === 'number' && minutes > 0) {
-          await timeSystem.advanceTime(minutes)
+          await timeSystem.advanceTime(session.user.id, minutes)
         } else {
           return NextResponse.json(
             { error: 'Valid minutes value is required for advance action' },
@@ -41,7 +61,7 @@ export async function POST(request: NextRequest) {
         }
         break
       case 'reset':
-        timeSystem.reset()
+        await timeSystem.resetUserTime(session.user.id)
         break
       default:
         return NextResponse.json(
@@ -50,7 +70,7 @@ export async function POST(request: NextRequest) {
         )
     }
 
-    const state = timeSystem.getState()
+    const state = await timeSystem.getState(session.user.id)
     return NextResponse.json(state)
   } catch (error) {
     console.error('Error updating time:', error)

@@ -33,7 +33,8 @@ export interface StoryCondition {
 // Последствия выборов (изменения в БД пользователя)
 export interface ChoiceConsequence {
   type: 'change_characteristic' | 'change_credits' | 'change_equipment' |
-        'change_story_point' | 'trigger_action' | 'end_scene' | 'add_character' | 'remove_character'
+        'change_story_point' | 'trigger_action' | 'end_scene' | 'add_character' | 'remove_character' |
+        'buy_character' | 'sell_character' | 'buy_equipment' | 'sell_equipment'
 
   // Для изменения характеристик персонажа
   characterId?: string // если не указан - применяется к текущему персонажу
@@ -42,6 +43,9 @@ export interface ChoiceConsequence {
 
   // Для изменения кредитов пользователя
   creditsChange?: number
+  // Поддержка переменных для кредитов
+  creditsVariable?: 'character_price' | 'equipment_price' | 'character_copy_price'
+  creditsMultiplier?: number // множитель для переменной (по умолчанию 1)
 
   // Для изменения оборудования
   equipmentId?: string
@@ -57,6 +61,15 @@ export interface ChoiceConsequence {
 
   // Для добавления/удаления персонажей
   targetCharacterId?: string // ID персонажа для добавления/удаления
+
+  // Для покупки/продажи персонажей
+  buyCharacterId?: string // ID персонажа для покупки
+  sellCharacterCopyId?: string // ID копии персонажа для продажи (берем цену из копии)
+
+  // Для покупки/продажи оборудования
+  buyEquipmentId?: string // ID оборудования для покупки
+  sellEquipmentId?: string // ID оборудования для продажи
+  equipmentQuantity?: number // количество оборудования (по умолчанию 1)
 }
 
 // Выбор игрока

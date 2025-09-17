@@ -7,6 +7,7 @@ import { PoseFormulaSystem } from '../poses/pose-formula-system'
 import { ActivePosesSystem } from '../poses/active-poses-system'
 import { SimpleEffectsSystem } from './simple-effects-system'
 import { SimplePoseSystem } from '../poses/simple-pose-system'
+import { TimeSystem } from '../time/time-system'
 import { ActionEffect, ActionResult } from '@/types/database'
 import { FormulaExecutionContext } from '../formulas/types/formula-context'
 import { CharacterMemoryManager } from '../../character/memory-manager'
@@ -255,7 +256,7 @@ export class ActionsSystem {
         }
       } : undefined,
       system: {
-        gameTime: 0, // TODO: получить из TimeSystem
+        gameTime: await this.getCurrentGameTime(user.id),
         realTime: Date.now(),
         isActionHolding: true,
         timeMultiplier: 1.0
@@ -1012,5 +1013,11 @@ export class ActionsSystem {
     )
 
     return `К тебе было применено действие "${action.name}"${anatomyInfo} (${actionCount}-й раз). ${sensations} Как ты реагируешь на это действие?`
+  }
+
+  // Получить текущее игровое время пользователя
+  private async getCurrentGameTime(userId: string): Promise<number> {
+    const timeSystem = TimeSystem.getInstance()
+    return await timeSystem.getGameTime(userId)
   }
 }

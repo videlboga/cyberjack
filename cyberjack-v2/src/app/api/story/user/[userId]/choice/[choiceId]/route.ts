@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { SceneManager } from '@/lib/story/scene-manager'
+import { ScreenBasedStoryManager } from '@/lib/story/screen-based-story-manager'
 
 // POST /api/story/user/[userId]/choice/[choiceId] - Выполнить выбор
 export async function POST(
@@ -8,15 +8,19 @@ export async function POST(
 ) {
   try {
     const { userId, choiceId } = await params
-    const sceneManager = SceneManager.getInstance()
+    const storyManager = ScreenBasedStoryManager.getInstance()
 
-    const success = await sceneManager.makeChoice(userId, choiceId)
+    const result = await storyManager.makeChoice(userId, choiceId)
 
-    if (success) {
-      return NextResponse.json({ success: true })
+    if (result.success) {
+      return NextResponse.json({
+        success: true,
+        nextScreenId: result.nextScreenId,
+        consequences: result.consequences
+      })
     } else {
       return NextResponse.json(
-        { error: 'Не удалось выполнить выбор' },
+        { error: result.error || 'Не удалось выполнить выбор' },
         { status: 400 }
       )
     }

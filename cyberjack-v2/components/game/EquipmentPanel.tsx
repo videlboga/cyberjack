@@ -31,10 +31,8 @@ interface EquipmentPanelProps {
 
 export function EquipmentPanel({ userId }: EquipmentPanelProps) {
   const [userEquipment, setUserEquipment] = useState<UserEquipment[]>([])
-  const [availableEquipment, setAvailableEquipment] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'owned' | 'shop'>('owned')
 
   useEffect(() => {
     if (userId) {
@@ -60,15 +58,6 @@ export function EquipmentPanel({ userId }: EquipmentPanelProps) {
         setUserEquipment(userData)
       } else {
         console.error('Ошибка загрузки оборудования пользователя:', userResponse.status, userResponse.statusText)
-      }
-
-      // Загружаем доступное оборудование
-      const shopResponse = await fetch('/api/equipment')
-      if (shopResponse.ok) {
-        const shopData = await shopResponse.json()
-        setAvailableEquipment(shopData)
-      } else {
-        console.error('Ошибка загрузки доступного оборудования:', shopResponse.status, shopResponse.statusText)
       }
     } catch (err) {
       console.error('EquipmentPanel fetchEquipment error:', err)
@@ -130,21 +119,6 @@ export function EquipmentPanel({ userId }: EquipmentPanelProps) {
     }
   }
 
-  const handleBuyEquipment = async (equipmentId: string) => {
-    try {
-      const response = await fetch(`/api/users/${userId}/equipment/${equipmentId}/buy`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (response.ok) {
-        // Обновляем список оборудования
-        await fetchEquipment()
-      }
-    } catch (error) {
-      console.error('Error buying equipment:', error)
-    }
-  }
 
   if (loading) {
     return (
@@ -171,103 +145,55 @@ export function EquipmentPanel({ userId }: EquipmentPanelProps) {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Табы */}
-      <div className="flex-shrink-0 border-b border-gray-700">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('owned')}
-            className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'owned'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-gray-400 hover:text-white'
-            }`}
-          >
-            🎒 Мое ({userEquipment.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('shop')}
-            className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'shop'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-gray-400 hover:text-white'
-            }`}
-          >
-            🛒 Магазин ({availableEquipment.length})
-          </button>
+      {/* Заголовок */}
+      <div className="flex-shrink-0 border-b border-gray-700 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🎒</span>
+          <span className="text-sm font-medium text-white">Мое оборудование ({userEquipment.length})</span>
         </div>
       </div>
 
       {/* Содержимое */}
       <div className="flex-1 overflow-y-auto p-3">
-        {activeTab === 'owned' ? (
-          <div className="space-y-2">
-            {userEquipment.length === 0 ? (
-              <div className="text-center text-gray-400 py-6">
-                <div className="text-3xl mb-2">🎒</div>
-                <p className="text-sm">Нет оборудования</p>
-              </div>
-            ) : (
-              userEquipment.map((item) => (
-                <div key={item.id} className="bg-gray-800 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{getCategoryIcon(item.equipment.category)}</span>
-                      <div>
-                        <h4 className="font-medium text-white text-sm">{item.equipment.name}</h4>
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className={getRarityColor(item.equipment.rarity)}>
-                            {getRarityIcon(item.equipment.rarity)} {item.equipment.rarity}
-                          </span>
-                          <span className="text-gray-400">x{item.quantity}</span>
-                        </div>
+        <div className="space-y-2">
+          {userEquipment.length === 0 ? (
+            <div className="text-center text-gray-400 py-6">
+              <div className="text-3xl mb-2">🎒</div>
+              <p className="text-sm">Нет оборудования</p>
+              <p className="text-xs text-gray-500 mt-1">Оборудование приобретается через сюжетные события</p>
+            </div>
+          ) : (
+            userEquipment.map((item) => (
+              <div key={item.id} className="bg-gray-800 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">{getCategoryIcon(item.equipment.category)}</span>
+                    <div>
+                      <h4 className="font-medium text-white text-sm">{item.equipment.name}</h4>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className={getRarityColor(item.equipment.rarity)}>
+                          {getRarityIcon(item.equipment.rarity)} {item.equipment.rarity}
+                        </span>
+                        <span className="text-gray-400">x{item.quantity}</span>
                       </div>
-                    </div>
-                    <button
-                      onClick={() => handleUseEquipment(item.equipmentId)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-xs transition-colors"
-                    >
-                      Использовать
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {availableEquipment.length === 0 ? (
-              <div className="text-center text-gray-400 py-6">
-                <div className="text-3xl mb-2">🛒</div>
-                <p className="text-sm">Магазин пуст</p>
-              </div>
-            ) : (
-              availableEquipment.map((equipment) => (
-                <div key={equipment.id} className="bg-gray-800 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{getCategoryIcon(equipment.category)}</span>
-                      <div>
-                        <h4 className="font-medium text-white text-sm">{equipment.name}</h4>
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className={getRarityColor(equipment.rarity)}>
-                            {getRarityIcon(equipment.rarity)} {equipment.rarity}
-                          </span>
-                          <span className="text-yellow-400">💰 {equipment.cost}</span>
+                      {item.equipment.relatedPose && (
+                        <div className="text-xs text-blue-400 mt-1">
+                          🎭 Связанная поза: {item.equipment.relatedPose.name}
                         </div>
-                      </div>
+                      )}
                     </div>
-                    <button
-                      onClick={() => handleBuyEquipment(equipment.id)}
-                      className="bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded text-xs transition-colors"
-                    >
-                      Купить
-                    </button>
                   </div>
+                  <button
+                    onClick={() => handleUseEquipment(item.equipmentId)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-xs transition-colors"
+                  >
+                    Использовать
+                  </button>
                 </div>
-              ))
-            )}
-          </div>
-        )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

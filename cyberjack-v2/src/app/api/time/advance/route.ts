@@ -1,10 +1,21 @@
 // app/api/time/advance/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { TimeSystem } from '../../../../../lib/core/time/time-system'
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { minutes, reason } = await request.json()
 
     if (typeof minutes !== 'number' || minutes <= 0) {
@@ -15,11 +26,14 @@ export async function POST(request: NextRequest) {
     }
 
     const timeSystem = TimeSystem.getInstance()
-    await timeSystem.advanceTime(minutes)
+    await timeSystem.advanceTime(session.user.id, minutes)
+
+    const gameTime = await timeSystem.getGameTime(session.user.id)
+    const formattedTime = await timeSystem.getFormattedTime(session.user.id)
 
     return NextResponse.json({
-      gameTime: timeSystem.getGameTime(),
-      formattedTime: timeSystem.getFormattedTime(),
+      gameTime,
+      formattedTime,
       reason: reason || 'manual'
     })
   } catch (error) {
@@ -33,8 +47,17 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const timeSystem = TimeSystem.getInstance()
-    const state = timeSystem.getState()
+    const state = await timeSystem.getState(session.user.id)
 
     return NextResponse.json(state)
   } catch (error) {

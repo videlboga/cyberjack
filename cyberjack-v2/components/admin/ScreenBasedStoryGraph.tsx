@@ -60,6 +60,35 @@ const ChoiceEditor = ({
     showConditions: Array.isArray(choice.showConditions) ? choice.showConditions : []
   })
 
+  const [characters, setCharacters] = useState<Array<{id: string, name: string, price: number}>>([])
+  const [equipment, setEquipment] = useState<Array<{id: string, name: string, cost: number, category: string}>>([])
+
+  // Загружаем списки персонажей и оборудования
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [charactersRes, equipmentRes] = await Promise.all([
+          fetch('/api/admin/characters/list'),
+          fetch('/api/admin/equipment/list')
+        ])
+
+        if (charactersRes.ok) {
+          const charactersData = await charactersRes.json()
+          setCharacters(charactersData)
+        }
+
+        if (equipmentRes.ok) {
+          const equipmentData = await equipmentRes.json()
+          setEquipment(equipmentData)
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error)
+      }
+    }
+
+    loadData()
+  }, [])
+
   const handleSave = () => {
     const dataToSave = {
       ...editData,
@@ -208,6 +237,10 @@ const ChoiceEditor = ({
                           <SelectItem value="trigger_action">Запустить действие</SelectItem>
                           <SelectItem value="add_character">Добавить персонажа</SelectItem>
                           <SelectItem value="remove_character">Удалить персонажа</SelectItem>
+                          <SelectItem value="buy_character">Купить персонажа</SelectItem>
+                          <SelectItem value="sell_character">Продать персонажа</SelectItem>
+                          <SelectItem value="buy_equipment">Купить оборудование</SelectItem>
+                          <SelectItem value="sell_equipment">Продать оборудование</SelectItem>
                           <SelectItem value="end_scene">Завершить сцену</SelectItem>
                         </SelectContent>
                       </Select>
@@ -228,14 +261,46 @@ const ChoiceEditor = ({
                     )}
 
                     {consequence.type === 'change_credits' && (
-                      <div>
-                        <Label className="text-white text-xs">Изменение кредитов</Label>
-                        <Input
-                          type="number"
-                          value={consequence.creditsChange || 0}
-                          onChange={(e) => updateConsequence(index, { creditsChange: parseInt(e.target.value) || 0 })}
-                          className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
-                        />
+                      <div className="col-span-2 space-y-2">
+                        <div>
+                          <Label className="text-white text-xs">Изменение кредитов</Label>
+                          <Input
+                            type="number"
+                            value={consequence.creditsChange || 0}
+                            onChange={(e) => updateConsequence(index, { creditsChange: parseInt(e.target.value) || 0 })}
+                            className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                            placeholder="Прямое изменение (например, 100)"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-white text-xs">Или используйте переменную</Label>
+                          <Select
+                            value={consequence.creditsVariable || ''}
+                            onValueChange={(value) => updateConsequence(index, { creditsVariable: value || undefined })}
+                          >
+                            <SelectTrigger className="h-8 bg-gray-700 border-gray-600 text-white text-xs">
+                              <SelectValue placeholder="Выберите переменную" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Без переменной</SelectItem>
+                              <SelectItem value="character_price">Цена персонажа</SelectItem>
+                              <SelectItem value="equipment_price">Цена оборудования</SelectItem>
+                              <SelectItem value="character_copy_price">Цена копии персонажа (из копии)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {consequence.creditsVariable && (
+                          <div>
+                            <Label className="text-white text-xs">Множитель</Label>
+                            <Input
+                              type="number"
+                              value={consequence.creditsMultiplier || 1}
+                              onChange={(e) => updateConsequence(index, { creditsMultiplier: parseFloat(e.target.value) || 1 })}
+                              className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                              placeholder="1"
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -281,6 +346,117 @@ const ChoiceEditor = ({
                           className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
                           placeholder="Введите ID персонажа"
                         />
+                      </div>
+                    )}
+
+                    {consequence.type === 'buy_character' && (
+                      <div>
+                        <Label className="text-white text-xs">Персонаж для покупки</Label>
+                        <Select
+                          value={consequence.buyCharacterId || ''}
+                          onValueChange={(value) => updateConsequence(index, { buyCharacterId: value })}
+                        >
+                          <SelectTrigger className="h-8 bg-gray-700 border-gray-600 text-white text-xs">
+                            <SelectValue placeholder="Выберите персонажа" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {characters.map((character) => (
+                              <SelectItem key={character.id} value={character.id}>
+                                {character.name} ({character.price} кредитов)
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-gray-400 text-xs mt-1">
+                          Персонаж будет куплен по его текущей цене
+                        </p>
+                      </div>
+                    )}
+
+                    {consequence.type === 'sell_character' && (
+                      <div>
+                        <Label className="text-white text-xs">Копия персонажа для продажи</Label>
+                        <Input
+                          value={consequence.sellCharacterCopyId || ''}
+                          onChange={(e) => updateConsequence(index, { sellCharacterCopyId: e.target.value })}
+                          className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                          placeholder="Введите ID копии персонажа"
+                        />
+                        <p className="text-gray-400 text-xs mt-1">
+                          Персонаж будет продан по его текущей цене (из копии)
+                        </p>
+                      </div>
+                    )}
+
+                    {consequence.type === 'buy_equipment' && (
+                      <div className="col-span-2 space-y-2">
+                        <div>
+                          <Label className="text-white text-xs">Оборудование для покупки</Label>
+                          <Select
+                            value={consequence.buyEquipmentId || ''}
+                            onValueChange={(value) => updateConsequence(index, { buyEquipmentId: value })}
+                          >
+                            <SelectTrigger className="h-8 bg-gray-700 border-gray-600 text-white text-xs">
+                              <SelectValue placeholder="Выберите оборудование" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {equipment.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.name} ({item.cost} кредитов) - {item.category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-white text-xs">Количество</Label>
+                          <Input
+                            type="number"
+                            value={consequence.equipmentQuantity || 1}
+                            onChange={(e) => updateConsequence(index, { equipmentQuantity: parseInt(e.target.value) || 1 })}
+                            className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                            placeholder="1"
+                          />
+                        </div>
+                        <p className="text-gray-400 text-xs">
+                          Оборудование будет куплено по его текущей цене
+                        </p>
+                      </div>
+                    )}
+
+                    {consequence.type === 'sell_equipment' && (
+                      <div className="col-span-2 space-y-2">
+                        <div>
+                          <Label className="text-white text-xs">Оборудование для продажи</Label>
+                          <Select
+                            value={consequence.sellEquipmentId || ''}
+                            onValueChange={(value) => updateConsequence(index, { sellEquipmentId: value })}
+                          >
+                            <SelectTrigger className="h-8 bg-gray-700 border-gray-600 text-white text-xs">
+                              <SelectValue placeholder="Выберите оборудование" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {equipment.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.name} ({item.cost} кредитов) - {item.category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-white text-xs">Количество</Label>
+                          <Input
+                            type="number"
+                            value={consequence.equipmentQuantity || 1}
+                            onChange={(e) => updateConsequence(index, { equipmentQuantity: parseInt(e.target.value) || 1 })}
+                            className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                            placeholder="1"
+                          />
+                        </div>
+                        <p className="text-gray-400 text-xs">
+                          Оборудование будет продано за 70% от его цены
+                        </p>
                       </div>
                     )}
 

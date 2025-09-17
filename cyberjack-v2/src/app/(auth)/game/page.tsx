@@ -341,10 +341,8 @@ export default function GameInterface() {
   }
 
   const getBackgroundImage = () => {
-    if (gameState.currentLocation === 'laboratory') {
-      return '/images/locations/laboratory-bg.svg'
-    }
-    return '/images/locations/default-bg.svg'
+    // Всегда используем новое изображение фона
+    return '/game-background.png'
   }
 
   // Показываем загрузку, пока сессия не загружена
@@ -393,10 +391,7 @@ export default function GameInterface() {
   return (
     <div className="fixed inset-0 bg-black overflow-hidden">
       {/* Основной фон локации */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${getBackgroundImage()})` }}
-      />
+      <div className="absolute inset-0 game-background" />
 
       {/* Отображение персонажа */}
       {gameState.selectedCharacter && (
@@ -539,6 +534,12 @@ export default function GameInterface() {
           >
             🎒 Оборудование
           </button>
+          <button
+            onClick={() => togglePanel('time')}
+            className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+          >
+            ⏰ {gameState.gameTime.formattedTime}
+          </button>
           {gameState.selectedCharacter && (
             <button
               onClick={() => togglePanel('chat')}
@@ -550,13 +551,6 @@ export default function GameInterface() {
         </div>
       </div>
 
-      {/* Индикатор времени */}
-      <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm z-50">
-        <div className="text-sm">
-          ⏰ {gameState.gameTime.formattedTime}
-          {gameState.gameTime.isRunning && <span className="ml-2 text-green-400">▶️</span>}
-        </div>
-      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 // lib/core/time/time-system.ts
 
+import { prisma } from '@/lib/db/client'
 import { CharacteristicsSystem } from '../characteristics/characteristics-system'
 import { PoseFormulaSystem } from '../poses/pose-formula-system'
 import { ActivePosesSystem } from '../poses/active-poses-system'
@@ -20,15 +21,25 @@ export class TimeSystem {
     return TimeSystem.instance
   }
 
-  // Получить текущее игровое время
-  getGameTime(): number {
-    return this.gameTime
+  // Получить текущее игровое время пользователя
+  async getGameTime(userId: string): Promise<number> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { gameTime: true }
+      })
+      return user?.gameTime || 0
+    } catch (error) {
+      console.error('Error getting user game time:', error)
+      return 0
+    }
   }
 
   // Получить игровое время в читаемом формате
-  getFormattedTime(): string {
-    const hours = Math.floor(this.gameTime / 60)
-    const minutes = this.gameTime % 60
+  async getFormattedTime(userId: string): Promise<string> {
+    const gameTime = await this.getGameTime(userId)
+    const hours = Math.floor(gameTime / 60)
+    const minutes = gameTime % 60
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
   }
 
@@ -82,26 +93,38 @@ export class TimeSystem {
     }
   }
 
-  // Ручное управление временем
-  async advanceTime(minutes: number): Promise<void> {
-    this.gameTime += minutes
+  // Ручное управление временем пользователя
+  async advanceTime(userId: string, minutes: number): Promise<void> {
+    try {
+      // Обновляем время в базе данных
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          gameTime: {
+            increment: minutes
+          }
+        }
+      })
 
-    // Запустить восстановление для каждого шага
-    for (let i = 0; i < minutes; i++) {
-      await this.triggerRecovery()
+      // Запустить восстановление для каждого шага
+      for (let i = 0; i < minutes; i++) {
+        await this.triggerRecovery(userId)
+      }
+    } catch (error) {
+      console.error('Error advancing user game time:', error)
     }
   }
 
-  // Запустить восстановление характеристик
-  private async triggerRecovery(): Promise<void> {
+  // Запустить восстановление характеристик для пользователя
+  private async triggerRecovery(userId: string): Promise<void> {
     try {
       const characteristicsSystem = new CharacteristicsSystem()
       const poseFormulaSystem = new PoseFormulaSystem()
       const activePosesSystem = ActivePosesSystem.getInstance()
       const autoPoseSystem = AutoPoseSystem.getInstance()
 
-      // Получить всех персонажей
-      const characters = await this.getAllCharacters()
+      // Получить всех персонажей пользователя
+      const characters = await this.getUserCharacters(userId)
 
       for (const character of characters) {
         // Получить все характеристики персонажа
@@ -119,10 +142,11 @@ export class TimeSystem {
         await this.applyPoseEffects(character.id, poseFormulaSystem, activePosesSystem)
       }
 
-      // Проверить и применить автоматические позы
-      await autoPoseSystem.checkAndApplyAutoPoses()
+      // Проверить и применить автоматические позы для пользователя
+      await autoPoseSystem.checkAndApplyAutoPoses(userId)
 
-      console.log(`Время обновлено: ${this.getFormattedTime()}`)
+      const formattedTime = await this.getFormattedTime(userId)
+      console.log(`Время обновлено для пользователя ${userId}: ${formattedTime}`)
     } catch (error) {
       console.error('Ошибка при восстановлении характеристик:', error)
     }
@@ -177,15 +201,22 @@ export class TimeSystem {
     return this.running
   }
 
-  // Получить состояние системы времени
+  // Получить состояние системы времени (устаревший метод)
   getState() {
     return {
       gameTime: this.gameTime,
-      formattedTime: this.getFormattedTime(),
+      formattedTime: this.getFormattedTimeLegacy(),
       isRunning: this.running,
       actionHoldStart: this.actionHoldStart ? new Date(this.actionHoldStart) : null,
       lastUpdate: new Date(this.lastUpdate)
     }
+  }
+
+  // Устаревший метод для обратной совместимости
+  private getFormattedTimeLegacy(): string {
+    const hours = Math.floor(this.gameTime / 60)
+    const minutes = this.gameTime % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
   }
 
   // Сбросить время
@@ -217,6 +248,48 @@ export class TimeSystem {
   // Получить игровое время с начала действия
   getActionGameTime(): number {
     return this.getActionDuration() // 1 секунда реального времени = 1 минута игрового времени
+  }
+
+  // Получить персонажей пользователя
+  private async getUserCharacters(userId: string) {
+    try {
+      const characterCopies = await prisma.characterCopy.findMany({
+        where: { userId },
+        include: {
+          character: true
+        }
+      })
+      return characterCopies.map(copy => copy.character)
+    } catch (error) {
+      console.error('Error getting user characters:', error)
+      return []
+    }
+  }
+
+  // Получить состояние системы времени для пользователя
+  async getState(userId: string) {
+    const gameTime = await this.getGameTime(userId)
+    const formattedTime = await this.getFormattedTime(userId)
+
+    return {
+      gameTime,
+      formattedTime,
+      isRunning: this.running,
+      actionHoldStart: this.actionHoldStart ? new Date(this.actionHoldStart) : null,
+      lastUpdate: new Date(this.lastUpdate)
+    }
+  }
+
+  // Сбросить время пользователя
+  async resetUserTime(userId: string): Promise<void> {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { gameTime: 0 }
+      })
+    } catch (error) {
+      console.error('Error resetting user game time:', error)
+    }
   }
 
   // Очистка ресурсов

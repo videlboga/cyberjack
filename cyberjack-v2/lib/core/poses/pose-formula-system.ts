@@ -13,6 +13,7 @@ import {
   CharacterPoseStatus
 } from '@/types/pose-formulas'
 import { FormulaEngine } from '../formulas/formula-engine'
+import { TimeSystem } from '../time/time-system'
 
 export class PoseFormulaSystem {
   private formulaEngine: FormulaEngine
@@ -294,7 +295,7 @@ export class PoseFormulaSystem {
         isActive: true
       },
       system: {
-        gameTime: Date.now(), // TODO: получить игровое время
+        gameTime: await this.getCurrentGameTime(userId),
         realTime: Date.now(),
         timeMultiplier: 1
       },
@@ -479,5 +480,11 @@ export class PoseFormulaSystem {
       map[item.equipment.name] = item.quantity
     }
     return map
+  }
+
+  // Получить текущее игровое время пользователя
+  private async getCurrentGameTime(userId: string): Promise<number> {
+    const timeSystem = TimeSystem.getInstance()
+    return await timeSystem.getGameTime(userId)
   }
 }

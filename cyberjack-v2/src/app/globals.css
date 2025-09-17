@@ -16,12 +16,15 @@
   --ring: #171717;
 
   /* Game background */
-  --bg-image: none;
+  --bg-image: url('/game-background.png');
 }
 
 /* Game background styles */
 .game-background {
   background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Notification animations */
