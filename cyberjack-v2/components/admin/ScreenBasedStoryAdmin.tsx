@@ -157,6 +157,8 @@ export function ScreenBasedStoryAdmin() {
   // Обновление станции
   const handleUpdateStation = async (stationId: string, updates: Partial<Station>) => {
     try {
+      console.log('Обновляем станцию:', stationId, updates)
+
       const response = await fetch(`/api/story/entities/${stationId}`, {
         method: 'PUT',
         headers: {
@@ -168,9 +170,40 @@ export function ScreenBasedStoryAdmin() {
       if (response.ok) {
         const updatedStation = await response.json()
         setStations(stations.map(s => s.id === stationId ? updatedStation : s))
+        console.log('Станция успешно обновлена:', updatedStation)
+      } else {
+        const errorData = await response.json()
+        console.error('Ошибка при обновлении станции:', errorData)
+        alert(`Ошибка при обновлении станции: ${errorData.error || 'Неизвестная ошибка'}`)
       }
     } catch (error) {
       console.error('Ошибка при обновлении станции:', error)
+      alert('Ошибка при обновлении станции')
+    }
+  }
+
+  // Удаление станции
+  const handleDeleteStation = async (stationId: string) => {
+    if (!confirm('Вы уверены, что хотите удалить эту станцию? Это действие нельзя отменить.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/story/entities/${stationId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setStations(stations.filter(s => s.id !== stationId))
+        // Также удаляем связанные сцены из состояния
+        setScenes(scenes.filter(s => s.stationId !== stationId))
+      } else {
+        const errorData = await response.json()
+        alert(`Ошибка при удалении станции: ${errorData.error || 'Неизвестная ошибка'}`)
+      }
+    } catch (error) {
+      console.error('Ошибка при удалении станции:', error)
+      alert('Ошибка при удалении станции')
     }
   }
 
@@ -687,6 +720,26 @@ export function ScreenBasedStoryAdmin() {
                         }
                       </div>
                     </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingStation(station)
+                          setIsCreatingStation(false)
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteStation(station.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -743,43 +796,64 @@ export function ScreenBasedStoryAdmin() {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="station-default-scene">Дефолтная сцена</Label>
-                  <Select
-                    value={editingStation?.defaultSceneId || 'none'}
-                    onValueChange={(value) => setEditingStation({
-                      ...editingStation!,
-                      defaultSceneId: value === 'none' ? undefined : value
-                    })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите сцену" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Без сцены</SelectItem>
-                      {scenes.map((scene) => (
-                        <SelectItem key={scene.id} value={scene.id}>
-                          {scene.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="station-default-scene">Дефолтная сцена</Label>
+                    <Select
+                      value={editingStation?.defaultSceneId || 'none'}
+                      onValueChange={(value) => setEditingStation({
+                        ...editingStation!,
+                        defaultSceneId: value === 'none' ? undefined : value
+                      })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите сцену" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Без сцены</SelectItem>
+                        {scenes.map((scene) => (
+                          <SelectItem key={scene.id} value={scene.id}>
+                            {scene.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="station-active">Статус</Label>
+                    <Select
+                      value={editingStation?.isActive ? 'true' : 'false'}
+                      onValueChange={(value) => setEditingStation({
+                        ...editingStation!,
+                        isActive: value === 'true'
+                      })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите статус" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Активна</SelectItem>
+                        <SelectItem value="false">Неактивна</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
                   <Button
                     onClick={() => {
-                      if (editingStation) {
+                      if (isCreatingStation) {
+                        handleCreateStation()
+                      } else if (editingStation && editingStation.id) {
                         handleUpdateStation(editingStation.id, editingStation)
                         setEditingStation(null)
-                      } else if (isCreatingStation) {
-                        handleCreateStation()
+                        setIsCreatingStation(false)
                       }
                     }}
                     disabled={!editingStation?.name || !editingStation?.type}
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Сохранить
+                    {isCreatingStation ? 'Создать' : 'Сохранить'}
                   </Button>
                   <Button
                     variant="outline"

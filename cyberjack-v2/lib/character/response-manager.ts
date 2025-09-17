@@ -33,11 +33,11 @@ export class CharacterResponseManager implements ResponseManager {
     const startTime = Date.now()
 
     try {
-      // Анализируем сообщение пользователя
-      const messageAnalysis = await this.analyzeUserMessage(userMessage)
+      // НЕ анализируем сообщение здесь - анализ уже выполнен в CharacterAIService
+      // const messageAnalysis = await this.analyzeUserMessage(userMessage)
 
       // Генерируем базовый ответ (это будет заменено на вызов AI API)
-      const rawResponse = await this.generateRawResponse(userMessage, context, messageAnalysis)
+      const rawResponse = await this.generateRawResponse(userMessage, context, null)
 
       // Анализируем ответ
       const responseAnalysis = await this.analyzeResponse(rawResponse, context)
@@ -235,7 +235,7 @@ export class CharacterResponseManager implements ResponseManager {
   private async generateRawResponse(
     userMessage: string,
     context: PromptContext,
-    messageAnalysis: ChatMessageMetadata
+    messageAnalysis: ChatMessageMetadata | null
   ): Promise<string> {
     try {
       // Получаем API ключ из переменных окружения
@@ -408,7 +408,11 @@ ${characteristicSummary.behaviorGuidance}
 
         // Добавляем последние воспоминания (максимум 3)
         const allRecentMemories = [...recentMemories, ...shortTermMemories]
-          .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+          .sort((a, b) => {
+            const aTime = a.timestamp instanceof Date ? a.timestamp.getTime() : new Date(a.timestamp).getTime()
+            const bTime = b.timestamp instanceof Date ? b.timestamp.getTime() : new Date(b.timestamp).getTime()
+            return bTime - aTime
+          })
           .slice(0, 3)
 
         allRecentMemories.forEach(memory => {

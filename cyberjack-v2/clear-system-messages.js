@@ -58,3 +58,4 @@ async function clearSystemMessages() {
 
 // Запускаем очистку
 clearSystemMessages();
+

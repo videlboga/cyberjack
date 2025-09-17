@@ -178,11 +178,11 @@ export class EnhancedMessageAnalyzer {
       const poseName = pose.definition.name.toLowerCase()
       const confidence = this.calculatePoseConfidence(message, poseName)
 
-      if (confidence > 0.3) {
+      if (confidence > 0.2) { // Понизили порог с 0.3 до 0.2
         commands.push({
           poseName: pose.definition.name,
           confidence,
-          isExplicit: confidence > 0.7,
+          isExplicit: confidence > 0.6, // Понизили порог с 0.7 до 0.6
           modifiers: this.extractPoseModifiers(message, poseName)
         })
       }
@@ -432,21 +432,52 @@ export class EnhancedMessageAnalyzer {
   }
 
   private calculatePoseConfidence(message: string, poseName: string): number {
-    const keywords = this.POSE_KEYWORDS[poseName as keyof typeof this.POSE_KEYWORDS] || []
+    const lowerMessage = message.toLowerCase()
+    const lowerPoseName = poseName.toLowerCase()
     let confidence = 0
 
+    // Проверяем точное совпадение названия позы
+    if (lowerMessage.includes(lowerPoseName)) {
+      confidence += 0.6
+    }
+
+    // Проверяем ключевые слова для каждой позы
+    const keywords = this.POSE_KEYWORDS[poseName as keyof typeof this.POSE_KEYWORDS] || []
     for (const keyword of keywords) {
-      if (message.includes(keyword)) {
+      if (lowerMessage.includes(keyword)) {
+        confidence += 0.4
+      }
+    }
+
+    // Проверяем общие команды поз
+    if (lowerMessage.includes('позу') && lowerMessage.includes(lowerPoseName)) {
+      confidence += 0.5
+    }
+
+    // Проверяем синонимы и связанные слова
+    const synonyms = this.getPoseSynonyms(poseName)
+    for (const synonym of synonyms) {
+      if (lowerMessage.includes(synonym)) {
         confidence += 0.3
       }
     }
 
-    // Дополнительные проверки на синонимы и контекст
-    if (message.includes('позу') && message.includes(poseName)) {
-      confidence += 0.4
+    return Math.min(1.0, confidence)
+  }
+
+  private getPoseSynonyms(poseName: string): string[] {
+    const synonyms: { [key: string]: string[] } = {
+      'стоя': ['встать', 'подняться', 'выпрямиться'],
+      'сидя': ['сесть', 'присесть', 'усадить'],
+      'лежа': ['лечь', 'прилечь', 'уложить'],
+      'на коленях': ['колени', 'присесть на колени', 'встать на колени'],
+      'распростертая': ['раскинуться', 'разложиться', 'распластаться'],
+      'скрученная': ['скрутиться', 'свернуться', 'сжаться'],
+      'доминирующая': ['доминировать', 'властвовать', 'командовать'],
+      'покорная': ['покориться', 'подчиниться', 'смириться']
     }
 
-    return Math.min(1.0, confidence)
+    return synonyms[poseName] || []
   }
 
   private extractPoseModifiers(message: string, poseName: string): string[] {

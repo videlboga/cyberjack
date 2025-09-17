@@ -102,3 +102,4 @@ async function testAITriggerClean() {
 
 // Запускаем тест
 testAITriggerClean();
+

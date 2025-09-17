@@ -125,3 +125,4 @@ async function testSensations() {
 
 // Запускаем тест
 testSensations();
+

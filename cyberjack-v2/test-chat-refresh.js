@@ -130,3 +130,4 @@ async function testChatRefresh() {
 
 // Запускаем тест
 testChatRefresh();
+

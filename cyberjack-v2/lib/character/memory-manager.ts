@@ -177,7 +177,8 @@ export class CharacterMemoryManager implements MemoryManager {
 
     memories.forEach(memory => {
       // Классификация по времени
-      const hoursDiff = (now.getTime() - memory.timestamp.getTime()) / (1000 * 60 * 60)
+      const memoryTime = memory.timestamp instanceof Date ? memory.timestamp.getTime() : new Date(memory.timestamp).getTime()
+      const hoursDiff = (now.getTime() - memoryTime) / (1000 * 60 * 60)
       const daysDiff = hoursDiff / 24
 
       if (hoursDiff <= this.SHORT_TERM_THRESHOLD_HOURS) {
@@ -238,7 +239,8 @@ export class CharacterMemoryManager implements MemoryManager {
     }
 
     memories.forEach(memory => {
-      const hoursDiff = (now.getTime() - memory.timestamp.getTime()) / (1000 * 60 * 60)
+      const memoryTime = memory.timestamp instanceof Date ? memory.timestamp.getTime() : new Date(memory.timestamp).getTime()
+      const hoursDiff = (now.getTime() - memoryTime) / (1000 * 60 * 60)
       const daysDiff = hoursDiff / 24
 
       // Классификация по времени
@@ -288,7 +290,9 @@ export class CharacterMemoryManager implements MemoryManager {
       }
 
       // Наконец по времени (более новые сначала)
-      return b.timestamp.getTime() - a.timestamp.getTime()
+      const aTime = a.timestamp instanceof Date ? a.timestamp.getTime() : new Date(a.timestamp).getTime()
+      const bTime = b.timestamp instanceof Date ? b.timestamp.getTime() : new Date(b.timestamp).getTime()
+      return bTime - aTime
     })
 
     return limit ? sorted.slice(0, limit) : sorted
@@ -321,7 +325,11 @@ export class CharacterMemoryManager implements MemoryManager {
     // Ограничиваем количество воспоминаний
     if (prompts.memories.length > this.MAX_MEMORY_ITEMS) {
       prompts.memories = prompts.memories
-        .sort((a: MemoryItem, b: MemoryItem) => b.timestamp.getTime() - a.timestamp.getTime())
+        .sort((a: MemoryItem, b: MemoryItem) => {
+          const aTime = a.timestamp instanceof Date ? a.timestamp.getTime() : new Date(a.timestamp).getTime()
+          const bTime = b.timestamp instanceof Date ? b.timestamp.getTime() : new Date(b.timestamp).getTime()
+          return bTime - aTime
+        })
         .slice(0, this.MAX_MEMORY_ITEMS)
     }
 
@@ -358,7 +366,11 @@ export class CharacterMemoryManager implements MemoryManager {
     memories = memories.filter((memory: MemoryItem) => memory.isActive)
 
     // Сортируем по времени
-    memories.sort((a: MemoryItem, b: MemoryItem) => b.timestamp.getTime() - a.timestamp.getTime())
+    memories.sort((a: MemoryItem, b: MemoryItem) => {
+      const aTime = a.timestamp instanceof Date ? a.timestamp.getTime() : new Date(a.timestamp).getTime()
+      const bTime = b.timestamp instanceof Date ? b.timestamp.getTime() : new Date(b.timestamp).getTime()
+      return bTime - aTime
+    })
 
     // Ограничиваем количество
     if (limit) {

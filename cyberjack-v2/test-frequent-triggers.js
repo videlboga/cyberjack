@@ -113,3 +113,4 @@ async function testFrequentTriggers() {
 
 // Запускаем тест
 testFrequentTriggers();
+

@@ -16,6 +16,7 @@
     "db:seed:full": "tsx lib/db/seed-v2.ts",
     "db:seed:equipment": "tsx lib/db/seed-equipment.ts",
     "db:seed:characters": "tsx lib/db/seed-characters-v2.ts",
+    "db:seed:new": "tsx scripts/seed-database.ts",
     "db:fix:characteristics": "tsx scripts/fix-characteristics.ts",
     "db:studio": "prisma studio",
     "test": "jest",

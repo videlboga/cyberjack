@@ -72,7 +72,7 @@ export class CharacterAIService implements ICharacterAIService {
     }
   }
 
-  // Генерация ответа персонажа
+  // Генерация ответа персонажа с анализом
   async generateResponse(
     characterId: string,
     userMessage: string,
@@ -156,7 +156,61 @@ export class CharacterAIService implements ICharacterAIService {
 
       console.error('Ошибка при генерации ответа:', error)
 
-      // Возвращаем fallback ответ
+      return {
+        message: 'Извините, произошла ошибка при генерации ответа.',
+        characterId,
+        timestamp: new Date(),
+        metadata: {
+          emotion: 'neutral',
+          intent: 'error',
+          keywords: [],
+          sentiment: 'neutral',
+          responseTime: Date.now() - startTime,
+          quality: 0.1,
+          confidence: 0.1,
+          tokensUsed: 0,
+          cost: 0
+        }
+      }
+    }
+  }
+
+  // Генерация ответа персонажа без анализа (для системных сообщений)
+  async generateResponseWithoutAnalysis(
+    characterId: string,
+    userMessage: string,
+    context: Partial<PromptContext>
+  ): Promise<AIResponse> {
+    const startTime = Date.now()
+    this.metrics.totalRequests++
+
+    try {
+      // Получаем полный контекст с динамическими промптами
+      const fullContext = await this.getCharacterContextWithDynamicPrompts(characterId, context.userId || '', context)
+
+      // НЕ анализируем сообщение - это системное сообщение
+
+      // Генерируем ответ через response manager
+      const aiResponse = await this.responseManager.generateResponse(
+        characterId,
+        userMessage,
+        fullContext
+      )
+
+      // Сохраняем ответ в чат
+      await this.saveResponseToChat(characterId, userMessage, aiResponse.message, context.userId || '')
+
+      // Обновляем метрики
+      this.metrics.totalResponses++
+      this.metrics.averageResponseTime =
+        (this.metrics.averageResponseTime * (this.metrics.totalResponses - 1) + aiResponse.metadata.responseTime) /
+        this.metrics.totalResponses
+
+      return aiResponse
+    } catch (error) {
+      this.metrics.errorRate = (this.metrics.errorRate * this.metrics.totalRequests + 1) / this.metrics.totalRequests
+      console.error('Ошибка при генерации ответа:', error)
+
       return {
         message: 'Извините, произошла ошибка при генерации ответа.',
         characterId,
@@ -741,7 +795,7 @@ export class CharacterAIService implements ICharacterAIService {
     try {
       // Обрабатываем команды поз
       for (const poseCommand of analysis.poseCommands) {
-        if (poseCommand.confidence > 0.7) {
+        if (poseCommand.confidence > 0.5) { // Понизили порог с 0.7 до 0.5
           await this.executePoseCommand(characterId, poseCommand)
         }
       }
@@ -1018,6 +1072,15 @@ export class CharacterAIService implements ICharacterAIService {
     userId: string
   ): Promise<void> {
     try {
+      // Получаем системного пользователя ИИ
+      const aiSystemUser = await prisma.user.findFirst({
+        where: { email: 'ai-system@cyberjack.local' }
+      })
+
+      if (!aiSystemUser) {
+        throw new Error('Системный пользователь ИИ не найден')
+      }
+
       // Проверяем, является ли сообщение системным (о действии)
       const isSystemMessage = userMessage.includes('К тебе было применено действие') ||
                               userMessage.includes('Это вызвало:') ||
@@ -1040,7 +1103,7 @@ export class CharacterAIService implements ICharacterAIService {
       await prisma.chatMessage.create({
         data: {
           content: aiResponse,
-          senderId: userId, // Используем userId как отправителя для ИИ-ответов
+          senderId: aiSystemUser.id, // Используем системного пользователя ИИ
           characterId,
           messageType: 'character',
           emotionalTone: 'positive' // Можно анализировать эмоциональный тон ответа

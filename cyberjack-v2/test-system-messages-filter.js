@@ -142,3 +142,4 @@ async function testSystemMessagesFilter() {
 
 // Запускаем тест
 testSystemMessagesFilter();
+

@@ -47,3 +47,4 @@ async function clearSystemMessagesAPI() {
 
 // Запускаем очистку
 clearSystemMessagesAPI();
+

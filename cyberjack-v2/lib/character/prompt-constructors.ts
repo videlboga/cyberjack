@@ -780,7 +780,7 @@ export class PromptConstructors {
         duration: lastAction.duration,
         effects: lastAction.effects,
         createdAt: lastAction.timestamp,
-        timeAgo: Date.now() - lastAction.timestamp.getTime()
+        timeAgo: Date.now() - (lastAction.timestamp instanceof Date ? lastAction.timestamp.getTime() : new Date(lastAction.timestamp).getTime())
       }
     } catch (error) {
       console.error('Ошибка при получении последнего действия:', error)
@@ -826,7 +826,7 @@ export class PromptConstructors {
         duration: action.duration,
         effects: action.effects,
         createdAt: action.timestamp,
-        timeAgo: Date.now() - action.timestamp.getTime()
+        timeAgo: Date.now() - (action.timestamp instanceof Date ? action.timestamp.getTime() : new Date(action.timestamp).getTime())
       }))
     } catch (error) {
       console.error('Ошибка при получении истории сессии:', error)

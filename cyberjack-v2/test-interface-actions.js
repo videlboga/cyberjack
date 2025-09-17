@@ -59,3 +59,4 @@ async function testInterfaceAction() {
 
 // Запускаем тест
 testInterfaceAction();
+

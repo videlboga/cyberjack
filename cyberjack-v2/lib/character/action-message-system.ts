@@ -142,9 +142,9 @@ export class ActionMessageSystemManager {
     // Генерируем сообщение
     const message = this.generateActionMessage(template, system.pendingActions)
 
-    // Отправляем через AI сервис
+    // Отправляем через AI сервис (без анализа, так как это системное сообщение)
     try {
-      const aiResponse = await this.aiService.generateResponse(
+      const aiResponse = await this.aiService.generateResponseWithoutAnalysis(
         characterId,
         message,
         {
@@ -216,8 +216,8 @@ export class ActionMessageSystemManager {
   private calculateTimeSpan(actions: PendingAction[]): string {
     if (actions.length <= 1) return 'мгновение'
 
-    const firstTime = actions[0].timestamp.getTime()
-    const lastTime = actions[actions.length - 1].timestamp.getTime()
+    const firstTime = actions[0].timestamp instanceof Date ? actions[0].timestamp.getTime() : new Date(actions[0].timestamp).getTime()
+    const lastTime = actions[actions.length - 1].timestamp instanceof Date ? actions[actions.length - 1].timestamp.getTime() : new Date(actions[actions.length - 1].timestamp).getTime()
     const spanSeconds = (lastTime - firstTime) / 1000
 
     if (spanSeconds < 10) return 'несколько секунд'
@@ -276,7 +276,7 @@ export class ActionMessageSystemManager {
     }
 
     const recentActions = system.actionHistory.filter(
-      action => (Date.now() - action.timestamp.getTime()) < 24 * 60 * 60 * 1000 // Последние 24 часа
+      action => (Date.now() - (action.timestamp instanceof Date ? action.timestamp.getTime() : new Date(action.timestamp).getTime())) < 24 * 60 * 60 * 1000 // Последние 24 часа
     )
 
     const avgIntensity = system.actionHistory.length > 0

@@ -7,12 +7,14 @@ const updateStationEntitySchema = z.object({
   name: z.string().min(1).optional(),
   type: z.string().min(1).optional(),
   description: z.string().optional(),
-  defaultSceneId: z.string().optional(),
-  customSceneId: z.string().optional(),
-  probability: z.number().min(0).max(100).optional(),
+  defaultSceneId: z.string().nullable().optional(),
   metadata: z.record(z.string(), z.any()).optional(),
   isActive: z.boolean().optional(),
-})
+  // Поля, которые могут прийти с фронтенда, но не сохраняются в БД
+  id: z.string().optional(),
+  defaultScene: z.any().optional(),
+  scenes: z.any().optional(),
+}).passthrough() // Разрешаем дополнительные поля
 
 // GET /api/story/entities/[id] - Получить сущность станции по ID
 export async function GET(
@@ -50,13 +52,35 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
+
+    console.log('PUT /api/story/entities/[id] - Обновление станции:', { id, body })
+
     const validatedData = updateStationEntitySchema.parse(body)
+    console.log('Валидированные данные:', validatedData)
+
+    // Фильтруем только поля, которые есть в модели StationEntity
+    const updateData = {
+      name: validatedData.name,
+      type: validatedData.type,
+      description: validatedData.description,
+      defaultSceneId: validatedData.defaultSceneId,
+      metadata: validatedData.metadata,
+      isActive: validatedData.isActive,
+    }
+    
+    // Убираем undefined значения
+    const filteredData = Object.fromEntries(
+      Object.entries(updateData).filter(([_, value]) => value !== undefined)
+    )
+    
+    console.log('Данные для обновления в БД:', filteredData)
 
     const entity = await prisma.stationEntity.update({
       where: { id: id },
-      data: validatedData
+      data: filteredData
     })
 
+    console.log('Станция успешно обновлена:', entity)
     return NextResponse.json(entity)
   } catch (error) {
     if (error instanceof z.ZodError) {

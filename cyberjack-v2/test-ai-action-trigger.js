@@ -59,3 +59,4 @@ async function testAIActionTrigger() {
 
 // Запускаем тест
 testAIActionTrigger();
+

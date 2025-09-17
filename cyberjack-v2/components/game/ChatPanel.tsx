@@ -91,10 +91,18 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return
 
-    // Не добавляем сообщение пользователя сразу - оно будет добавлено из базы данных
     const messageToSend = inputMessage
     setInputMessage('')
     setIsLoading(true)
+
+    // Добавляем сообщение пользователя сразу в интерфейс
+    const userMessage: Message = {
+      id: `temp_${Date.now()}`,
+      content: messageToSend,
+      isUser: true,
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, userMessage])
 
     try {
       const requestData = {
@@ -126,7 +134,7 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
       const data = await response.json()
       console.log('💬 Received AI response:', data)
 
-      // Перезагружаем историю чата, чтобы получить новые сообщения из базы данных
+      // Перезагружаем историю чата, чтобы получить актуальные сообщения из базы данных
       await loadChatHistory()
 
       // Проверяем, есть ли изменения характеристик в метаданных
@@ -150,6 +158,10 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
       }
     } catch (error) {
       console.error('Chat error:', error)
+
+      // Удаляем временное сообщение пользователя при ошибке
+      setMessages(prev => prev.filter(msg => msg.id !== userMessage.id))
+
       // Показываем ошибку через уведомления
       if (onNotification) {
         onNotification({

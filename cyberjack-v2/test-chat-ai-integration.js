@@ -117,3 +117,4 @@ async function testChatAIIntegration() {
 
 // Запускаем тест
 testChatAIIntegration();
+
