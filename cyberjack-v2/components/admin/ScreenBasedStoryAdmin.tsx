@@ -871,10 +871,10 @@ export function ScreenBasedStoryAdmin() {
           )}
         </TabsContent>
 
-        <TabsContent value="graph" className="mt-6">
+        <TabsContent value="graph" className="mt-2">
           {selectedScene ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="h-[calc(100vh-200px)]">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold">Граф сцены: {selectedScene.name}</h3>
                 <div className="flex gap-2">
                   <Button
@@ -894,7 +894,8 @@ export function ScreenBasedStoryAdmin() {
                 </div>
               </div>
 
-              <ScreenBasedStoryGraph
+              <div className="h-[calc(100%-60px)]">
+                <ScreenBasedStoryGraph
                 sceneId={selectedScene.id}
                 screens={selectedScene.screens}
                 onUpdateScreen={handleUpdateScreen}
@@ -904,7 +905,8 @@ export function ScreenBasedStoryAdmin() {
                 onDeleteScreen={handleDeleteScreen}
                 onDeleteChoice={handleDeleteChoice}
                 onCreateChoiceWithScreen={handleCreateChoiceWithScreen}
-              />
+                />
+              </div>
             </div>
           ) : (
             <div className="space-y-4">

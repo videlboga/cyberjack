@@ -1,23 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
-import { z } from 'zod'
-
-// Схема валидации для обновления выбора
-const updateChoiceSchema = z.object({
-  text: z.string().min(1, 'Текст выбора обязателен'),
-  description: z.string().optional(),
-  nextScreenId: z.string().optional(),
-  consequences: z.record(z.any()).default({}),
-  showConditions: z.record(z.any()).default({})
-})
 
 // GET /api/story/choices/[id] - Получить выбор
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
     const choice = await prisma.choice.findUnique({
       where: { id },
@@ -51,16 +41,24 @@ export async function GET(
 // PUT /api/story/choices/[id] - Обновить выбор
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const body = await request.json()
-    const validatedData = updateChoiceSchema.parse(body)
+
+    // Простая валидация без Zod
+    const updateData: any = {}
+
+    if (body.text !== undefined) updateData.text = body.text
+    if (body.description !== undefined) updateData.description = body.description
+    if (body.nextScreenId !== undefined) updateData.nextScreenId = body.nextScreenId
+    if (body.consequences !== undefined) updateData.consequences = body.consequences
+    if (body.showConditions !== undefined) updateData.showConditions = body.showConditions
 
     const choice = await prisma.choice.update({
       where: { id },
-      data: validatedData,
+      data: updateData,
       include: {
         screen: {
           include: {
@@ -73,12 +71,6 @@ export async function PUT(
 
     return NextResponse.json(choice)
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Ошибка валидации', details: error.issues },
-        { status: 400 }
-      )
-    }
 
     console.error('Ошибка при обновлении выбора:', error)
     return NextResponse.json(
@@ -91,10 +83,10 @@ export async function PUT(
 // DELETE /api/story/choices/[id] - Удалить выбор
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
     await prisma.choice.delete({
       where: { id }

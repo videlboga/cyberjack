@@ -58,12 +58,6 @@ export async function POST(
 
     return NextResponse.json(choice, { status: 201 })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Ошибка валидации', details: error.issues },
-        { status: 400 }
-      )
-    }
 
     console.error('Ошибка при создании выбора:', error)
     return NextResponse.json(

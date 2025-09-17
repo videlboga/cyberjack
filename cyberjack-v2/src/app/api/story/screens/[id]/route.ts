@@ -1,19 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
-import { z } from 'zod'
-
-// Схема валидации для обновления экрана
-const updateScreenSchema = z.object({
-  name: z.string().min(1, 'Название обязательно'),
-  description: z.string().optional(),
-  content: z.record(z.any()).default({}),
-  isFinal: z.boolean().default(false),
-  position: z.object({
-    x: z.number(),
-    y: z.number()
-  }).optional(),
-  accessConditions: z.record(z.any()).default({})
-})
 
 // GET /api/story/screens/[id] - Получить экран
 export async function GET(
@@ -51,16 +37,25 @@ export async function GET(
 // PUT /api/story/screens/[id] - Обновить экран
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const body = await request.json()
-    const validatedData = updateScreenSchema.parse(body)
+
+    // Простая валидация без Zod
+    const updateData: any = {}
+
+    if (body.name !== undefined) updateData.name = body.name
+    if (body.description !== undefined) updateData.description = body.description
+    if (body.content !== undefined) updateData.content = body.content
+    if (body.isFinal !== undefined) updateData.isFinal = body.isFinal
+    if (body.position !== undefined) updateData.position = body.position
+    if (body.accessConditions !== undefined) updateData.accessConditions = body.accessConditions
 
     const screen = await prisma.screen.update({
       where: { id },
-      data: validatedData,
+      data: updateData,
       include: {
         choices: true,
         scene: true
@@ -69,12 +64,6 @@ export async function PUT(
 
     return NextResponse.json(screen)
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Ошибка валидации', details: error.issues },
-        { status: 400 }
-      )
-    }
 
     console.error('Ошибка при обновлении экрана:', error)
     return NextResponse.json(
@@ -87,10 +76,10 @@ export async function PUT(
 // DELETE /api/story/screens/[id] - Удалить экран
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
     await prisma.screen.delete({
       where: { id }

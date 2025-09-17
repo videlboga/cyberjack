@@ -19,9 +19,7 @@ export async function GET(
           }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      // Убираем orderBy с createdAt, так как это поле не существует в схеме
     })
 
     return NextResponse.json(characterCopies)

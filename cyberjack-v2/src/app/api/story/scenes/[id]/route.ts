@@ -70,12 +70,7 @@ export async function PUT(
 
     return NextResponse.json(scene)
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Ошибка валидации', details: error.issues },
-        { status: 400 }
-      )
-    }
+    // Обработка ошибок валидации
 
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(

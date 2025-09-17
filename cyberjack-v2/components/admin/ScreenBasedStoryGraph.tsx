@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import ReactFlow, {
   Node,
   Edge,
@@ -153,13 +153,13 @@ const ChoiceEditor = ({
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
-              id={`isFinal-${choice.id}`}
+              id={`isFinal-${choice.id}-${Date.now()}`}
               checked={editData.isFinal}
               onChange={(e) => setEditData(prev => ({ ...prev, isFinal: e.target.checked }))}
               className="rounded"
               title="Завершает сцену"
             />
-            <Label htmlFor={`isFinal-${choice.id}`} className="text-white">
+            <Label htmlFor={`isFinal-${choice.id}-${Date.now()}`} className="text-white">
               Завершает сцену
             </Label>
           </div>
@@ -260,10 +260,51 @@ const ScreenNode = ({ data }: { data: any }) => {
   const [editData, setEditData] = useState(data)
   const [editingChoiceId, setEditingChoiceId] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Функция для дебаунсинга сохранения
+  const debouncedSave = useCallback((updates: Partial<any>) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      if (data.onUpdateScreen) {
+        data.onUpdateScreen(updates)
+      }
+    }, 500) // 500ms дебаунсинг
+  }, [data.onUpdateScreen])
+
+  // Очистка таймера при размонтировании
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleSave = () => {
     if (data.onUpdateScreen) {
-      data.onUpdateScreen(editData)
+      // Передаем только измененные поля
+      const updates: Partial<any> = {}
+
+      if (editData.name !== data.name) {
+        updates.name = editData.name
+      }
+      if (editData.description !== data.description) {
+        updates.description = editData.description
+      }
+      if (JSON.stringify(editData.content) !== JSON.stringify(data.content)) {
+        updates.content = editData.content
+      }
+      if (editData.isFinal !== data.isFinal) {
+        updates.isFinal = editData.isFinal
+      }
+
+      if (Object.keys(updates).length > 0) {
+        data.onUpdateScreen(updates)
+      }
     }
     setIsEditing(false)
   }
@@ -362,14 +403,30 @@ const ScreenNode = ({ data }: { data: any }) => {
         <div className="space-y-3">
           <Input
             value={editData.name}
-            onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+            onChange={(e) => {
+              const newName = e.target.value
+              setEditData({ ...editData, name: newName })
+
+              // Автоматически сохраняем изменения названия с дебаунсингом
+              if (newName !== data.name) {
+                debouncedSave({ name: newName })
+              }
+            }}
             className="h-7 text-xs bg-white/10 border-white/20 text-white"
             placeholder="Название экрана"
           />
 
           <Textarea
             value={editData.description || ''}
-            onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+            onChange={(e) => {
+              const newDescription = e.target.value
+              setEditData({ ...editData, description: newDescription })
+
+              // Автоматически сохраняем изменения описания с дебаунсингом
+              if (newDescription !== (data.description || '')) {
+                debouncedSave({ description: newDescription })
+              }
+            }}
             className="h-16 text-xs bg-white/10 border-white/20 text-white"
             placeholder="Описание экрана"
             rows={2}
@@ -589,6 +646,36 @@ export function ScreenBasedStoryGraph({
   onCreateChoiceWithScreen
 }: ScreenBasedStoryGraphProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const nodePositionsRef = useRef<Record<string, { x: number; y: number }>>({})
+
+  // Инициализация позиций при загрузке экранов
+  useEffect(() => {
+    if (screens && screens.length > 0) {
+      screens.forEach((screen, index) => {
+        // Инициализируем позицию только если её еще нет в ref
+        if (!nodePositionsRef.current[screen.id]) {
+          const hasValidPosition = screen.position &&
+            typeof screen.position === 'object' &&
+            'x' in screen.position &&
+            'y' in screen.position &&
+            typeof screen.position.x === 'number' &&
+            typeof screen.position.y === 'number' &&
+            !isNaN(screen.position.x) &&
+            !isNaN(screen.position.y)
+
+          if (hasValidPosition) {
+            nodePositionsRef.current[screen.id] = screen.position
+          } else {
+            // Создаем дефолтную позицию
+            nodePositionsRef.current[screen.id] = {
+              x: index * 400 + 100,
+              y: 200
+            }
+          }
+        }
+      })
+    }
+  }, [screens])
 
   // Создание узлов и связей на основе экранов
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
@@ -600,17 +687,38 @@ export function ScreenBasedStoryGraph({
       return { nodes, edges }
     }
 
+    // Создаем стабильные ID для мемоизации (без position для избежания лишних пересчетов)
+    const screensKey = screens.map(s => `${s.id}-${s.name}`).join('|')
+
     screens.forEach((screen, screenIndex) => {
-      // Валидируем и устанавливаем позицию экрана
-      const screenPosition = screen.position || {
+      // Используем сохраненную позицию из ref в первую очередь
+      const savedPosition = nodePositionsRef.current[screen.id]
+
+      // Проверяем, что position из базы данных валидный
+      const hasValidDbPosition = screen.position &&
+        typeof screen.position === 'object' &&
+        'x' in screen.position &&
+        'y' in screen.position &&
+        typeof screen.position.x === 'number' &&
+        typeof screen.position.y === 'number' &&
+        !isNaN(screen.position.x) &&
+        !isNaN(screen.position.y)
+
+      // Приоритет: сохраненная позиция > позиция из БД > дефолтная позиция
+      const screenPosition = savedPosition || (hasValidDbPosition ? screen.position : {
         x: screenIndex * 400 + 100,
         y: 200
-      }
+      })
 
       // Убеждаемся, что позиция является валидным числом
       const validScreenPosition = {
         x: typeof screenPosition.x === 'number' && !isNaN(screenPosition.x) ? screenPosition.x : screenIndex * 400 + 100,
         y: typeof screenPosition.y === 'number' && !isNaN(screenPosition.y) ? screenPosition.y : 200
+      }
+
+      // Сохраняем позицию в ref только если её там еще нет
+      if (!nodePositionsRef.current[screen.id]) {
+        nodePositionsRef.current[screen.id] = validScreenPosition
       }
 
       // Узел экрана
@@ -666,12 +774,77 @@ export function ScreenBasedStoryGraph({
 
   // Синхронизация узлов/рёбер при изменении исходных данных
   useEffect(() => {
-    setNodes(initialNodes)
+    setNodes(prevNodes => {
+      // Обновляем только если изменилось количество экранов или их ID
+      const currentScreenIds = prevNodes.map(n => n.id).sort()
+      const newScreenIds = initialNodes.map(n => n.id).sort()
+
+      if (JSON.stringify(currentScreenIds) !== JSON.stringify(newScreenIds)) {
+        // При добавлении/удалении экранов используем initialNodes
+        return initialNodes
+      } else {
+        // Обновляем только данные узлов, сохраняя позиции из ref
+        return prevNodes.map(prevNode => {
+          const newNode = initialNodes.find(n => n.id === prevNode.id)
+          if (newNode) {
+            // Всегда используем сохраненную позицию из ref, если она есть
+            const savedPosition = nodePositionsRef.current[prevNode.id]
+            return {
+              ...newNode,
+              position: savedPosition || prevNode.position
+            }
+          }
+          return prevNode
+        })
+      }
+    })
   }, [initialNodes, setNodes])
 
   useEffect(() => {
     setEdges(initialEdges)
   }, [initialEdges, setEdges])
+
+  // Обработчик изменений узлов с сохранением позиций
+  const handleNodesChange = useCallback((changes: any[]) => {
+    onNodesChange(changes)
+
+    // Сохраняем изменения позиций в базу данных только при завершении перетаскивания
+    changes.forEach(change => {
+      if (change.type === 'position' && change.position) {
+        const nodeId = change.id
+        const newPosition = change.position
+
+        // Всегда сохраняем позицию в ref для предотвращения прыжков
+        nodePositionsRef.current[nodeId] = newPosition
+
+        // Сохраняем в базе данных только когда перетаскивание завершено
+        if (change.dragging === false) {
+          // Находим экран по ID и обновляем его позицию
+          const screen = screens.find(s => s.id === nodeId)
+          if (screen) {
+            // Проверяем, действительно ли позиция изменилась
+            const currentPosition = screen.position
+            const hasValidCurrentPosition = currentPosition &&
+              typeof currentPosition === 'object' &&
+              'x' in currentPosition &&
+              'y' in currentPosition &&
+              typeof currentPosition.x === 'number' &&
+              typeof currentPosition.y === 'number'
+
+            // Сохраняем позицию, если она изменилась более чем на 1 пиксель
+            const shouldSave = !hasValidCurrentPosition ||
+              Math.abs(currentPosition.x - newPosition.x) > 1 ||
+              Math.abs(currentPosition.y - newPosition.y) > 1
+
+            if (shouldSave) {
+              // Сохраняем позицию немедленно без дебаунсинга
+              onUpdateScreen(nodeId, { position: newPosition })
+            }
+          }
+        }
+      }
+    })
+  }, [onNodesChange, screens, onUpdateScreen])
 
   // Обработчик соединения узлов
   const onConnect = useCallback(
@@ -739,11 +912,11 @@ export function ScreenBasedStoryGraph({
   }, [onAddScreen])
 
   return (
-    <div className="h-[calc(100vh-200px)] w-full">
+    <div className="h-full w-full">
       <Card className="h-full bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-xl border border-white/10 text-white">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-white">
+            <CardTitle className="flex items-center gap-2 text-white text-lg">
               <Monitor className="h-5 w-5" />
               Граф экранов сцены
             </CardTitle>
@@ -754,15 +927,15 @@ export function ScreenBasedStoryGraph({
               </Button>
             </div>
           </div>
-          <div className="text-sm text-gray-300">
+          <div className="text-xs text-gray-300">
             Двойной клик для добавления экрана. Перетаскивайте узлы для лучшего расположения.
           </div>
         </CardHeader>
-        <CardContent className="p-0 h-full">
+        <CardContent className="p-0 h-[calc(100%-80px)]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
+            onNodesChange={handleNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onNodeClick={onNodeClick}

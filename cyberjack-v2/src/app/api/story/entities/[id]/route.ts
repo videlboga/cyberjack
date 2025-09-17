@@ -67,12 +67,12 @@ export async function PUT(
       metadata: validatedData.metadata,
       isActive: validatedData.isActive,
     }
-    
+
     // Убираем undefined значения
     const filteredData = Object.fromEntries(
       Object.entries(updateData).filter(([_, value]) => value !== undefined)
     )
-    
+
     console.log('Данные для обновления в БД:', filteredData)
 
     const entity = await prisma.stationEntity.update({
@@ -83,12 +83,7 @@ export async function PUT(
     console.log('Станция успешно обновлена:', entity)
     return NextResponse.json(entity)
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Ошибка валидации', details: error.issues },
-        { status: 400 }
-      )
-    }
+    // Обработка ошибок валидации
 
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(

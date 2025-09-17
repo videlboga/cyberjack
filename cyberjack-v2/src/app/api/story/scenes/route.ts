@@ -69,12 +69,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(scene, { status: 201 })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Ошибка валидации', details: error.issues },
-        { status: 400 }
-      )
-    }
+    // Обработка ошибок валидации
 
     console.error('Ошибка при создании сцены:', error)
     return NextResponse.json(

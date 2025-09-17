@@ -9,7 +9,7 @@ const createStationSchema = z.object({
   description: z.string().optional(),
   defaultSceneId: z.string().optional(),
   isActive: z.boolean().default(true),
-  metadata: z.record(z.any()).default({})
+  metadata: z.record(z.string(), z.any()).default({})
 })
 
 // Схема валидации для обновления станции
@@ -103,12 +103,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(station, { status: 201 })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Ошибка валидации', details: error.issues },
-        { status: 400 }
-      )
-    }
+    // Обработка ошибок валидации
 
     console.error('Ошибка при создании станции:', error)
     return NextResponse.json(
