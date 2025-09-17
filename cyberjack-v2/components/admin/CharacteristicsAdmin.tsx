@@ -100,7 +100,7 @@ export function CharacteristicsAdmin() {
         selects: {
           ...prev.selects,
           category: {
-            ...prev.selects?.category,
+            ...(prev.selects?.category || {}),
             options: categories
           }
         }

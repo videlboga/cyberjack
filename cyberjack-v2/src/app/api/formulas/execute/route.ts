@@ -106,25 +106,25 @@ function executeSimpleFormula(formula: string, context: any): number {
         const condition = parts[0].trim()
         const trueValue = parseFloat(parts[1].trim()) || 0
         const falseValue = parseFloat(parts[2].trim()) || 0
-        
+
         // Простая проверка условий
         if (condition.includes('>')) {
-          const [left, right] = condition.split('>').map(s => parseFloat(s.trim()) || 0)
+          const [left, right] = condition.split('>').map((s: string) => parseFloat(s.trim()) || 0)
           return String(left > right ? trueValue : falseValue)
         } else if (condition.includes('<')) {
-          const [left, right] = condition.split('<').map(s => parseFloat(s.trim()) || 0)
+          const [left, right] = condition.split('<').map((s: string) => parseFloat(s.trim()) || 0)
           return String(left < right ? trueValue : falseValue)
         } else if (condition.includes('>=')) {
-          const [left, right] = condition.split('>=').map(s => parseFloat(s.trim()) || 0)
+          const [left, right] = condition.split('>=').map((s: string) => parseFloat(s.trim()) || 0)
           return String(left >= right ? trueValue : falseValue)
         } else if (condition.includes('<=')) {
-          const [left, right] = condition.split('<=').map(s => parseFloat(s.trim()) || 0)
+          const [left, right] = condition.split('<=').map((s: string) => parseFloat(s.trim()) || 0)
           return String(left <= right ? trueValue : falseValue)
         } else if (condition.includes('==')) {
-          const [left, right] = condition.split('==').map(s => parseFloat(s.trim()) || 0)
+          const [left, right] = condition.split('==').map((s: string) => parseFloat(s.trim()) || 0)
           return String(left === right ? trueValue : falseValue)
         } else if (condition.includes('!=')) {
-          const [left, right] = condition.split('!=').map(s => parseFloat(s.trim()) || 0)
+          const [left, right] = condition.split('!=').map((s: string) => parseFloat(s.trim()) || 0)
           return String(left !== right ? trueValue : falseValue)
         }
       }

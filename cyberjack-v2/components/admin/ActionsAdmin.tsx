@@ -98,7 +98,7 @@ export function ActionsAdmin() {
         selects: {
           ...prev.selects,
           category: {
-            ...prev.selects?.category,
+            ...(prev.selects?.category || {}),
             options: categories
           }
         }

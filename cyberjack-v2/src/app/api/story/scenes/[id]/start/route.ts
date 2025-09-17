@@ -94,8 +94,7 @@ export async function POST(
       scene: {
         id: scene.id,
         name: scene.name,
-        description: scene.description,
-        type: scene.type
+        description: scene.description
       },
       currentScreen: {
         id: startScreen.id,

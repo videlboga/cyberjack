@@ -64,6 +64,7 @@ model Character {
   description String?
   age         Int?
   avatar      String?
+  price       Int      @default(500)  // стоимость в кредитах
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

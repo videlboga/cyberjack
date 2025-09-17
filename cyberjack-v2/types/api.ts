@@ -57,6 +57,7 @@ export interface CreateCharacterRequest {
   description?: string
   age?: number
   avatar?: string
+  price?: number
   characteristics: CharacteristicCreateRequest[]
   anatomy: AnatomyCreateRequest[]
   poses: PoseCreateRequest[]
@@ -88,6 +89,7 @@ export interface UpdateCharacterRequest {
   description?: string
   age?: number
   avatar?: string
+  price?: number
   isActive?: boolean
   prompts?: Record<string, any>
 }
@@ -99,6 +101,7 @@ export interface CharacterListResponse {
     description?: string
     age?: number
     avatar?: string
+    price: number
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -477,4 +480,3 @@ export interface StatisticsResponse {
     active: number
   }
 }
-

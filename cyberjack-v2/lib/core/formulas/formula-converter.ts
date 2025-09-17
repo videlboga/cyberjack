@@ -65,10 +65,25 @@ export class FormulaConverter {
       id: formulaId,
       name: `Формула для ${actionName}`,
       description: `Автоматически сгенерированная формула для действия "${actionName}"`,
-      rootNode: effectsObject,
       version: '2.0',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      rootNode: effectsObject,
+      context: {
+        variables: {},
+        functions: {},
+        constants: {}
+      },
+      metadata: {
+        createdBy: 'llm' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        tags: ['action', 'auto-generated'],
+        category: 'action-effects'
+      },
+      validation: {
+        isValid: true,
+        errors: [],
+        warnings: []
+      }
     }
   }
 
@@ -78,27 +93,28 @@ export class FormulaConverter {
 
     for (const [characteristicName, effect] of Object.entries(oldFormula)) {
       // Создаем объект эффекта с динамическим изменением
-      effectsObject[characteristicName] = {
+      const effectNode = {
         id: this.generateNodeId(),
-        type: 'value',
+        type: 'object' as const,
         dataType: 'object' as DataType,
-        value: {
+        properties: {
           change: this.createDynamicChangeNode(effect.change, actionIntensity),
           permanent: {
             id: this.generateNodeId(),
-            type: 'value',
+            type: 'value' as const,
             dataType: 'boolean' as DataType,
             value: effect.permanent
           }
         }
       }
+      effectsObject[characteristicName] = effectNode
     }
 
     return {
       id: this.generateNodeId(),
-      type: 'value',
+      type: 'object',
       dataType: 'object' as DataType,
-      value: effectsObject
+      properties: effectsObject
     }
   }
 
@@ -140,7 +156,8 @@ export class FormulaConverter {
             id: this.generateNodeId(),
             type: 'variable',
             variablePath: 'action.intensity',
-            dataType: 'number' as DataType
+            dataType: 'number' as DataType,
+            displayName: 'Интенсивность действия'
           },
           rightInput: {
             id: this.generateNodeId(),
@@ -153,7 +170,8 @@ export class FormulaConverter {
           id: this.generateNodeId(),
           type: 'variable',
           variablePath: 'user.modifiers.general',
-          dataType: 'number' as DataType
+          dataType: 'number' as DataType,
+          displayName: 'Модификатор пользователя'
         }
       }
     }
@@ -193,10 +211,25 @@ export class FormulaConverter {
       id: formulaId,
       name: `Специализированная формула для ${actionName}`,
       description: `Формула с учетом типа действия: ${actionType}`,
-      rootNode,
       version: '2.0',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      rootNode,
+      context: {
+        variables: {},
+        functions: {},
+        constants: {}
+      },
+      metadata: {
+        createdBy: 'llm' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        tags: ['action', 'auto-generated', actionType],
+        category: 'action-effects'
+      },
+      validation: {
+        isValid: true,
+        errors: [],
+        warnings: []
+      }
     }
   }
 
@@ -270,7 +303,8 @@ export class FormulaConverter {
           id: this.generateNodeId(),
           type: 'variable',
           variablePath: conditionPath,
-          dataType: 'number' as DataType
+          dataType: 'number' as DataType,
+          displayName: 'Условие'
         },
         rightInput: {
           id: this.generateNodeId(),

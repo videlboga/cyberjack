@@ -259,7 +259,8 @@ export class ActionsSystem {
         realTime: Date.now(),
         isActionHolding: true,
         timeMultiplier: 1.0
-      }
+      },
+      custom: {}
     }
 
     // Выполнить формулу если она есть
@@ -296,7 +297,7 @@ export class ActionsSystem {
 
                 // Находим ID характеристики по имени
                 const characteristic = await this.characteristicsSystem.getCharacteristicByName(
-                  characterId,
+                  character.id,
                   characteristicName
                 )
 
@@ -312,7 +313,7 @@ export class ActionsSystem {
                     permanent: effect.permanent?.value || false
                   })
                 } else {
-                  console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${characterId}`)
+                  console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${character.id}`)
                 }
               }
             }
@@ -340,7 +341,7 @@ export class ActionsSystem {
 
               // Находим ID характеристики по имени
               const characteristic = await this.characteristicsSystem.getCharacteristicByName(
-                characterId,
+                character.id,
                 characteristicName
               )
 
@@ -356,7 +357,7 @@ export class ActionsSystem {
                   permanent: effect.permanent || false
                 })
               } else {
-                console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${characterId}`)
+                console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${character.id}`)
               }
             }
           }
@@ -953,17 +954,7 @@ export class ActionsSystem {
 
         // Отправляем запрос в ИИ-систему
         await this.aiService.generateResponse(characterId, actionMessage, {
-          userId,
-          actionContext: {
-            actionId: action.id,
-            actionName: action.name,
-            actionCount,
-            effects: effects.map(effect => ({
-              characteristicId: effect.characteristicId,
-              change: effect.change,
-              permanent: effect.permanent
-            }))
-          }
+          userId
         })
       }
     } catch (error) {

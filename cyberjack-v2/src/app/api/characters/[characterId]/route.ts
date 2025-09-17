@@ -52,7 +52,7 @@ export async function PUT(
   try {
     const { characterId: id } = await params
     const body = await request.json()
-    const { name, description, age, avatar, isActive } = body
+    const { name, description, age, avatar, price, isActive } = body
 
     const character = await prisma.character.update({
       where: { id },
@@ -61,6 +61,7 @@ export async function PUT(
         description,
         age,
         avatar,
+        price,
         isActive
       }
     })

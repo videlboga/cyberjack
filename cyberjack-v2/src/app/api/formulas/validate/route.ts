@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const availableVariables = await getAvailableVariables()
 
     // Создаем валидатор
-    const validator = new FormulaValidator()
+    const validator = new FormulaValidator({})
 
     // Создаем контекст для валидации с правильными типами
     const validationContext = {
@@ -112,7 +112,8 @@ export async function POST(request: NextRequest) {
         gameTime: 0,
         realTime: Date.now(),
         isActionHolding: false
-      }
+      },
+      custom: {}
     }
 
     // Валидируем формулу

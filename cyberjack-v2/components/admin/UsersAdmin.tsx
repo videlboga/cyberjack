@@ -260,7 +260,7 @@ export function UsersAdmin() {
                           <div>
                             <p className="text-sm font-medium">{copy.character.name}</p>
                             <p className="text-xs text-gray-500">
-                              Копий: {copy.quantity || 1}
+                              Копия персонажа
                             </p>
                           </div>
                         </div>

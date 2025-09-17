@@ -130,7 +130,7 @@ export function EquipmentAdmin() {
       name: item.name,
       category: item.category,
       description: item.description || '',
-      rarity: item.rarity,
+      rarity: item.rarity as any,
       cost: item.cost,
       relatedPoseId: item.relatedPoseId || '',
       requirements: JSON.stringify(item.requirements, null, 2),

@@ -14,6 +14,7 @@ interface Character {
   description: string | null
   age: number | null
   avatar: string | null
+  price: number
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -53,6 +54,7 @@ export function CharactersAdmin() {
     description: '',
     age: '',
     avatar: '',
+    price: '500',
     isActive: true
   })
 
@@ -85,7 +87,8 @@ export function CharactersAdmin() {
 
       const submitData = {
         ...formData,
-        age: formData.age ? parseInt(formData.age) : null
+        age: formData.age ? parseInt(formData.age) : null,
+        price: parseInt(formData.price) || 500
       }
 
       const response = await fetch(url, {
@@ -111,6 +114,7 @@ export function CharactersAdmin() {
       description: character.description || '',
       age: character.age?.toString() || '',
       avatar: character.avatar || '',
+      price: character.price.toString(),
       isActive: character.isActive
     })
     setEditingId(character.id)
@@ -141,6 +145,7 @@ export function CharactersAdmin() {
       description: '',
       age: '',
       avatar: '',
+      price: '500',
       isActive: true
     })
     setEditingId(null)
@@ -201,7 +206,7 @@ export function CharactersAdmin() {
 
           <TabsContent value="prompts" className="mt-6">
             <CharacterPromptsManager
-              character={selectedCharacter}
+              character={selectedCharacter as any}
               onUpdate={fetchCharacters}
             />
           </TabsContent>
@@ -253,6 +258,18 @@ export function CharactersAdmin() {
                   placeholder="Введите возраст"
                   min="1"
                   max="100"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Цена (кредиты)</label>
+                <input
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Введите цену"
+                  min="0"
+                  step="10"
                 />
               </div>
             </div>
@@ -332,6 +349,9 @@ export function CharactersAdmin() {
                       {character.age && (
                         <span className="text-sm text-gray-500">({character.age} лет)</span>
                       )}
+                      <span className="text-sm text-blue-600 font-medium">
+                        {character.price} кредитов
+                      </span>
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
                           character.isActive

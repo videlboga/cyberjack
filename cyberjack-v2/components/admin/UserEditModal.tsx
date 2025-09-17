@@ -98,7 +98,7 @@ export function UserEditModal({ user, isOpen, onClose, onSave }: UserEditModalPr
       setFormData({
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role.toString(),
         credits: user.credits,
         modifiers: JSON.stringify(user.modifiers, null, 2)
       })

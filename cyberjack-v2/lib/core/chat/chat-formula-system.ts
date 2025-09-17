@@ -49,13 +49,17 @@ export class ChatFormulaSystem {
       const context: FormulaExecutionContext = {
         character: {
           id: characterId,
-          characteristics: await this.getCharacterCharacteristics(characterId)
+          name: 'Character',
+          characteristics: await this.getCharacterCharacteristics(characterId),
+          anatomy: {}
         },
         user: {
           id: userId,
+          name: 'User',
           modifiers: {
             general: 1.0
-          }
+          },
+          credits: 1000
         },
         message: {
           content: message.content,
@@ -65,11 +69,12 @@ export class ChatFormulaSystem {
           negativeIntensity: emotionalTone === 'negative' ? intensity : 0
         },
         system: {
-          gameTime: {
-            current: new Date(),
-            gameTime: 0
-          }
-        }
+          gameTime: 0,
+          realTime: Date.now(),
+          isActionHolding: false,
+          timeMultiplier: 1.0
+        },
+        custom: {}
       }
 
       // Выбираем формулу в зависимости от тона

@@ -46,7 +46,7 @@ export function PoseFormulasEditor({
         { name: 'character.mood', type: 'number', description: 'Текущее настроение персонажа', example: 75 }
       ],
       example: {
-        context: { character: { mood: 75 } },
+        context: { character: { id: 'char1', name: 'Character', characteristics: { mood: 75 }, anatomy: {}, currentPoses: [], timeInCurrentPose: 0 } },
         result: true
       }
     },
@@ -60,7 +60,7 @@ export function PoseFormulasEditor({
         { name: 'user.equipment.rope', type: 'number', description: 'Количество веревки у пользователя', example: 2 }
       ],
       example: {
-        context: { user: { equipment: { rope: 2 } } },
+        context: { user: { id: 'user1', name: 'User', modifiers: {}, credits: 1000, equipment: { rope: 2 } } },
         result: true
       }
     },
@@ -75,7 +75,7 @@ export function PoseFormulasEditor({
         { name: 'character.mood', type: 'number', description: 'Текущее настроение', example: 50 }
       ],
       example: {
-        context: { character: { mood: 50 } },
+        context: { character: { id: 'char1', name: 'Character', characteristics: { mood: 50 }, anatomy: {}, currentPoses: [], timeInCurrentPose: 0 } },
         result: 52
       }
     },
@@ -90,7 +90,7 @@ export function PoseFormulasEditor({
         { name: 'pose.duration', type: 'number', description: 'Время в позе (минуты)', example: 10 }
       ],
       example: {
-        context: { character: { energy: 60 }, pose: { duration: 10 } },
+        context: { character: { id: 'char1', name: 'Character', characteristics: { energy: 60 }, anatomy: {}, currentPoses: [], timeInCurrentPose: 0 }, pose: { id: 'pose1', name: 'Pose', category: 'test', duration: 10, isActive: true } },
         result: 65
       }
     },
@@ -105,7 +105,7 @@ export function PoseFormulasEditor({
         { name: 'action.intensity', type: 'number', description: 'Базовая интенсивность действия', example: 50 }
       ],
       example: {
-        context: { action: { intensity: 50 } },
+        context: { action: { id: 'action1', name: 'Action', category: 'test', intensity: 50, duration: 10, isActive: true } },
         result: 75
       }
     },
@@ -184,8 +184,8 @@ export function PoseFormulasEditor({
   const updateItem = (type: 'condition' | 'effect' | 'modifier', index: number, updatedItem: PoseCondition | PoseEffect | PoseModifier) => {
     setFormulas(prev => ({
       ...prev,
-      [type === 'condition' ? 'conditions' : type === 'effect' ? 'effects' : 'modifiers']: 
-        prev[type === 'condition' ? 'conditions' : type === 'effect' ? 'effects' : 'modifiers'].map((item, i) => 
+      [type === 'condition' ? 'conditions' : type === 'effect' ? 'effects' : 'modifiers']:
+        prev[type === 'condition' ? 'conditions' : type === 'effect' ? 'effects' : 'modifiers'].map((item, i) =>
           i === index ? updatedItem : item
         )
     }))

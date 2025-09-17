@@ -136,7 +136,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Ошибка при удалении выбора:', error)
     return NextResponse.json(
-      { error: 'Ошибка при удалении выбора', details: error.message },
+      { error: 'Ошибка при удалении выбора', details: error instanceof Error ? error.message : 'Неизвестная ошибка' },
       { status: 500 }
     )
   }
