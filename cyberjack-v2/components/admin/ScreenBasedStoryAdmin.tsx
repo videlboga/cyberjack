@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -15,9 +15,7 @@ import {
   Trash2,
   Save,
   X,
-  Monitor,
-  Building,
-  Settings
+  Monitor
 } from 'lucide-react'
 
 import { ScreenBasedStoryGraph } from './ScreenBasedStoryGraph'
@@ -279,6 +277,13 @@ export function ScreenBasedStoryAdmin() {
   const handleAddChoice = async (screenId: string) => {
     try {
       console.log('Добавляем выбор для экрана:', screenId)
+      console.log('selectedScene:', selectedScene)
+
+      if (!selectedScene?.id) {
+        console.error('Не выбрана сцена для создания экрана')
+        alert('Пожалуйста, выберите сцену перед добавлением выбора')
+        return
+      }
 
       // Сначала создаем новый экран
       const newScreenResponse = await fetch('/api/story/screens', {
@@ -287,7 +292,7 @@ export function ScreenBasedStoryAdmin() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sceneId: selectedScene?.id,
+          sceneId: selectedScene.id,
           name: 'Новый экран',
           description: '',
           content: {
@@ -304,6 +309,13 @@ export function ScreenBasedStoryAdmin() {
       })
 
       console.log('newScreenResponse status:', newScreenResponse.status)
+
+      if (!newScreenResponse.ok) {
+        const errorText = await newScreenResponse.text()
+        console.error('Ошибка создания экрана:', errorText)
+        alert('Ошибка создания экрана: ' + errorText)
+        return
+      }
 
       if (newScreenResponse.ok) {
         const newScreen = await newScreenResponse.json()
@@ -333,6 +345,7 @@ export function ScreenBasedStoryAdmin() {
         if (!choiceResponse.ok) {
           const errorText = await choiceResponse.text()
           console.error('Ошибка создания выбора:', errorText)
+          alert('Ошибка создания выбора: ' + errorText)
           return // Прерываем выполнение, если выбор не создался
         }
 
@@ -485,6 +498,25 @@ export function ScreenBasedStoryAdmin() {
     try {
       console.log('Удаляем экран:', screenId)
 
+      // Сначала получаем все выборы, которые ведут к этому экрану из базы данных
+      const relatedChoicesResponse = await fetch(`/api/story/screens/${screenId}/related-choices`)
+      const relatedChoices = await relatedChoicesResponse.json()
+
+      console.log(`Найдено выборов, ведущих к экрану ${screenId}:`, relatedChoices.length)
+
+      // Удаляем все связанные выборы
+      for (const choice of relatedChoices) {
+        console.log(`Удаляем выбор ${choice.id} (${choice.text})`)
+        const deleteChoiceResponse = await fetch(`/api/story/choices/${choice.id}`, {
+          method: 'DELETE',
+        })
+
+        if (!deleteChoiceResponse.ok) {
+          console.error(`Ошибка удаления выбора ${choice.id}:`, await deleteChoiceResponse.text())
+        }
+      }
+
+      // Теперь удаляем сам экран (выборы экрана удалятся автоматически через CASCADE)
       const response = await fetch(`/api/story/screens/${screenId}`, {
         method: 'DELETE',
       })
@@ -492,21 +524,43 @@ export function ScreenBasedStoryAdmin() {
       console.log('deleteScreenResponse status:', response.status)
 
       if (response.ok) {
+        // Обновляем состояние: удаляем экран и все связанные выборы
         setScenes(scenes.map(scene => ({
           ...scene,
-          screens: scene.screens.filter(screen => screen.id !== screenId)
+          screens: scene.screens.map(screen => ({
+            ...screen,
+            choices: screen.choices.filter(choice =>
+              !relatedChoices.some((deletedChoice: StoryChoice) => deletedChoice.id === choice.id)
+            )
+          })).filter(screen => screen.id !== screenId)
         })))
 
         if (selectedScene) {
           const updatedSelectedScene = {
             ...selectedScene,
-            screens: selectedScene.screens.filter(screen => screen.id !== screenId)
+            screens: selectedScene.screens.map(screen => ({
+              ...screen,
+              choices: screen.choices.filter(choice =>
+                !relatedChoices.some((deletedChoice: StoryChoice) => deletedChoice.id === choice.id)
+              )
+            })).filter(screen => screen.id !== screenId)
           }
           setSelectedScene(updatedSelectedScene)
         }
       } else {
         const errorText = await response.text()
         console.error('Ошибка удаления экрана:', errorText)
+        // Не показываем ошибку пользователю, если экран уже удален
+        try {
+          const errorData = JSON.parse(errorText)
+          if (errorData.message && errorData.message.includes('уже удален')) {
+            console.log('Экран уже был удален, это нормально')
+            return
+          }
+        } catch {
+          // Если не удалось распарсить JSON, показываем ошибку
+        }
+        alert('Ошибка удаления экрана: ' + errorText)
       }
     } catch (error) {
       console.error('Ошибка при удалении экрана:', error)
@@ -516,32 +570,92 @@ export function ScreenBasedStoryAdmin() {
   // Удаление выбора
   const handleDeleteChoice = async (choiceId: string) => {
     try {
+      // Сначала находим экран, к которому принадлежит этот выбор
+      const screenWithChoice = scenes.flatMap(scene =>
+        scene.screens.filter(screen =>
+          screen.choices.some(choice => choice.id === choiceId)
+        )
+      )[0]
+
+      if (!screenWithChoice) {
+        console.error('Экран с выбором не найден')
+        return
+      }
+
+      console.log(`Удаляем выбор ${choiceId} из экрана ${screenWithChoice.id}`)
+
       const response = await fetch(`/api/story/choices/${choiceId}`, {
         method: 'DELETE',
       })
 
       if (response.ok) {
+        // Находим удаляемый выбор, чтобы получить nextScreenId
+        const deletedChoice = screenWithChoice.choices.find(choice => choice.id === choiceId)
+        const nextScreenId = deletedChoice?.nextScreenId
+
+        // Обновляем состояние: удаляем выбор и целевой экран
         setScenes(scenes.map(scene => ({
           ...scene,
-          screens: scene.screens.map(screen => ({
-            ...screen,
-            choices: screen.choices.filter(choice => choice.id !== choiceId)
-          }))
+          screens: scene.screens
+            .map(screen => ({
+              ...screen,
+              choices: screen.choices.filter(choice => choice.id !== choiceId)
+            }))
+            .filter(screen => screen.id !== nextScreenId) // Удаляем целевой экран
         })))
 
         if (selectedScene) {
           const updatedSelectedScene = {
             ...selectedScene,
-            screens: selectedScene.screens.map(screen => ({
-              ...screen,
-              choices: screen.choices.filter(choice => choice.id !== choiceId)
-            }))
+            screens: selectedScene.screens
+              .map(screen => ({
+                ...screen,
+                choices: screen.choices.filter(choice => choice.id !== choiceId)
+              }))
+              .filter(screen => screen.id !== nextScreenId) // Удаляем целевой экран
           }
           setSelectedScene(updatedSelectedScene)
+        }
+
+        if (nextScreenId) {
+          console.log(`Выбор удален, целевой экран ${nextScreenId} удален из состояния`)
+        } else {
+          console.log('Выбор удален, у выбора не было связанного экрана')
         }
       }
     } catch (error) {
       console.error('Ошибка при удалении выбора:', error)
+    }
+  }
+
+  // Установка стартового экрана
+  const handleSetStartScreen = async (screenId: string) => {
+    if (!selectedScene) return
+
+    try {
+      const response = await fetch(`/api/story/scenes/${selectedScene.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startScreenId: screenId
+        }),
+      })
+
+      if (response.ok) {
+        const updatedScene = await response.json()
+
+        // Обновляем сцены
+        setScenes(scenes.map(scene =>
+          scene.id === selectedScene.id ? updatedScene : scene
+        ))
+
+        // Обновляем выбранную сцену
+        setSelectedScene(updatedScene)
+      }
+    } catch (error) {
+      console.error('Ошибка при установке стартового экрана:', error)
     }
   }
 
@@ -905,6 +1019,7 @@ export function ScreenBasedStoryAdmin() {
                 onDeleteScreen={handleDeleteScreen}
                 onDeleteChoice={handleDeleteChoice}
                 onCreateChoiceWithScreen={handleCreateChoiceWithScreen}
+                onSetStartScreen={handleSetStartScreen}
                 />
               </div>
             </div>
@@ -1033,7 +1148,7 @@ export function ScreenBasedStoryAdmin() {
                         ...editingScene!,
                         triggerConditions: conditions
                       })
-                    } catch (error) {
+                    } catch {
                       // Оставляем как есть, если JSON невалидный
                     }
                   }}

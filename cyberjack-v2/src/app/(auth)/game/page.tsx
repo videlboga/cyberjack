@@ -9,6 +9,8 @@ import { NotificationSystem } from '@/components/game/NotificationSystem'
 import { LocationSelector } from '@/components/game/LocationSelector'
 import { ChatPanel } from '@/components/game/ChatPanel'
 import { SuperAdminAuthModal } from '@/components/game/SuperAdminAuthModal'
+import { StationsPanel } from '@/components/game/StationsPanel'
+import { SceneDisplay } from '@/components/game/SceneDisplay'
 
 interface Character {
   id: string
@@ -85,10 +87,18 @@ export default function GameInterface() {
     characteristics: false,
     equipment: false,
     time: false,
-    chat: false
+    chat: false,
+    stations: false
   })
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [chatRefreshTrigger, setChatRefreshTrigger] = useState(0)
+
+  // Состояние для сцен
+  const [activeScene, setActiveScene] = useState<{
+    sceneData: any
+    currentScreen: any
+    progress: any
+  } | null>(null)
 
   // Получаем текущее состояние времени
   useEffect(() => {
@@ -241,6 +251,81 @@ export default function GameInterface() {
     executeActionOnZone(zoneId)
   }
 
+  // Запуск сцены
+  const handleSceneStart = async (sceneId: string, stationId: string) => {
+    try {
+      const response = await fetch(`/api/story/scenes/${sceneId}/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session?.user?.id || '',
+          stationId
+        }),
+      })
+
+      if (response.ok) {
+        const sceneData = await response.json()
+        setActiveScene({
+          sceneData: sceneData.scene,
+          currentScreen: sceneData.currentScreen,
+          progress: sceneData.progress
+        })
+      } else {
+        const errorData = await response.json()
+        setNotifications(prev => [...prev, {
+          id: Date.now(),
+          type: 'error',
+          message: errorData.error || 'Ошибка при запуске сцены',
+          timestamp: new Date()
+        }])
+      }
+    } catch (error) {
+      console.error('Ошибка при запуске сцены:', error)
+      setNotifications(prev => [...prev, {
+        id: Date.now(),
+        type: 'error',
+        message: 'Ошибка при запуске сцены',
+        timestamp: new Date()
+      }])
+    }
+  }
+
+  // Обработка выбора в сцене
+  const handleSceneChoice = async (choiceId: string) => {
+    if (!activeScene) return
+
+    try {
+      // Здесь можно добавить логику обработки выбора
+      // Например, применение последствий, переход к следующему экрану и т.д.
+      console.log('Выбор сделан:', choiceId)
+
+      // Пока что просто закрываем сцену
+      setActiveScene(null)
+
+      setNotifications(prev => [...prev, {
+        id: Date.now(),
+        type: 'success',
+        message: 'Выбор обработан',
+        timestamp: new Date()
+      }])
+    } catch (error) {
+      console.error('Ошибка при обработке выбора:', error)
+      setNotifications(prev => [...prev, {
+        id: Date.now(),
+        type: 'error',
+        message: 'Ошибка при обработке выбора',
+        timestamp: new Date()
+      }])
+    }
+  }
+
+  // Закрытие сцены
+  const handleSceneClose = () => {
+    setActiveScene(null)
+  }
+
   // Сохраняем текущую позу при изменении
   useEffect(() => {
     if (gameState.selectedCharacter && gameState.currentPose && gameState.currentAngle) {
@@ -339,6 +424,30 @@ export default function GameInterface() {
         userId={session.user.id}
       />
 
+      {/* Панель станций */}
+      <div className={`fixed top-0 left-0 h-full w-96 max-w-[95vw] mobile-panel bg-black bg-opacity-90 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 ${
+        panels.stations ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="h-full flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-gray-700">
+            <h2 className="text-xl font-semibold text-white">Станции</h2>
+            <button
+              onClick={() => togglePanel('stations')}
+              className="text-gray-400 hover:text-white text-2xl"
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <StationsPanel
+              userId={session.user.id}
+              onSceneStart={handleSceneStart}
+              onNotification={(notification) => setNotifications(prev => [...prev, notification])}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Панель времени */}
       <TimePanel
         isOpen={panels.time}
@@ -386,6 +495,17 @@ export default function GameInterface() {
         onRemoveNotification={(id) => setNotifications(prev => prev.filter(n => n.id !== id))}
       />
 
+      {/* Отображение активной сцены */}
+      {activeScene && (
+        <SceneDisplay
+          sceneData={activeScene.sceneData}
+          currentScreen={activeScene.currentScreen}
+          onChoiceSelect={handleSceneChoice}
+          onClose={handleSceneClose}
+          onNotification={(notification) => setNotifications(prev => [...prev, notification])}
+        />
+      )}
+
       {/* Кнопки быстрого доступа */}
       <div className="absolute top-4 left-4 right-4 flex justify-between z-50">
         <button
@@ -396,6 +516,12 @@ export default function GameInterface() {
         </button>
 
         <div className="flex gap-2">
+          <button
+            onClick={() => togglePanel('stations')}
+            className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+          >
+            🏢 Станции
+          </button>
           <button
             onClick={() => togglePanel('actions')}
             className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"

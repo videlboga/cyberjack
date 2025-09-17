@@ -8,7 +8,8 @@ const createChoiceSchema = z.object({
   description: z.string().optional(),
   nextScreenId: z.string().optional(),
   consequences: z.array(z.any()).default([]),
-  showConditions: z.array(z.any()).default([])
+  showConditions: z.array(z.any()).default([]),
+  isFinal: z.boolean().optional().default(false)
 })
 
 // GET /api/story/screens/[id]/choices - Получить выборы экрана
@@ -46,6 +47,20 @@ export async function POST(
     const body = await request.json()
     const validatedData = createChoiceSchema.parse(body)
 
+    // Проверяем, существует ли экран, к которому ссылается выбор
+    if (validatedData.nextScreenId) {
+      const nextScreen = await prisma.screen.findUnique({
+        where: { id: validatedData.nextScreenId }
+      })
+
+      if (!nextScreen) {
+        return NextResponse.json(
+          { error: 'Экран для перехода не найден', details: `Экран с ID ${validatedData.nextScreenId} не существует` },
+          { status: 400 }
+        )
+      }
+    }
+
     const choice = await prisma.choice.create({
       data: {
         ...validatedData,
@@ -58,10 +73,14 @@ export async function POST(
 
     return NextResponse.json(choice, { status: 201 })
   } catch (error) {
-
     console.error('Ошибка при создании выбора:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    console.error('Детали ошибки:', {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
-      { error: 'Ошибка при создании выбора' },
+      { error: 'Ошибка при создании выбора', details: errorMessage },
       { status: 500 }
     )
   }

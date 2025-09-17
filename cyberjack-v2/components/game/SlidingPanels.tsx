@@ -44,6 +44,7 @@ interface SlidingPanelsProps {
     equipment: boolean
     time: boolean
     chat: boolean
+    stations: boolean
   }
   gameState: GameState
   onCharacterSelect: (character: Character) => void
@@ -169,7 +170,7 @@ export function SlidingPanels({
       </div>
 
       {/* Невидимая область для закрытия панелей при клике вне их */}
-      {(panels.characters || panels.actions || panels.characteristics || panels.equipment || panels.chat) && (
+      {(panels.characters || panels.actions || panels.characteristics || panels.equipment || panels.chat || panels.stations) && (
         <div
           className="fixed inset-0 z-30"
           onClick={() => {
@@ -178,6 +179,7 @@ export function SlidingPanels({
             if (panels.characteristics) onTogglePanel('characteristics')
             if (panels.equipment) onTogglePanel('equipment')
             if (panels.chat) onTogglePanel('chat')
+            if (panels.stations) onTogglePanel('stations')
           }}
         />
       )}

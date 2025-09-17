@@ -9,6 +9,7 @@ const updateSceneSchema = z.object({
   stationId: z.string().optional(),
   triggerConditions: z.record(z.string(), z.any()).optional(),
   probability: z.number().min(0).max(100).optional(),
+  startScreenId: z.string().optional(),
 })
 
 // GET /api/story/scenes/[id] - Получить сцену по ID

@@ -14,6 +14,63 @@
   --border: #e5e5e5;
   --input: #e5e5e5;
   --ring: #171717;
+
+  /* Game background */
+  --bg-image: none;
+}
+
+/* Game background styles */
+.game-background {
+  background-image: var(--bg-image);
+}
+
+/* Notification animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.shrink-animation {
+  animation: shrink 4000ms linear forwards;
+}
+
+.shrink-animation-3000 {
+  animation: shrink 3000ms linear forwards;
+}
+
+.shrink-animation-4000 {
+  animation: shrink 4000ms linear forwards;
+}
+
+.shrink-animation-5000 {
+  animation: shrink 5000ms linear forwards;
+}
+
+.shrink-animation-6000 {
+  animation: shrink 6000ms linear forwards;
+}
+
+.shrink-animation-8000 {
+  animation: shrink 8000ms linear forwards;
 }
 
 @theme inline {

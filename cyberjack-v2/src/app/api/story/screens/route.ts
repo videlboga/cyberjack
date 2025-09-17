@@ -69,10 +69,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(screen, { status: 201 })
   } catch (error) {
-
     console.error('Ошибка при создании экрана:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    console.error('Детали ошибки:', {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      body: body
+    })
     return NextResponse.json(
-      { error: 'Ошибка при создании экрана' },
+      { error: 'Ошибка при создании экрана', details: errorMessage },
       { status: 500 }
     )
   }

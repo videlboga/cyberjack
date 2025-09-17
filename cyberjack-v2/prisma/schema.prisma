@@ -516,6 +516,9 @@ model Choice {
   nextScreenId String?
   nextScreen   Screen? @relation("ChoiceToScreen", fields: [nextScreenId], references: [id])
 
+  // Завершает ли выбор сцену
+  isFinal     Boolean  @default(false)
+
   // Последствия выбора (изменения в БД пользователя)
   consequences Json    @default("{}")
 

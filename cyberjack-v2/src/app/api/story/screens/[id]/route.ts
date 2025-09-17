@@ -76,10 +76,20 @@ export async function PUT(
 // DELETE /api/story/screens/[id] - Удалить экран
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
+
+    // Сначала проверяем, существует ли экран
+    const existingScreen = await prisma.screen.findUnique({
+      where: { id }
+    })
+
+    if (!existingScreen) {
+      console.log(`Экран ${id} уже удален или не существует`)
+      return NextResponse.json({ success: true, message: 'Экран уже удален' })
+    }
 
     await prisma.screen.delete({
       where: { id }
@@ -88,8 +98,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Ошибка при удалении экрана:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     return NextResponse.json(
-      { error: 'Ошибка при удалении экрана' },
+      { error: 'Ошибка при удалении экрана', details: errorMessage },
       { status: 500 }
     )
   }

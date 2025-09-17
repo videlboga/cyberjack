@@ -33,7 +33,8 @@ import {
   GitBranch,
   Settings,
   Upload,
-  Download
+  Download,
+  Play
 } from 'lucide-react'
 
 import { StoryScreen, StoryChoice, StoryCondition, ChoiceConsequence } from '@/types/screen-based-story'
@@ -388,6 +389,17 @@ const ScreenNode = ({ data }: { data: any }) => {
           >
             <Settings className="h-3 w-3" />
           </Button>
+          {data.onSetStartScreen && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={data.onSetStartScreen}
+              className="h-6 w-6 p-0 text-green-300 hover:text-green-100"
+              title="Установить как стартовый экран"
+            >
+              <Play className="h-3 w-3" />
+            </Button>
+          )}
           <Button
             size="sm"
             variant="ghost"
@@ -632,6 +644,7 @@ interface ScreenBasedStoryGraphProps {
   onDeleteScreen: (screenId: string) => void
   onDeleteChoice: (choiceId: string) => void
   onCreateChoiceWithScreen?: (sourceScreenId: string, targetScreenId: string) => void
+  onSetStartScreen?: (screenId: string) => void
 }
 
 export function ScreenBasedStoryGraph({
@@ -643,7 +656,8 @@ export function ScreenBasedStoryGraph({
   onAddChoice,
   onDeleteScreen,
   onDeleteChoice,
-  onCreateChoiceWithScreen
+  onCreateChoiceWithScreen,
+  onSetStartScreen
 }: ScreenBasedStoryGraphProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const nodePositionsRef = useRef<Record<string, { x: number; y: number }>>({})
@@ -735,7 +749,8 @@ export function ScreenBasedStoryGraph({
           onAddChoice: () => onAddChoice(screen.id),
           onUpdateChoice: (choiceId: string, updates: Partial<StoryChoice>) => onUpdateChoice(choiceId, updates),
           onDeleteChoice: (choiceId: string) => onDeleteChoice(choiceId),
-          onDeleteScreen: () => onDeleteScreen(screen.id)
+          onDeleteScreen: () => onDeleteScreen(screen.id),
+          onSetStartScreen: onSetStartScreen ? () => onSetStartScreen(screen.id) : undefined
         }
       }
       nodes.push(screenNode)
@@ -767,7 +782,7 @@ export function ScreenBasedStoryGraph({
     })
 
     return { nodes, edges }
-  }, [screens, onUpdateScreen, onUpdateChoice, onAddChoice, onDeleteScreen, onDeleteChoice])
+  }, [screens, onUpdateScreen, onUpdateChoice, onAddChoice, onDeleteScreen, onDeleteChoice, onSetStartScreen])
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)

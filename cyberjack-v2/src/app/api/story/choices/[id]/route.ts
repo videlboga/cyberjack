@@ -83,20 +83,60 @@ export async function PUT(
 // DELETE /api/story/choices/[id] - Удалить выбор
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
+    // Сначала проверяем, существует ли выбор
+    const existingChoice = await prisma.choice.findUnique({
+      where: { id },
+      include: {
+        screen: true,
+        nextScreen: true
+      }
+    })
+
+    if (!existingChoice) {
+      console.log(`Выбор с ID ${id} не найден, возможно уже удален`)
+      return NextResponse.json({ success: true, message: 'Выбор уже удален' })
+    }
+
+    const screenId = existingChoice.screenId
+    const nextScreenId = existingChoice.nextScreenId
+    console.log(`Удаляем выбор ${id} из экрана ${screenId}`)
+
+    // Удаляем выбор
     await prisma.choice.delete({
       where: { id }
     })
+
+    // Если у выбора есть связанный экран (nextScreen), удаляем его
+    if (nextScreenId) {
+      console.log(`Удаляем экран, на который вел выбор: ${nextScreenId}`)
+
+      // Проверяем, существует ли целевой экран
+      const targetScreen = await prisma.screen.findUnique({
+        where: { id: nextScreenId }
+      })
+
+      if (targetScreen) {
+        await prisma.screen.delete({
+          where: { id: nextScreenId }
+        })
+        console.log(`Экран ${nextScreenId} удален`)
+      } else {
+        console.log(`Экран ${nextScreenId} уже удален или не существует`)
+      }
+    } else {
+      console.log('У выбора нет связанного экрана для удаления')
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Ошибка при удалении выбора:', error)
     return NextResponse.json(
-      { error: 'Ошибка при удалении выбора' },
+      { error: 'Ошибка при удалении выбора', details: error.message },
       { status: 500 }
     )
   }

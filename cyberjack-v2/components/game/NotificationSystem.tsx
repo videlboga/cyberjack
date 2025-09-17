@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Notification {
   id: number
@@ -18,6 +18,7 @@ interface NotificationSystemProps {
 
 export function NotificationSystem({ notifications, onRemoveNotification }: NotificationSystemProps) {
   const [visibleNotifications, setVisibleNotifications] = useState<Notification[]>([])
+  const timersRef = useRef<Map<number, NodeJS.Timeout>>(new Map())
 
   useEffect(() => {
     // Добавляем новые уведомления
@@ -28,23 +29,43 @@ export function NotificationSystem({ notifications, onRemoveNotification }: Noti
     if (newNotifications.length > 0) {
       setVisibleNotifications(prev => [...prev, ...newNotifications])
     }
-  }, [notifications, visibleNotifications])
+  }, [notifications])
 
   useEffect(() => {
     // Автоматическое удаление уведомлений
-    const timers = visibleNotifications.map(notification => {
-      const duration = notification.duration || getDefaultDuration(notification.type)
+    visibleNotifications.forEach(notification => {
+      // Если таймер уже существует, не создаем новый
+      if (timersRef.current.has(notification.id)) {
+        return
+      }
 
-      return setTimeout(() => {
+      const duration = notification.duration || getDefaultDuration(notification.type)
+      const timer = setTimeout(() => {
         onRemoveNotification(notification.id)
         setVisibleNotifications(prev => prev.filter(n => n.id !== notification.id))
+        timersRef.current.delete(notification.id)
       }, duration)
+
+      timersRef.current.set(notification.id, timer)
     })
 
-    return () => {
-      timers.forEach(timer => clearTimeout(timer))
-    }
+    // Очищаем таймеры для уведомлений, которые больше не видны
+    const visibleIds = new Set(visibleNotifications.map(n => n.id))
+    timersRef.current.forEach((timer, id) => {
+      if (!visibleIds.has(id)) {
+        clearTimeout(timer)
+        timersRef.current.delete(id)
+      }
+    })
   }, [visibleNotifications, onRemoveNotification])
+
+  // Очищаем все таймеры при размонтировании
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(timer => clearTimeout(timer))
+      timersRef.current.clear()
+    }
+  }, [])
 
   const getDefaultDuration = (type: string) => {
     switch (type) {
@@ -57,6 +78,11 @@ export function NotificationSystem({ notifications, onRemoveNotification }: Noti
       case 'time': return 3000
       default: return 4000
     }
+  }
+
+  const getAnimationClass = (type: string) => {
+    const duration = getDefaultDuration(type)
+    return `shrink-animation-${duration}`
   }
 
   const getNotificationIcon = (type: string) => {
@@ -148,6 +174,13 @@ export function NotificationSystem({ notifications, onRemoveNotification }: Noti
 
             <button
               onClick={() => {
+                // Очищаем таймер
+                const timer = timersRef.current.get(notification.id)
+                if (timer) {
+                  clearTimeout(timer)
+                  timersRef.current.delete(notification.id)
+                }
+
                 onRemoveNotification(notification.id)
                 setVisibleNotifications(prev => prev.filter(n => n.id !== notification.id))
               }}
@@ -160,49 +193,11 @@ export function NotificationSystem({ notifications, onRemoveNotification }: Noti
           {/* Прогресс-бар */}
           <div className="mt-2 h-1 bg-black bg-opacity-20 rounded-full overflow-hidden">
             <div
-              className="h-full bg-white bg-opacity-30 transition-all ease-linear"
-              style={{
-                width: '100%',
-                animation: `shrink ${getDefaultDuration(notification.type)}ms linear forwards`
-              }}
+              className={`h-full bg-white bg-opacity-30 transition-all ease-linear ${getAnimationClass(notification.type)}`}
             />
           </div>
         </div>
       ))}
     </div>
   )
-}
-
-// CSS анимации (добавить в globals.css)
-const styles = `
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes shrink {
-  from {
-    width: 100%;
-  }
-  to {
-    width: 0%;
-  }
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
-}
-`
-
-// Добавляем стили в head (в реальном проекте это должно быть в globals.css)
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style')
-  styleSheet.textContent = styles
-  document.head.appendChild(styleSheet)
 }
