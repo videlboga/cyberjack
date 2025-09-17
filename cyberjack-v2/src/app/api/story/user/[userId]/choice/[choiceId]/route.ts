@@ -4,10 +4,10 @@ import { SceneManager } from '@/lib/story/scene-manager'
 // POST /api/story/user/[userId]/choice/[choiceId] - Выполнить выбор
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string; choiceId: string } }
+  { params }: { params: Promise<{ userId: string; choiceId: string }> }
 ) {
   try {
-    const { userId, choiceId } = params
+    const { userId, choiceId } = await params
     const sceneManager = SceneManager.getInstance()
 
     const success = await sceneManager.makeChoice(userId, choiceId)

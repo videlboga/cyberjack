@@ -209,15 +209,176 @@ export class SceneManager {
       })
 
       // Применяем последствия выбора
-      const consequences = choice.consequences as Record<string, any>
-      if (consequences && Object.keys(consequences).length > 0) {
-        await this.storyPointsManager.applyChoiceConsequences(userId, consequences)
+      const consequences = choice.consequences as any[]
+      if (consequences && consequences.length > 0) {
+        await this.applyConsequences(userId, consequences)
       }
 
       return true
     } catch (error) {
       console.error('Ошибка при выполнении выбора:', error)
       return false
+    }
+  }
+
+  // Применить последствия выбора
+  private async applyConsequences(userId: string, consequences: any[]): Promise<void> {
+    for (const consequence of consequences) {
+      try {
+        switch (consequence.type) {
+          case 'change_story_point':
+            if (consequence.storyPointId && consequence.storyPointChange !== undefined) {
+              const currentValue = await this.storyPointsManager.getStoryPointValue(
+                userId,
+                consequence.storyPointId
+              )
+              const newValue = currentValue + consequence.storyPointChange
+              await this.storyPointsManager.setStoryPointValue(
+                userId,
+                consequence.storyPointId,
+                newValue,
+                'choice'
+              )
+            }
+            break
+
+          case 'change_credits':
+            if (consequence.creditsChange !== undefined) {
+              await prisma.user.update({
+                where: { id: userId },
+                data: {
+                  credits: {
+                    increment: consequence.creditsChange
+                  }
+                }
+              })
+            }
+            break
+
+          case 'change_equipment':
+            if (consequence.equipmentId && consequence.equipmentAction) {
+              if (consequence.equipmentAction === 'add') {
+                await prisma.userEquipment.upsert({
+                  where: {
+                    userId_equipmentId: {
+                      userId,
+                      equipmentId: consequence.equipmentId
+                    }
+                  },
+                  update: {
+                    quantity: {
+                      increment: 1
+                    }
+                  },
+                  create: {
+                    userId,
+                    equipmentId: consequence.equipmentId,
+                    quantity: 1
+                  }
+                })
+              } else if (consequence.equipmentAction === 'remove') {
+                await prisma.userEquipment.updateMany({
+                  where: {
+                    userId,
+                    equipmentId: consequence.equipmentId
+                  },
+                  data: {
+                    quantity: {
+                      decrement: 1
+                    }
+                  }
+                })
+              }
+            }
+            break
+
+          case 'trigger_action':
+            if (consequence.actionId) {
+              // Запускаем действие через API действий
+              try {
+                const actionResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/actions/execute-simple`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    actionId: consequence.actionId,
+                    userId: userId,
+                    intensity: consequence.actionIntensity || 1
+                  })
+                })
+
+                if (!actionResponse.ok) {
+                  console.error('Ошибка при выполнении действия:', await actionResponse.text())
+                }
+              } catch (error) {
+                console.error('Ошибка при триггере действия:', error)
+              }
+            }
+            break
+
+          case 'add_character':
+            if (consequence.targetCharacterId) {
+              // Проверяем, есть ли уже копия этого персонажа
+              const existingCopy = await prisma.characterCopy.findFirst({
+                where: {
+                  userId,
+                  characterId: consequence.targetCharacterId
+                }
+              })
+
+              if (!existingCopy) {
+                // Добавляем копию персонажа
+                await prisma.characterCopy.create({
+                  data: {
+                    userId,
+                    characterId: consequence.targetCharacterId,
+                    settings: {
+                      currentPose: 'default',
+                      currentAngle: 'front',
+                      lastPoseChange: new Date().toISOString()
+                    }
+                  }
+                })
+              }
+            }
+            break
+
+          case 'remove_character':
+            if (consequence.targetCharacterId) {
+              // Удаляем копию персонажа
+              await prisma.characterCopy.deleteMany({
+                where: {
+                  userId,
+                  characterId: consequence.targetCharacterId
+                }
+              })
+            }
+            break
+
+          case 'end_scene':
+            // Завершаем текущую сцену
+            const currentProgress = await prisma.userSceneProgress.findFirst({
+              where: {
+                userId,
+                status: 'IN_PROGRESS'
+              }
+            })
+
+            if (currentProgress) {
+              await prisma.userSceneProgress.update({
+                where: { id: currentProgress.id },
+                data: {
+                  status: 'COMPLETED',
+                  completedAt: new Date()
+                }
+              })
+            }
+            break
+        }
+      } catch (error) {
+        console.error('Ошибка при применении последствия:', error)
+      }
     }
   }
 

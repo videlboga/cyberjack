@@ -47,10 +47,17 @@ export async function POST(
     }
 
     // Получаем начальный экран сцены
-    const startScreen = scene.screens.find(screen =>
-      // Ищем экран с минимальным порядком или специально помеченный как начальный
-      screen.id === scene.startScreenId || scene.screens.indexOf(screen) === 0
-    ) || scene.screens[0]
+    let startScreen = null
+
+    // Сначала ищем экран по startScreenId, если он указан
+    if (scene.startScreenId) {
+      startScreen = scene.screens.find(screen => screen.id === scene.startScreenId)
+    }
+
+    // Если не найден по startScreenId, берем первый экран
+    if (!startScreen) {
+      startScreen = scene.screens[0]
+    }
 
     if (!startScreen) {
       return NextResponse.json(

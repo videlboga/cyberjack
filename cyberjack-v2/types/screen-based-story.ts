@@ -33,7 +33,7 @@ export interface StoryCondition {
 // Последствия выборов (изменения в БД пользователя)
 export interface ChoiceConsequence {
   type: 'change_characteristic' | 'change_credits' | 'change_equipment' |
-        'change_story_point' | 'trigger_action' | 'end_scene'
+        'change_story_point' | 'trigger_action' | 'end_scene' | 'add_character' | 'remove_character'
 
   // Для изменения характеристик персонажа
   characterId?: string // если не указан - применяется к текущему персонажу
@@ -54,6 +54,9 @@ export interface ChoiceConsequence {
   // Для триггера действия
   actionId?: string
   actionIntensity?: number
+
+  // Для добавления/удаления персонажей
+  targetCharacterId?: string // ID персонажа для добавления/удаления
 }
 
 // Выбор игрока

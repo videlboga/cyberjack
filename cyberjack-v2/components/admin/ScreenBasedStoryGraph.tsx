@@ -206,6 +206,9 @@ const ChoiceEditor = ({
                           <SelectItem value="change_equipment">Изменить оборудование</SelectItem>
                           <SelectItem value="change_story_point">Изменить сюжетную точку</SelectItem>
                           <SelectItem value="trigger_action">Запустить действие</SelectItem>
+                          <SelectItem value="add_character">Добавить персонажа</SelectItem>
+                          <SelectItem value="remove_character">Удалить персонажа</SelectItem>
+                          <SelectItem value="end_scene">Завершить сцену</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -233,6 +236,58 @@ const ChoiceEditor = ({
                           onChange={(e) => updateConsequence(index, { creditsChange: parseInt(e.target.value) || 0 })}
                           className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
                         />
+                      </div>
+                    )}
+
+                    {consequence.type === 'trigger_action' && (
+                      <div>
+                        <Label className="text-white text-xs">ID действия</Label>
+                        <Input
+                          value={consequence.actionId || ''}
+                          onChange={(e) => updateConsequence(index, { actionId: e.target.value })}
+                          className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                          placeholder="Введите ID действия"
+                        />
+                        <Label className="text-white text-xs mt-2">Интенсивность</Label>
+                        <Input
+                          type="number"
+                          value={consequence.actionIntensity || 1}
+                          onChange={(e) => updateConsequence(index, { actionIntensity: parseInt(e.target.value) || 1 })}
+                          className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                          min="1"
+                          max="10"
+                        />
+                      </div>
+                    )}
+
+                    {consequence.type === 'add_character' && (
+                      <div>
+                        <Label className="text-white text-xs">ID персонажа для добавления</Label>
+                        <Input
+                          value={consequence.targetCharacterId || ''}
+                          onChange={(e) => updateConsequence(index, { targetCharacterId: e.target.value })}
+                          className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                          placeholder="Введите ID персонажа"
+                        />
+                      </div>
+                    )}
+
+                    {consequence.type === 'remove_character' && (
+                      <div>
+                        <Label className="text-white text-xs">ID персонажа для удаления</Label>
+                        <Input
+                          value={consequence.targetCharacterId || ''}
+                          onChange={(e) => updateConsequence(index, { targetCharacterId: e.target.value })}
+                          className="h-8 bg-gray-700 border-gray-600 text-white text-xs"
+                          placeholder="Введите ID персонажа"
+                        />
+                      </div>
+                    )}
+
+                    {consequence.type === 'end_scene' && (
+                      <div>
+                        <Label className="text-white text-xs">Завершить сцену</Label>
+                        <p className="text-gray-400 text-xs">Этот выбор завершит текущую сцену</p>
                       </div>
                     )}
                   </div>
@@ -353,13 +408,20 @@ const ScreenNode = ({ data }: { data: any }) => {
 
       if (response.ok) {
         const { url } = await response.json()
+        const updatedContent = {
+          ...editData.content,
+          [type]: url
+        }
+
         setEditData(prev => ({
           ...prev,
-          content: {
-            ...prev.content,
-            [type]: url
-          }
+          content: updatedContent
         }))
+
+        // Автоматически сохраняем изменения в базе данных
+        if (data.onUpdateScreen) {
+          data.onUpdateScreen({ content: updatedContent })
+        }
       }
     } catch (error) {
       console.error('Ошибка загрузки медиа:', error)
@@ -374,11 +436,18 @@ const ScreenNode = ({ data }: { data: any }) => {
   }
 
   return (
-    <div className="relative px-4 py-3 shadow-lg rounded-xl bg-gradient-to-br from-blue-900/80 to-blue-800/80 text-white border-2 border-blue-400 min-w-[350px] max-w-[500px]">
+    <div className={`relative px-4 py-3 shadow-lg rounded-xl bg-gradient-to-br from-blue-900/80 to-blue-800/80 text-white border-2 min-w-[350px] max-w-[500px] ${
+      data.isStartScreen ? 'border-green-400' : 'border-blue-400'
+    }`}>
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <Monitor className="h-4 w-4 text-blue-300" />
           <span className="text-xs text-blue-200">Экран</span>
+          {data.isStartScreen && (
+            <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">
+              СТАРТ
+            </span>
+          )}
         </div>
         <div className="flex gap-1">
           <Button
@@ -637,6 +706,7 @@ const nodeTypes: ReactFlowNodeTypes = {
 interface ScreenBasedStoryGraphProps {
   sceneId: string
   screens: StoryScreen[]
+  startScreenId?: string
   onUpdateScreen: (screenId: string, updates: Partial<StoryScreen>) => void
   onUpdateChoice: (choiceId: string, updates: Partial<StoryChoice>) => void
   onAddScreen: () => void
@@ -650,6 +720,7 @@ interface ScreenBasedStoryGraphProps {
 export function ScreenBasedStoryGraph({
   sceneId,
   screens,
+  startScreenId,
   onUpdateScreen,
   onUpdateChoice,
   onAddScreen,
@@ -745,6 +816,7 @@ export function ScreenBasedStoryGraph({
           choicesCount: screen.choices?.length || 0,
           choices: screen.choices || [],
           allScreens: screens, // Передаем все экраны для выбора в ChoiceEditor
+          isStartScreen: screen.id === startScreenId, // Информация о том, является ли экран стартовым
           onUpdateScreen: (updates: Partial<StoryScreen>) => onUpdateScreen(screen.id, updates),
           onAddChoice: () => onAddChoice(screen.id),
           onUpdateChoice: (choiceId: string, updates: Partial<StoryChoice>) => onUpdateChoice(choiceId, updates),
@@ -782,7 +854,7 @@ export function ScreenBasedStoryGraph({
     })
 
     return { nodes, edges }
-  }, [screens, onUpdateScreen, onUpdateChoice, onAddChoice, onDeleteScreen, onDeleteChoice, onSetStartScreen])
+  }, [screens, startScreenId, onUpdateScreen, onUpdateChoice, onAddChoice, onDeleteScreen, onDeleteChoice, onSetStartScreen])
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)

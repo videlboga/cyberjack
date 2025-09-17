@@ -479,7 +479,89 @@ export class ScreenBasedStoryManager {
             }
             break
 
-          // Добавить другие типы последствий по необходимости
+          case 'trigger_action':
+            if (consequence.actionId) {
+              // Запускаем действие через API действий
+              try {
+                const actionResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/actions/execute-simple`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    actionId: consequence.actionId,
+                    userId: userId,
+                    intensity: consequence.actionIntensity || 1
+                  })
+                })
+
+                if (!actionResponse.ok) {
+                  console.error('Ошибка при выполнении действия:', await actionResponse.text())
+                }
+              } catch (error) {
+                console.error('Ошибка при триггере действия:', error)
+              }
+            }
+            break
+
+          case 'add_character':
+            if (consequence.targetCharacterId) {
+              // Проверяем, есть ли уже копия этого персонажа
+              const existingCopy = await prisma.characterCopy.findFirst({
+                where: {
+                  userId,
+                  characterId: consequence.targetCharacterId
+                }
+              })
+
+              if (!existingCopy) {
+                // Добавляем копию персонажа
+                await prisma.characterCopy.create({
+                  data: {
+                    userId,
+                    characterId: consequence.targetCharacterId,
+                    settings: {
+                      currentPose: 'default',
+                      currentAngle: 'front',
+                      lastPoseChange: new Date().toISOString()
+                    }
+                  }
+                })
+              }
+            }
+            break
+
+          case 'remove_character':
+            if (consequence.targetCharacterId) {
+              // Удаляем копию персонажа
+              await prisma.characterCopy.deleteMany({
+                where: {
+                  userId,
+                  characterId: consequence.targetCharacterId
+                }
+              })
+            }
+            break
+
+          case 'end_scene':
+            // Завершаем текущую сцену
+            const currentProgress = await prisma.userSceneProgress.findFirst({
+              where: {
+                userId,
+                status: 'IN_PROGRESS'
+              }
+            })
+
+            if (currentProgress) {
+              await prisma.userSceneProgress.update({
+                where: { id: currentProgress.id },
+                data: {
+                  status: 'COMPLETED',
+                  completedAt: new Date()
+                }
+              })
+            }
+            break
         }
       } catch (error) {
         console.error('Ошибка при применении последствия:', error)

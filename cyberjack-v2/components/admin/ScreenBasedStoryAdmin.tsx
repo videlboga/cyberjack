@@ -19,7 +19,22 @@ import {
 } from 'lucide-react'
 
 import { ScreenBasedStoryGraph } from './ScreenBasedStoryGraph'
+import { ScenePreview } from './ScenePreview'
 import { StoryScreen, StoryChoice, StoryScene } from '@/types/screen-based-story'
+
+// Тип для предпросмотра, совместимый с данными из API
+type PreviewScene = Omit<StoryScene, 'screens'> & {
+  screens: Array<Omit<StoryScreen, 'sceneId' | 'content'> & {
+    content: {
+      text?: string
+      background?: string
+      music?: string
+      images?: string[]
+      videos?: string[]
+      audio?: string[]
+    }
+  }>
+}
 
 interface Station {
   id: string
@@ -35,6 +50,7 @@ export function ScreenBasedStoryAdmin() {
   const [stations, setStations] = useState<Station[]>([])
   const [selectedScene, setSelectedScene] = useState<StoryScene | null>(null)
   const [editingScene, setEditingScene] = useState<StoryScene | null>(null)
+  const [previewScene, setPreviewScene] = useState<StoryScene | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [isCreatingStation, setIsCreatingStation] = useState(false)
   const [editingStation, setEditingStation] = useState<Station | null>(null)
@@ -202,6 +218,33 @@ export function ScreenBasedStoryAdmin() {
     } catch (error) {
       console.error('Ошибка при удалении станции:', error)
       alert('Ошибка при удалении станции')
+    }
+  }
+
+  // Удаление сцены
+  const handleDeleteScene = async (sceneId: string) => {
+    if (!confirm('Вы уверены, что хотите удалить эту сцену? Это действие нельзя отменить.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/story/scenes/${sceneId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setScenes(scenes.filter(s => s.id !== sceneId))
+        // Если удаляемая сцена была выбрана, сбрасываем выбор
+        if (selectedScene?.id === sceneId) {
+          setSelectedScene(null)
+        }
+      } else {
+        const errorData = await response.json()
+        alert(`Ошибка при удалении сцены: ${errorData.error || 'Неизвестная ошибка'}`)
+      }
+    } catch (error) {
+      console.error('Ошибка при удалении сцены:', error)
+      alert('Ошибка при удалении сцены')
     }
   }
 
@@ -771,7 +814,8 @@ export function ScreenBasedStoryAdmin() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setSelectedScene(scene)}
+                        onClick={() => setPreviewScene(scene)}
+                        title="Предпросмотр сцены"
                       >
                         <Monitor className="w-4 h-4" />
                       </Button>
@@ -779,8 +823,18 @@ export function ScreenBasedStoryAdmin() {
                         variant="outline"
                         size="sm"
                         onClick={() => setEditingScene(scene)}
+                        title="Редактировать сцену"
                       >
                         <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteScene(scene.id)}
+                        title="Удалить сцену"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -1012,6 +1066,7 @@ export function ScreenBasedStoryAdmin() {
                 <ScreenBasedStoryGraph
                 sceneId={selectedScene.id}
                 screens={selectedScene.screens}
+                startScreenId={selectedScene.startScreenId}
                 onUpdateScreen={handleUpdateScreen}
                 onUpdateChoice={handleUpdateChoice}
                 onAddScreen={() => handleAddScreen(selectedScene.id)}
@@ -1188,6 +1243,14 @@ export function ScreenBasedStoryAdmin() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Игровой предпросмотр сцены */}
+      {previewScene && (
+        <ScenePreview
+          scene={previewScene as PreviewScene}
+          onClose={() => setPreviewScene(null)}
+        />
       )}
     </div>
   )
