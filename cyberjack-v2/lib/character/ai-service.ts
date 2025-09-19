@@ -1,21 +1,23 @@
 // lib/character/ai-service.ts
 
-import { prisma } from '@/lib/db/client'
-import { CharacterContext } from '@/types/game'
+import { prisma } from '../db/client'
+import { CharacterContext } from '../../types/game'
 import { PromptSystem } from './prompt-system'
 import { CharacterMemoryManager } from './memory-manager'
 import { CharacterResponseManager } from './response-manager'
 import { EnhancedMessageAnalyzer } from './enhanced-message-analyzer'
 import { ActionMessageSystemManager } from './action-message-system'
-import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
+import { ActivePosesSystem } from '../core/poses/active-poses-system'
+import { serverLogger, LogCategory } from '../utils/server-logger'
 import {
   CharacterAIService as ICharacterAIService,
   AIResponse,
   MessageAnalysis,
   PromptContext,
   CharacterAIConfig,
-  CharacterAIMetrics
-} from '@/types/character-ai'
+  CharacterAIMetrics,
+  PoseCommand
+} from '../../types/character-ai'
 
 export class CharacterAIService implements ICharacterAIService {
   private openRouterApiKey: string
@@ -28,6 +30,7 @@ export class CharacterAIService implements ICharacterAIService {
   private responseManager: CharacterResponseManager
   private messageAnalyzer: EnhancedMessageAnalyzer
   private actionMessageSystem: ActionMessageSystemManager
+  private activePosesSystem: ActivePosesSystem
   private metrics: CharacterAIMetrics
 
   constructor(apiKey: string, baseUrl?: string, model?: string, model2?: string) {
@@ -55,8 +58,41 @@ export class CharacterAIService implements ICharacterAIService {
     this.promptSystem = new PromptSystem()
     this.memoryManager = new CharacterMemoryManager()
     this.responseManager = new CharacterResponseManager()
-    this.messageAnalyzer = new EnhancedMessageAnalyzer()
+
+    try {
+      console.log('🚀 Пытаемся инициализировать EnhancedMessageAnalyzer...')
+      this.messageAnalyzer = new EnhancedMessageAnalyzer()
+      console.log('✅ EnhancedMessageAnalyzer успешно инициализирован!')
+      console.log('🔍 Проверяем методы анализатора:', {
+        hasAnalyzeMessage: typeof this.messageAnalyzer.analyzeMessage === 'function',
+        hasAnalyzePoseCommands: typeof (this.messageAnalyzer as any).analyzePoseCommands === 'function'
+      })
+    } catch (error) {
+      console.error('❌ Ошибка при инициализации EnhancedMessageAnalyzer:', error)
+      console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
+      // Создаем заглушку
+      this.messageAnalyzer = {
+        analyzeMessage: async () => ({
+          intent: 'unknown',
+          emotion: 'neutral',
+          keywords: [],
+          sentiment: 'neutral',
+          complexity: 5,
+          urgency: 5,
+          requiresResponse: true,
+          suggestedActions: [],
+          poseCommands: [],
+          characteristicInfluences: [],
+          actionTriggers: [],
+          fetishElements: [],
+          moodChanges: []
+        })
+      } as any
+      console.log('⚠️ Создана заглушка для анализа сообщений')
+    }
+
     this.actionMessageSystem = new ActionMessageSystemManager(this)
+    this.activePosesSystem = new ActivePosesSystem()
 
     this.metrics = {
       totalRequests: 0,
@@ -92,11 +128,23 @@ export class CharacterAIService implements ICharacterAIService {
         userId: context.userId
       })
 
+      console.log('🚀 Вызываем this.messageAnalyzer.analyzeMessage...', {
+        userMessage,
+        characterId,
+        userId: context.userId || ''
+      })
+
       const messageAnalysis = await this.messageAnalyzer.analyzeMessage(
         userMessage,
         characterId,
         context.userId || ''
       )
+
+      console.log('📊 Результат анализа от messageAnalyzer:', {
+        poseCommandsCount: messageAnalysis.poseCommands.length,
+        characteristicInfluencesCount: messageAnalysis.characteristicInfluences.length,
+        actionTriggersCount: messageAnalysis.actionTriggers.length
+      })
 
       serverLogger.debug(LogCategory.AI, 'Анализ сообщения завершен', {
         message: userMessage,
@@ -106,7 +154,18 @@ export class CharacterAIService implements ICharacterAIService {
       })
 
       // Обрабатываем результаты анализа сообщения
+      serverLogger.info(LogCategory.AI, 'Вызываем processMessageAnalysis', {
+        characterId,
+        poseCommandsCount: messageAnalysis.poseCommands.length,
+        characteristicInfluencesCount: messageAnalysis.characteristicInfluences.length
+      })
+
       const characteristicChanges = await this.processMessageAnalysis(messageAnalysis, characterId, context.userId || '')
+
+      serverLogger.info(LogCategory.AI, 'processMessageAnalysis завершена', {
+        characterId,
+        characteristicChangesCount: characteristicChanges.length
+      })
 
       // Создаем воспоминание о взаимодействии
       if (this.config.enableMemoryManagement) {
@@ -419,9 +478,9 @@ export class CharacterAIService implements ICharacterAIService {
       character: {
         id: character.id,
         name: character.name,
-        description: character.description,
-        age: character.age,
-        avatar: character.avatar
+        description: character.description || undefined,
+        age: character.age || undefined,
+        avatar: character.avatar || undefined
       },
       characteristics,
       memory,
@@ -571,8 +630,15 @@ export class CharacterAIService implements ICharacterAIService {
     return this.model
   }
 
-  // Анализ сообщения пользователя
+  // Заглушка для интерфейса - реальная функция в EnhancedMessageAnalyzer
   async analyzeMessage(userMessage: string): Promise<MessageAnalysis> {
+    // Эта функция не должна вызываться - используется this.messageAnalyzer.analyzeMessage()
+    throw new Error('Эта функция не должна вызываться напрямую. Используйте this.messageAnalyzer.analyzeMessage()')
+  }
+
+  // УДАЛЕНА: Старая функция analyzeMessage - теперь используется EnhancedMessageAnalyzer
+  /*
+  async analyzeMessageOld(userMessage: string): Promise<MessageAnalysis> {
     const analysisPrompt = `
 Проанализируй следующее сообщение пользователя и верни JSON с анализом:
 
@@ -635,7 +701,12 @@ export class CharacterAIService implements ICharacterAIService {
           complexity: parsed.complexity || 5,
           urgency: parsed.urgency || 5,
           requiresResponse: parsed.requiresResponse !== false,
-          suggestedActions: parsed.suggestedActions || []
+          suggestedActions: parsed.suggestedActions || [],
+          poseCommands: [],
+          characteristicInfluences: [],
+          actionTriggers: [],
+          fetishElements: [],
+          moodChanges: []
         }
       } catch {
         // Если не удалось распарсить, попробуем найти JSON в markdown блоке
@@ -651,7 +722,12 @@ export class CharacterAIService implements ICharacterAIService {
               complexity: parsed.complexity || 5,
               urgency: parsed.urgency || 5,
               requiresResponse: parsed.requiresResponse !== false,
-              suggestedActions: parsed.suggestedActions || []
+              suggestedActions: parsed.suggestedActions || [],
+              poseCommands: [],
+              characteristicInfluences: [],
+              actionTriggers: [],
+              fetishElements: [],
+              moodChanges: []
             }
           } catch {
             // Если и это не сработало, попробуем найти JSON без markdown
@@ -667,7 +743,12 @@ export class CharacterAIService implements ICharacterAIService {
                   complexity: parsed.complexity || 5,
                   urgency: parsed.urgency || 5,
                   requiresResponse: parsed.requiresResponse !== false,
-                  suggestedActions: parsed.suggestedActions || []
+                  suggestedActions: parsed.suggestedActions || [],
+                  poseCommands: [],
+                  characteristicInfluences: [],
+                  actionTriggers: [],
+                  fetishElements: [],
+                  moodChanges: []
                 }
               } catch {
                 // Последняя попытка - вернуть дефолтные значения
@@ -685,7 +766,12 @@ export class CharacterAIService implements ICharacterAIService {
           complexity: 5,
           urgency: 5,
           requiresResponse: true,
-          suggestedActions: []
+          suggestedActions: [],
+          poseCommands: [],
+          characteristicInfluences: [],
+          actionTriggers: [],
+          fetishElements: [],
+          moodChanges: []
         }
       }
     } catch (error) {
@@ -698,10 +784,16 @@ export class CharacterAIService implements ICharacterAIService {
         complexity: 5,
         urgency: 5,
         requiresResponse: true,
-        suggestedActions: []
+        suggestedActions: [],
+        poseCommands: [],
+        characteristicInfluences: [],
+        actionTriggers: [],
+        fetishElements: [],
+        moodChanges: []
       }
     }
   }
+  */
 
   // Получить память персонажа
   async getCharacterMemory(characterId: string, type?: any): Promise<any[]> {
@@ -793,10 +885,35 @@ export class CharacterAIService implements ICharacterAIService {
     const characteristicChanges: any[] = []
 
     try {
+      serverLogger.info(LogCategory.AI, 'Начинаем обработку анализа сообщения', {
+        characterId,
+        poseCommandsCount: analysis.poseCommands.length,
+        characteristicInfluencesCount: analysis.characteristicInfluences.length
+      })
+
       // Обрабатываем команды поз
       for (const poseCommand of analysis.poseCommands) {
+        serverLogger.info(LogCategory.AI, 'Обрабатываем команду позы', {
+          characterId,
+          poseName: poseCommand.poseName,
+          confidence: poseCommand.confidence,
+          threshold: 0.5
+        })
+
         if (poseCommand.confidence > 0.5) { // Понизили порог с 0.7 до 0.5
-          await this.executePoseCommand(characterId, poseCommand)
+          serverLogger.info(LogCategory.AI, 'Команда позы прошла порог, выполняем', {
+            characterId,
+            poseName: poseCommand.poseName,
+            confidence: poseCommand.confidence
+          })
+          await this.executePoseCommand(characterId, poseCommand, userId)
+        } else {
+          serverLogger.warn(LogCategory.AI, 'Команда позы не прошла порог', {
+            characterId,
+            poseName: poseCommand.poseName,
+            confidence: poseCommand.confidence,
+            threshold: 0.5
+          })
         }
       }
 
@@ -843,10 +960,10 @@ export class CharacterAIService implements ICharacterAIService {
   }
 
   // Выполнение команды позы
-  private async executePoseCommand(characterId: string, poseCommand: PoseCommand): Promise<void> {
+  private async executePoseCommand(characterId: string, poseCommand: PoseCommand, userId: string): Promise<void> {
     try {
-      // Находим позу по имени
-      const pose = await prisma.characterPose.findFirst({
+      // Находим позу персонажа по имени
+      const characterPose = await prisma.characterPose.findFirst({
         where: {
           characterId,
           definition: {
@@ -857,27 +974,102 @@ export class CharacterAIService implements ICharacterAIService {
           }
         },
         include: {
-          definition: true
+          definition: {
+            include: {
+              angles: true
+            }
+          },
+          angles: true
         }
       })
 
-      if (pose) {
-        // Активируем позу (здесь должна быть логика активации позы)
-        console.log(`Активирована поза: ${pose.definition.name} для персонажа ${characterId}`)
+      if (characterPose) {
+        console.log(`🎭 Найдена поза: ${characterPose.definition.name}`)
+        console.log(`📐 Персонализированные ракурсы: ${characterPose.angles.length}`)
+        console.log(`📐 Общие ракурсы: ${characterPose.definition.angles.length}`)
 
-        // Создаем воспоминание
-        await this.memoryManager.addMemory(characterId, {
-          type: 'POSE_CHANGE' as any,
-          content: `Принята поза: ${pose.definition.name}`,
-          importance: 6,
-          tags: ['поза', poseCommand.poseName.toLowerCase()],
-          emotionalWeight: 4,
-          context: 'команда пользователя',
-          isActive: true
+        // Находим ракурс с медиа (персонализированные или общие)
+        let targetAngle = null
+        const allAngles = [...characterPose.angles, ...characterPose.definition.angles]
+        for (const angle of allAngles) {
+          const media = angle.media as any || { images: [], files: [] }
+          const hasImages = media.images && media.images.length > 0
+          const hasFiles = media.files && media.files.length > 0
+          console.log(`   - ${angle.name}: images=${hasImages}, files=${hasFiles}`)
+          if (hasImages || hasFiles) {
+            targetAngle = angle
+            console.log(`✅ Выбран ракурс: ${angle.name}`)
+            break
+          }
+        }
+
+        if (targetAngle) {
+          // Обновляем позу в копии персонажа
+          const characterCopy = await prisma.characterCopy.findFirst({
+            where: {
+              characterId,
+              userId
+            }
+          })
+
+          if (characterCopy) {
+            await prisma.characterCopy.update({
+              where: { id: characterCopy.id },
+              data: {
+                settings: {
+                  ...characterCopy.settings as any,
+                  currentPose: characterPose.definition.id,
+                  currentAngle: targetAngle.id,
+                  lastPoseChange: new Date().toISOString()
+                }
+              }
+            })
+
+            serverLogger.info(LogCategory.AI, 'Поза активирована', {
+              characterId,
+              poseId: characterPose.definition.id,
+              poseName: characterPose.definition.name,
+              angleId: targetAngle.id,
+              angleName: targetAngle.name,
+              confidence: poseCommand.confidence
+            })
+
+            // Создаем воспоминание
+            await this.memoryManager.addMemory(characterId, {
+              type: 'POSE_CHANGE' as any,
+              content: `Принята поза: ${characterPose.definition.name} (${targetAngle.name})`,
+              importance: 6,
+              tags: ['поза', poseCommand.poseName.toLowerCase()],
+              emotionalWeight: 4,
+              context: 'команда пользователя',
+              isActive: true
+            })
+          } else {
+            serverLogger.warn(LogCategory.AI, 'Копия персонажа не найдена', {
+              characterId,
+              userId
+            })
+          }
+        } else {
+          serverLogger.warn(LogCategory.AI, 'У позы нет ракурсов с медиа', {
+            characterId,
+            poseId: characterPose.definition.id,
+            poseName: characterPose.definition.name
+          })
+        }
+      } else {
+        serverLogger.warn(LogCategory.AI, 'Поза не найдена', {
+          characterId,
+          requestedPose: poseCommand.poseName,
+          confidence: poseCommand.confidence
         })
       }
     } catch (error) {
-      console.error('Ошибка при выполнении команды позы:', error)
+      serverLogger.error(LogCategory.AI, 'Ошибка при выполнении команды позы', {
+        characterId,
+        poseCommand,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
     }
   }
 

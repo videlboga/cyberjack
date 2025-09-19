@@ -3,6 +3,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CharacterAIService } from '../../../../../lib/character/ai-service'
 
+// Кэш для AI сервиса
+let cachedAIService: CharacterAIService | null = null
+let lastApiKey: string | null = null
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ characterId: string }> }
@@ -37,7 +41,19 @@ export async function POST(
       )
     }
 
-    const aiService = new CharacterAIService(apiKey, baseUrl, model, model2)
+    // Используем кэшированный AI сервис
+    if (!cachedAIService || lastApiKey !== apiKey) {
+      console.log('🚀 Создаем новый CharacterAIService...')
+      cachedAIService = new CharacterAIService(apiKey, baseUrl, model, model2)
+      lastApiKey = apiKey
+      console.log('✅ CharacterAIService создан и закэширован')
+    } else {
+      console.log('♻️ Используем кэшированный CharacterAIService')
+    }
+    
+    const aiService = cachedAIService
+
+    console.log('🚀 Вызываем aiService.generateResponse...')
     const aiResponse = await aiService.generateResponse(
       characterId,
       message,
@@ -46,6 +62,7 @@ export async function POST(
         ...context
       }
     )
+    console.log('✅ aiService.generateResponse завершен')
 
     console.log('🤖 AI Response:', {
       characterId,

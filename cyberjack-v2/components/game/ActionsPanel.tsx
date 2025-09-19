@@ -117,14 +117,14 @@ export function ActionsPanel({
   return (
     <div className="h-full flex flex-col">
       {/* Табы категорий */}
-      <div className="flex-shrink-0 border-b border-gray-700">
+      <div className="flex-shrink-0 border-b border-purple-400 border-opacity-30">
         <div className="flex overflow-x-auto">
           <button
             onClick={() => setActiveTab('all')}
             className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
               activeTab === 'all'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-gray-400 hover:text-white'
+                ? 'border-purple-400 text-purple-300 '
+                : 'border-transparent text-gray-400 hover:text-purple-300'
             }`}
           >
             Все ({actions.length})
@@ -135,8 +135,8 @@ export function ActionsPanel({
               onClick={() => setActiveTab(category)}
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                 activeTab === category
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-white'
+                  ? 'border-purple-400 text-purple-300 '
+                  : 'border-transparent text-gray-400 hover:text-purple-300'
               }`}
             >
               {getCategoryIcon(category)} {category} ({actionsByCategory[category].length})
@@ -146,12 +146,12 @@ export function ActionsPanel({
       </div>
 
       {/* Список действий */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
         {filteredActions.length === 0 ? (
           <div className="text-center text-gray-400 py-8">
-            <div className="text-4xl mb-2">⚡</div>
+            <div className="text-4xl mb-2 ">⚡</div>
             <p>Действия не найдены</p>
-            <p className="text-sm mt-1">
+            <p className="text-sm mt-1 text-purple-300">
               {activeTab === 'all'
                 ? 'Проверьте требования к действиям'
                 : `Нет действий в категории "${activeTab}"`
@@ -165,16 +165,16 @@ export function ActionsPanel({
                 key={action.id}
                 className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                   selectedAction === action.id
-                    ? 'border-blue-500 bg-blue-600 bg-opacity-20'
-                    : 'border-gray-700 bg-gray-800 hover:bg-gray-700'
+                    ? 'liquid-glass-card border-purple-400 neon-border-purple'
+                    : 'liquid-glass-card border-purple-400 border-opacity-20 hover:border-purple-400 hover:border-opacity-40'
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{getCategoryIcon(action.category)}</span>
-                    <h4 className="font-semibold text-white">{action.name}</h4>
+                    <span className="text-lg ">{getCategoryIcon(action.category)}</span>
+                    <h4 className="font-semibold text-white ">{action.name}</h4>
                   </div>
-                  <div className="text-right text-sm text-gray-400">
+                  <div className="text-right text-sm text-purple-300">
                     <div>{action.cost} кредитов</div>
                     <div>{action.duration}с</div>
                   </div>
@@ -188,14 +188,14 @@ export function ActionsPanel({
 
                 {/* Интенсивность */}
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs text-gray-400">Интенсивность:</span>
+                  <span className="text-xs text-purple-300">Интенсивность:</span>
                   <div className="flex-1 bg-gray-700 rounded-full h-2">
                     <div
-                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${action.intensity}%` }}
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-300  intensity-bar"
+                      style={{ '--intensity-width': `${action.intensity}%` } as React.CSSProperties}
                     ></div>
                   </div>
-                  <span className="text-xs text-gray-400">{action.intensity}%</span>
+                  <span className="text-xs text-purple-300">{action.intensity}%</span>
                 </div>
 
                 {/* Кнопка действия */}
@@ -207,10 +207,10 @@ export function ActionsPanel({
                       onActionSelect(action.id)
                     }
                   }}
-                  className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                  className={`w-full py-2 px-4 rounded-lg font-medium transition-colors liquid-shimmer ${
                     selectedAction === action.id
-                      ? 'bg-red-600 hover:bg-red-700 text-white'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      ? 'glass-button neon-border-red'
+                      : 'glass-button neon-border-purple'
                   }`}
                 >
                   {selectedAction === action.id ? (
@@ -230,9 +230,9 @@ export function ActionsPanel({
 
       {/* Подсказка */}
       {selectedAction && (
-        <div className="flex-shrink-0 p-4 bg-blue-600 bg-opacity-20 border-t border-blue-500">
-          <div className="text-sm text-blue-300">
-            <div className="font-semibold mb-1">🎯 Активные зоны включены</div>
+        <div className="flex-shrink-0 p-4 liquid-glass-card border-t border-purple-400 border-opacity-30">
+          <div className="text-sm text-purple-300">
+            <div className="font-semibold mb-1 ">🎯 Активные зоны включены</div>
             <p>Кликните на красные зоны на изображении персонажа для выполнения действия</p>
           </div>
         </div>

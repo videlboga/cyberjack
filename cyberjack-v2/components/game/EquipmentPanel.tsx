@@ -146,35 +146,35 @@ export function EquipmentPanel({ userId }: EquipmentPanelProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Заголовок */}
-      <div className="flex-shrink-0 border-b border-gray-700 px-4 py-3">
+      <div className="flex-shrink-0 border-b border-orange-400 border-opacity-30 px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🎒</span>
-          <span className="text-sm font-medium text-white">Мое оборудование ({userEquipment.length})</span>
+          <span className="text-lg ">🎒</span>
+          <span className="text-sm font-medium text-white ">Мое оборудование ({userEquipment.length})</span>
         </div>
       </div>
 
       {/* Содержимое */}
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
         <div className="space-y-2">
           {userEquipment.length === 0 ? (
             <div className="text-center text-gray-400 py-6">
-              <div className="text-3xl mb-2">🎒</div>
+              <div className="text-3xl mb-2 ">🎒</div>
               <p className="text-sm">Нет оборудования</p>
-              <p className="text-xs text-gray-500 mt-1">Оборудование приобретается через сюжетные события</p>
+              <p className="text-xs text-orange-300 mt-1">Оборудование приобретается через сюжетные события</p>
             </div>
           ) : (
             userEquipment.map((item) => (
-              <div key={item.id} className="bg-gray-800 rounded-lg p-3">
+              <div key={item.id} className="liquid-glass-card rounded-lg p-3 border border-orange-400 border-opacity-20">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">{getCategoryIcon(item.equipment.category)}</span>
+                    <span className="text-sm ">{getCategoryIcon(item.equipment.category)}</span>
                     <div>
-                      <h4 className="font-medium text-white text-sm">{item.equipment.name}</h4>
+                      <h4 className="font-medium text-white text-sm ">{item.equipment.name}</h4>
                       <div className="flex items-center gap-2 text-xs">
                         <span className={getRarityColor(item.equipment.rarity)}>
                           {getRarityIcon(item.equipment.rarity)} {item.equipment.rarity}
                         </span>
-                        <span className="text-gray-400">x{item.quantity}</span>
+                        <span className="text-orange-300">x{item.quantity}</span>
                       </div>
                       {item.equipment.relatedPose && (
                         <div className="text-xs text-blue-400 mt-1">
@@ -185,7 +185,7 @@ export function EquipmentPanel({ userId }: EquipmentPanelProps) {
                   </div>
                   <button
                     onClick={() => handleUseEquipment(item.equipmentId)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-xs transition-colors"
+                    className="glass-button neon-border-orange py-1 px-3 rounded text-xs transition-colors liquid-shimmer"
                   >
                     Использовать
                   </button>

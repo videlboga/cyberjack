@@ -96,6 +96,17 @@ export class TimeSystem {
   // Ручное управление временем пользователя
   async advanceTime(userId: string, minutes: number): Promise<void> {
     try {
+      // Проверяем, существует ли пользователь
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, gameTime: true }
+      })
+
+      if (!user) {
+        console.error(`User with ID ${userId} not found`)
+        throw new Error(`User with ID ${userId} not found`)
+      }
+
       // Обновляем время в базе данных
       await prisma.user.update({
         where: { id: userId },
@@ -106,12 +117,15 @@ export class TimeSystem {
         }
       })
 
+      console.log(`Time advanced for user ${userId}: +${minutes} minutes (new total: ${user.gameTime + minutes})`)
+
       // Запустить восстановление для каждого шага
       for (let i = 0; i < minutes; i++) {
         await this.triggerRecovery(userId)
       }
     } catch (error) {
       console.error('Error advancing user game time:', error)
+      throw error
     }
   }
 

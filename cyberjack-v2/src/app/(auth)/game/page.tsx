@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { CharacterDisplay } from '@/components/game/CharacterDisplay'
 import { SlidingPanels } from '@/components/game/SlidingPanels'
-import { TimePanel } from '@/components/game/TimePanel'
+import { TimeElement } from '@/components/game/TimeElement'
 import { NotificationSystem } from '@/components/game/NotificationSystem'
 import { ChatPanel } from '@/components/game/ChatPanel'
 import { SuperAdminAuthModal } from '@/components/game/SuperAdminAuthModal'
@@ -85,7 +85,6 @@ export default function GameInterface() {
     actions: false,
     characteristics: false,
     equipment: false,
-    time: false,
     chat: false,
     stations: false
   })
@@ -128,10 +127,12 @@ export default function GameInterface() {
 
   const loadCharacterDefaultPose = async (characterId: string) => {
     try {
+      console.log('🔄 Загружаем дефолтную позу для персонажа:', characterId)
       const response = await fetch(`/api/characters/${characterId}/poses/default?userId=${session?.user?.id || ''}`)
 
       if (response.ok) {
         const poseData = await response.json()
+        console.log('📊 Загружены данные позы:', poseData)
 
         setGameState(prev => ({
           ...prev,
@@ -139,9 +140,33 @@ export default function GameInterface() {
           currentAngle: poseData.defaultAngle,
           poseData: poseData
         }))
+        console.log('✅ Поза установлена в состоянии')
       }
     } catch (error) {
       console.error('❌ Error loading default pose:', error)
+    }
+  }
+
+  // Функция для обновления текущей позы после команды
+  const refreshCurrentPose = async (characterId: string) => {
+    try {
+      console.log('🔄 Обновляем позу для персонажа:', characterId)
+      const response = await fetch(`/api/characters/${characterId}/poses/default?userId=${session?.user?.id || ''}`)
+
+      if (response.ok) {
+        const poseData = await response.json()
+        console.log('📊 Получены данные позы:', poseData)
+
+        setGameState(prev => ({
+          ...prev,
+          currentPose: poseData.poseId,
+          currentAngle: poseData.defaultAngle,
+          poseData: poseData
+        }))
+        console.log('✅ Поза обновлена в состоянии')
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing current pose:', error)
     }
   }
 
@@ -363,17 +388,17 @@ export default function GameInterface() {
       <div className="fixed inset-0 bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">🎮 CYBERJACK v2.0</h1>
-            <p className="text-gray-400 text-lg mb-6">Игровой интерфейс</p>
+            <h1 className="text-4xl font-bold neon-text neon-cyan mb-4">🎮 CYBERJACK v2.0</h1>
+            <p className="text-white/80 text-lg mb-6">Игровой интерфейс</p>
           </div>
 
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-md mx-auto">
-            <p className="text-white text-lg mb-4">🔐 Необходима авторизация</p>
-            <p className="text-gray-400 mb-6">Войдите как суперадмин для доступа к игровому интерфейсу</p>
+          <div className="glass-modal p-6 max-w-md mx-auto">
+            <p className="neon-text neon-cyan text-lg mb-4">🔐 Необходима авторизация</p>
+            <p className="text-white/80 mb-6">Войдите как суперадмин для доступа к игровому интерфейсу</p>
 
             <button
               onClick={() => setShowAuthModal(true)}
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="w-full glass-button neon-border neon-cyan px-6 py-3 font-medium"
             >
               Войти в систему
             </button>
@@ -419,15 +444,15 @@ export default function GameInterface() {
       />
 
       {/* Панель станций */}
-      <div className={`fixed top-0 left-0 h-full w-96 max-w-[95vw] mobile-panel bg-black bg-opacity-90 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 ${
+      <div className={`fixed top-0 left-0 h-full w-96 max-w-[95vw] mobile-panel glass-panel neon-border neon-cyan transform transition-transform duration-300 ease-in-out z-40 ${
         panels.stations ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Станции</h2>
+          <div className="flex items-center justify-between p-4 border-b border-white/20">
+            <h2 className="text-xl font-semibold neon-text neon-cyan">Станции</h2>
             <button
               onClick={() => togglePanel('stations')}
-              className="text-gray-400 hover:text-white text-2xl"
+              className="text-white/60 hover:text-white text-2xl transition-colors"
             >
               ×
             </button>
@@ -442,25 +467,18 @@ export default function GameInterface() {
         </div>
       </div>
 
-      {/* Панель времени */}
-      <TimePanel
-        isOpen={panels.time}
-        gameTime={gameState.gameTime}
-        onToggle={() => togglePanel('time')}
-        onTimeChange={(newTime) => setGameState(prev => ({ ...prev, gameTime: newTime }))}
-      />
 
       {/* Панель чата */}
       {gameState.selectedCharacter && (
-        <div className={`fixed bottom-0 right-0 w-[28rem] max-w-[90vw] h-[32rem] max-h-[70vh] bg-black bg-opacity-90 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 ${
+        <div className={`fixed bottom-0 right-0 w-[28rem] max-w-[90vw] h-[32rem] max-h-[70vh] glass-panel neon-border neon-blue transform transition-transform duration-300 ease-in-out z-40 ${
           panels.chat ? 'translate-y-0' : 'translate-y-full'
         }`}>
           <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-xl font-semibold text-white">Чат с {gameState.selectedCharacter.name}</h2>
+            <div className="flex items-center justify-between p-4 border-b border-white/20">
+              <h2 className="text-xl font-semibold neon-text neon-blue">Чат с {gameState.selectedCharacter.name}</h2>
               <button
                 onClick={() => togglePanel('chat')}
-                className="text-gray-400 hover:text-white text-2xl"
+                className="text-white/60 hover:text-white text-2xl transition-colors"
               >
                 ×
               </button>
@@ -477,6 +495,7 @@ export default function GameInterface() {
                        }}
                        onNotification={(notification) => setNotifications(prev => [...prev, notification])}
                        refreshTrigger={chatRefreshTrigger}
+                       onPoseChange={() => refreshCurrentPose(gameState.selectedCharacter.id)}
                      />
                    </div>
           </div>
@@ -504,7 +523,7 @@ export default function GameInterface() {
       <div className="absolute top-4 left-4 right-4 flex justify-between z-50">
         <button
           onClick={() => togglePanel('characters')}
-          className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+          className="glass-button neon-border neon-purple px-4 py-2"
         >
           👥 Персонажи
         </button>
@@ -512,38 +531,36 @@ export default function GameInterface() {
         <div className="flex gap-2">
           <button
             onClick={() => togglePanel('stations')}
-            className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+            className="glass-button neon-border neon-cyan px-4 py-2"
           >
             🏢 Станции
           </button>
           <button
             onClick={() => togglePanel('actions')}
-            className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+            className="glass-button neon-border neon-orange px-4 py-2"
           >
             ⚡ Действия
           </button>
           <button
             onClick={() => togglePanel('characteristics')}
-            className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+            className="glass-button neon-border neon-green px-4 py-2"
           >
             📊 Характеристики
           </button>
           <button
             onClick={() => togglePanel('equipment')}
-            className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+            className="glass-button neon-border neon-pink px-4 py-2"
           >
             🎒 Оборудование
           </button>
-          <button
-            onClick={() => togglePanel('time')}
-            className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
-          >
-            ⏰ {gameState.gameTime.formattedTime}
-          </button>
+          <TimeElement
+            gameTime={gameState.gameTime}
+            onTimeChange={(newTime) => setGameState(prev => ({ ...prev, gameTime: newTime }))}
+          />
           {gameState.selectedCharacter && (
             <button
               onClick={() => togglePanel('chat')}
-              className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+              className="glass-button neon-border neon-blue px-4 py-2"
             >
               💬 Чат
             </button>

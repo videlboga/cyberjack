@@ -1,6 +1,6 @@
 // lib/character/enhanced-message-analyzer.ts
 
-import { prisma } from '@/lib/db/client'
+import { prisma } from '../db/client'
 import {
   MessageAnalysis,
   PoseCommand,
@@ -8,19 +8,15 @@ import {
   ActionTrigger,
   FetishElement,
   MoodChange
-} from '@/types/character-ai'
+} from '../../types/character-ai'
 
 export class EnhancedMessageAnalyzer {
-  private readonly POSE_KEYWORDS = {
-    'стоя': ['стоять', 'встать', 'стой', 'стоя'],
-    'сидя': ['сидеть', 'сядь', 'сидя', 'присядь'],
-    'лежа': ['лежать', 'ляг', 'лежа', 'приляг'],
-    'на коленях': ['колени', 'встать на колени', 'на коленях', 'присядь на колени'],
-    'распростертая': ['распростертая', 'раскинуться', 'разложиться'],
-    'скрученная': ['скрутиться', 'свернуться', 'скрученная'],
-    'доминирующая': ['доминировать', 'властвовать', 'командовать'],
-    'покорная': ['покориться', 'подчиниться', 'покорная']
+  constructor() {
+    console.log('🚀 EnhancedMessageAnalyzer ИНИЦИАЛИЗИРОВАН!')
+    console.log('🚀 EnhancedMessageAnalyzer конструктор выполнен успешно!')
   }
+
+  // Удалено: система анализа через ключевые слова заменена на AI анализ
 
   // Удалено: система анализа через ключевые слова заменена на AI анализ
 
@@ -50,7 +46,8 @@ export class EnhancedMessageAnalyzer {
     characterId: string,
     userId: string
   ): Promise<MessageAnalysis> {
-    console.log('🚀 Начинаем анализ сообщения:', { userMessage, characterId, userId })
+    console.log('🚀 ФУНКЦИЯ analyzeMessage ВЫЗВАНА!', { userMessage, characterId, userId })
+    console.log('📝 Начинаем анализ сообщения', { userMessage, characterId, userId })
 
     const lowerMessage = userMessage.toLowerCase()
 
@@ -59,8 +56,15 @@ export class EnhancedMessageAnalyzer {
     console.log('📊 Базовый анализ:', baseAnalysis)
 
     // Анализ команд поз
-    const poseCommands = await this.analyzePoseCommands(lowerMessage, characterId)
-    console.log('🎭 Команды поз:', poseCommands)
+    let poseCommands: PoseCommand[] = []
+    try {
+      console.log('🚀 ПЕРЕД ВЫЗОВОМ analyzePoseCommands', { lowerMessage, characterId })
+      poseCommands = await this.analyzePoseCommands(lowerMessage, characterId)
+      console.log('🎭 Команды поз:', poseCommands)
+    } catch (error) {
+      console.error('❌ Ошибка при анализе команд поз:', error)
+      console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
+    }
 
     // Анализ влияния на характеристики
     const characteristicInfluences = await this.analyzeCharacteristicInfluences(
@@ -152,43 +156,123 @@ export class EnhancedMessageAnalyzer {
     }
   }
 
-  // Анализ команд поз
+  // Анализ команд поз через LLM
   private async analyzePoseCommands(
     message: string,
     characterId: string
   ): Promise<PoseCommand[]> {
-    const commands: PoseCommand[] = []
+    console.log('🚀 ФУНКЦИЯ analyzePoseCommands ВЫЗВАНА!', { message, characterId })
 
-    // Получаем доступные позы для персонажа
-    const character = await prisma.character.findUnique({
-      where: { id: characterId },
-      include: {
-        poses: {
-          include: {
-            definition: true
+    try {
+      // Получаем доступные позы для персонажа
+      const character = await prisma.character.findUnique({
+        where: { id: characterId },
+        include: {
+          poses: {
+            include: {
+              definition: true
+            }
+          }
+        }
+      })
+
+      if (!character) {
+        console.log('❌ Персонаж не найден для анализа поз')
+        return []
+      }
+
+      console.log(`📊 Найдено поз у персонажа: ${character.poses.length}`)
+
+      if (character.poses.length === 0) {
+        console.log('❌ Нет доступных поз для анализа')
+        return []
+      }
+
+      // Создаем список доступных поз для LLM
+      const availablePoses = character.poses.map(pose => ({
+        name: pose.definition.name,
+        description: pose.definition.description || 'Без описания'
+      }))
+
+      // Анализируем через LLM
+      const poseCommands = await this.analyzePoseCommandsWithLLM(message, availablePoses)
+
+      console.log(`🎯 LLM нашел ${poseCommands.length} команд поз`)
+      return poseCommands
+    } catch (error) {
+      console.error('❌ Ошибка при анализе команд поз:', error)
+      console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
+      return []
+    }
+  }
+
+  // Анализ команд поз через LLM
+  private async analyzePoseCommandsWithLLM(
+    message: string,
+    availablePoses: Array<{ name: string; description: string }>
+  ): Promise<PoseCommand[]> {
+    try {
+      console.log('🤖 Анализируем команды поз через LLM:', { message, availablePosesCount: availablePoses.length })
+
+      const posesList = availablePoses.map(pose => `- ${pose.name}: ${pose.description}`).join('\n')
+
+      const prompt = `Проанализируй сообщение пользователя и определи, какие команды поз он хочет выполнить.
+
+Доступные позы:
+${posesList}
+
+Сообщение пользователя: "${message}"
+
+Ответь в формате JSON:
+{
+  "poseCommands": [
+    {
+      "poseName": "название_позы",
+      "confidence": 0.0-1.0,
+      "isExplicit": true/false,
+      "reason": "объяснение почему эта поза подходит"
+    }
+  ]
+}
+
+Правила:
+- confidence: насколько уверен, что пользователь хочет эту позу (0.0-1.0)
+- isExplicit: true если команда явная, false если подразумевается
+- Включай только позы с confidence > 0.3
+- Если нет команд поз, верни пустой массив`
+
+      const response = await this.callGeminiForAnalysis(prompt)
+      console.log('🤖 LLM ответ для команд поз:', response)
+
+      // Извлекаем JSON из markdown блока если нужно
+      let jsonString = response
+      const jsonMatch = response.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
+      if (jsonMatch) {
+        jsonString = jsonMatch[1]
+      }
+
+      const analysis = JSON.parse(jsonString)
+      const commands: PoseCommand[] = []
+
+      if (analysis.poseCommands && Array.isArray(analysis.poseCommands)) {
+        for (const cmd of analysis.poseCommands) {
+          if (cmd.poseName && cmd.confidence > 0.3) {
+            commands.push({
+              poseName: cmd.poseName,
+              confidence: cmd.confidence,
+              isExplicit: cmd.isExplicit || false,
+              modifiers: [] // Пока без модификаторов
+            })
           }
         }
       }
-    })
 
-    if (!character) return commands
-
-    // Проверяем каждую позу
-    for (const pose of character.poses) {
-      const poseName = pose.definition.name.toLowerCase()
-      const confidence = this.calculatePoseConfidence(message, poseName)
-
-      if (confidence > 0.2) { // Понизили порог с 0.3 до 0.2
-        commands.push({
-          poseName: pose.definition.name,
-          confidence,
-          isExplicit: confidence > 0.6, // Понизили порог с 0.7 до 0.6
-          modifiers: this.extractPoseModifiers(message, poseName)
-        })
-      }
+      console.log(`🤖 LLM нашел ${commands.length} команд поз:`, commands)
+      return commands
+    } catch (error) {
+      console.error('❌ Ошибка при анализе команд поз через LLM:', error)
+      return []
     }
-
-    return commands.sort((a, b) => b.confidence - a.confidence)
   }
 
   // Анализ влияния на характеристики через Gemini
@@ -391,9 +475,7 @@ export class EnhancedMessageAnalyzer {
   // Вызов Gemini для анализа
   private async callGeminiForAnalysis(prompt: string): Promise<string> {
     try {
-      // Импортируем fetch для Node.js
-      const { default: fetch } = await import('node-fetch')
-
+      // Используем встроенный fetch (Node.js 18+)
       const response = await fetch(process.env.OPENROUTER_BASE_URL + '/chat/completions', {
         method: 'POST',
         headers: {
@@ -431,67 +513,7 @@ export class EnhancedMessageAnalyzer {
     }
   }
 
-  private calculatePoseConfidence(message: string, poseName: string): number {
-    const lowerMessage = message.toLowerCase()
-    const lowerPoseName = poseName.toLowerCase()
-    let confidence = 0
-
-    // Проверяем точное совпадение названия позы
-    if (lowerMessage.includes(lowerPoseName)) {
-      confidence += 0.6
-    }
-
-    // Проверяем ключевые слова для каждой позы
-    const keywords = this.POSE_KEYWORDS[poseName as keyof typeof this.POSE_KEYWORDS] || []
-    for (const keyword of keywords) {
-      if (lowerMessage.includes(keyword)) {
-        confidence += 0.4
-      }
-    }
-
-    // Проверяем общие команды поз
-    if (lowerMessage.includes('позу') && lowerMessage.includes(lowerPoseName)) {
-      confidence += 0.5
-    }
-
-    // Проверяем синонимы и связанные слова
-    const synonyms = this.getPoseSynonyms(poseName)
-    for (const synonym of synonyms) {
-      if (lowerMessage.includes(synonym)) {
-        confidence += 0.3
-      }
-    }
-
-    return Math.min(1.0, confidence)
-  }
-
-  private getPoseSynonyms(poseName: string): string[] {
-    const synonyms: { [key: string]: string[] } = {
-      'стоя': ['встать', 'подняться', 'выпрямиться'],
-      'сидя': ['сесть', 'присесть', 'усадить'],
-      'лежа': ['лечь', 'прилечь', 'уложить'],
-      'на коленях': ['колени', 'присесть на колени', 'встать на колени'],
-      'распростертая': ['раскинуться', 'разложиться', 'распластаться'],
-      'скрученная': ['скрутиться', 'свернуться', 'сжаться'],
-      'доминирующая': ['доминировать', 'властвовать', 'командовать'],
-      'покорная': ['покориться', 'подчиниться', 'смириться']
-    }
-
-    return synonyms[poseName] || []
-  }
-
-  private extractPoseModifiers(message: string, poseName: string): string[] {
-    const modifiers: string[] = []
-    const modifierKeywords = ['быстро', 'медленно', 'осторожно', 'грубо', 'нежно']
-
-    for (const modifier of modifierKeywords) {
-      if (message.includes(modifier)) {
-        modifiers.push(modifier)
-      }
-    }
-
-    return modifiers
-  }
+  // Удалено: старые функции анализа поз заменены на LLM анализ
 
   // Удалено: старый метод анализа через ключевые слова заменен на AI анализ
 
@@ -703,7 +725,7 @@ export class EnhancedMessageAnalyzer {
     const stopWords = ['это', 'что', 'как', 'где', 'когда', 'почему', 'кто', 'который', 'которая', 'которое']
     const keywords = words.filter(word => !stopWords.includes(word))
 
-    return [...new Set(keywords)].slice(0, 10)
+    return Array.from(new Set(keywords)).slice(0, 10)
   }
 
   private analyzeSentiment(text: string): 'positive' | 'negative' | 'neutral' {

@@ -1,183 +1,192 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-
-  /* Radix UI компоненты */
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --accent: #f5f5f5;
-  --accent-foreground: #171717;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #171717;
-
-  /* Game background */
-  --bg-image: url('/game-background.png');
-}
-
-/* Game background styles */
+/* Фоновое изображение игры */
 .game-background {
-  background-image: var(--bg-image);
+  background-image: url('/game-background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-/* Notification animations */
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
+/* Ликвудласс эффекты */
+@layer components {
+  .liquid-glass {
+    @apply bg-black bg-opacity-20 backdrop-blur-xl rounded-xl;
+    background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 25%,
+      rgba(0, 0, 0, 0.1) 50%,
+      rgba(255, 255, 255, 0.05) 75%,
+      rgba(0, 0, 0, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   }
-  to {
-    transform: translateX(0);
-    opacity: 1;
+
+  .liquid-glass-panel {
+    @apply liquid-glass;
+    @apply border-2 border-cyan-400 border-opacity-30 rounded-2xl;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(34, 211, 238, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   }
-}
 
-@keyframes shrink {
-  from {
-    width: 100%;
+  .liquid-glass-card {
+    @apply liquid-glass;
+    @apply border border-cyan-300 border-opacity-20 rounded-xl;
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.2),
+      0 0 10px rgba(34, 211, 238, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
-  to {
-    width: 0%;
+
+  .neon-border {
+    @apply border-2 border-cyan-400 rounded-xl;
+    box-shadow:
+      0 0 10px rgba(34, 211, 238, 0.5),
+      0 0 20px rgba(34, 211, 238, 0.3),
+      0 0 30px rgba(34, 211, 238, 0.1);
   }
-}
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
-}
-
-.shrink-animation {
-  animation: shrink 4000ms linear forwards;
-}
-
-.shrink-animation-3000 {
-  animation: shrink 3000ms linear forwards;
-}
-
-.shrink-animation-4000 {
-  animation: shrink 4000ms linear forwards;
-}
-
-.shrink-animation-5000 {
-  animation: shrink 5000ms linear forwards;
-}
-
-.shrink-animation-6000 {
-  animation: shrink 6000ms linear forwards;
-}
-
-.shrink-animation-8000 {
-  animation: shrink 8000ms linear forwards;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-
-    /* Radix UI компоненты для темной темы */
-    --popover: #1a1a1a;
-    --popover-foreground: #ededed;
-    --accent: #262626;
-    --accent-foreground: #ededed;
-    --muted: #262626;
-    --muted-foreground: #a3a3a3;
-    --border: #404040;
-    --input: #404040;
-    --ring: #ededed;
+  .neon-border-purple {
+    @apply border-2 border-purple-400 rounded-xl;
+    box-shadow:
+      0 0 10px rgba(168, 85, 247, 0.5),
+      0 0 20px rgba(168, 85, 247, 0.3),
+      0 0 30px rgba(168, 85, 247, 0.1);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+  .neon-border-blue {
+    @apply border-2 border-blue-400 rounded-xl;
+    box-shadow:
+      0 0 10px rgba(59, 130, 246, 0.5),
+      0 0 20px rgba(59, 130, 246, 0.3),
+      0 0 30px rgba(59, 130, 246, 0.1);
+  }
 
-/* Мобильная адаптация для игрового интерфейса */
-@media (max-width: 768px) {
-  /* Убираем скролл на мобильных устройствах */
-  html, body {
+  .neon-border-green {
+    @apply border-2 border-green-400 rounded-xl;
+    box-shadow:
+      0 0 10px rgba(34, 197, 94, 0.5),
+      0 0 20px rgba(34, 197, 94, 0.3),
+      0 0 30px rgba(34, 197, 94, 0.1);
+  }
+
+  .neon-border-orange {
+    @apply border-2 border-orange-400 rounded-xl;
+    box-shadow:
+      0 0 10px rgba(251, 146, 60, 0.5),
+      0 0 20px rgba(251, 146, 60, 0.3),
+      0 0 30px rgba(251, 146, 60, 0.1);
+  }
+
+  .neon-border-red {
+    @apply border-2 border-red-400 rounded-xl;
+    box-shadow:
+      0 0 10px rgba(248, 113, 113, 0.5),
+      0 0 20px rgba(248, 113, 113, 0.3),
+      0 0 30px rgba(248, 113, 113, 0.1);
+  }
+
+  .neon-glow {
+    animation: neon-pulse 2s ease-in-out infinite alternate;
+  }
+
+  .neon-glow-fast {
+    animation: neon-pulse 1s ease-in-out infinite alternate;
+  }
+
+  .liquid-shimmer {
+    position: relative;
     overflow: hidden;
-    height: 100%;
-    touch-action: manipulation;
   }
 
-  /* Адаптация панелей для мобильных */
-  .mobile-panel {
-    max-width: 95vw;
-    max-height: 80vh;
-  }
-
-  /* Улучшенные тач-зоны */
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Адаптация текста */
-  .mobile-text {
-    font-size: 16px; /* Предотвращает зум на iOS */
-  }
-}
-
-/* Анимации для уведомлений */
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes shrink {
-  from {
+  .liquid-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 3s infinite;
+  }
+
+  .glass-button {
+    @apply liquid-glass;
+    @apply border border-cyan-300 border-opacity-30;
+    @apply text-white;
+    @apply transition-all duration-300;
+    @apply hover:border-cyan-400 hover:border-opacity-50;
+    @apply hover:shadow-lg hover:shadow-cyan-400/20;
+    @apply active:scale-95;
+    @apply rounded-xl;
+  }
+
+  .glass-button:hover {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(34, 211, 238, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-input {
+    @apply liquid-glass;
+    @apply border border-cyan-300 border-opacity-20;
+    @apply text-white placeholder-gray-400;
+    @apply focus:border-cyan-400 focus:border-opacity-50;
+    @apply focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-20;
+    @apply rounded-xl;
+  }
+
+  .glass-input:focus {
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.2),
+      0 0 10px rgba(34, 211, 238, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+}
+
+@keyframes neon-pulse {
+  from {
+    box-shadow:
+      0 0 5px rgba(34, 211, 238, 0.3),
+      0 0 10px rgba(34, 211, 238, 0.2),
+      0 0 15px rgba(34, 211, 238, 0.1);
   }
   to {
-    width: 0%;
+    box-shadow:
+      0 0 10px rgba(34, 211, 238, 0.6),
+      0 0 20px rgba(34, 211, 238, 0.4),
+      0 0 30px rgba(34, 211, 238, 0.2);
   }
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
-/* Утилиты для мобильных устройств */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Улучшенная прокрутка */
+/* Кастомный скроллбар */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  scrollbar-color: rgba(34, 211, 238, 0.3) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -185,31 +194,27 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
+  background: rgba(34, 211, 238, 0.3);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.5);
+  background: rgba(34, 211, 238, 0.5);
 }
 
-/* Адаптация для очень маленьких экранов */
-@media (max-width: 480px) {
+/* Динамические стили для интенсивности */
+.intensity-bar {
+  width: var(--intensity-width, 0%);
+}
+
+/* Мобильные панели */
+@media (max-width: 768px) {
   .mobile-panel {
-    max-width: 100vw;
-    max-height: 90vh;
+    @apply w-full max-w-none;
   }
-
-  .mobile-text {
-    font-size: 14px;
-  }
-}
-
-/* Утилиты для тач-устройств */
-.touch-manipulation {
-  touch-action: manipulation;
 }

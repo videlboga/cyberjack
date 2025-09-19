@@ -66,15 +66,15 @@ export function SlidingPanels({
   return (
     <>
       {/* Панель персонажей - выезжает слева */}
-      <div className={`fixed top-0 left-0 h-full w-96 max-w-[95vw] mobile-panel bg-black bg-opacity-90 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 ${
+      <div className={`fixed top-0 left-0 h-full w-96 max-w-[95vw] mobile-panel liquid-glass-panel transform transition-transform duration-300 ease-in-out z-40 ${
         panels.characters ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Персонажи</h2>
+          <div className="flex items-center justify-between p-4 border-b border-cyan-400 border-opacity-30 rounded-t-2xl">
+            <h2 className="text-xl font-semibold text-white">👥 Персонажи</h2>
             <button
               onClick={() => onTogglePanel('characters')}
-              className="text-gray-400 hover:text-white text-2xl"
+              className="text-cyan-400 hover:text-cyan-300 text-2xl transition-colors duration-200 "
             >
               ×
             </button>
@@ -89,20 +89,20 @@ export function SlidingPanels({
       </div>
 
       {/* Панель действий - выезжает справа */}
-      <div className={`fixed top-0 right-0 h-full w-96 max-w-[95vw] mobile-panel bg-black bg-opacity-90 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 ${
+      <div className={`fixed top-0 right-0 h-full w-96 max-w-[95vw] mobile-panel liquid-glass-panel transform transition-transform duration-300 ease-in-out z-40 ${
         panels.actions ? 'translate-x-0' : 'translate-x-full'
       }`}>
         <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Действия</h2>
+          <div className="flex items-center justify-between p-4 border-b border-purple-400 border-opacity-30 rounded-t-2xl">
+            <h2 className="text-xl font-semibold text-white">⚡ Действия</h2>
             <button
               onClick={() => onTogglePanel('actions')}
-              className="text-gray-400 hover:text-white text-2xl"
+              className="text-purple-400 hover:text-purple-300 text-2xl transition-colors duration-200 "
             >
               ×
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             {gameState.selectedCharacter ? (
               <ActionsPanel
                 characterId={gameState.selectedCharacter.id}
@@ -121,20 +121,20 @@ export function SlidingPanels({
       </div>
 
       {/* Панель характеристик - выезжает снизу */}
-      <div className={`fixed bottom-0 left-0 right-0 h-80 max-h-[60vh] bg-black bg-opacity-90 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 ${
+      <div className={`fixed bottom-0 left-0 right-0 h-80 max-h-[60vh] liquid-glass-panel transform transition-transform duration-300 ease-in-out z-40 ${
         panels.characteristics ? 'translate-y-0' : 'translate-y-full'
       }`}>
         <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Характеристики</h2>
+          <div className="flex items-center justify-between p-4 border-b border-green-400 border-opacity-30 rounded-t-2xl">
+            <h2 className="text-xl font-semibold text-white">📊 Характеристики</h2>
             <button
               onClick={() => onTogglePanel('characteristics')}
-              className="text-gray-400 hover:text-white text-2xl"
+              className="text-green-400 hover:text-green-300 text-2xl transition-colors duration-200 "
             >
               ×
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             {gameState.selectedCharacter ? (
               <CharacteristicsPanel
                 character={gameState.selectedCharacter}
@@ -150,20 +150,20 @@ export function SlidingPanels({
       </div>
 
       {/* Панель оборудования - выезжает сверху */}
-      <div className={`fixed top-0 left-0 right-0 h-80 max-h-[60vh] bg-black bg-opacity-90 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 ${
+      <div className={`fixed top-0 left-0 right-0 h-80 max-h-[60vh] liquid-glass-panel transform transition-transform duration-300 ease-in-out z-40 ${
         panels.equipment ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Оборудование</h2>
+          <div className="flex items-center justify-between p-4 border-b border-orange-400 border-opacity-30 rounded-t-2xl">
+            <h2 className="text-xl font-semibold text-white">🎒 Оборудование</h2>
             <button
               onClick={() => onTogglePanel('equipment')}
-              className="text-gray-400 hover:text-white text-2xl"
+              className="text-orange-400 hover:text-orange-300 text-2xl transition-colors duration-200 "
             >
               ×
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             <EquipmentPanel userId={userId} />
           </div>
         </div>

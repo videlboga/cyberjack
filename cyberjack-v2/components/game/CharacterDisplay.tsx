@@ -208,8 +208,8 @@ export function CharacterDisplay({
   if (loading) {
     return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="bg-black bg-opacity-50 text-white px-6 py-4 rounded-lg backdrop-blur-sm">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+        <div className="liquid-glass-card text-white px-6 py-4 rounded-lg neon-border">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto mb-2"></div>
           <p>Загрузка персонажа...</p>
         </div>
       </div>
@@ -219,10 +219,10 @@ export function CharacterDisplay({
   if (!currentImage) {
     return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="bg-black bg-opacity-50 text-white px-6 py-4 rounded-lg backdrop-blur-sm text-center">
+        <div className="liquid-glass-card text-white px-6 py-4 rounded-lg neon-border text-center">
           <div className="text-6xl mb-4">👤</div>
           <p className="text-lg font-semibold">{character.name}</p>
-          <p className="text-sm text-gray-300">Изображение загружается...</p>
+          <p className="text-sm text-cyan-300">Изображение загружается...</p>
         </div>
       </div>
     )
@@ -250,13 +250,13 @@ export function CharacterDisplay({
           return (
             <div
               key={zone.id}
-              className="absolute border border-black hover:border-gray-600 transition-all duration-200 cursor-pointer"
+              className="absolute border-2 border-red-400 hover:border-red-300 transition-all duration-200 cursor-pointer neon-border-red"
               style={{
                 left: `${zone.x}%`,
                 top: `${zone.y}%`,
                 width: `${zone.width}%`,
                 height: `${zone.height}%`
-              }}
+              } as React.CSSProperties}
               onClick={(e) => {
                 e.stopPropagation()
                 onZoneClick(zone.id)
@@ -276,7 +276,7 @@ export function CharacterDisplay({
               title={`${zone.name} - клик для действия, удержание для повторения`}
             >
               {/* Индикатор зоны */}
-              <div className="absolute -top-6 left-0 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+              <div className="absolute -top-6 left-0 liquid-glass-card text-white text-xs px-2 py-1 rounded whitespace-nowrap neon-border-red">
                 {zone.name}
               </div>
             </div>
@@ -285,9 +285,9 @@ export function CharacterDisplay({
 
         {/* Индикатор активных зон */}
         {activeZones && (
-          <div className="absolute top-4 left-4 bg-black bg-opacity-80 text-white px-3 py-1 rounded-lg text-sm">
+          <div className="absolute top-4 left-4 liquid-glass-card text-white px-3 py-1 rounded-xl text-sm neon-border-red">
             🎯 Активные зоны включены
-            <div className="mt-1 text-xs">
+            <div className="mt-1 text-xs text-red-300">
               Клик - действие, удержание - повтор
             </div>
           </div>
@@ -295,15 +295,15 @@ export function CharacterDisplay({
       </div>
 
       {/* Информация о персонаже */}
-      <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg backdrop-blur-sm">
+      <div className="absolute top-4 right-4 liquid-glass-card text-white px-4 py-2 rounded-xl neon-border">
         <div className="text-lg font-semibold">{character.name}</div>
         {poseData && (
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-cyan-300">
             Поза: {poseData.name}
           </div>
         )}
         {character.age && (
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-cyan-300">
             Возраст: {character.age}
           </div>
         )}
@@ -312,17 +312,17 @@ export function CharacterDisplay({
       {/* Переключатель ракурсов */}
       {poseData && poseData.angles.length > 1 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <div className="flex gap-2 bg-black bg-opacity-50 backdrop-blur-sm rounded-lg p-2">
+          <div className="flex gap-2 liquid-glass-card rounded-xl p-2 neon-border">
             {poseData.angles.map((angle) => (
               <button
                 key={angle.id}
                 onClick={() => setCurrentImage(
                   angle.media.images.length > 0 ? angle.media.images[0].url : currentImage
                 )}
-                className={`px-3 py-1 rounded text-sm transition-colors ${
+                className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                   angle.id === currentAngle
-                    ? 'bg-white text-black'
-                    : 'text-white hover:bg-white hover:bg-opacity-20'
+                    ? 'bg-cyan-400 text-black'
+                    : 'text-white hover:bg-cyan-400 hover:bg-opacity-20 hover:text-cyan-300'
                 }`}
               >
                 {angle.name}

@@ -98,30 +98,30 @@ export function SceneDisplay({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] bg-gray-900 border-gray-700 text-white overflow-hidden">
+      <Card className="w-full max-w-4xl max-h-[90vh] liquid-glass-card text-white overflow-hidden neon-border">
         {/* Заголовок сцены */}
-        <CardHeader className="border-b border-gray-700">
+        <CardHeader className="border-b border-cyan-400 border-opacity-30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
+              <div className="p-2 bg-blue-600 rounded-lg neon-border-blue">
                 <Play className="h-5 w-5" />
               </div>
               <div>
-                <CardTitle className="text-xl text-white">{sceneData.name}</CardTitle>
+                <CardTitle className="text-xl text-white ">{sceneData.name}</CardTitle>
                 {sceneData.description && (
-                  <p className="text-gray-400 text-sm mt-1">{sceneData.description}</p>
+                  <p className="text-cyan-300 text-sm mt-1">{sceneData.description}</p>
                 )}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs border-cyan-400 text-cyan-300">
                 {sceneData.type}
               </Badge>
               <Button
                 onClick={onClose}
                 variant="ghost"
                 size="sm"
-                className="text-gray-400 hover:text-white"
+                className="text-cyan-400 hover:text-cyan-300 hover:-fast"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -134,13 +134,13 @@ export function SceneDisplay({
           <div className="space-y-6">
             {/* Текст экрана */}
             {currentScreen.content?.text && (
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div className="liquid-glass-card rounded-lg p-4 border border-green-400 border-opacity-20">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green-600 rounded-lg flex-shrink-0">
+                  <div className="p-2 bg-green-600 rounded-lg flex-shrink-0 neon-border-green">
                     <User className="h-4 w-4" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-white mb-2">{currentScreen.name}</h3>
+                    <h3 className="font-medium text-white mb-2 ">{currentScreen.name}</h3>
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                       {currentScreen.content.text}
                     </p>
@@ -151,7 +151,7 @@ export function SceneDisplay({
 
             {/* Фоновое изображение */}
             {currentScreen.content?.background && (
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div className="liquid-glass-card rounded-lg p-4 border border-blue-400 border-opacity-20">
                 <img
                   src={currentScreen.content.background}
                   alt="Фон сцены"
@@ -162,13 +162,13 @@ export function SceneDisplay({
 
             {/* Фоновая музыка */}
             {currentScreen.content?.music && (
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div className="liquid-glass-card rounded-lg p-4 border border-purple-400 border-opacity-20">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-600 rounded-lg">
+                  <div className="p-2 bg-purple-600 rounded-lg neon-border-purple">
                     <Zap className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-white font-medium">Фоновая музыка</p>
+                    <p className="text-white font-medium ">Фоновая музыка</p>
                     <audio controls className="mt-2">
                       <source src={currentScreen.content.music} type="audio/mpeg" />
                       Ваш браузер не поддерживает аудио элемент.
@@ -181,7 +181,7 @@ export function SceneDisplay({
             {/* Выборы */}
             {currentScreen.choices && currentScreen.choices.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2 ">
                   <ArrowRight className="h-5 w-5" />
                   Ваш выбор:
                 </h3>
@@ -192,13 +192,13 @@ export function SceneDisplay({
                       key={choice.id}
                       onClick={() => handleChoiceClick(choice.id)}
                       disabled={isProcessing}
-                      className="w-full justify-start bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white p-4 h-auto"
+                      className="w-full justify-start glass-button border border-cyan-400 border-opacity-30 text-white p-4 h-auto liquid-shimmer"
                       variant="outline"
                     >
                       <div className="flex items-center gap-3 w-full">
                         <div className="flex-shrink-0">
                           {selectedChoice === choice.id && isProcessing ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-400"></div>
                           ) : (
                             <ArrowRight className="h-4 w-4" />
                           )}
@@ -206,7 +206,7 @@ export function SceneDisplay({
                         <div className="flex-1 text-left">
                           <p className="font-medium">{choice.text}</p>
                           {choice.description && (
-                            <p className="text-sm text-gray-400 mt-1">{choice.description}</p>
+                            <p className="text-sm text-cyan-300 mt-1">{choice.description}</p>
                           )}
                           {choice.consequences && choice.consequences.length > 0 && (
                             <div className="flex items-center gap-1 mt-2">
@@ -227,9 +227,9 @@ export function SceneDisplay({
             {/* Если нет выборов - это финальный экран */}
             {(!currentScreen.choices || currentScreen.choices.length === 0) && (
               <div className="text-center py-8">
-                <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
-                  <p className="text-gray-400 mb-4">Сцена завершена</p>
-                  <Button onClick={onClose} className="bg-blue-600 hover:bg-blue-500">
+                <div className="p-4 liquid-glass-card rounded-lg border border-orange-400 border-opacity-20">
+                  <p className="text-cyan-300 mb-4">Сцена завершена</p>
+                  <Button onClick={onClose} className="glass-button neon-border-blue">
                     Закрыть
                   </Button>
                 </div>

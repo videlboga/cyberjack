@@ -28,9 +28,10 @@ interface ChatPanelProps {
     data?: any
   }) => void
   refreshTrigger?: number // Добавляем триггер для обновления
+  onPoseChange?: () => void // Callback для обновления позы
 }
 
-export function ChatPanel({ characterId, characterName, gameContext, onNotification, refreshTrigger }: ChatPanelProps) {
+export function ChatPanel({ characterId, characterName, gameContext, onNotification, refreshTrigger, onPoseChange }: ChatPanelProps) {
   const { data: session } = useSession()
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
@@ -137,6 +138,14 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
       // Перезагружаем историю чата, чтобы получить актуальные сообщения из базы данных
       await loadChatHistory()
 
+      // Обновляем позу после получения ответа (на случай если была команда позы)
+      if (onPoseChange) {
+        console.log('🔄 Вызываем onPoseChange для обновления позы')
+        onPoseChange()
+      } else {
+        console.log('⚠️ onPoseChange не передан в ChatPanel')
+      }
+
       // Проверяем, есть ли изменения характеристик в метаданных
       if (data.metadata?.characteristicChanges && data.metadata.characteristicChanges.length > 0) {
         data.metadata.characteristicChanges.forEach((change: any) => {
@@ -185,10 +194,10 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
 
   return (
     <div className="h-full flex flex-col bg-transparent">
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
         {messages.length === 0 ? (
           <div className="text-center text-gray-400 py-4">
-            <p className="text-sm">Начните диалог с {characterName}</p>
+            <p className="text-sm ">Начните диалог с {characterName}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -200,8 +209,8 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
                 <div
                   className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${
                     message.isUser
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-100'
+                      ? 'liquid-glass-card border border-blue-400 border-opacity-30 text-white neon-border-blue'
+                      : 'liquid-glass-card border border-cyan-400 border-opacity-30 text-gray-100 neon-border'
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
@@ -210,10 +219,10 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-700 px-3 py-2 rounded-lg">
+                <div className="liquid-glass-card border border-cyan-400 border-opacity-30 px-3 py-2 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-400"></div>
-                    <span className="text-xs text-gray-300">Печатает...</span>
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-cyan-400"></div>
+                    <span className="text-xs text-cyan-300">Печатает...</span>
                   </div>
                 </div>
               </div>
@@ -223,20 +232,20 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
         )}
       </div>
 
-      <div className="flex gap-2 p-3 border-t border-gray-700">
+      <div className="flex gap-2 p-3 border-t border-cyan-400 border-opacity-30">
         <input
           type="text"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Введите сообщение..."
-          className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="flex-1 glass-input px-3 py-2 rounded-md text-sm"
           disabled={isLoading}
         />
         <button
           onClick={sendMessage}
           disabled={isLoading || !inputMessage.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
+          className="glass-button neon-border-blue px-4 py-2 rounded-md text-sm transition-colors liquid-shimmer disabled:opacity-50"
         >
           Отправить
         </button>

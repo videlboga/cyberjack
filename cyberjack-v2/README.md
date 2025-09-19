@@ -92,7 +92,9 @@ npm run restart  # Чистый перезапуск на порту 3000
 
 ### Заполнение тестовыми данными:
 ```bash
-npm run db:seed
+# Тестовые данные уже удалены из проекта
+# Для создания администратора используйте:
+npx tsx scripts/create-admin.ts
 ```
 
 ## 🔧 API
@@ -105,7 +107,9 @@ npm run db:seed
 
 ### Тестирование API:
 ```bash
-npx tsx scripts/test-all-functionality.ts
+# Тестовые скрипты удалены
+# Используйте Prisma Studio для проверки данных:
+npm run db:studio
 ```
 
 ## 📊 Системы
@@ -128,19 +132,18 @@ npx tsx scripts/test-all-functionality.ts
 
 ## 🧪 Тестирование
 
-### Unit тесты:
+### Тестирование:
 ```bash
-npm test
-```
-
-### E2E тесты:
-```bash
-npm run test:e2e
+# Тестовые системы удалены
+# Используйте Prisma Studio для проверки данных:
+npm run db:studio
 ```
 
 ### Тестирование функциональности:
 ```bash
-npx tsx scripts/test-all-functionality.ts
+# Тестовые скрипты удалены
+# Используйте Prisma Studio для проверки данных:
+npm run db:studio
 ```
 
 ## 📝 Разработка
@@ -186,9 +189,12 @@ test: тесты
 ```
 
 ### Документация:
-- `.cursorrules` - Правила для Cursor AI
-- `DEVELOPMENT_GUIDE.md` - Руководство разработчика
-- `CYBERJACK_v2_TECHNICAL_SPECIFICATION.md` - Техническая спецификация
+- `docs/` - Вся документация проекта
+  - `CYBERJACK_v2_TECHNICAL_SPECIFICATION.md` - Техническая спецификация
+  - `DEVELOPMENT_GUIDE.md` - Руководство разработчика
+  - `QUICK_START.md` - Быстрый старт
+  - `DATABASE_SEED_PLAN.md` - План заполнения базы данных
+  - `*_GUIDE.md` - Гайды по различным системам
 
 ## 🔗 Связь с оригинальным проектом
 

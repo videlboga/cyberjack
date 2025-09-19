@@ -88,3 +88,4 @@ function getFileType(filename: string): 'image' | 'video' | 'audio' | null {
 
   return null
 }
+

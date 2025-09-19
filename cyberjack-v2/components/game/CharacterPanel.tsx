@@ -88,15 +88,15 @@ export function CharacterPanel({ onCharacterSelect, selectedId }: CharacterPanel
         <div
           key={character.id}
           onClick={() => onCharacterSelect(character)}
-          className={`p-4 rounded-lg cursor-pointer transition-all duration-200 ${
+          className={`p-4 cursor-pointer transition-all duration-200 ${
             selectedId === character.id
-              ? 'bg-blue-600 border-2 border-blue-400'
-              : 'bg-gray-800 hover:bg-gray-700 border-2 border-transparent'
+              ? 'glass-card neon-border neon-cyan'
+              : 'glass-card hover:glass-card'
           }`}
         >
           <div className="flex items-start gap-3">
             {/* Аватар */}
-            <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 glass-card rounded-full flex items-center justify-center flex-shrink-0">
               {character.avatar ? (
                 <img
                   src={character.avatar}
@@ -104,7 +104,7 @@ export function CharacterPanel({ onCharacterSelect, selectedId }: CharacterPanel
                   className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
-                <span className="text-gray-300 text-lg">👤</span>
+                <span className="text-white/80 text-lg">👤</span>
               )}
             </div>
 
@@ -113,13 +113,13 @@ export function CharacterPanel({ onCharacterSelect, selectedId }: CharacterPanel
               <h3 className="font-semibold text-white truncate">{character.name}</h3>
 
               {character.description && (
-                <p className="text-sm text-gray-300 mt-1 line-clamp-2">
+                <p className="text-sm text-white/80 mt-1 line-clamp-2">
                   {character.description}
                 </p>
               )}
 
               {character.age && (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-white/60 mt-1">
                   Возраст: {character.age}
                 </p>
               )}
@@ -128,22 +128,22 @@ export function CharacterPanel({ onCharacterSelect, selectedId }: CharacterPanel
               <div className="mt-2 space-y-1">
                 {character.characteristics.slice(0, 2).map((char) => (
                   <div key={char.definition.name} className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 w-12 truncate">
+                    <span className="text-xs text-white/60 w-12 truncate">
                       {char.definition.name}:
                     </span>
-                    <div className="flex-1 bg-gray-700 rounded-full h-1.5">
+                    <div className="flex-1 glass-card rounded-full h-1.5">
                       <div
-                        className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${char.currentValue}%` }}
+                        className="bg-gradient-to-r from-cyan-400 to-blue-500 h-1.5 rounded-full transition-all duration-300 intensity-bar"
+                        style={{ '--intensity-width': `${char.currentValue}%` } as React.CSSProperties}
                       ></div>
                     </div>
-                    <span className="text-xs text-gray-400 w-6">
+                    <span className="text-xs text-white/60 w-6">
                       {Math.round(char.currentValue)}
                     </span>
                   </div>
                 ))}
                 {character.characteristics.length > 2 && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-white/50">
                     +{character.characteristics.length - 2} других характеристик
                   </p>
                 )}
@@ -152,7 +152,7 @@ export function CharacterPanel({ onCharacterSelect, selectedId }: CharacterPanel
 
             {/* Индикатор выбора */}
             {selectedId === character.id && (
-              <div className="text-blue-400 text-xl">✓</div>
+              <div className="neon-text neon-cyan text-xl">✓</div>
             )}
           </div>
         </div>

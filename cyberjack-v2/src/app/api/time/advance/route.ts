@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
+      console.log('No session or user ID')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -17,6 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { minutes, reason } = await request.json()
+    console.log(`Advancing time for user ${session.user.id}: +${minutes} minutes`)
 
     if (typeof minutes !== 'number' || minutes <= 0) {
       return NextResponse.json(
@@ -30,6 +32,8 @@ export async function POST(request: NextRequest) {
 
     const gameTime = await timeSystem.getGameTime(session.user.id)
     const formattedTime = await timeSystem.getFormattedTime(session.user.id)
+
+    console.log(`Time advanced successfully. New time: ${gameTime} minutes (${formattedTime})`)
 
     return NextResponse.json({
       gameTime,
