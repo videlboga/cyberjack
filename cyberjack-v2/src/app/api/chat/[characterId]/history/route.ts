@@ -17,15 +17,15 @@ export async function GET(
       )
     }
 
-    // Получаем последние 100 сообщений чата
+    // Получаем последние сообщения чата (до 200, начиная с самых свежих)
     const chatHistory = await prisma.chatMessage.findMany({
       where: {
         characterId
       },
       orderBy: {
-        createdAt: 'asc'
+        createdAt: 'desc'
       },
-      take: 100,
+      take: 200,
       select: {
         id: true,
         content: true,
@@ -35,7 +35,8 @@ export async function GET(
       }
     })
 
-    return NextResponse.json(chatHistory)
+    // Возвращаем в хронологическом порядке
+    return NextResponse.json(chatHistory.reverse())
   } catch (error) {
     console.error('Ошибка получения истории чата:', error)
     return NextResponse.json(

@@ -254,6 +254,7 @@ ${formattedPoses}
 - Определяй эмоциональное состояние говорящего
 - Выделяй ключевые слова, связанные с игровой механикой
 - Для poseCommands выбирай подходящую позу из списка доступных и возвращай "poseId" (обязательно) и "poseKey" (если уверен)
+- Не предлагай смену позы, если пользователь лишь спрашивает о текущей позе или обсуждает позы без явной команды
 - Для characteristicInfluences анализируй влияние на характеристики персонажа
 - Для actionTriggers определяй подразумеваемые действия
 - Для fetishElements ищи фетиш-элементы: невинность, покорность, чувствительность, агрессивность, унижение, бондаж, доминирование
@@ -406,13 +407,15 @@ ${formattedPoses}
         ? raw.modifiers.filter((item: unknown): item is string => typeof item === 'string')
         : undefined
 
+      const isExplicit = raw.isExplicit === false ? false : true
+
       normalized.push({
         poseId: matchedPose?.poseId ?? poseId,
         poseKey: matchedPose?.poseKey ?? poseKeyCandidate,
         poseName,
         command,
         confidence,
-        isExplicit: typeof raw.isExplicit === 'boolean' ? raw.isExplicit : !!command,
+        isExplicit,
         modifiers: modifiers && modifiers.length > 0 ? modifiers : undefined
       })
     }
@@ -627,6 +630,7 @@ ${posesList}
 - Всегда указывай poseId, если поза выбрана из списка
 - Если уверен в текстовом ключе, продублируй его в poseKey
 - Включай только позы с confidence > 0.3
+- Не возвращай команду, если пользователь спрашивает о позе или обсуждает её без явного запроса сменить
 - Если нет команд поз, верни пустой массив`
 
       const response = await this.callGeminiForAnalysis(prompt)

@@ -38,13 +38,20 @@ export function AngleSwitcher({
   const [loading, setLoading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
 
+  useEffect(() => {
+    if (!currentPoseId) {
+      setAngles([])
+      setCurrentIndex(0)
+    }
+  }, [currentPoseId])
+
 
   // Загружаем доступные ракурсы для текущей позы
   useEffect(() => {
     if (characterId && userId) {
       loadAngles()
     }
-  }, [characterId, userId])
+  }, [characterId, userId, currentPoseId])
 
   // Обновляем индекс при изменении текущего ракурса
   useEffect(() => {
@@ -65,6 +72,16 @@ export function AngleSwitcher({
       if (response.ok) {
         const data = await response.json()
         setAngles(data)
+
+        if (data.length > 0) {
+          const currentIdx = currentAngleId
+            ? data.findIndex((angle: Angle) => angle.id === currentAngleId)
+            : -1
+
+          setCurrentIndex(currentIdx >= 0 ? currentIdx : 0)
+        } else {
+          setCurrentIndex(0)
+        }
       } else {
         console.error('Ошибка загрузки ракурсов:', response.statusText)
       }

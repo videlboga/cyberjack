@@ -9,6 +9,9 @@ import { EnhancedMessageAnalyzer } from './enhanced-message-analyzer'
 import { ActionMessageSystemManager } from './action-message-system'
 import { ActivePosesSystem } from '../core/poses/active-poses-system'
 import { serverLogger, LogCategory } from '../utils/server-logger'
+import { CharacterContextService } from './services/context-service'
+import { PoseService } from './services/pose-service'
+import { CharacterEffectsService } from './services/effects-service'
 import {
   CharacterAIService as ICharacterAIService,
   AIResponse,
@@ -31,6 +34,9 @@ export class CharacterAIService implements ICharacterAIService {
   private messageAnalyzer: EnhancedMessageAnalyzer
   private actionMessageSystem: ActionMessageSystemManager
   private activePosesSystem: ActivePosesSystem
+  private contextService: CharacterContextService
+  private poseService: PoseService
+  private effectsService: CharacterEffectsService
   private metrics: CharacterAIMetrics
   // Кэши для оптимизации производительности
   private promptCache: Map<string, { prompt: string, timestamp: number, ttl: number }> = new Map()
@@ -62,6 +68,18 @@ export class CharacterAIService implements ICharacterAIService {
     this.promptSystem = new PromptSystem()
     this.memoryManager = new CharacterMemoryManager()
     this.responseManager = new CharacterResponseManager()
+    this.contextService = new CharacterContextService({
+      memoryManager: this.memoryManager,
+      promptSystem: this.promptSystem,
+      getConfig: () => this.config
+    })
+    this.poseService = new PoseService({
+      memoryManager: this.memoryManager
+    })
+    this.effectsService = new CharacterEffectsService({
+      memoryManager: this.memoryManager,
+      actionMessageSystem: this.actionMessageSystem
+    })
 
     try {
       console.log('🚀 Пытаемся инициализировать EnhancedMessageAnalyzer...')
@@ -149,7 +167,11 @@ export class CharacterAIService implements ICharacterAIService {
     }
 
     // Создаем новый промпт
-    const fullContext = await this.getCharacterContextWithDynamicPrompts(characterId, userId, context)
+    const fullContext = await this.contextService.getCharacterContextWithDynamicPrompts(
+      characterId,
+      userId,
+      context
+    )
     const prompt = await this.promptSystem.buildPrompt(fullContext)
 
     // Сохраняем в кэш (TTL 5 минут)
@@ -297,8 +319,16 @@ export class CharacterAIService implements ICharacterAIService {
     this.metrics.totalRequests++
 
     try {
+      if (context.userId) {
+        await this.saveUserMessage(characterId, userMessage, context.userId)
+      }
+
       // Получаем полный контекст с динамическими промптами (с кэшированием)
-      const fullContext = await this.getCharacterContextWithDynamicPrompts(characterId, context.userId || '', context)
+      const fullContext = await this.contextService.getCharacterContextWithDynamicPrompts(
+        characterId,
+        context.userId || '',
+        context
+      )
 
       // Анализируем сообщение пользователя с расширенным анализом (с кэшированием)
       serverLogger.info(LogCategory.AI, 'Начинаем анализ сообщения', {
@@ -391,7 +421,21 @@ export class CharacterAIService implements ICharacterAIService {
       })
 
       // Graceful degradation - возвращаем контекстный ответ вместо общей ошибки
-      return this.generateFallbackResponse(userMessage, characterId, context, startTime)
+      const fallbackResponse = this.generateFallbackResponse(userMessage, characterId, context, startTime)
+
+      try {
+        if (context.userId) {
+          await this.saveResponseToChat(characterId, userMessage, fallbackResponse.message, context.userId)
+        }
+      } catch (saveError) {
+        serverLogger.error(LogCategory.AI, 'Не удалось сохранить fallback сообщение в чат', {
+          characterId,
+          userId: context.userId,
+          error: saveError instanceof Error ? saveError.message : 'Неизвестная ошибка'
+        })
+      }
+
+      return fallbackResponse
     }
   }
 
@@ -452,7 +496,6 @@ export class CharacterAIService implements ICharacterAIService {
     }
   }
 
-
   // Генерация ответа персонажа без анализа (для системных сообщений)
   async generateResponseWithoutAnalysis(
     characterId: string,
@@ -463,8 +506,16 @@ export class CharacterAIService implements ICharacterAIService {
     this.metrics.totalRequests++
 
     try {
+      if (context.userId) {
+        await this.saveUserMessage(characterId, userMessage, context.userId)
+      }
+
       // Получаем полный контекст с динамическими промптами
-      const fullContext = await this.getCharacterContextWithDynamicPrompts(characterId, context.userId || '', context)
+      const fullContext = await this.contextService.getCharacterContextWithDynamicPrompts(
+        characterId,
+        context.userId || '',
+        context
+      )
 
       // НЕ анализируем сообщение - это системное сообщение
 
@@ -476,7 +527,9 @@ export class CharacterAIService implements ICharacterAIService {
       )
 
       // Сохраняем ответ в чат
-      await this.saveResponseToChat(characterId, userMessage, aiResponse.message, context.userId || '')
+      if (context.userId) {
+        await this.saveResponseToChat(characterId, userMessage, aiResponse.message, context.userId)
+      }
 
       // Обновляем метрики
       this.metrics.totalResponses++
@@ -509,240 +562,18 @@ export class CharacterAIService implements ICharacterAIService {
   }
 
   // Получить боевую копию персонажа пользователя
-  private async getCharacterCopy(characterId: string, userId: string) {
-    const characterCopy = await prisma.characterCopy.findUnique({
-      where: {
-        userId_characterId: {
-          userId,
-          characterId
-        }
-      },
-      include: {
-        characteristics: {
-          include: {
-            definition: true
-          }
-        },
-        character: {
-          include: {
-            anatomy: {
-              include: {
-                definition: true
-              }
-            },
-            poses: {
-              include: {
-                definition: true,
-                angles: {
-                  include: {
-                    zones: {
-                      include: {
-                        anatomy: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if (!characterCopy) {
-      throw new Error('Персональная копия персонажа не найдена')
-    }
-
-    return characterCopy
-  }
-
   // Получить контекст персонажа
   async getCharacterContext(characterId: string, userId: string, gameContext?: any): Promise<PromptContext> {
-    const characterCopy = await this.getCharacterCopy(characterId, userId)
-    const baseCharacter = characterCopy.character
-    const user = await this.getUser(userId)
-
-    const characteristicNameMap = new Map<string, { name: string; category: string }>()
-
-    for (const char of characterCopy.characteristics) {
-      characteristicNameMap.set(char.characteristicDefId, {
-        name: char.definition.name,
-        category: char.definition.category
-      })
-    }
-
-    const characteristics = characterCopy.characteristics.map(char => ({
-      id: char.id,
-      name: char.definition.name,
-      category: char.definition.category,
-      currentValue: char.currentValue,
-      baseValue: char.baseValue,
-      isRevealed: true,
-      revealedValue: char.currentValue,
-      accuracy: 100
-    }))
-
-    const memory = await this.memoryManager.getMemoryContext(characterId)
-
-    let poseContext: any = undefined
-    const copySettings = characterCopy.settings as Record<string, any> | null
-
-    if (typeof copySettings?.currentPose === 'string') {
-      const currentPoseId = copySettings.currentPose as string
-      const userPose = await prisma.characterPose.findUnique({
-        where: { id: currentPoseId },
-        include: {
-          definition: true,
-          angles: {
-            include: {
-              zones: {
-                include: {
-                  anatomy: true
-                }
-              }
-            }
-          }
-        }
-      })
-
-      if (userPose) {
-        const currentAngleId = typeof copySettings?.currentAngle === 'string' ? (copySettings.currentAngle as string) : undefined
-        const currentAngle = userPose.angles.find(angle => angle.id === currentAngleId) || userPose.angles[0]
-
-        poseContext = {
-          id: userPose.id,
-          name: userPose.definition.name,
-          category: userPose.definition.category,
-          description: userPose.definition.description,
-          currentAngle: currentAngle?.name || 'default',
-          activeZones: currentAngle?.zones.map(zone => ({
-            id: zone.id,
-            name: zone.name,
-            anatomyId: zone.anatomyDefId,
-            anatomyName: zone.anatomy?.name,
-            sensitivity: 50, // TODO: Добавить чувствительность в схему
-            isActive: true
-          })) || []
-        }
-      }
-    }
-
-    if (!poseContext) {
-      serverLogger.debug(LogCategory.AI, 'Ищем активную позу персонажа', {
-        characterId,
-        totalPoses: baseCharacter.poses.length,
-        activePoses: baseCharacter.poses.filter(pose => pose.isActive).length
-      })
-
-      let currentPose = baseCharacter.poses.find(pose => pose.isActive && pose.definition.name === 'Стоя')
-      if (!currentPose) {
-        currentPose = baseCharacter.poses.find(pose => pose.isActive)
-      }
-      if (currentPose) {
-        serverLogger.debug(LogCategory.AI, 'Найдена активная поза', {
-          characterId,
-          poseId: currentPose.id,
-          poseName: currentPose.definition.name,
-          anglesCount: currentPose.angles.length
-        })
-
-        poseContext = {
-          id: currentPose.id,
-          name: currentPose.definition.name,
-          category: currentPose.definition.category,
-          description: currentPose.definition.description,
-          currentAngle: currentPose.angles[0]?.name || 'default',
-          activeZones: currentPose.angles[0]?.zones.map(zone => ({
-            id: zone.id,
-            name: zone.name,
-            anatomyId: zone.anatomyDefId,
-            anatomyName: zone.anatomy?.name,
-            sensitivity: 50, // TODO: Добавить чувствительность в схему
-            isActive: true
-          })) || []
-        }
-      } else {
-        serverLogger.warn(LogCategory.AI, 'Не найдена активная поза', {
-          characterId,
-          totalPoses: baseCharacter.poses.length,
-          poses: baseCharacter.poses.map(p => ({ id: p.id, name: p.definition.name, isActive: p.isActive }))
-        })
-      }
-    }
-
-    const lastAction = await this.getLastAction(characterId, userId, characteristicNameMap)
-    const sessionHistory = await this.getSessionHistory(characterId, userId)
-
-    const environment = {
-      timeOfDay: 'день',
-      location: 'комната',
-      atmosphere: 'интимная',
-      temperature: 'комфортная',
-      lighting: 'приглушенная',
-      sounds: ['тишина'],
-      smells: ['легкий аромат']
-    }
-
-    return {
-      characterId,
-      userId,
-      message: '',
-      character: {
-        id: baseCharacter.id,
-        name: baseCharacter.name,
-        description: baseCharacter.description || undefined,
-        age: baseCharacter.age || undefined,
-        avatar: baseCharacter.avatar || undefined
-      },
-      characteristics,
-      memory,
-      currentPose: poseContext,
-      lastAction,
-      userModifiers: (user?.modifiers as Record<string, number>) || {},
-      gameTime: Date.now(),
-      sessionHistory,
-      environment
-    }
+    return this.contextService.getCharacterContext(characterId, userId, gameContext)
   }
 
   // Получить контекст персонажа с динамическими промптами
-  async getCharacterContextWithDynamicPrompts(characterId: string, userId: string, gameContext?: any): Promise<PromptContext> {
-    const context = await this.getCharacterContext(characterId, userId, gameContext)
-
-    // Создаем динамические промпты на основе текущего состояния
-    if (this.config.enablePromptOptimization) {
-      try {
-        // Анализируем характеристики для определения контекста
-        const avgValue = context.characteristics.reduce((sum, char) => sum + char.currentValue, 0) / context.characteristics.length
-        let characteristicContext: 'high' | 'low' | 'extreme' | 'normal' = 'normal'
-
-        if (avgValue >= 80) {
-          characteristicContext = 'high'
-        } else if (avgValue <= 30) {
-          characteristicContext = 'low'
-        } else if (avgValue >= 90 || avgValue <= 10) {
-          characteristicContext = 'extreme'
-        }
-
-        // Создаем динамические промпты
-        await this.promptSystem.createCharacteristicPrompt(characterId, characteristicContext)
-        await this.promptSystem.createPosePrompt(characterId)
-        await this.promptSystem.createCombinedPrompt(characterId, 'interaction')
-      } catch (error) {
-        console.warn('Ошибка при создании динамических промптов:', error)
-      }
-    }
-
-    return context
-  }
-
-  // Получить пользователя
-  private async getUser(userId: string) {
-    if (!userId) return null
-
-    return await prisma.user.findUnique({
-      where: { id: userId }
-    })
+  async getCharacterContextWithDynamicPrompts(
+    characterId: string,
+    userId: string,
+    gameContext?: any
+  ): Promise<PromptContext> {
+    return this.contextService.getCharacterContextWithDynamicPrompts(characterId, userId, gameContext)
   }
 
 
@@ -1105,9 +936,13 @@ export class CharacterAIService implements ICharacterAIService {
 
       // Обрабатываем команды поз - выполняем только команду с наивысшим confidence
       if (analysis.poseCommands.length > 0) {
+        serverLogger.debug(LogCategory.AI, 'Получены команды поз из анализа', {
+          characterId,
+          poseCommands: analysis.poseCommands
+        })
         // Сортируем по confidence и берем только команды выше порога
         const validPoseCommands = analysis.poseCommands
-          .filter(cmd => cmd.confidence > 0.5)
+          .filter(cmd => cmd.confidence >= 0.4 && cmd.isExplicit !== false)
           .sort((a, b) => b.confidence - a.confidence)
 
         if (validPoseCommands.length > 0) {
@@ -1121,12 +956,12 @@ export class CharacterAIService implements ICharacterAIService {
             totalCommands: analysis.poseCommands.length,
             validCommands: validPoseCommands.length
           })
-          await this.executePoseCommand(characterId, bestPoseCommand, userId)
+          await this.poseService.executePoseCommand(characterId, bestPoseCommand, userId)
         } else {
           serverLogger.info(LogCategory.AI, 'Нет команд поз выше порога', {
             characterId,
             totalCommands: analysis.poseCommands.length,
-            threshold: 0.5
+            threshold: 0.4
           })
         }
       }
@@ -1134,7 +969,7 @@ export class CharacterAIService implements ICharacterAIService {
       // Обрабатываем влияние на характеристики
       for (const influence of analysis.characteristicInfluences) {
         if (influence.confidence > 0.3) { // Понизили порог с 0.5 до 0.3
-          const change = await this.applyCharacteristicInfluence(characterId, influence)
+          const change = await this.effectsService.applyCharacteristicInfluence(characterId, influence)
           if (change) {
             characteristicChanges.push(change)
           }
@@ -1144,14 +979,14 @@ export class CharacterAIService implements ICharacterAIService {
       // Обрабатываем триггеры действий
       for (const trigger of analysis.actionTriggers) {
         if (trigger.confidence > 0.6) {
-          await this.executeActionTrigger(characterId, userId, trigger)
+          await this.effectsService.executeActionTrigger(characterId, userId, trigger)
         }
       }
 
       // Обрабатываем изменения настроения
       for (const moodChange of analysis.moodChanges) {
         if (moodChange.confidence > 0.5) {
-          await this.applyMoodChange(characterId, moodChange)
+          await this.effectsService.applyMoodChange(characterId, moodChange)
         }
       }
 
@@ -1171,161 +1006,6 @@ export class CharacterAIService implements ICharacterAIService {
     }
 
     return characteristicChanges
-  }
-
-  // Выполнение команды позы
-  private async executePoseCommand(characterId: string, poseCommand: PoseCommand, userId: string): Promise<void> {
-    try {
-  // ...existing code...
-
-      let characterPose = poseCommand.poseId
-        ? await prisma.characterPose.findUnique({
-            where: {
-              characterId_poseDefId: {
-                characterId,
-                poseDefId: poseCommand.poseId
-              }
-            },
-            include: {
-              definition: true,
-              angles: true
-            }
-          })
-        : null
-
-      let cachedPoses: any[] | null = null
-
-  // ...existing code...
-    } catch (error) {
-      serverLogger.error(LogCategory.AI, 'Ошибка при выполнении команды позы', {
-        characterId,
-        poseCommand,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
-    }
-  }
-
-  // Применение влияния на характеристики
-  private async applyCharacteristicInfluence(
-    characterId: string,
-    influence: any
-  ): Promise<any> {
-    try {
-      console.log('🎯 Применяем влияние на характеристику:', {
-        characterId,
-        characteristicName: influence.characteristicName,
-        influence: influence.influence,
-        confidence: influence.confidence,
-        reason: influence.reason
-      })
-
-      // Находим характеристику
-      const characteristic = await prisma.characteristic.findFirst({
-        where: {
-          characterId,
-          definition: {
-            name: {
-              contains: influence.characteristicName,
-              mode: 'insensitive'
-            }
-          }
-        },
-        include: {
-          definition: true
-        }
-      })
-
-      if (characteristic) {
-        const oldValue = characteristic.currentValue
-        // Применяем изменение
-        const newValue = Math.max(0, Math.min(100,
-          characteristic.currentValue + influence.influence
-        ))
-
-        await prisma.characteristic.update({
-          where: { id: characteristic.id },
-          data: {
-            currentValue: newValue,
-            lastChanged: new Date()
-          }
-        })
-
-        console.log('✅ Характеристика изменена:', {
-          characteristicName: influence.characteristicName,
-          oldValue,
-          newValue,
-          change: influence.influence
-        })
-
-        // Создаем воспоминание
-        await this.memoryManager.createCharacteristicChangeMemory(
-          characterId,
-          influence.characteristicName,
-          characteristic.currentValue,
-          newValue,
-          influence.reason
-        )
-
-        // Возвращаем информацию об изменении
-        return {
-          name: influence.characteristicName,
-          oldValue,
-          newValue,
-          change: influence.influence
-        }
-      }
-    } catch (error) {
-      console.error('Ошибка при применении влияния на характеристику:', error)
-    }
-    return null
-  }
-
-  // Выполнение триггера действия
-  private async executeActionTrigger(
-    characterId: string,
-    userId: string,
-    trigger: any
-  ): Promise<void> {
-    try {
-      // Находим действие
-      const action = await prisma.action.findFirst({
-        where: {
-          name: {
-            contains: trigger.actionName,
-            mode: 'insensitive'
-          },
-          isActive: true
-        }
-      })
-
-      if (action) {
-        // Регистрируем действие в системе сообщений
-        await this.actionMessageSystem.registerAction(
-          characterId,
-          userId,
-          action.name,
-          trigger.intensity || 50,
-          trigger.targetZone
-        )
-      }
-    } catch (error) {
-      console.error('Ошибка при выполнении триггера действия:', error)
-    }
-  }
-
-  // Применение изменения настроения
-  private async applyMoodChange(characterId: string, moodChange: any): Promise<void> {
-    try {
-      // Создаем эмоциональное воспоминание
-      await this.memoryManager.createEmotionalMemory(
-        characterId,
-        moodChange.moodType,
-        moodChange.trigger,
-        Math.abs(moodChange.change)
-      )
-    } catch (error) {
-      console.error('Ошибка при применении изменения настроения:', error)
-    }
   }
 
   // Методы для работы с системой действий-сообщений
@@ -1389,6 +1069,44 @@ export class CharacterAIService implements ICharacterAIService {
   }
 
   // Сохранение ответа в чат
+  private async saveUserMessage(
+    characterId: string,
+    userMessage: string,
+    userId: string
+  ): Promise<void> {
+    try {
+      const isSystemMessage = userMessage.includes('К тебе было применено действие') ||
+        userMessage.includes('Это вызвало:') ||
+        userMessage.includes('Как ты реагируешь на это действие?')
+
+      if (isSystemMessage) {
+        return
+      }
+
+      await prisma.chatMessage.create({
+        data: {
+          content: userMessage,
+          senderId: userId,
+          characterId,
+          messageType: 'user',
+          emotionalTone: 'neutral'
+        }
+      })
+
+      serverLogger.debug(LogCategory.AI, 'Сообщение пользователя сохранено', {
+        characterId,
+        userId,
+        messageLength: userMessage.length
+      })
+    } catch (error) {
+      serverLogger.error(LogCategory.AI, 'Ошибка при сохранении сообщения пользователя', {
+        characterId,
+        userId,
+        error: error instanceof Error ? error.message : 'Неизвестная ошибка'
+      })
+    }
+  }
+
   private async saveResponseToChat(
     characterId: string,
     userMessage: string,
@@ -1403,24 +1121,6 @@ export class CharacterAIService implements ICharacterAIService {
 
       if (!aiSystemUser) {
         throw new Error('Системный пользователь ИИ не найден')
-      }
-
-      // Проверяем, является ли сообщение системным (о действии)
-      const isSystemMessage = userMessage.includes('К тебе было применено действие') ||
-                              userMessage.includes('Это вызвало:') ||
-                              userMessage.includes('Как ты реагируешь на это действие?')
-
-      // Сохраняем сообщение пользователя только если это НЕ системное сообщение
-      if (!isSystemMessage) {
-        await prisma.chatMessage.create({
-          data: {
-            content: userMessage,
-            senderId: userId,
-            characterId,
-            messageType: 'user',
-            emotionalTone: 'neutral'
-          }
-        })
       }
 
       // Сохраняем ответ ИИ
@@ -1439,7 +1139,7 @@ export class CharacterAIService implements ICharacterAIService {
         userId,
         userMessageLength: userMessage.length,
         aiResponseLength: aiResponse.length,
-        isSystemMessage
+        isSystemMessage: false
       })
     } catch (error) {
       serverLogger.error(LogCategory.AI, 'Ошибка при сохранении ответа в чат', {
@@ -1450,115 +1150,4 @@ export class CharacterAIService implements ICharacterAIService {
     }
   }
 
-  private async getLastAction(
-    characterId: string,
-    userId: string,
-    characteristicNameMap: Map<string, { name: string; category: string }>
-  ): Promise<any> {
-    try {
-      const lastAction = await prisma.actionLog.findFirst({
-        where: {
-          characterId,
-          userId
-        },
-        orderBy: {
-          timestamp: 'desc'
-        },
-        include: {
-          action: {
-            select: {
-              id: true,
-              name: true,
-              category: true,
-              description: true
-            }
-          }
-        }
-      })
-
-      if (!lastAction) return null
-
-      let zoneData: any = null
-      if (lastAction.zoneId) {
-        try {
-          const zone = await prisma.characterActiveZone.findUnique({
-            where: { id: lastAction.zoneId },
-            include: {
-              anatomy: true
-            }
-          })
-
-          if (zone) {
-            zoneData = {
-              id: zone.id,
-              name: zone.name,
-              anatomyId: zone.anatomyDefId,
-              anatomyName: zone.anatomy?.name || null
-            }
-          }
-        } catch (error) {
-          console.warn('Не удалось получить информацию о зоне из ActionLog:', error)
-        }
-      }
-
-      const effects = Array.isArray(lastAction.effects)
-        ? (lastAction.effects as Array<{ characteristicId: string; change: number; permanent: boolean }>).map(effect => ({
-            ...effect,
-            characteristicName: characteristicNameMap.get(effect.characteristicId)?.name || null,
-            characteristicCategory: characteristicNameMap.get(effect.characteristicId)?.category || null
-          }))
-        : []
-
-      return {
-        id: lastAction.id,
-        actionId: lastAction.actionId,
-        actionName: lastAction.action.name,
-        actionCategory: lastAction.action.category,
-        actionDescription: lastAction.action.description,
-        intensity: lastAction.intensity,
-        duration: lastAction.duration,
-        timestamp: lastAction.timestamp,
-        zone: zoneData,
-        effects,
-        success: lastAction.success
-      }
-    } catch (error) {
-      console.error('Ошибка при получении последнего действия:', error)
-      return null
-    }
-  }
-
-  private async getSessionHistory(characterId: string, userId: string): Promise<any[]> {
-    try {
-      const recentMessages = await prisma.chatMessage.findMany({
-        where: {
-          characterId,
-          senderId: userId
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        take: 10, // Последние 10 сообщений
-        select: {
-          id: true,
-          content: true,
-          messageType: true,
-          emotionalTone: true,
-          createdAt: true
-        }
-      })
-
-      // Преобразуем в нужный формат
-      return recentMessages.reverse().map(msg => ({
-        id: msg.id,
-        content: msg.content,
-        isUser: msg.messageType === 'user',
-        timestamp: msg.createdAt,
-        emotionalTone: msg.emotionalTone
-      }))
-    } catch (error) {
-      console.error('Ошибка при получении истории сессии:', error)
-      return []
-    }
-  }
 }
