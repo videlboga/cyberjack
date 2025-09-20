@@ -11,6 +11,7 @@ import { SimplePoseSystem } from '../poses/simple-pose-system'
 import { TimeSystem } from '../time/time-system'
 import { ActionEffect, ActionResult } from '@/types/database'
 import { FormulaExecutionContext } from '../formulas/types/formula-context'
+import { FormulaResult } from '../formulas/types/formula-result'
 import { CharacterMemoryManager } from '../../character/memory-manager'
 import { MemoryType } from '@/types/character-ai'
 import { serverLogger, LogCategory } from '@/lib/utils/server-logger'
@@ -28,6 +29,8 @@ export class ActionsSystem {
   private memoryManager: CharacterMemoryManager
   private aiService: CharacterAIService | null
   private characteristicInterpreter: CharacteristicInterpreter
+  // Кэш для предотвращения дублирования AI запросов
+  private aiRequestCache: Map<string, { timestamp: number, actionCount: number }> = new Map()
 
   constructor() {
     this.formulaSystem = new FormulaSystem()
@@ -113,26 +116,54 @@ export class ActionsSystem {
     }
 
     // Вычислить эффекты действия через формулу
-    const effects = await this.calculateEffectsWithFormula(
+    const characterCopy = await prisma.characterCopy.findFirst({
+      where: {
+        characterId,
+        userId
+      },
+      include: {
+        character: {
+          include: {
+            anatomy: {
+              include: {
+                definition: true
+              }
+            }
+          }
+        },
+        characteristics: {
+          include: {
+            definition: true
+          }
+        }
+      }
+    })
+
+    if (!characterCopy) {
+      throw new Error('Копия персонажа не найдена')
+    }
+
+    let appliedEffects = await this.calculateFormulaEffectsForCopy(
       action,
-      character,
+      characterCopy,
       user,
-      zoneId || '',
-      durationSeconds
+      zoneId,
+      durationSeconds,
+      action.intensity
     )
 
-    // Применить эффекты
-    for (const effect of effects) {
-      await this.characteristicsSystem.changeValue(
-        characterId,
-        effect.characteristicId,
-        effect.change,
-        effect.permanent || false,
-        userId
+    if (!appliedEffects.length) {
+      appliedEffects = this.calculateSimpleEffectsForCopy(
+        action,
+        characterCopy,
+        user,
+        action.intensity,
+        durationSeconds
       )
     }
 
-    // Создать запись о действии
+    await this.applyEffectsToCharacterCopy(characterCopy, appliedEffects, userId, characterId)
+
     await this.logAction(
       actionId,
       characterId,
@@ -140,12 +171,12 @@ export class ActionsSystem {
       zoneId,
       durationSeconds,
       action.intensity,
-      effects
+      appliedEffects
     )
 
     return {
       success: true,
-      effects,
+      effects: appliedEffects,
       message: `Действие "${action.name}" выполнено за ${durationSeconds}с`
     }
   }
@@ -204,203 +235,255 @@ export class ActionsSystem {
     }
   }
 
-  // Вычислить эффекты действия через формулу
-  private async calculateEffectsWithFormula(
+  private async calculateFormulaEffectsForCopy(
     action: any,
-    character: any,
+    characterCopy: any,
     user: any,
-    zoneId: string,
-    durationSeconds: number
+    zoneId: string | undefined,
+    durationSeconds: number,
+    intensity: number
   ): Promise<ActionEffect[]> {
-    const effects: ActionEffect[] = []
-
-    // Получить зону если указана
-    const zone = zoneId ? await this.getZone(zoneId) : null
-
-    // Применить модификаторы поз к действию
-    const modifiedAction = await this.applyPoseModifiersToAction(action, character.id, user.id)
-
-    // Создать контекст для формулы
-    const context: FormulaExecutionContext = {
-      character: {
-        id: character.id,
-        name: character.name,
-        characteristics: this.formatCharacterCharacteristics(character.characteristics),
-        anatomy: this.formatCharacterAnatomyForContext(character.anatomy)
-      },
-      user: {
-        id: user.id,
-        name: user.name,
-        modifiers: user.modifiers || {},
-        credits: user.credits || 0
-      },
-      action: {
-        id: modifiedAction.id,
-        name: modifiedAction.name,
-        intensity: modifiedAction.intensity,
-        cost: 0, // больше не используется
-        duration: durationSeconds,
-        category: modifiedAction.category,
-        effects: modifiedAction.formula || {}
-      },
-      zone: zone ? {
-        id: zone.id,
-        name: zone.name,
-        sensitivity: this.getZoneSensitivity(zone, character.anatomy),
-        anatomy: {
-          id: zone.anatomyDefId || '',
-          name: zone.anatomy?.name || '',
-          category: zone.anatomy?.category || ''
-        },
-        coordinates: {
-          x: zone.x,
-          y: zone.y,
-          width: zone.width,
-          height: zone.height
-        }
-      } : undefined,
-      system: {
-        gameTime: await this.getCurrentGameTime(user.id),
-        realTime: Date.now(),
-        isActionHolding: true,
-        timeMultiplier: 1.0
-      },
-      custom: {}
+    if (!action.formula || Object.keys(action.formula).length === 0 || !action.formula.rootNode) {
+      return []
     }
 
-    // Выполнить формулу если она есть
-    if (action.formula && Object.keys(action.formula).length > 0) {
-      try {
-        // Логируем формулу для отладки
-        console.log('🔍 Формула действия:', JSON.stringify(action.formula, null, 2))
+    try {
+      const zone = zoneId ? await this.getZone(zoneId) : null
+      const baseCharacter = characterCopy.character
+      const modifiedAction = await this.applyPoseModifiersToAction(action, characterCopy.characterId, user.id)
+      const effectiveIntensity = intensity ?? modifiedAction.intensity ?? action.intensity ?? 50
+      const settings = (characterCopy.settings as Record<string, any>) || {}
 
-        // Проверяем, является ли это структурированной формулой или простыми эффектами
-        if (action.formula.rootNode) {
-          // Это новая структурированная формула
-          console.log('📊 Обрабатываем структурированную формулу')
-
-          const formulaResult = await this.formulaSystem.executeFormula(
-            action.formula,
-            context
-          )
-          console.log('📊 Результат формулы:', JSON.stringify(formulaResult, null, 2))
-
-          // Преобразовать результат формулы в эффекты
-          if (formulaResult.value && typeof formulaResult.value === 'object') {
-            // Новая структурированная формула возвращает эффекты в value
-            for (const [characteristicName, effectData] of Object.entries(formulaResult.value)) {
-              if (typeof effectData === 'object' && effectData !== null && 'change' in effectData) {
-                const effect = effectData as { change: any; permanent: any }
-
-                // Вычисляем изменение (если это формула, нужно выполнить ее)
-                let change = 0
-                if (typeof effect.change === 'number') {
-                  change = effect.change
-                } else if (effect.change && typeof effect.change === 'object' && effect.change.value !== undefined) {
-                  change = effect.change.value
-                }
-
-                // Находим ID характеристики по имени
-                const characteristic = await this.characteristicsSystem.getCharacteristicByName(
-                  character.id,
-                  characteristicName
-                )
-
-                if (characteristic) {
-                  // Применяем модификаторы интенсивности и пользователя
-                  const intensityMultiplier = action.intensity / 50 // Нормализуем к 50
-                  const userModifier = 1.0 // TODO: получить из user.modifiers
-                  const finalChange = change * intensityMultiplier * userModifier * durationSeconds
-
-                  effects.push({
-                    characteristicId: characteristic.id,
-                    change: finalChange,
-                    permanent: effect.permanent?.value || false
-                  })
-                } else {
-                  console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${character.id}`)
-                }
-              }
-            }
-          } else if (formulaResult.factors) {
-            // Старый формат через factors
-            for (const factor of formulaResult.factors) {
-              if (factor.category === 'input' && factor.name.includes('characteristic')) {
-                // Извлекаем ID характеристики из имени фактора
-                const charId = factor.name.split('.').pop() || 'mood'
-                effects.push({
-                  characteristicId: charId,
-                  change: factor.value * durationSeconds, // умножаем на время холда
-                  permanent: false
-                })
-              }
-            }
+      const context: FormulaExecutionContext = {
+        character: {
+          id: baseCharacter.id,
+          name: baseCharacter.name,
+          characteristics: this.formatCharacterCharacteristics(characterCopy.characteristics),
+          anatomy: this.formatCharacterAnatomyForContext(baseCharacter.anatomy || []),
+          currentPose: typeof settings.currentPose === 'string' ? settings.currentPose : undefined
+        },
+        user: {
+          id: user.id,
+          name: user.name,
+          modifiers: user.modifiers || {},
+          credits: user.credits || 0
+        },
+        action: {
+          id: modifiedAction.id,
+          name: modifiedAction.name,
+          intensity: effectiveIntensity,
+          cost: 0,
+          duration: durationSeconds,
+          category: modifiedAction.category,
+          effects: modifiedAction.formula || {}
+        },
+        zone: zone ? {
+          id: zone.id,
+          name: zone.name,
+          sensitivity: this.getZoneSensitivity(zone, baseCharacter.anatomy || []),
+          anatomy: {
+            id: zone.anatomyDefId || '',
+            name: zone.anatomy?.name || '',
+            category: zone.anatomy?.category || ''
+          },
+          coordinates: {
+            x: zone.x,
+            y: zone.y,
+            width: zone.width,
+            height: zone.height
           }
-        } else {
-          // Это простые эффекты (старый формат) - преобразуем на лету
-          console.log('📊 Обрабатываем простые эффекты (старый формат)')
-
-          for (const [characteristicName, effectData] of Object.entries(action.formula)) {
-            if (typeof effectData === 'object' && effectData !== null && 'change' in effectData) {
-              const effect = effectData as { change: number; permanent?: boolean }
-
-              // Находим ID характеристики по имени
-              const characteristic = await this.characteristicsSystem.getCharacteristicByName(
-                character.id,
-                characteristicName
-              )
-
-              if (characteristic) {
-                // Применяем модификаторы интенсивности и пользователя
-                const intensityMultiplier = action.intensity / 50 // Нормализуем к 50
-                const userModifier = 1.0 // TODO: получить из user.modifiers
-                const finalChange = effect.change * intensityMultiplier * userModifier * durationSeconds
-
-                effects.push({
-                  characteristicId: characteristic.id,
-                  change: finalChange,
-                  permanent: effect.permanent || false
-                })
-              } else {
-                console.warn(`⚠️ Характеристика "${characteristicName}" не найдена для персонажа ${character.id}`)
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Ошибка выполнения формулы:', error)
-        // Fallback к простым эффектам если формула не работает
-        return this.calculateSimpleEffects(action, character, user, zone, durationSeconds)
+        } : undefined,
+        system: {
+          gameTime: await this.getCurrentGameTime(user.id),
+          realTime: Date.now(),
+          isActionHolding: durationSeconds > 1,
+          timeMultiplier: 1.0
+        },
+        custom: {}
       }
-    } else {
-      // Если формулы нет, используем простые эффекты
-      return this.calculateSimpleEffects(action, character, user, zone, durationSeconds)
+
+      const formulaResult = await this.formulaSystem.executeFormula(action.formula, context)
+      return this.convertFormulaResultToEffects(formulaResult, characterCopy, effectiveIntensity, durationSeconds)
+    } catch (error) {
+      console.error('Ошибка при выполнении формулы действия для копии персонажа:', error)
+      return []
+    }
+  }
+
+  private convertFormulaResultToEffects(
+    formulaResult: FormulaResult,
+    characterCopy: any,
+    intensity: number,
+    durationSeconds: number
+  ): ActionEffect[] {
+    const effects: ActionEffect[] = []
+
+    if (!formulaResult.value || typeof formulaResult.value !== 'object') {
+      return effects
+    }
+
+    for (const [key, rawEffect] of Object.entries(formulaResult.value)) {
+      const normalized = this.normalizeFormulaEffect(rawEffect)
+
+      let change = normalized.change
+      if (normalized.applyIntensityMultiplier) {
+        change *= intensity / 50
+      }
+      if (normalized.applyDurationMultiplier) {
+        change *= durationSeconds
+      }
+
+      const target = this.findCopyCharacteristic(characterCopy, key)
+      if (!target) {
+        console.warn(`⚠️ Характеристика по ключу "${key}" не найдена у копии персонажа ${characterCopy.id}`)
+        continue
+      }
+
+      effects.push({
+        characteristicId: target.characteristicDefId,
+        change,
+        permanent: normalized.permanent
+      })
     }
 
     return effects
   }
 
-  // Простые эффекты (fallback)
-  private calculateSimpleEffects(
+  private normalizeFormulaEffect(rawEffect: any) {
+    if (typeof rawEffect === 'number') {
+      return {
+        change: rawEffect,
+        permanent: false,
+        applyIntensityMultiplier: true,
+        applyDurationMultiplier: true
+      }
+    }
+
+    if (rawEffect && typeof rawEffect === 'object') {
+      let changeValue = 0
+      if (typeof rawEffect.change === 'number') {
+        changeValue = rawEffect.change
+      } else if (rawEffect.change && typeof rawEffect.change === 'object' && typeof rawEffect.change.value === 'number') {
+        changeValue = rawEffect.change.value
+      }
+
+      return {
+        change: changeValue,
+        permanent: Boolean(rawEffect.permanent?.value ?? rawEffect.permanent ?? false),
+        applyIntensityMultiplier: rawEffect.applyIntensityMultiplier === false ? false : true,
+        applyDurationMultiplier: rawEffect.applyDurationMultiplier === false ? false : true
+      }
+    }
+
+    return {
+      change: 0,
+      permanent: false,
+      applyIntensityMultiplier: true,
+      applyDurationMultiplier: true
+    }
+  }
+
+  private findCopyCharacteristic(characterCopy: any, key: string) {
+    const lowered = key.toLowerCase()
+    return characterCopy.characteristics.find((char: any) => {
+      const definition = char.definition
+      if (!definition) return false
+
+      const defIdMatch = definition.id === key || char.characteristicDefId === key
+      const defNameMatch = definition.name?.toLowerCase() === lowered
+      return defIdMatch || defNameMatch
+    })
+  }
+
+  private async applyEffectsToCharacterCopy(
+    characterCopy: any,
+    effects: ActionEffect[],
+    userId: string,
+    characterId: string
+  ) {
+    const changes: Array<{ characteristicId: string; name: string; previous: number; current: number }> = []
+
+    for (const effect of effects) {
+      const target = characterCopy.characteristics.find((char: any) => char.characteristicDefId === effect.characteristicId)
+      if (!target) {
+        serverLogger.warn(LogCategory.CHARACTERISTICS, 'Персональная характеристика не найдена', {
+          characteristicId: effect.characteristicId,
+          characterCopyId: characterCopy.id,
+          characterId
+        })
+        continue
+      }
+
+      const previous = target.currentValue ?? 0
+
+      await this.personalCharacteristicsSystem.changeValue(
+        characterCopy.id,
+        effect.characteristicId,
+        effect.change,
+        effect.permanent || false,
+        userId
+      )
+
+      const newValue = Math.max(0, Math.min(100, previous + effect.change))
+      target.currentValue = newValue
+
+      changes.push({
+        characteristicId: effect.characteristicId,
+        name: target.definition?.name || effect.characteristicId,
+        previous,
+        current: newValue
+      })
+
+      serverLogger.debug(LogCategory.CHARACTERISTICS, 'Персональная характеристика изменена', {
+        characteristicName: target.definition?.name || effect.characteristicId,
+        change: effect.change,
+        characterCopyId: characterCopy.id,
+        characterId
+      })
+    }
+
+    return changes
+  }
+
+  private calculateSimpleEffectsForCopy(
     action: any,
-    character: any,
+    characterCopy: any,
     user: any,
-    zone: any,
+    intensity: number,
     durationSeconds: number
   ): ActionEffect[] {
-    const effects: ActionEffect[] = []
+    let effectsMap = this.simpleEffectsSystem.calculateActionEffects(
+      action.category || 'physical',
+      intensity,
+      durationSeconds
+    )
 
-    // Базовое изменение на основе интенсивности и времени
-    const baseChange = (action.intensity / 100) * durationSeconds
+    effectsMap = this.simpleEffectsSystem.applyUserModifiers(effectsMap, user.modifiers || {})
 
-    // Пример: повышаем настроение
-    effects.push({
-      characteristicId: 'mood',
-      change: baseChange,
-      permanent: false
-    })
+    const characterCharacteristics = this.formatCharacterCharacteristics(characterCopy.characteristics)
+    effectsMap = this.simpleEffectsSystem.applyDependencies(effectsMap, characterCharacteristics)
 
-    return effects
+    const results: ActionEffect[] = []
+
+    for (const [characteristicName, effect] of Object.entries(effectsMap)) {
+      const target = this.findCopyCharacteristic(characterCopy, characteristicName)
+      if (!target) {
+        serverLogger.warn(LogCategory.CHARACTERISTICS, 'Персональная характеристика не найдена', {
+          characteristicName,
+          characterCopyId: characterCopy.id,
+          characterId: characterCopy.characterId
+        })
+        continue
+      }
+
+      results.push({
+        characteristicId: target.characteristicDefId,
+        change: effect.change * durationSeconds,
+        permanent: effect.permanent || false
+      })
+    }
+
+    return results
   }
 
   // Получить зону
@@ -751,7 +834,29 @@ export class ActionsSystem {
           userId
         },
         include: {
-          character: true,
+          character: {
+            include: {
+              anatomy: {
+                include: {
+                  definition: true
+                }
+              },
+              poses: {
+                include: {
+                  definition: true,
+                  angles: {
+                    include: {
+                      zones: {
+                        include: {
+                          anatomy: true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           characteristics: {
             include: {
               definition: true
@@ -773,68 +878,31 @@ export class ActionsSystem {
         throw new Error('Пользователь не найден')
       }
 
-      // Вычисляем базовые эффекты действия
-      let effects = this.simpleEffectsSystem.calculateActionEffects(
-        action.category || 'physical',
-        intensity,
-        durationSeconds
+      let appliedEffects = await this.calculateFormulaEffectsForCopy(
+        action,
+        characterCopy,
+        user,
+        zoneId,
+        durationSeconds,
+        intensity
       )
 
-      // Применяем модификаторы пользователя
-      effects = this.simpleEffectsSystem.applyUserModifiers(effects, user.modifiers)
-
-      // Применяем модификаторы позы (пока без позы)
-      // TODO: Добавить получение текущей позы персонажа
-      // if (character.currentPose) {
-      //   effects = this.simplePoseSystem.applyPoseToAction(
-      //     effects,
-      //     action.category || 'physical',
-      //     character.currentPose.name
-      //   )
-      // }
-
-      // Применяем зависимости
-      const characterCharacteristics = this.formatCharacterCharacteristics(characterCopy.characteristics)
-      effects = this.simpleEffectsSystem.applyDependencies(effects, characterCharacteristics)
-
-      // Применяем эффекты к персональным характеристикам
-      const appliedEffects: ActionEffect[] = []
-      for (const [characteristicName, effect] of Object.entries(effects)) {
-        // Находим персональную характеристику
-        const characteristic = characterCopy.characteristics.find(
-          char => char.definition?.name === characteristicName
+      if (!appliedEffects.length) {
+        appliedEffects = this.calculateSimpleEffectsForCopy(
+          action,
+          characterCopy,
+          user,
+          intensity,
+          durationSeconds
         )
-
-        if (characteristic) {
-          const finalChange = effect.change * durationSeconds
-          await this.personalCharacteristicsSystem.changeValue(
-            characterCopy.id,
-            characteristic.characteristicDefId,
-            finalChange,
-            false,
-            userId
-          )
-
-          appliedEffects.push({
-            characteristicId: characteristic.characteristicDefId,
-            change: finalChange,
-            permanent: effect.permanent
-          })
-
-          serverLogger.debug(LogCategory.CHARACTERISTICS, 'Персональная характеристика изменена', {
-            characteristicName,
-            change: finalChange,
-            characterCopyId: characterCopy.id,
-            characterId
-          })
-        } else {
-          serverLogger.warn(LogCategory.CHARACTERISTICS, 'Персональная характеристика не найдена', {
-            characteristicName,
-            characterCopyId: characterCopy.id,
-            characterId
-          })
-        }
       }
+
+      const appliedChanges = await this.applyEffectsToCharacterCopy(
+        characterCopy,
+        appliedEffects,
+        userId,
+        characterId
+      )
 
       // Создаем запись в ActionLog
       await this.logAction(actionId, characterId, userId, zoneId, durationSeconds, intensity, appliedEffects)
@@ -868,20 +936,14 @@ export class ActionsSystem {
         })
 
         // Создаем воспоминания об изменениях характеристик
-        for (const effect of appliedEffects) {
-          const characteristic = characterCopy.characteristics.find(
-            char => char.characteristicDefId === effect.characteristicId
+        for (const change of appliedChanges) {
+          await this.memoryManager.createCharacteristicChangeMemory(
+            characterId,
+            change.name,
+            change.previous,
+            change.current,
+            `Действие "${action.name}" (интенсивность: ${intensity})`
           )
-
-          if (characteristic) {
-            await this.memoryManager.createCharacteristicChangeMemory(
-              characterId,
-              characteristic.definition.name,
-              characteristic.currentValue - effect.change,
-              characteristic.currentValue,
-              `Действие "${action.name}" (интенсивность: ${intensity})`
-            )
-          }
         }
       } catch (error) {
         console.error('Ошибка при создании воспоминаний:', error)
@@ -943,8 +1005,8 @@ export class ActionsSystem {
         effectsCount: effects.length
       })
 
-      // Проверяем, нужно ли отправить ИИ-запрос (2-е, 5-е и далее каждое 5-е для тестирования)
-      const shouldTriggerAI = actionCount === 2 || actionCount >= 5 && actionCount % 5 === 0
+      // Оптимизированная логика триггеров: реже, но эффективнее
+      const shouldTriggerAI = this.shouldTriggerAIRequest(characterId, action.id, actionCount)
 
       serverLogger.debug(LogCategory.AI, 'Результат проверки триггера', {
         characterId,
@@ -995,6 +1057,50 @@ export class ActionsSystem {
     })
 
     return count
+  }
+
+  // Умная логика определения необходимости AI запроса
+  private shouldTriggerAIRequest(characterId: string, actionId: string, actionCount: number): boolean {
+    const cacheKey = `${characterId}-${actionId}`
+    const now = Date.now()
+    const cacheEntry = this.aiRequestCache.get(cacheKey)
+
+    // Очищаем старые записи (старше 30 секунд)
+    if (cacheEntry && now - cacheEntry.timestamp > 30000) {
+      this.aiRequestCache.delete(cacheKey)
+    }
+
+    // Проверяем, не было ли недавнего запроса для этого действия
+    if (cacheEntry && now - cacheEntry.timestamp < 10000) {
+      serverLogger.debug(LogCategory.AI, 'Пропускаем AI запрос - недавно уже был', {
+        characterId,
+        actionId,
+        lastRequest: new Date(cacheEntry.timestamp).toISOString(),
+        timeSinceLastRequest: now - cacheEntry.timestamp
+      })
+      return false
+    }
+
+    // Оптимизированная логика триггеров:
+    // - 3-е действие (первое значимое)
+    // - 10-е действие (первое серьезное)
+    // - Далее каждое 15-е действие (реже, но эффективнее)
+    const shouldTrigger = actionCount === 3 || actionCount === 10 || (actionCount >= 15 && actionCount % 15 === 0)
+
+    if (shouldTrigger) {
+      // Сохраняем в кэш
+      this.aiRequestCache.set(cacheKey, { timestamp: now, actionCount })
+
+      serverLogger.info(LogCategory.AI, 'AI запрос разрешен', {
+        characterId,
+        actionId,
+        actionCount,
+        triggerReason: actionCount === 3 ? 'first_significant' :
+                      actionCount === 10 ? 'first_serious' : 'periodic'
+      })
+    }
+
+    return shouldTrigger
   }
 
   // Создание сообщения для ИИ о действии

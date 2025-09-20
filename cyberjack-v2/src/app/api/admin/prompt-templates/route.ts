@@ -143,7 +143,13 @@ export async function GET() {
 {{/if}}
 
 {{#if lastAction}}
-Последнее действие: {{lastAction.name}} ({{lastAction.category}})
+Последнее действие: {{lastAction.actionName}} ({{lastAction.actionCategory}}){{#if lastAction.zone.name}} — зона {{lastAction.zone.name}}{{/if}}
+{{#if lastAction.effects}}
+Изменения характеристик:
+{{#each lastAction.effects}}
+- {{characteristicName}}: {{change}}{{#if characteristicCategory}} ({{characteristicCategory}}){{/if}}
+{{/each}}
+{{/if}}
 {{/if}}
 
 {{#if environment}}

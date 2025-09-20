@@ -327,7 +327,10 @@ export interface MessageAnalysis {
 }
 
 export interface PoseCommand {
-  poseName: string
+  poseId?: string
+  poseKey?: string
+  poseName?: string
+  command?: string
   confidence: number
   isExplicit: boolean
   modifiers?: string[]

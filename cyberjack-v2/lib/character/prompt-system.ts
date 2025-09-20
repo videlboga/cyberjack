@@ -18,6 +18,8 @@ export class PromptSystem implements PromptBuilder {
   private templates: Map<string, PromptTemplate> = new Map()
   private defaultTemplates: PromptTemplate[] = []
   private constructors: PromptConstructors
+  // Кэш для оптимизированных промптов
+  private optimizedPromptsCache: Map<string, { prompt: string, timestamp: number, ttl: number }> = new Map()
 
   constructor() {
     this.initializeDefaultTemplates()
@@ -209,7 +211,13 @@ export class PromptSystem implements PromptBuilder {
 {{/if}}
 
 {{#if lastAction}}
-Последнее действие: {{lastAction.name}} ({{lastAction.category}})
+Последнее действие: {{lastAction.actionName}} ({{lastAction.actionCategory}}){{#if lastAction.zone.name}} — зона {{lastAction.zone.name}}{{/if}}
+{{#if lastAction.effects}}
+Изменения характеристик:
+{{#each lastAction.effects}}
+- {{characteristicName}}: {{change}}{{#if characteristicCategory}} ({{characteristicCategory}}){{/if}}
+{{/each}}
+{{/if}}
 {{/if}}
 
 {{#if environment}}
@@ -402,7 +410,103 @@ export class PromptSystem implements PromptBuilder {
       templatesUsed: promptParts.length
     })
 
-    return finalPrompt
+    // Оптимизируем финальный промпт
+    const optimizedPrompt = this.optimizePromptInternal(finalPrompt)
+
+    serverLogger.info(LogCategory.AI, 'Промпт построен и оптимизирован через PromptSystem', {
+      characterId: context.characterId,
+      originalLength: finalPrompt.length,
+      optimizedLength: optimizedPrompt.length,
+      compressionRatio: ((finalPrompt.length - optimizedPrompt.length) / finalPrompt.length * 100).toFixed(1) + '%',
+      estimatedTokens: Math.ceil(optimizedPrompt.length / 4),
+      templatesUsed: promptParts.length
+    })
+
+    return optimizedPrompt
+  }
+
+  // Оптимизация промпта для уменьшения размера и улучшения качества
+  private optimizePromptInternal(prompt: string, maxTokens: number = 2000): string {
+    const cacheKey = `optimized-${maxTokens}-${prompt.slice(0, 100)}`
+    const cached = this.optimizedPromptsCache.get(cacheKey)
+
+    if (cached && Date.now() - cached.timestamp < cached.ttl) {
+      return cached.prompt
+    }
+
+    let optimized = prompt
+
+    // 1. Удаляем избыточные пробелы и переносы строк
+    optimized = optimized.replace(/\n\s*\n\s*\n/g, '\n\n') // Максимум 2 переноса подряд
+    optimized = optimized.replace(/[ \t]+/g, ' ') // Множественные пробелы в один
+    optimized = optimized.replace(/\n[ \t]+/g, '\n') // Пробелы в начале строк
+
+    // 2. Удаляем дублирующиеся фразы
+    const lines = optimized.split('\n')
+    const uniqueLines = []
+    const seenLines = new Set()
+
+    for (const line of lines) {
+      const trimmedLine = line.trim()
+      if (trimmedLine && !seenLines.has(trimmedLine.toLowerCase())) {
+        uniqueLines.push(line)
+        seenLines.add(trimmedLine.toLowerCase())
+      }
+    }
+    optimized = uniqueLines.join('\n')
+
+    // 3. Сжимаем повторяющиеся паттерны
+    optimized = optimized.replace(/(\w+):\s*\1/g, '$1') // "слово: слово" -> "слово"
+    optimized = optimized.replace(/(\w+)\s*-\s*\1/g, '$1') // "слово - слово" -> "слово"
+
+    // 4. Удаляем избыточные описания
+    optimized = optimized.replace(/Ты - [^,]+, [^,]+, [^,]+/g, (match) => {
+      // Оставляем только основную информацию
+      const parts = match.split(', ')
+      return parts.slice(0, 2).join(', ')
+    })
+
+    // 5. Сжимаем списки характеристик
+    optimized = optimized.replace(/- (\w+): [^-\n]+/g, (match, charName) => {
+      // Оставляем только название и значение
+      const valueMatch = match.match(/: ([^-\n]+)/)
+      if (valueMatch) {
+        return `- ${charName}: ${valueMatch[1].split(' ')[0]}` // Только первое слово описания
+      }
+      return match
+    })
+
+    // 6. Удаляем избыточные инструкции
+    const redundantPhrases = [
+      'Помни об этом',
+      'Учитывай это',
+      'Будь внимателен',
+      'Не забывай',
+      'Важно помнить'
+    ]
+
+    for (const phrase of redundantPhrases) {
+      optimized = optimized.replace(new RegExp(phrase + '[^.!?]*[.!?]', 'gi'), '')
+    }
+
+    // 7. Ограничиваем длину по количеству токенов
+    if (maxTokens > 0) {
+      const estimatedTokens = Math.ceil(optimized.length / 4)
+      if (estimatedTokens > maxTokens) {
+        const ratio = maxTokens / estimatedTokens
+        const targetLength = Math.max(0, Math.floor(optimized.length * ratio))
+        optimized = optimized.substring(0, targetLength).trimEnd() + '...'
+      }
+    }
+
+    // Сохраняем в кэш
+    this.optimizedPromptsCache.set(cacheKey, {
+      prompt: optimized,
+      timestamp: Date.now(),
+      ttl: 300000 // 5 минут
+    })
+
+    return optimized
   }
 
   // Рендеринг шаблона с переменными
@@ -499,9 +603,10 @@ export class PromptSystem implements PromptBuilder {
     context: PromptContext,
     character: any
   ): string {
-    // Простая обработка условных блоков {{#if condition}}...{{/if}}
-    return template.replace(/\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, condition, content) => {
-      const value = this.getConditionValue(condition, context, character)
+    const conditionalRegex = /\{\{#if\s+([\w.]+)\}\}([\s\S]*?)\{\{\/if\}\}/g
+
+    return template.replace(conditionalRegex, (match, conditionPath, content) => {
+      const value = this.getConditionValue(conditionPath, context, character)
       return value ? content : ''
     })
   }
@@ -512,16 +617,17 @@ export class PromptSystem implements PromptBuilder {
     context: PromptContext,
     character: any
   ): string {
-    // Простая обработка циклов {{#each array}}...{{/each}}
-    return template.replace(/\{\{#each\s+(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, arrayName, content) => {
-      const array = this.getArrayValue(arrayName, context, character)
-      if (!Array.isArray(array)) return ''
+    const loopRegex = /\{\{#each\s+([\w.]+)\}\}([\s\S]*?)\{\{\/each\}\}/g
+
+    return template.replace(loopRegex, (match, arrayPath, content) => {
+      const array = this.getArrayValue(arrayPath, context, character)
+      if (!Array.isArray(array) || array.length === 0) return ''
 
       return array.map(item => {
         let itemContent = content
-        // Заменяем переменные внутри цикла
-        itemContent = itemContent.replace(/\{\{(\w+)\}\}/g, (varMatch, varName) => {
-          return item[varName] || ''
+        itemContent = itemContent.replace(/\{\{([\w.]+)\}\}/g, (variableMatch, variablePath) => {
+          const value = this.resolveItemPath(variablePath, item)
+          return value !== undefined && value !== null ? String(value) : ''
         })
         return itemContent
       }).join('')
@@ -548,7 +654,11 @@ export class PromptSystem implements PromptBuilder {
       case 'userSentiment':
         return context.userModifiers.sentiment
       default:
-        return false
+        const resolved = this.resolveContextPath(condition, context, character)
+        if (Array.isArray(resolved)) {
+          return resolved.length > 0
+        }
+        return resolved
     }
   }
 
@@ -566,7 +676,8 @@ export class PromptSystem implements PromptBuilder {
       case 'emotionalMemories':
         return context.memory.emotional || []
       default:
-        return []
+        const resolved = this.resolveContextPath(arrayName, context, character)
+        return Array.isArray(resolved) ? resolved : []
     }
   }
 
@@ -654,21 +765,7 @@ export class PromptSystem implements PromptBuilder {
 
   // Оптимизация промпта
   optimizePrompt(prompt: string, maxTokens: number = 2000): string {
-    // Простая оптимизация - удаление лишних пробелов и переносов
-    let optimized = prompt
-      .replace(/\n\s*\n\s*\n/g, '\n\n') // Убираем множественные переносы
-      .replace(/\s+/g, ' ') // Убираем множественные пробелы
-      .trim()
-
-    // Если промпт слишком длинный, обрезаем его
-    const estimatedTokens = Math.ceil(optimized.length / 4)
-    if (estimatedTokens > maxTokens) {
-      const ratio = maxTokens / estimatedTokens
-      const targetLength = Math.floor(optimized.length * ratio)
-      optimized = optimized.substring(0, targetLength) + '...'
-    }
-
-    return optimized
+    return this.optimizePromptInternal(prompt, maxTokens)
   }
 
   // Получение статистики промпта
@@ -679,9 +776,9 @@ export class PromptSystem implements PromptBuilder {
     conditionalBlocks: number
     loops: number
   } {
-    const variableMatches = prompt.match(/\{\{(\w+)\}\}/g) || []
-    const conditionalMatches = prompt.match(/\{\{#if\s+\w+\}\}/g) || []
-    const loopMatches = prompt.match(/\{\{#each\s+\w+\}\}/g) || []
+    const variableMatches = prompt.match(/\{\{([\w.]+)\}\}/g) || []
+    const conditionalMatches = prompt.match(/\{\{#if\s+[\w.]+\}\}/g) || []
+    const loopMatches = prompt.match(/\{\{#each\s+[\w.]+\}\}/g) || []
 
     return {
       length: prompt.length,
@@ -743,5 +840,43 @@ export class PromptSystem implements PromptBuilder {
   // Получение конструкторов
   getConstructors(): PromptConstructors {
     return this.constructors
+  }
+
+  private resolveContextPath(path: string, context: PromptContext, character: any): any {
+    if (!path) return undefined
+
+    const parts = path.split('.')
+    let current: any
+
+    if (parts[0] === 'character') {
+      current = character
+      parts.shift()
+    } else {
+      current = context as any
+    }
+
+    for (const part of parts) {
+      if (current === undefined || current === null) {
+        return undefined
+      }
+      current = current[part]
+    }
+
+    return current
+  }
+
+  private resolveItemPath(path: string, item: any): any {
+    if (!path) return undefined
+    const parts = path.split('.')
+    let current: any = item
+
+    for (const part of parts) {
+      if (current === undefined || current === null) {
+        return undefined
+      }
+      current = current[part]
+    }
+
+    return current
   }
 }

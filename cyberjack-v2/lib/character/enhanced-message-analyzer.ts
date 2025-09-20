@@ -10,6 +10,13 @@ import {
   MoodChange
 } from '../../types/character-ai'
 
+interface PosePromptInfo {
+  poseId: string
+  poseKey: string
+  name: string
+  description: string
+}
+
 export class EnhancedMessageAnalyzer {
   constructor() {
     console.log('🚀 EnhancedMessageAnalyzer ИНИЦИАЛИЗИРОВАН!')
@@ -40,13 +47,241 @@ export class EnhancedMessageAnalyzer {
     'похвала': ['похвалить', 'похвала', 'хвалить', 'одобрить']
   }
 
-  // Основной метод анализа сообщения
+  private createPoseKey(name: string): string {
+    return name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9а-яё]+/gi, '_')
+      .replace(/^_+|_+$/g, '')
+  }
+
+  private formatPoseListForPrompt(poses: PosePromptInfo[]): string {
+    try {
+      return JSON.stringify(
+        poses.map(pose => ({
+          poseId: pose.poseId,
+          poseKey: pose.poseKey,
+          name: pose.name,
+          description: pose.description
+        })),
+        null,
+        2
+      )
+    } catch (error) {
+      console.warn('Не удалось сериализовать список поз для промпта', error)
+      return '[]'
+    }
+  }
+
+  private async getAvailablePoses(characterId: string, userId: string): Promise<PosePromptInfo[]> {
+    const poses: PosePromptInfo[] = []
+
+    try {
+      const characterCopy = await prisma.characterCopy.findFirst({
+        where: {
+          characterId,
+          userId
+        },
+        include: {
+          character: {
+            include: {
+              poses: {
+                where: { isActive: true },
+                include: {
+                  definition: true
+                }
+              }
+            }
+          }
+        }
+      })
+
+      const activeCharacterPoses = characterCopy?.character?.poses ?? []
+
+      if (activeCharacterPoses.length > 0) {
+        for (const pose of activeCharacterPoses) {
+          if (!pose.definition) {
+            continue
+          }
+
+          poses.push({
+            poseId: pose.definition.id,
+            poseKey: this.createPoseKey(pose.definition.name),
+            name: pose.definition.name,
+            description: pose.definition.description || 'Без описания'
+          })
+        }
+      } else {
+        const fallbackCharacter = await prisma.character.findUnique({
+          where: { id: characterId },
+          include: {
+            poses: {
+              where: { isActive: true },
+              include: {
+                definition: true
+              }
+            }
+          }
+        })
+
+        for (const pose of fallbackCharacter?.poses ?? []) {
+          if (!pose.definition) {
+            continue
+          }
+
+          poses.push({
+            poseId: pose.definition.id,
+            poseKey: this.createPoseKey(pose.definition.name),
+            name: pose.definition.name,
+            description: pose.definition.description || 'Без описания'
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при получении доступных поз:', error)
+    }
+
+    return poses
+  }
+
+  // Основной метод анализа сообщения (оптимизированный)
   async analyzeMessage(
     userMessage: string,
     characterId: string,
     userId: string
   ): Promise<MessageAnalysis> {
-    console.log('📝 Начинаем анализ сообщения', { userMessage, characterId, userId })
+    console.log('📝 Начинаем оптимизированный анализ сообщения', { userMessage, characterId, userId })
+
+    const availablePoses = await this.getAvailablePoses(characterId, userId)
+
+    try {
+      // Пытаемся выполнить комплексный анализ через один LLM вызов
+      const comprehensiveAnalysis = await this.performComprehensiveAnalysis(
+        userMessage,
+        characterId,
+        userId,
+        availablePoses
+      )
+      console.log('✅ Комплексный анализ завершен:', comprehensiveAnalysis)
+      return comprehensiveAnalysis
+    } catch (error) {
+      console.warn('⚠️ Комплексный анализ не удался, используем fallback:', error)
+      // Fallback к старому методу
+      return this.performFallbackAnalysis(userMessage, characterId, userId, availablePoses)
+    }
+  }
+
+  // Комплексный анализ через один LLM вызов
+  private async performComprehensiveAnalysis(
+    userMessage: string,
+    characterId: string,
+    userId: string,
+    availablePoses: PosePromptInfo[]
+  ): Promise<MessageAnalysis> {
+    const formattedPoses = this.formatPoseListForPrompt(availablePoses)
+
+    const comprehensivePrompt = `
+Ты эксперт по анализу сообщений в NSFW игре с BDSM элементами. Проанализируй сообщение пользователя и верни JSON с полным анализом.
+
+СООБЩЕНИЕ: "${userMessage}"
+
+ДОСТУПНЫЕ ПОЗЫ ПЕРСОНАЖА (используй poseId или poseKey для ссылки):
+${formattedPoses}
+
+ВЕРНИ ВАЛИДНЫЙ JSON С СЛЕДУЮЩЕЙ СТРУКТУРОЙ:
+{
+  "intent": "compliment",
+  "emotion": "curious",
+  "keywords": ["чувствительная", "нежная"],
+  "sentiment": "positive",
+  "complexity": 3,
+  "urgency": 2,
+  "requiresResponse": true,
+  "suggestedActions": ["нежность", "забота"],
+  "poseCommands": [
+    {
+      "poseId": "pose-def-id",
+      "poseKey": "lech_1",
+      "poseName": "Лечь",
+      "confidence": 0.8,
+      "isExplicit": true
+    }
+  ],
+  "characteristicInfluences": [
+    {
+      "characteristicName": "Чувствительность",
+      "influence": 15,
+      "confidence": 0.9,
+      "reason": "действие повышает чувствительность",
+      "isPermanent": false
+    }
+  ],
+  "actionTriggers": [
+    {
+      "actionName": "ласка",
+      "confidence": 0.7,
+      "reason": "сообщение подразумевает нежное действие"
+    }
+  ],
+  "fetishElements": [
+    {
+      "type": "невинность",
+      "intensity": 0.6,
+      "confidence": 0.8
+    }
+  ],
+  "moodChanges": [
+    {
+      "mood": "возбуждение",
+      "intensity": 0.5,
+      "confidence": 0.7
+    }
+  ]
+}
+
+ВОЗМОЖНЫЕ ЗНАЧЕНИЯ:
+- intent: greeting, question, request, compliment, complaint, story, statement, command, threat, seduction
+- emotion: happy, sad, angry, fear, surprise, love, neutral, curious, excited, frustrated, confused, confident
+- sentiment: positive, negative, neutral
+- complexity: 1-10
+- urgency: 1-10
+- requiresResponse: true/false
+- suggestedActions: массив из: нежность, забота, грубость, насмешка, погладить, плеть, клиторальный модулятор, компрессионный пресс, нейронный осциллятор, ректо-анализатор
+
+ПРАВИЛА АНАЛИЗА:
+- Учитывай NSFW и BDSM тематику игры
+- Анализируй подтекст и скрытые намерения
+- Определяй эмоциональное состояние говорящего
+- Выделяй ключевые слова, связанные с игровой механикой
+- Для poseCommands выбирай подходящую позу из списка доступных и возвращай "poseId" (обязательно) и "poseKey" (если уверен)
+- Для characteristicInfluences анализируй влияние на характеристики персонажа
+- Для actionTriggers определяй подразумеваемые действия
+- Для fetishElements ищи фетиш-элементы: невинность, покорность, чувствительность, агрессивность, унижение, бондаж, доминирование
+- Для moodChanges определяй изменения настроения
+
+ВЕРНИ ТОЛЬКО ВАЛИДНЫЙ JSON БЕЗ ДОПОЛНИТЕЛЬНОГО ТЕКСТА:
+    `.trim()
+
+    try {
+      const response = await this.callGeminiForAnalysis(comprehensivePrompt)
+      const analysis = this.parseGeminiResponse(response)
+
+      // Валидируем и дополняем результат
+      return this.validateAndEnhanceAnalysis(analysis, userMessage, characterId, userId, availablePoses)
+    } catch (error) {
+      console.error('Ошибка при комплексном анализе через Gemini:', error)
+      throw error
+    }
+  }
+
+  // Fallback анализ (старый метод)
+  private async performFallbackAnalysis(
+    userMessage: string,
+    characterId: string,
+    userId: string,
+    availablePoses: PosePromptInfo[]
+  ): Promise<MessageAnalysis> {
+    console.log('📝 Выполняем fallback анализ', { userMessage, characterId, userId })
 
     const lowerMessage = userMessage.toLowerCase()
 
@@ -62,7 +297,7 @@ export class EnhancedMessageAnalyzer {
       fetishElements,
       moodChanges
     ] = await Promise.allSettled([
-      this.analyzePoseCommands(lowerMessage, characterId),
+      this.analyzePoseCommands(lowerMessage, characterId, availablePoses),
       this.analyzeCharacteristicInfluences(lowerMessage, characterId, userId),
       this.analyzeActionTriggers(lowerMessage, characterId),
       this.analyzeFetishElements(lowerMessage),
@@ -76,12 +311,6 @@ export class EnhancedMessageAnalyzer {
     const finalFetishElements = fetishElements.status === 'fulfilled' ? fetishElements.value : []
     const finalMoodChanges = moodChanges.status === 'fulfilled' ? moodChanges.value : []
 
-    console.log('🎭 Команды поз:', finalPoseCommands)
-    console.log('📈 Влияние на характеристики:', finalCharacteristicInfluences)
-    console.log('⚡ Триггеры действий:', finalActionTriggers)
-    console.log('🔥 Фетиш-элементы:', finalFetishElements)
-    console.log('😊 Изменения настроения:', finalMoodChanges)
-
     const result = {
       ...baseAnalysis,
       poseCommands: finalPoseCommands,
@@ -91,8 +320,156 @@ export class EnhancedMessageAnalyzer {
       moodChanges: finalMoodChanges
     }
 
-    console.log('✅ Анализ завершен:', result)
-    return result
+    console.log('✅ Fallback анализ завершен:', result)
+    return this.validateAndEnhanceAnalysis(result, userMessage, characterId, userId, availablePoses)
+  }
+
+  // Валидация и улучшение анализа
+  private validateAndEnhanceAnalysis(
+    analysis: any,
+    userMessage: string,
+    characterId: string,
+    userId: string,
+    availablePoses: PosePromptInfo[]
+  ): MessageAnalysis {
+    // Убеждаемся, что все необходимые поля присутствуют
+    const normalizedPoseCommands = Array.isArray(analysis.poseCommands)
+      ? this.normalizePoseCommands(analysis.poseCommands, availablePoses)
+      : []
+
+    const validatedAnalysis: MessageAnalysis = {
+      intent: analysis.intent || 'unknown',
+      emotion: analysis.emotion || 'neutral',
+      keywords: Array.isArray(analysis.keywords) ? analysis.keywords : [],
+      sentiment: analysis.sentiment || 'neutral',
+      complexity: typeof analysis.complexity === 'number' ? analysis.complexity : 5,
+      urgency: typeof analysis.urgency === 'number' ? analysis.urgency : 5,
+      requiresResponse: typeof analysis.requiresResponse === 'boolean' ? analysis.requiresResponse : true,
+      suggestedActions: Array.isArray(analysis.suggestedActions) ? analysis.suggestedActions : [],
+      poseCommands: normalizedPoseCommands,
+      characteristicInfluences: Array.isArray(analysis.characteristicInfluences) ? analysis.characteristicInfluences : [],
+      actionTriggers: Array.isArray(analysis.actionTriggers) ? analysis.actionTriggers : [],
+      fetishElements: Array.isArray(analysis.fetishElements) ? analysis.fetishElements : [],
+      moodChanges: Array.isArray(analysis.moodChanges) ? analysis.moodChanges : []
+    }
+
+    // Дополнительная валидация и улучшение
+    this.enhanceAnalysisWithContext(validatedAnalysis, userMessage, characterId, userId, availablePoses)
+
+    return validatedAnalysis
+  }
+
+  private normalizePoseCommands(rawCommands: any[], availablePoses: PosePromptInfo[]): PoseCommand[] {
+    if (!Array.isArray(rawCommands)) {
+      return []
+    }
+
+    const poseById = new Map(availablePoses.map(pose => [pose.poseId, pose]))
+    const poseByKey = new Map(availablePoses.map(pose => [pose.poseKey, pose]))
+
+    const normalized: PoseCommand[] = []
+
+    for (const raw of rawCommands) {
+      if (!raw) {
+        continue
+      }
+
+      let confidence: number | undefined
+      if (typeof raw.confidence === 'number') {
+        confidence = raw.confidence
+      } else if (typeof raw.confidence === 'string') {
+        const parsed = parseFloat(raw.confidence)
+        confidence = Number.isFinite(parsed) ? parsed : undefined
+      }
+
+      if (typeof confidence !== 'number' || Number.isNaN(confidence)) {
+        continue
+      }
+
+      const poseId = typeof raw.poseId === 'string' ? raw.poseId : typeof raw.poseID === 'string' ? raw.poseID : undefined
+      const poseKeyCandidate = typeof raw.poseKey === 'string' ? raw.poseKey : typeof raw.key === 'string' ? raw.key : undefined
+      const command = typeof raw.command === 'string' ? raw.command : undefined
+      let poseName = typeof raw.poseName === 'string' ? raw.poseName : typeof raw.name === 'string' ? raw.name : undefined
+
+      let matchedPose: PosePromptInfo | undefined
+      if (poseId && poseById.has(poseId)) {
+        matchedPose = poseById.get(poseId)
+      } else if (poseKeyCandidate && poseByKey.has(poseKeyCandidate)) {
+        matchedPose = poseByKey.get(poseKeyCandidate)
+      }
+
+      if (!poseName && matchedPose) {
+        poseName = matchedPose.name
+      }
+
+      const modifiers = Array.isArray(raw.modifiers)
+        ? raw.modifiers.filter((item: unknown): item is string => typeof item === 'string')
+        : undefined
+
+      normalized.push({
+        poseId: matchedPose?.poseId ?? poseId,
+        poseKey: matchedPose?.poseKey ?? poseKeyCandidate,
+        poseName,
+        command,
+        confidence,
+        isExplicit: typeof raw.isExplicit === 'boolean' ? raw.isExplicit : !!command,
+        modifiers: modifiers && modifiers.length > 0 ? modifiers : undefined
+      })
+    }
+
+    return normalized
+  }
+
+  // Улучшение анализа с учетом контекста
+  private enhanceAnalysisWithContext(
+    analysis: MessageAnalysis,
+    userMessage: string,
+    characterId: string,
+    userId: string,
+    availablePoses: PosePromptInfo[]
+  ): void {
+    const lowerMessage = userMessage.toLowerCase()
+
+    // Дополняем анализ ключевыми словами, если их мало
+    if (analysis.keywords.length < 3) {
+      const additionalKeywords = this.extractKeywords(userMessage)
+      analysis.keywords = [...new Set([...analysis.keywords, ...additionalKeywords])]
+    }
+
+    // Проверяем наличие команд поз в тексте
+    if (analysis.poseCommands.length === 0) {
+      const poseKeywords = ['лечь', 'сесть', 'встать', 'встать на колени', 'раздеться', 'одеться']
+      const foundPoseCommand = poseKeywords.find(keyword => lowerMessage.includes(keyword))
+      if (foundPoseCommand) {
+        const fallbackKey = this.createPoseKey(foundPoseCommand)
+        const matchedPose = availablePoses.find(pose =>
+          pose.poseKey === fallbackKey || pose.name.toLowerCase().includes(foundPoseCommand)
+        )
+
+        analysis.poseCommands.push({
+          poseId: matchedPose?.poseId,
+          poseKey: matchedPose?.poseKey ?? fallbackKey,
+          poseName: matchedPose?.name ?? foundPoseCommand,
+          command: foundPoseCommand,
+          confidence: 0.7,
+          isExplicit: true
+        })
+      }
+    }
+
+    // Проверяем фетиш-элементы
+    if (analysis.fetishElements.length === 0) {
+      for (const [fetishType, keywords] of Object.entries(this.FETISH_KEYWORDS)) {
+        const foundKeyword = keywords.find(keyword => lowerMessage.includes(keyword))
+        if (foundKeyword) {
+          analysis.fetishElements.push({
+            type: fetishType,
+            intensity: 0.6,
+            confidence: 0.7
+          })
+        }
+      }
+    }
   }
 
   // Базовый анализ сообщения через Gemini
@@ -155,43 +532,54 @@ export class EnhancedMessageAnalyzer {
   // Анализ команд поз через LLM
   private async analyzePoseCommands(
     message: string,
-    characterId: string
+    characterId: string,
+    availablePoses?: PosePromptInfo[]
   ): Promise<PoseCommand[]> {
     console.log('🚀 ФУНКЦИЯ analyzePoseCommands ВЫЗВАНА!', { message, characterId })
 
     try {
-      // Получаем доступные позы для персонажа
-      const character = await prisma.character.findUnique({
-        where: { id: characterId },
-        include: {
-          poses: {
-            include: {
-              definition: true
+      let posesForPrompt = availablePoses
+
+      if (!posesForPrompt || posesForPrompt.length === 0) {
+        // Получаем доступные позы для персонажа
+        const character = await prisma.character.findUnique({
+          where: { id: characterId },
+          include: {
+            poses: {
+              include: {
+                definition: true
+              }
             }
           }
+        })
+
+        if (!character) {
+          console.log('❌ Персонаж не найден для анализа поз')
+          return []
         }
-      })
 
-      if (!character) {
-        console.log('❌ Персонаж не найден для анализа поз')
-        return []
+        console.log(`📊 Найдено поз у персонажа: ${character.poses.length}`)
+
+        if (character.poses.length === 0) {
+          console.log('❌ Нет доступных поз для анализа')
+          return []
+        }
+
+        posesForPrompt = character.poses.map(pose => ({
+          poseId: pose.definition.id,
+          poseKey: this.createPoseKey(pose.definition.name),
+          name: pose.definition.name,
+          description: pose.definition.description || 'Без описания'
+        }))
       }
 
-      console.log(`📊 Найдено поз у персонажа: ${character.poses.length}`)
-
-      if (character.poses.length === 0) {
-        console.log('❌ Нет доступных поз для анализа')
+      if (!posesForPrompt || posesForPrompt.length === 0) {
+        console.log('❌ Нет поз для включения в промпт')
         return []
       }
-
-      // Создаем список доступных поз для LLM
-      const availablePoses = character.poses.map(pose => ({
-        name: pose.definition.name,
-        description: pose.definition.description || 'Без описания'
-      }))
 
       // Анализируем через LLM
-      const poseCommands = await this.analyzePoseCommandsWithLLM(message, availablePoses)
+      const poseCommands = await this.analyzePoseCommandsWithLLM(message, posesForPrompt)
 
       console.log(`🎯 LLM нашел ${poseCommands.length} команд поз`)
       return poseCommands
@@ -205,16 +593,16 @@ export class EnhancedMessageAnalyzer {
   // Анализ команд поз через LLM
   private async analyzePoseCommandsWithLLM(
     message: string,
-    availablePoses: Array<{ name: string; description: string }>
+    availablePoses: PosePromptInfo[]
   ): Promise<PoseCommand[]> {
     try {
       console.log('🤖 Анализируем команды поз через LLM:', { message, availablePosesCount: availablePoses.length })
 
-      const posesList = availablePoses.map(pose => `- ${pose.name}: ${pose.description}`).join('\n')
+      const posesList = this.formatPoseListForPrompt(availablePoses)
 
       const prompt = `Проанализируй сообщение пользователя и определи, какие команды поз он хочет выполнить.
 
-Доступные позы:
+Доступные позы (используй poseId или poseKey при ответе):
 ${posesList}
 
 Сообщение пользователя: "${message}"
@@ -223,6 +611,8 @@ ${posesList}
 {
   "poseCommands": [
     {
+      "poseId": "pose-def-id",
+      "poseKey": "pose_key",
       "poseName": "название_позы",
       "confidence": 0.0-1.0,
       "isExplicit": true/false,
@@ -234,6 +624,8 @@ ${posesList}
 Правила:
 - confidence: насколько уверен, что пользователь хочет эту позу (0.0-1.0)
 - isExplicit: true если команда явная, false если подразумевается
+- Всегда указывай poseId, если поза выбрана из списка
+- Если уверен в текстовом ключе, продублируй его в poseKey
 - Включай только позы с confidence > 0.3
 - Если нет команд поз, верни пустой массив`
 
@@ -251,14 +643,10 @@ ${posesList}
       const commands: PoseCommand[] = []
 
       if (analysis.poseCommands && Array.isArray(analysis.poseCommands)) {
-        for (const cmd of analysis.poseCommands) {
-          if (cmd.poseName && cmd.confidence > 0.3) {
-            commands.push({
-              poseName: cmd.poseName,
-              confidence: cmd.confidence,
-              isExplicit: cmd.isExplicit || false,
-              modifiers: [] // Пока без модификаторов
-            })
+        const normalized = this.normalizePoseCommands(analysis.poseCommands, availablePoses)
+        for (const cmd of normalized) {
+          if (cmd.confidence > 0.3) {
+            commands.push(cmd)
           }
         }
       }

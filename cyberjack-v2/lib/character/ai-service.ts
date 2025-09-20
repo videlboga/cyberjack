@@ -32,6 +32,10 @@ export class CharacterAIService implements ICharacterAIService {
   private actionMessageSystem: ActionMessageSystemManager
   private activePosesSystem: ActivePosesSystem
   private metrics: CharacterAIMetrics
+  // Кэши для оптимизации производительности
+  private promptCache: Map<string, { prompt: string, timestamp: number, ttl: number }> = new Map()
+  private contextCache: Map<string, { context: PromptContext, timestamp: number, ttl: number }> = new Map()
+  private analysisCache: Map<string, { analysis: MessageAnalysis, timestamp: number, ttl: number }> = new Map()
 
   constructor(apiKey: string, baseUrl?: string, model?: string, model2?: string) {
     this.openRouterApiKey = apiKey
@@ -70,25 +74,10 @@ export class CharacterAIService implements ICharacterAIService {
     } catch (error) {
       console.error('❌ Ошибка при инициализации EnhancedMessageAnalyzer:', error)
       console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
-      // Создаем заглушку
-      this.messageAnalyzer = {
-        analyzeMessage: async () => ({
-          intent: 'unknown',
-          emotion: 'neutral',
-          keywords: [],
-          sentiment: 'neutral',
-          complexity: 5,
-          urgency: 5,
-          requiresResponse: true,
-          suggestedActions: [],
-          poseCommands: [],
-          characteristicInfluences: [],
-          actionTriggers: [],
-          fetishElements: [],
-          moodChanges: []
-        })
-      } as any
-      console.log('⚠️ Создана заглушка для анализа сообщений')
+
+      // Создаем fallback анализатор с базовой функциональностью
+      this.messageAnalyzer = this.createFallbackAnalyzer()
+      console.log('⚠️ Создан fallback анализатор для анализа сообщений')
     }
 
     this.actionMessageSystem = new ActionMessageSystemManager(this)
@@ -106,6 +95,196 @@ export class CharacterAIService implements ICharacterAIService {
       errorRate: 0,
       lastUpdated: new Date()
     }
+
+    // Запускаем периодическую очистку кэша
+    this.startCacheCleanup()
+  }
+
+  // Запуск периодической очистки кэша
+  private startCacheCleanup(): void {
+    setInterval(() => {
+      this.cleanupExpiredCache()
+    }, 60000) // Очистка каждую минуту
+  }
+
+  // Очистка устаревших записей кэша
+  private cleanupExpiredCache(): void {
+    const now = Date.now()
+
+    // Очистка кэша промптов
+    for (const [key, value] of this.promptCache.entries()) {
+      if (now - value.timestamp > value.ttl) {
+        this.promptCache.delete(key)
+      }
+    }
+
+    // Очистка кэша контекста
+    for (const [key, value] of this.contextCache.entries()) {
+      if (now - value.timestamp > value.ttl) {
+        this.contextCache.delete(key)
+      }
+    }
+
+    // Очистка кэша анализа
+    for (const [key, value] of this.analysisCache.entries()) {
+      if (now - value.timestamp > value.ttl) {
+        this.analysisCache.delete(key)
+      }
+    }
+  }
+
+  // Получение промпта из кэша или создание нового
+  private async getCachedPrompt(characterId: string, userId: string, context: Partial<PromptContext>): Promise<string> {
+    const cacheKey = `${characterId}-${userId}-${JSON.stringify(context)}`
+    const cached = this.promptCache.get(cacheKey)
+
+    if (cached && Date.now() - cached.timestamp < cached.ttl) {
+      serverLogger.debug(LogCategory.AI, 'Используем кэшированный промпт', {
+        characterId,
+        userId,
+        cacheKey,
+        age: Date.now() - cached.timestamp
+      })
+      return cached.prompt
+    }
+
+    // Создаем новый промпт
+    const fullContext = await this.getCharacterContextWithDynamicPrompts(characterId, userId, context)
+    const prompt = await this.promptSystem.buildPrompt(fullContext)
+
+    // Сохраняем в кэш (TTL 5 минут)
+    this.promptCache.set(cacheKey, {
+      prompt,
+      timestamp: Date.now(),
+      ttl: 300000 // 5 минут
+    })
+
+    serverLogger.debug(LogCategory.AI, 'Создан и закэширован новый промпт', {
+      characterId,
+      userId,
+      promptLength: prompt.length
+    })
+
+    return prompt
+  }
+
+  // Получение анализа из кэша или создание нового
+  private async getCachedAnalysis(userMessage: string, characterId: string, userId: string): Promise<MessageAnalysis> {
+    const cacheKey = `${characterId}-${userId}-${userMessage.toLowerCase().slice(0, 100)}`
+    const cached = this.analysisCache.get(cacheKey)
+
+    if (cached && Date.now() - cached.timestamp < cached.ttl) {
+      serverLogger.debug(LogCategory.AI, 'Используем кэшированный анализ', {
+        characterId,
+        userId,
+        cacheKey,
+        age: Date.now() - cached.timestamp
+      })
+      return cached.analysis
+    }
+
+    // Создаем новый анализ
+    const analysis = await this.messageAnalyzer.analyzeMessage(userMessage, characterId, userId)
+
+    // Сохраняем в кэш (TTL 2 минуты)
+    this.analysisCache.set(cacheKey, {
+      analysis,
+      timestamp: Date.now(),
+      ttl: 120000 // 2 минуты
+    })
+
+    serverLogger.debug(LogCategory.AI, 'Создан и закэширован новый анализ', {
+      characterId,
+      userId,
+      analysisKeys: Object.keys(analysis)
+    })
+
+    return analysis
+  }
+
+  // Создание fallback анализатора с базовой функциональностью
+  private createFallbackAnalyzer(): any {
+    return {
+      analyzeMessage: async (userMessage: string, characterId: string, userId: string) => {
+        console.log('🔄 Используем fallback анализ сообщения')
+
+        // Базовый анализ без LLM
+        const lowerMessage = userMessage.toLowerCase()
+
+        // Простой анализ намерений
+        let intent = 'statement'
+        if (lowerMessage.includes('?')) intent = 'question'
+        if (lowerMessage.includes('привет') || lowerMessage.includes('здравствуй')) intent = 'greeting'
+        if (lowerMessage.includes('спасибо')) intent = 'compliment'
+
+        // Простой анализ эмоций
+        let emotion = 'neutral'
+        if (lowerMessage.includes('хорошо') || lowerMessage.includes('отлично')) emotion = 'happy'
+        if (lowerMessage.includes('плохо') || lowerMessage.includes('ужасно')) emotion = 'sad'
+        if (lowerMessage.includes('злой') || lowerMessage.includes('сердитый')) emotion = 'angry'
+
+        // Простой анализ тональности
+        let sentiment = 'neutral'
+        const positiveWords = ['хорошо', 'отлично', 'прекрасно', 'замечательно', 'спасибо']
+        const negativeWords = ['плохо', 'ужасно', 'отвратительно', 'ненавижу']
+
+        if (positiveWords.some(word => lowerMessage.includes(word))) sentiment = 'positive'
+        if (negativeWords.some(word => lowerMessage.includes(word))) sentiment = 'negative'
+
+        // Извлечение ключевых слов
+        const keywords = userMessage.split(' ').filter(word =>
+          word.length > 3 &&
+          !['что', 'как', 'где', 'когда', 'почему', 'который', 'которая', 'которое'].includes(word.toLowerCase())
+        ).slice(0, 5)
+
+        // Простой анализ команд поз
+        const poseCommands = []
+        const poseKeywords = ['лечь', 'сесть', 'встать', 'встать на колени', 'раздеться', 'одеться']
+        const foundPoseCommand = poseKeywords.find(keyword => lowerMessage.includes(keyword))
+        if (foundPoseCommand) {
+          poseCommands.push({
+            command: foundPoseCommand,
+            confidence: 0.8,
+            reason: `Найдена команда позы: ${foundPoseCommand}`
+          })
+        }
+
+        // Простой анализ фетиш-элементов
+        const fetishElements = []
+        const fetishKeywords = {
+          'невинность': ['невинность', 'чистота', 'девственность'],
+          'покорность': ['покорность', 'подчинение', 'послушание'],
+          'чувствительность': ['чувствительность', 'нежность', 'мягкость']
+        }
+
+        for (const [fetishType, keywords] of Object.entries(fetishKeywords)) {
+          const foundKeyword = keywords.find(keyword => lowerMessage.includes(keyword))
+          if (foundKeyword) {
+            fetishElements.push({
+              type: fetishType,
+              intensity: 0.6,
+              confidence: 0.7
+            })
+          }
+        }
+
+        return {
+          intent,
+          emotion,
+          keywords,
+          sentiment,
+          complexity: Math.min(10, Math.max(1, userMessage.split(' ').length / 5)),
+          urgency: 5,
+          requiresResponse: true,
+          suggestedActions: [],
+          poseCommands,
+          characteristicInfluences: [],
+          actionTriggers: [],
+          fetishElements,
+          moodChanges: []
+        }
+      }
+    }
   }
 
   // Генерация ответа персонажа с анализом
@@ -118,23 +297,23 @@ export class CharacterAIService implements ICharacterAIService {
     this.metrics.totalRequests++
 
     try {
-      // Получаем полный контекст с динамическими промптами
+      // Получаем полный контекст с динамическими промптами (с кэшированием)
       const fullContext = await this.getCharacterContextWithDynamicPrompts(characterId, context.userId || '', context)
 
-      // Анализируем сообщение пользователя с расширенным анализом
+      // Анализируем сообщение пользователя с расширенным анализом (с кэшированием)
       serverLogger.info(LogCategory.AI, 'Начинаем анализ сообщения', {
         userMessage,
         characterId,
         userId: context.userId
       })
 
-      console.log('🚀 Вызываем this.messageAnalyzer.analyzeMessage...', {
+      console.log('🚀 Вызываем кэшированный анализ сообщения...', {
         userMessage,
         characterId,
         userId: context.userId || ''
       })
 
-      const messageAnalysis = await this.messageAnalyzer.analyzeMessage(
+      const messageAnalysis = await this.getCachedAnalysis(
         userMessage,
         characterId,
         context.userId || ''
@@ -204,24 +383,123 @@ export class CharacterAIService implements ICharacterAIService {
       this.updateErrorRate()
 
       console.error('Ошибка при генерации ответа:', error)
-
-      return {
-        message: 'Извините, произошла ошибка при генерации ответа.',
+      serverLogger.error(LogCategory.AI, 'Ошибка при генерации ответа', {
         characterId,
-        timestamp: new Date(),
-        metadata: {
-          emotion: 'neutral',
-          intent: 'error',
-          keywords: [],
-          sentiment: 'neutral',
-          responseTime: Date.now() - startTime,
-          quality: 0.1,
-          confidence: 0.1,
-          tokensUsed: 0,
-          cost: 0
-        }
+        userId: context.userId,
+        error: error instanceof Error ? error.message : 'Неизвестная ошибка',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+
+      // Graceful degradation - возвращаем контекстный ответ вместо общей ошибки
+      return this.generateFallbackResponse(userMessage, characterId, context, startTime)
+    }
+  }
+
+  // Генерация fallback ответа при ошибках
+  private generateFallbackResponse(
+    userMessage: string,
+    characterId: string,
+    context: Partial<PromptContext>,
+    startTime: number
+  ): AIResponse {
+    // Простой анализ сообщения для контекстного ответа
+    const lowerMessage = userMessage.toLowerCase()
+    let fallbackMessage = 'Поняла...'
+
+    // Контекстные ответы в зависимости от содержания
+    if (lowerMessage.includes('привет') || lowerMessage.includes('здравствуй')) {
+      fallbackMessage = 'Привет...'
+    } else if (lowerMessage.includes('?')) {
+      fallbackMessage = 'Хм, интересный вопрос...'
+    } else if (lowerMessage.includes('спасибо')) {
+      fallbackMessage = 'Пожалуйста...'
+    } else if (lowerMessage.includes('лечь') || lowerMessage.includes('сесть')) {
+      fallbackMessage = 'Хорошо...'
+    } else if (lowerMessage.includes('встать')) {
+      fallbackMessage = 'Поняла, встаю...'
+    } else if (lowerMessage.includes('раздеться')) {
+      fallbackMessage = 'Хорошо...'
+    } else if (lowerMessage.includes('одеться')) {
+      fallbackMessage = 'Конечно...'
+    } else if (lowerMessage.includes('хорошо') || lowerMessage.includes('отлично')) {
+      fallbackMessage = 'Спасибо...'
+    } else if (lowerMessage.includes('плохо') || lowerMessage.includes('ужасно')) {
+      fallbackMessage = 'Извините...'
+    }
+
+    serverLogger.info(LogCategory.AI, 'Сгенерирован fallback ответ', {
+      characterId,
+      userId: context.userId,
+      userMessage: userMessage.slice(0, 100),
+      fallbackMessage
+    })
+
+    return {
+      message: fallbackMessage,
+      characterId,
+      timestamp: new Date(),
+      metadata: {
+        emotion: 'neutral',
+        intent: 'fallback',
+        keywords: [],
+        sentiment: 'neutral',
+        responseTime: Date.now() - startTime,
+        quality: 0.3,
+        confidence: 0.5,
+        tokensUsed: 0,
+        cost: 0
       }
     }
+  }
+
+  private createPoseKey(name: string): string {
+    return name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9а-яё]+/gi, '_')
+      .replace(/^_+|_+$/g, '')
+  }
+
+  // Маппинг команд на названия поз
+  private mapCommandToPoseName(command: string): string {
+    const commandMap: Record<string, string> = {
+      'лечь': 'Лежа',
+      'лежать': 'Лежа',
+      'ложись': 'Лежа',
+      'сесть': 'Сидя',
+      'сидеть': 'Сидя',
+      'сядь': 'Сидя',
+      'встать': 'Стоя',
+      'стоять': 'Стоя',
+      'встань': 'Стоя',
+      'встать на колени': 'На коленях',
+      'на колени': 'На коленях',
+      'колени': 'На коленях',
+      'встать на четвереньки': 'На четвереньках',
+      'четвереньки': 'На четвереньках',
+      'на четвереньки': 'На четвереньках',
+      'раздеться': 'Раздетый',
+      'раздеть': 'Раздетый',
+      'одеться': 'Одетый',
+      'одеть': 'Одетый'
+    }
+
+    const lowerCommand = command.toLowerCase().trim()
+    
+    // Ищем точное совпадение
+    if (commandMap[lowerCommand]) {
+      return commandMap[lowerCommand]
+    }
+
+    // Ищем частичное совпадение
+    for (const [key, value] of Object.entries(commandMap)) {
+      if (lowerCommand.includes(key) || key.includes(lowerCommand)) {
+        return value
+      }
+    }
+
+    // Если не найдено, возвращаем оригинальную команду
+    return command
   }
 
   // Генерация ответа персонажа без анализа (для системных сообщений)
@@ -279,27 +557,40 @@ export class CharacterAIService implements ICharacterAIService {
     }
   }
 
-  // Получить персонажа
-  private async getCharacter(characterId: string) {
-    const character = await prisma.character.findUnique({
-      where: { id: characterId },
+  // Получить боевую копию персонажа пользователя
+  private async getCharacterCopy(characterId: string, userId: string) {
+    const characterCopy = await prisma.characterCopy.findUnique({
+      where: {
+        userId_characterId: {
+          userId,
+          characterId
+        }
+      },
       include: {
         characteristics: {
           include: {
             definition: true
           }
         },
-        anatomy: {
+        character: {
           include: {
-            definition: true
-          }
-        },
-        poses: {
-          include: {
-            definition: true,
-            angles: {
+            anatomy: {
               include: {
-                zones: true
+                definition: true
+              }
+            },
+            poses: {
+              include: {
+                definition: true,
+                angles: {
+                  include: {
+                    zones: {
+                      include: {
+                        anatomy: true
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -307,98 +598,94 @@ export class CharacterAIService implements ICharacterAIService {
       }
     })
 
-    if (!character) {
-      throw new Error('Персонаж не найден')
+    if (!characterCopy) {
+      throw new Error('Персональная копия персонажа не найдена')
     }
 
-    return character
+    return characterCopy
   }
 
   // Получить контекст персонажа
   async getCharacterContext(characterId: string, userId: string, gameContext?: any): Promise<PromptContext> {
-    const character = await this.getCharacter(characterId)
+    const characterCopy = await this.getCharacterCopy(characterId, userId)
+    const baseCharacter = characterCopy.character
     const user = await this.getUser(userId)
 
-    // Получаем характеристики
-    const characteristics = character.characteristics.map(char => ({
+    const characteristicNameMap = new Map<string, { name: string; category: string }>()
+
+    for (const char of characterCopy.characteristics) {
+      characteristicNameMap.set(char.characteristicDefId, {
+        name: char.definition.name,
+        category: char.definition.category
+      })
+    }
+
+    const characteristics = characterCopy.characteristics.map(char => ({
       id: char.id,
       name: char.definition.name,
       category: char.definition.category,
       currentValue: char.currentValue,
       baseValue: char.baseValue,
-      isRevealed: true, // TODO: Реализовать систему раскрытия
+      isRevealed: true,
       revealedValue: char.currentValue,
       accuracy: 100
     }))
 
-    // Получаем память
     const memory = await this.memoryManager.getMemoryContext(characterId)
 
-    // Получаем текущую позу из копии персонажа пользователя
     let poseContext: any = undefined
-    if (userId) {
-      const characterCopy = await prisma.characterCopy.findUnique({
-        where: {
-          userId_characterId: {
-            userId,
-            characterId
-          }
-        }
-      })
+    const copySettings = characterCopy.settings as Record<string, any> | null
 
-      if (characterCopy?.settings?.currentPose) {
-        // Получаем позу по ID из копии
-        const userPose = await prisma.characterPose.findUnique({
-          where: { id: characterCopy.settings.currentPose },
-          include: {
-            definition: true,
-            angles: {
-              include: {
-                zones: {
-                  include: {
-                    anatomy: true
-                  }
+    if (typeof copySettings?.currentPose === 'string') {
+      const currentPoseId = copySettings.currentPose as string
+      const userPose = await prisma.characterPose.findUnique({
+        where: { id: currentPoseId },
+        include: {
+          definition: true,
+          angles: {
+            include: {
+              zones: {
+                include: {
+                  anatomy: true
                 }
               }
             }
           }
-        })
+        }
+      })
 
-        if (userPose) {
-          const currentAngleId = characterCopy.settings.currentAngle
-          const currentAngle = userPose.angles.find(angle => angle.id === currentAngleId) || userPose.angles[0]
+      if (userPose) {
+        const currentAngleId = typeof copySettings?.currentAngle === 'string' ? (copySettings.currentAngle as string) : undefined
+        const currentAngle = userPose.angles.find(angle => angle.id === currentAngleId) || userPose.angles[0]
 
-          poseContext = {
-            id: userPose.id,
-            name: userPose.definition.name,
-            category: userPose.definition.category,
-            description: userPose.definition.description,
-            currentAngle: currentAngle?.name || 'default',
-            activeZones: currentAngle?.zones.map(zone => ({
-              id: zone.id,
-              name: zone.name,
-              anatomyId: zone.anatomyDefId,
-              anatomyName: zone.anatomy?.name,
-              sensitivity: 50, // TODO: Добавить чувствительность в схему
-              isActive: true
-            })) || []
-          }
+        poseContext = {
+          id: userPose.id,
+          name: userPose.definition.name,
+          category: userPose.definition.category,
+          description: userPose.definition.description,
+          currentAngle: currentAngle?.name || 'default',
+          activeZones: currentAngle?.zones.map(zone => ({
+            id: zone.id,
+            name: zone.name,
+            anatomyId: zone.anatomyDefId,
+            anatomyName: zone.anatomy?.name,
+            sensitivity: 50, // TODO: Добавить чувствительность в схему
+            isActive: true
+          })) || []
         }
       }
     }
 
-    // Если нет позы из копии, берем дефолтную активную позу
     if (!poseContext) {
       serverLogger.debug(LogCategory.AI, 'Ищем активную позу персонажа', {
         characterId,
-        totalPoses: character.poses.length,
-        activePoses: character.poses.filter(pose => pose.isActive).length
+        totalPoses: baseCharacter.poses.length,
+        activePoses: baseCharacter.poses.filter(pose => pose.isActive).length
       })
 
-      // Ищем позу "Стоя" как дефолтную, если не найдена - берем первую активную
-      let currentPose = character.poses.find(pose => pose.isActive && pose.definition.name === 'Стоя')
+      let currentPose = baseCharacter.poses.find(pose => pose.isActive && pose.definition.name === 'Стоя')
       if (!currentPose) {
-        currentPose = character.poses.find(pose => pose.isActive)
+        currentPose = baseCharacter.poses.find(pose => pose.isActive)
       }
       if (currentPose) {
         serverLogger.debug(LogCategory.AI, 'Найдена активная поза', {
@@ -426,19 +713,15 @@ export class CharacterAIService implements ICharacterAIService {
       } else {
         serverLogger.warn(LogCategory.AI, 'Не найдена активная поза', {
           characterId,
-          totalPoses: character.poses.length,
-          poses: character.poses.map(p => ({ id: p.id, name: p.definition.name, isActive: p.isActive }))
+          totalPoses: baseCharacter.poses.length,
+          poses: baseCharacter.poses.map(p => ({ id: p.id, name: p.definition.name, isActive: p.isActive }))
         })
       }
     }
 
-    // Получаем последние действия из ActionLog
-    const lastAction = await this.getLastAction(characterId, userId)
-
-    // Получаем историю сессии
+    const lastAction = await this.getLastAction(characterId, userId, characteristicNameMap)
     const sessionHistory = await this.getSessionHistory(characterId, userId)
 
-    // Создаем контекст окружения
     const environment = {
       timeOfDay: 'день',
       location: 'комната',
@@ -454,17 +737,17 @@ export class CharacterAIService implements ICharacterAIService {
       userId,
       message: '',
       character: {
-        id: character.id,
-        name: character.name,
-        description: character.description || undefined,
-        age: character.age || undefined,
-        avatar: character.avatar || undefined
+        id: baseCharacter.id,
+        name: baseCharacter.name,
+        description: baseCharacter.description || undefined,
+        age: baseCharacter.age || undefined,
+        avatar: baseCharacter.avatar || undefined
       },
       characteristics,
       memory,
       currentPose: poseContext,
       lastAction,
-      userModifiers: user?.modifiers as Record<string, number> || {},
+      userModifiers: (user?.modifiers as Record<string, number>) || {},
       gameTime: Date.now(),
       sessionHistory,
       environment
@@ -880,6 +1163,8 @@ export class CharacterAIService implements ICharacterAIService {
           const bestPoseCommand = validPoseCommands[0]
           serverLogger.info(LogCategory.AI, 'Выполняем лучшую команду позы', {
             characterId,
+            poseId: bestPoseCommand.poseId,
+            poseKey: bestPoseCommand.poseKey,
             poseName: bestPoseCommand.poseName,
             confidence: bestPoseCommand.confidence,
             totalCommands: analysis.poseCommands.length,
@@ -940,22 +1225,100 @@ export class CharacterAIService implements ICharacterAIService {
   // Выполнение команды позы
   private async executePoseCommand(characterId: string, poseCommand: PoseCommand, userId: string): Promise<void> {
     try {
-      // Находим позу персонажа по имени
-      const characterPose = await prisma.characterPose.findFirst({
-        where: {
+      const commandText = poseCommand.command || poseCommand.poseName || poseCommand.poseKey
+
+      if (!poseCommand.poseId && !poseCommand.poseKey && !commandText) {
+        serverLogger.warn(LogCategory.AI, 'Неполная команда позы', {
           characterId,
-          definition: {
-            name: {
-              contains: poseCommand.poseName,
-              mode: 'insensitive'
-            }
-          }
-        },
-        include: {
-          definition: true,
-          angles: true
-        }
+          poseCommand,
+          hasCommand: !!poseCommand.command,
+          hasPoseName: !!poseCommand.poseName,
+          hasPoseId: !!poseCommand.poseId,
+          hasPoseKey: !!poseCommand.poseKey
+        })
+        return
+      }
+
+      const mappedPoseName = poseCommand.poseName || (commandText ? this.mapCommandToPoseName(commandText) : undefined)
+
+      serverLogger.info(LogCategory.AI, 'Маппинг команды позы', {
+        characterId,
+        poseId: poseCommand.poseId,
+        poseKey: poseCommand.poseKey,
+        originalCommand: poseCommand.command,
+        fallbackName: mappedPoseName,
+        confidence: poseCommand.confidence
       })
+
+      let characterPose = poseCommand.poseId
+        ? await prisma.characterPose.findUnique({
+            where: {
+              characterId_poseDefId: {
+                characterId,
+                poseDefId: poseCommand.poseId
+              }
+            },
+            include: {
+              definition: true,
+              angles: true
+            }
+          })
+        : null
+
+      let cachedPoses: any[] | null = null
+
+      const ensurePosesCache = async () => {
+        if (!cachedPoses) {
+          cachedPoses = await prisma.characterPose.findMany({
+            where: {
+              characterId,
+              isActive: true
+            },
+            include: {
+              definition: true,
+              angles: true
+            }
+          }) as any
+        }
+        return cachedPoses
+      }
+
+      const resolvePoseByKey = async (poseKey?: string) => {
+        if (!poseKey) {
+          return null
+        }
+        const poses = await ensurePosesCache()
+        const normalizedKey = poseKey.toLowerCase()
+        return poses.find(pose => this.createPoseKey(pose.definition.name) === normalizedKey) || null
+      }
+
+      const resolvePoseByName = async (name?: string) => {
+        if (!name) {
+          return null
+        }
+        const poses = await ensurePosesCache()
+        const normalizedName = name.toLowerCase()
+        return (
+          poses.find(pose => pose.definition.name.toLowerCase() === normalizedName) ||
+          poses.find(pose => pose.definition.name.toLowerCase().includes(normalizedName)) ||
+          null
+        )
+      }
+
+      if (!characterPose && poseCommand.poseKey) {
+        characterPose = await resolvePoseByKey(poseCommand.poseKey)
+      }
+
+      if (!characterPose && mappedPoseName) {
+        characterPose = await resolvePoseByName(mappedPoseName)
+      }
+
+      if (!characterPose && commandText) {
+        const poses = await ensurePosesCache()
+        const normalizedCommand = commandText.toLowerCase()
+        characterPose =
+          poses.find(pose => pose.definition.name.toLowerCase().includes(normalizedCommand)) || null
+      }
 
       if (characterPose) {
         console.log(`🎭 Найдена поза: ${characterPose.definition.name}`)
@@ -1012,7 +1375,10 @@ export class CharacterAIService implements ICharacterAIService {
               type: 'POSE_CHANGE' as any,
               content: `Принята поза: ${characterPose.definition.name} (${targetAngle.name})`,
               importance: 6,
-              tags: ['поза', poseCommand.poseName.toLowerCase()],
+              tags: [
+                'поза',
+                (characterPose.definition.name || poseCommand.poseKey || commandText || 'неизвестная поза').toLowerCase()
+              ],
               emotionalWeight: 4,
               context: 'команда пользователя',
               isActive: true
@@ -1034,6 +1400,8 @@ export class CharacterAIService implements ICharacterAIService {
         serverLogger.warn(LogCategory.AI, 'Поза не найдена', {
           characterId,
           requestedPose: poseCommand.poseName,
+          requestedPoseId: poseCommand.poseId,
+          requestedPoseKey: poseCommand.poseKey,
           confidence: poseCommand.confidence
         })
       }
@@ -1291,7 +1659,11 @@ export class CharacterAIService implements ICharacterAIService {
     }
   }
 
-  private async getLastAction(characterId: string, userId: string): Promise<any> {
+  private async getLastAction(
+    characterId: string,
+    userId: string,
+    characteristicNameMap: Map<string, { name: string; category: string }>
+  ): Promise<any> {
     try {
       const lastAction = await prisma.actionLog.findFirst({
         where: {
@@ -1315,6 +1687,37 @@ export class CharacterAIService implements ICharacterAIService {
 
       if (!lastAction) return null
 
+      let zoneData: any = null
+      if (lastAction.zoneId) {
+        try {
+          const zone = await prisma.characterActiveZone.findUnique({
+            where: { id: lastAction.zoneId },
+            include: {
+              anatomy: true
+            }
+          })
+
+          if (zone) {
+            zoneData = {
+              id: zone.id,
+              name: zone.name,
+              anatomyId: zone.anatomyDefId,
+              anatomyName: zone.anatomy?.name || null
+            }
+          }
+        } catch (error) {
+          console.warn('Не удалось получить информацию о зоне из ActionLog:', error)
+        }
+      }
+
+      const effects = Array.isArray(lastAction.effects)
+        ? (lastAction.effects as Array<{ characteristicId: string; change: number; permanent: boolean }>).map(effect => ({
+            ...effect,
+            characteristicName: characteristicNameMap.get(effect.characteristicId)?.name || null,
+            characteristicCategory: characteristicNameMap.get(effect.characteristicId)?.category || null
+          }))
+        : []
+
       return {
         id: lastAction.id,
         actionId: lastAction.actionId,
@@ -1324,7 +1727,8 @@ export class CharacterAIService implements ICharacterAIService {
         intensity: lastAction.intensity,
         duration: lastAction.duration,
         timestamp: lastAction.timestamp,
-        effects: lastAction.effects,
+        zone: zoneData,
+        effects,
         success: lastAction.success
       }
     } catch (error) {

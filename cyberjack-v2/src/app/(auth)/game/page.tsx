@@ -271,12 +271,14 @@ export default function GameInterface() {
     executeActionOnZone(zoneId)
   }
 
-  const handleZoneHold = (zoneId: string) => {
+  const handleZoneHold = (zoneId: string, isHolding: boolean) => {
     if (!gameState.actionInProgress) {
       return
     }
 
-    executeActionOnZone(zoneId)
+    if (isHolding) {
+      executeActionOnZone(zoneId)
+    }
   }
 
   const handleAngleChange = async (angleId: string) => {

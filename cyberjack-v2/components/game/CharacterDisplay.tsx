@@ -75,7 +75,7 @@ interface CharacterDisplayProps {
       height: number
     }>
   }
-  onZoneHold?: (zoneId: string) => void // Обработчик холда зоны
+  onZoneHold?: (zoneId: string, isHolding: boolean) => void // Обработчик холда зоны
   actionInProgress?: boolean // Действие в процессе
 }
 
@@ -376,7 +376,9 @@ export function CharacterDisplay({
           return (
             <div
               key={zone.id}
-              className="absolute border-2 border-blue-400 bg-blue-400 bg-opacity-10 cursor-pointer hover:bg-opacity-20 transition-all duration-200"
+              className={`absolute border-2 border-blue-400 bg-blue-400 bg-opacity-10 cursor-pointer transition-all duration-200 ${
+                actionInProgress ? 'hover:bg-opacity-20' : ''
+              }`}
               style={{
                 left: `${leftPercent}%`,
                 top: `${topPercent}%`,
@@ -390,15 +392,31 @@ export function CharacterDisplay({
               }}
               onMouseDown={(e) => {
                 e.preventDefault()
-                onZoneHold?.(zone.id, true)
+                if (actionInProgress) {
+                  onZoneHold?.(zone.id, true)
+                }
               }}
-              onMouseUp={() => onZoneHold?.(zone.id, false)}
-              onMouseLeave={() => onZoneHold?.(zone.id, false)}
+              onMouseUp={() => {
+                if (actionInProgress) {
+                  onZoneHold?.(zone.id, false)
+                }
+              }}
+              onMouseLeave={() => {
+                if (actionInProgress) {
+                  onZoneHold?.(zone.id, false)
+                }
+              }}
               onTouchStart={(e) => {
                 e.preventDefault()
-                onZoneHold?.(zone.id, true)
+                if (actionInProgress) {
+                  onZoneHold?.(zone.id, true)
+                }
               }}
-              onTouchEnd={() => onZoneHold?.(zone.id, false)}
+              onTouchEnd={() => {
+                if (actionInProgress) {
+                  onZoneHold?.(zone.id, false)
+                }
+              }}
               title={`${zone.name} - клик для действия, удержание для повторения`}
             >
               <div className="text-blue-400 text-xs p-1 font-medium">
