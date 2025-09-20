@@ -10,6 +10,7 @@ interface ZoneEditorProps {
   initialZones: Zone[]
   onZonesChange: (zones: Zone[]) => void
   onZoneSelect?: (zone: Zone | null) => void
+  onZoneCreate?: (zone: Zone) => void
   className?: string
 }
 
@@ -20,6 +21,7 @@ export function ZoneEditor({
   initialZones,
   onZonesChange,
   onZoneSelect,
+  onZoneCreate,
   className = ''
 }: ZoneEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -30,13 +32,28 @@ export function ZoneEditor({
   const [createStart, setCreateStart] = useState<{ x: number; y: number } | null>(null)
   const [scale, setScale] = useState(1)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
 
   // Конфигурация редактора
   const config: ZoneEditorConfig = {
     imageWidth,
-    imageHeight,
     minZoneSize: 20,
     maxZoneSize: Math.min(imageWidth, imageHeight)
+  }
+
+  // Функции управления масштабом
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev * 1.2, 3))
+  }
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev / 1.2, 0.5))
+  }
+
+  const handleResetZoom = () => {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
   }
 
   // Инициализация сервиса
@@ -81,7 +98,7 @@ export function ZoneEditor({
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {
-      // Вычисляем масштаб для отображения
+      // Вычисляем масштаб для отображения всего изображения
       const container = containerRef.current
       if (!container) return
 
@@ -94,15 +111,16 @@ export function ZoneEditor({
 
       setScale(newScale)
 
-      const displayWidth = imageWidth * newScale
-      const displayHeight = imageHeight * newScale
+      // Размер canvas фиксированный
+      const displayWidth = containerWidth
+      const displayHeight = containerHeight
 
       canvas.width = displayWidth
       canvas.height = displayHeight
 
       ctx.clearRect(0, 0, displayWidth, displayHeight)
 
-      // Рисуем изображение с сохранением пропорций (обрезаем, а не растягиваем)
+      // Рисуем изображение с сохранением пропорций, но показывая полностью
       const imgAspect = img.width / img.height
       const canvasAspect = displayWidth / displayHeight
 
@@ -112,22 +130,28 @@ export function ZoneEditor({
       let offsetY = 0
 
       if (imgAspect > canvasAspect) {
-        // Изображение шире - обрезаем по бокам
-        drawWidth = displayHeight * imgAspect
-        offsetX = (displayWidth - drawWidth) / 2
-      } else {
-        // Изображение выше - обрезаем сверху/снизу
+        // Изображение шире - подгоняем по ширине, добавляем отступы сверху/снизу
+        drawWidth = displayWidth
         drawHeight = displayWidth / imgAspect
         offsetY = (displayHeight - drawHeight) / 2
+      } else {
+        // Изображение выше - подгоняем по высоте, добавляем отступы по бокам
+        drawHeight = displayHeight
+        drawWidth = displayHeight * imgAspect
+        offsetX = (displayWidth - drawWidth) / 2
       }
 
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight)
+      ctx.save()
+      ctx.translate(pan.x, pan.y)
+      ctx.scale(zoom, zoom)
+      ctx.drawImage(img, offsetX / zoom, offsetY / zoom, drawWidth / zoom, drawHeight / zoom)
+      ctx.restore()
 
       setImageLoaded(true)
       drawZones()
     }
     img.src = imageUrl
-  }, [imageUrl, imageWidth, imageHeight, scale])
+  }, [imageUrl, imageWidth, imageHeight, zoom, pan.x, pan.y])
 
   // Отрисовка зон
   const drawZones = useCallback(() => {
@@ -140,10 +164,10 @@ export function ZoneEditor({
     // Очищаем canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Перерисовываем изображение
+    // Перерисовываем изображение с сохранением пропорций
     const img = new Image()
     img.onload = () => {
-      // Рисуем изображение с сохранением пропорций
+      // Вычисляем размеры для отображения с сохранением пропорций
       const imgAspect = img.width / img.height
       const canvasAspect = canvas.width / canvas.height
 
@@ -153,16 +177,22 @@ export function ZoneEditor({
       let offsetY = 0
 
       if (imgAspect > canvasAspect) {
-        // Изображение шире - обрезаем по бокам
-        drawWidth = canvas.height * imgAspect
-        offsetX = (canvas.width - drawWidth) / 2
-      } else {
-        // Изображение выше - обрезаем сверху/снизу
+        // Изображение шире - подгоняем по ширине
+        drawWidth = canvas.width
         drawHeight = canvas.width / imgAspect
         offsetY = (canvas.height - drawHeight) / 2
+      } else {
+        // Изображение выше - подгоняем по высоте
+        drawHeight = canvas.height
+        drawWidth = canvas.height * imgAspect
+        offsetX = (canvas.width - drawWidth) / 2
       }
 
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight)
+      ctx.save()
+      ctx.translate(pan.x, pan.y)
+      ctx.scale(zoom, zoom)
+      ctx.drawImage(img, offsetX / zoom, offsetY / zoom, drawWidth / zoom, drawHeight / zoom)
+      ctx.restore()
       drawZonesOnCanvas()
     }
     img.src = imageUrl
@@ -170,12 +200,39 @@ export function ZoneEditor({
     function drawZonesOnCanvas() {
       if (!editorState || !ctx) return
 
+      // Вычисляем отступы для корректного позиционирования зон
+      const imgAspect = img.width / img.height
+      const canvasAspect = canvas.width / canvas.height
+
+      let offsetX = 0
+      let offsetY = 0
+      let scaleX = 1
+      let scaleY = 1
+
+      if (imgAspect > canvasAspect) {
+        // Изображение шире - отступы сверху/снизу
+        const drawHeight = canvas.width / imgAspect
+        offsetY = (canvas.height - drawHeight) / 2
+        scaleY = drawHeight / canvas.height
+      } else {
+        // Изображение выше - отступы по бокам
+        const drawWidth = canvas.height * imgAspect
+        offsetX = (canvas.width - drawWidth) / 2
+        scaleX = drawWidth / canvas.width
+      }
+
+      // Применяем трансформации для зон
+      ctx.save()
+      ctx.translate(pan.x + offsetX, pan.y + offsetY)
+      ctx.scale(scaleX, scaleY)
+
       editorState.zones.forEach(zone => {
         const isSelected = zone.id === editorState.selectedZoneId
-        const x = zone.x * scale
-        const y = zone.y * scale
-        const width = zone.width * scale
-        const height = zone.height * scale
+        // Координаты зон в исходных координатах изображения, масштабируем их
+        const x = zone.x * scale * zoom
+        const y = zone.y * scale * zoom
+        const width = zone.width * scale * zoom
+        const height = zone.height * scale * zoom
 
         // Фон зоны
         ctx.fillStyle = isSelected ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)'
@@ -214,18 +271,65 @@ export function ZoneEditor({
           )
         }
       })
+
+      ctx.restore()
     }
-  }, [editorState, scale, imageUrl])
+  }, [editorState, scale, zoom, pan, imageUrl])
+
+  // Обработка колеса мыши для зума
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? 0.9 : 1.1
+    setZoom(prev => Math.max(0.5, Math.min(3, prev * delta)))
+  }
+
+  // Функция для преобразования координат мыши в координаты изображения
+  const getImageCoordinates = (clientX: number, clientY: number) => {
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (!rect) return { x: 0, y: 0 }
+
+    const canvas = canvasRef.current
+    if (!canvas || !canvas.width || !canvas.height) return { x: 0, y: 0 }
+
+    const canvasX = clientX - rect.left
+    const canvasY = clientY - rect.top
+
+    // Вычисляем отступы изображения
+    const imgAspect = imageWidth / imageHeight
+    const canvasAspect = canvas.width / canvas.height
+
+    let offsetX = 0
+    let offsetY = 0
+    let scaleX = 1
+    let scaleY = 1
+
+    if (imgAspect > canvasAspect) {
+      const drawHeight = canvas.width / imgAspect
+      offsetY = (canvas.height - drawHeight) / 2
+      scaleY = drawHeight / canvas.height
+    } else {
+      const drawWidth = canvas.height * imgAspect
+      offsetX = (canvas.width - drawWidth) / 2
+      scaleX = drawWidth / canvas.width
+    }
+
+    // Преобразуем координаты в координаты изображения
+    // Сначала убираем панорамирование и отступы
+    const imageX = (canvasX - pan.x - offsetX) / scaleX
+    const imageY = (canvasY - pan.y - offsetY) / scaleY
+
+    // Затем убираем зум и масштабируем к исходным размерам изображения
+    const x = (imageX / zoom) / scale
+    const y = (imageY / zoom) / scale
+
+    return { x, y }
+  }
 
   // Обработка событий мыши
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!editorService || !editorState) return
+    if (!editorService || !editorState || !imageLoaded) return
 
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
-
-    const x = (e.clientX - rect.left) / scale
-    const y = (e.clientY - rect.top) / scale
+    const { x, y } = getImageCoordinates(e.clientX, e.clientY)
 
     // Проверяем, кликнули ли по ручке изменения размера
     if (editorState.selectedZoneId) {
@@ -251,13 +355,9 @@ export function ZoneEditor({
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!editorService || !editorState) return
+    if (!editorService || !editorState || !imageLoaded) return
 
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
-
-    const x = (e.clientX - rect.left) / scale
-    const y = (e.clientY - rect.top) / scale
+    const { x, y } = getImageCoordinates(e.clientX, e.clientY)
 
     if (editorState.isDragging) {
       editorService.updateDrag(e.clientX, e.clientY)
@@ -267,11 +367,31 @@ export function ZoneEditor({
       // Отрисовываем предварительную зону при создании
       drawZones()
       const ctx = canvasRef.current?.getContext('2d')
-      if (ctx) {
-        const startX = createStart.x * scale
-        const startY = createStart.y * scale
-        const currentX = x * scale
-        const currentY = y * scale
+      const canvas = canvasRef.current
+      if (ctx && canvas) {
+        // Вычисляем отступы для корректного позиционирования
+        const imgAspect = imageWidth / imageHeight
+        const canvasAspect = canvas.width / canvas.height
+
+        let offsetX = 0
+        let offsetY = 0
+        let scaleX = 1
+        let scaleY = 1
+
+        if (imgAspect > canvasAspect) {
+          const drawHeight = canvas.width / imgAspect
+          offsetY = (canvas.height - drawHeight) / 2
+          scaleY = drawHeight / canvas.height
+        } else {
+          const drawWidth = canvas.height * imgAspect
+          offsetX = (canvas.width - drawWidth) / 2
+          scaleX = drawWidth / canvas.width
+        }
+
+        const startX = (createStart.x * scale * zoom * scaleX) + pan.x + offsetX
+        const startY = (createStart.y * scale * zoom * scaleY) + pan.y + offsetY
+        const currentX = (x * scale * zoom * scaleX) + pan.x + offsetX
+        const currentY = (y * scale * zoom * scaleY) + pan.y + offsetY
 
         ctx.strokeStyle = '#ef4444'
         ctx.lineWidth = 2
@@ -288,28 +408,28 @@ export function ZoneEditor({
   }
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    if (!editorService || !editorState) return
+    if (!editorService || !editorState || !imageLoaded) return
 
     if (editorState.isDragging) {
       editorService.endDrag()
     } else if (editorState.isResizing) {
       editorService.endResize()
     } else if (isCreating && createStart) {
-      const rect = canvasRef.current?.getBoundingClientRect()
-      if (rect) {
-        const x = (e.clientX - rect.left) / scale
-        const y = (e.clientY - rect.top) / scale
+      const { x, y } = getImageCoordinates(e.clientX, e.clientY)
 
-        const newZone = editorService.createZoneFromCoordinates(
-          createStart.x,
-          createStart.y,
-          x,
-          y,
-          `Зона ${editorState.zones.length + 1}`
-        )
+      const newZone = editorService.createZoneFromCoordinates(
+        createStart.x,
+        createStart.y,
+        x,
+        y,
+        `Зона ${editorState.zones.length + 1}`
+      )
 
-        if (newZone) {
-          editorService.selectZone(newZone.id)
+      if (newZone) {
+        editorService.selectZone(newZone.id)
+        // Уведомляем родительский компонент о создании зоны
+        if (onZoneCreate) {
+          onZoneCreate(newZone)
         }
       }
       setIsCreating(false)
@@ -329,12 +449,47 @@ export function ZoneEditor({
     }
   }, [editorState, imageLoaded, drawZones])
 
+  // Перерисовка при изменении зума или панорамирования
+  useEffect(() => {
+    if (imageLoaded) {
+      loadImage()
+    }
+  }, [zoom, pan, loadImage, imageLoaded])
+
   return (
     <div className={`relative ${className}`}>
+      {/* Панель управления */}
+      <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg border">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">Масштаб:</span>
+          <button
+            onClick={handleZoomOut}
+            className="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50"
+          >
+            −
+          </button>
+          <span className="text-sm w-16 text-center">{Math.round(zoom * 100)}%</span>
+          <button
+            onClick={handleZoomIn}
+            className="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50"
+          >
+            +
+          </button>
+          <button
+            onClick={handleResetZoom}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Сброс
+          </button>
+        </div>
+        <div className="text-sm text-gray-600">
+          Размер: {Math.round(imageWidth * scale * zoom)} × {Math.round(imageHeight * scale * zoom)}px
+        </div>
+      </div>
+
       <div
         ref={containerRef}
-        className="relative border border-gray-300 rounded-lg overflow-hidden bg-gray-100"
-        style={{ minHeight: '400px' }}
+        className="relative border border-gray-300 rounded-lg overflow-hidden bg-gray-100 min-h-[500px] max-h-[80vh]"
       >
         <canvas
           ref={canvasRef}
@@ -342,6 +497,7 @@ export function ZoneEditor({
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
+          onWheel={handleWheel}
           onMouseLeave={() => {
             if (editorService) {
               editorService.endDrag()
@@ -359,11 +515,12 @@ export function ZoneEditor({
         )}
       </div>
 
-      <div className="mt-2 text-sm text-gray-600">
+      <div className="mt-2 text-sm text-gray-600 space-y-1">
         <p>• Кликните и перетащите для создания новой зоны</p>
         <p>• Кликните по зоне для выбора</p>
         <p>• Перетаскивайте зону для перемещения</p>
         <p>• Используйте угловые ручки для изменения размера</p>
+        <p>• Колесо мыши для масштабирования</p>
       </div>
     </div>
   )

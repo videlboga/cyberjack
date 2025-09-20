@@ -9,13 +9,13 @@ interface AnatomyDefinition {
   category: string | null
   description: string | null
   isActive: boolean
-  anatomy: Array<{
+  anatomy?: Array<{
     id: string
     characterId: string
     hasPart: boolean
     sensitivity: number
   }>
-  activeZones: Array<{
+  activeZones?: Array<{
     id: string
     name: string
     x: number
@@ -246,8 +246,8 @@ export function AnatomyAdmin() {
                     </p>
                   )}
                   <div className="mt-2 text-xs text-gray-500">
-                    <p>Персонажи: {anatomyItem.anatomy.length}</p>
-                    <p>Активные зоны: {anatomyItem.activeZones.length}</p>
+                    <p>Персонажи: {anatomyItem.anatomy?.length || 0}</p>
+                    <p>Активные зоны: {anatomyItem.activeZones?.length || 0}</p>
                   </div>
                 </div>
                 <div className="flex gap-1 ml-2">

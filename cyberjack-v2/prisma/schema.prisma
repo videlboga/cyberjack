@@ -136,6 +136,9 @@ model CharacteristicDefinition {
   // Характеристики персонажей
   characteristics Characteristic[]
 
+  // Персональные характеристики копий
+  copyCharacteristics CharacterCopyCharacteristic[]
+
   // Знания пользователей
   knowledge CharacterKnowledge[]
 
@@ -169,8 +172,6 @@ model AnatomyDefinition {
   // Анатомия персонажей
   anatomy CharacterAnatomy[]
 
-  // Активные зоны
-  activeZones ActiveZone[]
 
   // Персонализированные активные зоны
   characterActiveZones CharacterActiveZone[]
@@ -224,6 +225,7 @@ model CharacterActiveZone {
   id          String   @id @default(cuid())
   characterAngleId String
   anatomyDefId String?
+  mediaFileId String?  // ID конкретного медиа файла в ракурсе
 
   name        String
   x           Float    // координаты на изображении
@@ -251,8 +253,6 @@ model PoseDefinition {
   // Условия применения
   requirements Json    @default("{}")
 
-  // Ракурсы
-  angles      PoseAngle[]
 
   // Позы персонажей
   poses       CharacterPose[]
@@ -265,43 +265,6 @@ model PoseDefinition {
   @@map("pose_definitions")
 }
 
-// Ракурсы поз
-model PoseAngle {
-  id          String   @id @default(cuid())
-  poseDefId   String
-  name        String
-  angle       String   // "front", "back", "side", etc.
-
-  // Медиа
-  media       Json     @default("{}") // {images: [], videos: [], gifs: []}
-
-  // Активные зоны
-  zones       ActiveZone[]
-
-
-  pose        PoseDefinition @relation(fields: [poseDefId], references: [id], onDelete: Cascade)
-
-  @@map("pose_angles")
-}
-
-// Активные зоны
-model ActiveZone {
-  id          String   @id @default(cuid())
-  angleId     String
-  anatomyDefId String?
-
-  name        String
-  x           Float    // координаты на изображении
-  y           Float
-  width       Float
-  height      Float
-
-  // Связь с анатомией
-  anatomy     AnatomyDefinition? @relation(fields: [anatomyDefId], references: [id])
-  angle       PoseAngle @relation(fields: [angleId], references: [id], onDelete: Cascade)
-
-  @@map("active_zones")
-}
 
 // Действия/Инструменты
 model Action {
@@ -363,8 +326,34 @@ model CharacterCopy {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
+  // Персональные характеристики копии
+  characteristics CharacterCopyCharacteristic[]
+
   @@unique([userId, characterId])
   @@map("character_copies")
+}
+
+// Персональные характеристики копий персонажей
+model CharacterCopyCharacteristic {
+  id                String   @id @default(cuid())
+  characterCopyId   String
+  characteristicDefId String
+
+  // Значения характеристики
+  currentValue      Float    @default(50)
+  baseValue         Float    @default(50)
+  recoveryRate      Float    @default(1.0)
+
+  // Метаданные
+  lastChanged       DateTime @default(now())
+  timeInAlteredState Int     @default(0)
+
+  // Связи
+  characterCopy     CharacterCopy @relation(fields: [characterCopyId], references: [id], onDelete: Cascade)
+  definition        CharacteristicDefinition @relation(fields: [characteristicDefId], references: [id])
+
+  @@unique([characterCopyId, characteristicDefId])
+  @@map("character_copy_characteristics")
 }
 
 // Знания пользователей о персонажах

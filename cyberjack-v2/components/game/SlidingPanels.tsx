@@ -169,20 +169,7 @@ export function SlidingPanels({
         </div>
       </div>
 
-      {/* Невидимая область для закрытия панелей при клике вне их */}
-      {(panels.characters || panels.actions || panels.characteristics || panels.equipment || panels.chat || panels.stations) && (
-        <div
-          className="fixed inset-0 z-30"
-          onClick={() => {
-            if (panels.characters) onTogglePanel('characters')
-            if (panels.actions) onTogglePanel('actions')
-            if (panels.characteristics) onTogglePanel('characteristics')
-            if (panels.equipment) onTogglePanel('equipment')
-            if (panels.chat) onTogglePanel('chat')
-            if (panels.stations) onTogglePanel('stations')
-          }}
-        />
-      )}
+      {/* Оверлей убран - теперь можно взаимодействовать с активными зонами при открытых панелях */}
     </>
   )
 }

@@ -7,6 +7,7 @@ import { CharacterPosesManager } from './CharacterPosesManager'
 import { CharacterAnatomyManager } from './CharacterAnatomyManager'
 import { CharacterCharacteristicsManager } from './CharacterCharacteristicsManager'
 import { CharacterPromptsManager } from './CharacterPromptsManager'
+import { AvatarUpload } from './AvatarUpload'
 
 interface Character {
   id: string
@@ -285,16 +286,11 @@ export function CharactersAdmin() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">URL аватара</label>
-              <input
-                type="url"
-                value={formData.avatar}
-                onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="https://example.com/avatar.jpg"
-              />
-            </div>
+            <AvatarUpload
+              characterId={editingId || 'new'}
+              currentAvatar={formData.avatar}
+              onAvatarChange={(url) => setFormData({ ...formData, avatar: url })}
+            />
 
             <div className="flex items-center">
               <label className="flex items-center">

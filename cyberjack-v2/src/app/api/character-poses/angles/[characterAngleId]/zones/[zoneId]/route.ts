@@ -11,7 +11,7 @@ export async function PATCH(
     const updates = await request.json()
 
     // Валидация данных
-    const allowedFields = ['name', 'anatomyDefId', 'x', 'y', 'width', 'height']
+    const allowedFields = ['name', 'anatomyDefId', 'mediaFileId', 'x', 'y', 'width', 'height']
     const filteredUpdates: any = {}
 
     for (const field of allowedFields) {

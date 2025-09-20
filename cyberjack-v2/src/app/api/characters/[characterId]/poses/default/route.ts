@@ -182,7 +182,7 @@ export async function GET(
     // Преобразуем медиа в нужный формат
     const media = defaultAngle.media as any || { images: [], files: [] }
     console.log('🔍 Медиа ракурса:', JSON.stringify(media, null, 2))
-    
+
     // Поддерживаем два формата: {images: []} и {files: []}
     let formattedImages = []
     if (media.images && Array.isArray(media.images)) {
@@ -196,7 +196,7 @@ export async function GET(
         type: file.type
       }))
     }
-    
+
     const formattedMedia = {
       images: formattedImages
     }
@@ -211,13 +211,29 @@ export async function GET(
       )
     }
 
+    // Фильтруем зоны по первому изображению
+    const firstImageId = formattedMedia.images[0]?.id
+    console.log('🔍 Все зоны ракурса:', defaultAngle.zones)
+    console.log('🖼️ Первое изображение ID:', firstImageId)
+
+    const filteredZones = firstImageId
+      ? defaultAngle.zones.filter((zone: any) => zone.mediaFileId === firstImageId)
+      : defaultAngle.zones.filter((zone: any) => !zone.mediaFileId) // Зоны без привязки к медиа
+
+    console.log('🎯 Зоны для отображения:', {
+      totalZones: defaultAngle.zones.length,
+      filteredZones: filteredZones.length,
+      firstImageId,
+      zones: filteredZones
+    })
+
     return NextResponse.json({
       poseId: defaultPose.definition.id,
       poseName: defaultPose.definition.name,
       defaultAngle: defaultAngle.id,
       angleName: defaultAngle.name,
       media: formattedMedia,
-      zones: defaultAngle.zones
+      zones: filteredZones
     })
   } catch (error) {
     console.error('Error fetching default pose:', error)

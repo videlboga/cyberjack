@@ -27,6 +27,7 @@ export function ActiveZonesEditor({
     name: string
     category: string
   }>>([])
+  const [defaultAnatomyId, setDefaultAnatomyId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -65,23 +66,36 @@ export function ActiveZonesEditor({
 
       if (isNewZone) {
         // Создаем новую зону
+        const requestData = {
+          name: zone.name,
+          anatomyDefId: zone.anatomyId,
+          x: zone.x,
+          y: zone.y,
+          width: zone.width,
+          height: zone.height
+        }
+
+        console.log('🔍 Создание зоны - отправляемые данные:', {
+          anatomyId: zone.anatomyId,
+          anatomyName: zone.anatomyName,
+          requestData
+        })
+
         const response = await fetch(`/api/character-poses/angles/${characterAngleId}/zones`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            name: zone.name,
-            anatomyDefId: zone.anatomyId,
-            x: zone.x,
-            y: zone.y,
-            width: zone.width,
-            height: zone.height
-          })
+          body: JSON.stringify(requestData)
         })
 
         if (response.ok) {
           const newZone = await response.json()
+          console.log('✅ Зона создана в API:', {
+            anatomyId: newZone.anatomyDefId,
+            anatomyName: newZone.anatomy?.name,
+            zoneName: newZone.name
+          })
           setZones(prev => prev.map(z => z.id === zone.id ? newZone : z))
           setSelectedZone(newZone)
         } else {
@@ -169,11 +183,47 @@ export function ActiveZonesEditor({
     setSelectedZone(zone)
   }
 
+  // Обработка создания новой зоны
+  const handleZoneCreate = (newZone: Zone) => {
+    console.log('🎯 Создание зоны - defaultAnatomyId:', defaultAnatomyId)
+
+    // Автоматически привязываем к выбранной анатомической зоне
+    if (defaultAnatomyId) {
+      const anatomyDef = anatomyDefinitions.find(a => a.id === defaultAnatomyId)
+
+      if (anatomyDef) {
+        newZone.anatomyId = defaultAnatomyId
+        newZone.anatomyName = anatomyDef.name
+        newZone.name = anatomyDef.name // Приравниваем название к названию анатомической зоны
+
+        console.log('🎯 Зона привязана к анатомии:', {
+          anatomyId: newZone.anatomyId,
+          anatomyName: newZone.anatomyName,
+          zoneName: newZone.name
+        })
+      }
+    }
+
+    // Добавляем зону в список
+    setZones(prev => [...prev, newZone])
+    setSelectedZone(newZone)
+  }
+
   // Обработка обновления зоны
   const handleZoneUpdate = (zoneId: string, updates: Partial<Omit<Zone, 'id'>>) => {
     const zone = zones.find(z => z.id === zoneId)
     if (zone) {
       const updatedZone = { ...zone, ...updates }
+
+      // Если изменилась анатомическая зона, обновляем название
+      if (updates.anatomyId && updates.anatomyId !== zone.anatomyId) {
+        const anatomyDef = anatomyDefinitions.find(a => a.id === updates.anatomyId)
+        if (anatomyDef) {
+          updatedZone.anatomyName = anatomyDef.name
+          updatedZone.name = anatomyDef.name
+        }
+      }
+
       saveZone(updatedZone)
     }
   }
@@ -214,6 +264,32 @@ export function ActiveZonesEditor({
         )}
       </div>
 
+      {/* Выбор анатомической зоны по умолчанию */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h3 className="font-medium mb-2">Настройки создания зон</h3>
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700">
+            Анатомическая зона по умолчанию:
+          </label>
+          <select
+            value={defaultAnatomyId}
+            onChange={(e) => setDefaultAnatomyId(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Выберите анатомическую зону по умолчанию"
+          >
+            <option value="">Не выбрано</option>
+            {anatomyDefinitions.map((anatomy) => (
+              <option key={anatomy.id} value={anatomy.id}>
+                {anatomy.name} ({anatomy.category})
+              </option>
+            ))}
+          </select>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Новые зоны будут автоматически привязаны к выбранной анатомической зоне
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Графический редактор */}
         <div className="lg:col-span-2">
@@ -224,6 +300,7 @@ export function ActiveZonesEditor({
             initialZones={zones}
             onZonesChange={handleZonesChange}
             onZoneSelect={handleZoneSelect}
+            onZoneCreate={handleZoneCreate}
             className="w-full"
           />
         </div>

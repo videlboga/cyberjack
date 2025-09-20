@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { ActiveZonesEditor } from './ActiveZonesEditor-v2'
+import { ActiveZonesEditorV3 } from './ActiveZonesEditor-v3'
 
 interface CharacterPoseAngle {
   id: string
@@ -239,11 +239,9 @@ export function CharacterPoseAnglesManagerV2({ characterPoseId, poseName, charac
           </div>
         </div>
 
-        <ActiveZonesEditor
+        <ActiveZonesEditorV3
           characterAngleId={selectedAngle.id}
-          imageUrl={getFirstImageUrl(selectedAngle.media)}
-          imageWidth={800}
-          imageHeight={600}
+          mediaFiles={selectedAngle.media?.files || []}
         />
       </div>
     )

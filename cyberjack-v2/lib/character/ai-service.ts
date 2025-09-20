@@ -167,16 +167,6 @@ export class CharacterAIService implements ICharacterAIService {
         characteristicChangesCount: characteristicChanges.length
       })
 
-      // Создаем воспоминание о взаимодействии
-      if (this.config.enableMemoryManagement) {
-        await this.memoryManager.createInteractionMemory(
-          characterId,
-          userMessage,
-          '', // Пока пустой ответ
-          fullContext.environment?.location || 'неизвестно'
-        )
-      }
-
       // Генерируем ответ через response manager
       const aiResponse = await this.responseManager.generateResponse(
         characterId,
@@ -192,7 +182,7 @@ export class CharacterAIService implements ICharacterAIService {
         }
       }
 
-      // Обновляем воспоминание с ответом
+      // Создаем воспоминание о взаимодействии (только один раз)
       if (this.config.enableMemoryManagement) {
         await this.memoryManager.createInteractionMemory(
           characterId,
@@ -361,19 +351,7 @@ export class CharacterAIService implements ICharacterAIService {
         const userPose = await prisma.characterPose.findUnique({
           where: { id: characterCopy.settings.currentPose },
           include: {
-            definition: {
-              include: {
-                angles: {
-                  include: {
-                    zones: {
-                      include: {
-                        anatomy: true
-                      }
-                    }
-                  }
-                }
-              }
-            },
+            definition: true,
             angles: {
               include: {
                 zones: {
@@ -891,27 +869,27 @@ export class CharacterAIService implements ICharacterAIService {
         characteristicInfluencesCount: analysis.characteristicInfluences.length
       })
 
-      // Обрабатываем команды поз
-      for (const poseCommand of analysis.poseCommands) {
-        serverLogger.info(LogCategory.AI, 'Обрабатываем команду позы', {
-          characterId,
-          poseName: poseCommand.poseName,
-          confidence: poseCommand.confidence,
-          threshold: 0.5
-        })
+      // Обрабатываем команды поз - выполняем только команду с наивысшим confidence
+      if (analysis.poseCommands.length > 0) {
+        // Сортируем по confidence и берем только команды выше порога
+        const validPoseCommands = analysis.poseCommands
+          .filter(cmd => cmd.confidence > 0.5)
+          .sort((a, b) => b.confidence - a.confidence)
 
-        if (poseCommand.confidence > 0.5) { // Понизили порог с 0.7 до 0.5
-          serverLogger.info(LogCategory.AI, 'Команда позы прошла порог, выполняем', {
+        if (validPoseCommands.length > 0) {
+          const bestPoseCommand = validPoseCommands[0]
+          serverLogger.info(LogCategory.AI, 'Выполняем лучшую команду позы', {
             characterId,
-            poseName: poseCommand.poseName,
-            confidence: poseCommand.confidence
+            poseName: bestPoseCommand.poseName,
+            confidence: bestPoseCommand.confidence,
+            totalCommands: analysis.poseCommands.length,
+            validCommands: validPoseCommands.length
           })
-          await this.executePoseCommand(characterId, poseCommand, userId)
+          await this.executePoseCommand(characterId, bestPoseCommand, userId)
         } else {
-          serverLogger.warn(LogCategory.AI, 'Команда позы не прошла порог', {
+          serverLogger.info(LogCategory.AI, 'Нет команд поз выше порога', {
             characterId,
-            poseName: poseCommand.poseName,
-            confidence: poseCommand.confidence,
+            totalCommands: analysis.poseCommands.length,
             threshold: 0.5
           })
         }
@@ -974,11 +952,7 @@ export class CharacterAIService implements ICharacterAIService {
           }
         },
         include: {
-          definition: {
-            include: {
-              angles: true
-            }
-          },
+          definition: true,
           angles: true
         }
       })
@@ -986,11 +960,10 @@ export class CharacterAIService implements ICharacterAIService {
       if (characterPose) {
         console.log(`🎭 Найдена поза: ${characterPose.definition.name}`)
         console.log(`📐 Персонализированные ракурсы: ${characterPose.angles.length}`)
-        console.log(`📐 Общие ракурсы: ${characterPose.definition.angles.length}`)
 
-        // Находим ракурс с медиа (персонализированные или общие)
+        // Находим ракурс с медиа (только персонализированные)
         let targetAngle = null
-        const allAngles = [...characterPose.angles, ...characterPose.definition.angles]
+        const allAngles = characterPose.angles
         for (const angle of allAngles) {
           const media = angle.media as any || { images: [], files: [] }
           const hasImages = media.images && media.images.length > 0

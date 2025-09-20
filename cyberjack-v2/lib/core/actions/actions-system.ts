@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/db/client'
 import { CharacteristicsSystem } from '../characteristics/characteristics-system'
+import { PersonalCharacteristicsSystem } from '../characteristics/personal-characteristics-system'
 import { FormulaSystem } from '../formulas/formula-system'
 import { PoseFormulaSystem } from '../poses/pose-formula-system'
 import { ActivePosesSystem } from '../poses/active-poses-system'
@@ -19,6 +20,7 @@ import { CharacteristicInterpreter } from '../../character/characteristic-interp
 export class ActionsSystem {
   private formulaSystem: FormulaSystem
   private characteristicsSystem: CharacteristicsSystem
+  private personalCharacteristicsSystem: PersonalCharacteristicsSystem
   private poseFormulaSystem: PoseFormulaSystem
   private activePosesSystem: ActivePosesSystem
   private simpleEffectsSystem: SimpleEffectsSystem
@@ -30,6 +32,7 @@ export class ActionsSystem {
   constructor() {
     this.formulaSystem = new FormulaSystem()
     this.characteristicsSystem = new CharacteristicsSystem()
+    this.personalCharacteristicsSystem = new PersonalCharacteristicsSystem()
     this.poseFormulaSystem = new PoseFormulaSystem()
     this.activePosesSystem = ActivePosesSystem.getInstance()
     this.simpleEffectsSystem = new SimpleEffectsSystem()
@@ -124,7 +127,8 @@ export class ActionsSystem {
         characterId,
         effect.characteristicId,
         effect.change,
-        effect.permanent || false
+        effect.permanent || false,
+        userId
       )
     }
 
@@ -740,10 +744,14 @@ export class ActionsSystem {
         throw new Error('Действие не найдено')
       }
 
-      // Получаем персонажа с характеристиками
-      const character = await prisma.character.findUnique({
-        where: { id: characterId },
+      // Получаем копию персонажа пользователя
+      const characterCopy = await prisma.characterCopy.findFirst({
+        where: {
+          characterId,
+          userId
+        },
         include: {
+          character: true,
           characteristics: {
             include: {
               definition: true
@@ -752,8 +760,8 @@ export class ActionsSystem {
         }
       })
 
-      if (!character) {
-        throw new Error('Персонаж не найден')
+      if (!characterCopy) {
+        throw new Error('Копия персонажа не найдена')
       }
 
       // Получаем пользователя
@@ -786,23 +794,25 @@ export class ActionsSystem {
       // }
 
       // Применяем зависимости
-      const characterCharacteristics = this.formatCharacterCharacteristics(character.characteristics)
+      const characterCharacteristics = this.formatCharacterCharacteristics(characterCopy.characteristics)
       effects = this.simpleEffectsSystem.applyDependencies(effects, characterCharacteristics)
 
-      // Применяем эффекты к характеристикам
+      // Применяем эффекты к персональным характеристикам
       const appliedEffects: ActionEffect[] = []
       for (const [characteristicName, effect] of Object.entries(effects)) {
-        // Находим характеристику напрямую
-        const characteristic = character.characteristics.find(
+        // Находим персональную характеристику
+        const characteristic = characterCopy.characteristics.find(
           char => char.definition?.name === characteristicName
         )
 
         if (characteristic) {
           const finalChange = effect.change * durationSeconds
-          await this.characteristicsSystem.changeValue(
-            characterId,
+          await this.personalCharacteristicsSystem.changeValue(
+            characterCopy.id,
             characteristic.characteristicDefId,
-            finalChange
+            finalChange,
+            false,
+            userId
           )
 
           appliedEffects.push({
@@ -811,14 +821,16 @@ export class ActionsSystem {
             permanent: effect.permanent
           })
 
-          serverLogger.debug(LogCategory.CHARACTERISTICS, 'Характеристика изменена', {
+          serverLogger.debug(LogCategory.CHARACTERISTICS, 'Персональная характеристика изменена', {
             characteristicName,
             change: finalChange,
+            characterCopyId: characterCopy.id,
             characterId
           })
         } else {
-          serverLogger.warn(LogCategory.CHARACTERISTICS, 'Характеристика не найдена', {
+          serverLogger.warn(LogCategory.CHARACTERISTICS, 'Персональная характеристика не найдена', {
             characteristicName,
+            characterCopyId: characterCopy.id,
             characterId
           })
         }
@@ -857,7 +869,7 @@ export class ActionsSystem {
 
         // Создаем воспоминания об изменениях характеристик
         for (const effect of appliedEffects) {
-          const characteristic = character.characteristics.find(
+          const characteristic = characterCopy.characteristics.find(
             char => char.characteristicDefId === effect.characteristicId
           )
 
@@ -1009,7 +1021,11 @@ export class ActionsSystem {
         characteristicId: effect.characteristicId,
         change: effect.change,
         permanent: effect.permanent
-      }))
+      })),
+      {
+        actionName: action.name,
+        anatomyInfo: anatomyInfo
+      }
     )
 
     return `К тебе было применено действие "${action.name}"${anatomyInfo} (${actionCount}-й раз). ${sensations} Как ты реагируешь на это действие?`

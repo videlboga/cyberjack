@@ -290,7 +290,6 @@ export function CharacterPosesManager({ characterId, characterName }: CharacterP
                     </p>
                   )}
                   <div className="mt-2 text-xs text-gray-500">
-                    <p>Доступные ракурсы: {pose.definition.angles?.length || 0}</p>
                     <p>Настроенные ракурсы: {pose.angles?.length || 0}</p>
                     <p>Активные зоны: {pose.angles?.reduce((total, angle) => total + (angle.zones?.length || 0), 0) || 0}</p>
                   </div>

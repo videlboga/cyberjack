@@ -10,6 +10,7 @@ import { ChatPanel } from '@/components/game/ChatPanel'
 import { SuperAdminAuthModal } from '@/components/game/SuperAdminAuthModal'
 import { StationsPanel } from '@/components/game/StationsPanel'
 import { SceneDisplay } from '@/components/game/SceneDisplay'
+import { AngleSwitcher } from '@/components/game/AngleSwitcher'
 
 interface Character {
   id: string
@@ -113,7 +114,8 @@ export default function GameInterface() {
     }
 
     fetchTimeState()
-    const interval = setInterval(fetchTimeState, 1000)
+    // Увеличиваем интервал до 5 секунд, чтобы уменьшить нагрузку
+    const interval = setInterval(fetchTimeState, 5000)
     return () => clearInterval(interval)
   }, [])
 
@@ -133,6 +135,7 @@ export default function GameInterface() {
       if (response.ok) {
         const poseData = await response.json()
         console.log('📊 Загружены данные позы:', poseData)
+        console.log('🎯 Зоны в данных позы:', poseData.zones)
 
         setGameState(prev => ({
           ...prev,
@@ -156,6 +159,7 @@ export default function GameInterface() {
       if (response.ok) {
         const poseData = await response.json()
         console.log('📊 Получены данные позы:', poseData)
+        console.log('🎯 Зоны в обновленных данных позы:', poseData.zones)
 
         setGameState(prev => ({
           ...prev,
@@ -273,6 +277,38 @@ export default function GameInterface() {
     }
 
     executeActionOnZone(zoneId)
+  }
+
+  const handleAngleChange = async (angleId: string) => {
+    if (!gameState.selectedCharacter || !gameState.currentPose) {
+      return
+    }
+
+    try {
+      // Сохраняем новый ракурс в базе данных
+      const response = await fetch(`/api/characters/${gameState.selectedCharacter.id}/poses/current`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: session?.user?.id || '',
+          poseId: gameState.currentPose,
+          angleId: angleId
+        })
+      })
+
+      if (response.ok) {
+        // Обновляем состояние
+        setGameState(prev => ({
+          ...prev,
+          currentAngle: angleId
+        }))
+
+        // Обновляем данные позы
+        await refreshCurrentPose(gameState.selectedCharacter.id)
+      }
+    } catch (error) {
+      console.error('❌ Error changing angle:', error)
+    }
   }
 
   // Запуск сцены
@@ -420,16 +456,30 @@ export default function GameInterface() {
 
       {/* Отображение персонажа */}
       {gameState.selectedCharacter && (
-        <CharacterDisplay
-          character={gameState.selectedCharacter}
-          currentPose={gameState.currentPose}
-          currentAngle={gameState.currentAngle}
-          activeZones={gameState.activeZones}
-          onZoneClick={handleZoneClick}
-          onZoneHold={handleZoneHold}
-          poseData={gameState.poseData}
-          actionInProgress={gameState.actionInProgress}
-        />
+        <>
+          <CharacterDisplay
+            character={gameState.selectedCharacter}
+            currentPose={gameState.currentPose}
+            currentAngle={gameState.currentAngle}
+            activeZones={gameState.activeZones}
+            onZoneClick={handleZoneClick}
+            onZoneHold={handleZoneHold}
+            poseData={gameState.poseData}
+            actionInProgress={gameState.actionInProgress}
+          />
+
+          {/* Переключатель ракурсов */}
+          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+            <AngleSwitcher
+              characterId={gameState.selectedCharacter.id}
+              currentPoseId={gameState.currentPose}
+              currentAngleId={gameState.currentAngle}
+              onAngleChange={handleAngleChange}
+              userId={session?.user?.id || ''}
+              className="glass-panel neon-border neon-cyan px-4 py-2"
+            />
+          </div>
+        </>
       )}
 
       {/* Выезжающие панели */}

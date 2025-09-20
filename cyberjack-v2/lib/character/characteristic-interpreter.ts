@@ -730,17 +730,23 @@ export class CharacteristicInterpreter {
   }
 
   // Интерпретация изменений характеристик в ощущения персонажа
-  interpretCharacteristicChanges(effects: Array<{characteristicId: string, change: number, permanent: boolean}>): string {
+  interpretCharacteristicChanges(
+    effects: Array<{characteristicId: string, change: number, permanent: boolean}>,
+    actionContext?: { actionName: string, anatomyInfo?: string }
+  ): string {
     const sensations: string[] = []
 
     for (const effect of effects) {
-      const sensation = this.getSensationFromChange(effect.characteristicId, effect.change)
+      const sensation = this.getSensationFromChange(effect.characteristicId, effect.change, actionContext)
       if (sensation) {
         sensations.push(sensation)
       }
     }
 
     if (sensations.length === 0) {
+      if (actionContext) {
+        return `Ты чувствуешь, что действие "${actionContext.actionName}"${actionContext.anatomyInfo || ''} что-то изменило в тебе, но не можешь точно определить что.`
+      }
       return 'Ты чувствуешь, что что-то изменилось, но не можешь точно определить что.'
     }
 
@@ -921,66 +927,170 @@ export class CharacteristicInterpreter {
   }
 
   // Получение ощущения от изменения характеристики
-  private getSensationFromChange(characteristicId: string, change: number): string | null {
+  private getSensationFromChange(
+    characteristicId: string,
+    change: number,
+    actionContext?: { actionName: string, anatomyInfo?: string }
+  ): string | null {
     // Маппинг ID характеристик на их названия и ощущения
-    const characteristicSensations: Record<string, (change: number) => string | null> = {
+    const characteristicSensations: Record<string, (change: number, actionContext?: { actionName: string, anatomyInfo?: string }) => string | null> = {
       // Физические характеристики
-      'cmflkd2lz0000hxpy5ntyixuz': (change) => { // Энергия
-        if (change > 0) return 'Ты чувствуешь прилив энергии и бодрости.'
-        if (change < 0) return 'Ты чувствуешь усталость и потерю сил.'
+      'cmflkd2lz0000hxpy5ntyixuz': (change, actionContext) => { // Энергия
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь прилив энергии и бодрости.`
+          }
+          return 'Ты чувствуешь прилив энергии и бодрости.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь усталость и потерю сил.`
+          }
+          return 'Ты чувствуешь усталость и потерю сил.'
+        }
         return null
       },
-      'cmflkd2m50007hxpy1n96qoo9': (change) => { // Настроение
-        if (change > 0) return 'Твое настроение улучшается, ты чувствуешь себя лучше.'
-        if (change < 0) return 'Твое настроение ухудшается, ты чувствуешь грусть.'
+      'cmflkd2m50007hxpy1n96qoo9': (change, actionContext) => { // Настроение
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} твое настроение улучшается, ты чувствуешь себя лучше.`
+          }
+          return 'Твое настроение улучшается, ты чувствуешь себя лучше.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} твое настроение ухудшается, ты чувствуешь грусть.`
+          }
+          return 'Твое настроение ухудшается, ты чувствуешь грусть.'
+        }
         return null
       },
-      'cmflkd2m50008hxpy1n96qooa': (change) => { // Выносливость
-        if (change > 0) return 'Ты чувствуешь, что стала более выносливой.'
-        if (change < 0) return 'Ты чувствуешь, что стала менее выносливой.'
+      'cmflkd2m50008hxpy1n96qooa': (change, actionContext) => { // Выносливость
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что стала более выносливой.`
+          }
+          return 'Ты чувствуешь, что стала более выносливой.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что стала менее выносливой.`
+          }
+          return 'Ты чувствуешь, что стала менее выносливой.'
+        }
         return null
       },
-      'cmflkd2m50009hxpy1n96qoob': (change) => { // Гибкость
-        if (change > 0) return 'Ты чувствуешь, что тело стало более гибким.'
-        if (change < 0) return 'Ты чувствуешь, что тело стало более жестким.'
+      'cmflkd2m50009hxpy1n96qoob': (change, actionContext) => { // Гибкость
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что тело стало более гибким.`
+          }
+          return 'Ты чувствуешь, что тело стало более гибким.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что тело стало более жестким.`
+          }
+          return 'Ты чувствуешь, что тело стало более жестким.'
+        }
         return null
       },
-      'cmflkd2m5000ahxpy1n96qooc': (change) => { // Чувствительность
-        if (change > 0) return 'Ты чувствуешь, что стала более чувствительной к прикосновениям.'
-        if (change < 0) return 'Ты чувствуешь, что стала менее чувствительной к прикосновениям.'
+      'cmflkd2m5000ahxpy1n96qooc': (change, actionContext) => { // Чувствительность
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что стала более чувствительной к прикосновениям.`
+          }
+          return 'Ты чувствуешь, что стала более чувствительной к прикосновениям.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что стала менее чувствительной к прикосновениям.`
+          }
+          return 'Ты чувствуешь, что стала менее чувствительной к прикосновениям.'
+        }
         return null
       },
       // Эмоциональные характеристики
-      'cmflkd2m5000bhxpy1n96qood': (change) => { // Стыд
-        if (change > 0) return 'Ты чувствуешь усиливающееся чувство стыда.'
-        if (change < 0) return 'Ты чувствуешь, что стыд отступает.'
+      'cmflkd2m5000bhxpy1n96qood': (change, actionContext) => { // Стыд
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь усиливающееся чувство стыда.`
+          }
+          return 'Ты чувствуешь усиливающееся чувство стыда.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что стыд отступает.`
+          }
+          return 'Ты чувствуешь, что стыд отступает.'
+        }
         return null
       },
-      'cmflkd2m5000chxpy1n96qooe': (change) => { // Унижение
-        if (change > 0) return 'Ты чувствуешь усиливающееся чувство унижения.'
-        if (change < 0) return 'Ты чувствуешь, что унижение отступает.'
+      'cmflkd2m5000chxpy1n96qooe': (change, actionContext) => { // Унижение
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь усиливающееся чувство унижения.`
+          }
+          return 'Ты чувствуешь усиливающееся чувство унижения.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что унижение отступает.`
+          }
+          return 'Ты чувствуешь, что унижение отступает.'
+        }
         return null
       },
-      'cmflkd2m5000dhxpy1n96qoof': (change) => { // Отчаяние
-        if (change > 0) return 'Ты чувствуешь усиливающееся отчаяние.'
-        if (change < 0) return 'Ты чувствуешь, что отчаяние отступает.'
+      'cmflkd2m5000dhxpy1n96qoof': (change, actionContext) => { // Отчаяние
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь усиливающееся отчаяние.`
+          }
+          return 'Ты чувствуешь усиливающееся отчаяние.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что отчаяние отступает.`
+          }
+          return 'Ты чувствуешь, что отчаяние отступает.'
+        }
         return null
       },
-      'cmflkd2m5000ehxpy1n96qoog': (change) => { // Гордость
-        if (change > 0) return 'Ты чувствуешь усиливающееся чувство гордости.'
-        if (change < 0) return 'Ты чувствуешь, что гордость угасает.'
+      'cmflkd2m5000ehxpy1n96qoog': (change, actionContext) => { // Гордость
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь усиливающееся чувство гордости.`
+          }
+          return 'Ты чувствуешь усиливающееся чувство гордости.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что гордость угасает.`
+          }
+          return 'Ты чувствуешь, что гордость угасает.'
+        }
         return null
       },
-      'cmflkd2m5000fhxpy1n96qooh': (change) => { // Самооценка
-        if (change > 0) return 'Ты чувствуешь, что самооценка растет.'
-        if (change < 0) return 'Ты чувствуешь, что самооценка падает.'
+      'cmflkd2m5000fhxpy1n96qooh': (change, actionContext) => { // Самооценка
+        if (change > 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что самооценка растет.`
+          }
+          return 'Ты чувствуешь, что самооценка растет.'
+        }
+        if (change < 0) {
+          if (actionContext) {
+            return `От действия "${actionContext.actionName}"${actionContext.anatomyInfo || ''} ты чувствуешь, что самооценка падает.`
+          }
+          return 'Ты чувствуешь, что самооценка падает.'
+        }
         return null
       }
     }
 
     const sensationFunction = characteristicSensations[characteristicId]
     if (sensationFunction) {
-      return sensationFunction(change)
+      return sensationFunction(change, actionContext)
     }
 
     return null

@@ -17,7 +17,7 @@ export async function GET(
       )
     }
 
-    // Получаем последние 50 сообщений чата
+    // Получаем последние 100 сообщений чата
     const chatHistory = await prisma.chatMessage.findMany({
       where: {
         characterId
@@ -25,7 +25,7 @@ export async function GET(
       orderBy: {
         createdAt: 'asc'
       },
-      take: 50,
+      take: 100,
       select: {
         id: true,
         content: true,
@@ -44,4 +44,3 @@ export async function GET(
     )
   }
 }
-

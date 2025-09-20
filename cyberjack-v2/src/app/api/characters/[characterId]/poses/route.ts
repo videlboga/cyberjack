@@ -17,17 +17,7 @@ export async function GET(
         poseDefId: true,
         isActive: true,
         customSettings: true,
-        definition: {
-          include: {
-            angles: {
-              select: {
-                id: true,
-                name: true,
-                angle: true
-              }
-            }
-          }
-        },
+        definition: true,
         angles: {
           include: {
             zones: {
@@ -100,17 +90,7 @@ export async function POST(
         poseDefId: true,
         isActive: true,
         customSettings: true,
-        definition: {
-          include: {
-            angles: {
-              select: {
-                id: true,
-                name: true,
-                angle: true
-              }
-            }
-          }
-        },
+        definition: true,
         angles: {
           include: {
             zones: {

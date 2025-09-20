@@ -41,9 +41,29 @@ export async function POST(
 ) {
   try {
     const { characterAngleId } = await params
-    const { name, anatomyDefId, x, y, width, height } = await request.json()
+    const body = await request.json()
+    const { name, anatomyDefId, mediaFileId, x, y, width, height } = body
+
+    console.log('🔍 Создание зоны:', {
+      characterAngleId,
+      body,
+      name,
+      anatomyDefId,
+      mediaFileId,
+      x,
+      y,
+      width,
+      height
+    })
 
     if (!name || x === undefined || y === undefined || width === undefined || height === undefined) {
+      console.error('❌ Отсутствуют обязательные поля:', {
+        name: !!name,
+        x: x !== undefined,
+        y: y !== undefined,
+        width: width !== undefined,
+        height: height !== undefined
+      })
       return NextResponse.json(
         { error: 'name, x, y, width, height are required' },
         { status: 400 }
@@ -52,6 +72,13 @@ export async function POST(
 
     // Валидация координат и размеров
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
+      console.error('❌ Невалидные координаты или размеры:', {
+        x, y, width, height,
+        xValid: x >= 0,
+        yValid: y >= 0,
+        widthValid: width > 0,
+        heightValid: height > 0
+      })
       return NextResponse.json(
         { error: 'Invalid coordinates or dimensions' },
         { status: 400 }
@@ -76,6 +103,7 @@ export async function POST(
         characterAngleId,
         name,
         anatomyDefId: anatomyDefId || null,
+        mediaFileId: mediaFileId || null,
         x: Number(x),
         y: Number(y),
         width: Number(width),

@@ -12,11 +12,6 @@ export async function GET(request: NextRequest) {
         ...(category && { category })
       },
       include: {
-        angles: {
-          include: {
-            zones: true
-          }
-        },
         poses: {
           include: {
             character: {

@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         anatomy: true,
-        activeZones: true
+        characterActiveZones: true
       },
       orderBy: { name: 'asc' }
     })

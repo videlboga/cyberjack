@@ -2,6 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { CharacteristicsSystem } from '../../../../../../lib/core/characteristics/characteristics-system'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../../../../../../lib/auth'
 
 export async function PATCH(
   request: NextRequest,
@@ -18,12 +20,22 @@ export async function PATCH(
       )
     }
 
+    // Получаем сессию пользователя
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const characteristicsSystem = new CharacteristicsSystem()
     await characteristicsSystem.changeValue(
       characterId,
       characteristicId,
       change,
-      permanent || false
+      permanent || false,
+      session.user.id
     )
 
     return NextResponse.json({ success: true })

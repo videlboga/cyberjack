@@ -17,6 +17,7 @@ interface Character {
       category: string
     }
   }>
+  copyId?: string // ID персональной копии
 }
 
 interface CharacterKnowledge {
@@ -53,8 +54,11 @@ export function CharacteristicsPanel({ character, userId }: CharacteristicsPanel
       if (response.ok) {
         const data = await response.json()
         setKnowledge(data)
+      } else {
+        setError(`Ошибка загрузки: ${response.status}`)
       }
     } catch (err) {
+      console.error('❌ [UI] Ошибка загрузки знаний:', err)
       setError(err instanceof Error ? err.message : 'Ошибка загрузки знаний')
     } finally {
       setLoading(false)
@@ -171,7 +175,14 @@ export function CharacteristicsPanel({ character, userId }: CharacteristicsPanel
       {/* Заголовок */}
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold text-white">{character.name}</h3>
-        <p className="text-sm text-gray-400">Характеристики и уровень знаний</p>
+        <p className="text-sm text-gray-400">
+          {character.copyId ? 'Персональные характеристики и уровень знаний' : 'Характеристики и уровень знаний'}
+        </p>
+        {character.copyId && (
+          <p className="text-xs text-blue-400 mt-1">
+            🔒 Ваша персональная копия персонажа
+          </p>
+        )}
       </div>
 
       {/* Характеристики по категориям */}

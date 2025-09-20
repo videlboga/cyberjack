@@ -42,7 +42,7 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const loadChatHistory = async () => {
+  const loadChatHistory = async (forceReload = false) => {
     try {
       const response = await fetch(`/api/chat/${characterId}/history`)
       if (response.ok) {
@@ -53,7 +53,25 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
           isUser: msg.messageType === 'user',
           timestamp: new Date(msg.createdAt)
         }))
-        setMessages(formattedMessages)
+
+        if (forceReload) {
+          // Полная перезагрузка (заменяем все сообщения)
+          setMessages(formattedMessages)
+        } else {
+          // Умное обновление: добавляем только новые сообщения, не перезаписывая существующие
+          setMessages(prevMessages => {
+            const existingIds = new Set(prevMessages.map(msg => msg.id))
+            const newMessages = formattedMessages.filter(msg => !existingIds.has(msg.id))
+
+            if (newMessages.length > 0) {
+              return [...prevMessages, ...newMessages].sort((a, b) =>
+                new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+              )
+            }
+
+            return prevMessages
+          })
+        }
       }
     } catch (error) {
       console.error('Ошибка загрузки истории чата:', error)
@@ -67,17 +85,17 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
   // Загружаем сообщения из базы данных при монтировании
   useEffect(() => {
     if (characterId) {
-      loadChatHistory()
+      loadChatHistory(true) // Полная перезагрузка при монтировании
     }
   }, [characterId])
 
-  // Автоматическое обновление чата каждые 3 секунды
+  // Автоматическое обновление чата каждые 10 секунд
   useEffect(() => {
     if (!characterId) return
 
     const interval = setInterval(() => {
       loadChatHistory()
-    }, 3000) // Обновляем каждые 3 секунды
+    }, 10000) // Обновляем каждые 10 секунд
 
     return () => clearInterval(interval)
   }, [characterId])
@@ -96,14 +114,7 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
     setInputMessage('')
     setIsLoading(true)
 
-    // Добавляем сообщение пользователя сразу в интерфейс
-    const userMessage: Message = {
-      id: `temp_${Date.now()}`,
-      content: messageToSend,
-      isUser: true,
-      timestamp: new Date()
-    }
-    setMessages(prev => [...prev, userMessage])
+    // Не добавляем временное сообщение - загрузим все из базы после ответа
 
     try {
       const requestData = {
@@ -136,7 +147,8 @@ export function ChatPanel({ characterId, characterName, gameContext, onNotificat
       console.log('💬 Received AI response:', data)
 
       // Перезагружаем историю чата, чтобы получить актуальные сообщения из базы данных
-      await loadChatHistory()
+      // Делаем полную перезагрузку после отправки сообщения
+      await loadChatHistory(true)
 
       // Обновляем позу после получения ответа (на случай если была команда позы)
       if (onPoseChange) {

@@ -92,6 +92,7 @@ export function CharacterDisplay({
   const [poseData, setPoseData] = useState<PoseData | null>(null)
   const [currentImage, setCurrentImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const [holdTimers, setHoldTimers] = useState<Map<string, NodeJS.Timeout>>(new Map())
 
   useEffect(() => {
@@ -145,6 +146,12 @@ export function CharacterDisplay({
   }
 
   const getCurrentZones = () => {
+    // Если есть внешние данные позы (из игрового интерфейса), используем их
+    if (externalPoseData?.zones) {
+      return externalPoseData.zones
+    }
+
+    // Иначе ищем в структуре angles (для админки)
     const angleData = getCurrentAngleData()
     const zones = angleData?.zones || []
     return zones
@@ -189,19 +196,63 @@ export function CharacterDisplay({
       return
     }
 
-    const rect = event.currentTarget.getBoundingClientRect()
-    const x = ((event.clientX - rect.left) / rect.width) * 100
-    const y = ((event.clientY - rect.top) / rect.height) * 100
+    // Получаем элемент изображения
+    const imgElement = document.querySelector('img[alt*="поза"]') as HTMLImageElement
+    if (!imgElement) return
+
+    const container = imgElement.parentElement
+    if (!container) return
+
+    const containerRect = container.getBoundingClientRect()
+
+    // Получаем координаты клика относительно контейнера
+    const clickX = event.clientX - containerRect.left
+    const clickY = event.clientY - containerRect.top
+
 
     // Находим зону, в которую попал клик
     const zones = getCurrentZones()
+
     const clickedZone = zones.find(zone => {
-      return x >= zone.x && x <= zone.x + zone.width &&
-             y >= zone.y && y <= zone.y + zone.height
+      // Вычисляем размеры изображения с учетом object-contain (как в рендеринге)
+      const imgAspect = imgElement.naturalWidth / imgElement.naturalHeight
+      const containerAspect = containerRect.width / containerRect.height
+
+      let displayWidth, displayHeight, offsetX, offsetY
+
+      if (imgAspect > containerAspect) {
+        // Изображение шире контейнера - подгоняем по ширине
+        displayWidth = containerRect.width
+        displayHeight = containerRect.width / imgAspect
+        offsetX = 0
+        offsetY = (containerRect.height - displayHeight) / 2
+      } else {
+        // Изображение выше контейнера - подгоняем по высоте
+        displayHeight = containerRect.height
+        displayWidth = containerRect.height * imgAspect
+        offsetX = (containerRect.width - displayWidth) / 2
+        offsetY = 0
+      }
+
+      // Конвертируем координаты зоны в координаты отображения
+      const scaleX = displayWidth / imgElement.naturalWidth
+      const scaleY = displayHeight / imgElement.naturalHeight
+
+      const displayX = zone.x * scaleX + offsetX
+      const displayY = zone.y * scaleY + offsetY
+      const displayZoneWidth = zone.width * scaleX
+      const displayZoneHeight = zone.height * scaleY
+
+      // Проверяем, попадает ли клик в зону
+      const inZone = clickX >= displayX && clickX <= displayX + displayZoneWidth &&
+                     clickY >= displayY && clickY <= displayY + displayZoneHeight
+
+
+      return inZone
     })
 
     if (clickedZone) {
-      onZoneClick(clickedZone.id)
+      onZoneClick?.(clickedZone)
     }
   }
 
@@ -230,6 +281,7 @@ export function CharacterDisplay({
 
   const zones = getCurrentZones()
 
+
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       {/* Основное изображение персонажа */}
@@ -243,55 +295,119 @@ export function CharacterDisplay({
           alt={`${character.name} - ${poseData?.name || 'поза'}`}
           className="max-w-full max-h-full object-contain"
           draggable={false}
+          onLoad={() => {
+            setImageLoaded(true)
+            // Принудительно обновляем компонент после загрузки изображения
+            setTimeout(() => {
+              window.dispatchEvent(new Event('resize'))
+            }, 100)
+          }}
         />
 
+
         {/* Активные зоны (только при выбранном действии) */}
-        {activeZones && zones.map((zone) => {
+        {activeZones && zones.length > 0 && imageLoaded && zones.map((zone) => {
+          // Получаем элемент изображения
+          let imgElement = document.querySelector('img[alt*="поза"]') as HTMLImageElement
+
+          // Если не нашли по alt, попробуем по src
+          if (!imgElement) {
+            imgElement = document.querySelector(`img[src*="${currentImage}"]`) as HTMLImageElement
+          }
+
+          // Если все еще не нашли, попробуем просто первый img
+          if (!imgElement) {
+            imgElement = document.querySelector('img') as HTMLImageElement
+          }
+
+          if (!imgElement) {
+            return null
+          }
+
+          // Проверяем, загружено ли изображение
+          if (imgElement.naturalWidth === 0 || imgElement.naturalHeight === 0) {
+            return null
+          }
+
+          // Получаем размеры отображения изображения (не натуральные!)
+          const displayRect = imgElement.getBoundingClientRect()
+          const containerRect = imgElement.parentElement?.getBoundingClientRect()
+
+          if (!containerRect) {
+            return null
+          }
+
+          // Вычисляем размеры изображения с учетом object-contain
+          const imgAspect = imgElement.naturalWidth / imgElement.naturalHeight
+          const containerAspect = containerRect.width / containerRect.height
+
+          let displayWidth, displayHeight, offsetX, offsetY
+
+          if (imgAspect > containerAspect) {
+            // Изображение шире контейнера - подгоняем по ширине
+            displayWidth = containerRect.width
+            displayHeight = containerRect.width / imgAspect
+            offsetX = 0
+            offsetY = (containerRect.height - displayHeight) / 2
+          } else {
+            // Изображение выше контейнера - подгоняем по высоте
+            displayHeight = containerRect.height
+            displayWidth = containerRect.height * imgAspect
+            offsetX = (containerRect.width - displayWidth) / 2
+            offsetY = 0
+          }
+
+          // Конвертируем координаты зоны (относительно исходного изображения) в координаты отображения
+          const scaleX = displayWidth / imgElement.naturalWidth
+          const scaleY = displayHeight / imgElement.naturalHeight
+
+          const displayX = zone.x * scaleX + offsetX
+          const displayY = zone.y * scaleY + offsetY
+          const displayZoneWidth = zone.width * scaleX
+          const displayZoneHeight = zone.height * scaleY
+
+          // Конвертируем в проценты от контейнера
+          const leftPercent = (displayX / containerRect.width) * 100
+          const topPercent = (displayY / containerRect.height) * 100
+          const widthPercent = (displayZoneWidth / containerRect.width) * 100
+          const heightPercent = (displayZoneHeight / containerRect.height) * 100
+
+
           return (
             <div
               key={zone.id}
-              className="absolute border-2 border-red-400 hover:border-red-300 transition-all duration-200 cursor-pointer neon-border-red"
+              className="absolute border-2 border-blue-400 bg-blue-400 bg-opacity-10 cursor-pointer hover:bg-opacity-20 transition-all duration-200"
               style={{
-                left: `${zone.x}%`,
-                top: `${zone.y}%`,
-                width: `${zone.width}%`,
-                height: `${zone.height}%`
+                left: `${leftPercent}%`,
+                top: `${topPercent}%`,
+                width: `${widthPercent}%`,
+                height: `${heightPercent}%`,
+                zIndex: 10
               } as React.CSSProperties}
               onClick={(e) => {
                 e.stopPropagation()
-                onZoneClick(zone.id)
+                onZoneClick?.(zone)
               }}
               onMouseDown={(e) => {
-                e.stopPropagation()
-                handleZoneMouseDown(zone.id)
+                e.preventDefault()
+                onZoneHold?.(zone.id, true)
               }}
-              onMouseUp={(e) => {
-                e.stopPropagation()
-                handleZoneMouseUp(zone.id)
+              onMouseUp={() => onZoneHold?.(zone.id, false)}
+              onMouseLeave={() => onZoneHold?.(zone.id, false)}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                onZoneHold?.(zone.id, true)
               }}
-              onMouseLeave={(e) => {
-                e.stopPropagation()
-                handleZoneMouseLeave(zone.id)
-              }}
+              onTouchEnd={() => onZoneHold?.(zone.id, false)}
               title={`${zone.name} - клик для действия, удержание для повторения`}
             >
-              {/* Индикатор зоны */}
-              <div className="absolute -top-6 left-0 liquid-glass-card text-white text-xs px-2 py-1 rounded whitespace-nowrap neon-border-red">
+              <div className="text-blue-400 text-xs p-1 font-medium">
                 {zone.name}
               </div>
             </div>
           )
         })}
 
-        {/* Индикатор активных зон */}
-        {activeZones && (
-          <div className="absolute top-4 left-4 liquid-glass-card text-white px-3 py-1 rounded-xl text-sm neon-border-red">
-            🎯 Активные зоны включены
-            <div className="mt-1 text-xs text-red-300">
-              Клик - действие, удержание - повтор
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Информация о персонаже */}

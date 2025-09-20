@@ -1,7 +1,9 @@
 // lib/core/chat/chat-formula-system.ts
 
+import { prisma } from '../../db/client'
 import { FormulaSystem } from '../formulas/formula-system'
 import { CharacteristicsSystem } from '../characteristics/characteristics-system'
+import { PersonalCharacteristicsSystem } from '../characteristics/personal-characteristics-system'
 import { FormulaExecutionContext } from '../formulas/types/formula-context'
 
 export interface ChatMessage {
@@ -28,10 +30,12 @@ export interface ChatFormulaResult {
 export class ChatFormulaSystem {
   private formulaSystem: FormulaSystem
   private characteristicsSystem: CharacteristicsSystem
+  private personalCharacteristicsSystem: PersonalCharacteristicsSystem
 
   constructor() {
     this.formulaSystem = new FormulaSystem()
     this.characteristicsSystem = new CharacteristicsSystem()
+    this.personalCharacteristicsSystem = new PersonalCharacteristicsSystem()
   }
 
   // Обрабатывает сообщение пользователя и применяет формулы
@@ -45,12 +49,31 @@ export class ChatFormulaSystem {
       const emotionalTone = this.analyzeMessageTone(message.content)
       const intensity = this.calculateMessageIntensity(message.content)
 
+      // Получаем копию персонажа пользователя
+      const characterCopy = await prisma.characterCopy.findFirst({
+        where: {
+          characterId,
+          userId
+        },
+        include: {
+          characteristics: {
+            include: {
+              definition: true
+            }
+          }
+        }
+      })
+
+      if (!characterCopy) {
+        throw new Error('Копия персонажа не найдена')
+      }
+
       // Создаем контекст для формулы
       const context: FormulaExecutionContext = {
         character: {
           id: characterId,
           name: 'Character',
-          characteristics: await this.getCharacterCharacteristics(characterId),
+          characteristics: await this.getCharacterCopyCharacteristics(characterCopy.id),
           anatomy: {}
         },
         user: {
@@ -94,13 +117,14 @@ export class ChatFormulaSystem {
       // Преобразуем результат в эффекты
       const effects = this.convertFormulaResultToEffects(result, characterId)
 
-      // Применяем эффекты к характеристикам
+      // Применяем эффекты к персональным характеристикам
       for (const effect of effects) {
-        await this.characteristicsSystem.changeValue(
-          characterId,
+        await this.personalCharacteristicsSystem.changeValue(
+          characterCopy.id,
           effect.characteristicId,
           effect.change,
-          effect.permanent
+          effect.permanent,
+          userId
         )
       }
 
@@ -174,6 +198,28 @@ export class ChatFormulaSystem {
       fear: 20,
       stress: 30
     }
+  }
+
+  // Получить персональные характеристики копии персонажа
+  private async getCharacterCopyCharacteristics(characterCopyId: string): Promise<Record<string, number>> {
+    const characteristics = await prisma.characterCopyCharacteristic.findMany({
+      where: { characterCopyId },
+      include: {
+        definition: true
+      }
+    })
+
+    const result: Record<string, number> = {}
+    characteristics.forEach(char => {
+      const defId = char.characteristicDefId
+      const defName = char.definition?.name
+      if (defId && defName) {
+        result[defId] = char.currentValue || 0
+        result[defName] = char.currentValue || 0
+      }
+    })
+
+    return result
   }
 
   // Выбирает формулу в зависимости от тона сообщения

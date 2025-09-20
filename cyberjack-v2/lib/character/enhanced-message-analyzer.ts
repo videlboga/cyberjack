@@ -46,7 +46,6 @@ export class EnhancedMessageAnalyzer {
     characterId: string,
     userId: string
   ): Promise<MessageAnalysis> {
-    console.log('🚀 ФУНКЦИЯ analyzeMessage ВЫЗВАНА!', { userMessage, characterId, userId })
     console.log('📝 Начинаем анализ сообщения', { userMessage, characterId, userId })
 
     const lowerMessage = userMessage.toLowerCase()
@@ -55,44 +54,41 @@ export class EnhancedMessageAnalyzer {
     const baseAnalysis = await this.performBaseAnalysis(userMessage)
     console.log('📊 Базовый анализ:', baseAnalysis)
 
-    // Анализ команд поз
-    let poseCommands: PoseCommand[] = []
-    try {
-      console.log('🚀 ПЕРЕД ВЫЗОВОМ analyzePoseCommands', { lowerMessage, characterId })
-      poseCommands = await this.analyzePoseCommands(lowerMessage, characterId)
-      console.log('🎭 Команды поз:', poseCommands)
-    } catch (error) {
-      console.error('❌ Ошибка при анализе команд поз:', error)
-      console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
-    }
-
-    // Анализ влияния на характеристики
-    const characteristicInfluences = await this.analyzeCharacteristicInfluences(
-      lowerMessage,
-      characterId,
-      userId
-    )
-    console.log('📈 Влияние на характеристики:', characteristicInfluences)
-
-    // Анализ триггеров действий
-    const actionTriggers = await this.analyzeActionTriggers(lowerMessage, characterId)
-    console.log('⚡ Триггеры действий:', actionTriggers)
-
-    // Анализ фетиш-элементов
-    const fetishElements = await this.analyzeFetishElements(lowerMessage)
-    console.log('🔥 Фетиш-элементы:', fetishElements)
-
-    // Анализ изменений настроения
-    const moodChanges = await this.analyzeMoodChanges(lowerMessage, characterId)
-    console.log('😊 Изменения настроения:', moodChanges)
-
-    const result = {
-      ...baseAnalysis,
+    // Параллельно выполняем все анализы
+    const [
       poseCommands,
       characteristicInfluences,
       actionTriggers,
       fetishElements,
       moodChanges
+    ] = await Promise.allSettled([
+      this.analyzePoseCommands(lowerMessage, characterId),
+      this.analyzeCharacteristicInfluences(lowerMessage, characterId, userId),
+      this.analyzeActionTriggers(lowerMessage, characterId),
+      this.analyzeFetishElements(lowerMessage),
+      this.analyzeMoodChanges(lowerMessage, characterId)
+    ])
+
+    // Обрабатываем результаты
+    const finalPoseCommands = poseCommands.status === 'fulfilled' ? poseCommands.value : []
+    const finalCharacteristicInfluences = characteristicInfluences.status === 'fulfilled' ? characteristicInfluences.value : []
+    const finalActionTriggers = actionTriggers.status === 'fulfilled' ? actionTriggers.value : []
+    const finalFetishElements = fetishElements.status === 'fulfilled' ? fetishElements.value : []
+    const finalMoodChanges = moodChanges.status === 'fulfilled' ? moodChanges.value : []
+
+    console.log('🎭 Команды поз:', finalPoseCommands)
+    console.log('📈 Влияние на характеристики:', finalCharacteristicInfluences)
+    console.log('⚡ Триггеры действий:', finalActionTriggers)
+    console.log('🔥 Фетиш-элементы:', finalFetishElements)
+    console.log('😊 Изменения настроения:', finalMoodChanges)
+
+    const result = {
+      ...baseAnalysis,
+      poseCommands: finalPoseCommands,
+      characteristicInfluences: finalCharacteristicInfluences,
+      actionTriggers: finalActionTriggers,
+      fetishElements: finalFetishElements,
+      moodChanges: finalMoodChanges
     }
 
     console.log('✅ Анализ завершен:', result)

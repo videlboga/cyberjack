@@ -44,7 +44,7 @@ export async function GET(
 
     return NextResponse.json(formattedKnowledge)
   } catch (error) {
-    console.error('Error fetching character knowledge:', error)
+    console.error('❌ [API] Ошибка получения знаний:', error)
     return NextResponse.json(
       { error: 'Внутренняя ошибка сервера' },
       { status: 500 }

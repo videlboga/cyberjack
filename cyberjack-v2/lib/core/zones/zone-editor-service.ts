@@ -11,6 +11,7 @@ export interface Zone {
   height: number
   anatomyId?: string
   anatomyName?: string
+  mediaFileId?: string  // ID конкретного медиа файла
 }
 
 export interface ZoneEditorState {
@@ -198,11 +199,15 @@ export class ZoneEditorService {
   createZoneFromCoordinates(x1: number, y1: number, x2: number, y2: number, name: string = 'Новая зона') {
     const x = Math.min(x1, x2)
     const y = Math.min(y1, y2)
-    const width = Math.abs(x2 - x1)
-    const height = Math.abs(y2 - y1)
+    let width = Math.abs(x2 - x1)
+    let height = Math.abs(y2 - y1)
 
-    if (width < this.config.minZoneSize || height < this.config.minZoneSize) {
-      return null
+    // Принудительно устанавливаем минимальные размеры
+    if (width < this.config.minZoneSize) {
+      width = this.config.minZoneSize
+    }
+    if (height < this.config.minZoneSize) {
+      height = this.config.minZoneSize
     }
 
     return this.addZone({

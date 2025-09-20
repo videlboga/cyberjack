@@ -55,7 +55,8 @@ export class CharacteristicsSystem {
     characterId: string,
     characteristicId: string,
     change: number,
-    permanent: boolean = false
+    permanent: boolean = false,
+    userId?: string
   ): Promise<void> {
     const characteristic = await prisma.characteristic.findUnique({
       where: {
@@ -66,8 +67,11 @@ export class CharacteristicsSystem {
       }
     })
 
-    if (!characteristic) return
+    if (!characteristic) {
+      return
+    }
 
+    const oldValue = characteristic.currentValue
     const newValue = Math.max(0, Math.min(100, characteristic.currentValue + change))
 
     await prisma.characteristic.update({
@@ -90,7 +94,9 @@ export class CharacteristicsSystem {
     }
 
     // Проверить раскрытие характеристики
-    await this.checkReveal(characterId, characteristicId, newValue)
+    if (userId) {
+      await this.checkReveal(characterId, characteristicId, newValue, userId)
+    }
   }
 
   // Восстановление к базовому значению
@@ -164,7 +170,8 @@ export class CharacteristicsSystem {
   private async checkReveal(
     characterId: string,
     characteristicId: string,
-    newValue: number
+    newValue: number,
+    userId: string
   ): Promise<void> {
     const characteristic = await prisma.characteristic.findUnique({
       where: {
@@ -175,7 +182,9 @@ export class CharacteristicsSystem {
       }
     })
 
-    if (!characteristic) return
+    if (!characteristic) {
+      return
+    }
 
     const changePercent = Math.abs(newValue - characteristic.baseValue) / characteristic.baseValue * 100
     let newLevel: KnowledgeLevel = KnowledgeLevel.UNKNOWN
@@ -188,22 +197,69 @@ export class CharacteristicsSystem {
       newLevel = KnowledgeLevel.APPROXIMATE
     }
 
-    // Обновить знания всех пользователей
-    await prisma.characterKnowledge.updateMany({
+    // Проверяем текущие знания пользователя
+    const existingKnowledge = await prisma.characterKnowledge.findUnique({
       where: {
-        characterId,
-        characteristicDefId: characteristicId,
-        level: {
-          not: newLevel
+        userId_characterId_characteristicDefId: {
+          userId,
+          characterId,
+          characteristicDefId: characteristicId
         }
-      },
-      data: {
-        level: newLevel,
-        value: this.calculateRevealedValue(newValue, newLevel),
-        accuracy: this.getAccuracy(newLevel),
-        lastRevealed: new Date()
       }
     })
+
+    // Логируем только если уровень знаний изменился и это значимое изменение
+    if ((!existingKnowledge || existingKnowledge.level !== newLevel) && newLevel !== KnowledgeLevel.UNKNOWN) {
+      const revealedValue = this.calculateRevealedValue(newValue, newLevel)
+      const accuracy = this.getAccuracy(newLevel)
+
+      console.log(`🔍 [REVEAL] Новое раскрытие!`, {
+        characteristic: characteristic.definition?.name || 'Unknown',
+        oldLevel: existingKnowledge?.level || 'UNKNOWN',
+        newLevel,
+        changePercent: changePercent.toFixed(1) + '%',
+        revealedValue: Math.round(revealedValue),
+        accuracy: accuracy + '%'
+      })
+
+      await prisma.characterKnowledge.upsert({
+        where: {
+          userId_characterId_characteristicDefId: {
+            userId,
+            characterId,
+            characteristicDefId: characteristicId
+          }
+        },
+        update: {
+          level: newLevel,
+          value: revealedValue,
+          accuracy: accuracy,
+          lastRevealed: new Date()
+        },
+        create: {
+          userId,
+          characterId,
+          characteristicDefId: characteristicId,
+          level: newLevel,
+          value: revealedValue,
+          accuracy: accuracy,
+          lastRevealed: new Date()
+        }
+      })
+    } else if (!existingKnowledge && newLevel === KnowledgeLevel.UNKNOWN) {
+      // Создаем запись UNKNOWN без логирования
+      await prisma.characterKnowledge.create({
+        data: {
+          userId,
+          characterId,
+          characteristicDefId: characteristicId,
+          level: newLevel,
+          value: 0,
+          accuracy: 100,
+          lastRevealed: new Date()
+        }
+      })
+    }
   }
 
   // Вычислить раскрытое значение

@@ -12,6 +12,7 @@ interface ZonePropertiesPanelProps {
     name: string
     category: string
   }>
+  mediaFileId?: string
   className?: string
 }
 
@@ -20,6 +21,7 @@ export function ZonePropertiesPanel({
   onZoneUpdate,
   onZoneDelete,
   anatomyDefinitions,
+  mediaFileId,
   className = ''
 }: ZonePropertiesPanelProps) {
   const [name, setName] = useState('')
@@ -32,12 +34,21 @@ export function ZonePropertiesPanel({
   // Обновляем поля при изменении выбранной зоны
   useEffect(() => {
     if (selectedZone) {
+      console.log('🎯 ZonePropertiesPanel: Загружена зона:', {
+        id: selectedZone.id,
+        name: selectedZone.name,
+        anatomyId: selectedZone.anatomyId,
+        anatomyDefId: (selectedZone as any).anatomyDefId
+      })
+
       setName(selectedZone.name)
-      setAnatomyId(selectedZone.anatomyId || '')
-      setX(Math.round(selectedZone.x))
-      setY(Math.round(selectedZone.y))
-      setWidth(Math.round(selectedZone.width))
-      setHeight(Math.round(selectedZone.height))
+      // Используем anatomyDefId если anatomyId не установлен
+      const anatomyIdToUse = selectedZone.anatomyId || (selectedZone as any).anatomyDefId || ''
+      setAnatomyId(anatomyIdToUse)
+      setX(Math.round(selectedZone.x) || 0)
+      setY(Math.round(selectedZone.y) || 0)
+      setWidth(Math.round(selectedZone.width) || 0)
+      setHeight(Math.round(selectedZone.height) || 0)
     } else {
       setName('')
       setAnatomyId('')
@@ -48,17 +59,35 @@ export function ZonePropertiesPanel({
     }
   }, [selectedZone])
 
+  // Автоматически обновляем название при изменении анатомической зоны
+  useEffect(() => {
+    if (anatomyId && anatomyDefinitions.length > 0) {
+      const anatomyDef = anatomyDefinitions.find(a => a.id === anatomyId)
+      if (anatomyDef) {
+        setName(anatomyDef.name)
+      }
+    }
+  }, [anatomyId, anatomyDefinitions])
+
   const handleSave = () => {
     if (!selectedZone) return
 
-    onZoneUpdate(selectedZone.id, {
+    const updates = {
       name,
       anatomyId: anatomyId || undefined,
+      mediaFileId: mediaFileId || undefined,
       x: Number(x),
       y: Number(y),
       width: Number(width),
       height: Number(height)
+    }
+
+    console.log('💾 ZonePropertiesPanel: Сохранение зоны:', {
+      zoneId: selectedZone.id,
+      updates
     })
+
+    onZoneUpdate(selectedZone.id, updates)
   }
 
   const handleDelete = () => {
@@ -125,8 +154,11 @@ export function ZonePropertiesPanel({
             </label>
             <input
               type="number"
-              value={x}
-              onChange={(e) => setX(Number(e.target.value))}
+              value={isNaN(x) ? 0 : x}
+              onChange={(e) => {
+                const value = Number(e.target.value)
+                setX(isNaN(value) ? 0 : value)
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="0"
               aria-label="Координата X"
@@ -138,8 +170,11 @@ export function ZonePropertiesPanel({
             </label>
             <input
               type="number"
-              value={y}
-              onChange={(e) => setY(Number(e.target.value))}
+              value={isNaN(y) ? 0 : y}
+              onChange={(e) => {
+                const value = Number(e.target.value)
+                setY(isNaN(value) ? 0 : value)
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="0"
               aria-label="Координата Y"
@@ -151,8 +186,11 @@ export function ZonePropertiesPanel({
             </label>
             <input
               type="number"
-              value={width}
-              onChange={(e) => setWidth(Number(e.target.value))}
+              value={isNaN(width) ? 0 : width}
+              onChange={(e) => {
+                const value = Number(e.target.value)
+                setWidth(isNaN(value) ? 0 : Math.max(1, value))
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="1"
               aria-label="Ширина зоны"
@@ -164,8 +202,11 @@ export function ZonePropertiesPanel({
             </label>
             <input
               type="number"
-              value={height}
-              onChange={(e) => setHeight(Number(e.target.value))}
+              value={isNaN(height) ? 0 : height}
+              onChange={(e) => {
+                const value = Number(e.target.value)
+                setHeight(isNaN(value) ? 0 : Math.max(1, value))
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="1"
               aria-label="Высота зоны"
