@@ -563,11 +563,16 @@ ${context.interactionType || 'общение'}
    * Вызывает LLM API
    */
   private async callLLMAPI(prompt: string): Promise<string> {
+    const apiKey = process.env.OPENROUTER_API_KEY
+    if (!apiKey) {
+      console.warn('⚠️ OPENROUTER_API_KEY не установлен. LLM API недоступен.')
+      return 'Извините, AI-сервис недоступен.'
+    }
     try {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer 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',
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': 'http://localhost:3002',
           'X-Title': 'CyberJack AI Character System'

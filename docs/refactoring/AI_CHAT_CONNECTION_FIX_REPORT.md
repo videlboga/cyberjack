@@ -82,7 +82,7 @@ const characterAI = useCharacterAI({
 ### 4. `.env` файл
 ```bash
 # Исправлено: убраны export
-OPENAI_API_KEY="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"
+OPENAI_API_KEY="sk-or-v1-...your_openrouter_api_key_here..."
 OPENAI_BASE_URL="https://openrouter.ai/api/v1"
 OPENAI_MODEL="z-ai/glm-4.5v"
 NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY="google/gemini-2.5-flash-lite"

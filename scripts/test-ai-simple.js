@@ -38,11 +38,18 @@ const testContext = {
 async function testLLMAPI() {
   console.log('📡 Тестирование LLM API...')
   
+  const apiKey = process.env.OPENROUTER_API_KEY
+  if (!apiKey) {
+    console.error('❌ OPENROUTER_API_KEY не установлен в переменных окружения')
+    return
+  }
+  console.log(`🔑 Используем API ключ: ${apiKey.substring(0, 10)}...`)
+  
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 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',
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'http://localhost:3002',
         'X-Title': 'CyberJack AI Test'
