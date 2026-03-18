@@ -32,7 +32,11 @@ class OpenRouterLLMService {
   private model: string
 
   constructor() {
-    this.apiKey = "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"
+    const apiKey = process.env.OPENROUTER_API_KEY
+    if (!apiKey) {
+      throw new Error('OPENROUTER_API_KEY environment variable is not set')
+    }
+    this.apiKey = apiKey
     this.baseUrl = "https://openrouter.ai/api/v1"
     this.model = "z-ai/glm-4.5"
   }

@@ -2,37 +2,24 @@
 const fs = require('fs');
 const path = require('path');
 
-// Загружаем переменные окружения
-const envPath = path.join(__dirname, '../.env');
-const envContent = fs.readFileSync(envPath, 'utf8');
+// Загружаем переменные окружения из .env если dotenv доступен
+try {
+  require('dotenv').config({ path: path.join(__dirname, '../.env') });
+} catch (_) {
+  // dotenv не установлен — используем переменные окружения напрямую
+}
 
-// Парсим переменные окружения
-const envVars = {};
-envContent.split('\n').forEach(line => {
-  if (line.includes('=') && !line.startsWith('#')) {
-    const [key, value] = line.split('=');
-    if (key && value) {
-      envVars[key.trim()] = value.trim().replace(/"/g, '');
-    }
-  }
-});
-
-const apiKey = envVars.OPENAI_API_KEY;
-const geminiModel = envVars.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY;
+const apiKey = process.env.OPENROUTER_API_KEY;
+const model = process.env.OPENROUTER_MODEL || 'z-ai/glm-4.5';
 
 console.log('🔍 Обновленный тест подключения к OpenRouter...\n');
 
 console.log('📋 Переменные окружения:');
-console.log(`   OPENAI_API_KEY: ${apiKey ? 'Установлен' : 'НЕ УСТАНОВЛЕН'}`);
-console.log(`   NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY: ${geminiModel || 'НЕ УСТАНОВЛЕН'}`);
+console.log(`   OPENROUTER_API_KEY: ${apiKey ? (apiKey.length > 6 ? apiKey.substring(0, 6) + '...' + ` (len=${apiKey.length})` : `[key too short] (len=${apiKey.length})`) : 'НЕ УСТАНОВЛЕН'}`);
+console.log(`   OPENROUTER_MODEL: ${model}`);
 
 if (!apiKey) {
-  console.error('❌ OPENAI_API_KEY не найден в .env файле');
-  process.exit(1);
-}
-
-if (!geminiModel) {
-  console.error('❌ NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY не найден в .env файле');
+  console.error('❌ OPENROUTER_API_KEY не найден в переменных окружения');
   process.exit(1);
 }
 
@@ -40,8 +27,8 @@ if (!geminiModel) {
 async function testOpenRouter() {
   try {
     console.log('\n🔄 Тестируем подключение к OpenRouter...');
-    console.log(`🔑 Используем API ключ: ${apiKey.substring(0, 10)}...`);
-    console.log(`🤖 Используем модель: ${geminiModel}`);
+    console.log(`🔑 Используем API ключ: ${apiKey.length > 6 ? apiKey.substring(0, 6) + '...' + ` (len=${apiKey.length})` : `[key too short] (len=${apiKey.length})`}`);
+    console.log(`🤖 Используем модель: ${model}`);
     
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -52,7 +39,7 @@ async function testOpenRouter() {
         'X-Title': 'CyberJack Test'
       },
       body: JSON.stringify({
-        model: geminiModel,
+        model: model,
         messages: [
           {
             role: 'user',

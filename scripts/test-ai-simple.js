@@ -1,6 +1,16 @@
 // Простой тест AI-интеграции
 console.log('🧪 Тестирование AI-интеграции...')
 
+const apiKey = process.env.OPENROUTER_API_KEY
+
+if (!apiKey) {
+  console.error('❌ OPENROUTER_API_KEY не найден в переменных окружения')
+  process.exit(1)
+}
+
+const maskedKey = apiKey.length > 6 ? apiKey.substring(0, 6) + '...' + ` (len=${apiKey.length})` : `[key too short] (len=${apiKey.length})`
+console.log(`🔑 Используем API ключ: ${maskedKey}`)
+
 // Имитируем данные персонажа
 const testTalent = {
   id: 'test-1',
@@ -42,7 +52,7 @@ async function testLLMAPI() {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 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',
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'http://localhost:3002',
         'X-Title': 'CyberJack AI Test'
