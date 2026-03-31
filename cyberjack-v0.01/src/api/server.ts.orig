@@ -5,8 +5,6 @@ import { db } from '../infrastructure/db';
 import { sendToSillyTavern } from '../adapters/sillyTavernAdapter';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayload } from '../prompts/buildPromptPayload';
-import { activeConfig, updateConfig } from '../prompts/config';
-import { parseVerbalInput } from '../parser/verbalParser';
 
 const app = express();
 app.use(express.json());
@@ -16,12 +14,6 @@ app.post('/api/tick', async (req, res) => {
     try {
         const { subjectId = 'S-01', playerId = 'PL-1', pointId = 'hands', sceneId = 'lab', presetId, textMessage } = req.body;
 
-        // Optional text semantic classification
-        let dynamicModifiers;
-        if (textMessage) {
-            dynamicModifiers = await parseVerbalInput(textMessage);
-        }
-
         // Run engine logic
         const engineOutput = runGameTick({
             subjectId,
@@ -29,8 +21,7 @@ app.post('/api/tick', async (req, res) => {
             pointId,
             sceneId,
             presetId,
-            playerIntensity: 1.0,
-            dynamicModifiers
+            playerIntensity: 1.0
         });
 
         // Current Subject State query for UI
@@ -39,19 +30,18 @@ app.post('/api/tick', async (req, res) => {
         const fullState = { ...stateObj as object, point: pointObj };
 
         // Post-Tick Processes (Diagnostics & Prompts)
-        const diagnostics = buildDiagnostics(engineOutput.tickMeta?.inputs?.action || {intensity:0, valence:0, contact:0, sharpness:0, novelty:0}, fullState as any, engineOutput);
-        const promptPayload = await buildPromptPayload(subjectId, engineOutput as any);
+        console.log("ENGINE:", engineOutput); const diagnostics = buildDiagnostics(engineOutput.result, fullState as any, engineOutput.action);
+        const promptPayload = await buildPromptPayload(subjectId, engineOutput.result);
 
         // ST API Integration
-        const {reply: stReply, sentMessages} = await sendToSillyTavern(promptPayload, textMessage);
+        const stReply = await sendToSillyTavern(promptPayload, textMessage);
 
         res.json({
             success: true,
             tickResult: engineOutput.result,
             state: fullState,
             diagnostics,
-            reply: stReply,
-            promptMessages: sentMessages
+            reply: stReply
         });
     } catch (error: any) {
         console.error(error);
@@ -67,29 +57,14 @@ app.get('/api/state', (req, res) => {
         const stateObj = db.prepare('SELECT * FROM subjects WHERE id = ?').get(subjectId);
         const pointObj = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ? AND point_id = ?').get(subjectId, pointId);
         const actions = db.prepare('SELECT id, label FROM action_presets').all();
-        const points = db.prepare('SELECT p.id, p.label FROM point_presets p JOIN subject_point_states sps ON p.id = sps.point_id WHERE sps.subject_id = ?').all(subjectId);
-
+        
         res.json({
             success: true,
             subject: { ...stateObj as object, point: pointObj },
-            availableActions: actions,
-            availablePoints: points
+            availableActions: actions
         });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-app.get('/api/config', (req, res) => {
-    res.json({ success: true, config: activeConfig });
-});
-
-app.post('/api/config', (req, res) => {
-    try {
-        updateConfig(req.body.config);
-        res.json({ success: true, config: activeConfig });
-    } catch (err: any) {
-        res.status(500).json({ success: false, error: err.message });
     }
 });
 

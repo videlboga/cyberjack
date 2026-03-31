@@ -10,6 +10,7 @@ export interface ActionInput {
     eventId: string; // The scene or global event to pull context from
     playerIntensity?: number; // Override if player dragged the UI slider
     history?: any[]; // Passed down to calculate novelty
+    dynamicModifiers?: Partial<CompiledAction>; // Add dynamic traits, like text classification
 }
 
 /**
@@ -21,20 +22,23 @@ export function compileAction(input: ActionInput): CompiledAction {
     const baseAction = presetRepo.getActionPreset(input.presetId) || {};
     
     // 2. Add player direct overrides
-    const playerModifiers: Partial<CompiledAction> = {};
+    // Assume player slider mostly controls intensity. We override base rather than add.
     if (input.playerIntensity !== undefined) {
-        // Assume player slider mostly controls intensity. 
-        // We override base rather than add.
         baseAction.intensity = input.playerIntensity;
     }
 
-    // 3. Compute Novelty 
-    baseAction.novelty = computeNovelty(baseAction, input.history || []);
+    // 2.5 Merge dynamic modifiers (e.g. from LLM text classifier)
+    const baseWithDynamic = input.dynamicModifiers 
+        ? mergeVectors(baseAction as CompiledAction, input.dynamicModifiers as CompiledAction)
+        : baseAction;
+
+    // 3. Compute Novelty
+    baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || []);
 
     // 4. Get Contexts
     const activeContextIds = activeContextsRepo.getAllForEvent(input.eventId);
     const contextModifiers = compileContextVector(activeContextIds);
 
     // 5. Merge
-    return mergeVectors(baseAction, contextModifiers);
+    return mergeVectors(baseWithDynamic as CompiledAction, contextModifiers);
 }

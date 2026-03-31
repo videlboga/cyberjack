@@ -1,23 +1,41 @@
 import { SubjectCoreState } from '../domain/types';
-import { inferTraits } from '../diagnostics/traitInference';
+import { activeConfig } from './config';
 
 /**
- * Генерирует текстовое резюме текущего состояния субъекта
- * для инъекции в промпт (например, в системный промпт или как память).
+ * Преобразует числовые стейты в соматические ощущения от 2го/1го лица
  */
 export function buildStateSummary(core: SubjectCoreState): string {
-    const traits = inferTraits(core);
-    
-    // Формируем человекочитаемый блок о состоянии
+    const cfg = activeConfig.somaticSense;
+
+    // Helper to get index 0-4
+    const getLevelIndex = (val: number) => {
+        if (val <= 20) return 0;
+        if (val <= 40) return 1;
+        if (val <= 60) return 2;
+        if (val <= 80) return 3;
+        return 4;
+    };
+
+    const sensIdx = getLevelIndex(core.sensitivity);
+    const capIdx = getLevelIndex(core.capacity);
+    const openIdx = getLevelIndex(core.openness);
+    const attIdx = getLevelIndex(core.attitude);
+
+    // Dynamic key access
+    const sensText = (cfg as any)[`sensitivity_L${sensIdx}`];
+    const capText = (cfg as any)[`capacity_L${capIdx}`];
+    const openText = (cfg as any)[`openness_L${openIdx}`];
+    const attText = (cfg as any)[`attitude_L${attIdx}`];
+
+    // Build human readable block
     const lines = [
-        `[System Note: Subject Internal State]`,
-        `- Emotional Sensitivity: ${Math.round(core.sensitivity)}%`,
-        `- Stress Capacity: ${Math.round(core.capacity)}%`,
-        `- Receptiveness (Openness): ${Math.round(core.openness)}%`,
-        `- Attitude towards Player: ${Math.round(core.attitude)}%`,
+        cfg.noteTitle,
+        `- ${sensText}`,
+        `- ${capText}`,
+        `- ${openText}`,
+        `- ${attText}`,
         ``,
-        `Current Behavioral Traits:`,
-        traits.length > 0 ? traits.map(t => `* ${t}`).join('\n') : '* None noticeable.'
+        `${cfg.traitsTitle} ${cfg.noTraitsFallback}` // Traits are handled implicitly by text now, but we keep placeholder
     ];
 
     return lines.join('\n');

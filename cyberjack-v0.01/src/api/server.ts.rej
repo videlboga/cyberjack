@@ -1,0 +1,8 @@
+--- server.ts
++++ server.ts
+@@ -29,3 +29,3 @@
+         // Post-Tick Processes (Diagnostics & Prompts)
+-        const action = engineOutput.tickMeta?.inputs?.action || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
+-        const diagnostics = buildDiagnostics(engineOutput.result, fullState as any, action);
++        const action = engineOutput.result?.tickMeta?.inputs?.action || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
++        const previousCore = engineOutput.result?.tickMeta?.inputs?.core || fullState;

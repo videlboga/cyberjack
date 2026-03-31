@@ -14,10 +14,10 @@ export function inferTraits(core: SubjectCoreState): Record<string, string> {
     };
 
     return {
-        attitude: getLevel(core.attitude, ['Hostile', 'Defensive', 'Neutral', 'Receptive', 'Devoted']),
-        openness: getLevel(core.openness, ['Closed off', 'Guarded', 'Cautious', 'Open', 'Completely open']),
-        sensitivity: getLevel(core.sensitivity, ['Numb', 'Dull', 'Normal', 'Sensitive', 'Hypersensitive']),
-        capacity: getLevel(core.capacity, ['Fragile', 'Vulnerable', 'Average', 'Resilient', 'Unbreakable']),
-        plasticity: getLevel(core.plasticity, ['Rigid', 'Stubborn', 'Adaptable', 'Malleable', 'Highly impressionable'])
+        attitude: getLevel(core.attitude, ['Враждебный', 'Оборонительный', 'Нейтральный', 'Благосклонный', 'Преданный']),
+        openness: getLevel(core.openness, ['Отстраненный', 'Закрытый', 'Осторожный', 'Открытый', 'Абсолютно открытый']),
+        sensitivity: getLevel(core.sensitivity, ['Онемевший', 'Притупленный', 'Нормальный', 'Чувствительный', 'Сверхчувствительный']),
+        capacity: getLevel(core.capacity, ['Хрупкий', 'Уязвимый', 'Средний', 'Стойкий', 'Несокрушимый']),
+        plasticity: getLevel(core.plasticity, ['Ригидный', 'Упрямый', 'Адаптивный', 'Податливый', 'Легко внушаемый'])
     };
 }

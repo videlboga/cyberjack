@@ -8,20 +8,20 @@ export function interpretAction(action: CompiledAction): string {
     const v = action.valence;
     const c = action.contact;
 
-    let intensityLabel = 'mild';
-    if (i > 0.8) intensityLabel = 'extreme';
-    else if (i > 0.5) intensityLabel = 'moderate';
-    else if (i < 0.2) intensityLabel = 'very subtle';
+    let intensityLabel = 'мягкое';
+    if (i > 0.8) intensityLabel = 'экстремальное';
+    else if (i > 0.5) intensityLabel = 'умеренное';
+    else if (i < 0.2) intensityLabel = 'очень легкое';
 
-    let valenceLabel = 'neutral';
-    if (v > 0.6) valenceLabel = 'highly pleasant';
-    else if (v > 0.2) valenceLabel = 'pleasant';
-    else if (v < -0.6) valenceLabel = 'highly aversive';
-    else if (v < -0.2) valenceLabel = 'aversive';
+    let valenceLabel = 'нейтральное';
+    if (v > 0.6) valenceLabel = 'крайне приятное';
+    else if (v > 0.2) valenceLabel = 'приятное';
+    else if (v < -0.6) valenceLabel = 'крайне неприятное';
+    else if (v < -0.2) valenceLabel = 'неприятное';
 
-    let contactLabel = 'non-physical';
-    if (c > 0.7) contactLabel = 'close physical';
-    else if (c > 0.3) contactLabel = 'light physical';
+    let contactLabel = 'бесконтактное';
+    if (c > 0.7) contactLabel = 'тесное физическое';
+    else if (c > 0.3) contactLabel = 'легкое физическое';
 
-    return `A ${intensityLabel}, ${valenceLabel}, ${contactLabel} action`;
+    return `${intensityLabel}, ${valenceLabel}, ${contactLabel} действие`;
 }
