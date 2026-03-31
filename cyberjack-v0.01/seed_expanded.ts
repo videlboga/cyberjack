@@ -30,7 +30,8 @@ const points = [
     { id: 'inner_thighs', label: 'Внутр. бедра', sens: 85, att: 10 },
     { id: 'knees', label: 'Колени', sens: 20, att: 70 },
     { id: 'calves', label: 'Икры', sens: 30, att: 70 },
-    { id: 'feet', label: 'Ступни', sens: 75, att: 50 }
+    { id: 'feet', label: 'Ступни', sens: 75, att: 50 },
+    { id: 'general', label: 'Общее воздействие', sens: 50, att: 50 } // Для вербальных и общих эффектов
 ];
 
 const insertPointStmt = db.prepare('INSERT INTO point_presets (id, label, values_json) VALUES (?, ?, ?)');
@@ -79,12 +80,10 @@ const actions = [
     { id: 'breath_blow', label: 'Обдувание дыханием', i: 0.1, v: 0.4, c: 0.05, s: 0.1, n: 0.5 },
 
     // Психологические и бесконтактные
+    { id: 'verbal_pressure', label: 'Обычная беседа (скрытое)', i: 0.1, v: 0.0, c: 0.0, s: 0.0, n: 0.1 }, // Базовый пресет для чата
     { id: 'stare', label: 'Пристальный взгляд', i: 0.3, v: -0.1, c: 0.0, s: 0.1, n: 0.2 },
     { id: 'close_inspection', label: 'Относительно близкий осмотр', i: 0.4, v: -0.3, c: 0.0, s: 0.2, n: 0.4 },
-    { id: 'feint_strike', label: 'Ложный замах', i: 0.7, v: -0.5, c: 0.0, s: 0.9, n: 0.5 },
-    { id: 'praise', label: 'Ласковая похвала', i: 0.4, v: 0.8, c: 0.0, s: 0.1, n: 0.3 },
-    { id: 'humiliation', label: 'Унижение/Оскорбление', i: 0.7, v: -0.8, c: 0.0, s: 0.6, n: 0.6 },
-    { id: 'shout', label: 'Резкий приказ', i: 0.8, v: -0.6, c: 0.0, s: 0.7, n: 0.5 }
+    { id: 'feint_strike', label: 'Ложный замах', i: 0.7, v: -0.5, c: 0.0, s: 0.9, n: 0.5 }
 ];
 
 const insertActionStmt = db.prepare('INSERT INTO action_presets (id, label, values_json) VALUES (?, ?, ?)');

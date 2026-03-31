@@ -145,13 +145,13 @@ export function App() {
             ))}
             {loading && <div style={{ color: '#888' }}>S-01 печатает...</div>}
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
             <input 
               type="text" 
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
               style={{ flex: 1, padding: 8 }}
-              placeholder="Сказать что-нибудь (или использовать действие 'Словесное давление' из кнопок)"
+              placeholder="Сказать что-нибудь..."
               onKeyDown={(e) => e.key === 'Enter' && inputMsg && handleAction('verbal_pressure', inputMsg)}
             />
             <button onClick={() => inputMsg && handleAction('verbal_pressure', inputMsg)} disabled={!inputMsg || loading} style={{ padding: '8px 16px' }}>Отправить</button>

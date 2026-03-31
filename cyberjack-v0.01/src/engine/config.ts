@@ -89,8 +89,8 @@ export const DEFAULT_CONFIG: any =
     intensity: {
       baseOffset: 0.3,
       sensitivityPow: 1.2,
-      contactBase: 0.6,
-      contactScale: 0.8,
+      contactBase: 0.25, // Уменьшен множитель бесконтактных/вербальных действий
+      contactScale: 1.15, // Чтобы в сумме при максимальном контакте оставалось около 1.4
       toPercent: 100,
     },
     attitude: {

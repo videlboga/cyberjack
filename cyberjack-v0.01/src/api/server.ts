@@ -14,12 +14,23 @@ app.use(cors());
 
 app.post('/api/tick', async (req, res) => {
     try {
-        const { subjectId = 'S-01', playerId = 'PL-1', pointId = 'hands', sceneId = 'lab', presetId, textMessage } = req.body;
+        const { subjectId = 'S-01', playerId = 'PL-1', sceneId = 'lab', presetId, textMessage } = req.body;
+        let pointId = req.body.pointId || 'general';
 
         // Optional text semantic classification
         let dynamicModifiers;
         if (textMessage) {
             dynamicModifiers = await parseVerbalInput(textMessage);
+            if (dynamicModifiers.pointId) {
+                // Пытаемся применить точку из LLM, если она существует в БД
+                const pointExists = db.prepare('SELECT 1 FROM point_presets WHERE id = ?').get(dynamicModifiers.pointId);
+                if (pointExists) {
+                    pointId = dynamicModifiers.pointId;
+                } else {
+                    console.log(`[Server] Unknown pointId "${dynamicModifiers.pointId}" from LLM. Falling back to "general".`);
+                    pointId = 'general';
+                }
+            }
         }
 
         // Run engine logic
@@ -38,8 +49,14 @@ app.post('/api/tick', async (req, res) => {
         const pointObj = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ? AND point_id = ?').get(subjectId, pointId);
         const fullState = { ...stateObj as object, point: pointObj };
 
-        // Post-Tick Processes (Diagnostics & Prompts)
-        const diagnostics = buildDiagnostics(engineOutput.tickMeta?.inputs?.action || {intensity:0, valence:0, contact:0, sharpness:0, novelty:0}, fullState as any, engineOutput);
+    // Post-Tick Processes (Diagnostics & Prompts)
+    // Use the pre-tick core stored in engineOutput.tickMeta.inputs.core when available.
+    // Previously we passed the DB state (which was already updated) as the "previous" core,
+    // producing zero deltas because previous === next. Use the engine's recorded inputs
+    // to compute meaningful deltas.
+    const action = engineOutput.tickMeta?.inputs?.action || {intensity:0, valence:0, contact:0, sharpness:0, novelty:0};
+    const previousCore = engineOutput.tickMeta?.inputs?.core || (fullState as any);
+    const diagnostics = buildDiagnostics(action, previousCore, engineOutput);
         const promptPayload = await buildPromptPayload(subjectId, engineOutput as any);
 
         // ST API Integration
@@ -51,7 +68,10 @@ app.post('/api/tick', async (req, res) => {
             state: fullState,
             diagnostics,
             reply: stReply,
-            promptMessages: sentMessages
+            promptMessages: sentMessages,
+            // expose classifier raw log for debugging
+            classifierLog: dynamicModifiers?.raw ?? null,
+            classifierModel: dynamicModifiers?.model ?? null
         });
     } catch (error: any) {
         console.error(error);

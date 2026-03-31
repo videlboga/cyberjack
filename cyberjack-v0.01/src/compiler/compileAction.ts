@@ -28,8 +28,9 @@ export function compileAction(input: ActionInput): CompiledAction {
     }
 
     // 2.5 Merge dynamic modifiers (e.g. from LLM text classifier)
+    // We OVERWRITE base action fields rather than add, because the LLM returns an absolute semantic vector
     const baseWithDynamic = input.dynamicModifiers 
-        ? mergeVectors(baseAction as CompiledAction, input.dynamicModifiers as CompiledAction)
+        ? { ...baseAction, ...input.dynamicModifiers }
         : baseAction;
 
     // 3. Compute Novelty

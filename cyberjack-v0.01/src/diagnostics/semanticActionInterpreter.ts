@@ -14,10 +14,10 @@ export function interpretAction(action: CompiledAction): string {
     else if (i < 0.2) intensityLabel = 'очень легкое';
 
     let valenceLabel = 'нейтральное';
-    if (v > 0.6) valenceLabel = 'крайне приятное';
-    else if (v > 0.2) valenceLabel = 'приятное';
-    else if (v < -0.6) valenceLabel = 'крайне неприятное';
-    else if (v < -0.2) valenceLabel = 'неприятное';
+    if (v > 0.75) valenceLabel = 'крайне позитивное';
+    else if (v > 0.2) valenceLabel = 'позитивное';
+    else if (v < -0.75) valenceLabel = 'крайне негативное';
+    else if (v < -0.2) valenceLabel = 'негативное';
 
     let contactLabel = 'бесконтактное';
     if (c > 0.7) contactLabel = 'тесное физическое';

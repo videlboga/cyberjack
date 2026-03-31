@@ -43,7 +43,7 @@ export async function sendToSillyTavern(payload: PromptPayload, userInput?: stri
     const OPENROUTER_API_KEY = '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';
     const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
     
-    console.log(`[ST Adapter] Sending to OpenRouter (deepseek/deepseek-v3.2)...`);
+    console.log(`[ST Adapter] Sending to OpenRouter (deepseek/deepseek-chat)...`);
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -52,7 +52,7 @@ export async function sendToSillyTavern(payload: PromptPayload, userInput?: stri
                 'Authorization': `Bearer ${OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'deepseek/deepseek-v3.2',
+                model: 'deepseek/deepseek-chat', // Correct DeepSeek V3 ID for faster routing
                 messages,
                 max_tokens: 300,
                 temperature: 0.8,
