@@ -43,13 +43,27 @@ export async function buildPromptPayload(
         JOIN context_presets cp ON ac.context_id = cp.id
         WHERE ac.event_id = ?
     `).all(eventId) as {label: string}[];
+
+    // Fetch point states for body overload calculations
+    const pointStatesRow = db.prepare(`
+        SELECT p.label, sps.local_sensitivity, sps.local_attitude
+        FROM subject_point_states sps
+        JOIN point_presets p ON sps.point_id = p.id
+        WHERE sps.subject_id = ?
+    `).all(subjectId) as any[];
     
     const activeContextNames = activeContextRow.map(r => r.label);
     const contextText = activeContextNames.length > 0 
-        ? `\n[Физическое состояние и влияние среды]: ${activeContextNames.join(', ')}` 
+        ? `\n[Физическое состояние и влияние среды]: ${activeContextNames.join(', ')}`
         : '';
 
-    const stateSummary = buildStateSummary(core);
+    const mappedPoints = pointStatesRow.map(row => ({
+        label: row.label,
+        localSensitivity: row.local_sensitivity,
+        localAttitude: row.local_attitude
+    }));
+
+    const stateSummary = buildStateSummary(core, mappedPoints);
     const eventsText = buildRecentEventsSummary(recentEvents);
     
     const cfg = activeConfig.character;

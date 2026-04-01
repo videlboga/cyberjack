@@ -2,6 +2,7 @@
 import { loadTickState } from './loadTickState';
 import { saveTickState } from './saveTickState';
 import { compileAction } from '../compiler/compileAction';
+import { applyDynamicContexts } from '../compiler/dynamicModifiers';
 import { runTick } from '../engine/runTick';
 import { eventQueries } from '../infrastructure/eventQueries';
 import { activeContextsRepo } from '../infrastructure/repositories';
@@ -29,13 +30,18 @@ export function runGameTick(payload: GameEventPayload): TickOutput {
     const history = eventQueries.getRecentLogs(payload.subjectId, 5);
     
     // 4. Compile Action Vector
-    const compiledAction = compileAction({
+    let compiledAction = compileAction({
         presetId: payload.presetId,
         eventId: payload.sceneId, // Treat sceneId as the root event contexts are bound to for now
         playerIntensity: payload.playerIntensity,
         history: history,
         dynamicModifiers: payload.dynamicModifiers
-    });    // 5. Run Engine Tick
+    });
+
+    // 4.5 Apply Virtual Contexts (Mental and Body point overloads)
+    compiledAction = applyDynamicContexts(compiledAction, state.core, state.point);
+
+    // 5. Run Engine Tick
     const engineOutput = runTick({
         action: compiledAction,
         core: state.core,
