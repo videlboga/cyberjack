@@ -79,7 +79,7 @@ app.post('/api/tick', async (req, res) => {
                     // Check logic based on anatomical constraints
                     const allPoints = presetRepo.getAllPointPresets();
                     const activeIds = activeContextsRepo.getAllForEvent(eventId);
-                    const allActiveContexts = activeIds.map(aId => presetRepo.getContextPreset(aId)).filter(Boolean);
+                    const allActiveContexts = activeIds.map(a => presetRepo.getContextPreset(a.id)).filter(Boolean);
                     
                     const resolvedFunctions = resolveAvailableFunctions({
                         anatomyPoints: allPoints,
@@ -194,7 +194,8 @@ app.post('/api/contexts/toggle', (req, res) => {
             // Find EXCLUSIVE contexts in the same slot/point
             if (targetContext.slot && targetContext.exclusiveWithinSlot) {
                 const activeIds = activeContextsRepo.getAllForEvent(eventId);
-                for (const aId of activeIds) {
+                for (const aObj of activeIds) {
+                    const aId = aObj.id;
                     const aPreset = presetRepo.getContextPreset(aId);
                     if (aPreset && aPreset.slot === targetContext.slot && aPreset.id !== targetContext.id) {
                         activeContextsRepo.remove(eventId, aId);
@@ -206,7 +207,8 @@ app.post('/api/contexts/toggle', (req, res) => {
                 }
             } else if (targetContext.point_id && !targetContext.slot) { // Fallback to old behavior
                 const activeIds = activeContextsRepo.getAllForEvent(eventId);
-                for (const aId of activeIds) {
+                for (const aObj of activeIds) {
+                    const aId = aObj.id;
                     const aPreset = presetRepo.getContextPreset(aId);
                     if (aPreset && aPreset.point_id === targetContext.point_id && aPreset.id !== targetContext.id) {
                         activeContextsRepo.remove(eventId, aId);

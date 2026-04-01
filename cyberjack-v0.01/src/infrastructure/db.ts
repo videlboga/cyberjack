@@ -76,7 +76,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS active_contexts (
     event_id TEXT NOT NULL,     -- Optional, to bind it to a scene or global state 
     context_id TEXT NOT NULL,
-    duration INTEGER DEFAULT -1, -- -1 for infinite
+    duration INTEGER DEFAULT -1, ticks_active INTEGER DEFAULT 0,
     PRIMARY KEY (event_id, context_id)
   );
 `);

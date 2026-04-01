@@ -218,10 +218,14 @@ export const activeContextsRepo = {
         `);
         stmt.run(eventId, contextId, duration);
     },
-    getAllForEvent(eventId: string): string[] {
-        const stmt = db.prepare('SELECT context_id FROM active_contexts WHERE event_id = ?');
+    getAllForEvent(eventId: string): { id: string, ticks: number }[] {
+        const stmt = db.prepare('SELECT context_id, coalesce(ticks_active, 0) as ticks_active FROM active_contexts WHERE event_id = ?');
         const rows = stmt.all(eventId) as any[];
-        return rows.map(r => r.context_id);
+        return rows.map(r => ({ id: r.context_id, ticks: r.ticks_active }));
+    },
+    incrementTicks(eventId: string) {
+        const stmt = db.prepare('UPDATE active_contexts SET ticks_active = ticks_active + 1 WHERE event_id = ?');
+        stmt.run(eventId);
     },
     remove(eventId: string, contextId: string) {
         const stmt = db.prepare('DELETE FROM active_contexts WHERE event_id = ? AND context_id = ?');

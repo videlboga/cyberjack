@@ -4,6 +4,7 @@ import { saveTickState } from './saveTickState';
 import { compileAction } from '../compiler/compileAction';
 import { runTick } from '../engine/runTick';
 import { eventQueries } from '../infrastructure/eventQueries';
+import { activeContextsRepo } from '../infrastructure/repositories';
 import { TickOutput, CompiledAction } from '../domain/types';
 
 export interface GameEventPayload {
@@ -43,6 +44,9 @@ export function runGameTick(payload: GameEventPayload): TickOutput {
 
     // 6. Save new state
     saveTickState(payload.subjectId, payload.pointId, payload.presetId, compiledAction, engineOutput);
+
+    // 6.5 Increment context durations (Escalation / Decay)
+    activeContextsRepo.incrementTicks(payload.sceneId);
 
     // 7. Return complete Tick Bundle
     return engineOutput;
