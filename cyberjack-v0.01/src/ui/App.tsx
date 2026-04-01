@@ -13,10 +13,43 @@ export function App() {
   const [promptLog, setPromptLog] = useState<any[]>([]);
   const [physicalReaction, setPhysicalReaction] = useState<string>("");
 
+  const [allContexts, setAllContexts] = useState<any[]>([]);
+  const [activeContexts, setActiveContexts] = useState<string[]>([]);
+
   // Load initial state
   useEffect(() => {
     fetchState();
+    fetchContexts();
   }, [pointId]);
+
+  const fetchContexts = async () => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/contexts`);
+      const data = await res.json();
+      if (data.success) {
+        setAllContexts(data.allPresets || []);
+        setActiveContexts(data.activeIds || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const toggleContext = async (contextId: string, isActive: boolean) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/contexts/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contextId, isActive })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchContexts();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchState = async () => {
     try {
@@ -30,6 +63,39 @@ export function App() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleWait = async (ticks: number, callLLM: boolean) => {
+    setLoading(true);
+    setChat(p => [...p, { role: 'player', text: `[Время] Пропустить ${ticks} тик(ов). Отправка в LLM: ${callLLM ? 'Да' : 'Нет'}` }]);
+    
+    try {
+      const res = await fetch('http://localhost:3001/api/wait', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticks, callLLM })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setState(data.state);
+        if (data.promptMessages) setPromptLog(data.promptMessages);
+        
+        if (data.reply) {
+            setPhysicalReaction(data.reply.reaction || "");
+            if (data.reply.speech) {
+                setChat(p => [...p, { role: 'ST', text: data.reply.speech }]);
+            } else {
+                setChat(p => [...p, { role: 'ST', text: '(Молчит)' }]);
+            }
+        } else {
+            setChat(p => [...p, { role: 'system', text: 'Время прошло (Silent Tick)' }]);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setLoading(false);
   };
 
   const handleAction = async (presetId: string, textMessage = "") => {
@@ -78,9 +144,9 @@ export function App() {
       {/* ЛЕВАЯ КОЛОНКА - СИМУЛЯТОР */}
       <div style={{ flex: 2, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingRight: 10 }}>
         <h2>Милстоун: Интеграция с ST</h2>
-        
+
         <div style={{ display: 'flex', gap: 20, marginBottom: 20 }}>
-          <div style={{ flex: 1, padding: 10, border: '1px solid #ccc', borderRadius: 8 }}>
+          <div style={{ flex: 1, padding: 10, border: '1px solid #444', borderRadius: 8 }}>
             <h3>Субъект: {state.name} ({state.id})</h3>
             <div>Sensitivity: {state.sensitivity?.toFixed(1)}</div>
             <div>Attitude: {state.attitude?.toFixed(1)}</div>
@@ -98,7 +164,7 @@ export function App() {
             </div>
           </div>
 
-          <div style={{ flex: 1, padding: 10, border: '1px solid #ccc', borderRadius: 8 }}>
+          <div style={{ flex: 1, padding: 10, border: '1px solid #444', borderRadius: 8 }}>
             <h3>Диагностика</h3>
             {diagnostics ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -120,6 +186,29 @@ export function App() {
           </div>
         </div>
 
+        <div style={{ marginBottom: 20, padding: 10, border: '1px solid #444', borderRadius: 8 }}>
+          <h3>Активные контексты (постоянные модификаторы)</h3>
+          <div style={{ display: 'flex', gap: 15, flexWrap: 'wrap' }}>
+            {allContexts.map(c => (
+               <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}>
+                 <input 
+                   type="checkbox" 
+                   checked={activeContexts.includes(c.id)}
+                   onChange={(e) => toggleContext(c.id, e.target.checked)}
+                 />
+                 {c.label}
+               </label>
+            ))}
+          </div>
+          
+          <div style={{ marginTop: 15, paddingTop: 15, borderTop: '1px solid #444', display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span style={{ fontSize: '0.9em', color: '#999' }}>Прокрутка времени (накопление эффектов от сред):</span>
+            <button onClick={() => handleWait(1, false)} disabled={loading} style={{ padding: '6px 12px', background: '#444', border: '1px solid #666', borderRadius: 4, cursor: 'pointer', color: '#fff' }}>+1 тик (Скрыто)</button>
+            <button onClick={() => handleWait(5, false)} disabled={loading} style={{ padding: '6px 12px', background: '#444', border: '1px solid #666', borderRadius: 4, cursor: 'pointer', color: '#fff' }}>+5 тиков (Скрыто)</button>
+            <button onClick={() => handleWait(5, true)} disabled={loading} style={{ padding: '6px 12px', background: '#2c3e50', border: '1px solid #34495e', borderRadius: 4, cursor: 'pointer', color: '#fff' }}>+5 тиков и ответ (LLM)</button>
+          </div>
+        </div>
+
         <div style={{ marginBottom: 20 }}>
           <h3>Доступные действия</h3>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -128,7 +217,7 @@ export function App() {
                 key={a.id} 
                 onClick={() => handleAction(a.id)}
                 disabled={loading}
-                style={{ padding: '8px 16px', background: '#e0e0e0', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                style={{ padding: '8px 16px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: 4, cursor: 'pointer' }}
               >
                 {a.label}
               </button>
@@ -136,10 +225,10 @@ export function App() {
           </div>
         </div>
 
-        <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 10, height: 300, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ border: '1px solid #444', borderRadius: 8, padding: 10, height: 300, display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1, overflowY: 'auto', marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {chat.map((m, i) => (
-              <div key={i} style={{ alignSelf: m.role === 'player' ? 'flex-end' : 'flex-start', background: m.role === 'player' ? '#d1e8ff' : '#f0f0f0', padding: '8px 12px', borderRadius: 8, maxWidth: '80%' }}>
+              <div key={i} style={{ alignSelf: m.role === 'player' ? 'flex-end' : 'flex-start', background: m.role === 'player' ? '#2c3e50' : '#333333', padding: '8px 12px', borderRadius: 8, maxWidth: '80%' }}>
                 <strong>{m.role === 'player' ? 'Вы' : 'S-01'}:</strong> {m.text}
               </div>
             ))}
@@ -159,15 +248,15 @@ export function App() {
         </div>
 
         {promptLog.length > 0 && (
-          <div style={{ marginTop: 20, border: '1px solid #ddd', borderRadius: 8, padding: 10, background: '#fdfdfd' }}>
+          <div style={{ marginTop: 20, border: '1px solid #444', borderRadius: 8, padding: 10, background: '#1e1e1e' }}>
             <details>
-              <summary style={{ cursor: 'pointer', fontWeight: 'bold', color: '#555' }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 'bold', color: '#ccc' }}>
                 Лог последнего отправленного промпта ({promptLog.length} сообщений)
               </summary>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {promptLog.map((m, i) => (
-                  <div key={i} style={{ padding: 10, background: m.role === 'system' ? '#fff3cd' : '#eee', borderRadius: 4 }}>
-                    <div style={{ fontSize: '0.8em', textTransform: 'uppercase', color: '#666', marginBottom: 5 }}>Role: {m.role}</div>
+                  <div key={i} style={{ padding: 10, background: m.role === 'system' ? '#3e2723' : '#222', borderRadius: 4 }}>
+                    <div style={{ fontSize: '0.8em', textTransform: 'uppercase', color: '#999', marginBottom: 5 }}>Role: {m.role}</div>
                     <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, fontSize: '0.9em', fontFamily: 'monospace' }}>
                       {m.content}
                     </pre>

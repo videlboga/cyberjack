@@ -1,22 +1,47 @@
 // src/orchestration/eventRouter.ts
 import { runGameTick, GameEventPayload } from './runGameTick';
+import { parseVerbalInput } from '../parser/verbalParser';
+import { presetRepo } from '../infrastructure/repositories';
+
+export interface RouteResponse {
+    engineOutput: any;
+    dynamicModifiers?: any;
+    pointIdUsed: string;
+}
 
 /**
  * Basic router to handle incoming game events.
- * Currently only routes 'INTERACT', but will expand as Phase 8 (Verbal) comes online.
+ * Handles extracting semantic meaning from text messages, overriding targets,
+ * and routing into the engine tick.
  */
-export function eventRouter(eventType: string, payload: any) {
-    console.log(`[EventRouter] Received ${eventType}`);
-    
-    switch (eventType) {
-        case 'INTERACT':
-            return runGameTick(payload as GameEventPayload);
-            
-        case 'VERBAL':
-            // Phase 8: Pass through verbal parser first, then route to INTERACT
-            throw new Error('Verbal routing not implemented yet.');
-            
-        default:
-            throw new Error(`Unknown event type: ${eventType}`);
+export async function dispatchEvent(payload: any): Promise<RouteResponse> {
+    let pointId = payload.pointId || 'general';
+    let dynamicModifiers = undefined;
+
+    // Optional text semantic classification
+    if (payload.textMessage) {
+        dynamicModifiers = await parseVerbalInput(payload.textMessage);
+        if (dynamicModifiers.pointId) {
+            // Check repo instead of direct db query
+            if (presetRepo.pointPresetExists(dynamicModifiers.pointId)) {
+                pointId = dynamicModifiers.pointId;
+            } else {
+                console.log(`[EventRouter] Unknown pointId "${dynamicModifiers.pointId}" from LLM. Falling back to "general".`);
+                pointId = 'general';
+            }
+        }
     }
+
+    // Run engine logic
+    const engineOutput = runGameTick({
+        subjectId: payload.subjectId || 'S-01',
+        playerId: payload.playerId || 'PL-1',
+        pointId,
+        sceneId: payload.sceneId || 'lab',
+        presetId: payload.presetId,
+        playerIntensity: 1.0,
+        dynamicModifiers
+    });
+
+    return { engineOutput, dynamicModifiers, pointIdUsed: pointId };
 }

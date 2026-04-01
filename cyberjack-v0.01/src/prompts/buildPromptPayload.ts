@@ -9,7 +9,8 @@ import { activeConfig } from './config';
  */
 export async function buildPromptPayload(
     subjectId: string,
-    latestResult?: TickOutput
+    latestResult?: TickOutput,
+    eventId: string = 'lab' // TODO: Pass actual scene instead of hardcoding
 ): Promise<PromptPayload & { systemPrompt: string }> {
     const subjectRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(subjectId) as any;
     if (!subjectRow) throw new Error("Subject not found for prompt building");
@@ -35,16 +36,29 @@ export async function buildPromptPayload(
         } as EventRecord;
     }).reverse(); // Chronological order
 
+    // Fetch active contexts
+    const activeContextRow = db.prepare(`
+        SELECT cp.label 
+        FROM active_contexts ac
+        JOIN context_presets cp ON ac.context_id = cp.id
+        WHERE ac.event_id = ?
+    `).all(eventId) as {label: string}[];
+    
+    const activeContextNames = activeContextRow.map(r => r.label);
+    const contextText = activeContextNames.length > 0 
+        ? `\n[Физическое состояние и влияние среды]: ${activeContextNames.join(', ')}` 
+        : '';
+
     const stateSummary = buildStateSummary(core);
     const eventsText = buildRecentEventsSummary(recentEvents);
     
     const cfg = activeConfig.character;
     const characterProfile = `${cfg.identity}\n${cfg.history}\n[Инструкции]: ${cfg.formatInstructions}`;
 
-    const systemPrompt = `${characterProfile}\n\n${stateSummary}\n\n${eventsText}`;
-
+    const systemPrompt = `${characterProfile}\n\n${stateSummary}${contextText}\n\n${eventsText}`;
+    
     return {
-        stateSummary,
+        stateSummary: stateSummary + contextText,
         recentEvents: [eventsText],
         systemPrompt
     };

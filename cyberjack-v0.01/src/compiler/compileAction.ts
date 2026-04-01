@@ -18,12 +18,14 @@ export interface ActionInput {
  * that will be sent into Engine.runTick()
  */
 export function compileAction(input: ActionInput): CompiledAction {
-    // 1. Get Base
-    const baseAction = presetRepo.getActionPreset(input.presetId) || {};
-    
+    // 1. Get Base (handle 'wait' as zero-vector implicitly)
+    const baseAction = input.presetId === 'wait' 
+        ? { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }
+        : (presetRepo.getActionPreset(input.presetId) || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 });
+
     // 2. Add player direct overrides
     // Assume player slider mostly controls intensity. We override base rather than add.
-    if (input.playerIntensity !== undefined) {
+    if (input.playerIntensity !== undefined && input.presetId !== 'wait') {
         baseAction.intensity = input.playerIntensity;
     }
 

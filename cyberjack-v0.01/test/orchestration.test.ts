@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { db } from '../src/infrastructure/db';
 import { subjectRepo, pointStateRepo, playerRepo, sceneRepo, presetRepo } from '../src/infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../src/engine/config';
-import { eventRouter } from '../src/orchestration/eventRouter';
+import { dispatchEvent } from '../src/orchestration/eventRouter';
 import { eventQueries } from '../src/infrastructure/eventQueries';
 
 describe('Orchestration Integration', () => {
@@ -17,7 +17,7 @@ describe('Orchestration Integration', () => {
         presetRepo.saveActionPreset('act_soft_touch', 'Soft Touch', { intensity: 0.35, valence: 0.45, contact: 0.75, sharpness: 0.15, novelty: 0.8 });
     });
 
-    it('should run a full game tick entirely from DB state', () => {
+    it('should run a full game tick entirely from DB state', async () => {
         const payload = {
             subjectId: 'sub_1',
             pointId: 'point_A',
@@ -26,14 +26,15 @@ describe('Orchestration Integration', () => {
             presetId: 'act_soft_touch'
         };
 
-        const result = eventRouter('INTERACT', payload);
+        const result = await dispatchEvent(payload);
+        const engineOutput = result.engineOutput;
 
         // Core constraints
-        expect(result.nextCore).toBeDefined();
-        
+        expect(engineOutput.nextCore).toBeDefined();
+
         // Check persistence updated
         const updatedCore = subjectRepo.get('sub_1');
-        expect(updatedCore?.attitude).toEqual(result.nextCore.attitude);
+        expect(updatedCore?.attitude).toEqual(engineOutput.nextCore.attitude);
 
         const logs = eventQueries.getRecentLogs('sub_1', 10);
         expect(logs.length).toBe(1);

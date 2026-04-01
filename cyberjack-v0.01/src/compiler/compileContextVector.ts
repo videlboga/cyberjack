@@ -9,7 +9,8 @@ export function compileContextVector(activeContextIds: string[]): Partial<Compil
     const combinedModifiers: Record<string, number> = {};
 
     for (const contextId of activeContextIds) {
-        const modifiers = presetRepo.getContextPreset(contextId) as Partial<CompiledAction>;
+        const presetResult = presetRepo.getContextPreset(contextId);
+        const modifiers = presetResult ? presetResult.modifiers as Partial<CompiledAction> : null;
         if (modifiers) {
             for (const [key, val] of Object.entries(modifiers)) {
                 if (typeof val === 'number') {

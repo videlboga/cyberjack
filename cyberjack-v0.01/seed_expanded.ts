@@ -1,7 +1,7 @@
 import { db } from './src/infrastructure/db';
 
 console.log("Очистка базы данных...");
-db.exec('DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets; DELETE FROM point_presets;');
+db.exec('DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets; DELETE FROM point_presets; DELETE FROM context_presets; DELETE FROM active_contexts;');
 
 console.log("Создание субъекта S-01...");
 db.prepare(`
@@ -10,35 +10,39 @@ db.prepare(`
 `).run('S-01', 'Test Subject', 60, 50, 40, 50, 50);
 
 console.log("Добавление точек применения (point_presets)...");
-const points = [
-    { id: 'head', label: 'Голова/Волосы', sens: 30, att: 70 },
+
+const points: any[] = [
+    { id: 'head', label: 'Голова/Волосы', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
     { id: 'face', label: 'Лицо', sens: 60, att: 40 },
-    { id: 'lips', label: 'Губы', sens: 85, att: 20 },
+    { id: 'lips', label: 'Губы', sens: 85, att: 20, providesFunctions: ['speak', 'kiss', 'eat'] },
     { id: 'neck', label: 'Шея', sens: 80, att: 30 },
     { id: 'shoulders', label: 'Плечи', sens: 30, att: 80 },
-    { id: 'back', label: 'Спина', sens: 40, att: 60 },
+    { id: 'back', label: 'Спина', sens: 40, att: 60, providesFunctions: ['stabilize_posture'] },
     { id: 'chest', label: 'Грудь', sens: 60, att: 30 },
     { id: 'nipples', label: 'Соски', sens: 95, att: 10 },
     { id: 'belly', label: 'Живот', sens: 50, att: 40 },
-    { id: 'arms', label: 'Руки/Предплечья', sens: 20, att: 90 },
+    { id: 'arms', label: 'Руки/Предплечья', sens: 20, att: 90, providesFunctions: ['reach', 'gesture'] },
     { id: 'wrists', label: 'Запястья', sens: 50, att: 50 },
-    { id: 'hands', label: 'Ладони', sens: 70, att: 85 },
+    { id: 'hands', label: 'Ладони', sens: 70, att: 85, providesFunctions: ['touch', 'manipulate'] },
     { id: 'waist', label: 'Талия', sens: 65, att: 45 },
     { id: 'hips', label: 'Бедра (спереди)', sens: 40, att: 50 },
     { id: 'groin', label: 'Пах/Гениталии', sens: 100, att: 5 },
     { id: 'buttocks', label: 'Ягодицы', sens: 50, att: 15 },
     { id: 'inner_thighs', label: 'Внутр. бедра', sens: 85, att: 10 },
-    { id: 'knees', label: 'Колени', sens: 20, att: 70 },
+    { id: 'knees', label: 'Колени', sens: 20, att: 70, providesFunctions: ['kneel', 'stand', 'shift_posture'] },
     { id: 'calves', label: 'Икры', sens: 30, att: 70 },
-    { id: 'feet', label: 'Ступни', sens: 75, att: 50 },
-    { id: 'general', label: 'Общее воздействие', sens: 50, att: 50 } // Для вербальных и общих эффектов
+    { id: 'feet', label: 'Ступни', sens: 75, att: 50, providesFunctions: ['stand', 'walk'] },
+    { id: 'general', label: 'Общее воздействие', sens: 50, att: 50 },
+    { id: 'slot_pose', label: 'Слот: Поза', sens: 50, att: 50 },
+    { id: 'slot_room', label: 'Слот: Окружение (Комната)', sens: 50, att: 50 },
+    { id: 'slot_social', label: 'Слот: Социальное', sens: 50, att: 50 }
 ];
 
-const insertPointStmt = db.prepare('INSERT INTO point_presets (id, label, values_json) VALUES (?, ?, ?)');
+const insertPointStmt = db.prepare('INSERT INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) VALUES (?, ?, ?, ?, ?, ?)');
 const insertSubjectPointStmt = db.prepare('INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude) VALUES (?, ?, ?, ?)');
 
 for (const p of points) {
-    insertPointStmt.run(p.id, p.label, JSON.stringify({ localSensitivity: p.sens, localAttitude: p.att }));
+    insertPointStmt.run(p.id, p.label, JSON.stringify({ localSensitivity: p.sens, localAttitude: p.att }), (p as any).parentId || null, JSON.stringify((p as any).providesFunctions || []), JSON.stringify((p as any).tags || []));
     insertSubjectPointStmt.run('S-01', p.id, p.sens, p.att);
 }
 
@@ -46,6 +50,8 @@ console.log("Создание Игрока...");
 db.prepare('INSERT INTO players (id, resources) VALUES (?, ?)').run('PL-1', JSON.stringify({}));
 
 console.log("Добавление действий (action_presets)...");
+
+
 const actions = [
     // Ласки и мягкий контакт
     { id: 'gentle_stroke', label: 'Мягкое поглаживание', i: 0.2, v: 0.6, c: 0.4, s: 0.1, n: 0.2 },
@@ -91,6 +97,35 @@ for (const a of actions) {
     insertActionStmt.run(a.id, a.label, JSON.stringify({
         intensity: a.i, valence: a.v, contact: a.c, sharpness: a.s, novelty: a.n
     }));
+}
+
+console.log("Добавление контекстов (context_presets)...");
+const contexts = [
+    { id: 'pose_lying', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Лёжа', requiredFunctions: ['shift_posture'], m: { intensity: -0.1, valence: 0.1, contact: 0.1, novelty: -0.1 } },
+    { id: 'pose_kneeling', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Стоя на коленях', requiredFunctions: ['kneel', 'shift_posture'], m: { intensity: 0.2, valence: -0.2, sharpness: 0.1, novelty: 0.1 } },
+    { id: 'pose_spread_eagle', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Звездой (привязана)', requiredFunctions: ['shift_posture'], blockedFunctions: ['stand', 'kneel', 'walk', 'shift_posture', 'reach', 'touch'], m: { intensity: 0.4, valence: -0.3, sharpness: 0.2, novelty: 0.3 } },
+    { id: 'bound_hands', point_id: 'hands', slot: 'restraint_arms', exclusiveWithinSlot: true, priority: 50, label: 'Связанные руки (за спиной)', blockedFunctions: ['manipulate', 'touch', 'reach', 'gesture'], m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 } },
+    { id: 'bound_legs', point_id: 'knees', slot: 'restraint_legs', exclusiveWithinSlot: true, priority: 50, label: 'Связанные ноги', blockedFunctions: ['stand', 'walk', 'kneel', 'shift_posture'], m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 } },
+    { id: 'blindfold', point_id: 'head', slot: 'equipment_head', exclusiveWithinSlot: true, priority: 50, label: 'Завязанные глаза', blockedFunctions: ['look'], m: { intensity: 0.5, valence: -0.2, sharpness: 0.3, novelty: 0.5 } }
+];
+
+const insertContextStmt = db.prepare('INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+for (const c of contexts) {
+    insertContextStmt.run(
+        c.id, 
+        c.label, 
+        c.point_id, 
+        JSON.stringify((c as any).m), 
+        (c as any).type || 'condition', 
+        (c as any).slot || 'general', 
+        (c as any).exclusiveWithinSlot ? 1 : 0, 
+        JSON.stringify((c as any).blocksSlots || []), 
+        JSON.stringify((c as any).affectedPointIds || []), 
+        JSON.stringify((c as any).blockedFunctions || []), 
+        JSON.stringify((c as any).boostedFunctions || []), 
+        JSON.stringify((c as any).requiredFunctions || []), 
+        (c as any).priority || 0
+    );
 }
 
 console.log("Создание сцены...");

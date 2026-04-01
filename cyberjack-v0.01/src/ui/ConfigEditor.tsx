@@ -48,7 +48,7 @@ export function ConfigEditor() {
     const sections = ['character', 'somaticSense', 'perception', 'adapters'];
 
     return (
-        <div style={{ padding: 10, background: '#f5f5f5', borderRadius: 8, height: '100%', overflowY: 'auto' }}>
+        <div style={{ padding: 10, background: '#1e1e1e', border: '1px solid #444', borderRadius: 8, height: '100%', overflowY: 'auto' }}>
             <h3>Конфигуратор промптов</h3>
             {sections.map(section => (
                 <div key={section} style={{ marginBottom: 15 }}>

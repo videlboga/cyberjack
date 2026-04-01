@@ -37,7 +37,34 @@ export interface GameEvent { type: string; payload: any; }
 export interface PlayerState { id: string; resources: Record<string, number>; }
 export interface Scene { id: string; availableActions: string[]; }
 export interface Mission { id: string; progress: number; }
-export interface ContextPreset { id: string; modifiers: Partial<CompiledAction>; }
+export interface AnatomyPointPreset {
+    id: string;
+    label: string;
+    defaults: {
+        localSensitivity: number;
+        localAttitude: number;
+    };
+    parentId?: string | null;
+    providesFunctions: string[];
+    tags: string[];
+}
+
+export interface ContextPreset {
+    id: string;
+    label: string;
+    point_id?: string; // fallback if needed
+    modifiers: Partial<CompiledAction>;
+    
+    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition";
+    slot: string;
+    exclusiveWithinSlot?: boolean;
+    blocksSlots?: string[];
+    affectedPointIds?: string[];
+    blockedFunctions?: string[];
+    boostedFunctions?: string[];
+    requiredFunctions?: string[];
+    priority?: number;
+}
 
 export interface PromptPayload {
     stateSummary: string;

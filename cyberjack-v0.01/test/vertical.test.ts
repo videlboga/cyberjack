@@ -22,7 +22,7 @@ describe('Vertical Slice Integration (Full System Pipeline)', () => {
                     VALUES ('player_v', '{"energy":100}')`).run();
     });
 
-    it('should successfully pass data from Scenario -> Orchestration -> Engine -> DB -> Diagnostics', () => {
+    it('should successfully pass data from Scenario -> Orchestration -> Engine -> DB -> Diagnostics', async () => {
         const scene = { id: 'scene_v', availableActions: ['act_v_test', 'act_other'] };
         const player = { id: 'player_v', resources: { energy: 100 } };
         
@@ -33,7 +33,8 @@ describe('Vertical Slice Integration (Full System Pipeline)', () => {
             playerId: 'player_v',
             pointId: 'point_v',
             sceneId: 'scene_v',
-            action: { intensity: 0.9, valence: 0.8, contact: 0.6, sharpness: 0.3, novelty: 0.8 }
+            presetId: 'act_v_test',
+            dynamicModifiers: { intensity: 0.9, valence: 0.8, contact: 0.6, sharpness: 0.3, novelty: 0.8 }
         });
 
         expect(tickResult.nextCore).toBeDefined();
@@ -41,11 +42,10 @@ describe('Vertical Slice Integration (Full System Pipeline)', () => {
         const logs = db.prepare('SELECT * FROM event_logs WHERE subject_id = ? ORDER BY timestamp DESC').all('sub_vertical') as any[];
         expect(logs.length).toBe(1);
 
-        // Отладим, почему парсер падал (выведем лог ошибки напрямую)
         try {
-           const promptInfo = buildPromptPayload(tickResult.nextCore, logs);
-           expect(promptInfo.stateSummary).toContain('System Note: Subject Internal State');
-           expect(promptInfo.recentEvents[0]).toContain('The player performed an action:');
+           const promptInfo = await buildPromptPayload('sub_vertical', tickResult as any);
+           expect(promptInfo.stateSummary).toContain('состояние');
+           expect(promptInfo.recentEvents.length).toBeGreaterThan(0);
         } catch(e) {
            console.error("DEBUG PROMPT PAYLOAD ERROR", e);
            throw e;

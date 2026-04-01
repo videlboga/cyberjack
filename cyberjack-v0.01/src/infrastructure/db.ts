@@ -51,13 +51,26 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS point_presets (
     id TEXT PRIMARY KEY,
     label TEXT NOT NULL,
-    values_json TEXT NOT NULL -- JSON: { localSensitivity, localAttitude }
+    values_json TEXT NOT NULL, -- JSON: { localSensitivity, localAttitude }
+    parent_id TEXT,
+    provides_functions TEXT DEFAULT '[]',
+    tags TEXT DEFAULT '[]'
   );
 
   CREATE TABLE IF NOT EXISTS context_presets (
     id TEXT PRIMARY KEY,
     label TEXT NOT NULL,
-    modifiers_json TEXT NOT NULL -- JSON: Partial<CompiledAction>
+    point_id TEXT DEFAULT 'general',
+    modifiers_json TEXT NOT NULL, -- JSON: Partial<CompiledAction>
+    type TEXT DEFAULT 'condition',
+    slot TEXT DEFAULT 'general',
+    exclusive_within_slot INTEGER DEFAULT 0,
+    blocks_slots TEXT DEFAULT '[]',
+    affected_point_ids TEXT DEFAULT '[]',
+    blocked_functions TEXT DEFAULT '[]',
+    boosted_functions TEXT DEFAULT '[]',
+    required_functions TEXT DEFAULT '[]',
+    priority INTEGER DEFAULT 0
   );
 
   CREATE TABLE IF NOT EXISTS active_contexts (

@@ -17,17 +17,37 @@ export const subjectRepo = {
         stmt.run(id, name, state.sensitivity, state.capacity, state.openness, state.plasticity, state.attitude);
     },
     
-    get(id: string): (SubjectCoreState & { name: string }) | null {
+    get(id: string): (SubjectCoreState & { name: string, id?: string }) | null {
         const stmt = db.prepare('SELECT * FROM subjects WHERE id = ?');
         const row = stmt.get(id) as any;
         if (!row) return null;
         return {
+            id: row.id,
             name: row.name,
             sensitivity: row.sensitivity,
             capacity: row.capacity,
             openness: row.openness,
             plasticity: row.plasticity,
             attitude: row.attitude
+        };
+    },
+
+    getWithPoint(id: string, pointId: string): any {
+        const stateObj = db.prepare('SELECT * FROM subjects WHERE id = ?').get(id);
+        const pointObj = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ? AND point_id = ?').get(id, pointId);
+        if (!stateObj) return null;
+        return { ...(stateObj as object), point: pointObj };
+    },
+
+    getUIState(id: string, pointId: string): any {
+        const subject = this.getWithPoint(id, pointId);
+        const actions = db.prepare('SELECT id, label FROM action_presets').all();
+        const points = db.prepare('SELECT p.id, p.label FROM point_presets p JOIN subject_point_states sps ON p.id = sps.point_id WHERE sps.subject_id = ?').all(id);
+        
+        return {
+            subject,
+            availableActions: actions,
+            availablePoints: points
         };
     }
 };
@@ -83,38 +103,109 @@ export const presetRepo = {
         return JSON.parse(row.values_json);
     },
     
-    savePointPreset(id: string, label: string, values: any) {
+    savePointPreset(preset: any) {
         const stmt = db.prepare(`
-            INSERT INTO point_presets (id, label, values_json)
-            VALUES (?, ?, ?)
+            INSERT INTO point_presets (id, label, values_json, parent_id, provides_functions, tags)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 label = excluded.label,
-                values_json = excluded.values_json
+                values_json = excluded.values_json,
+                parent_id = excluded.parent_id,
+                provides_functions = excluded.provides_functions,
+                tags = excluded.tags
         `);
-        stmt.run(id, label, JSON.stringify(values));
+        stmt.run(preset.id, preset.label, JSON.stringify(preset.values || {}), preset.parentId || null, JSON.stringify(preset.providesFunctions || []), JSON.stringify(preset.tags || []));
     },
     getPointPreset(id: string): any | null {
         const stmt = db.prepare('SELECT * FROM point_presets WHERE id = ?');
         const row = stmt.get(id) as any;
         if (!row) return null;
-        return JSON.parse(row.values_json);
+        return {
+            id: row.id,
+            label: row.label,
+            values: JSON.parse(row.values_json),
+            parentId: row.parent_id,
+            providesFunctions: JSON.parse(row.provides_functions || '[]'),
+            tags: JSON.parse(row.tags || '[]')
+        };
+    },
+    getAllPointPresets(): any[] {
+        const stmt = db.prepare('SELECT * FROM point_presets');
+        const rows = stmt.all() as any[];
+        return rows.map(row => ({
+            id: row.id,
+            label: row.label,
+            values: JSON.parse(row.values_json),
+            parentId: row.parent_id,
+            providesFunctions: JSON.parse(row.provides_functions || '[]'),
+            tags: JSON.parse(row.tags || '[]')
+        }));
     },
 
-    saveContextPreset(id: string, label: string, modifiers: any) {
+    saveContextPreset(preset: any) {
         const stmt = db.prepare(`
-            INSERT INTO context_presets (id, label, modifiers_json)
-            VALUES (?, ?, ?)
+            INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 label = excluded.label,
-                modifiers_json = excluded.modifiers_json
+                point_id = excluded.point_id,
+                modifiers_json = excluded.modifiers_json,
+                type = excluded.type,
+                slot = excluded.slot,
+                exclusive_within_slot = excluded.exclusive_within_slot,
+                blocks_slots = excluded.blocks_slots,
+                affected_point_ids = excluded.affected_point_ids,
+                blocked_functions = excluded.blocked_functions,
+                boosted_functions = excluded.boosted_functions,
+                required_functions = excluded.required_functions,
+                priority = excluded.priority
         `);
-        stmt.run(id, label, JSON.stringify(modifiers));
+        stmt.run(
+            preset.id, preset.label, preset.point_id || 'general', JSON.stringify(preset.modifiers || {}),
+            preset.type || 'condition', preset.slot || 'general', preset.exclusiveWithinSlot ? 1 : 0,
+            JSON.stringify(preset.blocksSlots || []), JSON.stringify(preset.affectedPointIds || []),
+            JSON.stringify(preset.blockedFunctions || []), JSON.stringify(preset.boostedFunctions || []),
+            JSON.stringify(preset.requiredFunctions || []), preset.priority || 0
+        );
     },
     getContextPreset(id: string): any | null {
         const stmt = db.prepare('SELECT * FROM context_presets WHERE id = ?');
         const row = stmt.get(id) as any;
         if (!row) return null;
-        return JSON.parse(row.modifiers_json);
+        return { 
+            id: row.id, label: row.label, point_id: row.point_id, 
+            modifiers: JSON.parse(row.modifiers_json),
+            type: row.type, slot: row.slot, exclusiveWithinSlot: row.exclusive_within_slot === 1,
+            blocksSlots: JSON.parse(row.blocks_slots || '[]'),
+            affectedPointIds: JSON.parse(row.affected_point_ids || '[]'),
+            blockedFunctions: JSON.parse(row.blocked_functions || '[]'),
+            boostedFunctions: JSON.parse(row.boosted_functions || '[]'),
+            requiredFunctions: JSON.parse(row.required_functions || '[]'),
+            priority: row.priority
+        };
+    },
+
+    getAllContextPresetsFull(): any[] {
+        const stmt = db.prepare('SELECT * FROM context_presets');
+        return stmt.all().map((row: any) => ({
+            id: row.id, label: row.label, point_id: row.point_id,
+            modifiers: JSON.parse(row.modifiers_json),
+            type: row.type, slot: row.slot, exclusiveWithinSlot: row.exclusive_within_slot === 1,
+            blocksSlots: JSON.parse(row.blocks_slots || '[]'),
+            affectedPointIds: JSON.parse(row.affected_point_ids || '[]'),
+            blockedFunctions: JSON.parse(row.blocked_functions || '[]'),
+            boostedFunctions: JSON.parse(row.boosted_functions || '[]'),
+            requiredFunctions: JSON.parse(row.required_functions || '[]'),
+            priority: row.priority
+        }));
+    },    getAllContextPresets(): { id: string, label: string, point_id: string }[] {
+        const stmt = db.prepare('SELECT id, label, point_id FROM context_presets');
+        return stmt.all() as { id: string, label: string, point_id: string }[];
+    },
+
+    pointPresetExists(id: string): boolean {
+        const row = db.prepare('SELECT 1 FROM point_presets WHERE id = ?').get(id);
+        return !!row;
     }
 };
 
