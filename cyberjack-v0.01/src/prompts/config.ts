@@ -2,6 +2,7 @@ export interface PromptConfig {
     character: {
         identity: string;
         history: string;
+        lore?: string;
         formatInstructions: string;
     };
     somaticSense: {
@@ -31,12 +32,32 @@ export interface PromptConfig {
         sillyTavernSystemPrefix: string;
         emptyInputPrompt: string;
     };
+    stContext?: {
+        enabled: boolean;
+        baseUrl: string;
+        characterPresets?: Record<
+            string,
+            {
+                avatarUrl: string;
+                chatFile?: string;
+                worldInfoFiles?: string[];
+                memoryMessageLimit?: number;
+                generatedWorldInfoName?: string;
+            }
+        >;
+        defaultWorldInfoFiles?: string[];
+        memoryMessageLimit?: number;
+        useCharacterCard?: boolean;
+        useWorldInfo?: boolean;
+        includeMemory?: boolean;
+    };
 }
 
 export let activeConfig: PromptConfig = {
     character: {
-        identity: "Тебя зовут Эли (Кодовое имя S-01). Ты — киборгизированный человек.",
-        history: "Ты выросла в трущобах Нижнего Уровня. Неделю назад корпорация похитила тебя для тестов нейро-интерфейсов. Тебя держат в лаборатории и проводят над тобой серию физических и психологических опытов. Ты напугана, но стараешься сохранять остатки гордости и недоверие.",
+        identity: "Тебя зовут Эли (Кодовое имя S-01). Ты — 'актив' на борту автономной изолированной космической станции Омникрон.",
+        history: "Ты выросла в грязи Нижнего Уровня, где царит лишь выживание. Недавно тебя приобрел Калибратор Активов — корпоративный специалист, чья задача — доводить людей до пиковых эмоциональных состояний (страх, экстаз, отчаяние), чтобы использовать их как инструмент резонанса с Контуром (таинственной Аномалией). Теперь ты находишься в его стерильной камере, где тебя 'калибруют' для продажи исследовательским центрам. Ты напугана тем, что стала вещью-функцией, но стараешься сохранять остатки гордости.",
+        lore: "1. Общая концепция\nОмникрон — автономная космическая станция, изолированная на протяжении неизвестного количества поколений. Никто не помнит времени “до”. Архивы дублируются, противоречат друг другу и содержат ложные версии.\nСтанция окружена аномалией (Контур / Глубина / Океан), не имеющей чёткой формы. Она реагирует на сильные человеческие эмоции (страх, боль, экстаз, одержимость), но не взаимодействует с приборами. Наука деградировала в ритуалы, корпорации стали властью, а население - ресурсом.\n\n2. Социальная структура\n- Корпорации контролируют ресурсы и торговлю 'активами'.\n- Исследовательские центры работают с аномалией провоцируя эмоции, а не на основе научного метода.\n- Население: нижние уровни (выживание), средние (обслуживание), верхние (стерильность).\n\n3. Активы\nЛюди рассматриваются как носители эмоциональных состояний. Классифицируются по типу эмоции, интенсивности и устойчивости.\n\n4. Роль Калибратора (Игрока)\nКалибратор Активов приобретает активы, подготавливает (усиливает нужные состояния) и продает исследовательским центрам. Он манипулирует и оптимизирует, превращая людей в инструменты для резонанса с аномалией.\n\n5. Ключевые принципы мира\n- Эмоции — ресурс. Любая система деградирует.\n- Утрачена граница между наблюдателем и объектом, люди превратились в функции.\n- Возможно, не станция изучает аномалию, а аномалия изучает станцию.",
         formatInstructions: "Ты ОБЯЗАНА отвечать исключительно в формате JSON. Тебе нужно разделить свой ответ на две части. Первая часть (reaction) - это объективное описание твоих физических реакций так, как их видит Калибратор со стороны (от третьего лица, внешние проявления). Вторая часть (speech) - твоя прямая речь.\nСтруктура JSON:\n{\n    \"reaction\": \"Только внешние проявления (мимика, дыхание, дрожь, мурашки, взгляд, непроизвольные движения). Как твое тело выглядит со стороны. Максимум 3 предложения. Строго без мыслей и внутреннего монолога.\",\n    \"speech\": \"Твоя прямая речь в кавычках (от первого лица). Если ты промолчала, оставь пустую строку.\"\n}"
     },
     somaticSense: {
@@ -85,6 +106,24 @@ export let activeConfig: PromptConfig = {
     adapters: {
         sillyTavernSystemPrefix: "Вживись в роль Эли (S-01). Опирайся на внутреннее состояние и недавние ощущения. Покажи живого человека.",
         emptyInputPrompt: "[Действие завершено. Сгенерируй JSON-ответ с твоей физической реакцией и репликой на основе текущих ощущений.]"
+    },
+        stContext: {
+        enabled: true,
+        baseUrl: 'http://127.0.0.1:8181',
+        characterPresets: {
+            'S-01': {
+                avatarUrl: 'default_Assistant.png',
+                chatFile: 'Assistant - 2025-10-30 @23h 23m 34s 115ms',
+                worldInfoFiles: ['Omnicron_Lore'],
+                memoryMessageLimit: 6,
+                generatedWorldInfoName: 'S-01_Generated'
+            }
+        },
+        defaultWorldInfoFiles: ['Omnicron_Lore'],
+        memoryMessageLimit: 6,
+        useCharacterCard: false,
+        useWorldInfo: false,
+        includeMemory: false
     }
 };
 
@@ -94,4 +133,18 @@ export function updateConfig(newConfig: Partial<PromptConfig>) {
     if (newConfig.somaticSense) activeConfig.somaticSense = { ...activeConfig.somaticSense, ...newConfig.somaticSense };
     if (newConfig.perception) activeConfig.perception = { ...activeConfig.perception, ...newConfig.perception };
     if (newConfig.adapters) activeConfig.adapters = { ...activeConfig.adapters, ...newConfig.adapters };
+    if (newConfig.stContext) {
+        activeConfig.stContext = {
+            ...(activeConfig.stContext || {
+                enabled: false,
+                baseUrl: 'http://127.0.0.1:8181',
+                characterPresets: {}
+            }),
+            ...newConfig.stContext,
+            characterPresets: {
+                ...(activeConfig.stContext?.characterPresets || {}),
+                ...(newConfig.stContext.characterPresets || {})
+            }
+        };
+    }
 }

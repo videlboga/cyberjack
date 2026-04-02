@@ -26,7 +26,7 @@ export function applyLearning(
             config.core.max
         ),
         capacity: clamp(
-            safeCore.capacity + (f.capacityTarget - result.overload) * f.capacityFromOverload,
+            safeCore.capacity - (result.overload * (f.capacityDropMultiplier || 0.25)) + ((result.overload < 10) ? (f.capacityRecoveryRate || 1.0) : 0),
             config.core.min,
             config.core.max
         ),
@@ -52,6 +52,7 @@ export function applyLearning(
     };
 
     const nextPoint: SubjectPointState = {
+        pointId: safePoint.pointId,
         localSensitivity: clamp(
             safePoint.localSensitivity + (result.experiencedIntensity - f.localSensitivityTarget) * f.localSensitivityFromIntensity,
             config.point.min,
@@ -64,6 +65,16 @@ export function applyLearning(
             config.point.min,
             config.point.max
         ),
+        familiarity: clamp(
+            (safePoint.familiarity ?? config.point.defaults.familiarity ?? 0) + result.learningEffect * 0.01,
+            config.point.min,
+            config.point.max
+        ),
+        exposureCount: clamp(
+            (safePoint.exposureCount ?? config.point.defaults.exposureCount ?? 0) + 1,
+            config.point.min,
+            config.point.max
+        )
     };
 
     // мягкое взаимное протекание

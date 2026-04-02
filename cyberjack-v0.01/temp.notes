@@ -1,0 +1,1 @@
+export interface GetUIState { subject: any; points: any[]; actions: any[]; }

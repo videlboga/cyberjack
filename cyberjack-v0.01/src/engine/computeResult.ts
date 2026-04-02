@@ -1,6 +1,6 @@
 // src/engine/computeResult.ts
 
-import { CompiledAction, SubjectCoreState, SubjectPointState, EngineConfig } from '../domain/types';
+import { CompiledAction, SubjectCoreState, SubjectPointState, EngineConfig, TickResult, TickMeta } from '../domain/types';
 import { validateConfig } from './validate';
 import { normalizeAction, normalizeCore, normalizePoint } from './normalize';
 import { clamp } from './utils';
@@ -11,7 +11,7 @@ export function computeResult(
     core: Partial<SubjectCoreState>,
     point: Partial<SubjectPointState>,
     config: EngineConfig = DEFAULT_CONFIG
-) {
+): { result: TickResult; tickMeta: TickMeta } {
     validateConfig(config);
     const safeAction = normalizeAction(action, config);
     const safeCore = normalizeCore(core, config);
@@ -98,7 +98,7 @@ export function computeResult(
         },
     };
 
-    return {
+    const result: TickResult = {
         effectiveSensitivity,
         effectiveAttitude,
         attitudeShift,
@@ -109,6 +109,7 @@ export function computeResult(
         overload,
         engagement,
         learningEffect,
-        tickMeta,
     };
+
+    return { result, tickMeta };
 }

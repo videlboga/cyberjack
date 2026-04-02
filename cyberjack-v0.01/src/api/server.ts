@@ -3,10 +3,13 @@ import cors from 'cors';
 import { dispatchEvent } from '../orchestration/eventRouter';
 import { subjectRepo } from '../infrastructure/repositories';
 import { sendToSillyTavern } from '../adapters/sillyTavernAdapter';
-import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
-import { buildPromptPayload } from '../prompts/buildPromptPayload';
 import { activeConfig, updateConfig } from '../prompts/config';
 import { runGameTick } from '../orchestration/runGameTick';
+import { clamp } from '../engine/utils';
+import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
+import { composePromptSections } from '../orchestration/characterGenerator/promptComposer';
+import { setGeneratedProfile } from '../orchestration/characterGenerator/profileStore';
+import { applyGeneratedContextToSillyTavern } from '../adapters/sillyTavernManager';
 
 const app = express();
 app.use(express.json());
@@ -15,11 +18,11 @@ app.use(cors());
 app.post('/api/wait', async (req, res) => {
     try {
         const { subjectId = 'S-01', ticks = 1, eventId = 'lab', callLLM = false } = req.body;
-        let lastOutput;
+        let lastBundle: Awaited<ReturnType<typeof runGameTick>> | null = null;
         
         // Run N silent ticks
         for (let i = 0; i < ticks; i++) {
-            lastOutput = runGameTick({
+            lastBundle = await runGameTick({
                 subjectId,
                 pointId: 'general',
                 playerId: 'PL-1',
@@ -29,9 +32,8 @@ app.post('/api/wait', async (req, res) => {
         }
 
         let stReply, promptMessages;
-        if (callLLM) {
-            const promptPayload = await buildPromptPayload(subjectId, lastOutput, eventId);
-            const stRes = await sendToSillyTavern(promptPayload, `[Прошло времени: ${ticks} тиков. Ничего нового не произошло.]`);
+        if (callLLM && lastBundle) {
+            const stRes = await sendToSillyTavern(lastBundle.prompt, `[Прошло времени: ${ticks} тиков. Ничего нового не произошло.]`);
             stReply = stRes.reply;
             promptMessages = stRes.sentMessages;
         }
@@ -42,7 +44,8 @@ app.post('/api/wait', async (req, res) => {
             state: fullState,
             reply: stReply || null,
             promptMessages: promptMessages || null,
-            tickResult: lastOutput?.result
+            tickResult: lastBundle?.output.result,
+            bundle: lastBundle
         });
     } catch (error: any) {
         console.error(error);
@@ -57,12 +60,13 @@ app.post('/api/tick', async (req, res) => {
         const { subjectId = 'S-01', textMessage } = req.body;
         
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
-        const { engineOutput, dynamicModifiers, pointIdUsed } = await dispatchEvent(req.body);
+        const { bundle, dynamicModifiers, pointIdUsed } = await dispatchEvent(req.body);
         
+        const fullState = subjectRepo.getWithPoint(subjectId, pointIdUsed);
+
         // 1.5 Handle special actions returned by parser (like context changes)
         if (dynamicModifiers && dynamicModifiers.commandIntent && dynamicModifiers.commandIntent.type !== 'none') {
             const commandIntent = dynamicModifiers.commandIntent;
-            const fullState = subjectRepo.getWithPoint(subjectId, pointIdUsed);
             
             const eventId = req.body.sceneId || 'lab';
             let targetCtxId: string | undefined;
@@ -130,22 +134,15 @@ app.post('/api/tick', async (req, res) => {
 
         // 2. Load latest full UI state from DB
 // ...existing code...
-        const fullState = subjectRepo.getWithPoint(subjectId, pointIdUsed);
-
-        // 3. Post-Tick Diagnostics
-        const action = engineOutput.tickMeta?.inputs?.action || {intensity:0, valence:0, contact:0, sharpness:0, novelty:0};
-        const previousCore = engineOutput.tickMeta?.inputs?.core || fullState;
-        const diagnostics = buildDiagnostics(action, previousCore, engineOutput);
-        
         // 4. SillyTavern Communication (External Adapter)
-        const promptPayload = await buildPromptPayload(subjectId, engineOutput as any);
-        const {reply: stReply, sentMessages} = await sendToSillyTavern(promptPayload, textMessage);
+        const {reply: stReply, sentMessages} = await sendToSillyTavern(bundle.prompt, textMessage);
 
         res.json({
             success: true,
-            tickResult: engineOutput.result,
+            tickResult: bundle.output.result,
             state: fullState,
-            diagnostics,
+            diagnostics: bundle.diagnostics,
+            bundle,
             reply: stReply,
             promptMessages: sentMessages,
             classifierLog: dynamicModifiers?.raw ?? null,
@@ -247,6 +244,136 @@ app.post('/api/config', (req, res) => {
         res.json({ success: true, config: activeConfig });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/api/characters/prompt', async (req, res) => {
+    try {
+        const subjectId = req.body.subjectId || 'S-01';
+        const includeTags = Array.isArray(req.body.includeTags) ? req.body.includeTags : undefined;
+        const excludeTags = Array.isArray(req.body.excludeTags) ? req.body.excludeTags : undefined;
+        const seed = typeof req.body.seed === 'string' && req.body.seed.trim() ? req.body.seed.trim() : undefined;
+        const applyToSillyTavern = Boolean(req.body.applyToSillyTavern);
+
+        const context = generateCharacterContext({
+            seed,
+            includeTags,
+            excludeTags
+        });
+
+        const narrative = context.narrative || {
+            identityParagraphs: [],
+            historyParagraphs: [],
+            activationParagraphs: []
+        };
+
+        const hasGeneratedNarrative =
+            (narrative.identityParagraphs?.length || 0) > 0 ||
+            (narrative.historyParagraphs?.length || 0) > 0 ||
+            (narrative.activationParagraphs?.length || 0) > 0;
+
+        const identityBlocks = narrative.identityParagraphs.length
+            ? narrative.identityParagraphs
+            : hasGeneratedNarrative
+            ? []
+            : [activeConfig.character.identity];
+        const historyBlocks = narrative.historyParagraphs.length
+            ? narrative.historyParagraphs
+            : hasGeneratedNarrative
+            ? []
+            : [activeConfig.character.history];
+        const activationBlocks = narrative.activationParagraphs || [];
+
+        const sections = composePromptSections(context, {
+            identity: activeConfig.character.identity,
+            history: activeConfig.character.history,
+            instructions: activeConfig.character.formatInstructions,
+            identityBlocks,
+            historyBlocks,
+            activationBlocks
+        });
+
+        let stUpdate: { worldInfoName: string } | null = null;
+        if (applyToSillyTavern) {
+            const personaForSt =
+                sections.personaWithoutTraits ||
+                [activeConfig.character.identity, activeConfig.character.history].join('\n\n');
+            const scenarioForSt =
+                [sections.historyText, sections.activationText].filter(Boolean).join('\n\n') ||
+                activeConfig.character.history;
+
+            stUpdate = await applyGeneratedContextToSillyTavern({
+                subjectId,
+                context,
+                personaText: personaForSt,
+                traitBlock: sections.traitBlock,
+                scenarioText: scenarioForSt,
+                instructions: activeConfig.character.formatInstructions
+            });
+        }
+
+        const responsePayload = {
+            success: true,
+            subjectId,
+            seed: context.seed,
+            tags: context.tags,
+            grouped: context.grouped,
+            personaNotes: context.personaNotes,
+            personaText: sections.personaText,
+            loreNotes: context.loreNotes,
+            loreRefs: context.loreRefs,
+            systemPrompt: `${activeConfig.adapters.sillyTavernSystemPrefix}\n${sections.systemPrompt}`,
+            stUpdate,
+            narrative
+        };
+
+        setGeneratedProfile(subjectId, {
+            personaText: sections.personaText,
+            personaWithoutTraits: sections.personaWithoutTraits,
+            traitBlock: sections.traitBlock,
+            loreNotes: context.loreNotes,
+            loreRefs: context.loreRefs,
+            systemPrompt: sections.systemPrompt,
+            identityText: sections.identityText,
+            historyText: sections.historyText,
+            activationText: sections.activationText,
+            seed: context.seed
+        });
+
+        res.json(responsePayload);
+    } catch (error: any) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/subject/update', (req, res) => {
+    try {
+        const subjectId = req.body.subjectId || 'S-01';
+        const current = subjectRepo.get(subjectId);
+
+        if (!current) {
+            return res.status(404).json({ success: false, error: 'Subject not found' });
+        }
+
+        const asNumber = (value: any, fallback: number) => {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : fallback;
+        };
+
+        const updated = {
+            sensitivity: clamp(asNumber(req.body.sensitivity, current.sensitivity), 0, 100),
+            attitude: clamp(asNumber(req.body.attitude, current.attitude), 0, 100),
+            capacity: clamp(asNumber(req.body.capacity, current.capacity), 0, 100),
+            openness: clamp(asNumber(req.body.openness, current.openness), 0, 100),
+            plasticity: clamp(asNumber(req.body.plasticity, current.plasticity), 0, 100)
+        };
+
+        subjectRepo.save(subjectId, current.name || subjectId, updated as any);
+        const fullState = subjectRepo.getWithPoint(subjectId, req.body.pointId || 'general');
+        res.json({ success: true, state: fullState });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 

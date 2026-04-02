@@ -11,6 +11,8 @@ export interface ActionInput {
     playerIntensity?: number; // Override if player dragged the UI slider
     history?: any[]; // Passed down to calculate novelty
     dynamicModifiers?: Partial<CompiledAction>; // Add dynamic traits, like text classification
+    sourceText?: string;
+    parserVersion?: string;
 }
 
 /**
@@ -18,22 +20,58 @@ export interface ActionInput {
  * that will be sent into Engine.runTick()
  */
 export function compileAction(input: ActionInput): CompiledAction {
-    // 1. Get Base (handle 'wait' as zero-vector implicitly)
-    const baseAction = input.presetId === 'wait' 
+    const presetRecord = presetRepo.getActionPreset(input.presetId);
+
+    const baseVector = input.presetId === 'wait'
         ? { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }
-        : (presetRepo.getActionPreset(input.presetId) || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 });
+        : (presetRecord?.vector || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 });
+
+    const baseAction: CompiledAction = {
+        actionKey: input.presetId,
+        label: presetRecord?.label || input.presetId,
+        type: presetRecord?.type || 'physical',
+        tags: presetRecord?.tags || [],
+        source: {
+            presetId: input.presetId,
+            rawText: input.sourceText,
+            parserVersion: input.parserVersion
+        },
+        ...baseVector
+    };
 
     // 2. Add player direct overrides
-    // Assume player slider mostly controls intensity. We override base rather than add.
+    // Multiply base intensity by slider value.
     if (input.playerIntensity !== undefined && input.presetId !== 'wait') {
-        baseAction.intensity = input.playerIntensity;
+        baseAction.intensity *= input.playerIntensity;
     }
 
     // 2.5 Merge dynamic modifiers (e.g. from LLM text classifier)
     // We OVERWRITE base action fields rather than add, because the LLM returns an absolute semantic vector
-    const baseWithDynamic = input.dynamicModifiers 
-        ? { ...baseAction, ...input.dynamicModifiers }
-        : baseAction;
+    const numericKeys: Array<keyof Pick<CompiledAction, 'intensity' | 'valence' | 'contact' | 'sharpness' | 'novelty'>> = [
+        'intensity',
+        'valence',
+        'contact',
+        'sharpness',
+        'novelty'
+    ];
+
+    const baseWithDynamic = { ...baseAction };
+    if (input.dynamicModifiers) {
+        for (const key of numericKeys) {
+            if (typeof input.dynamicModifiers[key] === 'number') {
+                baseWithDynamic[key] = input.dynamicModifiers[key] as number;
+            }
+        }
+    }
+
+    // Apply the player's slider as a multiplier to the final combined intensity again, 
+    // in case dynamicModifiers overwrote it (e.g. from verbalParser).
+    if (input.playerIntensity !== undefined && input.presetId !== 'wait') {
+        // If it got overridden by dynamic modifiers, multiply it back
+        if (input.dynamicModifiers && input.dynamicModifiers.intensity) {
+            baseWithDynamic.intensity *= input.playerIntensity;
+        }
+    }
 
     // 3. Compute Novelty
     baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || []);
@@ -43,5 +81,7 @@ export function compileAction(input: ActionInput): CompiledAction {
     const contextModifiers = compileContextVector(activeContextIds);
 
     // 5. Merge
-    return mergeVectors(baseWithDynamic as CompiledAction, contextModifiers);
+    const merged = mergeVectors(baseWithDynamic as CompiledAction, contextModifiers);
+    (merged as any)._baseAction = baseWithDynamic; // Keep base for prompt generation
+    return merged;
 }

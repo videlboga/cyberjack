@@ -1,16 +1,6 @@
-import { SubjectCoreState, CompiledAction, TickOutput } from '../domain/types';
+import { SubjectCoreState, CompiledAction, TickOutput, DiagnosticsOutput } from '../domain/types';
 import { interpretAction } from './semanticActionInterpreter';
 import { inferTraits } from './traitInference';
-
-export interface DiagnosticsOutput {
-    actionSummary: string;
-    reactionSummary: string;
-    inferredTraits: Record<string, string>;
-    rawDelta: {
-        attitudeDelta: number;
-        opennessDelta: number;
-    }
-}
 
 /**
  * Builds a readable diagnostic object from a completed tick.
@@ -23,9 +13,11 @@ export function buildDiagnostics(
 ): DiagnosticsOutput {
     
     const reactionSummary = buildReactionSummary(output.result);
+    // Use baseAction for semantic description if available to avoid calling 'Обычная беседа' an extreme action because of posture/restraints
+    const actionToInterpret = (action as any)._baseAction || action;
 
     return {
-        actionSummary: interpretAction(action),
+        actionSummary: interpretAction(actionToInterpret),
         reactionSummary,
         inferredTraits: inferTraits(output.nextCore),
         rawDelta: {

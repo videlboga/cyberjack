@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { runGameTick } from '../src/orchestration/runGameTick';
-import { buildPromptPayload } from '../src/prompts/buildPromptPayload';
 import { checkActionAccess } from '../src/scenario/checkActionAccess';
 import { db } from '../src/infrastructure/db';
+import { subjectRepo, pointStateRepo, sceneRepo, playerRepo, presetRepo } from '../src/infrastructure/repositories';
+import { DEFAULT_CONFIG } from '../src/engine/config';
 
 describe('Vertical Slice Integration (Full System Pipeline)', () => {
     beforeEach(() => {
@@ -11,15 +12,19 @@ describe('Vertical Slice Integration (Full System Pipeline)', () => {
         db.prepare('DELETE FROM subject_point_states').run();
         db.prepare('DELETE FROM scenes').run();
         db.prepare('DELETE FROM players').run();
+        db.prepare('DELETE FROM action_presets').run();
 
-        db.prepare(`INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude) 
-                    VALUES ('sub_vertical', 'V-Subject', 50, 50, 50, 50, 50)`).run();
-        db.prepare(`INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude) 
-                    VALUES ('sub_vertical', 'point_v', 50, 50)`).run();
-        db.prepare(`INSERT INTO scenes (id, available_actions) 
-                    VALUES ('scene_v', '["act_v_test"]')`).run();
-        db.prepare(`INSERT INTO players (id, resources) 
-                    VALUES ('player_v', '{"energy":100}')`).run();
+        subjectRepo.save('sub_vertical', 'V-Subject', DEFAULT_CONFIG.core.defaults);
+        pointStateRepo.save('sub_vertical', 'point_v', DEFAULT_CONFIG.point.defaults);
+        sceneRepo.save({ id: 'scene_v', availableActions: ['act_v_test'] });
+        playerRepo.save({ id: 'player_v', resources: { energy: 100 } });
+        presetRepo.saveActionPreset('act_v_test', 'Vertical Test Action', {
+            intensity: 0.6,
+            valence: 0.4,
+            contact: 0.5,
+            sharpness: 0.2,
+            novelty: 0.7
+        });
     });
 
     it('should successfully pass data from Scenario -> Orchestration -> Engine -> DB -> Diagnostics', async () => {
@@ -28,7 +33,7 @@ describe('Vertical Slice Integration (Full System Pipeline)', () => {
         
         expect(checkActionAccess('act_v_test', scene, player)).toBe(true);
 
-        const tickResult = runGameTick({
+        const tickBundle = await runGameTick({
             subjectId: 'sub_vertical',
             playerId: 'player_v',
             pointId: 'point_v',
@@ -37,14 +42,14 @@ describe('Vertical Slice Integration (Full System Pipeline)', () => {
             dynamicModifiers: { intensity: 0.9, valence: 0.8, contact: 0.6, sharpness: 0.3, novelty: 0.8 }
         });
 
-        expect(tickResult.nextCore).toBeDefined();
+        expect(tickBundle.output.nextCore).toBeDefined();
 
         const logs = db.prepare('SELECT * FROM event_logs WHERE subject_id = ? ORDER BY timestamp DESC').all('sub_vertical') as any[];
         expect(logs.length).toBe(1);
 
         try {
-           const promptInfo = await buildPromptPayload('sub_vertical', tickResult as any);
-           expect(promptInfo.stateSummary).toContain('состояние');
+           const promptInfo = tickBundle.prompt;
+           expect(promptInfo.currentStateSummary.interpretation).toContain('состояние');
            expect(promptInfo.recentEvents.length).toBeGreaterThan(0);
         } catch(e) {
            console.error("DEBUG PROMPT PAYLOAD ERROR", e);

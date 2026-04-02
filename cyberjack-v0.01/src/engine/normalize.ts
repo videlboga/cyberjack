@@ -24,11 +24,13 @@ export function normalizeCore(core: Partial<SubjectCoreState>, config: EngineCon
 }
 
 export function normalizePoint(point: Partial<SubjectPointState>, config: EngineConfig): SubjectPointState {
-    const normalized: any = {};
+    const normalized: any = {
+        pointId: point.pointId || 'general',
+    };
     for (const k of Object.keys(config.point.defaults)) {
         const key = k as keyof SubjectPointState;
-        const raw = point[key] ?? config.point.defaults[key];
-        normalized[key] = clamp(ensureFiniteNumber(raw, config.point.defaults[key], key), config.point.min, config.point.max);
+        const raw = (point as any)[key] ?? (config.point.defaults as any)[key];
+        normalized[key] = clamp(ensureFiniteNumber(raw, (config.point.defaults as any)[key], key), config.point.min, config.point.max);
     }
     return normalized as SubjectPointState;
 }

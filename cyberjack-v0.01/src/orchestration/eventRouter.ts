@@ -4,7 +4,7 @@ import { parseVerbalInput } from '../parser/verbalParser';
 import { presetRepo } from '../infrastructure/repositories';
 
 export interface RouteResponse {
-    engineOutput: any;
+    bundle: Awaited<ReturnType<typeof runGameTick>>;
     dynamicModifiers?: any;
     pointIdUsed: string;
 }
@@ -33,15 +33,18 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
     }
 
     // Run engine logic
-    const engineOutput = runGameTick({
+    const bundle = await runGameTick({
         subjectId: payload.subjectId || 'S-01',
         playerId: payload.playerId || 'PL-1',
         pointId,
         sceneId: payload.sceneId || 'lab',
         presetId: payload.presetId,
-        playerIntensity: 1.0,
-        dynamicModifiers
+        playerIntensity: payload.intensity !== undefined ? payload.intensity : 1.0,
+        dynamicModifiers,
+        eventType: payload.eventType,
+        textMessage: payload.textMessage,
+        parserVersion: dynamicModifiers?.model
     });
 
-    return { engineOutput, dynamicModifiers, pointIdUsed: pointId };
+    return { bundle, dynamicModifiers, pointIdUsed: pointId };
 }

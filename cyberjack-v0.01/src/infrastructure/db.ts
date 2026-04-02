@@ -76,7 +76,20 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS active_contexts (
     event_id TEXT NOT NULL,     -- Optional, to bind it to a scene or global state 
     context_id TEXT NOT NULL,
-    duration INTEGER DEFAULT -1, ticks_active INTEGER DEFAULT 0,
+    duration INTEGER DEFAULT -1, ticks_active REAL DEFAULT 0,
     PRIMARY KEY (event_id, context_id)
   );
 `);
+
+const safeAddColumn = (table: string, column: string, definition: string) => {
+    try {
+        db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    } catch (error: any) {
+        if (!error.message.includes('duplicate column name')) {
+            throw error;
+        }
+    }
+};
+
+safeAddColumn('subject_point_states', 'familiarity', 'REAL DEFAULT 0');
+safeAddColumn('subject_point_states', 'exposure_count', 'REAL DEFAULT 0');

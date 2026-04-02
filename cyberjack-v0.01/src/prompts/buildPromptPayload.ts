@@ -3,6 +3,63 @@ import { buildStateSummary } from './buildStateSummary';
 import { buildRecentEventsSummary, EventRecord } from './buildRecentEventsSummary';
 import { db } from '../infrastructure/db';
 import { activeConfig } from './config';
+import { fetchSillyTavernContext } from './sillyTavernContext';
+import { getGeneratedProfile, setGeneratedProfile, StoredProfile } from '../orchestration/characterGenerator/profileStore';
+import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
+import { composePromptSections } from '../orchestration/characterGenerator/promptComposer';
+import { getGeneratedProfile } from '../orchestration/characterGenerator/profileStore';
+
+function ensureGeneratedProfile(subjectId: string): StoredProfile {
+    const existing = getGeneratedProfile(subjectId);
+    if (existing) {
+        return existing;
+    }
+
+    const context = generateCharacterContext({ seed: subjectId });
+    const narrative = context.narrative || {
+        identityParagraphs: [],
+        historyParagraphs: [],
+        activationParagraphs: []
+    };
+
+    const identityBlocks = [...(narrative.identityParagraphs || [])];
+    const historyBlocks = [...(narrative.historyParagraphs || [])];
+    const activationBlocks = [...(narrative.activationParagraphs || [])];
+
+    if (!identityBlocks.length && !historyBlocks.length && !activationBlocks.length) {
+        identityBlocks.push(activeConfig.character.identity);
+        historyBlocks.push(activeConfig.character.history);
+    }
+
+    const sections = composePromptSections(context, {
+        identity: activeConfig.character.identity,
+        history: activeConfig.character.history,
+        instructions: activeConfig.character.formatInstructions,
+        identityBlocks,
+        historyBlocks,
+        activationBlocks
+    });
+
+    const draftProfile = {
+        personaText: sections.personaText,
+        personaWithoutTraits: sections.personaWithoutTraits,
+        traitBlock: sections.traitBlock,
+        loreNotes: context.loreNotes,
+        loreRefs: context.loreRefs,
+        systemPrompt: sections.systemPrompt,
+        identityText: sections.identityText,
+        historyText: sections.historyText,
+        activationText: sections.activationText,
+        seed: context.seed
+    };
+
+    setGeneratedProfile(subjectId, draftProfile);
+    const stored = getGeneratedProfile(subjectId);
+    if (stored) {
+        return stored;
+    }
+    return { subjectId, ...draftProfile, updatedAt: new Date().toISOString() };
+}
 
 /**
  * Builds the payload for LLM/SillyTavern, grabbing history right from the DB.
@@ -13,7 +70,7 @@ export async function buildPromptPayload(
     eventId: string = 'lab' // TODO: Pass actual scene instead of hardcoding
 ): Promise<PromptPayload & { systemPrompt: string }> {
     const subjectRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(subjectId) as any;
-    if (!subjectRow) throw new Error("Subject not found for prompt building");
+    if (!subjectRow) throw new Error(`Subject ${subjectId} not found for prompt building`);
 
     const core: SubjectCoreState = {
         sensitivity: subjectRow.sensitivity,
@@ -65,15 +122,89 @@ export async function buildPromptPayload(
 
     const stateSummary = buildStateSummary(core, mappedPoints);
     const eventsText = buildRecentEventsSummary(recentEvents);
-    
-    const cfg = activeConfig.character;
-    const characterProfile = `${cfg.identity}\n${cfg.history}\n[Инструкции]: ${cfg.formatInstructions}`;
+    const contextSummary = activeContextNames.length > 0 ? activeContextNames.join(', ') : undefined;
+    const interpretationBlock = `${stateSummary}${contextText}`;
 
-    const systemPrompt = `${characterProfile}\n\n${stateSummary}${contextText}\n\n${eventsText}`;
-    
+    const averageLocalAttitude = mappedPoints.length
+        ? mappedPoints.reduce((acc, point) => acc + point.localAttitude, 0) / mappedPoints.length
+        : core.attitude;
+
+    const fallbackResult = (() => {
+        for (let i = recentEvents.length - 1; i >= 0; i--) {
+            try {
+                return JSON.parse(recentEvents[i].result_payload || '{}');
+            } catch {
+                // ignore malformed log entries
+            }
+        }
+        return undefined;
+    })();
+
+    const lastResult = latestResult?.result || fallbackResult || {};
+    const engagement = Number(lastResult.engagement) || 0;
+    const overload = Number(lastResult.overload) || 0;
+
+    const structuredEvents = recentEvents.map(event => {
+        let interpretation = event.action_type;
+        try {
+            const payload = JSON.parse(event.action_payload || '{}');
+            interpretation = payload.actionLabel || payload.presetId || interpretation;
+        } catch {
+            // fall back to event type
+        }
+        return {
+            type: event.action_type,
+            interpretation
+        };
+    });
+
+    const diagnostics: string[] = [];
+    stateSummary.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('*')) {
+            diagnostics.push(trimmed);
+        }
+    });
+
+    const generatedProfile = ensureGeneratedProfile(subjectId);
+    const stContext = await fetchSillyTavernContext(subjectId);
+    const cfg = activeConfig.character;
+    const personaBlock =
+        generatedProfile?.personaText ||
+        (stContext?.personaText || `${cfg.identity}\n${cfg.history}`);
+
+    let loreBlock = '';
+    if (generatedProfile?.loreNotes?.length) {
+        loreBlock = `[Записки из лора]\n${generatedProfile.loreNotes.join('\n\n')}`;
+    } else if (stContext?.loreText) {
+        loreBlock = `[Записки из лора]\n${stContext.loreText}`;
+    }
+
+    const includeMemory = activeConfig.stContext?.includeMemory ?? false;
+    const memoryBlock =
+        includeMemory && stContext?.memoryText ? `\n[Память]\n${stContext.memoryText}` : '';
+
+    const characterProfile = `${personaBlock}${loreBlock ? `\n\n${loreBlock}` : ''}\n\n[Инструкции]: ${cfg.formatInstructions}`;
+
+    const systemPrompt = `${characterProfile}${memoryBlock}\n\n${interpretationBlock}\n\n${eventsText}`;
+
+    const payload: PromptPayload = {
+        subjectId,
+        sceneId: eventId,
+        currentStateSummary: {
+            interpretation: interpretationBlock.trim(),
+            attitude: core.attitude,
+            localAttitude: averageLocalAttitude,
+            engagement,
+            overload
+        },
+        recentEvents: structuredEvents,
+        diagnostics: diagnostics.length ? diagnostics : undefined,
+        sceneContext: contextSummary
+    };
+
     return {
-        stateSummary: stateSummary + contextText,
-        recentEvents: [eventsText],
+        ...payload,
         systemPrompt
     };
 }

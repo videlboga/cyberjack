@@ -27,7 +27,7 @@ describe('Orchestration Integration', () => {
         };
 
         const result = await dispatchEvent(payload);
-        const engineOutput = result.engineOutput;
+        const engineOutput = result.bundle.output;
 
         // Core constraints
         expect(engineOutput.nextCore).toBeDefined();

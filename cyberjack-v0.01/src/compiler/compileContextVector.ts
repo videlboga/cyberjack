@@ -1,7 +1,15 @@
 import { CompiledAction } from '../domain/types';
 import { presetRepo } from '../infrastructure/repositories';
 
-export function compileContextVector(activeContexts: { id: string, ticks: number }[]): Partial<CompiledAction> {
+const STRAIN_MULTIPLIERS: Record<string, number> = {
+    intensity: 1.5,
+    valence: 1.0,
+    sharpness: 1.2,
+    contact: 0.5,
+    novelty: 0.5
+};
+
+export function compileContextVector(activeContexts: { id: string; strain?: number }[]): Partial<CompiledAction> {
     const combinedModifiers: Record<string, number> = {};
 
     for (const ctx of activeContexts) {
@@ -11,22 +19,14 @@ export function compileContextVector(activeContexts: { id: string, ticks: number
         if (modifiers) {
             for (const [key, val] of Object.entries(modifiers)) {
                 if (typeof val === 'number') {
-                    // Escalation Mechanic:
-                    // Poses and restraints get more intense and more negative over time
-                    let escalatedVal = val;
-                    if (presetResult && (presetResult.type === 'condition' || presetResult.slot?.startsWith('pose') || presetResult.slot?.startsWith('restraint'))) {
-                        if (key === 'intensity') {
-                            escalatedVal = val + (ctx.ticks * 0.05); // +0.05 intensity per tick
-                        }
-                        if (key === 'valence' && val < 0) {
-                            escalatedVal = val - (ctx.ticks * 0.05); // more negative per tick
-                        }
-                        if (key === 'discomfort' || key === 'sharpness') {
-                            escalatedVal = val + (ctx.ticks * 0.02); // increase discomfort slightly
-                        }
+                    let adjustedVal = val;
+                    const strain = Math.max(0, Math.min(ctx.strain ?? 0, 1));
+                    const multiplier = STRAIN_MULTIPLIERS[key] ?? 0;
+                    if (strain > 0 && multiplier !== 0) {
+                        adjustedVal += val * multiplier * strain;
                     }
 
-                    combinedModifiers[key] = (combinedModifiers[key] || 0) + escalatedVal;
+                    combinedModifiers[key] = (combinedModifiers[key] || 0) + adjustedVal;
                 }
             }
         }

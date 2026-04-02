@@ -1,6 +1,7 @@
 // src/infrastructure/repositories.ts
 import { db } from './db';
 import { SubjectCoreState, SubjectPointState, PlayerState, Scene } from '../domain/types';
+import { applyDecayLevel, clamp } from '../engine/utils';
 
 export const subjectRepo = {
     save(id: string, name: string, state: SubjectCoreState) {
@@ -55,13 +56,22 @@ export const subjectRepo = {
 export const pointStateRepo = {
     save(subjectId: string, pointId: string, state: SubjectPointState) {
         const stmt = db.prepare(`
-            INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT(subject_id, point_id) DO UPDATE SET
                 local_sensitivity = excluded.local_sensitivity,
-                local_attitude = excluded.local_attitude
+                local_attitude = excluded.local_attitude,
+                familiarity = excluded.familiarity,
+                exposure_count = excluded.exposure_count
         `);
-        stmt.run(subjectId, pointId, state.localSensitivity, state.localAttitude);
+        stmt.run(
+            subjectId,
+            pointId,
+            state.localSensitivity,
+            state.localAttitude,
+            state.familiarity ?? 0,
+            state.exposureCount ?? 0
+        );
     },
     
     get(subjectId: string, pointId: string): SubjectPointState | null {
@@ -69,8 +79,11 @@ export const pointStateRepo = {
         const row = stmt.get(subjectId, pointId) as any;
         if (!row) return null;
         return {
+            pointId: row.point_id,
             localSensitivity: row.local_sensitivity,
-            localAttitude: row.local_attitude
+            localAttitude: row.local_attitude,
+            familiarity: row.familiarity ?? 0,
+            exposureCount: row.exposure_count ?? 0
         };
     }
 };
@@ -100,7 +113,13 @@ export const presetRepo = {
         const stmt = db.prepare('SELECT * FROM action_presets WHERE id = ?');
         const row = stmt.get(id) as any;
         if (!row) return null;
-        return JSON.parse(row.values_json);
+        return {
+            id: row.id,
+            label: row.label,
+            type: row.type || 'physical',
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            vector: JSON.parse(row.values_json)
+        };
     },
     
     savePointPreset(preset: any) {
@@ -218,14 +237,31 @@ export const activeContextsRepo = {
         `);
         stmt.run(eventId, contextId, duration);
     },
-    getAllForEvent(eventId: string): { id: string, ticks: number }[] {
+    getAllForEvent(eventId: string): { id: string; strain: number }[] {
         const stmt = db.prepare('SELECT context_id, coalesce(ticks_active, 0) as ticks_active FROM active_contexts WHERE event_id = ?');
         const rows = stmt.all(eventId) as any[];
-        return rows.map(r => ({ id: r.context_id, ticks: r.ticks_active }));
+        return rows.map(r => ({
+            id: r.context_id,
+            strain: clamp(Number(r.ticks_active) || 0, 0, 1)
+        }));
     },
-    incrementTicks(eventId: string) {
-        const stmt = db.prepare('UPDATE active_contexts SET ticks_active = ticks_active + 1 WHERE event_id = ?');
-        stmt.run(eventId);
+    applyStrain(eventId: string, opts: { actionIntensity?: number } = {}) {
+        const selectStmt = db.prepare('SELECT context_id, coalesce(ticks_active, 0) as ticks_active FROM active_contexts WHERE event_id = ?');
+        const rows = selectStmt.all(eventId) as any[];
+        if (!rows.length) return;
+
+        const intensity = clamp(opts.actionIntensity ?? 0, 0, 5);
+        const BASE_PASSIVE_GAIN = 0.005;
+        const ACTIVE_GAIN_PER_INTENSITY = 0.01;
+        const DECAY_RATE = 0.02;
+        const gain = BASE_PASSIVE_GAIN + ACTIVE_GAIN_PER_INTENSITY * intensity;
+
+        const updateStmt = db.prepare('UPDATE active_contexts SET ticks_active = ? WHERE event_id = ? AND context_id = ?');
+        for (const row of rows) {
+            const current = clamp(Number(row.ticks_active) || 0, 0, 1);
+            const next = applyDecayLevel(current, gain, DECAY_RATE);
+            updateStmt.run(next, eventId, row.context_id);
+        }
     },
     remove(eventId: string, contextId: string) {
         const stmt = db.prepare('DELETE FROM active_contexts WHERE event_id = ? AND context_id = ?');

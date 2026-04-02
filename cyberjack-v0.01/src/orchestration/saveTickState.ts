@@ -8,7 +8,8 @@ export function saveTickState(
     pointId: string, 
     presetId: string,
     action: CompiledAction, 
-    output: TickOutput
+    output: TickOutput,
+    tickId: string
 ) {
     // 1. Save new core state
     const currentSubject = subjectRepo.get(subjectId);
@@ -28,7 +29,7 @@ export function saveTickState(
     eventLogRepo.append(
         subjectId, 
         'interaction', 
-        { action, pointId, presetId, actionLabel, pointLabel },
-        output.result
+        { action, pointId, presetId, actionLabel, pointLabel, tickId, delta: output.delta },
+        { result: output.result, delta: output.delta }
     );
 }

@@ -5,33 +5,31 @@ db.exec('DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM pla
 
 console.log("Создание субъекта S-01...");
 db.prepare(`
-    INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude) 
+    INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-`).run('S-01', 'Test Subject', 60, 50, 40, 50, 50);
-
-console.log("Добавление точек применения (point_presets)...");
+`).run('S-01', 'Синтетик (Нейтраль/Пластика)', 50, 60, 50, 80, 50);console.log("Добавление точек применения (point_presets)...");
 
 const points: any[] = [
-    { id: 'head', label: 'Голова/Волосы', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
-    { id: 'face', label: 'Лицо', sens: 60, att: 40 },
-    { id: 'lips', label: 'Губы', sens: 85, att: 20, providesFunctions: ['speak', 'kiss', 'eat'] },
-    { id: 'neck', label: 'Шея', sens: 80, att: 30 },
-    { id: 'shoulders', label: 'Плечи', sens: 30, att: 80 },
-    { id: 'back', label: 'Спина', sens: 40, att: 60, providesFunctions: ['stabilize_posture'] },
-    { id: 'chest', label: 'Грудь', sens: 60, att: 30 },
-    { id: 'nipples', label: 'Соски', sens: 95, att: 10 },
-    { id: 'belly', label: 'Живот', sens: 50, att: 40 },
-    { id: 'arms', label: 'Руки/Предплечья', sens: 20, att: 90, providesFunctions: ['reach', 'gesture'] },
+    { id: 'head', label: 'Голова/Волосы', sens: 40, att: 55, providesFunctions: ['look', 'hear'] },
+    { id: 'face', label: 'Лицо', sens: 50, att: 50 },
+    { id: 'lips', label: 'Губы', sens: 75, att: 50, providesFunctions: ['speak', 'kiss', 'eat'] },
+    { id: 'neck', label: 'Шея', sens: 70, att: 50 },
+    { id: 'shoulders', label: 'Плечи', sens: 40, att: 55 },
+    { id: 'back', label: 'Спина', sens: 45, att: 50, providesFunctions: ['stabilize_posture'] },
+    { id: 'chest', label: 'Грудь', sens: 50, att: 50 },
+    { id: 'nipples', label: 'Соски', sens: 65, att: 45 },
+    { id: 'belly', label: 'Живот', sens: 50, att: 50 },
+    { id: 'arms', label: 'Руки/Предплечья', sens: 35, att: 55, providesFunctions: ['reach', 'gesture'] },
     { id: 'wrists', label: 'Запястья', sens: 50, att: 50 },
-    { id: 'hands', label: 'Ладони', sens: 70, att: 85, providesFunctions: ['touch', 'manipulate'] },
-    { id: 'waist', label: 'Талия', sens: 65, att: 45 },
-    { id: 'hips', label: 'Бедра (спереди)', sens: 40, att: 50 },
-    { id: 'groin', label: 'Пах/Гениталии', sens: 100, att: 5 },
-    { id: 'buttocks', label: 'Ягодицы', sens: 50, att: 15 },
-    { id: 'inner_thighs', label: 'Внутр. бедра', sens: 85, att: 10 },
-    { id: 'knees', label: 'Колени', sens: 20, att: 70, providesFunctions: ['kneel', 'stand', 'shift_posture'] },
-    { id: 'calves', label: 'Икры', sens: 30, att: 70 },
-    { id: 'feet', label: 'Ступни', sens: 75, att: 50, providesFunctions: ['stand', 'walk'] },
+    { id: 'hands', label: 'Ладони', sens: 60, att: 55, providesFunctions: ['touch', 'manipulate'] },
+    { id: 'waist', label: 'Талия', sens: 60, att: 50 },
+    { id: 'hips', label: 'Бедра (спереди)', sens: 45, att: 50 },
+    { id: 'groin', label: 'Пах/Гениталии', sens: 75, att: 40 },
+    { id: 'buttocks', label: 'Ягодицы', sens: 50, att: 45 },
+    { id: 'inner_thighs', label: 'Внутр. бедра', sens: 65, att: 45 },
+    { id: 'knees', label: 'Колени', sens: 35, att: 50, providesFunctions: ['kneel', 'stand', 'shift_posture'] },
+    { id: 'calves', label: 'Икры', sens: 40, att: 50 },
+    { id: 'feet', label: 'Ступни', sens: 65, att: 50, providesFunctions: ['stand', 'walk'] },
     { id: 'general', label: 'Общее воздействие', sens: 50, att: 50 },
     { id: 'slot_pose', label: 'Слот: Поза', sens: 50, att: 50 },
     { id: 'slot_room', label: 'Слот: Окружение (Комната)', sens: 50, att: 50 },

@@ -1,18 +1,36 @@
 // src/engine/runTick.ts
 
-import { TickInput, TickOutput, EngineConfig } from '../domain/types';
+import { TickInput, TickOutput, EngineConfig, TickDelta } from '../domain/types';
 import { computeResult } from './computeResult';
 import { applyLearning } from './applyLearning';
 import { DEFAULT_CONFIG } from './config';
 
 export function runTick(input: TickInput, config: EngineConfig = DEFAULT_CONFIG): TickOutput {
-    const result = computeResult(input.action, input.core, input.point, config);
+    const { result, tickMeta } = computeResult(input.action, input.core, input.point, config);
     const { nextCore, nextPoint } = applyLearning(input.core, input.point, input.action, result, config);
+
+    const delta: TickDelta = {
+        core: {
+            sensitivity: nextCore.sensitivity - tickMeta.inputs.core.sensitivity,
+            capacity: nextCore.capacity - tickMeta.inputs.core.capacity,
+            openness: nextCore.openness - tickMeta.inputs.core.openness,
+            plasticity: nextCore.plasticity - tickMeta.inputs.core.plasticity,
+            attitude: nextCore.attitude - tickMeta.inputs.core.attitude,
+        },
+        point: {
+            pointId: nextPoint.pointId,
+            localSensitivity: nextPoint.localSensitivity - tickMeta.inputs.point.localSensitivity,
+            localAttitude: nextPoint.localAttitude - tickMeta.inputs.point.localAttitude,
+            familiarity: (nextPoint.familiarity ?? 0) - (tickMeta.inputs.point.familiarity ?? 0),
+            exposureCount: (nextPoint.exposureCount ?? 0) - (tickMeta.inputs.point.exposureCount ?? 0),
+        },
+    };
 
     return {
         nextCore,
         nextPoint,
         result,
-        tickMeta: result.tickMeta
+        delta,
+        tickMeta
     };
 }
