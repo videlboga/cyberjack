@@ -292,11 +292,19 @@ export const playerRepo = {
 export const sceneRepo = {
     save(scene: Scene) {
         const stmt = db.prepare(`
-            INSERT INTO scenes (id, available_actions)
-            VALUES (?, ?)
-            ON CONFLICT(id) DO UPDATE SET available_actions = excluded.available_actions
+            INSERT INTO scenes (id, available_actions, action_costs, transitions)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET 
+                available_actions = excluded.available_actions,
+                action_costs = excluded.action_costs,
+                transitions = excluded.transitions
         `);
-        stmt.run(scene.id, JSON.stringify(scene.availableActions));
+        stmt.run(
+            scene.id,
+            JSON.stringify(scene.availableActions),
+            JSON.stringify(scene.actionCosts || {}),
+            JSON.stringify(scene.transitions || [])
+        );
     },
     get(id: string): Scene | null {
         const stmt = db.prepare('SELECT * FROM scenes WHERE id = ?');
@@ -304,7 +312,149 @@ export const sceneRepo = {
         if (!row) return null;
         return {
             id: row.id,
-            availableActions: JSON.parse(row.available_actions)
+            availableActions: JSON.parse(row.available_actions || '[]'),
+            actionCosts: row.action_costs ? JSON.parse(row.action_costs) : undefined,
+            transitions: row.transitions ? JSON.parse(row.transitions) : undefined
         };
     }
 };
+
+export const chatMemoryRepo = {
+    append(subjectId: string, role: 'user' | 'assistant', content: string): number | null {
+        if (!content || !subjectId) return null;
+        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content) VALUES (?, ?, ?)');
+        const info = stmt.run(subjectId, role, content);
+        return Number(info.lastInsertRowid) || null;
+    },
+    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
+        const stmt = db.prepare(
+            'SELECT id, role, content FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
+        );
+        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string }>;
+        return rows.reverse();
+    },
+    getSince(subjectId: string, afterId: number, limit = 100): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
+        const stmt = db.prepare(
+            'SELECT id, role, content FROM chat_memory WHERE subject_id = ? AND id > ? ORDER BY id ASC LIMIT ?'
+        );
+        return stmt.all(subjectId, afterId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string }>;
+    },
+    getLastId(subjectId: string): number {
+        const stmt = db.prepare('SELECT id FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT 1');
+        const row = stmt.get(subjectId) as { id: number } | undefined;
+        return row?.id ?? 0;
+    }
+};
+
+export const chatSummaryRepo = {
+    save(record: {
+        subjectId: string;
+        summaryText: string;
+        importantEvents?: string[];
+        startMessageId?: number;
+        endMessageId?: number;
+    }) {
+        const stmt = db.prepare(
+            'INSERT INTO chat_memory_summary (subject_id, summary_text, important_events, start_message_id, end_message_id) VALUES (?, ?, ?, ?, ?)'
+        );
+        stmt.run(
+            record.subjectId,
+            record.summaryText,
+            JSON.stringify(record.importantEvents || []),
+            record.startMessageId ?? null,
+            record.endMessageId ?? null
+        );
+    },
+    getLast(subjectId: string): { id: number; lastMessageId: number } | null {
+        const stmt = db.prepare(
+            'SELECT id, end_message_id FROM chat_memory_summary WHERE subject_id = ? ORDER BY id DESC LIMIT 1'
+        );
+        const row = stmt.get(subjectId) as { id: number; end_message_id: number } | undefined;
+        if (!row) return null;
+        return { id: row.id, lastMessageId: row.end_message_id ?? 0 };
+    },
+    getRecent(subjectId: string, limit = 5): Array<{ summary: string; important: string[] }> {
+        const stmt = db.prepare(
+            'SELECT summary_text, important_events FROM chat_memory_summary WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
+        );
+        return stmt.all(subjectId, limit).map((row: any) => ({
+            summary: row.summary_text,
+            important: JSON.parse(row.important_events || '[]')
+        }));
+    }
+};
+
+export const memoryRepo = {
+    save(record: {
+        subjectId: string;
+        text: string;
+        embedding: number[];
+        tags?: string[];
+        relatedSubjects?: string[];
+        type?: string;
+        metadata?: Record<string, any>;
+    }) {
+        if (!record.text || !record.embedding || !record.embedding.length) {
+            return;
+        }
+        const stmt = db.prepare(
+            'INSERT INTO memory_embeddings (subject_id, text, tags, related_subjects, type, embedding, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        );
+        stmt.run(
+            record.subjectId,
+            record.text,
+            JSON.stringify(record.tags || []),
+            JSON.stringify(record.relatedSubjects || []),
+            record.type || 'interaction',
+            JSON.stringify(record.embedding),
+            JSON.stringify(record.metadata || {})
+        );
+    },
+    findRelevant(subjectId: string, queryEmbedding: number[], limit = 5, tagFilter?: string[]): Array<{ text: string; score: number }> {
+        if (!queryEmbedding || !queryEmbedding.length) return [];
+        const rows = db
+            .prepare(
+                'SELECT id, text, embedding, tags FROM memory_embeddings WHERE subject_id = ? ORDER BY created_at DESC LIMIT 200'
+            )
+            .all(subjectId) as Array<{ id: number; text: string; embedding: string; tags: string }>;
+
+        const normalizedQuery = normalizeVector(queryEmbedding);
+        const scored: Array<{ text: string; score: number }> = [];
+        for (const row of rows) {
+            try {
+                const emb = JSON.parse(row.embedding) as number[];
+                if (!emb || !emb.length) continue;
+                if (tagFilter && tagFilter.length) {
+                    const tags = JSON.parse(row.tags || '[]') as string[];
+                    if (!tags.some(tag => tagFilter.includes(tag))) {
+                        continue;
+                    }
+                }
+                const score = cosineSimilarity(normalizedQuery, normalizeVector(emb));
+                scored.push({ text: row.text, score });
+            } catch {
+                continue;
+            }
+        }
+
+        return scored
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit)
+            .filter(entry => entry.score > 0);
+    }
+};
+
+function normalizeVector(vec: number[]): number[] {
+    const length = Math.sqrt(vec.reduce((sum, value) => sum + value * value, 0));
+    if (!length || !Number.isFinite(length)) return vec;
+    return vec.map(value => value / length);
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+    if (!a.length || a.length !== b.length) return 0;
+    let dot = 0;
+    for (let i = 0; i < a.length; i++) {
+        dot += a[i] * b[i];
+    }
+    return dot;
+}

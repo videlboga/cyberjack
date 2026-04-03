@@ -7,7 +7,10 @@ import { fetchSillyTavernContext } from './sillyTavernContext';
 import { getGeneratedProfile, setGeneratedProfile, StoredProfile } from '../orchestration/characterGenerator/profileStore';
 import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
 import { composePromptSections } from '../orchestration/characterGenerator/promptComposer';
-import { getGeneratedProfile } from '../orchestration/characterGenerator/profileStore';
+import { memoryRepo, chatSummaryRepo } from '../infrastructure/repositories';
+import { buildEmbedding } from '../services/embeddingService';
+import { memoryRepo } from '../infrastructure/repositories';
+import { buildEmbedding } from '../services/embeddingService';
 
 function ensureGeneratedProfile(subjectId: string): StoredProfile {
     const existing = getGeneratedProfile(subjectId);
@@ -184,9 +187,25 @@ export async function buildPromptPayload(
     const memoryBlock =
         includeMemory && stContext?.memoryText ? `\n[Память]\n${stContext.memoryText}` : '';
 
-    const characterProfile = `${personaBlock}${loreBlock ? `\n\n${loreBlock}` : ''}\n\n[Инструкции]: ${cfg.formatInstructions}`;
+    const recentSummaries = chatSummaryRepo.getRecent(subjectId, 3);
+    const chatSummaryBlock = recentSummaries.length
+        ? `\n[Конспект беседы]\n${recentSummaries
+              .map(entry => {
+                  const highlights = entry.important?.length ? ` (важно: ${entry.important.join(', ')})` : '';
+                  return `• ${entry.summary}${highlights}`;
+              })
+              .join('\n')}`
+        : '';
 
-    const systemPrompt = `${characterProfile}${memoryBlock}\n\n${interpretationBlock}\n\n${eventsText}`;
+    const voiceInstructions = `\n- Говори от первого лица и реагируй так, будто воздействие происходит прямо сейчас.\n- Не пересказывай прошлые ответы, каждый раз формируй живую реплику.\n- Замечай тело: связки, позы, дискомфорт или облегчение. Если что-то неприятно, дай понять через интонацию.`;
+
+    const characterProfile = `${personaBlock}${loreBlock ? `\n\n${loreBlock}` : ''}\n\n[Инструкции]: ${cfg.formatInstructions}${voiceInstructions}`;
+    const longTermBlocks = selectLongTermMemory(subjectId, structuredEvents, core, mappedPoints);
+    const longTermSection = longTermBlocks.length
+        ? `\n[Долгосрочная память]\n${longTermBlocks.join('\n')}`
+        : '';
+
+    const systemPrompt = `${characterProfile}${memoryBlock}${chatSummaryBlock}${longTermSection}\n\n${interpretationBlock}\n\n${eventsText}`;
 
     const payload: PromptPayload = {
         subjectId,
@@ -200,11 +219,31 @@ export async function buildPromptPayload(
         },
         recentEvents: structuredEvents,
         diagnostics: diagnostics.length ? diagnostics : undefined,
-        sceneContext: contextSummary
+        sceneContext: contextSummary,
+        longTermMemory: longTermBlocks.length ? longTermBlocks : undefined
     };
 
     return {
         ...payload,
         systemPrompt
     };
+}
+function selectLongTermMemory(
+    subjectId: string,
+    events: Array<{ type: string; interpretation: string }>,
+    core: SubjectCoreState,
+    points: Array<{ label: string; localSensitivity: number; localAttitude: number }>
+): string[] {
+    const baseText = [
+        activeConfig.character.identity,
+        activeConfig.character.history,
+        events.map(e => `${e.type}: ${e.interpretation}`).join('; '),
+        `Attitude: ${core.attitude.toFixed(1)}, Openness: ${core.openness.toFixed(1)}`
+    ].join('\n');
+    const queryEmbedding = buildEmbedding(baseText);
+    const tags: string[] = [];
+    if (core.capacity < 30 || core.openness < 40) tags.push('overload');
+    if (points.some(p => p.localAttitude < 30)) tags.push('pain');
+    const records = memoryRepo.findRelevant(subjectId, queryEmbedding, 5, tags.length ? tags : undefined);
+    return records.map(record => `- ${record.text}`);
 }

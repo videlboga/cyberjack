@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { dispatchEvent } from '../orchestration/eventRouter';
-import { subjectRepo } from '../infrastructure/repositories';
+import { subjectRepo, playerRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneRepo, chatMemoryRepo, memoryRepo } from '../infrastructure/repositories';
 import { sendToSillyTavern } from '../adapters/sillyTavernAdapter';
 import { activeConfig, updateConfig } from '../prompts/config';
 import { runGameTick } from '../orchestration/runGameTick';
@@ -10,6 +10,28 @@ import { generateCharacterContext } from '../orchestration/characterGenerator/ge
 import { composePromptSections } from '../orchestration/characterGenerator/promptComposer';
 import { setGeneratedProfile } from '../orchestration/characterGenerator/profileStore';
 import { applyGeneratedContextToSillyTavern } from '../adapters/sillyTavernManager';
+import { maybeSummarizeChat } from '../services/chatSummary';
+import { buildEmbedding } from '../services/embeddingService';
+
+const DEFAULT_PLAYER = {
+    id: 'PL-1',
+    resources: {
+        credits: 0,
+        authority: 0,
+        timeBudget: 0
+    }
+};
+
+function normalizePlayer(playerObj?: { id: string; resources: Record<string, number> } | null) {
+    const src = playerObj || DEFAULT_PLAYER;
+    return {
+        id: src.id,
+        resources: {
+            ...DEFAULT_PLAYER.resources,
+            ...(src.resources || {})
+        }
+    };
+}
 
 const app = express();
 app.use(express.json());
@@ -33,19 +55,37 @@ app.post('/api/wait', async (req, res) => {
 
         let stReply, promptMessages;
         if (callLLM && lastBundle) {
-            const stRes = await sendToSillyTavern(lastBundle.prompt, `[Прошло времени: ${ticks} тиков. Ничего нового не произошло.]`);
+            const waitMessage = `[Прошло времени: ${ticks} тиков. Ничего нового не произошло.]`;
+            const chatHistory = chatMemoryRepo.getRecent(subjectId, 10).map(entry => ({
+                role: entry.role,
+                content: entry.content
+            }));
+            const stRes = await sendToSillyTavern(lastBundle.prompt, waitMessage, chatHistory);
             stReply = stRes.reply;
             promptMessages = stRes.sentMessages;
+            chatMemoryRepo.append(subjectId, 'user', waitMessage);
+            if (stReply && typeof stReply === 'object' && (stReply as any).speech) {
+                chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech);
+            }
+            recordMemoryEntry({
+                subjectId,
+                bundle: lastBundle,
+                userText: waitMessage,
+                assistantText: typeof stReply === 'object' ? stReply.speech : ''
+            });
+            maybeSummarizeChat(subjectId);
         }
 
         const fullState = subjectRepo.getWithPoint(subjectId, 'general');
+        const player = normalizePlayer(playerRepo.get('PL-1'));
         res.json({
             success: true,
             state: fullState,
             reply: stReply || null,
             promptMessages: promptMessages || null,
             tickResult: lastBundle?.output.result,
-            bundle: lastBundle
+            bundle: lastBundle,
+            player
         });
     } catch (error: any) {
         console.error(error);
@@ -57,12 +97,13 @@ import { resolveAvailableFunctions, canExecuteCommand } from '../domain/resolver
 // ...existing code...
 app.post('/api/tick', async (req, res) => {
     try {
-        const { subjectId = 'S-01', textMessage } = req.body;
+        const { subjectId = 'S-01', textMessage, playerId = 'PL-1' } = req.body;
         
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
         const { bundle, dynamicModifiers, pointIdUsed } = await dispatchEvent(req.body);
         
         const fullState = subjectRepo.getWithPoint(subjectId, pointIdUsed);
+        const player = normalizePlayer(playerRepo.get(playerId));
 
         // 1.5 Handle special actions returned by parser (like context changes)
         if (dynamicModifiers && dynamicModifiers.commandIntent && dynamicModifiers.commandIntent.type !== 'none') {
@@ -135,12 +176,32 @@ app.post('/api/tick', async (req, res) => {
         // 2. Load latest full UI state from DB
 // ...existing code...
         // 4. SillyTavern Communication (External Adapter)
-        const {reply: stReply, sentMessages} = await sendToSillyTavern(bundle.prompt, textMessage);
+        const chatHistory = chatMemoryRepo.getRecent(subjectId, 10).map(entry => ({
+            role: entry.role,
+            content: entry.content
+        }));
+        const {reply: stReply, sentMessages} = await sendToSillyTavern(bundle.prompt, textMessage, chatHistory);
+
+        if (textMessage && String(textMessage).trim().length > 0) {
+            chatMemoryRepo.append(subjectId, 'user', textMessage);
+        }
+        if (stReply && typeof stReply === 'object' && (stReply as any).speech) {
+            chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech);
+        }
+        recordMemoryEntry({
+            subjectId,
+            bundle,
+            userText: textMessage,
+            assistantText: typeof stReply === 'object' ? stReply.speech : '',
+            infoTag: req.body?.presetId
+        });
+        maybeSummarizeChat(subjectId);
 
         res.json({
             success: true,
             tickResult: bundle.output.result,
             state: fullState,
+            player,
             diagnostics: bundle.diagnostics,
             bundle,
             reply: stReply,
@@ -157,16 +218,58 @@ app.post('/api/tick', async (req, res) => {
 app.get('/api/state', (req, res) => {
     const subjectId = req.query.subjectId as string || 'S-01';
     const pointId = req.query.pointId as string || 'hands';
+    const sceneId = req.query.sceneId as string || 'lab';
     
     try {
         const uiState = subjectRepo.getUIState(subjectId, pointId);
-        res.json({ success: true, ...uiState });
+        const scene = sceneRepo.get(sceneId);
+        const player = normalizePlayer(playerRepo.get('PL-1'));
+
+        let availableActions = uiState.availableActions || [];
+        if (scene) {
+            availableActions = (scene.availableActions || []).map(actionId => {
+                const preset = presetRepo.getActionPreset(actionId);
+                const costs = scene.actionCosts?.[actionId];
+                return {
+                    id: actionId,
+                    label: preset?.label || actionId,
+                    costs: costs && Object.keys(costs).length ? costs : null
+                };
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            subject: uiState.subject,
+            availablePoints: uiState.availablePoints,
+            availableActions,
+            scene: scene ? { id: scene.id, transitions: scene.transitions || [] } : null,
+            player 
+        });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-import { presetRepo, activeContextsRepo, eventLogRepo } from '../infrastructure/repositories';
+app.post('/api/player/update', (req, res) => {
+    try {
+        const { playerId = 'PL-1', resources = {} } = req.body || {};
+        const existing = normalizePlayer(playerRepo.get(playerId));
+        const nextResources: Record<string, number> = { ...existing.resources };
+
+        for (const [key, value] of Object.entries(resources || {})) {
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) continue;
+            nextResources[key] = numeric;
+        }
+
+        const nextPlayer = { id: playerId, resources: nextResources };
+        playerRepo.save(nextPlayer);
+        res.json({ success: true, player: normalizePlayer(nextPlayer) });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 app.get('/api/contexts', (req, res) => {
     try {
@@ -376,6 +479,78 @@ app.post('/api/subject/update', (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
+function recordMemoryEntry(opts: {
+    subjectId: string;
+    bundle: Awaited<ReturnType<typeof runGameTick>>;
+    userText?: string;
+    assistantText?: string;
+    infoTag?: string;
+}) {
+    const parts: string[] = [];
+    const actionLabel = opts.bundle.compiledAction.label;
+    if (opts.userText && opts.userText.trim().length > 0) {
+        parts.push(`Команда/реплика: ${summarizeCommand(opts.userText)}`);
+    } else {
+        parts.push(`Тактическое воздействие: ${actionLabel}`);
+    }
+    parts.push(`Тело ощущает: ${opts.bundle.diagnostics.reactionSummary || 'короткий отклик'}`);
+    if (opts.assistantText && opts.assistantText.trim().length > 0) {
+        parts.push(`Вербальная реакция: ${summarizeSpeech(opts.assistantText)}`);
+    }
+
+    const text = parts.join('. ');
+    if (!text.trim()) return;
+
+    memoryRepo.save({
+        subjectId: opts.subjectId,
+        text,
+        embedding: buildEmbedding(text),
+        tags: collectMemoryTags(opts.bundle),
+        metadata: {
+            actionId: opts.bundle.event.payload?.presetId,
+            sceneId: opts.bundle.event.sceneId,
+            userText: opts.userText || '',
+            assistantText: opts.assistantText || '',
+            infoTag: opts.infoTag || null,
+            timestamp: opts.bundle.event.timestamp
+        }
+    });
+}
+
+function collectMemoryTags(bundle: Awaited<ReturnType<typeof runGameTick>>): string[] {
+    const tags: string[] = [];
+    const result = bundle.output.result;
+    if (result.overload > 0.5) tags.push('overload');
+    if (result.pleasure > 0.4) tags.push('pleasure');
+    if (result.discomfort > 0.4) tags.push('pain');
+    if (bundle.compiledAction.type === 'context') tags.push('context');
+    if (Array.isArray((bundle.compiledAction as any).tags)) {
+        tags.push(...((bundle.compiledAction as any).tags as string[]));
+    }
+    return tags;
+}
+
+function summarizeCommand(text: string): string {
+    const normalized = text.trim().toLowerCase();
+    if (normalized.includes('контекст')) return 'изменяет позу/ограничения';
+    if (normalized.includes('удоб') || normalized.includes('комфорт')) return 'проверяет комфорт';
+    if (normalized.includes('как себя') || normalized.includes('самочувств')) return 'интересуется самочувствием';
+    if (normalized.includes('добрый') || normalized.includes('привет')) return 'поддерживает формальное приветствие';
+    if (normalized.includes('будем') && normalized.includes('менять')) return 'предупреждает о грядущем воздействии';
+    if (normalized.endsWith('?')) return 'задаёт уточняющий вопрос';
+    return 'произносит короткую инструкцию';
+}
+
+function summarizeSpeech(text: string): string {
+    const normalized = text.trim().toLowerCase();
+    if (normalized.includes('понятно') || normalized.includes('продолжаем')) return 'послушно подтверждает изменения';
+    if (normalized.includes('как обычно') || normalized.includes('в норме') || normalized.includes('стабиль')) return 'сухо сообщает о стабильности';
+    if (normalized.includes('удоб') || normalized.includes('комфорт')) return 'оценивает комфорт без эмоций';
+    if (normalized.includes('не') || normalized.includes('хватит')) return 'пытается возразить или обозначить границы';
+    if (normalized.includes('не чувствую') || normalized.includes('привыкла')) return 'говорит устало, подчёркивая привычку к давлению';
+    return 'отвечает коротко и сдержанно';
+}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

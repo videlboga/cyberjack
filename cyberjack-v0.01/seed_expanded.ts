@@ -45,7 +45,11 @@ for (const p of points) {
 }
 
 console.log("Создание Игрока...");
-db.prepare('INSERT INTO players (id, resources) VALUES (?, ?)').run('PL-1', JSON.stringify({}));
+db.prepare('INSERT INTO players (id, resources) VALUES (?, ?)').run('PL-1', JSON.stringify({
+    credits: 10,
+    authority: 5,
+    timeBudget: 5
+}));
 
 console.log("Добавление действий (action_presets)...");
 
@@ -126,7 +130,25 @@ for (const c of contexts) {
     );
 }
 
-console.log("Создание сцены...");
-db.prepare('INSERT INTO scenes (id, available_actions) VALUES (?, ?)').run('lab', JSON.stringify(actions.map(a => a.id)));
+console.log("Создание сцен...");
+const baseSceneActions = JSON.stringify(actions.map(a => a.id));
+const actionCosts = JSON.stringify({
+    gentle_stroke: { credits: 1 },
+    hard_slap: { authority: 1 },
+    wait: { timeBudget: 1 }
+});
+const transitionsLab = JSON.stringify([
+    { targetSceneId: 'lab_recovery', conditions: { requiresActionId: 'wait', minAttitude: 70 } },
+    { targetSceneId: 'lab_discipline', conditions: { requiresActionId: 'hard_slap', maxAttitude: 35 } }
+]);
+
+db.prepare('INSERT INTO scenes (id, available_actions, action_costs, transitions) VALUES (?, ?, ?, ?)')
+    .run('lab', baseSceneActions, actionCosts, transitionsLab);
+
+db.prepare('INSERT INTO scenes (id, available_actions, action_costs, transitions) VALUES (?, ?, ?, ?)')
+    .run('lab_recovery', JSON.stringify(['gentle_stroke', 'wait', 'verbal_pressure']), JSON.stringify({ wait: { timeBudget: 1 } }), JSON.stringify([{ targetSceneId: 'lab', conditions: { requiresActionId: 'wait', minAttitude: 60 } }]));
+
+db.prepare('INSERT INTO scenes (id, available_actions, action_costs, transitions) VALUES (?, ?, ?, ?)')
+    .run('lab_discipline', JSON.stringify(['hard_slap', 'firm_grip', 'wait']), JSON.stringify({ hard_slap: { authority: 1 }, wait: { timeBudget: 1 } }), JSON.stringify([{ targetSceneId: 'lab', conditions: { requiresActionId: 'wait', minAttitude: 45 } }]));
 
 console.log("База данных успешно пересобрана!");

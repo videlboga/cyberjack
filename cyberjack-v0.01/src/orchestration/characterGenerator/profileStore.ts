@@ -26,12 +26,13 @@ function loadFromDisk() {
     try {
         const raw = fs.readFileSync(STORE_PATH, 'utf-8');
         const parsed = JSON.parse(raw);
-        const subjects = parsed?.subjects;
-        if (subjects && typeof subjects === 'object') {
-            for (const [subjectId, profile] of Object.entries(subjects)) {
-                if (profile && typeof profile === 'object' && profile.personaText) {
-                    cache.set(subjectId, profile as StoredProfile);
-                }
+        const subjects = parsed?.subjects as Record<string, unknown> | undefined;
+        if (!subjects) {
+            return;
+        }
+        for (const [subjectId, profile] of Object.entries(subjects)) {
+            if (profile && typeof profile === 'object' && typeof (profile as any).personaText === 'string') {
+                cache.set(subjectId, profile as StoredProfile);
             }
         }
     } catch (error) {

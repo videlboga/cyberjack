@@ -92,7 +92,7 @@ export function ConfigEditor() {
     const sections = ['character', 'somaticSense', 'perception', 'adapters'];
 
     return (
-        <div style={{ padding: 10, background: '#1e1e1e', border: '1px solid #444', borderRadius: 8, height: '100%', overflowY: 'auto' }}>
+        <div className="config-editor" style={{ padding: 10, background: '#1e1e1e', border: '1px solid #444', borderRadius: 8, height: '100%', overflowY: 'auto' }}>
             <h3>Конфигуратор промптов</h3>
             {sections.map(section => (
                 <div key={section} style={{ marginBottom: 15 }}>
@@ -173,12 +173,16 @@ export function ConfigEditor() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <strong>Выбранные теги:</strong>
-                            {generatorResult.grouped && Object.entries(generatorResult.grouped).map(([level, tags]: [string, any[]]) => (
-                                <div key={level} style={{ fontSize: 12 }}>
-                                    <span style={{ textTransform: 'uppercase', color: '#999' }}>{level}:</span>{' '}
-                                    {tags.map(tag => tag.title || tag.id).join(', ')}
-                                </div>
-                            ))}
+                            {generatorResult.grouped &&
+                                (Object.entries(generatorResult.grouped) as Array<[string, any]>).map(([level, tags]) => {
+                                    const tagList = Array.isArray(tags) ? tags : [];
+                                    return (
+                                        <div key={level} style={{ fontSize: 12 }}>
+                                            <span style={{ textTransform: 'uppercase', color: '#999' }}>{level}:</span>{' '}
+                                            {tagList.map((tag: any) => tag.title || tag.id).join(', ')}
+                                        </div>
+                                    );
+                                })}
                         </div>
                         {generatorResult.narrative && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

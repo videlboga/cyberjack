@@ -1,18 +1,38 @@
-import { Scene, SubjectCoreState } from '../domain/types';
+import { Scene, SubjectCoreState, SceneTransitionRule } from '../domain/types';
+
+export interface TransitionContext {
+    actionId: string;
+}
+
+function matchesConditions(rule: SceneTransitionRule, core: SubjectCoreState, ctx: TransitionContext): boolean {
+    const conditions = rule.conditions;
+    if (!conditions) return true;
+
+    if (conditions.requiresActionId && conditions.requiresActionId !== ctx.actionId) {
+        return false;
+    }
+    if (conditions.minAttitude !== undefined && core.attitude < conditions.minAttitude) {
+        return false;
+    }
+    if (conditions.maxAttitude !== undefined && core.attitude > conditions.maxAttitude) {
+        return false;
+    }
+    return true;
+}
 
 /**
- * Проверяет, соблюдаются ли условия для перехода к следующей сцене.
- * Пока это заглушка, возвращающая текущую сцену, если условия перехода не заданы.
+ * Проверяет, можно ли перейти на другую сцену согласно правилам.
  */
 export function resolveSceneTransition(
-    currentScene: Scene, 
-    core: SubjectCoreState, 
-    transitions: Array<{ targetSceneId: string; condition: (c: SubjectCoreState) => boolean }>
+    currentScene: Scene,
+    core: SubjectCoreState,
+    ctx: TransitionContext
 ): string | null {
-    for (const transition of transitions) {
-        if (transition.condition(core)) {
-            return transition.targetSceneId;
+    const transitions = currentScene.transitions || [];
+    for (const rule of transitions) {
+        if (matchesConditions(rule, core, ctx)) {
+            return rule.targetSceneId;
         }
     }
-    return null; // Нет перехода
+    return null;
 }

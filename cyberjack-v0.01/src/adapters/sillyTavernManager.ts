@@ -101,8 +101,21 @@ export async function applyGeneratedContextToSillyTavern({
     );
     const mergedWorldInfoList = [worldInfoName, ...preserved];
 
+    const currentSt = activeConfig.stContext || {
+        enabled: false,
+        baseUrl: 'http://127.0.0.1:8181',
+        characterPresets: {}
+    };
+
     updateConfig({
         stContext: {
+            enabled: currentSt.enabled,
+            baseUrl: currentSt.baseUrl,
+            defaultWorldInfoFiles: currentSt.defaultWorldInfoFiles,
+            memoryMessageLimit: currentSt.memoryMessageLimit,
+            useCharacterCard: currentSt.useCharacterCard,
+            useWorldInfo: currentSt.useWorldInfo,
+            includeMemory: currentSt.includeMemory,
             characterPresets: {
                 [subjectId]: {
                     ...preset,

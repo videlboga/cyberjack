@@ -37,7 +37,13 @@ const ST_JSON_SCHEMA = {
     }
 };
 
-export function generateChatPayload(payload: PromptPayload, userInput?: string): ChatMessage[] {
+type MemoryMessage = { role: 'user' | 'assistant'; content: string };
+
+export function generateChatPayload(
+    payload: PromptPayload,
+    userInput?: string,
+    history?: MemoryMessage[]
+): ChatMessage[] {
     const messages: ChatMessage[] = [];
 
     // System setup
@@ -45,6 +51,16 @@ export function generateChatPayload(payload: PromptPayload, userInput?: string):
         role: 'system',
         content: `${activeConfig.adapters.sillyTavernSystemPrefix}\n${payload.systemPrompt}`
     });
+
+    if (history && history.length) {
+        history.forEach(entry => {
+            if (!entry.content) return;
+            messages.push({
+                role: entry.role,
+                content: entry.content
+            });
+        });
+    }
 
     if (userInput) {
         messages.push({
@@ -74,52 +90,53 @@ function validateStructuredReply(candidate: any): candidate is { reaction: strin
     return typeof candidate.reaction === 'string' && typeof candidate.speech === 'string';
 }
 
-async function requestCompletion(messages: ChatMessage[]) {
-        const body: Record<string, any> = {
-            type: ST_REQUEST_TYPE,
-            chat_completion_source: ST_SOURCE,
-            model: ST_MODEL,
-            messages,
-            max_tokens: ST_MAX_TOKENS,
-            temperature: ST_TEMPERATURE,
-            stream: false,
-            include_reasoning: false,
-            request_images: false,
-            json_schema: ST_JSON_SCHEMA
-        };
+async function requestCompletion(messages: ChatMessage[]): Promise<string> {
+    const body: Record<string, any> = {
+        type: ST_REQUEST_TYPE,
+        chat_completion_source: ST_SOURCE,
+        model: ST_MODEL,
+        messages,
+        max_tokens: ST_MAX_TOKENS,
+        temperature: ST_TEMPERATURE,
+        stream: false,
+        include_reasoning: false,
+        request_images: false,
+        json_schema: ST_JSON_SCHEMA
+    };
 
-        if (Number.isFinite(ST_TOP_P)) {
-            body.top_p = ST_TOP_P;
-        }
+    if (Number.isFinite(ST_TOP_P)) {
+        body.top_p = ST_TOP_P;
+    }
 
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json'
-        };
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+    };
 
-        if (ST_API_KEY) {
-            headers['Authorization'] = `Bearer ${ST_API_KEY}`;
-        }
+    if (ST_API_KEY) {
+        headers['Authorization'] = `Bearer ${ST_API_KEY}`;
+    }
 
-        const response = await fetch(ST_COMPLETIONS_URL, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body)
-        });
+    const response = await fetch(ST_COMPLETIONS_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+    });
 
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errText}`);
-        }
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errText}`);
+    }
 
-        const data = await response.json();
-        return data.choices?.[0]?.message?.content || '';
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || '';
 }
 
 export async function sendToSillyTavern(
     payload: PromptPayload,
-    userInput?: string
+    userInput?: string,
+    history?: MemoryMessage[]
 ): Promise<{ reply: { speech: string; reaction: string } | string; sentMessages: ChatMessage[] }> {
-    const messages = generateChatPayload(payload, userInput);
+    const messages = generateChatPayload(payload, userInput, history);
 
     console.log(`\n========== ОТПРАВЛЯЕМЫЙ ПРОМПТ В ST ==========`);
     messages.forEach(m => {
@@ -167,4 +184,9 @@ export async function sendToSillyTavern(
             sentMessages: messages
         };
     }
+
+    return {
+        reply: { reaction: '*Нет ответа от SillyTavern*', speech: '' },
+        sentMessages: messages
+    };
 }

@@ -101,7 +101,24 @@ export interface GameEvent {
     payload: Record<string, unknown>;
 }
 export interface PlayerState { id: string; resources: Record<string, number>; }
-export interface Scene { id: string; availableActions: string[]; }
+
+export interface SceneTransitionRule {
+    targetSceneId: string;
+    conditions?: {
+        requiresActionId?: string;
+        minAttitude?: number;
+        maxAttitude?: number;
+    };
+}
+
+export interface Scene {
+    id: string;
+    title?: string;
+    description?: string;
+    availableActions: string[];
+    actionCosts?: Record<string, Record<string, number>>;
+    transitions?: SceneTransitionRule[];
+}
 export interface Mission { id: string; progress: number; }
 export interface AnatomyPointPreset {
     id: string;
@@ -148,6 +165,7 @@ export interface PromptPayload {
     }>;
     diagnostics?: string[];
     sceneContext?: string;
+    longTermMemory?: string[];
     systemPrompt?: string;
 }
 
@@ -176,5 +194,12 @@ export interface TickBundle {
     };
     diagnostics: DiagnosticsOutput;
     prompt: PromptPayload & { systemPrompt: string };
+    scenario?: {
+        nextSceneId: string | null;
+        updatedPlayer: PlayerState;
+        updatedMission: Mission | null;
+        success: boolean;
+        error?: string;
+    };
     metadata?: Record<string, unknown>;
 }

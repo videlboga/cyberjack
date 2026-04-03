@@ -39,7 +39,9 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS scenes (
     id TEXT PRIMARY KEY,
-    available_actions TEXT NOT NULL -- JSON
+    available_actions TEXT NOT NULL, -- JSON
+    action_costs TEXT DEFAULT '{}',
+    transitions TEXT DEFAULT '[]'
   );
 
   CREATE TABLE IF NOT EXISTS action_presets (
@@ -79,6 +81,40 @@ db.exec(`
     duration INTEGER DEFAULT -1, ticks_active REAL DEFAULT 0,
     PRIMARY KEY (event_id, context_id)
   );
+
+  CREATE TABLE IF NOT EXISTS chat_memory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS memory_embeddings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_id TEXT NOT NULL,
+    text TEXT NOT NULL,
+    tags TEXT DEFAULT '[]',
+    related_subjects TEXT DEFAULT '[]',
+    type TEXT DEFAULT 'interaction',
+    embedding TEXT NOT NULL,
+    metadata TEXT DEFAULT '{}',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_memory_subject ON memory_embeddings(subject_id, created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS chat_memory_summary (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_id TEXT NOT NULL,
+    summary_text TEXT NOT NULL,
+    important_events TEXT DEFAULT '[]',
+    start_message_id INTEGER,
+    end_message_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_chat_summary_subject ON chat_memory_summary(subject_id, created_at DESC);
 `);
 
 const safeAddColumn = (table: string, column: string, definition: string) => {
@@ -93,3 +129,5 @@ const safeAddColumn = (table: string, column: string, definition: string) => {
 
 safeAddColumn('subject_point_states', 'familiarity', 'REAL DEFAULT 0');
 safeAddColumn('subject_point_states', 'exposure_count', 'REAL DEFAULT 0');
+safeAddColumn('scenes', 'action_costs', 'TEXT DEFAULT \'{}\'');
+safeAddColumn('scenes', 'transitions', 'TEXT DEFAULT \'[]\'');

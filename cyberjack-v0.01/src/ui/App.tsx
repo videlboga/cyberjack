@@ -1,435 +1,721 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ConfigEditor } from './ConfigEditor';
 
-export function App() {
-  const [pointId, setPointId] = useState('hands');
-  const [state, setState] = useState<any>(null);
-  const [actions, setActions] = useState<any[]>([]);
-  const [points, setPoints] = useState<any[]>([]);
-  const [chat, setChat] = useState<{role: string, text: string}[]>([]);
-  const [inputMsg, setInputMsg] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [diagnostics, setDiagnostics] = useState<any>(null);
-  const [promptLog, setPromptLog] = useState<any[]>([]);
-  const [physicalReaction, setPhysicalReaction] = useState<string>("");
+type ChatEntry = {
+  role: 'player' | 'subject' | 'system';
+  text: string;
+};
 
-  const [allContexts, setAllContexts] = useState<any[]>([]);
-  const [activeContexts, setActiveContexts] = useState<string[]>([]);
-  const [intensity, setIntensity] = useState<number>(1.0);
+const API_BASE = 'http://localhost:3001';
+
+const CORE_FIELDS = [
+  { key: 'sensitivity', label: 'Sensitivity (Чувствительность)' },
+  { key: 'attitude', label: 'Attitude (Отношение)' },
+  { key: 'capacity', label: 'Capacity (Ресурс)' },
+  { key: 'openness', label: 'Openness (Открытость)' },
+  { key: 'plasticity', label: 'Plasticity (Пластичность)' }
+] as const;
+
+export function App() {
+  const [activeTab, setActiveTab] = useState<'console' | 'prompts'>('console');
+  const [subject, setSubject] = useState<any>(null);
+  const [player, setPlayer] = useState<any>(null);
+  const [points, setPoints] = useState<any[]>([]);
+  const [pointId, setPointId] = useState('hands');
+  const [actions, setActions] = useState<any[]>([]);
+  const [selectedAction, setSelectedAction] = useState<string>('');
+  const [intensity, setIntensity] = useState(1);
+  const [chat, setChat] = useState<ChatEntry[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [diagnostics, setDiagnostics] = useState<any>(null);
   const [engineResult, setEngineResult] = useState<any>(null);
-  const [classifierLog, setClassifierLog] = useState<any>(null);
-  const [coreEdit, setCoreEdit] = useState({
+  const [physicalReaction, setPhysicalReaction] = useState('');
+  const [promptLog, setPromptLog] = useState<any[]>([]);
+  const [contexts, setContexts] = useState<any[]>([]);
+  const [activeContexts, setActiveContexts] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [scene, setScene] = useState<any>(null);
+  const [playerDraft, setPlayerDraft] = useState<Record<string, number>>({});
+  const [savingPlayer, setSavingPlayer] = useState(false);
+  const [coreDraft, setCoreDraft] = useState({
     sensitivity: 0,
     attitude: 0,
     capacity: 0,
     openness: 0,
     plasticity: 0
   });
-  const [coreSaving, setCoreSaving] = useState(false);
+  const [savingCore, setSavingCore] = useState(false);
+  const [classifierLog, setClassifierLog] = useState<any>(null);
+  const [newResourceKey, setNewResourceKey] = useState('');
+  const [newResourceValue, setNewResourceValue] = useState('0');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Load initial state
+  const subjectId = subject?.id || 'S-01';
+  const sceneId = scene?.id || 'lab';
+
   useEffect(() => {
-    fetchState();
-    fetchContexts();
+    fetchState(pointId);
   }, [pointId]);
 
   useEffect(() => {
-    if (state) {
-      setCoreEdit({
-        sensitivity: Number(state.sensitivity || 0),
-        attitude: Number(state.attitude || 0),
-        capacity: Number(state.capacity || 0),
-        openness: Number(state.openness || 0),
-        plasticity: Number(state.plasticity || 0)
+    fetchContexts();
+  }, []);
+
+  useEffect(() => {
+    if (subject) {
+      setCoreDraft({
+        sensitivity: Number(subject.sensitivity ?? 0),
+        attitude: Number(subject.attitude ?? 0),
+        capacity: Number(subject.capacity ?? 0),
+        openness: Number(subject.openness ?? 0),
+        plasticity: Number(subject.plasticity ?? 0)
       });
     }
-  }, [state]);
+  }, [subject]);
 
-  const fetchContexts = async () => {
+  useEffect(() => {
+    if (player?.resources) {
+      setPlayerDraft(player.resources);
+    }
+  }, [player]);
+
+  const groupedContexts = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    for (const ctx of contexts) {
+      const key = ctx.slot || ctx.type || 'misc';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(ctx);
+    }
+    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [contexts]);
+
+  const formatCosts = (costs?: Record<string, number> | null) => {
+    if (!costs || !Object.keys(costs).length) return '';
+    return Object.entries(costs)
+      .map(([resource, value]) => `${resource}-${value}`)
+      .join(', ');
+  };
+
+  const selectedActionInfo = actions.find((a) => a.id === selectedAction);
+  const selectedActionCosts = selectedActionInfo?.costs || null;
+
+  async function fetchState(targetPointId: string) {
     try {
-      const res = await fetch(`http://localhost:3001/api/contexts`);
+      const res = await fetch(`${API_BASE}/api/state?subjectId=${subjectId}&pointId=${targetPointId}`);
       const data = await res.json();
-      if (data.success) {
-        setAllContexts(data.allPresets || []);
-        setActiveContexts((data.activeIds || []).map((a: any) => a.id || a));
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
+      if (!data.success) throw new Error('Не удалось получить состояние');
 
-  const toggleContext = async (contextId: string, isActive: boolean) => {
+      setSubject(data.subject);
+      setPoints(data.availablePoints || []);
+      setActions(data.availableActions || []);
+      setScene(data.scene);
+      setPlayer(data.player);
+
+      const availablePointIds = (data.availablePoints || []).map((p: any) => p.id);
+      if (availablePointIds.length && !availablePointIds.includes(targetPointId)) {
+        setPointId(availablePointIds[0]);
+      }
+
+      if (!selectedAction && data.availableActions?.length) {
+        setSelectedAction(data.availableActions[0].id);
+      } else if (selectedAction && !data.availableActions?.some((a: any) => a.id === selectedAction)) {
+        setSelectedAction(data.availableActions[0]?.id || '');
+      }
+      setErrorMessage('');
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || 'Ошибка загрузки состояния');
+    }
+  }
+
+  async function fetchContexts() {
     try {
-      const res = await fetch(`http://localhost:3001/api/contexts/toggle`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contextId, isActive })
-      });
+      const res = await fetch(`${API_BASE}/api/contexts`);
       const data = await res.json();
-      if (data.success) {
-        fetchContexts();
-      }
-    } catch (e) {
-      console.error(e);
+      if (!data.success) throw new Error('Не удалось загрузить контексты');
+      setContexts(data.allPresets || []);
+      setActiveContexts((data.activeIds || []).map((item: any) => item.id || item.context_id || item));
+    } catch (err) {
+      console.error(err);
     }
+  }
+
+  const handleCoreValueChange = (field: keyof typeof coreDraft, value: number) => {
+    setCoreDraft((prev) => ({ ...prev, [field]: value }));
   };
 
-  const fetchState = async () => {
+  async function saveCoreState() {
+    if (!subject) return;
+    setSavingCore(true);
     try {
-      const res = await fetch(`http://localhost:3001/api/state?pointId=${pointId}`);
-      const data = await res.json();
-      if (data.success) {
-        setState(data.subject);
-        setActions(data.availableActions);
-        setPoints(data.availablePoints || []);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleWait = async (ticks: number, callLLM: boolean) => {
-    setLoading(true);
-    setChat(p => [...p, { role: 'player', text: `[Время] Пропустить ${ticks} тик(ов). Отправка в LLM: ${callLLM ? 'Да' : 'Нет'}` }]);
-    
-    try {
-      const res = await fetch('http://localhost:3001/api/wait', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticks, callLLM })
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        setState(data.state);
-        const bundleDiagnostics = data.bundle?.diagnostics || data.diagnostics || null;
-        const bundleResult = data.bundle?.output?.result || data.tickResult || null;
-        setDiagnostics(bundleDiagnostics);
-        setEngineResult(bundleResult);
-        setClassifierLog(null);
-        if (data.promptMessages) setPromptLog(data.promptMessages);
-        
-        if (data.reply) {
-            setPhysicalReaction(data.reply.reaction || "");
-            if (data.reply.speech) {
-                setChat(p => [...p, { role: 'ST', text: data.reply.speech }]);
-            } else {
-                setChat(p => [...p, { role: 'ST', text: '(Молчит)' }]);
-            }
-        } else {
-            setChat(p => [...p, { role: 'system', text: 'Время прошло (Silent Tick)' }]);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-  };
-
-  const handleAction = async (presetId: string, textMessage = "") => {
-    setLoading(true);
-    if (textMessage) {
-        setChat(p => [...p, { role: 'player', text: textMessage }]);
-    } else {
-        const actionLabel = actions.find(a => a.id === presetId)?.label || presetId;
-        setChat(p => [...p, { role: 'player', text: `[Действие: ${actionLabel}] на точку ${pointId}` }]);
-    }
-    
-    try {
-      const res = await fetch('http://localhost:3001/api/tick', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ presetId, textMessage, pointId, intensity })
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        const bundle = data.bundle;
-        setState(data.state);
-        const bundleDiagnostics = bundle?.diagnostics || data.diagnostics || null;
-        const bundleResult = bundle?.output?.result || data.tickResult || null;
-        setDiagnostics(bundleDiagnostics);
-        setEngineResult(bundleResult);
-        setClassifierLog(data.classifierLog || null);
-        if (data.promptMessages) setPromptLog(data.promptMessages);
-        
-        // Handle explicit JSON structure
-        if (data.reply) {
-            setPhysicalReaction(data.reply.reaction || "");
-            if (data.reply.speech) {
-                setChat(p => [...p, { role: 'ST', text: data.reply.speech }]);
-            } else {
-                setChat(p => [...p, { role: 'ST', text: '(Молчит)' }]);
-            }
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-    setInputMsg("");
-  };
-
-  if (!state) return <div>Загрузка состояния... (Убедитесь, что npx tsx src/api/server.ts запущен)</div>;
-
-  const handleCoreChange = (field: keyof typeof coreEdit, value: number) => {
-    setCoreEdit(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleCoreSave = async () => {
-    if (!state) return;
-    setCoreSaving(true);
-    try {
-      const res = await fetch('http://localhost:3001/api/subject/update', {
+      const res = await fetch(`${API_BASE}/api/subject/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subjectId: state.id,
-          ...coreEdit
+          subjectId,
+          ...coreDraft
         })
       });
       const data = await res.json();
-      if (data.success) {
-        setState(data.state);
-      }
-    } catch (e) {
-      console.error(e);
+      if (!data.success) throw new Error(data.error || 'Не удалось сохранить параметры');
+      setSubject(data.state);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingCore(false);
     }
-    setCoreSaving(false);
+  }
+
+  const handlePlayerDraftChange = (key: string, value: number) => {
+    setPlayerDraft((prev) => ({ ...prev, [key]: value }));
+  };
+
+  async function savePlayerResources() {
+    setSavingPlayer(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/player/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          playerId: player?.id || 'PL-1',
+          resources: playerDraft
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Не удалось обновить ресурсы');
+      setPlayer(data.player);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingPlayer(false);
+    }
+  }
+
+  const addNewResourceField = () => {
+    if (!newResourceKey.trim()) return;
+    setPlayerDraft((prev) => ({
+      ...prev,
+      [newResourceKey.trim()]: Number(newResourceValue) || 0
+    }));
+    setNewResourceKey('');
+    setNewResourceValue('0');
+  };
+
+  async function handleAction(options?: {
+    presetId?: string;
+    textMessage?: string;
+    labelOverride?: string;
+    intensityOverride?: number;
+  }) {
+    const actionId = options?.presetId || selectedAction;
+    if (!actionId) return;
+
+    const label = options?.labelOverride || actions.find((a) => a.id === actionId)?.label || actionId;
+    const textMessage = options?.textMessage;
+
+    if (textMessage) {
+      setChat((prev) => [...prev, { role: 'player', text: textMessage }]);
+    } else {
+      setChat((prev) => [...prev, { role: 'player', text: `[Действие] ${label}` }]);
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/tick`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subjectId,
+          pointId,
+          sceneId,
+          presetId: actionId,
+          intensity: options?.intensityOverride ?? intensity,
+          textMessage
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Tick failed');
+
+      setSubject(data.state);
+      setPlayer(data.player);
+      setDiagnostics(data.diagnostics);
+      setEngineResult(data.tickResult);
+      setClassifierLog(data.classifierLog);
+
+      if (data.reply) {
+        setPhysicalReaction(data.reply.reaction || '');
+        if (data.reply.speech !== undefined) {
+          const speechText = data.reply.speech || '';
+          setChat((prev) => [
+            ...prev,
+            {
+              role: 'subject',
+              text: speechText || '(молчит)'
+            }
+          ]);
+        }
+      }
+      if (data.promptMessages) {
+        setPromptLog(data.promptMessages);
+      }
+      await fetchState(pointId);
+      await fetchContexts();
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || 'Ошибка выполнения действия');
+    } finally {
+      setLoading(false);
+      setChatInput('');
+    }
+  }
+
+  async function handleWait(ticks: number, callLLM = false) {
+    setChat((prev) => [
+      ...prev,
+      { role: 'system', text: `⏳ Прокрутка времени: +${ticks} тик(ов) (${callLLM ? 'с ответом' : 'без ответа'})` }
+    ]);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/wait`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subjectId,
+          ticks,
+          eventId: sceneId,
+          callLLM
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Не удалось прокрутить время');
+      setSubject(data.state);
+      setPlayer(data.player);
+      setEngineResult(data.tickResult);
+      setDiagnostics(data.diagnostics || data.bundle?.diagnostics || null);
+      if (data.reply) {
+        setPhysicalReaction(data.reply.reaction || '');
+        if (data.reply.speech) {
+          setChat((prev) => [...prev, { role: 'subject', text: data.reply.speech }]);
+        }
+      }
+      if (data.promptMessages) setPromptLog(data.promptMessages);
+      await fetchState(pointId);
+      await fetchContexts();
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || 'Ошибка ожидания');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function toggleContext(contextId: string, enable: boolean, label: string) {
+    try {
+      const res = await fetch(`${API_BASE}/api/contexts/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contextId,
+          isActive: enable,
+          subjectId,
+          eventId: sceneId
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error('Контекст не изменён');
+      await fetchContexts();
+      await handleAction({
+        presetId: 'verbal_pressure',
+        textMessage: enable
+          ? `Контекст активирован: ${label}. Примени это состояние.`
+          : `Контекст снят: ${label}. Возвращайся к нейтральному состоянию.`,
+        labelOverride: `[Контекст] ${label}`,
+        intensityOverride: 0.4
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const sendChatMessage = () => {
+    if (!chatInput.trim()) return;
+    handleAction({
+      presetId: 'verbal_pressure',
+      textMessage: chatInput.trim()
+    });
   };
 
   const renderBadges = () => {
-    if (!state) return null;
-    const c = state.capacity || 0;
-    const o = state.openness || 0;
-    const s = state.sensitivity || 0;
-    const a = state.attitude || 0;
-    const p = state.plasticity || 0;
-    const badges = [];
+    if (!subject) return null;
+    const badges: string[] = [];
+    const c = Number(subject.capacity || 0);
+    const o = Number(subject.openness || 0);
+    const s = Number(subject.sensitivity || 0);
+    const a = Number(subject.attitude || 0);
+    const p = Number(subject.plasticity || 0);
 
-    if (c < 10) badges.push(<span key="apathy" style={{ background: '#8e44ad', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Апатия</span>);
-    else if (c <= 25 && o > 80) badges.push(<span key="subspace" style={{ background: '#9b59b6', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Сабспейс</span>);
-    else if (c <= 25 && o < 30 && a < 20) badges.push(<span key="panic" style={{ background: '#e74c3c', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Паническая атака</span>);
-    else if (c <= 25 && s > 80) badges.push(<span key="overload" style={{ background: '#e67e22', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Сенсорная перегрузка</span>);
-    
-    if (c <= 40 && p > 80) badges.push(<span key="suggest" style={{ background: '#3498db', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Внушаемость</span>);
-    if (c <= 30 && p < 30) badges.push(<span key="freeze" style={{ background: '#34495e', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Оцепенение</span>);
-    if (c > 50 && s > 80) badges.push(<span key="hyper" style={{ background: '#f1c40f', color: '#000', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Гиперестезия</span>);
-    if (c > 50 && a < 0) badges.push(<span key="defiance" style={{ background: '#c0392b', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Активное сопротивление</span>);
+    if (c < 10) badges.push('Апатия');
+    if (c <= 25 && o > 80) badges.push('Сабспейс');
+    if (c <= 25 && o < 30 && a < 20) badges.push('Паника');
+    if (c <= 25 && s > 80) badges.push('Перегрузка (сенс)');
+    if (p > 80 && c <= 40) badges.push('Внушаемость');
+    if (p < 30 && c <= 30) badges.push('Оцепенение');
+    if (s > 80 && c > 50) badges.push('Гиперестезия');
+    if (a < 0 && c > 50) badges.push('Активное сопротивление');
 
-    if (state.point) {
-      const ls = state.point.local_sensitivity || 0;
-      const la = state.point.local_attitude || 0;
-      if (ls > 80) badges.push(<span key="focal" style={{ background: '#d35400', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Гиперчувствительность ({state.point.point_id})</span>);
-      if (ls > 70 && la < 30) badges.push(<span key="dissonance" style={{ background: '#c0392b', color: '#fff', padding: '3px 8px', borderRadius: 4, fontSize: '0.8em' }}>Диссонанс ({state.point.point_id})</span>);
+    if (!badges.length) {
+      return <span className="badge muted">Стабильно</span>;
     }
-
-    if (badges.length === 0) return <span style={{ color: '#888', fontSize: '0.9em' }}>Стабильное состояние</span>;
-    return <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '5px' }}>{badges}</div>;
+    return badges.map((badge) => (
+      <span key={badge} className="badge">
+        {badge}
+      </span>
+    ));
   };
 
+  if (!subject) {
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <div className="logo">Cyberjack Control</div>
+        </header>
+        <div className="loading-state">Загрузка состояния... (запустите npx tsx src/api/server.ts)</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', gap: 20, padding: 20, fontFamily: 'sans-serif', maxWidth: 1200, margin: '0 auto', height: '95vh' }}>
-      {/* ЛЕВАЯ КОЛОНКА - СИМУЛЯТОР */}
-      <div style={{ flex: 2, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingRight: 10 }}>
-        <h2>Милстоун: Интеграция с ST</h2>
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="logo">Cyberjack · Simulation Console</div>
+        <div className="view-tabs">
+          <button className={activeTab === 'console' ? 'active' : ''} onClick={() => setActiveTab('console')}>
+            Консоль симуляции
+          </button>
+          <button className={activeTab === 'prompts' ? 'active' : ''} onClick={() => setActiveTab('prompts')}>
+            Конфигуратор промптов
+          </button>
+        </div>
+        <div className="header-status">
+          <span>Сцена: {scene?.id || 'lab'}</span>
+          <span>Точка: {pointId}</span>
+          {loading && <span className="spinner">⟳</span>}
+        </div>
+      </header>
 
-        <div style={{ display: 'flex', gap: 20, marginBottom: 20 }}>
-          <div style={{ flex: 1, padding: 10, border: '1px solid #444', borderRadius: 8 }}>
-            <h3>Субъект: {state.name} ({state.id})</h3>
-            <div>Sensitivity (Чувствительность): <strong>{state.sensitivity?.toFixed(1)}</strong></div>
-            <div>Attitude (Отношение): <strong>{state.attitude?.toFixed(1)}</strong></div>
-            <div>Capacity (Ресурс): <strong>{state.capacity?.toFixed(1)}</strong></div>
-            <div>Openness (Открытость): <strong>{state.openness?.toFixed(1)}</strong></div>
-            <div>Plasticity (Пластичность): <strong>{state.plasticity?.toFixed(1)}</strong></div>
-            <div style={{ marginTop: 10 }}>
-              <h4>Редактор параметров</h4>
-              {[
-                { key: 'sensitivity', label: 'Sensitivity (Чувствительность)' },
-                { key: 'attitude', label: 'Attitude (Отношение)' },
-                { key: 'capacity', label: 'Capacity (Ресурс)' },
-                { key: 'openness', label: 'Openness (Открытость)' },
-                { key: 'plasticity', label: 'Plasticity (Пластичность)' }
-              ].map(field => (
-                <div key={field.key} style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                  <label style={{ flex: 1 }}>{field.label}:</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={(coreEdit as any)[field.key]}
-                    onChange={e => handleCoreChange(field.key as keyof typeof coreEdit, Number(e.target.value))}
-                    style={{ width: 80, padding: '3px 5px' }}
-                  />
+      {errorMessage && <div className="error-banner">{errorMessage}</div>}
+
+      {activeTab === 'prompts' ? (
+        <div className="config-tab">
+          <ConfigEditor />
+        </div>
+      ) : (
+        <div className="dashboard">
+          <div className="column">
+            <div className="panel">
+              <div className="panel-header">
+                <div>
+                  <h3>{subject.name}</h3>
+                  <span className="subtitle">ID: {subject.id}</span>
                 </div>
-              ))}
-              <button onClick={handleCoreSave} disabled={coreSaving} style={{ marginTop: 8 }}>
-                {coreSaving ? 'Сохранение...' : 'Сохранить параметры'}
-              </button>
+                <div className="badge-row">{renderBadges()}</div>
+              </div>
+              <div className="core-grid">
+                {CORE_FIELDS.map((field) => (
+                  <label key={field.key}>
+                    <span>{field.label}</span>
+                    <input
+                      type="number"
+                      value={coreDraft[field.key]}
+                      onChange={(e) => handleCoreValueChange(field.key, Number(e.target.value))}
+                    />
+                  </label>
+                ))}
+              </div>
+              <div className="panel-footer">
+                <button onClick={saveCoreState} disabled={savingCore}>
+                  {savingCore ? 'Сохранение...' : 'Сохранить параметры'}
+                </button>
+                <div className="point-selector">
+                  <label>Точка воздействия</label>
+                  <select value={pointId} onChange={(e) => setPointId(e.target.value)}>
+                    {points.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="point-stats">
+                  <span>Local Sensitivity: {subject.point?.local_sensitivity?.toFixed(1) ?? '-'}</span>
+                  <span>Local Attitude: {subject.point?.local_attitude?.toFixed(1) ?? '-'}</span>
+                </div>
+              </div>
             </div>
 
-            <div style={{ marginTop: '10px' }}>
-              <strong>Биометрия / Модуль состояний:</strong><br/>
-              {renderBadges()}
-            </div>
-            
-            <h4 style={{ marginTop: 15 }}>Точка воздействия:</h4>
-            <select value={pointId} onChange={(e) => setPointId(e.target.value)} style={{ padding: '5px', width: '100%' }}>
-              {points.map(p => (
-                <option key={p.id} value={p.id}>{p.label}</option>
-              ))}
-            </select>
-            <div style={{ fontSize: '0.9em', color: '#666', marginTop: 5 }}>
-              Local Sensitivity: {state.point?.local_sensitivity?.toFixed(1)}<br/>
-              Local Attitude: {state.point?.local_attitude?.toFixed(1)}
-            </div>
-          </div>
-
-          <div style={{ flex: 1, padding: 10, border: '1px solid #444', borderRadius: 8 }}>
-            <h3>Диагностика</h3>
-            {diagnostics ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <span className="label"><strong>Суть:</strong> {diagnostics.actionSummary}</span>
-                <span className="label"><strong>Реакция:</strong> {diagnostics.reactionSummary}</span>
-                <span className="label"><strong>Дельта Att:</strong> {(diagnostics.rawDelta?.attitudeDelta || 0).toFixed(2)}</span>
-                <span className="label"><strong>Дельта Open:</strong> {(diagnostics.rawDelta?.opennessDelta || 0).toFixed(2)}</span>
+            <div className="panel">
+              <div className="panel-header">
+                <div>
+                  <h3>Ресурсы игрока</h3>
+                  <span className="subtitle">{player?.id || 'PL-1'}</span>
+                </div>
+                <button onClick={savePlayerResources} disabled={savingPlayer}>
+                  {savingPlayer ? 'Сохранение...' : 'Сохранить'}
+                </button>
               </div>
-            ) : (
-              <div style={{ color: '#999' }}>Пока нет данных...</div>
-            )}
-            
-            {engineResult && (
-              <div style={{ marginTop: 10, padding: 8, background: '#2c3e50', borderRadius: 4, fontSize: '0.85em' }}>
-                <details>
-                  <summary style={{ cursor: 'pointer', fontWeight: 'bold', color: '#ecf0f1' }}>Движок: Подробности</summary>
-                  <div style={{ marginTop: 5, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5, color: '#bdc3c7' }}>
-                    <div>Валентность: {engineResult.finalValence?.toFixed(2)}</div>
-                    <div>Ощущаемая Сила: {engineResult.experiencedIntensity?.toFixed(2)}</div>
-                    <div>Удовольствие: {engineResult.pleasure?.toFixed(2)}</div>
-                    <div>Дискомфорт: {engineResult.discomfort?.toFixed(2)}</div>
-                    <div>Перегрузка: {engineResult.overload?.toFixed(2)}</div>
-                    <div>Вовлеченность: {engineResult.engagement?.toFixed(2)}</div>
-                    <div>Эффект обучения: {engineResult.learningEffect?.toFixed(2)}</div>
-                  </div>
-                </details>
-              </div>
-            )}
-
-            {classifierLog && (
-              <div style={{ marginTop: 10, padding: 8, background: '#27ae60', borderRadius: 4, fontSize: '0.85em', color: '#fff' }}>
-                <details>
-                  <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>LLM Классификатор Намерения</summary>
-                  <pre style={{ margin: '5px 0 0 0', whiteSpace: 'pre-wrap', wordWrap: 'break-word', color: '#ecf0f1' }}>
-                    {JSON.stringify(classifierLog, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            )}
-            
-            {physicalReaction && (
-              <div style={{ marginTop: 15, padding: 10, background: '#1e384c', color: '#e0f7fa', borderRadius: 6, fontStyle: 'italic' }}>
-                <strong>Физическая реакция:</strong><br/>
-                {physicalReaction}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 20, padding: 10, border: '1px solid #444', borderRadius: 8 }}>
-          <h3>Активные контексты (постоянные модификаторы)</h3>
-          <div style={{ display: 'flex', gap: 15, flexWrap: 'wrap' }}>
-            {allContexts.map(c => (
-               <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}>
-                 <input 
-                   type="checkbox" 
-                   checked={activeContexts.includes(c.id)}
-                   onChange={(e) => toggleContext(c.id, e.target.checked)}
-                 />
-                 {c.label}
-               </label>
-            ))}
-          </div>
-          
-          <div style={{ marginTop: 15, paddingTop: 15, borderTop: '1px solid #444', display: 'flex', gap: 10, alignItems: 'center' }}>
-            <span style={{ fontSize: '0.9em', color: '#999' }}>Прокрутка времени (накопление эффектов от сред):</span>
-            <button onClick={() => handleWait(1, false)} disabled={loading} style={{ padding: '6px 12px', background: '#444', border: '1px solid #666', borderRadius: 4, cursor: 'pointer', color: '#fff' }}>+1 тик (Скрыто)</button>
-            <button onClick={() => handleWait(5, false)} disabled={loading} style={{ padding: '6px 12px', background: '#444', border: '1px solid #666', borderRadius: 4, cursor: 'pointer', color: '#fff' }}>+5 тиков (Скрыто)</button>
-            <button onClick={() => handleWait(5, true)} disabled={loading} style={{ padding: '6px 12px', background: '#2c3e50', border: '1px solid #34495e', borderRadius: 4, cursor: 'pointer', color: '#fff' }}>+5 тиков и ответ (LLM)</button>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <h3 style={{ margin: 0 }}>Доступные действия</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#222', padding: '5px 15px', borderRadius: 8, border: '1px solid #444' }}>
-              <label style={{ fontSize: '0.9em', color: '#ccc' }}>Сила воздействия:</label>
-              <input type="range" min="0.1" max="5.0" step="0.1" value={intensity} onChange={e => setIntensity(parseFloat(e.target.value))} />
-              <strong style={{ width: '30px', textAlign: 'right', color: intensity > 2 ? '#e74c3c' : (intensity < 0.5 ? '#3498db' : '#2ecc71') }}>{intensity.toFixed(1)}x</strong>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {actions.map(a => (
-              <button 
-                key={a.id} 
-                onClick={() => handleAction(a.id)}
-                disabled={loading}
-                style={{ padding: '8px 16px', background: '#333', color: '#fff', border: '1px solid #555', borderRadius: 4, cursor: 'pointer' }}
-              >
-                {a.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ border: '1px solid #444', borderRadius: 8, padding: 10, height: 300, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, overflowY: 'auto', marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {chat.map((m, i) => (
-              <div key={i} style={{ alignSelf: m.role === 'player' ? 'flex-end' : 'flex-start', background: m.role === 'player' ? '#2c3e50' : '#333333', padding: '8px 12px', borderRadius: 8, maxWidth: '80%' }}>
-                <strong>{m.role === 'player' ? 'Вы' : 'S-01'}:</strong> {m.text}
-              </div>
-            ))}
-            {loading && <div style={{ color: '#888' }}>S-01 печатает...</div>}
-          </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-            <input 
-              type="text" 
-              value={inputMsg}
-              onChange={(e) => setInputMsg(e.target.value)}
-              style={{ flex: 1, padding: 8 }}
-              placeholder="Сказать что-нибудь..."
-              onKeyDown={(e) => e.key === 'Enter' && inputMsg && handleAction('verbal_pressure', inputMsg)}
-            />
-            <button onClick={() => inputMsg && handleAction('verbal_pressure', inputMsg)} disabled={!inputMsg || loading} style={{ padding: '8px 16px' }}>Отправить</button>
-          </div>
-        </div>
-
-        {promptLog.length > 0 && (
-          <div style={{ marginTop: 20, border: '1px solid #444', borderRadius: 8, padding: 10, background: '#1e1e1e' }}>
-            <details>
-              <summary style={{ cursor: 'pointer', fontWeight: 'bold', color: '#ccc' }}>
-                Лог последнего отправленного промпта ({promptLog.length} сообщений)
-              </summary>
-              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {promptLog.map((m, i) => (
-                  <div key={i} style={{ padding: 10, background: m.role === 'system' ? '#3e2723' : '#222', borderRadius: 4 }}>
-                    <div style={{ fontSize: '0.8em', textTransform: 'uppercase', color: '#999', marginBottom: 5 }}>Role: {m.role}</div>
-                    <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, fontSize: '0.9em', fontFamily: 'monospace' }}>
-                      {m.content}
-                    </pre>
+              <div className="resource-grid">
+                {Object.entries(player?.resources || {}).map(([key, value]) => (
+                  <div key={key} className="resource-card">
+                    <strong>{key}</strong>
+                    <span>{value}</span>
                   </div>
                 ))}
               </div>
-            </details>
-          </div>
-        )}
-      </div>
+              <div className="resource-editors">
+                {Object.entries(playerDraft).map(([key, value]) => (
+                  <label key={key}>
+                    <span>{key}</span>
+                    <input
+                      type="number"
+                      value={value}
+                      onChange={(e) => handlePlayerDraftChange(key, Number(e.target.value))}
+                    />
+                  </label>
+                ))}
+              </div>
+              <div className="resource-add">
+                <input
+                  type="text"
+                  placeholder="Новый ресурс"
+                  value={newResourceKey}
+                  onChange={(e) => setNewResourceKey(e.target.value)}
+                />
+                <input
+                  type="number"
+                  value={newResourceValue}
+                  onChange={(e) => setNewResourceValue(e.target.value)}
+                />
+                <button onClick={addNewResourceField}>Добавить</button>
+              </div>
+            </div>
 
-      {/* ПРАВАЯ КОЛОНКА - КОНФИГУРАТОР ПРОМПТОВ */}
-      <div style={{ flex: 1, minWidth: 350 }}>
-        <ConfigEditor />
-      </div>
+            <div className="panel contexts-panel">
+              <div className="panel-header">
+                <h3>Активные контексты</h3>
+                <div className="wait-controls">
+                  <button onClick={() => handleWait(1, false)}>+1 тик</button>
+                  <button onClick={() => handleWait(5, false)}>+5 тиков</button>
+                  <button onClick={() => handleWait(5, true)}>+5 и ответ</button>
+                </div>
+              </div>
+              <div className="contexts-scroll">
+                {groupedContexts.map(([slot, items]) => (
+                  <div key={slot} className="context-group">
+                    <div className="context-slot">{slot}</div>
+                    <div className="context-grid">
+                      {items.map((ctx: any) => {
+                        const isActive = activeContexts.includes(ctx.id);
+                        return (
+                          <label key={ctx.id} className={`context-switch ${isActive ? 'active' : ''}`}>
+                            <input
+                              type="checkbox"
+                              checked={isActive}
+                              onChange={(e) => toggleContext(ctx.id, e.target.checked, ctx.label)}
+                            />
+                            <span className="switch-thumb" />
+                            <span className="context-label">{ctx.label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <h3>Сценарий / переходы</h3>
+              {scene?.transitions?.length ? (
+                <div className="transitions">
+                  {scene.transitions.map((transition: any, idx: number) => (
+                    <div key={`${transition.targetSceneId}-${idx}`} className="transition-card">
+                      <strong>{transition.targetSceneId}</strong>
+                      {transition.conditions ? (
+                        <span className="subtitle">
+                          {transition.conditions.requiresActionId && `действие: ${transition.conditions.requiresActionId} `}
+                          {transition.conditions.minAttitude !== undefined &&
+                            `att >= ${transition.conditions.minAttitude} `}
+                          {transition.conditions.maxAttitude !== undefined &&
+                            `att <= ${transition.conditions.maxAttitude}`}
+                        </span>
+                      ) : (
+                        <span className="subtitle">без условий</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <span className="subtitle">Переходы не заданы</span>
+              )}
+            </div>
+          </div>
+
+          <div className="column">
+            <div className="panel">
+              <div className="panel-header">
+                <h3>Консоль действий</h3>
+                <div className="intensity">
+                  <label>Сила {intensity.toFixed(1)}x</label>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="5"
+                    step="0.1"
+                    value={intensity}
+                    onChange={(e) => setIntensity(parseFloat(e.target.value))}
+                  />
+                </div>
+              </div>
+              <div className="action-controls">
+                <select value={selectedAction} onChange={(e) => setSelectedAction(e.target.value)}>
+                  {actions.map((action) => {
+                    const costsLabel = formatCosts(action.costs);
+                    return (
+                      <option key={action.id} value={action.id}>
+                        {action.label}
+                        {costsLabel ? ` · ${costsLabel}` : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+                <button onClick={() => handleAction()} disabled={!selectedAction}>
+                  Применить
+                </button>
+              </div>
+              <div className="action-costs">
+                <span>Стоимость:</span>
+                {selectedActionCosts ? (
+                  Object.entries(selectedActionCosts).map(([resKey, value]) => (
+                    <span key={resKey} className="chip">
+                      {resKey}: -{value}
+                    </span>
+                  ))
+                ) : (
+                  <span className="chip muted">Бесплатно</span>
+                )}
+              </div>
+            </div>
+
+            <div className="panel chat-panel">
+              <div className="panel-header">
+                <h3>Диалог с субъектом</h3>
+              </div>
+              <div className="chat-log">
+                {chat.map((entry, idx) => (
+                  <div key={idx} className={`chat-message ${entry.role}`}>
+                    <strong>{entry.role === 'player' ? 'Вы' : entry.role === 'subject' ? subject.name : 'Система'}:</strong>{' '}
+                    <span>{entry.text || '(молчание)'}</span>
+                  </div>
+                ))}
+                {loading && <div className="chat-message system">S-01 обрабатывает...</div>}
+              </div>
+              <div className="chat-input">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Введите реплику..."
+                  onKeyDown={(e) => e.key === 'Enter' && sendChatMessage()}
+                />
+                <button onClick={sendChatMessage} disabled={!chatInput.trim()}>
+                  Отправить
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="column">
+            <div className="panel diagnostics-panel">
+              <div className="panel-header">
+                <h3>Диагностика</h3>
+              </div>
+              {diagnostics ? (
+                <div className="diagnostic-body">
+                  <div>
+                    <strong>Суть:</strong> {diagnostics.actionSummary}
+                  </div>
+                  <div>
+                    <strong>Реакция:</strong> {diagnostics.reactionSummary}
+                  </div>
+                  <div>
+                    ΔAtt: {(diagnostics.rawDelta?.attitudeDelta || 0).toFixed(2)} · ΔOpen:{' '}
+                    {(diagnostics.rawDelta?.opennessDelta || 0).toFixed(2)}
+                  </div>
+                </div>
+              ) : (
+                <span className="subtitle">Данных пока нет</span>
+              )}
+
+              {engineResult && (
+                <div className="engine-grid">
+                  <div>
+                    <span>Валентность</span>
+                    <strong>{engineResult.finalValence?.toFixed(2)}</strong>
+                  </div>
+                  <div>
+                    <span>Интенсивность</span>
+                    <strong>{engineResult.experiencedIntensity?.toFixed(2)}</strong>
+                  </div>
+                  <div>
+                    <span>Удовольствие</span>
+                    <strong>{engineResult.pleasure?.toFixed(2)}</strong>
+                  </div>
+                  <div>
+                    <span>Дискомфорт</span>
+                    <strong>{engineResult.discomfort?.toFixed(2)}</strong>
+                  </div>
+                  <div>
+                    <span>Перегрузка</span>
+                    <strong>{engineResult.overload?.toFixed(2)}</strong>
+                  </div>
+                  <div>
+                    <span>Вовлеченность</span>
+                    <strong>{engineResult.engagement?.toFixed(2)}</strong>
+                  </div>
+                </div>
+              )}
+
+              {physicalReaction && (
+                <div className="physical-reaction">
+                  <strong>Физическая реакция:</strong>
+                  <p>{physicalReaction}</p>
+                </div>
+              )}
+
+              {classifierLog && (
+                <details className="classifier-log">
+                  <summary>LLM Классификатор</summary>
+                  <pre>{JSON.stringify(classifierLog, null, 2)}</pre>
+                </details>
+              )}
+            </div>
+
+            <div className="panel prompt-panel">
+              <div className="panel-header">
+                <h3>Лог промпта ({promptLog.length})</h3>
+              </div>
+              <div className="prompt-log">
+                {promptLog.map((entry, idx) => (
+                  <div key={idx} className={`prompt-entry ${entry.role}`}>
+                    <div className="prompt-role">{entry.role}</div>
+                    <pre>{entry.content}</pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
