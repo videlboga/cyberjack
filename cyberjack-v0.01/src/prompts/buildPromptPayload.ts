@@ -4,65 +4,8 @@ import { buildRecentEventsSummary, EventRecord } from './buildRecentEventsSummar
 import { db } from '../infrastructure/db';
 import { activeConfig } from './config';
 import { fetchSillyTavernContext } from './sillyTavernContext';
-import { getGeneratedProfile, setGeneratedProfile, StoredProfile } from '../orchestration/characterGenerator/profileStore';
-import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
-import { composePromptSections } from '../orchestration/characterGenerator/promptComposer';
-import { memoryRepo, chatSummaryRepo } from '../infrastructure/repositories';
-import { buildEmbedding } from '../services/embeddingService';
-import { memoryRepo } from '../infrastructure/repositories';
-import { buildEmbedding } from '../services/embeddingService';
-
-function ensureGeneratedProfile(subjectId: string): StoredProfile {
-    const existing = getGeneratedProfile(subjectId);
-    if (existing) {
-        return existing;
-    }
-
-    const context = generateCharacterContext({ seed: subjectId });
-    const narrative = context.narrative || {
-        identityParagraphs: [],
-        historyParagraphs: [],
-        activationParagraphs: []
-    };
-
-    const identityBlocks = [...(narrative.identityParagraphs || [])];
-    const historyBlocks = [...(narrative.historyParagraphs || [])];
-    const activationBlocks = [...(narrative.activationParagraphs || [])];
-
-    if (!identityBlocks.length && !historyBlocks.length && !activationBlocks.length) {
-        identityBlocks.push(activeConfig.character.identity);
-        historyBlocks.push(activeConfig.character.history);
-    }
-
-    const sections = composePromptSections(context, {
-        identity: activeConfig.character.identity,
-        history: activeConfig.character.history,
-        instructions: activeConfig.character.formatInstructions,
-        identityBlocks,
-        historyBlocks,
-        activationBlocks
-    });
-
-    const draftProfile = {
-        personaText: sections.personaText,
-        personaWithoutTraits: sections.personaWithoutTraits,
-        traitBlock: sections.traitBlock,
-        loreNotes: context.loreNotes,
-        loreRefs: context.loreRefs,
-        systemPrompt: sections.systemPrompt,
-        identityText: sections.identityText,
-        historyText: sections.historyText,
-        activationText: sections.activationText,
-        seed: context.seed
-    };
-
-    setGeneratedProfile(subjectId, draftProfile);
-    const stored = getGeneratedProfile(subjectId);
-    if (stored) {
-        return stored;
-    }
-    return { subjectId, ...draftProfile, updatedAt: new Date().toISOString() };
-}
+import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
+import { selectLongTermMemory, getRecentSummaries } from '../services/memoryLayer';
 
 /**
  * Builds the payload for LLM/SillyTavern, grabbing history right from the DB.
@@ -187,7 +130,7 @@ export async function buildPromptPayload(
     const memoryBlock =
         includeMemory && stContext?.memoryText ? `\n[Память]\n${stContext.memoryText}` : '';
 
-    const recentSummaries = chatSummaryRepo.getRecent(subjectId, 3);
+    const recentSummaries = getRecentSummaries(subjectId, 3);
     const chatSummaryBlock = recentSummaries.length
         ? `\n[Конспект беседы]\n${recentSummaries
               .map(entry => {
@@ -227,23 +170,4 @@ export async function buildPromptPayload(
         ...payload,
         systemPrompt
     };
-}
-function selectLongTermMemory(
-    subjectId: string,
-    events: Array<{ type: string; interpretation: string }>,
-    core: SubjectCoreState,
-    points: Array<{ label: string; localSensitivity: number; localAttitude: number }>
-): string[] {
-    const baseText = [
-        activeConfig.character.identity,
-        activeConfig.character.history,
-        events.map(e => `${e.type}: ${e.interpretation}`).join('; '),
-        `Attitude: ${core.attitude.toFixed(1)}, Openness: ${core.openness.toFixed(1)}`
-    ].join('\n');
-    const queryEmbedding = buildEmbedding(baseText);
-    const tags: string[] = [];
-    if (core.capacity < 30 || core.openness < 40) tags.push('overload');
-    if (points.some(p => p.localAttitude < 30)) tags.push('pain');
-    const records = memoryRepo.findRelevant(subjectId, queryEmbedding, 5, tags.length ? tags : undefined);
-    return records.map(record => `- ${record.text}`);
 }

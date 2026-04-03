@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { dispatchEvent } from '../orchestration/eventRouter';
-import { subjectRepo, playerRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneRepo, chatMemoryRepo, memoryRepo } from '../infrastructure/repositories';
+import { subjectRepo, playerRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneRepo, chatMemoryRepo } from '../infrastructure/repositories';
 import { sendToSillyTavern } from '../adapters/sillyTavernAdapter';
 import { activeConfig, updateConfig } from '../prompts/config';
 import { runGameTick } from '../orchestration/runGameTick';
@@ -11,7 +11,8 @@ import { composePromptSections } from '../orchestration/characterGenerator/promp
 import { setGeneratedProfile } from '../orchestration/characterGenerator/profileStore';
 import { applyGeneratedContextToSillyTavern } from '../adapters/sillyTavernManager';
 import { maybeSummarizeChat } from '../services/chatSummary';
-import { buildEmbedding } from '../services/embeddingService';
+import { recordMemoryEvent } from '../services/memoryLayer';
+import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 
 const DEFAULT_PLAYER = {
     id: 'PL-1',
@@ -67,7 +68,7 @@ app.post('/api/wait', async (req, res) => {
             if (stReply && typeof stReply === 'object' && (stReply as any).speech) {
                 chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech);
             }
-            recordMemoryEntry({
+            recordMemoryEvent({
                 subjectId,
                 bundle: lastBundle,
                 userText: waitMessage,
@@ -188,7 +189,7 @@ app.post('/api/tick', async (req, res) => {
         if (stReply && typeof stReply === 'object' && (stReply as any).speech) {
             chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech);
         }
-        recordMemoryEntry({
+        recordMemoryEvent({
             subjectId,
             bundle,
             userText: textMessage,
@@ -341,6 +342,18 @@ app.get('/api/config', (req, res) => {
     res.json({ success: true, config: activeConfig });
 });
 
+app.get('/api/characters/profile', (req, res) => {
+    try {
+        const rawSubject = req.query.subjectId;
+        const subjectId =
+            typeof rawSubject === 'string' && rawSubject.trim().length > 0 ? rawSubject.trim() : 'S-01';
+        const profile = ensureGeneratedProfile(subjectId);
+        res.json({ success: true, subjectId, profile });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 app.post('/api/config', (req, res) => {
     try {
         updateConfig(req.body.config);
@@ -443,7 +456,12 @@ app.post('/api/characters/prompt', async (req, res) => {
             seed: context.seed
         });
 
-        res.json(responsePayload);
+        const storedProfile = ensureGeneratedProfile(subjectId);
+
+        res.json({
+            ...responsePayload,
+            profile: storedProfile
+        });
     } catch (error: any) {
         console.error(error);
         res.status(500).json({ success: false, error: error.message });
@@ -479,78 +497,6 @@ app.post('/api/subject/update', (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-
-function recordMemoryEntry(opts: {
-    subjectId: string;
-    bundle: Awaited<ReturnType<typeof runGameTick>>;
-    userText?: string;
-    assistantText?: string;
-    infoTag?: string;
-}) {
-    const parts: string[] = [];
-    const actionLabel = opts.bundle.compiledAction.label;
-    if (opts.userText && opts.userText.trim().length > 0) {
-        parts.push(`Команда/реплика: ${summarizeCommand(opts.userText)}`);
-    } else {
-        parts.push(`Тактическое воздействие: ${actionLabel}`);
-    }
-    parts.push(`Тело ощущает: ${opts.bundle.diagnostics.reactionSummary || 'короткий отклик'}`);
-    if (opts.assistantText && opts.assistantText.trim().length > 0) {
-        parts.push(`Вербальная реакция: ${summarizeSpeech(opts.assistantText)}`);
-    }
-
-    const text = parts.join('. ');
-    if (!text.trim()) return;
-
-    memoryRepo.save({
-        subjectId: opts.subjectId,
-        text,
-        embedding: buildEmbedding(text),
-        tags: collectMemoryTags(opts.bundle),
-        metadata: {
-            actionId: opts.bundle.event.payload?.presetId,
-            sceneId: opts.bundle.event.sceneId,
-            userText: opts.userText || '',
-            assistantText: opts.assistantText || '',
-            infoTag: opts.infoTag || null,
-            timestamp: opts.bundle.event.timestamp
-        }
-    });
-}
-
-function collectMemoryTags(bundle: Awaited<ReturnType<typeof runGameTick>>): string[] {
-    const tags: string[] = [];
-    const result = bundle.output.result;
-    if (result.overload > 0.5) tags.push('overload');
-    if (result.pleasure > 0.4) tags.push('pleasure');
-    if (result.discomfort > 0.4) tags.push('pain');
-    if (bundle.compiledAction.type === 'context') tags.push('context');
-    if (Array.isArray((bundle.compiledAction as any).tags)) {
-        tags.push(...((bundle.compiledAction as any).tags as string[]));
-    }
-    return tags;
-}
-
-function summarizeCommand(text: string): string {
-    const normalized = text.trim().toLowerCase();
-    if (normalized.includes('контекст')) return 'изменяет позу/ограничения';
-    if (normalized.includes('удоб') || normalized.includes('комфорт')) return 'проверяет комфорт';
-    if (normalized.includes('как себя') || normalized.includes('самочувств')) return 'интересуется самочувствием';
-    if (normalized.includes('добрый') || normalized.includes('привет')) return 'поддерживает формальное приветствие';
-    if (normalized.includes('будем') && normalized.includes('менять')) return 'предупреждает о грядущем воздействии';
-    if (normalized.endsWith('?')) return 'задаёт уточняющий вопрос';
-    return 'произносит короткую инструкцию';
-}
-
-function summarizeSpeech(text: string): string {
-    const normalized = text.trim().toLowerCase();
-    if (normalized.includes('понятно') || normalized.includes('продолжаем')) return 'послушно подтверждает изменения';
-    if (normalized.includes('как обычно') || normalized.includes('в норме') || normalized.includes('стабиль')) return 'сухо сообщает о стабильности';
-    if (normalized.includes('удоб') || normalized.includes('комфорт')) return 'оценивает комфорт без эмоций';
-    if (normalized.includes('не') || normalized.includes('хватит')) return 'пытается возразить или обозначить границы';
-    if (normalized.includes('не чувствую') || normalized.includes('привыкла')) return 'говорит устало, подчёркивая привычку к давлению';
-    return 'отвечает коротко и сдержанно';
-}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

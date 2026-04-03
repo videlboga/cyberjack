@@ -107,11 +107,14 @@ button:disabled {
 
 .dashboard {
   flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   grid-template-columns: 1.25fr 1fr 1fr;
+  grid-template-rows: 1fr;
   gap: 18px;
   padding: 18px 24px 24px;
   overflow: visible;
+  align-items: stretch;
 }
 
 .column {
@@ -120,6 +123,7 @@ button:disabled {
   gap: 14px;
   min-height: 0;
   min-width: 0;
+  height: 100%;
 }
 
 .panel {
@@ -415,6 +419,8 @@ button:disabled {
 .chat-panel {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-log {
