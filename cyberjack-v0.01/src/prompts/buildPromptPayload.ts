@@ -116,7 +116,8 @@ export async function buildPromptPayload(
         let interpretation = event.action_type;
         try {
             const payload = JSON.parse(event.action_payload || '{}');
-            interpretation = payload.actionLabel || payload.presetId || interpretation;
+            interpretation =
+                payload?.narrative || payload?.actionLabel || payload?.presetId || interpretation;
         } catch {
             // fall back to event type
         }
@@ -152,15 +153,37 @@ export async function buildPromptPayload(
     const memoryBlock =
         includeMemory && stContext?.memoryText ? `\n[Память]\n${stContext.memoryText}` : '';
 
-    const recentSummaries = getRecentSummaries(subjectId, 3);
-    const chatSummaryBlock = recentSummaries.length
-        ? `\n[Конспект беседы]\n${recentSummaries
-              .map(entry => {
-                  const highlights = entry.important?.length ? ` (важно: ${entry.important.join(', ')})` : '';
-                  return `• ${entry.summary}${highlights}`;
-              })
-              .join('\n')}`
-        : '';
+    const recentSummaries = getRecentSummaries(subjectId, 5);
+    const intents = new Set<string>();
+    const responses = new Set<string>();
+    const extraStatements = new Set<string>();
+    const highlightSet = new Set<string>();
+
+    const summaryPieces: string[] = [];
+    const seenSummaries = new Set<string>();
+    for (const entry of recentSummaries) {
+        const parts = entry.summary
+            .split('\n')
+            .map(p => p.trim())
+            .filter(Boolean);
+        parts.forEach(part => {
+            if (!part) return;
+            const normalized = part.toLowerCase();
+            if (seenSummaries.has(normalized)) return;
+            seenSummaries.add(normalized);
+            summaryPieces.push(`• ${part}`);
+        });
+        (entry.important || []).forEach(label => {
+            if (label) highlightSet.add(label);
+        });
+    }
+
+    const chatSummaryBlock =
+        summaryPieces.length > 0
+            ? `\n[Конспект беседы]\n${summaryPieces.join('\n')}${
+                  highlightSet.size ? `\n(важно: ${Array.from(highlightSet).join(', ')})` : ''
+              }`
+            : '';
 
     const voiceInstructions = `\n- Говори от первого лица и реагируй так, будто воздействие происходит прямо сейчас.\n- Не пересказывай прошлые ответы, каждый раз формируй живую реплику.\n- Замечай тело: связки, позы, дискомфорт или облегчение. Если что-то неприятно, дай понять через интонацию.`;
 
@@ -189,7 +212,9 @@ export async function buildPromptPayload(
         : '';
 
     const aggregatedMemory = buildMemoryInsights(logs);
-    const vectorMemories = selectLongTermMemory(subjectId, structuredEvents, core, mappedPoints);
+    const vectorMemories = aggregatedMemory.length
+        ? []
+        : selectLongTermMemory(subjectId, structuredEvents, core, mappedPoints).slice(0, 2);
     const combinedMemories = [...aggregatedMemory, ...vectorMemories];
     const longTermSection = combinedMemories.length
         ? `\n[Долгосрочная память]\n${combinedMemories.map(entry => `- ${entry}`).join('\n')}`

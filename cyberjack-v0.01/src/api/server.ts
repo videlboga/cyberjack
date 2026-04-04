@@ -504,6 +504,8 @@ app.post('/api/contexts/toggle', (req, res) => {
         
         if (!targetContext) throw new Error("Context preset not found.");
 
+        const narratives: string[] = [];
+
         if (isActive) {
             // Find EXCLUSIVE contexts in the same slot/point
             if (targetContext.slot && targetContext.exclusiveWithinSlot) {
@@ -518,6 +520,7 @@ app.post('/api/contexts/toggle', (req, res) => {
                             { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
                             { removed: true, slot: aPreset.slot }
                         );
+                        narratives.push(removalText);
                     }
                 }
             } else if (targetContext.point_id && !targetContext.slot) { // Fallback to old behavior
@@ -532,6 +535,7 @@ app.post('/api/contexts/toggle', (req, res) => {
                             { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
                             { removed: true, point_id: aPreset.point_id }
                         );
+                        narratives.push(removalText);
                     }
                 }
             }
@@ -541,6 +545,7 @@ app.post('/api/contexts/toggle', (req, res) => {
                 { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative },
                 { added: true, point_id: targetContext.point_id, slot: targetContext.slot }
             );
+            narratives.push(forcedNarrative);
         } else {
             activeContextsRepo.remove(eventId, contextId);
             const removalText = describeContextNarrative(targetContext, 'removed', actorName);
@@ -548,8 +553,9 @@ app.post('/api/contexts/toggle', (req, res) => {
                 { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
                 { removed: true, point_id: targetContext.point_id }
             );
+            narratives.push(removalText);
         }
-        res.json({ success: true });
+        res.json({ success: true, narratives });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }

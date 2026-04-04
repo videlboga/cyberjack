@@ -1,6 +1,19 @@
 import { db } from './src/infrastructure/db';
 
-db.exec('DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets;');
+db.exec(`
+    PRAGMA foreign_keys = OFF;
+    DELETE FROM event_logs;
+    DELETE FROM active_contexts;
+    DELETE FROM scene_characters;
+    DELETE FROM scenes;
+    DELETE FROM subject_point_states;
+    DELETE FROM characters;
+    DELETE FROM character_relations;
+    DELETE FROM subjects;
+    DELETE FROM players;
+    DELETE FROM action_presets;
+    PRAGMA foreign_keys = ON;
+`);
 
 db.prepare(`
     INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
@@ -16,6 +29,11 @@ db.prepare(`
     INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `).run('S-01', 'body', 70, 50, 0, 0, 70, 50);
+
+db.prepare(`
+    INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+`).run('S-01', 'general', 55, 50, 0, 0, 55, 50);
 
 db.prepare(`
     INSERT INTO players (id, resources)

@@ -1,7 +1,7 @@
 import { EventRecord } from './buildRecentEventsSummary';
 
 interface ParsedEvent {
-    narrative: string;
+    narrative?: string;
     actorName: string;
     pointLabel: string;
     actionLabel: string;
@@ -16,7 +16,8 @@ interface ParsedEvent {
 }
 
 interface PointStat {
-    point: string;
+    key: string;
+    label: string;
     count: number;
     actors: Set<string>;
     actions: Set<string>;
@@ -43,11 +44,7 @@ function parseEvents(events: EventRecord[]): ParsedEvent[] {
             if (!payload) return null;
             const result = safeParse(event.result_payload);
             return {
-                narrative:
-                    payload.narrative ||
-                    payload.actionLabel ||
-                    payload.presetId ||
-                    'воздействие',
+                narrative: payload.narrative,
                 actorName: payload.actorName || 'Калибратор',
                 pointLabel: payload.pointLabel || payload.pointId || 'тело',
                 actionLabel: payload.actionLabel || payload.presetId || 'воздействие',
@@ -95,6 +92,49 @@ function describeFrequency(count: number): string {
     return 'пару раз';
 }
 
+function describePoint(point: string) {
+    const normalized = point.trim();
+    if (!normalized || normalized.toLowerCase() === 'общее воздействие') {
+        return 'ко мне';
+    }
+    return `к моим ${normalized}`;
+}
+
+function describeAction(actor: string, action: string, point: string) {
+    const target = describePoint(point);
+    return `${actor} использует «${action}» ${target}`.trim();
+}
+
+function describeContext(label: string, count: number) {
+    const freq = describeFrequency(count);
+    return `Меня ${freq} переводили в состояние «${label}».`;
+}
+
+function describeExtreme(event: ParsedEvent, suffix: string) {
+    const actor = event.actorName;
+    const action = event.actionLabel;
+    const target = describePoint(event.pointLabel);
+    return `${actor} применял «${action}» ${target}. ${suffix}`;
+}
+
+function describeOverloadPhrase(value: number) {
+    if (value >= 0.8) return 'Это почти вышибает меня из тела.';
+    if (value >= 0.6) return 'От этого тяжело удерживать внимание, словно накрывает волной.';
+    return 'Чувствую, как организм начинает сдавать, хотя я пытаюсь держаться.';
+}
+
+function describeDiscomfortPhrase(value: number) {
+    if (value >= 0.8) return 'Боль прожигает мгновенно, приходится сжимать зубы.';
+    if (value >= 0.6) return 'Боль тянет изнутри, и хочется отодвинуться.';
+    return 'Неприятно, но я лишь сильнее зажимаюсь.';
+}
+
+function describePleasurePhrase(value: number) {
+    if (value >= 0.8) return 'Нервная система вспыхивает удовольствием, и сложно скрыть реакцию.';
+    if (value >= 0.6) return 'Мягкая волна удовольствия накрывает и заставляет дышать глубже.';
+    return 'Чувствую лёгкую отдачу, как будто тело вспоминает приятное.';
+}
+
 export function buildMemoryInsights(events: EventRecord[]): string[] {
     if (!events.length) return [];
 
@@ -116,19 +156,20 @@ export function buildMemoryInsights(events: EventRecord[]): string[] {
             continue;
         }
 
-        const point = event.pointLabel.toLowerCase();
+        const pointKey = (event.pointLabel || 'тело').toLowerCase();
         const stat =
-            pointStats.get(point) ||
+            pointStats.get(pointKey) ||
             ({
-                point,
+                key: pointKey,
+                label: event.pointLabel || 'тело',
                 count: 0,
                 actors: new Set<string>(),
                 actions: new Set<string>()
             } as PointStat);
         stat.count += 1;
         stat.actors.add(event.actorName);
-        stat.actions.add(event.actionLabel.toLowerCase());
-        pointStats.set(point, stat);
+        stat.actions.add(event.actionLabel);
+        pointStats.set(pointKey, stat);
 
         const overload = event.result?.overload ?? 0;
         const discomfort = event.result?.discomfort ?? 0;
@@ -136,19 +177,15 @@ export function buildMemoryInsights(events: EventRecord[]): string[] {
 
         if (overload >= 0.45) {
             overloadInsights.push(
-                `${event.narrative}. Это доводило до перегрузки (уровень ${Math.round(overload * 100)}%).`
+                describeExtreme(event, describeOverloadPhrase(overload))
             );
         } else if (discomfort >= 0.4) {
             overloadInsights.push(
-                `${event.narrative}. От этого тело реагирует болью (около ${Math.round(
-                    discomfort * 100
-                )}%).`
+                describeExtreme(event, describeDiscomfortPhrase(discomfort))
             );
         } else if (pleasure >= 0.5) {
             overloadInsights.push(
-                `${event.narrative}. Нервная система фиксирует удовольствие (примерно ${Math.round(
-                    pleasure * 100
-                )}%).`
+                describeExtreme(event, describePleasurePhrase(pleasure))
             );
         }
     }
@@ -164,18 +201,28 @@ export function buildMemoryInsights(events: EventRecord[]): string[] {
             const actions = formatList([...stat.actions]);
             const freq = describeFrequency(stat.count);
             insights.push(
-                `${actors} ${freq} возвращается к моим ${stat.point}: в ход идут ${actions}.`
+                `${actors} ${freq} возвращается ${describePoint(stat.label)} — чаще всего ${actions}.`
             );
         });
 
     [...contextStats.values()]
         .sort((a, b) => b.count - a.count)
         .slice(0, 2)
-        .forEach(stat => {
-            insights.push(`Меня несколько раз переводили в состояние "${stat.label}".`);
-        });
+        .forEach(stat => insights.push(describeContext(stat.label, stat.count)));
 
     overloadInsights.slice(0, 2).forEach(text => insights.push(text));
 
-    return insights;
+    const finalInsights: string[] = [];
+    const seen = new Set<string>();
+    for (const text of insights) {
+        const normalized = text.trim();
+        if (!normalized) continue;
+        const key = normalized.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        finalInsights.push(normalized);
+        if (finalInsights.length >= 6) break;
+    }
+
+    return finalInsights;
 }

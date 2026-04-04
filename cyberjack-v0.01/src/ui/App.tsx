@@ -534,14 +534,10 @@ useEffect(() => {
       const data = await res.json();
       if (!data.success) throw new Error('Контекст не изменён');
       await fetchContexts();
-      await handleAction({
-        presetId: 'verbal_pressure',
-        textMessage: enable
-          ? `Контекст активирован: ${label}. Примени это состояние.`
-          : `Контекст снят: ${label}. Возвращайся к нейтральному состоянию.`,
-        labelOverride: `[Контекст] ${label}`,
-        intensityOverride: 0.4
-      });
+      if (Array.isArray(data.narratives) && data.narratives.length) {
+        const narrativeText = data.narratives.join('\n');
+        setChat((prev) => [...prev, { role: 'system', text: narrativeText }]);
+      }
     } catch (err) {
       console.error(err);
     }
