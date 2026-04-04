@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { dispatchEvent } from '../orchestration/eventRouter';
 import { subjectRepo, playerRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneRepo, chatMemoryRepo, characterRepo, characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
-import { sendToSillyTavern } from '../adapters/sillyTavernAdapter';
+import { sendToSillyTavern, sendNarratorDescription } from '../adapters/sillyTavernAdapter';
 import { activeConfig, updateConfig } from '../prompts/config';
 import { runGameTick } from '../orchestration/runGameTick';
 import { clamp } from '../engine/utils';
@@ -14,6 +14,7 @@ import { maybeSummarizeChat } from '../services/chatSummary';
 import { recordMemoryEvent } from '../services/memoryLayer';
 import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 import { buildPromptPayload } from '../prompts/buildPromptPayload';
+import { orchestrateSceneActors } from '../orchestration/sceneOrchestrator';
 import { describeActionNarrative, describeContextNarrative } from '../narrative/eventTemplates';
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string }): string {
@@ -312,23 +313,60 @@ app.post('/api/tick', async (req, res) => {
             role: entry.role,
             content: entry.content
         }));
-        const {reply: stReply, sentMessages} = await sendToSillyTavern(
-            promptPayload,
-            autoUserMessage,
-            chatHistory
-        );
+        const orchestration = orchestrateSceneActors(bundle);
+
+        let narratorReaction: string | null = null;
+        if (orchestration.narrator?.enabled && promptPayload.narratorPrompt) {
+            const narratorRes = await sendNarratorDescription(promptPayload.narratorPrompt);
+            narratorReaction = narratorRes?.reaction || null;
+        }
+
+        const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; reaction: string }> = [];
+        let primaryReply: { speech: string; reaction: string } | null = null;
+        let promptMessages: any = null;
+
+        if (orchestration.actorDecisions.length) {
+            for (const decision of orchestration.actorDecisions) {
+                const { reply, sentMessages } = await sendToSillyTavern(
+                    promptPayload,
+                    autoUserMessage,
+                    chatHistory
+                );
+
+                const structuredReply =
+                    reply && typeof reply === 'object'
+                        ? (reply as { speech: string; reaction: string })
+                        : { speech: String(reply || ''), reaction: '' };
+
+                actorReplies.push({
+                    actorId: decision.actorId,
+                    kind: decision.kind,
+                    tone: decision.reason,
+                    speech: structuredReply.speech,
+                    reaction: structuredReply.reaction
+                });
+
+                if (!primaryReply) {
+                    primaryReply = structuredReply;
+                    promptMessages = sentMessages;
+                }
+                break; // пока поддерживаем одного субъекта
+            }
+        } else {
+            promptMessages = [];
+        }
 
         if (autoUserMessage && autoUserMessage.trim().length > 0) {
             chatMemoryRepo.append(subjectId, 'user', autoUserMessage);
         }
-        if (stReply && typeof stReply === 'object' && (stReply as any).speech) {
-            chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech);
+        if (primaryReply?.speech) {
+            chatMemoryRepo.append(subjectId, 'assistant', primaryReply.speech);
         }
         recordMemoryEvent({
             subjectId,
             bundle,
             userText: autoUserMessage,
-            assistantText: typeof stReply === 'object' ? stReply.speech : '',
+            assistantText: primaryReply?.speech || '',
             infoTag: req.body?.presetId
         });
         maybeSummarizeChat(subjectId);
@@ -340,8 +378,10 @@ app.post('/api/tick', async (req, res) => {
             player,
             diagnostics: bundle.diagnostics,
             bundle,
-            reply: stReply,
-            promptMessages: sentMessages,
+            reply: primaryReply,
+            promptMessages,
+            actorReplies,
+            narratorReaction,
             actionTrace: bundle.trace || null,
             classifierLog: dynamicModifiers?.raw ?? null,
             classifierModel: dynamicModifiers?.model ?? null

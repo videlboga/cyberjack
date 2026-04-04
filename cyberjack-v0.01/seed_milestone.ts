@@ -21,6 +21,11 @@ db.prepare(`
 `).run('S-01', 'Test Subject', 60, 50, 40, 50, 50, 60, 50, 40, 50, 50);
 
 db.prepare(`
+    INSERT OR REPLACE INTO characters (id, name, kind, subject_id, current_scene_id)
+    VALUES (?, ?, 'subject', ?, 'lab')
+`).run('S-01', 'Test Subject', 'S-01');
+
+db.prepare(`
     INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `).run('S-01', 'hands', 40, 50, 0, 0, 40, 50);
@@ -77,5 +82,30 @@ db.prepare(`
     sharpness: 0.5,
     novelty: 0.3
 }));
+
+db.prepare(`
+    INSERT OR REPLACE INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`).run('S-02', 'Наблюдатель', 45, 55, 45, 40, 45, 45, 55, 45, 40, 45);
+
+db.prepare(`
+    INSERT OR REPLACE INTO characters (id, name, kind, subject_id, current_scene_id)
+    VALUES (?, ?, 'subject', ?, 'lab')
+`).run('S-02', 'Наблюдатель', 'S-02');
+
+db.prepare(`
+    INSERT OR REPLACE INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, baseline_attitude)
+    VALUES (?, ?, 1, 1, 1, ?, ?)
+`).run('S-01', 'S-02', 55, 50);
+
+db.prepare(`
+    INSERT OR REPLACE INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, baseline_attitude)
+    VALUES (?, ?, 1, 1, 1, ?, ?)
+`).run('S-02', 'S-01', 40, 45);
+
+db.prepare(`
+    INSERT OR REPLACE INTO scene_characters (scene_id, character_id, role, can_act, presence_state)
+    VALUES (?, ?, 'participant', 1, 'present')
+`).run('lab', 'S-02');
 
 console.log("Database seeded for milestone UI");

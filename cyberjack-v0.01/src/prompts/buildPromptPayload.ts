@@ -1,4 +1,4 @@
-import { SubjectCoreState, PromptPayload, TickOutput } from '../domain/types';
+import { SubjectCoreState, PromptPayload, TickOutput, NarratorPromptPayload } from '../domain/types';
 import { buildStateSummary } from './buildStateSummary';
 import { buildRecentEventsSummary, EventRecord } from './buildRecentEventsSummary';
 import { db } from '../infrastructure/db';
@@ -224,6 +224,13 @@ export async function buildPromptPayload(
     const memorySection = memoryBlock ? memoryBlock.trim() : '';
     const stateSection = `[Текущее состояние]\n${interpretationBlock.trim()}`;
 
+    const narratorPrompt: NarratorPromptPayload = {
+        subjectId,
+        recentEventsText: eventsText.trim(),
+        stateText: interpretationBlock.trim(),
+        instructions: cfg.narratorFormatInstructions
+    };
+
     const systemPrompt = [
         personaSection,
         loreBlock,
@@ -252,7 +259,8 @@ export async function buildPromptPayload(
         diagnostics: diagnostics.length ? diagnostics : undefined,
         sceneContext: contextSummary,
         relations,
-        longTermMemory: combinedMemories.length ? combinedMemories : undefined
+        longTermMemory: combinedMemories.length ? combinedMemories : undefined,
+        narratorPrompt
     };
 
     return {

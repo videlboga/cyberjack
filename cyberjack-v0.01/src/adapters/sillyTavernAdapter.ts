@@ -1,4 +1,4 @@
-import { PromptPayload } from '../domain/types';
+import { PromptPayload, NarratorPromptPayload } from '../domain/types';
 import { activeConfig } from '../prompts/config';
 
 export interface ChatMessage {
@@ -35,7 +35,7 @@ const ST_HEALTH_TIMEOUT = Number(process.env.SILLYTAVERN_HEALTH_TIMEOUT ?? 3000)
 const ST_HEALTH_ATTEMPTS = Math.max(1, Number(process.env.SILLYTAVERN_HEALTH_ATTEMPTS ?? 3));
 const ST_HEALTH_BACKOFF_MS = Number(process.env.SILLYTAVERN_HEALTH_BACKOFF_MS ?? 1000);
 
-const ST_JSON_SCHEMA = {
+const ST_CHARACTER_SCHEMA = {
     name: 'cyberjack_reply',
     strict: true,
     value: {
@@ -45,6 +45,19 @@ const ST_JSON_SCHEMA = {
             speech: { type: 'string' }
         },
         required: ['reaction', 'speech'],
+        additionalProperties: false
+    }
+};
+
+const ST_NARRATOR_SCHEMA = {
+    name: 'cyberjack_narrator',
+    strict: true,
+    value: {
+        type: 'object',
+        properties: {
+            reaction: { type: 'string' }
+        },
+        required: ['reaction'],
         additionalProperties: false
     }
 };
@@ -89,6 +102,30 @@ export function generateChatPayload(
     return messages;
 }
 
+function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
+    const sections: string[] = [];
+    if (activeConfig.adapters.narratorSystemPrefix) {
+        sections.push(activeConfig.adapters.narratorSystemPrefix);
+    }
+    if (prompt.stateText) {
+        sections.push(prompt.stateText);
+    }
+    if (prompt.recentEventsText) {
+        sections.push(prompt.recentEventsText);
+    }
+    const messages: ChatMessage[] = [
+        {
+            role: 'system',
+            content: sections.filter(Boolean).join('\n\n')
+        },
+        {
+            role: 'user',
+            content: prompt.instructions || activeConfig.adapters.narratorInputPrompt
+        }
+    ];
+    return messages;
+}
+
 function sanitizeJson(text: string): string {
     return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
@@ -97,9 +134,18 @@ function sanitizeJson(text: string): string {
  * Ставит SillyTavern в роль выраженческого слоя: мы строим промпт,
  * а сам рендеринг делегируем локально поднятому экземпляру ST через его backend endpoint.
  */
-function validateStructuredReply(candidate: any): candidate is { reaction: string; speech: string } {
+function validateCharacterReply(candidate: any): candidate is { reaction: string; speech: string } {
     if (!candidate || typeof candidate !== 'object') return false;
     return typeof candidate.reaction === 'string' && typeof candidate.speech === 'string';
+}
+
+function validateNarratorReply(candidate: any): candidate is { reaction: string } {
+    if (!candidate || typeof candidate !== 'object') return false;
+    return typeof candidate.reaction === 'string';
+}
+
+function validateStructuredReply(candidate: any): candidate is { reaction: string; speech: string } {
+    return validateCharacterReply(candidate);
 }
 
 function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
@@ -134,7 +180,7 @@ async function ensureHealthy() {
     throw new Error('SillyTavern не отвечает (health-check)');
 }
 
-async function requestCompletion(messages: ChatMessage[]): Promise<string> {
+async function requestCompletion(messages: ChatMessage[], schema: any): Promise<string> {
     const body: Record<string, any> = {
         type: ST_REQUEST_TYPE,
         chat_completion_source: ST_SOURCE,
@@ -145,7 +191,7 @@ async function requestCompletion(messages: ChatMessage[]): Promise<string> {
         stream: false,
         include_reasoning: false,
         request_images: false,
-        json_schema: ST_JSON_SCHEMA
+        json_schema: schema
     };
 
     if (Number.isFinite(ST_TOP_P)) {
@@ -197,7 +243,7 @@ export async function sendToSillyTavern(
         await ensureHealthy();
 
         for (let attempt = 0; attempt <= ST_JSON_RETRY_ATTEMPTS; attempt++) {
-            const rawText = await requestCompletion(messages);
+            const rawText = await requestCompletion(messages, ST_CHARACTER_SCHEMA);
 
             try {
                 const parsed = JSON.parse(sanitizeJson(rawText));
@@ -239,4 +285,45 @@ export async function sendToSillyTavern(
         reply: { reaction: '*Нет ответа от SillyTavern*', speech: '' },
         sentMessages: messages
     };
+}
+
+export async function sendNarratorDescription(
+    prompt: NarratorPromptPayload
+): Promise<{ reaction: string; sentMessages: ChatMessage[] }> {
+    const messages = generateNarratorPayload(prompt);
+
+    console.log(`\n========== НАРРАТОРСКИЙ ПРОМПТ В ST ==========`);
+    messages.forEach(m => {
+        console.log(`[Роль: ${m.role.toUpperCase()}]`);
+        console.log(m.content);
+        console.log(`----------------------------------------`);
+    });
+
+    try {
+        await ensureHealthy();
+
+        const rawText = await requestCompletion(messages, ST_NARRATOR_SCHEMA);
+        try {
+            const parsed = JSON.parse(sanitizeJson(rawText));
+            if (!validateNarratorReply(parsed)) {
+                throw new Error('invalid narrator structure');
+            }
+            return {
+                reaction: parsed.reaction,
+                sentMessages: messages
+            };
+        } catch (err) {
+            console.warn('[ST Adapter] Narrator reply parsing failed, returning raw text');
+            return {
+                reaction: rawText,
+                sentMessages: messages
+            };
+        }
+    } catch (err: any) {
+        console.error(`[ST Adapter] Narrator request failed: ${err.message}`);
+        return {
+            reaction: `*Ошибка связи с SillyTavern (narrator): ${err.message}*`,
+            sentMessages: messages
+        };
+    }
 }

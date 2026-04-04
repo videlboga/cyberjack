@@ -205,26 +205,35 @@ export interface PromptPayload {
     sceneContext?: string;
     longTermMemory?: string[];
     systemPrompt?: string;
+    narratorPrompt?: NarratorPromptPayload;
 }
 
-export interface TickBundle {
-    tickId: string;
-    event: GameEvent;
-    compiledAction: CompiledAction;
-    output: TickOutput;
-    stateBefore: {
-        core: SubjectCoreState;
-        point: SubjectPointState;
-    };
-    stateAfter: {
-        core: SubjectCoreState;
-        point: SubjectPointState;
-    };
-    diagnostics?: any;
-    prompt: PromptPayload;
-    scenario?: any;
-    metadata?: Record<string, any>;
-    trace?: Array<{ label: string; values: any }>;
+export interface NarratorPromptPayload {
+    subjectId: string;
+    recentEventsText: string;
+    stateText: string;
+    instructions?: string;
+}
+
+export interface NarratorReply {
+    reaction: string;
+}
+
+export interface NarratorDecision {
+    enabled: boolean;
+    reason?: string;
+}
+
+
+export interface ActorDecision {
+    actorId: string;
+    kind: 'reactive' | 'proactive';
+    reason?: string;
+}
+
+export interface OrchestratedTurn {
+    narrator?: NarratorDecision;
+    actorDecisions: ActorDecision[];
 }
 
 export interface DiagnosticsOutput {
@@ -236,6 +245,7 @@ export interface DiagnosticsOutput {
         opennessDelta: number;
     };
 }
+
 
 export interface TickBundle {
     tickId: string;

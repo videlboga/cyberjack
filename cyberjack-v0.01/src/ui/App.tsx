@@ -448,8 +448,25 @@ useEffect(() => {
       setEngineResult(data.tickResult);
       setClassifierLog(data.classifierLog);
 
-      if (data.reply) {
-        setPhysicalReaction(data.reply.reaction || '');
+      if (data.narratorReaction || data.reply?.reaction) {
+        setPhysicalReaction(data.narratorReaction || data.reply?.reaction || '');
+      }
+
+      const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string }> = data.actorReplies || [];
+      if (actorReplies.length) {
+        const subjectName = data.state?.name || data.state?.subject?.name || 'Субъект';
+        setChat((prev) => [
+          ...prev,
+          ...actorReplies.map((reply) => ({
+            role: 'subject',
+            text: reply.speech || '(молчит)',
+            actorId: reply.actorId,
+            kind: reply.kind,
+            tone: reply.tone,
+            label: reply.actorId === subjectId ? subjectName : reply.actorId
+          }))
+        ]);
+      } else if (data.reply) {
         if (data.reply.speech !== undefined) {
           const speechText = data.reply.speech || '';
           setChat((prev) => [
