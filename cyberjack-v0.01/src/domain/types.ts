@@ -4,6 +4,33 @@ export interface SubjectCoreState {
     openness: number;
     plasticity: number;
     attitude: number;
+    baselineSensitivity?: number;
+    baselineCapacity?: number;
+    baselineOpenness?: number;
+    baselinePlasticity?: number;
+    baselineAttitude?: number;
+}
+
+export type CharacterKind = 'subject' | 'player' | 'npc';
+
+export interface Character {
+    id: string;
+    name: string;
+    kind: CharacterKind;
+    subjectId?: string | null;
+    playerId?: string | null;
+    currentSceneId?: string | null;
+}
+
+export interface CharacterRelation {
+    fromId: string;
+    toId: string;
+    knows: boolean;
+    present: boolean;
+    canInteract: boolean;
+    attitude: number;
+    baselineAttitude?: number;
+    target?: Character;
 }
 
 export interface SubjectPointState {
@@ -12,6 +39,8 @@ export interface SubjectPointState {
     localAttitude: number;
     familiarity?: number;
     exposureCount?: number;
+    baselineLocalSensitivity?: number;
+    baselineLocalAttitude?: number;
 }
 
 export interface ActionSourceInfo {
@@ -118,6 +147,14 @@ export interface Scene {
     availableActions: string[];
     actionCosts?: Record<string, Record<string, number>>;
     transitions?: SceneTransitionRule[];
+    characters?: SceneCharacterPresence[];
+}
+
+export interface SceneCharacterPresence {
+    character: Character;
+    role: string;
+    canAct: boolean;
+    presenceState: string;
 }
 export interface Mission { id: string; progress: number; }
 export interface AnatomyPointPreset {
@@ -152,6 +189,7 @@ export interface ContextPreset {
 export interface PromptPayload {
     subjectId: string;
     sceneId?: string;
+    relations?: CharacterRelation[];
     currentStateSummary: {
         interpretation: string;
         attitude: number;
@@ -167,6 +205,26 @@ export interface PromptPayload {
     sceneContext?: string;
     longTermMemory?: string[];
     systemPrompt?: string;
+}
+
+export interface TickBundle {
+    tickId: string;
+    event: GameEvent;
+    compiledAction: CompiledAction;
+    output: TickOutput;
+    stateBefore: {
+        core: SubjectCoreState;
+        point: SubjectPointState;
+    };
+    stateAfter: {
+        core: SubjectCoreState;
+        point: SubjectPointState;
+    };
+    diagnostics?: any;
+    prompt: PromptPayload;
+    scenario?: any;
+    metadata?: Record<string, any>;
+    trace?: Array<{ label: string; values: any }>;
 }
 
 export interface DiagnosticsOutput {

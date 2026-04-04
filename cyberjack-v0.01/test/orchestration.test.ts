@@ -7,7 +7,7 @@ import { eventQueries } from '../src/infrastructure/eventQueries';
 
 describe('Orchestration Integration', () => {
     beforeEach(() => {
-        db.exec('DELETE FROM event_logs; DELETE FROM active_contexts; DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets;');
+        db.exec('DELETE FROM scene_characters; DELETE FROM character_relations; DELETE FROM event_logs; DELETE FROM active_contexts; DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets; DELETE FROM characters;');
         
         // Seed DB
         subjectRepo.save('sub_1', 'Test Subject', DEFAULT_CONFIG.core.defaults);

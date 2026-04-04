@@ -12,6 +12,7 @@ export interface LoreTagDefinition {
     excludes?: string[];
     personaHooks?: string[];
     narrative?: TagNarrative;
+    category?: string;
 }
 
 export interface TagNarrative {
@@ -47,6 +48,8 @@ export interface GeneratedCharacterContext {
     personaNotes: string[];
     seed: string;
     narrative?: NarrativeSummary;
+    originStatements?: string[];
+    assetReasons?: string[];
 }
 
 export interface NarrativeSummary {

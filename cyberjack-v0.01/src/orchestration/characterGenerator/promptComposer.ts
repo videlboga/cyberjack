@@ -9,6 +9,10 @@ interface PromptSectionsOptions {
     identityBlocks?: string[];
     historyBlocks?: string[];
     activationBlocks?: string[];
+    originBlocks?: string[];
+    assetBlocks?: string[];
+    originTitle?: string;
+    assetTitle?: string;
 }
 
 export interface PromptSectionsResult {
@@ -20,6 +24,8 @@ export interface PromptSectionsResult {
     identityText: string;
     historyText: string;
     activationText: string;
+    originText?: string;
+    assetText?: string;
 }
 
 export function composePromptSections(
@@ -28,6 +34,8 @@ export function composePromptSections(
 ): PromptSectionsResult {
     const traitsTitle = options.traitsTitle || '[Характер и повадки]';
     const loreTitle = options.loreTitle || '[Записки из лора]';
+    const originTitle = options.originTitle || '[Происхождение]';
+    const assetTitle = options.assetTitle || '[Почему ты стал активом]';
 
     const hasIdentityBlocks = Array.isArray(options.identityBlocks);
     const hasHistoryBlocks = Array.isArray(options.historyBlocks);
@@ -38,6 +46,8 @@ export function composePromptSections(
     const historyParagraphs =
         hasHistoryBlocks ? options.historyBlocks || [] : [options.history];
     const activationParagraphs = hasActivationBlocks ? options.activationBlocks || [] : [];
+    const originParagraphs = Array.isArray(options.originBlocks) ? options.originBlocks : [];
+    const assetParagraphs = Array.isArray(options.assetBlocks) ? options.assetBlocks : [];
 
     const traitBlock = context.personaNotes.length
         ? context.personaNotes.map((note, idx) => `${idx + 1}. ${note}`).join('\n')
@@ -46,12 +56,22 @@ export function composePromptSections(
     const identityText = identityParagraphs.filter(Boolean).join(' ');
     const historyText = historyParagraphs.filter(Boolean).join('\n\n');
     const activationText = activationParagraphs.filter(Boolean).join('\n\n');
+    const originText = originParagraphs.filter(Boolean).join('\n');
+    const assetText = assetParagraphs.filter(Boolean).join('\n');
+
+    const originBlock = originText ? `${originTitle}\n${originText}` : '';
+    const assetBlock = assetText ? `${assetTitle}\n${assetText}` : '';
 
     const personaWithoutTraits = [identityText, historyText, activationText]
         .filter(Boolean)
         .join('\n\n');
 
-    const personaText = [personaWithoutTraits, `${traitsTitle}\n${traitBlock}`]
+    const personaText = [
+        personaWithoutTraits,
+        originBlock,
+        assetBlock,
+        `${traitsTitle}\n${traitBlock}`
+    ]
         .filter(Boolean)
         .join('\n\n');
 
@@ -60,7 +80,7 @@ export function composePromptSections(
         : '';
 
     const systemPrompt = [
-        personaWithoutTraits,
+        [personaWithoutTraits, originBlock, assetBlock].filter(Boolean).join('\n\n'),
         loreBlock,
         `[Инструкции]: ${options.instructions}`
     ]
@@ -75,6 +95,8 @@ export function composePromptSections(
         systemPrompt,
         identityText,
         historyText,
-        activationText
+        activationText,
+        originText,
+        assetText
     };
 }

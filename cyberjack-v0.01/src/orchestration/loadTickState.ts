@@ -1,12 +1,15 @@
 // src/orchestration/loadTickState.ts
-import { subjectRepo, pointStateRepo, playerRepo, sceneRepo } from '../infrastructure/repositories';
-import { SubjectCoreState, SubjectPointState, PlayerState, Scene } from '../domain/types';
+import { subjectRepo, pointStateRepo, playerRepo, sceneRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
+import { SubjectCoreState, SubjectPointState, PlayerState, Scene, CharacterRelation, Character } from '../domain/types';
 
 export interface TickState {
     core: SubjectCoreState;
     point: SubjectPointState;
     player: PlayerState;
     scene: Scene;
+    relation: CharacterRelation;
+    subjectCharacter: Character;
+    playerCharacter: Character;
 }
 
 export function loadTickState(subjectId: string, pointId: string, playerId: string, sceneId: string): TickState {
@@ -22,5 +25,12 @@ export function loadTickState(subjectId: string, pointId: string, playerId: stri
     const scene = sceneRepo.get(sceneId);
     if (!scene) throw new Error(`Scene ${sceneId} not found`);
 
-    return { core, point, player, scene };
+    const subjectCharacter = characterRepo.ensureSubject(subjectId, core.name || subjectId);
+    const playerCharacter = characterRepo.ensurePlayer(playerId, playerId);
+    const relation = characterRelationRepo.ensure(subjectCharacter.id, playerCharacter.id, {
+        attitude: core.attitude,
+        baselineAttitude: core.baselineAttitude ?? core.attitude
+    });
+
+    return { core, point, player, scene, relation, subjectCharacter, playerCharacter };
 }

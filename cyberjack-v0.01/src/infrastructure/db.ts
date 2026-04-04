@@ -10,6 +10,30 @@ db.exec(`
     resources TEXT NOT NULL -- JSON string for resources map
   );
 
+  CREATE TABLE IF NOT EXISTS characters (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    subject_id TEXT,
+    player_id TEXT,
+    current_scene_id TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS character_relations (
+    from_id TEXT NOT NULL,
+    to_id TEXT NOT NULL,
+    knows INTEGER DEFAULT 1,
+    present INTEGER DEFAULT 1,
+    can_interact INTEGER DEFAULT 1,
+    attitude REAL NOT NULL DEFAULT 50,
+    baseline_attitude REAL,
+    PRIMARY KEY (from_id, to_id),
+    FOREIGN KEY (from_id) REFERENCES characters(id),
+    FOREIGN KEY (to_id) REFERENCES characters(id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_character_relations_from ON character_relations(from_id);
+
   CREATE TABLE IF NOT EXISTS subjects (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -17,7 +41,12 @@ db.exec(`
     capacity REAL NOT NULL,
     openness REAL NOT NULL,
     plasticity REAL NOT NULL,
-    attitude REAL NOT NULL
+    attitude REAL NOT NULL,
+    baseline_sensitivity REAL,
+    baseline_capacity REAL,
+    baseline_openness REAL,
+    baseline_plasticity REAL,
+    baseline_attitude REAL
   );
 
   CREATE TABLE IF NOT EXISTS subject_point_states (
@@ -25,6 +54,10 @@ db.exec(`
     point_id TEXT NOT NULL,
     local_sensitivity REAL NOT NULL,
     local_attitude REAL NOT NULL,
+    familiarity REAL DEFAULT 0,
+    exposure_count REAL DEFAULT 0,
+    baseline_local_sensitivity REAL,
+    baseline_local_attitude REAL,
     PRIMARY KEY (subject_id, point_id)
   );
 
@@ -42,6 +75,17 @@ db.exec(`
     available_actions TEXT NOT NULL, -- JSON
     action_costs TEXT DEFAULT '{}',
     transitions TEXT DEFAULT '[]'
+  );
+
+  CREATE TABLE IF NOT EXISTS scene_characters (
+    scene_id TEXT NOT NULL,
+    character_id TEXT NOT NULL,
+    role TEXT DEFAULT 'participant',
+    can_act INTEGER DEFAULT 1,
+    presence_state TEXT DEFAULT 'present',
+    PRIMARY KEY (scene_id, character_id),
+    FOREIGN KEY (scene_id) REFERENCES scenes(id),
+    FOREIGN KEY (character_id) REFERENCES characters(id)
   );
 
   CREATE TABLE IF NOT EXISTS action_presets (
@@ -72,7 +116,11 @@ db.exec(`
     blocked_functions TEXT DEFAULT '[]',
     boosted_functions TEXT DEFAULT '[]',
     required_functions TEXT DEFAULT '[]',
-    priority INTEGER DEFAULT 0
+    priority INTEGER DEFAULT 0,
+    self_applicable INTEGER DEFAULT 0,
+    self_text TEXT,
+    forced_text TEXT,
+    removal_text TEXT
   );
 
   CREATE TABLE IF NOT EXISTS active_contexts (
@@ -129,5 +177,38 @@ const safeAddColumn = (table: string, column: string, definition: string) => {
 
 safeAddColumn('subject_point_states', 'familiarity', 'REAL DEFAULT 0');
 safeAddColumn('subject_point_states', 'exposure_count', 'REAL DEFAULT 0');
+safeAddColumn('subject_point_states', 'baseline_local_sensitivity', 'REAL');
+safeAddColumn('subject_point_states', 'baseline_local_attitude', 'REAL');
 safeAddColumn('scenes', 'action_costs', 'TEXT DEFAULT \'{}\'');
 safeAddColumn('scenes', 'transitions', 'TEXT DEFAULT \'[]\'');
+safeAddColumn('characters', 'current_scene_id', 'TEXT');
+safeAddColumn('subjects', 'baseline_sensitivity', 'REAL');
+safeAddColumn('subjects', 'baseline_capacity', 'REAL');
+safeAddColumn('subjects', 'baseline_openness', 'REAL');
+safeAddColumn('subjects', 'baseline_plasticity', 'REAL');
+safeAddColumn('subjects', 'baseline_attitude', 'REAL');
+safeAddColumn('character_relations', 'baseline_attitude', 'REAL');
+safeAddColumn('context_presets', 'self_applicable', 'INTEGER DEFAULT 0');
+safeAddColumn('context_presets', 'self_text', 'TEXT');
+safeAddColumn('context_presets', 'forced_text', 'TEXT');
+safeAddColumn('context_presets', 'removal_text', 'TEXT');
+
+db.exec(`
+  UPDATE subjects
+  SET baseline_sensitivity = COALESCE(baseline_sensitivity, sensitivity),
+      baseline_capacity = COALESCE(baseline_capacity, capacity),
+      baseline_openness = COALESCE(baseline_openness, openness),
+      baseline_plasticity = COALESCE(baseline_plasticity, plasticity),
+      baseline_attitude = COALESCE(baseline_attitude, attitude)
+`);
+
+db.exec(`
+  UPDATE subject_point_states
+  SET baseline_local_sensitivity = COALESCE(baseline_local_sensitivity, local_sensitivity),
+      baseline_local_attitude = COALESCE(baseline_local_attitude, local_attitude)
+`);
+
+db.exec(`
+  UPDATE character_relations
+  SET baseline_attitude = COALESCE(baseline_attitude, attitude)
+`);

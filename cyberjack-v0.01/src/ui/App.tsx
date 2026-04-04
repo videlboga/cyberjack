@@ -6,6 +6,26 @@ type ChatEntry = {
   text: string;
 };
 
+type RelationEntry = {
+  toId: string;
+  knows: boolean;
+  present: boolean;
+  canInteract: boolean;
+  attitude: number;
+  target?: {
+    id: string;
+    name: string;
+    kind: string;
+  };
+};
+
+type CharacterInfo = {
+  id: string;
+  name: string;
+  kind: string;
+  currentSceneId?: string | null;
+};
+
 const API_BASE = 'http://localhost:3001';
 
 const CORE_FIELDS = [
@@ -31,10 +51,22 @@ export function App() {
   const [engineResult, setEngineResult] = useState<any>(null);
   const [physicalReaction, setPhysicalReaction] = useState('');
   const [promptLog, setPromptLog] = useState<any[]>([]);
+  const [actionTrace, setActionTrace] = useState<any[]>([]);
+  const [tabState, setTabState] = useState<'prompt' | 'trace'>('prompt');
   const [contexts, setContexts] = useState<any[]>([]);
   const [activeContexts, setActiveContexts] = useState<string[]>([]);
+  const [relations, setRelations] = useState<RelationEntry[]>([]);
+  const [characters, setCharacters] = useState<CharacterInfo[]>([]);
+  const [perspectiveId, setPerspectiveId] = useState<string>('');
+  const [relationDrafts, setRelationDrafts] = useState<Record<string, RelationEntry>>({});
+  const [selectedRelationId, setSelectedRelationId] = useState<string | null>(null);
+  const [savingRelation, setSavingRelation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [scene, setScene] = useState<any>(null);
+  const [scenesList, setScenesList] = useState<any[]>([]);
+  const [moveCharacterId, setMoveCharacterId] = useState<string>('');
+  const [moveSceneId, setMoveSceneId] = useState<string>('');
+  const [movingCharacter, setMovingCharacter] = useState(false);
   const [playerDraft, setPlayerDraft] = useState<Record<string, number>>({});
   const [savingPlayer, setSavingPlayer] = useState(false);
   const [coreDraft, setCoreDraft] = useState({
@@ -57,9 +89,29 @@ export function App() {
     fetchState(pointId);
   }, [pointId]);
 
+useEffect(() => {
+  fetchContexts();
+}, []);
+
+useEffect(() => {
+  fetchScenesList();
+}, []);
+
   useEffect(() => {
-    fetchContexts();
-  }, []);
+    if (!relations.length) {
+      setRelationDrafts({});
+      setSelectedRelationId(null);
+      return;
+    }
+    const map: Record<string, RelationEntry> = {};
+    relations.forEach((rel) => {
+      map[rel.toId] = { ...rel };
+    });
+    setRelationDrafts(map);
+    if (!selectedRelationId || !map[selectedRelationId]) {
+      setSelectedRelationId(relations[0].toId);
+    }
+  }, [relations, selectedRelationId]);
 
   useEffect(() => {
     if (subject) {
@@ -73,11 +125,23 @@ export function App() {
     }
   }, [subject]);
 
-  useEffect(() => {
-    if (player?.resources) {
-      setPlayerDraft(player.resources);
-    }
-  }, [player]);
+useEffect(() => {
+  if (player?.resources) {
+    setPlayerDraft(player.resources);
+  }
+}, [player]);
+
+useEffect(() => {
+  if (!moveCharacterId && characters.length) {
+    setMoveCharacterId(characters[0].id);
+  }
+}, [characters, moveCharacterId]);
+
+useEffect(() => {
+  if (!moveSceneId && scenesList.length) {
+    setMoveSceneId(scenesList[0].id);
+  }
+}, [scenesList, moveSceneId]);
 
   const groupedContexts = useMemo(() => {
     const groups: Record<string, any[]> = {};
@@ -99,6 +163,127 @@ export function App() {
   const selectedActionInfo = actions.find((a) => a.id === selectedAction);
   const selectedActionCosts = selectedActionInfo?.costs || null;
 
+  const perspectiveCharacter = useMemo(() => {
+    if (!perspectiveId) return null;
+    return characters.find((c) => c.id === perspectiveId) || null;
+  }, [characters, perspectiveId]);
+
+  const locationMap = useMemo(() => {
+    const map: Record<string, string | null | undefined> = {};
+    characters.forEach((ch) => {
+      map[ch.id] = ch.currentSceneId ?? null;
+    });
+    return map;
+  }, [characters]);
+
+  const isNear = (targetId?: string | null) => {
+    if (!targetId) return false;
+    const base = perspectiveCharacter ? locationMap[perspectiveCharacter.id] : null;
+    if (!base) return false;
+    return (locationMap[targetId] ?? null) === base;
+  };
+
+  const selectedRelation = selectedRelationId ? relationDrafts[selectedRelationId] : null;
+
+  const formatNumber = (value: any, digits = 1) => {
+    if (value === undefined || value === null || value === '') return '—';
+    const num = Number(value);
+    if (Number.isNaN(num)) return '—';
+    return num.toFixed(digits);
+  };
+
+  const fetchRelations = async (fromId: string) => {
+    if (!fromId) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/relations?fromId=${fromId}`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Не удалось получить связи');
+      setRelations(data.relations || []);
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || 'Ошибка загрузки связей');
+    }
+  };
+
+  const perspectiveOptions = useMemo(() => {
+    if (characters.length) return characters;
+    if (subject) return [{ id: subject.id, name: subject.name, kind: 'subject' }];
+    return [];
+  }, [characters, subject]);
+
+  const handlePerspectiveChange = (id: string) => {
+    setPerspectiveId(id);
+    setSelectedRelationId(null);
+    fetchRelations(id);
+  };
+
+  const updateRelationDraft = (field: keyof RelationEntry, value: boolean | number) => {
+    if (!selectedRelationId) return;
+    setRelationDrafts((prev) => ({
+      ...prev,
+      [selectedRelationId]: {
+        ...prev[selectedRelationId],
+        [field]: value
+      }
+    }));
+  };
+
+  const saveSelectedRelation = async () => {
+    if (!selectedRelation) return;
+    setSavingRelation(true);
+    setErrorMessage('');
+    try {
+      const ownerId = perspectiveId || subject?.id || 'S-01';
+      const res = await fetch(`${API_BASE}/api/relations/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fromId: ownerId,
+          toId: selectedRelation.toId,
+          knows: selectedRelation.knows,
+          present: selectedRelation.present,
+          canInteract: selectedRelation.canInteract,
+          attitude: selectedRelation.attitude
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Не удалось обновить связь');
+      }
+      await fetchRelations(ownerId);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Ошибка обновления связи');
+    } finally {
+      setSavingRelation(false);
+    }
+  };
+
+  const moveCharacter = async () => {
+    if (!moveCharacterId || !moveSceneId) return;
+    setMovingCharacter(true);
+    setErrorMessage('');
+    try {
+      const res = await fetch(`${API_BASE}/api/scene/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          characterId: moveCharacterId,
+          sceneId: moveSceneId
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Не удалось переместить персонажа');
+      }
+      await fetchScenesList();
+      await fetchState(pointId);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Ошибка перемещения персонажа');
+    } finally {
+      setMovingCharacter(false);
+    }
+  };
+
   async function fetchState(targetPointId: string) {
     try {
       const res = await fetch(`${API_BASE}/api/state?subjectId=${subjectId}&pointId=${targetPointId}`);
@@ -110,6 +295,16 @@ export function App() {
       setActions(data.availableActions || []);
       setScene(data.scene);
       setPlayer(data.player);
+      setCharacters(data.characters || []);
+      if (data.scene?.id) {
+        setMoveSceneId((prev) => prev || data.scene.id);
+      }
+
+      const currentPerspective = perspectiveId || data.subject?.id || 'S-01';
+      if (!perspectiveId) {
+        setPerspectiveId(currentPerspective);
+      }
+      await fetchRelations(currentPerspective);
 
       const availablePointIds = (data.availablePoints || []).map((p: any) => p.id);
       if (availablePointIds.length && !availablePointIds.includes(targetPointId)) {
@@ -135,6 +330,17 @@ export function App() {
       if (!data.success) throw new Error('Не удалось загрузить контексты');
       setContexts(data.allPresets || []);
       setActiveContexts((data.activeIds || []).map((item: any) => item.id || item.context_id || item));
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function fetchScenesList() {
+    try {
+      const res = await fetch(`${API_BASE}/api/scenes`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Не удалось получить сцены');
+      setScenesList(data.scenes || []);
     } catch (err) {
       console.error(err);
     }
@@ -258,6 +464,9 @@ export function App() {
       if (data.promptMessages) {
         setPromptLog(data.promptMessages);
       }
+      if (data.actionTrace) {
+        setActionTrace(data.actionTrace);
+      }
       await fetchState(pointId);
       await fetchContexts();
     } catch (err: any) {
@@ -299,6 +508,7 @@ export function App() {
         }
       }
       if (data.promptMessages) setPromptLog(data.promptMessages);
+      if (data.actionTrace) setActionTrace(data.actionTrace);
       await fetchState(pointId);
       await fetchContexts();
     } catch (err: any) {
@@ -421,16 +631,23 @@ export function App() {
                 <div className="badge-row">{renderBadges()}</div>
               </div>
               <div className="core-grid">
-                {CORE_FIELDS.map((field) => (
-                  <label key={field.key}>
-                    <span>{field.label}</span>
-                    <input
-                      type="number"
-                      value={coreDraft[field.key]}
-                      onChange={(e) => handleCoreValueChange(field.key, Number(e.target.value))}
-                    />
-                  </label>
-                ))}
+                {CORE_FIELDS.map((field) => {
+                  const baselineKey = `baseline_${field.key}` as keyof typeof subject;
+                  const baselineValue = (subject as any)?.[baselineKey];
+                  return (
+                    <label key={field.key} className="core-field">
+                      <div className="core-field-label">
+                        <span>{field.label}</span>
+                        <small className="norm-hint">Норма: {formatNumber(baselineValue)}</small>
+                      </div>
+                      <input
+                        type="number"
+                        value={coreDraft[field.key]}
+                        onChange={(e) => handleCoreValueChange(field.key, Number(e.target.value))}
+                      />
+                    </label>
+                  );
+                })}
               </div>
               <div className="panel-footer">
                 <button onClick={saveCoreState} disabled={savingCore}>
@@ -447,9 +664,196 @@ export function App() {
                   </select>
                 </div>
                 <div className="point-stats">
-                  <span>Local Sensitivity: {subject.point?.local_sensitivity?.toFixed(1) ?? '-'}</span>
-                  <span>Local Attitude: {subject.point?.local_attitude?.toFixed(1) ?? '-'}</span>
+                  <div>
+                    <span>Local Sensitivity: {formatNumber(subject.point?.local_sensitivity)}</span>
+                    <small className="norm-hint inline">Норма: {formatNumber(subject.point?.baseline_local_sensitivity)}</small>
+                  </div>
+                  <div>
+                    <span>Local Attitude: {formatNumber(subject.point?.local_attitude)}</span>
+                    <small className="norm-hint inline">Норма: {formatNumber(subject.point?.baseline_local_attitude)}</small>
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="panel relations-panel">
+              <div className="panel-header">
+                <div>
+                  <h3>Персонажи и отношения</h3>
+                  {perspectiveCharacter ? (
+                    <span className="subtitle">Перспектива: {perspectiveCharacter.name}</span>
+                  ) : (
+                    <span className="subtitle">Перспектива: {subject?.name || subjectId}</span>
+                  )}
+                </div>
+              </div>
+              <div className="perspective-controls">
+                <span className="perspective-label">Перспективы</span>
+                <div className="perspective-list">
+                  {perspectiveOptions.map((ch) => (
+                    <button
+                      key={ch.id}
+                      className={`perspective-pill ${ch.id === (perspectiveId || subject?.id) ? 'active' : ''}`}
+                      onClick={() => handlePerspectiveChange(ch.id)}
+                    >
+                      <span>{ch.name}</span>
+                      <small>{ch.kind === 'player' ? 'Калибратор' : ch.kind === 'npc' ? 'NPC' : 'Субъект'}</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {relations.length ? (
+                <div className="relations-body">
+                  <div className="relations-list">
+                    {relations.map((rel) => {
+                      const active = rel.toId === selectedRelationId;
+                      return (
+                        <button
+                          key={rel.toId}
+                          className={`relation-pill ${active ? 'active' : ''}`}
+                          onClick={() => setSelectedRelationId(rel.toId)}
+                        >
+                          <div className="relation-name">
+                            {rel.target?.name || rel.toId}
+                            <span className="relation-kind">
+                              {rel.target?.kind === 'player'
+                                ? 'Калибратор'
+                                : rel.target?.kind === 'npc'
+                                ? 'NPC'
+                                : 'Субъект'}
+                            </span>
+                          </div>
+                          <div className="relation-pill-status">
+                            <span className={`relation-flag ${rel.knows ? 'on' : 'off'}`}>знает</span>
+                            <span className={`relation-flag ${isNear(rel.toId) ? 'on' : 'off'}`}>рядом</span>
+                            <span className={`relation-flag ${rel.canInteract ? 'on' : 'off'}`}>может</span>
+                          </div>
+                          <div className="relation-pill-attitude">{rel.attitude.toFixed(0)}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedRelation ? (
+                    <div className="relation-detail">
+                      <div className="relation-detail-header">
+                        <h4>{selectedRelation.target?.name || selectedRelation.toId}</h4>
+                        <span className="relation-kind">
+                          {selectedRelation.target?.kind === 'player'
+                            ? 'Калибратор'
+                            : selectedRelation.target?.kind === 'npc'
+                            ? 'NPC'
+                            : 'Субъект'}
+                        </span>
+                      </div>
+                      <div className="relation-flags">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={!!selectedRelation.knows}
+                            onChange={(e) => updateRelationDraft('knows', e.target.checked)}
+                          />
+                          Знает
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={!!selectedRelation.canInteract}
+                            onChange={(e) => updateRelationDraft('canInteract', e.target.checked)}
+                          />
+                          Может взаимодействовать
+                        </label>
+                        <div className={`relation-near-flag ${isNear(selectedRelation.toId) ? 'on' : 'off'}`}>
+                          Рядом
+                        </div>
+                      </div>
+                      <div className="relation-attitude-editor">
+                        <span>Отношение</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={selectedRelation.attitude}
+                          onChange={(e) => updateRelationDraft('attitude', Number(e.target.value))}
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={selectedRelation.attitude}
+                          onChange={(e) => updateRelationDraft('attitude', Number(e.target.value) || 0)}
+                        />
+                      </div>
+                      <button onClick={saveSelectedRelation} disabled={savingRelation}>
+                        {savingRelation ? 'Сохранение...' : 'Сохранить связь'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relation-detail empty">Выберите персонажа из списка</div>
+                  )}
+                </div>
+              ) : (
+                <span className="subtitle">Нет других персонажей</span>
+              )}
+            </div>
+
+            <div className="panel locations-panel">
+              <div className="panel-header">
+                <div>
+                  <h3>Локации</h3>
+                  <span className="subtitle">Распределение персонажей</span>
+                </div>
+                <button onClick={fetchScenesList}>Обновить</button>
+              </div>
+              <div className="move-controls">
+                <div>
+                  <label>Персонаж</label>
+                  <select value={moveCharacterId} onChange={(e) => setMoveCharacterId(e.target.value)}>
+                    {characters.map((ch) => (
+                      <option key={ch.id} value={ch.id}>
+                        {ch.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>Локация</label>
+                  <select value={moveSceneId} onChange={(e) => setMoveSceneId(e.target.value)}>
+                    {scenesList.map((sc) => (
+                      <option key={sc.id} value={sc.id}>
+                        {sc.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={moveCharacter} disabled={movingCharacter || !moveCharacterId || !moveSceneId}>
+                  {movingCharacter ? 'Перемещение...' : 'Переместить'}
+                </button>
+              </div>
+              <div className="scenes-grid">
+                {scenesList.map((sc) => (
+                  <div key={sc.id} className={`scene-card ${scene?.id === sc.id ? 'active' : ''}`}>
+                    <div className="scene-title">{sc.id}</div>
+                    <div className="scene-characters">
+                      {sc.characters && sc.characters.length ? (
+                        sc.characters.map((entry: any) => (
+                          <div key={entry.character.id} className="scene-character-row">
+                            <div>
+                              {entry.character.name}
+                              <span className="scene-character-role">
+                                {entry.role || entry.character.kind}
+                              </span>
+                            </div>
+                            <span className={`scene-character-flag ${entry.presenceState}`}>
+                              {entry.presenceState}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="subtitle">Нет персонажей</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -701,17 +1105,46 @@ export function App() {
             </div>
 
             <div className="panel prompt-panel">
-              <div className="panel-header">
-                <h3>Лог промпта ({promptLog.length})</h3>
+              <div className="prompt-header">
+                <h3>Лог промпта</h3>
+                <div className="prompt-tabs">
+                  <button
+                    className={tabState === 'prompt' ? 'active' : ''}
+                    onClick={() => setTabState('prompt')}
+                  >
+                    Промпт ({promptLog.length})
+                  </button>
+                  <button
+                    className={tabState === 'trace' ? 'active' : ''}
+                    onClick={() => setTabState('trace')}
+                  >
+                    Изменения ({actionTrace?.length || 0})
+                  </button>
+                </div>
               </div>
-              <div className="prompt-log">
-                {promptLog.map((entry, idx) => (
-                  <div key={idx} className={`prompt-entry ${entry.role}`}>
-                    <div className="prompt-role">{entry.role}</div>
-                    <pre>{entry.content}</pre>
-                  </div>
-                ))}
-              </div>
+              {tabState === 'prompt' ? (
+                <div className="prompt-log">
+                  {promptLog.map((entry, idx) => (
+                    <div key={idx} className={`prompt-entry ${entry.role}`}>
+                      <div className="prompt-role">{entry.role}</div>
+                      <pre>{entry.content}</pre>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="action-trace-log">
+                  {actionTrace?.length ? (
+                    actionTrace.map((entry, idx) => (
+                      <details key={idx} className="trace-entry" open={idx === actionTrace.length - 1}>
+                        <summary>{entry.label}</summary>
+                        <pre>{JSON.stringify(entry.values, null, 2)}</pre>
+                      </details>
+                    ))
+                  ) : (
+                    <span className="subtitle">Нет данных по изменению</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -16,13 +16,16 @@ for (const seed of seeds) {
     const personaBlock = ctx.personaNotes.map((note, idx) => `${idx + 1}. ${note}`).join('\n');
     const loreBlock = ctx.loreNotes.join('\n\n');
 
-    const prompt = [
-        '[Профиль персонажа]',
-        personaBlock || '(нет заметок)',
-        '',
-        '[Записки из лора]',
-        loreBlock || '(нет лора)'
-    ].join('\n');
+    const promptParts: string[] = ['[Профиль персонажа]', personaBlock || '(нет заметок)'];
+    if (ctx.originStatements?.length) {
+        promptParts.push('', '[Происхождение]', ctx.originStatements.join('\n'));
+    }
+    if (ctx.assetReasons?.length) {
+        promptParts.push('', '[Почему стал активом]', ctx.assetReasons.join('\n'));
+    }
+    promptParts.push('', '[Записки из лора]', loreBlock || '(нет лора)');
+
+    const prompt = promptParts.join('\n');
 
     console.log(prompt);
     console.log();

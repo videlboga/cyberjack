@@ -28,16 +28,14 @@ function buildChatSummary(messages: Array<{ id: number; role: 'user' | 'assistan
     const subjMsgs = messages.filter(m => m.role === 'assistant').map(m => m.content);
 
     const parts: string[] = [];
-    if (userMsgs.length) {
-        parts.push(`Калибратор направляет: ${describeIntent(userMsgs)}`);
-    }
-    if (subjMsgs.length) {
-        parts.push(`С-01 отвечает: ${describeResponse(subjMsgs)}`);
-    }
+    const intentText = describeIntent(userMsgs);
+    if (intentText) parts.push(intentText);
+    const responseText = describeResponse(subjMsgs);
+    if (responseText) parts.push(responseText);
     const highlights = extractHighlights(messages);
 
     return {
-        summary: parts.join(' / ') || 'Активно обменивались репликами. ',
+        summary: parts.join(' / ') || 'Калибратор и я обменялись несколькими ровными репликами.',
         highlights
     };
 }
@@ -55,10 +53,12 @@ function describeIntent(texts: string[]): string {
     });
 
     const parts: string[] = [];
-    if (commands) parts.push('даёт указания/меняет условия');
-    if (comfort) parts.push('проверяет состояние и удобство');
-    if (general) parts.push('поддерживает нейтральный диалог');
-    return parts.join(', ') || 'короткие реплики';
+    if (commands) parts.push('менял контекст и задавал новые позиции');
+    if (comfort) parts.push('несколько раз уточнял, как мне чувствуется');
+    if (general) parts.push('держал разговор в деловом тоне');
+
+    if (!parts.length) return '';
+    return `Калибратор ${parts.join(', ')}.`;
 }
 
 function describeResponse(texts: string[]): string {
@@ -74,10 +74,12 @@ function describeResponse(texts: string[]): string {
     });
 
     const parts: string[] = [];
-    if (compliant) parts.push('выполняет приказы без споров');
-    if (dry) parts.push('говорит сухо и отстранённо');
-    if (resistant) parts.push('пытается обозначить границы');
-    return parts.join(', ') || 'короткие односложные ответы';
+    if (compliant) parts.push('послушно подтверждала команды');
+    if (dry) parts.push('отвечала сухо и старалась держать дистанцию');
+    if (resistant) parts.push('пару раз попыталась обозначить границы');
+
+    if (!parts.length) return '';
+    return `Я ${parts.join(', ')}.`;
 }
 
 const HIGHLIGHT_RULES: Array<{ regex: RegExp; label: string }> = [

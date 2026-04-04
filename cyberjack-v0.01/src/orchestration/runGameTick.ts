@@ -72,6 +72,14 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     compiledAction = applyDynamicContexts(compiledAction, state.core, state.point);
     (compiledAction as any)._baseAction = baseAction || compiledAction;
 
+    const commandIntent = payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent;
+    if (commandIntent && commandIntent.type && commandIntent.type !== 'none') {
+        (compiledAction as any).commandIntent = commandIntent;
+        if ((compiledAction as any)._baseAction) {
+            ((compiledAction as any)._baseAction as any).commandIntent = commandIntent;
+        }
+    }
+
     // 5. Run Engine Tick
     const engineOutput = runTick({
         subjectId: payload.subjectId,
@@ -89,7 +97,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // 6. Save new state
     const tickId = randomUUID();
 
-    saveTickState(payload.subjectId, payload.pointId, payload.presetId, compiledAction, engineOutput, tickId);
+    saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
 
     // 6.1 Run scenario consequences (transitions, missions)
     const scenarioResult = runScenarioStep(
@@ -144,6 +152,21 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         }
     };
 
+    const actionTrace = [
+        { label: 'State before (core)', values: stateBefore.core },
+        { label: 'State before (point)', values: stateBefore.point },
+        { label: 'Compiled action', values: compiledAction },
+        {
+            label: 'Engine result',
+            values: {
+                delta: engineOutput.delta?.core,
+                result: engineOutput.result
+            }
+        },
+        { label: 'State after (core)', values: engineOutput.nextCore },
+        { label: 'State after (point)', values: engineOutput.nextPoint }
+    ];
+
     return {
         tickId,
         event,
@@ -159,6 +182,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         scenario: scenarioResult,
         metadata: {
             commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent
-        }
+        },
+        trace: actionTrace
     };
 }

@@ -10,12 +10,40 @@ import {
     LoreTagDefinition
 } from './types';
 
+const CORE_WORLD_TAGS = [
+    'world_omnicron',
+    'world_isolation',
+    'world_anomaly',
+    'world_assets',
+    'world_calibrator',
+    'world_corporations'
+] as const;
+
+const CORE_TRAIT_IDS = [
+    'trait_profile_observant',
+    'trait_profile_pragmatic',
+    'trait_profile_resilient',
+    'trait_profile_cautious',
+    'trait_profile_empathic',
+    'trait_profile_stubborn',
+    'trait_profile_direct',
+    'trait_profile_loyal',
+    'trait_profile_patient',
+    'trait_profile_adaptive'
+];
+
+const CORE_WORLD_TARGET =
+    CORE_WORLD_TAGS.length + Number(process.env.GENERATOR_EXTRA_WORLD ?? 2);
+const CORE_TRAIT_TARGET = Number(process.env.GENERATOR_CORE_TRAITS ?? 2);
+const MIN_ASSET_CAUSE_TAGS = Number(process.env.GENERATOR_ASSET_CAUSE ?? 1);
+const ASSET_CAUSE_CATEGORY = 'asset_cause';
+
 const DEFAULT_LEVEL_COUNTS: Record<LoreLevel, number> = {
-    world: 3,
+    world: Math.max(CORE_WORLD_TARGET, CORE_WORLD_TAGS.length),
     faction: 2,
     origin: 2,
     event: 2,
-    trait: 2
+    trait: Math.max(CORE_TRAIT_TARGET + 1, 2)
 };
 
 function hashSeed(str: string): number {
@@ -80,6 +108,57 @@ function addTag(
     grouped[tag.level].push({ ...tag });
 }
 
+function pickCoreTraitProfiles(
+    grouped: Record<LoreLevel, GeneratedTag[]>,
+    selected: Set<string>,
+    excludeSet: Set<string>,
+    rng: () => number,
+    targetCount: number
+) {
+    if (targetCount <= 0) return;
+    const pool = CORE_TRAIT_IDS.map(id => findTagById(id)).filter(
+        (tag): tag is LoreTagDefinition =>
+            Boolean(tag) &&
+            !excludeSet.has(tag.id) &&
+            !selected.has(tag.id) &&
+            requirementsMet(tag, selected)
+    );
+
+    let picks = Math.min(targetCount, pool.length);
+    while (picks > 0 && pool.length) {
+        const idx = Math.floor(rng() * pool.length);
+        const [tag] = pool.splice(idx, 1);
+        addTag(tag, grouped, selected);
+        picks -= 1;
+    }
+}
+
+function pickCategoryTags(
+    level: LoreLevel,
+    category: string,
+    grouped: Record<LoreLevel, GeneratedTag[]>,
+    selected: Set<string>,
+    excludeSet: Set<string>,
+    rng: () => number,
+    targetCount: number
+) {
+    if (targetCount <= 0) return;
+    const pool = TAG_LIBRARY[level].filter(
+        tag =>
+            tag.category === category &&
+            !selected.has(tag.id) &&
+            !excludeSet.has(tag.id) &&
+            requirementsMet(tag, selected)
+    );
+    let picks = Math.min(targetCount, pool.length);
+    while (picks > 0 && pool.length) {
+        const idx = Math.floor(rng() * pool.length);
+        const [tag] = pool.splice(idx, 1);
+        addTag(tag, grouped, selected);
+        picks -= 1;
+    }
+}
+
 export function generateCharacterContext(options: GeneratorOptions = {}): GeneratedCharacterContext {
     const seedSource = options.seed ?? `auto-${Date.now()}-${Math.random()}`;
     const rng = createRng(hashSeed(seedSource));
@@ -93,7 +172,11 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
     };
     const selected = new Set<string>();
 
-    const forcedIds = new Set([...(options.includeTags || []), ...(options.forced || [])]);
+    const forcedIds = new Set([
+        ...CORE_WORLD_TAGS,
+        ...(options.includeTags || []),
+        ...(options.forced || [])
+    ]);
     const forcedTags = sortByLevel(Array.from(forcedIds).map(ensureTagExists));
 
     for (const tag of forcedTags) {
@@ -105,6 +188,9 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         }
         addTag(tag, grouped, selected);
     }
+
+    pickCoreTraitProfiles(grouped, selected, excludeSet, rng, CORE_TRAIT_TARGET);
+    pickCategoryTags('event', ASSET_CAUSE_CATEGORY, grouped, selected, excludeSet, rng, MIN_ASSET_CAUSE_TAGS);
 
     for (const level of LEVEL_ORDER) {
         const target = options.levelPickCounts?.[level] ?? DEFAULT_LEVEL_COUNTS[level];
@@ -137,9 +223,29 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
     );
     const loreNotes = loreNoteEntries.map(note => note.text);
     const personaNotes = tags
-        .filter(tag => tag.level !== 'world' && tag.level !== 'faction')
+        .filter(
+            tag =>
+                tag.level !== 'world' &&
+                tag.level !== 'faction' &&
+                tag.category !== ASSET_CAUSE_CATEGORY
+        )
         .flatMap(tag => tag.personaHooks || []);
     const narrative = buildNarrativeSummary(tags);
+    const originStatements = Array.from(
+        new Set(
+            grouped.origin
+                .map(tag => (tag.narrative?.identity?.[0] || tag.summary || '').trim())
+                .filter(Boolean)
+        )
+    );
+    const assetReasons = Array.from(
+        new Set(
+            tags
+                .filter(tag => tag.category === ASSET_CAUSE_CATEGORY)
+                .map(tag => (tag.narrative?.history?.[0] || tag.summary || '').trim())
+                .filter(Boolean)
+        )
+    );
 
     return {
         tags,
@@ -149,7 +255,9 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         loreEntries: loreNoteEntries,
         personaNotes,
         seed: seedSource,
-        narrative
+        narrative,
+        originStatements,
+        assetReasons
     };
 }
 

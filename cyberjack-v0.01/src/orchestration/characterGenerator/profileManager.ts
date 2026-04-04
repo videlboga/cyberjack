@@ -43,7 +43,9 @@ export function ensureGeneratedProfile(subjectId: string): StoredProfile {
         instructions: activeConfig.character.formatInstructions,
         identityBlocks,
         historyBlocks,
-        activationBlocks
+        activationBlocks,
+        originBlocks: context.originStatements,
+        assetBlocks: context.assetReasons
     });
 
     const draftProfile = {

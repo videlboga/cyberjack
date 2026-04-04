@@ -27,6 +27,7 @@ export interface PromptConfig {
         noEvents: string;
         actionPrefix: string;
         reactionPrefix: string;
+        recentEventLimit?: number;
     };
     adapters: {
         sillyTavernSystemPrefix: string;
@@ -101,7 +102,8 @@ export let activeConfig: PromptConfig = {
         recentEventsTitle: "[Твои последние телесные и сенсорные логи]",
         noEvents: "Сенсорная память пуста.",
         actionPrefix: "Калибратор применил",
-        reactionPrefix: "Твоя непроизвольная реакция на это:"
+        reactionPrefix: "Твоя непроизвольная реакция на это:",
+        recentEventLimit: 10
     },
     adapters: {
         sillyTavernSystemPrefix: "Вживись в роль Эли (S-01). Опирайся на внутреннее состояние и недавние ощущения. Покажи живого человека.",

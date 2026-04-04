@@ -1,13 +1,44 @@
 import { db } from './src/infrastructure/db';
 
 console.log("Очистка базы данных...");
-db.exec('DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets; DELETE FROM point_presets; DELETE FROM context_presets; DELETE FROM active_contexts;');
+db.exec('DELETE FROM character_relations; DELETE FROM scene_characters; DELETE FROM characters; DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets; DELETE FROM point_presets; DELETE FROM context_presets; DELETE FROM active_contexts;');
 
-console.log("Создание субъекта S-01...");
-db.prepare(`
-    INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-`).run('S-01', 'Синтетик (Нейтраль/Пластика)', 50, 60, 50, 80, 50);console.log("Добавление точек применения (point_presets)...");
+const subjects = [
+    {
+        id: 'S-01',
+        name: 'Синтетик (Нейтраль/Пластика)',
+        state: { sensitivity: 50, capacity: 60, openness: 50, plasticity: 80, attitude: 50 }
+    },
+    {
+        id: 'S-02',
+        name: 'Синтетик (Импульсив/Гиперчувствительная)',
+        state: { sensitivity: 70, capacity: 45, openness: 60, plasticity: 65, attitude: 40 }
+    }
+];
+
+console.log("Создание субъектов...");
+const insertSubjectStmt = db.prepare(`
+    INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
+for (const subject of subjects) {
+    insertSubjectStmt.run(
+        subject.id,
+        subject.name,
+        subject.state.sensitivity,
+        subject.state.capacity,
+        subject.state.openness,
+        subject.state.plasticity,
+        subject.state.attitude,
+        subject.state.sensitivity,
+        subject.state.capacity,
+        subject.state.openness,
+        subject.state.plasticity,
+        subject.state.attitude
+    );
+}
+
+console.log("Добавление точек применения (point_presets)...");
 
 const points: any[] = [
     { id: 'head', label: 'Голова/Волосы', sens: 40, att: 55, providesFunctions: ['look', 'hear'] },
@@ -37,11 +68,20 @@ const points: any[] = [
 ];
 
 const insertPointStmt = db.prepare('INSERT INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) VALUES (?, ?, ?, ?, ?, ?)');
-const insertSubjectPointStmt = db.prepare('INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude) VALUES (?, ?, ?, ?)');
+const insertSubjectPointStmt = db.prepare('INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 
 for (const p of points) {
-    insertPointStmt.run(p.id, p.label, JSON.stringify({ localSensitivity: p.sens, localAttitude: p.att }), (p as any).parentId || null, JSON.stringify((p as any).providesFunctions || []), JSON.stringify((p as any).tags || []));
-    insertSubjectPointStmt.run('S-01', p.id, p.sens, p.att);
+    insertPointStmt.run(
+        p.id,
+        p.label,
+        JSON.stringify({ localSensitivity: p.sens, localAttitude: p.att }),
+        (p as any).parentId || null,
+        JSON.stringify((p as any).providesFunctions || []),
+        JSON.stringify((p as any).tags || [])
+    );
+    for (const subject of subjects) {
+        insertSubjectPointStmt.run(subject.id, p.id, p.sens, p.att, 0, 0, p.sens, p.att);
+    }
 }
 
 console.log("Создание Игрока...");
@@ -50,6 +90,63 @@ db.prepare('INSERT INTO players (id, resources) VALUES (?, ?)').run('PL-1', JSON
     authority: 5,
     timeBudget: 5
 }));
+
+console.log("Создание персонажей и отношений...");
+const insertCharacterStmt = db.prepare(`
+    INSERT INTO characters (id, name, kind, subject_id, player_id)
+    VALUES (?, ?, ?, ?, ?)
+`);
+for (const subject of subjects) {
+    insertCharacterStmt.run(subject.id, subject.name, 'subject', subject.id, null);
+}
+insertCharacterStmt.run('PL-1', 'Калибратор', 'player', null, 'PL-1');
+
+const npcCharacters = [
+    { id: 'OBS-01', name: 'Наблюдатель Continuum Archive' },
+    { id: 'VEIL-01', name: 'Связной Veil' }
+];
+for (const npc of npcCharacters) {
+    insertCharacterStmt.run(npc.id, npc.name, 'npc', null, null);
+}
+
+const relationStmt = db.prepare(`
+    INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude)
+    VALUES (?, ?, ?, ?, ?, ?)
+`);
+type RelationOptions = { knows?: boolean; present?: boolean; canInteract?: boolean; attitude?: number };
+const addRelation = (fromId: string, toId: string, opts: RelationOptions = {}) => {
+    relationStmt.run(
+        fromId,
+        toId,
+        opts.knows === false ? 0 : 1,
+        opts.present === false ? 0 : 1,
+        opts.canInteract === false ? 0 : 1,
+        opts.attitude ?? 50
+    );
+};
+
+for (const subject of subjects) {
+    addRelation(subject.id, 'PL-1', { attitude: subject.state.attitude });
+    addRelation('PL-1', subject.id, { attitude: 55 });
+}
+
+addRelation('S-01', 'S-02', { present: false, canInteract: false, attitude: 45 });
+addRelation('S-02', 'S-01', { present: false, canInteract: false, attitude: 40 });
+
+const awarenessPairs: Array<[string, string, RelationOptions]> = [
+    ['S-01', 'OBS-01', { present: false, canInteract: false, attitude: 35 }],
+    ['OBS-01', 'S-01', { present: false, canInteract: false, attitude: 60 }],
+    ['PL-1', 'OBS-01', { attitude: 60 }],
+    ['OBS-01', 'PL-1', { attitude: 65 }],
+    ['S-02', 'VEIL-01', { present: false, canInteract: false, attitude: 30 }],
+    ['VEIL-01', 'S-02', { present: false, canInteract: false, attitude: 55 }],
+    ['PL-1', 'VEIL-01', { attitude: 45 }],
+    ['VEIL-01', 'PL-1', { attitude: 50 }]
+];
+
+for (const [fromId, toId, options] of awarenessPairs) {
+    addRelation(fromId, toId, options);
+}
 
 console.log("Добавление действий (action_presets)...");
 
@@ -103,15 +200,87 @@ for (const a of actions) {
 
 console.log("Добавление контекстов (context_presets)...");
 const contexts = [
-    { id: 'pose_lying', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Лёжа', requiredFunctions: ['shift_posture'], m: { intensity: -0.1, valence: 0.1, contact: 0.1, novelty: -0.1 } },
-    { id: 'pose_kneeling', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Стоя на коленях', requiredFunctions: ['kneel', 'shift_posture'], m: { intensity: 0.2, valence: -0.2, sharpness: 0.1, novelty: 0.1 } },
-    { id: 'pose_spread_eagle', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Звездой (привязана)', requiredFunctions: ['shift_posture'], blockedFunctions: ['stand', 'kneel', 'walk', 'shift_posture', 'reach', 'touch'], m: { intensity: 0.4, valence: -0.3, sharpness: 0.2, novelty: 0.3 } },
-    { id: 'bound_hands', point_id: 'hands', slot: 'restraint_arms', exclusiveWithinSlot: true, priority: 50, label: 'Связанные руки (за спиной)', blockedFunctions: ['manipulate', 'touch', 'reach', 'gesture'], m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 } },
-    { id: 'bound_legs', point_id: 'knees', slot: 'restraint_legs', exclusiveWithinSlot: true, priority: 50, label: 'Связанные ноги', blockedFunctions: ['stand', 'walk', 'kneel', 'shift_posture'], m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 } },
-    { id: 'blindfold', point_id: 'head', slot: 'equipment_head', exclusiveWithinSlot: true, priority: 50, label: 'Завязанные глаза', blockedFunctions: ['look'], m: { intensity: 0.5, valence: -0.2, sharpness: 0.3, novelty: 0.5 } }
+    {
+        id: 'pose_lying',
+        point_id: 'slot_pose',
+        slot: 'pose',
+        exclusiveWithinSlot: true,
+        label: 'Поза: Лёжа',
+        selfApplicable: true,
+        selfText: 'Ты сама опускаешься и ложишься на поверхность.',
+        forcedText: 'Калибратор укладывает тебя лицом вверх, не оставляя выбора.',
+        removalText: 'Он разрешает приподняться и сменить позу.',
+        requiredFunctions: ['shift_posture'],
+        m: { intensity: -0.1, valence: 0.1, contact: 0.1, novelty: -0.1 }
+    },
+    {
+        id: 'pose_kneeling',
+        point_id: 'slot_pose',
+        slot: 'pose',
+        exclusiveWithinSlot: true,
+        label: 'Поза: Стоя на коленях',
+        selfApplicable: true,
+        selfText: 'Ты опускаешься на колени и замираешь.',
+        forcedText: 'Калибратор прижимает тебя к полу и ставит на колени.',
+        removalText: 'Он велит подняться с колен.',
+        requiredFunctions: ['kneel', 'shift_posture'],
+        m: { intensity: 0.2, valence: -0.2, sharpness: 0.1, novelty: 0.1 }
+    },
+    {
+        id: 'pose_spread_eagle',
+        point_id: 'slot_pose',
+        slot: 'pose',
+        exclusiveWithinSlot: true,
+        label: 'Поза: Звездой (привязана)',
+        selfApplicable: false,
+        forcedText: 'Калибратор растягивает тебя звездой, фиксируя конечности.',
+        removalText: 'Он освобождает ремни и даёт собраться.',
+        requiredFunctions: ['shift_posture'],
+        blockedFunctions: ['stand', 'kneel', 'walk', 'shift_posture', 'reach', 'touch'],
+        m: { intensity: 0.4, valence: -0.3, sharpness: 0.2, novelty: 0.3 }
+    },
+    {
+        id: 'bound_hands',
+        point_id: 'hands',
+        slot: 'restraint_arms',
+        exclusiveWithinSlot: true,
+        priority: 50,
+        label: 'Связанные руки (за спиной)',
+        selfApplicable: false,
+        forcedText: 'Калибратор стягивает твои руки за спиной.',
+        removalText: 'Он освобождает запястья.',
+        blockedFunctions: ['manipulate', 'touch', 'reach', 'gesture'],
+        m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 }
+    },
+    {
+        id: 'bound_legs',
+        point_id: 'knees',
+        slot: 'restraint_legs',
+        exclusiveWithinSlot: true,
+        priority: 50,
+        label: 'Связанные ноги',
+        selfApplicable: false,
+        forcedText: 'Калибратор связывает твои ноги, оставляя беспомощной.',
+        removalText: 'Он снимает стяжки с ног.',
+        blockedFunctions: ['stand', 'walk', 'kneel', 'shift_posture'],
+        m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 }
+    },
+    {
+        id: 'blindfold',
+        point_id: 'head',
+        slot: 'equipment_head',
+        exclusiveWithinSlot: true,
+        priority: 50,
+        label: 'Завязанные глаза',
+        selfApplicable: false,
+        forcedText: 'Он закрывает тебе глаза, лишая опоры.',
+        removalText: 'Он снимает повязку и возвращает зрение.',
+        blockedFunctions: ['look'],
+        m: { intensity: 0.5, valence: -0.2, sharpness: 0.3, novelty: 0.5 }
+    }
 ];
 
-const insertContextStmt = db.prepare('INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+const insertContextStmt = db.prepare('INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority, self_applicable, self_text, forced_text, removal_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 for (const c of contexts) {
     insertContextStmt.run(
         c.id, 
@@ -126,7 +295,11 @@ for (const c of contexts) {
         JSON.stringify((c as any).blockedFunctions || []), 
         JSON.stringify((c as any).boostedFunctions || []), 
         JSON.stringify((c as any).requiredFunctions || []), 
-        (c as any).priority || 0
+        (c as any).priority || 0,
+        (c as any).selfApplicable ? 1 : 0,
+        (c as any).selfText || null,
+        (c as any).forcedText || null,
+        (c as any).removalText || null
     );
 }
 
@@ -150,5 +323,27 @@ db.prepare('INSERT INTO scenes (id, available_actions, action_costs, transitions
 
 db.prepare('INSERT INTO scenes (id, available_actions, action_costs, transitions) VALUES (?, ?, ?, ?)')
     .run('lab_discipline', JSON.stringify(['hard_slap', 'firm_grip', 'wait']), JSON.stringify({ hard_slap: { authority: 1 }, wait: { timeBudget: 1 } }), JSON.stringify([{ targetSceneId: 'lab', conditions: { requiresActionId: 'wait', minAttitude: 45 } }]));
+
+console.log("Распределение персонажей по сценам...");
+const assignSceneStmt = db.prepare(`
+    INSERT INTO scene_characters (scene_id, character_id, role, can_act, presence_state)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(scene_id, character_id) DO UPDATE SET
+        role = excluded.role,
+        can_act = excluded.can_act,
+        presence_state = excluded.presence_state
+`);
+const updateLocationStmt = db.prepare('UPDATE characters SET current_scene_id = ? WHERE id = ?');
+
+const placeCharacter = (sceneId: string, characterId: string, role = 'participant', canAct = true, presenceState = 'present') => {
+    assignSceneStmt.run(sceneId, characterId, role, canAct ? 1 : 0, presenceState);
+    updateLocationStmt.run(sceneId, characterId);
+};
+
+placeCharacter('lab', 'S-01', 'subject', true);
+placeCharacter('lab', 'PL-1', 'calibrator', true);
+placeCharacter('lab', 'OBS-01', 'observer', false);
+placeCharacter('lab_recovery', 'S-02', 'subject', true);
+placeCharacter('lab_recovery', 'VEIL-01', 'handler', false);
 
 console.log("База данных успешно пересобрана!");

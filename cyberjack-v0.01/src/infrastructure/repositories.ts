@@ -1,21 +1,197 @@
 // src/infrastructure/repositories.ts
 import { db } from './db';
-import { SubjectCoreState, SubjectPointState, PlayerState, Scene } from '../domain/types';
+import { SubjectCoreState, SubjectPointState, PlayerState, Scene, Character, CharacterRelation, SceneCharacterPresence } from '../domain/types';
 import { applyDecayLevel, clamp } from '../engine/utils';
+
+const mapCharacter = (row: any): Character => ({
+    id: row.id,
+    name: row.name,
+    kind: row.kind,
+    subjectId: row.subject_id,
+    playerId: row.player_id,
+    currentSceneId: row.current_scene_id
+});
+
+const mapRelation = (row: any): CharacterRelation => ({
+    fromId: row.from_id,
+    toId: row.to_id,
+    knows: Boolean(row.knows),
+    present: Boolean(row.present),
+    canInteract: Boolean(row.can_interact),
+    attitude: row.attitude,
+    baselineAttitude: row.baseline_attitude,
+    target: row.target_id
+        ? {
+              id: row.target_id,
+              name: row.target_name,
+              kind: row.target_kind,
+              subjectId: row.target_subject_id,
+              playerId: row.target_player_id
+          }
+        : undefined
+});
+
+export const characterRepo = {
+    ensureSubject(subjectId: string, name: string): Character {
+        const stmt = db.prepare(`
+            INSERT INTO characters (id, name, kind, subject_id)
+            VALUES (?, ?, 'subject', ?)
+            ON CONFLICT(id) DO UPDATE SET
+                name = excluded.name,
+                kind = excluded.kind,
+                subject_id = excluded.subject_id
+        `);
+        stmt.run(subjectId, name, subjectId);
+        return this.get(subjectId)!;
+    },
+    ensurePlayer(playerId: string, name: string): Character {
+        const stmt = db.prepare(`
+            INSERT INTO characters (id, name, kind, player_id)
+            VALUES (?, ?, 'player', ?)
+            ON CONFLICT(id) DO UPDATE SET
+                name = excluded.name,
+                kind = excluded.kind,
+                player_id = excluded.player_id
+        `);
+        stmt.run(playerId, name, playerId);
+        return this.get(playerId)!;
+    },
+    get(id: string): Character | null {
+        const row = db.prepare('SELECT * FROM characters WHERE id = ?').get(id);
+        return row ? mapCharacter(row) : null;
+    },
+    listByIds(ids: string[]): Character[] {
+        if (!ids.length) return [];
+        const placeholders = ids.map(() => '?').join(',');
+        const rows = db.prepare(`SELECT * FROM characters WHERE id IN (${placeholders})`).all(...ids);
+        return rows.map(mapCharacter);
+    },
+    listAll(): Character[] {
+        const rows = db.prepare('SELECT * FROM characters').all();
+        return rows.map(mapCharacter);
+    },
+    updateLocation(id: string, sceneId: string | null) {
+        db.prepare('UPDATE characters SET current_scene_id = ? WHERE id = ?').run(sceneId, id);
+    }
+};
+
+export const characterRelationRepo = {
+    ensure(fromId: string, toId: string, defaults?: Partial<CharacterRelation>): CharacterRelation {
+        const existing = db.prepare(
+            `SELECT cr.*, c.id as target_id, c.name as target_name, c.kind as target_kind, c.subject_id as target_subject_id, c.player_id as target_player_id
+             FROM character_relations cr LEFT JOIN characters c ON c.id = cr.to_id
+             WHERE cr.from_id = ? AND cr.to_id = ?`
+        ).get(fromId, toId);
+        if (existing) return mapRelation(existing);
+        const stmt = db.prepare(`
+            INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, baseline_attitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+        stmt.run(
+            fromId,
+            toId,
+            defaults?.knows === false ? 0 : 1,
+            defaults?.present === false ? 0 : 1,
+            defaults?.canInteract === false ? 0 : 1,
+            defaults?.attitude ?? 50,
+            defaults?.baselineAttitude ?? defaults?.attitude ?? 50
+        );
+        return this.get(fromId, toId)!;
+    },
+    get(fromId: string, toId: string): CharacterRelation | null {
+        const row = db.prepare(
+            `SELECT cr.*, c.id as target_id, c.name as target_name, c.kind as target_kind, c.subject_id as target_subject_id, c.player_id as target_player_id
+             FROM character_relations cr LEFT JOIN characters c ON c.id = cr.to_id
+             WHERE cr.from_id = ? AND cr.to_id = ?`
+        ).get(fromId, toId);
+        return row ? mapRelation(row) : null;
+    },
+    listFor(fromId: string): CharacterRelation[] {
+        const stmt = db.prepare(
+            `SELECT cr.*, c.id as target_id, c.name as target_name, c.kind as target_kind, c.subject_id as target_subject_id, c.player_id as target_player_id
+             FROM character_relations cr LEFT JOIN characters c ON c.id = cr.to_id
+             WHERE cr.from_id = ?`
+        );
+        const rows = stmt.all(fromId);
+        return rows.map(mapRelation);
+    },
+    updateAttitude(fromId: string, toId: string, attitude: number, options?: { baselineAttitude?: number }) {
+        const stmt = db.prepare(`
+            INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, baseline_attitude)
+            VALUES (
+                ?, ?, 1, 1, 1, ?,
+                COALESCE(
+                    ?,
+                    (SELECT baseline_attitude FROM character_relations WHERE from_id = ? AND to_id = ?),
+                    ?
+                )
+            )
+            ON CONFLICT(from_id, to_id) DO UPDATE SET 
+                attitude = excluded.attitude,
+                baseline_attitude = COALESCE(excluded.baseline_attitude, character_relations.baseline_attitude)
+        `);
+        stmt.run(
+            fromId,
+            toId,
+            attitude,
+            options?.baselineAttitude,
+            fromId,
+            toId,
+            options?.baselineAttitude ?? attitude
+        );
+    },
+    updateFlags(fromId: string, toId: string, flags: Partial<Pick<CharacterRelation, 'knows' | 'present' | 'canInteract'>>) {
+        const current = this.ensure(fromId, toId);
+        const stmt = db.prepare(
+            `UPDATE character_relations SET knows = ?, present = ?, can_interact = ? WHERE from_id = ? AND to_id = ?`
+        );
+        stmt.run(
+            flags.knows === undefined ? (current.knows ? 1 : 0) : flags.knows ? 1 : 0,
+            flags.present === undefined ? (current.present ? 1 : 0) : flags.present ? 1 : 0,
+            flags.canInteract === undefined ? (current.canInteract ? 1 : 0) : flags.canInteract ? 1 : 0,
+            fromId,
+            toId
+        );
+    }
+};
 
 export const subjectRepo = {
     save(id: string, name: string, state: SubjectCoreState) {
+        const baselineSensitivity = state.baselineSensitivity ?? state.sensitivity;
+        const baselineCapacity = state.baselineCapacity ?? state.capacity;
+        const baselineOpenness = state.baselineOpenness ?? state.openness;
+        const baselinePlasticity = state.baselinePlasticity ?? state.plasticity;
+        const baselineAttitude = state.baselineAttitude ?? state.attitude;
         const stmt = db.prepare(`
-            INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 sensitivity = excluded.sensitivity,
                 capacity = excluded.capacity,
                 openness = excluded.openness,
                 plasticity = excluded.plasticity,
-                attitude = excluded.attitude
+                attitude = excluded.attitude,
+                baseline_sensitivity = excluded.baseline_sensitivity,
+                baseline_capacity = excluded.baseline_capacity,
+                baseline_openness = excluded.baseline_openness,
+                baseline_plasticity = excluded.baseline_plasticity,
+                baseline_attitude = excluded.baseline_attitude
         `);
-        stmt.run(id, name, state.sensitivity, state.capacity, state.openness, state.plasticity, state.attitude);
+        stmt.run(
+            id,
+            name,
+            state.sensitivity,
+            state.capacity,
+            state.openness,
+            state.plasticity,
+            state.attitude,
+            baselineSensitivity,
+            baselineCapacity,
+            baselineOpenness,
+            baselinePlasticity,
+            baselineAttitude
+        );
+        characterRepo.ensureSubject(id, name);
     },
     
     get(id: string): (SubjectCoreState & { name: string, id?: string }) | null {
@@ -29,7 +205,12 @@ export const subjectRepo = {
             capacity: row.capacity,
             openness: row.openness,
             plasticity: row.plasticity,
-            attitude: row.attitude
+            attitude: row.attitude,
+            baselineSensitivity: row.baseline_sensitivity,
+            baselineCapacity: row.baseline_capacity,
+            baselineOpenness: row.baseline_openness,
+            baselinePlasticity: row.baseline_plasticity,
+            baselineAttitude: row.baseline_attitude
         };
     },
 
@@ -55,14 +236,18 @@ export const subjectRepo = {
 
 export const pointStateRepo = {
     save(subjectId: string, pointId: string, state: SubjectPointState) {
+        const baselineLocalSensitivity = state.baselineLocalSensitivity ?? state.localSensitivity;
+        const baselineLocalAttitude = state.baselineLocalAttitude ?? state.localAttitude;
         const stmt = db.prepare(`
-            INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(subject_id, point_id) DO UPDATE SET
                 local_sensitivity = excluded.local_sensitivity,
                 local_attitude = excluded.local_attitude,
                 familiarity = excluded.familiarity,
-                exposure_count = excluded.exposure_count
+                exposure_count = excluded.exposure_count,
+                baseline_local_sensitivity = excluded.baseline_local_sensitivity,
+                baseline_local_attitude = excluded.baseline_local_attitude
         `);
         stmt.run(
             subjectId,
@@ -70,7 +255,9 @@ export const pointStateRepo = {
             state.localSensitivity,
             state.localAttitude,
             state.familiarity ?? 0,
-            state.exposureCount ?? 0
+            state.exposureCount ?? 0,
+            baselineLocalSensitivity,
+            baselineLocalAttitude
         );
     },
     
@@ -83,7 +270,9 @@ export const pointStateRepo = {
             localSensitivity: row.local_sensitivity,
             localAttitude: row.local_attitude,
             familiarity: row.familiarity ?? 0,
-            exposureCount: row.exposure_count ?? 0
+            exposureCount: row.exposure_count ?? 0,
+            baselineLocalSensitivity: row.baseline_local_sensitivity,
+            baselineLocalAttitude: row.baseline_local_attitude
         };
     }
 };
@@ -163,8 +352,8 @@ export const presetRepo = {
 
     saveContextPreset(preset: any) {
         const stmt = db.prepare(`
-            INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority, self_applicable, self_text, forced_text, removal_text)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 label = excluded.label,
                 point_id = excluded.point_id,
@@ -177,14 +366,22 @@ export const presetRepo = {
                 blocked_functions = excluded.blocked_functions,
                 boosted_functions = excluded.boosted_functions,
                 required_functions = excluded.required_functions,
-                priority = excluded.priority
+                priority = excluded.priority,
+                self_applicable = excluded.self_applicable,
+                self_text = excluded.self_text,
+                forced_text = excluded.forced_text,
+                removal_text = excluded.removal_text
         `);
         stmt.run(
             preset.id, preset.label, preset.point_id || 'general', JSON.stringify(preset.modifiers || {}),
             preset.type || 'condition', preset.slot || 'general', preset.exclusiveWithinSlot ? 1 : 0,
             JSON.stringify(preset.blocksSlots || []), JSON.stringify(preset.affectedPointIds || []),
             JSON.stringify(preset.blockedFunctions || []), JSON.stringify(preset.boostedFunctions || []),
-            JSON.stringify(preset.requiredFunctions || []), preset.priority || 0
+            JSON.stringify(preset.requiredFunctions || []), preset.priority || 0,
+            preset.selfApplicable ? 1 : 0,
+            preset.selfText || null,
+            preset.forcedText || null,
+            preset.removalText || null
         );
     },
     getContextPreset(id: string): any | null {
@@ -200,7 +397,11 @@ export const presetRepo = {
             blockedFunctions: JSON.parse(row.blocked_functions || '[]'),
             boostedFunctions: JSON.parse(row.boosted_functions || '[]'),
             requiredFunctions: JSON.parse(row.required_functions || '[]'),
-            priority: row.priority
+            priority: row.priority,
+            selfApplicable: row.self_applicable === 1,
+            selfText: row.self_text || null,
+            forcedText: row.forced_text || null,
+            removalText: row.removal_text || null
         };
     },
 
@@ -215,9 +416,14 @@ export const presetRepo = {
             blockedFunctions: JSON.parse(row.blocked_functions || '[]'),
             boostedFunctions: JSON.parse(row.boosted_functions || '[]'),
             requiredFunctions: JSON.parse(row.required_functions || '[]'),
-            priority: row.priority
+            priority: row.priority,
+            selfApplicable: row.self_applicable === 1,
+            selfText: row.self_text || null,
+            forcedText: row.forced_text || null,
+            removalText: row.removal_text || null
         }));
-    },    getAllContextPresets(): { id: string, label: string, point_id: string }[] {
+    },
+    getAllContextPresets(): { id: string, label: string, point_id: string }[] {
         const stmt = db.prepare('SELECT id, label, point_id FROM context_presets');
         return stmt.all() as { id: string, label: string, point_id: string }[];
     },
@@ -277,6 +483,7 @@ export const playerRepo = {
             ON CONFLICT(id) DO UPDATE SET resources = excluded.resources
         `);
         stmt.run(player.id, JSON.stringify(player.resources));
+        characterRepo.ensurePlayer(player.id, player.id);
     },
     get(id: string): PlayerState | null {
         const stmt = db.prepare('SELECT * FROM players WHERE id = ?');
@@ -316,6 +523,80 @@ export const sceneRepo = {
             actionCosts: row.action_costs ? JSON.parse(row.action_costs) : undefined,
             transitions: row.transitions ? JSON.parse(row.transitions) : undefined
         };
+    },
+    list(): Scene[] {
+        const stmt = db.prepare('SELECT * FROM scenes');
+        const rows = stmt.all() as any[];
+        return rows.map(row => ({
+            id: row.id,
+            availableActions: JSON.parse(row.available_actions || '[]'),
+            actionCosts: row.action_costs ? JSON.parse(row.action_costs) : undefined,
+            transitions: row.transitions ? JSON.parse(row.transitions) : undefined
+        }));
+    }
+};
+
+const mapScenePresence = (row: any): SceneCharacterPresence => ({
+    character: {
+        id: row.character_id,
+        name: row.character_name,
+        kind: row.character_kind,
+        subjectId: row.character_subject_id,
+        playerId: row.character_player_id,
+        currentSceneId: row.character_current_scene_id
+    },
+    role: row.role || 'participant',
+    canAct: Boolean(row.can_act),
+    presenceState: row.presence_state || 'present'
+});
+
+export const sceneCharacterRepo = {
+    list(sceneId: string): SceneCharacterPresence[] {
+        const stmt = db.prepare(
+            `SELECT sc.scene_id, sc.role, sc.can_act, sc.presence_state,
+                    c.id as character_id, c.name as character_name, c.kind as character_kind,
+                    c.subject_id as character_subject_id, c.player_id as character_player_id,
+                    c.current_scene_id as character_current_scene_id
+             FROM scene_characters sc
+             JOIN characters c ON c.id = sc.character_id
+             WHERE sc.scene_id = ?`
+        );
+        const rows = stmt.all(sceneId) as any[];
+        return rows.map(mapScenePresence);
+    },
+    set(sceneId: string, characterId: string, opts: { role?: string; canAct?: boolean; presenceState?: string } = {}) {
+        const stmt = db.prepare(
+            `INSERT INTO scene_characters (scene_id, character_id, role, can_act, presence_state)
+             VALUES (?, ?, ?, ?, ?)
+             ON CONFLICT(scene_id, character_id) DO UPDATE SET
+                role = excluded.role,
+                can_act = excluded.can_act,
+                presence_state = excluded.presence_state`
+        );
+        stmt.run(
+            sceneId,
+            characterId,
+            opts.role || 'participant',
+            opts.canAct === false ? 0 : 1,
+            opts.presenceState || 'present'
+        );
+        characterRepo.updateLocation(characterId, sceneId);
+    },
+    remove(sceneId: string, characterId: string) {
+        const stmt = db.prepare('DELETE FROM scene_characters WHERE scene_id = ? AND character_id = ?');
+        stmt.run(sceneId, characterId);
+        characterRepo.updateLocation(characterId, null);
+    },
+    moveCharacter(characterId: string, nextSceneId: string | null, opts?: { role?: string; canAct?: boolean; presenceState?: string }) {
+        const current = db.prepare('SELECT scene_id FROM scene_characters WHERE character_id = ?').get(characterId) as { scene_id: string } | undefined;
+        if (current) {
+            this.remove(current.scene_id, characterId);
+        }
+        if (nextSceneId) {
+            this.set(nextSceneId, characterId, opts);
+        } else {
+            characterRepo.updateLocation(characterId, null);
+        }
     }
 };
 

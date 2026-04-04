@@ -75,7 +75,8 @@ function normalizeTag(raw: any): LoreTagDefinition | null {
                       history: narrativeHistory.length ? narrativeHistory : undefined,
                       activation: narrativeActivation.length ? narrativeActivation : undefined
                   }
-                : undefined
+                : undefined,
+        category: typeof raw.category === 'string' && raw.category.trim() ? raw.category.trim() : undefined
     };
 }
 

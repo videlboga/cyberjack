@@ -6,6 +6,8 @@ import { activeConfig } from './config';
 import { fetchSillyTavernContext } from './sillyTavernContext';
 import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 import { selectLongTermMemory, getRecentSummaries } from '../services/memoryLayer';
+import { characterRelationRepo } from '../infrastructure/repositories';
+import { buildMemoryInsights } from './buildMemoryInsights';
 
 /**
  * Builds the payload for LLM/SillyTavern, grabbing history right from the DB.
@@ -13,7 +15,8 @@ import { selectLongTermMemory, getRecentSummaries } from '../services/memoryLaye
 export async function buildPromptPayload(
     subjectId: string,
     latestResult?: TickOutput,
-    eventId: string = 'lab' // TODO: Pass actual scene instead of hardcoding
+    eventId: string = 'lab', // TODO: Pass actual scene instead of hardcoding
+    options?: { suppressTickIds?: string[] }
 ): Promise<PromptPayload & { systemPrompt: string }> {
     const subjectRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(subjectId) as any;
     if (!subjectRow) throw new Error(`Subject ${subjectId} not found for prompt building`);
@@ -26,7 +29,25 @@ export async function buildPromptPayload(
         attitude: subjectRow.attitude
     };
 
-    const logs = db.prepare('SELECT * FROM event_logs WHERE subject_id = ? ORDER BY timestamp DESC LIMIT 3').all(subjectId) as any[];
+    const recentLogLimit = activeConfig.perception?.recentEventLimit ?? 10;
+    let logs = db.prepare(
+        'SELECT * FROM event_logs WHERE subject_id = ? ORDER BY timestamp DESC LIMIT ?'
+    ).all(subjectId, recentLogLimit) as any[];
+
+    if (options?.suppressTickIds?.length) {
+        const suppressSet = new Set(options.suppressTickIds);
+        logs = logs.filter(log => {
+            try {
+                const payload = JSON.parse(log.action_payload || '{}');
+                if (payload?.tickId && suppressSet.has(payload.tickId)) {
+                    return false;
+                }
+            } catch {
+                // ignore parsing errors
+            }
+            return true;
+        });
+    }
     
     // Map to EventRecord
     const recentEvents: EventRecord[] = logs.map(log => {
@@ -65,6 +86,7 @@ export async function buildPromptPayload(
         localSensitivity: row.local_sensitivity,
         localAttitude: row.local_attitude
     }));
+    const relations = characterRelationRepo.listFor(subjectId);
 
     const stateSummary = buildStateSummary(core, mappedPoints);
     const eventsText = buildRecentEventsSummary(recentEvents);
@@ -142,13 +164,54 @@ export async function buildPromptPayload(
 
     const voiceInstructions = `\n- Говори от первого лица и реагируй так, будто воздействие происходит прямо сейчас.\n- Не пересказывай прошлые ответы, каждый раз формируй живую реплику.\n- Замечай тело: связки, позы, дискомфорт или облегчение. Если что-то неприятно, дай понять через интонацию.`;
 
-    const characterProfile = `${personaBlock}${loreBlock ? `\n\n${loreBlock}` : ''}\n\n[Инструкции]: ${cfg.formatInstructions}${voiceInstructions}`;
-    const longTermBlocks = selectLongTermMemory(subjectId, structuredEvents, core, mappedPoints);
-    const longTermSection = longTermBlocks.length
-        ? `\n[Долгосрочная память]\n${longTermBlocks.join('\n')}`
+    const describeAttitude = (value: number) => {
+        if (value >= 70) return 'я почти доверяю и могу немного расслабиться';
+        if (value >= 50) return 'я держусь ровно и просто наблюдаю';
+        if (value >= 30) return 'я напрягаюсь и заранее ищу пути отступления';
+        return 'мне хочется держаться как можно дальше';
+    };
+
+    const relationsSection = relations.length
+        ? `[Персонажи сцены]\n${relations
+              .map(rel => {
+                  const name = rel.target?.name || rel.toId;
+                  const knowledge = rel.knows ? 'мы знакомы' : 'я почти не представляю, чего от него ждать';
+                  const presence = rel.present
+                      ? 'этот человек рядом'
+                      : 'его сейчас нет поблизости';
+                  const access = rel.canInteract
+                      ? 'у меня есть прямой доступ'
+                      : 'нас разделяют барьеры';
+                  const tone = describeAttitude(rel.attitude);
+                  return `${name}: ${knowledge}, ${presence}, ${access}. По ощущениям ${tone}.`;
+              })
+              .join('\n')}`
         : '';
 
-    const systemPrompt = `${characterProfile}${memoryBlock}${chatSummaryBlock}${longTermSection}\n\n${interpretationBlock}\n\n${eventsText}`;
+    const aggregatedMemory = buildMemoryInsights(logs);
+    const vectorMemories = selectLongTermMemory(subjectId, structuredEvents, core, mappedPoints);
+    const combinedMemories = [...aggregatedMemory, ...vectorMemories];
+    const longTermSection = combinedMemories.length
+        ? `\n[Долгосрочная память]\n${combinedMemories.map(entry => `- ${entry}`).join('\n')}`
+        : '';
+    const personaSection = `[Персона]\n${personaBlock}`;
+    const instructionsSection = `[Инструкции]\n${cfg.formatInstructions}${voiceInstructions}`;
+    const memorySection = memoryBlock ? memoryBlock.trim() : '';
+    const stateSection = `[Текущее состояние]\n${interpretationBlock.trim()}`;
+
+    const systemPrompt = [
+        personaSection,
+        loreBlock,
+        instructionsSection,
+        relationsSection,
+        memorySection,
+        chatSummaryBlock.trim(),
+        longTermSection.trim(),
+        stateSection,
+        eventsText.trim()
+    ]
+        .filter(Boolean)
+        .join('\n\n');
 
     const payload: PromptPayload = {
         subjectId,
@@ -163,7 +226,8 @@ export async function buildPromptPayload(
         recentEvents: structuredEvents,
         diagnostics: diagnostics.length ? diagnostics : undefined,
         sceneContext: contextSummary,
-        longTermMemory: longTermBlocks.length ? longTermBlocks : undefined
+        relations,
+        longTermMemory: combinedMemories.length ? combinedMemories : undefined
     };
 
     return {

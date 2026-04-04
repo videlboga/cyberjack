@@ -42,29 +42,45 @@ export function buildRecentEventsSummary(events: EventRecord[]): string {
         groupedEvents.push({ isWait: true, count: waitCount, timestamp: events[events.length-1].timestamp });
     }
 
-    groupedEvents.forEach(item => {
+    for (const item of groupedEvents) {
         if (item.isWait) {
             const timeSpan = new Date(item.timestamp).toLocaleTimeString();
             lines.push(`- [${timeSpan}] Прошло время: ожидание/бездействие (${item.count} тиков). Активные факторы среды продолжали влиять на твое состояние.`);
-            return;
+            continue;
         }
 
         const event = item.event;
         try {
-            
-        const payloadData = item.payloadData || JSON.parse(event.action_payload); 
-        
-        if (event.action_type === 'context_change' || payloadData.presetId === 'context_change') {
+            const payloadData = item.payloadData || JSON.parse(event.action_payload);
             const timeSpan = new Date(event.timestamp).toLocaleTimeString();
-            lines.push(`- [${timeSpan}] Изменение среды/состояния: ${payloadData.actionLabel}`);
-            return;
-        }
+            const narrativeText =
+                payloadData?.narrative ||
+                payloadData?.actionLabel ||
+                payloadData?.presetId ||
+                'воздействие';
 
-        const action = payloadData.action; 
- 
-            const aLabel = payloadData.actionLabel || payloadData.presetId || "воздействие"; 
-            const pLabel = payloadData.pointLabel || payloadData.pointId || "тело";
-            
+            const isContextSwitch =
+                event.action_type === 'context_change' ||
+                (typeof payloadData?.presetId === 'string' &&
+                    payloadData.presetId.toLowerCase().includes('context'));
+
+            if (isContextSwitch) {
+                lines.push(`- [${timeSpan}] ${narrativeText}`);
+                continue;
+            }
+
+            const action = payloadData.action;
+
+            const hasCommandIntent =
+                action?.commandIntent &&
+                action.commandIntent.type &&
+                action.commandIntent.type !== 'none';
+            if (hasCommandIntent) {
+                // Команда уже отражена отдельным событием context_change, пропускаем дублирующий лог
+                continue;
+            }
+
+            const pLabel = payloadData.pointLabel || payloadData.pointId || 'тело';
             const resultObj = JSON.parse(event.result_payload);
 
             const tickOutputMock = {
@@ -78,18 +94,17 @@ export function buildRecentEventsSummary(events: EventRecord[]): string {
 
             const diagnostics = action ? buildDiagnostics(action, previousCore, tickOutputMock as any) : null;
             
-            const timeSpan = new Date(event.timestamp).toLocaleTimeString();
-            const actionSemantic = diagnostics ? diagnostics.actionSummary : "неизвестное воздействие";
-            
-            lines.push(`- [${timeSpan}] ${cfg.actionPrefix} "${aLabel}" на точку "${pLabel}" (оценивается тобой как: ${actionSemantic})`);
-            
-            if (diagnostics && diagnostics.reactionSummary !== "нейтральная реакция") {
+            const actionSemantic = diagnostics ? diagnostics.actionSummary : 'неизвестное воздействие';
+
+            lines.push(`- [${timeSpan}] ${narrativeText}. Точка воздействия: ${pLabel.toLowerCase()}. Это ощущается как: ${actionSemantic}.`);
+
+            if (diagnostics && diagnostics.reactionSummary !== 'нейтральная реакция') {
                 lines.push(`  ${cfg.reactionPrefix} ${diagnostics.reactionSummary}`);
             }
         } catch (err: any) {
             lines.push(`- [${event.timestamp}] (Ошибка памяти: ${err.message})`);
         }
-    });
+    }
 
     return lines.join('\n');
 }

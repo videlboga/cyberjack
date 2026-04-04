@@ -125,8 +125,10 @@ export const DEFAULT_CONFIG: any =
       overloadPenalty: 0.5,
     },
     applyLearning: {
-      sensitivityFromIntensity: 0.08,
-      sensitivityTarget: 50,
+      sensitivityFromIntensity: 0.06,
+      sensitivityTarget: 5,
+      sensitivityRegenRate: 0.4,
+      sensitivityRegenThreshold: 8,
       capacityDropMultiplier: 0.25, // For fast draining
       capacityRecoveryRate: 1.0,    // Regen per silent tick
       opennessFromPleasureDiscomfort: 0.12,
@@ -135,13 +137,46 @@ export const DEFAULT_CONFIG: any =
       plasticityFromOverload: 0.1,
       attitudeFromPleasureDiscomfort: 0.08,
       attitudeFromOverload: 0.08,
-      localSensitivityFromIntensity: 0.1,
-      localSensitivityTarget: 45,
+      localSensitivityFromIntensity: 0.08,
+      localSensitivityTarget: 3,
+      localSensitivityRegenRate: 0.5,
       localAttitudeFromPleasureDiscomfort: 0.1,
       localAttitudeFromSharpOverload: 0.1,
       localToGlobalLeak: 0.1,
       globalToLocalLeak: 0.08,
     },
+    baseline: {
+      core: {
+        dampingBase: 0.15,
+        dampingDistanceScale: 0.01,
+        maxDamping: 0.6,
+        adaptBase: 0.01,
+        plasticityWeight: 1,
+        opennessWeight: 0.6,
+        noveltyBase: 0.8,
+        noveltyScale: 0.4
+      },
+      point: {
+        dampingBase: 0.2,
+        dampingDistanceScale: 0.015,
+        maxDamping: 0.7,
+        adaptBase: 0.008,
+        plasticityWeight: 1,
+        opennessWeight: 0.5,
+        noveltyBase: 0.7,
+        noveltyScale: 0.5
+      },
+      relation: {
+        dampingBase: 0.1,
+        dampingDistanceScale: 0.01,
+        maxDamping: 0.4,
+        adaptBase: 0.006,
+        plasticityWeight: 1,
+        opennessWeight: 0.5,
+        noveltyBase: 0.8,
+        noveltyScale: 0.3
+      }
+    }
   },
 }; // as EngineConfig;
 

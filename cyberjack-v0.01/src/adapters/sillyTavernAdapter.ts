@@ -9,6 +9,14 @@ export interface ChatMessage {
 const ST_COMPLETIONS_URL =
     process.env.SILLYTAVERN_API_URL ||
     'http://127.0.0.1:8181/api/backends/chat-completions/generate';
+const ST_COMPLETIONS_ORIGIN = (() => {
+    try {
+        return new URL(ST_COMPLETIONS_URL).origin;
+    } catch {
+        return 'http://127.0.0.1:8181';
+    }
+})();
+const ST_HEALTH_URL = process.env.SILLYTAVERN_HEALTH_URL || `${ST_COMPLETIONS_ORIGIN}/`;
 const ST_API_KEY = process.env.SILLYTAVERN_API_KEY;
 const ST_MODEL =
     process.env.SILLYTAVERN_MODEL ||
@@ -22,6 +30,10 @@ const ST_JSON_RETRY_ATTEMPTS = Math.max(
     0,
     Number(process.env.SILLYTAVERN_JSON_RETRY_ATTEMPTS ?? 1)
 );
+const ST_REQUEST_TIMEOUT = Number(process.env.SILLYTAVERN_REQUEST_TIMEOUT ?? 20000);
+const ST_HEALTH_TIMEOUT = Number(process.env.SILLYTAVERN_HEALTH_TIMEOUT ?? 3000);
+const ST_HEALTH_ATTEMPTS = Math.max(1, Number(process.env.SILLYTAVERN_HEALTH_ATTEMPTS ?? 3));
+const ST_HEALTH_BACKOFF_MS = Number(process.env.SILLYTAVERN_HEALTH_BACKOFF_MS ?? 1000);
 
 const ST_JSON_SCHEMA = {
     name: 'cyberjack_reply',
@@ -90,6 +102,38 @@ function validateStructuredReply(candidate: any): candidate is { reaction: strin
     return typeof candidate.reaction === 'string' && typeof candidate.speech === 'string';
 }
 
+function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const mergedInit: RequestInit = { ...init, signal: controller.signal };
+    return fetch(url, mergedInit).finally(() => clearTimeout(timer));
+}
+
+async function checkHealth(): Promise<boolean> {
+    try {
+        const response = await fetchWithTimeout(
+            ST_HEALTH_URL,
+            {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            },
+            ST_HEALTH_TIMEOUT
+        );
+        return response.ok;
+    } catch (err: any) {
+        console.warn(`[ST Adapter] Health check failed: ${err.message || err}`);
+        return false;
+    }
+}
+
+async function ensureHealthy() {
+    for (let attempt = 0; attempt < ST_HEALTH_ATTEMPTS; attempt++) {
+        if (await checkHealth()) return;
+        await new Promise(resolve => setTimeout(resolve, ST_HEALTH_BACKOFF_MS));
+    }
+    throw new Error('SillyTavern не отвечает (health-check)');
+}
+
 async function requestCompletion(messages: ChatMessage[]): Promise<string> {
     const body: Record<string, any> = {
         type: ST_REQUEST_TYPE,
@@ -116,11 +160,15 @@ async function requestCompletion(messages: ChatMessage[]): Promise<string> {
         headers['Authorization'] = `Bearer ${ST_API_KEY}`;
     }
 
-    const response = await fetch(ST_COMPLETIONS_URL, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body)
-    });
+    const response = await fetchWithTimeout(
+        ST_COMPLETIONS_URL,
+        {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body)
+        },
+        ST_REQUEST_TIMEOUT
+    );
 
     if (!response.ok) {
         const errText = await response.text();
@@ -146,6 +194,8 @@ export async function sendToSillyTavern(
     });
 
     try {
+        await ensureHealthy();
+
         for (let attempt = 0; attempt <= ST_JSON_RETRY_ATTEMPTS; attempt++) {
             const rawText = await requestCompletion(messages);
 
