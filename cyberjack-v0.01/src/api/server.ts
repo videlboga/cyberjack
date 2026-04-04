@@ -219,7 +219,9 @@ app.post('/api/tick', async (req, res) => {
                             }
                         }
                         activeContextsRepo.add(eventId, targetCtxId, -1);
-                        const forcedNarrative = describeContextNarrative(targetContext, 'forced', actorName);
+                        const applicationMode: 'self' | 'forced' =
+                            hasUserText && targetContext.selfApplicable ? 'self' : 'forced';
+                        const forcedNarrative = describeContextNarrative(targetContext, applicationMode, actorName);
                         eventLogRepo.append(subjectId, 'context_change', {
                             presetId: 'context_change',
                             action: null,
@@ -540,7 +542,8 @@ app.post('/api/contexts/toggle', (req, res) => {
                 }
             }
             activeContextsRepo.add(eventId, contextId, -1);
-            const forcedNarrative = describeContextNarrative(targetContext, 'forced', actorName);
+            const applicationMode: 'self' | 'forced' = targetContext.selfApplicable ? 'self' : 'forced';
+            const forcedNarrative = describeContextNarrative(targetContext, applicationMode, actorName);
             eventLogRepo.append(subjectId, 'context_change', 
                 { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative },
                 { added: true, point_id: targetContext.point_id, slot: targetContext.slot }
