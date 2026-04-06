@@ -16,10 +16,11 @@ import { ensureGeneratedProfile } from '../orchestration/characterGenerator/prof
 import { buildPromptPayload } from '../prompts/buildPromptPayload';
 import { orchestrateSceneActors } from '../orchestration/sceneOrchestrator';
 import { describeActionNarrative, describeContextNarrative } from '../narrative/eventTemplates';
+import { db } from '../infrastructure/db';
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
-    return `[Действие] ${opts.actionLabel}${pointPart}`;
+    return `*(Без слов)* [Калибратор применяет воздействие: ${opts.actionLabel}${pointPart}]`;
 }
 
 const DEFAULT_PLAYER = {
@@ -65,7 +66,7 @@ app.post('/api/wait', async (req, res) => {
 
         let stReply, promptMessages;
         if (callLLM && lastBundle) {
-            const waitMessage = `[Прошло времени: ${ticks} тиков. Ничего нового не произошло.]`;
+            const waitMessage = `[Прошло времени: ${ticks} тиков. Ничего нового не произошло. Ответь, только если хочешь что-то сказать в пустоту.]`;
             const chatHistory = chatMemoryRepo.getRecent(subjectId, 10).map(entry => ({
                 role: entry.role,
                 content: entry.content
@@ -73,7 +74,7 @@ app.post('/api/wait', async (req, res) => {
             const stRes = await sendToSillyTavern(lastBundle.prompt, waitMessage, chatHistory);
             stReply = stRes.reply;
             promptMessages = stRes.sentMessages;
-            chatMemoryRepo.append(subjectId, 'user', waitMessage);
+            
             if (stReply && typeof stReply === 'object' && (stReply as any).speech) {
                 chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech);
             }
@@ -93,7 +94,7 @@ app.post('/api/wait', async (req, res) => {
             state: fullState,
             reply: stReply || null,
             promptMessages: promptMessages || null,
-            actionTrace: lastBundle?.trace || null,
+            actionTrace: null,
             tickResult: lastBundle?.output.result,
             bundle: lastBundle,
             player
@@ -297,10 +298,12 @@ app.post('/api/tick', async (req, res) => {
         }
 
         let autoUserMessage: string | null = null;
+        let actionLabelMessage: string | null = null;
         if (pendingUserCommandMessage) {
             autoUserMessage = pendingUserCommandMessage;
-        } else if (!suppressActionNarrative) {
-            autoUserMessage = buildAutoUserMessage({
+        } 
+        if (!suppressActionNarrative) {
+            actionLabelMessage = buildAutoUserMessage({
                 actionLabel,
                 pointLabel
             });
@@ -308,11 +311,39 @@ app.post('/api/tick', async (req, res) => {
 
         // 2. Load latest full UI state from DB
 // ...existing code...
+        // Count consecutive occurrences using actual domain state
+        let actionRepeats = 1;
+        if (actionId && !autoUserMessage) {
+            const recentLogs = db.prepare('SELECT action_payload FROM event_logs WHERE subject_id = ? AND action_type = ? ORDER BY id DESC LIMIT 15').all(subjectId, 'interaction') as { action_payload: string }[];
+            for (const row of recentLogs) {
+                try {
+                    const parsed = JSON.parse(row.action_payload);
+                    const logActionId = parsed.presetId || parsed.actionId || parsed.action?.actionKey;
+                    // Match action and point to consider it a repeat
+                    if (logActionId === actionId && parsed.pointId === pointIdUsed) {
+                        actionRepeats++;
+                    } else {
+                        break;
+                    }
+                } catch { break; }
+            }
+        }
+
+        let historyMessage = autoUserMessage || actionLabelMessage;
+        
+        if (historyMessage && historyMessage.trim().length > 0) {
+            if (actionRepeats > 1 && !autoUserMessage) {
+                historyMessage = `*(Без слов)* [Калибратор применяет воздействие: ${actionLabel} - точка ${pointLabel}] *(уже ${actionRepeats}-й раз подряд)*`;
+            }
+            chatMemoryRepo.append(subjectId, 'user', historyMessage);
+        }
+
         // 4. SillyTavern Communication (External Adapter)
         const chatHistory = chatMemoryRepo.getRecent(subjectId, 10).map(entry => ({
             role: entry.role,
             content: entry.content
         }));
+        
         const orchestration = orchestrateSceneActors(bundle);
 
         let narratorReaction: string | null = null;
@@ -327,45 +358,61 @@ app.post('/api/tick', async (req, res) => {
 
         if (orchestration.actorDecisions.length) {
             for (const decision of orchestration.actorDecisions) {
+                let currentPayload = promptPayload;
+                let currentHistory = chatHistory;
+                let userMsgOverride = autoUserMessage || undefined;
+
+                if (decision.actorId !== subjectId) {
+                    currentPayload = await buildPromptPayload(decision.actorId, undefined, eventId, {
+                        suppressTickIds
+                    });
+                    
+                    if (historyMessage && historyMessage.trim().length > 0) {
+                        chatMemoryRepo.append(decision.actorId, 'user', `*[Наблюдение: Калибратор применил воздействие к ${subjectId}]* ${historyMessage}`);
+                    }
+                    currentHistory = chatMemoryRepo.getRecent(decision.actorId, 10).map(entry => ({
+                        role: entry.role,
+                        content: entry.content
+                    }));
+                    userMsgOverride = undefined; // We appended observation to their memory
+                }
+
                 const { reply, sentMessages } = await sendToSillyTavern(
-                    promptPayload,
-                    autoUserMessage,
-                    chatHistory
+                    currentPayload,
+                    userMsgOverride,
+                    currentHistory
                 );
 
                 const structuredReply =
                     reply && typeof reply === 'object'
-                        ? (reply as { speech: string; reaction: string })
-                        : { speech: String(reply || ''), reaction: '' };
+                        ? (reply as { speech: string })
+                        : { speech: String(reply || '') };
 
                 actorReplies.push({
                     actorId: decision.actorId,
                     kind: decision.kind,
                     tone: decision.reason,
                     speech: structuredReply.speech,
-                    reaction: structuredReply.reaction
+                    reaction: narratorReaction || ''
                 });
 
-                if (!primaryReply) {
-                    primaryReply = structuredReply;
+                if (decision.actorId === subjectId || !primaryReply) {
+                    primaryReply = { speech: structuredReply.speech, reaction: narratorReaction || '' };
                     promptMessages = sentMessages;
                 }
-                break; // пока поддерживаем одного субъекта
+
+                if (structuredReply.speech) {
+                    chatMemoryRepo.append(decision.actorId, 'assistant', structuredReply.speech);
+                }
             }
         } else {
             promptMessages = [];
         }
 
-        if (autoUserMessage && autoUserMessage.trim().length > 0) {
-            chatMemoryRepo.append(subjectId, 'user', autoUserMessage);
-        }
-        if (primaryReply?.speech) {
-            chatMemoryRepo.append(subjectId, 'assistant', primaryReply.speech);
-        }
         recordMemoryEvent({
             subjectId,
             bundle,
-            userText: autoUserMessage,
+            userText: autoUserMessage || actionLabelMessage || undefined,
             assistantText: primaryReply?.speech || '',
             infoTag: req.body?.presetId
         });
@@ -382,7 +429,7 @@ app.post('/api/tick', async (req, res) => {
             promptMessages,
             actorReplies,
             narratorReaction,
-            actionTrace: bundle.trace || null,
+            actionTrace: null,
             classifierLog: dynamicModifiers?.raw ?? null,
             classifierModel: dynamicModifiers?.model ?? null
         });
@@ -771,7 +818,7 @@ app.post('/api/subject/update', (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`[Engine API] Running on http://localhost:${PORT}`);
 });

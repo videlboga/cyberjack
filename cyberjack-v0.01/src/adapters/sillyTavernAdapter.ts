@@ -24,8 +24,10 @@ const ST_MODEL =
 const ST_SOURCE = process.env.SILLYTAVERN_SOURCE || 'openrouter';
 const ST_REQUEST_TYPE = process.env.SILLYTAVERN_REQUEST_TYPE || 'external';
 const ST_MAX_TOKENS = Number(process.env.SILLYTAVERN_MAX_TOKENS ?? 300);
-const ST_TEMPERATURE = Number(process.env.SILLYTAVERN_TEMPERATURE ?? 0.8);
+const ST_TEMPERATURE = Number(process.env.SILLYTAVERN_TEMPERATURE ?? 0.85);
 const ST_TOP_P = Number(process.env.SILLYTAVERN_TOP_P ?? 0.9);
+const ST_FREQUENCY_PENALTY = Number(process.env.SILLYTAVERN_FREQUENCY_PENALTY ?? 0.5);
+const ST_PRESENCE_PENALTY = Number(process.env.SILLYTAVERN_PRESENCE_PENALTY ?? 0.3);
 const ST_JSON_RETRY_ATTEMPTS = Math.max(
     0,
     Number(process.env.SILLYTAVERN_JSON_RETRY_ATTEMPTS ?? 1)
@@ -41,10 +43,9 @@ const ST_CHARACTER_SCHEMA = {
     value: {
         type: 'object',
         properties: {
-            reaction: { type: 'string' },
             speech: { type: 'string' }
         },
-        required: ['reaction', 'speech'],
+        required: ['speech'],
         additionalProperties: false
     }
 };
@@ -93,9 +94,18 @@ export function generateChatPayload(
             content: userInput
         });
     } else {
+        let prompt = activeConfig.adapters.emptyInputPrompt;
+        
+        // Remove the last action from history if it's a *(Без слов)* marker
+        // and inject it directly into the prompt so the LLM doesn't double-read it
+        if (messages.length > 0 && messages[messages.length - 1].role === 'user' && messages[messages.length - 1].content.includes('*(Без слов)*')) {
+            const lastAction = messages.pop()?.content;
+            prompt = `${lastAction}\n\n${prompt}`;
+        }
+        
         messages.push({
             role: 'user',
-            content: activeConfig.adapters.emptyInputPrompt
+            content: prompt
         });
     }
 
@@ -120,7 +130,7 @@ function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
         },
         {
             role: 'user',
-            content: prompt.instructions || activeConfig.adapters.narratorInputPrompt
+            content: `Ознакомься с последними логами воздействий. Опиши ТОЛЬКО внешние физические реакции на самые последние события в логах. Требования:\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`
         }
     ];
     return messages;
@@ -134,9 +144,9 @@ function sanitizeJson(text: string): string {
  * Ставит SillyTavern в роль выраженческого слоя: мы строим промпт,
  * а сам рендеринг делегируем локально поднятому экземпляру ST через его backend endpoint.
  */
-function validateCharacterReply(candidate: any): candidate is { reaction: string; speech: string } {
+function validateCharacterReply(candidate: any): candidate is { speech: string } {
     if (!candidate || typeof candidate !== 'object') return false;
-    return typeof candidate.reaction === 'string' && typeof candidate.speech === 'string';
+    return typeof candidate.speech === 'string';
 }
 
 function validateNarratorReply(candidate: any): candidate is { reaction: string } {
@@ -144,7 +154,7 @@ function validateNarratorReply(candidate: any): candidate is { reaction: string 
     return typeof candidate.reaction === 'string';
 }
 
-function validateStructuredReply(candidate: any): candidate is { reaction: string; speech: string } {
+function validateStructuredReply(candidate: any): candidate is { speech: string } {
     return validateCharacterReply(candidate);
 }
 
@@ -188,6 +198,8 @@ async function requestCompletion(messages: ChatMessage[], schema: any): Promise<
         messages,
         max_tokens: ST_MAX_TOKENS,
         temperature: ST_TEMPERATURE,
+        frequency_penalty: ST_FREQUENCY_PENALTY,
+        presence_penalty: ST_PRESENCE_PENALTY,
         stream: false,
         include_reasoning: false,
         request_images: false,
@@ -229,7 +241,7 @@ export async function sendToSillyTavern(
     payload: PromptPayload,
     userInput?: string,
     history?: MemoryMessage[]
-): Promise<{ reply: { speech: string; reaction: string } | string; sentMessages: ChatMessage[] }> {
+): Promise<{ reply: { speech: string } | string; sentMessages: ChatMessage[] }> {
     const messages = generateChatPayload(payload, userInput, history);
 
     console.log(`\n========== ОТПРАВЛЯЕМЫЙ ПРОМПТ В ST ==========`);
@@ -265,7 +277,7 @@ export async function sendToSillyTavern(
                 }
                 console.warn('[ST Adapter] Reply не в JSON-формате, возвращаем как plaintext');
                 return {
-                    reply: { reaction: rawText, speech: '' },
+                    reply: { speech: rawText },
                     sentMessages: messages
                 };
             }
@@ -274,15 +286,14 @@ export async function sendToSillyTavern(
         console.error(`[ST Adapter] Ошибка связи с SillyTavern: ${err.message}`);
         return {
             reply: {
-                reaction: `*Ошибка соединения с SillyTavern: ${err.message}*`,
-                speech: ''
+                speech: `*Ошибка соединения с SillyTavern: ${err.message}*`
             },
             sentMessages: messages
         };
     }
 
     return {
-        reply: { reaction: '*Нет ответа от SillyTavern*', speech: '' },
+        reply: { speech: '*Нет ответа от SillyTavern*' },
         sentMessages: messages
     };
 }

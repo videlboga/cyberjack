@@ -4,6 +4,10 @@ import { ConfigEditor } from './ConfigEditor';
 type ChatEntry = {
   role: 'player' | 'subject' | 'system';
   text: string;
+  label?: string;
+  actorId?: string;
+  kind?: string;
+  tone?: string;
 };
 
 type RelationEntry = {
@@ -26,7 +30,7 @@ type CharacterInfo = {
   currentSceneId?: string | null;
 };
 
-const API_BASE = 'http://localhost:3001';
+const API_BASE = '';
 
 const CORE_FIELDS = [
   { key: 'sensitivity', label: 'Sensitivity (Чувствительность)' },
@@ -457,23 +461,24 @@ useEffect(() => {
         const subjectName = data.state?.name || data.state?.subject?.name || 'Субъект';
         setChat((prev) => [
           ...prev,
-          ...actorReplies.map((reply) => ({
-            role: 'subject',
-            text: reply.speech || '(молчит)',
-            actorId: reply.actorId,
-            kind: reply.kind,
-            tone: reply.tone,
-            label: reply.actorId === subjectId ? subjectName : reply.actorId
-          }))
+          ...actorReplies.map((reply: any) => {
+            return {
+              role: 'subject' as const,
+              text: reply.speech || '(молчит)',
+              actorId: reply.actorId,
+              kind: reply.kind,
+              tone: reply.tone,
+              label: reply.actorId === subjectId ? subjectName : reply.actorId
+            };
+          })
         ]);
       } else if (data.reply) {
-        if (data.reply.speech !== undefined) {
-          const speechText = data.reply.speech || '';
+        if (data.reply.speech !== undefined || data.reply.reaction !== undefined) {
           setChat((prev) => [
             ...prev,
             {
               role: 'subject',
-              text: speechText || '(молчит)'
+              text: data.reply.speech || '(молчит)'
             }
           ]);
         }
@@ -522,6 +527,8 @@ useEffect(() => {
         setPhysicalReaction(data.reply.reaction || '');
         if (data.reply.speech) {
           setChat((prev) => [...prev, { role: 'subject', text: data.reply.speech }]);
+        } else {
+          setChat((prev) => [...prev, { role: 'subject', text: '(молчит)' }]);
         }
       }
       if (data.promptMessages) setPromptLog(data.promptMessages);
@@ -884,7 +891,7 @@ useEffect(() => {
                 {Object.entries(player?.resources || {}).map(([key, value]) => (
                   <div key={key} className="resource-card">
                     <strong>{key}</strong>
-                    <span>{value}</span>
+                    <span>{String(value)}</span>
                   </div>
                 ))}
               </div>
@@ -1014,7 +1021,7 @@ useEffect(() => {
                 {selectedActionCosts ? (
                   Object.entries(selectedActionCosts).map(([resKey, value]) => (
                     <span key={resKey} className="chip">
-                      {resKey}: -{value}
+                      {resKey}: -{String(value)}
                     </span>
                   ))
                 ) : (
@@ -1030,7 +1037,7 @@ useEffect(() => {
               <div className="chat-log">
                 {chat.map((entry, idx) => (
                   <div key={idx} className={`chat-message ${entry.role}`}>
-                    <strong>{entry.role === 'player' ? 'Вы' : entry.role === 'subject' ? subject.name : 'Система'}:</strong>{' '}
+                    <strong>{entry.role === 'player' ? 'Вы' : (entry.role === 'subject' ? (entry.label || subject?.name || 'NPC') : 'Система')}:</strong>{' '}
                     <span>{entry.text || '(молчание)'}</span>
                   </div>
                 ))}

@@ -1,0 +1,8 @@
+Subject: S-01
+Looping...
+Chat history for subject: S-01
+assistant|Я все еще здесь.
+assistant|Понятно.
+assistant|Понятно.
+assistant|Понятно.
+assistant|Я… я в порядке.

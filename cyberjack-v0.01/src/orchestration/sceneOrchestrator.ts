@@ -6,7 +6,7 @@ import {
     CharacterRelation
 } from '../domain/types';
 import { activeConfig } from '../prompts/config';
-import { activeContextsRepo, presetRepo, playerRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, presetRepo, playerRepo, subjectRepo, characterRelationRepo } from '../infrastructure/repositories';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -43,11 +43,15 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         if (rel.target?.id) relationMap.set(rel.target.id, rel);
     });
 
-    const allActors = relations
-        .filter(rel => rel.target?.subjectId && rel.present)
-        .map(rel => rel.target!.subjectId!);
+    const allActors = Array.from(new Set([
+        subjectId,
+        ...relations
+            .filter(rel => rel.target?.subjectId && rel.present)
+            .map(rel => rel.target!.subjectId!)
+    ]));
 
     const lastActionIntensity = clamp01(bundle.compiledAction.intensity ?? 0);
+    const lastActionNovelty = clamp01(bundle.compiledAction.novelty ?? 1); // If no novelty, assume 1 (new action)
     const activeContextIds = activeContextsRepo.getAllForEvent(bundle.event.sceneId || 'lab');
     const activeContextLabels = activeContextIds
         .map(ctx => presetRepo.getContextPreset(ctx.id)?.label)
@@ -58,12 +62,22 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
     const playerState = playerRepo.get(playerId);
 
     for (const actorId of allActors) {
-        const core = actorId === subjectId ? bundle.stateAfter.core : bundle.stateBefore.core;
-        const relationToCalibrator = relationMap.get(bundle.event.playerId || 'PL-1');
+        let core = actorId === subjectId ? bundle.stateAfter.core : bundle.stateBefore.core;
+        let relationToCalibrator = relationMap.get(bundle.event.playerId || 'PL-1');
+        let peerRelations = relations.filter(rel => rel.target?.subjectId && rel.target.subjectId !== actorId);
+
+        if (actorId !== subjectId) {
+            const externalCore = subjectRepo.get(actorId);
+            if (externalCore) core = externalCore;
+            
+            const actorRelations = characterRelationRepo.listFor(actorId);
+            relationToCalibrator = actorRelations.find(r => r.target?.id === (bundle.event.playerId || 'PL-1'));
+            peerRelations = actorRelations.filter(rel => rel.target?.subjectId && rel.target.subjectId !== actorId);
+        }
+
         const relationNorm = relationToCalibrator ? normalize(relationToCalibrator.attitude ?? 50) : 0.5;
         const sensitivityNorm = normalize(core?.sensitivity ?? 50);
         const capacityNorm = normalize(core?.capacity ?? 50);
-        const peerRelations = relations.filter(rel => rel.target?.subjectId && rel.target.subjectId !== actorId);
         const peerNorm = peerRelations.length
             ? peerRelations.reduce((sum, rel) => sum + normalize(rel.attitude ?? 50), 0) / peerRelations.length
             : 0.5;
@@ -73,11 +87,14 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         const resourceScale = cfg.resourceScale || 100;
         const resourceNorm = normalize(resourceValue, 0, resourceScale);
 
+        // Смягчаем штраф за отсутствие новизны: максимум снижение на 50%, а не до нуля.
+        const noveltyFactor = isVerbalInput ? 1.0 : (0.5 + 0.5 * lastActionNovelty);
+
         const reactiveProb = clamp01(
-            cfg.baseReactiveProbability +
-                cfg.sensitivityModifier * (1 - capacityNorm) +
-                cfg.attitudeModifier * (1 - relationNorm) +
-                cfg.intensityModifier * lastActionIntensity +
+            cfg.baseReactiveProbability * noveltyFactor +
+                cfg.sensitivityModifier * (1 - capacityNorm) * noveltyFactor +
+                cfg.attitudeModifier * (1 - relationNorm) * noveltyFactor +
+                cfg.intensityModifier * lastActionIntensity * noveltyFactor +
                 cfg.contextModifier * contextBonus +
                 cfg.opennessModifier * opennessNorm +
                 cfg.resourceModifier * resourceNorm +
@@ -98,9 +115,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
                 kind: 'reactive',
                 reason: describeTone(relationToCalibrator?.attitude)
             });
-        }
-
-        if (sampleProbability(proactiveProb)) {
+        } else if (sampleProbability(proactiveProb)) {
             actorDecisions.push({
                 actorId,
                 kind: 'proactive',

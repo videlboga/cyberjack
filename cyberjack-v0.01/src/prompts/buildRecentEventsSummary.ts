@@ -83,14 +83,21 @@ export function buildRecentEventsSummary(events: EventRecord[]): string {
             const pLabel = payloadData.pointLabel || payloadData.pointId || 'тело';
             const resultObj = JSON.parse(event.result_payload);
 
-            const tickOutputMock = {
-                result: resultObj,
-                nextCore: resultObj.tickMeta?.inputs?.core || { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 }
-            };
+            const safeCore = { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 };
             
-            const previousCore = resultObj.tickMeta?.inputs?.core || {
-                sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50
-            };
+            let tickOutputMock = resultObj;
+            if (resultObj && resultObj.result) {
+                if (!tickOutputMock.nextCore) {
+                    tickOutputMock.nextCore = resultObj.tickMeta?.inputs?.core || safeCore;
+                }
+            } else {
+                tickOutputMock = {
+                    result: resultObj,
+                    nextCore: resultObj?.tickMeta?.inputs?.core || safeCore
+                };
+            }
+            
+            const previousCore = resultObj?.tickMeta?.inputs?.core || safeCore;
 
             const diagnostics = action ? buildDiagnostics(action, previousCore, tickOutputMock as any) : null;
             

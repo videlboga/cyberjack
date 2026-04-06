@@ -1,4 +1,3 @@
-// src/infrastructure/db.ts
 import Database from 'better-sqlite3';
 
 export const db = new Database('cyberjack.sqlite', { verbose: console.log });
@@ -31,7 +30,7 @@ db.exec(`
     FOREIGN KEY (from_id) REFERENCES characters(id),
     FOREIGN KEY (to_id) REFERENCES characters(id)
   );
-
+  
   CREATE INDEX IF NOT EXISTS idx_character_relations_from ON character_relations(from_id);
 
   CREATE TABLE IF NOT EXISTS subjects (
@@ -124,9 +123,10 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS active_contexts (
-    event_id TEXT NOT NULL,     -- Optional, to bind it to a scene or global state 
+    event_id TEXT NOT NULL,     -- Optional, to bind it to a scene or global state
     context_id TEXT NOT NULL,
-    duration INTEGER DEFAULT -1, ticks_active REAL DEFAULT 0,
+    duration INTEGER DEFAULT -1,
+    ticks_active REAL DEFAULT 0,
     PRIMARY KEY (event_id, context_id)
   );
 
@@ -149,7 +149,7 @@ db.exec(`
     metadata TEXT DEFAULT '{}',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
-
+  
   CREATE INDEX IF NOT EXISTS idx_memory_subject ON memory_embeddings(subject_id, created_at DESC);
 
   CREATE TABLE IF NOT EXISTS chat_memory_summary (
@@ -161,7 +161,7 @@ db.exec(`
     end_message_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
-
+  
   CREATE INDEX IF NOT EXISTS idx_chat_summary_subject ON chat_memory_summary(subject_id, created_at DESC);
 `);
 
@@ -179,8 +179,8 @@ safeAddColumn('subject_point_states', 'familiarity', 'REAL DEFAULT 0');
 safeAddColumn('subject_point_states', 'exposure_count', 'REAL DEFAULT 0');
 safeAddColumn('subject_point_states', 'baseline_local_sensitivity', 'REAL');
 safeAddColumn('subject_point_states', 'baseline_local_attitude', 'REAL');
-safeAddColumn('scenes', 'action_costs', 'TEXT DEFAULT \'{}\'');
-safeAddColumn('scenes', 'transitions', 'TEXT DEFAULT \'[]\'');
+safeAddColumn('scenes', 'action_costs', "TEXT DEFAULT '{}'");
+safeAddColumn('scenes', 'transitions', "TEXT DEFAULT '[]'");
 safeAddColumn('characters', 'current_scene_id', 'TEXT');
 safeAddColumn('subjects', 'baseline_sensitivity', 'REAL');
 safeAddColumn('subjects', 'baseline_capacity', 'REAL');

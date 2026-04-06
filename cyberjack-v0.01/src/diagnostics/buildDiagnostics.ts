@@ -17,7 +17,7 @@ export function buildDiagnostics(
     const actionToInterpret = (action as any)._baseAction || action;
 
     return {
-        actionSummary: interpretAction(actionToInterpret),
+        actionSummary: interpretAction(actionToInterpret, output.result),
         reactionSummary,
         inferredTraits: inferTraits(output.nextCore),
         rawDelta: {

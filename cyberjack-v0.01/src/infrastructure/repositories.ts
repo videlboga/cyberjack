@@ -624,6 +624,9 @@ export const chatMemoryRepo = {
         const stmt = db.prepare('SELECT id FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT 1');
         const row = stmt.get(subjectId) as { id: number } | undefined;
         return row?.id ?? 0;
+    },
+    updateContent(id: number, content: string) {
+        db.prepare('UPDATE chat_memory SET content = ? WHERE id = ?').run(content, id);
     }
 };
 

@@ -20,7 +20,7 @@ export function ConfigEditor() {
     const [copyStatus, setCopyStatus] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:3001/api/config')
+        fetch('/api/config')
             .then(res => res.json())
             .then(data => {
                 setConfig(data.config);
@@ -42,7 +42,7 @@ export function ConfigEditor() {
     const saveConfig = async () => {
         setSaving(true);
         try {
-            const res = await fetch('http://localhost:3001/api/config', {
+            const res = await fetch('/api/config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ config })
@@ -67,7 +67,7 @@ export function ConfigEditor() {
         setProfileLoading(true);
         setProfileStatus('');
         try {
-            const res = await fetch(`http://localhost:3001/api/characters/profile?subjectId=${encodeURIComponent(targetId)}`);
+            const res = await fetch(`/api/characters/profile?subjectId=${encodeURIComponent(targetId)}`);
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Не удалось загрузить профиль');
             setCurrentProfile({ ...data.profile, subjectId: data.subjectId || targetId });
@@ -89,7 +89,7 @@ export function ConfigEditor() {
         setGeneratorLoading(true);
         setGeneratorError('');
         try {
-            const res = await fetch('http://localhost:3001/api/characters/prompt', {
+            const res = await fetch('/api/characters/prompt', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -138,9 +138,10 @@ export async function buildPromptPayload(
     const generatedProfile = ensureGeneratedProfile(subjectId);
     const stContext = await fetchSillyTavernContext(subjectId);
     const cfg = activeConfig.character;
+    const fallbackPersona = `Тебя зовут ${subjectRow.name} (Кодовое имя ${subjectId}).\n${cfg.history}`;
     const personaBlock =
         generatedProfile?.personaText ||
-        (stContext?.personaText || `${cfg.identity}\n${cfg.history}`);
+        (stContext?.personaText || fallbackPersona);
 
     let loreBlock = '';
     if (generatedProfile?.loreNotes?.length) {
