@@ -34,6 +34,8 @@ db.transaction(() => {
 })();
 
 const points = [
+    { id: 'global_pose', label: 'Общая поза тела (виртуальная)', sens: 0, att: 50 },
+    { id: 'mind_state', label: 'Состояние разума (виртуальная)', sens: 0, att: 50 },
     { id: 'head', label: 'Голова/Волосы', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
     { id: 'face', label: 'Лицо', sens: 60, att: 40 },
     { id: 'lips', label: 'Губы', sens: 85, att: 20, providesFunctions: ['speak', 'kiss', 'eat'] },
@@ -121,35 +123,19 @@ const actions = [
     { id: 'verbal_pressure', label: 'Обычная беседа (скрытое)', i: 0.1, v: 0.0, c: 0.0, s: 0.0, n: 0.1 },
     { id: 'stare', label: 'Пристальный взгляд', i: 0.3, v: -0.1, c: 0.0, s: 0.1, n: 0.2 },
     { id: 'close_inspection', label: 'Относительно близкий осмотр', i: 0.4, v: -0.3, c: 0.0, s: 0.2, n: 0.4 },
-    { id: 'feint_strike', label: 'Ложный замах', i: 0.7, v: -0.5, c: 0.0, s: 0.9, n: 0.5 }
+    { id: 'feint_strike', label: 'Ложный замах', i: 0.7, v: -0.5, c: 0.0, s: 0.9, n: 0.5 },
+    { id: 'pose_lying', label: 'Поза: Лёжа', i: -0.1, v: 0.1, c: 0.1, s: 0, n: -0.1, cc: { type: 'pose', occupiesPoints: ['global_pose'], exclusiveWithinPoint: true, requiredFunctions: ['shift_posture'] } },
+    { id: 'pose_kneeling', label: 'Поза: Стоя на коленях', i: 0.2, v: -0.2, c: 0, s: 0.1, n: 0.1, cc: { type: 'pose', occupiesPoints: ['global_pose'], exclusiveWithinPoint: true, requiredFunctions: ['kneel', 'shift_posture'] } },
+    { id: 'pose_spread_eagle', label: 'Поза: Звездой (привязана)', i: 0.4, v: -0.3, c: 0, s: 0.2, n: 0.3, cc: { type: 'pose', occupiesPoints: ['global_pose'], exclusiveWithinPoint: true, requiredFunctions: ['shift_posture'], blockedFunctions: ['stand', 'kneel', 'walk', 'shift_posture', 'reach', 'touch'] } },
+    { id: 'bound_hands', label: 'Связанные руки (за спиной)', i: 0.3, v: -0.2, c: 0, s: 0.2, n: 0.2, cc: { type: 'restraint', occupiesPoints: ['hands', 'arms'], exclusiveWithinPoint: true, priority: 50, blockedFunctions: ['manipulate', 'touch', 'reach', 'gesture'] } },
+    { id: 'bound_legs', label: 'Связанные ноги', i: 0.3, v: -0.2, c: 0, s: 0.2, n: 0.2, cc: { type: 'restraint', occupiesPoints: ['knees', 'feet', 'calves'], exclusiveWithinPoint: true, priority: 50, blockedFunctions: ['stand', 'walk', 'kneel', 'shift_posture'] } },
+    { id: 'blindfold', label: 'Завязанные глаза', i: 0.5, v: -0.2, c: 0, s: 0.3, n: 0.5, cc: { type: 'equipment', occupiesPoints: ['eyes_virtual'], exclusiveWithinPoint: true, priority: 50, blockedFunctions: ['look'] } }
 ];
 
-const insertActionStmt = db.prepare('INSERT INTO action_presets (id, label, values_json) VALUES (?, ?, ?) ON CONFLICT(id) DO UPDATE SET label = excluded.label, values_json = excluded.values_json');
+const insertActionStmt = db.prepare('INSERT INTO action_presets (id, label, values_json, context_config_json) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET label = excluded.label, values_json = excluded.values_json, context_config_json = excluded.context_config_json');
 db.transaction(() => {
     for (const a of actions) {
-        insertActionStmt.run(a.id, a.label, JSON.stringify({ intensity: a.i, valence: a.v, contact: a.c, sharpness: a.s, novelty: a.n }));
-    }
-})();
-
-console.log("Добавление контекстов (contexts)...");
-const contexts = [
-    { id: 'pose_lying', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Лёжа', requiredFunctions: ['shift_posture'], m: { intensity: -0.1, valence: 0.1, contact: 0.1, novelty: -0.1 } },
-    { id: 'pose_kneeling', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Стоя на коленях', requiredFunctions: ['kneel', 'shift_posture'], m: { intensity: 0.2, valence: -0.2, sharpness: 0.1, novelty: 0.1 } },
-    { id: 'pose_spread_eagle', point_id: 'slot_pose', slot: 'pose', exclusiveWithinSlot: true, label: 'Поза: Звездой (привязана)', requiredFunctions: ['shift_posture'], blockedFunctions: ['stand', 'kneel', 'walk', 'shift_posture', 'reach', 'touch'], m: { intensity: 0.4, valence: -0.3, sharpness: 0.2, novelty: 0.3 } },
-    { id: 'bound_hands', point_id: 'hands', slot: 'restraint_arms', exclusiveWithinSlot: true, priority: 50, label: 'Связанные руки (за спиной)', blockedFunctions: ['manipulate', 'touch', 'reach', 'gesture'], m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 } },
-    { id: 'bound_legs', point_id: 'knees', slot: 'restraint_legs', exclusiveWithinSlot: true, priority: 50, label: 'Связанные ноги', blockedFunctions: ['stand', 'walk', 'kneel', 'shift_posture'], m: { intensity: 0.3, valence: -0.2, sharpness: 0.2, novelty: 0.2 } },
-    { id: 'blindfold', point_id: 'head', slot: 'equipment_head', exclusiveWithinSlot: true, priority: 50, label: 'Завязанные глаза', blockedFunctions: ['look'], m: { intensity: 0.5, valence: -0.2, sharpness: 0.3, novelty: 0.5 } }
-];
-
-const insertContextStmt = db.prepare('INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority, self_applicable, self_text, forced_text, removal_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET label = excluded.label, modifiers_json = excluded.modifiers_json, blocked_functions = excluded.blocked_functions, required_functions = excluded.required_functions');
-db.transaction(() => {
-    for (const c of contexts) {
-        insertContextStmt.run(
-            c.id, c.label, c.point_id, JSON.stringify((c as any).m), (c as any).type || 'condition', (c as any).slot || 'general',
-            (c as any).exclusiveWithinSlot ? 1 : 0, JSON.stringify((c as any).blocksSlots || []), JSON.stringify((c as any).affectedPointIds || []),
-            JSON.stringify((c as any).blockedFunctions || []), JSON.stringify((c as any).boostedFunctions || []), JSON.stringify((c as any).requiredFunctions || []),
-            (c as any).priority || 0, (c as any).selfApplicable ? 1 : 0, (c as any).selfText || null, (c as any).forcedText || null, (c as any).removalText || null
-        );
+        insertActionStmt.run(a.id, a.label, JSON.stringify({ intensity: a.i, valence: a.v, contact: a.c || 0, sharpness: a.s || 0, novelty: a.n || 0 }), a.cc ? JSON.stringify(a.cc) : null);
     }
 })();
 
