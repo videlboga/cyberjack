@@ -283,7 +283,7 @@ app.post('/api/tick', async (req, res) => {
         const suppressTickIds = suppressActionNarrative ? [bundle.tickId] : undefined;
 
         if (promptDirty || suppressTickIds) {
-            promptPayload = await buildPromptPayload(subjectId, bundle.output, eventId, {
+            promptPayload = await buildPromptPayload(subjectId, subjectId, bundle.output, eventId, {
                 suppressTickIds
             });
             bundle.prompt = promptPayload;
@@ -329,12 +329,17 @@ app.post('/api/tick', async (req, res) => {
             }
         }
 
-        let historyMessage = autoUserMessage || actionLabelMessage;
-        
-        if (historyMessage && historyMessage.trim().length > 0) {
-            if (actionRepeats > 1 && !autoUserMessage) {
-                historyMessage = `*(Без слов)* [Калибратор применяет воздействие: ${actionLabel} - точка ${pointLabel}] *(уже ${actionRepeats}-й раз подряд)*`;
+        let historyMessage = '';
+        if (autoUserMessage) {
+            historyMessage = `[Игрок (к ${fullState.name || subjectId})]: "${autoUserMessage}"`;
+        } else if (actionLabelMessage) {
+            historyMessage = `*(Без слов)* [Калибратор применяет воздействие к ${fullState.name || subjectId}: ${actionLabel} - точка ${pointLabel}]`;
+            if (actionRepeats > 1) {
+                historyMessage += ` *(уже ${actionRepeats}-й раз подряд)*`;
             }
+        }
+
+        if (historyMessage.trim().length > 0) {
             chatMemoryRepo.append(subjectId, 'user', historyMessage);
         }
 
@@ -363,12 +368,12 @@ app.post('/api/tick', async (req, res) => {
                 let userMsgOverride = autoUserMessage || undefined;
 
                 if (decision.actorId !== subjectId) {
-                    currentPayload = await buildPromptPayload(decision.actorId, undefined, eventId, {
+                    currentPayload = await buildPromptPayload(decision.actorId, subjectId, undefined, eventId, {
                         suppressTickIds
                     });
                     
                     if (historyMessage && historyMessage.trim().length > 0) {
-                        chatMemoryRepo.append(decision.actorId, 'user', `*[Наблюдение: Калибратор применил воздействие к ${subjectId}]* ${historyMessage}`);
+                        chatMemoryRepo.append(decision.actorId, 'user', historyMessage);
                     }
                     currentHistory = chatMemoryRepo.getRecent(decision.actorId, 10).map(entry => ({
                         role: entry.role,

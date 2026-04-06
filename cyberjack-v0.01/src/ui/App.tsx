@@ -86,12 +86,14 @@ export function App() {
   const [newResourceValue, setNewResourceValue] = useState('0');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const subjectId = subject?.id || 'S-01';
+  const [actionTargetId, setActionTargetId] = useState<string>('S-01');
+
+  const subjectId = actionTargetId || subject?.id || 'S-01';
   const sceneId = scene?.id || 'lab';
 
   useEffect(() => {
     fetchState(pointId);
-  }, [pointId]);
+  }, [actionTargetId, pointId]);
 
 useEffect(() => {
   fetchContexts();
@@ -422,11 +424,13 @@ useEffect(() => {
 
     const label = options?.labelOverride || actions.find((a) => a.id === actionId)?.label || actionId;
     const textMessage = options?.textMessage;
+    
+    const targetName = characters.find(c => c.id === actionTargetId)?.name || actionTargetId;
 
     if (textMessage) {
       setChat((prev) => [...prev, { role: 'player', text: textMessage }]);
     } else {
-      setChat((prev) => [...prev, { role: 'player', text: `[Действие] ${label}` }]);
+      setChat((prev) => [...prev, { role: 'player', text: `[На: ${targetName}] ${label}` }]);
     }
 
     setLoading(true);
@@ -435,7 +439,7 @@ useEffect(() => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subjectId,
+          subjectId: actionTargetId,
           pointId,
           sceneId,
           presetId: actionId,
@@ -1000,21 +1004,31 @@ useEffect(() => {
                   />
                 </div>
               </div>
-              <div className="action-controls">
-                <select value={selectedAction} onChange={(e) => setSelectedAction(e.target.value)}>
-                  {actions.map((action) => {
-                    const costsLabel = formatCosts(action.costs);
-                    return (
-                      <option key={action.id} value={action.id}>
-                        {action.label}
-                        {costsLabel ? ` · ${costsLabel}` : ''}
-                      </option>
-                    );
-                  })}
-                </select>
-                <button onClick={() => handleAction()} disabled={!selectedAction}>
-                  Применить
-                </button>
+              <div className="action-controls" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                  <span style={{ color: '#aaa', alignSelf: 'center' }}>Цель:</span>
+                  <select value={actionTargetId} onChange={(e) => setActionTargetId(e.target.value)} style={{ flex: 1 }}>
+                    {characters.map(c => (
+                      <option key={c.id} value={c.id}>{c.name} ({c.id})</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                  <select value={selectedAction} onChange={(e) => setSelectedAction(e.target.value)} style={{ flex: 1 }}>
+                    {actions.map((action) => {
+                      const costsLabel = formatCosts(action.costs);
+                      return (
+                        <option key={action.id} value={action.id}>
+                          {action.label}
+                          {costsLabel ? ` · ${costsLabel}` : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <button onClick={() => handleAction()} disabled={!selectedAction}>
+                    Применить
+                  </button>
+                </div>
               </div>
               <div className="action-costs">
                 <span>Стоимость:</span>

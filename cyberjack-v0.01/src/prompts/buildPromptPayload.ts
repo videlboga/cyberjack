@@ -13,26 +13,31 @@ import { buildMemoryInsights } from './buildMemoryInsights';
  * Builds the payload for LLM/SillyTavern, grabbing history right from the DB.
  */
 export async function buildPromptPayload(
-    subjectId: string,
+    ownerId: string, // Whose generation this is
+    targetId: string, // Who received the primary action
     latestResult?: TickOutput,
     eventId: string = 'lab', // TODO: Pass actual scene instead of hardcoding
-    options?: { suppressTickIds?: string[] }
+    options?: { suppressTickIds?: string[]; initiatorId?: string }
 ): Promise<PromptPayload & { systemPrompt: string }> {
-    const subjectRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(subjectId) as any;
-    if (!subjectRow) throw new Error(`Subject ${subjectId} not found for prompt building`);
+    const ownerRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(ownerId) as any;
+    if (!ownerRow) throw new Error(`Subject ${ownerId} not found for prompt building`);
+    
+    // Fallback if targetId missing
+    const targetQueryId = targetId || ownerId;
+    const targetRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(targetQueryId) as Record<string, any> | undefined;
 
-    const core: SubjectCoreState = {
-        sensitivity: subjectRow.sensitivity,
-        capacity: subjectRow.capacity,
-        openness: subjectRow.openness,
-        plasticity: subjectRow.plasticity,
-        attitude: subjectRow.attitude
-    };
+    const core: SubjectCoreState = targetRow ? {
+        sensitivity: targetRow.sensitivity,
+        capacity: targetRow.capacity,
+        openness: targetRow.openness,
+        plasticity: targetRow.plasticity,
+        attitude: targetRow.attitude
+    } : { sensitivity: 50, capacity:50, openness:50, plasticity:50, attitude:50 };
 
     const recentLogLimit = activeConfig.perception?.recentEventLimit ?? 10;
     let logs = db.prepare(
         'SELECT * FROM event_logs WHERE subject_id = ? ORDER BY timestamp DESC LIMIT ?'
-    ).all(subjectId, recentLogLimit) as any[];
+    ).all(targetQueryId, recentLogLimit) as any[];
 
     if (options?.suppressTickIds?.length) {
         const suppressSet = new Set(options.suppressTickIds);
@@ -74,10 +79,10 @@ export async function buildPromptPayload(
         FROM subject_point_states sps
         JOIN point_presets p ON sps.point_id = p.id
         WHERE sps.subject_id = ?
-    `).all(subjectId) as any[];
-    
+    `).all(targetQueryId) as any[];
+
     const activeContextNames = activeContextRow.map(r => r.label);
-    const contextText = activeContextNames.length > 0 
+    const contextText = activeContextNames.length > 0
         ? `\n[Физическое состояние и влияние среды]: ${activeContextNames.join(', ')}`
         : '';
 
@@ -86,9 +91,7 @@ export async function buildPromptPayload(
         localSensitivity: row.local_sensitivity,
         localAttitude: row.local_attitude
     }));
-    const relations = characterRelationRepo.listFor(subjectId);
-
-    const stateSummary = buildStateSummary(core, mappedPoints);
+    const relations = characterRelationRepo.listFor(ownerId);    const stateSummary = buildStateSummary(core, mappedPoints);
     const eventsText = buildRecentEventsSummary(recentEvents);
     const contextSummary = activeContextNames.length > 0 ? activeContextNames.join(', ') : undefined;
     const interpretationBlock = `${stateSummary}${contextText}`;
@@ -135,10 +138,21 @@ export async function buildPromptPayload(
         }
     });
 
-    const generatedProfile = ensureGeneratedProfile(subjectId);
-    const stContext = await fetchSillyTavernContext(subjectId);
+    const isObserver = ownerId !== targetQueryId;
+    const stateSection = isObserver 
+        ? `[Статус: Наблюдатель]\nЖертва воздействия: ${targetRow?.name || targetQueryId}. Ты только наблюдаешь со стороны.` 
+        : `[Текущее состояние]\n${interpretationBlock.trim()}`;
+
+    const generatedProfile = ensureGeneratedProfile(ownerId);
+    const stContext = await fetchSillyTavernContext(ownerId);
     const cfg = activeConfig.character;
-    const fallbackPersona = `Тебя зовут ${subjectRow.name} (Кодовое имя ${subjectId}).\n${cfg.history}`;
+    
+    // Dynamic history based on role if no profile found
+    const fallbackHistory = isObserver 
+        ? "Ты находишься в стерильной камере рядом с калибровочным столом. Ты видишь, как Калибратор испытывает другого синтетика. Ты просто сторонний наблюдатель." 
+        : cfg.history;
+
+    const fallbackPersona = `Тебя зовут ${ownerRow.name} (Кодовое имя ${ownerId}).\n${fallbackHistory}`;
     const personaBlock =
         generatedProfile?.personaText ||
         (stContext?.personaText || fallbackPersona);
@@ -154,7 +168,7 @@ export async function buildPromptPayload(
     const memoryBlock =
         includeMemory && stContext?.memoryText ? `\n[Память]\n${stContext.memoryText}` : '';
 
-    const recentSummaries = getRecentSummaries(subjectId, 5);
+    const recentSummaries = getRecentSummaries(ownerId, 5);
     const intents = new Set<string>();
     const responses = new Set<string>();
     const extraStatements = new Set<string>();
@@ -186,7 +200,9 @@ export async function buildPromptPayload(
               }`
             : '';
 
-    const voiceInstructions = `\n- Говори от первого лица и реагируй так, будто воздействие происходит прямо сейчас.\n- Не пересказывай прошлые ответы, каждый раз формируй живую реплику.\n- Замечай тело: связки, позы, дискомфорт или облегчение. Если что-то неприятно, дай понять через интонацию.`;
+    const voiceInstructions = isObserver
+        ? `\n- Говори от первого лица.\n- Ты — НАБЛЮДАТЕЛЬ (зритель). Это воздействие применяют НЕ к тебе.\n- Комментируй происходящее со стороны, обращайся к калибратору или к жертве, оценивай их действия.`
+        : `\n- Говори от первого лица и реагируй так, будто воздействие происходит прямо сейчас.\n- Не пересказывай прошлые ответы, каждый раз формируй живую реплику.\n- Замечай тело: связки, позы, дискомфорт или облегчение. Если что-то неприятно, дай понять через интонацию.`;
 
     const describeAttitude = (value: number) => {
         if (value >= 70) return 'я почти доверяю и могу немного расслабиться';
@@ -215,7 +231,7 @@ export async function buildPromptPayload(
     const aggregatedMemory = buildMemoryInsights(logs);
     const vectorMemories = aggregatedMemory.length
         ? []
-        : selectLongTermMemory(subjectId, structuredEvents, core, mappedPoints).slice(0, 2);
+        : selectLongTermMemory(ownerId, structuredEvents, core, mappedPoints).slice(0, 2);
     const combinedMemories = [...aggregatedMemory, ...vectorMemories];
     const longTermSection = combinedMemories.length
         ? `\n[Долгосрочная память]\n${combinedMemories.map(entry => `- ${entry}`).join('\n')}`
@@ -223,10 +239,9 @@ export async function buildPromptPayload(
     const personaSection = `[Персона]\n${personaBlock}`;
     const instructionsSection = `[Инструкции]\n${cfg.formatInstructions}${voiceInstructions}`;
     const memorySection = memoryBlock ? memoryBlock.trim() : '';
-    const stateSection = `[Текущее состояние]\n${interpretationBlock.trim()}`;
 
     const narratorPrompt: NarratorPromptPayload = {
-        subjectId,
+        subjectId: targetQueryId,
         recentEventsText: eventsText.trim(),
         stateText: interpretationBlock.trim(),
         instructions: cfg.narratorFormatInstructions
@@ -247,7 +262,7 @@ export async function buildPromptPayload(
         .join('\n\n');
 
     const payload: PromptPayload = {
-        subjectId,
+        subjectId: ownerId,
         sceneId: eventId,
         currentStateSummary: {
             interpretation: interpretationBlock.trim(),

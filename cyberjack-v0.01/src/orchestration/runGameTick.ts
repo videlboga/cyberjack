@@ -135,7 +135,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         engineOutput
     );
 
-    const prompt = await buildPromptPayload(payload.subjectId, engineOutput, activeSceneId);
+    const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId);
 
     const event: GameEvent = {
         id: tickId,
