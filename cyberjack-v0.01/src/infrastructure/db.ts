@@ -90,7 +90,8 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS action_presets (
     id TEXT PRIMARY KEY,
     label TEXT NOT NULL,
-    values_json TEXT NOT NULL -- JSON: { intensity, valence, contact, sharpness, novelty }
+    values_json TEXT NOT NULL,
+    context_config_json TEXT
   );
 
   CREATE TABLE IF NOT EXISTS point_presets (
@@ -102,32 +103,14 @@ db.exec(`
     tags TEXT DEFAULT '[]'
   );
 
-  CREATE TABLE IF NOT EXISTS context_presets (
-    id TEXT PRIMARY KEY,
-    label TEXT NOT NULL,
-    point_id TEXT DEFAULT 'general',
-    modifiers_json TEXT NOT NULL, -- JSON: Partial<CompiledAction>
-    type TEXT DEFAULT 'condition',
-    slot TEXT DEFAULT 'general',
-    exclusive_within_slot INTEGER DEFAULT 0,
-    blocks_slots TEXT DEFAULT '[]',
-    affected_point_ids TEXT DEFAULT '[]',
-    blocked_functions TEXT DEFAULT '[]',
-    boosted_functions TEXT DEFAULT '[]',
-    required_functions TEXT DEFAULT '[]',
-    priority INTEGER DEFAULT 0,
-    self_applicable INTEGER DEFAULT 0,
-    self_text TEXT,
-    forced_text TEXT,
-    removal_text TEXT
-  );
-
   CREATE TABLE IF NOT EXISTS active_contexts (
-    event_id TEXT NOT NULL,     -- Optional, to bind it to a scene or global state
-    context_id TEXT NOT NULL,
+    id TEXT PRIMARY KEY,
+    subject_id TEXT NOT NULL,
+    action_id TEXT NOT NULL,
     duration INTEGER DEFAULT -1,
     ticks_active REAL DEFAULT 0,
-    PRIMARY KEY (event_id, context_id)
+    FOREIGN KEY(subject_id) REFERENCES characters(id),
+    FOREIGN KEY(action_id) REFERENCES action_presets(id)
   );
 
   CREATE TABLE IF NOT EXISTS chat_memory (
@@ -188,10 +171,6 @@ safeAddColumn('subjects', 'baseline_openness', 'REAL');
 safeAddColumn('subjects', 'baseline_plasticity', 'REAL');
 safeAddColumn('subjects', 'baseline_attitude', 'REAL');
 safeAddColumn('character_relations', 'baseline_attitude', 'REAL');
-safeAddColumn('context_presets', 'self_applicable', 'INTEGER DEFAULT 0');
-safeAddColumn('context_presets', 'self_text', 'TEXT');
-safeAddColumn('context_presets', 'forced_text', 'TEXT');
-safeAddColumn('context_presets', 'removal_text', 'TEXT');
 
 db.exec(`
   UPDATE subjects

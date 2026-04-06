@@ -49,6 +49,17 @@ export interface ActionSourceInfo {
     parserVersion?: string;
 }
 
+export interface ContextConfig {
+    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition";
+    occupiesPoints: string[];
+    exclusiveWithinPoint?: boolean;
+    blocksPoints?: string[];
+    blockedFunctions?: string[];
+    boostedFunctions?: string[];
+    requiredFunctions?: string[];
+    priority?: number;
+}
+
 export interface CompiledAction {
     actionKey: string;
     label: string;
@@ -60,6 +71,7 @@ export interface CompiledAction {
     contact: number;
     sharpness: number;
     novelty: number;
+    contextConfig?: ContextConfig;
 }
 
 export interface EngineConfig {
@@ -167,23 +179,7 @@ export interface AnatomyPointPreset {
     parentId?: string | null;
     providesFunctions: string[];
     tags: string[];
-}
-
-export interface ContextPreset {
-    id: string;
-    label: string;
-    point_id?: string; // fallback if needed
-    modifiers: Partial<CompiledAction>;
-    
-    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition";
-    slot: string;
-    exclusiveWithinSlot?: boolean;
-    blocksSlots?: string[];
-    affectedPointIds?: string[];
-    blockedFunctions?: string[];
-    boostedFunctions?: string[];
-    requiredFunctions?: string[];
-    priority?: number;
+    isVirtual?: boolean;
 }
 
 export interface PromptPayload {
