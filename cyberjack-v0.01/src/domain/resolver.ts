@@ -25,11 +25,12 @@ export function resolveAvailableFunctions(input: {
     }
   }
 
-  const sortedContexts = [...activeContexts].sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  const sortedContexts = [...activeContexts].filter(c => c.contextConfig).sort((a, b) => (b.contextConfig?.priority || 0) - (a.contextConfig?.priority || 0));
 
   for (const ctx of sortedContexts) {
-    if (ctx.blockedFunctions) {
-      for (const fn of ctx.blockedFunctions) {
+    const config = ctx.contextConfig;
+    if (config?.blockedFunctions) {
+      for (const fn of config.blockedFunctions) {
         if (availableSet.has(fn)) {
           availableSet.delete(fn);
         }
@@ -73,7 +74,7 @@ export function canExecuteCommand(input: {
     return { allowed: false, blockedReasons: [`Целевой контекст не найден (${targetCtxId})`] };
   }
 
-  const reqFns = preset.requiredFunctions || [];
+  const reqFns = preset.contextConfig?.requiredFunctions || [];
   const blockedReasons: string[] = [];
   let allowed = true;
 

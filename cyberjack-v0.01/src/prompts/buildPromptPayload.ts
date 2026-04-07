@@ -67,13 +67,11 @@ export async function buildPromptPayload(
 
     // Fetch active contexts
     const activeContextRow = db.prepare(`
-        SELECT cp.label 
+        SELECT cp.label
         FROM active_contexts ac
-        JOIN context_presets cp ON ac.context_id = cp.id
-        WHERE ac.event_id = ?
-    `).all(eventId) as {label: string}[];
-
-    // Fetch point states for body overload calculations
+        JOIN action_presets cp ON ac.action_id = cp.id
+        WHERE ac.subject_id = ?
+    `).all(targetQueryId) as {label: string}[];    // Fetch point states for body overload calculations
     const pointStatesRow = db.prepare(`
         SELECT p.label, sps.local_sensitivity, sps.local_attitude
         FROM subject_point_states sps

@@ -288,15 +288,16 @@ export const eventLogRepo = {
 };
 
 export const presetRepo = {
-    saveActionPreset(id: string, label: string, values: any) {
+    saveActionPreset(id: string, label: string, values: any, contextConfig?: any) {
         const stmt = db.prepare(`
-            INSERT INTO action_presets (id, label, values_json)
-            VALUES (?, ?, ?)
+            INSERT INTO action_presets (id, label, values_json, context_config_json)
+            VALUES (?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 label = excluded.label,
-                values_json = excluded.values_json
+                values_json = excluded.values_json,
+                context_config_json = excluded.context_config_json
         `);
-        stmt.run(id, label, JSON.stringify(values));
+        stmt.run(id, label, JSON.stringify(values), contextConfig ? JSON.stringify(contextConfig) : null);
     },
     getActionPreset(id: string): any | null {
         const stmt = db.prepare('SELECT * FROM action_presets WHERE id = ?');
@@ -307,8 +308,20 @@ export const presetRepo = {
             label: row.label,
             type: row.type || 'physical',
             tags: row.tags ? JSON.parse(row.tags) : [],
-            vector: JSON.parse(row.values_json)
+            vector: JSON.parse(row.values_json),
+            contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
         };
+    },
+    getAllActionPresets(): any[] {
+        const stmt = db.prepare('SELECT * FROM action_presets');
+        return stmt.all().map((row: any) => ({
+            id: row.id,
+            label: row.label,
+            type: row.type || 'physical',
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            vector: JSON.parse(row.values_json),
+            contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
+        }));
     },
     
     savePointPreset(preset: any) {
@@ -349,85 +362,6 @@ export const presetRepo = {
             tags: JSON.parse(row.tags || '[]')
         }));
     },
-
-    saveContextPreset(preset: any) {
-        const stmt = db.prepare(`
-            INSERT INTO context_presets (id, label, point_id, modifiers_json, type, slot, exclusive_within_slot, blocks_slots, affected_point_ids, blocked_functions, boosted_functions, required_functions, priority, self_applicable, self_text, forced_text, removal_text)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-                label = excluded.label,
-                point_id = excluded.point_id,
-                modifiers_json = excluded.modifiers_json,
-                type = excluded.type,
-                slot = excluded.slot,
-                exclusive_within_slot = excluded.exclusive_within_slot,
-                blocks_slots = excluded.blocks_slots,
-                affected_point_ids = excluded.affected_point_ids,
-                blocked_functions = excluded.blocked_functions,
-                boosted_functions = excluded.boosted_functions,
-                required_functions = excluded.required_functions,
-                priority = excluded.priority,
-                self_applicable = excluded.self_applicable,
-                self_text = excluded.self_text,
-                forced_text = excluded.forced_text,
-                removal_text = excluded.removal_text
-        `);
-        stmt.run(
-            preset.id, preset.label, preset.point_id || 'general', JSON.stringify(preset.modifiers || {}),
-            preset.type || 'condition', preset.slot || 'general', preset.exclusiveWithinSlot ? 1 : 0,
-            JSON.stringify(preset.blocksSlots || []), JSON.stringify(preset.affectedPointIds || []),
-            JSON.stringify(preset.blockedFunctions || []), JSON.stringify(preset.boostedFunctions || []),
-            JSON.stringify(preset.requiredFunctions || []), preset.priority || 0,
-            preset.selfApplicable ? 1 : 0,
-            preset.selfText || null,
-            preset.forcedText || null,
-            preset.removalText || null
-        );
-    },
-    getContextPreset(id: string): any | null {
-        const stmt = db.prepare('SELECT * FROM context_presets WHERE id = ?');
-        const row = stmt.get(id) as any;
-        if (!row) return null;
-        return { 
-            id: row.id, label: row.label, point_id: row.point_id, 
-            modifiers: JSON.parse(row.modifiers_json),
-            type: row.type, slot: row.slot, exclusiveWithinSlot: row.exclusive_within_slot === 1,
-            blocksSlots: JSON.parse(row.blocks_slots || '[]'),
-            affectedPointIds: JSON.parse(row.affected_point_ids || '[]'),
-            blockedFunctions: JSON.parse(row.blocked_functions || '[]'),
-            boostedFunctions: JSON.parse(row.boosted_functions || '[]'),
-            requiredFunctions: JSON.parse(row.required_functions || '[]'),
-            priority: row.priority,
-            selfApplicable: row.self_applicable === 1,
-            selfText: row.self_text || null,
-            forcedText: row.forced_text || null,
-            removalText: row.removal_text || null
-        };
-    },
-
-    getAllContextPresetsFull(): any[] {
-        const stmt = db.prepare('SELECT * FROM context_presets');
-        return stmt.all().map((row: any) => ({
-            id: row.id, label: row.label, point_id: row.point_id,
-            modifiers: JSON.parse(row.modifiers_json),
-            type: row.type, slot: row.slot, exclusiveWithinSlot: row.exclusive_within_slot === 1,
-            blocksSlots: JSON.parse(row.blocks_slots || '[]'),
-            affectedPointIds: JSON.parse(row.affected_point_ids || '[]'),
-            blockedFunctions: JSON.parse(row.blocked_functions || '[]'),
-            boostedFunctions: JSON.parse(row.boosted_functions || '[]'),
-            requiredFunctions: JSON.parse(row.required_functions || '[]'),
-            priority: row.priority,
-            selfApplicable: row.self_applicable === 1,
-            selfText: row.self_text || null,
-            forcedText: row.forced_text || null,
-            removalText: row.removal_text || null
-        }));
-    },
-    getAllContextPresets(): { id: string, label: string, point_id: string }[] {
-        const stmt = db.prepare('SELECT id, label, point_id FROM context_presets');
-        return stmt.all() as { id: string, label: string, point_id: string }[];
-    },
-
     pointPresetExists(id: string): boolean {
         const row = db.prepare('SELECT 1 FROM point_presets WHERE id = ?').get(id);
         return !!row;
@@ -435,43 +369,34 @@ export const presetRepo = {
 };
 
 export const activeContextsRepo = {
-    add(eventId: string, contextId: string, duration: number = -1) {
+    add(id: string, subjectId: string, actionId: string, duration: number = -1) {
         const stmt = db.prepare(`
-            INSERT INTO active_contexts (event_id, context_id, duration)
-            VALUES (?, ?, ?)
-            ON CONFLICT(event_id, context_id) DO UPDATE SET duration = excluded.duration
+            INSERT INTO active_contexts (id, subject_id, action_id, duration)
+            VALUES (?, ?, ?, ?)
         `);
-        stmt.run(eventId, contextId, duration);
+        stmt.run(id, subjectId, actionId, duration);
     },
-    getAllForEvent(eventId: string): { id: string; strain: number }[] {
-        const stmt = db.prepare('SELECT context_id, coalesce(ticks_active, 0) as ticks_active FROM active_contexts WHERE event_id = ?');
-        const rows = stmt.all(eventId) as any[];
+    getAllForSubject(subjectId: string): { id: string; actionId: string; ticksActive: number; duration: number }[] {
+        const stmt = db.prepare('SELECT id, action_id, coalesce(ticks_active, 0) as ticks_active, duration FROM active_contexts WHERE subject_id = ?');
+        const rows = stmt.all(subjectId) as any[];
         return rows.map(r => ({
-            id: r.context_id,
-            strain: clamp(Number(r.ticks_active) || 0, 0, 1)
+            id: r.id,
+            actionId: r.action_id,
+            ticksActive: Number(r.ticks_active) || 0,
+            duration: Number(r.duration) || -1
         }));
     },
-    applyStrain(eventId: string, opts: { actionIntensity?: number } = {}) {
-        const selectStmt = db.prepare('SELECT context_id, coalesce(ticks_active, 0) as ticks_active FROM active_contexts WHERE event_id = ?');
-        const rows = selectStmt.all(eventId) as any[];
-        if (!rows.length) return;
-
-        const intensity = clamp(opts.actionIntensity ?? 0, 0, 5);
-        const BASE_PASSIVE_GAIN = 0.005;
-        const ACTIVE_GAIN_PER_INTENSITY = 0.01;
-        const DECAY_RATE = 0.02;
-        const gain = BASE_PASSIVE_GAIN + ACTIVE_GAIN_PER_INTENSITY * intensity;
-
-        const updateStmt = db.prepare('UPDATE active_contexts SET ticks_active = ? WHERE event_id = ? AND context_id = ?');
-        for (const row of rows) {
-            const current = clamp(Number(row.ticks_active) || 0, 0, 1);
-            const next = applyDecayLevel(current, gain, DECAY_RATE);
-            updateStmt.run(next, eventId, row.context_id);
-        }
+    incrementTicks(subjectId: string, amount: number = 1) {
+        const stmt = db.prepare('UPDATE active_contexts SET ticks_active = ticks_active + ? WHERE subject_id = ?');
+        stmt.run(amount, subjectId);
     },
-    remove(eventId: string, contextId: string) {
-        const stmt = db.prepare('DELETE FROM active_contexts WHERE event_id = ? AND context_id = ?');
-        stmt.run(eventId, contextId);
+    remove(id: string) {
+        const stmt = db.prepare('DELETE FROM active_contexts WHERE id = ?');
+        stmt.run(id);
+    },
+    removeByActionId(subjectId: string, actionId: string) {
+        const stmt = db.prepare('DELETE FROM active_contexts WHERE subject_id = ? AND action_id = ?');
+        stmt.run(subjectId, actionId);
     }
 };
 

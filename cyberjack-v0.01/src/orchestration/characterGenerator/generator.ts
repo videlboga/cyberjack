@@ -118,10 +118,7 @@ function pickCoreTraitProfiles(
     if (targetCount <= 0) return;
     const pool = CORE_TRAIT_IDS.map(id => findTagById(id)).filter(
         (tag): tag is LoreTagDefinition =>
-            Boolean(tag) &&
-            !excludeSet.has(tag.id) &&
-            !selected.has(tag.id) &&
-            requirementsMet(tag, selected)
+            !!tag && !excludeSet.has(tag.id) && !selected.has(tag.id) && !!requirementsMet(tag as any, selected)
     );
 
     let picks = Math.min(targetCount, pool.length);
@@ -147,7 +144,7 @@ function pickCategoryTags(
         tag =>
             tag.category === category &&
             !selected.has(tag.id) &&
-            !excludeSet.has(tag.id) &&
+            tag && !excludeSet.has(tag.id) &&
             requirementsMet(tag, selected)
     );
     let picks = Math.min(targetCount, pool.length);
@@ -199,7 +196,7 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         }
 
         const availablePool = TAG_LIBRARY[level].filter(
-            tag => !excludeSet.has(tag.id)
+            tag => tag && !excludeSet.has(tag.id)
         );
 
         while (grouped[level].length < target) {

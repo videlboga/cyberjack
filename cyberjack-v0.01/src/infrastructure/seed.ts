@@ -92,7 +92,6 @@ db.transaction(() => {
 db.prepare('INSERT OR IGNORE INTO players (id, resources) VALUES (?, ?)').run('PL-1', JSON.stringify({ credits: 10, authority: 5, timeBudget: 5 }));
 
 console.log("База данных успешно обновлена без потери прогресса!");
-import { db } from '../../src/infrastructure/db.js';
 
 console.log("Добавление действий (actions)...");
 const actions = [

@@ -14,9 +14,12 @@ import { maybeSummarizeChat } from '../services/chatSummary';
 import { recordMemoryEvent } from '../services/memoryLayer';
 import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 import { buildPromptPayload } from '../prompts/buildPromptPayload';
-import { orchestrateSceneActors } from '../orchestration/sceneOrchestrator';
+import { orchestrateSceneActors, executeTurnConversations } from '../orchestration/sceneOrchestrator';
 import { describeActionNarrative, describeContextNarrative } from '../narrative/eventTemplates';
+import { ContextManager } from '../engine/contextManager';
 import { db } from '../infrastructure/db';
+
+const pendingActionNarratives: Record<string, string[]> = {};
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
@@ -165,102 +168,36 @@ app.post('/api/tick', async (req, res) => {
             }
 
             if (targetCtxId) {
-                const targetContext = presetRepo.getContextPreset(targetCtxId);
-                if (targetContext) {
-                    // Check logic based on anatomical constraints
-                    const allPoints = presetRepo.getAllPointPresets();
-                    const activeIds = activeContextsRepo.getAllForEvent(eventId);
-                    const allActiveContexts = activeIds.map(a => presetRepo.getContextPreset(a.id)).filter(Boolean);
+                const actionPreset = presetRepo.getActionPreset(targetCtxId);
+                if (actionPreset && actionPreset.contextConfig) {
+                    ContextManager.applyContext(subjectId, targetCtxId, actionPreset);
+                    const forcedNarrative = `Выполнено действие: ${actionPreset.label}. Примени это состояние.`;
                     
-                    const resolvedFunctions = resolveAvailableFunctions({
-                        anatomyPoints: allPoints,
-                        activeContexts: allActiveContexts
-                    });
+                    eventLogRepo.append(subjectId, 'context_change', {
+                        presetId: 'context_change',
+                        action: null,
+                        actionLabel: forcedNarrative,
+                        narrative: forcedNarrative
+                    }, { added: true });
                     
-                    const contextPresetsAll = presetRepo.getAllContextPresetsFull();
-                    
-                    const executionCheck = canExecuteCommand({
-                        commandIntent,
-                        contextPresets: contextPresetsAll,
-                        resolvedFunctions
-                    });
-                    
-                    const opennessTarget = 30; // Threshold hardcoded for testing, usually 50
-                    const currentOpenness = fullState?.openness ?? fullState?.core?.openness ?? 0;
-                    const contextCommandPhrase = `Контекст активирован: ${targetContext.label}. Примени это состояние.`;
-                    if (hasUserText && !pendingUserCommandMessage) {
-                        pendingUserCommandMessage = contextCommandPhrase;
-                    }
-
-                    if (executionCheck.allowed && currentOpenness >= opennessTarget) {
-                        if (targetContext.slot) {
-                            for (const aPreset of allActiveContexts) {
-                                if (aPreset && aPreset.slot === targetContext.slot && aPreset.id !== targetContext.id) {
-                                    const removalText = describeContextNarrative(aPreset, 'removed', actorName);
-                                    activeContextsRepo.remove(eventId, aPreset.id);
-                                    eventLogRepo.append(
-                                        subjectId,
-                                        'context_change',
-                                        { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
-                                        { removed: true, slot: aPreset.slot }
-                                    );
-                                }
-                            }
-                        } else if (targetContext.point_id && !targetContext.slot) {
-                            for (const aPreset of allActiveContexts) {
-                                if (aPreset && aPreset.point_id === targetContext.point_id && aPreset.id !== targetContext.id) {
-                                    const removalText = describeContextNarrative(aPreset, 'removed', actorName);
-                                    activeContextsRepo.remove(eventId, aPreset.id);
-                                    eventLogRepo.append(
-                                        subjectId,
-                                        'context_change',
-                                        { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
-                                        { removed: true, point_id: aPreset.point_id }
-                                    );
-                                }
-                            }
-                        }
-                        activeContextsRepo.add(eventId, targetCtxId, -1);
-                        const applicationMode: 'self' | 'forced' =
-                            hasUserText && targetContext.selfApplicable ? 'self' : 'forced';
-                        const forcedNarrative = describeContextNarrative(targetContext, applicationMode, actorName);
-                        eventLogRepo.append(subjectId, 'context_change', {
-                            presetId: 'context_change',
-                            action: null,
-                            actionLabel: forcedNarrative,
-                            narrative: forcedNarrative
-                        }, { added: true });
-                        promptDirty = true;
-                        immediateNotes.push(forcedNarrative);
-                        suppressActionNarrative = !hasUserText;
-                    } else {
-                        let failReason = '';
-                        if (!executionCheck.allowed) {
-                            failReason = `Команда отклонена из-за ограничений тела:\n - ${executionCheck.blockedReasons.join('\n - ')}`;
-                        } else {
-                            failReason = `Тебе приказали: ${targetContext.label}, но ты отказываешься подчиниться, т.к уровень Открытости (${currentOpenness.toFixed(1)}) недостаточен.`;
-                        }
-                        eventLogRepo.append(subjectId, 'context_change', {
-                            presetId: 'context_change', action: null, actionLabel: failReason, actionFailed: true
-                        }, { failed: true, reasons: executionCheck.blockedReasons });
-                        promptDirty = true;
-                        immediateNotes.push(failReason);
-                    }
+                    promptDirty = true;
+                    immediateNotes.push(forcedNarrative);
+                    suppressActionNarrative = !hasUserText;
                 }
             }
         }
 
         if (wantsNeutralPose) {
-            const activeIds = activeContextsRepo.getAllForEvent(eventId);
-            const poseContexts = activeIds
-                .map(obj => presetRepo.getContextPreset(obj.id))
-                .filter(ctx => ctx && ctx.slot === 'pose');
+            const currentContexts = activeContextsRepo.getAllForSubject(subjectId);
+            const poseContexts = currentContexts
+                .map(obj => ({ ctx: obj, preset: presetRepo.getActionPreset(obj.actionId) }))
+                .filter(item => item.preset?.contextConfig?.occupiesPoints?.includes('global_pose'));
 
             if (poseContexts.length) {
-                for (const poseCtx of poseContexts) {
-                    if (!poseCtx?.id) continue;
-                    const removalNarrative = describeContextNarrative(poseCtx, 'removed', actorName);
-                    activeContextsRepo.remove(eventId, poseCtx.id);
+                for (const { ctx, preset } of poseContexts) {
+                    if (!preset?.id) continue;
+                    const removalNarrative = `Состояние отменено: ${preset.label}`;
+                    activeContextsRepo.remove(ctx.id);
                     eventLogRepo.append(
                         subjectId,
                         'context_change',
@@ -270,7 +207,7 @@ app.post('/api/tick', async (req, res) => {
                             actionLabel: removalNarrative,
                             narrative: removalNarrative
                         },
-                        { removed: true, slot: poseCtx.slot }
+                        { removed: true }
                     );
                     immediateNotes.push(removalNarrative);
                 }
@@ -278,6 +215,10 @@ app.post('/api/tick', async (req, res) => {
             } else {
                 immediateNotes.push('Ты уже стоишь, поэтому дополнительных изменений нет.');
             }
+        }
+        
+        if (!req.body.skipTimeTick) {
+            ContextManager.processTick(subjectId);
         }
 
         const suppressTickIds = suppressActionNarrative ? [bundle.tickId] : undefined;
@@ -291,10 +232,23 @@ app.post('/api/tick', async (req, res) => {
         if (!suppressActionNarrative) {
             immediateNotes.unshift(actionNarrative);
         }
-        if (immediateNotes.length) {
-            const block = `\n[Только что]\n${immediateNotes.join('\n')}`;
-            promptPayload.systemPrompt = `${promptPayload.systemPrompt}${block}`;
-            bundle.prompt = promptPayload;
+        
+        if (req.body.skipLLM) {
+            if (!pendingActionNarratives[subjectId]) {
+                pendingActionNarratives[subjectId] = [];
+            }
+            pendingActionNarratives[subjectId].push(...immediateNotes);
+        } else {
+            if (pendingActionNarratives[subjectId]) {
+                immediateNotes.unshift(...pendingActionNarratives[subjectId]);
+                delete pendingActionNarratives[subjectId];
+            }
+            
+            if (immediateNotes.length) {
+                const block = `\n[Только что]\n${immediateNotes.join('\n')}`;
+                promptPayload.systemPrompt = `${promptPayload.systemPrompt}${block}`;
+                bundle.prompt = promptPayload;
+            }
         }
 
         let autoUserMessage: string | null = null;
@@ -343,6 +297,19 @@ app.post('/api/tick', async (req, res) => {
             chatMemoryRepo.append(subjectId, 'user', historyMessage);
         }
 
+        
+        
+        
+        
+        
+
+        
+        let narratorReaction: string | null = null;
+        let actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; reaction: string }> = [];
+        let primaryReply: { speech: string; reaction: string } | null = null;
+        let promptMessages: any = null;
+
+        if (!req.body.skipLLM) {
         // 4. SillyTavern Communication (External Adapter)
         const chatHistory = chatMemoryRepo.getRecent(subjectId, 10).map(entry => ({
             role: entry.role,
@@ -351,15 +318,15 @@ app.post('/api/tick', async (req, res) => {
         
         const orchestration = orchestrateSceneActors(bundle);
 
-        let narratorReaction: string | null = null;
+        
         if (orchestration.narrator?.enabled && promptPayload.narratorPrompt) {
             const narratorRes = await sendNarratorDescription(promptPayload.narratorPrompt);
             narratorReaction = narratorRes?.reaction || null;
         }
 
-        const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; reaction: string }> = [];
-        let primaryReply: { speech: string; reaction: string } | null = null;
-        let promptMessages: any = null;
+        
+        
+        
 
         if (orchestration.actorDecisions.length) {
             for (const decision of orchestration.actorDecisions) {
@@ -421,6 +388,7 @@ app.post('/api/tick', async (req, res) => {
             assistantText: primaryReply?.speech || '',
             infoTag: req.body?.presetId
         });
+        }
         maybeSummarizeChat(subjectId);
 
         res.json({
@@ -471,7 +439,7 @@ app.get('/api/state', (req, res) => {
                 return {
                     id: actionId,
                     label: preset?.label || actionId,
-                    costs: costs && Object.keys(costs).length ? costs : null
+                    costs: costs && Object.keys(costs).length ? costs : null, occupiesPoints: preset?.contextConfig?.occupiesPoints || []
                 };
             });
             scene.characters = sceneCharacterRepo.list(scene.id);
@@ -577,86 +545,50 @@ app.post('/api/scene/move', (req, res) => {
     }
 });
 
-app.get('/api/contexts', (req, res) => {
-    try {
-        const eventId = req.query.eventId as string || 'lab';
-        const allPresets = presetRepo.getAllContextPresets();
-        const activeIds = activeContextsRepo.getAllForEvent(eventId);
+    app.get('/api/contexts', (req, res) => {
+        try {
+            const subjectId = req.query.subjectId as string || 'CL-01';
+            const allPresets = presetRepo.getAllActionPresets().filter((a: any) => a.contextConfig);
+            const activeIds = activeContextsRepo.getAllForSubject(subjectId);
 
-        res.json({ success: true, allPresets, activeIds });
-    } catch (error: any) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-app.post('/api/contexts/toggle', (req, res) => {
-    try {
-        const { eventId = 'lab', subjectId = 'S-01', contextId, isActive } = req.body;
-        const targetContext = presetRepo.getContextPreset(contextId);
-        const actorCharacter = characterRepo.ensurePlayer('PL-1', 'Калибратор');
-        const actorName = actorCharacter.name || 'Калибратор';
-        
-        if (!targetContext) throw new Error("Context preset not found.");
-
-        const narratives: string[] = [];
-
-        if (isActive) {
-            // Find EXCLUSIVE contexts in the same slot/point
-            if (targetContext.slot && targetContext.exclusiveWithinSlot) {
-                const activeIds = activeContextsRepo.getAllForEvent(eventId);
-                for (const aObj of activeIds) {
-                    const aId = aObj.id;
-                    const aPreset = presetRepo.getContextPreset(aId);
-                    if (aPreset && aPreset.slot === targetContext.slot && aPreset.id !== targetContext.id) {
-                        activeContextsRepo.remove(eventId, aId);
-                        const removalText = describeContextNarrative(aPreset, 'removed', actorName);
-                        eventLogRepo.append(subjectId, 'context_change', 
-                            { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
-                            { removed: true, slot: aPreset.slot }
-                        );
-                        narratives.push(removalText);
-                    }
-                }
-            } else if (targetContext.point_id && !targetContext.slot) { // Fallback to old behavior
-                const activeIds = activeContextsRepo.getAllForEvent(eventId);
-                for (const aObj of activeIds) {
-                    const aId = aObj.id;
-                    const aPreset = presetRepo.getContextPreset(aId);
-                    if (aPreset && aPreset.point_id === targetContext.point_id && aPreset.id !== targetContext.id) {
-                        activeContextsRepo.remove(eventId, aId);
-                        const removalText = describeContextNarrative(aPreset, 'removed', actorName);
-                        eventLogRepo.append(subjectId, 'context_change', 
-                            { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
-                            { removed: true, point_id: aPreset.point_id }
-                        );
-                        narratives.push(removalText);
-                    }
-                }
-            }
-            activeContextsRepo.add(eventId, contextId, -1);
-            const applicationMode: 'self' | 'forced' = targetContext.selfApplicable ? 'self' : 'forced';
-            const forcedNarrative = describeContextNarrative(targetContext, applicationMode, actorName);
-            eventLogRepo.append(subjectId, 'context_change', 
-                { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative },
-                { added: true, point_id: targetContext.point_id, slot: targetContext.slot }
-            );
-            narratives.push(forcedNarrative);
-        } else {
-            activeContextsRepo.remove(eventId, contextId);
-            const removalText = describeContextNarrative(targetContext, 'removed', actorName);
-            eventLogRepo.append(subjectId, 'context_change', 
-                { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
-                { removed: true, point_id: targetContext.point_id }
-            );
-            narratives.push(removalText);
+            res.json({ success: true, allPresets, activeIds });
+        } catch (error: any) {
+            res.status(500).json({ success: false, error: error.message });
         }
-        res.json({ success: true, narratives });
-    } catch (error: any) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
+    });
 
-app.get('/api/config', (req, res) => {
+    app.post('/api/contexts/toggle', (req, res) => {
+        try {
+            const { subjectId = 'CL-01', contextId, isActive } = req.body;
+            const targetContext = presetRepo.getActionPreset(contextId);
+            const actorName = 'Калибратор';
+            
+            if (!targetContext) throw new Error("Context preset not found.");
+
+            const narratives: string[] = [];
+
+            if (isActive) {
+                ContextManager.applyContext(subjectId, contextId, targetContext);
+                const forcedNarrative = `Активирован контекст: ${targetContext.label}`;
+                eventLogRepo.append(subjectId, 'context_change',
+                    { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative },
+                    { added: true }
+                );
+                narratives.push(forcedNarrative);
+            } else {
+                activeContextsRepo.removeByActionId(subjectId, contextId);
+                const removalText = `Контекст удален: ${targetContext.label}`;
+                eventLogRepo.append(subjectId, 'context_change',
+                    { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
+                    { removed: true }
+                );
+                narratives.push(removalText);
+            }
+            res.json({ success: true, narratives });
+        } catch (error: any) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });app.get('/api/config', (req, res) => {
     res.json({ success: true, config: activeConfig });
 });
 

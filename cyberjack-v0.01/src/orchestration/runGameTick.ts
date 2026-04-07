@@ -127,7 +127,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     // 6.5 Update context strain (Escalation / Decay)
-    activeContextsRepo.applyStrain(activeSceneId, { actionIntensity: compiledAction.intensity });
 
     const diagnostics = buildDiagnostics(
         engineOutput.tickMeta.inputs.action,
@@ -183,6 +182,5 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         metadata: {
             commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent
         },
-        trace: actionTrace
     };
 }

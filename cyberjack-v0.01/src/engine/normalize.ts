@@ -25,7 +25,7 @@ export function normalizeCore(core: Partial<SubjectCoreState>, config: EngineCon
     for (const k of Object.keys(config.core.defaults)) {
         const key = k as keyof SubjectCoreState;
         const raw = core[key] ?? config.core.defaults[key];
-        normalized[key] = clamp(ensureFiniteNumber(raw, config.core.defaults[key], key), config.core.min, config.core.max);
+        normalized[key] = clamp(ensureFiniteNumber(raw, (config.core.defaults as any)[key] || 0, key), config.core.min, config.core.max);
     }
     normalized.baselineSensitivity = clamp(
         ensureFiniteNumber(

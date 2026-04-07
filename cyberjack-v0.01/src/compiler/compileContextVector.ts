@@ -9,12 +9,12 @@ const STRAIN_MULTIPLIERS: Record<string, number> = {
     novelty: 0.5
 };
 
-export function compileContextVector(activeContexts: { id: string; strain?: number }[]): Partial<CompiledAction> {
+export function compileContextVector(activeContexts: { actionId: string; strain?: number }[]): Partial<CompiledAction> {
     const combinedModifiers: Record<string, number> = {};
 
     for (const ctx of activeContexts) {
-        const presetResult = presetRepo.getContextPreset(ctx.id);
-        const modifiers = presetResult ? presetResult.modifiers as Partial<CompiledAction> : null;
+        const presetResult = presetRepo.getActionPreset(ctx.actionId);
+        const modifiers = presetResult ? presetResult.vector as Partial<CompiledAction> : null;
         
         if (modifiers) {
             for (const [key, val] of Object.entries(modifiers)) {

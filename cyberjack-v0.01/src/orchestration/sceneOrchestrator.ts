@@ -52,9 +52,9 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
 
     const lastActionIntensity = clamp01(bundle.compiledAction.intensity ?? 0);
     const lastActionNovelty = clamp01(bundle.compiledAction.novelty ?? 1); // If no novelty, assume 1 (new action)
-    const activeContextIds = activeContextsRepo.getAllForEvent(bundle.event.sceneId || 'lab');
+    const activeContextIds = activeContextsRepo.getAllForSubject(bundle.event.subjectId || 'S-01');
     const activeContextLabels = activeContextIds
-        .map(ctx => presetRepo.getContextPreset(ctx.id)?.label)
+        .map(ctx => presetRepo.getActionPreset(ctx.actionId)?.label)
         .filter(Boolean);
 
     const isVerbalInput = bundle.event.type === 'verbal_input';
@@ -131,5 +131,149 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
     return {
         narrator,
         actorDecisions
+    };
+}
+
+import { db } from '../infrastructure/db';
+import { chatMemoryRepo } from '../infrastructure/repositories';
+import { sendToSillyTavern, sendNarratorDescription } from '../adapters/sillyTavernAdapter';
+import { buildPromptPayload } from '../prompts/buildPromptPayload';
+import { recordMemoryEvent } from '../services/memoryLayer';
+import { maybeSummarizeChat } from '../services/chatSummary';
+
+export interface TurnExecutionParams {
+    subjectId: string;
+    eventId: string;
+    actionId: string;
+    actionLabel: string;
+    pointLabel: string;
+    pointIdUsed: string;
+    autoUserMessage: string | null;
+    actionLabelMessage: string | null;
+    suppressTickIds?: string[];
+    fullStateName: string;
+    reqBodyInfoTag?: string;
+    promptPayload: any;
+}
+
+export async function executeTurnConversations(bundle: TickBundle, params: TurnExecutionParams) {
+    const {
+        subjectId, eventId, actionId, actionLabel, pointLabel, pointIdUsed,
+        autoUserMessage, actionLabelMessage, suppressTickIds, fullStateName, reqBodyInfoTag,
+        promptPayload
+    } = params;
+
+    let actionRepeats = 1;
+    if (actionId && !autoUserMessage) {
+        const recentLogs = db.prepare('SELECT action_payload FROM event_logs WHERE subject_id = ? AND action_type = ? ORDER BY id DESC LIMIT 15').all(subjectId, 'interaction') as { action_payload: string }[];
+        for (const row of recentLogs) {
+            try {
+                const parsed = JSON.parse(row.action_payload);
+                const logActionId = parsed.presetId || parsed.actionId || parsed.action?.actionKey;
+                if (logActionId === actionId && parsed.pointId === pointIdUsed) {
+                    actionRepeats++;
+                } else {
+                    break;
+                }
+            } catch { break; }
+        }
+    }
+
+    let historyMessage = '';
+    if (autoUserMessage) {
+        historyMessage = `[Игрок (к ${fullStateName || subjectId})]: "${autoUserMessage}"`;
+    } else if (actionLabelMessage) {
+        historyMessage = `*(Без слов)* [Калибратор применяет воздействие к ${fullStateName || subjectId}: ${actionLabel} - точка ${pointLabel}]`;
+        if (actionRepeats > 1) {
+            historyMessage += ` *(уже ${actionRepeats}-й раз подряд)*`;
+        }
+    }
+
+    if (historyMessage.trim().length > 0) {
+        chatMemoryRepo.append(subjectId, 'user', historyMessage);
+    }
+
+    const chatHistory = chatMemoryRepo.getRecent(subjectId, 10).map(entry => ({
+        role: entry.role,
+        content: entry.content
+    }));
+
+    const orchestration = orchestrateSceneActors(bundle);
+    let narratorReaction: string | null = null;
+    if (orchestration.narrator?.enabled && promptPayload.narratorPrompt) {
+        const narratorRes = await sendNarratorDescription(promptPayload.narratorPrompt);
+        narratorReaction = narratorRes?.reaction || null;
+    }
+
+    const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; reaction: string }> = [];
+    let primaryReply: { speech: string; reaction: string } | null = null;
+    let promptMessages: any = null;
+
+    if (orchestration.actorDecisions.length) {
+        for (const decision of orchestration.actorDecisions) {
+            let currentPayload = promptPayload;
+            let currentHistory = chatHistory;
+            let userMsgOverride = autoUserMessage || undefined;
+
+            if (decision.actorId !== subjectId) {
+                currentPayload = await buildPromptPayload(decision.actorId, subjectId, undefined, eventId, {
+                    suppressTickIds
+                });
+                if (historyMessage && historyMessage.trim().length > 0) {
+                    chatMemoryRepo.append(decision.actorId, 'user', historyMessage);
+                }
+                currentHistory = chatMemoryRepo.getRecent(decision.actorId, 10).map(entry => ({
+                    role: entry.role,
+                    content: entry.content
+                }));
+                userMsgOverride = undefined;
+            }
+
+            const { reply, sentMessages } = await sendToSillyTavern(
+                currentPayload,
+                userMsgOverride,
+                currentHistory
+            );
+
+            const structuredReply =
+                reply && typeof reply === 'object'
+                    ? (reply as { speech: string })
+                    : { speech: String(reply || '') };
+
+            actorReplies.push({
+                actorId: decision.actorId,
+                kind: decision.kind,
+                tone: decision.reason,
+                speech: structuredReply.speech,
+                reaction: narratorReaction || ''
+            });
+
+            if (decision.actorId === subjectId || !primaryReply) {
+                primaryReply = { speech: structuredReply.speech, reaction: narratorReaction || '' };
+                promptMessages = sentMessages;
+            }
+
+            if (structuredReply.speech) {
+                chatMemoryRepo.append(decision.actorId, 'assistant', structuredReply.speech);
+            }
+        }
+    } else {
+        promptMessages = [];
+    }
+
+    recordMemoryEvent({
+        subjectId,
+        bundle,
+        userText: autoUserMessage || actionLabelMessage || undefined,
+        assistantText: primaryReply?.speech || '',
+        infoTag: reqBodyInfoTag
+    });
+    maybeSummarizeChat(subjectId);
+
+    return {
+        reply: primaryReply,
+        promptMessages,
+        actorReplies,
+        narratorReaction
     };
 }

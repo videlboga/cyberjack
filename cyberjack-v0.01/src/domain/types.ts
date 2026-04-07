@@ -58,6 +58,7 @@ export interface ContextConfig {
     boostedFunctions?: string[];
     requiredFunctions?: string[];
     priority?: number;
+    duration?: number;
 }
 
 export interface CompiledAction {

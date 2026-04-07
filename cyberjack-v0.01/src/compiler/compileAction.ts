@@ -7,7 +7,7 @@ import { computeNovelty } from './noveltyService';
 
 export interface ActionInput {
     presetId: string;
-    eventId: string; // The scene or global event to pull context from
+    eventId: string; targetId?: string; // The scene or global event to pull context from
     playerIntensity?: number; // Override if player dragged the UI slider
     history?: any[]; // Passed down to calculate novelty
     dynamicModifiers?: Partial<CompiledAction>; // Add dynamic traits, like text classification
@@ -64,6 +64,10 @@ export function compileAction(input: ActionInput): CompiledAction {
         }
     }
 
+    if (input.dynamicModifiers && input.dynamicModifiers.contextConfig) {
+        baseWithDynamic.contextConfig = { ...(baseWithDynamic.contextConfig || {}), ...input.dynamicModifiers.contextConfig };
+    }
+
     // Apply the player's slider as a multiplier to the final combined intensity again, 
     // in case dynamicModifiers overwrote it (e.g. from verbalParser).
     if (input.playerIntensity !== undefined && input.presetId !== 'wait') {
@@ -77,7 +81,7 @@ export function compileAction(input: ActionInput): CompiledAction {
     baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || []);
 
     // 4. Get Contexts
-    const activeContextIds = activeContextsRepo.getAllForEvent(input.eventId);
+    const activeContextIds = activeContextsRepo.getAllForSubject(input.targetId || 'S-01');
     const contextModifiers = compileContextVector(activeContextIds);
 
     // 5. Merge

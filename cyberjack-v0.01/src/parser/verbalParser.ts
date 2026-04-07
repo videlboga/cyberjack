@@ -46,11 +46,11 @@ export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction
                 'Authorization': `Bearer ${OPENROUTER_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'google/gemini-3.1-flash-lite-preview',
-                messages,
-                temperature: 0.1,
-                response_format: { type: 'json_object' }
-            })
+                    model: process.env.SILLYTAVERN_MODEL || 'google/gemini-3.1-flash-lite-preview',
+                    messages,
+                    temperature: 0.1,
+                    response_format: { type: 'json_object' }
+                })
         });
 
         if (!response.ok) {

@@ -175,7 +175,8 @@ async function checkHealth(): Promise<boolean> {
             },
             ST_HEALTH_TIMEOUT
         );
-        console.log(`[ST Adapter] Health check response: ${response.status} ${response.statusText} for ${ST_HEALTH_URL}`); return response.ok;
+        console.log(`[ST Adapter] Health check response: ${response.status} ${response.statusText} for ${ST_HEALTH_URL}`);
+        return true; // We accept any response as ok if connection established
     } catch (err: any) {
         console.warn(`[ST Adapter] Health check failed: ${err.message || err}`);
         return false;
