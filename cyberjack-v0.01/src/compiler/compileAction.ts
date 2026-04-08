@@ -36,7 +36,9 @@ export function compileAction(input: ActionInput): CompiledAction {
             rawText: input.sourceText,
             parserVersion: input.parserVersion
         },
-        ...baseVector
+        ...baseVector,
+        contextConfig: presetRecord?.contextConfig,
+        removeContexts: presetRecord?.removeContexts
     };
 
     // 2. Add player direct overrides

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:ui": "vite",
-    "dev:api": "tsx src/api/server.ts",
+    "dev:api": "tsx --env-file=.env src/api/server.ts",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:ui\"",
     "build": "vite build",
     "preview": "vite preview"

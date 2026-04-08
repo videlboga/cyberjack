@@ -953,3 +953,12 @@ button:disabled {
   font-size: 13px;
   border-bottom: 1px solid #4d1d1d;
 }
+.scene-map { display: grid; gap: 8px; margin-top: 10px; }
+.scene-slot { border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 6px; background: rgba(0,0,0,0.2); }
+.scene-slot.occupied { border-color: rgba(97, 218, 251, 0.4); background: rgba(97, 218, 251, 0.05); }
+.slot-header { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #888; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
+.scene-slot.occupied .slot-header { color: #61dafb; border-color: rgba(97, 218, 251, 0.2); }
+.slot-cap { color: #555; }
+.scene-slot.unassigned .slot-header { color: #ff9800; border-color: rgba(255, 152, 0, 0.2); }
+.scene-slot.unassigned { border-color: rgba(255, 152, 0, 0.4); background: rgba(255, 152, 0, 0.05); }
+.slot-occupants { display: flex; flex-direction: column; gap: 4px; }

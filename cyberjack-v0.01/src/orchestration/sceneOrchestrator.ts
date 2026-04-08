@@ -6,7 +6,7 @@ import {
     CharacterRelation
 } from '../domain/types';
 import { activeConfig } from '../prompts/config';
-import { activeContextsRepo, presetRepo, playerRepo, subjectRepo, characterRelationRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, presetRepo, playerRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -43,8 +43,16 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         if (rel.target?.id) relationMap.set(rel.target.id, rel);
     });
 
+    const eventSceneId = bundle.event.sceneId || 'lab';
+    const presentChars = sceneCharacterRepo.list(eventSceneId);
+    
+    const presentSubjectIds = presentChars
+        .filter(pc => pc.presenceState === 'present' && pc.canAct && pc.character.subjectId)
+        .map(pc => pc.character.subjectId as string);
+
     const allActors = Array.from(new Set([
         subjectId,
+        ...presentSubjectIds,
         ...relations
             .filter(rel => rel.target?.subjectId && rel.present)
             .map(rel => rel.target!.subjectId!)
@@ -183,7 +191,13 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
     if (autoUserMessage) {
         historyMessage = `[Игрок (к ${fullStateName || subjectId})]: "${autoUserMessage}"`;
     } else if (actionLabelMessage) {
-        historyMessage = `*(Без слов)* [Калибратор применяет воздействие к ${fullStateName || subjectId}: ${actionLabel} - точка ${pointLabel}]`;
+        let reactionPart = bundle.diagnostics?.reactionSummary && bundle.diagnostics.reactionSummary !== 'нейтральная реакция' 
+            ? ` [Движок: ${bundle.diagnostics.reactionSummary}]` 
+            : '';
+        let sensoryPart = bundle.diagnostics?.actionSummary 
+            ? ` [Мои сенсоры: это ощущается как ${bundle.diagnostics.actionSummary}]` 
+            : '';
+        historyMessage = `*(Без слов)* [Калибратор применяет воздействие к ${fullStateName || subjectId}: ${actionLabel} - точка ${pointLabel}]${sensoryPart}${reactionPart}`;
         if (actionRepeats > 1) {
             historyMessage += ` *(уже ${actionRepeats}-й раз подряд)*`;
         }
@@ -210,10 +224,13 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
     let promptMessages: any = null;
 
     if (orchestration.actorDecisions.length) {
-        for (const decision of orchestration.actorDecisions) {
+        const actorPromises = orchestration.actorDecisions.map(async (decision) => {
             let currentPayload = promptPayload;
             let currentHistory = chatHistory;
-            let userMsgOverride = autoUserMessage || undefined;
+            let userMsgOverride = autoUserMessage || actionLabelMessage || undefined;
+            if (narratorReaction) {
+                userMsgOverride = userMsgOverride ? `${userMsgOverride}\n\n[Твоя физическая реакция (Рассказчик)]: ${narratorReaction}` : `[Твоя физическая реакция (Рассказчик)]: ${narratorReaction}`;
+            }
 
             if (decision.actorId !== subjectId) {
                 currentPayload = await buildPromptPayload(decision.actorId, subjectId, undefined, eventId, {
@@ -226,7 +243,11 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                     role: entry.role,
                     content: entry.content
                 }));
-                userMsgOverride = undefined;
+                let observerOverride = autoUserMessage || actionLabelMessage || undefined;
+                if (narratorReaction) {
+                    observerOverride = observerOverride ? `${observerOverride}\n\n[Общая сцена - реакция ${subjectId} (Рассказчик)]: ${narratorReaction}` : `[Общая сцена - реакция ${subjectId} (Рассказчик)]: ${narratorReaction}`;
+                }
+                userMsgOverride = observerOverride;
             }
 
             const { reply, sentMessages } = await sendToSillyTavern(
@@ -240,6 +261,12 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                     ? (reply as { speech: string })
                     : { speech: String(reply || '') };
 
+            return { decision, structuredReply, sentMessages };
+        });
+
+        const results = await Promise.all(actorPromises);
+
+        for (const { decision, structuredReply, sentMessages } of results) {
             actorReplies.push({
                 actorId: decision.actorId,
                 kind: decision.kind,
@@ -266,7 +293,8 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         bundle,
         userText: autoUserMessage || actionLabelMessage || undefined,
         assistantText: primaryReply?.speech || '',
-        infoTag: reqBodyInfoTag
+        infoTag: reqBodyInfoTag,
+        reactionText: primaryReply?.reaction || narratorReaction || ''
     });
     maybeSummarizeChat(subjectId);
 

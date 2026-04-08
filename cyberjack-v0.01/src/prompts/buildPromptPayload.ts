@@ -6,7 +6,7 @@ import { activeConfig } from './config';
 import { fetchSillyTavernContext } from './sillyTavernContext';
 import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 import { selectLongTermMemory, getRecentSummaries } from '../services/memoryLayer';
-import { characterRelationRepo } from '../infrastructure/repositories';
+import { characterRelationRepo, sceneCharacterRepo, sceneRepo } from '../infrastructure/repositories';
 import { buildMemoryInsights } from './buildMemoryInsights';
 
 /**
@@ -209,19 +209,27 @@ export async function buildPromptPayload(
         return 'мне хочется держаться как можно дальше';
     };
 
+    const sceneCharactersData = sceneCharacterRepo.list(eventId);
+    const mySceneChar = sceneCharactersData.find(sc => sc.character.id === ownerId || sc.character.subjectId === ownerId);
+
     const relationsSection = relations.length
         ? `[Персонажи сцены]\n${relations
               .map(rel => {
+                  const targetIdToFind = rel.target?.id || rel.toId;
+                  const theirSceneChar = sceneCharactersData.find(sc => sc.character.id === targetIdToFind || sc.character.subjectId === rel.toId);
+                  
+                  const isNearby = mySceneChar && theirSceneChar && mySceneChar.slotId === theirSceneChar.slotId;
+                  const presenceToken = rel.present 
+                      ? (isNearby ? 'этот человек рядом, в одной зоне' : 'человек в этой же комнате, но в отдалении')
+                      : 'его сейчас нет поблизости';
+
                   const name = rel.target?.name || rel.toId;
                   const knowledge = rel.knows ? 'мы знакомы' : 'я почти не представляю, чего от него ждать';
-                  const presence = rel.present
-                      ? 'этот человек рядом'
-                      : 'его сейчас нет поблизости';
                   const access = rel.canInteract
                       ? 'у меня есть прямой доступ'
                       : 'нас разделяют барьеры';
                   const tone = describeAttitude(rel.attitude);
-                  return `${name}: ${knowledge}, ${presence}, ${access}. По ощущениям ${tone}.`;
+                  return `${name}: ${knowledge}, ${presenceToken}, ${access}. По ощущениям ${tone}.`;
               })
               .join('\n')}`
         : '';

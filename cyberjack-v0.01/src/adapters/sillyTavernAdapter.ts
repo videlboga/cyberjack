@@ -219,6 +219,8 @@ async function requestCompletion(messages: ChatMessage[], schema: any): Promise<
         headers['Authorization'] = `Bearer ${ST_API_KEY}`;
     }
 
+    const t0 = performance.now();
+    
     const response = await fetchWithTimeout(
         ST_COMPLETIONS_URL,
         {
@@ -228,6 +230,10 @@ async function requestCompletion(messages: ChatMessage[], schema: any): Promise<
         },
         ST_REQUEST_TIMEOUT
     );
+
+    const t1 = performance.now();
+    const elapsedMs = Math.round(t1 - t0);
+    console.log(`[ST Adapter][Timing] Completion request to ${ST_COMPLETIONS_URL} took ${elapsedMs}ms`);
 
     if (!response.ok) {
         const errText = await response.text();

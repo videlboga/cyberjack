@@ -9,18 +9,35 @@ interface RecordMemoryInput {
     userText?: string;
     assistantText?: string;
     infoTag?: string;
+    reactionText?: string;
 }
 
 export function recordMemoryEvent(input: RecordMemoryInput) {
     const parts: string[] = [];
-    const actionLabel = input.bundle.compiledAction.label;
+    const actionLabel = input.bundle.compiledAction.label || 'Неизвестное действие';
+    
     if (input.userText && input.userText.trim().length > 0) {
-        parts.push(`Калибратор ${summarizeCommand(input.userText)}`);
+        if (input.userText.includes('*(Без слов)*')) {
+            const match = input.userText.match(/\[(.*?)\]/);
+            let actionPart = match ? match[1] : input.userText;
+            actionPart = actionPart.replace('Калибратор применяет воздействие: ', '');
+            parts.push(`Ко мне применили действие: "${actionPart}"`);
+        } else if (input.userText.includes('[Прошло времени')) {
+            parts.push(input.userText);
+        } else {
+            parts.push(`Калибратор сказал: "${input.userText}"`);
+        }
     } else {
-        parts.push(`Калибратор применил "${actionLabel}"`);
+        parts.push(`Ко мне применили действие: "${actionLabel}"`);
     }
-    const reaction = input.bundle.diagnostics.reactionSummary || 'почти безэмоциональный отклик';
-    parts.push(`Я ощутила: ${reaction}`);
+
+    if (input.reactionText) {
+        parts.push(`Моя физическая реакция: ${input.reactionText}`);
+    } else {
+        const reaction = input.bundle.diagnostics?.reactionSummary || 'почти безэмоциональный отклик';
+        parts.push(`Я ощутила: ${reaction}`);
+    }
+
     if (input.assistantText && input.assistantText.trim().length > 0) {
         parts.push(`Я ответила: ${summarizeSpeech(input.assistantText)}`);
     }

@@ -1,5 +1,6 @@
 import { CompiledAction } from '../domain/types';
 import { CommandIntent } from '../domain/resolver';
+import { presetRepo } from '../infrastructure/repositories';
 
 export interface ParsedVerbalAction extends Partial<CompiledAction> {
     pointId?: string;
@@ -16,12 +17,19 @@ export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction
         return { intensity: 0.1, valence: 0, contact: 0.1, sharpness: 0, novelty: 0.5, pointId: 'general', commandIntent: { type: 'none' } };
     }
 
+    const ctxList = presetRepo.getAllActionPresets()
+        .filter(act => act.contextConfig)
+        .map(act => `- "${act.id}": ${act.label}`)
+        .join('\n');
+
     const messages = [
         {
             role: 'system',
-            content: `Ты — классификатор семантических параметров речи в симуляторе. В симуляторе сейчас можно изменять позу (на колени, ложись, звездой).
-ЕСЛИ пользователь явно приказывает сменить позу или состояние (например "Встань на колени", "Ложись", "Рогатка", "Звездой"), тогда помимо параметров добавь поле "intent": "change_pose" и поле "targetContext": со значением "pose_kneeling", "pose_lying" или "pose_spread_eagle".
+            content: `Ты — классификатор семантических параметров речи в симуляторе. В симуляторе сейчас можно изменять позу или применять состояние.
+Текущий список доступных ID для контекстов/поз/скованности:
+${ctxList}
 
+ЕСЛИ текст пользователя является прямым приказом применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять, используй intent  "deactivate_context" и соответствующий ID.
 Твоя задача — классифицировать пользовательскую фразу по 5 параметрам (от 0.0 до 1.0, кроме valence: от -1.0 до 1.0) и определить цель воздействия (pointId).
 {
   "intensity": 0.0-1.0,
@@ -95,11 +103,12 @@ export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction
         }
 
         let commandIntent: CommandIntent = { type: 'none' };
-        if (parsed.intent === 'change_pose' && parsed.targetContext) {
-            commandIntent = { type: 'change_pose', targetPoseId: parsed.targetContext };
+        if ((parsed.intent === 'change_pose' || parsed.intent === 'activate_context') && parsed.targetContext) {
+            commandIntent = { type: 'activate_context', targetContextId: parsed.targetContext };
         } else if (parsed.intent === 'change_context' && parsed.targetContext) {
-            // alias just in case
-            commandIntent = { type: 'change_pose', targetPoseId: parsed.targetContext };
+            commandIntent = { type: 'activate_context', targetContextId: parsed.targetContext };
+        } else if (parsed.intent === 'deactivate_context' && parsed.targetContext) {
+            commandIntent = { type: 'deactivate_context', targetContextId: parsed.targetContext };
         }
 
         return {

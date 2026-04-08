@@ -13,6 +13,7 @@ import { buildPromptPayload } from '../prompts/buildPromptPayload';
 import { checkActionAccess } from '../scenario/checkActionAccess';
 import { applyResourceCosts } from '../scenario/applyResourceCosts';
 import { runScenarioStep } from '../scenario/runScenarioStep';
+import { ContextManager } from '../engine/contextManager';
 
 export interface GameEventPayload {
     subjectId: string;
@@ -96,6 +97,16 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // 6. Save new state
     const tickId = randomUUID();
+
+    // 6.0 Apply Context Overrides
+    if (compiledAction.contextConfig) {
+        ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction);
+    }
+    if (compiledAction.removeContexts) {
+        for (const remCtx of compiledAction.removeContexts) {
+            activeContextsRepo.removeByActionId(payload.subjectId, remCtx);
+        }
+    }
 
     saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
 

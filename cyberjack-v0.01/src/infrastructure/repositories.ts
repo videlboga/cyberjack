@@ -303,25 +303,31 @@ export const presetRepo = {
         const stmt = db.prepare('SELECT * FROM action_presets WHERE id = ?');
         const row = stmt.get(id) as any;
         if (!row) return null;
+        const valJson = JSON.parse(row.values_json);
         return {
             id: row.id,
             label: row.label,
             type: row.type || 'physical',
             tags: row.tags ? JSON.parse(row.tags) : [],
-            vector: JSON.parse(row.values_json),
+            vector: valJson,
+            removeContexts: valJson.removeContexts,
             contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
         };
     },
     getAllActionPresets(): any[] {
         const stmt = db.prepare('SELECT * FROM action_presets');
-        return stmt.all().map((row: any) => ({
-            id: row.id,
-            label: row.label,
-            type: row.type || 'physical',
-            tags: row.tags ? JSON.parse(row.tags) : [],
-            vector: JSON.parse(row.values_json),
-            contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
-        }));
+        return stmt.all().map((row: any) => {
+            const valJson = JSON.parse(row.values_json);
+            return {
+                id: row.id,
+                label: row.label,
+                type: row.type || 'physical',
+                tags: row.tags ? JSON.parse(row.tags) : [],
+                vector: valJson,
+                removeContexts: valJson.removeContexts,
+                contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
+            };
+        });
     },
     
     savePointPreset(preset: any) {
@@ -424,18 +430,22 @@ export const playerRepo = {
 export const sceneRepo = {
     save(scene: Scene) {
         const stmt = db.prepare(`
-            INSERT INTO scenes (id, available_actions, action_costs, transitions)
-            VALUES (?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET 
+            INSERT INTO scenes (id, available_actions, action_costs, transitions, description, slots)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
                 available_actions = excluded.available_actions,
                 action_costs = excluded.action_costs,
-                transitions = excluded.transitions
+                transitions = excluded.transitions,
+                description = excluded.description,
+                slots = excluded.slots
         `);
         stmt.run(
             scene.id,
             JSON.stringify(scene.availableActions),
             JSON.stringify(scene.actionCosts || {}),
-            JSON.stringify(scene.transitions || [])
+            JSON.stringify(scene.transitions || []),
+            scene.description || '',
+            JSON.stringify(scene.slots || [])
         );
     },
     get(id: string): Scene | null {
@@ -444,9 +454,11 @@ export const sceneRepo = {
         if (!row) return null;
         return {
             id: row.id,
+            description: row.description,
             availableActions: JSON.parse(row.available_actions || '[]'),
             actionCosts: row.action_costs ? JSON.parse(row.action_costs) : undefined,
-            transitions: row.transitions ? JSON.parse(row.transitions) : undefined
+            transitions: row.transitions ? JSON.parse(row.transitions) : undefined,
+            slots: row.slots ? JSON.parse(row.slots) : []
         };
     },
     list(): Scene[] {
@@ -454,9 +466,11 @@ export const sceneRepo = {
         const rows = stmt.all() as any[];
         return rows.map(row => ({
             id: row.id,
+            description: row.description,
             availableActions: JSON.parse(row.available_actions || '[]'),
             actionCosts: row.action_costs ? JSON.parse(row.action_costs) : undefined,
-            transitions: row.transitions ? JSON.parse(row.transitions) : undefined
+            transitions: row.transitions ? JSON.parse(row.transitions) : undefined,
+            slots: row.slots ? JSON.parse(row.slots) : []
         }));
     }
 };
@@ -472,13 +486,14 @@ const mapScenePresence = (row: any): SceneCharacterPresence => ({
     },
     role: row.role || 'participant',
     canAct: Boolean(row.can_act),
-    presenceState: row.presence_state || 'present'
+    presenceState: row.presence_state || 'present',
+    slotId: row.slot_id
 });
 
 export const sceneCharacterRepo = {
     list(sceneId: string): SceneCharacterPresence[] {
         const stmt = db.prepare(
-            `SELECT sc.scene_id, sc.role, sc.can_act, sc.presence_state,
+            `SELECT sc.scene_id, sc.role, sc.can_act, sc.presence_state, sc.slot_id,
                     c.id as character_id, c.name as character_name, c.kind as character_kind,
                     c.subject_id as character_subject_id, c.player_id as character_player_id,
                     c.current_scene_id as character_current_scene_id
@@ -489,21 +504,23 @@ export const sceneCharacterRepo = {
         const rows = stmt.all(sceneId) as any[];
         return rows.map(mapScenePresence);
     },
-    set(sceneId: string, characterId: string, opts: { role?: string; canAct?: boolean; presenceState?: string } = {}) {
+    set(sceneId: string, characterId: string, opts: { role?: string; canAct?: boolean; presenceState?: string; slotId?: string } = {}) {
         const stmt = db.prepare(
-            `INSERT INTO scene_characters (scene_id, character_id, role, can_act, presence_state)
-             VALUES (?, ?, ?, ?, ?)
+            `INSERT INTO scene_characters (scene_id, character_id, role, can_act, presence_state, slot_id)
+             VALUES (?, ?, ?, ?, ?, ?)
              ON CONFLICT(scene_id, character_id) DO UPDATE SET
                 role = excluded.role,
                 can_act = excluded.can_act,
-                presence_state = excluded.presence_state`
+                presence_state = excluded.presence_state,
+                slot_id = excluded.slot_id`
         );
         stmt.run(
             sceneId,
             characterId,
             opts.role || 'participant',
             opts.canAct === false ? 0 : 1,
-            opts.presenceState || 'present'
+            opts.presenceState || 'present',
+            opts.slotId || null
         );
         characterRepo.updateLocation(characterId, sceneId);
     },
@@ -512,7 +529,7 @@ export const sceneCharacterRepo = {
         stmt.run(sceneId, characterId);
         characterRepo.updateLocation(characterId, null);
     },
-    moveCharacter(characterId: string, nextSceneId: string | null, opts?: { role?: string; canAct?: boolean; presenceState?: string }) {
+    moveCharacter(characterId: string, nextSceneId: string | null, opts?: { role?: string; canAct?: boolean; presenceState?: string; slotId?: string }) {
         const current = db.prepare('SELECT scene_id FROM scene_characters WHERE character_id = ?').get(characterId) as { scene_id: string } | undefined;
         if (current) {
             this.remove(current.scene_id, characterId);

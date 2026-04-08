@@ -86,6 +86,7 @@ export function App() {
   const [scenesList, setScenesList] = useState<any[]>([]);
   const [moveCharacterId, setMoveCharacterId] = useState<string>('');
   const [moveSceneId, setMoveSceneId] = useState<string>('');
+  const [moveSlotId, setMoveSlotId] = useState<string>('');
   const [movingCharacter, setMovingCharacter] = useState(false);
   const [playerDraft, setPlayerDraft] = useState<Record<string, number>>({});
   const [savingPlayer, setSavingPlayer] = useState(false);
@@ -159,13 +160,24 @@ useEffect(() => {
   }
 }, [characters, moveCharacterId]);
 
-useEffect(() => {
-  if (!moveSceneId && scenesList.length) {
-    setMoveSceneId(scenesList[0].id);
-  }
-}, [scenesList, moveSceneId]);
+  useEffect(() => {
+    if (!moveSceneId && scenesList.length) {
+      setMoveSceneId(scenesList[0].id);
+    }
+  }, [scenesList, moveSceneId]);
 
-  const groupedContexts = useMemo(() => {
+  useEffect(() => {
+    if (moveSceneId) {
+      const selectedScene = scenesList.find((sc) => sc.id === moveSceneId);
+      if (selectedScene && selectedScene.slots && selectedScene.slots.length > 0) {
+        if (!selectedScene.slots.includes(moveSlotId)) {
+          setMoveSlotId(selectedScene.slots[0]);
+        }
+      } else {
+        setMoveSlotId('');
+      }
+    }
+  }, [moveSceneId, scenesList, moveSlotId]);  const groupedContexts = useMemo(() => {
     const groups: Record<string, any[]> = {};
     for (const ctx of contexts) {
       const key = ctx.slot || ctx.type || 'misc';
@@ -351,7 +363,7 @@ useEffect(() => {
       const data = await res.json();
       if (!data.success) throw new Error('Не удалось загрузить контексты');
       setContexts(data.allPresets || []);
-      setActiveContexts((data.activeIds || []).map((item: any) => item.id || item.context_id || item));
+      setActiveContexts((data.activeIds || []).map((item: any) => item.actionId || item.context_id || item.id || item));
     } catch (err) {
       console.error(err);
     }

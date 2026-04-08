@@ -15,7 +15,8 @@ db.exec(`
     kind TEXT NOT NULL,
     subject_id TEXT,
     player_id TEXT,
-    current_scene_id TEXT
+    current_scene_id TEXT,
+    profile_json TEXT
   );
 
   CREATE TABLE IF NOT EXISTS character_relations (
@@ -91,7 +92,7 @@ db.exec(`
     id TEXT PRIMARY KEY,
     label TEXT NOT NULL,
     values_json TEXT NOT NULL,
-    context_config_json TEXT
+    type TEXT DEFAULT "physical", tags TEXT DEFAULT "[]", context_config_json TEXT
   );
 
   CREATE TABLE IF NOT EXISTS point_presets (

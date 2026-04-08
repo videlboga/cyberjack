@@ -73,6 +73,7 @@ export interface CompiledAction {
     sharpness: number;
     novelty: number;
     contextConfig?: ContextConfig;
+    removeContexts?: string[];
 }
 
 export interface EngineConfig {
@@ -161,6 +162,7 @@ export interface Scene {
     actionCosts?: Record<string, Record<string, number>>;
     transitions?: SceneTransitionRule[];
     characters?: SceneCharacterPresence[];
+    slots?: string[];
 }
 
 export interface SceneCharacterPresence {
@@ -168,6 +170,7 @@ export interface SceneCharacterPresence {
     role: string;
     canAct: boolean;
     presenceState: string;
+    slotId?: string;
 }
 export interface Mission { id: string; progress: number; }
 export interface AnatomyPointPreset {

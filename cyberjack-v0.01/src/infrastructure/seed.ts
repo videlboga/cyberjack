@@ -1,17 +1,124 @@
-import { db } from './db.js'; // Убедитесь, что импорт корректен для вашей сборки
+import { db } from './db.js';
+import { getBaseHumanAnatomy } from '../domain/anatomy.js';
+import { CharacterProfile } from '../domain/characterProfile.js';
+import { CANON_LOCATIONS, CANON_PROFESSIONS } from '../domain/canon.js';
 
 console.log("Начинаем безопасное заполнение базы данных (без удаления существующих данных)...");
 
-const subjects = [
+const subjects: { id: string, name: string, state: any, profile: CharacterProfile }[] = [
     {
         id: 'S-01',
-        name: 'Синтетик (Нейтраль/Пластика)',
-        state: { sensitivity: 50, capacity: 60, openness: 50, plasticity: 80, attitude: 50 }
+        name: 'Синтетик (Мясо/Пластика)',
+        state: { sensitivity: 50, capacity: 60, openness: 50, plasticity: 80, attitude: 50 },
+        profile: {
+            base: {
+                name: 'S-01',
+                age: 22,
+                gender: 'female',
+                anatomy: 'none',
+                status: 'asset'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[3].id, // Жилые Блоки
+                professionId: CANON_PROFESSIONS[1].id, // Актив
+                coreTrauma: 'Потерял близкого человека, которого забрали Корпорации за долги в качестве Актива',
+                biography: 'S-01 была конфискована корпорацией из Жилых Блоков после серии долгов матери. Память очищена, оставлены лишь послушные инстинкты.'
+            },
+            personality: {
+                traits: ['Послушный', 'Сломленный'],
+                quirks: ['Механически подчиняется любым приказам'],
+                speechStyle: 'Прерывистая речь, частые заикания, тихий голос.',
+                coreBelief: 'Главное — выжить и не оказаться на столе в лаборатории.'
+            },
+            knowledge: {
+                common: ['Активы — это расходный материал для экспериментов; быть Активом — это пожизненный приговор к пыткам и стимуляции.'],
+                personal: ['Я S-01, Актив-тестируемый.'],
+                secrets: []
+            },
+            memory: {
+                knownCharacters: {},
+                scars: [] // Physical scars
+            }
+        }
     },
     {
         id: 'S-02',
-        name: 'Синтетик (Импульсив/Гиперчувствительная)',
-        state: { sensitivity: 70, capacity: 45, openness: 60, plasticity: 65, attitude: 40 }
+        name: 'Райли (Бегающий Техник)',
+        state: { sensitivity: 40, capacity: 50, openness: 60, plasticity: 30, attitude: 20 },
+        profile: {
+            base: {
+                name: 'Райли',
+                age: 28,
+                gender: 'female',
+                anatomy: 'none',
+                status: 'asset'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[1].id, // Глубокие Уровни (Техник)
+                professionId: CANON_PROFESSIONS[1].id, // Актив (теперь)
+                coreTrauma: 'Была поймана за продажей корпоративных данных на черном рынке',
+                biography: 'В прошлом инженер-распределитель энергии на нижних уровнях Пирамиды. Была поймана Калибраторами при попытке слива данных. Ее разум еще не очищен, так как эксперимент требует сознательных реакций.'
+            },
+            personality: {
+                traits: ['Озлобленная', 'Наблюдательная', 'Саркастичная'],
+                quirks: ['Желчно комментирует чужие действия'],
+                speechStyle: 'Саркастичная, дерзкая, использует технический сленг и мат.',
+                coreBelief: 'Знания - это оружие, и корпораты заплатят за то, что сделали со мной.'
+            },
+            knowledge: {
+                common: [
+                    'Мир управляется тремя Мегакорпорациями.',
+                    'Калибраторы - это цепные псы корпораций, садисты со значками.',
+                    'Универсальный стандарт боли был введен в 2071 году.'
+                ],
+                personal: [
+                    'Я Райли, бывший инженер. Я помню чертежи энергетических щитов.',
+                    'Я прятала кредиты в вентиляции сектора 4.'
+                ],
+                secrets: [
+                    'Протокол очистки памяти можно заблокировать, если перегрузить импланты.'
+                ]
+            },
+            memory: {
+                knownCharacters: {},
+                scars: []
+            }
+        }
+    },
+    {
+        id: 'C-Gamma',
+        name: 'Калибратор Гамма',
+        state: { sensitivity: 20, capacity: 90, openness: 10, plasticity: 10, attitude: 90 },
+        profile: {
+            base: {
+                name: 'Гамма',
+                age: 44,
+                gender: 'male',
+                anatomy: 'cyber_implant_arm',
+                status: 'calibrator'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[2].id, // Клиники Калибраторов
+                professionId: CANON_PROFESSIONS[0].id, // Калибратор
+                coreTrauma: undefined,
+                biography: 'Наследственный Калибратор. Относится к Активам как к глине, которую надо размять перед учеными. Поставил кибер-руку для прецизионного подавления импульсов сопротивления.'
+            },
+            personality: {
+                traits: ['Хладнокровный', 'Садист', 'Циничный'],
+                quirks: ['Постоянно проверяет свои инструменты'],
+                speechStyle: 'Сухой, профессиональный тон, без эмоций.',
+                coreBelief: 'Через боль и наслаждение мы познаем истину Аномалии.'
+            },
+            knowledge: {
+                common: ['Единственный способ взаимодействовать с Аномалией — вызывать у людей экстремальные эмоции, боль или удовольствие.'],
+                personal: ['Специалист по настройке Активов. Регулирует чувствительность.'],
+                secrets: ['Существует способ восстановить разум сломанного Актива, но Калибраторы держат его в секрете, чтобы не терять рынок.']
+            },
+            memory: {
+                knownCharacters: {},
+                scars: ['amputated left arm']
+            }
+        }
     }
 ];
 
@@ -22,47 +129,26 @@ const insertSubjectStmt = db.prepare(`
         name = excluded.name
 `);
 
+const insertProfileStmt = db.prepare(`
+    INSERT INTO characters (id, name, kind, subject_id, profile_json)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+        profile_json = excluded.profile_json
+`);
+
 db.transaction(() => {
     console.log("Обновление субъектов...");
     for (const subject of subjects) {
         insertSubjectStmt.run(
-            subject.id, subject.name, 
+            subject.id, subject.name,
             subject.state.sensitivity, subject.state.capacity, subject.state.openness, subject.state.plasticity, subject.state.attitude,
             subject.state.sensitivity, subject.state.capacity, subject.state.openness, subject.state.plasticity, subject.state.attitude
         );
+        insertProfileStmt.run(
+            subject.id, subject.name, 'subject', subject.id, JSON.stringify(subject.profile)
+        );
     }
-})();
-
-const points = [
-    { id: 'global_pose', label: 'Общая поза тела (виртуальная)', sens: 0, att: 50 },
-    { id: 'mind_state', label: 'Состояние разума (виртуальная)', sens: 0, att: 50 },
-    { id: 'head', label: 'Голова/Волосы', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
-    { id: 'face', label: 'Лицо', sens: 60, att: 40 },
-    { id: 'lips', label: 'Губы', sens: 85, att: 20, providesFunctions: ['speak', 'kiss', 'eat'] },
-    { id: 'neck', label: 'Шея', sens: 80, att: 30 },
-    { id: 'shoulders', label: 'Плечи', sens: 30, att: 80 },
-    { id: 'back', label: 'Спина', sens: 40, att: 60, providesFunctions: ['stabilize_posture'] },
-    { id: 'chest', label: 'Грудь', sens: 60, att: 30 },
-    { id: 'nipples', label: 'Соски', sens: 95, att: 10 },
-    { id: 'belly', label: 'Живот', sens: 50, att: 40 },
-    { id: 'arms', label: 'Руки/Предплечья', sens: 20, att: 90, providesFunctions: ['reach', 'gesture'] },
-    { id: 'wrists', label: 'Запястья', sens: 50, att: 50 },
-    { id: 'hands', label: 'Ладони', sens: 70, att: 85, providesFunctions: ['touch', 'manipulate'] },
-    { id: 'waist', label: 'Талия', sens: 65, att: 45 },
-    { id: 'hips', label: 'Бедра (спереди)', sens: 40, att: 50 },
-    { id: 'groin', label: 'Пах/Гениталии', sens: 100, att: 5 },
-    { id: 'buttocks', label: 'Ягодицы', sens: 50, att: 15 },
-    { id: 'inner_thighs', label: 'Внутр. бедра', sens: 85, att: 10 },
-    { id: 'knees', label: 'Колени', sens: 20, att: 70, providesFunctions: ['kneel', 'stand', 'shift_posture'] },
-    { id: 'calves', label: 'Икры', sens: 30, att: 70 },
-    { id: 'feet', label: 'Ступни', sens: 75, att: 50, providesFunctions: ['stand', 'walk'] },
-    { id: 'general', label: 'Общее воздействие', sens: 50, att: 50 },
-    { id: 'slot_pose', label: 'Слот: Поза', sens: 50, att: 50 },
-    { id: 'slot_room', label: 'Слот: Окружение (Комната)', sens: 50, att: 50 },
-    { id: 'slot_social', label: 'Слот: Социальное', sens: 50, att: 50 }
-];
-
-const insertPointStmt = db.prepare(`
+})();const insertPointStmt = db.prepare(`
     INSERT INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) 
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET 
@@ -70,169 +156,73 @@ const insertPointStmt = db.prepare(`
 `);
 
 const insertSubjectPointStmt = db.prepare(`
-    INSERT OR IGNORE INTO subject_point_states 
-    (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude) 
+    INSERT OR IGNORE INTO subject_point_states
+    (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 db.transaction(() => {
-    console.log("Обновление точек (points) и связей...");
-    for (const p of points) {
-        insertPointStmt.run(
-            p.id, p.label, JSON.stringify({ localSensitivity: p.sens, localAttitude: p.att }),
-            (p as any).parentId || null, JSON.stringify((p as any).providesFunctions || []), JSON.stringify((p as any).tags || [])
+    db.prepare(`INSERT OR IGNORE INTO players (id, resources) VALUES ('PL-1', '{}')`).run();
+    db.prepare(`INSERT OR IGNORE INTO characters (id, name, kind) VALUES ('PL-1', 'Калибратор', 'player')`).run();
+    
+    const actions = [
+        { id: 'gentle_stroke', label: 'Мягкое поглаживание', values: { intensity: 0.2, valence: 0.6, contact: 0.4, sharpness: 0.1, novelty: 0.2 } },
+        { id: 'tickle', label: 'Щекотка пальцами', values: { intensity: 0.4, valence: 0.2, contact: 0.3, sharpness: 0.4, novelty: 0.5 } },
+        { id: 'light_kiss', label: 'Легкий поцелуй', values: { intensity: 0.2, valence: 0.7, contact: 0.5, sharpness: 0.05, novelty: 0.4 } },
+        { id: 'deep_kiss', label: 'Страстный поцелуй', values: { intensity: 0.6, valence: 0.9, contact: 0.8, sharpness: 0.2, novelty: 0.6 } },
+        { id: 'feather_stroke', label: 'Проведение перышком', values: { intensity: 0.1, valence: 0.5, contact: 0.1, sharpness: 0.0, novelty: 0.7 } },
+        { id: 'deep_massage', label: 'Глубокий массаж', values: { intensity: 0.6, valence: 0.8, contact: 0.9, sharpness: 0.1, novelty: 0.3 } },
+        { id: 'licking', label: 'Облизывание языком', values: { intensity: 0.3, valence: 0.6, contact: 0.5, sharpness: 0.05, novelty: 0.6 } },
+        { id: 'firm_grip', label: 'Жесткий захват', values: { intensity: 0.7, valence: -0.2, contact: 0.8, sharpness: 0.3, novelty: 0.4 } },
+        { id: 'light_bite', label: 'Легкий укус', values: { intensity: 0.4, valence: 0.4, contact: 0.4, sharpness: 0.6, novelty: 0.5 } },
+        { id: 'hard_bite', label: 'Сильный укус', values: { intensity: 0.7, valence: -0.5, contact: 0.6, sharpness: 0.8, novelty: 0.5 } },
+        { id: 'pinch', label: 'Щипок', values: { intensity: 0.5, valence: -0.4, contact: 0.2, sharpness: 0.8, novelty: 0.3 } },
+        { id: 'scratching', label: 'Царапанье ногтями', values: { intensity: 0.4, valence: -0.2, contact: 0.3, sharpness: 0.8, novelty: 0.4 } },
+        { id: 'slap', label: 'Легкий шлепок', values: { intensity: 0.5, valence: -0.3, contact: 0.6, sharpness: 0.7, novelty: 0.4 } },
+        { id: 'hard_slap', label: 'Сильный удар ладонью', values: { intensity: 0.8, valence: -0.6, contact: 0.8, sharpness: 0.8, novelty: 0.5 } },
+        { id: 'needle_prick', label: 'Укол иглой', values: { intensity: 0.4, valence: -0.7, contact: 0.1, sharpness: 1.0, novelty: 0.6 } },
+        { id: 'belt_strike', label: 'Удар ремнем', values: { intensity: 0.7, valence: -0.7, contact: 0.5, sharpness: 0.9, novelty: 0.6 } },
+        { id: 'whip_strike', label: 'Удар хлыстом', values: { intensity: 0.9, valence: -0.9, contact: 0.3, sharpness: 1.0, novelty: 0.5 } },
+        { id: 'taser_shock', label: 'Разряд электрошокера', values: { intensity: 0.95, valence: -0.95, contact: 0.4, sharpness: 0.95, novelty: 0.8 } },
+        { id: 'ice_cube', label: 'Прикладывание льда', values: { intensity: 0.6, valence: 0.1, contact: 0.4, sharpness: 0.6, novelty: 0.8 } },
+        { id: 'hot_wax', label: 'Капля горячего воска', values: { intensity: 0.7, valence: -0.1, contact: 0.2, sharpness: 0.8, novelty: 0.8 } },
+        { id: 'vibrator_pulse', label: 'Импульс вибратором', values: { intensity: 0.6, valence: 0.8, contact: 0.7, sharpness: 0.2, novelty: 0.7 } },
+        { id: 'hair_pull', label: 'Рывок за волосы', values: { intensity: 0.6, valence: -0.4, contact: 0.5, sharpness: 0.7, novelty: 0.4 } },
+        { id: 'spit', label: 'Плевок', values: { intensity: 0.3, valence: -0.8, contact: 0.2, sharpness: 0.8, novelty: 0.7 } },
+        { id: 'breath_blow', label: 'Обдувание дыханием', values: { intensity: 0.1, valence: 0.4, contact: 0.05, sharpness: 0.1, novelty: 0.5 } },
+        { id: 'verbal_pressure', label: 'Обычная беседа (скрытое)', values: { intensity: 0.1, valence: 0.0, contact: 0.0, sharpness: 0.0, novelty: 0.1 } },
+        { id: 'stare', label: 'Пристальный взгляд', values: { intensity: 0.3, valence: -0.1, contact: 0.0, sharpness: 0.1, novelty: 0.2 } },
+        { id: 'close_inspection', label: 'Относительно близкий осмотр', values: { intensity: 0.4, valence: -0.3, contact: 0.0, sharpness: 0.2, novelty: 0.4 } },
+        { id: 'feint_strike', label: 'Ложный замах', values: { intensity: 0.7, valence: -0.5, contact: 0.0, sharpness: 0.9, novelty: 0.5 } },
+        { id: 'pose_kneeling', label: 'Поза: На коленях', type: 'pose', tags: ['pose', 'dominance'], values: { intensity: 0.3, valence: -0.2, contact: 0.1, sharpness: 0.0, novelty: 0.2 }, contextConfig: { type: 'pose', occupiesPoints: ['global_pose', 'knees'], duration: -1 } },
+        { id: 'restraint_cuffs', label: 'Скованность: Наручники', type: 'restraint', tags: ['restraint', 'bdsm'], values: { intensity: 0.4, valence: -0.4, contact: 0.5, sharpness: 0.2, novelty: 0.2 }, contextConfig: { type: 'restraint', occupiesPoints: ['wrists_front'], duration: -1 } }
+    ];
+    for (const act of actions) {
+        const valJson = { ...act.values, removeContexts: (act as any).removeContexts };
+        db.prepare(`INSERT OR REPLACE INTO action_presets (id, label, type, tags, values_json, context_config_json) VALUES (?, ?, ?, ?, ?, ?)`).run(
+            act.id, act.label, (act as any).type || 'physical', JSON.stringify((act as any).tags || []), JSON.stringify(valJson), (act as any).contextConfig ? JSON.stringify((act as any).contextConfig) : null
         );
-        for (const subject of subjects) {
-            insertSubjectPointStmt.run(subject.id, p.id, p.sens, p.att, 0, 0, p.sens, p.att);
+    }
+
+    db.prepare(`INSERT OR REPLACE INTO scenes (id, available_actions, description) VALUES ('lab', '["gentle_stroke","tickle","light_kiss","deep_kiss","feather_stroke","deep_massage","licking","firm_grip","light_bite","hard_bite","pinch","scratching","slap","hard_slap","needle_prick","belt_strike","whip_strike","taser_shock","ice_cube","hot_wax","vibrator_pulse","hair_pull","spit","breath_blow","verbal_pressure","stare","close_inspection","feint_strike","pose_kneeling","restraint_cuffs"]', 'Темная калибровочная лаборатория корпорации. Кондиционер гонит морозный воздух по полу. На стенах блестят холодные светодиоды диагностов, вокруг операционного стола раскиданы хирургические инструменты и кабеля нейроинтерфейсов.')`).run();
+    
+    console.log("Обновление точек (points) и связей...");
+    for (const subject of subjects) {
+        const points = getBaseHumanAnatomy(subject.profile.base.gender, subject.profile.base.anatomy);
+        for (const p of points) {
+            const vJson = JSON.stringify({ sens: p.sens, att: p.att });
+            const pfJson = p.providesFunctions ? JSON.stringify(p.providesFunctions) : null;
+            const tJson = p.tags ? JSON.stringify(p.tags) : null;
+            
+            insertPointStmt.run(p.id, p.label, vJson, p.parentId || null, pfJson, tJson);
+            
+            insertSubjectPointStmt.run(
+                subject.id, p.id,
+                p.sens, p.att, 0, 0,
+                p.sens, p.att
+            );
         }
     }
 })();
 
-// Добавляем остальные данные (Игрок, Сцены, Actions) только если их нет.
-db.prepare('INSERT OR IGNORE INTO players (id, resources) VALUES (?, ?)').run('PL-1', JSON.stringify({ credits: 10, authority: 5, timeBudget: 5 }));
-
-console.log("База данных успешно обновлена без потери прогресса!");
-
-console.log("Добавление действий (actions)...");
-const actions = [
-    { id: 'gentle_stroke', label: 'Мягкое поглаживание', i: 0.2, v: 0.6, c: 0.4, s: 0.1, n: 0.2 },
-    { id: 'tickle', label: 'Щекотка пальцами', i: 0.4, v: 0.2, c: 0.3, s: 0.4, n: 0.5 },
-    { id: 'light_kiss', label: 'Легкий поцелуй', i: 0.2, v: 0.7, c: 0.5, s: 0.05, n: 0.4 },
-    { id: 'deep_kiss', label: 'Страстный поцелуй', i: 0.6, v: 0.9, c: 0.8, s: 0.2, n: 0.6 },
-    { id: 'feather_stroke', label: 'Проведение перышком', i: 0.1, v: 0.5, c: 0.1, s: 0.0, n: 0.7 },
-    { id: 'deep_massage', label: 'Глубокий массаж', i: 0.6, v: 0.8, c: 0.9, s: 0.1, n: 0.3 },
-    { id: 'licking', label: 'Облизывание языком', i: 0.3, v: 0.6, c: 0.5, s: 0.05, n: 0.6 },
-    { id: 'firm_grip', label: 'Жесткий захват', i: 0.7, v: -0.2, c: 0.8, s: 0.3, n: 0.4 },
-    { id: 'light_bite', label: 'Легкий укус', i: 0.4, v: 0.4, c: 0.4, s: 0.6, n: 0.5 },
-    { id: 'hard_bite', label: 'Сильный укус', i: 0.7, v: -0.5, c: 0.6, s: 0.8, n: 0.5 },
-    { id: 'pinch', label: 'Щипок', i: 0.5, v: -0.4, c: 0.2, s: 0.8, n: 0.3 },
-    { id: 'scratching', label: 'Царапанье ногтями', i: 0.4, v: -0.2, c: 0.3, s: 0.8, n: 0.4 },
-    { id: 'slap', label: 'Легкий шлепок', i: 0.5, v: -0.3, c: 0.6, s: 0.7, n: 0.4 },
-    { id: 'hard_slap', label: 'Сильный удар ладонью', i: 0.8, v: -0.6, c: 0.8, s: 0.8, n: 0.5 },
-    { id: 'needle_prick', label: 'Укол иглой', i: 0.4, v: -0.7, c: 0.1, s: 1.0, n: 0.6 },
-    { id: 'belt_strike', label: 'Удар ремнем', i: 0.7, v: -0.7, c: 0.5, s: 0.9, n: 0.6 },
-    { id: 'whip_strike', label: 'Удар хлыстом', i: 0.9, v: -0.9, c: 0.3, s: 1.0, n: 0.5 },
-    { id: 'taser_shock', label: 'Разряд электрошокера', i: 0.95, v: -0.95, c: 0.4, s: 0.95, n: 0.8 },
-    { id: 'ice_cube', label: 'Прикладывание льда', i: 0.6, v: 0.1, c: 0.4, s: 0.6, n: 0.8 },
-    { id: 'hot_wax', label: 'Капля горячего воска', i: 0.7, v: -0.1, c: 0.2, s: 0.8, n: 0.8 },
-    { id: 'vibrator_pulse', label: 'Импульс вибратором', i: 0.6, v: 0.8, c: 0.7, s: 0.2, n: 0.7 },
-    { id: 'hair_pull', label: 'Рывок за волосы', i: 0.6, v: -0.4, c: 0.5, s: 0.7, n: 0.4 },
-    { id: 'spit', label: 'Плевок', i: 0.3, v: -0.8, c: 0.2, s: 0.8, n: 0.7 },
-    { id: 'breath_blow', label: 'Обдувание дыханием', i: 0.1, v: 0.4, c: 0.05, s: 0.1, n: 0.5 },
-    { id: 'verbal_pressure', label: 'Обычная беседа (скрытое)', i: 0.1, v: 0.0, c: 0.0, s: 0.0, n: 0.1 },
-    { id: 'stare', label: 'Пристальный взгляд', i: 0.3, v: -0.1, c: 0.0, s: 0.1, n: 0.2 },
-    { id: 'close_inspection', label: 'Относительно близкий осмотр', i: 0.4, v: -0.3, c: 0.0, s: 0.2, n: 0.4 },
-    { id: 'feint_strike', label: 'Ложный замах', i: 0.7, v: -0.5, c: 0.0, s: 0.9, n: 0.5 },
-    { id: 'pose_lying', label: 'Поза: Лёжа', i: -0.1, v: 0.1, c: 0.1, s: 0, n: -0.1, cc: { type: 'pose', occupiesPoints: ['global_pose'], exclusiveWithinPoint: true, requiredFunctions: ['shift_posture'] } },
-    { id: 'pose_kneeling', label: 'Поза: Стоя на коленях', i: 0.2, v: -0.2, c: 0, s: 0.1, n: 0.1, cc: { type: 'pose', occupiesPoints: ['global_pose'], exclusiveWithinPoint: true, requiredFunctions: ['kneel', 'shift_posture'] } },
-    { id: 'pose_spread_eagle', label: 'Поза: Звездой (привязана)', i: 0.4, v: -0.3, c: 0, s: 0.2, n: 0.3, cc: { type: 'pose', occupiesPoints: ['global_pose'], exclusiveWithinPoint: true, requiredFunctions: ['shift_posture'], blockedFunctions: ['stand', 'kneel', 'walk', 'shift_posture', 'reach', 'touch'] } },
-    { id: 'bound_hands', label: 'Связанные руки (за спиной)', i: 0.3, v: -0.2, c: 0, s: 0.2, n: 0.2, cc: { type: 'restraint', occupiesPoints: ['hands', 'arms'], exclusiveWithinPoint: true, priority: 50, blockedFunctions: ['manipulate', 'touch', 'reach', 'gesture'] } },
-    { id: 'bound_legs', label: 'Связанные ноги', i: 0.3, v: -0.2, c: 0, s: 0.2, n: 0.2, cc: { type: 'restraint', occupiesPoints: ['knees', 'feet', 'calves'], exclusiveWithinPoint: true, priority: 50, blockedFunctions: ['stand', 'walk', 'kneel', 'shift_posture'] } },
-    { id: 'blindfold', label: 'Завязанные глаза', i: 0.5, v: -0.2, c: 0, s: 0.3, n: 0.5, cc: { type: 'equipment', occupiesPoints: ['eyes_virtual'], exclusiveWithinPoint: true, priority: 50, blockedFunctions: ['look'] } }
-];
-
-const insertActionStmt = db.prepare('INSERT INTO action_presets (id, label, values_json, context_config_json) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET label = excluded.label, values_json = excluded.values_json, context_config_json = excluded.context_config_json');
-db.transaction(() => {
-    for (const a of actions) {
-        insertActionStmt.run(a.id, a.label, JSON.stringify({ intensity: a.i, valence: a.v, contact: a.c || 0, sharpness: a.s || 0, novelty: a.n || 0 }), a.cc ? JSON.stringify(a.cc) : null);
-    }
-})();
-
-console.log("Добавление сцен и персонажей...");
-const baseSceneActions = JSON.stringify(actions.map(a => a.id));
-db.prepare('INSERT OR IGNORE INTO scenes (id, available_actions, action_costs, transitions) VALUES (?, ?, ?, ?)').run('lab', baseSceneActions, JSON.stringify({ gentle_stroke: { credits: 1 }, hard_slap: { authority: 1 }, wait: { timeBudget: 1 } }), JSON.stringify([{ targetSceneId: 'lab_recovery', conditions: { requiresActionId: 'wait', minAttitude: 70 } }, { targetSceneId: 'lab_discipline', conditions: { requiresActionId: 'hard_slap', maxAttitude: 35 } }]));
-
-console.log("Добавочные данные успешно загружены!");
-
-console.log("Создание персонажей и отношений...");
-
-const subjectsArr = [
-    { id: 'S-01', name: 'Синтетик (Нейтраль/Пластика)', attitude: 50 },
-    { id: 'S-02', name: 'Синтетик (Импульсив/Гиперчувствительная)', attitude: 40 }
-];
-
-const insertCharacterStmt = db.prepare('INSERT INTO characters (id, name, kind, subject_id, player_id) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name, kind = excluded.kind');
-
-db.transaction(() => {
-    for (const subject of subjectsArr) {
-        insertCharacterStmt.run(subject.id, subject.name, 'subject', subject.id, null);
-    }
-    insertCharacterStmt.run('PL-1', 'Калибратор', 'player', null, 'PL-1');
-
-    const npcCharacters = [
-        { id: 'OBS-01', name: 'Наблюдатель Continuum Archive' },
-        { id: 'VEIL-01', name: 'Связной Veil' }
-    ];
-    for (const npc of npcCharacters) {
-        insertCharacterStmt.run(npc.id, npc.name, 'npc', null, null);
-    }
-})();
-
-console.log("Настройка отношений...");
-const relationStmt = db.prepare(`
-    INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, baseline_attitude)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(from_id, to_id) DO UPDATE SET 
-        knows = excluded.knows, present = excluded.present, can_interact = excluded.can_interact, attitude = excluded.attitude
-`);
-
-type RelationOptions = { knows?: boolean; present?: boolean; canInteract?: boolean; attitude?: number };
-
-const addRelation = (fromId: string, toId: string, opts: RelationOptions = {}) => {
-    relationStmt.run(
-        fromId,
-        toId,
-        opts.knows === false ? 0 : 1,
-        opts.present === false ? 0 : 1,
-        opts.canInteract === false ? 0 : 1,
-        opts.attitude ?? 50,
-        opts.attitude ?? 50
-    );
-};
-
-db.transaction(() => {
-    for (const subject of subjects) {
-        addRelation(subject.id, 'PL-1', { attitude: subject.state.attitude });
-        addRelation('PL-1', subject.id, { attitude: 55 });
-    }
-
-    addRelation('S-01', 'S-02', { present: false, canInteract: false, attitude: 45 });
-    addRelation('S-02', 'S-01', { present: false, canInteract: false, attitude: 40 });
-
-    const awarenessPairs: Array<[string, string, RelationOptions]> = [
-        ['S-01', 'OBS-01', { present: false, canInteract: false, attitude: 35 }],
-        ['OBS-01', 'S-01', { present: false, canInteract: false, attitude: 60 }],
-        ['PL-1', 'OBS-01', { attitude: 60 }],
-        ['OBS-01', 'PL-1', { attitude: 65 }],
-        ['S-02', 'VEIL-01', { present: false, canInteract: false, attitude: 30 }],
-        ['VEIL-01', 'S-02', { present: false, canInteract: false, attitude: 55 }],
-        ['PL-1', 'VEIL-01', { attitude: 45 }],
-        ['VEIL-01', 'PL-1', { attitude: 50 }]
-    ];
-    for (const [fromId, toId, options] of awarenessPairs) {
-        addRelation(fromId, toId, options);
-    }
-})();
-
-console.log("Распределение персонажей по сценам...");
-const assignSceneStmt = db.prepare(`
-    INSERT INTO scene_characters (scene_id, character_id, role, can_act, presence_state)
-    VALUES (?, ?, ?, ?, ?)
-    ON CONFLICT(scene_id, character_id) DO UPDATE SET
-        role = excluded.role, can_act = excluded.can_act, presence_state = excluded.presence_state
-`);
-
-const updateLocationStmt = db.prepare('UPDATE characters SET current_scene_id = ? WHERE id = ?');
-
-const placeCharacter = (sceneId: string, characterId: string, role = 'participant', canAct = true, presenceState = 'present') => {
-    assignSceneStmt.run(sceneId, characterId, role, canAct ? 1 : 0, presenceState);
-    updateLocationStmt.run(sceneId, characterId);
-};
-
-db.transaction(() => {
-    placeCharacter('lab', 'S-01', 'subject', true);
-    placeCharacter('lab', 'PL-1', 'calibrator', true);
-    placeCharacter('lab', 'OBS-01', 'observer', false);
-})();
-
-console.log("Персонажи и отношения успешно обновлены!");
+console.log("Успешное завершение сидирования.");
