@@ -166,6 +166,18 @@ db.transaction(() => {
     db.prepare(`INSERT OR IGNORE INTO characters (id, name, kind) VALUES ('PL-1', 'Калибратор', 'player')`).run();
     
     const actions = [
+        // System and Context Effects
+        { id: 'effect_apathy', label: 'Апатия / Отключение', type: 'condition', tags: ['condition', 'apathy'], values: { intensity_mult: 0.5, sharpness_mult: 0.5 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_chronic_apathy', label: 'Глубокий Срыв (Хроническая Апатия)', type: 'condition', tags: ['condition', 'apathy'], values: { intensity_mult: 0.5, sharpness_mult: 0.5 }, contextConfig: { duration: 10, occupiesPoints: [] } },
+        { id: 'effect_subspace', label: 'Сабспейс (Податливость)', type: 'condition', tags: ['condition', 'subspace'], values: { valence: 0.2, sharpness_mult: 0.6 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_panic', label: 'Паническая Атака', type: 'condition', tags: ['condition', 'panic'], values: { valence: -0.3, sharpness_mult: 1.4 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_sensory_overload', label: 'Сенсорная Перегрузка', type: 'condition', tags: ['condition', 'overload'], values: { intensity_mult: 1.2, sharpness: 0.15 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_freeze', label: 'Тоническое Оцепенение', type: 'condition', tags: ['condition', 'freeze'], values: { contact_mult: 0.8 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_suggestibility', label: 'Смещение контроля', type: 'condition', tags: ['condition', 'submissive'], values: { valence: 0.15, sharpness_mult: 0.8 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_active_defiance', label: 'Активное Отторжение', type: 'condition', tags: ['condition', 'defiance'], values: { intensity_mult: 0.8, valence: -0.1 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_hyperesthesia', label: 'Гиперестезия', type: 'condition', tags: ['condition', 'hyperesthesia'], values: { intensity_mult: 1.3, sharpness_mult: 1.1 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+
+        // Standard actions
         { id: 'gentle_stroke', label: 'Мягкое поглаживание', values: { intensity: 0.2, valence: 0.6, contact: 0.4, sharpness: 0.1, novelty: 0.2 } },
         { id: 'tickle', label: 'Щекотка пальцами', values: { intensity: 0.4, valence: 0.2, contact: 0.3, sharpness: 0.4, novelty: 0.5 } },
         { id: 'light_kiss', label: 'Легкий поцелуй', values: { intensity: 0.2, valence: 0.7, contact: 0.5, sharpness: 0.05, novelty: 0.4 } },

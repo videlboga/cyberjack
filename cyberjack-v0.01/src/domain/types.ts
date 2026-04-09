@@ -72,6 +72,13 @@ export interface CompiledAction {
     contact: number;
     sharpness: number;
     novelty: number;
+
+    intensity_mult?: number;
+    valence_mult?: number;
+    contact_mult?: number;
+    sharpness_mult?: number;
+    novelty_mult?: number;
+
     contextConfig?: ContextConfig;
     removeContexts?: string[];
 }

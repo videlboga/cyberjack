@@ -19,14 +19,18 @@ export function compileContextVector(activeContexts: { actionId: string; strain?
         if (modifiers) {
             for (const [key, val] of Object.entries(modifiers)) {
                 if (typeof val === 'number') {
-                    let adjustedVal = val;
-                    const strain = Math.max(0, Math.min(ctx.strain ?? 0, 1));
-                    const multiplier = STRAIN_MULTIPLIERS[key] ?? 0;
-                    if (strain > 0 && multiplier !== 0) {
-                        adjustedVal += val * multiplier * strain;
-                    }
+                    if (key.endsWith('_mult')) {
+                        combinedModifiers[key] = (combinedModifiers[key] !== undefined ? combinedModifiers[key] : 1) * val;
+                    } else {
+                        let adjustedVal = val;
+                        const strain = Math.max(0, Math.min(ctx.strain ?? 0, 1));
+                        const multiplier = STRAIN_MULTIPLIERS[key] ?? 0;
+                        if (strain > 0 && multiplier !== 0) {
+                            adjustedVal += val * multiplier * strain;
+                        }
 
-                    combinedModifiers[key] = (combinedModifiers[key] || 0) + adjustedVal;
+                        combinedModifiers[key] = (combinedModifiers[key] || 0) + adjustedVal;
+                    }
                 }
             }
         }
