@@ -91,20 +91,6 @@ export const processTick = async (req: Request, res: Response) => {
         const { subjectId = 'S-01', textMessage, playerId = 'PL-1' } = req.body;
         const tickSceneId = req.body.sceneId || 'lab';
 
-        // 1. Proximity Validation Constraints
-        if (!textMessage && (req.body.presetId || req.body.actionId)) {
-            const actionPresetId = req.body.presetId || req.body.actionId;
-            const actionPreset = presetRepo.getActionPreset(actionPresetId);
-            
-            if (actionPreset && (actionPreset.type === 'physical' || actionPreset.contact > 0.3)) {
-                const presentChars = sceneCharacterRepo.list(tickSceneId);
-                const subjSceneChar = presentChars.find(sc => sc.character.subjectId === subjectId || sc.character.id === subjectId);
-                const playerSceneChar = presentChars.find(sc => sc.character.playerId === playerId || sc.character.id === playerId);
-                if (subjSceneChar && playerSceneChar && subjSceneChar.slotId && playerSceneChar.slotId && subjSceneChar.slotId !== playerSceneChar.slotId) {
-                    return res.status(400).json({ success: false, error: 'Слишком далеко для физического воздействия. Сначала подойдите в нужную зону.' });
-                }
-            }
-        }
 
         const baseUserMessage = typeof textMessage === 'string' && textMessage.trim().length ? textMessage.trim() : null;
 

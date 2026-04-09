@@ -1,5 +1,5 @@
 import { Scene, ResourceState } from '../domain/types';
-import { presetRepo, sceneCharacterRepo } from '../infrastructure/repositories';
+import { presetRepo, sceneCharacterRepo, characterItemsRepo, sceneObjectsRepo } from '../infrastructure/repositories';
 
 export interface ActionValidationResult {
     allowed: boolean;
@@ -20,13 +20,14 @@ export function validateAction(
     // 1. Scene Availability Constraint
     const isGlobalAction = actionId === 'wait' || actionId === 'verbal_pressure';
     const isListedInScene = scene.availableActions.includes(actionId);
-    
+
     if (!isGlobalAction && !isListedInScene) {
         return { allowed: false, errorReason: `Действие "${actionId}" недоступно в сцене "${scene.id}".` };
     }
 
-    // 2. Proximity / Geographical Slot Constraints
     const actionPreset = presetRepo.getActionPreset(actionId);
+    
+    // 2. Proximity / Geographical Slot Constraints
     if (actionPreset && (actionPreset.type === 'physical' || actionPreset.contact > 0.3) && subjectId && playerId) {
         const presentChars = sceneCharacterRepo.list(scene.id);
         const subjSceneChar = presentChars.find(sc => sc.character.subjectId === subjectId || sc.character.id === subjectId);
@@ -37,7 +38,37 @@ export function validateAction(
         }
     }
 
-    // 3. Resource Availability: проверим требования к ресурсам (включая AP) до списания
+    // 3. Items and Scene Objects Requirements
+    if (actionPreset && playerId) {
+        const requiredItem = actionPreset.requiresItem || actionPreset.contextConfig?.requiresItem;
+        if (requiredItem) {
+            // playerId currently serves as the initiator ID. In the future this should be `initiatorId` mapping to `characterId`
+            const theChar = sceneCharacterRepo.list(scene.id).find(c => c.character.playerId === playerId || c.character.id === playerId)?.character;
+            if (!theChar) {
+                return { allowed: false, errorReason: `Персонаж-инициатор не найден в сцене.` };
+            }
+            const item = characterItemsRepo.get(theChar.id, requiredItem);
+            if (!item || item.state === 'consumed' || item.state === 'broken') {
+                return { allowed: false, errorReason: `Требуется предмет "${requiredItem}" в инвентаре для этого действия.` };
+            }
+        }
+
+        const requiredSceneObject = actionPreset.requiresSceneObject || actionPreset.contextConfig?.requiresSceneObject;
+        if (requiredSceneObject) {
+            const objects = sceneObjectsRepo.listForScene(scene.id);
+            const obj = objects.find(o => o.itemId === requiredSceneObject);
+            if (!obj || obj.state === 'broken' || obj.state === 'offline') {
+                return { allowed: false, errorReason: `В сцене отсутствует или не работает объект "${requiredSceneObject}".` };
+            }
+            // Optional: check proximity to the node if the object is tied to a node_id
+            const theChar = sceneCharacterRepo.list(scene.id).find(c => c.character.playerId === playerId || c.character.id === playerId);
+            if (obj.nodeId && theChar?.slotId && obj.nodeId !== theChar.slotId) {
+                return { allowed: false, errorReason: `Слишком далеко от объекта "${requiredSceneObject}". Сначала подойдите к нему.` };
+            }
+        }
+    }
+
+    // 4. Resource Availability: проверим требования к ресурсам (включая AP) до списания
     const actionSceneCosts = scene.actionCosts?.[actionId];
     if (actionSceneCosts && player) {
         // actionSceneCosts — это map resource -> number

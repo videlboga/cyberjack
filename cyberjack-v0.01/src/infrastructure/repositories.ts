@@ -35,6 +35,116 @@ const mapRelation = (row: any): CharacterRelation => ({
         : undefined
 });
 
+export const characterItemsRepo = {
+    save(item: { characterId: string; itemId: string; state?: string; charges?: number; metadata?: Record<string, unknown> }) {
+        db.prepare(`
+            INSERT INTO character_items (character_id, item_id, state, charges, metadata)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(character_id, item_id) DO UPDATE SET
+                state = excluded.state,
+                charges = excluded.charges,
+                metadata = excluded.metadata
+        `).run(
+            item.characterId, 
+            item.itemId, 
+            item.state || 'active', 
+            item.charges ?? -1, 
+            JSON.stringify(item.metadata || {})
+        );
+    },
+    get(characterId: string, itemId: string): { characterId: string; itemId: string; state: string; charges: number; metadata: Record<string, unknown> } | null {
+        const row = db.prepare('SELECT * FROM character_items WHERE character_id = ? AND item_id = ?').get(characterId, itemId) as any;
+        if (!row) return null;
+        return {
+            characterId: row.character_id,
+            itemId: row.item_id,
+            state: row.state,
+            charges: row.charges,
+            metadata: JSON.parse(row.metadata || '{}')
+        };
+    },
+    listFor(characterId: string) {
+        return db.prepare('SELECT * FROM character_items WHERE character_id = ?').all(characterId).map((row: any) => ({
+            characterId: row.character_id,
+            itemId: row.item_id,
+            state: row.state,
+            charges: row.charges,
+            metadata: JSON.parse(row.metadata || '{}')
+        }));
+    },
+    remove(characterId: string, itemId: string) {
+        db.prepare('DELETE FROM character_items WHERE character_id = ? AND item_id = ?').run(characterId, itemId);
+    }
+};
+
+export const sceneObjectsRepo = {
+    save(obj: { id: string; sceneId: string; nodeId?: string; itemId: string; ownerId?: string; state?: string; metadata?: Record<string, unknown> }) {
+        db.prepare(`
+            INSERT INTO scene_objects (id, scene_id, node_id, item_id, owner_id, state, metadata)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                node_id = excluded.node_id,
+                item_id = excluded.item_id,
+                owner_id = excluded.owner_id,
+                state = excluded.state,
+                metadata = excluded.metadata
+        `).run(
+            obj.id,
+            obj.sceneId,
+            obj.nodeId || null,
+            obj.itemId,
+            obj.ownerId || null,
+            obj.state || 'active',
+            JSON.stringify(obj.metadata || {})
+        );
+    },
+    get(id: string) {
+        const row = db.prepare('SELECT * FROM scene_objects WHERE id = ?').get(id) as any;
+        if (!row) return null;
+        return {
+            id: row.id,
+            sceneId: row.scene_id,
+            nodeId: row.node_id,
+            itemId: row.item_id,
+            ownerId: row.owner_id,
+            state: row.state,
+            metadata: JSON.parse(row.metadata || '{}')
+        };
+    },
+    listForScene(sceneId: string) {
+        return db.prepare('SELECT * FROM scene_objects WHERE scene_id = ?').all(sceneId).map((row: any) => ({
+            id: row.id,
+            sceneId: row.scene_id,
+            nodeId: row.node_id,
+            itemId: row.item_id,
+            ownerId: row.owner_id,
+            state: row.state,
+            metadata: JSON.parse(row.metadata || '{}')
+        }));
+    },
+    remove(id: string) {
+        db.prepare('DELETE FROM scene_objects WHERE id = ?').run(id);
+    }
+};
+
+export const sceneLayoutsRepo = {
+    save(sceneId: string, layout: { nodes: any[]; edges: any[] }) {
+        db.prepare(`
+            INSERT INTO scene_layouts (scene_id, layout_json)
+            VALUES (?, ?)
+            ON CONFLICT(scene_id) DO UPDATE SET layout_json = excluded.layout_json
+        `).run(sceneId, JSON.stringify(layout));
+    },
+    get(sceneId: string): { sceneId: string; nodes: any[]; edges: any[] } | null {
+        const row = db.prepare('SELECT * FROM scene_layouts WHERE scene_id = ?').get(sceneId) as any;
+        if (!row) return null;
+        return {
+            sceneId: row.scene_id,
+            ...JSON.parse(row.layout_json)
+        };
+    }
+};
+
 export const characterRepo = {
     ensureSubject(subjectId: string, name: string): Character {
         const stmt = db.prepare(`

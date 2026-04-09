@@ -66,6 +66,46 @@ export interface ContextConfig {
     requiredFunctions?: string[];
     priority?: number;
     duration?: number;
+    requiresItem?: string;
+    requiresSceneObject?: string;
+}
+
+export interface CharacterItem {
+    characterId: string;
+    itemId: string;
+    state?: string;
+    charges?: number;
+    metadata?: Record<string, unknown>;
+}
+
+export interface SceneObject {
+    id: string;
+    sceneId: string;
+    nodeId?: string;
+    itemId: string;
+    ownerId?: string;
+    state?: string;
+    metadata?: Record<string, unknown>;
+}
+
+export interface SceneLayoutNode {
+    id: string;
+    label: string;
+    type?: string;
+    properties?: Record<string, unknown>;
+}
+
+export interface SceneLayoutEdge {
+    from: string;
+    to: string;
+    type?: string;
+    conditions?: Record<string, unknown>;
+}
+
+export interface SceneLayout {
+    sceneId: string;
+    nodes: SceneLayoutNode[];
+    edges: SceneLayoutEdge[];
 }
 
 export interface CompiledAction {
@@ -88,6 +128,8 @@ export interface CompiledAction {
 
     contextConfig?: ContextConfig;
     removeContexts?: string[];
+    requiresItem?: string;
+    requiresSceneObject?: string;
 }
 
 export interface EngineConfig {
