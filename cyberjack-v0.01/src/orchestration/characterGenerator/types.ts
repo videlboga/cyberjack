@@ -13,6 +13,8 @@ export interface LoreTagDefinition {
     personaHooks?: string[];
     narrative?: TagNarrative;
     category?: string;
+    coreModifiers?: Record<string, number>;
+    initialContexts?: string[];
 }
 
 export interface TagNarrative {
@@ -50,6 +52,13 @@ export interface GeneratedCharacterContext {
     narrative?: NarrativeSummary;
     originStatements?: string[];
     assetReasons?: string[];
+    baseModifiers?: Record<string, number>;
+    initialContexts?: string[];
+    baseProfile?: {
+        name: string;
+        age: string;
+        anatomy: string;
+    };
 }
 
 export interface NarrativeSummary {

@@ -51,9 +51,6 @@ function normalizeTag(raw: any): LoreTagDefinition | null {
     }
 
     const narrativeIdentity = ensureStringArray(raw.narrative?.identity);
-    if (!narrativeIdentity.length && text) {
-        narrativeIdentity.push(text);
-    }
 
     const narrativeHistory = ensureStringArray(raw.narrative?.history);
     const narrativeActivation = ensureStringArray(raw.narrative?.activation);
@@ -79,7 +76,9 @@ function normalizeTag(raw: any): LoreTagDefinition | null {
                       activation: narrativeActivation.length ? narrativeActivation : undefined
                   }
                 : undefined,
-        category: typeof raw.category === 'string' && raw.category.trim() ? raw.category.trim() : undefined
+        category: typeof raw.category === 'string' && raw.category.trim() ? raw.category.trim() : undefined,
+        coreModifiers: raw.coreModifiers,
+        initialContexts: Array.isArray(raw.initialContexts) ? raw.initialContexts : undefined
     };
 }
 

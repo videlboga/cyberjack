@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { activeConfig, updateConfig } from '../../prompts/config';
 import { generateCharacterContext } from '../../orchestration/characterGenerator/generator';
 import { composePromptSections } from '../../orchestration/characterGenerator/promptComposer';
-import { applyGeneratedContextToSillyTavern } from '../../adapters/sillyTavernManager';
 import { ensureGeneratedProfile } from '../../orchestration/characterGenerator/profileManager';
 
 export function getConfig(req: Request, res: Response) {
@@ -63,19 +62,7 @@ export async function getCharacterPrompt(req: Request, res: Response) {
         });
 
         let stUpdate: { worldInfoName: string } | null = null;
-        if (applyToSillyTavern) {
-            const personaForSt = sections.personaWithoutTraits || [activeConfig.character.identity, activeConfig.character.history].join('\n\n');
-            const scenarioForSt = [sections.historyText, sections.activationText].filter(Boolean).join('\n\n') || activeConfig.character.history;
-            stUpdate = await applyGeneratedContextToSillyTavern({
-                subjectId,
-                context,
-                personaText: personaForSt,
-                traitBlock: sections.traitBlock,
-                scenarioText: scenarioForSt,
-                instructions: activeConfig.character.formatInstructions
-            });
-        }
-        
+
         res.json({
             success: true,
             subjectId,

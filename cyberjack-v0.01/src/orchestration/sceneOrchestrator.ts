@@ -144,7 +144,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
 
 import { db } from '../infrastructure/db';
 import { chatMemoryRepo } from '../infrastructure/repositories';
-import { sendToSillyTavern, sendNarratorDescription } from '../adapters/sillyTavernAdapter';
+import { generateCharacterReply, generateNarratorReply } from '../adapters/llmAdapter';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { recordMemoryEvent } from '../services/memoryLayer';
 import { maybeSummarizeChat } from '../services/chatSummary';
@@ -215,7 +215,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
     const orchestration = orchestrateSceneActors(bundle);
     let narratorReaction: string | null = null;
     if (orchestration.narrator?.enabled && promptPayload.narratorPrompt) {
-        const narratorRes = await sendNarratorDescription(promptPayload.narratorPrompt);
+        const narratorRes = await generateNarratorReply(promptPayload.narratorPrompt);
         narratorReaction = narratorRes?.reaction || null;
     }
 
@@ -250,7 +250,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 userMsgOverride = observerOverride;
             }
 
-            const { reply, sentMessages } = await sendToSillyTavern(
+            const { reply, sentMessages } = await generateCharacterReply(
                 currentPayload,
                 userMsgOverride,
                 currentHistory

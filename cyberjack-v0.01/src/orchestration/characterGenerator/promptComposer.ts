@@ -53,16 +53,23 @@ export function composePromptSections(
         ? context.personaNotes.map((note, idx) => `${idx + 1}. ${note}`).join('\n')
         : '1. Черты характера не заданы.';
 
-    const identityText = identityParagraphs.filter(Boolean).join(' ');
-    const historyText = historyParagraphs.filter(Boolean).join('\n\n');
-    const activationText = activationParagraphs.filter(Boolean).join('\n\n');
+    const allHooks = new Set([...context.personaNotes, ...originParagraphs, ...assetParagraphs]);
+
+    const identityText = identityParagraphs.filter(p => !allHooks.has(p)).filter(Boolean).join(' ');
+    const historyText = historyParagraphs.filter(p => !allHooks.has(p)).filter(Boolean).join('\n\n');
+    const activationText = activationParagraphs.filter(p => !allHooks.has(p)).filter(Boolean).join('\n\n');
     const originText = originParagraphs.filter(Boolean).join('\n');
     const assetText = assetParagraphs.filter(Boolean).join('\n');
 
     const originBlock = originText ? `${originTitle}\n${originText}` : '';
     const assetBlock = assetText ? `${assetTitle}\n${assetText}` : '';
 
-    const personaWithoutTraits = [identityText, historyText, activationText]
+    let baseInfoBlock = '';
+    if (context.baseProfile) {
+        baseInfoBlock = `[Базовая информация]\n- Имя: ${context.baseProfile.name}\n- Возраст: ${context.baseProfile.age}\n- Анатомия: ${context.baseProfile.anatomy}`;
+    }
+
+    const personaWithoutTraits = [baseInfoBlock, identityText, historyText, activationText]
         .filter(Boolean)
         .join('\n\n');
 

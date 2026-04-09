@@ -19,6 +19,15 @@ const CORE_WORLD_TAGS = [
     'world_corporations'
 ] as const;
 
+const NAMES_POOL = ['Эли', 'Рен', 'Кай', 'Сайлас', 'Никс', 'Лира', 'Сет', 'Титан', 'Джун', 'Нейт', 'Рунис', 'Векс', 'Зейн', 'Мара', 'Иден', 'Нова'];
+const BODY_KNOWLEDGE_POOL = [
+    'Абсолютно не понимает процессы в своём теле. Воспринимает любую боль, мышечный спазм или удовольствие со страхом и слепым замешательством.',
+    'Слабое знание тела. Ориентируется лишь на базовые животные инстинкты — отдернуть руку от боли, сжаться при страхе.',
+    'Среднее знание собственного тела. Знает свои пределы выносливости, но совершенно не умеет контролировать мелкую моторику, дрожь или сбитое дыхание.',
+    'Хорошее чувство тела. Различает виды боли и стимуляции, умеет частично отключать восприятие или терпеть, сцепив зубы.',
+    'Острое телесное сознание. Детально осознает каждую мышцу, связку и сокращение. Способен к тонкому самоконтролю даже при перегрузке нервной системы.'
+];
+
 const CORE_TRAIT_IDS = [
     'trait_profile_observant',
     'trait_profile_pragmatic',
@@ -230,6 +239,7 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
             tag =>
                 tag.level !== 'world' &&
                 tag.level !== 'faction' &&
+                tag.level !== 'origin' &&
                 tag.category !== ASSET_CAUSE_CATEGORY
         )
         .flatMap(tag => tag.personaHooks || []);
@@ -250,8 +260,30 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         )
     );
 
+    const baseModifiers: Record<string, number> = {};
+    const initialContexts: string[] = [];
+    for (const t of tags) {
+        if (t.coreModifiers) {
+            for (const [k, v] of Object.entries(t.coreModifiers)) {
+                baseModifiers[k] = (baseModifiers[k] || 0) + v;
+            }
+        }
+        if (t.initialContexts) {
+            initialContexts.push(...t.initialContexts);
+        }
+    }
+    
+    const baseProfile = {
+        name: NAMES_POOL[Math.floor(rng() * NAMES_POOL.length)],
+        age: Math.floor(18 + rng() * 15).toString(),
+        anatomy: 'Голова, Лицо, Шея, Грудь, Спина, Левая рука, Правая рука, Губы, Ноги, Живот'
+    };
+
     return {
         tags,
+        baseModifiers,
+        initialContexts,
+        baseProfile,
         grouped,
         loreNotes,
         loreRefs,

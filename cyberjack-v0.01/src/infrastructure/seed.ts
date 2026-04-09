@@ -195,7 +195,13 @@ db.transaction(() => {
         { id: 'close_inspection', label: 'Относительно близкий осмотр', values: { intensity: 0.4, valence: -0.3, contact: 0.0, sharpness: 0.2, novelty: 0.4 } },
         { id: 'feint_strike', label: 'Ложный замах', values: { intensity: 0.7, valence: -0.5, contact: 0.0, sharpness: 0.9, novelty: 0.5 } },
         { id: 'pose_kneeling', label: 'Поза: На коленях', type: 'pose', tags: ['pose', 'dominance'], values: { intensity: 0.3, valence: -0.2, contact: 0.1, sharpness: 0.0, novelty: 0.2 }, contextConfig: { type: 'pose', occupiesPoints: ['global_pose', 'knees'], duration: -1 } },
-        { id: 'restraint_cuffs', label: 'Скованность: Наручники', type: 'restraint', tags: ['restraint', 'bdsm'], values: { intensity: 0.4, valence: -0.4, contact: 0.5, sharpness: 0.2, novelty: 0.2 }, contextConfig: { type: 'restraint', occupiesPoints: ['wrists_front'], duration: -1 } }
+        { id: 'restraint_cuffs', label: 'Скованность: Наручники', type: 'restraint', tags: ['restraint', 'bdsm'], values: { intensity: 0.4, valence: -0.4, contact: 0.5, sharpness: 0.2, novelty: 0.2 }, contextConfig: { duration: -1 } },
+        { id: 'context_defiant', label: 'Агрессивный бунт', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: 0.2, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
+        { id: 'context_fear_of_loss', label: 'Страх утраты', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0.1, valence: -0.2, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
+        { id: 'context_glitch_prone', label: 'Нестабильность имплантов', type: 'condition', tags: ['physical', 'condition'], values: { intensity: 0.1, valence: -0.1, contact: 0, sharpness: 0, novelty: 0.2 }, contextConfig: { duration: -1 } },
+        { id: 'context_sensitive_skin', label: 'Гиперестезия', type: 'condition', tags: ['physical', 'condition'], values: { intensity: 0.2, valence: 0, contact: 0.2, sharpness: 0.3, novelty: 0 }, contextConfig: { duration: -1 } },
+        { id: 'context_masochism', label: 'Мазохистская инверсия', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
+        { id: 'context_pleasure_burn', label: 'Ожог удовольствием', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: -0.1, contact: 0, sharpness: 0.1, novelty: 0 }, contextConfig: { duration: -1 } }
     ];
     for (const act of actions) {
         const valJson = { ...act.values, removeContexts: (act as any).removeContexts };

@@ -20,24 +20,15 @@ export function ensureGeneratedProfile(subjectId: string): StoredProfile {
     const context = generateCharacterContext({ seed: subjectId });
     const narrative = context.narrative || buildFallbackNarrative();
 
-    const hasGeneratedNarrative =
-        (narrative.identityParagraphs?.length || 0) > 0 ||
-        (narrative.historyParagraphs?.length || 0) > 0 ||
-        (narrative.activationParagraphs?.length || 0) > 0;
+    const hasGeneratedNarrative = true;
 
     const identityBlocks = narrative.identityParagraphs?.length
         ? narrative.identityParagraphs
-        : hasGeneratedNarrative
-        ? []
-        : [activeConfig.character.identity];
+        : [];
     const historyBlocks = narrative.historyParagraphs?.length
         ? narrative.historyParagraphs
-        : hasGeneratedNarrative
-        ? []
-        : [activeConfig.character.history];
-    const activationBlocks = narrative.activationParagraphs || [];
-
-    const sections = composePromptSections(context, {
+        : [];
+    const activationBlocks = narrative.activationParagraphs || [];    const sections = composePromptSections(context, {
         identity: activeConfig.character.identity,
         history: activeConfig.character.history,
         instructions: activeConfig.character.formatInstructions,
