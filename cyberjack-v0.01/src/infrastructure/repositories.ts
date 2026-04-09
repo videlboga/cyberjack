@@ -19,7 +19,11 @@ const mapRelation = (row: any): CharacterRelation => ({
     present: Boolean(row.present),
     canInteract: Boolean(row.can_interact),
     attitude: row.attitude,
+    openness: row.openness ?? 0,
+    plasticity: row.plasticity ?? 0,
     baselineAttitude: row.baseline_attitude,
+    baselineOpenness: row.baseline_openness,
+    baselinePlasticity: row.baseline_plasticity,
     target: row.target_id
         ? {
               id: row.target_id,
@@ -84,8 +88,8 @@ export const characterRelationRepo = {
         ).get(fromId, toId);
         if (existing) return mapRelation(existing);
         const stmt = db.prepare(`
-            INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, baseline_attitude)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, openness, plasticity, baseline_attitude, baseline_openness, baseline_plasticity)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
         stmt.run(
             fromId,
@@ -94,7 +98,11 @@ export const characterRelationRepo = {
             defaults?.present === false ? 0 : 1,
             defaults?.canInteract === false ? 0 : 1,
             defaults?.attitude ?? 50,
-            defaults?.baselineAttitude ?? defaults?.attitude ?? 50
+            defaults?.openness ?? 0,
+            defaults?.plasticity ?? 0,
+            defaults?.baselineAttitude ?? defaults?.attitude ?? 50,
+            defaults?.baselineOpenness ?? defaults?.openness ?? 0,
+            defaults?.baselinePlasticity ?? defaults?.plasticity ?? 0
         );
         return this.get(fromId, toId)!;
     },
@@ -115,29 +123,23 @@ export const characterRelationRepo = {
         const rows = stmt.all(fromId);
         return rows.map(mapRelation);
     },
-    updateAttitude(fromId: string, toId: string, attitude: number, options?: { baselineAttitude?: number }) {
+    updateAttitude(fromId: string, toId: string, attitude: number, options?: { baselineAttitude?: number, openness?: number, plasticity?: number }) {
+        this.ensure(fromId, toId);
         const stmt = db.prepare(`
-            INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, baseline_attitude)
-            VALUES (
-                ?, ?, 1, 1, 1, ?,
-                COALESCE(
-                    ?,
-                    (SELECT baseline_attitude FROM character_relations WHERE from_id = ? AND to_id = ?),
-                    ?
-                )
-            )
-            ON CONFLICT(from_id, to_id) DO UPDATE SET 
-                attitude = excluded.attitude,
-                baseline_attitude = COALESCE(excluded.baseline_attitude, character_relations.baseline_attitude)
+            UPDATE character_relations 
+            SET attitude = COALESCE(?, attitude),
+                baseline_attitude = COALESCE(?, baseline_attitude),
+                openness = COALESCE(?, openness),
+                plasticity = COALESCE(?, plasticity)
+            WHERE from_id = ? AND to_id = ?
         `);
         stmt.run(
-            fromId,
-            toId,
             attitude,
-            options?.baselineAttitude,
+            options?.baselineAttitude ?? null,
+            options?.openness ?? null,
+            options?.plasticity ?? null,
             fromId,
-            toId,
-            options?.baselineAttitude ?? attitude
+            toId
         );
     },
     updateFlags(fromId: string, toId: string, flags: Partial<Pick<CharacterRelation, 'knows' | 'present' | 'canInteract'>>) {
@@ -162,15 +164,17 @@ export const subjectRepo = {
         const baselineOpenness = state.baselineOpenness ?? state.openness;
         const baselinePlasticity = state.baselinePlasticity ?? state.plasticity;
         const baselineAttitude = state.baselineAttitude ?? state.attitude;
+        const preferences = state.preferences ?? '{}';
         const stmt = db.prepare(`
-            INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, preferences, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 sensitivity = excluded.sensitivity,
                 capacity = excluded.capacity,
                 openness = excluded.openness,
                 plasticity = excluded.plasticity,
                 attitude = excluded.attitude,
+                preferences = excluded.preferences,
                 baseline_sensitivity = excluded.baseline_sensitivity,
                 baseline_capacity = excluded.baseline_capacity,
                 baseline_openness = excluded.baseline_openness,
@@ -185,6 +189,7 @@ export const subjectRepo = {
             state.openness,
             state.plasticity,
             state.attitude,
+            preferences,
             baselineSensitivity,
             baselineCapacity,
             baselineOpenness,
@@ -206,6 +211,7 @@ export const subjectRepo = {
             openness: row.openness,
             plasticity: row.plasticity,
             attitude: row.attitude,
+            preferences: row.preferences || '{}',
             baselineSensitivity: row.baseline_sensitivity,
             baselineCapacity: row.baseline_capacity,
             baselineOpenness: row.baseline_openness,
@@ -238,29 +244,50 @@ export const pointStateRepo = {
     save(subjectId: string, pointId: string, state: SubjectPointState) {
         const baselineLocalSensitivity = state.baselineLocalSensitivity ?? state.localSensitivity;
         const baselineLocalAttitude = state.baselineLocalAttitude ?? state.localAttitude;
+        const baselineLocalOpenness = state.baselineLocalOpenness ?? state.localOpenness ?? 50;
         const stmt = db.prepare(`
-            INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, local_openness, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude, baseline_local_openness)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(subject_id, point_id) DO UPDATE SET
                 local_sensitivity = excluded.local_sensitivity,
                 local_attitude = excluded.local_attitude,
+                local_openness = excluded.local_openness,
                 familiarity = excluded.familiarity,
                 exposure_count = excluded.exposure_count,
                 baseline_local_sensitivity = excluded.baseline_local_sensitivity,
-                baseline_local_attitude = excluded.baseline_local_attitude
+                baseline_local_attitude = excluded.baseline_local_attitude,
+                baseline_local_openness = excluded.baseline_local_openness
         `);
         stmt.run(
             subjectId,
             pointId,
             state.localSensitivity,
             state.localAttitude,
+            state.localOpenness ?? 50,
             state.familiarity ?? 0,
             state.exposureCount ?? 0,
             baselineLocalSensitivity,
-            baselineLocalAttitude
+            baselineLocalAttitude,
+            baselineLocalOpenness
         );
     },
     
+    getAllForSubject(subjectId: string): SubjectPointState[] {
+        const stmt = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ?');
+        const rows = stmt.all(subjectId) as any[];
+        return rows.map((row: any) => ({
+            pointId: row.point_id,
+            localSensitivity: row.local_sensitivity,
+            localAttitude: row.local_attitude,
+            localOpenness: row.local_openness ?? 50,
+            familiarity: row.familiarity ?? 0,
+            exposureCount: row.exposure_count ?? 0,
+            baselineLocalSensitivity: row.baseline_local_sensitivity,
+            baselineLocalAttitude: row.baseline_local_attitude,
+            baselineLocalOpenness: row.baseline_local_openness
+        }));
+    },
+
     get(subjectId: string, pointId: string): SubjectPointState | null {
         const stmt = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ? AND point_id = ?');
         const row = stmt.get(subjectId, pointId) as any;
@@ -269,10 +296,12 @@ export const pointStateRepo = {
             pointId: row.point_id,
             localSensitivity: row.local_sensitivity,
             localAttitude: row.local_attitude,
+            localOpenness: row.local_openness ?? 50,
             familiarity: row.familiarity ?? 0,
             exposureCount: row.exposure_count ?? 0,
             baselineLocalSensitivity: row.baseline_local_sensitivity,
-            baselineLocalAttitude: row.baseline_local_attitude
+            baselineLocalAttitude: row.baseline_local_attitude,
+            baselineLocalOpenness: row.baseline_local_openness
         };
     }
 };
@@ -399,21 +428,23 @@ export const stateTriggersRepo = {
 };
 
 export const activeContextsRepo = {
-    add(id: string, subjectId: string, actionId: string, duration: number = -1) {
+    add(id: string, subjectId: string, actionId: string, duration: number = -1, pointId: string | null = null, initiatorId?: string | null) {
         const stmt = db.prepare(`
-            INSERT INTO active_contexts (id, subject_id, action_id, duration)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO active_contexts (id, subject_id, action_id, duration, point_id, initiator_id)
+            VALUES (?, ?, ?, ?, ?, ?)
         `);
-        stmt.run(id, subjectId, actionId, duration);
+        stmt.run(id, subjectId, actionId, duration, pointId, initiatorId || null);
     },
-    getAllForSubject(subjectId: string): { id: string; actionId: string; ticksActive: number; duration: number }[] {
-        const stmt = db.prepare('SELECT id, action_id, coalesce(ticks_active, 0) as ticks_active, duration FROM active_contexts WHERE subject_id = ?');
+    getAllForSubject(subjectId: string): { id: string; actionId: string; ticksActive: number; duration: number; pointId: string | null; initiatorId?: string | null }[] {
+        const stmt = db.prepare('SELECT id, action_id, coalesce(ticks_active, 0) as ticks_active, duration, point_id, initiator_id FROM active_contexts WHERE subject_id = ?');
         const rows = stmt.all(subjectId) as any[];
         return rows.map(r => ({
             id: r.id,
             actionId: r.action_id,
             ticksActive: Number(r.ticks_active) || 0,
-            duration: Number(r.duration) || -1
+            duration: Number(r.duration) || -1,
+            pointId: r.point_id,
+            initiatorId: r.initiator_id || null
         }));
     },
     incrementTicks(subjectId: string, amount: number = 1) {

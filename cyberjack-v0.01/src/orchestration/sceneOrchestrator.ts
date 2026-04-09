@@ -1,3 +1,4 @@
+import { runGameTick } from './runGameTick';
 import {
     TickBundle,
     OrchestratedTurn,
@@ -6,7 +7,8 @@ import {
     CharacterRelation
 } from '../domain/types';
 import { activeConfig } from '../prompts/config';
-import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo, pointStateRepo, sceneRepo } from '../infrastructure/repositories';
+import { ActionScorer } from './actionScorer';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -123,13 +125,73 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
                 kind: 'reactive',
                 reason: describeTone(relationToCalibrator?.attitude)
             });
-        } else if (sampleProbability(proactiveProb)) {
-            actorDecisions.push({
-                actorId,
-                kind: 'proactive',
-                reason: describeTone(relationToCalibrator?.attitude)
-            });
-        }
+        } else {
+            // Adjust proactive probability based on actor's available Action Points (AP).
+            // Чем меньше AP, тем ниже шанс проявить инициативу.
+            const actorResources = resourceRepo.get(actorId);
+            let apNorm = 1;
+            if (actorResources && actorResources.resources) {
+                const curAP = Number(actorResources.resources.actionPoints ?? 0);
+                const maxAP = Number(actorResources.resources.maxActionPoints ?? 100);
+                apNorm = clamp01(curAP / Math.max(1, maxAP));
+            }
+
+            const effectiveProactiveProb = proactiveProb * apNorm;
+
+            if (sampleProbability(effectiveProactiveProb)) {
+                // Если персонаж хочет действовать проактивно, узнаем ЧТО он хочет сделать
+                let proactiveReason = describeTone(relationToCalibrator?.attitude);
+                let decidedAction = undefined;
+
+                if (actorId !== playerId) {
+                    // Пытаемся найти лучшую цель из присутствующих
+                    const possibleTargets = presentSubjectIds.filter(id => id !== actorId);
+                    const targetId = possibleTargets.length > 0 
+                        ? possibleTargets[Math.floor(Math.random() * possibleTargets.length)] 
+                        : (actorId === subjectId ? playerId : subjectId);
+                    
+                    if (targetId) {
+                        const targetRelation = characterRelationRepo.get(actorId, targetId);
+                        proactiveReason = describeTone(targetRelation?.attitude || relationToCalibrator?.attitude);
+
+                        const targetPointRecords = pointStateRepo.getAllForSubject(targetId);
+                        const targetPoints = targetPointRecords.map(p => p.pointId);
+                        if (targetPoints.length === 0) targetPoints.push('general');
+
+                        const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints);
+
+                        const scene = sceneRepo.get(eventSceneId);
+                        const actorResources = resourceRepo.get(actorId);
+
+                        const affordable = actions.filter(a => {
+                            const sceneCost = scene?.actionCosts?.[a.actionId];
+                            let requiredAP = 0;
+                            if (sceneCost) {
+                                requiredAP = Number(sceneCost.actionPoints ?? sceneCost.ap ?? sceneCost.apCost ?? sceneCost.action_points ?? 0);
+                            }
+                            const curAP = Number(actorResources?.resources?.actionPoints ?? 0);
+                            return !(requiredAP > 0 && curAP < requiredAP);
+                        });
+
+                        const bestAction = affordable.find(a => a.score > 0);
+                        if (bestAction) {
+                            const targetChar = subjectRepo.get(targetId);
+                            const targetName = targetChar?.name || targetId;
+                            const preset = presetRepo.getActionPreset(bestAction.actionId);
+                            
+                            decidedAction = { ...bestAction, targetId };
+                            proactiveReason = `Отношение к ${targetName}: ${proactiveReason}. Цель инициативы: применить действие "${preset?.label || bestAction.actionId}" к анатомической зоне "${bestAction.pointId}" персонажа ${targetName} (Мотивация: ${Math.round(bestAction.score)})`;
+                        }
+                    }
+                }
+
+                actorDecisions.push({
+                    actorId,
+                    kind: 'proactive',
+                    reason: proactiveReason,
+                    mechanicalAction: decidedAction
+                });
+            }        }
     }
 
     const narrator: NarratorDecision | undefined = prompt.narratorPrompt
@@ -213,6 +275,19 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
     }));
 
     const orchestration = orchestrateSceneActors(bundle);
+
+    if (actionId === 'wait') {
+        const hasProactive = orchestration.actorDecisions.some(d => d.kind === 'proactive');
+        if (!hasProactive) {
+            orchestration.actorDecisions = [];
+        } else {
+            orchestration.actorDecisions = orchestration.actorDecisions.filter(d => d.kind === 'proactive');
+        }
+        if (orchestration.narrator) {
+            orchestration.narrator.enabled = false;
+        }
+    }
+
     let narratorReaction: string | null = null;
     if (orchestration.narrator?.enabled && promptPayload.narratorPrompt) {
         const narratorRes = await generateNarratorReply(promptPayload.narratorPrompt);
@@ -228,7 +303,8 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             let currentPayload = promptPayload;
             let currentHistory = chatHistory;
             let userMsgOverride = autoUserMessage || actionLabelMessage || undefined;
-            if (narratorReaction) {
+
+                if (narratorReaction) {
                 userMsgOverride = userMsgOverride ? `${userMsgOverride}\n\n[Твоя физическая реакция (Рассказчик)]: ${narratorReaction}` : `[Твоя физическая реакция (Рассказчик)]: ${narratorReaction}`;
             }
 
@@ -250,16 +326,25 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 userMsgOverride = observerOverride;
             }
 
-            const { reply, sentMessages } = await generateCharacterReply(
+            let structuredReply = { speech: '' };
+            let sentMessages: any = null;
+
+            if (decision.kind === "proactive" && decision.reason) {
+                userMsgOverride = userMsgOverride 
+                    ? `${userMsgOverride}\n\n[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`
+                    : `[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`;
+            }
+
+            const res = await generateCharacterReply(
                 currentPayload,
                 userMsgOverride,
                 currentHistory
             );
+            sentMessages = res.sentMessages;
+            structuredReply = res.reply && typeof res.reply === 'object'
+                ? (res.reply as { speech: string })
+                : { speech: String(res.reply || '') };
 
-            const structuredReply =
-                reply && typeof reply === 'object'
-                    ? (reply as { speech: string })
-                    : { speech: String(reply || '') };
 
             return { decision, structuredReply, sentMessages };
         });
@@ -267,6 +352,34 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         const results = await Promise.all(actorPromises);
 
         for (const { decision, structuredReply, sentMessages } of results) {
+            if (decision.kind === 'proactive' && decision.mechanicalAction) {
+                // Execute the mechanical game tick for the proactive action
+                try {
+                    await runGameTick({
+                        subjectId: decision.mechanicalAction.targetId || subjectId,
+                        pointId: decision.mechanicalAction.pointId,
+                        playerId: decision.actorId,
+                        sceneId: eventId,
+                        presetId: decision.mechanicalAction.actionId,
+                        textMessage: structuredReply.speech
+                    });
+                    const actionLabel = presetRepo.getActionPreset(decision.mechanicalAction.actionId)?.label || decision.mechanicalAction.actionId;
+                    const actorName = subjectRepo.get(decision.actorId)?.name || decision.actorId;
+                    const tgtId = decision.mechanicalAction.targetId || subjectId;
+                    const targetName = subjectRepo.get(tgtId)?.name || tgtId;
+                    const pointLabel = presetRepo.getPointPreset(decision.mechanicalAction.pointId)?.label || decision.mechanicalAction.pointId;
+                    const notice = `*(Сцена: ${actorName} применяет ${actionLabel} к ${targetName} (${pointLabel}))*`;
+                    
+                    if (tgtId !== decision.actorId) {
+                        chatMemoryRepo.append(tgtId, 'user', notice);
+                    }
+                    chatMemoryRepo.append(decision.actorId, 'user', notice);
+
+                } catch (err) {
+                    console.error('Failed to run proactive tick for NPC:', err);
+                }
+            }
+
             actorReplies.push({
                 actorId: decision.actorId,
                 kind: decision.kind,

@@ -24,7 +24,7 @@ Cyberjack симулирует реакцию субъекта на воздей
 - **SubjectPointState** (`subject_point_states`): локальная чувствительность/отношение, знакомство, счётчик экспозиции.
 - **ActionPreset** (`action_presets`): базовый вектор, теги, `contextConfig` (тип, занимаемые слоты, длительность, эксклюзивность, приоритет, блокировки/баффы).
 - **Inventory / Equipment**. Каждый персонаж может владеть объектами (например, “электрошокер”, “полевой набор фиксаторов”). Такие предметы дают доступ к действиям вне зависимости от сцены (или позволяют накладывать контексты). Для этого нужна таблица `character_items` (`character_id`, `item_id`, `state`, `charges`, `metadata`). Кроме того, сцена может содержать стационарные объекты (`scene_objects`: `scene_id`, `node_id`, `item_id`, `owner_id`, `metadata`) — например, “капсула сенсорной депривации” в секторе лаборатории. Сценарий использует эти данные, чтобы расширять `scene_layouts` и набор доступных действий.
-- **ActiveContext** (`active_contexts`): применённые позы/состояния/экипировка. Хранит `actionId`, длительность, счётчик тиков.
+- **ActiveContext** (`active_contexts`): применённые позы/состояния/экипировка. Хранит `actionId`, длительность, счётчик тиков, а также опциональный `pointId` для локальных модификаторов кожи/конечностей.
 - **Scene** (`scenes`): список допустимых действий, стоимость ресурсов, правила переходов, список слотов, персонажи (`scene_characters`, поле `slot_id`).
 - **PlayerState** (`players`): ресурсы, используются для списания стоимости действий.
 - **Event Logs** (`event_logs`): полный след действий для диаграмм, промптов и памяти.
@@ -153,7 +153,7 @@ Cyberjack симулирует реакцию субъекта на воздей
 - **subject_point_states** — `{ subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_* }`.
 - **action_presets** — `{ id PK, label, values_json, type, tags, context_config_json }`.
 - **point_presets** — `{ id PK, label, values_json, parent_id, provides_functions, tags }` (иерархия анатомии).
-- **active_contexts** — `{ id PK, subject_id, action_id, duration, ticks_active }` — источник для ContextManager.
+- **active_contexts** — `{ id PK, subject_id, action_id, duration, ticks_active, point_id }` — источник для ContextManager.
 - **scenes** — `{ id PK, available_actions JSON, action_costs JSON, transitions JSON, description, slots JSON }`.
 - **scene_characters** — `{ scene_id, character_id, role, can_act, presence_state, slot_id }` — связывает персонажей со сценой и их позициями.
 - **scene_layouts** — `{ scene_id PK, layout_json TEXT }` — граф плана помещения. `layout_json` содержит `nodes` (идентификатор, подписи, тип слота, произвольные свойства) и `edges` (парные связи/проходы с типами), а также опциональные правила (например, “доступ только с ключом”, “перегородка закрыта”). `scenes.slots` и `scene_characters.slot_id` должны ссылаться на `nodes.id`, чтобы сценарий мог проверять соседство и перемещения по карте.

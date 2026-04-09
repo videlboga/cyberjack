@@ -4,6 +4,7 @@ export interface SubjectCoreState {
     openness: number;
     plasticity: number;
     attitude: number;
+    preferences?: string; // JSON string of preferences (points, actions, contexts)
     baselineSensitivity?: number;
     baselineCapacity?: number;
     baselineOpenness?: number;
@@ -29,7 +30,11 @@ export interface CharacterRelation {
     present: boolean;
     canInteract: boolean;
     attitude: number;
+    openness?: number;
+    plasticity?: number;
     baselineAttitude?: number;
+    baselineOpenness?: number;
+    baselinePlasticity?: number;
     target?: Character;
 }
 
@@ -37,10 +42,12 @@ export interface SubjectPointState {
     pointId: string;
     localSensitivity: number;
     localAttitude: number;
+    localOpenness?: number;
     familiarity?: number;
     exposureCount?: number;
     baselineLocalSensitivity?: number;
     baselineLocalAttitude?: number;
+    baselineLocalOpenness?: number;
 }
 
 export interface ActionSourceInfo {

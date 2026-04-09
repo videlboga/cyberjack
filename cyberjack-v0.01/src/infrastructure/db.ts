@@ -26,7 +26,11 @@ db.exec(`
     present INTEGER DEFAULT 1,
     can_interact INTEGER DEFAULT 1,
     attitude REAL NOT NULL DEFAULT 50,
+    openness REAL DEFAULT 0,
+    plasticity REAL DEFAULT 0,
     baseline_attitude REAL,
+    baseline_openness REAL,
+    baseline_plasticity REAL,
     PRIMARY KEY (from_id, to_id),
     FOREIGN KEY (from_id) REFERENCES characters(id),
     FOREIGN KEY (to_id) REFERENCES characters(id)
@@ -42,6 +46,7 @@ db.exec(`
     openness REAL NOT NULL,
     plasticity REAL NOT NULL,
     attitude REAL NOT NULL,
+    preferences TEXT DEFAULT '{}',
     baseline_sensitivity REAL,
     baseline_capacity REAL,
     baseline_openness REAL,
@@ -54,10 +59,12 @@ db.exec(`
     point_id TEXT NOT NULL,
     local_sensitivity REAL NOT NULL,
     local_attitude REAL NOT NULL,
+    local_openness REAL DEFAULT 50,
     familiarity REAL DEFAULT 0,
     exposure_count REAL DEFAULT 0,
     baseline_local_sensitivity REAL,
     baseline_local_attitude REAL,
+    baseline_local_openness REAL,
     PRIMARY KEY (subject_id, point_id)
   );
 
@@ -171,15 +178,26 @@ safeAddColumn('subject_point_states', 'familiarity', 'REAL DEFAULT 0');
 safeAddColumn('subject_point_states', 'exposure_count', 'REAL DEFAULT 0');
 safeAddColumn('subject_point_states', 'baseline_local_sensitivity', 'REAL');
 safeAddColumn('subject_point_states', 'baseline_local_attitude', 'REAL');
+safeAddColumn('subject_point_states', 'local_openness', 'REAL DEFAULT 50');
+safeAddColumn('subject_point_states', 'baseline_local_openness', 'REAL');
+
 safeAddColumn('scenes', 'action_costs', "TEXT DEFAULT '{}'");
 safeAddColumn('scenes', 'transitions', "TEXT DEFAULT '[]'");
+
 safeAddColumn('characters', 'current_scene_id', 'TEXT');
+
 safeAddColumn('subjects', 'baseline_sensitivity', 'REAL');
 safeAddColumn('subjects', 'baseline_capacity', 'REAL');
 safeAddColumn('subjects', 'baseline_openness', 'REAL');
 safeAddColumn('subjects', 'baseline_plasticity', 'REAL');
 safeAddColumn('subjects', 'baseline_attitude', 'REAL');
+safeAddColumn('subjects', 'preferences', "TEXT DEFAULT '{}'");
+
+safeAddColumn('character_relations', 'openness', 'REAL DEFAULT 0');
+safeAddColumn('character_relations', 'plasticity', 'REAL DEFAULT 0');
 safeAddColumn('character_relations', 'baseline_attitude', 'REAL');
+safeAddColumn('character_relations', 'baseline_openness', 'REAL');
+safeAddColumn('character_relations', 'baseline_plasticity', 'REAL');
 
 db.exec(`
   UPDATE subjects
@@ -193,10 +211,25 @@ db.exec(`
 db.exec(`
   UPDATE subject_point_states
   SET baseline_local_sensitivity = COALESCE(baseline_local_sensitivity, local_sensitivity),
-      baseline_local_attitude = COALESCE(baseline_local_attitude, local_attitude)
+      baseline_local_attitude = COALESCE(baseline_local_attitude, local_attitude),
+      baseline_local_openness = COALESCE(baseline_local_openness, local_openness)
 `);
 
 db.exec(`
   UPDATE character_relations
-  SET baseline_attitude = COALESCE(baseline_attitude, attitude)
+  SET baseline_attitude = COALESCE(baseline_attitude, attitude),
+      baseline_openness = COALESCE(baseline_openness, openness),
+      baseline_plasticity = COALESCE(baseline_plasticity, plasticity)
 `);
+
+try {
+  db.exec(`ALTER TABLE active_contexts ADD COLUMN point_id TEXT`);
+} catch (e) {
+  // Ignore if column already exists
+}
+
+try {
+  db.exec(`ALTER TABLE active_contexts ADD COLUMN initiator_id TEXT`);
+} catch (e) {
+  // Ignore if column already exists
+}

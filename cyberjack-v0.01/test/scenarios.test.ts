@@ -136,7 +136,7 @@ describe('Advanced Scenarios and Multi-Character Proactivity', () => {
         });
         expect(tick2.output.nextCore.capacity).not.toEqual(state1.capacity);
 
-        activeContextsRepo.add('test_ctx_id', sub, 'act_c', 5);
+    activeContextsRepo.add('test_ctx_id', sub, 'act_c', 5, null, null);
         const tick3 = await runGameTick({
             subjectId: sub,
             playerId,

@@ -5,7 +5,10 @@ resourceRepo.save({
     id: 'PL-1',
     resources: {
         'strain': 0,
-        'credits': 1000
+        'credits': 1000,
+        // Action Points: current and maximum
+        'actionPoints': 20,
+        'maxActionPoints': 100
     }
 });
 console.log('Done! Player and resources created.');

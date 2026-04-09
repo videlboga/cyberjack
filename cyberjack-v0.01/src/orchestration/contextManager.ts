@@ -3,12 +3,12 @@ import { CompiledAction } from '../domain/types';
 import { randomUUID } from 'crypto';
 
 export class ContextManager {
-    static applyContext(subjectId: string, actionId: string, action: CompiledAction) {
+    static applyContext(subjectId: string, actionId: string, action: CompiledAction, pointId?: string, initiatorId?: string | null) {
         if (!action.contextConfig) return;
 
         const config = action.contextConfig;
         const currentContexts = activeContextsRepo.getAllForSubject(subjectId);
-        
+
         for (const pt of config.occupiesPoints || []) {
             for (const ctx of currentContexts) {
                 const existingAction = presetRepo.getActionPreset(ctx.actionId);
@@ -17,13 +17,13 @@ export class ContextManager {
                         return; // Blocked by higher priority
                     }
                     if (config.exclusiveWithinPoint) {
-                        activeContextsRepo.removeByActionId(subjectId, existingAction.actionKey);
+                        activeContextsRepo.removeByActionId(subjectId, existingAction.actionKey || existingAction.id);
                     }
                 }
             }
         }
-        
-        activeContextsRepo.add(randomUUID(), subjectId, actionId, config.duration || -1);
+
+        activeContextsRepo.add(randomUUID(), subjectId, actionId, config.duration || -1, pointId, initiatorId);
     }
     
     static processTick(subjectId: string) {

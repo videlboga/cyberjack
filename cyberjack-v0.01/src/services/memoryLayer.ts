@@ -28,7 +28,11 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
             parts.push(`Калибратор сказал: "${input.userText}"`);
         }
     } else {
-        parts.push(`Ко мне применили действие: "${actionLabel}"`);
+        if (input.bundle.compiledAction.actionKey !== 'wait') {
+            parts.push(`Ко мне применили действие: "${actionLabel}"`);
+        } else {
+            parts.push(`Время шло, Калибратор просто наблюдал`);
+        }
     }
 
     if (input.reactionText) {

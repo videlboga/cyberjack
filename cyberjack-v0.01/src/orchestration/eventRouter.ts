@@ -38,7 +38,7 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
         playerId: payload.playerId || 'PL-1',
         pointId,
         sceneId: payload.sceneId || 'lab',
-        presetId: payload.presetId || 'verbal_pressure',
+        presetId: payload.presetId || payload.actionId || 'verbal_pressure',
         playerIntensity: payload.intensity !== undefined ? payload.intensity : 1.0,
         dynamicModifiers,
         eventType: payload.eventType,

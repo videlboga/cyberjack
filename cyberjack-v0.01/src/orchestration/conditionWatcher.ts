@@ -5,6 +5,7 @@ import { ContextManager } from './contextManager';
 export interface TriggerRule {
     code: string;
     description: string;
+    pointSpecific?: boolean; // If true, this condition binds to the specific pointId being interacted with
     check: (core: SubjectCoreState, point: SubjectPointState) => boolean;
     requiredTicks: number; // 0 for instant effects, > 0 for chronic
     actionPresetId: string; // The active context to grant
@@ -81,33 +82,55 @@ export const STATE_RULES: TriggerRule[] = [
     },
     {
         code: 'hyperesthesia',
-        description: 'Гиперестезия',
+        description: 'Глобальная Гиперестезия',
         check: (core) => core.sensitivity >= 85,
         requiredTicks: 0,
         actionPresetId: 'effect_hyperesthesia',
+        removeOnFail: true
+    },
+    {
+        code: 'local_hyperesthesia',
+        description: 'Локальная Гиперестезия (Точка)',
+        pointSpecific: true,
+        check: (core, point) => point.localSensitivity >= 85,
+        requiredTicks: 0,
+        actionPresetId: 'effect_local_hyperesthesia',
+        removeOnFail: true
+    },
+    {
+        code: 'local_numbness',
+        description: 'Локальное Онемение (Точка)',
+        pointSpecific: true,
+        check: (core, point) => point.localSensitivity <= 10,
+        requiredTicks: 0,
+        actionPresetId: 'effect_local_numbness',
         removeOnFail: true
     }
 ];
 
 export class ConditionWatcher {
-    static evaluate(subjectId: string, core: SubjectCoreState, point: SubjectPointState) {
+    static evaluate(subjectId: string, pointId: string | null, core: SubjectCoreState, point: SubjectPointState) {
         const activeContexts = activeContextsRepo.getAllForSubject(subjectId);
-        
+
         for (const rule of STATE_RULES) {
             const isConditionMet = rule.check(core, point);
-            const hasContext = activeContexts.some(c => c.actionId === rule.actionPresetId);
+            // If the rule is point-specific, ensure we match the pointId as well
+            const hasContext = activeContexts.some(c => 
+                c.actionId === rule.actionPresetId && 
+                (!rule.pointSpecific || c.pointId === pointId)
+            );
             
+            // To separate triggers by point, compound the trigger code
+            const triggerCode = rule.pointSpecific && pointId ? `${rule.code}_${pointId}` : rule.code;
+
             if (isConditionMet) {
-                const currentTicks = stateTriggersRepo.increment(subjectId, rule.code, 1);
-                
-                // If it's an instant trigger and we just hit >= 0 ticks (well, instantly), or chronic reaching threshold
+                const currentTicks = stateTriggersRepo.increment(subjectId, triggerCode, 1);
+
                 if (currentTicks >= rule.requiredTicks) {
                     if (!hasContext || (rule.requiredTicks > 0 && currentTicks === rule.requiredTicks)) {
-                        // Apply the context (we don't want to re-apply instant every tick unless it needs refresh, but ContextManager might spam it if we do)
                         if (!hasContext) {
                             const preset = presetRepo.getActionPreset(rule.actionPresetId);
                             if (preset) {
-                                // temporarily patch the duration if rule specifies it
                                 const originalDuration = preset.contextConfig?.duration;
                                 if (preset.contextConfig && rule.durationOnTrigger !== undefined) {
                                     preset.contextConfig.duration = rule.durationOnTrigger;
@@ -118,15 +141,15 @@ export class ConditionWatcher {
                                         duration: rule.durationOnTrigger ?? -1
                                     };
                                 }
-                                
-                                ContextManager.applyContext(subjectId, rule.actionPresetId, preset);
-                                
-                                const narrative = `[Состояние] Активация: ${rule.description}`;
-                                eventLogRepo.append(subjectId, 'system_trigger', { 
-                                    presetId: 'system_trigger', action: null, actionLabel: narrative, narrative 
-                                }, { triggeredRule: rule.code });
-                                
-                                // Restore preset
+
+                                const applyPointId = rule.pointSpecific ? pointId : undefined;
+                                ContextManager.applyContext(subjectId, rule.actionPresetId, preset, applyPointId || undefined);
+
+                                const narrative = `[Состояние] Активация: ${rule.description}${rule.pointSpecific ? ` (${pointId})` : ''}`;
+                                eventLogRepo.append(subjectId, 'system_trigger', {
+                                    presetId: 'system_trigger', action: null, actionLabel: narrative, narrative
+                                }, { triggeredRule: triggerCode });
+
                                 if (preset.contextConfig && originalDuration !== undefined) {
                                     preset.contextConfig.duration = originalDuration;
                                 }
@@ -135,18 +158,25 @@ export class ConditionWatcher {
                     }
                 }
             } else {
-                // Condition broken
-                const currentTicks = stateTriggersRepo.get(subjectId, rule.code);
+                const currentTicks = stateTriggersRepo.get(subjectId, triggerCode);
                 if (currentTicks > 0) {
-                    stateTriggersRepo.reset(subjectId, rule.code);
+                    stateTriggersRepo.reset(subjectId, triggerCode);
                 }
-                
+
                 if (rule.removeOnFail && hasContext) {
-                    activeContextsRepo.removeByActionId(subjectId, rule.actionPresetId);
-                    const narrative = `[Состояние] Снятие: ${rule.description}`;
-                    eventLogRepo.append(subjectId, 'system_trigger', { 
-                        presetId: 'system_trigger', action: null, actionLabel: narrative, narrative 
-                    }, { clearedRule: rule.code });
+                    // Need to potentially filter by pointId when removing.
+                    const contextToRemove = activeContexts.find(c => 
+                        c.actionId === rule.actionPresetId && 
+                        (!rule.pointSpecific || c.pointId === pointId)
+                    );
+                    
+                    if (contextToRemove) {
+                        activeContextsRepo.remove(contextToRemove.id);
+                        const narrative = `[Состояние] Снятие: ${rule.description}${rule.pointSpecific ? ` (${pointId})` : ''}`;
+                        eventLogRepo.append(subjectId, 'system_trigger', {
+                            presetId: 'system_trigger', action: null, actionLabel: narrative, narrative
+                        }, { clearedRule: triggerCode });
+                    }
                 }
             }
         }

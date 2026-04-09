@@ -176,6 +176,8 @@ db.transaction(() => {
         { id: 'effect_suggestibility', label: 'Смещение контроля', type: 'condition', tags: ['condition', 'submissive'], values: { valence: 0.15, sharpness_mult: 0.8 }, contextConfig: { duration: -1, occupiesPoints: [] } },
         { id: 'effect_active_defiance', label: 'Активное Отторжение', type: 'condition', tags: ['condition', 'defiance'], values: { intensity_mult: 0.8, valence: -0.1 }, contextConfig: { duration: -1, occupiesPoints: [] } },
         { id: 'effect_hyperesthesia', label: 'Гиперестезия', type: 'condition', tags: ['condition', 'hyperesthesia'], values: { intensity_mult: 1.3, sharpness_mult: 1.1 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_local_hyperesthesia', label: 'Локальная Гиперестезия', type: 'condition', tags: ['condition', 'hyperesthesia', 'local'], values: { intensity_mult: 1.5, sharpness_mult: 1.2 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_local_numbness', label: 'Локальное Онемение', type: 'condition', tags: ['condition', 'numbness', 'local'], values: { intensity_mult: 0.1, sharpness_mult: 0.1, contact_mult: 0.5 }, contextConfig: { duration: -1, occupiesPoints: [] } },
 
         // Standard actions
         { id: 'gentle_stroke', label: 'Мягкое поглаживание', values: { intensity: 0.2, valence: 0.6, contact: 0.4, sharpness: 0.1, novelty: 0.2 } },

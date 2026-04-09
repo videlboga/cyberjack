@@ -123,7 +123,7 @@ export const processTick = async (req: Request, res: Response) => {
         // Wait, Context overrides should really be inside RUN GAME TICK! But for now we just handle it via Orchestrator here cleanly.
         let promptDirty = false;
         const immediateNotes: string[] = [];
-        let suppressActionNarrative = false;
+        let suppressActionNarrative = actionId === 'wait';
         const hasUserText = Boolean(baseUserMessage);
         const actorCharacter = characterRepo.ensureCharacter(playerId, playerId === 'PL-1' ? 'Калибратор' : playerId);
         const actionNarrative = describeActionNarrative(actionId, actionLabel, actorCharacter.name || 'Калибратор', pointLabel, pointIdUsed);

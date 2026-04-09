@@ -51,7 +51,7 @@ function createTestChar() {
             const exists = db.prepare('SELECT id FROM action_presets WHERE id = ?').get(contextId);
             if (exists) {
                 const uid = `ctx-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-                activeContextsRepo.add(uid, subjectId, contextId, -1);
+                activeContextsRepo.add(uid, subjectId, contextId, -1, null, null);
                 console.log(`Added Context: ${contextId}`);
             } else {
                 console.log(`Context action_preset ${contextId} NOT FOUND in DB, skipping...`);

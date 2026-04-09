@@ -3,7 +3,6 @@ import { randomUUID } from 'crypto';
 import { loadTickState } from './loadTickState';
 import { saveTickState } from './saveTickState';
 import { compileAction } from '../compiler/compileAction';
-import { applyDynamicContexts } from '../compiler/dynamicModifiers';
 import { runTick } from '../engine/runTick';
 import { eventQueries } from '../infrastructure/eventQueries';
 import { activeContextsRepo, resourceRepo, sceneRepo, presetRepo, eventLogRepo } from '../infrastructure/repositories';
@@ -46,7 +45,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         throw new Error(validation.errorReason || `Action "${payload.presetId}" blocked by scenario.`);
     }
 
-    const actionCosts = state.scene.actionCosts?.[payload.presetId];
+    const actionCosts = state.scene.actionCosts?.[payload.presetId] || { actionPoints: 15 };
     if (actionCosts && Object.keys(actionCosts).length) {
         try {
             const nextResources = applyResourceCosts(state.resources, actionCosts);
@@ -63,7 +62,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const history = eventQueries.getRecentLogs(payload.subjectId, 5);
     
     // 4. Compile Action Vector
-    const activeContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
+    const allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
+    const applicableContexts = allContexts.filter(c => !c.pointId || c.pointId === payload.pointId);
 
     let compiledAction = compileAction({
         presetId: payload.presetId,
@@ -72,12 +72,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         history: history,
         dynamicModifiers: payload.dynamicModifiers,
         sourceText: payload.textMessage,
-        parserVersion: payload.parserVersion, activeContexts: activeContexts
+        parserVersion: payload.parserVersion, 
+        activeContexts: applicableContexts
     });
 
     // 4.5 Apply Virtual Contexts (Mental and Body point overloads)
     const baseAction = (compiledAction as any)._baseAction;
-    compiledAction = applyDynamicContexts(compiledAction, state.core, state.point);
     (compiledAction as any)._baseAction = baseAction || compiledAction;
 
     const commandIntent = payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent;
@@ -116,7 +116,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
         let targetCtxId: string | undefined;
         if (commandIntent.type === 'change_pose') targetCtxId = commandIntent.targetPoseId;
-        else if (commandIntent.type === 'activate_context') targetCtxId = commandIntent.targetContextId;
+    else if (commandIntent.type === 'activate_context') targetCtxId = commandIntent.targetContextId;
         else if (commandIntent.type === 'deactivate_context') {
             const deactivateId = commandIntent.targetContextId;
             const actionPreset = presetRepo.getActionPreset(deactivateId);
@@ -129,14 +129,16 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             }
         }
 
-        if (targetCtxId) {
+                if (targetCtxId) {
             const actionPreset = presetRepo.getActionPreset(targetCtxId);
             if (actionPreset && actionPreset.contextConfig) {
                 const requiredCompliance = (actionPreset.contextConfig.priority || 1) * 20;
                 const currentCompliance = (engineOutput.nextCore.plasticity || 0) + (engineOutput.nextCore.openness || 0) * 0.5 + (engineOutput.nextCore.attitude || 0) * 0.5;
                 
                 if (currentCompliance >= requiredCompliance) {
-                    ContextManager.applyContext(payload.subjectId, targetCtxId, actionPreset);
+                    // If there is a playerId (actor), mark them as initiator; otherwise default to subject
+                    const initiator = payload.playerId || payload.subjectId;
+                    ContextManager.applyContext(payload.subjectId, targetCtxId, actionPreset, undefined, initiator);
                     const forcedNarrative = `Выполнено действие: ${actionPreset.label}. Примени это состояние.`;
                     eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
                     addedContextNotes.push(forcedNarrative);
@@ -176,7 +178,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     if (compiledAction.contextConfig) {
-        ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction);
+        const initiator = payload.playerId || payload.subjectId;
+        ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction, undefined, initiator);
     }
     if (compiledAction.removeContexts) {
         for (const remCtx of compiledAction.removeContexts) {
@@ -185,12 +188,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     ContextManager.processTick(payload.subjectId); // Time passes
-
-
-    
-
-    
-
 
     // Save player and scene state at the final atomicity boundary
     
@@ -211,6 +208,22 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         state.resources = scenarioResult.updatedResources;
     }
 
+    // === Action Points (AP) regeneration per tick ===
+    try {
+        const cur = state.resources.resources || {};
+        const curAP = Number(cur.actionPoints ?? 0);
+        const maxAP = Number(cur.maxActionPoints ?? 100);
+        // base regen and capacity-based bonus
+        const baseRegen = 5; // base AP per tick
+        const capacity = Number(state.core?.capacity ?? 50);
+        const capacityBonus = Math.round((capacity / 100) * 5); // up to +5
+        const regen = Math.max(1, baseRegen + capacityBonus);
+        const nextAP = Math.min(maxAP, curAP + regen);
+        state.resources.resources = { ...cur, actionPoints: nextAP };
+    } catch (err) {
+        console.warn('AP regen error', err);
+    }
+
     if (scenarioResult.nextSceneId && scenarioResult.nextSceneId !== state.scene.id) {
         const nextScene = sceneRepo.get(scenarioResult.nextSceneId);
         if (nextScene) {
@@ -223,7 +236,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     // 6.6 Evaluate conditions for state triggers (Trauma, Panic, Subspace) over ticks
-    ConditionWatcher.evaluate(payload.subjectId, engineOutput.nextCore, engineOutput.nextPoint);
+    ConditionWatcher.evaluate(payload.subjectId, payload.pointId, engineOutput.nextCore, engineOutput.nextPoint);
 
     // 7. Save Atomically (before prompt building)
     saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
