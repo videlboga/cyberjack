@@ -114,6 +114,14 @@ db.exec(`
     FOREIGN KEY(action_id) REFERENCES action_presets(id)
   );
 
+  CREATE TABLE IF NOT EXISTS state_triggers (
+    id TEXT PRIMARY KEY,
+    subject_id TEXT NOT NULL,
+    trigger_code TEXT NOT NULL,
+    active_ticks INTEGER DEFAULT 0,
+    UNIQUE(subject_id, trigger_code)
+  );
+
   CREATE TABLE IF NOT EXISTS chat_memory (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id TEXT NOT NULL,

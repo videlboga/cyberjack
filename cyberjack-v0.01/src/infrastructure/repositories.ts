@@ -374,6 +374,30 @@ export const presetRepo = {
     }
 };
 
+export const stateTriggersRepo = {
+    get(subjectId: string, triggerCode: string): number {
+        const stmt = db.prepare(`SELECT active_ticks FROM state_triggers WHERE subject_id = ? AND trigger_code = ?`);
+        const row = stmt.get(subjectId, triggerCode) as any;
+        return row ? row.active_ticks : 0;
+    },
+    set(subjectId: string, triggerCode: string, ticks: number) {
+        db.prepare(`
+            INSERT INTO state_triggers (id, subject_id, trigger_code, active_ticks)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(subject_id, trigger_code) DO UPDATE SET active_ticks = excluded.active_ticks
+        `).run(Math.random().toString(36).substring(2, 15), subjectId, triggerCode, ticks);
+    },
+    increment(subjectId: string, triggerCode: string, delta: number = 1): number {
+        const current = this.get(subjectId, triggerCode);
+        const next = current + delta;
+        this.set(subjectId, triggerCode, next);
+        return next;
+    },
+    reset(subjectId: string, triggerCode: string) {
+        db.prepare(`DELETE FROM state_triggers WHERE subject_id = ? AND trigger_code = ?`).run(subjectId, triggerCode);
+    }
+};
+
 export const activeContextsRepo = {
     add(id: string, subjectId: string, actionId: string, duration: number = -1) {
         const stmt = db.prepare(`

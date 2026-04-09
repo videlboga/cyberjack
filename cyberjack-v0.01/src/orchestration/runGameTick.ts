@@ -15,6 +15,8 @@ import { applyResourceCosts } from '../scenario/applyResourceCosts';
 import { runScenarioStep } from '../scenario/runScenarioStep';
 import { ContextManager } from './contextManager';
 
+import { ConditionWatcher } from './conditionWatcher';
+
 export interface GameEventPayload {
     subjectId: string;
     pointId: string;
@@ -219,6 +221,9 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     if (!activeSceneId) {
         activeSceneId = state.scene.id;
     }
+
+    // 6.6 Evaluate conditions for state triggers (Trauma, Panic, Subspace) over ticks
+    ConditionWatcher.evaluate(payload.subjectId, engineOutput.nextCore, engineOutput.nextPoint);
 
     // 7. Save Atomically (before prompt building)
     saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);

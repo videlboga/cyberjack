@@ -31,7 +31,7 @@ Cyberjack симулирует реакцию субъекта на воздей
 - **Memory** (`chat_memory`, `chat_memory_summary`, `memory_embeddings`): цепочка истории и сжатых резюме/векторных воспоминаний для long-term отзывов.
 - **Memory**:
   - `memory_embeddings` — контекст для LLM (текстовые записи с эмбеддингами, как сейчас). Используются для построения промптов и аналитики (“вспомни последнюю перегрузку”).
-  - `memory_facts` (план) — детерминированные факты, влияющие на симуляцию (травмы, фобии, устойчивость). Содержат `subjectId`, `type`, `target` (например, `point:feet`), `effect` (изменение параметров), `strength`, `duration`/`decay`, `source`. Сценарий добавляет факты при выполнении условий (например, “impact ≥ 90 на протяжении N тиков” или “миссия завершена”), и они автоматически учитываются в формуле (`validateAction`, `compileAction`, `applyLearning`).
+  - `memory_facts` (как отдельной сущности больше нет) — детерминированные факты, влияющие на симуляцию (травмы, фобии, устойчивость), теперь работают через унифицированный механизм **контекстов** (`active_contexts`). Пул условных триггеров (Condition Engine) отслеживает пороговые значения (например, “capacity < 10 на протяжении 3 тиков”) и, при срабатывании, применяет контекст типа `trauma` или `phobia` через `ContextManager`, который автоматически влияет на формулу тика.
 
 Новая сущность v2 — **анатомические слоты**. Они работают на двух уровнях:
 1. UI-очередь (`src/ui/App.tsx`) не даёт добавить в один тик действия, пересекающие `occupiesPoints`.
@@ -161,7 +161,7 @@ Cyberjack симулирует реакцию субъекта на воздей
 - **chat_memory** — история коммуникации `{ id, subject_id, role, content, created_at }`.
 - **chat_memory_summary** — консолидация окна сообщений `{ summary_text, important_events, start_message_id, end_message_id }`.
 - **memory_embeddings** — `{ id, subject_id, text, tags, related_subjects, type, embedding JSON, metadata JSON }` — long-term память для промптов.
-- **memory_facts** — `{ id, subject_id, type, target, effect_json, strength, expiry_at?, source }` — детерминированные факты (травмы, устойчивость), влияющие на симуляцию.
+- **state_triggers** (ранее facts) — `{ id, subject_id, trigger_id, active_ticks }` — монитор условий, который при достижении порога автоматически накладывает контексты (например, травмы).
 
 
 ## 11. Отличия от v1 и дальнейшие шаги
