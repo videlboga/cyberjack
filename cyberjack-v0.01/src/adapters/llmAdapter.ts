@@ -48,3 +48,41 @@ export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, 
         return { reply: '', sentMessages: messages };
     }
 }
+
+export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any): Promise<any> {
+    const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
+    const LLM_API_KEY = process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || process.env.SILLYTAVERN_API_KEY || '';
+    const PARSER_MODEL = process.env.PARSER_MODEL || process.env.SILLYTAVERN_MODEL || 'google/gemini-3.1-flash-lite-preview';
+
+    try {
+        const response = await fetch(LLM_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}),
+            },
+            body: JSON.stringify({
+                model: PARSER_MODEL,
+                messages,
+                temperature: 0.1,
+                response_format: { type: 'json_object' }
+            })
+        });
+
+        if (!response.ok) {
+            const errD = await response.text();
+            console.error(`[LLM Adapter Parser] HTTP Error ${response.status}`, errD);
+            throw new Error(`Parser network error ${response.status}`);
+        }
+
+        const data = await response.json();
+        const resultString = data.choices[0].message.content;
+        return {
+            parsed: JSON.parse(resultString),
+            model: data.model
+        };
+    } catch (e: any) {
+        console.error('[LLM Adapter Parser] Error:', e.message);
+        throw e;
+    }
+}

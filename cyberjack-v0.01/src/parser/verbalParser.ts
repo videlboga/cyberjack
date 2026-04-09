@@ -1,6 +1,7 @@
 import { CompiledAction } from '../domain/types';
 import { CommandIntent } from '../domain/resolver';
 import { presetRepo } from '../infrastructure/repositories';
+import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 
 export interface ParsedVerbalAction extends Partial<CompiledAction> {
     pointId?: string;
@@ -10,9 +11,6 @@ export interface ParsedVerbalAction extends Partial<CompiledAction> {
 }
 
 export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction> {
-    const OPENROUTER_API_KEY = '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';
-    const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
     if (!text || text.trim() === "") {
         return { intensity: 0.1, valence: 0, contact: 0.1, sharpness: 0, novelty: 0.5, pointId: 'general', commandIntent: { type: 'none' } };
     }
@@ -22,14 +20,14 @@ export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction
         .map(act => `- "${act.id}": ${act.label}`)
         .join('\n');
 
-    const messages = [
+    const messages: any[] = [
         {
             role: 'system',
             content: `Ты — классификатор семантических параметров речи в симуляторе. В симуляторе сейчас можно изменять позу или применять состояние.
 Текущий список доступных ID для контекстов/поз/скованности:
 ${ctxList}
 
-ЕСЛИ текст пользователя является прямым приказом применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять, используй intent  "deactivate_context" и соответствующий ID.
+ЕСЛИ текст пользователя является прямым приказом применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять, используй intent "deactivate_context" и соответствующий ID.
 Твоя задача — классифицировать пользовательскую фразу по 5 параметрам (от 0.0 до 1.0, кроме valence: от -1.0 до 1.0) и определить цель воздействия (pointId).
 {
   "intensity": 0.0-1.0,
@@ -47,57 +45,34 @@ ${ctxList}
 
     try {
         console.log(`[VerbalParser] Analyzing text: "${text}"`);
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENROUTER_API_KEY}`
-            },
-            body: JSON.stringify({
-                    model: process.env.SILLYTAVERN_MODEL || 'google/gemini-3.1-flash-lite-preview',
-                    messages,
-                    temperature: 0.1,
-                    response_format: { type: 'json_object' }
-                })
-        });
+        
+        const { parsed, model } = await parseVerbalInputWithLLM(messages);
 
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errText}`);
-        }
-        
-        const data = await response.json();
-        const rawText = data.choices?.[0]?.message?.content || "{}";
-        console.log(`[VerbalParser] Model raw output:`, rawText);
-        
-        const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-        const parsed = JSON.parse(cleanedText);
-        
         const synonyms: Record<string, string> = {
             голова: 'head', лицо: 'face', губы: 'lips', шея: 'neck', плечи: 'shoulders',
-            спина: 'back', грудь: 'chest', соски: 'nipples', живот: 'belly', 
-            талия: 'waist', бедра: 'hips', пах: 'groin', ягодицы: 'buttocks', 
-            икры: 'calves', колени: 'knees', ступни: 'feet', 
+            спина: 'back', грудь: 'chest', соски: 'nipples', живот: 'belly',
+            талия: 'waist', бедра: 'hips', пах: 'groin', ягодицы: 'buttocks',
+            икры: 'calves', колени: 'knees', ступни: 'feet',
             руки: 'hands', кисти: 'hands', запястья: 'wrists'
         };
 
-        const normalize = (candidate?: string, text?: string) => {
-            if (!candidate && !text) return 'general';
+        const normalize = (candidate?: string, txt?: string) => {
+            if (!candidate && !txt) return 'general';
             if (candidate) {
                 const c = candidate.toString().toLowerCase();
                 if (synonyms[c]) return synonyms[c];
             }
-            if (text) {
-                const txt = text.toString().toLowerCase();
+            if (txt) {
+                const lowerTxt = txt.toString().toLowerCase();
                 for (const key of Object.keys(synonyms)) {
                     const re = new RegExp(`\\b${key}\\b`, 'i');
-                    if (re.test(txt)) return synonyms[key];
+                    if (re.test(lowerTxt)) return synonyms[key];
                 }
             }
             return candidate ?? 'general';
         };
 
-        const normalizedPoint = normalize(parsed.pointId, rawText);
+        const normalizedPoint = normalize(parsed.pointId, text);
         if (normalizedPoint !== (parsed.pointId ?? 'general')) {
             console.log(`[VerbalParser] Normalized pointId '${parsed.pointId}' -> '${normalizedPoint}'`);
         }
@@ -114,13 +89,13 @@ ${ctxList}
         return {
             intensity: parsed.intensity ?? 0.3,
             valence: parsed.valence ?? 0,
-            contact: parsed.contact ?? 0.1,
-            sharpness: parsed.sharpness ?? 0.1,
-            novelty: parsed.novelty ?? 0.5,
+            contact: parsed.contact ?? 0,
+            sharpness: parsed.sharpness ?? 0,
+            novelty: parsed.novelty ?? 0,
             pointId: normalizedPoint ?? 'general',
             commandIntent,
-            raw: rawText,
-            model: 'google/gemini-3.1-flash-lite-preview'
+            raw: JSON.stringify(parsed),
+            model: model ?? 'google/gemini-3.1-flash-lite-preview'
         };
     } catch (error: any) {
         console.error("[VerbalParser] Failed to classify text:", error.message);

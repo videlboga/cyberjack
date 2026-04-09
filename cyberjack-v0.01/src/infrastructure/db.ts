@@ -4,7 +4,7 @@ export const db = new Database('cyberjack.sqlite', { verbose: console.log });
 
 // Initialize schema
 db.exec(`
-  CREATE TABLE IF NOT EXISTS players (
+  CREATE TABLE IF NOT EXISTS character_resources (
     id TEXT PRIMARY KEY,
     resources TEXT NOT NULL -- JSON string for resources map
   );

@@ -1,6 +1,6 @@
 // src/infrastructure/repositories.ts
 import { db } from './db';
-import { SubjectCoreState, SubjectPointState, PlayerState, Scene, Character, CharacterRelation, SceneCharacterPresence } from '../domain/types';
+import { SubjectCoreState, SubjectPointState, ResourceState, Scene, Character, CharacterRelation, SceneCharacterPresence } from '../domain/types';
 import { applyDecayLevel, clamp } from '../engine/utils';
 
 const mapCharacter = (row: any): Character => ({
@@ -44,7 +44,7 @@ export const characterRepo = {
         stmt.run(subjectId, name, subjectId);
         return this.get(subjectId)!;
     },
-    ensurePlayer(playerId: string, name: string): Character {
+    ensureCharacter(playerId: string, name: string): Character {
         const stmt = db.prepare(`
             INSERT INTO characters (id, name, kind, player_id)
             VALUES (?, ?, 'player', ?)
@@ -406,18 +406,18 @@ export const activeContextsRepo = {
     }
 };
 
-export const playerRepo = {
-    save(player: PlayerState) {
+export const resourceRepo = {
+    save(player: ResourceState) {
         const stmt = db.prepare(`
-            INSERT INTO players (id, resources)
+            INSERT INTO character_resources (id, resources)
             VALUES (?, ?)
             ON CONFLICT(id) DO UPDATE SET resources = excluded.resources
         `);
         stmt.run(player.id, JSON.stringify(player.resources));
-        characterRepo.ensurePlayer(player.id, player.id);
+        characterRepo.ensureCharacter(player.id, player.id);
     },
-    get(id: string): PlayerState | null {
-        const stmt = db.prepare('SELECT * FROM players WHERE id = ?');
+    get(id: string): ResourceState | null {
+        const stmt = db.prepare('SELECT * FROM character_resources WHERE id = ?');
         const row = stmt.get(id) as any;
         if (!row) return null;
         return {

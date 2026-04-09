@@ -143,7 +143,7 @@ export interface GameEvent {
     timestamp: string;
     payload: Record<string, unknown>;
 }
-export interface PlayerState { id: string; resources: Record<string, number>; }
+export interface ResourceState { id: string; resources: Record<string, number>; }
 
 export interface SceneTransitionRule {
     targetSceneId: string;
@@ -264,7 +264,7 @@ export interface TickBundle {
     prompt: PromptPayload & { systemPrompt: string };
     scenario?: {
         nextSceneId: string | null;
-        updatedPlayer: PlayerState;
+        updatedResources: ResourceState;
         updatedMission: Mission | null;
         success: boolean;
         error?: string;

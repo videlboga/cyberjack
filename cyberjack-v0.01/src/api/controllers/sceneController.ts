@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { sceneRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneCharacterRepo } from '../../infrastructure/repositories';
-import { ContextManager } from '../../engine/contextManager';
+import { ContextManager } from '../../orchestration/contextManager';
 
 
 export const getScenes = (req: Request, res: Response) => {

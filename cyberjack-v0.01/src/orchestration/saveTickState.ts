@@ -20,7 +20,7 @@ export function saveTickState(
     const subjectName = currentSubject?.name || 'Unknown';
     subjectRepo.save(subjectId, subjectName, output.nextCore);
     characterRepo.ensureSubject(subjectId, subjectName);
-    const playerCharacter = characterRepo.ensurePlayer(playerId, playerId === 'PL-1' ? 'Калибратор' : playerId);
+    const playerCharacter = characterRepo.ensureCharacter(playerId, playerId === 'PL-1' ? 'Калибратор' : playerId);
     const actorName = playerCharacter.name || 'Калибратор';
     const relationCfg = (DEFAULT_CONFIG.formulas.baseline?.relation) || {};
     const relation = characterRelationRepo.ensure(subjectId, playerCharacter.id, {

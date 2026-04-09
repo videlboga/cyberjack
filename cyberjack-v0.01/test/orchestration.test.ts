@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { db } from '../src/infrastructure/db';
-import { subjectRepo, pointStateRepo, playerRepo, sceneRepo, presetRepo } from '../src/infrastructure/repositories';
+import { subjectRepo, pointStateRepo, resourceRepo, sceneRepo, presetRepo } from '../src/infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../src/engine/config';
 import { dispatchEvent } from '../src/orchestration/eventRouter';
 import { eventQueries } from '../src/infrastructure/eventQueries';
 
 describe('Orchestration Integration', () => {
     beforeEach(() => {
-        db.exec('DELETE FROM scene_characters; DELETE FROM character_relations; DELETE FROM event_logs; DELETE FROM active_contexts; DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM players; DELETE FROM scenes; DELETE FROM action_presets; DELETE FROM characters;');
+        db.exec('DELETE FROM scene_characters; DELETE FROM character_relations; DELETE FROM event_logs; DELETE FROM active_contexts; DELETE FROM subjects; DELETE FROM subject_point_states; DELETE FROM character_resources; DELETE FROM scenes; DELETE FROM action_presets; DELETE FROM characters;');
         
         // Seed DB
         subjectRepo.save('sub_1', 'Test Subject', DEFAULT_CONFIG.core.defaults);
         pointStateRepo.save('sub_1', 'point_A', DEFAULT_CONFIG.point.defaults);
-        playerRepo.save({ id: 'player_1', resources: { energy: 100 } });
+        resourceRepo.save({ id: 'player_1', resources: { energy: 100 } });
         sceneRepo.save({ id: 'scene_main', availableActions: ['act_soft_touch'] });
         presetRepo.saveActionPreset('act_soft_touch', 'Soft Touch', { intensity: 0.35, valence: 0.45, contact: 0.75, sharpness: 0.15, novelty: 0.8 });
     });

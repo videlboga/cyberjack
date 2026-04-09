@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { playerRepo, characterRepo, characterRelationRepo } from '../../infrastructure/repositories';
+import { resourceRepo, characterRepo, characterRelationRepo } from '../../infrastructure/repositories';
 
 const DEFAULT_PLAYER = {
     id: 'PL-1',
@@ -12,7 +12,7 @@ const DEFAULT_PLAYER = {
 
 function normalizePlayer(playerObj?: { id: string; resources: Record<string, number> } | null) {
     const src = playerObj || DEFAULT_PLAYER;
-    characterRepo.ensurePlayer(src.id, src.id === 'PL-1' ? 'Калибратор' : src.id);
+    characterRepo.ensureCharacter(src.id, src.id === 'PL-1' ? 'Калибратор' : src.id);
     return { ...DEFAULT_PLAYER, ...src };
 }
 
@@ -20,7 +20,7 @@ function normalizePlayer(playerObj?: { id: string; resources: Record<string, num
 export const updatePlayer = (req: Request, res: Response) => {
     try {
         const { playerId = 'PL-1', resources = {} } = req.body || {};
-        const existing = normalizePlayer(playerRepo.get(playerId));
+        const existing = normalizePlayer(resourceRepo.get(playerId));
         const nextResources: Record<string, number> = { ...existing.resources };
 
         for (const [key, value] of Object.entries(resources || {})) {
@@ -30,7 +30,7 @@ export const updatePlayer = (req: Request, res: Response) => {
         }
 
         const nextPlayer = { id: playerId, resources: nextResources };
-        playerRepo.save(nextPlayer);
+        resourceRepo.save(nextPlayer);
         res.json({ success: true, player: normalizePlayer(nextPlayer) });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });

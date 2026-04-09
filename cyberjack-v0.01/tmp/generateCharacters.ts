@@ -4,29 +4,33 @@ const seeds = ['A1', 'A2', 'A3', 'A4', 'A5'];
 
 for (const seed of seeds) {
     const ctx = generateCharacterContext({ seed });
-    console.log(`--- Seed ${seed} ---`);
+    console.log(`\n================================`);
+    console.log(`[ГЕНЕРАТОР: СИСТЕМНЫЙ ПРОМПТ ПЕРСОНАЖА (SEED: ${seed})]`);
+    
+    const worldLore = ctx.grouped.world.map(t => t.summary || t.title).filter(Boolean);
+    const factionLore = ctx.grouped.faction.map(t => t.summary || t.title).filter(Boolean);
+    
+    const promptParts = [
+        `## ОБЩИЙ ЛОР И БАЗОВОЕ ЗНАНИЕ МИРА`,
+        `Ты находишься на изолированной станции Омникрон. То, что тебе известно о мире вокруг:`,
+        ...worldLore.map(w => `> ${w}`),
+        ``,
+        `## ЗНАНИЯ О ФРАКЦИЯХ`,
+        `Твое понимание корпораций и сил, управляющих станцией:`,
+        ...factionLore.map(f => `> ${f}`),
+        ``,
+        `## ИНДИВИДУАЛЬНЫЙ ПРОФИЛЬ ПЕРСОНАЖА (АКТИВА)`
+    ];
 
-    const tagLines: string[] = [];
-    for (const [level, tags] of Object.entries(ctx.grouped)) {
-        const levelTags = tags.map(tag => `${tag.id} (${tag.title})`).join(', ');
-        tagLines.push(`${level}: ${levelTags}`);
-    }
-    console.log(tagLines.join('\n'));
-
-    const personaBlock = ctx.personaNotes.map((note, idx) => `${idx + 1}. ${note}`).join('\n');
-    const loreBlock = ctx.loreNotes.join('\n\n');
-
-    const promptParts: string[] = ['[Профиль персонажа]', personaBlock || '(нет заметок)'];
     if (ctx.originStatements?.length) {
-        promptParts.push('', '[Происхождение]', ctx.originStatements.join('\n'));
+        promptParts.push(...ctx.originStatements.map(o => `- Происхождение: ${o}`));
     }
     if (ctx.assetReasons?.length) {
-        promptParts.push('', '[Почему стал активом]', ctx.assetReasons.join('\n'));
+        promptParts.push(...ctx.assetReasons.map(a => `- Причина попадания: ${a}`));
     }
-    promptParts.push('', '[Записки из лора]', loreBlock || '(нет лора)');
 
-    const prompt = promptParts.join('\n');
+    promptParts.push(``, `## ЛИЧНЫЕ УСТАНОВКИ, ФИЗИОЛОГИЯ И ВОСПОМИНАНИЯ (ТВОЕ "Я")`);
+    ctx.personaNotes.forEach(note => promptParts.push(`* ${note}`));
 
-    console.log(prompt);
-    console.log();
+    console.log(promptParts.join('\n'));
 }

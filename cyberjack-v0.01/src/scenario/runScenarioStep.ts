@@ -1,18 +1,18 @@
-import { Scene, PlayerState, SubjectCoreState, Mission } from '../domain/types';
+import { Scene, ResourceState, SubjectCoreState, Mission } from '../domain/types';
 import { resolveSceneTransition } from './resolveSceneTransition';
 import { applyMissionProgress } from './applyMissionProgress';
 
 // Типов для scenarioState нет, но мы можем собрать заглушку.
 export interface ScenarioState {
     scene: Scene;
-    player: PlayerState;
+    resources: ResourceState;
     core: SubjectCoreState;
     mission: Mission | null;
 }
 
 export interface ScenarioStepResult {
     nextSceneId: string | null;
-    updatedPlayer: PlayerState;
+    updatedResources: ResourceState;
     updatedMission: Mission | null;
     success: boolean;
     error?: string;
@@ -31,8 +31,8 @@ export function runScenarioStep(
     state: ScenarioState,
     context: ScenarioStepContext
 ): ScenarioStepResult {
-    const { scene, player, core, mission } = state;
-    let nextPlayer = player;
+    const { scene, resources, core, mission } = state;
+    let nextResources = resources;
     
     const nextSceneId = resolveSceneTransition(scene, core, { actionId: context.actionId });
     let nextMission = mission;
@@ -42,7 +42,7 @@ export function runScenarioStep(
 
     return {
         nextSceneId,
-        updatedPlayer: nextPlayer,
+        updatedResources: nextResources,
         updatedMission: nextMission,
         success: true
     };

@@ -1,4 +1,4 @@
-export type LoreLevel = 'world' | 'faction' | 'origin' | 'event' | 'trait';
+export type LoreLevel = 'world' | 'faction' | 'origin' | 'event' | 'trait' | 'persona' | 'physical' | 'psychological';
 
 export interface LoreTagDefinition {
     id: string;
@@ -58,4 +58,4 @@ export interface NarrativeSummary {
     activationParagraphs: string[];
 }
 
-export const LEVEL_ORDER: LoreLevel[] = ['world', 'faction', 'origin', 'event', 'trait'];
+export const LEVEL_ORDER: LoreLevel[] = ['world', 'faction', 'origin', 'persona', 'physical', 'psychological', 'event', 'trait'];

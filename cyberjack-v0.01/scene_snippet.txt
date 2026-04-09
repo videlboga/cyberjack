@@ -1,0 +1,19 @@
+   926	                    <div className="scene-characters">
+   927	                      {sc.characters && sc.characters.length ? (
+   928	                        sc.characters.map((entry: any) => (
+   929	                          <div key={entry.character.id} className="scene-character-row">
+   930	                            <div>
+   931	                              {entry.character.name}
+   932	                              <span className="scene-character-role">
+   933	                                {entry.role || entry.character.kind}
+   934	                              </span>
+   935	                            </div>
+   936	                            <span className={`scene-character-flag ${entry.presenceState}`}>
+   937	                              {entry.presenceState}
+   938	                            </span>
+   939	                          </div>
+   940	                        ))
+   941	                      ) : (
+   942	                        <span className="subtitle">Нет персонажей</span>
+   943	                      )}
+   944	                    </div>

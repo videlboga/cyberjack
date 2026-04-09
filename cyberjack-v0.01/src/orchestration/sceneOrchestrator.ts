@@ -6,7 +6,7 @@ import {
     CharacterRelation
 } from '../domain/types';
 import { activeConfig } from '../prompts/config';
-import { activeContextsRepo, presetRepo, playerRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -67,7 +67,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
 
     const isVerbalInput = bundle.event.type === 'verbal_input';
     const playerId = bundle.event.playerId || 'PL-1';
-    const playerState = playerRepo.get(playerId);
+    const playerState = resourceRepo.get(playerId);
 
     for (const actorId of allActors) {
         let core = actorId === subjectId ? bundle.stateAfter.core : bundle.stateBefore.core;
@@ -145,7 +145,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
 import { db } from '../infrastructure/db';
 import { chatMemoryRepo } from '../infrastructure/repositories';
 import { sendToSillyTavern, sendNarratorDescription } from '../adapters/sillyTavernAdapter';
-import { buildPromptPayload } from '../prompts/buildPromptPayload';
+import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { recordMemoryEvent } from '../services/memoryLayer';
 import { maybeSummarizeChat } from '../services/chatSummary';
 

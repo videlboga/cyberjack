@@ -6,14 +6,14 @@ import { compileAction } from '../compiler/compileAction';
 import { applyDynamicContexts } from '../compiler/dynamicModifiers';
 import { runTick } from '../engine/runTick';
 import { eventQueries } from '../infrastructure/eventQueries';
-import { activeContextsRepo, playerRepo, sceneRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, resourceRepo, sceneRepo, presetRepo, eventLogRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
-import { buildPromptPayload } from '../prompts/buildPromptPayload';
-import { checkActionAccess } from '../scenario/checkActionAccess';
+import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
+import * as checkActionAccess from '../scenario/checkActionAccess';
 import { applyResourceCosts } from '../scenario/applyResourceCosts';
 import { runScenarioStep } from '../scenario/runScenarioStep';
-import { ContextManager } from '../engine/contextManager';
+import { ContextManager } from './contextManager';
 
 export interface GameEventPayload {
     subjectId: string;
@@ -36,17 +36,20 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         point: { ...state.point }
     };
     
-    // 2. Scenario layer: доступность действия и ресурсы
-    if (!checkActionAccess(payload.presetId, state.scene, state.player)) {
-        throw new Error(`Action "${payload.presetId}" is not available in scene "${state.scene.id}".`);
+    // 2. Scenario layer: доступность действия, ресурсы, локация
+    const validation = checkActionAccess.validateAction(
+        payload.presetId, state.scene, state.resources, payload.subjectId, payload.playerId
+    );
+    if (!validation.allowed) {
+        throw new Error(validation.errorReason || `Action "${payload.presetId}" blocked by scenario.`);
     }
 
     const actionCosts = state.scene.actionCosts?.[payload.presetId];
     if (actionCosts && Object.keys(actionCosts).length) {
         try {
-            const nextPlayer = applyResourceCosts(state.player, actionCosts);
-            playerRepo.save(nextPlayer);
-            state.player = nextPlayer;
+            const nextResources = applyResourceCosts(state.resources, actionCosts);
+            resourceRepo.save(nextResources);
+            state.resources = nextResources;
         } catch (error: any) {
             throw new Error(error.message || 'Failed to apply resource costs');
         }
@@ -58,6 +61,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const history = eventQueries.getRecentLogs(payload.subjectId, 5);
     
     // 4. Compile Action Vector
+    const activeContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
+
     let compiledAction = compileAction({
         presetId: payload.presetId,
         eventId: payload.sceneId, // Treat sceneId as the root event contexts are bound to for now
@@ -65,7 +70,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         history: history,
         dynamicModifiers: payload.dynamicModifiers,
         sourceText: payload.textMessage,
-        parserVersion: payload.parserVersion
+        parserVersion: payload.parserVersion, activeContexts: activeContexts
     });
 
     // 4.5 Apply Virtual Contexts (Mental and Body point overloads)
@@ -98,7 +103,76 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // 6. Save new state
     const tickId = randomUUID();
 
-    // 6.0 Apply Context Overrides
+    // 6.0 Apply Context Overrides (Parser Intention Hook)
+    // Here we perform dynamic context modification dictated directly by the LLM classification,
+    // intercepting and modifying the subject's conditions immediately.
+    let addedContextNotes: string[] = [];
+    if (commandIntent && commandIntent.type !== 'none') {
+        
+        const activeContextsRepo2 = activeContextsRepo;
+        
+
+        let targetCtxId: string | undefined;
+        if (commandIntent.type === 'change_pose') targetCtxId = commandIntent.targetPoseId;
+        else if (commandIntent.type === 'activate_context') targetCtxId = commandIntent.targetContextId;
+        else if (commandIntent.type === 'deactivate_context') {
+            const deactivateId = commandIntent.targetContextId;
+            const actionPreset = presetRepo.getActionPreset(deactivateId);
+            const currentStatus = activeContextsRepo2.getAllForSubject(payload.subjectId).find((c: any) => c.actionId === deactivateId);
+            if (currentStatus) {
+                activeContextsRepo2.remove(currentStatus.id);
+                const removalNarrative = `Состояние отменено: ${actionPreset?.label || deactivateId}`;
+                eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
+                addedContextNotes.push(removalNarrative);
+            }
+        }
+
+        if (targetCtxId) {
+            const actionPreset = presetRepo.getActionPreset(targetCtxId);
+            if (actionPreset && actionPreset.contextConfig) {
+                const requiredCompliance = (actionPreset.contextConfig.priority || 1) * 20;
+                const currentCompliance = (engineOutput.nextCore.plasticity || 0) + (engineOutput.nextCore.openness || 0) * 0.5 + (engineOutput.nextCore.attitude || 0) * 0.5;
+                
+                if (currentCompliance >= requiredCompliance) {
+                    ContextManager.applyContext(payload.subjectId, targetCtxId, actionPreset);
+                    const forcedNarrative = `Выполнено действие: ${actionPreset.label}. Примени это состояние.`;
+                    eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
+                    addedContextNotes.push(forcedNarrative);
+                } else {
+                    const refusedNarrative = `[Система]: Актив мысленно ОТКАЗЫВАЕТСЯ выполнять команду ("${actionPreset.label}"). Требуемый уровень подчинения: ${requiredCompliance}, но текущий всего ~${Math.round(currentCompliance)}. Отреагируй отказом словами или жестами.`;
+                    addedContextNotes.push(refusedNarrative);
+                }
+            }
+        }
+    }
+
+    // "Neutral pose" heuristic: If saying "встань", stand up.
+    if (payload.textMessage) {
+        const wantsNeutralPose = /\b(встань|вставай|поднимись|поднимайся|на\s+ноги|встаньте)\b/.test(payload.textMessage.toLowerCase());
+        if (wantsNeutralPose) {
+            
+            const activeContextsRepo2 = activeContextsRepo;
+            
+
+            const currentContexts = activeContextsRepo2.getAllForSubject(payload.subjectId);
+            const poseContexts = currentContexts
+                .map((obj: any) => ({ ctx: obj, preset: presetRepo.getActionPreset(obj.actionId) }))
+                .filter((item: any) => item.preset?.contextConfig?.occupiesPoints?.includes('global_pose'));
+
+            if (poseContexts.length) {
+                for (const { ctx, preset } of poseContexts) {
+                    if (!preset?.id) continue;
+                    const removalNarrative = `Состояние отменено: ${preset.label}`;
+                    activeContextsRepo2.remove(ctx.id);
+                    eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
+                    addedContextNotes.push(removalNarrative);
+                }
+            } else {
+                addedContextNotes.push('Ты уже стоишь, поэтому дополнительных изменений нет.');
+            }
+        }
+    }
+
     if (compiledAction.contextConfig) {
         ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction);
     }
@@ -108,22 +182,31 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         }
     }
 
-    saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
+    ContextManager.processTick(payload.subjectId); // Time passes
+
+
+    
+
+    
+
+
+    // Save player and scene state at the final atomicity boundary
+    
+    // Currently scene changes aren't saved to DB in runGameTick but rather through activeSceneId. If scene state mutated, we'd save it here.
 
     // 6.1 Run scenario consequences (transitions, missions)
     const scenarioResult = runScenarioStep(
         {
             scene: state.scene,
-            player: state.player,
+            resources: state.resources,
             core: engineOutput.nextCore,
             mission: null
         },
         { actionId: payload.presetId }
     );
 
-    if (scenarioResult.updatedPlayer !== state.player) {
-        playerRepo.save(scenarioResult.updatedPlayer);
-        state.player = scenarioResult.updatedPlayer;
+    if (scenarioResult.updatedResources !== state.resources) {
+        state.resources = scenarioResult.updatedResources;
     }
 
     if (scenarioResult.nextSceneId && scenarioResult.nextSceneId !== state.scene.id) {
@@ -135,6 +218,13 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
     if (!activeSceneId) {
         activeSceneId = state.scene.id;
+    }
+
+    // 7. Save Atomically (before prompt building)
+    saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
+    
+    if (scenarioResult.updatedResources !== state.resources || true) {
+        resourceRepo.save(state.resources);
     }
 
     // 6.5 Update context strain (Escalation / Decay)
@@ -177,6 +267,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         { label: 'State after (point)', values: engineOutput.nextPoint }
     ];
 
+    
     return {
         tickId,
         event,

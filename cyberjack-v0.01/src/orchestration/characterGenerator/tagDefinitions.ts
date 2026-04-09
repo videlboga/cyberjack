@@ -9,6 +9,9 @@ function createEmptyLibrary(): TagLibrary {
         world: [],
         faction: [],
         origin: [],
+        persona: [],
+        physical: [],
+        psychological: [],
         event: [],
         trait: []
     };
@@ -96,6 +99,9 @@ function loadCustomTagLibrary(): TagLibrary {
         world: new Map(),
         faction: new Map(),
         origin: new Map(),
+        persona: new Map(),
+        physical: new Map(),
+        psychological: new Map(),
         event: new Map(),
         trait: new Map()
     };

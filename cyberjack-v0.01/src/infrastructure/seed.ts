@@ -162,7 +162,7 @@ const insertSubjectPointStmt = db.prepare(`
 `);
 
 db.transaction(() => {
-    db.prepare(`INSERT OR IGNORE INTO players (id, resources) VALUES ('PL-1', '{}')`).run();
+    db.prepare(`INSERT OR IGNORE INTO character_resources (id, resources) VALUES ('PL-1', '{}')`).run();
     db.prepare(`INSERT OR IGNORE INTO characters (id, name, kind) VALUES ('PL-1', 'Калибратор', 'player')`).run();
     
     const actions = [

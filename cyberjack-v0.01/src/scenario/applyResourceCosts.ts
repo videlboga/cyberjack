@@ -1,10 +1,10 @@
-import { PlayerState } from '../domain/types';
+import { ResourceState } from '../domain/types';
 
 /**
  * Применяет стоимость действия (или сценария) к ресурсам игрока.
- * Возвращает новый объект PlayerState или выбрасывает ошибку, если ресурсов недостаточно.
+ * Возвращает новый объект ResourceState или выбрасывает ошибку, если ресурсов недостаточно.
  */
-export function applyResourceCosts(player: PlayerState, costs: Record<string, number>): PlayerState {
+export function applyResourceCosts(player: ResourceState, costs: Record<string, number>): ResourceState {
     const updatedResources = { ...player.resources };
     
     for (const [res, cost] of Object.entries(costs)) {

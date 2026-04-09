@@ -1,6 +1,6 @@
 import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
-import { subjectRepo, playerRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo } from '../../infrastructure/repositories';
+import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo } from '../../infrastructure/repositories';
 import { activeConfig, updateConfig } from '../../prompts/config';
 
 const DEFAULT_PLAYER = {
@@ -14,7 +14,7 @@ const DEFAULT_PLAYER = {
 
 function normalizePlayer(playerObj?: { id: string; resources: Record<string, number> } | null) {
     const src = playerObj || DEFAULT_PLAYER;
-    characterRepo.ensurePlayer(src.id, src.id === 'PL-1' ? 'Калибратор' : src.id);
+    characterRepo.ensureCharacter(src.id, src.id === 'PL-1' ? 'Калибратор' : src.id);
     return { ...DEFAULT_PLAYER, ...src };
 }
 
@@ -29,7 +29,7 @@ export const getState = (req: Request, res: Response) => {
         const subjectCharacter = characterRepo.ensureSubject(subjectId, uiState.subject?.name || subjectId);
         const targetSceneId = requestedSceneId || subjectCharacter.currentSceneId || 'lab';
         const scene = sceneRepo.get(targetSceneId);
-        const player = normalizePlayer(playerRepo.get('PL-1'));
+        const player = normalizePlayer(resourceRepo.get('PL-1'));
         const relations = characterRelationRepo.listFor(subjectCharacter.id);
         const characters = characterRepo.listAll().map((ch) => ({
             id: ch.id,

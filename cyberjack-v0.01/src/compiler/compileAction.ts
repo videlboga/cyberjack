@@ -13,6 +13,7 @@ export interface ActionInput {
     dynamicModifiers?: Partial<CompiledAction>; // Add dynamic traits, like text classification
     sourceText?: string;
     parserVersion?: string;
+    activeContexts?: any[]; // IDs of active contexts
 }
 
 /**
@@ -83,8 +84,8 @@ export function compileAction(input: ActionInput): CompiledAction {
     baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || []);
 
     // 4. Get Contexts
-    const activeContextIds = activeContextsRepo.getAllForSubject(input.targetId || 'S-01');
-    const contextModifiers = compileContextVector(activeContextIds);
+    const activeContexts = input.activeContexts || [];
+    const contextModifiers = compileContextVector(activeContexts);
 
     // 5. Merge
     const merged = mergeVectors(baseWithDynamic as CompiledAction, contextModifiers);
