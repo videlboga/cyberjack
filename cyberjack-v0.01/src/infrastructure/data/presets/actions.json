@@ -1,0 +1,576 @@
+[
+  {
+    "id": "act_slap",
+    "name": "Пощечина",
+    "description": "Резкий, звонкий удар открытой ладонью по лицу.",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "impact",
+      "pain",
+      "demeaning"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 5,
+      "valence": -3,
+      "sharpness": 8,
+      "contact": 4,
+      "novelty": 2,
+      "powerBase": 25
+    }
+  },
+  {
+    "id": "act_kiss",
+    "name": "Поцелуй",
+    "description": "Нежный и интимный контакт губ.",
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "affection",
+      "intimate"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": 8,
+      "sharpness": 0,
+      "contact": 5,
+      "novelty": 1,
+      "powerBase": 20
+    }
+  },
+  {
+    "id": "act_punch",
+    "name": "Удар кулаком",
+    "description": "Тяжелый, травмирующий удар кулаком.",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "impact",
+      "pain",
+      "blunt"
+    ],
+    "validTargets": [
+      "head",
+      "torso"
+    ],
+    "vector": {
+      "intensity": 8,
+      "valence": -6,
+      "sharpness": 3,
+      "contact": 7,
+      "novelty": 3,
+      "powerBase": 50
+    }
+  },
+  {
+    "id": "act_caress",
+    "name": "Поглаживание",
+    "description": "Мягкое, успокаивающее прикосновение.",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "affection",
+      "comfort"
+    ],
+    "validTargets": [
+      "head",
+      "torso",
+      "limbs"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": 5,
+      "sharpness": -2,
+      "contact": 3,
+      "novelty": -1,
+      "powerBase": 5
+    }
+  },
+  {
+    "id": "act_interrogate",
+    "name": "Жесткий допрос",
+    "description": "Лавина подавляющих вопросов, требующих немедленных ответов.",
+    "categories": [
+      "verbal"
+    ],
+    "tags": [
+      "mental",
+      "pressure",
+      "command"
+    ],
+    "validTargets": [
+      "general"
+    ],
+    "vector": {
+      "intensity": 7,
+      "valence": -4,
+      "sharpness": 8,
+      "contact": 0,
+      "novelty": 4,
+      "powerBase": 45
+    }
+  },
+  {
+    "id": "act_praise",
+    "name": "Похвала",
+    "description": "Одобрительные слова, возвышающие субъекта.",
+    "categories": [
+      "verbal"
+    ],
+    "tags": [
+      "mental",
+      "comfort"
+    ],
+    "validTargets": [
+      "general"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": 7,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 1,
+      "powerBase": 15
+    }
+  },
+  {
+    "id": "act_examine",
+    "name": "Строгий осмотр",
+    "description": "Холодный, клинический осмотр тела субъекта без оглядки на личные границы.",
+    "categories": [
+      "physical",
+      "clinical"
+    ],
+    "tags": [
+      "clinical",
+      "vulnerable"
+    ],
+    "validTargets": [
+      "general",
+      "torso",
+      "groin"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": -1,
+      "sharpness": 2,
+      "contact": 5,
+      "novelty": 4,
+      "powerBase": 20
+    }
+  },
+  {
+    "id": "act_apply_handcuffs",
+    "name": "Надеть наручники",
+    "description": "Сковывание запястий металлическими браслетами.",
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "restraint",
+      "metal",
+      "humiliation"
+    ],
+    "requiresItem": "eq_handcuffs",
+    "validTargets": [
+      "limbs"
+    ],
+    "vector": {
+      "intensity": 5,
+      "valence": -2,
+      "sharpness": 3,
+      "contact": 8,
+      "novelty": 5,
+      "powerBase": 35
+    },
+    "contextConfig": {
+      "type": "equipment",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "left_hand",
+        "right_hand"
+      ],
+      "modifiers": {
+        "intensity": 3,
+        "valence": -1,
+        "sharpness": 1,
+        "contact": 10,
+        "novelty": 0
+      }
+    }
+  },
+  {
+    "id": "act_remove_handcuffs",
+    "name": "Снять наручники",
+    "description": "Освобождение запястий от оков.",
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "comfort",
+      "metal"
+    ],
+    "requireContexts": [
+      "act_apply_handcuffs"
+    ],
+    "removeContexts": [
+      "act_apply_handcuffs"
+    ],
+    "validTargets": [
+      "limbs"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": 4,
+      "sharpness": 0,
+      "contact": 4,
+      "novelty": 2,
+      "powerBase": 10
+    }
+  },
+  {
+    "id": "act_struggle_cuffs",
+    "name": "Вырываться из наручников",
+    "description": "Бесплодные попытки освободиться от оков, причиняющие боль.",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "struggle",
+      "pain",
+      "metal"
+    ],
+    "requireContexts": [
+      "act_apply_handcuffs"
+    ],
+    "validTargets": [
+      "limbs"
+    ],
+    "vector": {
+      "intensity": 6,
+      "valence": -4,
+      "sharpness": 6,
+      "contact": 9,
+      "novelty": 1,
+      "powerBase": 20
+    }
+  },
+  {
+    "id": "act_apply_collar",
+    "name": "Застегнуть шоковый ошейник",
+    "description": "Установка электронного ошейника контроля.",
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "restraint",
+      "electronic",
+      "control"
+    ],
+    "requiresItem": "eq_collar",
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": -3,
+      "sharpness": 1,
+      "contact": 7,
+      "novelty": 6,
+      "powerBase": 40
+    },
+    "contextConfig": {
+      "type": "equipment",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "neck"
+      ],
+      "modifiers": {
+        "intensity": 2,
+        "valence": -2,
+        "contact": 9,
+        "sharpness": 0,
+        "novelty": 1
+      }
+    }
+  },
+  {
+    "id": "act_shock_collar",
+    "name": "Ударить током через ошейник",
+    "description": "Активация встроенного шокера. Резкий и болезненный разряд.",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "electronic",
+      "pain",
+      "punishment"
+    ],
+    "requireContexts": [
+      "act_apply_collar"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 9,
+      "valence": -7,
+      "sharpness": 10,
+      "contact": 3,
+      "novelty": 5,
+      "powerBase": 65
+    }
+  },
+  {
+    "id": "act_remove_collar",
+    "name": "Снять ошейник",
+    "description": "Отключение и снятие устройства контроля.",
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "comfort",
+      "electronic"
+    ],
+    "requireContexts": [
+      "act_apply_collar"
+    ],
+    "removeContexts": [
+      "act_apply_collar"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 5,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 3,
+      "powerBase": 5
+    }
+  },
+  {
+    "id": "act_inject_truth_serum",
+    "name": "Ввести сыворотку (Veritas-9)",
+    "description": "Внутривенная инъекция препарата, подавляющего волю.",
+    "categories": [
+      "clinical",
+      "context"
+    ],
+    "tags": [
+      "medical",
+      "chemical",
+      "mental",
+      "piercing"
+    ],
+    "requiresItem": "drug_truth_serum",
+    "validTargets": [
+      "limbs"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": -1,
+      "sharpness": 7,
+      "contact": 2,
+      "novelty": 6,
+      "powerBase": 35
+    },
+    "contextConfig": {
+      "type": "status",
+      "duration": 5,
+      "exclusiveWithinPoint": false,
+      "occupiesPoints": [],
+      "modifiers": {
+        "intensity": 6,
+        "valence": -2,
+        "sharpness": -3,
+        "contact": -5,
+        "novelty": 8
+      },
+      "traitRules": [
+        {
+          "trigger": {
+            "requireActionCategories": [
+              "verbal"
+            ]
+          },
+          "overrides": {
+            "powerMult": 1.8
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "act_inject_painkiller",
+    "name": "Ввести болеутоляющее (Numb-X)",
+    "description": "Инъекция мощного анальгетика, отключающего болевую чувствительность.",
+    "categories": [
+      "clinical",
+      "context"
+    ],
+    "tags": [
+      "medical",
+      "chemical",
+      "comfort",
+      "piercing"
+    ],
+    "requiresItem": "drug_painkiller",
+    "validTargets": [
+      "limbs"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": 2,
+      "sharpness": 6,
+      "contact": 2,
+      "novelty": 3,
+      "powerBase": 20
+    },
+    "contextConfig": {
+      "type": "status",
+      "duration": 6,
+      "exclusiveWithinPoint": false,
+      "occupiesPoints": [],
+      "modifiers": {
+        "intensity": -5,
+        "valence": 4,
+        "sharpness": -8,
+        "contact": -2,
+        "novelty": 2
+      },
+      "traitRules": [
+        {
+          "trigger": {
+            "requireActionTags": [
+              "pain"
+            ]
+          },
+          "overrides": {
+            "intensityMult": 0.2,
+            "sharpnessMult": 0.1,
+            "valence": 0
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "act_insert_plug",
+    "name": "Ввести телеметрический плаг",
+    "description": "Плотное введение умного сенсора внутрь.",
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "intimate",
+      "stretching",
+      "electronic"
+    ],
+    "requiresItem": "eq_plug",
+    "validTargets": [
+      "groin"
+    ],
+    "vector": {
+      "intensity": 6,
+      "valence": 1,
+      "sharpness": 4,
+      "contact": 10,
+      "novelty": 7,
+      "powerBase": 45
+    },
+    "contextConfig": {
+      "type": "equipment",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "internal_lower"
+      ],
+      "modifiers": {
+        "intensity": 4,
+        "valence": 2,
+        "sharpness": 1,
+        "contact": 10,
+        "novelty": 4
+      }
+    }
+  },
+  {
+    "id": "act_activate_plug",
+    "name": "Включить вибрацию плага",
+    "description": "Подача сигнала на внутреннее устройство.",
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation"
+    ],
+    "requireContexts": [
+      "act_insert_plug"
+    ],
+    "validTargets": [
+      "groin"
+    ],
+    "vector": {
+      "intensity": 8,
+      "valence": 4,
+      "sharpness": 2,
+      "contact": 10,
+      "novelty": 3,
+      "powerBase": 55
+    }
+  },
+  {
+    "id": "act_remove_plug",
+    "name": "Извлечь плаг",
+    "description": "Медленное удаление устройства.",
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "comfort",
+      "intimate"
+    ],
+    "requireContexts": [
+      "act_insert_plug"
+    ],
+    "removeContexts": [
+      "act_insert_plug"
+    ],
+    "validTargets": [
+      "groin"
+    ],
+    "vector": {
+      "intensity": 5,
+      "valence": 3,
+      "sharpness": 1,
+      "contact": 8,
+      "novelty": 2,
+      "powerBase": 20
+    }
+  }
+]

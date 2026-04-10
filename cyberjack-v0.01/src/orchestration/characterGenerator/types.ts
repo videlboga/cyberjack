@@ -14,7 +14,9 @@ export interface LoreTagDefinition {
     narrative?: TagNarrative;
     category?: string;
     coreModifiers?: Record<string, number>;
+    weightModifiers?: Record<string, number>;
     initialContexts?: string[];
+    archetypes?: CharacterArchetype[];
 }
 
 export interface TagNarrative {
@@ -29,12 +31,15 @@ export interface TagNarrativeFragment {
     activationHooks?: string[];
 }
 
+export type CharacterArchetype = 'asset' | 'broker' | 'client' | 'observer';
+
 export interface GeneratorOptions {
     seed?: string;
     levelPickCounts?: Partial<Record<LoreLevel, number>>;
     includeTags?: string[];
     excludeTags?: string[];
     forced?: string[];
+    archetype?: CharacterArchetype;
 }
 
 export interface GeneratedTag extends LoreTagDefinition {
@@ -42,6 +47,7 @@ export interface GeneratedTag extends LoreTagDefinition {
 }
 
 export interface GeneratedCharacterContext {
+    archetype: CharacterArchetype;
     tags: GeneratedTag[];
     grouped: Record<LoreLevel, GeneratedTag[]>;
     loreNotes: string[];
@@ -67,4 +73,4 @@ export interface NarrativeSummary {
     activationParagraphs: string[];
 }
 
-export const LEVEL_ORDER: LoreLevel[] = ['world', 'faction', 'origin', 'persona', 'physical', 'psychological', 'event', 'trait'];
+export const LEVEL_ORDER: LoreLevel[] = ['world', 'origin', 'faction', 'persona', 'physical', 'psychological', 'event', 'trait'];

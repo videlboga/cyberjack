@@ -2,6 +2,7 @@ import { TAG_LIBRARY, findTagById } from './tagDefinitions';
 import { buildLoreNotes } from './loreSource';
 import { buildNarrativeSummary } from './narrativeBuilder';
 import {
+    CharacterArchetype,
     GeneratedCharacterContext,
     GeneratedTag,
     GeneratorOptions,
@@ -99,10 +100,10 @@ function requirementsMet(tag: LoreTagDefinition, selected: Set<string>): boolean
 }
 
 function pickWeighted<T extends { weight?: number }>(items: T[], rng: () => number): T {
-    const total = items.reduce((sum, item) => sum + (item.weight ?? 1), 0);
+    const total = items.reduce((sum, item) => sum + Math.max(item.weight ?? 1, 0), 0);
     let roll = rng() * total;
     for (const item of items) {
-        roll -= item.weight ?? 1;
+        roll -= Math.max(item.weight ?? 1, 0);
         if (roll <= 0) {
             return item;
         }
@@ -168,10 +169,28 @@ function pickCategoryTags(
     }
 }
 
+// No adaptRoleText anymore
+
 export function generateCharacterContext(options: GeneratorOptions = {}): GeneratedCharacterContext {
     const seedSource = options.seed ?? `auto-${Date.now()}-${Math.random()}`;
     const rng = createRng(hashSeed(seedSource));
     const excludeSet = new Set(options.excludeTags ?? []);
+    const archetype = options.archetype ?? 'asset';
+
+    const causeCategory = `${archetype}_cause`;
+
+    for (const level of LEVEL_ORDER) {
+        for (const tag of TAG_LIBRARY[level] || []) {
+            if (tag.archetypes && tag.archetypes.length > 0 && !tag.archetypes.includes(archetype)) {
+                excludeSet.add(tag.id);
+            }
+            // Only include the cause tags for the current archetype
+            if (tag.category?.endsWith('_cause') && tag.category !== causeCategory) {
+               excludeSet.add(tag.id);
+            }
+        }
+    }
+
     const grouped: Record<LoreLevel, GeneratedTag[]> = {
         world: [],
         faction: [],
@@ -202,7 +221,7 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
     }
 
     pickCoreTraitProfiles(grouped, selected, excludeSet, rng, CORE_TRAIT_TARGET);
-    pickCategoryTags('event', ASSET_CAUSE_CATEGORY, grouped, selected, excludeSet, rng, MIN_ASSET_CAUSE_TAGS);
+    pickCategoryTags('event', causeCategory, grouped, selected, excludeSet, rng, MIN_ASSET_CAUSE_TAGS);
 
     for (const level of LEVEL_ORDER) {
         const target = options.levelPickCounts?.[level] ?? DEFAULT_LEVEL_COUNTS[level];
@@ -221,8 +240,21 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
             if (!allowed.length) {
                 break;
             }
-            const picked = pickWeighted(allowed, rng);
-            addTag(picked, grouped, selected);
+
+            // Calculate effective weights based on weightModifiers of already selected tags
+            const selectedTags = Array.from(selected).map(ensureTagExists);
+            const candidates = allowed.map(tag => {
+                let effectiveWeight = tag.weight ?? 1;
+                for (const sTag of selectedTags) {
+                    if (sTag.weightModifiers && sTag.weightModifiers[tag.id]) {
+                        effectiveWeight += sTag.weightModifiers[tag.id];
+                    }
+                }
+                return { ...tag, weight: Math.max(effectiveWeight, 0) };
+            });
+
+            const picked = pickWeighted(candidates, rng);
+            addTag(ensureTagExists(picked.id), grouped, selected);
         }
     }
 
@@ -240,10 +272,12 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
                 tag.level !== 'world' &&
                 tag.level !== 'faction' &&
                 tag.level !== 'origin' &&
-                tag.category !== ASSET_CAUSE_CATEGORY
+                tag.category !== causeCategory
         )
         .flatMap(tag => tag.personaHooks || []);
+
     const narrative = buildNarrativeSummary(tags);
+
     const originStatements = Array.from(
         new Set(
             grouped.origin
@@ -254,7 +288,7 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
     const assetReasons = Array.from(
         new Set(
             tags
-                .filter(tag => tag.category === ASSET_CAUSE_CATEGORY)
+                .filter(tag => tag.category === causeCategory)
                 .map(tag => (tag.narrative?.history?.[0] || tag.summary || '').trim())
                 .filter(Boolean)
         )
@@ -280,6 +314,7 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
     };
 
     return {
+        archetype,
         tags,
         baseModifiers,
         initialContexts,

@@ -85,7 +85,7 @@ export function compileAction(input: ActionInput): CompiledAction {
 
     // 4. Get Contexts
     const activeContexts = input.activeContexts || [];
-    const contextModifiers = compileContextVector(activeContexts);
+    const contextModifiers = compileContextVector(activeContexts, baseWithDynamic);
 
     // 5. Merge
     const merged = mergeVectors(baseWithDynamic as CompiledAction, contextModifiers);

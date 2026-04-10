@@ -58,7 +58,14 @@ export async function buildPromptPayloadWithDB(
         try {
             const meta = JSON.parse(brokerResRow.metadata);
             if (meta && meta.assets && meta.assets.length > 0) {
-                extraLog = `[SYSTEM: Твой ассортимент на продажу: ${meta.assets.map((a: any) => `${a.name} (ID: ${a.id}) - Базовая цена: ${a.basePrice}cr`).join(', ')}. Вы можете предлагать скидку исходя из вектора Plasticity и Отношения.]`;
+                const discountFactor = 1 - ((core.attitude / 100) * (core.plasticity / 100));
+                const catalogItems = meta.assets.map((a: any) => {
+                    const price = Math.max(0, Math.floor(a.basePrice * discountFactor));
+                    return `"${a.name}" (ID: ${a.id}) за ${price}cr`;
+                });
+                const discountPercent = Math.round((1 - discountFactor) * 100);
+                
+                extraLog = `[SYSTEM: Текущий ассортимент твоих товаров: ${catalogItems.join(', ')}. Твоя симпатия к клиенту и готовность торговаться УЖЕ заложены в эти цены (ты делаешь скидку в ${discountPercent}% от базовой стоимости). Назови клиенту цены и, если сочтешь нужным, между делом упомяни, почему даешь такую скидку, или наоборот — почему не делаешь поблажек.]`;
             }
         } catch(e) {}
     }

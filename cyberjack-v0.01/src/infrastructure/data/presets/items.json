@@ -1,0 +1,93 @@
+[
+  {
+    "id": "eq_handcuffs",
+    "name": "Жесткие наручники",
+    "description": "Металлические наручники для надежной фиксации запястий.",
+    "type": "equipment",
+    "tags": ["metal", "restraint"]
+  },
+  {
+    "id": "eq_collar",
+    "name": "Управляемый ошейник",
+    "description": "Ошейник с возможностью удаленного шокового воздействия.",
+    "type": "equipment",
+    "tags": ["electronic", "control"]
+  },
+  {
+    "id": "eq_tens_unit",
+    "name": "Электро-стимулятор (TENS)",
+    "description": "Устройство для нейро-электрической стимуляции. Может доставлять как удовольствие, так и боль.",
+    "type": "equipment",
+    "tags": ["electronic", "stimulation"]
+  },
+  {
+    "id": "eq_plug",
+    "name": "Сенсорный плаг",
+    "description": "Телеметрический плаг для внутреннего контроля и стимуляции.",
+    "type": "equipment",
+    "tags": ["intimate", "stimulation"]
+  },
+  {
+    "id": "eq_speculum",
+    "name": "Медицинский расширитель",
+    "description": "Металлический инструмент для полного раскрытия и осмотра.",
+    "type": "equipment",
+    "tags": ["medical", "metal"]
+  },
+  {
+    "id": "eq_vibrator",
+    "name": "Многорежимный вибратор",
+    "description": "Интенсивное устройство для направленной гиперстимуляции.",
+    "type": "equipment",
+    "tags": ["electronic", "stimulation"]
+  },
+  {
+    "id": "eq_sensory_pod",
+    "name": "Сенсорная капсула",
+    "description": "Герметичная капсула для полной сенсорной депривации.",
+    "type": "equipment",
+    "tags": ["machine", "isolation"]
+  },
+  {
+    "id": "eq_fuck_machine",
+    "name": "Фак-машина",
+    "description": "Устройство для безжалостного механического воздействия.",
+    "type": "equipment",
+    "tags": ["machine", "intimate"]
+  },
+  {
+    "id": "eq_med_analyzer",
+    "name": "Медицинский сканер",
+    "description": "Фиксирующее кольцо для глубокого структурного сканирования.",
+    "type": "equipment",
+    "tags": ["machine", "medical"]
+  },
+  {
+    "id": "drug_truth_serum",
+    "name": "Сыворотка правды (Veritas-9)",
+    "description": "Снижает когнитивную защиту, развязывает язык и делает субъекта податливым.",
+    "type": "consumable",
+    "tags": ["chemical", "mental"]
+  },
+  {
+    "id": "drug_aphrodisiac",
+    "name": "Синтетический афродизиак (Eros-V)",
+    "description": "Резко повышает чувствительность и возбудимость нервной системы.",
+    "type": "consumable",
+    "tags": ["chemical", "stimulation"]
+  },
+  {
+    "id": "drug_painkiller",
+    "name": "Болеутоляющее (Numb-X)",
+    "description": "Подавляет болевые рецепторы, делая субъекта устойчивым к повреждениям.",
+    "type": "consumable",
+    "tags": ["chemical", "medical"]
+  },
+  {
+    "id": "drug_sensitizer",
+    "name": "Гипер-сенсибилизатор (NeuroSpike)",
+    "description": "Многократно усиливает любые тактильные и болевые ощущения.",
+    "type": "consumable",
+    "tags": ["chemical", "torture"]
+  }
+]

@@ -15,7 +15,12 @@ const state: SubjectCoreState = {
     attitude: 40,
 };
 
+import { pointStateRepo } from '../src/infrastructure/repositories';
+
+// ...
 subjectRepo.save(BROKER_ID, 'Voron (Fixer)', state);
+
+pointStateRepo.save(BROKER_ID, 'general', { pointId: 'general', localSensitivity: 50, localAttitude: 50 });
 
 db.prepare('UPDATE characters SET profile_json = ? WHERE id = ?').run(
     JSON.stringify({ prompt: "You are Voron, a black market fixer. You sell raw assets (people in cryo). Be strictly business, gruff." }),

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "trait_masochist",
+    "name": "Мазохист",
+    "description": "Субъект получает извращенное удовольствие от боли и жесткого физического воздействия.",
+    "rules": [
+      {
+        "trigger": { "requireActionTags": ["pain"] },
+        "overrides": { "valence": 3.0, "intensityMult": 1.3 }
+      },
+      {
+        "trigger": { "requireActionTags": ["impact", "blunt"] },
+        "overrides": { "valence": 4.0 }
+      }
+    ]
+  },
+  {
+    "id": "trait_submissive",
+    "name": "Покорный",
+    "description": "Психика субъекта легко поддается давлению и командам.",
+    "rules": [
+      {
+        "trigger": { "requireActionTags": ["command", "pressure"] },
+        "overrides": { "powerMult": 1.5, "intensityMult": 1.2, "valence": 2.0 }
+      },
+      {
+        "trigger": { "requireActionTags": ["demeaning"] },
+        "overrides": { "powerMult": 1.3, "valence": 1.0 }
+      }
+    ]
+  },
+  {
+    "id": "trait_defiant",
+    "name": "Бунтарь",
+    "description": "Субъект яростно сопротивляется любому контролю и приказам.",
+    "rules": [
+      {
+        "trigger": { "requireActionTags": ["command", "pressure"] },
+        "overrides": { "powerMult": 0.5, "valence": -6.0, "intensityMult": 1.5 }
+      },
+      {
+        "trigger": { "requireActionTags": ["restraint"] },
+        "overrides": { "valence": -8.0, "sharpnessMult": 1.5 }
+      }
+    ]
+  },
+  {
+    "id": "trait_chem_addict",
+    "name": "Хим-зависимый",
+    "description": "Резкое влечение к медицинским препаратам и инъекциям. Нахождение под веществами приносит сильную эйфорию.",
+    "rules": [
+      {
+        "trigger": { "requireActionTags": ["chemical"] },
+        "overrides": { "valence": 6.0, "intensityMult": 1.4, "powerMult": 1.2 }
+      },
+      {
+        "trigger": { "requireActionTags": ["piercing", "medical"] },
+        "overrides": { "valence": 3.0 }
+      }
+    ]
+  },
+  {
+    "id": "trait_somatophile",
+    "name": "Соматофил",
+    "description": "Повышенный интерес к чужому телу, фиксация на физическом контакте и изучении анатомии.",
+    "rules": [
+      {
+        "trigger": { "requireActionCategories": ["physical"], "requireTarget": "torso" },
+        "overrides": { "valence": 4.0, "contactMult": 1.5, "intensityMult": 1.2 }
+      },
+      {
+        "trigger": { "requireActionCategories": ["physical"], "requireTarget": "groin" },
+        "overrides": { "valence": 5.0, "contactMult": 1.8 }
+      }
+    ]
+  },
+  {
+    "id": "trait_narcissist",
+    "name": "Нарцисс (Самофиксация)",
+    "description": "Крайняя степень фиксации на собственном теле и ощущениях. Любое воздействие на себя воспринимается на порядок острее.",
+    "rules": [
+      {
+        "trigger": { "requireActionCategories": ["physical"] },
+        "overrides": { "intensityMult": 1.3, "noveltyMult": 0.5 }
+      },
+      {
+        "trigger": { "requireActionTags": ["affection"] },
+        "overrides": { "valence": 4.0, "intensityMult": 1.5 }
+      },
+      {
+        "trigger": { "requireActionTags": ["humiliation", "demeaning"] },
+        "overrides": { "valence": -7.0, "powerMult": 1.5 }
+      }
+    ]
+  },
+  {
+    "id": "trait_clinical_fetish",
+    "name": "Медицинский фетиш",
+    "description": "Необъяснимая тяга к холодной клинической обстановке, осмотрам и медицинским инструментам.",
+    "rules": [
+      {
+        "trigger": { "requireActionTags": ["clinical", "medical"] },
+        "overrides": { "valence": 5.0, "intensityMult": 1.2, "sharpnessMult": 0.8 }
+      },
+      {
+        "trigger": { "requireActionTags": ["vulnerable"] },
+        "overrides": { "valence": 3.0 }
+      }
+    ]
+  },
+  {
+    "id": "trait_technophile",
+    "name": "Технофил",
+    "description": "Получает глубокое удовлетворение от взаимодействия с механизмами, машинами и электронными приспособлениями.",
+    "rules": [
+      {
+        "trigger": { "requireActionTags": ["electronic", "machine"] },
+        "overrides": { "valence": 5.0, "powerMult": 1.3, "contactMult": 1.4 }
+      }
+    ]
+  },
+  {
+    "id": "trait_hypersensitive",
+    "name": "Гиперчувствительный",
+    "description": "Нервная система острее реагирует на любые физические стимулы.",
+    "rules": [
+      {
+        "trigger": { "requireActionCategories": ["physical"] },
+        "overrides": { "intensityMult": 1.5, "sharpnessMult": 1.4 }
+      },
+      {
+        "trigger": { "requireActionTags": ["stimulation"] },
+        "overrides": { "intensityMult": 1.5, "powerMult": 1.3 }
+      }
+    ]
+  },
+  {
+    "id": "trait_stoic",
+    "name": "Стоик",
+    "description": "Притупленные эмоции и высокий болевой порог.",
+    "rules": [
+      {
+        "trigger": { "requireActionCategories": ["physical"] },
+        "overrides": { "intensityMult": 0.7, "sharpnessMult": 0.6 }
+      },
+      {
+        "trigger": { "requireActionTags": ["mental"] },
+        "overrides": { "powerMult": 0.6 }
+      }
+    ]
+  }
+]

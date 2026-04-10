@@ -1,12 +1,48 @@
-const fs = require('fs');
+import fs from 'fs';
+import path from 'path';
 
-let stContent = fs.readFileSync('src/adapters/sillyTavernAdapter.ts', 'utf8');
+const PRESETS_DIR = 'src/infrastructure/data/presets';
+const OUTPUT_ACTIONS = 'src/infrastructure/data/presets/actions.json';
+const OUTPUT_ITEMS = 'src/infrastructure/data/presets/items.json';
 
-stContent = stContent.replace(/sendToSillyTavern/g, 'generateCharacterReply');
-stContent = stContent.replace(/ST_MODEL/g, 'MODEL');
-stContent = stContent.replace(/export async function sendNarratorDescription/g, 'export async function generateNarratorReply');
-stContent = stContent.replace(/sillyTavernSystemPrefix/g, 'narrativeSystemPrefix'); // just config keys, probably don't rename this yet
+// Simple regex to strip JS comments from JSON before parsing
+function stripComments(jsonc) {
+    return jsonc
+        .replace(/\/\*[\s\S]*?\*\//g, '') 
+        .replace(/\/\/.*/g, '');
+}
 
-// Just simple rename string:
-fs.writeFileSync('src/adapters/llmAdapterExt.ts', stContent);
+function processFiles(pattern, outputFile) {
+    const files = fs.readdirSync(PRESETS_DIR).filter(f => f.startsWith(pattern) && f.endsWith('.json') && f !== path.basename(outputFile));
+    
+    let combined = [];
+    
+    for (const file of files) {
+        console.log(`Reading ${file}...`);
+        const p = path.join(PRESETS_DIR, file);
+        const raw = fs.readFileSync(p, 'utf8');
+        try {
+            const clean = stripComments(raw);
+            const parsed = JSON.parse(clean);
+            if (Array.isArray(parsed)) {
+                combined = combined.concat(parsed);
+            } else {
+                console.warn(`${file} is not an array, skipping.`);
+            }
+        } catch (e) {
+            console.error(`Error parsing ${file}: ${e.message}`);
+        }
+    }
+    
+    fs.writeFileSync(OUTPUT_ACTIONS.replace('actions.json', outputFile), JSON.stringify(combined, null, 2));
+    console.log(`Merged ${files.length} files into ${outputFile} (total items: ${combined.length})`);
+    
+    // Delete chunks
+    for(const file of files) {
+        fs.unlinkSync(path.join(PRESETS_DIR, file));
+    }
+}
+
+processFiles('actions_', 'actions.json');
+processFiles('items_', 'items.json');
 

@@ -9,7 +9,8 @@ const mapCharacter = (row: any): Character => ({
     kind: row.kind,
     subjectId: row.subject_id,
     playerId: row.player_id,
-    currentSceneId: row.current_scene_id
+    currentSceneId: row.current_scene_id,
+    profileJson: row.profile_json || null
 });
 
 const mapRelation = (row: any): CharacterRelation => ({

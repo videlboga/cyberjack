@@ -9,13 +9,19 @@ const STRAIN_MULTIPLIERS: Record<string, number> = {
     novelty: 0.5
 };
 
-export function compileContextVector(activeContexts: { actionId: string; strain?: number }[]): Partial<CompiledAction> {
+export function compileContextVector(
+    activeContexts: { actionId: string; strain?: number }[],
+    baseAction?: Partial<CompiledAction>
+): Partial<CompiledAction> {
     const combinedModifiers: Record<string, number> = {};
 
     for (const ctx of activeContexts) {
         const presetResult = presetRepo.getActionPreset(ctx.actionId);
-        const modifiers = presetResult ? presetResult.vector as Partial<CompiledAction> : null;
+        const config = presetResult?.contextConfig;
         
+        // Use config.modifiers if explicitly provided, otherwise fallback to the primary vector.
+        const modifiers = config?.modifiers || (presetResult ? presetResult.vector as Partial<CompiledAction> : null);
+
         if (modifiers) {
             for (const [key, val] of Object.entries(modifiers)) {
                 if (typeof val === 'number') {
@@ -30,6 +36,37 @@ export function compileContextVector(activeContexts: { actionId: string; strain?
                         }
 
                         combinedModifiers[key] = (combinedModifiers[key] || 0) + adjustedVal;
+                    }
+                }
+            }
+        }
+        
+        if (config && config.traitRules && baseAction) {
+            const actionTags = baseAction.tags || [];
+            
+            for (const rule of config.traitRules) {
+                const trigger = rule.trigger;
+                let triggerFired = true;
+
+                if (trigger.requireActionTags && trigger.requireActionTags.length > 0) {
+                    const hasAllTags = trigger.requireActionTags.every(t => actionTags.includes(t));
+                    if (!hasAllTags) {
+                        triggerFired = false;
+                    }
+                }
+
+                if (triggerFired && trigger.minIntensity !== undefined) {
+                    const actionIntensity = baseAction.intensity || 0;
+                    if (actionIntensity < trigger.minIntensity) {
+                        triggerFired = false;
+                    }
+                }
+
+                if (triggerFired && rule.overrides) {
+                    for (const [key, val] of Object.entries(rule.overrides)) {
+                        if (typeof val === 'number') {
+                            combinedModifiers[key] = (combinedModifiers[key] || 0) + val;
+                        }
                     }
                 }
             }

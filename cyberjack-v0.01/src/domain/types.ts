@@ -22,6 +22,7 @@ export interface Character {
     subjectId?: string | null;
     playerId?: string | null;
     currentSceneId?: string | null;
+    profileJson?: string | null;
 }
 
 export interface CharacterRelation {
@@ -57,8 +58,24 @@ export interface ActionSourceInfo {
     parserVersion?: string;
 }
 
+export interface TraitRule {
+    trigger: {
+        requireActionTags?: string[];
+        requireAnatomyTags?: string[];
+        minIntensity?: number;
+    };
+    overrides: {
+        valence?: number;
+        intensityMult?: number;
+        attitudeShiftDelta?: number;
+        opennessDelta?: number;
+        capacityDelta?: number;
+        pleasureDelta?: number;
+    };
+}
+
 export interface ContextConfig {
-    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition";
+    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition" | "trait";
     occupiesPoints: string[];
     exclusiveWithinPoint?: boolean;
     blocksPoints?: string[];
@@ -69,6 +86,8 @@ export interface ContextConfig {
     duration?: number;
     requiresItem?: string;
     requiresSceneObject?: string;
+    modifiers?: Partial<CompiledAction>;
+    traitRules?: TraitRule[];
 }
 
 export interface CharacterItem {
@@ -128,6 +147,7 @@ export interface CompiledAction {
     novelty_mult?: number;
 
     contextConfig?: ContextConfig;
+    requireContexts?: string[];
     removeContexts?: string[];
     requiresItem?: string;
     requiresSceneObject?: string;

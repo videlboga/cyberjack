@@ -1,9 +1,10 @@
 import { GeneratedCharacterContext } from './types';
 
-interface PromptSectionsOptions {
+export interface PromptSectionsOptions {
     identity: string;
     history: string;
     instructions: string;
+    archetypeBlock?: string;
     traitsTitle?: string;
     loreTitle?: string;
     identityBlocks?: string[];
@@ -13,6 +14,7 @@ interface PromptSectionsOptions {
     assetBlocks?: string[];
     originTitle?: string;
     assetTitle?: string;
+    archetypeTitle?: string;
 }
 
 export interface PromptSectionsResult {
@@ -24,6 +26,7 @@ export interface PromptSectionsResult {
     identityText: string;
     historyText: string;
     activationText: string;
+    archetypeText?: string;
     originText?: string;
     assetText?: string;
 }
@@ -36,6 +39,7 @@ export function composePromptSections(
     const loreTitle = options.loreTitle || '[Записки из лора]';
     const originTitle = options.originTitle || '[Происхождение]';
     const assetTitle = options.assetTitle || '[Почему ты стал активом]';
+    const archetypeTitle = options.archetypeTitle || '[Текущая роль]';
 
     const hasIdentityBlocks = Array.isArray(options.identityBlocks);
     const hasHistoryBlocks = Array.isArray(options.historyBlocks);
@@ -63,13 +67,14 @@ export function composePromptSections(
 
     const originBlock = originText ? `${originTitle}\n${originText}` : '';
     const assetBlock = assetText ? `${assetTitle}\n${assetText}` : '';
+    const archetypeBlockDef = options.archetypeBlock ? `${archetypeTitle}\n${options.archetypeBlock}` : '';
 
     let baseInfoBlock = '';
     if (context.baseProfile) {
         baseInfoBlock = `[Базовая информация]\n- Имя: ${context.baseProfile.name}\n- Возраст: ${context.baseProfile.age}\n- Анатомия: ${context.baseProfile.anatomy}`;
     }
 
-    const personaWithoutTraits = [baseInfoBlock, identityText, historyText, activationText]
+    const personaWithoutTraits = [baseInfoBlock, archetypeBlockDef, identityText, historyText, activationText]
         .filter(Boolean)
         .join('\n\n');
 
@@ -103,6 +108,7 @@ export function composePromptSections(
         identityText,
         historyText,
         activationText,
+        archetypeText: options.archetypeBlock,
         originText,
         assetText
     };
