@@ -1,0 +1,347 @@
+.game-app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #06080d;
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(10, 15, 25, 0.9);
+  border-bottom: 1px solid #1e293b;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.player-stats {
+  font-size: 14px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.top-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.icon-btn, .time-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover, .time-btn:hover {
+  background: #334155;
+  color: #fff;
+}
+
+.game-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Map / Nodes Layer */
+.map-view {
+  flex: 0 0 320px;
+  background: #0f172a;
+  border-right: 1px solid #1e293b;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  position: relative;
+}
+
+.map-node {
+  width: 100%;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.map-node.active {
+  border-color: #3b82f6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+}
+
+.map-node h4 {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.map-path {
+  width: 2px;
+  height: 40px;
+  background: #334155;
+}
+
+.avatar-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+}
+
+.avatar.player {
+  background: #1c1917;
+  border: 2px solid #57534e;
+  color: #d6d3d1;
+}
+
+.avatar.subject {
+  background: #172554;
+  border: 2px solid #3b82f6;
+  color: #bfdbfe;
+}
+
+.bubble {
+  position: absolute;
+  top: -24px;
+  right: -24px;
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: float 2s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Timeline / Chat */
+.chat-timeline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #020617;
+  position: relative;
+}
+
+.log-entries {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.log-entry {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.log-entry.system {
+  background: #1e1b4b;
+  color: #a5b4fc;
+  border: 1px solid #312e81;
+  align-self: center;
+  font-size: 12px;
+  text-align: center;
+  max-width: 60%;
+}
+
+.log-entry.narrator {
+  background: transparent;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 8px 16px;
+  border-left: 2px solid #475569;
+  border-radius: 0 12px 12px 0;
+}
+
+.chat-input-bar {
+  padding: 16px;
+  background: #0f172a;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  gap: 12px;
+}
+
+.chat-input-bar input {
+  flex: 1;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #f8fafc;
+  outline: none;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.chat-input-bar input:focus {
+  border-color: #3b82f6;
+}
+
+.chat-input-bar button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chat-input-bar button:hover {
+  background: #1d4ed8;
+}
+
+/* Status Panel */
+.status-panel {
+  flex: 0 0 300px;
+  background: #0f172a;
+  border-left: 1px solid #1e293b;
+  padding: 24px;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-out;
+  display: none;
+}
+
+.status-panel.open {
+  transform: translateX(0);
+  display: block;
+}
+
+.subject-details h3 {
+  margin: 0 0 24px 0;
+  font-size: 18px;
+  color: #f8fafc;
+}
+
+.stat-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.stat progress {
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  border: none;
+}
+
+.stat progress::-webkit-progress-bar {
+  background: #1e293b;
+  border-radius: 3px;
+}
+
+.stat progress::-webkit-progress-value {
+  background: #3b82f6;
+  border-radius: 3px;
+}
+
+.active-contexts {
+  margin-bottom: 32px;
+}
+
+.active-contexts h4, .quick-actions-list h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.context-pill {
+  display: inline-block;
+  background: #1e1b4b;
+  color: #c7d2fe;
+  border: 1px solid #3730a3;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  margin: 0 6px 6px 0;
+}
+
+.quick-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-actions-list button {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-actions-list button:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.empty-state {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
