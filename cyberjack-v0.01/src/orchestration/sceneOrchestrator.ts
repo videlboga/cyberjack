@@ -93,7 +93,8 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
             : 0.5;
         const contextBonus = activeContextLabels.length ? cfg.contextModifier : 0;
         const opennessNorm = normalize(core?.openness ?? 50);
-        const resourceValue = Math.max(0, playerState?.resources?.credits ?? 0);
+        const playerCredits = playerState?.resources?.credits?.amount ?? playerState?.resources?.credits ?? 0;
+        const resourceValue = Math.max(0, Number(playerCredits));
         const resourceScale = cfg.resourceScale || 100;
         const resourceNorm = normalize(resourceValue, 0, resourceScale);
 
@@ -167,7 +168,8 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
                             const sceneCost = scene?.actionCosts?.[a.actionId];
                             let requiredAP = 0;
                             if (sceneCost) {
-                                requiredAP = Number(sceneCost.actionPoints ?? sceneCost.ap ?? sceneCost.apCost ?? sceneCost.action_points ?? 0);
+                                const costRecord = (sceneCost as any).consume || sceneCost;
+                                requiredAP = Number(costRecord.actionPoints ?? costRecord.ap ?? costRecord.apCost ?? costRecord.action_points ?? 0);
                             }
                             const curAP = Number(actorResources?.resources?.actionPoints ?? 0);
                             return !(requiredAP > 0 && curAP < requiredAP);

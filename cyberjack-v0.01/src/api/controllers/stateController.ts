@@ -2,22 +2,7 @@ import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
 import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo } from '../../infrastructure/repositories';
 import { activeConfig, updateConfig } from '../../prompts/config';
-
-const DEFAULT_PLAYER = {
-    id: 'PL-1',
-    resources: {
-        credits: 0,
-        authority: 0,
-        timeBudget: 0
-    }
-};
-
-function normalizePlayer(playerObj?: { id: string; resources: Record<string, number> } | null) {
-    const src = playerObj || DEFAULT_PLAYER;
-    characterRepo.ensureCharacter(src.id, src.id === 'PL-1' ? 'Калибратор' : src.id);
-    return { ...DEFAULT_PLAYER, ...src };
-}
-
+import { normalizePlayer } from './playerController';
 
 export const getState = (req: Request, res: Response) => {
     const subjectId = (req.query.subjectId as string) || 'S-01';

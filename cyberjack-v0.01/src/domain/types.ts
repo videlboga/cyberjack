@@ -10,6 +10,7 @@ export interface SubjectCoreState {
     baselineOpenness?: number;
     baselinePlasticity?: number;
     baselineAttitude?: number;
+    flags?: string[];
 }
 
 export type CharacterKind = 'subject' | 'player' | 'npc';
@@ -199,7 +200,19 @@ export interface GameEvent {
     timestamp: string;
     payload: Record<string, unknown>;
 }
-export interface ResourceState { id: string; resources: Record<string, number>; }
+export interface CharacterResource {
+    characterId: string;
+    resourceKey: string;
+    amount: number;
+    maxAmount?: number;
+    regenRate?: number;
+    metadata?: Record<string, unknown>;
+}
+
+export interface ResourceState {
+    id: string; // character id
+    resources: Record<string, CharacterResource>;
+}
 
 export interface SceneTransitionRule {
     targetSceneId: string;
@@ -210,12 +223,17 @@ export interface SceneTransitionRule {
     };
 }
 
+export interface ActionCostDefinition {
+    require?: Record<string, number>;
+    consume?: Record<string, number>;
+}
+
 export interface Scene {
     id: string;
     title?: string;
     description?: string;
     availableActions: string[];
-    actionCosts?: Record<string, Record<string, number>>;
+    actionCosts?: Record<string, ActionCostDefinition>;
     transitions?: SceneTransitionRule[];
     characters?: SceneCharacterPresence[];
     slots?: string[];
@@ -228,7 +246,50 @@ export interface SceneCharacterPresence {
     presenceState: string;
     slotId?: string;
 }
-export interface Mission { id: string; progress: number; }
+export interface Faction {
+    id: string;
+    name: string;
+    type: 'syndicate' | 'research_center' | 'security' | 'other';
+    description?: string;
+    meta?: Record<string, unknown>;
+}
+
+export interface PlayerFactionState {
+    playerId: string;
+    factionId: string;
+    relation: number;
+    trust: number;
+    accessLevel: number;
+    flags: string[];
+}
+
+export interface AssetContractCondition {
+    type: 'flag' | 'attitude' | 'trait' | 'resource' | 'custom';
+    key?: string; // e.g. "masochistic_tendencies"
+    operator?: '>' | '<' | '==' | '!=';
+    value?: any; 
+}
+
+export interface AssetContract {
+    id: string;
+    issuerId: string; // reference to Faction
+    title: string;
+    description: string;
+    state: 'available' | 'accepted' | 'completed' | 'failed' | 'expired';
+    acceptedByPlayerId?: string;
+    attachedSubjectId?: string; // asset assigned to order
+    deadlineTick?: number; 
+    conditions: AssetContractCondition[];
+    rewards: {
+        credits?: number;
+        trust?: number;
+        items?: string[];
+    };
+    penalties?: {
+        credits?: number;
+        trust?: number;
+    };
+}
 export interface AnatomyPointPreset {
     id: string;
     label: string;
@@ -285,6 +346,12 @@ export interface ActorDecision {
     actorId: string;
     kind: 'reactive' | 'proactive';
     reason?: string;
+    mechanicalAction?: {
+        actionId: string;
+        pointId: string;
+        targetId: string;
+        score?: number;
+    };
 }
 
 export interface OrchestratedTurn {
@@ -321,7 +388,7 @@ export interface TickBundle {
     scenario?: {
         nextSceneId: string | null;
         updatedResources: ResourceState;
-        updatedMission: Mission | null;
+        updatedContracts: AssetContract[];
         success: boolean;
         error?: string;
     };

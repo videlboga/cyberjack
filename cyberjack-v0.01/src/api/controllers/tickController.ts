@@ -13,17 +13,7 @@ import { buildUserPromptForCurrentTick } from '../../prompts/openRouterPromptBui
 import { maybeSummarizeChat } from '../../services/chatSummary';
 import { recordMemoryEvent } from '../../services/memoryLayer';
 import { chatMemoryRepo } from '../../infrastructure/repositories';
-
-// Simple constants
-const DEFAULT_PLAYER = {
-    id: 'PL-1',
-    resources: { credits: 0, authority: 0, timeBudget: 0 }
-};
-
-function normalizePlayer(resourcesObj?: { id: string; resources: Record<string, number> } | null) {
-    const src = resourcesObj || DEFAULT_PLAYER;
-    return { ...DEFAULT_PLAYER, ...src };
-}
+import { normalizePlayer } from './playerController';
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';

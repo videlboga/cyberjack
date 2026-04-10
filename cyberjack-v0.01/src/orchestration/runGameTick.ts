@@ -45,7 +45,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         throw new Error(validation.errorReason || `Action "${payload.presetId}" blocked by scenario.`);
     }
 
-    const actionCosts = state.scene.actionCosts?.[payload.presetId] || { actionPoints: 15 };
+    const actionCosts = state.scene.actionCosts?.[payload.presetId] || { consume: { actionPoints: 15 } };
     if (actionCosts && Object.keys(actionCosts).length) {
         try {
             const nextResources = applyResourceCosts(state.resources, actionCosts);
@@ -199,7 +199,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             scene: state.scene,
             resources: state.resources,
             core: engineOutput.nextCore,
-            mission: null
+            contracts: state.contracts
         },
         { actionId: payload.presetId }
     );
@@ -207,21 +207,24 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     if (scenarioResult.updatedResources !== state.resources) {
         state.resources = scenarioResult.updatedResources;
     }
+    // We can do something with scenarioResult.updatedContracts later if needed.
+    if (scenarioResult.updatedCore && scenarioResult.updatedCore !== engineOutput.nextCore) {
+        engineOutput.nextCore = scenarioResult.updatedCore;
+    }
 
-    // === Action Points (AP) regeneration per tick ===
+    // === Resource Regeneration per tick ===
     try {
         const cur = state.resources.resources || {};
-        const curAP = Number(cur.actionPoints ?? 0);
-        const maxAP = Number(cur.maxActionPoints ?? 100);
-        // base regen and capacity-based bonus
-        const baseRegen = 5; // base AP per tick
-        const capacity = Number(state.core?.capacity ?? 50);
-        const capacityBonus = Math.round((capacity / 100) * 5); // up to +5
-        const regen = Math.max(1, baseRegen + capacityBonus);
-        const nextAP = Math.min(maxAP, curAP + regen);
-        state.resources.resources = { ...cur, actionPoints: nextAP };
+        for (const [key, res] of Object.entries(cur)) {
+            if (res.regenRate && res.regenRate !== 0) {
+                res.amount += res.regenRate;
+                if (res.maxAmount !== undefined && res.amount > res.maxAmount) {
+                    res.amount = res.maxAmount;
+                }
+            }
+        }
     } catch (err) {
-        console.warn('AP regen error', err);
+        console.warn('Resource regen error', err);
     }
 
     if (scenarioResult.nextSceneId && scenarioResult.nextSceneId !== state.scene.id) {

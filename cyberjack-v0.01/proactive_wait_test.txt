@@ -1,0 +1,40 @@
+nohup: ввод игнорируется
+=== STARTING PROACTIVE NPC SIMULATION (7 TURNS) ===
+
+
+[36m--- TICK 1 ---[0m
+[33m[Time passes]:[0m Player waits, giving initiative to NPC.
+
+[State Update]: Openness: 70.43, Attitude: 60.82, Plasticity: 49.97
+
+[36m--- TICK 2 ---[0m
+[33m[Time passes]:[0m Player waits, giving initiative to NPC.
+
+[35m[S-GEN-1 (proactive)]:[0m "Я хочу, чтобы вы поняли. И чтобы это не было просто так, для отчёта."
+  [90m[Motiv]: neutral[0m
+
+[State Update]: Openness: 70.42, Attitude: 60.81, Plasticity: 49.94
+
+[36m--- TICK 3 ---[0m
+[33m[Time passes]:[0m Player waits, giving initiative to NPC.
+
+[State Update]: Openness: 70.41, Attitude: 60.81, Plasticity: 49.92
+
+[36m--- TICK 4 ---[0m
+[33m[Time passes]:[0m Player waits, giving initiative to NPC.
+
+[State Update]: Openness: 70.40, Attitude: 60.80, Plasticity: 49.89
+
+[36m--- TICK 5 ---[0m
+[33m[Time passes]:[0m Player waits, giving initiative to NPC.
+Status Error: Insufficient resources: actionPoints. Required: 15, available: 12.
+
+[36m--- TICK 6 ---[0m
+[33m[Time passes]:[0m Player waits, giving initiative to NPC.
+Status Error: Insufficient resources: actionPoints. Required: 15, available: 12.
+
+[36m--- TICK 7 ---[0m
+[33m[Time passes]:[0m Player waits, giving initiative to NPC.
+Status Error: Insufficient resources: actionPoints. Required: 15, available: 12.
+
+=== SIMULATION COMPLETE ===

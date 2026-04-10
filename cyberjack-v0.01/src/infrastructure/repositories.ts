@@ -572,23 +572,66 @@ export const activeContextsRepo = {
 };
 
 export const resourceRepo = {
-    save(player: ResourceState) {
+    save(state: ResourceState) {
         const stmt = db.prepare(`
-            INSERT INTO character_resources (id, resources)
-            VALUES (?, ?)
-            ON CONFLICT(id) DO UPDATE SET resources = excluded.resources
+            INSERT INTO character_resources (character_id, resource_key, amount, max_amount, regen_rate, metadata)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(character_id, resource_key) DO UPDATE SET
+                amount = excluded.amount,
+                max_amount = excluded.max_amount,
+                regen_rate = excluded.regen_rate,
+                metadata = excluded.metadata
         `);
-        stmt.run(player.id, JSON.stringify(player.resources));
-        characterRepo.ensureCharacter(player.id, player.id);
+        db.transaction(() => {
+            for (const [key, res] of Object.entries(state.resources)) {
+                stmt.run(
+                    state.id, 
+                    key, 
+                    res.amount, 
+                    res.maxAmount ?? null, 
+                    res.regenRate ?? null, 
+                    JSON.stringify(res.metadata || {})
+                );
+            }
+        })();
+        characterRepo.ensureCharacter(state.id, state.id);
     },
     get(id: string): ResourceState | null {
-        const stmt = db.prepare('SELECT * FROM character_resources WHERE id = ?');
-        const row = stmt.get(id) as any;
-        if (!row) return null;
+        const rows = db.prepare('SELECT * FROM character_resources WHERE character_id = ?').all(id) as any[];
+        if (!rows.length) return null;
+        
+        const resources: Record<string, any> = {};
+        for (const row of rows) {
+            resources[row.resource_key] = {
+                characterId: row.character_id,
+                resourceKey: row.resource_key,
+                amount: row.amount,
+                maxAmount: row.max_amount !== null ? row.max_amount : undefined,
+                regenRate: row.regen_rate !== null ? row.regen_rate : undefined,
+                metadata: JSON.parse(row.metadata || '{}')
+            };
+        }
         return {
-            id: row.id,
-            resources: JSON.parse(row.resources)
+            id,
+            resources
         };
+    },
+    applyRegeneration(characterIds?: string[]) {
+        // Regenerate up to max_amount
+        db.prepare(`
+            UPDATE character_resources
+            SET amount = MIN(amount + regen_rate, max_amount)
+            WHERE regen_rate IS NOT NULL 
+              AND max_amount IS NOT NULL 
+              AND amount < max_amount
+        `).run();
+
+        // Regenerate unbounded
+        db.prepare(`
+            UPDATE character_resources
+            SET amount = amount + regen_rate
+            WHERE regen_rate IS NOT NULL AND max_amount IS NULL
+        `).run();
     }
 };
 

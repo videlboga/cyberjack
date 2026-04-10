@@ -5,8 +5,14 @@ export const db = new Database('cyberjack.sqlite', { verbose: console.log });
 // Initialize schema
 db.exec(`
   CREATE TABLE IF NOT EXISTS character_resources (
-    id TEXT PRIMARY KEY,
-    resources TEXT NOT NULL -- JSON string for resources map
+    character_id TEXT NOT NULL,
+    resource_key TEXT NOT NULL,
+    amount REAL NOT NULL,
+    max_amount REAL,
+    regen_rate REAL,
+    metadata TEXT DEFAULT '{}',
+    PRIMARY KEY (character_id, resource_key),
+    FOREIGN KEY (character_id) REFERENCES characters(id)
   );
 
   CREATE TABLE IF NOT EXISTS characters (
@@ -93,6 +99,39 @@ db.exec(`
     baseline_local_attitude REAL,
     baseline_local_openness REAL,
     PRIMARY KEY (subject_id, point_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS factions (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    description TEXT,
+    meta TEXT DEFAULT '{}'
+  );
+
+  CREATE TABLE IF NOT EXISTS player_faction_states (
+    player_id TEXT NOT NULL,
+    faction_id TEXT NOT NULL,
+    relation REAL DEFAULT 0,
+    trust REAL DEFAULT 0,
+    access_level INTEGER DEFAULT 1,
+    flags TEXT DEFAULT '[]',
+    PRIMARY KEY (player_id, faction_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS asset_contracts (
+    id TEXT PRIMARY KEY,
+    issuer_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    state TEXT DEFAULT 'available',
+    accepted_by_player_id TEXT,
+    attached_subject_id TEXT,
+    deadline_tick INTEGER,
+    conditions TEXT DEFAULT '[]',
+    rewards TEXT DEFAULT '{}',
+    penalties TEXT DEFAULT '{}',
+    FOREIGN KEY (issuer_id) REFERENCES factions(id)
   );
 
   CREATE TABLE IF NOT EXISTS event_logs (

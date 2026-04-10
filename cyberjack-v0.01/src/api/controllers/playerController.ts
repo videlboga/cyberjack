@@ -1,32 +1,41 @@
 import { Request, Response } from 'express';
 import { resourceRepo, characterRepo, characterRelationRepo } from '../../infrastructure/repositories';
+import { ResourceState } from '../../domain/types';
 
 const DEFAULT_PLAYER = {
     id: 'PL-1',
     resources: {
-        credits: 0,
-        authority: 0,
-        timeBudget: 0
+        credits: { characterId: 'PL-1', resourceKey: 'credits', amount: 0 },
+        authority: { characterId: 'PL-1', resourceKey: 'authority', amount: 0 }
     }
 };
 
-function normalizePlayer(playerObj?: { id: string; resources: Record<string, number> } | null) {
+export function normalizePlayer(playerObj?: ResourceState | null) {
     const src = playerObj || DEFAULT_PLAYER;
     characterRepo.ensureCharacter(src.id, src.id === 'PL-1' ? 'Калибратор' : src.id);
-    return { ...DEFAULT_PLAYER, ...src };
+    
+    const flatResources: Record<string, number> = {};
+    for (const [key, res] of Object.entries(src.resources)) {
+        flatResources[key] = res.amount;
+    }
+    
+    return { id: src.id, resources: flatResources };
 }
-
 
 export const updatePlayer = (req: Request, res: Response) => {
     try {
         const { playerId = 'PL-1', resources = {} } = req.body || {};
-        const existing = normalizePlayer(resourceRepo.get(playerId));
-        const nextResources: Record<string, number> = { ...existing.resources };
-
+        const existing = resourceRepo.get(playerId) || { id: playerId, resources: {} };
+        const nextResources = { ...existing.resources };
+        
         for (const [key, value] of Object.entries(resources || {})) {
             const numeric = Number(value);
             if (!Number.isFinite(numeric)) continue;
-            nextResources[key] = numeric;
+            if (nextResources[key]) {
+                nextResources[key].amount = numeric;
+            } else {
+                nextResources[key] = { characterId: playerId, resourceKey: key, amount: numeric };
+            }
         }
 
         const nextPlayer = { id: playerId, resources: nextResources };
@@ -35,9 +44,7 @@ export const updatePlayer = (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
-};
-
-export const updateRelations = (req: Request, res: Response) => {
+};export const updateRelations = (req: Request, res: Response) => {
     try {
         const { fromId, toId, knows, present, canInteract, attitude } = req.body || {};
         if (!fromId || !toId) {

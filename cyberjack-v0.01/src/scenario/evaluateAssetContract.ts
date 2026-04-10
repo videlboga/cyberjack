@@ -1,0 +1,100 @@
+import { AssetContract, SubjectCoreState, AssetContractCondition } from '../domain/types';
+
+export interface EvaluationResult {
+    contract: AssetContract;
+    core: SubjectCoreState;
+    metRequirements: boolean;
+}
+
+export function evaluateAllContracts(
+    contracts: AssetContract[],
+    core: SubjectCoreState,
+    context: Record<string, any>
+): SubjectCoreState {
+    let currentCore = core;
+    for (const contract of contracts) {
+        const res = evaluateAssetContract(contract, currentCore, context);
+        currentCore = res.core;
+    }
+    return currentCore;
+}
+
+/**
+ * Проверяет текущее состояние актива и решает, соответствует ли он контракту.
+ * Если да, вешает на актив флаг готовности к сдаче.
+ */
+export function evaluateAssetContract(
+    contract: AssetContract, 
+    core: SubjectCoreState, 
+    context: Record<string, any>
+): EvaluationResult {
+    if (contract.state !== 'accepted') {
+        return { contract, core, metRequirements: false };
+    }
+
+    let allCondsMet = true;
+
+    if (contract.conditions && contract.conditions.length > 0) {
+        for (const cond of contract.conditions) {
+            allCondsMet = allCondsMet && checkCondition(cond, core, context);
+            if (!allCondsMet) break; // Оптимизация
+        }
+    } else {
+        // Если условий нет — контракт невозможно автоматически засчитать собранным (или он просто пустой)
+        allCondsMet = false; 
+    }
+
+    const readyFlag = `contract_ready:${contract.id}`;
+    let updatedCore = { ...core, flags: core.flags || [] };
+    let changed = false;
+
+    if (allCondsMet) {
+        // Актив готов. Вешаем флаг, чтобы в UI показать отметку.
+        if (!updatedCore.flags.includes(readyFlag)) {
+            updatedCore.flags = [...updatedCore.flags, readyFlag];
+            changed = true;
+        }
+    } else {
+        // Если параметры упали (актив "испортился"), снимаем флаг
+        if (updatedCore.flags.includes(readyFlag)) {
+            updatedCore.flags = updatedCore.flags.filter(f => f !== readyFlag);
+            changed = true;
+        }
+    }
+
+    return { 
+        contract, 
+        core: changed ? updatedCore : core, 
+        metRequirements: allCondsMet 
+    };
+}
+
+function checkCondition(cond: AssetContractCondition, core: SubjectCoreState, context: Record<string, any>): boolean {
+    if (cond.type === 'attitude') {
+        return compareValues(core.attitude, cond.operator, cond.value);
+    }
+    if (cond.type === 'flag' || cond.type === 'trait') {
+        const hasFlag = core.flags?.includes(cond.key || '');
+        // Если требуется отсутствие флага? Можно добавить operator '!='
+        if (cond.operator === '!=') return !hasFlag;
+        return !!hasFlag;
+    }
+    // базовые статы
+    if (cond.type === 'custom' && cond.key) {
+        const val = (core as any)[cond.key];
+        if (val !== undefined) {
+             return compareValues(val, cond.operator, cond.value);
+        }
+    }
+    return false;
+}
+
+function compareValues(actual: any, operator: string = '==', target: any): boolean {
+    switch (operator) {
+        case '>': return actual > target;
+        case '<': return actual < target;
+        case '==': return actual == target;
+        case '!=': return actual != target;
+        default: return actual === target;
+    }
+}

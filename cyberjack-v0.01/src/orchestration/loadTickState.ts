@@ -1,6 +1,7 @@
 // src/orchestration/loadTickState.ts
 import { subjectRepo, pointStateRepo, resourceRepo, sceneRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
-import { SubjectCoreState, SubjectPointState, ResourceState, Scene, CharacterRelation, Character } from '../domain/types';
+import { contractRepo } from '../infrastructure/contractRepo';
+import { SubjectCoreState, SubjectPointState, ResourceState, Scene, CharacterRelation, Character, AssetContract } from '../domain/types';
 
 export interface TickState {
     core: SubjectCoreState;
@@ -10,6 +11,7 @@ export interface TickState {
     relation: CharacterRelation;
     subjectCharacter: Character;
     playerCharacter: Character;
+    contracts: AssetContract[];
 }
 
 export function loadTickState(subjectId: string, pointId: string, playerId: string, sceneId: string): TickState {
@@ -27,10 +29,14 @@ export function loadTickState(subjectId: string, pointId: string, playerId: stri
 
     const subjectCharacter = characterRepo.ensureSubject(subjectId, core.name || subjectId);
     const playerCharacter = characterRepo.ensureCharacter(playerId, playerId);
+
     const relation = characterRelationRepo.ensure(subjectCharacter.id, playerCharacter.id, {
         attitude: core.attitude,
         baselineAttitude: core.baselineAttitude ?? core.attitude
     });
 
-    return { core, point, resources, scene, relation, subjectCharacter, playerCharacter };
+    // Берем все активные контракты игрока
+    const contracts = contractRepo.listForPlayer(playerId).filter(c => c.state === 'accepted');
+
+    return { core, point, resources, scene, relation, subjectCharacter, playerCharacter, contracts };
 }

@@ -1,19 +1,19 @@
-import { Scene, ResourceState, SubjectCoreState, Mission } from '../domain/types';
+import { Scene, ResourceState, SubjectCoreState, AssetContract } from '../domain/types';
 import { resolveSceneTransition } from './resolveSceneTransition';
-import { applyMissionProgress } from './applyMissionProgress';
+import { evaluateAssetContract, evaluateAllContracts } from './evaluateAssetContract';
 
-// Типов для scenarioState нет, но мы можем собрать заглушку.
 export interface ScenarioState {
     scene: Scene;
     resources: ResourceState;
     core: SubjectCoreState;
-    mission: Mission | null;
+    contracts: AssetContract[];
 }
 
 export interface ScenarioStepResult {
     nextSceneId: string | null;
     updatedResources: ResourceState;
-    updatedMission: Mission | null;
+    updatedContracts: AssetContract[];
+    updatedCore?: SubjectCoreState;
     success: boolean;
     error?: string;
 }
@@ -22,28 +22,26 @@ export interface ScenarioStepContext {
     actionId: string;
 }
 
-/**
- * Оркеструет последствия после расчёта тика:
- * проверяет условия переходов сцен, обновляет миссию и передаёт
- * информацию о следующей сцене.
- */
 export function runScenarioStep(
     state: ScenarioState,
     context: ScenarioStepContext
 ): ScenarioStepResult {
-    const { scene, resources, core, mission } = state;
+    const { scene, resources, core, contracts } = state;
     let nextResources = resources;
     
     const nextSceneId = resolveSceneTransition(scene, core, { actionId: context.actionId });
-    let nextMission = mission;
-    if (mission) {
-        nextMission = applyMissionProgress(mission, core, {});
+    
+    let nextContracts = contracts;
+    let nextCore = core;
+    if (contracts && contracts.length > 0) {
+        nextCore = evaluateAllContracts(contracts, core, {});
     }
 
     return {
         nextSceneId,
         updatedResources: nextResources,
-        updatedMission: nextMission,
+        updatedContracts: nextContracts,
+        updatedCore: nextCore,
         success: true
     };
 }

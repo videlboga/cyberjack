@@ -71,13 +71,20 @@ export function validateAction(
     // 4. Resource Availability: проверим требования к ресурсам (включая AP) до списания
     const actionSceneCosts = scene.actionCosts?.[actionId];
     if (actionSceneCosts && player) {
-        // actionSceneCosts — это map resource -> number
-        for (const [resKey, val] of Object.entries(actionSceneCosts)) {
-            const required = Number(val as any);
-            if (isNaN(required)) continue;
-            const available = Number(player.resources?.[resKey] ?? 0);
-            if (available < required) {
-                return { allowed: false, errorReason: `Недостаточно ресурса '${resKey}' для выполнения действия. Требуется ${required}, доступно ${available}.` };
+        if (actionSceneCosts.require) {
+            for (const [resKey, required] of Object.entries(actionSceneCosts.require)) {
+                const available = player.resources?.[resKey]?.amount ?? 0;
+                if (available < required) {
+                    return { allowed: false, errorReason: `Недостаточно ресурса '${resKey}' (требуется: ${required}, в наличии: ${available}).` };
+                }
+            }
+        }
+        if (actionSceneCosts.consume) {
+            for (const [resKey, cost] of Object.entries(actionSceneCosts.consume)) {
+                const available = player.resources?.[resKey]?.amount ?? 0;
+                if (available < cost) {
+                    return { allowed: false, errorReason: `Недостаточно ресурса '${resKey}' для оплаты действия (стоимость: ${cost}, в наличии: ${available}).` };
+                }
             }
         }
     }
