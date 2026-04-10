@@ -51,7 +51,19 @@ export async function buildPromptPayloadWithDB(
         WHERE sps.subject_id = ?
     `).all(targetQueryId) as any[];
 
-    return buildPromptPayload(
+    // Inject market catalog if the subject is a broker
+    const brokerResRow = db.prepare('SELECT metadata FROM character_resources WHERE character_id = ? AND resource_key = ?').get(targetQueryId, 'store_catalog') as any;
+    let extraLog = '';
+    if (brokerResRow && brokerResRow.metadata) {
+        try {
+            const meta = JSON.parse(brokerResRow.metadata);
+            if (meta && meta.assets && meta.assets.length > 0) {
+                extraLog = `[SYSTEM: Твой ассортимент на продажу: ${meta.assets.map((a: any) => `${a.name} (ID: ${a.id}) - Базовая цена: ${a.basePrice}cr`).join(', ')}. Вы можете предлагать скидку исходя из вектора Plasticity и Отношения.]`;
+            }
+        } catch(e) {}
+    }
+
+    const payload = await buildPromptPayload(
         ownerId,
         targetId,
         { name: targetRow?.name || targetQueryId, core },
@@ -62,4 +74,10 @@ export async function buildPromptPayloadWithDB(
         eventId,
         options
     );
+
+    if (extraLog) {
+        payload.systemPrompt += `\n\n${extraLog}`;
+    }
+
+    return payload;
 }

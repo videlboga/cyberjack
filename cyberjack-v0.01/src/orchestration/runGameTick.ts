@@ -1,3 +1,4 @@
+import { handleBuyAssetAction } from '../scenario/buyAssetHandler';
 // src/orchestration/runGameTick.ts
 import { randomUUID } from 'crypto';
 import { loadTickState } from './loadTickState';
@@ -27,6 +28,7 @@ export interface GameEventPayload {
     eventType?: GameEvent['type'];
     textMessage?: string;
     parserVersion?: string;
+    customPayload?: Record<string, unknown>;
 }
 
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
@@ -258,6 +260,21 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId);
 
+    let systemMarketLog = '';
+    if (payload.presetId === 'buy_raw_asset' && payload.customPayload?.assetId) {
+        try {
+            systemMarketLog = handleBuyAssetAction(
+                payload.playerId, 
+                payload.subjectId, 
+                activeSceneId, 
+                payload.customPayload.assetId as string
+            );
+            prompt.systemPrompt += `\n\n${systemMarketLog}`;
+        } catch (e: any) {
+            prompt.systemPrompt += `\n\n[SYSTEM: Транзакция отклонена: ${e.message}]`;
+        }
+    }
+
     const event: GameEvent = {
         id: tickId,
         type: payload.eventType || (payload.textMessage ? 'verbal_input' : 'ui_action'),
@@ -269,7 +286,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         payload: {
             presetId: payload.presetId,
             playerIntensity: payload.playerIntensity,
-            dynamicModifiers: payload.dynamicModifiers
+            dynamicModifiers: payload.dynamicModifiers,
+            ...payload.customPayload
         }
     };
 

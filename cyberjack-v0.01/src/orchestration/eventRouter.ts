@@ -43,7 +43,8 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
         dynamicModifiers,
         eventType: payload.eventType,
         textMessage: payload.textMessage,
-        parserVersion: dynamicModifiers?.model
+        parserVersion: dynamicModifiers?.model,
+        customPayload: payload.payload
     });
 
     return { bundle, dynamicModifiers, pointIdUsed: pointId };
