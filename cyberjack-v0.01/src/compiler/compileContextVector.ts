@@ -49,7 +49,7 @@ export function compileContextVector(
                 let triggerFired = true;
 
                 if (trigger.requireActionTags && trigger.requireActionTags.length > 0) {
-                    const hasAllTags = trigger.requireActionTags.every(t => actionTags.includes(t));
+                    const hasAllTags = trigger.requireActionTags.every((t: string) => actionTags.includes(t));
                     if (!hasAllTags) {
                         triggerFired = false;
                     }

@@ -43,11 +43,11 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const validation = checkActionAccess.validateAction(
         payload.presetId, state.scene, state.resources, payload.subjectId, payload.playerId
     );
-    if (!validation.allowed) {
+    if (!validation.allowed && payload.presetId !== 'wait') {
         throw new Error(validation.errorReason || `Action "${payload.presetId}" blocked by scenario.`);
     }
 
-    const actionCosts = state.scene.actionCosts?.[payload.presetId] || { consume: { actionPoints: 15 } };
+    const actionCosts = state.scene.actionCosts?.[payload.presetId] || null;
     if (actionCosts && Object.keys(actionCosts).length) {
         try {
             const nextResources = applyResourceCosts(state.resources, actionCosts);

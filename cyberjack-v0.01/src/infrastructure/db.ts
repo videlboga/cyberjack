@@ -35,6 +35,14 @@ db.exec(`
     FOREIGN KEY (character_id) REFERENCES characters(id)
   );
 
+  CREATE TABLE IF NOT EXISTS items (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    tags TEXT DEFAULT '[]',
+    description TEXT DEFAULT ''
+  );
+
   CREATE TABLE IF NOT EXISTS scene_objects (
     id TEXT PRIMARY KEY,
     scene_id TEXT NOT NULL,
@@ -44,6 +52,13 @@ db.exec(`
     state TEXT DEFAULT 'active',
     metadata TEXT DEFAULT '{}',
     FOREIGN KEY (scene_id) REFERENCES scenes(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS traits (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    rules_json TEXT DEFAULT '{}'
   );
 
   CREATE TABLE IF NOT EXISTS scene_layouts (
@@ -165,7 +180,10 @@ db.exec(`
     id TEXT PRIMARY KEY,
     label TEXT NOT NULL,
     values_json TEXT NOT NULL,
-    type TEXT DEFAULT "physical", tags TEXT DEFAULT "[]", context_config_json TEXT
+    type TEXT DEFAULT "physical",
+    tags TEXT DEFAULT "[]",
+    context_config_json TEXT,
+    requires_item TEXT
   );
 
   CREATE TABLE IF NOT EXISTS point_presets (
@@ -249,8 +267,11 @@ safeAddColumn('subject_point_states', 'baseline_local_openness', 'REAL');
 
 safeAddColumn('scenes', 'action_costs', "TEXT DEFAULT '{}'");
 safeAddColumn('scenes', 'transitions', "TEXT DEFAULT '[]'");
+safeAddColumn('scenes', 'description', "TEXT DEFAULT ''");
+safeAddColumn('scenes', 'slots', "TEXT DEFAULT '[]'");
 
 safeAddColumn('characters', 'current_scene_id', 'TEXT');
+safeAddColumn('action_presets', 'requires_item', 'TEXT');
 
 safeAddColumn('subjects', 'baseline_sensitivity', 'REAL');
 safeAddColumn('subjects', 'baseline_capacity', 'REAL');
@@ -264,6 +285,7 @@ safeAddColumn('character_relations', 'plasticity', 'REAL DEFAULT 0');
 safeAddColumn('character_relations', 'baseline_attitude', 'REAL');
 safeAddColumn('character_relations', 'baseline_openness', 'REAL');
 safeAddColumn('character_relations', 'baseline_plasticity', 'REAL');
+safeAddColumn('scene_characters', 'slot_id', 'TEXT');
 
 db.exec(`
   UPDATE subjects

@@ -31,7 +31,9 @@ export const getState = (req: Request, res: Response) => {
                 return {
                     id: actionId,
                     label: preset?.label || actionId,
-                    costs: costs && Object.keys(costs).length ? costs : null, occupiesPoints: preset?.contextConfig?.occupiesPoints || []
+                    costs: costs && Object.keys(costs).length ? costs : null, occupiesPoints: preset?.contextConfig?.occupiesPoints || [],
+                        categories: preset?.categories || ['physical'],
+                        tags: preset?.tags || []
                 };
             });
             scene.characters = sceneCharacterRepo.list(scene.id);

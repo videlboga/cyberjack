@@ -132,9 +132,13 @@ const insertSubjectStmt = db.prepare(`
 `);
 
 const insertProfileStmt = db.prepare(`
-    INSERT INTO characters (id, name, kind, subject_id, profile_json)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO characters (id, name, kind, subject_id, player_id, profile_json)
+    VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
+        name = excluded.name,
+        kind = excluded.kind,
+        subject_id = excluded.subject_id,
+        player_id = excluded.player_id,
         profile_json = excluded.profile_json
 `);
 
@@ -188,8 +192,11 @@ db.transaction(() => {
             subject.state.sensitivity, subject.state.capacity, subject.state.openness, subject.state.plasticity, subject.state.attitude,
             subject.state.sensitivity, subject.state.capacity, subject.state.openness, subject.state.plasticity, subject.state.attitude
         );
+        const isCalibrator = subject.profile.base.status === 'calibrator';
+        const characterKind = isCalibrator ? 'calibrator' : 'subject';
+        const playerId = isCalibrator ? subject.id : null;
         insertProfileStmt.run(
-            subject.id, subject.name, 'subject', subject.id, JSON.stringify(subject.profile)
+            subject.id, subject.name, characterKind, subject.id, playerId, JSON.stringify(subject.profile)
         );
     }
 })();const insertPointStmt = db.prepare(`
@@ -205,10 +212,33 @@ const insertSubjectPointStmt = db.prepare(`
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
+const upsertSceneCharacterStmt = db.prepare(`
+    INSERT INTO scene_characters (scene_id, character_id, role, can_act, presence_state, slot_id)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(scene_id, character_id) DO UPDATE SET
+        role = excluded.role,
+        can_act = excluded.can_act,
+        presence_state = excluded.presence_state,
+        slot_id = excluded.slot_id
+`);
+
+const updateCharacterLocationStmt = db.prepare(`
+    UPDATE characters SET current_scene_id = ? WHERE id = ?
+`);
+
+const upsertSceneObjectStmt = db.prepare(`
+    INSERT INTO scene_objects (id, scene_id, node_id, item_id, owner_id, state, metadata)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+        scene_id = excluded.scene_id,
+        node_id = excluded.node_id,
+        item_id = excluded.item_id,
+        owner_id = excluded.owner_id,
+        state = excluded.state,
+        metadata = excluded.metadata
+`);
+
 db.transaction(() => {
-    db.prepare(`INSERT OR IGNORE INTO character_resources (id, resources) VALUES ('PL-1', '{}')`).run();
-    db.prepare(`INSERT OR IGNORE INTO characters (id, name, kind) VALUES ('PL-1', 'Калибратор', 'player')`).run();
-    
     const actions = [
         // System and Context Effects
         { id: 'effect_apathy', label: 'Апатия / Отключение', type: 'condition', tags: ['condition', 'apathy'], values: { intensity_mult: 0.5, sharpness_mult: 0.5 }, contextConfig: { duration: -1, occupiesPoints: [] } },
@@ -268,7 +298,67 @@ db.transaction(() => {
         );
     }
 
-    db.prepare(`INSERT OR REPLACE INTO scenes (id, available_actions, description) VALUES ('lab', '["gentle_stroke","tickle","light_kiss","deep_kiss","feather_stroke","deep_massage","licking","firm_grip","light_bite","hard_bite","pinch","scratching","slap","hard_slap","needle_prick","belt_strike","whip_strike","taser_shock","ice_cube","hot_wax","vibrator_pulse","hair_pull","spit","breath_blow","verbal_pressure","stare","close_inspection","feint_strike","pose_kneeling","restraint_cuffs"]', 'Темная калибровочная лаборатория корпорации. Кондиционер гонит морозный воздух по полу. На стенах блестят холодные светодиоды диагностов, вокруг операционного стола раскиданы хирургические инструменты и кабеля нейроинтерфейсов.')`).run();
+    const labSceneId = 'lab';
+    const labAvailableActions = ["gentle_stroke","tickle","light_kiss","deep_kiss","feather_stroke","deep_massage","licking","firm_grip","light_bite","hard_bite","pinch","scratching","slap","hard_slap","needle_prick","belt_strike","whip_strike","taser_shock","ice_cube","hot_wax","vibrator_pulse","hair_pull","spit","breath_blow","verbal_pressure","stare","close_inspection","feint_strike","pose_kneeling","restraint_cuffs"];
+    const labDescription = 'Темная калибровочная лаборатория корпорации. Кондиционер гонит морозный воздух по полу. На стенах блестят холодные светодиоды диагностов, вокруг операционного стола раскиданы хирургические инструменты и кабеля нейроинтерфейсов.';
+    const labSlots = [
+        { id: 'slot_table', name: 'Операционный стол', capacity: 2, tags: ['core', 'restraint'] },
+        { id: 'slot_side', name: 'Секция фиксации', capacity: 1, tags: ['observation'] },
+        { id: 'slot_console', name: 'Пост Калибратора', capacity: 1, tags: ['control'] }
+    ];
+
+    db.prepare(`INSERT OR REPLACE INTO scenes (id, available_actions, description, slots) VALUES (?, ?, ?, ?)`).run(
+        labSceneId,
+        JSON.stringify(labAvailableActions),
+        labDescription,
+        JSON.stringify(labSlots)
+    );
+
+    const labLayout = {
+        bounds: { width: 1000, height: 650 },
+        nodes: [
+            { id: 'slot_table', label: 'Операционный стол', x: 500, y: 340 },
+            { id: 'slot_side', label: 'Фиксация', x: 320, y: 200 },
+            { id: 'slot_console', label: 'Пульт', x: 760, y: 360 }
+        ],
+        edges: [
+            { from: 'slot_console', to: 'slot_table' },
+            { from: 'slot_side', to: 'slot_table' }
+        ]
+    };
+
+    db.prepare(`INSERT OR REPLACE INTO scene_layouts (scene_id, layout_json) VALUES (?, ?)`).run(
+        labSceneId,
+        JSON.stringify(labLayout)
+    );
+
+    const labPlacements = [
+        { characterId: 'S-01', role: 'asset', slotId: 'slot_table', presenceState: 'present', canAct: true },
+        { characterId: 'S-02', role: 'asset', slotId: 'slot_side', presenceState: 'present', canAct: true },
+        { characterId: 'C-Gamma', role: 'calibrator', slotId: 'slot_console', presenceState: 'present', canAct: true }
+    ];
+
+    for (const placement of labPlacements) {
+        upsertSceneCharacterStmt.run(
+            labSceneId,
+            placement.characterId,
+            placement.role,
+            placement.canAct ? 1 : 0,
+            placement.presenceState,
+            placement.slotId
+        );
+        updateCharacterLocationStmt.run(labSceneId, placement.characterId);
+    }
+
+    upsertSceneObjectStmt.run(
+        'lab-eq-tens-unit',
+        labSceneId,
+        'slot_table',
+        'eq_tens_unit',
+        'C-Gamma',
+        'active',
+        JSON.stringify({ label: 'Нейро-стимулятор ТЕНС', attachedSlot: 'slot_table' })
+    );
     
     console.log("Обновление точек (points) и связей...");
     for (const subject of subjects) {

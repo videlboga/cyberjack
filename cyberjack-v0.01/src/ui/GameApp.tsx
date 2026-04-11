@@ -1,17 +1,179 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './GameApp.css';
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = '';
+const PLAYER_CHARACTER_ID = 'C-Gamma';
+const PLAYER_RESOURCE_ID = 'PL-1';
 
-type ActionPreset = { id: string; label: string; occupiesPoints?: string[] };
-type Character = { id: string; name: string; kind?: string };
+type ActionPreset = {
+  id: string;
+  label: string;
+  occupiesPoints?: string[];
+  disabled?: boolean;
+  tags?: string[];
+  requiresItem?: string | null;
+};
+
+type Character = { id: string; name: string; kind?: string; playerId?: string | null; };
+
+type SceneCharacterPresence = {
+  character: Character;
+  role?: string;
+  canAct?: boolean;
+  presenceState?: string;
+  slotId?: string | null;
+};
+
+type LayoutNode = {
+  id: string;
+  label?: string;
+  name?: string;
+  x?: number;
+  y?: number;
+  position?: { x: number; y: number };
+  coords?: { x: number; y: number };
+};
+
+type NodePosition = {
+  left: string;
+  top: string;
+  leftValue: number;
+  topValue: number;
+};
+
+const sanitizeActions = (actions: ActionPreset[] = []) => actions.filter(action => !action.disabled);
+
+const clampPercent = (value: number, min = 12, max = 88) => Math.max(min, Math.min(max, value));
+const clampRange = (value: number, min = 5, max = 95) => Math.max(min, Math.min(max, value));
+
+const FALLBACK_BOUNDS = { width: 1000, height: 700 };
+
+const RADIAL_GROUPS = [
+  { id: 'medical', label: 'Медицинские', tags: ['medical', 'clinical', 'chemical', 'piercing', 'inspection'] },
+  { id: 'intimate', label: 'Интимные', tags: ['intimate', 'sensual', 'stimulation', 'affection'] },
+  { id: 'pain', label: 'Силовые', tags: ['impact', 'pain', 'punishment', 'dominance', 'struggle'] },
+  { id: 'control', label: 'Контроль', tags: ['restraint', 'control', 'metal', 'electronic', 'pose', 'bdsm'] },
+  { id: 'support', label: 'Поддержка', tags: ['mental', 'comfort', 'talk', 'trade', 'praise'] }
+];
+
+const ACTION_GROUP_OVERRIDES: Record<string, string> = {
+  gentle_stroke: 'support',
+  tickle: 'support',
+  feather_stroke: 'support',
+  breath_blow: 'support',
+  verbal_pressure: 'support',
+  stare: 'support',
+  close_inspection: 'support',
+  light_kiss: 'intimate',
+  deep_kiss: 'intimate',
+  deep_massage: 'intimate',
+  licking: 'intimate',
+  vibrator_pulse: 'intimate',
+  gentle_touch: 'intimate',
+  firm_grip: 'pain',
+  light_bite: 'pain',
+  hard_bite: 'pain',
+  pinch: 'pain',
+  scratching: 'pain',
+  slap: 'pain',
+  hard_slap: 'pain',
+  belt_strike: 'pain',
+  whip_strike: 'pain',
+  taser_shock: 'pain',
+  feint_strike: 'pain',
+  hair_pull: 'pain',
+  spit: 'control',
+  needle_prick: 'medical',
+  ice_cube: 'medical',
+  hot_wax: 'medical',
+  pose_kneeling: 'control',
+  restraint_cuffs: 'control'
+};
+
+const computeAutoPositions = (nodes: LayoutNode[]): Record<string, NodePosition> => {
+  if (!nodes.length) return {};
+  const count = nodes.length;
+  const rings: number[] = [];
+  let remaining = count;
+  let ring = 0;
+  while (remaining > 0) {
+    const baseCapacity = ring === 0 ? Math.min(count, 6) : 6 + ring * 4;
+    const capacity = Math.min(remaining, baseCapacity);
+    rings.push(capacity);
+    remaining -= capacity;
+    ring += 1;
+  }
+  const baseRadius = 24;
+  const radiusStep = 14;
+  let ringStart = 0;
+  let currentRing = 0;
+  return nodes.reduce((acc, node, index) => {
+    while (index >= ringStart + (rings[currentRing] || 0)) {
+      ringStart += rings[currentRing];
+      currentRing += 1;
+    }
+    const ringSize = rings[currentRing] || count;
+    const angle = (index - ringStart) / Math.max(ringSize, 1) * Math.PI * 2;
+    const radius = baseRadius + currentRing * radiusStep;
+    const leftValue = clampPercent(50 + Math.cos(angle) * radius);
+    const topValue = clampPercent(50 + Math.sin(angle) * radius * 0.75);
+    acc[node.id] = { left: `${leftValue}%`, top: `${topValue}%`, leftValue, topValue };
+    return acc;
+  }, {} as Record<string, NodePosition>);
+};
+
+const getEdgeNode = (edge: any, key: 'from' | 'to') => {
+  if (!edge) return null;
+  return edge[key] ?? edge[key === 'from' ? 'source' : 'target'] ?? edge[key === 'from' ? 'start' : 'end'] ?? null;
+};
+
+const normalizeTags = (tags?: string[]) => (tags || []).map(tag => tag.toLowerCase());
+
+const classifyAction = (action: ActionPreset): string | null => {
+  if (ACTION_GROUP_OVERRIDES[action.id]) {
+    return ACTION_GROUP_OVERRIDES[action.id];
+  }
+  const categories = ((action as any).categories || []) as string[];
+  const baseTags = [...(action.tags || []), ...categories];
+  const tags = normalizeTags(baseTags);
+  for (const group of RADIAL_GROUPS) {
+    if (tags.some(tag => group.tags.includes(tag))) {
+      return group.id;
+    }
+  }
+  if (action.requiresItem) {
+    return 'control';
+  }
+  if (tags.length === 0) {
+    return 'pain';
+  }
+  return null;
+};
+
+const filterActionsForPoint = (actions: ActionPreset[], pointId?: string | null) => {
+  if (!pointId) {
+    return actions.filter(action => !action.occupiesPoints || action.occupiesPoints.length === 0);
+  }
+  return actions.filter(action => {
+    if (!action.occupiesPoints || action.occupiesPoints.length === 0) return true;
+    return action.occupiesPoints.includes(pointId);
+  });
+};
 
 export function GameApp() {
   const [messages, setMessages] = useState<any[]>([]);
   const [playerResources, setPlayerResources] = useState<Record<string, number>>({});
-  const [activeSubject, setActiveSubject] = useState<Character | null>(null);
   const [subjectState, setSubjectState] = useState<any>(null);
   const [availableActions, setAvailableActions] = useState<ActionPreset[]>([]);
+  const [layout, setLayout] = useState<any>(null);
+  const [sceneData, setSceneData] = useState<any>(null);
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
+  const [focusedCharId, setFocusedCharId] = useState<string | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<string>('general');
+  const [intensity, setIntensity] = useState<number>(1.0);
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const [availablePointsList, setAvailablePointsList] = useState<{ id: string; label: string }[]>([]);
+  const [actionCache, setActionCache] = useState<{ uid: string; presetId: string; label: string; pointId: string; intensity: number; targetCharId: string; targetCharName: string }[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -19,8 +181,71 @@ export function GameApp() {
 
   const sceneId = 'lab';
 
+  const sceneCharacters: SceneCharacterPresence[] = sceneData?.characters || [];
+
+  const fetchInteractionState = async (targetId: string, hydrateState: boolean) => {
+    try {
+      const search = new URLSearchParams({
+        subjectId: targetId,
+        sceneId,
+        pointId: selectedPoint || 'general'
+      });
+      const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
+      const body = await res.json();
+      if (!body.success) return;
+      setAvailableActions(sanitizeActions(body.availableActions || []));
+      if (body.player?.resources) {
+        setPlayerResources(body.player.resources);
+      }
+      if (hydrateState && focusedCharId === targetId) {
+        setSubjectState(body.subject);
+        setAvailablePointsList(body.availablePoints || []);
+        if (!body.availablePoints?.some((pt: any) => pt.id === selectedPoint)) {
+          setSelectedPoint(body.availablePoints?.[0]?.id || 'general');
+        }
+      }
+    } catch (err) {
+      console.error('failed to fetch interaction state', err);
+    }
+  };
+
+  const refreshSceneInfo = async () => {
+    try {
+      const [layoutRes, scenesRes] = await Promise.all([
+        fetch(`${API_BASE}/api/scene/layout?sceneId=${sceneId}`),
+        fetch(`${API_BASE}/api/scenes`)
+      ]);
+
+      const layoutBody = await layoutRes.json();
+      if (layoutBody.success) {
+        setLayout(layoutBody.layout || null);
+      }
+
+      const scenesBody = await scenesRes.json();
+      if (scenesBody.success) {
+        const nextScene = scenesBody.scenes.find((x: any) => x.id === sceneId) || scenesBody.scenes[0];
+        setSceneData(nextScene || null);
+      }
+    } catch (err) {
+      console.error('failed to load scene info', err);
+    }
+  };
+
   useEffect(() => {
-    fetchInitialState();
+    (async () => {
+      await Promise.all([
+        refreshSceneInfo(),
+        fetchInteractionState('S-A1', false)
+      ]);
+
+      setMessages([
+        {
+          id: Date.now(),
+          role: 'system',
+          text: `Связь установлена. Карта сцены: ${sceneId}`
+        }
+      ]);
+    })();
   }, []);
 
   useEffect(() => {
@@ -29,61 +254,236 @@ export function GameApp() {
     }
   }, [messages]);
 
-  async function fetchInitialState() {
-    try {
-      const res = await fetch(`${API_BASE}/api/state?subjectId=S-01&pointId=head`);
-      const body = await res.json();
-      if (body.success && body.subject) {
-        setSubjectState(body.subject);
-        setActiveSubject({ id: body.subject.id, name: body.subject.name });
-        setAvailableActions(body.availableActions || []);
-      }
-      
-      const pRes = await fetch(`${API_BASE}/api/relations?fromId=C-Gamma`);
-      const pBody = await pRes.json();
-      if (pBody.success) {
-        // Mock player resources for now, until player API gives it
-        setPlayerResources({ TimeBudget: 100, Energy: 50 });
-      }
-
-      setMessages([{
-        id: Date.now(),
-        role: 'system',
-        text: 'Simulation started. Connected to ' + sceneId
-      }]);
-    } catch (e) {
-      console.error(e);
+  useEffect(() => {
+    if (!focusedCharId) {
+      setSubjectState(null);
+      return;
     }
-  }
+    fetchInteractionState(focusedCharId, true);
+  }, [focusedCharId, selectedPoint]);
 
-  async function sendAction(presetId?: string, text?: string, targetPoint: string = 'head') {
-    if (!activeSubject) return;
+  useEffect(() => {
+    if (focusedCharId && sceneCharacters.length) {
+      const stillPresent = sceneCharacters.some(entry => entry.character.id === focusedCharId);
+      if (!stillPresent) {
+        setFocusedCharId(null);
+      }
+    }
+  }, [sceneCharacters, focusedCharId]);
+
+  useEffect(() => {
+    setActiveGroup(null);
+  }, [focusedNodeId]);
+
+  useEffect(() => {
+    setActiveGroup(null);
+  }, [focusedCharId]);
+
+  useEffect(() => {
+    if (!focusedCharId) return;
+    setSelectedPoint('general');
+  }, [focusedCharId]);
+
+  const slotMap = useMemo(() => {
+    if (!sceneData?.slots) return new Map<string, any>();
+    return new Map(sceneData.slots.map((slot: any) => [slot.id, slot]));
+  }, [sceneData]);
+
+  const layoutNodes: LayoutNode[] = useMemo(() => {
+    if (layout?.nodes?.length) return layout.nodes;
+    if (sceneData?.slots?.length) {
+      return sceneData.slots.map((slot: any) => ({ id: slot.id, label: slot.name, capacity: slot.capacity }));
+    }
+    return [];
+  }, [layout, sceneData]);
+
+  const nodePositions = useMemo(() => {
+    if (!layoutNodes.length) return {} as Record<string, NodePosition>;
+    const bounds = layout?.bounds || FALLBACK_BOUNDS;
+    const nodesWithCoords = layoutNodes.filter(node => {
+      const rawX = node.x ?? node.position?.x ?? node.coords?.x;
+      const rawY = node.y ?? node.position?.y ?? node.coords?.y;
+      return typeof rawX === 'number' && typeof rawY === 'number';
+    });
+
+    if (!nodesWithCoords.length) {
+      return computeAutoPositions(layoutNodes);
+    }
+
+    const xs = nodesWithCoords.map(node => node.x ?? node.position?.x ?? node.coords?.x ?? 0);
+    const ys = nodesWithCoords.map(node => node.y ?? node.position?.y ?? node.coords?.y ?? 0);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const rangeX = maxX - minX || bounds.width || 1;
+    const rangeY = maxY - minY || bounds.height || 1;
+
+    return layoutNodes.reduce((acc, node, index) => {
+      const rawX = node.x ?? node.position?.x ?? node.coords?.x;
+      const rawY = node.y ?? node.position?.y ?? node.coords?.y;
+      if (typeof rawX === 'number' && typeof rawY === 'number') {
+        const leftValue = clampPercent(25 + ((rawX - minX) / rangeX) * 50);
+        const topValue = clampPercent(25 + ((rawY - minY) / rangeY) * 50);
+        acc[node.id] = { left: `${leftValue}%`, top: `${topValue}%`, leftValue, topValue };
+      } else {
+        const fallback = clampPercent(25 + (index / Math.max(layoutNodes.length - 1, 1)) * 50);
+        acc[node.id] = { left: `${fallback}%`, top: `${50}%`, leftValue: fallback, topValue: 50 };
+      }
+      return acc;
+    }, {} as Record<string, NodePosition>);
+  }, [layoutNodes, layout]);
+
+  const nodeLabelMap = useMemo(() => {
+    const entries = layoutNodes.map(node => [node.id, node.label || node.name || slotMap.get(node.id)?.name || node.id]);
+    return new Map<string, string>(entries as [string, string][]);
+  }, [layoutNodes, slotMap]);
+
+  const speechBubbles = useMemo(() => {
+    const store = new Map<string, string>();
+    messages.forEach(msg => {
+      if (msg.actorId && msg.actorId !== 'player') {
+        store.set(msg.actorId, msg.text);
+      }
+    });
+    return store;
+  }, [messages]);
+
+  const characterNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    sceneCharacters.forEach(entry => {
+      map.set(entry.character.id, entry.character.name);
+    });
+    return map;
+  }, [sceneCharacters]);
+
+  const focusedPresence = useMemo(() => {
+    if (!focusedCharId) return null;
+    return sceneCharacters.find(entry => entry.character.id === focusedCharId) || null;
+  }, [sceneCharacters, focusedCharId]);
+
+  const focusedCharacter = focusedPresence?.character || null;
+
+  const focusedBubblePosition = focusedPresence?.slotId ? nodePositions[focusedPresence.slotId] : undefined;
+  const focusedNodePosition = focusedNodeId ? nodePositions[focusedNodeId] : undefined;
+  const focusedNodeLabel = focusedNodeId ? (nodeLabelMap.get(focusedNodeId) || focusedNodeId) : null;
+  const focusedNodeMeta = focusedNodeId ? slotMap.get(focusedNodeId) : null;
+
+  const sectorCharacters = useMemo(() => {
+    if (!focusedNodeId) return [] as SceneCharacterPresence[];
+    return sceneCharacters.filter(entry => entry.slotId === focusedNodeId);
+  }, [sceneCharacters, focusedNodeId]);
+
+  const sectorCardStyle = useMemo(() => {
+    if (!focusedNodePosition) return { left: '50%', top: '40%' };
+    const left = clampRange(focusedNodePosition.leftValue + 4, 10, 85);
+    const top = clampRange(focusedNodePosition.topValue - 15, 10, 75);
+    return { left: `${left}%`, top: `${top}%` };
+  }, [focusedNodePosition]);
+
+  const overlayPlacement = useMemo(() => {
+    if (!focusedBubblePosition) {
+      return {
+        horizontal: 'right',
+        vertical: 'down',
+        style: { left: '55%', top: '40%', transform: 'translate(-40%, -20%)' }
+      } as { horizontal: 'left' | 'right' | 'center'; vertical: 'up' | 'down'; style: React.CSSProperties };
+    }
+    const { leftValue, topValue } = focusedBubblePosition;
+    const horizontal: 'left' | 'right' | 'center' = leftValue > 62 ? 'left' : leftValue < 38 ? 'right' : 'center';
+    const vertical: 'up' | 'down' = topValue > 55 ? 'up' : 'down';
+    const leftOffset = horizontal === 'left' ? -12 : horizontal === 'right' ? 12 : 0;
+    const topOffset = vertical === 'up' ? -14 : 10;
+    const left = clampRange(leftValue + leftOffset, 12, 88);
+    const top = clampRange(topValue + topOffset, 12, 88);
+    const translateX = horizontal === 'left' ? '-90%' : horizontal === 'right' ? '-5%' : '-50%';
+    const translateY = vertical === 'up' ? '-95%' : '-15%';
+    return {
+      horizontal,
+      vertical,
+      style: { left: `${left}%`, top: `${top}%`, transform: `translate(${translateX}, ${translateY})` }
+    };
+  }, [focusedBubblePosition]);
+
+  const latestNarrative = useMemo(() => {
+    const reversed = [...messages].reverse();
+    const narrator = reversed.find(msg => msg.role === 'narrator');
+    const system = reversed.find(msg => msg.role === 'system');
+    return narrator?.text || system?.text || 'Ожидание событий...';
+  }, [messages]);
+
+  const addMessage = (msg: any) => {
+    setMessages(prev => [...prev, { ...msg, id: Date.now() + Math.random() }]);
+  };
+
+  const clearFocus = () => {
+    setFocusedNodeId(null);
+    setFocusedCharId(null);
+  };
+
+  const movePlayerToSector = async (nodeId: string, label: string) => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/scene/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          characterId: PLAYER_CHARACTER_ID,
+          sceneId,
+          slotId: nodeId
+        })
+      });
+      const body = await res.json();
+      if (!body.success) {
+        throw new Error(body.error || 'move failed');
+      }
+      await refreshSceneInfo();
+      setFocusedNodeId(nodeId);
+      addMessage({ role: 'system', text: `Калибратор перемещён в сектор «${label}».` });
+    } catch (error) {
+      console.error('failed to move player', error);
+      addMessage({ role: 'system', text: 'Не удалось перейти в сектор.' });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const getActorName = (actorId?: string, role?: string) => {
+    if (actorId === 'player') return 'Вы';
+    if (actorId) return characterNameMap.get(actorId) || actorId;
+    if (role === 'narrator') return 'Рассказчик';
+    if (role === 'system') return 'Система';
+    return 'Субъект';
+  };
+
+  const sendAction = async (presetId?: string, text?: string, targetPoint?: string, targetCharIdOverride?: string, customIntensity?: number) => {
+    const targetCharId = targetCharIdOverride || focusedCharId;
+    if (!targetCharId) {
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
+      const resolvedPoint = targetPoint || selectedPoint || 'general';
+      const actualIntensity = customIntensity ?? intensity;
       const reqBody: any = {
-        subjectId: activeSubject.id,
-        pointId: targetPoint,
+        subjectId: targetCharId,
+        pointId: resolvedPoint,
+        intensity: actualIntensity,
         sceneId,
-        playerId: 'C-Gamma',
+        playerId: PLAYER_RESOURCE_ID,
         skipLLM: false
       };
 
       if (presetId) reqBody.presetId = presetId;
       if (text) reqBody.textMessage = text;
 
-      // Optimistic UI log for user action
       if (presetId) {
         const actionLabel = availableActions.find(a => a.id === presetId)?.label || presetId;
-        addMessage({
-          role: 'player',
-          text: `[Action] ${actionLabel} -> ${targetPoint}`,
-        });
+        addMessage({ role: 'player', text: `[Действие] ${actionLabel} -> ${resolvedPoint}`, actorId: 'player' });
       } else if (text) {
-        addMessage({
-          role: 'player',
-          text: `"${text}"`,
-        });
+        addMessage({ role: 'player', text, actorId: 'player' });
       }
 
       setChatInput('');
@@ -94,149 +494,436 @@ export function GameApp() {
         body: JSON.stringify(reqBody)
       });
       const data = await res.json();
-      
-      if (data.success) {
-        // Refresh state
-        fetchInitialState();
 
-        // Narrator or LLM response
-        const newMsgText = data.llmResponse?.content || data.diagnostics?.semanticNarrative || "Action completed.";
-        addMessage({
-          role: 'narrator',
-          text: newMsgText
-        });
+      if (!data.success) {
+        const errorText = data.error || 'Действие недоступно.';
+        addMessage({ role: 'system', text: errorText });
+        return;
+      }
+
+      if (data.success) {
+        await Promise.all([
+          refreshSceneInfo(),
+          fetchInteractionState(targetCharId, true)
+        ]);
+
+        if (data.actorReplies && data.actorReplies.length > 0) {
+          data.actorReplies.forEach((repl: any) => {
+            if (repl.speech) {
+              addMessage({ role: 'subject', text: repl.speech, actorId: repl.actorId });
+            }
+            if (repl.reaction) {
+              addMessage({ role: 'narrator', text: repl.reaction });
+            }
+          });
+        } else if (data.reply) {
+          if (data.reply.speech) addMessage({ role: 'subject', text: data.reply.speech, actorId: targetCharId });
+          if (data.reply.reaction) addMessage({ role: 'narrator', text: data.reply.reaction });
+        } else if (data.narratorReaction) {
+          addMessage({ role: 'narrator', text: data.narratorReaction });
+        } else {
+          const fallback = data.diagnostics?.semanticNarrative || data.llmResponse?.content || 'Действие выполнено.';
+          addMessage({ role: 'narrator', text: fallback });
+        }
       }
     } catch (e) {
       console.error(e);
-      addMessage({ role: 'system', text: 'Error executing action.' });
+      addMessage({ role: 'system', text: e instanceof Error ? e.message : 'Ошибка выполнения действия.' });
     } finally {
       setIsProcessing(false);
     }
-  }
-
-  const addMessage = (msg: any) => {
-    setMessages(prev => [...prev, { ...msg, id: Date.now() + Math.random() }]);
   };
 
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || !focusedCharId) return;
     sendAction(undefined, chatInput.trim());
   };
 
+  const groupedActions = useMemo(() => {
+    const actions = filterActionsForPoint(availableActions, selectedPoint);
+    const base: Record<string, ActionPreset[]> = {};
+    RADIAL_GROUPS.forEach(group => {
+      base[group.id] = [];
+    });
+    actions.forEach(action => {
+      const groupId = classifyAction(action);
+      if (groupId) {
+        if (!base[groupId]) base[groupId] = [];
+        base[groupId].push(action);
+      }
+    });
+    return base;
+  }, [availableActions, selectedPoint]);
+
+  const radialCategories = RADIAL_GROUPS.filter(group => groupedActions[group.id]?.length);
+
   return (
     <div className="game-app-container">
-      <header className="game-header">
-        <div className="player-stats">
-          {Object.entries(playerResources).map(([k, v]) => (
-            <span key={k} style={{ marginRight: 16 }}>{k}: {v}</span>
-          ))}
-        </div>
-        <div className="top-actions">
-          <button className="icon-btn">Inventory</button>
-          <button className="icon-btn">Journal</button>
-          <button className="time-btn" onClick={() => sendAction('wait')} disabled={isProcessing}>
-            {isProcessing ? 'Waiting...' : 'Wait Tick'}
-          </button>
-        </div>
-      </header>
-      
-      <main className="game-main">
-        {/* Map Layer */}
-        <section className="map-view">
-          <div className="map-node">
-            <h4>Control Terminal</h4>
-            <div className="avatar-group">
-              <div className="avatar player" title="Calibrator">OP</div>
-            </div>
-          </div>
-          <div className="map-path"></div>
-          <div className="map-node active">
-            <h4>Lab Chair</h4>
-            <div className="avatar-group">
-              {activeSubject && (
-                <div className="avatar subject" title={activeSubject.name}>
-                  {activeSubject.id}
-                  {isProcessing && <div className="bubble">...</div>}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+      <div className="map-stage">
+        <div className="map-canvas" onClick={clearFocus}>
+          {layout?.edges?.length && (
+            <svg className="map-edges" viewBox="0 0 100 100" preserveAspectRatio="none">
+              {layout.edges.map((edge: any, idx: number) => {
+                const fromId = getEdgeNode(edge, 'from');
+                const toId = getEdgeNode(edge, 'to');
+                const fromPos = fromId ? nodePositions[fromId] : null;
+                const toPos = toId ? nodePositions[toId] : null;
+                if (!fromPos || !toPos) return null;
+                return (
+                  <line key={`${fromId}-${toId}-${idx}`} x1={fromPos.leftValue} y1={fromPos.topValue} x2={toPos.leftValue} y2={toPos.topValue} />
+                );
+              })}
+            </svg>
+          )}
 
-        {/* Chat Timeline Layer */}
-        <section className="chat-timeline">
-          <div className="log-entries" ref={logRef}>
-            {messages.map(m => (
-              <div key={m.id} className={`log-entry ${m.role}`}>
-                {m.role === 'player' && <strong style={{color: '#93c5fd'}}>You: </strong>}
-                {m.role === 'narrator' && <strong style={{color: '#cbd5e1'}}>Simulation: </strong>}
-                {m.role === 'subject' && <strong style={{color: '#fca5a5'}}>{activeSubject?.name}: </strong>}
-                {m.text}
+          {layoutNodes.length === 0 && (
+            <div className="map-empty">Нет данных о карте сцены</div>
+          )}
+
+          {layoutNodes.map(node => {
+            const nodePosition = nodePositions[node.id];
+            const nodeLabel = nodeLabelMap.get(node.id) || node.id;
+            const slotMeta = slotMap.get(node.id);
+            const nodeChars = sceneCharacters.filter(entry => entry.slotId === node.id);
+            return (
+              <div
+                key={node.id}
+                className={`map-node ${focusedNodeId === node.id ? 'active' : ''}`}
+                style={nodePosition}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFocusedNodeId(node.id);
+                  setFocusedCharId(null);
+                }}
+              >
+                <button
+                  className="node-core"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFocusedNodeId(node.id);
+                    setFocusedCharId(null);
+                  }}
+                >
+                  <span className="node-label">{nodeLabel}</span>
+                  <span className="node-capacity">
+                    {nodeChars.length}
+                    {slotMeta?.capacity ? `/${slotMeta.capacity}` : ''}
+                  </span>
+                </button>
+
+                <div className="node-avatars" onClick={e => e.stopPropagation()}>
+                  {nodeChars.map(entry => (
+                    <div
+                      key={entry.character.id}
+                      className={`avatar ${entry.character.playerId ? 'player' : 'subject'} ${focusedCharId === entry.character.id ? 'focused' : ''}`}
+                      title={entry.character.name}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFocusedCharId(entry.character.id);
+                        setFocusedNodeId(null);
+                      }}
+                    >
+                      {entry.character.name.split(' ').slice(0, 2).map(part => part[0]).join('')}
+                      {speechBubbles.get(entry.character.id) && (
+                        <div className="avatar-bubble">{speechBubbles.get(entry.character.id)}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+
+          {focusedNodeId && (
+            <div className="sector-card" style={sectorCardStyle} onClick={e => e.stopPropagation()}>
+              <div className="sector-card-header">
+                <div>
+                  <span className="card-label">Сектор</span>
+                  <h3>{focusedNodeLabel || focusedNodeId}</h3>
+                </div>
+                {focusedNodeMeta?.capacity && (
+                  <span className="presence-state">{sectorCharacters.length}/{focusedNodeMeta.capacity}</span>
+                )}
+              </div>
+              <div className="sector-body">
+                <div className="sector-meta">
+                  <button
+                    type="button"
+                    onClick={() => movePlayerToSector(focusedNodeId, focusedNodeLabel || focusedNodeId)}
+                    disabled={isProcessing}
+                  >
+                    Переместить в сектор
+                  </button>
+                </div>
+                <div className="sector-occupants">
+                  <span className="card-label">Персонажи</span>
+                  <div className="occupant-list">
+                    {sectorCharacters.length ? sectorCharacters.map(entry => (
+                      <button
+                        key={entry.character.id}
+                        type="button"
+                        className={`occupant-chip ${focusedCharId === entry.character.id ? 'active' : ''}`}
+                        onClick={() => { setFocusedCharId(entry.character.id); setFocusedNodeId(null); }}
+                      >
+                        {entry.character.name}
+                      </button>
+                    )) : (
+                      <span className="node-menu-empty">Никого нет</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {focusedCharacter && (
+            <div
+              className={`focus-overlay align-${overlayPlacement.horizontal} vert-${overlayPlacement.vertical}`}
+              style={{ ...overlayPlacement.style, display: 'flex', flexDirection: 'row', gap: '16px', background: 'transparent' }}
+              onClick={e => e.stopPropagation()}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(15,23,42,0.95)', border: '1px solid #334155', borderRadius: '8px', padding: '16px', minWidth: '250px' }}>
+                     <h4 style={{ margin: '0 0 8px 0', color: '#fff', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>Категории действий</h4>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                          {radialCategories.length === 0 && <span style={{ color: '#94a3b8', fontSize: '14px' }}>Нет доступных действий</span>}
+                          {radialCategories.map(group => (
+                              <button 
+                                key={group.id} 
+                                style={{ textAlign: 'left', padding: '8px 12px', background: activeGroup === group.id ? '#4f46e5' : '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', cursor: 'pointer', transition: 'background 0.2s' }}
+                                onClick={(e) => { e.stopPropagation(); setActiveGroup(prev => prev === group.id ? null : group.id); }}
+                              >
+                                  {group.label}
+                              </button>
+                          ))}
+                     </div>
+                     {activeGroup && groupedActions[activeGroup]?.length > 0 && (
+                         <>
+                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', overflowY: 'auto', maxHeight: '250px', paddingRight: '4px' }}>
+                                 {groupedActions[activeGroup].map(action => (
+                                     <button 
+                                       key={action.id} 
+                                       style={{ textAlign: 'left', padding: '6px 12px', background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', transition: 'color 0.2s, border 0.2s' }}
+                                       onMouseOver={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#4f46e5'; }}
+                                       onMouseOut={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = '#4f46e5'; }}
+                                       onClick={(e) => { 
+                                           e.stopPropagation(); 
+                                           if (focusedCharId && focusedCharacter) {
+                                               setActionCache(prev => [{ uid: Math.random().toString(36).substring(2, 9), presetId: action.id, label: action.label, targetCharId: focusedCharId, targetCharName: focusedCharacter.name, pointId: selectedPoint, intensity: intensity }, ...prev].slice(0, 10));
+                                           }
+                                       }}
+                                       disabled={isProcessing}
+                                     >
+                                         {action.label}
+                                     </button>
+                                 ))}
+                             </div>
+                         </>
+                     )}
+                </div>
+                <div className="character-focus-card">
+                  <div className="character-card-header">
+                    <div>
+                      <span className="card-label">Фокус</span>
+                      <h3>{focusedCharacter.name}</h3>
+                    </div>
+                    {focusedPresence?.presenceState && (
+                      <span className="presence-state">{focusedPresence.presenceState}</span>
+                    )}
+                  </div>
+                  {subjectState ? (
+                    <div className="stat-bars">
+                      {[{
+                        key: 'sensitivity', label: 'Чувствительность'
+                      }, {
+                        key: 'capacity', label: 'Ресурс'
+                      }, {
+                        key: 'attitude', label: 'Доверие'
+                      }, {
+                        key: 'plasticity', label: 'Пластичность'
+                      }].map(stat => (
+                        <div className="stat" key={stat.key}>
+                          <label>
+                            <span>{stat.label}</span>
+                            <span>{Math.round(subjectState[stat.key] ?? 0)}</span>
+                          </label>
+                          <progress value={subjectState[stat.key] ?? 0} max={100} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="stat-placeholder">Загрузка состояния...</div>
+                  )}
+
+                <div className="active-state">
+                  <span className="card-label">Точка воздействия</span>
+                  <select
+                    value={selectedPoint}
+                    onChange={e => setSelectedPoint(e.target.value)}
+                  >
+                    {availablePointsList.map(point => (
+                      <option key={point.id} value={point.id}>{point.label}</option>
+                    ))}
+                  </select>
+                  <span className="card-label" style={{ marginTop: 12 }}>Интенсивность: {intensity}</span>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="2.0"
+                    step="0.1"
+                    value={intensity}
+                    onChange={e => setIntensity(Number(e.target.value))}
+                    style={{ width: '100%', cursor: 'pointer' }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {actionCache.length > 0 && (
+          <div className="action-cache-panel" style={{
+            position: 'absolute', bottom: 120, right: 20, // Меню кэша в нижнем правом углу
+            background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: 8,
+            padding: 12, display: 'flex', flexDirection: 'column', gap: 8, zIndex: 1000,
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)', minWidth: 500, maxWidth: 800
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <h4 style={{ margin: 0, fontSize: 13, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Кэш действий ({actionCache.length} / 10)</h4>
+              <button onClick={() => setActionCache([])} style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', fontSize: 11, cursor: 'pointer', padding: '2px 8px', borderRadius: 4 }}>Очистить всё</button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 300, overflowY: 'auto' }}>
+            {actionCache.map(cacheItem => (
+              <div key={cacheItem.uid} style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(30, 41, 59, 0.8)', padding: '8px 12px', border: '1px solid #475569', borderRadius: 6, fontSize: 13 }}>
+                
+                <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', minWidth: 150 }}>
+                  <span style={{ color: '#e2e8f0', fontWeight: 'bold' }} title={cacheItem.label}>{cacheItem.label}</span>
+                  <span style={{ color: '#94a3b8', fontSize: 11 }}>Цель: {cacheItem.targetCharName}</span>
+                </div>
+
+                <select
+                  value={cacheItem.pointId || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setActionCache(prev => prev.map(p => p.uid === cacheItem.uid ? { ...p, pointId: val } : p));
+                  }}
+                  style={{ width: 140, padding: '4px 8px', background: '#0f172a', color: '#fff', border: '1px solid #64748b', borderRadius: 4, fontSize: 12, outline: 'none' }}
+                >
+                  <option value="" disabled>Выберите точку</option>
+                  {availablePointsList.map(pt => (
+                    <option key={pt.id} value={pt.id}>{pt.label}</option>
+                  ))}
+                </select>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#0f172a', padding: '4px 8px', borderRadius: 4, border: '1px solid #64748b' }}>
+                  <span style={{ fontSize: 11, color: '#94a3b8' }}>Сила:</span>
+                  <input
+                    type="range" min="0.1" max="2.0" step="0.1"
+                    value={cacheItem.intensity}
+                    title={`Интенсивность: ${cacheItem.intensity.toFixed(1)}`}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setActionCache(prev => prev.map(p => p.uid === cacheItem.uid ? { ...p, intensity: val } : p));
+                    }}
+                    style={{ width: 80, cursor: 'pointer', accentColor: '#3b82f6' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#e2e8f0', width: 24, textAlign: 'right', fontWeight: 'bold' }}>{cacheItem.intensity.toFixed(1)}</span>
+                </div>
+
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button 
+                    type="button" 
+                    disabled={isProcessing || !cacheItem.pointId}
+                    onClick={() => {
+                        sendAction(cacheItem.presetId, undefined, cacheItem.pointId, cacheItem.targetCharId, cacheItem.intensity);
+                    }}
+                    style={{ background: isProcessing || !cacheItem.pointId ? '#475569' : '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: isProcessing || !cacheItem.pointId ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: 12, transition: 'background 0.2s' }}
+                    title={!cacheItem.pointId ? "Выберите точку применения" : "Применить действие"}
+                  >
+                    Применить
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setActionCache(prev => prev.filter(p => p.uid !== cacheItem.uid))}
+                    style={{ background: '#7f1d1d', color: '#fca5a5', border: 'none', borderRadius: 4, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16, transition: 'background 0.2s' }}
+                    title="Удалить из списка"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+              </div>
+            ))}
+            </div>
+          </div>
+        )}
+
+        <div className="hud-panel">
+          <div className="resource-strip">
+            {Object.entries(playerResources).map(([key, value]) => (
+              <div key={key} className="resource-chip">
+                <span>{key}</span>
+                <strong>{value}</strong>
               </div>
             ))}
           </div>
-          <form className="chat-input-bar" onSubmit={handleChatSubmit}>
-            <input 
-              type="text" 
-              value={chatInput} 
-              onChange={e => setChatInput(e.target.value)}
-              placeholder={activeSubject ? `Speak or describe action to ${activeSubject.name}...` : `Select a subject...`}
-              disabled={isProcessing || !activeSubject}
-            />
-            <button type="submit" disabled={isProcessing || !activeSubject}>Send</button>
-          </form>
-        </section>
+          <div className="hud-buttons">
+            <button type="button">Инвентарь</button>
+            <button type="button">Журнал</button>
+            <button type="button" onClick={() => sendAction('wait')} disabled={isProcessing || !focusedCharId}>
+              {isProcessing ? 'Ход...' : 'Ждать тик'}
+            </button>
+          </div>
+          <div className="narrator-card">
+            <span className="card-label">Рассказчик</span>
+            <p>{latestNarrative}</p>
+          </div>
+        </div>
 
-        {/* Info & Radial Layer */}
-        <aside className={`status-panel ${subjectState ? 'open' : ''}`}>
-          {subjectState ? (
-            <div className="subject-details">
-              <h3>{subjectState.name}</h3>
-              
-              <div className="stat-bars">
-                <div className="stat">
-                  <label><span>Sensitivity</span> <span>{Math.round(subjectState.sensitivity)} / 100</span></label>
-                  <progress value={subjectState.sensitivity} max="100"/>
-                </div>
-                <div className="stat">
-                  <label><span>Capacity</span> <span>{Math.round(subjectState.capacity)} / 100</span></label>
-                  <progress value={subjectState.capacity} max="100"/>
-                </div>
-                <div className="stat">
-                  <label><span>Attitude</span> <span>{Math.round(subjectState.attitude)} / 100</span></label>
-                  <progress value={subjectState.attitude} max="100"/>
-                </div>
-                <div className="stat">
-                  <label><span>Plasticity</span> <span>{Math.round(subjectState.plasticity)} / 100</span></label>
-                  <progress value={subjectState.plasticity} max="100"/>
-                </div>
-              </div>
-              
-              <div className="active-contexts">
-                <h4>Active Contexts</h4>
-                <p style={{fontSize: 12, color: '#64748b'}}>None</p>
-                {/* We'd map through subjectState.activeContexts if we had them fetched here */}
-              </div>
-              
-              <div className="quick-actions-list">
-                <h4>Quick Interactions (Head)</h4>
-                {availableActions.slice(0, 8).map(action => (
-                  <button 
-                    key={action.id} 
-                    onClick={() => sendAction(action.id)}
-                    disabled={isProcessing}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
+        <div className="chat-overlay">
+          <div className="chat-header">
+            <div>
+              <span>Адресат:</span>
+              <strong>{focusedCharacter ? focusedCharacter.name : 'нет фокуса'}</strong>
             </div>
-          ) : (
-            <div className="empty-state">Loading subject data...</div>
-          )}
-        </aside>
-      </main>
+            {focusedNodeId && (
+              <div className="chat-node-indicator">
+                <span>Сектор:</span>
+                <strong>{nodeLabelMap.get(focusedNodeId) || focusedNodeId}</strong>
+              </div>
+            )}
+          </div>
+          <div className="chat-body">
+            <div className="log-entries" ref={logRef}>
+              {messages.map(m => (
+                <div key={m.id} className={`log-entry ${m.role}`}>
+                  <strong>{getActorName(m.actorId, m.role)}:</strong> {m.text}
+                </div>
+              ))}
+            </div>
+            <form className="chat-input-bar" onSubmit={handleChatSubmit}>
+              <div className="chat-target-hint">
+                {focusedCharacter ? `Фраза адресована: ${focusedCharacter.name}` : 'Выберите персонажа на карте, чтобы активировать чат'}
+              </div>
+              <div className="chat-input-row">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  placeholder={focusedCharacter ? `Сообщение для ${focusedCharacter.name}` : 'Нет активного фокуса'}
+                  disabled={isProcessing || !focusedCharacter}
+                />
+                <button type="submit" disabled={isProcessing || !focusedCharacter}>
+                  Отправить
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

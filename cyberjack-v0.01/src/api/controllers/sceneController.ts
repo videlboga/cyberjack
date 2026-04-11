@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { sceneRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneCharacterRepo } from '../../infrastructure/repositories';
+import { sceneRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneCharacterRepo, sceneLayoutsRepo } from '../../infrastructure/repositories';
 import { ContextManager } from '../../orchestration/contextManager';
 
 
@@ -80,4 +80,14 @@ export const moveScene = (req: Request, res: Response) => {
         } catch (error: any) {
             res.status(500).json({ success: false, error: error.message });
         }
+};
+
+export const getSceneLayout = (req: Request, res: Response) => {
+    try {
+        const sceneId = (req.query.sceneId as string) || 'lab';
+        const layout = sceneLayoutsRepo.get(sceneId);
+        res.json({ success: true, layout });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 };
