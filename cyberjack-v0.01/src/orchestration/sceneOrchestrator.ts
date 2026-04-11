@@ -7,7 +7,7 @@ import {
     CharacterRelation
 } from '../domain/types';
 import { activeConfig } from '../prompts/config';
-import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo, pointStateRepo, sceneRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo, pointStateRepo, sceneRepo, characterRepo } from '../infrastructure/repositories';
 import { ActionScorer } from './actionScorer';
 
 const normalize = (value: number, min = 0, max = 100) => {
@@ -72,6 +72,10 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
     const playerState = resourceRepo.get(playerId);
 
     for (const actorId of allActors) {
+        if (actorId === playerId || actorId === 'C-Gamma') continue; // Игрок и Калибратор не участвуют в автоматических бросках
+        const actorChar = characterRepo.get(actorId);
+        if (actorChar && (actorChar.playerId === playerId || (actorChar.kind as any) === 'calibrator')) continue;
+
         let core = actorId === subjectId ? bundle.stateAfter.core : bundle.stateBefore.core;
         let relationToCalibrator = relationMap.get(bundle.event.playerId || 'PL-1');
         let peerRelations = relations.filter(rel => rel.target?.subjectId && rel.target.subjectId !== actorId);
@@ -101,102 +105,110 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         // Смягчаем штраф за отсутствие новизны: максимум снижение на 50%, а не до нуля.
         const noveltyFactor = isVerbalInput ? 1.0 : (0.5 + 0.5 * lastActionNovelty);
 
+        // Снижаем вероятность реакций для наблюдателей
+        const isTarget = (actorId === subjectId);
+        const observerPenalty = (isTarget || isVerbalInput) ? 1.0 : 0.15; // Наблюдатели вмешиваются в 15% случаев от базы
+
         const reactiveProb = clamp01(
-            cfg.baseReactiveProbability * noveltyFactor +
+            (cfg.baseReactiveProbability * noveltyFactor +
                 cfg.sensitivityModifier * (1 - capacityNorm) * noveltyFactor +
                 cfg.attitudeModifier * (1 - relationNorm) * noveltyFactor +
                 cfg.intensityModifier * lastActionIntensity * noveltyFactor +
                 cfg.contextModifier * contextBonus +
                 cfg.opennessModifier * opennessNorm +
                 cfg.resourceModifier * resourceNorm +
-                (isVerbalInput ? cfg.verbalReactiveBoost : 0)
+                (isVerbalInput ? cfg.verbalReactiveBoost : 0)) * observerPenalty
         );
 
         const proactiveProb = clamp01(
-            cfg.baseProactiveProbability +
+            (cfg.baseProactiveProbability +
                 cfg.attitudeModifier * relationNorm +
                 cfg.sensitivityModifier * sensitivityNorm +
                 cfg.peerModifier * peerNorm +
-                cfg.contextModifier * contextBonus
+                cfg.contextModifier * contextBonus) * observerPenalty
         );
 
-        if (sampleProbability(reactiveProb)) {
-            actorDecisions.push({
-                actorId,
-                kind: 'reactive',
-                reason: describeTone(relationToCalibrator?.attitude)
-            });
-        } else {
-            // Adjust proactive probability based on actor's available Action Points (AP).
-            // Чем меньше AP, тем ниже шанс проявить инициативу.
-            const actorResources = resourceRepo.get(actorId);
-            let apNorm = 1;
-            if (actorResources && actorResources.resources) {
-                const curAP = Number(actorResources.resources.actionPoints ?? 0);
-                const maxAP = Number(actorResources.resources.maxActionPoints ?? 100);
-                apNorm = clamp01(curAP / Math.max(1, maxAP));
-            }
+        // Чем меньше AP, тем ниже шанс проявить инициативу.
+        const actorResources = resourceRepo.get(actorId);
+        let apNorm = 1;
+        if (actorResources && actorResources.resources) {
+            const curAP = Number(actorResources.resources.actionPoints ?? 0);
+            const maxAP = Number(actorResources.resources.maxActionPoints ?? 100);
+            apNorm = clamp01(curAP / Math.max(1, maxAP));
+        }
 
-            const effectiveProactiveProb = proactiveProb * apNorm;
+        const effectiveProactiveProb = proactiveProb * apNorm;
 
-            if (sampleProbability(effectiveProactiveProb)) {
-                // Если персонаж хочет действовать проактивно, узнаем ЧТО он хочет сделать
-                let proactiveReason = describeTone(relationToCalibrator?.attitude);
-                let decidedAction = undefined;
+        // Пытаемся сначала сделать проактивное действие
+        let becameProactive = false;
+        if (sampleProbability(effectiveProactiveProb)) {
+            // Если персонаж хочет действовать проактивно, узнаем ЧТО он хочет сделать
+            let proactiveReason = describeTone(relationToCalibrator?.attitude);
+            let decidedAction = undefined;
 
-                if (actorId !== playerId) {
-                    // Пытаемся найти лучшую цель из присутствующих
-                    const possibleTargets = presentSubjectIds.filter(id => id !== actorId);
-                    const targetId = possibleTargets.length > 0 
-                        ? possibleTargets[Math.floor(Math.random() * possibleTargets.length)] 
-                        : (actorId === subjectId ? playerId : subjectId);
+            if (actorId !== playerId) {
+                // Пытаемся найти лучшую цель из присутствующих
+                const possibleTargets = presentSubjectIds.filter(id => id !== actorId);
+                const targetId = possibleTargets.length > 0
+                    ? possibleTargets[Math.floor(Math.random() * possibleTargets.length)]
+                    : (actorId === subjectId ? playerId : subjectId);
+                
+                if (targetId) {
+                    const targetRelation = characterRelationRepo.get(actorId, targetId);
+                    proactiveReason = describeTone(targetRelation?.attitude || relationToCalibrator?.attitude);
                     
-                    if (targetId) {
-                        const targetRelation = characterRelationRepo.get(actorId, targetId);
-                        proactiveReason = describeTone(targetRelation?.attitude || relationToCalibrator?.attitude);
-
-                        const targetPointRecords = pointStateRepo.getAllForSubject(targetId);
-                        const targetPoints = targetPointRecords.map(p => p.pointId);
-                        if (targetPoints.length === 0) targetPoints.push('general');
-
-                        const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints);
-
-                        const scene = sceneRepo.get(eventSceneId);
-                        const actorResources = resourceRepo.get(actorId);
-
-                        const affordable = actions.filter(a => {
-                            const sceneCost = scene?.actionCosts?.[a.actionId];
-                            let requiredAP = 0;
-                            if (sceneCost) {
-                                const costRecord = (sceneCost as any).consume || sceneCost;
-                                requiredAP = Number(costRecord.actionPoints ?? costRecord.ap ?? costRecord.apCost ?? costRecord.action_points ?? 0);
-                            }
-                            const curAP = Number(actorResources?.resources?.actionPoints ?? 0);
-                            return !(requiredAP > 0 && curAP < requiredAP);
-                        });
-
-                        const bestAction = affordable.find(a => a.score > 0);
-                        if (bestAction) {
-                            const targetChar = subjectRepo.get(targetId);
-                            const targetName = targetChar?.name || targetId;
-                            const preset = presetRepo.getActionPreset(bestAction.actionId);
-                            
-                            decidedAction = { ...bestAction, targetId };
-                            proactiveReason = `Отношение к ${targetName}: ${proactiveReason}. Цель инициативы: применить действие "${preset?.label || bestAction.actionId}" к анатомической зоне "${bestAction.pointId}" персонажа ${targetName} (Мотивация: ${Math.round(bestAction.score)})`;
+                    const targetPointRecords = pointStateRepo.getAllForSubject(targetId);
+                    const targetPoints = targetPointRecords.map(p => p.pointId);
+                    if (targetPoints.length === 0) targetPoints.push('general');
+                    
+                    const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints);
+                    
+                    const scene = sceneRepo.get(eventSceneId);
+                    const actorResources = resourceRepo.get(actorId);
+                    
+                    const affordable = actions.filter(a => {
+                        const sceneCost = scene?.actionCosts?.[a.actionId];
+                        let requiredAP = 0;
+                        if (sceneCost) {
+                            const costRecord = (sceneCost as any).consume || sceneCost;
+                            requiredAP = Number(costRecord.actionPoints ?? costRecord.ap ?? costRecord.apCost ?? costRecord.action_points ?? 0);
                         }
+                        const curAP = Number(actorResources?.resources?.actionPoints ?? 0);
+                        return !(requiredAP > 0 && curAP < requiredAP);
+                    });
+                    
+                    const bestAction = affordable.find(a => a.score > 0);
+                    if (bestAction) {
+                        const targetChar = subjectRepo.get(targetId);
+                        const targetName = targetChar?.name || targetId;
+                        const preset = presetRepo.getActionPreset(bestAction.actionId);
+                        
+                        decidedAction = { ...bestAction, targetId };
+                        proactiveReason = `Отношение к ${targetName}: ${proactiveReason}. Цель инициативы: применить действие "${preset?.label || bestAction.actionId}" к анатомической зоне "${bestAction.pointId}" персонажа ${targetName} (Мотивация: ${Math.round(bestAction.score)})`;
+                        becameProactive = true;
                     }
                 }
+            }
 
+            if (becameProactive) {
                 actorDecisions.push({
                     actorId,
                     kind: 'proactive',
                     reason: proactiveReason,
                     mechanicalAction: decidedAction
                 });
-            }        }
-    }
+            }
+        }
 
-    const narrator: NarratorDecision | undefined = prompt.narratorPrompt
+        // Если не проактивны (или не смогли найти действие), пробуем отреагировать репликой
+        if (!becameProactive && sampleProbability(reactiveProb)) {
+            actorDecisions.push({
+                actorId,
+                kind: 'reactive',
+                reason: describeTone(relationToCalibrator?.attitude)
+            });
+        }
+    }    const narrator: NarratorDecision | undefined = prompt.narratorPrompt
         ? { enabled: true }
         : undefined;
 

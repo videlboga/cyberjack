@@ -341,9 +341,27 @@ export function GameApp() {
 
   const speechBubbles = useMemo(() => {
     const store = new Map<string, string>();
+    // Показываем облачко только для последней партии сообщений (группы с одним timestamp)
+    if (messages.length === 0) return store;
+    
+    // Находим все сообщения, которые пришли одновременно с самым последним
+    const lastMsgTime = messages[messages.length - 1].timestamp || messages[messages.length - 1].id;
+    // Упрощенный подход: берем несколько последних сообщений, если они близки по времени,
+    // или еще надежнее: собираем только из последнего "тика".
+    // Так как у нас нет явного tickId в messages, будем считать,
+    // что мы просто оставляем облачка только для самых недавних сообщений (последние 3 секунды).
+    const recentTimeThreshold = Date.now() - 3000; 
+
+    // Найдем самую позднюю отметку времени генерации ID (id у нас Date.now() + random)
+    const latestIdBase = Math.floor(messages[messages.length - 1].id);
+    
     messages.forEach(msg => {
-      if (msg.actorId && msg.actorId !== 'player') {
-        store.set(msg.actorId, msg.text);
+      // Показывать облачко только если сообщение было добавлено только что
+      // Примечание: msg.id это Date.now() + Math.random(), поэтому Math.floor(msg.id) это timestamp
+      if (Math.floor(msg.id) >= latestIdBase - 500) {
+        if (msg.actorId && msg.actorId !== 'player') {
+          store.set(msg.actorId, msg.text);
+        }
       }
     });
     return store;
@@ -392,7 +410,7 @@ export function GameApp() {
     const { leftValue, topValue } = focusedBubblePosition;
     const horizontal: 'left' | 'right' | 'center' = leftValue > 62 ? 'left' : leftValue < 38 ? 'right' : 'center';
     const vertical: 'up' | 'down' = topValue > 55 ? 'up' : 'down';
-    const leftOffset = horizontal === 'left' ? -12 : horizontal === 'right' ? 12 : 0;
+    const leftOffset = horizontal === 'left' ? -12 : horizontal === 'right' ? 18 : 5;
     const topOffset = vertical === 'up' ? -14 : 10;
     const left = clampRange(leftValue + leftOffset, 12, 88);
     const top = clampRange(topValue + topOffset, 12, 88);
@@ -512,10 +530,11 @@ export function GameApp() {
             if (repl.speech) {
               addMessage({ role: 'subject', text: repl.speech, actorId: repl.actorId });
             }
-            if (repl.reaction) {
-              addMessage({ role: 'narrator', text: repl.reaction });
-            }
           });
+          const reaction = data.narratorReaction || data.actorReplies[0]?.reaction;
+          if (reaction) {
+            addMessage({ role: 'narrator', text: reaction });
+          }
         } else if (data.reply) {
           if (data.reply.speech) addMessage({ role: 'subject', text: data.reply.speech, actorId: targetCharId });
           if (data.reply.reaction) addMessage({ role: 'narrator', text: data.reply.reaction });
@@ -661,16 +680,9 @@ export function GameApp() {
                 <div className="sector-occupants">
                   <span className="card-label">Персонажи</span>
                   <div className="occupant-list">
-                    {sectorCharacters.length ? sectorCharacters.map(entry => (
-                      <button
-                        key={entry.character.id}
-                        type="button"
-                        className={`occupant-chip ${focusedCharId === entry.character.id ? 'active' : ''}`}
-                        onClick={() => { setFocusedCharId(entry.character.id); setFocusedNodeId(null); }}
-                      >
-                        {entry.character.name}
-                      </button>
-                    )) : (
+                    {sectorCharacters.length ? (
+                      <span className="node-menu-empty" style={{ fontSize: '11px' }}>Выберите аватара на карте</span>
+                    ) : (
                       <span className="node-menu-empty">Никого нет</span>
                     )}
                   </div>
@@ -756,30 +768,8 @@ export function GameApp() {
                   ) : (
                     <div className="stat-placeholder">Загрузка состояния...</div>
                   )}
-
-                <div className="active-state">
-                  <span className="card-label">Точка воздействия</span>
-                  <select
-                    value={selectedPoint}
-                    onChange={e => setSelectedPoint(e.target.value)}
-                  >
-                    {availablePointsList.map(point => (
-                      <option key={point.id} value={point.id}>{point.label}</option>
-                    ))}
-                  </select>
-                  <span className="card-label" style={{ marginTop: 12 }}>Интенсивность: {intensity}</span>
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="2.0"
-                    step="0.1"
-                    value={intensity}
-                    onChange={e => setIntensity(Number(e.target.value))}
-                    style={{ width: '100%', cursor: 'pointer' }}
-                  />
                 </div>
               </div>
-            </div>
           )}
         </div>
 
@@ -898,7 +888,7 @@ export function GameApp() {
           </div>
           <div className="chat-body">
             <div className="log-entries" ref={logRef}>
-              {messages.map(m => (
+              {messages.filter(m => m.role !== 'narrator').map(m => (
                 <div key={m.id} className={`log-entry ${m.role}`}>
                   <strong>{getActorName(m.actorId, m.role)}:</strong> {m.text}
                 </div>
