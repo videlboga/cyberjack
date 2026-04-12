@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { resourceRepo, characterRepo, characterRelationRepo } from '../../infrastructure/repositories';
 import { ResourceState } from '../../domain/types';
+import { db } from '../../infrastructure/db';
 
 const DEFAULT_PLAYER = {
     id: 'PL-1',
@@ -19,7 +20,15 @@ export function normalizePlayer(playerObj?: ResourceState | null) {
         flatResources[key] = res.amount;
     }
     
-    return { id: src.id, resources: flatResources };
+    // Fetch inventory
+    const inventoryRows = db.prepare(`
+        SELECT ci.item_id as id, i.name, i.type, i.description, ci.state, ci.charges
+        FROM character_items ci
+        JOIN items i ON ci.item_id = i.id
+        WHERE ci.character_id = ?
+    `).all(src.id);
+    
+    return { id: src.id, resources: flatResources, inventory: inventoryRows };
 }
 
 export const updatePlayer = (req: Request, res: Response) => {

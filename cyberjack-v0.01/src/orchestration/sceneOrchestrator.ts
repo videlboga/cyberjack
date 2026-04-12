@@ -132,7 +132,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         const actorResources = resourceRepo.get(actorId);
         let apNorm = 1;
         if (actorResources && actorResources.resources) {
-            const curAP = Number(actorResources.resources.actionPoints ?? 0);
+            const curAP = Number(actorResources.resources.actionPoints ?? 100);
             const maxAP = Number(actorResources.resources.maxActionPoints ?? 100);
             apNorm = clamp01(curAP / Math.max(1, maxAP));
         }
@@ -173,7 +173,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
                             const costRecord = (sceneCost as any).consume || sceneCost;
                             requiredAP = Number(costRecord.actionPoints ?? costRecord.ap ?? costRecord.apCost ?? costRecord.action_points ?? 0);
                         }
-                        const curAP = Number(actorResources?.resources?.actionPoints ?? 0);
+                        const curAP = Number(actorResources?.resources?.actionPoints ?? 100);
                         return !(requiredAP > 0 && curAP < requiredAP);
                     });
                     

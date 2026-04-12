@@ -10,11 +10,11 @@ console.log("Начинаем безопасное заполнение базы
 const subjects: { id: string, name: string, state: any, profile: CharacterProfile }[] = [
     {
         id: 'S-01',
-        name: 'Синтетик (Мясо/Пластика)',
+        name: 'Эли',
         state: { sensitivity: 50, capacity: 60, openness: 50, plasticity: 80, attitude: 50 },
         profile: {
             base: {
-                name: 'S-01',
+                name: 'Эли',
                 age: 22,
                 gender: 'female',
                 anatomy: 'none',
@@ -45,11 +45,11 @@ const subjects: { id: string, name: string, state: any, profile: CharacterProfil
     },
     {
         id: 'S-02',
-        name: 'Райли (Бегающий Техник)',
+        name: 'Никс',
         state: { sensitivity: 40, capacity: 50, openness: 60, plasticity: 30, attitude: 20 },
         profile: {
             base: {
-                name: 'Райли',
+                name: 'Никс',
                 age: 28,
                 gender: 'female',
                 anatomy: 'none',
@@ -89,11 +89,11 @@ const subjects: { id: string, name: string, state: any, profile: CharacterProfil
     },
     {
         id: 'C-Gamma',
-        name: 'Калибратор Гамма',
+        name: 'Векс',
         state: { sensitivity: 20, capacity: 90, openness: 10, plasticity: 10, attitude: 90 },
         profile: {
             base: {
-                name: 'Гамма',
+                name: 'Векс',
                 age: 44,
                 gender: 'male',
                 anatomy: 'cyber_implant_arm',

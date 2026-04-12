@@ -33,7 +33,9 @@ export const getState = (req: Request, res: Response) => {
                     label: preset?.label || actionId,
                     costs: costs && Object.keys(costs).length ? costs : null, occupiesPoints: preset?.contextConfig?.occupiesPoints || [],
                         categories: preset?.categories || ['physical'],
-                        tags: preset?.tags || []
+                        tags: preset?.tags || [],
+                        type: preset?.type || 'physical',
+                        requiresItem: preset?.requiresItem || null
                 };
             });
             scene.characters = sceneCharacterRepo.list(scene.id);

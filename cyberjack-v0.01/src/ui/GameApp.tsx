@@ -11,6 +11,7 @@ type ActionPreset = {
   occupiesPoints?: string[];
   disabled?: boolean;
   tags?: string[];
+  type?: string;
   requiresItem?: string | null;
 };
 
@@ -47,6 +48,26 @@ const clampPercent = (value: number, min = 12, max = 88) => Math.max(min, Math.m
 const clampRange = (value: number, min = 5, max = 95) => Math.max(min, Math.min(max, value));
 
 const FALLBACK_BOUNDS = { width: 1000, height: 700 };
+
+const avatarNameMap: Record<string, string> = {
+  "Векс": "/avatars/Vex.png",
+  "Сайлас": "/avatars/Silas.png",
+  "Эли": "/avatars/Eli.png",
+  "Никс": "/avatars/Nyx.png",
+  "Мара": "/avatars/Mara.png",
+  "Кай": "/avatars/Kai.png",
+  "Иден": "/avatars/Eden.png",
+  "Рунис": "/avatars/Runis.png",
+  "Рен": "/avatars/Ren.png",
+  "Калибратор": "/avatars/Calibrator.png", // Fallback for player
+};
+
+const getAvatarUrl = (name: string): string | null => {
+  for (const [ru, filename] of Object.entries(avatarNameMap)) {
+    if (name.includes(ru)) return filename;
+  }
+  return null;
+};
 
 const RADIAL_GROUPS = [
   { id: 'medical', label: 'Медицинские', tags: ['medical', 'clinical', 'chemical', 'piercing', 'inspection'] },
@@ -163,6 +184,9 @@ const filterActionsForPoint = (actions: ActionPreset[], pointId?: string | null)
 export function GameApp() {
   const [messages, setMessages] = useState<any[]>([]);
   const [playerResources, setPlayerResources] = useState<Record<string, number>>({});
+  const [playerInventory, setPlayerInventory] = useState<any[]>([]);
+  const [showInventory, setShowInventory] = useState(false);
+  const [showCardParams, setShowCardParams] = useState(false);
   const [subjectState, setSubjectState] = useState<any>(null);
   const [availableActions, setAvailableActions] = useState<ActionPreset[]>([]);
   const [layout, setLayout] = useState<any>(null);
@@ -196,6 +220,9 @@ export function GameApp() {
       setAvailableActions(sanitizeActions(body.availableActions || []));
       if (body.player?.resources) {
         setPlayerResources(body.player.resources);
+      }
+      if (body.player?.inventory) {
+        setPlayerInventory(body.player.inventory);
       }
       if (hydrateState && focusedCharId === targetId) {
         setSubjectState(body.subject);
@@ -475,7 +502,12 @@ export function GameApp() {
   };
 
   const sendAction = async (presetId?: string, text?: string, targetPoint?: string, targetCharIdOverride?: string, customIntensity?: number) => {
-    const targetCharId = targetCharIdOverride || focusedCharId;
+    let targetCharId = targetCharIdOverride || focusedCharId;
+    if (!targetCharId && presetId === 'wait') {
+      const npcInScene = sceneCharacters.find(c => c.character.id !== PLAYER_CHARACTER_ID)?.character.id;
+      targetCharId = npcInScene || 'S-01'; // Fallback so tick has a subject context
+    }
+    
     if (!targetCharId) {
       return;
     }
@@ -497,9 +529,11 @@ export function GameApp() {
       if (presetId) reqBody.presetId = presetId;
       if (text) reqBody.textMessage = text;
 
-      if (presetId) {
+      if (presetId && presetId !== 'wait') {
         const actionLabel = availableActions.find(a => a.id === presetId)?.label || presetId;
         addMessage({ role: 'player', text: `[Действие] ${actionLabel} -> ${resolvedPoint}`, actorId: 'player' });
+      } else if (presetId === 'wait') {
+        addMessage({ role: 'system', text: `Вы ждете... Проходит время.`, actorId: 'system' });
       } else if (text) {
         addMessage({ role: 'player', text, actorId: 'player' });
       }
@@ -560,7 +594,21 @@ export function GameApp() {
   };
 
   const groupedActions = useMemo(() => {
-    const actions = filterActionsForPoint(availableActions, selectedPoint);
+    // 1. Ограничение: физические действия недоступны, если сектора разные
+    // 2. Не отображаем вербальные действия
+    // 3. Только доступные по ресурсам
+    const playerSector = sceneCharacters.find(c => c.character.id === PLAYER_CHARACTER_ID)?.slotId;
+    const targetSector = sceneCharacters.find(c => c.character.id === focusedCharId)?.slotId;
+    const sameSector = playerSector === targetSector;
+
+    const validActions = availableActions.filter(a => {
+      if (a.requiresItem && !playerInventory.some(item => item.id === a.requiresItem)) return false;
+      if (a.type === 'verbal') return false;
+      if (a.type === 'physical' && !sameSector) return false;
+      return true;
+    });
+
+    const actions = filterActionsForPoint(validActions, selectedPoint);
     const base: Record<string, ActionPreset[]> = {};
     RADIAL_GROUPS.forEach(group => {
       base[group.id] = [];
@@ -573,7 +621,7 @@ export function GameApp() {
       }
     });
     return base;
-  }, [availableActions, selectedPoint]);
+  }, [availableActions, selectedPoint, sceneCharacters, focusedCharId, playerResources]);
 
   const radialCategories = RADIAL_GROUPS.filter(group => groupedActions[group.id]?.length);
 
@@ -633,23 +681,32 @@ export function GameApp() {
                 </button>
 
                 <div className="node-avatars" onClick={e => e.stopPropagation()}>
-                  {nodeChars.map(entry => (
-                    <div
-                      key={entry.character.id}
-                      className={`avatar ${entry.character.playerId ? 'player' : 'subject'} ${focusedCharId === entry.character.id ? 'focused' : ''}`}
-                      title={entry.character.name}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFocusedCharId(entry.character.id);
-                        setFocusedNodeId(null);
-                      }}
-                    >
-                      {entry.character.name.split(' ').slice(0, 2).map(part => part[0]).join('')}
-                      {speechBubbles.get(entry.character.id) && (
-                        <div className="avatar-bubble">{speechBubbles.get(entry.character.id)}</div>
-                      )}
-                    </div>
-                  ))}
+                  {nodeChars.map(entry => {
+                    const avatarUrl = getAvatarUrl(entry.character.name);
+                    return (
+                      <div
+                        key={entry.character.id}
+                        className={`avatar ${entry.character.playerId ? 'player' : 'subject'} ${focusedCharId === entry.character.id ? 'focused' : ''}`}
+                        title={entry.character.name}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFocusedCharId(entry.character.id);
+                          setFocusedNodeId(null);
+                        }}
+                        style={avatarUrl ? {
+                          backgroundImage: `url("${avatarUrl}")`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          color: 'transparent'
+                        } : {}}
+                      >
+                        {!avatarUrl ? entry.character.name.split(' ').slice(0, 2).map(part => part[0]).join('') : ''}
+                        {speechBubbles.get(entry.character.id) && (
+                          <div className="avatar-bubble" style={{color: '#fff'}}>{speechBubbles.get(entry.character.id)}</div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -735,39 +792,78 @@ export function GameApp() {
                          </>
                      )}
                 </div>
-                <div className="character-focus-card">
-                  <div className="character-card-header">
-                    <div>
-                      <span className="card-label">Фокус</span>
-                      <h3>{focusedCharacter.name}</h3>
+                <div className="character-focus-card" style={getAvatarUrl(focusedCharacter.name) ? {
+                  backgroundImage: `url("${getAvatarUrl(focusedCharacter.name)}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                } : {}}>
+                  <div className="character-focus-content" style={{
+                    transform: showCardParams ? 'translateY(0)' : 'translateY(100%)',
+                    transition: 'transform 0.3s ease-in-out',
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    boxSizing: 'border-box'
+                  }}>
+                    <div className="character-card-header">
+                      <div>
+                        <span className="card-label">Фокус</span>
+                        <h3>{focusedCharacter.name}</h3>
+                      </div>
+                      {focusedPresence?.presenceState && (
+                        <span className="presence-state">{focusedPresence.presenceState}</span>
+                      )}
                     </div>
-                    {focusedPresence?.presenceState && (
-                      <span className="presence-state">{focusedPresence.presenceState}</span>
+                    {subjectState ? (
+                      <div className="stat-bars">
+                        {[{
+                          key: 'sensitivity', label: 'Чувствительность'
+                        }, {
+                          key: 'capacity', label: 'Ресурс'
+                        }, {
+                          key: 'attitude', label: 'Доверие'
+                        }, {
+                          key: 'plasticity', label: 'Пластичность'
+                        }].map(stat => (
+                          <div className="stat" key={stat.key}>
+                            <label>
+                              <span>{stat.label}</span>
+                              <span>{Math.round(subjectState[stat.key] ?? 0)}</span>
+                            </label>
+                            <progress value={subjectState[stat.key] ?? 0} max={100} />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="stat-placeholder">Загрузка состояния...</div>
                     )}
                   </div>
-                  {subjectState ? (
-                    <div className="stat-bars">
-                      {[{
-                        key: 'sensitivity', label: 'Чувствительность'
-                      }, {
-                        key: 'capacity', label: 'Ресурс'
-                      }, {
-                        key: 'attitude', label: 'Доверие'
-                      }, {
-                        key: 'plasticity', label: 'Пластичность'
-                      }].map(stat => (
-                        <div className="stat" key={stat.key}>
-                          <label>
-                            <span>{stat.label}</span>
-                            <span>{Math.round(subjectState[stat.key] ?? 0)}</span>
-                          </label>
-                          <progress value={subjectState[stat.key] ?? 0} max={100} />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="stat-placeholder">Загрузка состояния...</div>
-                  )}
+                  
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowCardParams(!showCardParams);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: 'rgba(0, 0, 0, 0.5)',
+                      color: 'white',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '16px',
+                      padding: '4px 12px',
+                      cursor: 'pointer',
+                      zIndex: 10
+                    }}
+                  >
+                    {showCardParams ? 'Скрыть параметры ▼' : 'Показать параметры ▲'}
+                  </button>
                 </div>
               </div>
           )}
@@ -861,9 +957,9 @@ export function GameApp() {
             ))}
           </div>
           <div className="hud-buttons">
-            <button type="button">Инвентарь</button>
+            <button type="button" onClick={() => setShowInventory(!showInventory)}>Инвентарь</button>
             <button type="button">Журнал</button>
-            <button type="button" onClick={() => sendAction('wait')} disabled={isProcessing || !focusedCharId}>
+            <button type="button" onClick={() => sendAction('wait')} disabled={isProcessing}>
               {isProcessing ? 'Ход...' : 'Ждать тик'}
             </button>
           </div>
@@ -872,6 +968,43 @@ export function GameApp() {
             <p>{latestNarrative}</p>
           </div>
         </div>
+
+        {showInventory && (
+          <div style={{
+            position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: 8, padding: 20, zIndex: 2000,
+            width: 500, color: '#e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 16 }}>Инвентарь (Калибратор)</h3>
+              <button 
+                onClick={() => setShowInventory(false)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}
+              >×</button>
+            </div>
+            {playerInventory.length === 0 ? (
+              <p style={{ color: '#64748b', fontSize: 13 }}>Инвентарь пуст</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
+                {playerInventory.map(item => (
+                  <div key={item.id} style={{
+                    background: 'rgba(30, 41, 59, 0.8)', padding: 12, borderRadius: 6, border: '1px solid #475569'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <strong style={{ color: '#e2e8f0', fontSize: 14 }}>{item.name}</strong>
+                      <span style={{ fontSize: 11, color: '#94a3b8', background: '#0f172a', padding: '2px 6px', borderRadius: 4 }}>{item.type}</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 12, color: '#cbd5e1' }}>{item.description}</p>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 8, fontSize: 11, color: '#64748b' }}>
+                      <span>Состояние: <span style={{ color: item.state === 'active' ? '#4ade80' : '#f87171' }}>{item.state}</span></span>
+                      {item.charges >= 0 && <span>Заряды: {item.charges}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="chat-overlay">
           <div className="chat-header">
