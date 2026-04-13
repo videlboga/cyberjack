@@ -29,6 +29,9 @@ export interface CharacterRelation {
     fromId: string;
     toId: string;
     knows: boolean;
+    familiarityLevel?: number; // 0.0 - 1.0 or higher
+    generalOpinion?: string; // Text summary of the opinion
+    recentMemories?: string[]; // Array of text memories
     present: boolean;
     canInteract: boolean;
     attitude: number;

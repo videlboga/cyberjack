@@ -22,6 +22,9 @@ const mapRelation = (row: any): CharacterRelation => ({
     attitude: row.attitude,
     openness: row.openness ?? 0,
     plasticity: row.plasticity ?? 0,
+    familiarityLevel: row.familiarity_level ?? 0,
+    generalOpinion: row.general_opinion,
+    recentMemories: row.recent_memories ? JSON.parse(row.recent_memories) : [],
     baselineAttitude: row.baseline_attitude,
     baselineOpenness: row.baseline_openness,
     baselinePlasticity: row.baseline_plasticity,
@@ -199,8 +202,8 @@ export const characterRelationRepo = {
         ).get(fromId, toId);
         if (existing) return mapRelation(existing);
         const stmt = db.prepare(`
-            INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, openness, plasticity, baseline_attitude, baseline_openness, baseline_plasticity)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, openness, plasticity, baseline_attitude, baseline_openness, baseline_plasticity, familiarity_level, general_opinion, recent_memories)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '', '[]')
         `);
         stmt.run(
             fromId,
@@ -233,6 +236,28 @@ export const characterRelationRepo = {
         );
         const rows = stmt.all(fromId);
         return rows.map(mapRelation);
+    },
+    
+    updateSocialStats(fromId: string, toId: string, stats: { familiarityDelta: number, generalOpinion?: string, newMemory?: string }) {
+        const existing = this.ensure(fromId, toId);
+        
+        const newFam = existing.familiarityLevel !== undefined ? Math.min(1.0, existing.familiarityLevel + stats.familiarityDelta) : stats.familiarityDelta;
+        let opinion = stats.generalOpinion || existing.generalOpinion || '';
+        
+        let mems = existing.recentMemories || [];
+        if (stats.newMemory) {
+             mems.push(stats.newMemory);
+             if (mems.length > 5) mems.shift(); // Keep only last 5 
+        }
+        
+        const stmt = db.prepare(`
+            UPDATE character_relations 
+            SET familiarity_level = ?,
+                general_opinion = ?,
+                recent_memories = ?
+            WHERE from_id = ? AND to_id = ?
+        `);
+        stmt.run(newFam, opinion, JSON.stringify(mems), fromId, toId);
     },
     updateAttitude(fromId: string, toId: string, attitude: number, options?: { baselineAttitude?: number, openness?: number, plasticity?: number }) {
         this.ensure(fromId, toId);

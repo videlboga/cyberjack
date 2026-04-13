@@ -1,26 +1,44 @@
 const fs = require('fs');
+let file = fs.readFileSync('src/infrastructure/repositories.ts', 'utf8');
 
-const path = 'src/infrastructure/repositories.ts';
-let code = fs.readFileSync(path, 'utf8');
+// Patch mapRelation
+file = file.replace(/plasticity: row.plasticity \?\? 0,/, `plasticity: row.plasticity ?? 0,
+    familiarityLevel: row.familiarity_level ?? 0,
+    generalOpinion: row.general_opinion,
+    recentMemories: row.recent_memories ? JSON.parse(row.recent_memories) : [],`);
 
-const targetStr = `    get(subjectId: string, pointId: string): SubjectPointState | null {`;
-const newStr = `    getAllForSubject(subjectId: string): SubjectPointState[] {
-        const stmt = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ?');
-        const rows = stmt.all(subjectId) as any[];
-        return rows.map((row: any) => ({
-            pointId: row.point_id,
-            localSensitivity: row.local_sensitivity,
-            localAttitude: row.local_attitude,
-            localOpenness: row.local_openness ?? 50,
-            familiarity: row.familiarity ?? 0,
-            exposureCount: row.exposure_count ?? 0,
-            baselineLocalSensitivity: row.baseline_local_sensitivity,
-            baselineLocalAttitude: row.baseline_local_attitude,
-            baselineLocalOpenness: row.baseline_local_openness
-        }));
+// Patch ensure insert
+file = file.replace(/INSERT INTO character_relations \(from_id, to_id, knows, present, can_interact, attitude, openness, plasticity, baseline_attitude, baseline_openness, baseline_plasticity\).*?VALUES \(\?, \?, \?, \?, \?, \?, \?, \?, \?, \?, \?\)/s, 
+`INSERT INTO character_relations (from_id, to_id, knows, present, can_interact, attitude, openness, plasticity, baseline_attitude, baseline_openness, baseline_plasticity, familiarity_level, general_opinion, recent_memories)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '', '[]')`);
+
+
+// Add an updateFamiliarity method to characterRelationRepo
+const updateAttitudeMatch = `updateAttitude(fromId: string, toId: string, attitude: number, options?: { baselineAttitude?: number, openness?: number, plasticity?: number }) {`;
+const newMethod = `
+    updateSocialStats(fromId: string, toId: string, stats: { familiarityDelta: number, generalOpinion?: string, newMemory?: string }) {
+        const existing = this.ensure(fromId, toId);
+        
+        const newFam = existing.familiarityLevel !== undefined ? Math.min(1.0, existing.familiarityLevel + stats.familiarityDelta) : stats.familiarityDelta;
+        let opinion = stats.generalOpinion || existing.generalOpinion || '';
+        
+        let mems = existing.recentMemories || [];
+        if (stats.newMemory) {
+             mems.push(stats.newMemory);
+             if (mems.length > 5) mems.shift(); // Keep only last 5 
+        }
+        
+        const stmt = db.prepare(\`
+            UPDATE character_relations 
+            SET familiarity_level = ?,
+                general_opinion = ?,
+                recent_memories = ?
+            WHERE from_id = ? AND to_id = ?
+        \`);
+        stmt.run(newFam, opinion, JSON.stringify(mems), fromId, toId);
     },
+    updateAttitude(fromId: string, toId: string, attitude: number, options?: { baselineAttitude?: number, openness?: number, plasticity?: number }) {`;
 
-    get(subjectId: string, pointId: string): SubjectPointState | null {`;
+file = file.replace(updateAttitudeMatch, newMethod);
 
-code = code.replace(targetStr, newStr);
-fs.writeFileSync(path, code);
+fs.writeFileSync('src/infrastructure/repositories.ts', file);

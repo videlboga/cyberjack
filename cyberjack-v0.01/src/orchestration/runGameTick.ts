@@ -245,6 +245,18 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // 7. Save Atomically (before prompt building)
     saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
+
+    // [Async] Background update relations
+    const bgUpdate = require('../workers/backgroundRelationUpdate');
+    setTimeout(() => {
+        bgUpdate.backgroundRelationUpdate(
+            payload.subjectId, 
+            payload.playerId, 
+            payload.presetId, 
+            engineOutput.result?.narrative || 'Взаимодействие',
+            engineOutput.delta?.core?.attitude || 0
+        );
+    }, 100);
     
     if (scenarioResult.updatedResources !== state.resources || true) {
         resourceRepo.save(state.resources);
