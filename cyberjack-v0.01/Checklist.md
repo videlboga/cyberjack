@@ -79,3 +79,4 @@
 - [ ] Subject interaction UI
 - [ ] Player/station management UI
 - [ ] VN/scene renderer
+TODO: Rethink Aggro/Focus Attention System for Scene Orchestrator where observing extreme events overrides base proactive probability constraints

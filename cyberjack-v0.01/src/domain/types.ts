@@ -387,6 +387,8 @@ export interface DiagnosticsOutput {
         attitudeDelta: number;
         opennessDelta: number;
     };
+    physicalEffect?: number;
+    emotionalEffect?: number;
 }
 
 

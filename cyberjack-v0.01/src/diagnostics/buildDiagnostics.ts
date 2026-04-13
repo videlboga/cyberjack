@@ -23,7 +23,9 @@ export function buildDiagnostics(
         rawDelta: {
             attitudeDelta: output.nextCore.attitude - previousCore.attitude,
             opennessDelta: output.nextCore.openness - previousCore.openness,
-        }
+        },
+        physicalEffect: (output.result.pleasure || 0) - (output.result.discomfort || 0),
+        emotionalEffect: output.result.attitudeShift || 0
     };
 }
 

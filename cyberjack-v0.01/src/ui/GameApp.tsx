@@ -181,7 +181,7 @@ const filterActionsForPoint = (actions: ActionPreset[], pointId?: string | null)
   });
 };
 
-export function GameApp() {
+export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [playerResources, setPlayerResources] = useState<Record<string, number>>({});
   const [playerInventory, setPlayerInventory] = useState<any[]>([]);

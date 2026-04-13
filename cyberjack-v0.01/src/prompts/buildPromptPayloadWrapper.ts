@@ -45,9 +45,9 @@ export async function buildPromptPayloadWithDB(
     const activeContextNames = activeContextRow.map(r => r.label);
 
     const pointStatesRow = db.prepare(`
-        SELECT p.label, sps.local_sensitivity, sps.local_attitude
+        SELECT sps.point_id as label, sps.local_sensitivity, sps.local_attitude
         FROM subject_point_states sps
-        JOIN point_presets p ON sps.point_id = p.id
+        -- JOIN point_presets p ON sps.point_id = p.id
         WHERE sps.subject_id = ?
     `).all(targetQueryId) as any[];
 

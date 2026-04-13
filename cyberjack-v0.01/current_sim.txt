@@ -1,0 +1,117 @@
+import React, { useState, useEffect } from 'react';
+
+const SimulationView: React.FC = () => {
+    const [subTab, setSubTab] = useState<'main'|'anatomy'|'relations'|'contexts'|'inventory'>('main');
+
+    return (
+        <div style={{ flex: 1, width: '100%', height: '100%', display: 'flex', gap: '10px', overflow: 'hidden' }}>
+            
+            {/* Левая колонка: Чат и действия */}
+            <div style={{ flex: 1, background: '#222', border: '1px solid #444', display: 'flex', flexDirection: 'column', pading: '0', overflow: 'hidden' }}>
+                <div style={{ background: '#333', padding: '8px', borderBottom: '1px solid #444' }}>
+                    <h3 style={{ margin: 0, fontSize: '14px' }}>Чат и События</h3>
+                </div>
+                <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
+                    <div style={{ color: '#aaa', fontSize: '12px' }}>Логи чата и системы...</div>
+                </div>
+                <div style={{ padding: '10px', borderTop: '1px solid #444', background: '#2a2a2a', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ fontSize: '12px', color: '#ccc' }}><strong>Ручное действие</strong></div>
+                    <select style={{ padding: '4px', background: '#111', color: '#fff', border: '1px solid #555' }}>
+                        <option>Выбрать Инициатора...</option>
+                    </select>
+                    <select style={{ padding: '4px', background: '#111', color: '#fff', border: '1px solid #555' }}>
+                        <option>Выбрать Цель...</option>
+                    </select>
+                    <select style={{ padding: '4px', background: '#111', color: '#fff', border: '1px solid #555' }}>
+                        <option>Действие (Action Preset)...</option>
+                    </select>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#ccc' }}>
+                        <input type="checkbox" defaultChecked /> Использовать LLM
+                    </label>
+                    <button style={{ padding: '6px', background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer' }}>Отправить</button>
+                </div>
+            </div>
+
+            {/* Центральная колонка: Инспектор Персонажа */}
+            <div style={{ flex: 2, background: '#1a1a1a', border: '1px solid #444', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ background: '#2a2a2a', padding: '8px', borderBottom: '1px solid #444', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ margin: 0, fontSize: '14px', color: '#e2e8f0' }}>Инспектор Субъекта (Фокус)</h3>
+                    <select style={{ padding: '2px 6px', background: '#111', color: '#fff', border: '1px solid #555' }}>
+                        <option>Никс (S-02)</option>
+                        <option>Эли (S-01)</option>
+                    </select>
+                </div>
+                
+                {/* Саб-табы инспектора */}
+                <div style={{ display: 'flex', background: '#222', borderBottom: '1px solid #555' }}>
+                    {[
+                        { id: 'main', label: 'Параметры' },
+                        { id: 'anatomy', label: 'Анатомия' },
+                        { id: 'relations', label: 'Отношения' },
+                        { id: 'contexts', label: 'Контексты' },
+                        { id: 'inventory', label: 'Ресурсы' }
+                    ].map(t => (
+                        <button 
+                            key={t.id}
+                            onClick={() => setSubTab(t.id as any)}
+                            style={{ 
+                                flex: 1, padding: '8px', cursor: 'pointer', border: 'none',
+                                background: subTab === t.id ? '#3b82f6' : 'transparent',
+                                color: subTab === t.id ? '#fff' : '#aaa',
+                                borderBottom: subTab === t.id ? '2px solid #60a5fa' : '2px solid transparent'
+                            }}
+                        >
+                            {t.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div style={{ flex: 1, padding: '15px', overflowY: 'auto', color: '#ccc' }}>
+                    {subTab === 'main' && (
+                        <div>
+                            <h4>Основные оси</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div>Sensetivity: 50 / 50 <progress value="50" max="100" style={{width: '100%'}}/></div>
+                                <div>Capacity: 100 / 100 <progress value="100" max="100" style={{width: '100%'}}/></div>
+                                <div>Attitude: 40 / 40 <progress value="40" max="100" style={{width: '100%'}}/></div>
+                            </div>
+                        </div>
+                    )}
+                    {subTab === 'anatomy' && <div>Список анатомических точек: голова, грудь, руки... (с их local_sensitivity, familiarity)</div>}
+                    {subTab === 'relations' && <div>Матрица связей текущего субъекта к другим персонажам...</div>}
+                    {subTab === 'contexts' && <div>Активные статусы и дебаффы (Шок, Страх)...</div>}
+                    {subTab === 'inventory' && <div>Инвентарь, AP...</div>}
+                </div>
+            </div>
+
+            {/* Правая колонка: Сцена */}
+            <div style={{ flex: 1, background: '#222', border: '1px solid #444', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ background: '#333', padding: '8px', borderBottom: '1px solid #444' }}>
+                    <h3 style={{ margin: 0, fontSize: '14px' }}>Управление Сценой</h3>
+                </div>
+                <div style={{ padding: '10px', borderBottom: '1px solid #444' }}>
+                    <select style={{ width: '100%', padding: '6px', background: '#111', color: '#fff', border: '1px solid #555' }}>
+                        <option>Сцена: Лаборатория (lab)</option>
+                    </select>
+                </div>
+                <div style={{ flex: 1, padding: '10px', overflowY: 'auto', color: '#aaa', fontSize: '13px' }}>
+                    <div style={{ marginBottom: '15px' }}>
+                        <strong style={{ color: '#e2e8f0' }}>Сектор 1 (Операционный стол)</strong>
+                        <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
+                            <li>Никс (S-02)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong style={{ color: '#e2e8f0' }}>Сектор 2 (Медицинский пост)</strong>
+                        <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
+                            <li>Калибратор (PL-1)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    );
+};
+
+export default SimulationView;

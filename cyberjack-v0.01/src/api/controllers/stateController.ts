@@ -1,6 +1,6 @@
 import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
-import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo } from '../../infrastructure/repositories';
+import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo } from '../../infrastructure/repositories';
 import { activeConfig, updateConfig } from '../../prompts/config';
 import { normalizePlayer } from './playerController';
 
@@ -41,9 +41,21 @@ export const getState = (req: Request, res: Response) => {
             scene.characters = sceneCharacterRepo.list(scene.id);
         }
 
+        const anatomyDict: any = {};
+        const subjectPoints = pointStateRepo.getAllForSubject(subjectId) || [];
+        for (const pt of subjectPoints) {
+            anatomyDict[pt.pointId] = pt; // get mapped pointId
+        }
+
+        let subject = uiState.subject;
+        if (subject) {
+            subject.anatomy = anatomyDict;
+            subject.contexts = activeContextsRepo.getAllForSubject(subjectId) || [];
+        }
+
         res.json({ 
             success: true, 
-            subject: uiState.subject,
+            subject: subject,
             availablePoints: uiState.availablePoints,
             availableActions,
             scene: scene ? { id: scene.id, transitions: scene.transitions || [], characters: scene.characters || [] } : null,
@@ -86,6 +98,38 @@ export const updateSubject = (req: Request, res: Response) => {
         subjectRepo.save(subjectId, current.name || subjectId, updated as any);
         const fullState = subjectRepo.getWithPoint(subjectId, req.body.pointId || 'general');
         res.json({ success: true, state: fullState });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const updatePointState = (req: Request, res: Response) => {
+    try {
+        const subjectId = req.body.subjectId;
+        const pointId = req.body.pointId;
+        if (!subjectId || !pointId) return res.status(400).json({ success: false, error: 'subjectId and pointId required' });
+
+        // Accept numeric fields and fallback to defaults where appropriate
+        const asNum = (v: any, def: number) => {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : def;
+        };
+
+        const state = {
+            localSensitivity: asNum(req.body.localSensitivity, 0),
+            localAttitude: asNum(req.body.localAttitude, 50),
+            localOpenness: asNum(req.body.localOpenness, 50),
+            familiarity: asNum(req.body.familiarity, 0),
+            exposureCount: asNum(req.body.exposureCount, 0),
+            baselineLocalSensitivity: req.body.baselineLocalSensitivity !== undefined ? asNum(req.body.baselineLocalSensitivity, 0) : null,
+            baselineLocalAttitude: req.body.baselineLocalAttitude !== undefined ? asNum(req.body.baselineLocalAttitude, 0) : null,
+            baselineLocalOpenness: req.body.baselineLocalOpenness !== undefined ? asNum(req.body.baselineLocalOpenness, 0) : null
+        } as any;
+
+        // Persist using repository
+        pointStateRepo.save(subjectId, pointId, state);
+
+        res.json({ success: true });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
