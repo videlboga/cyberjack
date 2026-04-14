@@ -40,6 +40,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
     const prompt = bundle.prompt;
     const relations = prompt.relations || [];
     const actorDecisions: ActorDecision[] = [];
+    const actorDiagnostics: Array<any> = [];
     const subjectId = bundle.event.subjectId;
 
     const relationMap = new Map<string, CharacterRelation>();
@@ -108,9 +109,10 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         // Смягчаем штраф за отсутствие новизны: максимум снижение на 50%, а не до нуля.
         const noveltyFactor = isVerbalInput ? 1.0 : (0.5 + 0.5 * lastActionNovelty);
 
-        // Снижаем вероятность реакций для наблюдателей
+    // Снижаем вероятность реакций для наблюдателей
         const isTarget = (actorId === subjectId);
-        const observerPenalty = (isTarget || isVerbalInput) ? 1.0 : 0.15; // Наблюдатели вмешиваются в 15% случаев от базы
+    // make observerPenalty less punitive in experiments (was 0.15)
+    const observerPenalty = (isTarget || isVerbalInput) ? 1.0 : 0.5; // Наблюдатели вмешиваются в 50% случаев от базы
 
         const reactiveProb = clamp01(
             (cfg.baseReactiveProbability * noveltyFactor +
@@ -141,6 +143,16 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         }
 
         const effectiveProactiveProb = proactiveProb * apNorm;
+
+        // push diagnostics for this actor (recorded even if no decision made)
+        actorDiagnostics.push({
+            actorId,
+            isTarget,
+            reactiveProb,
+            proactiveProb,
+            apNorm,
+            effectiveProactiveProb
+        });
 
         // Пытаемся сначала сделать проактивное действие
         let becameProactive = false;
@@ -218,6 +230,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
     return {
         narrator,
         actorDecisions
+        , diagnostics: actorDiagnostics
     };
 }
 
@@ -326,6 +339,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             subjectId,
             narrator: !!orchestration.narrator,
             decisions: summaryDecisions,
+            diagnostics: orchestration.diagnostics || [],
             explanationRu: explainOrchestratorDecision({ tickId: bundle.tickId, sceneId: eventId, subjectId, decisions: summaryDecisions })
         });
     } catch (e) { /* ignore */ }

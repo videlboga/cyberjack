@@ -380,6 +380,7 @@ export interface ActorDecision {
 export interface OrchestratedTurn {
     narrator?: NarratorDecision;
     actorDecisions: ActorDecision[];
+    diagnostics?: any[];
 }
 
 export interface DiagnosticsOutput {

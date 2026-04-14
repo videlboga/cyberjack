@@ -166,7 +166,8 @@ export let activeConfig: PromptConfig = {
     },
     orchestrator: {
         baseReactiveProbability: 0.85,
-        baseProactiveProbability: 0.50,
+        // increased to encourage initiative in experiments
+        baseProactiveProbability: 0.9,
         sensitivityModifier: 0.2,
         attitudeModifier: 0.15,
         peerModifier: 0.1,
