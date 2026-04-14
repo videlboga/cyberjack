@@ -130,7 +130,7 @@ export function generateCharacterEndpoint(req: Request, res: Response) {
             VALUES (?, ?, 'subject', ?, ?)
             ON CONFLICT(id) DO UPDATE SET name = excluded.name, profile_json = excluded.profile_json
           `).run(subjectId, req.body.name || profile.personaText.split('\n')[1]?.replace('- Имя: ', '').trim() || subjectId, subjectId, JSON.stringify(profile));
-        const points = getBaseHumanAnatomy(profile.base.gender, profile.base.anatomy);
+        const points = getBaseHumanAnatomy('female', undefined);
         const stmt = db.prepare(`INSERT OR IGNORE INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude) VALUES (?, ?, ?, ?, 0, 0, ?, ?)`);
         for (const p of points) stmt.run(subjectId, p.id, p.sens, p.att, p.sens, p.att);
         })();
@@ -138,5 +138,17 @@ export function generateCharacterEndpoint(req: Request, res: Response) {
         res.json({ success: true, subjectId, profile });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
+    }
+}
+export function getDiagnostics(req: any, res: any) { try { const fs = require('fs'); const prompt = fs.existsSync('prompt_snapshot.json') ? fs.readFileSync('prompt_snapshot.json', 'utf-8') : 'null'; const result = fs.existsSync('result_log.json') ? fs.readFileSync('result_log.json', 'utf-8') : 'null'; res.json({ success: true, prompt: prompt !== 'null' ? JSON.parse(prompt) : null, result: result !== 'null' ? JSON.parse(result) : null }); } catch (e) { res.status(500).json({ success: false, error: String(e) }); } }
+
+import { presetRepo } from '../../infrastructure/repositories';
+
+export function getActions(req: Request, res: Response) {
+    try {
+        const actions = presetRepo.getAllActionPresets();
+        res.json(actions);
+    } catch (e: any) {
+        res.status(500).json({ error: String(e) });
     }
 }

@@ -1,9 +1,13 @@
 import { Router } from 'express';
-import { getConfig, postConfig, getCharacterProfile, getCharacterPrompt, getAllCharacters, deleteCharacter, generateCharacterEndpoint } from '../controllers/metaController';
+import { getConfig, getActions, getDiagnostics, postConfig, getCharacterProfile, getCharacterPrompt, getAllCharacters, deleteCharacter, generateCharacterEndpoint } from '../controllers/metaController';
 
 const router = Router();
 
+router.get('/actions', getActions);
 router.get('/config', getConfig);
+router.get('/actions', getActions);
+router.get('/diagnostics', getDiagnostics);
+router.get('/diagnostics', getDiagnostics);
 router.post('/config', postConfig);
 router.get('/characters/profile', getCharacterProfile);
 router.post('/characters/prompt', getCharacterPrompt);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+// Use the clean composed SimulationView for dev UI
 import SimulationView from './views/Simulation/SimulationView';
 import DiagnosticsView from './views/Diagnostics/DiagnosticsView';
 import DatabaseView from './views/Database/DatabaseView';

@@ -205,7 +205,7 @@ export async function buildPromptPayload(
                     result += ` Я помню, что: ${rel.recentMemories.join('; ')}.`;
                 }
 
-                return `${name}: ${knowledge}, ${presenceToken}, ${access}. По ощущениям ${tone}.`;
+                return result;
               })
               .join('\n')}`
         : '';
