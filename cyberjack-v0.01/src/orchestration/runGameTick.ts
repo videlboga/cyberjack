@@ -10,6 +10,8 @@ import { activeContextsRepo, resourceRepo, sceneRepo, presetRepo, eventLogRepo }
 import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
+import { appendJsonLog } from '../utils/fileLogs';
+import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
 import * as checkActionAccess from '../scenario/checkActionAccess';
 import { applyResourceCosts } from '../scenario/applyResourceCosts';
 import { runScenarioStep } from '../scenario/runScenarioStep';
@@ -272,6 +274,17 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId);
 
+    // Log the constructed prompt payload for debugging/inspection
+    try {
+        appendJsonLog('prompt_payloads.jsonl', {
+            tickId,
+            forSubject: payload.subjectId,
+            sceneId: activeSceneId,
+            prompt: prompt,
+            explanationRu: explainPromptLog({ tickId, forSubject: payload.subjectId, sceneId: activeSceneId, prompt })
+        });
+    } catch (e) { /* ignore */ }
+
     let systemMarketLog = '';
     if (payload.presetId === 'buy_raw_asset' && payload.customPayload?.assetId) {
         try {
@@ -317,6 +330,22 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         { label: 'State after (core)', values: engineOutput.nextCore },
         { label: 'State after (point)', values: engineOutput.nextPoint }
     ];
+
+    // Log engine state changes: before vs after
+    try {
+        const diffs: any = { core: {}, point: {} };
+        for (const k of Object.keys(stateBefore.core || {})) {
+            const beforeV = (stateBefore.core as any)[k];
+            const afterV = (engineOutput.nextCore as any)[k];
+            if (JSON.stringify(beforeV) !== JSON.stringify(afterV)) diffs.core[k] = { before: beforeV, after: afterV };
+        }
+        for (const k of Object.keys(stateBefore.point || {})) {
+            const beforeV = (stateBefore.point as any)[k];
+            const afterV = (engineOutput.nextPoint as any)[k];
+            if (JSON.stringify(beforeV) !== JSON.stringify(afterV)) diffs.point[k] = { before: beforeV, after: afterV };
+        }
+    appendJsonLog('engine_state.jsonl', { tickId, subjectId: payload.subjectId, diffs, diagnostics, explanationRu: explainEngineState({ tickId, subjectId: payload.subjectId, diffs, diagnostics }) });
+    } catch (e) { /* ignore */ }
 
     
     return {

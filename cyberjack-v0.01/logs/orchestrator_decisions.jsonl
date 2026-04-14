@@ -1,0 +1,23 @@
+{"ts":"2026-04-14T10:58:03.662Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T11:06:24.002Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T11:06:47.458Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T11:09:35.700Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T11:09:35.700Z","tickId":"f36dc972-c0eb-4e56-bea7-6cea277d09ff","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null},{"actorId":"S-02","kind":"reactive","reason":"neutral","mechanicalAction":null}]}
+{"ts":"2026-04-14T11:14:21.167Z","sceneId":"lab","subjectId":"S-01","actorCount":0,"narrator":true}
+{"ts":"2026-04-14T11:14:21.167Z","tickId":"49ddc015-6190-4d68-9625-4d923aca6a22","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[]}
+{"ts":"2026-04-14T11:52:08.958Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T11:52:08.958Z","tickId":"1df801d2-7b39-4904-b1de-6f0192a77589","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null},{"actorId":"S-02","kind":"reactive","reason":"neutral","mechanicalAction":null}]}
+{"ts":"2026-04-14T11:58:05.677Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T11:58:05.677Z","tickId":"951e237b-c5f6-4e51-8587-4ca254358767","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null},{"actorId":"S-02","kind":"reactive","reason":"neutral","mechanicalAction":null}]}
+{"ts":"2026-04-14T11:58:36.844Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T11:58:36.845Z","tickId":"20400f6f-defd-4be2-8f8b-7ac60ae36ab0","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null},{"actorId":"S-02","kind":"reactive","reason":"neutral","mechanicalAction":null}]}
+{"ts":"2026-04-14T13:19:58.087Z","sceneId":"lab","subjectId":"S-02","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T13:19:58.088Z","tickId":"dfb7ec3d-e259-49f6-a87a-8d5812545957","eventId":"lab","sceneId":"lab","subjectId":"S-02","narrator":true,"decisions":[{"actorId":"S-02","kind":"reactive","reason":"hostile","mechanicalAction":null},{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null}]}
+{"ts":"2026-04-14T13:20:36.586Z","sceneId":"lab","subjectId":"S-02","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T13:20:36.586Z","tickId":"1984840f-4317-4365-9247-923be7316c0b","eventId":"lab","sceneId":"lab","subjectId":"S-02","narrator":true,"decisions":[{"actorId":"S-02","kind":"reactive","reason":"hostile","mechanicalAction":null},{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null}]}
+{"ts":"2026-04-14T14:55:05.478Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true}
+{"ts":"2026-04-14T14:55:05.478Z","tickId":"a0251687-bf78-477b-b0cc-63c72b98a7b2","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null},{"actorId":"S-02","kind":"reactive","reason":"hostile","mechanicalAction":null}]}
+{"ts":"2026-04-14T15:13:09.577Z","sceneId":"lab","subjectId":"S-01","actorCount":1,"narrator":true,"explanationRu":"Оркестрация: найдено 1 решений, рассказчик активен"}
+{"ts":"2026-04-14T15:13:09.577Z","tickId":"b0afbc10-3aaf-430b-b50d-258a9383842e","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null}],"explanationRu":"Оркестратор на тике b0afbc10-3aaf-430b-b50d-258a9383842e (сцена lab) решил: S-01 — reactive причина: neutral"}
+{"ts":"2026-04-14T15:14:10.850Z","sceneId":"lab","subjectId":"S-01","actorCount":2,"narrator":true,"explanationRu":"Оркестрация: найдено 2 решений, рассказчик активен"}
+{"ts":"2026-04-14T15:14:10.850Z","tickId":"35af93ef-a0d9-4f5b-8847-cc7c9a380257","eventId":"lab","sceneId":"lab","subjectId":"S-01","narrator":true,"decisions":[{"actorId":"S-01","kind":"reactive","reason":"neutral","mechanicalAction":null},{"actorId":"S-02","kind":"reactive","reason":"hostile","mechanicalAction":null}],"explanationRu":"Оркестратор на тике 35af93ef-a0d9-4f5b-8847-cc7c9a380257 (сцена lab) решил: S-01 — reactive причина: neutral; S-02 — reactive причина: hostile"}

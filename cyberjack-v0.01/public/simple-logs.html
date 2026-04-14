@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Simple Logs</title>
+  <style>
+    body { background:#111; color:#ddd; font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial; margin:0; padding:12px }
+    .toolbar { display:flex; gap:8px; margin-bottom:8px }
+    button { background:#222; color:#fff; border:1px solid #333; padding:6px 10px; cursor:pointer }
+    .grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px }
+    .panel { background:#0f1113; border:1px solid #222; padding:8px; height:75vh; overflow:auto }
+    pre { white-space:pre-wrap; font-size:12px; color:#cfcfcf }
+    label { font-size:13px }
+    input[type=checkbox] { margin-left:8px }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button id="refresh">Refresh</button>
+    <label>Auto-refresh <input id="autorefresh" type="checkbox" /></label>
+    <label>Interval <input id="interval" type="number" value="2000" style="width:80px;margin-left:6px"/> ms</label>
+    <label style="margin-left:12px">Scene <input id="filterScene" placeholder="sceneId" style="width:120px;margin-left:6px"/></label>
+    <label>Subject <input id="filterSubject" placeholder="subjectId" style="width:120px;margin-left:6px"/></label>
+    <label>Tick <input id="filterTick" placeholder="tickId" style="width:160px;margin-left:6px"/></label>
+    <label>Search <input id="filterText" placeholder="text search" style="width:200px;margin-left:6px"/></label>
+  </div>
+  <div class="grid">
+    <div class="panel">
+      <h3>Prompts (current)</h3>
+      <pre id="prompts">-</pre>
+    </div>
+    <div class="panel">
+      <h3>Orchestrator (filtered)</h3>
+      <pre id="orchestrator">-</pre>
+    </div>
+    <div class="panel">
+      <h3>Engine (nohup-api.log tail)</h3>
+      <pre id="engine">-</pre>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+    async function fetchJson(url){
+      try{
+        const r = await fetch(url, {cache:'no-store'});
+        return await r.json();
+      }catch(e){ return { success:false, error:String(e) } }
+    }
+
+    async function refresh(){
+      $('prompts').textContent = 'Loading...';
+      $('orchestrator').textContent = 'Loading...';
+      $('engine').textContent = 'Loading...';
+
+      const [p,o,e] = await Promise.all([
+        fetchJson('/api/logs/prompts'),
+        fetchJson('/api/logs/orchestrator'),
+        fetchJson('/api/logs/engine')
+      ]);
+
+      // Render prompts
+      if(p.success){
+        try{
+          const compact = p.prompts?.compact || {};
+          const recent = p.prompts?.recentPayloads || p.prompts?.recent || [];
+          // Show per-subject compact data first
+          const subjectLines = Object.entries(compact).map(([k,v])=>k+":\n"+v).join('\n\n----\n\n');
+          // Show recent payloads (if any)
+          const recentLines = Array.isArray(recent) && recent.length ? recent.slice(-20).map(r=>{
+            const expl = r.explanationRu ? (`\nРезюме: ${r.explanationRu}`) : '';
+            return `${r.ts||r.t||''} tick:${r.tickId||''} subject:${r.forSubject||r.subjectId||r.subject||''}${expl}\n${JSON.stringify(r.prompt || r, null, 2)}`;
+          }).join('\n\n----\n\n') : '';
+          $('prompts').textContent = (subjectLines ? subjectLines + '\n\n====\n\n' : '') + (recentLines || JSON.stringify(p.prompts,null,2));
+        }catch(e){ $('prompts').textContent = JSON.stringify(p,null,2) }
+      } else {
+        $('prompts').textContent = 'Error: '+(p.error||'unknown');
+      }
+
+      // Render orchestrator with grouping and filters
+      if(o.success){
+        try{
+          const decisions = o.decisions || o.decisionsList || o.decisionsArray || [];
+          const raw = o.raw || o.log || o.rawText || JSON.stringify(o,null,2);
+          if(!Array.isArray(decisions) || decisions.length === 0){
+            $('orchestrator').textContent = raw;
+          } else {
+            // Apply filters
+            const sceneFilter = ($('filterScene').value||'').trim();
+            const subjectFilter = ($('filterSubject').value||'').trim();
+            const tickFilter = ($('filterTick').value||'').trim();
+            const textFilter = ($('filterText').value||'').trim().toLowerCase();
+
+            // Group by tickId (or ts)
+            const byTick = {};
+            decisions.forEach(d => {
+              const tick = d.tickId || d.tick || d.t || ('ts:'+ (d.ts||''));
+              if(sceneFilter && d.sceneId && !String(d.sceneId).includes(sceneFilter)) return;
+              if(subjectFilter && d.subjectId && !String(d.subjectId).includes(subjectFilter)) return;
+              if(tickFilter && !String(tick).includes(tickFilter)) return;
+              const textCheck = textFilter ? JSON.stringify(d).toLowerCase().includes(textFilter) : true;
+              if(!textCheck) return;
+              byTick[tick] = byTick[tick] || [];
+              byTick[tick].push(d);
+            });
+
+            const ticks = Object.keys(byTick).sort((a,b)=>a.localeCompare(b));
+            if(ticks.length === 0){
+              $('orchestrator').textContent = 'No orchestrator decisions match filters.';
+            } else {
+              // Build readable output with collapsible details
+              const blocks = ticks.map(tick => {
+                const items = byTick[tick].map(d=>{
+                  const header = `${d.ts || ''}  scene:${d.sceneId||''} subject:${d.subjectId||''} actorCount:${d.actorCount ?? ''}`;
+                  const expl = d.explanationRu ? (`\nРезюме: ${d.explanationRu}`) : '';
+                  const dec = d.decisions ? d.decisions : d.decisionsSummary ? d.decisionsSummary : d;
+                  // pretty per-actor
+                  const perActor = Array.isArray(dec) ? dec.map(a=>`- ${a.actorId || a.actor || ''} (${a.kind || ''}) ${a.reason ? '- '+a.reason : ''} ${a.mechanicalAction ? '\n  action: '+JSON.stringify(a.mechanicalAction) : ''}`).join('\n') : JSON.stringify(dec,null,2);
+                  return `---\n${header}${expl}\n${perActor}\n`;
+                }).join('\n');
+                return `=== TICK ${tick} ===\n\n${items}`;
+              }).join('\n\n\\\\\\\n\n');
+              $('orchestrator').textContent = blocks;
+            }
+          }
+        }catch(e){ $('orchestrator').textContent = JSON.stringify(o,null,2) }
+      } else { $('orchestrator').textContent = 'Error: '+(o.error||'unknown') }
+
+      // Engine output
+      if(e.success){
+        try{
+          // try structured stateChanges
+          if(e.stateChanges && Array.isArray(e.stateChanges)){
+            $('engine').textContent = e.stateChanges.slice(-20).map(s=> `${s.ts||s.t||''} tick:${s.tickId||''} subject:${s.subjectId||''}\n${JSON.stringify(s.diffs||s, null, 2)}`).join('\n\n----\n\n');
+          } else {
+            $('engine').textContent = e.log || JSON.stringify(e, null, 2);
+          }
+        }catch(ex){ $('engine').textContent = JSON.stringify(e,null,2) }
+      } else { $('engine').textContent = 'Error: '+(e.error||'unknown') }
+    }
+
+    $('refresh').addEventListener('click', refresh);
+    let timer = null;
+    $('autorefresh').addEventListener('change', (ev)=>{
+      if(ev.target.checked){
+        const ms = parseInt($('interval').value)||2000;
+        timer = setInterval(refresh, ms);
+      } else { clearInterval(timer); timer=null }
+    });
+
+    // start
+    refresh();
+  </script>
+</body>
+</html>

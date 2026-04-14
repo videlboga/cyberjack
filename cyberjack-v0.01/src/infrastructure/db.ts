@@ -285,6 +285,10 @@ safeAddColumn('character_relations', 'plasticity', 'REAL DEFAULT 0');
 safeAddColumn('character_relations', 'baseline_attitude', 'REAL');
 safeAddColumn('character_relations', 'baseline_openness', 'REAL');
 safeAddColumn('character_relations', 'baseline_plasticity', 'REAL');
+// Ensure newer columns exist for character_relations used by repositories
+safeAddColumn('character_relations', 'familiarity_level', 'REAL DEFAULT 0');
+safeAddColumn('character_relations', 'general_opinion', "TEXT DEFAULT ''");
+safeAddColumn('character_relations', 'recent_memories', "TEXT DEFAULT '[]'");
 safeAddColumn('scene_characters', 'slot_id', 'TEXT');
 
 db.exec(`

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getConfig, getActions, getDiagnostics, postConfig, getCharacterProfile, getCharacterPrompt, getAllCharacters, deleteCharacter, generateCharacterEndpoint } from '../controllers/metaController';
+import { getPrompts, getEngineLog, getOrchestratorLog } from '../controllers/logsController';
 
 const router = Router();
 
@@ -8,6 +9,9 @@ router.get('/config', getConfig);
 router.get('/actions', getActions);
 router.get('/diagnostics', getDiagnostics);
 router.get('/diagnostics', getDiagnostics);
+router.get('/logs/prompts', getPrompts);
+router.get('/logs/engine', getEngineLog);
+router.get('/logs/orchestrator', getOrchestratorLog);
 router.post('/config', postConfig);
 router.get('/characters/profile', getCharacterProfile);
 router.post('/characters/prompt', getCharacterPrompt);

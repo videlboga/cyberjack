@@ -9,6 +9,8 @@ import {
 import { activeConfig } from '../prompts/config';
 import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo, pointStateRepo, sceneRepo, characterRepo } from '../infrastructure/repositories';
 import { ActionScorer } from './actionScorer';
+import { appendJsonLog } from '../utils/fileLogs';
+import { explainPromptLog, explainOrchestratorDecision } from '../utils/logExplainers';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -88,6 +90,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
             relationToCalibrator = actorRelations.find(r => r.target?.id === (bundle.event.playerId || 'PL-1'));
             peerRelations = actorRelations.filter(rel => rel.target?.subjectId && rel.target.subjectId !== actorId);
         }
+    
 
         const relationNorm = relationToCalibrator ? normalize(relationToCalibrator.attitude ?? 50) : 0.5;
         const sensitivityNorm = normalize(core?.sensitivity ?? 50);
@@ -290,6 +293,43 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
 
     const orchestration = orchestrateSceneActors(bundle);
 
+    // Quick instrumentation: ensure a minimal orchestration record is written (helps guarantee file exists)
+    try {
+        appendJsonLog('orchestrator_decisions.jsonl', {
+            ts: new Date().toISOString(),
+            sceneId: eventId,
+            subjectId,
+            actorCount: orchestration.actorDecisions.length,
+            narrator: !!orchestration.narrator,
+            explanationRu: `Оркестрация: найдено ${orchestration.actorDecisions.length} решений${orchestration.narrator ? ', рассказчик активен' : ''}`
+        });
+    } catch (e) { /* ignore */ }
+
+    // Also write the full orchestration object (decisions + reasons) for detailed analysis
+    try {
+        const summaryDecisions = orchestration.actorDecisions.map(d => ({
+            actorId: d.actorId,
+            kind: d.kind,
+            reason: d.reason,
+            mechanicalAction: d.mechanicalAction ? {
+                actionId: (d.mechanicalAction as any).actionId || (d.mechanicalAction as any).action || null,
+                pointId: (d.mechanicalAction as any).pointId || (d.mechanicalAction as any).point || null,
+                targetId: (d.mechanicalAction as any).targetId || (d.mechanicalAction as any).target || null,
+                score: (d.mechanicalAction as any).score || null
+            } : null
+        }));
+        appendJsonLog('orchestrator_decisions.jsonl', {
+            ts: new Date().toISOString(),
+            tickId: bundle.tickId,
+            eventId,
+            sceneId: eventId,
+            subjectId,
+            narrator: !!orchestration.narrator,
+            decisions: summaryDecisions,
+            explanationRu: explainOrchestratorDecision({ tickId: bundle.tickId, sceneId: eventId, subjectId, decisions: summaryDecisions })
+        });
+    } catch (e) { /* ignore */ }
+
     if (actionId === 'wait') {
         const hasProactive = orchestration.actorDecisions.some(d => d.kind === 'proactive');
         if (!hasProactive) {
@@ -343,6 +383,19 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             let structuredReply = { speech: '' };
             let sentMessages: any = null;
 
+            // Log the prompt payload that will be sent to the LLM for this actor
+            try {
+                appendJsonLog('prompt_payloads.jsonl', {
+                    tickId: bundle.event.id || null,
+                    sceneId: eventId,
+                    actorId: decision.actorId,
+                    kind: decision.kind,
+                    prompt: currentPayload,
+                    userMsgOverride,
+                    explanationRu: explainPromptLog({ tickId: bundle.event.id || null, forSubject: decision.actorId, sceneId: eventId, prompt: currentPayload })
+                });
+            } catch (e) { /* ignore */ }
+
             if (decision.kind === "proactive" && decision.reason) {
                 userMsgOverride = userMsgOverride 
                     ? `${userMsgOverride}\n\n[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`
@@ -358,6 +411,19 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             structuredReply = res.reply && typeof res.reply === 'object'
                 ? (res.reply as { speech: string })
                 : { speech: String(res.reply || '') };
+
+            // Log the LLM response for this actor
+            try {
+                appendJsonLog('prompt_payloads.jsonl', {
+                    tickId: bundle.event.id || null,
+                    sceneId: eventId,
+                    actorId: decision.actorId,
+                    kind: decision.kind,
+                    response: structuredReply,
+                    sentMessages,
+                    explanationRu: `LLM-ответ для ${decision.actorId}: ${String(structuredReply.speech || '').slice(0,200)}`
+                });
+            } catch (e) { /* ignore */ }
 
 
             return { decision, structuredReply, sentMessages };
