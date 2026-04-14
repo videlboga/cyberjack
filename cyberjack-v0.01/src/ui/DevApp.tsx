@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import SimulationView from './views/Simulation/SimulationView';
 import DiagnosticsView from './views/Diagnostics/DiagnosticsView';
 import DatabaseView from './views/Database/DatabaseView';
+import LogsView from './views/Logs/LogsView';
 
 export const DevApp: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'simulation' | 'diagnostics' | 'database'>('simulation');
+    const [activeTab, setActiveTab] = useState<'simulation' | 'diagnostics' | 'database' | 'logs'>('simulation');
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', fontFamily: 'monospace', backgroundColor: '#111', color: '#eee' }}>
@@ -23,6 +24,12 @@ export const DevApp: React.FC = () => {
                     Диагностика Engine
                 </button>
                 <button 
+                    onClick={() => setActiveTab('logs')} 
+                    style={{ background: activeTab === 'logs' ? '#444' : '#222', color: '#fff', border: '1px solid #555', padding: '5px 10px', cursor: 'pointer' }}
+                >
+                    Логи (prompts/orch/engine)
+                </button>
+                <button 
                     onClick={() => setActiveTab('database')} 
                     style={{ background: activeTab === 'database' ? '#444' : '#222', color: '#fff', border: '1px solid #555', padding: '5px 10px', cursor: 'pointer' }}
                 >
@@ -36,6 +43,7 @@ export const DevApp: React.FC = () => {
                 {activeTab === 'simulation' && <SimulationView />}
                 {activeTab === 'diagnostics' && <DiagnosticsView />}
                 {activeTab === 'database' && <DatabaseView />}
+                {activeTab === 'logs' && <LogsView />}
             </div>
         </div>
     );
