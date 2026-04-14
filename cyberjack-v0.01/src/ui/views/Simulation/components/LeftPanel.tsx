@@ -2,11 +2,25 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 interface LeftPanelProps {
-    availableActions: any[];
-    availablePoints: any[];
-    onActionSubmit: (actionId: string, pointId: string, intensity: number, useLlm: boolean) => void;
-    onWaitSubmit: () => void;
+    // flexible props to match different SimulationView variants
+    characters?: any[];
+    focusedCharId?: string;
+    setFocusedCharId?: (id: string) => void;
+    intensity?: number;
+    setIntensity?: (n: number) => void;
+    skipLLM?: boolean;
+    setSkipLLM?: (b: boolean) => void;
+    targetPointId?: string;
+    setTargetPointId?: (p: string) => void;
+    actionsList?: any[];
+    availableActions?: any[];
+    availablePoints?: any[];
+    onActionSubmit?: (actionId: string, pointId: string, intensity: number, useLlm: boolean) => void;
+    onWaitSubmit?: () => void;
     lastTick?: any;
+    sendAction?: (actionId?: string, text?: string) => void;
+    chatLog?: { role: string; text: string }[];
+    loading?: boolean;
 }
 
 const PanelContainer = styled.div`
@@ -71,43 +85,70 @@ const Button = styled.button`
     &:hover { background: #3a3a3a; }
 `;
 
-export const LeftPanel: React.FC<LeftPanelProps> = ({
-    availableActions,
-    availablePoints,
-    onActionSubmit,
-    onWaitSubmit,
-    lastTick
-}) => {
+const BottomRow = styled.div`
+    display: flex;
+    gap: 8px;
+`;
+
+const SmallButton = styled(Button)`
+    width: 120px;
+`;
+
+const LeftPanel: React.FC<LeftPanelProps> = (props) => {
+    const availableActions = props.availableActions || props.actionsList || [];
+    const availablePoints = props.availablePoints || [];
     const [actionId, setActionId] = useState(availableActions[0]?.id || '');
-    const [pointId, setPointId] = useState(availablePoints[0]?.id || '');
-    const [intensity, setIntensity] = useState(50);
-    const [useLlm, setUseLlm] = useState(true);
+    const [pointId, setPointId] = useState(props.targetPointId || availablePoints[0]?.id || 'general');
+    const [intensity, setIntensity] = useState<number>(props.intensity ?? 50);
+    const [useLlm, setUseLlm] = useState<boolean>(!props.skipLLM);
+    const [chatInput, setChatInput] = useState('');
+
+    const chatLog = props.chatLog || [];
 
     return (
         <PanelContainer>
-            <Section style={{flex: 1, overflowY: 'auto'}}>
+            <Section style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
                 <Title>Общий Чат / Журнал</Title>
-                {!lastTick ? <div style={{color:'#666', fontStyle:'italic'}}>Журнал пуст... отправьте действие</div> : (
-                    <div style={{fontSize:'0.85rem'}}>
-                        {lastTick.diagnostics?.actionSummary && (
-                            <div style={{color:'#ffaa00', marginBottom:'10px', fontStyle:'italic'}}>
-                                * {lastTick.diagnostics.actionSummary}
-                            </div>
-                        )}
-                        {lastTick.reply?.speech && (
-                            <div style={{color:'#00ffff', marginBottom:'10px'}}>
-                                <b>Реакция:</b> "{lastTick.reply.speech}"
-                            </div>
-                        )}
-                        {lastTick.narratorReaction?.speech && (
-                            <div style={{color:'#ff00ff', marginBottom:'10px'}}>
-                                <b>Рассказчик:</b> {lastTick.narratorReaction.speech}
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div style={{flex: 1, overflowY: 'auto', fontSize:'0.85rem'}}>
+                    {chatLog.map((log, i) => (
+                        <div key={i} style={{marginBottom:6, color: log.role === 'player' ? '#88f' : (log.role === 'system' ? '#ccc' : '#aaa')}}>
+                            <strong>{log.role === 'player' ? 'Вы:' : (log.role === 'system' ? 'SYS:' : log.role + ':')}</strong> {log.text}
+                        </div>
+                    ))}
+
+                    {!chatLog.length && !props.lastTick && (
+                        <div style={{color:'#666', fontStyle:'italic'}}>Журнал пуст... отправьте действие</div>
+                    )}
+
+                    {props.lastTick && (
+                        <div>
+                            {props.lastTick.diagnostics?.actionSummary && (
+                                <div style={{color:'#ffaa00', marginBottom:'10px', fontStyle:'italic'}}>
+                                    * {props.lastTick.diagnostics.actionSummary}
+                                </div>
+                            )}
+                            {props.lastTick.reply?.speech && (
+                                <div style={{color:'#00ffff', marginBottom:'10px'}}>
+                                    <b>Реакция:</b> "{props.lastTick.reply.speech}"
+                                </div>
+                            )}
+                            {props.lastTick.narratorReaction?.speech && (
+                                <div style={{color:'#ff00ff', marginBottom:'10px'}}>
+                                    <b>Рассказчик:</b> {props.lastTick.narratorReaction.speech}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <form onSubmit={e => { e.preventDefault(); if (chatInput.trim()) { props.sendAction && props.sendAction(undefined, chatInput.trim()); setChatInput(''); } }} style={{marginTop:8}}>
+                    <BottomRow>
+                        <Input placeholder="Сообщение в общий чат..." value={chatInput} onChange={e => setChatInput(e.target.value)} />
+                        <SmallButton type="submit">Отправить</SmallButton>
+                    </BottomRow>
+                </form>
             </Section>
-            
+
             <Section>
                 <Title>Панель действия</Title>
                 <FormRow>
@@ -130,7 +171,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
 
                 <FormRow>
                     <Label>Интенсивность: {intensity}</Label>
-                    <Input type="range" min="0" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} />
+                    <Input type="range" min="0" max="100" value={String(intensity)} onChange={e => setIntensity(Number(e.target.value))} />
                 </FormRow>
 
                 <FormRow style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
@@ -138,13 +179,15 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
                     <Label style={{margin:0}}>Использовать LLM</Label>
                 </FormRow>
 
-                <Button onClick={() => onActionSubmit(actionId, pointId, intensity, useLlm)}>
+                <Button onClick={() => props.onActionSubmit && props.onActionSubmit(actionId, pointId, intensity, useLlm)}>
                     ОТПРАВИТЬ ДЕЙСТВИЕ
                 </Button>
-                <Button onClick={onWaitSubmit} style={{borderColor: '#ffaa00', color: '#ffaa00'}}>
+                <Button onClick={() => props.onWaitSubmit && props.onWaitSubmit()} style={{borderColor: '#ffaa00', color: '#ffaa00'}}>
                     ЖДАТЬ 1 ТИК
                 </Button>
             </Section>
         </PanelContainer>
     );
 };
+
+export default LeftPanel;
