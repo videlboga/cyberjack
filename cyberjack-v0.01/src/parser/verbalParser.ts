@@ -53,7 +53,7 @@ ${moveInstructions}
     try {
         console.log(`[VerbalParser] Analyzing text: "${text}"`);
         
-        const { parsed, model } = await parseVerbalInputWithLLM(messages);
+        const { parsed, model } = await parseVerbalInputWithLLM(messages); console.log("[VerbalParser] raw parsed:", JSON.stringify(parsed));
 
         const synonyms: Record<string, string> = {
             голова: 'head', лицо: 'face', губы: 'lips', шея: 'neck', плечи: 'shoulders',

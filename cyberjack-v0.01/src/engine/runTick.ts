@@ -11,6 +11,7 @@ export function runTick(input: TickInput, config: EngineConfig = DEFAULT_CONFIG)
 
     const delta: TickDelta = {
         core: {
+            tension: nextCore.tension - (tickMeta.inputs.core.tension || 0),
             sensitivity: nextCore.sensitivity - tickMeta.inputs.core.sensitivity,
             capacity: nextCore.capacity - tickMeta.inputs.core.capacity,
             openness: nextCore.openness - tickMeta.inputs.core.openness,

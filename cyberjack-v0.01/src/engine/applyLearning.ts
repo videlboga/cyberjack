@@ -22,6 +22,20 @@ export function applyLearning(
 
     const lowIntensity = result.experiencedIntensity < (f.sensitivityTarget ?? 5);
     const regenAllowed = lowIntensity && (result.overload || 0) < (f.sensitivityRegenThreshold ?? 8);
+    const tension = safeCore.tension ?? 0;
+    const isEdging = tension > 85;
+    
+    // Calculate new tension
+    // Grows based on action intensity (pleasure/discomfort), scaled by sensitivity.
+    // Drops when action intensity is very low (wait/rest), scaled by openness.
+    const tensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * (safeCore.sensitivity / 50) * (f.tensionGrowthMultiplier ?? 0.3);
+    const tensionDrop = (result.experiencedIntensity < 5) ? Math.max(1, safeCore.openness / 10) : 0;
+    const nextTension = clamp(
+        tension + tensionGrowth - tensionDrop,
+        0,
+        150 // Allow exceeding 100 temporarily to trigger Discharge
+    );
+
     const coreRegen = regenAllowed ? (f.sensitivityRegenRate ?? 0) : 0;
     const localRegen =
         (result.experiencedIntensity < (f.localSensitivityTarget ?? 5) &&
@@ -29,35 +43,43 @@ export function applyLearning(
             ? (f.localSensitivityRegenRate ?? 0)
             : 0;
 
+    let baseCapacityDrop = (result.overload * (f.capacityDropMultiplier ?? 0.25));
+    if (isEdging) {
+        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.3); // Burn capacity when on the brink
+    }
+
+    const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
+
     const nextCore: SubjectCoreState = {
+        tension: nextTension,
         sensitivity: clamp(
             safeCore.sensitivity +
-                (f.sensitivityTarget - result.experiencedIntensity) * f.sensitivityFromIntensity +
-                coreRegen,
+                ((f.sensitivityTarget - result.experiencedIntensity) * f.sensitivityFromIntensity +
+                coreRegen + (isEdging ? 1.5 : 0)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         capacity: clamp(
-            safeCore.capacity - (result.overload * (f.capacityDropMultiplier || 0.25)) + ((result.overload < 10) ? (f.capacityRecoveryRate || 1.0) : 0),
+            safeCore.capacity - (baseCapacityDrop - ((result.overload < 10 && !isEdging) ? (f.capacityRecoveryRate ?? 1.0) : 0)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         openness: clamp(
-            safeCore.openness + (result.pleasure - result.discomfort) * f.opennessFromPleasureDiscomfort,
+            safeCore.openness + ((result.pleasure - result.discomfort) * f.opennessFromPleasureDiscomfort + (isEdging ? 0.5 : 0)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         plasticity: clamp(
             safeCore.plasticity +
-            (result.learningEffect - f.plasticityTarget) * f.plasticityFromLearning -
-            result.overload * f.plasticityFromOverload,
+            ((result.learningEffect - f.plasticityTarget) * f.plasticityFromLearning -
+            result.overload * f.plasticityFromOverload + (isEdging ? 1.0 : 0)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         attitude: clamp(
             safeCore.attitude +
-            (result.pleasure - result.discomfort) * f.attitudeFromPleasureDiscomfort -
-            result.overload * f.attitudeFromOverload,
+            ((result.pleasure - result.discomfort) * f.attitudeFromPleasureDiscomfort -
+            result.overload * f.attitudeFromOverload) * tensionModifier,
             config.core.min,
             config.core.max
         ),
@@ -186,6 +208,8 @@ export function applyLearning(
         coreDriver,
         { baseRate: coreConfig.adaptBase, ...coreConfig }
     );
+    
+    // Tension actively drops towards its baseline when resting, but doesn't adapt its baseline easily.
 
     const pointDriver = {
         plasticity: safeCore.plasticity,

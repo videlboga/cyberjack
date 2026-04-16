@@ -300,9 +300,7 @@ export const subjectRepo = {
         const baselineOpenness = state.baselineOpenness ?? state.openness;
         const baselinePlasticity = state.baselinePlasticity ?? state.plasticity;
         const baselineAttitude = state.baselineAttitude ?? state.attitude;
-        // Preserve existing preferences in DB when caller didn't provide meaningful prefs.
-        // If caller passed an empty JSON ('{}' or {actions:{},points:{},contexts:{}}) we treat it as absent
-        // to avoid accidental overwrites from code paths that default to empty preferences.
+        
         let preferences = '{}';
         if (state.preferences !== undefined) {
             try {
@@ -328,14 +326,15 @@ export const subjectRepo = {
         // Use a guarded upsert: only overwrite preferences when the incoming value is not the empty literal
         // This prevents accidental wipes when callers pass '{}' or other empty markers.
         const stmt = db.prepare(`
-            INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, preferences, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, tension, preferences, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 sensitivity = excluded.sensitivity,
                 capacity = excluded.capacity,
                 openness = excluded.openness,
                 plasticity = excluded.plasticity,
                 attitude = excluded.attitude,
+                tension = excluded.tension,
                 preferences = CASE WHEN excluded.preferences = '{}' THEN subjects.preferences ELSE excluded.preferences END,
                 baseline_sensitivity = excluded.baseline_sensitivity,
                 baseline_capacity = excluded.baseline_capacity,
@@ -351,6 +350,7 @@ export const subjectRepo = {
             state.openness,
             state.plasticity,
             state.attitude,
+            state.tension ?? 0,
             preferences,
             baselineSensitivity,
             baselineCapacity,
@@ -373,6 +373,7 @@ export const subjectRepo = {
             openness: row.openness,
             plasticity: row.plasticity,
             attitude: row.attitude,
+            tension: row.tension || 0,
             preferences: row.preferences || '{}',
             baselineSensitivity: row.baseline_sensitivity,
             baselineCapacity: row.baseline_capacity,

@@ -169,7 +169,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             }
 
             if (finalSlotId) {
-                const currentCompliance = (engineOutput.nextCore.plasticity || 0) + (engineOutput.nextCore.openness || 0) * 0.5 + (engineOutput.nextCore.attitude || 0) * 0.5;
+                const currentCompliance = 100;
                 const moveCompliance = 30; 
                 
                 if (currentCompliance >= moveCompliance) {
@@ -195,7 +195,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             const actionPreset = presetRepo.getActionPreset(targetCtxId);
             if (actionPreset && actionPreset.contextConfig) {
                 const requiredCompliance = (actionPreset.contextConfig.priority || 1) * 20;
-                const currentCompliance = (engineOutput.nextCore.plasticity || 0) + (engineOutput.nextCore.openness || 0) * 0.5 + (engineOutput.nextCore.attitude || 0) * 0.5;
+                const currentCompliance = 100;
                 
                 if (currentCompliance >= requiredCompliance) {
                     // If there is a playerId (actor), mark them as initiator; otherwise default to subject
@@ -256,6 +256,41 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     ContextManager.processTick(payload.subjectId); // Time passes
+
+    // === Edging & Tension Discharge Mechanic ===
+    if (engineOutput.nextCore.tension >= 100) {
+        const isPositive = engineOutput.result.pleasure >= engineOutput.result.discomfort;
+        let dischargeNarrative = '';
+
+        if (isPositive) {
+            dischargeNarrative = `[Система: КАСКАДНЫЙ СРЫВ] Субъект достигает пика эйфории. Мощный оргазм сносит нейронные барьеры, обнуляя волю к сопротивлению.`;
+            engineOutput.nextCore.openness = Math.min((engineOutput.nextCore.openness || 0) + 20, 100);
+            engineOutput.nextCore.attitude = Math.min((engineOutput.nextCore.attitude || 0) + 25, 100);
+            engineOutput.nextCore.sensitivity = Math.max((engineOutput.nextCore.sensitivity || 0) - 20, 0); // refractory period
+            engineOutput.nextCore.capacity = Math.max((engineOutput.nextCore.capacity || 0) - 40, 0);
+        } else {
+            dischargeNarrative = `[Система: КАСКАДНЫЙ СРЫВ] Субъект не выдерживает чудовищного напряжения. Разум захлебывается в паническом искореняющем шоке.`;
+            engineOutput.nextCore.attitude = Math.max((engineOutput.nextCore.attitude || 0) - 20, 0);
+            engineOutput.nextCore.openness = Math.max((engineOutput.nextCore.openness || 0) - 15, 0);
+            engineOutput.nextCore.capacity = 0; // Total exhaustion
+        }
+
+        // Apply shared post-discharge vulnerability
+        engineOutput.nextCore.plasticity = Math.min((engineOutput.nextCore.plasticity || 0) + 30, 100);
+        engineOutput.nextCore.tension = 10; // Reset tension down to baseline-ish value
+
+        addedContextNotes.push(dischargeNarrative);
+        eventLogRepo.append(payload.subjectId, 'system_tick', { presetId: 'discharge', action: null, actionLabel: dischargeNarrative, narrative: dischargeNarrative }, { added: true });
+
+    } else if ((engineOutput.nextCore.capacity || 0) <= 0 && (state.core.tension || 0) > 85 && (engineOutput.nextCore.tension || 0) < 100) {
+        // "Ruined" / Exhaustion before peak
+        const ruinNarrative = `[Система: ИСТОЩЕНИЕ РЕСУРСА] Выносливость упала до нуля, пока субъект находился на грани. Разрядки не произошло. Оставляя лишь гнетущую апатию и опустошение.`;
+        addedContextNotes.push(ruinNarrative);
+        engineOutput.nextCore.attitude = Math.max((engineOutput.nextCore.attitude || 0) - 10, 0);
+        engineOutput.nextCore.tension = 20; // Tension drops into a frustrating low-burn
+        
+        eventLogRepo.append(payload.subjectId, 'system_tick', { presetId: 'ruined', action: null, actionLabel: ruinNarrative, narrative: ruinNarrative }, { added: true });
+    }
 
     // Save player and scene state at the final atomicity boundary
     

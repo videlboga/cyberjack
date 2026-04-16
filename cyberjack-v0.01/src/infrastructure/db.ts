@@ -94,6 +94,7 @@ db.exec(`
     openness REAL NOT NULL,
     plasticity REAL NOT NULL,
     attitude REAL NOT NULL,
+    tension REAL DEFAULT 0,
     preferences TEXT DEFAULT '{}',
     baseline_sensitivity REAL,
     baseline_capacity REAL,

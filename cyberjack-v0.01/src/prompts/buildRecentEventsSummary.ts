@@ -68,8 +68,9 @@ export function buildRecentEventsSummary(events: EventRecord[], subjectName?: st
 
             const isContextSwitch =
                 event.action_type === 'context_change' ||
+                event.action_type === 'system_trigger' ||
                 (typeof payloadData?.presetId === 'string' &&
-                    payloadData.presetId.toLowerCase().includes('context'));
+                    (payloadData.presetId.toLowerCase().includes('context') || payloadData.presetId === 'system_trigger'));
 
             if (isContextSwitch) {
                 lines.push(`- [${timeSpan}] ${narrativeText}`);

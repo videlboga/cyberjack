@@ -1,4 +1,4 @@
-import { db } from './db.js';
+import { db } from './db.ts';
 import fs from 'fs';
 import { ActionPresetSchema, ItemPresetSchema, TraitPresetSchema } from '../domain/schemas.js';
 import { getBaseHumanAnatomy } from '../domain/anatomy.js';
@@ -121,6 +121,31 @@ const subjects: { id: string, name: string, state: any, profile: CharacterProfil
                 scars: ['amputated left arm']
             }
         }
+    },
+    {
+        id: 'PL-1',
+        name: 'Калибратор',
+        state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
+        profile: {
+            base: {
+                name: 'Калибратор',
+                age: 30,
+                gender: 'male',
+                anatomy: 'none',
+                status: 'calibrator'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[0].id,
+                professionId: CANON_PROFESSIONS[0].id,
+                coreTrauma: undefined,
+                biography: 'Игрок. Роль по умолчанию.'
+            },
+            personality: {
+                traits: [], quirks: [], speechStyle: '', coreBelief: ''
+            },
+            knowledge: { common: [], personal: [], secrets: [] },
+            memory: { knownCharacters: {}, scars: [] }
+        }
     }
 ];
 
@@ -200,7 +225,7 @@ db.transaction(() => {
         );
     }
 })();const insertPointStmt = db.prepare(`
-    INSERT INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) 
+    INSERT OR IGNORE INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) 
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET 
         label = excluded.label, values_json = excluded.values_json, provides_functions = excluded.provides_functions
@@ -335,7 +360,8 @@ db.transaction(() => {
     const labPlacements = [
         { characterId: 'S-01', role: 'asset', slotId: 'slot_table', presenceState: 'present', canAct: true },
         { characterId: 'S-02', role: 'asset', slotId: 'slot_side', presenceState: 'present', canAct: true },
-        { characterId: 'C-Gamma', role: 'calibrator', slotId: 'slot_console', presenceState: 'present', canAct: true }
+        { characterId: 'C-Gamma', role: 'calibrator', slotId: 'slot_console', presenceState: 'present', canAct: true },
+        { characterId: 'PL-1', role: 'calibrator', slotId: 'slot_console', presenceState: 'present', canAct: true }
     ];
 
     for (const placement of labPlacements) {
@@ -359,6 +385,56 @@ db.transaction(() => {
         'active',
         JSON.stringify({ label: 'Нейро-стимулятор ТЕНС', attachedSlot: 'slot_table' })
     );
+
+    const eliSceneId = 'eli-chamber';
+    const eliDescription = 'Изолятор Эли. Холодное помещение с металлическими стенами. Разделено на первичный шлюз и основную зону изоляции.';
+    const eliSlots = [
+        { id: 'sector_airlock', name: 'Шлюз', capacity: 2, tags: ['control', 'observation'] },
+        { id: 'sector_isolation', name: 'Изолятор', capacity: 2, tags: ['core', 'restraint'] }
+    ];
+
+    db.prepare(`INSERT OR REPLACE INTO scenes (id, available_actions, description, slots) VALUES (?, ?, ?, ?)`).run(
+        eliSceneId,
+        JSON.stringify(labAvailableActions),
+        eliDescription,
+        JSON.stringify(eliSlots)
+    );
+
+    const eliLayout = {
+        bounds: { width: 1000, height: 650 },
+        nodes: [
+            { id: 'sector_airlock', label: 'Шлюз', x: 300, y: 320, type: 'sector' },
+            { id: 'sector_isolation', label: 'Изолятор', x: 700, y: 320, type: 'sector' }
+        ],
+        edges: [
+            { from: 'sector_airlock', to: 'sector_isolation', type: 'door' }
+        ]
+    };
+
+    db.prepare(`INSERT OR REPLACE INTO scene_layouts (scene_id, layout_json) VALUES (?, ?)`).run(
+        eliSceneId,
+        JSON.stringify(eliLayout)
+    );
+
+    const eliPlacements = [
+        { characterId: 'S-01', role: 'asset', slotId: 'sector_isolation', presenceState: 'present', canAct: true },
+        { characterId: 'C-Gamma', role: 'calibrator', slotId: 'sector_airlock', presenceState: 'present', canAct: true },
+        { characterId: 'PL-1', role: 'calibrator', slotId: 'sector_airlock', presenceState: 'present', canAct: true }
+    ];
+
+    for (const placement of eliPlacements) {
+        upsertSceneCharacterStmt.run(
+            eliSceneId,
+            placement.characterId,
+            placement.role,
+            placement.canAct ? 1 : 0,
+            placement.presenceState,
+            placement.slotId
+        );
+        if(placement.characterId === 'S-01') {
+            updateCharacterLocationStmt.run(eliSceneId, placement.characterId);
+        }
+    }
     
     console.log("Обновление точек (points) и связей...");
     for (const subject of subjects) {

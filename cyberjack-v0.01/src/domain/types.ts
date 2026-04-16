@@ -4,6 +4,7 @@ export interface SubjectCoreState {
     openness: number;
     plasticity: number;
     attitude: number;
+    tension: number; // Напряжение/Накал для механики разрядки
     preferences?: string; // JSON string of preferences (points, actions, contexts)
     baselineSensitivity?: number;
     baselineCapacity?: number;

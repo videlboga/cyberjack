@@ -27,6 +27,20 @@ export function buildStateSummary(core: SubjectCoreState, points?: any[]): strin
     const openText = (cfg as any)[`openness_L${openIdx}`];
     const attText = (cfg as any)[`attitude_L${attIdx}`];
 
+    // Edging and Tension mechanics
+    let tensionAddon = "";
+    if (core.tension !== undefined) {
+        if (core.tension >= 95) {
+            tensionAddon = "\n- [АБСОЛЮТНАЯ ПРЕДЕЛ] Ты находишься на грани разрядки (оргазма или срыва). В глазах темнеет, дыхание срывается. Мысли путаются в кашу из-за невыносимого напряжения. Тебе физически тяжело строить сложные фразы, тело требует конца.";
+        } else if (core.tension >= 85) {
+            tensionAddon = "\n- [НА ГРАНИ] Напряжение почти достигло пика. Твое тело дрожит, каждая клеточка молит о разрядке. Ты теряешь контроль над собой.";
+        } else if (core.tension >= 60) {
+            tensionAddon = "\n- [СИЛЬНОЕ НАПРЯЖЕНИЕ] Внутри тебя скопилось интенсивное напряжение. Дыхание сбито, ощущения обострены.";
+        } else if (core.tension <= 15) {
+            tensionAddon = "\n- [ОПУСТОШЕНИЕ/ПОКОЙ] Напряжение минимально. Тело расслаблено или опустошено.";
+        }
+    }
+
     // Динамический расчет Особых состояний (Overload mechanics)
     let traitsText = cfg.noTraitsFallback;
     
@@ -83,6 +97,7 @@ export function buildStateSummary(core: SubjectCoreState, points?: any[]): strin
         `- ${capText}`,
         `- ${openText}`,
         `- ${attText}`,
+        tensionAddon,
         ``,
         `${cfg.traitsTitle} ${traitsText}${pointOverloads}`
     ];

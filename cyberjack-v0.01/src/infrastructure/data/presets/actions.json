@@ -572,5 +572,719 @@
       "novelty": 2,
       "powerBase": 20
     }
+  },
+  {
+    "id": "pose_standing",
+    "name": "Стойка: Смирно",
+    "description": "Стоять прямо, руки по швам. Базовая стойка подчинения.",
+    "categories": [
+      "pose"
+    ],
+    "tags": [
+      "pose",
+      "neutral"
+    ],
+    "validTargets": [
+      "general"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 0,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "pose",
+      "duration": -1,
+      "occupiesPoints": [
+        "global_pose"
+      ]
+    }
+  },
+  {
+    "id": "pose_all_fours",
+    "name": "Поза: На четвереньках",
+    "description": "Опуститься на руки и колени, ожидая указаний.",
+    "categories": [
+      "pose"
+    ],
+    "tags": [
+      "pose",
+      "submission",
+      "vulnerable"
+    ],
+    "validTargets": [
+      "general"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": -2,
+      "sharpness": 1,
+      "contact": 3,
+      "novelty": 4,
+      "powerBase": 25
+    },
+    "contextConfig": {
+      "type": "pose",
+      "duration": -1,
+      "occupiesPoints": [
+        "global_pose",
+        "knees",
+        "hands"
+      ]
+    }
+  },
+  {
+    "id": "pose_spread_eagle",
+    "name": "Поза: Широко раскрыто",
+    "description": "Лежать на спине с широко разведёнными руками и ногами.",
+    "categories": [
+      "pose"
+    ],
+    "tags": [
+      "pose",
+      "vulnerable",
+      "intimate"
+    ],
+    "validTargets": [
+      "general"
+    ],
+    "vector": {
+      "intensity": 5,
+      "valence": -3,
+      "sharpness": 2,
+      "contact": 2,
+      "novelty": 5,
+      "powerBase": 40
+    },
+    "contextConfig": {
+      "type": "pose",
+      "duration": -1,
+      "occupiesPoints": [
+        "global_pose"
+      ]
+    }
+  },
+  {
+    "id": "eq_blindfold_apply",
+    "name": "Надеть повязку на глаза",
+    "description": "Лишить зрения, обостряя другие чувства.",
+    "categories": [
+      "equipment",
+      "sensory"
+    ],
+    "tags": [
+      "sensory",
+      "deprivation",
+      "vulnerable"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 6,
+      "valence": -4,
+      "sharpness": 2,
+      "contact": 5,
+      "novelty": 6,
+      "powerBase": 35
+    },
+    "contextConfig": {
+      "type": "equipment",
+      "duration": -1,
+      "occupiesPoints": [
+        "eyes"
+      ],
+      "modifiers": {
+        "intensity": 4,
+        "sharpness": 2
+      }
+    }
+  },
+  {
+    "id": "eq_blindfold_remove",
+    "name": "Снять повязку",
+    "description": "Вернуть зрение.",
+    "categories": [
+      "equipment"
+    ],
+    "tags": [
+      "comfort"
+    ],
+    "requireContexts": [
+      "eq_blindfold_apply"
+    ],
+    "removeContexts": [
+      "eq_blindfold_apply"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": 5,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 2,
+      "powerBase": 10
+    }
+  },
+  {
+    "id": "eq_gag_apply",
+    "name": "Вставить кляп",
+    "description": "Заблокировать возможность говорить.",
+    "categories": [
+      "equipment",
+      "restraint"
+    ],
+    "tags": [
+      "restraint",
+      "demeaning"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 7,
+      "valence": -5,
+      "sharpness": 4,
+      "contact": 8,
+      "novelty": 6,
+      "powerBase": 45
+    },
+    "contextConfig": {
+      "type": "equipment",
+      "duration": -1,
+      "occupiesPoints": [
+        "mouth"
+      ],
+      "modifiers": {
+        "intensity": 3,
+        "sharpness": 3
+      }
+    }
+  },
+  {
+    "id": "eq_gag_remove",
+    "name": "Вынуть кляп",
+    "description": "Позволить дышать свободно и говорить.",
+    "categories": [
+      "equipment"
+    ],
+    "tags": [
+      "comfort"
+    ],
+    "requireContexts": [
+      "eq_gag_apply"
+    ],
+    "removeContexts": [
+      "eq_gag_apply"
+    ],
+    "validTargets": [
+      "head"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": 6,
+      "sharpness": 0,
+      "contact": 3,
+      "novelty": 3,
+      "powerBase": 15
+    }
+  },
+  {
+    "id": "eq_clothe_robe",
+    "name": "Одеть: Медицинский халат",
+    "description": "Накинуть простой, тонкий халат.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "comfort"
+    ],
+    "validTargets": [
+      "torso"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 4,
+      "sharpness": 0,
+      "contact": 6,
+      "novelty": 2,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "clothing",
+      "duration": -1,
+      "occupiesPoints": [
+        "torso"
+      ]
+    }
+  },
+  {
+    "id": "eq_strip_robe",
+    "name": "Снять халат",
+    "description": "Обнажить тело.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "vulnerable",
+      "exposure"
+    ],
+    "requireContexts": [
+      "eq_clothe_robe"
+    ],
+    "removeContexts": [
+      "eq_clothe_robe"
+    ],
+    "validTargets": [
+      "torso"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": -3,
+      "sharpness": 1,
+      "contact": 2,
+      "novelty": 4,
+      "powerBase": 25
+    }
+  },
+  {
+    "id": "eq_clothe_shirt",
+    "name": "Одеть: Рубашка/Футболка",
+    "description": "Повседневный верх.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "comfort"
+    ],
+    "validTargets": [
+      "torso"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 5,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "clothing",
+      "duration": -1,
+      "occupiesPoints": [
+        "torso"
+      ]
+    }
+  },
+  {
+    "id": "eq_strip_shirt",
+    "name": "Снять верхнюю одежду",
+    "description": "Обнажить торс.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "vulnerable",
+      "exposure"
+    ],
+    "requireContexts": [
+      "eq_clothe_shirt"
+    ],
+    "removeContexts": [
+      "eq_clothe_shirt"
+    ],
+    "validTargets": [
+      "torso"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": -2,
+      "sharpness": 1,
+      "contact": 2,
+      "novelty": 3,
+      "powerBase": 15
+    }
+  },
+  {
+    "id": "eq_clothe_pants",
+    "name": "Одеть: Штаны",
+    "description": "Брюки или штаны.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "comfort"
+    ],
+    "validTargets": [
+      "legs"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 5,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "clothing",
+      "duration": -1,
+      "occupiesPoints": [
+        "legs"
+      ]
+    }
+  },
+  {
+    "id": "eq_strip_pants",
+    "name": "Снять штаны",
+    "description": "Оставить ноги без защиты.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "vulnerable",
+      "exposure"
+    ],
+    "requireContexts": [
+      "eq_clothe_pants"
+    ],
+    "removeContexts": [
+      "eq_clothe_pants"
+    ],
+    "validTargets": [
+      "legs"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": -2,
+      "sharpness": 1,
+      "contact": 2,
+      "novelty": 3,
+      "powerBase": 15
+    }
+  },
+  {
+    "id": "eq_clothe_shoes",
+    "name": "Обуть: Ботинки",
+    "description": "Обувь.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "comfort"
+    ],
+    "validTargets": [
+      "feet"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 3,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "clothing",
+      "duration": -1,
+      "occupiesPoints": [
+        "feet"
+      ]
+    }
+  },
+  {
+    "id": "eq_strip_shoes",
+    "name": "Снять ботинки",
+    "description": "Разуть.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "vulnerable",
+      "exposure"
+    ],
+    "requireContexts": [
+      "eq_clothe_shoes"
+    ],
+    "removeContexts": [
+      "eq_clothe_shoes"
+    ],
+    "validTargets": [
+      "feet"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": -1,
+      "sharpness": 1,
+      "contact": 1,
+      "novelty": 2,
+      "powerBase": 10
+    }
+  },
+  {
+    "id": "pose_sitting",
+    "name": "Поза: Сидя",
+    "description": "Сидеть на поверхности.",
+    "categories": [
+      "pose"
+    ],
+    "tags": [
+      "pose",
+      "neutral"
+    ],
+    "validTargets": [
+      "general"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 1,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "pose",
+      "duration": -1,
+      "occupiesPoints": [
+        "global_pose"
+      ]
+    }
+  },
+  {
+    "id": "pose_lying_down",
+    "name": "Поза: Лежа",
+    "description": "Лежать ровно.",
+    "categories": [
+      "pose"
+    ],
+    "tags": [
+      "pose",
+      "vulnerable"
+    ],
+    "validTargets": [
+      "general"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": -1,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 2,
+      "powerBase": 15
+    },
+    "contextConfig": {
+      "type": "pose",
+      "duration": -1,
+      "occupiesPoints": [
+        "global_pose"
+      ]
+    }
+  },
+  {
+    "id": "act_suspend_wrists",
+    "name": "Подвешивание за запястья",
+    "description": "Закрепить веревки или цепи на запястьях и поднять тело так, чтобы ноги едва касались пола.",
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "restraint",
+      "pain",
+      "vulnerable",
+      "suspension"
+    ],
+    "requiresItem": "eq_suspension",
+    "validTargets": [
+      "limbs",
+      "general"
+    ],
+    "vector": {
+      "intensity": 8,
+      "valence": -6,
+      "sharpness": 4,
+      "contact": 9,
+      "novelty": 7,
+      "powerBase": 50
+    },
+    "contextConfig": {
+      "type": "equipment",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "global_pose",
+        "hands"
+      ],
+      "modifiers": {
+        "intensity": 5,
+        "valence": -3,
+        "sharpness": 2,
+        "contact": 8,
+        "novelty": 2
+      }
+    }
+  },
+  {
+    "id": "act_release_wrists",
+    "name": "Развязать запястья (снять с подвеса)",
+    "description": "Опустить на пол и освободить руки от креплений.",
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "comfort",
+      "relief"
+    ],
+    "requireContexts": [
+      "act_suspend_wrists"
+    ],
+    "removeContexts": [
+      "act_suspend_wrists"
+    ],
+    "validTargets": [
+      "limbs",
+      "general"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": 7,
+      "sharpness": 0,
+      "contact": 4,
+      "novelty": 3,
+      "powerBase": 20
+    }
+  },
+  {
+    "id": "eq_clothe_panties",
+    "name": "Одеть: Трусики",
+    "description": "Легкие трусики, прикрывающие низ.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "comfort"
+    ],
+    "validTargets": [
+      "groin"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 3,
+      "sharpness": 0,
+      "contact": 4,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "clothing",
+      "duration": -1,
+      "occupiesPoints": [
+        "groin",
+        "vulva",
+        "anus"
+      ]
+    }
+  },
+  {
+    "id": "eq_strip_panties",
+    "name": "Снять трусики",
+    "description": "Обнажить область паха.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "vulnerable",
+      "exposure"
+    ],
+    "requireContexts": [
+      "eq_clothe_panties"
+    ],
+    "removeContexts": [
+      "eq_clothe_panties"
+    ],
+    "validTargets": [
+      "groin"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": -3,
+      "sharpness": 1,
+      "contact": 2,
+      "novelty": 4,
+      "powerBase": 20
+    }
+  },
+  {
+    "id": "eq_clothe_bra",
+    "name": "Одеть: Бюстгальтер",
+    "description": "Бра, поддерживающее и скрывающее грудь.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "comfort"
+    ],
+    "validTargets": [
+      "chest"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 4,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "clothing",
+      "duration": -1,
+      "occupiesPoints": [
+        "chest",
+        "breasts",
+        "nipples"
+      ]
+    }
+  },
+  {
+    "id": "eq_strip_bra",
+    "name": "Снять бюстгальтер",
+    "description": "Обнажить грудь.",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "vulnerable",
+      "exposure"
+    ],
+    "requireContexts": [
+      "eq_clothe_bra"
+    ],
+    "removeContexts": [
+      "eq_clothe_bra"
+    ],
+    "validTargets": [
+      "chest"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": -3,
+      "sharpness": 1,
+      "contact": 2,
+      "novelty": 4,
+      "powerBase": 20
+    }
   }
 ]
