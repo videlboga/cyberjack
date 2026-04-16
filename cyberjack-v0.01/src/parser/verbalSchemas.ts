@@ -11,4 +11,5 @@ export interface ParsedVerbalAction {
     intent: VerbalIntentType;
     intensity: number; // Насколько сильно выражено намерение (0.0 - 1.0)
     topics: string[]; // Ключевые темы, затронутые в тексте
+    commandIntent?: import('../domain/resolver').CommandIntent;
 }

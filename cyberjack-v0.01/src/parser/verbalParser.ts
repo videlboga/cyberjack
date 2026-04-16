@@ -10,7 +10,7 @@ export interface ParsedVerbalAction extends Partial<CompiledAction> {
     commandIntent: CommandIntent;
 }
 
-export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction> {
+export async function parseVerbalInput(text: string, sceneContextStr?: string): Promise<ParsedVerbalAction> {
     if (!text || text.trim() === "") {
         return { intensity: 0.1, valence: 0, contact: 0.1, sharpness: 0, novelty: 0.5, pointId: 'general', commandIntent: { type: 'none' } };
     }
@@ -20,6 +20,12 @@ export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction
         .map(act => `- "${act.id}": ${act.label}`)
         .join('\n');
 
+    let moveInstructions = '';
+    if (sceneContextStr) {
+        moveInstructions = `Текущая сцена: ${sceneContextStr}
+ЕСЛИ текст является приказом переместиться (например "подойди ко мне", "отойти в угол", "иди к Вексу"), добавь в JSON поле "intent": "move", а целевое место укажи в поле "targetLocation". В качестве "targetLocation" используй ТОЛЬКО имя зоны из списка, имя персонажа из списка, либо значение "initiator" (если приказ "подойди ко мне" или "ближе").\n`;
+    }
+
     const messages: any[] = [
         {
             role: 'system',
@@ -28,7 +34,8 @@ export async function parseVerbalInput(text: string): Promise<ParsedVerbalAction
 ${ctxList}
 
 ЕСЛИ текст пользователя является прямым приказом применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять, используй intent "deactivate_context" и соответствующий ID.
-Твоя задача — классифицировать пользовательскую фразу по 5 параметрам (от 0.0 до 1.0, кроме valence: от -1.0 до 1.0) и определить цель воздействия (pointId).
+${moveInstructions}
+Твоя задача — классифицировать фразу по 5 параметрам и намерению. Возможные дополнительные поля: "intent" ("activate_context", "deactivate_context", "move"), "targetContext" (для контекстов) или "targetLocation" (для перемещения).
 {
   "intensity": 0.0-1.0,
   "valence": -1.0..1.0,
@@ -84,6 +91,8 @@ ${ctxList}
             commandIntent = { type: 'activate_context', targetContextId: parsed.targetContext };
         } else if (parsed.intent === 'deactivate_context' && parsed.targetContext) {
             commandIntent = { type: 'deactivate_context', targetContextId: parsed.targetContext };
+        } else if (parsed.intent === 'move' && parsed.targetLocation) {
+            commandIntent = { type: 'move', targetLocation: parsed.targetLocation };
         }
 
         return {

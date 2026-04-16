@@ -2,6 +2,7 @@ export type CommandIntent =
   | { type: "change_pose"; targetPoseId: string }
   | { type: "activate_context"; targetContextId: string }
   | { type: "deactivate_context"; targetContextId: string }
+  | { type: "move"; targetLocation: string }
   | { type: "none" };
 
 export type ResolvedFunctions = {

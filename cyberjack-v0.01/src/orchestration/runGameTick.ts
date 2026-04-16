@@ -16,6 +16,7 @@ import * as checkActionAccess from '../scenario/checkActionAccess';
 import { applyResourceCosts } from '../scenario/applyResourceCosts';
 import { runScenarioStep } from '../scenario/runScenarioStep';
 import { ContextManager } from './contextManager';
+import { sceneCharacterRepo } from '../infrastructure/repositories';
 
 import { ConditionWatcher } from './conditionWatcher';
 
@@ -131,6 +132,63 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
                 addedContextNotes.push(removalNarrative);
             }
+        } else if (commandIntent.type === 'move') {
+            const tgtLoc = commandIntent.targetLocation;
+            let finalSlotId: string | null = null;
+            let targetLabel = tgtLoc;
+            
+            const sceneChars = sceneCharacterRepo.list(payload.sceneId);
+            const sceneSlots = state.scene.slots || []; 
+            
+            if (tgtLoc.trim().toLowerCase() === 'initiator') {
+                const initiator = sceneChars.find(c => c.character.id === payload.playerId || c.character.playerId === payload.playerId);
+                if (initiator && initiator.slotId) {
+                    finalSlotId = initiator.slotId;
+                    targetLabel = initiator.character.name || initiator.character.id;
+                }
+            } else {
+                const tgtChar = sceneChars.find(c => {
+                    const cname = (c.character.name || '').toLowerCase();
+                    return cname.includes(tgtLoc.toLowerCase()) || tgtLoc.toLowerCase().includes(cname);
+                });
+                if (tgtChar && tgtChar.slotId) {
+                    finalSlotId = tgtChar.slotId;
+                    targetLabel = tgtChar.character.name || tgtLoc;
+                } else {
+                    const slotObj = sceneSlots.find((s: any) => {
+                        const sname = (typeof s === 'string' ? s : s.id || '').toLowerCase();
+                        return sname === tgtLoc.toLowerCase() || sname.includes(tgtLoc.toLowerCase()) || tgtLoc.toLowerCase().includes(sname);
+                    });
+                    if (slotObj) {
+                        finalSlotId = typeof slotObj === 'string' ? slotObj : (slotObj as any).id;
+                        targetLabel = finalSlotId;
+                    } else {
+                        finalSlotId = tgtLoc;
+                    }
+                }
+            }
+
+            if (finalSlotId) {
+                const currentCompliance = (engineOutput.nextCore.plasticity || 0) + (engineOutput.nextCore.openness || 0) * 0.5 + (engineOutput.nextCore.attitude || 0) * 0.5;
+                const moveCompliance = 30; 
+                
+                if (currentCompliance >= moveCompliance) {
+                    const subjCharPresence = sceneChars.find(c => c.character.subjectId === payload.subjectId || c.character.id === payload.subjectId);
+                    if (subjCharPresence) {
+                        if (subjCharPresence.slotId !== finalSlotId) {
+                            sceneCharacterRepo.set(payload.sceneId, subjCharPresence.character.id, { slotId: finalSlotId });
+                            const moveNarrative = `Выполнено действие: Персонаж перемещается в зону "${targetLabel}".`;
+                            eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'move', action: null, actionLabel: moveNarrative, narrative: moveNarrative }, { added: true });
+                            addedContextNotes.push(moveNarrative);
+                        } else {
+                            addedContextNotes.push(`Ты уже в зоне "${targetLabel}", перемещение не нужно.`);
+                        }
+                    }
+                } else {
+                    const refusedNarrative = `[Система]: Актив мысленно ОТКАЗЫВАЕТСЯ выполнить приказ на перемещение в "${targetLabel}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${moveCompliance}).`;
+                    addedContextNotes.push(refusedNarrative);
+                }
+            }
         }
 
                 if (targetCtxId) {
@@ -143,9 +201,11 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     // If there is a playerId (actor), mark them as initiator; otherwise default to subject
                     const initiator = payload.playerId || payload.subjectId;
                     ContextManager.applyContext(payload.subjectId, targetCtxId, actionPreset, undefined, initiator);
-                    // Only record a forced narrative state for non-verbal / non-wait actions (i.e., physical/contextual changes)
-                    // This prevents simple verbal interactions from creating persistent "Выполнено действие: Разговор" states.
-                    if (!actionPreset.type || (actionPreset.type !== 'verbal' && actionPreset.type !== 'wait')) {
+                    // Only record a forced narrative state when the action preset explicitly
+                    // defines a non-verbal, non-wait type. If the preset has no type, we
+                    // avoid creating a forced narrative to prevent polluting memory with
+                    // spurious "Выполнено действие: Разговор" entries.
+                    if (actionPreset.type && actionPreset.type !== 'verbal' && actionPreset.type !== 'wait') {
                         const forcedNarrative = `Выполнено действие: ${actionPreset.label}. Примени это состояние.`;
                         eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
                         addedContextNotes.push(forcedNarrative);

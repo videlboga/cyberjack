@@ -1,7 +1,7 @@
 // src/orchestration/eventRouter.ts
 import { runGameTick, GameEventPayload } from './runGameTick';
 import { parseVerbalInput } from '../parser/verbalParser';
-import { presetRepo } from '../infrastructure/repositories';
+import { presetRepo, sceneRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 
 export interface RouteResponse {
     bundle: Awaited<ReturnType<typeof runGameTick>>;
@@ -17,10 +17,23 @@ export interface RouteResponse {
 export async function dispatchEvent(payload: any): Promise<RouteResponse> {
     let pointId = payload.pointId || 'general';
     let dynamicModifiers = undefined;
+    const sceneId = payload.sceneId || 'lab';
 
     // Optional text semantic classification
     if (payload.textMessage) {
-        dynamicModifiers = await parseVerbalInput(payload.textMessage);
+        let sceneContextStr = '';
+        try {
+            const scene = sceneRepo.get(sceneId);
+            const chars = sceneCharacterRepo.list(sceneId);
+            const nodesLine = scene?.slots?.length ? `Доступные зоны (сектора): ${scene.slots.map(s => typeof s === 'string' ? s : (s as any).id || s).join(', ')}` : 'Доступные зоны: не определены';
+            const charsLine = chars.length ? `Персонажи рядом: ${chars.map(c => c.character.name || c.character.id).join(', ')}` : 'Персонажи рядом: никого';
+            sceneContextStr = `${nodesLine}. ${charsLine}.`;
+        } catch (err) {
+            sceneContextStr = '';
+        }
+
+        dynamicModifiers = await parseVerbalInput(payload.textMessage, sceneContextStr);
+
         if (dynamicModifiers.pointId) {
             // Check repo instead of direct db query
             if (presetRepo.pointPresetExists(dynamicModifiers.pointId)) {
