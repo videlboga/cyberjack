@@ -28,7 +28,12 @@ export function validateAction(
     const actionPreset = presetRepo.getActionPreset(actionId);
     
     // 2. Proximity / Geographical Slot Constraints
-    if (actionPreset && (actionPreset.type === 'physical' || actionPreset.contact > 0.3) && subjectId && playerId) {
+    // Proximity check: only enforce sector proximity for explicitly physical actions
+    // that are not considered global actions (like 'verbal_pressure').
+    // Previously we allowed contact>0.3 to trigger this, which caused some
+    // non-local interactions to be blocked. Also treat known global actions
+    // as exempt even if their preset type is 'physical'.
+    if (actionPreset && actionPreset.type === 'physical' && !isGlobalAction && subjectId && playerId) {
         const presentChars = sceneCharacterRepo.list(scene.id);
         const subjSceneChar = presentChars.find(sc => sc.character.subjectId === subjectId || sc.character.id === subjectId);
         const playerSceneChar = presentChars.find(sc => sc.character.playerId === playerId || sc.character.id === playerId);

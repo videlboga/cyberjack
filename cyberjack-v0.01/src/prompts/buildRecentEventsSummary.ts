@@ -9,7 +9,7 @@ export interface EventRecord {
     result_payload: string; // JSON
 }
 
-export function buildRecentEventsSummary(events: EventRecord[]): string {
+export function buildRecentEventsSummary(events: EventRecord[], subjectName?: string): string {
     const cfg = activeConfig.perception;
 
     if (!events || events.length === 0) {
@@ -59,6 +59,13 @@ export function buildRecentEventsSummary(events: EventRecord[]): string {
                 payloadData?.presetId ||
                 'воздействие';
 
+            const rawActor = payloadData?.actorName || payloadData?.actor || 'Неизвестный';
+            const rawTarget = payloadData?.targetName || payloadData?.target || subjectName || undefined;
+
+            // Use the actual names as provided by the engine
+            const actorName = rawActor;
+            const targetName = rawTarget;
+
             const isContextSwitch =
                 event.action_type === 'context_change' ||
                 (typeof payloadData?.presetId === 'string' &&
@@ -103,7 +110,12 @@ export function buildRecentEventsSummary(events: EventRecord[]): string {
             
             const actionSemantic = diagnostics ? diagnostics.actionSummary : 'неизвестное воздействие';
 
-            lines.push(`- [${timeSpan}] ${narrativeText}. Точка воздействия: ${pLabel.toLowerCase()}. Это ощущается как: ${actionSemantic}.`);
+            // Prefer an explicit "Событие: <actor> <action> (к <target>)" phrasing to help narrator
+            if (targetName) {
+                lines.push(`- [${timeSpan}] Событие: ${actorName} — ${narrativeText} (цель: ${targetName}). Точка воздействия: ${pLabel.toLowerCase()}. Это ощущается как: ${actionSemantic}.`);
+            } else {
+                lines.push(`- [${timeSpan}] Событие: ${actorName} — ${narrativeText}. Точка воздействия: ${pLabel.toLowerCase()}. Это ощущается как: ${actionSemantic}.`);
+            }
 
             if (diagnostics && diagnostics.reactionSummary !== 'нейтральная реакция') {
                 lines.push(`  ${cfg.reactionPrefix} ${diagnostics.reactionSummary}`);

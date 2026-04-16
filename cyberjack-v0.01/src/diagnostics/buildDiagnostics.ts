@@ -15,9 +15,10 @@ export function buildDiagnostics(
     const reactionSummary = buildReactionSummary(output.result);
     // Use baseAction for semantic description if available to avoid calling 'Обычная беседа' an extreme action because of posture/restraints
     const actionToInterpret = (action as any)._baseAction || action;
+    const point = output.tickMeta?.inputs?.point || (output as any).nextPoint;
 
     return {
-        actionSummary: interpretAction(actionToInterpret, output.result),
+        actionSummary: interpretAction(actionToInterpret, output.result, previousCore, point),
         reactionSummary,
         inferredTraits: inferTraits(output.nextCore),
         rawDelta: {

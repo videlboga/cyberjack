@@ -218,5 +218,20 @@ export function applyLearning(
         { baseRate: pointConfig.adaptBase, ...pointConfig }
     );
 
+    // Preserve a small explicit whitelist of metadata fields that callers may
+    // attach to the core (preferences JSON string, flags, name, profileJson).
+    // Using a whitelist avoids accidentally copying unknown fields and is
+    // safer than copying every non-numeric key.
+    try {
+        const whitelist = ['preferences', 'flags', 'name', 'profileJson'];
+        for (const k of whitelist) {
+            if ((core as any)[k] !== undefined) {
+                (nextCore as any)[k] = (core as any)[k];
+            }
+        }
+    } catch (e) {
+        // non-critical: ignore
+    }
+
     return { nextCore, nextPoint };
 }

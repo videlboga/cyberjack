@@ -53,7 +53,7 @@ export const moveScene = (req: Request, res: Response) => {
         try {
             const { subjectId = 'CL-01', contextId, isActive } = req.body;
             const targetContext = presetRepo.getActionPreset(contextId);
-            const actorName = 'Калибратор';
+            const actorName = 'Брокер';
             
             if (!targetContext) throw new Error("Context preset not found.");
 

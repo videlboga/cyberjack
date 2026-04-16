@@ -143,9 +143,13 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     // If there is a playerId (actor), mark them as initiator; otherwise default to subject
                     const initiator = payload.playerId || payload.subjectId;
                     ContextManager.applyContext(payload.subjectId, targetCtxId, actionPreset, undefined, initiator);
-                    const forcedNarrative = `Выполнено действие: ${actionPreset.label}. Примени это состояние.`;
-                    eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
-                    addedContextNotes.push(forcedNarrative);
+                    // Only record a forced narrative state for non-verbal / non-wait actions (i.e., physical/contextual changes)
+                    // This prevents simple verbal interactions from creating persistent "Выполнено действие: Разговор" states.
+                    if (!actionPreset.type || (actionPreset.type !== 'verbal' && actionPreset.type !== 'wait')) {
+                        const forcedNarrative = `Выполнено действие: ${actionPreset.label}. Примени это состояние.`;
+                        eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
+                        addedContextNotes.push(forcedNarrative);
+                    }
                 } else {
                     const refusedNarrative = `[Система]: Актив мысленно ОТКАЗЫВАЕТСЯ выполнять команду ("${actionPreset.label}"). Требуемый уровень подчинения: ${requiredCompliance}, но текущий всего ~${Math.round(currentCompliance)}. Отреагируй отказом словами или жестами.`;
                     addedContextNotes.push(refusedNarrative);

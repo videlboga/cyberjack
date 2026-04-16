@@ -175,10 +175,11 @@ export function generateChatPayload(
     }
 
     if (userInput) {
-        messages.push({
-            role: 'user',
-            content: userInput
-        });
+        // User input should be passed as-is. Higher-level orchestration (sceneOrchestrator)
+        // is responsible for detecting observer-case and injecting any observer notes into
+        // the payload.systemPrompt before this function is called. Keeping this function
+        // simple avoids duplicating parsing logic here.
+        messages.push({ role: 'user', content: userInput });
     } else {
         let prompt = activeConfig.adapters.emptyInputPrompt;
         
@@ -408,8 +409,12 @@ export async function generateNarratorReply(
             const parsed = JSON.parse(sanitizeJson(rawText));
             
             let reactionText = '';
-            if (typeof parsed.reaction === 'string') {
+            if (Array.isArray(parsed)) {
+                reactionText = parsed.map((r: any) => typeof r === 'string' ? r : (r.reaction || r.description || Object.values(r)[0])).join(' ');
+            } else if (typeof parsed.reaction === 'string') {
                 reactionText = parsed.reaction;
+            } else if (typeof parsed.description === 'string') {
+                reactionText = parsed.description;
             } else if (Array.isArray(parsed.reactions)) {
                 reactionText = parsed.reactions.map((r: any) => typeof r === 'string' ? r : (r.description || r.reaction || Object.values(r)[0])).join(' ');
             } else if (Object.keys(parsed).length > 0) {

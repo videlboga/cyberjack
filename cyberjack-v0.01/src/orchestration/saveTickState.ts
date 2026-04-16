@@ -1,5 +1,6 @@
 // src/orchestration/saveTickState.ts
 import { subjectRepo, pointStateRepo, eventLogRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
+import { subjectPreferencesRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { SubjectCoreState, SubjectPointState, CompiledAction, TickOutput } from '../domain/types';
 import { db } from '../infrastructure/db';
 import { DEFAULT_CONFIG } from '../engine/config';
@@ -76,4 +77,32 @@ export function saveTickState(
         },
         { result: output.result, delta: output.delta }
     );
+
+    // 4. Adjust preferences conservatively based on the tick result
+    try {
+        const result = output.result;
+        // simple reward signal: pleasure minus discomfort plus small weight for attitude shift
+        const reward = (result.pleasure || 0) - (result.discomfort || 0) + (result.attitudeShift || 0) * 0.2;
+        // scale by actor plasticity so more plastic subjects learn faster
+        const plasticityFactor = (output.nextCore?.plasticity ?? 50) / 100;
+        const rawDelta = Math.sign(reward) * Math.min(1, Math.abs(reward)) * 0.5 * plasticityFactor;
+
+        // apply to action pref and point pref
+        if (presetId) {
+            subjectPreferencesRepo.adjust(subjectId, 'actions', presetId, rawDelta);
+        }
+        if (pointId) {
+            subjectPreferencesRepo.adjust(subjectId, 'points', pointId, rawDelta);
+        }
+
+        // also bump any active contexts for the subject
+        const active = activeContextsRepo.getAllForSubject(subjectId) || [];
+        for (const ctx of active) {
+            if (!ctx || !ctx.actionId) continue;
+            subjectPreferencesRepo.adjust(subjectId, 'contexts', ctx.actionId, rawDelta * 0.6);
+        }
+    } catch (err) {
+        // don't fail the save if prefs adjustment fails
+        console.warn('[saveTickState] preference adjustment failed', (err as Error).message);
+    }
 }

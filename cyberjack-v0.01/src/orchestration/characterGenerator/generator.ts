@@ -306,6 +306,47 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
             initialContexts.push(...t.initialContexts);
         }
     }
+    // Build a simple preferences object from tags and contexts.
+    // This is intentionally lightweight: physical tags that match known point ids
+    // will increase point preferences; initialContexts and personaHooks will
+    // seed context preferences. Action preferences are left empty for now.
+    const POINT_IDS = [
+        'general', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back',
+        'left_arm', 'right_arm', 'anus', 'groin', 'legs', 'knees', 'feet'
+    ];
+
+    const preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number> } = {
+        actions: {},
+        points: {},
+        contexts: {}
+    };
+
+    for (const t of tags) {
+        // If this physical tag resembles a point id, bump point preference
+        if (t.level === 'physical') {
+            const tid = t.id;
+            if (POINT_IDS.includes(tid)) {
+                preferences.points[tid] = (preferences.points[tid] || 0) + (t.weight ?? 1);
+            }
+        }
+
+        // Seed contexts from initialContexts
+        if (t.initialContexts && t.initialContexts.length) {
+            for (const ctx of t.initialContexts) {
+                preferences.contexts[ctx] = (preferences.contexts[ctx] || 0) + 1;
+            }
+        }
+
+        // Persona hooks often reflect behavioral inclinations; use them as context seeds
+        if (t.personaHooks && t.personaHooks.length) {
+            for (const hook of t.personaHooks) {
+                // normalize small strings
+                const key = hook.trim();
+                if (!key) continue;
+                preferences.contexts[key] = (preferences.contexts[key] || 0) + 1;
+            }
+        }
+    }
     
     const baseProfile = {
         name: NAMES_POOL[Math.floor(rng() * NAMES_POOL.length)],
@@ -328,6 +369,8 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         narrative,
         originStatements,
         assetReasons
+        ,
+        preferences
     };
 }
 

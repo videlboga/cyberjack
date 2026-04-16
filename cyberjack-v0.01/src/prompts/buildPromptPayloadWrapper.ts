@@ -9,9 +9,14 @@ export async function buildPromptPayloadWithDB(
     eventId: string = 'lab',
     options?: { suppressTickIds?: string[]; initiatorId?: string }
 ) {
-    const targetQueryId = targetId || ownerId;
-    const ownerRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(ownerId) as any;
-    if (!ownerRow) throw new Error(`Subject ${ownerId} not found`);
+    const ownerQueryId = ownerId === 'C-Gamma' ? 'PL-1' : ownerId;
+    const targetQueryId = targetId || ownerQueryId;
+    const ownerRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(ownerQueryId) as any;
+    // For calibrators/players they don't have a rigid subject state in db sometimes
+    // so we handle missing ownerRow gracefully if we can.
+    if (!ownerRow && ownerQueryId !== 'PL-1' && ownerQueryId !== 'C-Gamma') {
+        throw new Error(`Subject ${ownerQueryId} not found`);
+    }
 
     const targetRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(targetQueryId) as any;
     

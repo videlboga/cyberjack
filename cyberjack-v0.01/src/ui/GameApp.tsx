@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './GameApp.css';
 
 const API_BASE = '';
-const PLAYER_CHARACTER_ID = 'C-Gamma';
+const PLAYER_CHARACTER_ID = 'PL-1';
 const PLAYER_RESOURCE_ID = 'PL-1';
 
 type ActionPreset = {
@@ -59,7 +59,7 @@ const avatarNameMap: Record<string, string> = {
   "Иден": "/avatars/Eden.png",
   "Рунис": "/avatars/Runis.png",
   "Рен": "/avatars/Ren.png",
-  "Калибратор": "/avatars/Calibrator.png", // Fallback for player
+  "Брокер": "/avatars/Calibrator.png", // Fallback for player
 };
 
 const getAvatarUrl = (name: string): string | null => {
@@ -182,10 +182,26 @@ const filterActionsForPoint = (actions: ActionPreset[], pointId?: string | null)
 };
 
 export function GameApp({ embedded = false }: { embedded?: boolean }) {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('cyberjack_ui_messages');
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        localStorage.setItem('cyberjack_ui_messages', JSON.stringify(messages.slice(-500)));
+      }
+    } catch(e) {}
+  }, [messages]);
+
   const [playerResources, setPlayerResources] = useState<Record<string, number>>({});
   const [playerInventory, setPlayerInventory] = useState<any[]>([]);
   const [showInventory, setShowInventory] = useState(false);
+  const [showLocations, setShowLocations] = useState(false);
   const [showCardParams, setShowCardParams] = useState(false);
   const [subjectState, setSubjectState] = useState<any>(null);
   const [availableActions, setAvailableActions] = useState<ActionPreset[]>([]);
@@ -203,9 +219,14 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   const logRef = useRef<HTMLDivElement>(null);
 
-  const sceneId = 'lab';
+  const [sceneId, setSceneId] = useState(() => {
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams('');
+    return urlParams.get('sceneId') || 'lab';
+  });
 
+  const [allScenes, setAllScenes] = useState<any[]>([]);
   const sceneCharacters: SceneCharacterPresence[] = sceneData?.characters || [];
+
 
   const fetchInteractionState = async (targetId: string, hydrateState: boolean) => {
     try {
@@ -250,6 +271,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
       const scenesBody = await scenesRes.json();
       if (scenesBody.success) {
+        setAllScenes(scenesBody.scenes || []);
         const nextScene = scenesBody.scenes.find((x: any) => x.id === sceneId) || scenesBody.scenes[0];
         setSceneData(nextScene || null);
       }
@@ -260,12 +282,15 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     (async () => {
+      clearFocus();
       await Promise.all([
         refreshSceneInfo(),
-        fetchInteractionState('S-A1', false)
+        // Just fetch the lab scene state, the UI will focus the first character if needed.
+        fetchInteractionState('S-AV-01', false)
       ]);
 
-      setMessages([
+      setMessages(prev => [
+        ...prev,
         {
           id: Date.now(),
           role: 'system',
@@ -273,7 +298,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         }
       ]);
     })();
-  }, []);
+  }, [sceneId]);
 
   useEffect(() => {
     if (logRef.current) {
@@ -484,7 +509,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       }
       await refreshSceneInfo();
       setFocusedNodeId(nodeId);
-      addMessage({ role: 'system', text: `Калибратор перемещён в сектор «${label}».` });
+      addMessage({ role: 'system', text: `Игрок перемещён в сектор «${label}».` });
     } catch (error) {
       console.error('failed to move player', error);
       addMessage({ role: 'system', text: 'Не удалось перейти в сектор.' });
@@ -498,7 +523,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
     if (actorId) return characterNameMap.get(actorId) || actorId;
     if (role === 'narrator') return 'Рассказчик';
     if (role === 'system') return 'Система';
-    return 'Субъект';
+    return 'Персонаж';
   };
 
   const sendAction = async (presetId?: string, text?: string, targetPoint?: string, targetCharIdOverride?: string, customIntensity?: number) => {
@@ -590,6 +615,14 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim() || !focusedCharId) return;
+    
+    if (chatInput.trim() === '/clear') {
+      setMessages([]);
+      localStorage.removeItem('cyberjack_ui_messages');
+      setChatInput('');
+      return;
+    }
+
     sendAction(undefined, chatInput.trim());
   };
 
@@ -731,7 +764,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
                     onClick={() => movePlayerToSector(focusedNodeId, focusedNodeLabel || focusedNodeId)}
                     disabled={isProcessing}
                   >
-                    Переместить в сектор
+                    Перейти
                   </button>
                 </div>
                 <div className="sector-occupants">
@@ -957,7 +990,8 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
             ))}
           </div>
           <div className="hud-buttons">
-            <button type="button" onClick={() => setShowInventory(!showInventory)}>Инвентарь</button>
+            <button type="button" onClick={() => { setShowLocations(!showLocations); setShowInventory(false); }}>Локации</button>
+            <button type="button" onClick={() => { setShowInventory(!showInventory); setShowLocations(false); }}>Инвентарь</button>
             <button type="button">Журнал</button>
             <button type="button" onClick={() => sendAction('wait')} disabled={isProcessing}>
               {isProcessing ? 'Ход...' : 'Ждать тик'}
@@ -969,6 +1003,74 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
           </div>
         </div>
 
+        {showLocations && (
+          <div style={{
+            position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: 8, padding: 20, zIndex: 2000,
+            width: 450, color: '#e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 16 }}>Навигация</h3>
+              <button 
+                onClick={() => setShowLocations(false)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}
+              >×</button>
+            </div>
+            
+            <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid #475569' }}>
+               <h4 style={{ margin: '0 0 8px 0', color: '#e2e8f0', fontSize: 14 }}>{sceneData?.description || sceneData?.id}</h4>
+               <p style={{ margin: 0, color: '#94a3b8', fontSize: 13 }}>Доступные переходы в другие сектора:</p>
+               
+               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                 {sceneData?.transitions?.length > 0 ? (
+                   sceneData.transitions.map((tr: any) => {
+                     const target = allScenes.find(s => s.id === tr.targetSceneId);
+                     const label = target?.description ? target.description.split('.')[0] : tr.targetSceneId;
+                     return (
+                       <button
+                         key={tr.targetSceneId}
+                         onClick={() => {
+                           const searchParams = new URLSearchParams(window.location.search);
+                           searchParams.set('sceneId', tr.targetSceneId);
+                           window.history.pushState({}, '', '?' + searchParams.toString());
+                           setSceneId(tr.targetSceneId);
+                           setShowLocations(false);
+                         }}
+                         style={{ textAlign: 'left', background: '#3b82f6', color: '#fff', border: 'none', padding: '10px 14px', borderRadius: 6, cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
+                       >
+                         <span>{label}</span>
+                         <span>→</span>
+                       </button>
+                     );
+                   })
+                 ) : (
+                   <div style={{ padding: '12px', background: 'rgba(30, 41, 59, 0.5)', borderRadius: 6, color: '#64748b', fontSize: 13 }}>Нет доступных путей из этой локации</div>
+                 )}
+               </div>
+            </div>
+
+            <div>
+              <h4 style={{ margin: '0 0 10px 0', color: '#64748b', fontSize: 12, textTransform: 'uppercase', letterSpacing: '1px' }}>Системный телепорт</h4>
+              <select 
+                value={sceneId}
+                onChange={(e) => {
+                  const newId = e.target.value;
+                  const searchParams = new URLSearchParams(window.location.search);
+                  searchParams.set('sceneId', newId);
+                  window.history.pushState({}, '', '?' + searchParams.toString());
+                  setSceneId(newId);
+                  setShowLocations(false);
+                }}
+                style={{ width: '100%', background: '#0f172a', color: '#fff', border: '1px solid #475569', borderRadius: '4px', padding: '8px 12px', outline: 'none', cursor: 'pointer' }}
+              >
+                {allScenes.map(sc => (
+                  <option key={sc.id} value={sc.id}>{sc.description ? sc.description.slice(0, 30) + '...' : sc.id}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
         {showInventory && (
           <div style={{
             position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
@@ -976,7 +1078,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
             width: 500, color: '#e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 16 }}>Инвентарь (Калибратор)</h3>
+              <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 16 }}>Инвентарь</h3>
               <button 
                 onClick={() => setShowInventory(false)}
                 style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}

@@ -15,9 +15,9 @@ import { recordMemoryEvent } from '../../services/memoryLayer';
 import { chatMemoryRepo } from '../../infrastructure/repositories';
 import { normalizePlayer } from './playerController';
 
-function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string }): string {
+function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; actorName: string; targetName: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
-    return `*(Без слов)* [Калибратор применяет воздействие: ${opts.actionLabel}${pointPart}]`;
+    return `*(Без слов)* [${opts.actorName} применяет воздействие к ${opts.targetName}: ${opts.actionLabel}${pointPart}]`;
 }
 
 // Memory tracking for forced narrative skipLLM logic
@@ -25,7 +25,7 @@ const pendingActionNarratives: Record<string, string[]> = {};
 
 export const processWait = async (req: Request, res: Response) => {
     try {
-        const { subjectId = 'S-01', ticks = 1, eventId = 'lab', callLLM = false } = req.body;
+        const { subjectId = 'S-AV-01', ticks = 1, eventId = 'lab', callLLM = false } = req.body;
         let lastBundle: Awaited<ReturnType<typeof runGameTick>> | null = null;
 
         for (let i = 0; i < ticks; i++) {
@@ -78,7 +78,7 @@ export const processWait = async (req: Request, res: Response) => {
 
 export const processTick = async (req: Request, res: Response) => {
     try {
-        const { subjectId = 'S-01', textMessage, playerId = 'PL-1' } = req.body;
+        const { subjectId = 'S-AV-01', textMessage, playerId = 'PL-1' } = req.body;
         const tickSceneId = req.body.sceneId || 'lab';
 
 
@@ -133,7 +133,7 @@ export const processTick = async (req: Request, res: Response) => {
         let autoUserMessage: string | null = baseUserMessage;
         let actionLabelMessage: string | null = null;
         if (!suppressActionNarrative) {
-            actionLabelMessage = buildAutoUserMessage({ actionLabel, pointLabel });
+            actionLabelMessage = buildAutoUserMessage({ actionLabel, pointLabel, actorName: actorCharacter.name || 'Калибратор', targetName: fullState.name || subjectId });
         }
 
         let turnExecutionMetrics = null;

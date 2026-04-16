@@ -48,7 +48,7 @@ export async function buildPromptPayload(
     }));
     const relations = characterRelationRepo.listFor(ownerId);
     const stateSummary = buildStateSummary(core, mappedPoints);
-    const eventsText = buildRecentEventsSummary(recentEvents);
+    const eventsText = buildRecentEventsSummary(recentEvents, actorDetails.name);
     const contextSummary = activeContextNames.length > 0 ? activeContextNames.join(', ') : undefined;
     const interpretationBlock = `${stateSummary}${contextText}`;
 
@@ -95,18 +95,14 @@ export async function buildPromptPayload(
     const targetQueryId = targetId || ownerId;
     const isObserver = ownerId !== targetQueryId;
     const stateSection = isObserver
-        ? `[Статус: Наблюдатель]\nЖертва воздействия: ${actorDetails.name}. Ты только наблюдаешь со стороны.`
+        ? `[Текущее состояние]\nТы не являешься главной целью текущего действия. Твое состояние:\n${interpretationBlock.trim()}`
         : `[Текущее состояние]\n${interpretationBlock.trim()}`;
         
     const generatedProfile = ensureGeneratedProfile(ownerId);
     const stContext = await fetchSillyTavernContext(ownerId);
     const cfg = activeConfig.character;
 
-    const fallbackHistory = isObserver
-        ? "Ты находишься в стерильной камере рядом с калибровочным столом. Ты видишь, как Калибратор испытывает другого синтетика. Ты просто сторонний наблюдатель."
-        : cfg.history;
-
-    const fallbackPersona = `Тебя зовут ${actorDetails.name} (Кодовое имя ${ownerId}).\n${fallbackHistory}`;
+    const fallbackPersona = `Тебя зовут ${actorDetails.name} (Кодовое имя ${ownerId}).\n${cfg.history || ''}`;
 
     const personaBlock =
         generatedProfile?.personaText ||
@@ -152,15 +148,27 @@ export async function buildPromptPayload(
               }`
             : '';
 
-    const voiceInstructions = isObserver
-        ? `\n- Говори от первого лица.\n- Ты — НАБЛЮДАТЕЛЬ (зритель). Это воздействие применяют НЕ к тебе.\n- Комментируй происходящее со стороны, обращайся к калибратору или к жертве, оценивай их действия.`
-        : `\n- Говори от первого лица и реагируй так, будто воздействие происходит прямо сейчас.\n- Не пересказывай прошлые ответы, каждый раз формируй живую реплику.\n- Замечай тело: связки, позы, дискомфорт или облегчение. Если что-то неприятно, дай понять через интонацию.`;
+    const voiceInstructions = 
+        `\n- Говори от первого лица, оставаясь в рамках своего характера.\n- В своих репликах и интонациях реагируй на текущую сцену (обращай внимание на свое состояние и действия других).\n- Если воздействие или фраза направлены НА ТЕБЯ — отвечай живо, не пересказывая прошлые ответы.\n- Если действие направлено НА ДРУГОГО персонажа, ты — свидетель. Ты можешь промолчать (Верни пустую строку "speech": ""), если не хочешь вмешиваться. Если вмешиваешься, делай это только из-за сильных отношений (гнев, защита, страх, злорадство).\n- Не описывай текстом, что "ты просто стоишь и смотришь" — в таком случае просто возвращай пустую строку.`;
 
     const describeAttitude = (value: number) => {
-        if (value >= 70) return 'я почти доверяю и могу немного расслабиться';
-        if (value >= 50) return 'я держусь ровно и просто наблюдаю';
-        if (value >= 30) return 'я напрягаюсь и заранее ищу пути отступления';
-        return 'мне хочется держаться как можно дальше';
+        if (value >= 90) return 'я испытываю к этому человеку глубокую привязанность и преданность';
+        if (value >= 75) return 'я искренне тепло к нему отношусь и симпатизирую';
+        if (value >= 60) return 'он мне приятен, я отношусь к нему с легкой симпатией';
+        if (value >= 40) return 'мое отношение к нему совершенно нейтральное';
+        if (value >= 25) return 'он вызывает у меня раздражение и некоторую неприязнь';
+        if (value >= 10) return 'я испытываю к нему сильную антипатию и презрение';
+        return 'я люто его ненавижу';
+    };
+
+    const describeOpenness = (value: number) => {
+        if (value >= 90) return 'я абсолютно открыт(а) и готов(а) делиться всем';
+        if (value >= 75) return 'я легко и охотно иду с ним на контакт';
+        if (value >= 60) return 'я в целом не против пообщаться с ним';
+        if (value >= 40) return 'я поддерживаю только формальный, сухой диалог';
+        if (value >= 25) return 'я общаюсь с ним очень неохотно и сдержанно';
+        if (value >= 10) return 'я стараюсь всячески избегать разговоров с ним';
+        return 'я полностью игнорирую его и избегаю любых контактов';
     };
 
     const sceneCharactersData = sceneCharacterRepo.list(eventId);
@@ -190,15 +198,10 @@ export async function buildPromptPayload(
                     : 'нас разделяют физические барьеры';
                     
                 const tone = describeAttitude(rel.attitude);
-                const opennessLabel = (rel.openness && rel.openness > 70) 
-                    ? 'я готов(а) ему открыться' 
-                    : (rel.openness && rel.openness < 30) 
-                    ? 'я совершенно закрыт(а) для него' 
-                    : 'я держу нейтральную дистанцию';
+                const opennessVal = typeof rel.openness === 'number' ? rel.openness : 50;
+                const opennessLabel = describeOpenness(opennessVal);
 
-                let result = `${name}: ${familiarityLabel}, ${presenceToken}, ${access}. По ощущениям ${tone}. В плане общения: ${opennessLabel}.`;
-                
-                if (rel.generalOpinion) {
+                let result = `${name}: ${familiarityLabel}, ${presenceToken}, ${access}. По ощущениям: ${tone}. В плане общения: ${opennessLabel}.`;                if (rel.generalOpinion) {
                     result += ` Мое мнение о нем: ${rel.generalOpinion}`;
                 }
                 if (rel.recentMemories && rel.recentMemories.length > 0) {
@@ -224,10 +227,12 @@ export async function buildPromptPayload(
     const instructionsSection = `[Инструкции]\n${cfg.formatInstructions}${voiceInstructions}`;
     const memorySection = memoryBlock ? memoryBlock.trim() : '';
 
+    const narratorEventsText = buildRecentEventsSummary(recentEvents.slice(-2), actorDetails.name);
+
     const narratorPrompt: NarratorPromptPayload = {
         subjectId: targetQueryId,
-        recentEventsText: eventsText.trim(),
-        stateText: interpretationBlock.trim(),
+        recentEventsText: narratorEventsText.trim(),
+        stateText: '',
         instructions: cfg.narratorFormatInstructions
     };
 

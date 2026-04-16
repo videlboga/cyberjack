@@ -31,7 +31,7 @@ async function testProactive() {
     // Player
     subjectRepo.save(playerId, "Player", {
         sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50,
-        preferences: JSON.stringify({})
+        // preferences omitted to avoid accidental overwrites of existing generated preferences
     });
 
     console.log("Characters configured.");
@@ -50,7 +50,7 @@ async function testProactive() {
 
     resourceRepo.save({
         id: npcId,
-        resources: { actionPoints: 30, maxActionPoints: 100 }
+        resources: { actionPoints: { amount: 30, maxAmount: 100 } }
     });
 
     // 3. Создаем базовую сцену с доступными действиями
@@ -134,7 +134,7 @@ async function testProactive() {
     console.log("\n=== SCENARIO 3: Очень мало AP (5 AP), Страстный поцелуй недоступен ===");
     resourceRepo.save({
         id: npcId,
-        resources: { actionPoints: 5, maxActionPoints: 100 }
+        resources: { actionPoints: { amount: 5, maxAmount: 100 } }
     });
     
     actorResources = resourceRepo.get(npcId);

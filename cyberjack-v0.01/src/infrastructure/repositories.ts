@@ -151,7 +151,7 @@ export const sceneLayoutsRepo = {
 
 export const characterRepo = {
     ensureSubject(subjectId: string, name: string): Character {
-        const stmt = db.prepare(`
+    const stmt = db.prepare(`
             INSERT INTO characters (id, name, kind, subject_id)
             VALUES (?, ?, 'subject', ?)
             ON CONFLICT(id) DO UPDATE SET
@@ -300,7 +300,33 @@ export const subjectRepo = {
         const baselineOpenness = state.baselineOpenness ?? state.openness;
         const baselinePlasticity = state.baselinePlasticity ?? state.plasticity;
         const baselineAttitude = state.baselineAttitude ?? state.attitude;
-        const preferences = state.preferences ?? '{}';
+        // Preserve existing preferences in DB when caller didn't provide meaningful prefs.
+        // If caller passed an empty JSON ('{}' or {actions:{},points:{},contexts:{}}) we treat it as absent
+        // to avoid accidental overwrites from code paths that default to empty preferences.
+        let preferences = '{}';
+        if (state.preferences !== undefined) {
+            try {
+                const parsed = typeof state.preferences === 'string' ? JSON.parse(state.preferences) : state.preferences;
+                const hasAny = (obj: any) => obj && Object.keys(obj).length > 0;
+                const meaningful = hasAny(parsed.actions) || hasAny(parsed.points) || hasAny(parsed.contexts);
+                if (meaningful) {
+                    preferences = typeof state.preferences === 'string' ? state.preferences : JSON.stringify(parsed);
+                } else {
+                    // treat empty prefs as not provided -> preserve existing
+                    const existing = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(id) as any;
+                    if (existing && existing.preferences) preferences = existing.preferences;
+                }
+            } catch (e) {
+                // If parse failed, just preserve existing
+                const existing = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(id) as any;
+                if (existing && existing.preferences) preferences = existing.preferences;
+            }
+        } else {
+            const existing = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(id) as any;
+            if (existing && existing.preferences) preferences = existing.preferences;
+        }
+        // Use a guarded upsert: only overwrite preferences when the incoming value is not the empty literal
+        // This prevents accidental wipes when callers pass '{}' or other empty markers.
         const stmt = db.prepare(`
             INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, preferences, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -310,7 +336,7 @@ export const subjectRepo = {
                 openness = excluded.openness,
                 plasticity = excluded.plasticity,
                 attitude = excluded.attitude,
-                preferences = excluded.preferences,
+                preferences = CASE WHEN excluded.preferences = '{}' THEN subjects.preferences ELSE excluded.preferences END,
                 baseline_sensitivity = excluded.baseline_sensitivity,
                 baseline_capacity = excluded.baseline_capacity,
                 baseline_openness = excluded.baseline_openness,
@@ -373,6 +399,37 @@ export const subjectRepo = {
             availableActions: actions,
             availablePoints: points
         };
+    }
+};
+
+export const subjectPreferencesRepo = {
+    get(subjectId: string): { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number> } {
+        const row = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(subjectId) as any;
+        if (!row || !row.preferences) return { actions: {}, points: {}, contexts: {} };
+        try {
+            const parsed = JSON.parse(row.preferences);
+            return {
+                actions: parsed.actions || {},
+                points: parsed.points || {},
+                contexts: parsed.contexts || {}
+            };
+        } catch (e) {
+            return { actions: {}, points: {}, contexts: {} };
+        }
+    },
+    set(subjectId: string, prefs: { actions?: Record<string, number>; points?: Record<string, number>; contexts?: Record<string, number> }) {
+        const asJson = JSON.stringify({ actions: prefs.actions || {}, points: prefs.points || {}, contexts: prefs.contexts || {} });
+        db.prepare('UPDATE subjects SET preferences = ? WHERE id = ?').run(asJson, subjectId);
+    },
+    /** Adjust a single preference entry by delta and clamp to [-5,5] */
+    adjust(subjectId: string, category: 'actions' | 'points' | 'contexts', key: string, delta: number) {
+        const prefs = this.get(subjectId);
+        const bucket = (prefs as any)[category] as Record<string, number>;
+        const current = bucket[key] ?? 0;
+        const next = Math.max(-5, Math.min(5, current + delta));
+        bucket[key] = next;
+        this.set(subjectId, prefs);
+        return next;
     }
 };
 

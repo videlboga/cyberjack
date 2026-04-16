@@ -65,6 +65,12 @@ export interface GeneratedCharacterContext {
         age: string;
         anatomy: string;
     };
+    // Preferences to be serialized into subject state (actions, points, contexts)
+    preferences?: {
+        actions?: Record<string, number>;
+        points?: Record<string, number>;
+        contexts?: Record<string, number>;
+    };
 }
 
 export interface NarrativeSummary {

@@ -25,10 +25,14 @@ function sampleProbability(prob: number): boolean {
 }
 
 function describeTone(attitude?: number): string {
-    if (typeof attitude !== 'number') return 'neutral';
-    if (attitude >= 70) return 'warm';
-    if (attitude <= 30) return 'hostile';
-    return 'neutral';
+    if (typeof attitude !== 'number') return 'нейтральный тон';
+    if (attitude >= 90) return 'крайне теплый, с искренней привязанностью';
+    if (attitude >= 75) return 'теплый, с явной симпатией';
+    if (attitude >= 60) return 'дружелюбный и приятный';
+    if (attitude >= 40) return 'ровный и нейтральный';
+    if (attitude >= 25) return 'холодный, с нотками недоверия и раздражения';
+    if (attitude >= 10) return 'враждебный и презрительный';
+    return 'крайне агрессивный, продиктованный лютой ненавистью';
 }
 
 function relationTo(targetId: string, relations: CharacterRelation[]): CharacterRelation | undefined {
@@ -77,7 +81,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
     for (const actorId of allActors) {
         if (actorId === playerId || actorId === 'C-Gamma') continue; // Игрок и Калибратор не участвуют в автоматических бросках
         const actorChar = characterRepo.get(actorId);
-        if (actorChar && (actorChar.playerId === playerId || (actorChar.kind as any) === 'calibrator')) continue;
+        if (actorChar && (actorChar.playerId === playerId || (actorChar.kind as any) === 'calibrator' || (actorChar as any).profile?.base?.status === 'calibrator')) continue;
 
         let core = actorId === subjectId ? bundle.stateAfter.core : bundle.stateBefore.core;
         let relationToCalibrator = relationMap.get(bundle.event.playerId || 'PL-1');
@@ -109,12 +113,9 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         // Смягчаем штраф за отсутствие новизны: максимум снижение на 50%, а не до нуля.
         const noveltyFactor = isVerbalInput ? 1.0 : (0.5 + 0.5 * lastActionNovelty);
 
-    // Снижаем вероятность реакций для наблюдателей
+        // Наблюдатели вмешиваются реже. Если это слова к кому-то другому — штраф больше.
         const isTarget = (actorId === subjectId);
-    // make observerPenalty less punitive in experiments (was 0.15)
-    const observerPenalty = (isTarget || isVerbalInput) ? 1.0 : 0.5; // Наблюдатели вмешиваются в 50% случаев от базы
-
-        const reactiveProb = clamp01(
+        const observerPenalty = isTarget ? 1.0 : (isVerbalInput ? 0.2 : 0.1);        const reactiveProb = clamp01(
             (cfg.baseReactiveProbability * noveltyFactor +
                 cfg.sensitivityModifier * (1 - capacityNorm) * noveltyFactor +
                 cfg.attitudeModifier * (1 - relationNorm) * noveltyFactor +
@@ -283,19 +284,21 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
     if (autoUserMessage) {
         historyMessage = `[Игрок (к ${fullStateName || subjectId})]: "${autoUserMessage}"`;
     } else if (actionLabelMessage) {
-        let reactionPart = bundle.diagnostics?.reactionSummary && bundle.diagnostics.reactionSummary !== 'нейтральная реакция' 
-            ? ` [Движок: ${bundle.diagnostics.reactionSummary}]` 
+        let reactionPart = bundle.diagnostics?.reactionSummary && bundle.diagnostics.reactionSummary !== 'нейтральная реакция'
+            ? ` [Движок: ${bundle.diagnostics.reactionSummary}]`
             : '';
-        let sensoryPart = bundle.diagnostics?.actionSummary 
-            ? ` [Мои сенсоры: это ощущается как ${bundle.diagnostics.actionSummary}]` 
+        let sensoryPart = bundle.diagnostics?.actionSummary
+            ? ` [Мои сенсоры: это ощущается как ${bundle.diagnostics.actionSummary}]`
             : '';
-        historyMessage = `*(Без слов)* [Калибратор применяет воздействие к ${fullStateName || subjectId}: ${actionLabel} - точка ${pointLabel}]${sensoryPart}${reactionPart}`;
+        
+        const actionPayloadStr = (bundle.event as any)?.action_payload;
+        const rawActor = typeof actionPayloadStr === 'string' ? JSON.parse(actionPayloadStr)?.actorName : null;
+        const actorNameForHistory = rawActor || 'Игрок';
+        historyMessage = `*(Без слов)* [${actorNameForHistory} применяет воздействие к ${fullStateName || subjectId}: ${actionLabel} - точка ${pointLabel}]${sensoryPart}${reactionPart}`;
         if (actionRepeats > 1) {
             historyMessage += ` *(уже ${actionRepeats}-й раз подряд)*`;
         }
-    }
-
-    if (historyMessage.trim().length > 0) {
+    }    if (historyMessage.trim().length > 0) {
         chatMemoryRepo.append(subjectId, 'user', historyMessage);
     }
 
@@ -377,7 +380,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             }
 
             if (decision.actorId !== subjectId) {
-                currentPayload = await buildPromptPayload(decision.actorId, subjectId, undefined, eventId, {
+                currentPayload = await buildPromptPayload(decision.actorId, decision.actorId, undefined, eventId, {
                     suppressTickIds
                 });
                 if (historyMessage && historyMessage.trim().length > 0) {
@@ -387,7 +390,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                     role: entry.role,
                     content: entry.content
                 }));
-                let observerOverride = autoUserMessage || actionLabelMessage || undefined;
+                let observerOverride = historyMessage || actionLabelMessage || undefined;
                 if (narratorReaction) {
                     observerOverride = observerOverride ? `${observerOverride}\n\n[Общая сцена - реакция ${subjectId} (Рассказчик)]: ${narratorReaction}` : `[Общая сцена - реакция ${subjectId} (Рассказчик)]: ${narratorReaction}`;
                 }

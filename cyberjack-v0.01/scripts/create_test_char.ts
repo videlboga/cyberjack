@@ -24,6 +24,13 @@ function createTestChar() {
     const subjectId = 'S-GEN-1';
     const name = ctx.baseProfile?.name || 'Generated Subject';
 
+    // Attach generated preferences (serialized) so ActionScorer and orchestrator
+    // can take them into account. If generator produced preferences, stringify
+    // and include them in the subject core state.
+    if (ctx.preferences) {
+        (state as any).preferences = JSON.stringify(ctx.preferences);
+    }
+
     subjectRepo.save(subjectId, name, state);
     console.log(`Saved Subject ${subjectId} / ${name}`);
 
