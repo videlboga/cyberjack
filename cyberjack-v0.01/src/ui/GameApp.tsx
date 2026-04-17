@@ -205,6 +205,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const [showCardParams, setShowCardParams] = useState(false);
   const [subjectState, setSubjectState] = useState<any>(null);
   const [availableActions, setAvailableActions] = useState<ActionPreset[]>([]);
+  const [sceneObjects, setSceneObjects] = useState<any[]>([]);
   const [layout, setLayout] = useState<any>(null);
   const [sceneData, setSceneData] = useState<any>(null);
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
@@ -274,6 +275,16 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         setAllScenes(scenesBody.scenes || []);
         const nextScene = scenesBody.scenes.find((x: any) => x.id === sceneId) || scenesBody.scenes[0];
         setSceneData(nextScene || null);
+      }
+      // additionally fetch scene objects (furniture / equipment) via state endpoint
+      try {
+        const stateRes = await fetch(`${API_BASE}/api/state?subjectId=S-01&sceneId=${sceneId}`);
+        const stateBody = await stateRes.json();
+        if (stateBody && stateBody.success) {
+          setSceneObjects(stateBody.sceneObjects || []);
+        }
+      } catch (e) {
+        console.warn('failed to load scene objects', e);
       }
     } catch (err) {
       console.error('failed to load scene info', err);
@@ -768,13 +779,27 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
                   </button>
                 </div>
                 <div className="sector-occupants">
-                  <span className="card-label">Персонажи</span>
+                  <span className="card-label">Оборудование</span>
                   <div className="occupant-list">
-                    {sectorCharacters.length ? (
-                      <span className="node-menu-empty" style={{ fontSize: '11px' }}>Выберите аватара на карте</span>
-                    ) : (
-                      <span className="node-menu-empty">Никого нет</span>
-                    )}
+                    {(() => {
+                      const objs = sceneObjects.filter(o => o.nodeId === focusedNodeId);
+                      if (objs.length === 0) return <span className="node-menu-empty">Нет оборудования</span>;
+                      return objs.map(obj => {
+                        const preset = availableActions.find(a => a.id === obj.itemId);
+                        const label = preset?.label || obj.itemId;
+                        return (
+                          <div key={obj.id} style={{ padding: '6px 8px', margin: '4px 0', background: '#0b1220', border: '1px solid #233044', borderRadius: 6 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ color: '#fff' }}>{label}</div>
+                              <div style={{ color: '#94a3b8', fontSize: 12 }}>{obj.state || '—'}</div>
+                            </div>
+                            {obj.metadata && Object.keys(obj.metadata).length > 0 && (
+                              <div style={{ color: '#98a8c7', fontSize: 12, marginTop: 6 }}>{JSON.stringify(obj.metadata)}</div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
               </div>
