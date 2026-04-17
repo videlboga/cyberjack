@@ -39,7 +39,7 @@ export const getState = (req: Request, res: Response) => {
                     // expose requirements so frontend can pre-filter actions
                     requiresItem: preset?.requiresItem || null,
                     requiresSceneObject: preset?.contextConfig?.requiresSceneObject || null,
-                    requireContexts: (preset?.vector && preset.vector.requireContexts) || null,
+                    requireContexts: (preset?.vector && preset.vector.requireContexts) || preset?.requireContexts || null,
                     removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null
                 };
             });
@@ -55,7 +55,11 @@ export const getState = (req: Request, res: Response) => {
         let subject = uiState.subject;
         if (subject) {
             subject.anatomy = anatomyDict;
-            subject.contexts = activeContextsRepo.getAllForSubject(subjectId) || [];
+            const rawContexts = activeContextsRepo.getAllForSubject(subjectId) || [];
+            subject.contexts = rawContexts.map(c => {
+                const preset = presetRepo.get(c.actionId);
+                return { ...c, label: preset?.label || c.actionId, type: preset?.type || c.actionId };
+            });
         }
 
         res.json({ 
