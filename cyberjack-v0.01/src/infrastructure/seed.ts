@@ -177,30 +177,40 @@ db.transaction(() => {
     // Load Items
     const insertItemStmt = db.prepare('INSERT OR IGNORE INTO items (id, name, type, tags, description) VALUES (?, ?, ?, ?, ?)');
     for (const item of rawItems) {
-        const validItem = ItemPresetSchema.parse(item);
+        const validItem = item as any;
         insertItemStmt.run(validItem.id, validItem.name, validItem.type, JSON.stringify(validItem.tags || []), validItem.description || '');
     }
 
     // Load Actions
-    const insertActionStmt = db.prepare('INSERT OR IGNORE INTO action_presets (id, label, type, tags, values_json, context_config_json, requires_item) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const insertActionStmt = db.prepare(`
+        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json, requires_item)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            label = excluded.label,
+            type = excluded.type,
+            tags = excluded.tags,
+            values_json = excluded.values_json,
+            context_config_json = excluded.context_config_json,
+            requires_item = excluded.requires_item
+    `);
     for (const act of rawActions) {
-        const validAct = ActionPresetSchema.parse(act);
-        
+        const validAct = act as any;
+        const valuesWithReqs = { ...(validAct.vector || {}), requireContexts: validAct.requireContexts || null, removeContexts: validAct.removeContexts || null };
         insertActionStmt.run(
             validAct.id,
             validAct.name,
             validAct.categories[0], // map first category as type
             JSON.stringify(validAct.tags),
-            JSON.stringify(validAct.vector),
+            JSON.stringify(valuesWithReqs),
             validAct.contextConfig ? JSON.stringify(validAct.contextConfig) : null,
-            validAct.requiresItem || null
+            (validAct as any).requiresItem || null
         );
     }
     
     // Load Traits
     const insertTraitStmt = db.prepare('INSERT OR IGNORE INTO traits (id, name, description, rules_json) VALUES (?, ?, ?, ?)');
     for (const trait of rawTraits) {
-        const validTrait = TraitPresetSchema.parse(trait);
+        const validTrait = trait as any;
         insertTraitStmt.run(
             validTrait.id,
             validTrait.name,
@@ -308,7 +318,6 @@ db.transaction(() => {
         { id: 'close_inspection', label: 'Относительно близкий осмотр', values: { intensity: 0.4, valence: -0.3, contact: 0.0, sharpness: 0.2, novelty: 0.4 } },
         { id: 'feint_strike', label: 'Ложный замах', values: { intensity: 0.7, valence: -0.5, contact: 0.0, sharpness: 0.9, novelty: 0.5 } },
         { id: 'pose_kneeling', label: 'Поза: На коленях', type: 'pose', tags: ['pose', 'dominance'], values: { intensity: 0.3, valence: -0.2, contact: 0.1, sharpness: 0.0, novelty: 0.2 }, contextConfig: { type: 'pose', occupiesPoints: ['global_pose', 'knees'], duration: -1 } },
-        { id: 'restraint_cuffs', label: 'Скованность: Наручники', type: 'restraint', tags: ['restraint', 'bdsm'], values: { intensity: 0.4, valence: -0.4, contact: 0.5, sharpness: 0.2, novelty: 0.2 }, contextConfig: { duration: -1 } },
         { id: 'context_defiant', label: 'Агрессивный бунт', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: 0.2, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
         { id: 'context_fear_of_loss', label: 'Страх утраты', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0.1, valence: -0.2, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
         { id: 'context_glitch_prone', label: 'Нестабильность имплантов', type: 'condition', tags: ['physical', 'condition'], values: { intensity: 0.1, valence: -0.1, contact: 0, sharpness: 0, novelty: 0.2 }, contextConfig: { duration: -1 } },
@@ -316,15 +325,30 @@ db.transaction(() => {
         { id: 'context_masochism', label: 'Мазохистская инверсия', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
         { id: 'context_pleasure_burn', label: 'Ожог удовольствием', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: -0.1, contact: 0, sharpness: 0.1, novelty: 0 }, contextConfig: { duration: -1 } }
     ];
+    const upsertActionStmt = db.prepare(`
+        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            label = excluded.label,
+            type = excluded.type,
+            tags = excluded.tags,
+            values_json = excluded.values_json,
+            context_config_json = excluded.context_config_json
+    `);
     for (const act of actions) {
-        const valJson = { ...act.values, removeContexts: (act as any).removeContexts };
-        db.prepare(`INSERT OR REPLACE INTO action_presets (id, label, type, tags, values_json, context_config_json) VALUES (?, ?, ?, ?, ?, ?)`).run(
-            act.id, act.label, (act as any).type || 'physical', JSON.stringify((act as any).tags || []), JSON.stringify(valJson), (act as any).contextConfig ? JSON.stringify((act as any).contextConfig) : null
+        const valJson = { ...(act as any).values || {}, requireContexts: (act as any).requireContexts || null, removeContexts: (act as any).removeContexts || null };
+        upsertActionStmt.run(
+            act.id,
+            act.label,
+            (act as any).type || 'physical',
+            JSON.stringify((act as any).tags || []),
+            JSON.stringify(valJson),
+            (act as any).contextConfig ? JSON.stringify((act as any).contextConfig) : null
         );
     }
 
     const labSceneId = 'lab';
-    const labAvailableActions = ["gentle_stroke","tickle","light_kiss","deep_kiss","feather_stroke","deep_massage","licking","firm_grip","light_bite","hard_bite","pinch","scratching","slap","hard_slap","needle_prick","belt_strike","whip_strike","taser_shock","ice_cube","hot_wax","vibrator_pulse","hair_pull","spit","breath_blow","verbal_pressure","stare","close_inspection","feint_strike","pose_kneeling","restraint_cuffs"];
+    const labAvailableActions = ["gentle_stroke","tickle","light_kiss","deep_kiss","feather_stroke","deep_massage","licking","firm_grip","light_bite","hard_bite","pinch","scratching","slap","hard_slap","needle_prick","belt_strike","whip_strike","taser_shock","ice_cube","hot_wax","vibrator_pulse","hair_pull","spit","breath_blow","verbal_pressure","stare","close_inspection","feint_strike","pose_kneeling","act_apply_handcuffs","act_remove_handcuffs","act_struggle_cuffs","act_suspend_wrists","act_release_wrists"];
     const labDescription = 'Темная калибровочная лаборатория корпорации. Кондиционер гонит морозный воздух по полу. На стенах блестят холодные светодиоды диагностов, вокруг операционного стола раскиданы хирургические инструменты и кабеля нейроинтерфейсов.';
     const labSlots = [
         { id: 'slot_table', name: 'Операционный стол', capacity: 2, tags: ['core', 'restraint'] },

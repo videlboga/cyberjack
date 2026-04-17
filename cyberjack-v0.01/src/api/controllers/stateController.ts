@@ -1,6 +1,6 @@
 import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
-import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo } from '../../infrastructure/repositories';
+import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo, sceneObjectsRepo } from '../../infrastructure/repositories';
 import { activeConfig, updateConfig } from '../../prompts/config';
 import { normalizePlayer } from './playerController';
 
@@ -31,11 +31,16 @@ export const getState = (req: Request, res: Response) => {
                 return {
                     id: actionId,
                     label: preset?.label || actionId,
-                    costs: costs && Object.keys(costs).length ? costs : null, occupiesPoints: preset?.contextConfig?.occupiesPoints || [],
-                        categories: preset?.categories || ['physical'],
-                        tags: preset?.tags || [],
-                        type: preset?.type || 'physical',
-                        requiresItem: preset?.requiresItem || null
+                    costs: costs && Object.keys(costs).length ? costs : null,
+                    occupiesPoints: preset?.contextConfig?.occupiesPoints || [],
+                    categories: preset?.categories || ['physical'],
+                    tags: preset?.tags || [],
+                    type: preset?.type || 'physical',
+                    // expose requirements so frontend can pre-filter actions
+                    requiresItem: preset?.requiresItem || null,
+                    requiresSceneObject: preset?.contextConfig?.requiresSceneObject || null,
+                    requireContexts: (preset?.vector && preset.vector.requireContexts) || null,
+                    removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null
                 };
             });
             scene.characters = sceneCharacterRepo.list(scene.id);
@@ -59,6 +64,8 @@ export const getState = (req: Request, res: Response) => {
             availablePoints: uiState.availablePoints,
             availableActions,
             scene: scene ? { id: scene.id, transitions: scene.transitions || [], characters: scene.characters || [] } : null,
+            // include physical objects present in the scene (furniture, gear, suspension rigs, etc.)
+            sceneObjects: scene ? sceneObjectsRepo.listForScene(scene.id) : [],
             player,
             relations,
             characters

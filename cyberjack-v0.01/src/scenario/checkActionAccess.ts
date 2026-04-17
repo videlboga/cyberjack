@@ -1,5 +1,5 @@
 import { Scene, ResourceState } from '../domain/types';
-import { presetRepo, sceneCharacterRepo, characterItemsRepo, sceneObjectsRepo } from '../infrastructure/repositories';
+import { presetRepo, sceneCharacterRepo, characterItemsRepo, sceneObjectsRepo, activeContextsRepo } from '../infrastructure/repositories';
 
 export interface ActionValidationResult {
     allowed: boolean;
@@ -70,6 +70,18 @@ export function validateAction(
             if (obj.nodeId && theChar?.slotId && obj.nodeId !== theChar.slotId) {
                 return { allowed: false, errorReason: `Слишком далеко от объекта "${requiredSceneObject}". Сначала подойдите к нему.` };
             }
+        }
+    }
+
+    // 3.5. Context-based requirements: some actions only allowed when the target
+    // subject already has specific active contexts (e.g. 'release' requires 'suspend').
+    // We check requireContexts defined on the preset's vector or top-level field.
+    const requiredContexts: string[] | undefined = (actionPreset && ((actionPreset.vector && (actionPreset.vector as any).requireContexts) || (actionPreset as any).requireContexts)) || undefined;
+    if (requiredContexts && requiredContexts.length > 0 && subjectId) {
+        const active = activeContextsRepo.getAllForSubject(subjectId).map((c: any) => c.actionId);
+        const missing = requiredContexts.filter(rc => !active.includes(rc));
+        if (missing.length) {
+            return { allowed: false, errorReason: `Действие требует, чтобы у субъекта были состояния: ${requiredContexts.join(', ')}.` };
         }
     }
 

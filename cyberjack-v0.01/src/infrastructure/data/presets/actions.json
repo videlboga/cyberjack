@@ -630,6 +630,7 @@
       "type": "pose",
       "duration": -1,
       "occupiesPoints": [
+        "general",
         "global_pose",
         "knees",
         "hands"
@@ -1104,7 +1105,6 @@
       "vulnerable",
       "suspension"
     ],
-    "requiresItem": "eq_suspension",
     "validTargets": [
       "limbs",
       "general"
@@ -1122,9 +1122,11 @@
       "duration": -1,
       "exclusiveWithinPoint": true,
       "occupiesPoints": [
+        "general",
         "global_pose",
         "hands"
       ],
+      "requiresSceneObject": "eq_suspension",
       "modifiers": {
         "intensity": 5,
         "valence": -3,

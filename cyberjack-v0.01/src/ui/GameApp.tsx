@@ -13,6 +13,8 @@ type ActionPreset = {
   tags?: string[];
   type?: string;
   requiresItem?: string | null;
+  requiresSceneObject?: string | null;
+  requireContexts?: string[] | null;
 };
 
 type Character = { id: string; name: string; kind?: string; playerId?: string | null; };
@@ -78,6 +80,11 @@ const RADIAL_GROUPS = [
 ];
 
 const ACTION_GROUP_OVERRIDES: Record<string, string> = {
+  act_suspend_wrists: 'control',
+  act_release_wrists: 'control',
+  act_apply_handcuffs: 'control',
+  act_remove_handcuffs: 'control',
+  act_struggle_cuffs: 'control',
   gentle_stroke: 'support',
   tickle: 'support',
   feather_stroke: 'support',
@@ -239,11 +246,10 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   const fetchInteractionState = async (targetId: string, hydrateState: boolean) => {
     try {
-      const search = new URLSearchParams({
-        subjectId: targetId,
-        sceneId,
-        pointId: selectedPoint || 'general'
-      });
+      const search = new URLSearchParams();
+      search.append('subjectId', targetId);
+      if (sceneId) search.append('sceneId', sceneId);
+      search.append('pointId', selectedPoint || 'general');
       const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
       const body = await res.json();
       if (!body.success) return;
@@ -671,6 +677,22 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       if (a.requiresItem && !playerInventory.some(item => item.id === a.requiresItem)) return false;
       if (a.type === 'verbal') return false;
       if (a.type === 'physical' && !sameSector) return false;
+      // Scene object requirement: only show if the scene contains the required object
+      if ((a as any).requiresSceneObject) {
+        const req = (a as any).requiresSceneObject as string;
+        // find matching scene object
+        const obj = sceneObjects.find(o => o.itemId === req);
+        if (!obj) return false;
+        // if object tied to a node, require player to be in same node (proximity)
+        if (obj.nodeId && playerSector && obj.nodeId !== playerSector) return false;
+      }
+      // Context requirement: e.g. 'release' requires that subject already has 'suspend'
+      if ((a as any).requireContexts && (a as any).requireContexts.length > 0) {
+        const needed: string[] = (a as any).requireContexts || [];
+        const subjCtxs: string[] = (subjectState?.contexts || []).map((c: any) => c.actionId);
+        const missing = needed.filter(n => !subjCtxs.includes(n));
+        if (missing.length > 0) return false;
+      }
       return true;
     });
 
