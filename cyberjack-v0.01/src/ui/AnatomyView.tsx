@@ -114,7 +114,19 @@ export function AnatomyView({ subjectState, character, avatarUrl, activeContexts
 
       // Point check
       if (!selectedPoint) return !a.occupiesPoints || a.occupiesPoints.length === 0;
-      return !a.occupiesPoints || a.occupiesPoints.length === 0 || a.occupiesPoints.includes(selectedPoint);
+
+      const isSystemPoint = classifyPoint(selectedPoint) === 'system';
+      if (isSystemPoint) {
+        // Системные точки (вкл. "Общее воздействие") принимают только те действия,
+        // которые явно указаны для них. Остальные действия (без явного occupiesPoints) 
+        // туда не попадают.
+        if (!a.occupiesPoints || !a.occupiesPoints.includes(selectedPoint)) return false;
+      } else {
+        // Физические части тела принимают действия, которые не имеют привязки,
+        // либо явно привязаны к этой части тела.
+        if (a.occupiesPoints && a.occupiesPoints.length > 0 && !a.occupiesPoints.includes(selectedPoint)) return false;
+      }
+      return true;
     });
 
     const groups: Record<string, any[]> = {};
@@ -180,7 +192,7 @@ export function AnatomyView({ subjectState, character, avatarUrl, activeContexts
           <h4>Точка: {availablePoints.find(p=>p.id===selectedPoint)?.label || selectedPoint}</h4>
           <div className="point-contexts">
              {getPointContexts(selectedPoint).map(ctx => (
-                <div key={ctx.id} className="ctx-chip">{ctx.label || ctx.type}</div>
+                <div key={ctx.id} className="ctx-chip">{ctx.label || ctx.actionId || ctx.type || ctx.id || "Неизвестно"}</div>
              ))}
              {getPointContexts(selectedPoint).length === 0 && <div className="ctx-empty">Нет эффектов или контекстов</div>}
           </div>
