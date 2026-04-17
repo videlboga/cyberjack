@@ -43,7 +43,7 @@ export function handleBuyAssetAction(playerId: string, brokerId: string, sceneId
     // Create the raw asset subject
     characterRepo.ensureSubject(assetId, targetAsset.name);
     subjectRepo.save(assetId, targetAsset.name, {
-        sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 30
+        tension: 0, sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 30
     });
     
     // Give it raw flag

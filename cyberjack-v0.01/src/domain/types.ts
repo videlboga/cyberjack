@@ -1,10 +1,10 @@
 export interface SubjectCoreState {
-    sensitivity: number;
-    capacity: number;
-    openness: number;
-    plasticity: number;
-    attitude: number;
-    tension: number; // Напряжение/Накал для механики разрядки
+    sensitivity: number; // Чувствительность (реакция на физическое воздействие, интенсивность ощущений)
+    capacity: number;    // Выносливость / Ресурс (способность выдерживать стресс, сопротивляемость перегрузке)
+    openness: number;    // Открытость (восприимчивость к новому опыту, снятие психологических барьеров)
+    plasticity: number;  // Пластичность (податливость разума к изменениям, формированию новых привязанностей/трейтов)
+    attitude: number;    // Отношение / Лояльность (позитивное/негативное отношение к оператору, покорность)
+    tension: number;     // Напряжение (накопленный физиологический/психологический накал для механики разрядки)
     preferences?: string; // JSON string of preferences (points, actions, contexts)
     baselineSensitivity?: number;
     baselineCapacity?: number;
@@ -46,11 +46,11 @@ export interface CharacterRelation {
 
 export interface SubjectPointState {
     pointId: string;
-    localSensitivity: number;
-    localAttitude: number;
-    localOpenness?: number;
-    familiarity?: number;
-    exposureCount?: number;
+    localSensitivity: number; // Локальная чувствительность зоны
+    localAttitude: number;    // Локальное отношение (триггер/сопротивление или принятие)
+    localOpenness?: number;   // Локальная открытость (готовность зоны к новым видам стимуляции)
+    familiarity?: number;     // Привычность воздействия на зону
+    exposureCount?: number;   // Счетчик воздействий (выдержка зоны)
     baselineLocalSensitivity?: number;
     baselineLocalAttitude?: number;
     baselineLocalOpenness?: number;

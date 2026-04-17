@@ -78,7 +78,7 @@ export async function buildPromptPayloadWithDB(
     const payload = await buildPromptPayload(
         ownerId,
         targetId,
-        { name: targetRow?.name || targetQueryId, core },
+        { name: targetRow?.name || targetQueryId, core: { tension: (core as any).tension || 0, ...core } as any },
         recentEvents,
         pointStatesRow,
         activeContextNames,

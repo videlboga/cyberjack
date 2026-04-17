@@ -26,7 +26,7 @@ export const getState = (req: Request, res: Response) => {
         let availableActions = uiState.availableActions || [];
         if (scene) {
             availableActions = (scene.availableActions || []).map(actionId => {
-                const preset = presetRepo.getActionPreset(actionId);
+                const preset = presetRepo.getActionPresetActionPresetActionPreset(actionId);
                 const costs = scene.actionCosts?.[actionId];
                 return {
                     id: actionId,
