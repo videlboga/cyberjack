@@ -210,7 +210,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   // fallback labels for item IDs that are not present in action presets
   const ITEM_LABELS: Record<string,string> = {
-    'eq_suspension': 'Подвес (система)',
+    'eq_suspension': 'Подвес',
     'eq_collar': 'Управляемый ошейник',
     'eq_handcuffs': 'Наручники'
   };
