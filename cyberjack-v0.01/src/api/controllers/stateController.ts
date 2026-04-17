@@ -26,7 +26,7 @@ export const getState = (req: Request, res: Response) => {
         let availableActions = uiState.availableActions || [];
         if (scene) {
             availableActions = (scene.availableActions || []).map(actionId => {
-                const preset = presetRepo.getActionPresetActionPresetActionPreset(actionId);
+                const preset = presetRepo.getActionPreset(actionId);
                 const costs = scene.actionCosts?.[actionId];
                 return {
                     id: actionId,
@@ -57,7 +57,7 @@ export const getState = (req: Request, res: Response) => {
             subject.anatomy = anatomyDict;
             const rawContexts = activeContextsRepo.getAllForSubject(subjectId) || [];
             subject.contexts = rawContexts.map(c => {
-                const preset = presetRepo.get(c.actionId);
+                const preset = presetRepo.getActionPreset(c.actionId);
                 return { ...c, label: preset?.label || c.actionId, type: preset?.type || c.actionId };
             });
         }

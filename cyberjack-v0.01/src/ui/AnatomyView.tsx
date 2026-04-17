@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { VrmAnatomyView } from './VrmAnatomyView';
 import './AnatomyView.css';
 
 interface AnatomyViewProps {
@@ -154,35 +155,16 @@ export function AnatomyView({ subjectState, character, avatarUrl, activeContexts
 
   return (
     <div className="anatomy-overlay">
-      <div className="anatomy-panel left-panel">
+      <div className="anatomy-panel left-panel" style={{ display: 'flex', flexDirection: 'column' }}>
         <h3 className="panel-title">Сканер Анатомии</h3>
-        <div className="points-accordion actions-accordion">
-          {POINT_GROUPS.map(group => {
-            const points = groupedPoints[group.id];
-            if (!points || points.length === 0) return null;
-            const isOpen = activePointGroup === group.id;
-            return (
-              <div key={group.id} className="action-group">
-                <button className="group-header" onClick={() => setActivePointGroup(isOpen ? null : group.id)}>
-                   {group.label} ({points.length})
-                </button>
-                {isOpen && (
-                  <div className="points-list actions-list" style={{ padding: '4px 0', border: 'none', background: 'transparent' }}>
-                    {points.map(pt => (
-                      <button 
-                        key={pt.id} 
-                        className={`point-btn ${selectedPoint === pt.id ? 'active' : ''}`}
-                        onClick={() => setSelectedPoint(pt.id)}
-                      >
-                        <span>{pt.label}</span>
-                        {getPointContexts(pt.id).length > 0 && <span className="point-badge">{getPointContexts(pt.id).length}</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div style={{ flex: 1, position: 'relative', marginTop: 8, minHeight: 400 }}>
+          <VrmAnatomyView 
+            subjectState={subjectState}
+            activeContexts={activeContexts}
+            availablePoints={availablePoints}
+            selectedPoint={selectedPoint}
+            onSelectPoint={(id) => setSelectedPoint(id)}
+          />
         </div>
       </div>
       
