@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AnatomyView } from './AnatomyView';
 import './GameApp.css';
 
 const API_BASE = '';
@@ -13,8 +14,6 @@ type ActionPreset = {
   tags?: string[];
   type?: string;
   requiresItem?: string | null;
-  requiresSceneObject?: string | null;
-  requireContexts?: string[] | null;
 };
 
 type Character = { id: string; name: string; kind?: string; playerId?: string | null; };
@@ -80,11 +79,6 @@ const RADIAL_GROUPS = [
 ];
 
 const ACTION_GROUP_OVERRIDES: Record<string, string> = {
-  act_suspend_wrists: 'control',
-  act_release_wrists: 'control',
-  act_apply_handcuffs: 'control',
-  act_remove_handcuffs: 'control',
-  act_struggle_cuffs: 'control',
   gentle_stroke: 'support',
   tickle: 'support',
   feather_stroke: 'support',
@@ -246,10 +240,11 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   const fetchInteractionState = async (targetId: string, hydrateState: boolean) => {
     try {
-      const search = new URLSearchParams();
-      search.append('subjectId', targetId);
-      if (sceneId) search.append('sceneId', sceneId);
-      search.append('pointId', selectedPoint || 'general');
+      const search = new URLSearchParams({
+        subjectId: targetId,
+        sceneId,
+        pointId: selectedPoint || 'general'
+      });
       const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
       const body = await res.json();
       if (!body.success) return;
@@ -677,22 +672,6 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       if (a.requiresItem && !playerInventory.some(item => item.id === a.requiresItem)) return false;
       if (a.type === 'verbal') return false;
       if (a.type === 'physical' && !sameSector) return false;
-      // Scene object requirement: only show if the scene contains the required object
-      if ((a as any).requiresSceneObject) {
-        const req = (a as any).requiresSceneObject as string;
-        // find matching scene object
-        const obj = sceneObjects.find(o => o.itemId === req);
-        if (!obj) return false;
-        // if object tied to a node, require player to be in same node (proximity)
-        if (obj.nodeId && playerSector && obj.nodeId !== playerSector) return false;
-      }
-      // Context requirement: e.g. 'release' requires that subject already has 'suspend'
-      if ((a as any).requireContexts && (a as any).requireContexts.length > 0) {
-        const needed: string[] = (a as any).requireContexts || [];
-        const subjCtxs: string[] = (subjectState?.contexts || []).map((c: any) => c.actionId);
-        const missing = needed.filter(n => !subjCtxs.includes(n));
-        if (missing.length > 0) return false;
-      }
       return true;
     });
 
@@ -855,118 +834,19 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
               style={{ ...overlayPlacement.style, display: 'flex', flexDirection: 'row', gap: '16px', background: 'transparent' }}
               onClick={e => e.stopPropagation()}
             >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(15,23,42,0.95)', border: '1px solid #334155', borderRadius: '8px', padding: '16px', minWidth: '250px' }}>
-                     <h4 style={{ margin: '0 0 8px 0', color: '#fff', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>Категории действий</h4>
-                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
-                          {radialCategories.length === 0 && <span style={{ color: '#94a3b8', fontSize: '14px' }}>Нет доступных действий</span>}
-                          {radialCategories.map(group => (
-                              <button 
-                                key={group.id} 
-                                style={{ textAlign: 'left', padding: '8px 12px', background: activeGroup === group.id ? '#4f46e5' : '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', cursor: 'pointer', transition: 'background 0.2s' }}
-                                onClick={(e) => { e.stopPropagation(); setActiveGroup(prev => prev === group.id ? null : group.id); }}
-                              >
-                                  {group.label}
-                              </button>
-                          ))}
-                     </div>
-                     {activeGroup && groupedActions[activeGroup]?.length > 0 && (
-                         <>
-                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', overflowY: 'auto', maxHeight: '250px', paddingRight: '4px' }}>
-                                 {groupedActions[activeGroup].map(action => (
-                                     <button 
-                                       key={action.id} 
-                                       style={{ textAlign: 'left', padding: '6px 12px', background: '#0f172a', border: '1px solid #334155', borderRadius: '4px', color: '#94a3b8', cursor: 'pointer', transition: 'color 0.2s, border 0.2s' }}
-                                       onMouseOver={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#4f46e5'; }}
-                                       onMouseOut={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = '#4f46e5'; }}
-                                       onClick={(e) => { 
-                                           e.stopPropagation(); 
-                                           if (focusedCharId && focusedCharacter) {
-                                               setActionCache(prev => [{ uid: Math.random().toString(36).substring(2, 9), presetId: action.id, label: action.label, targetCharId: focusedCharId, targetCharName: focusedCharacter.name, pointId: selectedPoint, intensity: intensity }, ...prev].slice(0, 10));
-                                           }
-                                       }}
-                                       disabled={isProcessing}
-                                     >
-                                         {action.label}
-                                     </button>
-                                 ))}
-                             </div>
-                         </>
-                     )}
-                </div>
-                <div className="character-focus-card" style={getAvatarUrl(focusedCharacter.name) ? {
-                  backgroundImage: `url("${getAvatarUrl(focusedCharacter.name)}")`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                } : {}}>
-                  <div className="character-focus-content" style={{
-                    transform: showCardParams ? 'translateY(0)' : 'translateY(100%)',
-                    transition: 'transform 0.3s ease-in-out',
-                    background: 'rgba(15, 23, 42, 0.85)',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-start',
-                    boxSizing: 'border-box'
-                  }}>
-                    <div className="character-card-header">
-                      <div>
-                        <span className="card-label">Фокус</span>
-                        <h3>{focusedCharacter.name}</h3>
-                      </div>
-                      {focusedPresence?.presenceState && (
-                        <span className="presence-state">{focusedPresence.presenceState}</span>
-                      )}
-                    </div>
-                    {subjectState ? (
-                      <div className="stat-bars">
-                        {[{
-                          key: 'sensitivity', label: 'Чувствительность'
-                        }, {
-                          key: 'capacity', label: 'Ресурс'
-                        }, {
-                          key: 'attitude', label: 'Доверие'
-                        }, {
-                          key: 'plasticity', label: 'Пластичность'
-                        }].map(stat => (
-                          <div className="stat" key={stat.key}>
-                            <label>
-                              <span>{stat.label}</span>
-                              <span>{Math.round(subjectState[stat.key] ?? 0)}</span>
-                            </label>
-                            <progress value={subjectState[stat.key] ?? 0} max={100} />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="stat-placeholder">Загрузка состояния...</div>
-                    )}
-                  </div>
-                  
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowCardParams(!showCardParams);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      bottom: '8px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      background: 'rgba(0, 0, 0, 0.5)',
-                      color: 'white',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '16px',
-                      padding: '4px 12px',
-                      cursor: 'pointer',
-                      zIndex: 10
-                    }}
-                  >
-                    {showCardParams ? 'Скрыть параметры ▼' : 'Показать параметры ▲'}
-                  </button>
-                </div>
-              </div>
+              <AnatomyView
+                subjectState={subjectState}
+                character={focusedCharacter}
+                avatarUrl={getAvatarUrl(focusedCharacter.name)}
+                activeContexts={subjectState?.contexts || []}
+                availablePoints={availablePointsList}
+                availableActions={availableActions}
+                onActionSelect={(pointId: string, actionId: string, intensity: number) => {
+                  if (!focusedCharId) return;
+                  sendAction(actionId, undefined, pointId, focusedCharId, intensity);
+                }}
+              />
+            </div>
           )}
         </div>
 
