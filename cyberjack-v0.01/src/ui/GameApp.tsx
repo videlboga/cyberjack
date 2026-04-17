@@ -206,6 +206,14 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const [subjectState, setSubjectState] = useState<any>(null);
   const [availableActions, setAvailableActions] = useState<ActionPreset[]>([]);
   const [sceneObjects, setSceneObjects] = useState<any[]>([]);
+  const [actionPresetMap, setActionPresetMap] = useState<Record<string,string>>({});
+
+  // fallback labels for item IDs that are not present in action presets
+  const ITEM_LABELS: Record<string,string> = {
+    'eq_suspension': 'Подвес (система)',
+    'eq_collar': 'Управляемый ошейник',
+    'eq_handcuffs': 'Наручники'
+  };
   const [layout, setLayout] = useState<any>(null);
   const [sceneData, setSceneData] = useState<any>(null);
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
@@ -308,6 +316,20 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
           text: `Связь установлена. Карта сцены: ${sceneId}`
         }
       ]);
+    })();
+    // fetch global action presets so we can map itemId -> human label
+    (async () => {
+      try {
+        const resp = await fetch(`${API_BASE}/api/actions`);
+        const all = await resp.json();
+        if (Array.isArray(all)) {
+          const map: Record<string,string> = {};
+          all.forEach((a: any) => { if (a.id && a.label) map[a.id] = a.label; });
+          setActionPresetMap(map);
+        }
+      } catch (e) {
+        console.warn('failed to load action presets', e);
+      }
     })();
   }, [sceneId]);
 
@@ -785,8 +807,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
                       const objs = sceneObjects.filter(o => o.nodeId === focusedNodeId);
                       if (objs.length === 0) return <span className="node-menu-empty">Нет оборудования</span>;
                       return objs.map(obj => {
-                        const preset = availableActions.find(a => a.id === obj.itemId);
-                        const label = preset?.label || obj.itemId;
+                        const label = actionPresetMap[obj.itemId] || availableActions.find(a => a.id === obj.itemId)?.label || ITEM_LABELS[obj.itemId] || obj.itemId;
                         return (
                           <div key={obj.id} style={{ padding: '6px 8px', margin: '4px 0', background: '#0b1220', border: '1px solid #233044', borderRadius: 6 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
