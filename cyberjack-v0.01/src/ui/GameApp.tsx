@@ -834,7 +834,8 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
               style={{ ...overlayPlacement.style, display: 'flex', flexDirection: 'row', gap: '16px', background: 'transparent' }}
               onClick={e => e.stopPropagation()}
             >
-              <AnatomyView
+              
+                <AnatomyView
                 subjectState={subjectState}
                 character={focusedCharacter}
                 avatarUrl={getAvatarUrl(focusedCharacter.name)}
@@ -846,6 +847,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
                   sendAction(actionId, undefined, pointId, focusedCharId, intensity);
                 }}
               />
+
             </div>
           )}
         </div>

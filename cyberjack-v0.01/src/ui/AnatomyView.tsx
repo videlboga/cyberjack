@@ -72,6 +72,7 @@ export function AnatomyView({ subjectState, character, avatarUrl, activeContexts
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [activePointGroup, setActivePointGroup] = useState<string | null>('system');
   const [showTelemetry, setShowTelemetry] = useState<boolean>(true);
+  
 
   const getPointContexts = (point: string) => {
     return activeContexts.filter(c => c.targetPoint === point || (point === 'general' && !c.targetPoint));
@@ -225,11 +226,30 @@ export function AnatomyView({ subjectState, character, avatarUrl, activeContexts
           </button>
         </div>
         
-        <div className="avatar-container" style={{ flexGrow: 1, position: 'relative', background: '#0f172a', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-           <div style={{ fontSize: 40, opacity: 0.5 }}>👤</div>
-           {/* В идеале здесь будет аватар: <img src={`/avatars/${character?.id}.png`} /> */}
+        <div className="avatar-container" style={avatarUrl ? {
+          flexGrow: 1, 
+          position: 'relative', 
+          background: `url("${avatarUrl}") center/cover`, 
+          borderRadius: 8, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', overflow: 'hidden', minHeight: '380px', width: '100%' } : { 
+          flexGrow: 1, 
+          position: 'relative', 
+          background: '#0f172a', 
+          borderRadius: 8, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', overflow: 'hidden', minHeight: '380px', width: '100%' }}>
+           {!avatarUrl && <div style={{ fontSize: 40, opacity: 0.5 }}>👤</div>}
            
-           <div className={`telemetry-overlay ${showTelemetry ? 'visible' : ''}`}>
+           <div className={`telemetry-overlay ${showTelemetry ? 'visible' : ''}`} style={{ zIndex: 1 }}>
+              <div className="character-card-header" style={{ marginBottom: '16px' }}>
+                <div>
+                  <span className="card-label" style={{ color: '#94a3b8', fontSize: '12px' }}>Фокус</span>
+                  <h3 style={{ margin: 0 }}>{character?.name}</h3>
+                </div>
+              </div>
              <div className="telemetry-bar">
                <label>Tension (Напряжение)</label>
                <div className="bar"><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, subjectState?.tension || 0))}%`, background: '#ef4444'}}></div></div>
