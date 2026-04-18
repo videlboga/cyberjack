@@ -182,23 +182,44 @@ export function VrmAnatomyView({ subjectState, activeContexts, availablePoints, 
   const modelUrl = '/models/base.vrm';
 
   return (
-    <div style={{ width: '100%', height: '500px', background: '#020617', borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
-       {/* Панель с fallback'ами для общих точек (general, mind_state), которые не привязать к костям */}
-       <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 10, display: 'flex', gap: 6, flexWrap: 'wrap', maxWidth: 200 }}>
-         {availablePoints.filter((pt: any) => !BONE_MAPPING[pt.id]).map((pt: any) => (
+    <div style={{ width: '100%', height: '100%', minHeight: '600px', background: '#020617', borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
+       {/* Не-костяные точки раскидываем по углам и краям для эстетики */}
+      {(() => {
+        const unmapped = availablePoints.filter((pt: any) => !BONE_MAPPING[pt.id]);
+        return unmapped.map((pt: any, i: number) => {
+          // Раскидываем по кругу или по краям:
+          // Четные слева, нечетные справа. По высоте распределяем.
+          const isLeft = i % 2 === 0;
+          const indexOnSide = Math.floor(i / 2);
+          const topPosition = 20 + indexOnSide * 40; // 20px, 60px, 100px...
+          
+          return (
             <button 
               key={pt.id}
               onClick={() => onSelectPoint(pt.id)}
               style={{
+                position: 'absolute',
+                top: `${topPosition}px`,
+                [isLeft ? 'left' : 'right']: '16px',
+                zIndex: 10,
                 background: selectedPoint === pt.id ? '#38bdf8' : '#1e293b',
                 color: selectedPoint === pt.id ? '#000' : '#bac4d4',
-                border: 'none', padding: '4px 8px', borderRadius: 4, fontSize: 11, cursor: 'pointer'
+                border: '1px solid #334155', 
+                padding: '6px 12px', 
+                borderRadius: 8, 
+                fontSize: 12, 
+                cursor: 'pointer',
+                boxShadow: selectedPoint === pt.id ? '0 0 8px rgba(56, 189, 248, 0.5)' : 'none',
+                transition: 'all 0.2s',
+                minWidth: '100px',
+                textAlign: 'center'
               }}
             >
               {pt.label}
             </button>
-         ))}
-       </div>
+          );
+        });
+      })()}
 
        <Canvas camera={{ position: [0, 1.2, 2.5], fov: 40 }}>
          <ambientLight intensity={0.7} />
