@@ -107,19 +107,43 @@ const loadVRM = (url: string): Promise<any> => {
 
 function BoneMarker({ boneNode, offset = [0,0,0], children }: { boneNode: THREE.Object3D, offset?: [number, number, number], children: React.ReactNode }) {
   const ref = useRef<THREE.Group>(null);
-  useFrame(() => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const offsetVec = useMemo(() => new THREE.Vector3(offset[0], offset[1], offset[2]), [offset]);
+  const normalVec = useMemo(() => {
+     let v = new THREE.Vector3(offset[0], offset[1], offset[2]);
+     if (v.length() < 0.001) v.set(0, 0, 1);
+     return v.normalize();
+  }, [offset]);
+  
+  useFrame(({ camera }) => {
     if (ref.current && boneNode) {
-      boneNode.getWorldPosition(ref.current.position);
-      // У модели с rotation.y = Math.PI локальная Z-координата направлена на нас (или от нас).
-      // Чтобы не заморачиваться со сложной математикой Quaternions, просто сдвигаем getWorldPosition напрямую 
-      // (Мировые: Y-вверх. Камера смотрит на 0,0,0 с положения +Z). 
-      // Так что Z- это ближе к нам, Z+ это глубже в экран.
-      ref.current.position.x += offset[0];
-      ref.current.position.y += offset[1];
-      ref.current.position.z += offset[2];
+      ref.current.position.copy(offsetVec);
+      ref.current.applyMatrix4(boneNode.matrixWorld);
+      
+      if (wrapperRef.current) {
+        // Calculate point visibility based on the normal (approximate if point is on skin surface)
+        const pointWorldPos = ref.current.position;
+        const camDir = new THREE.Vector3().subVectors(pointWorldPos, camera.position).normalize();
+        
+        // Bone's direction normal transformed to world space
+        const worldNormal = normalVec.clone().transformDirection(boneNode.matrixWorld).normalize();
+        
+        const dot = camDir.dot(worldNormal);
+        // dot < 0 means the normal points towards the camera.
+        // It should be visible if dot < 0.2 (allow some grazing angle visibility)
+        const isVisible = dot < 0.2;
+        wrapperRef.current.style.opacity = isVisible ? '1' : '0.1';
+        wrapperRef.current.style.pointerEvents = isVisible ? 'auto' : 'none';
+      }
     }
   });
-  return <group ref={ref}>{children}</group>;
+  
+  // Clone children to inject ref into the root div
+  const clonedChild = React.isValidElement(children) 
+    ? React.cloneElement(children as React.ReactElement<any>, { ref: wrapperRef }) 
+    : children;
+    
+  return <group ref={ref}>{clonedChild}</group>;
 }
 
 function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activeContexts }: VrmAnatomyProps) {
@@ -174,7 +198,7 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
 
         return (
           <BoneMarker key={pt.id} boneNode={boneNode} offset={POINT_OFFSETS[pt.id] || [0,0,0]}>
-            <Html center occlude="blending" zIndexRange={[100, 0]}>
+            <Html center zIndexRange={[100, 0]}>
               <div 
                 className={`vrm-marker ${selectedPoint === pt.id ? 'active' : ''}`}
                 onClick={(e) => {
@@ -188,7 +212,7 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
                   width: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 20 : 12,
                   height: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 20 : 12,
                   borderRadius: '50%',
-                  background: selectedPoint === pt.id ? 'rgba(56, 189, 248, 0.9)' : hoveredPoint === pt.id ? 'rgba(96, 165, 250, 0.7)' : 'rgba(30, 41, 59, 0.5)',
+                  background: selectedPoint === pt.id ? '#38bdf8' : hoveredPoint === pt.id ? '#60a5fa' : '#1e293b',
                   border: `2px solid ${selectedPoint === pt.id ? '#38bdf8' : hoveredPoint === pt.id ? '#93c5fd' : '#64748b'}`,
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -214,11 +238,11 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
                 {(selectedPoint === pt.id || hoveredPoint === pt.id) && (
                   <div style={{
                     position: 'absolute', left: '120%', top: '50%', transform: 'translateY(-50%)',
-                    background: 'rgba(15, 23, 42, 0.95)', padding: '6px 10px', borderRadius: 6,
+                    background: '#0f172a', padding: '6px 10px', borderRadius: 6,
                     whiteSpace: 'nowrap', color: '#fff', fontSize: 12, border: '1px solid #334155',
                     pointerEvents: 'none', zIndex: 10,
                     boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                    backdropFilter: 'blur(4px)'
+                    /* backdrop filter removed */
                   }}>
                     {pt.label}
                   </div>
