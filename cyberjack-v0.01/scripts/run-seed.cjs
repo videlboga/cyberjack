@@ -97,10 +97,10 @@ try {
 }
 // =======================================================
 
-process.exit(0);
 const insertResourceStmt = db.prepare(`
   INSERT OR REPLACE INTO character_resources (character_id, resource_key, amount, max_amount, regen_rate, metadata)
   VALUES (?, ?, ?, ?, ?, ?)
 `);
 insertResourceStmt.run('PL-1', 'credits', 0, 1000, 0, '{}');
 insertResourceStmt.run('PL-1', 'authority', 0, 100, 0, '{}');
+process.exit(0);
