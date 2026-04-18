@@ -36,7 +36,7 @@ const SimulationViewNew: React.FC = () => {
   const [focusedCharId, setFocusedCharId] = useState<string>('');
   const [subjectState, setSubjectState] = useState<any>(null);
 
-  const [targetPointId, setTargetPointId] = useState<string>('general');
+  const [targetPointId, setTargetPointId] = useState<string>('systemic');
   const [intensity, setIntensity] = useState<number>(1.0);
   const [skipLLM, setSkipLLM] = useState<boolean>(false);
 
@@ -73,7 +73,7 @@ const SimulationViewNew: React.FC = () => {
     if (!focusedCharId) return;
     const fetchState = async () => {
       try {
-        const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'lab', pointId: 'general' });
+        const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'lab', pointId: 'systemic' });
         const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
         const body = await res.json();
         if (body && body.success) setSubjectState(body.subject);
@@ -87,7 +87,7 @@ const SimulationViewNew: React.FC = () => {
   const fetchState = async () => {
     if (!focusedCharId) return;
     try {
-      const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'lab', pointId: 'general' });
+      const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'lab', pointId: 'systemic' });
       const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
       const body = await res.json();
       if (body && body.success) setSubjectState(body.subject);

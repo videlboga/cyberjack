@@ -60,7 +60,7 @@ export function translateStateToPrompt(
     // Движок сам отдает актуальный список частей тела.
     const myAnatomyDef = getBaseHumanAnatomy(gender, anatomyMod);
     const visibleParts = myAnatomyDef
-        .filter(p => !p.id.startsWith('slot_') && p.id !== 'global_pose' && p.id !== 'mind_state' && p.id !== 'general')
+        .filter(p => !p.id.startsWith('slot_') && p.id !== 'global_pose' && p.id !== 'mind_state' && p.id !== 'systemic')
         .map(p => p.label);
     
     const bodyAnatomy = `Мое доступное тело содержит следующие зоны: ${visibleParts.join(', ')}.`;

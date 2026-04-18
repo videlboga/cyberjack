@@ -15,7 +15,7 @@ export interface RouteResponse {
  * and routing into the engine tick.
  */
 export async function dispatchEvent(payload: any): Promise<RouteResponse> {
-    let pointId = payload.pointId || 'general';
+    let pointId = payload.pointId || 'systemic';
     let dynamicModifiers = undefined;
     const sceneId = payload.sceneId || 'lab';
 
@@ -40,7 +40,7 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
                 pointId = dynamicModifiers.pointId;
             } else {
                 console.log(`[EventRouter] Unknown pointId "${dynamicModifiers.pointId}" from LLM. Falling back to "general".`);
-                pointId = 'general';
+                pointId = 'systemic';
             }
         }
     }

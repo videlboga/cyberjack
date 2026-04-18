@@ -311,7 +311,7 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
     // will increase point preferences; initialContexts and personaHooks will
     // seed context preferences. Action preferences are left empty for now.
     const POINT_IDS = [
-        'general', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back',
+        'systemic', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back',
         'left_arm', 'right_arm', 'anus', 'groin', 'legs', 'knees', 'feet'
     ];
 

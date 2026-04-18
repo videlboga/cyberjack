@@ -31,7 +31,7 @@ export const processWait = async (req: Request, res: Response) => {
         for (let i = 0; i < ticks; i++) {
             lastBundle = await runGameTick({
                 subjectId,
-                pointId: 'general',
+                pointId: 'systemic',
                 playerId: 'PL-1',
                 sceneId: eventId,
                 presetId: 'wait'
@@ -57,7 +57,7 @@ export const processWait = async (req: Request, res: Response) => {
             maybeSummarizeChat(subjectId);
         }
 
-        const fullState = subjectRepo.getWithPoint(subjectId, 'general');
+        const fullState = subjectRepo.getWithPoint(subjectId, 'systemic');
         const resources = normalizePlayer(resourceRepo.get('PL-1'));
         
         res.json({

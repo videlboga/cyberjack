@@ -13,7 +13,7 @@ async function runAutoSimulation(turns: number) {
 
         const payload = {
             subjectId: SUBJECT_ID,
-            pointId: "general",
+            pointId: "systemic",
             presetId: "wait",
             actionId: "wait",
             playerId: PLAYER_ID,

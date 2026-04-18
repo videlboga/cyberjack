@@ -39,7 +39,7 @@ function createTestChar() {
         subjectId
     );
 
-    const points = ['general', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back', 'left_arm', 'right_arm'];
+    const points = ['systemic', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back', 'left_arm', 'right_arm'];
     for (const pt of points) {
         pointStateRepo.save(subjectId, pt, {
             localSensitivity: 50,

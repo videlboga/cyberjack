@@ -175,7 +175,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
                     
                     const targetPointRecords = pointStateRepo.getAllForSubject(targetId);
                     const targetPoints = targetPointRecords.map(p => p.pointId);
-                    if (targetPoints.length === 0) targetPoints.push('general');
+                    if (targetPoints.length === 0) targetPoints.push('systemic');
                     
                     const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints);
                     

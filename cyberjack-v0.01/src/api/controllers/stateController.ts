@@ -107,7 +107,7 @@ export const updateSubject = (req: Request, res: Response) => {
         };
 
         subjectRepo.save(subjectId, current.name || subjectId, updated as any);
-        const fullState = subjectRepo.getWithPoint(subjectId, req.body.pointId || 'general');
+        const fullState = subjectRepo.getWithPoint(subjectId, req.body.pointId || 'systemic');
         res.json({ success: true, state: fullState });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });

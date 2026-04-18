@@ -12,7 +12,7 @@ export interface ParsedVerbalAction extends Partial<CompiledAction> {
 
 export async function parseVerbalInput(text: string, sceneContextStr?: string): Promise<ParsedVerbalAction> {
     if (!text || text.trim() === "") {
-        return { intensity: 0.1, valence: 0, contact: 0.1, sharpness: 0, novelty: 0.5, pointId: 'general', commandIntent: { type: 'none' } };
+        return { intensity: 0.1, valence: 0, contact: 0.1, sharpness: 0, novelty: 0.5, pointId: 'systemic', commandIntent: { type: 'none' } };
     }
 
     const ctxList = presetRepo.getAllActionPresets()
@@ -42,7 +42,7 @@ ${moveInstructions}
   "contact": 0.0-1.0,
   "sharpness": 0.0-1.0,
   "novelty": 0.5,
-  "pointId": "general"
+  "pointId": "systemic"
 }
 
 Ответь ТОЛЬКО валидным JSON.`
@@ -64,7 +64,7 @@ ${moveInstructions}
         };
 
         const normalize = (candidate?: string, txt?: string) => {
-            if (!candidate && !txt) return 'general';
+            if (!candidate && !txt) return 'systemic';
             if (candidate) {
                 const c = candidate.toString().toLowerCase();
                 if (synonyms[c]) return synonyms[c];
@@ -76,11 +76,11 @@ ${moveInstructions}
                     if (re.test(lowerTxt)) return synonyms[key];
                 }
             }
-            return candidate ?? 'general';
+            return candidate ?? 'systemic';
         };
 
         const normalizedPoint = normalize(parsed.pointId, text);
-        if (normalizedPoint !== (parsed.pointId ?? 'general')) {
+        if (normalizedPoint !== (parsed.pointId ?? 'systemic')) {
             console.log(`[VerbalParser] Normalized pointId '${parsed.pointId}' -> '${normalizedPoint}'`);
         }
 
@@ -101,13 +101,13 @@ ${moveInstructions}
             contact: parsed.contact ?? 0,
             sharpness: parsed.sharpness ?? 0,
             novelty: parsed.novelty ?? 0,
-            pointId: normalizedPoint ?? 'general',
+            pointId: normalizedPoint ?? 'systemic',
             commandIntent,
             raw: JSON.stringify(parsed),
             model: model ?? 'google/gemini-3.1-flash-lite-preview'
         };
     } catch (error: any) {
         console.error("[VerbalParser] Failed to classify text:", error.message);
-        return { intensity: 0.3, valence: 0, contact: 0.1, sharpness: 0.1, novelty: 0.5, pointId: 'general', raw: error.message, model: 'google/gemini-3.1-flash-lite-preview', commandIntent: { type: 'none' } };
+        return { intensity: 0.3, valence: 0, contact: 0.1, sharpness: 0.1, novelty: 0.5, pointId: 'systemic', raw: error.message, model: 'google/gemini-3.1-flash-lite-preview', commandIntent: { type: 'none' } };
     }
 }

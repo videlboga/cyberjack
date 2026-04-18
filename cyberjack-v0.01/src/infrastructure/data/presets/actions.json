@@ -630,7 +630,7 @@
       "type": "pose",
       "duration": -1,
       "occupiesPoints": [
-        "general",
+        "systemic",
         "global_pose",
         "knees",
         "hands"
@@ -1122,7 +1122,7 @@
       "duration": -1,
       "exclusiveWithinPoint": true,
       "occupiesPoints": [
-        "general",
+        "systemic",
         "global_pose",
         "hands"
       ],

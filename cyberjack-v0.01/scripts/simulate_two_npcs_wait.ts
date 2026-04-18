@@ -18,7 +18,7 @@ async function main() {
                     playerId: 'PL-1',
                     actionId: 'wait',
                     labelOverride: 'ожидает',
-                    pointId: 'general',
+                    pointId: 'systemic',
                     sceneId: 'lab'
                 })
             });

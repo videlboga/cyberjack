@@ -77,7 +77,7 @@ export function normalizeCore(core: Partial<SubjectCoreState>, config: EngineCon
 
 export function normalizePoint(point: Partial<SubjectPointState>, config: EngineConfig): SubjectPointState {
     const normalized: any = {
-        pointId: point.pointId || 'general',
+        pointId: point.pointId || 'systemic',
     };
     for (const k of Object.keys(config.point.defaults)) {
         const key = k as keyof SubjectPointState;

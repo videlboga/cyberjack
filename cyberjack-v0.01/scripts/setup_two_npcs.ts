@@ -21,7 +21,7 @@ function setupTwoNpcs() {
     subjectRepo.save(npc1Id, npc1Name, { sensitivity: 60, capacity: 50, openness: 80, plasticity: 70, attitude: 60 });
     subjectRepo.save(npc2Id, npc2Name, { sensitivity: 50, capacity: 60, openness: 70, plasticity: 60, attitude: 60 });
 
-    const points = ['general', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back', 'left_arm', 'right_arm'];
+    const points = ['systemic', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back', 'left_arm', 'right_arm'];
     for (const pt of points) {
         pointStateRepo.save(npc1Id, pt, { localSensitivity: 50, localAttitude: 50 });
         pointStateRepo.save(npc2Id, pt, { localSensitivity: 50, localAttitude: 50 });

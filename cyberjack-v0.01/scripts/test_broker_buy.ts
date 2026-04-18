@@ -12,7 +12,7 @@ async function testV() {
          subjectId: 'B-001',
          playerId: 'PL-1',
          sceneId: 'lab',
-         pointId: 'general',
+         pointId: 'systemic',
          presetId: 'verbal_pressure', // Just talk
          textMessage: 'Ворон, покажи прайс. Что есть на продажу?'
       })
@@ -28,7 +28,7 @@ async function testV() {
          subjectId: 'B-001',
          playerId: 'PL-1',
          sceneId: 'lab',
-         pointId: 'general',
+         pointId: 'systemic',
          presetId: 'buy_raw_asset',
          payload: { assetId: 'RAW-001' },
          textMessage: 'Я беру Fresh Spacer. Перевожу бабки.'

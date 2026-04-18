@@ -37,7 +37,7 @@ async function testProactive() {
     console.log("Characters configured.");
 
     // 2. Настраиваем точки Игрока (барьеры интимности)
-    const points = ['general', 'face', 'lips', 'chest', 'left_arm'];
+    const points = ['systemic', 'face', 'lips', 'chest', 'left_arm'];
     for (const pt of points) {
         pointStateRepo.save(playerId, pt, {
             pointId: pt,
