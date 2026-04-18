@@ -830,8 +830,18 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
           {focusedCharacter && (
             <div
-              className={`focus-overlay align-${overlayPlacement.horizontal} vert-${overlayPlacement.vertical}`}
-              style={{ ...overlayPlacement.style, display: 'flex', flexDirection: 'row', gap: '16px', background: 'transparent' }}
+              className="anatomy-modal-container"
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'flex',
+                flexDirection: 'row',
+                gap: '16px',
+                background: 'transparent',
+                zIndex: 1000
+              }}
               onClick={e => e.stopPropagation()}
             >
               
