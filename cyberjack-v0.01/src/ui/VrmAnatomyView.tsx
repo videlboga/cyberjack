@@ -130,7 +130,7 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
     loadVRM(vrmUrl).then(loadedVrm => {
       setVrm(loadedVrm);
       // Поворачиваем VRM лицом к камере
-      loadedVrm.scene.rotation.y = Math.PI; 
+      loadedVrm.scene.rotation.y = 0; 
     }).catch(err => {
       console.error('Failed to load VRM:', err);
     });
