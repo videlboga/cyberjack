@@ -85,12 +85,12 @@ try {
 
 // 2. Put panties, bra, and shirt on Eli (S-01)
 try {
-  const applyContextStmt = db.prepare("INSERT OR REPLACE INTO active_contexts (id, subject_id, action_id, duration) VALUES (?, ?, ?, ?)");
-  applyContextStmt.run('ctx_eli_panties', 'S-01', 'eq_clothe_panties', -1);
-  applyContextStmt.run('ctx_eli_bra', 'S-01', 'eq_clothe_bra', -1);
-  applyContextStmt.run('ctx_eli_shirt', 'S-01', 'eq_clothe_shirt', -1);
-  applyContextStmt.run('ctx_eli_pants', 'S-01', 'eq_clothe_pants', -1);
-  applyContextStmt.run('ctx_eli_shoes', 'S-01', 'eq_clothe_shoes', -1);
+  const applyContextStmt = db.prepare("INSERT OR REPLACE INTO active_contexts (id, subject_id, action_id, duration, point_id) VALUES (?, ?, ?, ?, ?)");
+  applyContextStmt.run('ctx_eli_panties', 'S-01', 'eq_clothe_panties', -1, 'vulva');
+  applyContextStmt.run('ctx_eli_bra', 'S-01', 'eq_clothe_bra', -1, 'chest');
+  applyContextStmt.run('ctx_eli_shirt', 'S-01', 'eq_clothe_shirt', -1, 'shoulders');
+  applyContextStmt.run('ctx_eli_pants', 'S-01', 'eq_clothe_pants', -1, 'hips');
+  applyContextStmt.run('ctx_eli_shoes', 'S-01', 'eq_clothe_shoes', -1, 'feet');
   console.log('Clothed S-01 (Eli)');
 } catch(e) {
   console.error(e);
