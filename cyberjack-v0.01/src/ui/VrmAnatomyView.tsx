@@ -36,7 +36,7 @@ const BONE_MAPPING: Record<string, VRMHumanBoneName> = {
   right_leg: VRMHumanBoneName.RightUpperLeg,
   knees: VRMHumanBoneName.LeftLowerLeg,
   feet: VRMHumanBoneName.LeftFoot,
-  inner_thighs: VRMHumanBoneName.Hips,
+  inner_thighs: VRMHumanBoneName.LeftUpperLeg,
   groin: VRMHumanBoneName.Hips,
   penis: VRMHumanBoneName.Hips,
   testicles: VRMHumanBoneName.Hips,
@@ -51,26 +51,33 @@ const BONE_MAPPING: Record<string, VRMHumanBoneName> = {
 // Z+ направлен в спину (от камеры), Z- направлен на зрителя.
 // Y+ вверх, X- вправо (зрителя), X+ влево (зрителя) - зависит от Math.PI поворота.
 const POINT_OFFSETS: Record<string, [number, number, number]> = {
-  shoulders: [0, 0.12, 0],          // Выше груди
+  shoulders: [0, 0.12, 0],          // Чуть выше груди
   nipples: [0, -0.05, 0.12],        // Спереди (Z+)
   chest: [0, 0.05, 0.12],           // Спереди (Z+)
-  belly: [0, -0.08, 0.15],          // Живот спереди (Z+)
+  belly: [0, -0.05, 0.15],          // Живот спереди (Z+)
   waist: [0, -0.08, 0],             // Талия
-  back: [0, 0.05, -0.12],           // Спина сзади (Z-)
-  buttocks: [0, -0.05, -0.15],      // Ягодицы сзади (Z-)
-  hips: [0, 0.05, 0],               // Бедра по бокам
-  inner_thighs: [0, -0.15, 0],      // Вниз
+  back: [0, 0.05, -0.15],           // Спина сзади (Z-)
+  buttocks: [0, -0.05, -0.16],      // Ягодицы сзади (Z-)
+  hips: [0.12, 0.05, 0],            // Бедра (сбоку, Z=0). X+ = сдвиг влево (к правому краю экрана)
   
-  groin: [0, -0.06, 0.10],          // Пах спереди (Z+)
-  penis: [0, -0.10, 0.15],          // Спереди (Z+)
-  testicles: [0, -0.14, 0.12],      // Вниз и спереди
-  vagina: [0, -0.10, 0.08],         // Вниз и чуть спереди
-  vulva: [0, -0.08, 0.10],          // Вниз и чуть спереди
-  clitoris: [0, -0.06, 0.12],       // Чуть выше
-  anus: [0, -0.12, -0.06],          // Вниз и сзади (Z-)
-  prostate: [0, -0.05, -0.02],      // Внутри
+  inner_thighs: [-0.08, -0.1, 0.05], // От левой ноги сдвигаем вправо (X-), вниз (Y-) и чуть вперед (Z+)
+  
+  // Интимные зоны раскидываем так, чтобы они не слипались в одну кучу, а образовывали столбик или веер
+  groin: [0, -0.04, 0.12],          // Самое высокое, спереди
+  
+  // Женские точки (чуть ниже)
+  clitoris: [0.03, -0.07, 0.13],    // Сдвинем на пару мм вбок и вниз
+  vulva: [-0.03, -0.09, 0.11],      // В другой бок и еще ниже
+  vagina: [0, -0.12, 0.09],         // Еще ниже, ближе к центру
+  
+  // Мужские точки
+  penis: [0, -0.08, 0.16],          // Спереди, выступает
+  testicles: [0, -0.14, 0.13],      // Самое низкое спереди
+  
+  // Задние/внутренние
+  anus: [0, -0.12, -0.10],          // Снизу и сзади (Z-)
+  prostate: [0, -0.08, -0.03],      // Глубже внутри
 };
-
 // Храним загруженные модели в кеше, чтобы не грузить по 10 раз
 const loadVRM = (url: string): Promise<any> => {
   return new Promise((resolve, reject) => {
@@ -123,7 +130,7 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
     loadVRM(vrmUrl).then(loadedVrm => {
       setVrm(loadedVrm);
       // Поворачиваем VRM лицом к камере
-      loadedVrm.scene.rotation.y = 0; 
+      loadedVrm.scene.rotation.y = Math.PI; 
     }).catch(err => {
       console.error('Failed to load VRM:', err);
     });
