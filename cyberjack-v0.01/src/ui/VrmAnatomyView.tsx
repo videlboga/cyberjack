@@ -17,27 +17,59 @@ interface VrmAnatomyProps {
 // Связываем наши ID точек (из БД) с костями VRM
 const BONE_MAPPING: Record<string, VRMHumanBoneName> = {
   head: VRMHumanBoneName.Head,
+  face: VRMHumanBoneName.Head,
+  lips: VRMHumanBoneName.Jaw,
   neck: VRMHumanBoneName.Neck,
+  shoulders: VRMHumanBoneName.UpperChest,
   chest: VRMHumanBoneName.UpperChest,
+  nipples: VRMHumanBoneName.UpperChest,
   belly: VRMHumanBoneName.Spine,
-  buttocks: VRMHumanBoneName.Hips, // У VRM нет костей ягодиц, берем Hips (таз)
+  waist: VRMHumanBoneName.Spine,
+  back: VRMHumanBoneName.Spine,
+  buttocks: VRMHumanBoneName.Hips,
   hips: VRMHumanBoneName.Hips,
-  left_arm: VRMHumanBoneName.LeftUpperArm, // Можно спуститься к LeftLowerArm
+  left_arm: VRMHumanBoneName.LeftUpperArm,
   right_arm: VRMHumanBoneName.RightUpperArm,
   left_hand: VRMHumanBoneName.LeftHand,
   right_hand: VRMHumanBoneName.RightHand,
   left_leg: VRMHumanBoneName.LeftUpperLeg,
   right_leg: VRMHumanBoneName.RightUpperLeg,
-  knees: VRMHumanBoneName.LeftLowerLeg, // Условно цепляемся к одной или обеим
-  feet: VRMHumanBoneName.LeftFoot, 
-  face: VRMHumanBoneName.Head, // Вместе с головой
-  lips: VRMHumanBoneName.Jaw, // Челюсть
-  // Интимные точки (привязываем к Hips)
-  vagina: VRMHumanBoneName.Hips, 
+  knees: VRMHumanBoneName.LeftLowerLeg,
+  feet: VRMHumanBoneName.LeftFoot,
+  inner_thighs: VRMHumanBoneName.Hips,
+  groin: VRMHumanBoneName.Hips,
+  penis: VRMHumanBoneName.Hips,
+  testicles: VRMHumanBoneName.Hips,
+  vagina: VRMHumanBoneName.Hips,
   vulva: VRMHumanBoneName.Hips,
   clitoris: VRMHumanBoneName.Hips,
   anus: VRMHumanBoneName.Hips,
-  // ...остальные точки кидаем на таз или грудь по умолчанию
+  prostate: VRMHumanBoneName.Hips,
+};
+
+// Смещения (X, Y, Z) относительно мировых координат кости для разнесения перекрывающихся/специфичных точек
+// Z+ направлен в спину (от камеры), Z- направлен на зрителя.
+// Y+ вверх, X- вправо (зрителя), X+ влево (зрителя) - зависит от Math.PI поворота.
+const POINT_OFFSETS: Record<string, [number, number, number]> = {
+  shoulders: [0, 0.12, 0],          // Чуть выше груди
+  nipples: [0, -0.05, 0.12],        // Ниже центра верхнегрудной кости и вперед
+  chest: [0, 0.05, 0.12],           // Выше сосков, вперед
+  belly: [0, -0.08, 0.15],          // Ниже центра позвоночника, наружу (живот)
+  waist: [0, -0.08, 0],             // Талия сбоку (или просто ниже)
+  back: [0, 0.05, -0.12],           // Назад от спины
+  buttocks: [0, -0.05, -0.15],      // Вниз и назад от таза
+  hips: [0, 0.05, -0.12],           // Внешняя часть бедер/таза (сзади/сбоку)
+  inner_thighs: [0, -0.15, 0.05],   // Сильно вниз от таза (между ног и чуть вперед)
+  
+  // Интимные зоны (раскиданы)
+  groin: [0, -0.06, 0.10],         
+  penis: [0, -0.10, 0.15],         
+  testicles: [0, -0.14, 0.12],     
+  vagina: [0, -0.10, 0.08],        
+  vulva: [0, -0.08, 0.10],         
+  clitoris: [0, -0.06, 0.12],      
+  anus: [0, -0.12, -0.06],          // Сильно вниз и назад (промежность)
+  prostate: [0, -0.05, -0.02],      // Глубже внутри, сзади
 };
 
 // Храним загруженные модели в кеше, чтобы не грузить по 10 раз
@@ -67,11 +99,18 @@ const loadVRM = (url: string): Promise<any> => {
   });
 };
 
-function BoneMarker({ boneNode, children }: { boneNode: THREE.Object3D, children: React.ReactNode }) {
+function BoneMarker({ boneNode, offset = [0,0,0], children }: { boneNode: THREE.Object3D, offset?: [number, number, number], children: React.ReactNode }) {
   const ref = useRef<THREE.Group>(null);
   useFrame(() => {
     if (ref.current && boneNode) {
       boneNode.getWorldPosition(ref.current.position);
+      // У модели с rotation.y = Math.PI локальная Z-координата направлена на нас (или от нас).
+      // Чтобы не заморачиваться со сложной математикой Quaternions, просто сдвигаем getWorldPosition напрямую 
+      // (Мировые: Y-вверх. Камера смотрит на 0,0,0 с положения +Z). 
+      // Так что Z- это ближе к нам, Z+ это глубже в экран.
+      ref.current.position.x += offset[0];
+      ref.current.position.y += offset[1];
+      ref.current.position.z += offset[2];
     }
   });
   return <group ref={ref}>{children}</group>;
@@ -126,7 +165,7 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
         const pointContexts = activeContexts.filter(c => c.pointId === pt.id || c.targetPoint === pt.id);
 
         return (
-          <BoneMarker key={pt.id} boneNode={boneNode}>
+          <BoneMarker key={pt.id} boneNode={boneNode} offset={POINT_OFFSETS[pt.id] || [0,0,0]}>
             <Html center zIndexRange={[100, 0]}>
               <div 
                 className={`vrm-marker ${selectedPoint === pt.id ? 'active' : ''}`}
