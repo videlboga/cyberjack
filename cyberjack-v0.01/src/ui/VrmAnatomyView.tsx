@@ -126,8 +126,6 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
   const [vrm, setVrm] = useState<any>(null);
   const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
   const sceneRef = useRef<THREE.Group>(null);
-  const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
-  const sceneRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
     if (!vrmUrl) return;
