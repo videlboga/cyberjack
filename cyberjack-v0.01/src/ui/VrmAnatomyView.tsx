@@ -139,11 +139,14 @@ function BoneMarker({ boneNode, offset = [0,0,0], children }: { boneNode: THREE.
   });
   
   // Clone children to inject ref into the root div
-  const clonedChild = React.isValidElement(children) 
-    ? React.cloneElement(children as React.ReactElement<any>, { ref: wrapperRef }) 
-    : children;
-    
-  return <group ref={ref}>{clonedChild}</group>;
+  return (
+    <group ref={ref}>
+      {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, { 
+        style: { ...((children as any).props.style || {}), opacity: 1, pointerEvents: 'auto' },
+        ref: wrapperRef 
+      }) : children}
+    </group>
+  );
 }
 
 function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activeContexts }: VrmAnatomyProps) {
