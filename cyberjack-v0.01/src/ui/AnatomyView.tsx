@@ -45,7 +45,7 @@ const POINT_GROUPS = [
   { id: 'torso', label: 'Торс', points: ['shoulders', 'chest', 'nipples', 'belly', 'back', 'waist'] },
   { id: 'limbs', label: 'Конечности', points: ['left_arm', 'right_arm', 'left_hand', 'right_hand', 'left_leg', 'right_leg', 'knees', 'feet', 'hips'] },
   { id: 'intimate', label: 'Чувствительные зоны', points: ['inner_thighs', 'buttocks', 'anus', 'groin', 'penis', 'testicles', 'prostate', 'vulva', 'vagina', 'clitoris'] },
-  { id: 'system', label: 'Системы и Контекст', points: ['general', 'mind_state', 'global_pose', 'slot_pose', 'slot_room', 'slot_social'] }
+  { id: 'system', label: 'Общее состояние', points: ['systemic', 'mind_state', 'posture'] }
 ];
 
 const classifyPoint = (pointId: string) => {
@@ -68,7 +68,7 @@ const classifyAction = (action: any): string | null => {
 };
 
 export function AnatomyView({ subjectState, character, avatarUrl, activeContexts, onActionSelect, availablePoints, availableActions, playerInventory = [], sceneObjects = [], playerSector, targetSector }: AnatomyViewProps) {
-  const [selectedPoint, setSelectedPoint] = useState<string>('general');
+  const [selectedPoint, setSelectedPoint] = useState<string>('systemic');
   const [intensity, setIntensity] = useState<number>(1.0);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [activePointGroup, setActivePointGroup] = useState<string | null>('system');
@@ -76,7 +76,7 @@ export function AnatomyView({ subjectState, character, avatarUrl, activeContexts
   
 
   const getPointContexts = (point: string) => {
-    return activeContexts.filter(c => c.targetPoint === point || (point === 'general' && !c.targetPoint));
+    return activeContexts.filter(c => c.pointId === point || (point === 'systemic' && (!c.pointId || c.pointId === 'systemic')));
   };
 
   const filteredAndGroupedActions = useMemo(() => {

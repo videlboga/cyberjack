@@ -13,8 +13,8 @@ export interface AnatomyPointDef {
 
 export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): AnatomyPointDef[] {
     const points: AnatomyPointDef[] = [
-        { id: 'global_pose', label: 'Общая поза тела (виртуальная)', sens: 0, att: 50 },
-        { id: 'mind_state', label: 'Состояние разума (виртуальная)', sens: 0, att: 50 },
+        { id: 'posture', label: 'Поза (Текущее положение тела)', sens: 0, att: 50 },
+        { id: 'mind_state', label: 'Психика/Разум', sens: 0, att: 50 },
         
         { id: 'head', label: 'Голова/Волосы', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
         { id: 'face', label: 'Лицо', sens: 60, att: 40, parentId: 'head' },
@@ -76,10 +76,10 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
 
     // Добавляем сервисные технические слоты, если они нужны движку
     points.push(
-        { id: 'slot_pose', label: 'Слот: Поза', sens: 50, att: 50 },
+        
         { id: 'slot_room', label: 'Слот: Окружение (Комната)', sens: 50, att: 50 },
         { id: 'slot_social', label: 'Слот: Социальное', sens: 50, att: 50 },
-        { id: 'general', label: 'Общее воздействие', sens: 50, att: 50 }
+        { id: 'systemic', label: 'Организм (Системное)', sens: 50, att: 50 }
     );
 
     return points;

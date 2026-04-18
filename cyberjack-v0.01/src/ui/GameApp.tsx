@@ -219,7 +219,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const [sceneData, setSceneData] = useState<any>(null);
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [focusedCharId, setFocusedCharId] = useState<string | null>(null);
-  const [selectedPoint, setSelectedPoint] = useState<string>('general');
+  const [selectedPoint, setSelectedPoint] = useState<string>('systemic');
   const [intensity, setIntensity] = useState<number>(1.0);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [availablePointsList, setAvailablePointsList] = useState<{ id: string; label: string }[]>([]);
@@ -243,7 +243,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       const search = new URLSearchParams({
         subjectId: targetId,
         sceneId,
-        pointId: selectedPoint || 'general'
+        pointId: selectedPoint || 'systemic'
       });
       const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
       const body = await res.json();
@@ -259,7 +259,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         setSubjectState(body.subject);
         setAvailablePointsList(body.availablePoints || []);
         if (!body.availablePoints?.some((pt: any) => pt.id === selectedPoint)) {
-          setSelectedPoint(body.availablePoints?.[0]?.id || 'general');
+          setSelectedPoint(body.availablePoints?.[0]?.id || 'systemic');
         }
       }
     } catch (err) {
@@ -367,7 +367,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     if (!focusedCharId) return;
-    setSelectedPoint('general');
+    setSelectedPoint('systemic');
   }, [focusedCharId]);
 
   const slotMap = useMemo(() => {
@@ -574,7 +574,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
     setIsProcessing(true);
 
     try {
-      const resolvedPoint = targetPoint || selectedPoint || 'general';
+      const resolvedPoint = targetPoint || selectedPoint || 'systemic';
       const actualIntensity = customIntensity ?? intensity;
       const reqBody: any = {
         subjectId: targetCharId,

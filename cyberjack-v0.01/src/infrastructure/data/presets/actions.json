@@ -110,7 +110,7 @@
       "command"
     ],
     "validTargets": [
-      "general"
+      "mind_state"
     ],
     "vector": {
       "intensity": 7,
@@ -133,7 +133,7 @@
       "comfort"
     ],
     "validTargets": [
-      "general"
+      "mind_state"
     ],
     "vector": {
       "intensity": 4,
@@ -157,7 +157,7 @@
       "vulnerable"
     ],
     "validTargets": [
-      "general",
+      "systemic",
       "torso",
       "groin"
     ],
@@ -585,7 +585,7 @@
       "neutral"
     ],
     "validTargets": [
-      "general"
+      "systemic"
     ],
     "vector": {
       "intensity": 1,
@@ -616,7 +616,7 @@
       "vulnerable"
     ],
     "validTargets": [
-      "general"
+      "systemic"
     ],
     "vector": {
       "intensity": 3,
@@ -650,7 +650,7 @@
       "intimate"
     ],
     "validTargets": [
-      "general"
+      "systemic"
     ],
     "vector": {
       "intensity": 5,
@@ -1043,7 +1043,7 @@
       "neutral"
     ],
     "validTargets": [
-      "general"
+      "systemic"
     ],
     "vector": {
       "intensity": 1,
@@ -1073,7 +1073,7 @@
       "vulnerable"
     ],
     "validTargets": [
-      "general"
+      "systemic"
     ],
     "vector": {
       "intensity": 2,
@@ -1107,7 +1107,7 @@
     ],
     "validTargets": [
       "limbs",
-      "general"
+      "systemic"
     ],
     "vector": {
       "intensity": 8,
@@ -1156,7 +1156,7 @@
     ],
     "validTargets": [
       "limbs",
-      "general"
+      "systemic"
     ],
     "vector": {
       "intensity": 3,
