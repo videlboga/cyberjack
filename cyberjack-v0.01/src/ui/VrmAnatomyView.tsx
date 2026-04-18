@@ -199,6 +199,17 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
         // Ищем активные эффекты, привязанные конкретно к этой точке
         const pointContexts = activeContexts.filter(c => c.pointId === pt.id || c.targetPoint === pt.id);
 
+        
+        // Callout directions depending on left/right side or X coord
+        // We use pt.id to statically decide direction
+        // Compute X dynamically from our point offsets, default to string analysis if 0
+        const posX = POINT_OFFSETS[pt.id]?.[0] || 0;
+        const isScreenRight = posX > 0 || (posX === 0 && pt.id.includes('left'));
+        const calloutX = isScreenRight ? 100 : -100;
+        const isLeftSide = !isScreenRight;
+        
+        const calloutY = -60;
+        
         return (
           <BoneMarker key={pt.id} boneNode={boneNode} offset={POINT_OFFSETS[pt.id] || [0,0,0]}>
             <Html center zIndexRange={[100, 0]}>
@@ -212,23 +223,23 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
                 onPointerLeave={() => setHoveredPoint(null)}
                 style={{
                   position: 'relative',
-                  width: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 20 : 12,
-                  height: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 20 : 12,
+                  width: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 14 : 10,
+                  height: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 14 : 10,
                   borderRadius: '50%',
                   background: selectedPoint === pt.id ? '#38bdf8' : hoveredPoint === pt.id ? '#60a5fa' : '#1e293b',
                   border: `2px solid ${selectedPoint === pt.id ? '#38bdf8' : hoveredPoint === pt.id ? '#93c5fd' : '#64748b'}`,
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all 0.2s',
-                  opacity: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 1 : 0.7,
-                  boxShadow: pointContexts.length > 0 ? '0 0 10px rgba(239, 68, 68, 0.6)' : 'none'
+                  opacity: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 1 : 0.6,
+                  boxShadow: pointContexts.length > 0 ? '0 0 10px #ef4444' : 'none'
                 }}
               >
                 {pointContexts.length > 0 && (
                   <div style={{
-                    position: 'absolute', top: -8, right: -8,
+                    position: 'absolute', top: -6, right: -6,
                     background: '#ef4444', color: '#fff', fontSize: 9,
-                    width: 16, height: 16, borderRadius: '50%',
+                    width: 14, height: 14, borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transform: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 'scale(1)' : 'scale(0.8)',
                     transition: 'transform 0.2s'
@@ -237,18 +248,40 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
                   </div>
                 )}
                 
-                {/* Лейбл при наведении или клике */}
+                {/* Лейбл как Выноска (Callout) */}
                 {(selectedPoint === pt.id || hoveredPoint === pt.id) && (
-                  <div style={{
-                    position: 'absolute', left: '120%', top: '50%', transform: 'translateY(-50%)',
-                    background: '#0f172a', padding: '6px 10px', borderRadius: 6,
-                    whiteSpace: 'nowrap', color: '#fff', fontSize: 12, border: '1px solid #334155',
-                    pointerEvents: 'none', zIndex: 10,
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                    /* backdrop filter removed */
-                  }}>
-                    {pt.label}
-                  </div>
+                  <>
+                    {/* SVG линия от точки (0,0) к лейблу */}
+                    <svg style={{ position: 'absolute', top: 0, left: 0, width: 200, height: 200, overflow: 'visible', pointerEvents: 'none' }}>
+                      <line 
+                        x1={isLeftSide ? -7 : 7} y1={isLeftSide ? -7 : -7} 
+                        x2={calloutX} y2={calloutY} 
+                        stroke={selectedPoint === pt.id ? '#38bdf8' : '#93c5fd'} 
+                        strokeWidth="2" 
+                      />
+                      <line 
+                        x1={calloutX} y1={calloutY} 
+                        x2={calloutX + (isLeftSide ? -100 : 100)} y2={calloutY} 
+                        stroke={selectedPoint === pt.id ? '#38bdf8' : '#93c5fd'} 
+                        strokeWidth="2" 
+                      />
+                    </svg>
+                    
+                    {/* Текстовый блок выноски */}
+                    <div style={{
+                      position: 'absolute', 
+                      left: calloutX + (isLeftSide ? -100 : 10), 
+                      top: calloutY - 26, 
+                      width: 90,
+                      background: '#0f172a', padding: '6px 10px', borderRadius: 6,
+                      color: '#fff', fontSize: 13, border: '1px solid #334155',
+                      pointerEvents: 'none', zIndex: 10,
+                      boxShadow: '0 4px 6px #000000',
+                      textAlign: isLeftSide ? 'right' as const : 'left' as const
+                    }}>
+                      {pt.label}
+                    </div>
+                  </>
                 )}
               </div>
             </Html>
