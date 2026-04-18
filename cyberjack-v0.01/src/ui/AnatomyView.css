@@ -19,15 +19,15 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 720px;
-  flex: 1 1 720px;
+  width: 585px;
+  flex: 1 1 585px;
   min-width: 0;
   height: 100%;
 }
 
 .anatomy-panel.center-panel {
-  width: 810px;
-  flex: 1 1 810px;
+  width: 585px;
+  flex: 1 1 585px;
   border-left: 1px solid #334155;
   border-right: 1px solid #334155;
   padding: 0 16px;
@@ -240,4 +240,13 @@
   max-height: 120px;
   overflow-y: auto;
   align-items: flex-start;
+}
+
+.anatomy-panel.left-panel {
+  width: 1170px;
+  flex: 2 1 1170px;
+}
+.anatomy-panel.right-panel {
+  width: 585px;
+  flex: 1 1 585px;
 }
