@@ -174,7 +174,7 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
 
         return (
           <BoneMarker key={pt.id} boneNode={boneNode} offset={POINT_OFFSETS[pt.id] || [0,0,0]}>
-            <Html center occlude={[sceneRef]} zIndexRange={[100, 0]}>
+            <Html center occlude="blending" zIndexRange={[100, 0]}>
               <div 
                 className={`vrm-marker ${selectedPoint === pt.id ? 'active' : ''}`}
                 onClick={(e) => {
