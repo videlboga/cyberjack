@@ -124,6 +124,10 @@ function BoneMarker({ boneNode, offset = [0,0,0], children }: { boneNode: THREE.
 
 function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activeContexts }: VrmAnatomyProps) {
   const [vrm, setVrm] = useState<any>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
+  const sceneRef = useRef<THREE.Group>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
+  const sceneRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
     if (!vrmUrl) return;
@@ -155,7 +159,7 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
   }
 
   return (
-    <group>
+    <group ref={sceneRef}>
       <primitive object={vrm.scene} />
 
       {/* Отрисовываем DOM-плашки (точки + контексты) поверх 3D */}
@@ -172,43 +176,51 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
 
         return (
           <BoneMarker key={pt.id} boneNode={boneNode} offset={POINT_OFFSETS[pt.id] || [0,0,0]}>
-            <Html center zIndexRange={[100, 0]}>
+            <Html center occlude={[sceneRef]} zIndexRange={[100, 0]}>
               <div 
                 className={`vrm-marker ${selectedPoint === pt.id ? 'active' : ''}`}
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  onSelectPoint(pt.id); 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectPoint(pt.id);
                 }}
+                onPointerEnter={() => setHoveredPoint(pt.id)}
+                onPointerLeave={() => setHoveredPoint(null)}
                 style={{
                   position: 'relative',
-                  width: 24, height: 24, 
+                  width: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 20 : 12,
+                  height: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 20 : 12,
                   borderRadius: '50%',
-                  background: selectedPoint === pt.id ? 'rgba(56, 189, 248, 0.7)' : 'rgba(30, 41, 59, 0.5)',
-                  border: `2px solid ${selectedPoint === pt.id ? '#38bdf8' : '#64748b'}`,
+                  background: selectedPoint === pt.id ? 'rgba(56, 189, 248, 0.9)' : hoveredPoint === pt.id ? 'rgba(96, 165, 250, 0.7)' : 'rgba(30, 41, 59, 0.5)',
+                  border: `2px solid ${selectedPoint === pt.id ? '#38bdf8' : hoveredPoint === pt.id ? '#93c5fd' : '#64748b'}`,
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all 0.2s',
+                  opacity: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 1 : 0.7,
                   boxShadow: pointContexts.length > 0 ? '0 0 10px rgba(239, 68, 68, 0.6)' : 'none'
                 }}
               >
                 {pointContexts.length > 0 && (
                   <div style={{
-                    position: 'absolute', top: -10, right: -10,
-                    background: '#ef4444', color: '#fff', fontSize: 10,
-                    width: 18, height: 18, borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    position: 'absolute', top: -8, right: -8,
+                    background: '#ef4444', color: '#fff', fontSize: 9,
+                    width: 16, height: 16, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transform: (selectedPoint === pt.id || hoveredPoint === pt.id) ? 'scale(1)' : 'scale(0.8)',
+                    transition: 'transform 0.2s'
                   }}>
                     {pointContexts.length}
                   </div>
                 )}
                 
                 {/* Лейбл при наведении или клике */}
-                {selectedPoint === pt.id && (
+                {(selectedPoint === pt.id || hoveredPoint === pt.id) && (
                   <div style={{
                     position: 'absolute', left: '120%', top: '50%', transform: 'translateY(-50%)',
-                    background: 'rgba(15, 23, 42, 0.9)', padding: '4px 8px', borderRadius: 4,
+                    background: 'rgba(15, 23, 42, 0.95)', padding: '6px 10px', borderRadius: 6,
                     whiteSpace: 'nowrap', color: '#fff', fontSize: 12, border: '1px solid #334155',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none', zIndex: 10,
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                    backdropFilter: 'blur(4px)'
                   }}>
                     {pt.label}
                   </div>
