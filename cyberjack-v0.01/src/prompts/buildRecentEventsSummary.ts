@@ -83,10 +83,10 @@ export function buildRecentEventsSummary(events: EventRecord[], subjectName?: st
                 action?.commandIntent &&
                 action.commandIntent.type &&
                 action.commandIntent.type !== 'none';
-            if (hasCommandIntent) {
-                // Команда уже отражена отдельным событием context_change, пропускаем дублирующий лог
-                continue;
-            }
+            // if (hasCommandIntent) { // DO NOT SKIP command logs! We need them for memory
+            //     // Команда уже отражена отдельным событием context_change, пропускаем дублирующий лог
+            //     continue;
+            // }
 
             const pLabel = payloadData.pointLabel || payloadData.pointId || 'тело';
             const resultObj = JSON.parse(event.result_payload);
