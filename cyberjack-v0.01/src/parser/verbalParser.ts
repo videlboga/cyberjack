@@ -20,6 +20,11 @@ export async function parseVerbalInput(text: string, sceneContextStr?: string): 
         .map(act => `- "${act.id}": ${act.label}`)
         .join('\n');
 
+    const actionList = presetRepo.getAllActionPresets()
+        .filter(act => !act.contextConfig && act.type !== 'system' && act.type !== 'wait')
+        .map(act => `- "${act.id}": ${act.label}`)
+        .join('\n');
+
     let moveInstructions = '';
     if (sceneContextStr) {
         moveInstructions = `Текущая сцена: ${sceneContextStr}
@@ -29,13 +34,17 @@ export async function parseVerbalInput(text: string, sceneContextStr?: string): 
     const messages: any[] = [
         {
             role: 'system',
-            content: `Ты — классификатор семантических параметров речи в симуляторе. В симуляторе сейчас можно изменять позу или применять состояние.
-Текущий список доступных ID для контекстов/поз/скованности:
+            content: `Ты — классификатор семантических параметров речи в симуляторе. В симуляторе сейчас можно изменять позу, применять состояние или давать команду на действие.
+Текущий список доступных ID для контекстов/поз:
 ${ctxList}
 
+Текущий список доступных ID для простых действий:
+${actionList}
+
 ЕСЛИ текст пользователя является прямым приказом применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять, используй intent "deactivate_context" и соответствующий ID.
+ЕСЛИ текст является приказом выполнить конкретное действие (например, "поцелуй Векса", "ударь меня", "погладь"), добавь "intent": "perform_action", укажи ID подходящего действия в поле "targetAction", цель действия в поле "targetId" (если требуют ударить себя, укажи "initiator", если другого персонажа — его имя из сцены) и точку в "pointId".
 ${moveInstructions}
-Твоя задача — классифицировать фразу по 5 параметрам и намерению. Возможные дополнительные поля: "intent" ("activate_context", "deactivate_context", "move"), "targetContext" (для контекстов) или "targetLocation" (для перемещения).
+Твоя задача — классифицировать фразу по 5 параметрам и намерению. Возможные дополнительные поля: "intent" ("activate_context", "deactivate_context", "move", "perform_action"), "targetContext" (для контекстов), "targetLocation" (для перемещения) или "targetAction" и "targetId" (для действий).
 {
   "intensity": 0.0-1.0,
   "valence": -1.0..1.0,
@@ -93,6 +102,8 @@ ${moveInstructions}
             commandIntent = { type: 'deactivate_context', targetContextId: parsed.targetContext };
         } else if (parsed.intent === 'move' && parsed.targetLocation) {
             commandIntent = { type: 'move', targetLocation: parsed.targetLocation };
+        } else if (parsed.intent === 'perform_action' && parsed.targetAction) {
+            commandIntent = { type: 'perform_action', actionId: parsed.targetAction, targetId: parsed.targetId || 'initiator', pointId: normalizedPoint };
         }
 
         return {

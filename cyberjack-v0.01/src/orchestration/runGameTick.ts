@@ -189,6 +189,13 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     addedContextNotes.push(refusedNarrative);
                 }
             }
+        } else if (commandIntent.type === 'perform_action') {
+            const actionPreset = presetRepo.getActionPreset(commandIntent.actionId);
+            if (actionPreset) {
+                const forcedNarrative = `[Система]: Получен ПРЯМОЙ ПРИКАЗ на выполнение действия — "${actionPreset.label}" (цель: ${commandIntent.targetId || 'не указана'}, точка: ${commandIntent.pointId || 'любая'}). Если твой уровень подчинения позволяет, ты ОБЯЗАН немедленно выполнить это (объявить о согласии и отыграть). Примени это действие физически. Если отказываешься, то отыграй сопротивление.`;
+                addedContextNotes.push(forcedNarrative);
+                eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
+            }
         }
 
                 if (targetCtxId) {
