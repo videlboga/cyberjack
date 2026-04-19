@@ -97,14 +97,24 @@ export function saveTickState(
         }
 
         // Actor (Initiator) preference update
-        // Actor likes doing actions that yield positive results for the target, scaled by actor's plasticity
+        // Actor evaluates the action based on their own relationship to the target (empathy / malice).
         const actorChar = characterRepo.get(playerId); // playerId is actually actorId in this context
         if (actorChar && actorChar.kind !== 'player' && actorChar.subjectId) { // Only update preferences for NPCs with a subjectId
             const actorSubject = subjectRepo.get(actorChar.subjectId);
             if (actorSubject) {
+                const actorRelation = characterRelationRepo.get(actorChar.id, subjectId);
+                const actorAttitude = actorRelation?.attitude ?? 50;
+                
+                // Map attitude [0..100] -> [-1..1] (empathy vs malice)
+                const empathyFactor = (actorAttitude - 50) / 50;
+                const targetNetFeeling = (result.pleasure || 0) - (result.discomfort || 0);
+                
+                // If sympathy > 50, likes causing pleasure. If < 50, likes causing discomfort.
+                // Add a small inherent active bias (+0.05) so acting is slightly better than doing nothing.
+                const actorReward = (empathyFactor * targetNetFeeling) + 0.05;
+                
                 const actorPlasticity = (actorSubject.plasticity ?? 50) / 100;
-                // Actor's delta: slightly less than target's, based on the same reward signal
-                const actorDelta = Math.sign(reward) * Math.min(1, Math.abs(reward)) * 0.3 * actorPlasticity;
+                const actorDelta = Math.sign(actorReward) * Math.min(1, Math.abs(actorReward)) * 0.5 * actorPlasticity;
                 
                 if (presetId) subjectPreferencesRepo.adjust(actorSubject.id!, 'actions', presetId, actorDelta);
                 if (pointId) subjectPreferencesRepo.adjust(actorSubject.id!, 'points', pointId, actorDelta);
