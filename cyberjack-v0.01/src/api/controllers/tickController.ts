@@ -133,7 +133,7 @@ export const processTick = async (req: Request, res: Response) => {
         let autoUserMessage: string | null = baseUserMessage;
         let actionLabelMessage: string | null = null;
         if (!suppressActionNarrative) {
-            actionLabelMessage = buildAutoUserMessage({ actionLabel, pointLabel, actorName: actorCharacter.name || 'Калибратор', targetName: fullState.name || subjectId });
+            actionLabelMessage = buildAutoUserMessage({ actionLabel, pointLabel, actorName: actorCharacter?.name || 'Калибратор', targetName: fullState?.name || subjectId });
         }
 
         let turnExecutionMetrics = null;

@@ -347,6 +347,7 @@ export async function generateCharacterReply(
 
         for (let attempt = 0; attempt <= ST_JSON_RETRY_ATTEMPTS; attempt++) {
             const rawText = await requestCompletion(messages, ST_CHARACTER_SCHEMA);
+            console.log(`\n========== ПОЛУЧЕН ОТВЕТ ST ==========\n${rawText}\n========================================\n`);
 
             try {
                 const parsed = JSON.parse(sanitizeJson(rawText));

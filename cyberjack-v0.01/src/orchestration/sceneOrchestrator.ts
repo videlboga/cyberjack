@@ -110,8 +110,8 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         const resourceScale = cfg.resourceScale || 100;
         const resourceNorm = normalize(resourceValue, 0, resourceScale);
 
-        // Смягчаем штраф за отсутствие новизны: максимум снижение на 50%, а не до нуля.
-        const noveltyFactor = isVerbalInput ? 1.0 : (0.5 + 0.5 * lastActionNovelty);
+        // Смягчаем штраф за отсутствие новизны: снижение максимум на 20%, чтобы персонажи чаще отвечали.
+        const noveltyFactor = isVerbalInput ? 1.0 : (0.8 + 0.2 * lastActionNovelty);
 
         // Наблюдатели вмешиваются реже. Если это слова к кому-то другому — штраф больше.
         const isTarget = (actorId === subjectId);
