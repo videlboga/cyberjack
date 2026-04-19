@@ -342,7 +342,7 @@ export function AnatomyView({ subjectState, relationsList = [], character, avata
                      </div>
                      <div className="telemetry-bar">
                        <label>Familiarity (Привыкание)</label>
-                       <div className="bar" style={{ height: '6px' }}><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, (pData.familiarity || 0) * 100))}%`, background: '#60a5fa'}}></div></div>
+                       <div className="bar" style={{ height: '6px' }}><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, pData.familiarity || 0))}%`, background: '#60a5fa'}}></div></div>
                      </div>
                      <div className="telemetry-bar" style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '4px' }}>
                        <label>Exposure Count: {pData.exposure_count || 0}</label>
