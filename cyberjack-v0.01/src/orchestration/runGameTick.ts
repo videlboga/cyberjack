@@ -169,7 +169,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             }
 
             if (finalSlotId) {
-                const currentCompliance = 100;
+                const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
                 const moveCompliance = 30; 
                 
                 if (currentCompliance >= moveCompliance) {
@@ -177,7 +177,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     if (subjCharPresence) {
                         if (subjCharPresence.slotId !== finalSlotId) {
                             sceneCharacterRepo.set(payload.sceneId, subjCharPresence.character.id, { slotId: finalSlotId });
-                            const moveNarrative = `Выполнено действие: Персонаж перемещается в зону "${targetLabel}".`;
+                            let reason = (state.relation?.attitude > 70) ? "с готовностью" : "с неохотой, подчиняясь приказу";
+                            const moveNarrative = `[Система]: Актив перемещается в зону "${targetLabel}", ${reason}.`;
                             eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'move', action: null, actionLabel: moveNarrative, narrative: moveNarrative }, { added: true });
                             addedContextNotes.push(moveNarrative);
                         } else {
@@ -193,11 +194,13 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             const actionPreset = presetRepo.getActionPreset(commandIntent.actionId);
             if (actionPreset) {
                 const requiredCompliance = (actionPreset.priority || 1) * 20;
-                const currentCompliance = 100;
+                const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
                 const targetName = commandIntent.targetId || 'не указана';
                 
                 if (currentCompliance >= requiredCompliance) {
-                    const forcedNarrative = `Выполнено действие: ${actionPreset.label} (цель: ${targetName})`;
+                    let reason = state.relation?.attitude > 70 ? "из симпатии и покорности" : "вынужденно подчиняясь сломленной воле";
+                    if (state.core.attitude < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
+                    const forcedNarrative = `[Система]: Актив выполняет указание "${actionPreset.label}" (цель: ${targetName}), ${reason}.`;
                     addedContextNotes.push(forcedNarrative);
                     eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
                 } else {
@@ -211,9 +214,11 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             const actionPreset = presetRepo.getActionPreset(targetCtxId);
             if (actionPreset && actionPreset.contextConfig) {
                 const requiredCompliance = (actionPreset.contextConfig.priority || 1) * 20;
-                const currentCompliance = 100;
+                const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
                 
                 if (currentCompliance >= requiredCompliance) {
+                    let reason = (state.relation?.attitude > 70) ? "охотно поддаваясь влиянию" : "с неохотой подчиняясь программированию";
+                    if (state.core.attitude < 30) reason = "вынужденно и унизительно для себя";
                     // If there is a playerId (actor), mark them as initiator; otherwise default to subject
                     const initiator = payload.playerId || payload.subjectId;
                     ContextManager.applyContext(payload.subjectId, targetCtxId, actionPreset, undefined, initiator);
@@ -222,7 +227,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     // avoid creating a forced narrative to prevent polluting memory with
                     // spurious "Выполнено действие: Разговор" entries.
                     if (actionPreset.type && actionPreset.type !== 'verbal' && actionPreset.type !== 'wait') {
-                        const forcedNarrative = `Выполнено действие: ${actionPreset.label}. Примени это состояние.`;
+                        const forcedNarrative = `[Система]: Актив принимает состояние "${actionPreset.label}", ${reason}. Примени это состояние.`;
                         eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
                         addedContextNotes.push(forcedNarrative);
                     }
