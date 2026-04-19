@@ -393,8 +393,8 @@ export const subjectRepo = {
     getUIState(id: string, pointId: string): any {
         const subject = this.getWithPoint(id, pointId);
         const actions = db.prepare('SELECT id, label FROM action_presets').all();
-        const points = db.prepare('SELECT p.id, p.label FROM point_presets p JOIN subject_point_states sps ON p.id = sps.point_id WHERE sps.subject_id = ?').all(id);
-        
+        const points = db.prepare('SELECT p.id, p.label, sps.local_sensitivity, sps.local_attitude, sps.local_openness, sps.familiarity, sps.exposure_count FROM point_presets p JOIN subject_point_states sps ON p.id = sps.point_id WHERE sps.subject_id = ?').all(id);
+
         return {
             subject,
             availableActions: actions,

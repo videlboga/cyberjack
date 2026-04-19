@@ -223,6 +223,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const [intensity, setIntensity] = useState<number>(1.0);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [availablePointsList, setAvailablePointsList] = useState<{ id: string; label: string }[]>([]);
+  const [relationsList, setRelationsList] = useState<any[]>([]);
   const [actionCache, setActionCache] = useState<{ uid: string; presetId: string; label: string; pointId: string; intensity: number; targetCharId: string; targetCharName: string }[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -257,6 +258,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       }
       if (hydrateState && focusedCharId === targetId) {
         setSubjectState(body.subject);
+        setRelationsList(body.relations || []);
         setAvailablePointsList(body.availablePoints || []);
         if (!body.availablePoints?.some((pt: any) => pt.id === selectedPoint)) {
           setSelectedPoint(body.availablePoints?.[0]?.id || 'systemic');
@@ -845,7 +847,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
               onClick={e => e.stopPropagation()}
             >
               
-                <AnatomyView
+                <AnatomyView relationsList={relationsList}
                 subjectState={subjectState}
                 character={focusedCharacter}
                 avatarUrl={getAvatarUrl(focusedCharacter.name)}

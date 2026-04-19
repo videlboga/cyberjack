@@ -4,11 +4,12 @@ import './AnatomyView.css';
 
 interface AnatomyViewProps {
   subjectState: any;
+  relationsList?: any[];
   character: any;
   avatarUrl?: string | null;
   activeContexts: any[];
   onActionSelect: (pointId: string, actionId: string, intensity: number) => void;
-  availablePoints: {id: string, label: string}[];
+  availablePoints: any[];
   availableActions: any[];
   playerInventory?: any[];
   sceneObjects?: any[];
@@ -67,7 +68,7 @@ const classifyAction = (action: any): string | null => {
   return null;
 };
 
-export function AnatomyView({ subjectState, character, avatarUrl, activeContexts, onActionSelect, availablePoints, availableActions, playerInventory = [], sceneObjects = [], playerSector, targetSector }: AnatomyViewProps) {
+export function AnatomyView({ subjectState, relationsList = [], character, avatarUrl, activeContexts, onActionSelect, availablePoints, availableActions, playerInventory = [], sceneObjects = [], playerSector, targetSector }: AnatomyViewProps) {
   const [selectedPoint, setSelectedPoint] = useState<string>('systemic');
   const [intensity, setIntensity] = useState<number>(1.0);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
@@ -268,6 +269,84 @@ export function AnatomyView({ subjectState, character, avatarUrl, activeContexts
                <label>Plasticity (Пластичность)</label>
                <div className="bar"><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, subjectState?.plasticity || 0))}%`, background: '#a78bfa'}}></div></div>
              </div>
+             
+             {relationsList && relationsList.length > 0 && (
+               <div className="relations-overlay" style={{ marginTop: '16px', background: 'rgba(15, 23, 42, 0.7)', padding: '12px', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#94a3b8' }}>Отношение к другим</h4>
+                  {relationsList.map((rel, idx) => (
+                    <div key={idx} style={{ marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                        <span>{rel.target.name} ({rel.target.kind})</span>
+                        <span style={{ color: rel.attitude > 50 ? '#34d399' : '#ef4444' }}>{rel.attitude.toFixed(1)} / {rel.openness.toFixed(1)} / {rel.plasticity.toFixed(1)}</span>
+                      </div>
+                      <div className="bar" style={{ height: '2px', background: '#1e293b', marginBottom: '2px' }}>
+                        <div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, rel.attitude))}%`, background: rel.attitude > 50 ? '#34d399' : '#ef4444'}}></div>
+                      </div>
+                      <div className="bar" style={{ height: '2px', background: '#1e293b', marginBottom: '2px' }}>
+                        <div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, rel.openness))}%`, background: '#fbbf24'}}></div>
+                      </div>
+                      <div className="bar" style={{ height: '2px', background: '#1e293b' }}>
+                        <div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, rel.plasticity))}%`, background: '#a78bfa'}}></div>
+                      </div>
+                    </div>
+                  ))}
+               </div>
+             )}
+
+             {(() => {
+               const pData = availablePoints.find((p: any) => p.id === selectedPoint);
+               if (!pData) return null;
+               return (
+                 <div className="zone-overlay" style={{ marginTop: '16px', background: 'rgba(15, 23, 42, 0.7)', padding: '12px', borderRadius: '8px', border: '1px solid #334155' }}>
+                   <h4 style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#94a3b8' }}>Данные зоны: {pData.label || pData.id}</h4>
+                   
+                   <div className="telemetry-bar">
+                     <label>Local Sens (Чувствительность)</label>
+                     <div className="bar" style={{ height: '6px' }}><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, pData.local_sensitivity || 0))}%`, background: '#f87171'}}></div></div>
+                   </div>
+                   <div className="telemetry-bar">
+                     <label>Local Attitude (Отношение)</label>
+                     <div className="bar" style={{ height: '6px' }}><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, pData.local_attitude || 0))}%`, background: '#34d399'}}></div></div>
+                   </div>
+                   <div className="telemetry-bar">
+                     <label>Local Openness (Открытость)</label>
+                     <div className="bar" style={{ height: '6px' }}><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, pData.local_openness || 0))}%`, background: '#fbbf24'}}></div></div>
+                   </div>
+                   <div className="telemetry-bar">
+                     <label>Familiarity (Привыкание)</label>
+                     <div className="bar" style={{ height: '6px' }}><div className="bar-fill" style={{width: `${Math.min(100, Math.max(0, (pData.familiarity || 0) * 100))}%`, background: '#60a5fa'}}></div></div>
+                   </div>
+                   <div className="telemetry-bar" style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '4px' }}>
+                     <label>Exposure Count: {pData.exposure_count || 0}</label>
+                   </div>
+                 </div>
+               );
+             })()}
+             
+             {subjectState?.preferences && (
+               <div className="preferences-overlay" style={{ marginTop: '16px', background: 'rgba(15, 23, 42, 0.7)', padding: '12px', borderRadius: '8px', border: '1px solid #334155' }}>
+                 <h4 style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#94a3b8' }}>Предпочтения (Скрытые)</h4>
+                 <div style={{ fontSize: '10px', color: '#cbd5e1', maxHeight: '80px', overflowY: 'auto' }}>
+                    {(() => {
+                      try {
+                        const prefs = typeof subjectState.preferences === 'string' ? JSON.parse(subjectState.preferences) : subjectState.preferences;
+                        const validKeys = Object.keys(prefs?.actions || {}).filter(k => prefs.actions[k] > 0.05).slice(0, 10);
+                        if (!validKeys.length) return <div>Нет ярко выраженных предпочтений</div>;
+                        return Object.entries(prefs.actions)
+                           .sort(([, a], [, b]) => (b as number) - (a as number))
+                           .slice(0, 10)
+                           .map(([key, val]) => (
+                             <div key={key} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                               <span>{availableActions.find(a => a.id === key)?.label || key}</span>
+                               <span style={{ color: '#fbbf24' }}>{(val as number).toFixed(2)}</span>
+                             </div>
+                           ));
+                      } catch { return <div>Не удалось прочитать</div>; }
+                    })()}
+                 </div>
+               </div>
+             )}
+
            </div>
         </div>
       </div>
