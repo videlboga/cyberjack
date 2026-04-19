@@ -193,7 +193,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
                         return !(requiredAP > 0 && curAP < requiredAP);
                     });
                     
-                    const bestAction = affordable.find(a => a.score > 0);
+                    const bestAction = affordable.find(a => a.score > -20); // Лояльнее смотрим на действия - даже если штрафы за барьеры, могут быть триггеры
                     if (bestAction) {
                         const targetChar = subjectRepo.get(targetId);
                         const targetName = targetChar?.name || targetId;
