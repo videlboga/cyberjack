@@ -78,15 +78,30 @@ export function saveTickState(
         { result: output.result, delta: output.delta }
     );
 
-    // 4. Adjust preferences conservatively based on the tick result
+    // 4. Adjust preferences based on psychological and relationship factors
     try {
         const result = output.result;
-        // simple reward signal: pleasure minus discomfort plus small weight for attitude shift
-        const reward = (result.pleasure || 0) - (result.discomfort || 0) + (result.attitudeShift || 0) * 0.2;
         
-        // Target (Receiver) preference update
+        // --- TARGET (Receiver) Preference Update ---
+        // Base reward: direct sensations + relation shift
+        let targetReward = (result.pleasure || 0) - (result.discomfort || 0) + (result.attitudeShift || 0) * 0.2;
+
+        const targetRelation = characterRelationRepo.get(subjectId, playerId);
+        const targetAttitude = targetRelation?.attitude ?? 50;
+        const targetRelPlasticity = targetRelation?.plasticity ?? 50;
+        const targetSympathy = (targetAttitude - 50) / 50; // [-1..1]
+        // Dominance: low plasticity towards actor = dominant (>0), high plasticity = submissive (<0)
+        const targetDominance = (50 - targetRelPlasticity) / 50; 
+
+        // Masochistic/Submissive learning: if target is submissive and likes the actor, 
+        // they can learn to prefer pain/discomfort from them (Stockholm/Masochism effect)
+        if (targetDominance < 0 && targetSympathy > 0) {
+            const submissiveness = -targetDominance; // [0..1]
+            targetReward += (result.discomfort || 0) * submissiveness * targetSympathy;
+        }
+
         const targetPlasticity = (output.nextCore?.plasticity ?? 50) / 100;
-        const targetDelta = Math.sign(reward) * Math.min(1, Math.abs(reward)) * 0.5 * targetPlasticity;
+        const targetDelta = Math.sign(targetReward) * Math.min(1, Math.abs(targetReward)) * 0.5 * targetPlasticity;
 
         if (presetId) subjectPreferencesRepo.adjust(subjectId, 'actions', presetId, targetDelta);
         if (pointId) subjectPreferencesRepo.adjust(subjectId, 'points', pointId, targetDelta);
@@ -96,22 +111,41 @@ export function saveTickState(
             if (ctx?.actionId) subjectPreferencesRepo.adjust(subjectId, 'contexts', ctx.actionId, targetDelta * 0.6);
         }
 
-        // Actor (Initiator) preference update
-        // Actor evaluates the action based on their own relationship to the target (empathy / malice).
+        // --- ACTOR (Initiator) Preference Update ---
+        // Actor evaluates the action based on their own relationship to the target (empathy, dominance/submission).
         const actorChar = characterRepo.get(playerId); // playerId is actually actorId in this context
         if (actorChar && actorChar.kind !== 'player' && actorChar.subjectId) { // Only update preferences for NPCs with a subjectId
             const actorSubject = subjectRepo.get(actorChar.subjectId);
             if (actorSubject) {
                 const actorRelation = characterRelationRepo.get(actorChar.id, subjectId);
                 const actorAttitude = actorRelation?.attitude ?? 50;
+                const actorRelPlasticity = actorRelation?.plasticity ?? 50;
                 
-                // Map attitude [0..100] -> [-1..1] (empathy vs malice)
-                const empathyFactor = (actorAttitude - 50) / 50;
-                const targetNetFeeling = (result.pleasure || 0) - (result.discomfort || 0);
+                // Empathy: [-1..1] (1 = loves target, -1 = hates target)
+                const actorSympathy = (actorAttitude - 50) / 50;
+                // Dominance: [-1..1] (1 = dominant unyielding, -1 = submissive malleable)
+                const actorDominance = (50 - actorRelPlasticity) / 50;
                 
-                // If sympathy > 50, likes causing pleasure. If < 50, likes causing discomfort.
-                // Add a small inherent active bias (+0.05) so acting is slightly better than doing nothing.
-                const actorReward = (empathyFactor * targetNetFeeling) + 0.05;
+                const targetPleasure = result.pleasure || 0;
+                const targetDiscomfort = result.discomfort || 0;
+                const tensionShift = (output.nextCore?.tension ?? 0) - (currentSubject?.tension ?? 0);
+                
+                // 1. Empathy reward: "I want them to feel good/bad based on if I like them"
+                const empathyReward = actorSympathy * (targetPleasure - targetDiscomfort);
+                
+                // 2. Submission reward: "I am submitting, so I get rewarded strictly by target's pleasure"
+                const submissionDrive = Math.max(0, -actorDominance);
+                const submissionReward = submissionDrive * targetPleasure;
+                
+                // 3. Dominance reward: "I want to see my impact (tension shift + total sensations)"
+                // Sadistic dom (dislikes target) -> enjoys causing discomfort + high tension.
+                // Benevolent dom (likes target) -> enjoys causing pleasure + high tension.
+                const impact = targetPleasure + targetDiscomfort + (Math.abs(tensionShift) / 10);
+                const dominantDrive = Math.max(0, actorDominance);
+                const dominantReward = dominantDrive * (actorSympathy > 0 ? (targetPleasure + impact * 0.3) : (targetDiscomfort + impact * 0.3));
+                
+                // Blend internal drives (adding a tiny +0.05 so acting is slightly better than doing nothing)
+                const actorReward = (empathyReward * 0.4) + (submissionReward * 0.3) + (dominantReward * 0.3) + 0.05;
                 
                 const actorPlasticity = (actorSubject.plasticity ?? 50) / 100;
                 const actorDelta = Math.sign(actorReward) * Math.min(1, Math.abs(actorReward)) * 0.5 * actorPlasticity;
