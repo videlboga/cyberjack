@@ -83,24 +83,39 @@ export function saveTickState(
         const result = output.result;
         // simple reward signal: pleasure minus discomfort plus small weight for attitude shift
         const reward = (result.pleasure || 0) - (result.discomfort || 0) + (result.attitudeShift || 0) * 0.2;
-        // scale by actor plasticity so more plastic subjects learn faster
-        const plasticityFactor = (output.nextCore?.plasticity ?? 50) / 100;
-        const rawDelta = Math.sign(reward) * Math.min(1, Math.abs(reward)) * 0.5 * plasticityFactor;
+        
+        // Target (Receiver) preference update
+        const targetPlasticity = (output.nextCore?.plasticity ?? 50) / 100;
+        const targetDelta = Math.sign(reward) * Math.min(1, Math.abs(reward)) * 0.5 * targetPlasticity;
 
-        // apply to action pref and point pref
-        if (presetId) {
-            subjectPreferencesRepo.adjust(subjectId, 'actions', presetId, rawDelta);
-        }
-        if (pointId) {
-            subjectPreferencesRepo.adjust(subjectId, 'points', pointId, rawDelta);
+        if (presetId) subjectPreferencesRepo.adjust(subjectId, 'actions', presetId, targetDelta);
+        if (pointId) subjectPreferencesRepo.adjust(subjectId, 'points', pointId, targetDelta);
+
+        const targetActive = activeContextsRepo.getAllForSubject(subjectId) || [];
+        for (const ctx of targetActive) {
+            if (ctx?.actionId) subjectPreferencesRepo.adjust(subjectId, 'contexts', ctx.actionId, targetDelta * 0.6);
         }
 
-        // also bump any active contexts for the subject
-        const active = activeContextsRepo.getAllForSubject(subjectId) || [];
-        for (const ctx of active) {
-            if (!ctx || !ctx.actionId) continue;
-            subjectPreferencesRepo.adjust(subjectId, 'contexts', ctx.actionId, rawDelta * 0.6);
+        // Actor (Initiator) preference update
+        // Actor likes doing actions that yield positive results for the target, scaled by actor's plasticity
+        const actorChar = characterRepo.get(playerId); // playerId is actually actorId in this context
+        if (actorChar && actorChar.kind !== 'player' && actorChar.subjectId) { // Only update preferences for NPCs with a subjectId
+            const actorSubject = subjectRepo.get(actorChar.subjectId);
+            if (actorSubject) {
+                const actorPlasticity = (actorSubject.plasticity ?? 50) / 100;
+                // Actor's delta: slightly less than target's, based on the same reward signal
+                const actorDelta = Math.sign(reward) * Math.min(1, Math.abs(reward)) * 0.3 * actorPlasticity;
+                
+                if (presetId) subjectPreferencesRepo.adjust(actorSubject.id!, 'actions', presetId, actorDelta);
+                if (pointId) subjectPreferencesRepo.adjust(actorSubject.id!, 'points', pointId, actorDelta);
+                
+                const actorActive = activeContextsRepo.getAllForSubject(actorSubject.id!) || [];
+                for (const ctx of actorActive) {
+                    if (ctx?.actionId) subjectPreferencesRepo.adjust(actorSubject.id!, 'contexts', ctx.actionId, actorDelta * 0.6);
+                }
+            }
         }
+
     } catch (err) {
         // don't fail the save if prefs adjustment fails
         console.warn('[saveTickState] preference adjustment failed', (err as Error).message);
