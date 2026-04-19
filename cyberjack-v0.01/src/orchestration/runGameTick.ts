@@ -192,9 +192,18 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         } else if (commandIntent.type === 'perform_action') {
             const actionPreset = presetRepo.getActionPreset(commandIntent.actionId);
             if (actionPreset) {
-                const forcedNarrative = `[Система]: Поступило указание на выполнение действия — "${actionPreset.label}" (цель: ${commandIntent.targetId || 'не указана'}, точка: ${commandIntent.pointId || 'любая'}). Реши, как отреагировать (выполнить или отказаться), опираясь на текущий уровень подчинения и отношение к субъекту.`;
-                addedContextNotes.push(forcedNarrative);
-                eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
+                const requiredCompliance = (actionPreset.priority || 1) * 20;
+                const currentCompliance = 100;
+                const targetName = commandIntent.targetId || 'не указана';
+                
+                if (currentCompliance >= requiredCompliance) {
+                    const forcedNarrative = `Выполнено действие: ${actionPreset.label} (цель: ${targetName})`;
+                    addedContextNotes.push(forcedNarrative);
+                    eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
+                } else {
+                    const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${actionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
+                    addedContextNotes.push(refusedNarrative);
+                }
             }
         }
 
@@ -218,7 +227,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                         addedContextNotes.push(forcedNarrative);
                     }
                 } else {
-                    const refusedNarrative = `[Система]: Актив мысленно ОТКАЗЫВАЕТСЯ выполнять команду ("${actionPreset.label}"). Требуемый уровень подчинения: ${requiredCompliance}, но текущий всего ~${Math.round(currentCompliance)}. Отреагируй отказом словами или жестами.`;
+                    const refusedNarrative = `[Система]: Актив мысленно отклоняет требование перейти в состояние "${actionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
                     addedContextNotes.push(refusedNarrative);
                 }
             }
