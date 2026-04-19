@@ -114,7 +114,7 @@ export function saveTickState(
         // --- ACTOR (Initiator) Preference Update ---
         // Actor evaluates the action based on their own relationship to the target (empathy, dominance/submission).
         const actorChar = characterRepo.get(playerId); // playerId is actually actorId in this context
-        if (actorChar && actorChar.kind !== 'player' && actorChar.subjectId) { // Only update preferences for NPCs with a subjectId
+        if (actorChar && actorChar.subjectId) { // Only update preferences for NPCs with a subjectId
             const actorSubject = subjectRepo.get(actorChar.subjectId);
             if (actorSubject) {
                 const actorRelation = characterRelationRepo.get(actorChar.id, subjectId);
