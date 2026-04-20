@@ -8,12 +8,22 @@ const db = new Database(DB_PATH);
 
 console.log('Running JS seed against', DB_PATH);
 
+function safeRun(sql, params) {
+  try {
+    db.prepare(sql).run(...(params||[]));
+  } catch (e) {
+    console.error('seed error:', e && e.message);
+  }
+}
+
+// Load presets if available
 function loadJson(rel) {
   const p = path.join(ROOT, rel);
   if (!fs.existsSync(p)) return null;
   return JSON.parse(fs.readFileSync(p, 'utf8'));
 }
 
+// 1) ensure basic subjects from existing seed.ts (S-01, S-02, C-Gamma, PL-1)
 const subjects = [
   { id: 'S-01', name: 'Эли', state: { sensitivity:50, capacity:60, openness:50, plasticity:80, attitude:50 } },
   { id: 'S-02', name: 'Никс', state: { sensitivity:40, capacity:50, openness:60, plasticity:30, attitude:20 } },
@@ -32,6 +42,7 @@ for (const s of subjects) {
 }
 console.log('Inserted core subjects');
 
+// 2) load action presets from src/infrastructure/data/presets/actions.json if exists
 const actions = loadJson('src/infrastructure/data/presets/actions.json');
 if (actions) {
   const stmt = db.prepare('INSERT OR REPLACE INTO action_presets (id, label, type, tags, values_json, context_config_json) VALUES (?, ?, ?, ?, ?, ?)');
@@ -49,12 +60,14 @@ if (actions) {
   console.log('No actions preset JSON found, skipping actions seeding');
 }
 
+// 3) seed scenes (lab + eli-chamber) minimal if not present
 const scenesStmt = db.prepare('INSERT OR REPLACE INTO scenes (id, available_actions, action_costs, transitions, slots) VALUES (?, ?, ?, ?, ?)');
-const labActions = JSON.stringify(['gentle_stroke','tickle','light_kiss','deep_kiss','feather_stroke','deep_massage','licking','firm_grip','light_bite','hard_bite','pinch','scratching','slap','hard_slap','needle_prick','belt_strike','whip_strike','taser_shock','ice_cube','hot_wax','vibrator_pulse','hair_pull','spit','breath_blow','verbal_pressure','stare','close_inspection','feint_strike','pose_kneeling','restraint_cuffs','pose_standing','pose_all_fours','pose_spread_eagle','eq_blindfold_apply','eq_blindfold_remove','eq_gag_apply','eq_gag_remove','eq_clothe_robe','eq_strip_robe','eq_clothe_shirt','eq_strip_shirt','eq_clothe_pants','eq_strip_pants','eq_clothe_shoes','eq_strip_shoes','pose_sitting','pose_lying_down','act_suspend_wrists','act_release_wrists','eq_clothe_panties','eq_strip_panties','eq_clothe_bra','eq_strip_bra']);
+const labActions = JSON.stringify(['gentle_stroke','tickle','light_kiss','deep_kiss','feather_stroke','deep_massage']);
 scenesStmt.run('lab', labActions, '{}', '[]', JSON.stringify([{id:'slot_table',name:'Операционный стол',capacity:2}]));
 scenesStmt.run('eli-chamber', labActions, '{}', '[]', JSON.stringify([{id:'sector_isolation',name:'Изолятор',capacity:2}]));
 console.log('Upserted minimal scenes');
 
+// 4) ensure point_presets exist by copying from seed.ts data if available (but don't overwrite existing)
 const pointPresets = loadJson('src/infrastructure/data/presets/points.json');
 if (pointPresets) {
   const stmt = db.prepare('INSERT OR REPLACE INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) VALUES (?, ?, ?, ?, ?, ?)');
@@ -68,39 +81,9 @@ if (pointPresets) {
 
 console.log('JS seed finished.');
 
+// Show quick DB summary
 const subjectsRows = db.prepare('SELECT id,name,sensitivity,capacity,openness,plasticity,attitude,tension FROM subjects').all();
 console.log('Subjects in DB:');
 console.table(subjectsRows);
 
-
-// ==== ADD EQUIPMENT AND CLOTHING (Runtime DB Mod) ====
-// 1. Give eq_suspension item to Isolator sector
-try {
-  db.prepare("INSERT OR REPLACE INTO items (id, name, type, tags) VALUES ('eq_suspension', 'Система подвеса', 'equipment', '[]')").run();
-  db.prepare("INSERT OR REPLACE INTO scene_objects (id, scene_id, node_id, item_id, state) VALUES ('obj_suspension_1', 'eli-chamber', 'sector_isolation', 'eq_suspension', 'active')").run();
-  console.log('Added suspension equipment to eli-chamber');
-} catch(e) {
-  console.error(e);
-}
-
-// 2. Put panties, bra, and shirt on Eli (S-01)
-try {
-  const applyContextStmt = db.prepare("INSERT OR REPLACE INTO active_contexts (id, subject_id, action_id, duration, point_id) VALUES (?, ?, ?, ?, ?)");
-  applyContextStmt.run('ctx_eli_panties', 'S-01', 'eq_clothe_panties', -1, 'vulva');
-  applyContextStmt.run('ctx_eli_bra', 'S-01', 'eq_clothe_bra', -1, 'chest');
-  applyContextStmt.run('ctx_eli_shirt', 'S-01', 'eq_clothe_shirt', -1, 'shoulders');
-  applyContextStmt.run('ctx_eli_pants', 'S-01', 'eq_clothe_pants', -1, 'hips');
-  applyContextStmt.run('ctx_eli_shoes', 'S-01', 'eq_clothe_shoes', -1, 'feet');
-  console.log('Clothed S-01 (Eli)');
-} catch(e) {
-  console.error(e);
-}
-// =======================================================
-
-const insertResourceStmt = db.prepare(`
-  INSERT OR REPLACE INTO character_resources (character_id, resource_key, amount, max_amount, regen_rate, metadata)
-  VALUES (?, ?, ?, ?, ?, ?)
-`);
-insertResourceStmt.run('PL-1', 'credits', 0, 1000, 0, '{}');
-insertResourceStmt.run('PL-1', 'authority', 0, 100, 0, '{}');
 process.exit(0);

@@ -1,0 +1,79 @@
+```tsx
+import React from 'react';
+
+type Props = {
+  characters: any[];
+  focusedCharId: string;
+  setFocusedCharId: (id: string) => void;
+  intensity: number;
+  setIntensity: (v: number) => void;
+  skipLLM: boolean;
+  setSkipLLM: (v: boolean) => void;
+  targetPointId: string;
+  setTargetPointId: (p: string) => void;
+  actionsList: any[];
+  sendAction: (actionId?: string, text?: string) => Promise<void>;
+  loading: boolean;
+  chatLog: { role: string; text: string }[];
+};
+
+const LeftPanel: React.FC<Props> = ({ characters, focusedCharId, setFocusedCharId, intensity, setIntensity, skipLLM, setSkipLLM, targetPointId, setTargetPointId, actionsList, sendAction, loading, chatLog }) => {
+  return (
+    <div style={{ padding: 12, height: '100%', boxSizing: 'border-box' }}>
+      <h2 style={{ marginTop: 0 }}>Управление</h2>
+
+      <div style={{ marginBottom: 10 }}>
+        <label style={{ display: 'block', marginBottom: 6 }}>Фокус (Персонаж):</label>
+        <select value={focusedCharId} onChange={e => setFocusedCharId(e.target.value)} style={{ padding: 6, width: '100%' }}>
+          <option value="">-- выберите --</option>
+          {characters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <label style={{ display: 'block', marginBottom: 6 }}>Интенсивность: {intensity.toFixed(1)}x</label>
+        <input type="range" min="0.1" max="5" step="0.1" value={intensity} onChange={e => setIntensity(Number(e.target.value))} style={{ width: '100%' }} />
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <input type="checkbox" checked={skipLLM} onChange={e => setSkipLLM(e.target.checked)} /> Без LLM
+        </label>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div>
+          <label style={{ display: 'block', marginBottom: 6 }}>Точка:</label>
+          <select value={targetPointId} onChange={e => setTargetPointId(e.target.value)} style={{ padding: 6, width: '100%' }}>
+            <option value="general">-- точка --</option>
+            {/* options are filled by parent via availablePoints mapping when needed */}
+          </select>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', marginBottom: 6 }}>Действие:</label>
+          <select id="left-action-select" style={{ padding: 6, width: '100%' }}>
+            {actionsList.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+          <button onClick={() => { const val = (document.getElementById('left-action-select') as HTMLSelectElement).value; sendAction(val); }} disabled={loading} style={{ flex: 1, padding: '8px', background: '#4a4', color: '#fff', border: 'none', cursor: 'pointer' }}>Выполнить</button>
+          <button onClick={() => sendAction('wait')} disabled={loading} style={{ padding: '8px', background: '#666', color: '#fff', border: 'none', cursor: 'pointer' }}>Ожидать</button>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12, overflowY: 'auto', maxHeight: '40vh', background: '#111', padding: 8, border: '1px solid #333' }}>
+        <h4 style={{ margin: '4px 0 8px' }}>Лог (Чат)</h4>
+        {chatLog.map((log, i) => (
+          <div key={i} style={{ marginBottom: 6, color: log.role === 'player' ? '#88f' : '#ccc' }}><strong>{log.role === 'player' ? 'Вы:' : 'SYS:'}</strong> {log.text}</div>
+        ))}
+        {loading && <div style={{ color: '#ff0' }}>Обработка...</div>}
+      </div>
+    </div>
+  );
+};
+
+export default LeftPanel;
+
+```

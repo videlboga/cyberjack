@@ -9,73 +9,140 @@ console.log("Начинаем безопасное заполнение базы
 
 const subjects: { id: string, name: string, state: any, profile: CharacterProfile }[] = [
     {
-        id: 'PL-1',
-        name: 'Player',
-        state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
-        profile: {
-            base: { name: 'Player', age: 30, gender: 'male', anatomy: 'none', status: 'calibrator' },
-            origin: { birthplaceId: 'loc-001', professionId: 'prof-001', biography: 'Main character.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
-        }
-    },
-    {
-        id: 'C-BROKER',
-        name: 'Шепот',
-        state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
-        profile: {
-            base: { name: 'Шепот', age: 40, gender: 'male', anatomy: 'none', status: 'calibrator' },
-            origin: { birthplaceId: 'loc-001', professionId: 'prof-001', biography: 'Торговец информацией.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
-        }
-    },
-    {
-        id: 'C-LIAISON',
-        name: 'Куратор',
-        state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
-        profile: {
-            base: { name: 'Куратор', age: 35, gender: 'female', anatomy: 'none', status: 'calibrator' },
-            origin: { birthplaceId: 'loc-001', professionId: 'prof-001', biography: 'Представитель Корпорации.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
-        }
-    },
-    {
         id: 'S-ASSET-1',
         name: 'Эли',
         state: { sensitivity: 50, capacity: 60, openness: 50, plasticity: 80, attitude: 50 },
         profile: {
-            base: { name: 'Эли', age: 22, gender: 'female', anatomy: 'none', status: 'asset' },
-            origin: { birthplaceId: 'loc-004', professionId: 'prof-002', biography: 'S-ASSET-1.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
+            base: {
+                name: 'Эли',
+                age: 22,
+                gender: 'female',
+                anatomy: 'none',
+                status: 'asset'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[3].id, // Жилые Блоки
+                professionId: CANON_PROFESSIONS[1].id, // Актив
+                coreTrauma: 'Потерял близкого человека, которого забрали Корпорации за долги в качестве Актива',
+                biography: 'S-ASSET-1 была конфискована корпорацией из Жилых Блоков после серии долгов матери. Память очищена, оставлены лишь послушные инстинкты.'
+            },
+            personality: {
+                traits: ['Послушный', 'Сломленный'],
+                quirks: ['Механически подчиняется любым приказам'],
+                speechStyle: 'Прерывистая речь, частые заикания, тихий голос.',
+                coreBelief: 'Главное — выжить и не оказаться на столе в лаборатории.'
+            },
+            knowledge: {
+                common: ['Активы — это расходный материал для экспериментов; быть Активом — это пожизненный приговор к пыткам и стимуляции.'],
+                personal: ['Я S-ASSET-1, Актив-тестируемый.'],
+                secrets: []
+            },
+            memory: {
+                knownCharacters: {},
+                scars: [] // Physical scars
+            }
         }
     },
     {
-        id: 'S-ASSET-2',
+        id: 'S-02',
         name: 'Никс',
         state: { sensitivity: 40, capacity: 50, openness: 60, plasticity: 30, attitude: 20 },
         profile: {
-            base: { name: 'Никс', age: 28, gender: 'female', anatomy: 'none', status: 'asset' },
-            origin: { birthplaceId: 'loc-002', professionId: 'prof-002', biography: 'S-ASSET-2.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
+            base: {
+                name: 'Никс',
+                age: 28,
+                gender: 'female',
+                anatomy: 'none',
+                status: 'asset'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[1].id, // Глубокие Уровни (Техник)
+                professionId: CANON_PROFESSIONS[1].id, // Актив (теперь)
+                coreTrauma: 'Была поймана за продажей корпоративных данных на черном рынке',
+                biography: 'В прошлом инженер-распределитель энергии на нижних уровнях Пирамиды. Была поймана Калибраторами при попытке слива данных. Ее разум еще не очищен, так как эксперимент требует сознательных реакций.'
+            },
+            personality: {
+                traits: ['Озлобленная', 'Наблюдательная', 'Саркастичная'],
+                quirks: ['Желчно комментирует чужие действия'],
+                speechStyle: 'Саркастичная, дерзкая, использует технический сленг и мат.',
+                coreBelief: 'Знания - это оружие, и корпораты заплатят за то, что сделали со мной.'
+            },
+            knowledge: {
+                common: [
+                    'Мир управляется тремя Мегакорпорациями.',
+                    'Калибраторы - это цепные псы корпораций, садисты со значками.',
+                    'Универсальный стандарт боли был введен в 2071 году.'
+                ],
+                personal: [
+                    'Я Райли, бывший инженер. Я помню чертежи энергетических щитов.',
+                    'Я прятала кредиты в вентиляции сектора 4.'
+                ],
+                secrets: [
+                    'Протокол очистки памяти можно заблокировать, если перегрузить импланты.'
+                ]
+            },
+            memory: {
+                knownCharacters: {},
+                scars: []
+            }
         }
     },
     {
-        id: 'S-ASSET-3',
-        name: 'Рэй',
-        state: { sensitivity: 30, capacity: 40, openness: 70, plasticity: 40, attitude: 30 },
+        id: 'C-Gamma',
+        name: 'Векс',
+        state: { sensitivity: 20, capacity: 90, openness: 10, plasticity: 10, attitude: 90 },
         profile: {
-            base: { name: 'Рэй', age: 25, gender: 'male', anatomy: 'none', status: 'asset' },
-            origin: { birthplaceId: 'loc-003', professionId: 'prof-002', biography: 'S-ASSET-3.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
+            base: {
+                name: 'Векс',
+                age: 44,
+                gender: 'male',
+                anatomy: 'cyber_implant_arm',
+                status: 'calibrator'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[2].id, // Клиники Калибраторов
+                professionId: CANON_PROFESSIONS[0].id, // Калибратор
+                coreTrauma: undefined,
+                biography: 'Наследственный Калибратор. Относится к Активам как к глине, которую надо размять перед учеными. Поставил кибер-руку для прецизионного подавления импульсов сопротивления.'
+            },
+            personality: {
+                traits: ['Хладнокровный', 'Садист', 'Циничный'],
+                quirks: ['Постоянно проверяет свои инструменты'],
+                speechStyle: 'Сухой, профессиональный тон, без эмоций.',
+                coreBelief: 'Через боль и наслаждение мы познаем истину Аномалии.'
+            },
+            knowledge: {
+                common: ['Единственный способ взаимодействовать с Аномалией — вызывать у людей экстремальные эмоции, боль или удовольствие.'],
+                personal: ['Специалист по настройке Активов. Регулирует чувствительность.'],
+                secrets: ['Существует способ восстановить разум сломанного Актива, но Калибраторы держат его в секрете, чтобы не терять рынок.']
+            },
+            memory: {
+                knownCharacters: {},
+                scars: ['amputated left arm']
+            }
+        }
+    },
+    {
+        id: 'PL-1',
+        name: 'Калибратор',
+        state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
+        profile: {
+            base: {
+                name: 'Калибратор',
+                age: 30,
+                gender: 'male',
+                anatomy: 'none',
+                status: 'calibrator'
+            },
+            origin: {
+                birthplaceId: CANON_LOCATIONS[0].id,
+                professionId: CANON_PROFESSIONS[0].id,
+                coreTrauma: undefined,
+                biography: 'Игрок. Роль по умолчанию.'
+            },
+            personality: {
+                traits: [], quirks: [], speechStyle: '', coreBelief: ''
+            },
             knowledge: { common: [], personal: [], secrets: [] },
             memory: { knownCharacters: {}, scars: [] }
         }

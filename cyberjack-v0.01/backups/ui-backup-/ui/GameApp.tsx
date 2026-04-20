@@ -1085,8 +1085,8 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
           </div>
           <div className="chat-body">
             <div className="log-entries" ref={logRef}>
-              {messages.filter(m => m.role !== 'narrator').map((m, i) => (
-                <div key={`${m.id}-${i}`} className={`log-entry ${m.role}`}>
+              {messages.filter(m => m.role !== 'narrator').map(m => (
+                <div key={m.id} className={`log-entry ${m.role}`}>
                   <strong>{getActorName(m.actorId, m.role)}:</strong> {m.text}
                 </div>
               ))}
