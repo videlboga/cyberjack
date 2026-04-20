@@ -1,8 +1,0 @@
-// Disabled copy of seed_milestone.ts — moved to .disabled to avoid accidental one-time DB resets
-// Original file moved here on 2026-04-15 by automated cleanup script.
-
-import { db } from './src/infrastructure/db';
-
-// ...original seeding script intentionally disabled...
-
-console.log('seed_milestone.ts has been disabled (moved to seed_milestone.ts.disabled)');

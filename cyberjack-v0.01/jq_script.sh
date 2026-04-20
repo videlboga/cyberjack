@@ -1,1 +1,0 @@
-jq -r '.[] | select((.occupiesPoints != null and ( (.occupiesPoints | index("global_pose")) or (.occupiesPoints | index("slot_pose")) )) or (.validTargets != null and ( (.validTargets | index("global_pose")) or (.validTargets | index("slot_pose")) )) ) | "\(.id): occupies=\(.occupiesPoints), targets=\(.validTargets)"' src/infrastructure/data/presets/actions.json
