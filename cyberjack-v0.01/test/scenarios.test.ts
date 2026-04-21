@@ -7,7 +7,7 @@ import {
     presetRepo, characterRepo, characterRelationRepo, activeContextsRepo 
 } from '../src/infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../src/engine/config';
-import * as stAdapter from '../src/adapters/sillyTavernAdapter';
+import * as llmAdapter from '../src/adapters/llmAdapter';
 
 describe('Advanced Scenarios and Multi-Character Proactivity', () => {
 
@@ -27,14 +27,14 @@ describe('Advanced Scenarios and Multi-Character Proactivity', () => {
         db.prepare('DELETE FROM action_presets').run();
         db.prepare('PRAGMA foreign_keys = ON').run();
 
-        vi.spyOn(stAdapter, 'sendToSillyTavern').mockResolvedValue({
+        vi.spyOn(llmAdapter, 'generateCharacterReply').mockResolvedValue({
             reply: { speech: "I am responding proactively!" },
             sentMessages: []
-        });
-        vi.spyOn(stAdapter, 'sendNarratorDescription').mockResolvedValue({
+        } as any);
+        vi.spyOn(llmAdapter, 'generateNarratorReply').mockResolvedValue({
             reaction: "Narrator sees something.",
             sentMessages: []
-        });
+        } as any);
     });
 
     afterEach(() => {
@@ -97,7 +97,7 @@ describe('Advanced Scenarios and Multi-Character Proactivity', () => {
         expect(res.actorReplies).toBeDefined();
         const respondedIds = res.actorReplies.map(r => r.actorId);
         expect(respondedIds).toContain(sub1);
-        expect(stAdapter.sendToSillyTavern).toHaveBeenCalled();
+    expect(llmAdapter.generateCharacterReply).toHaveBeenCalled();
     });
 
     it('should process multiple sequential combination inputs properly', async () => {

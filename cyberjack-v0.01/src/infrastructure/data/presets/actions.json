@@ -796,242 +796,6 @@
     }
   },
   {
-    "id": "eq_clothe_robe",
-    "name": "Одеть: Медицинский халат",
-    "description": "Накинуть простой, тонкий халат.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "clothing",
-      "comfort"
-    ],
-    "validTargets": [
-      "torso"
-    ],
-    "vector": {
-      "intensity": 1,
-      "valence": 4,
-      "sharpness": 0,
-      "contact": 6,
-      "novelty": 2,
-      "powerBase": 5
-    },
-    "contextConfig": {
-      "type": "clothing",
-      "duration": -1,
-      "occupiesPoints": [
-        "torso"
-      ]
-    }
-  },
-  {
-    "id": "eq_strip_robe",
-    "name": "Снять халат",
-    "description": "Обнажить тело.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "vulnerable",
-      "exposure"
-    ],
-    "requireContexts": [
-      "eq_clothe_robe"
-    ],
-    "removeContexts": [
-      "eq_clothe_robe"
-    ],
-    "validTargets": [
-      "torso"
-    ],
-    "vector": {
-      "intensity": 4,
-      "valence": -3,
-      "sharpness": 1,
-      "contact": 2,
-      "novelty": 4,
-      "powerBase": 25
-    }
-  },
-  {
-    "id": "eq_clothe_shirt",
-    "name": "Одеть: Рубашка/Футболка",
-    "description": "Повседневный верх.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "clothing",
-      "comfort"
-    ],
-    "validTargets": [
-      "torso"
-    ],
-    "vector": {
-      "intensity": 1,
-      "valence": 2,
-      "sharpness": 0,
-      "contact": 5,
-      "novelty": 1,
-      "powerBase": 5
-    },
-    "contextConfig": {
-      "type": "clothing",
-      "duration": -1,
-      "occupiesPoints": [
-        "torso"
-      ]
-    }
-  },
-  {
-    "id": "eq_strip_shirt",
-    "name": "Снять верхнюю одежду",
-    "description": "Обнажить торс.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "vulnerable",
-      "exposure"
-    ],
-    "requireContexts": [
-      "eq_clothe_shirt"
-    ],
-    "removeContexts": [
-      "eq_clothe_shirt"
-    ],
-    "validTargets": [
-      "torso"
-    ],
-    "vector": {
-      "intensity": 3,
-      "valence": -2,
-      "sharpness": 1,
-      "contact": 2,
-      "novelty": 3,
-      "powerBase": 15
-    }
-  },
-  {
-    "id": "eq_clothe_pants",
-    "name": "Одеть: Штаны",
-    "description": "Брюки или штаны.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "clothing",
-      "comfort"
-    ],
-    "validTargets": [
-      "legs"
-    ],
-    "vector": {
-      "intensity": 1,
-      "valence": 2,
-      "sharpness": 0,
-      "contact": 5,
-      "novelty": 1,
-      "powerBase": 5
-    },
-    "contextConfig": {
-      "type": "clothing",
-      "duration": -1,
-      "occupiesPoints": [
-        "legs"
-      ]
-    }
-  },
-  {
-    "id": "eq_strip_pants",
-    "name": "Снять штаны",
-    "description": "Оставить ноги без защиты.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "vulnerable",
-      "exposure"
-    ],
-    "requireContexts": [
-      "eq_clothe_pants"
-    ],
-    "removeContexts": [
-      "eq_clothe_pants"
-    ],
-    "validTargets": [
-      "legs"
-    ],
-    "vector": {
-      "intensity": 3,
-      "valence": -2,
-      "sharpness": 1,
-      "contact": 2,
-      "novelty": 3,
-      "powerBase": 15
-    }
-  },
-  {
-    "id": "eq_clothe_shoes",
-    "name": "Обуть: Ботинки",
-    "description": "Обувь.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "clothing",
-      "comfort"
-    ],
-    "validTargets": [
-      "feet"
-    ],
-    "vector": {
-      "intensity": 1,
-      "valence": 2,
-      "sharpness": 0,
-      "contact": 3,
-      "novelty": 1,
-      "powerBase": 5
-    },
-    "contextConfig": {
-      "type": "clothing",
-      "duration": -1,
-      "occupiesPoints": [
-        "feet"
-      ]
-    }
-  },
-  {
-    "id": "eq_strip_shoes",
-    "name": "Снять ботинки",
-    "description": "Разуть.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "vulnerable",
-      "exposure"
-    ],
-    "requireContexts": [
-      "eq_clothe_shoes"
-    ],
-    "removeContexts": [
-      "eq_clothe_shoes"
-    ],
-    "validTargets": [
-      "feet"
-    ],
-    "vector": {
-      "intensity": 2,
-      "valence": -1,
-      "sharpness": 1,
-      "contact": 1,
-      "novelty": 2,
-      "powerBase": 10
-    }
-  },
-  {
     "id": "pose_sitting",
     "name": "Поза: Сидя",
     "description": "Сидеть на поверхности.",
@@ -1168,102 +932,78 @@
     }
   },
   {
-    "id": "eq_clothe_panties",
-    "name": "Одеть: Трусики",
-    "description": "Легкие трусики, прикрывающие низ.",
+    "id": "eq_clothe_jumpsuit",
+    "name": "Надеть Комбинезон",
+    "description": "Плотный изоляционный комбинезон. Закрывает всё тело, кроме лица, ладоней и ступней. Существенно снижает тактильную чувствительность.",
     "categories": [
       "clothing"
     ],
     "tags": [
       "clothing",
-      "comfort"
+      "isolation"
     ],
     "validTargets": [
-      "groin"
+      "systemic"
     ],
     "vector": {
-      "intensity": 1,
-      "valence": 3,
+      "intensity": 2,
+      "valence": -1,
       "sharpness": 0,
-      "contact": 4,
-      "novelty": 1,
-      "powerBase": 5
-    },
-    "contextConfig": {
-      "type": "clothing",
-      "duration": -1,
-      "occupiesPoints": [
-        "groin",
-        "vulva",
-        "anus"
-      ]
-    }
-  },
-  {
-    "id": "eq_strip_panties",
-    "name": "Снять трусики",
-    "description": "Обнажить область паха.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "vulnerable",
-      "exposure"
-    ],
-    "requireContexts": [
-      "eq_clothe_panties"
-    ],
-    "removeContexts": [
-      "eq_clothe_panties"
-    ],
-    "validTargets": [
-      "groin"
-    ],
-    "vector": {
-      "intensity": 4,
-      "valence": -3,
-      "sharpness": 1,
-      "contact": 2,
-      "novelty": 4,
+      "contact": 8,
+      "novelty": 3,
       "powerBase": 20
-    }
-  },
-  {
-    "id": "eq_clothe_bra",
-    "name": "Одеть: Бюстгальтер",
-    "description": "Бра, поддерживающее и скрывающее грудь.",
-    "categories": [
-      "clothing"
-    ],
-    "tags": [
-      "clothing",
-      "comfort"
-    ],
-    "validTargets": [
-      "chest"
-    ],
-    "vector": {
-      "intensity": 1,
-      "valence": 2,
-      "sharpness": 0,
-      "contact": 4,
-      "novelty": 1,
-      "powerBase": 5
     },
     "contextConfig": {
       "type": "clothing",
       "duration": -1,
+      "exclusiveWithinPoint": false,
       "occupiesPoints": [
+        "neck",
+        "shoulders",
         "chest",
+        "nipples",
+        "belly",
+        "back",
+        "waist",
+        "hips",
+        "left_arm",
+        "right_arm",
+        "inner_thighs",
+        "left_leg",
+        "right_leg",
+        "knees",
+        "buttocks",
+        "anus",
+        "vulva",
+        "vagina",
+        "clitoris",
+        "torso",
+        "legs",
+        "groin",
+        "breasts"
+      ],
+      "blocksPoints": [
+        "vulva",
+        "vagina",
+        "clitoris",
+        "anus",
+        "nipples",
         "breasts",
-        "nipples"
-      ]
+        "groin",
+        "penis",
+        "testicles"
+      ],
+      "modifiers": {
+        "intensity_mult": 0.3,
+        "sharpness_mult": 0.1,
+        "contact_mult": 0.5
+      }
     }
   },
   {
-    "id": "eq_strip_bra",
-    "name": "Снять бюстгальтер",
-    "description": "Обнажить грудь.",
+    "id": "eq_strip_jumpsuit",
+    "name": "Снять Комбинезон",
+    "description": "Снять комбинезон, оставив тело полностью обнаженным.",
     "categories": [
       "clothing"
     ],
@@ -1271,21 +1011,21 @@
       "vulnerable",
       "exposure"
     ],
+    "validTargets": [
+      "systemic"
+    ],
     "requireContexts": [
-      "eq_clothe_bra"
+      "eq_clothe_jumpsuit"
     ],
     "removeContexts": [
-      "eq_clothe_bra"
-    ],
-    "validTargets": [
-      "chest"
+      "eq_clothe_jumpsuit"
     ],
     "vector": {
       "intensity": 4,
       "valence": -3,
       "sharpness": 1,
-      "contact": 2,
-      "novelty": 4,
+      "contact": 4,
+      "novelty": 5,
       "powerBase": 20
     }
   }

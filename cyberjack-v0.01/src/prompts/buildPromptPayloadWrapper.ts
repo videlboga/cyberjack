@@ -9,13 +9,15 @@ export async function buildPromptPayloadWithDB(
     eventId: string = 'lab',
     options?: { suppressTickIds?: string[]; initiatorId?: string }
 ) {
-    const ownerQueryId = ownerId === 'C-Gamma' ? 'PL-1' : ownerId;
+    const ownerQueryId = ownerId;
     const targetQueryId = targetId || ownerQueryId;
     const ownerRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(ownerQueryId) as any;
+    
     // For calibrators/players they don't have a rigid subject state in db sometimes
     // so we handle missing ownerRow gracefully if we can.
-    if (!ownerRow && ownerQueryId !== 'PL-1' && ownerQueryId !== 'C-Gamma') {
-        throw new Error(`Subject ${ownerQueryId} not found`);
+    if (!ownerRow && ownerQueryId !== 'PL-1') {
+        // Log a warning instead of throwing to prevent systemic crashes
+        console.warn(`Subject ${ownerQueryId} not found. Using neutral fallbacks.`);
     }
 
     const targetRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(targetQueryId) as any;
@@ -52,28 +54,13 @@ export async function buildPromptPayloadWithDB(
     const pointStatesRow = db.prepare(`
         SELECT sps.point_id as label, sps.local_sensitivity, sps.local_attitude
         FROM subject_point_states sps
-        -- JOIN point_presets p ON sps.point_id = p.id
         WHERE sps.subject_id = ?
     `).all(targetQueryId) as any[];
 
-    // Inject market catalog if the subject is a broker
-    const brokerResRow = db.prepare('SELECT metadata FROM character_resources WHERE character_id = ? AND resource_key = ?').get(targetQueryId, 'store_catalog') as any;
+    // Removed the broker log generation from here logic, 
+    // it belongs in specific character templates or scenario controllers,
+    // not in the generic orchestration layer.
     let extraLog = '';
-    if (brokerResRow && brokerResRow.metadata) {
-        try {
-            const meta = JSON.parse(brokerResRow.metadata);
-            if (meta && meta.assets && meta.assets.length > 0) {
-                const discountFactor = 1 - ((core.attitude / 100) * (core.plasticity / 100));
-                const catalogItems = meta.assets.map((a: any) => {
-                    const price = Math.max(0, Math.floor(a.basePrice * discountFactor));
-                    return `"${a.name}" (ID: ${a.id}) за ${price}cr`;
-                });
-                const discountPercent = Math.round((1 - discountFactor) * 100);
-                
-                extraLog = `[SYSTEM: Текущий ассортимент твоих товаров: ${catalogItems.join(', ')}. Твоя симпатия к клиенту и готовность торговаться УЖЕ заложены в эти цены (ты делаешь скидку в ${discountPercent}% от базовой стоимости). Назови клиенту цены и, если сочтешь нужным, между делом упомяни, почему даешь такую скидку, или наоборот — почему не делаешь поблажек.]`;
-            }
-        } catch(e) {}
-    }
 
     const payload = await buildPromptPayload(
         ownerId,

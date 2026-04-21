@@ -50,6 +50,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         throw new Error(validation.errorReason || `Action "${payload.presetId}" blocked by scenario.`);
     }
 
+    // 2.5 Verify node unblocked
+    const blockCheck = ContextManager.isPointBlocked(payload.subjectId, payload.pointId);
+    if (blockCheck.blocked && payload.presetId !== 'wait') {
+        throw new Error(blockCheck.reason || `Точка "${payload.pointId}" заблокирована.`);
+    }
+
     const actionCosts = state.scene.actionCosts?.[payload.presetId] || null;
     if (actionCosts && Object.keys(actionCosts).length) {
         try {

@@ -1,6 +1,8 @@
 import Database from 'better-sqlite3';
 
-export const db = new Database('cyberjack.sqlite', { verbose: console.log });
+// Use an in-memory database when running tests to avoid file locks and make tests hermetic.
+const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === '1';
+export const db = new Database(isTest ? ':memory:' : 'cyberjack.sqlite', { verbose: console.log });
 
 // Initialize schema
 db.exec(`
@@ -164,6 +166,12 @@ db.exec(`
     available_actions TEXT NOT NULL, -- JSON
     action_costs TEXT DEFAULT '{}',
     transitions TEXT DEFAULT '[]'
+  );
+
+  CREATE TABLE IF NOT EXISTS players (
+    id TEXT PRIMARY KEY,
+    resources TEXT DEFAULT '{}',
+    profile_json TEXT DEFAULT '{}'
   );
 
   CREATE TABLE IF NOT EXISTS scene_characters (

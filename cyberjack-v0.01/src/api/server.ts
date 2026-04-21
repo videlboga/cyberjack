@@ -1,4 +1,8 @@
 import express from 'express';
+
+// Tests run in environments where @types/node may not be present for TS checks.
+// Declare process to avoid a compile-time error here.
+declare const process: any;
 import cors from 'cors';
 import { activeConfig } from '../prompts/config';
 
@@ -28,6 +32,12 @@ app.use('/api', sceneRoutes);
 app.use('/api', metaRoutes);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`[Engine API] Running on http://localhost:${PORT}`);
-});
+// Start server only when not in test mode. When running tests we import `app` and
+// let Supertest handle requests without starting a dedicated listener.
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`[Engine API] Running on http://localhost:${PORT}`);
+    });
+}
+
+export default app;

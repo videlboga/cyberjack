@@ -174,6 +174,18 @@ export const characterRepo = {
         stmt.run(playerId, name, playerId);
         return this.get(playerId)!;
     },
+    ensurePlayer(playerId: string, name: string): Character {
+        const stmt = db.prepare(`
+            INSERT INTO characters (id, name, kind, player_id)
+            VALUES (?, ?, 'player', ?)
+            ON CONFLICT(id) DO UPDATE SET
+                name = excluded.name,
+                kind = excluded.kind,
+                player_id = excluded.player_id
+        `);
+        stmt.run(playerId, name, playerId);
+        return this.get(playerId)!;
+    },
     get(id: string): Character | null {
         const row = db.prepare('SELECT * FROM characters WHERE id = ?').get(id);
         return row ? mapCharacter(row) : null;
@@ -653,10 +665,22 @@ export const activeContextsRepo = {
         const stmt = db.prepare('DELETE FROM active_contexts WHERE subject_id = ? AND action_id = ?');
         stmt.run(subjectId, actionId);
     }
+    ,
+    removeByActionIdAndPoint(subjectId: string, actionId: string, pointId: string | null) {
+        if (pointId === null) {
+            const stmt = db.prepare('DELETE FROM active_contexts WHERE subject_id = ? AND action_id = ? AND point_id IS NULL');
+            stmt.run(subjectId, actionId);
+        } else {
+            const stmt = db.prepare('DELETE FROM active_contexts WHERE subject_id = ? AND action_id = ? AND point_id = ?');
+            stmt.run(subjectId, actionId, pointId);
+        }
+    }
 };
 
 export const resourceRepo = {
     save(state: ResourceState) {
+        // Ensure a character row exists for this id to satisfy FK constraints
+        characterRepo.ensureCharacter(state.id, state.id);
         const stmt = db.prepare(`
             INSERT INTO character_resources (character_id, resource_key, amount, max_amount, regen_rate, metadata)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -667,18 +691,19 @@ export const resourceRepo = {
                 metadata = excluded.metadata
         `);
         db.transaction(() => {
-            for (const [key, res] of Object.entries(state.resources)) {
+            for (const [key, resRaw] of Object.entries(state.resources)) {
+                // Accept either a number (amount) or an object describing the resource
+                const res: any = typeof resRaw === 'number' ? { amount: Number(resRaw) } : resRaw || {};
                 stmt.run(
-                    state.id, 
-                    key, 
-                    res.amount, 
-                    res.maxAmount ?? null, 
-                    res.regenRate ?? null, 
+                    state.id,
+                    key,
+                    Number(res.amount ?? 0),
+                    res.maxAmount ?? null,
+                    res.regenRate ?? null,
                     JSON.stringify(res.metadata || {})
                 );
             }
         })();
-        characterRepo.ensureCharacter(state.id, state.id);
     },
     get(id: string): ResourceState | null {
         const rows = db.prepare('SELECT * FROM character_resources WHERE character_id = ?').all(id) as any[];
@@ -716,6 +741,28 @@ export const resourceRepo = {
             SET amount = amount + regen_rate
             WHERE regen_rate IS NOT NULL AND max_amount IS NULL
         `).run();
+    }
+};
+
+export const playerRepo = {
+    save(state: { id: string; resources?: Record<string, any>; profileJson?: any }) {
+        const stmt = db.prepare(`
+            INSERT INTO players (id, resources, profile_json)
+            VALUES (?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                resources = excluded.resources,
+                profile_json = excluded.profile_json
+        `);
+        stmt.run(state.id, JSON.stringify(state.resources || {}), JSON.stringify(state.profileJson || {}));
+    },
+    get(id: string) {
+        const row = db.prepare('SELECT * FROM players WHERE id = ?').get(id) as any;
+        if (!row) return null;
+        return {
+            id: row.id,
+            resources: JSON.parse(row.resources || '{}'),
+            profileJson: JSON.parse(row.profile_json || '{}')
+        };
     }
 };
 

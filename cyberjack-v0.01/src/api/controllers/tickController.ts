@@ -20,8 +20,7 @@ function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; 
     return `*(Без слов)* [${opts.actorName} применяет воздействие к ${opts.targetName}: ${opts.actionLabel}${pointPart}]`;
 }
 
-// Memory tracking for forced narrative skipLLM logic
-const pendingActionNarratives: Record<string, string[]> = {};
+
 
 export const processWait = async (req: Request, res: Response) => {
     try {
@@ -94,39 +93,13 @@ export const processTick = async (req: Request, res: Response) => {
         const pointLabel = pointPreset?.label || pointIdUsed;
         const fullState = subjectRepo.getWithPoint(subjectId, pointIdUsed);
 
-        // Pre-LLM Orchestration Hook Processing
-        // (Wants neutralize pose, commanding poses, applying direct changes)
-        // Wait, Context overrides should really be inside RUN GAME TICK! But for now we just handle it via Orchestrator here cleanly.
-        let promptDirty = false;
-        const immediateNotes: string[] = [];
         let suppressActionNarrative = actionId === 'wait';
-        const hasUserText = Boolean(baseUserMessage);
         const actorCharacter = characterRepo.ensureCharacter(playerId, playerId === 'PL-1' ? 'Калибратор' : playerId);
-        const actionNarrative = describeActionNarrative(actionId, actionLabel, actorCharacter.name || 'Калибратор', pointLabel, pointIdUsed);
-
-        const normalizedInput = baseUserMessage ? baseUserMessage.toLowerCase() : '';
-        const wantsNeutralPose = /\b(встань|вставай|поднимись|поднимайся|на\s+ноги|встаньте)\b/.test(normalizedInput);
 
         let promptPayload = bundle.prompt;
         const suppressTickIds = suppressActionNarrative ? [bundle.tickId] : undefined;
-        if (promptDirty || suppressTickIds) {
+        if (suppressTickIds) {
             promptPayload = await buildPromptPayloadWithDB(subjectId, subjectId, bundle.output, eventId, { suppressTickIds });
-            bundle.prompt = promptPayload;
-        }
-
-        if (!suppressActionNarrative) immediateNotes.unshift(actionNarrative);
-        
-        if (req.body.skipLLM) {
-            pendingActionNarratives[subjectId] = pendingActionNarratives[subjectId] || [];
-            pendingActionNarratives[subjectId].push(...immediateNotes);
-        } else if (pendingActionNarratives[subjectId]) {
-            immediateNotes.unshift(...pendingActionNarratives[subjectId]);
-            delete pendingActionNarratives[subjectId];
-        }
-
-        if (!req.body.skipLLM && immediateNotes.length) {
-            const block = `\n[Только что]\n${immediateNotes.join('\n')}`;
-            promptPayload.systemPrompt = `${promptPayload.systemPrompt}${block}`;
             bundle.prompt = promptPayload;
         }
 

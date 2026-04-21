@@ -332,7 +332,7 @@ db.transaction(() => {
     const placements = [
         { characterId: 'PL-1', role: 'calibrator', slotId: 'slot_terminal', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true },
         { characterId: 'C-BROKER', role: 'npc', slotId: 'slot_broker_desk', sceneId: 'scene_broker', presenceState: 'present', canAct: true },
-        { characterId: 'S-ASSET-1', role: 'asset', slotId: 'slot_display_1', sceneId: 'scene_broker', presenceState: 'present', canAct: true },
+        { characterId: 'S-ASSET-1', role: 'asset', slotId: 'slot_table', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true },
         { characterId: 'S-ASSET-2', role: 'asset', slotId: 'slot_display_2', sceneId: 'scene_broker', presenceState: 'present', canAct: true },
         { characterId: 'S-ASSET-3', role: 'asset', slotId: 'slot_display_3', sceneId: 'scene_broker', presenceState: 'present', canAct: true },
         { characterId: 'C-LIAISON', role: 'npc', slotId: 'slot_liaison_desk', sceneId: 'scene_liaison', presenceState: 'present', canAct: true }

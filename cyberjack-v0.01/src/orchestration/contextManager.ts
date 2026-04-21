@@ -3,6 +3,17 @@ import { CompiledAction } from '../domain/types';
 import { randomUUID } from 'crypto';
 
 export class ContextManager {
+    static isPointBlocked(subjectId: string, pointId: string): { blocked: boolean; reason?: string } {
+        const currentContexts = activeContextsRepo.getAllForSubject(subjectId);
+        for (const ctx of currentContexts) {
+            const preset = presetRepo.getActionPreset(ctx.actionId);
+            if (preset?.contextConfig?.blocksPoints?.includes(pointId)) {
+                return { blocked: true, reason: `Эта часть тела заблокирована (надето: ${preset.label || ctx.actionId}).` };
+            }
+        }
+        return { blocked: false };
+    }
+
     static applyContext(subjectId: string, actionId: string, action: CompiledAction, pointId?: string, initiatorId?: string | null) {
         if (!action.contextConfig) return;
 
@@ -17,13 +28,19 @@ export class ContextManager {
                         return; // Blocked by higher priority
                     }
                     if (config.exclusiveWithinPoint) {
-                        activeContextsRepo.removeByActionId(subjectId, existingAction.actionKey || existingAction.id);
+                        activeContextsRepo.removeByActionIdAndPoint(subjectId, existingAction.actionKey || existingAction.id, pt);
                     }
                 }
             }
         }
 
-        activeContextsRepo.add(randomUUID(), subjectId, actionId, config.duration || -1, pointId, initiatorId);
+        const pointsToOccupy = (config.occupiesPoints && config.occupiesPoints.length > 0)
+            ? config.occupiesPoints
+            : [pointId || null];
+
+        for (const pt of pointsToOccupy) {
+            activeContextsRepo.add(randomUUID(), subjectId, actionId, config.duration || -1, pt, initiatorId);
+        }
     }
     
     static processTick(subjectId: string) {

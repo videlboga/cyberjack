@@ -986,16 +986,16 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
                  {sceneData?.transitions?.length > 0 ? (
                    sceneData.transitions.map((tr: any) => {
-                     const target = allScenes.find(s => s.id === tr.targetSceneId);
-                     const label = target?.description ? target.description.split('.')[0] : tr.targetSceneId;
+                     const target = allScenes.find(s => s.id === (tr.targetSceneId || tr.toSceneId));
+                     const label = target?.description ? target.description.split('.')[0] : tr.targetSceneId || tr.toSceneId;
                      return (
                        <button
-                         key={tr.targetSceneId}
+                         key={tr.targetSceneId || tr.toSceneId}
                          onClick={() => {
                            const searchParams = new URLSearchParams(window.location.search);
-                           searchParams.set('sceneId', tr.targetSceneId);
+                           searchParams.set('sceneId', tr.targetSceneId || tr.toSceneId);
                            window.history.pushState({}, '', '?' + searchParams.toString());
-                           setSceneId(tr.targetSceneId);
+                           setSceneId(tr.targetSceneId || tr.toSceneId);
                            setShowLocations(false);
                          }}
                          style={{ textAlign: 'left', background: '#3b82f6', color: '#fff', border: 'none', padding: '10px 14px', borderRadius: 6, cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}

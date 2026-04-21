@@ -51,7 +51,7 @@ export const moveScene = (req: Request, res: Response) => {
 
     export const toggleContext = (req: Request, res: Response) => {
         try {
-            const { subjectId = 'CL-01', contextId, isActive } = req.body;
+            const { subjectId = 'CL-01', contextId, isActive, pointId } = req.body;
             const targetContext = presetRepo.getActionPreset(contextId);
             const actorName = 'Брокер';
             
@@ -60,7 +60,8 @@ export const moveScene = (req: Request, res: Response) => {
             const narratives: string[] = [];
 
             if (isActive) {
-                ContextManager.applyContext(subjectId, contextId, targetContext);
+                // If a pointId is provided, apply the context specifically to that point
+                ContextManager.applyContext(subjectId, contextId, targetContext, pointId || undefined);
                 const forcedNarrative = `Активирован контекст: ${targetContext.label}`;
                 eventLogRepo.append(subjectId, 'context_change',
                     { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative },
@@ -68,7 +69,11 @@ export const moveScene = (req: Request, res: Response) => {
                 );
                 narratives.push(forcedNarrative);
             } else {
-                activeContextsRepo.removeByActionId(subjectId, contextId);
+                if (pointId !== undefined && pointId !== null) {
+                    activeContextsRepo.removeByActionIdAndPoint(subjectId, contextId, pointId);
+                } else {
+                    activeContextsRepo.removeByActionId(subjectId, contextId);
+                }
                 const removalText = `Контекст удален: ${targetContext.label}`;
                 eventLogRepo.append(subjectId, 'context_change',
                     { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
