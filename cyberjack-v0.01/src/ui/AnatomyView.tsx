@@ -174,6 +174,7 @@ export function AnatomyView({
   playerSector,
   targetSector,
 }: AnatomyViewProps) {
+  const [poseUrl, setPoseUrl] = useState<string | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<string>("systemic");
   const [intensity, setIntensity] = useState<number>(1.0);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
@@ -280,8 +281,16 @@ export function AnatomyView({
             availablePoints={availablePoints}
             selectedPoint={selectedPoint}
             onSelectPoint={(id: string) => setSelectedPoint(id)}
-            clothingModelMap={clothingModelMap}
+              clothingModelMap={clothingModelMap}
+              poseUrl={poseUrl}
           />
+          <div style={{ position: 'absolute', left: 16, bottom: 16, zIndex: 20 }}>
+            <label style={{ color: '#94a3b8', fontSize: 12, display: 'block', marginBottom: 6 }}>Pose URL (например, /poses/handup.vpd)</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input value={poseUrl || ''} onChange={(e) => setPoseUrl(e.target.value || null)} placeholder="/poses/handup.vpd" style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #334155', background: '#0b1220', color: '#cbd5e1' }} />
+              <button className="action-btn" onClick={() => setPoseUrl(null)} style={{ padding: '6px 8px' }}>Clear</button>
+            </div>
+          </div>
         </div>
       </div>
 

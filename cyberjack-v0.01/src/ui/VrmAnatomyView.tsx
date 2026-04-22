@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
@@ -7,15 +8,15 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { VRMLoaderPlugin, VRMHumanBoneName } from '@pixiv/three-vrm';
 import { clothingModelMap } from './clothingModelMap';
 
-interface VrmAnatomyProps {
-  vrmUrl?: string; // URL к файлу VRM
+interface Props {
+  vrmUrl?: string | null;
   availablePoints: { id: string, label: string }[];
   selectedPoint: string;
-  onSelectPoint: (pointId: string) => void;
+  onSelectPoint: (id: string) => void;
   activeContexts: any[];
+  poseUrl?: string | null;
 }
 
-// Связываем наши ID точек (из БД) с костями VRM
 const BONE_MAPPING: Record<string, VRMHumanBoneName> = {
   head: VRMHumanBoneName.Head,
   face: VRMHumanBoneName.Head,
@@ -48,60 +49,42 @@ const BONE_MAPPING: Record<string, VRMHumanBoneName> = {
   prostate: VRMHumanBoneName.Hips,
 };
 
-// Смещения (X, Y, Z) относительно мировых координат кости для разнесения перекрывающихся/специфичных точек
-// Z+ направлен в спину (от камеры), Z- направлен на зрителя.
-// Y+ вверх, X- вправо (зрителя), X+ влево (зрителя) - зависит от Math.PI поворота.
 const POINT_OFFSETS: Record<string, [number, number, number]> = {
-  shoulders: [0, 0.12, 0],          // Чуть выше груди
-  nipples: [0, -0.05, 0.12],        // Спереди (Z+)
-  chest: [0, 0.05, 0.12],           // Спереди (Z+)
-  belly: [0, -0.05, 0.15],          // Живот спереди (Z+)
-  waist: [0, -0.08, 0],             // Талия
-  back: [0, 0.05, -0.15],           // Спина сзади (Z-)
-  buttocks: [0, -0.05, -0.16],      // Ягодицы сзади (Z-)
-  hips: [0.12, 0.05, 0],            // Бедра (сбоку, Z=0). X+ = сдвиг влево (к правому краю экрана)
-  
-  inner_thighs: [-0.08, -0.1, 0.05], // От левой ноги сдвигаем вправо (X-), вниз (Y-) и чуть вперед (Z+)
-  
-  // Интимные зоны раскидываем так, чтобы они не слипались в одну кучу, а образовывали столбик или веер
-  groin: [0, -0.04, 0.12],          // Самое высокое, спереди
-  
-  // Женские точки (чуть ниже)
-  clitoris: [0.03, -0.07, 0.13],    // Сдвинем на пару мм вбок и вниз
-  vulva: [-0.03, -0.09, 0.11],      // В другой бок и еще ниже
-  vagina: [0, -0.12, 0.09],         // Еще ниже, ближе к центру
-  
-  // Мужские точки
-  penis: [0, -0.08, 0.16],          // Спереди, выступает
-  testicles: [0, -0.14, 0.13],      // Самое низкое спереди
-  
-  // Задние/внутренние
-  anus: [0, -0.12, -0.10],          // Снизу и сзади (Z-)
-  prostate: [0, -0.08, -0.03],      // Глубже внутри
+  shoulders: [0, 0.12, 0],
+  nipples: [0, -0.05, 0.12],
+  chest: [0, 0.05, 0.12],
+  belly: [0, -0.05, 0.15],
+  waist: [0, -0.08, 0],
+  back: [0, 0.05, -0.15],
+  buttocks: [0, -0.05, -0.16],
+  hips: [0.12, 0.05, 0],
+  inner_thighs: [-0.08, -0.1, 0.05],
+  groin: [0, -0.04, 0.12],
+  clitoris: [0.03, -0.07, 0.13],
+  vulva: [-0.03, -0.09, 0.11],
+  vagina: [0, -0.12, 0.09],
+  penis: [0, -0.08, 0.16],
+  testicles: [0, -0.14, 0.13],
+  anus: [0, -0.12, -0.10],
+  prostate: [0, -0.08, -0.03],
 };
-// Храним загруженные модели в кеше, чтобы не грузить по 10 раз
+
 const loadVRM = (url: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader();
     loader.crossOrigin = 'anonymous';
 
-    loader.register((parser: any) => {
-      // pixiv/three-vrm plugin
-      return new VRMLoaderPlugin(parser);
-    });
+    loader.register((parser: any) => new VRMLoaderPlugin(parser));
 
     loader.load(
       url,
       (gltf: any) => {
         const vrm = gltf.userData.vrm;
-        // Отключаем фрустум-куллинг, чтобы меши из-за анимаций не пропадали
-        vrm.scene.traverse((obj: any) => {
-          obj.frustumCulled = false;
-        });
+        vrm.scene.traverse((obj: any) => { obj.frustumCulled = false; });
         resolve(vrm);
       },
       undefined,
-      (error: any) => reject(error)
+  (err: any) => reject(err)
     );
   });
 };
@@ -111,16 +94,15 @@ function BoneMarker({ boneNode, offset = [0,0,0], content }: { boneNode: THREE.O
   const wrapperRef = useRef<HTMLDivElement>(null);
   const offsetVec = useMemo(() => new THREE.Vector3(offset[0], offset[1], offset[2]), [offset]);
   const normalVec = useMemo(() => {
-     let v = new THREE.Vector3(offset[0], offset[1], offset[2]);
-     if (v.length() < 0.001) v.set(0, 0, 1);
-     return v.normalize();
+    let v = new THREE.Vector3(offset[0], offset[1], offset[2]);
+    if (v.length() < 0.001) v.set(0, 0, 1);
+    return v.normalize();
   }, [offset]);
 
   useFrame(({ camera }) => {
     if (ref.current && boneNode) {
       ref.current.position.copy(offsetVec);
       ref.current.applyMatrix4(boneNode.matrixWorld);
-
       if (wrapperRef.current) {
         const pointWorldPos = ref.current.position;
         const camDir = new THREE.Vector3().subVectors(pointWorldPos, camera.position).normalize();
@@ -142,7 +124,7 @@ function BoneMarker({ boneNode, offset = [0,0,0], content }: { boneNode: THREE.O
   );
 }
 
-function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activeContexts }: VrmAnatomyProps) {
+function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activeContexts, poseUrl }: Props) {
   const [vrm, setVrm] = useState<any>(null);
   const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
   const sceneRef = useRef<THREE.Group>(null);
@@ -151,16 +133,57 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
     if (!vrmUrl) return;
     loadVRM(vrmUrl).then(loadedVrm => {
       setVrm(loadedVrm);
-      // Поворачиваем VRM лицом к камере
-      loadedVrm.scene.rotation.y = 0; 
-    }).catch(err => {
-      console.error('Failed to load VRM:', err);
-    });
+      loadedVrm.scene.rotation.y = 0;
+    }).catch(err => console.error('Failed to load VRM:', err));
   }, [vrmUrl]);
 
-  useFrame((state, delta) => {
-    if (vrm) vrm.update(delta);
-  });
+  const applyPoseData = async (pUrl?: string | null) => {
+    if (!vrm || !pUrl) return;
+    try {
+      const res = await fetch(pUrl);
+      const text = await res.text();
+      let poseObj: any = null;
+      try { poseObj = JSON.parse(text); } catch (e) { /* not JSON */ }
+      if (!poseObj) {
+        console.warn('Pose file is not JSON; provide JSON mapping or convert VPD to JSON.');
+        return;
+      }
+
+      for (const [boneName, data] of Object.entries(poseObj)) {
+        try {
+          let node: THREE.Object3D | undefined;
+          try { node = (vrm as any).humanoid?.getBoneNode(boneName as any); } catch {}
+          if (!node) node = vrm.scene.getObjectByName(boneName as string) as THREE.Object3D | undefined;
+          if (!node) continue;
+          if ((data as any).rot && Array.isArray((data as any).rot) && (data as any).rot.length === 4) {
+            const [x, y, z, w] = (data as any).rot as number[];
+            node.quaternion.set(x, y, z, w);
+          } else if ((data as any).euler && Array.isArray((data as any).euler) && (data as any).euler.length === 3) {
+            const [ex, ey, ez] = (data as any).euler as number[];
+            node.rotation.set(ex, ey, ez);
+          }
+          if ((data as any).pos && Array.isArray((data as any).pos) && (data as any).pos.length === 3) {
+            const [px, py, pz] = (data as any).pos as number[];
+            node.position.set(px, py, pz);
+          }
+        } catch (err) {
+          console.warn('Failed to apply pose for bone', boneName, err);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch or apply pose:', err);
+    }
+  };
+
+  useEffect(() => {
+    const handler = (ev: any) => { try { const url = ev?.detail?.poseUrl; applyPoseData(url); } catch (e) {} };
+    window.addEventListener('applyPose', handler as EventListener);
+    return () => window.removeEventListener('applyPose', handler as EventListener);
+  }, [vrm]);
+
+  useEffect(() => { if (vrm && poseUrl) applyPoseData(poseUrl); }, [vrm, poseUrl]);
+
+  useFrame((state, delta) => { if (vrm) vrm.update(delta); });
 
   if (!vrm) {
     return (
@@ -179,30 +202,18 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
   return (
     <group ref={sceneRef}>
       <primitive object={vrm.scene} />
-
-      {/* Отрисовываем DOM-плашки (точки + контексты) поверх 3D */}
-  {availablePoints.map(pt => {
-        // Пропускаем абстрактные или общие точки (general, pose_lying_down, mind_state)
+      {availablePoints.map(pt => {
         const targetBone = BONE_MAPPING[pt.id];
         if (!targetBone) return null;
-
         const boneNode = vrm.humanoid?.getRawBoneNode(targetBone);
         if (!boneNode) return null;
-
-        // Ищем активные эффекты, привязанные конкретно к этой точке
         const pointContexts = activeContexts.filter(c => c.pointId === pt.id || c.targetPoint === pt.id);
-
-        
-        // Callout directions depending on left/right side or X coord
-        // We use pt.id to statically decide direction
-        // Compute X dynamically from our point offsets, default to string analysis if 0
         const posX = POINT_OFFSETS[pt.id]?.[0] || 0;
         const isScreenRight = posX > 0 || (posX === 0 && pt.id.includes('left'));
         const calloutX = isScreenRight ? 100 : -100;
         const isLeftSide = !isScreenRight;
-        
         const calloutY = -60;
-        
+
         const markerContent = (
           <>
             <div
@@ -264,42 +275,31 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
   );
 }
 
-export function VrmAnatomyView({ subjectState, activeContexts, availablePoints, selectedPoint, onSelectPoint, clothingModelMap: injectedModelMap }: any) {
-  // Determine model URL based on active clothing contexts and a mapping.
-  const modelMap = injectedModelMap || clothingModelMap || { base: '/models/base.vrm' };
-
-  const clothingCtxIds = (activeContexts || [])
-    .map((c: any) => c.actionId)
-    .filter((id: string) => typeof id === 'string' && id.startsWith('eq_clothe'))
-    .filter(Boolean as any) as string[];
-
-  const comboKey = clothingCtxIds.length ? clothingCtxIds.slice().sort().join('+') : '';
-  let modelUrl = modelMap.base || '/models/base.vrm';
-  if (comboKey && modelMap[comboKey]) {
-    modelUrl = modelMap[comboKey];
-  } else if (clothingCtxIds.length) {
-    for (let i = clothingCtxIds.length - 1; i >= 0; i--) {
-      const id = clothingCtxIds[i];
-      if (modelMap[id]) { modelUrl = modelMap[id]; break; }
-    }
-  }
+export default function VrmAnatomyView({ vrmUrl = null, availablePoints, selectedPoint, onSelectPoint, activeContexts, poseUrl }: Props) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  // Resolve model url: explicit prop vrmUrl preferred, otherwise fallback to clothingModelMap.base
+  let modelUrl = vrmUrl || clothingModelMap.base || '/models/base.vrm';
+
+  // When poseUrl changes, dispatch applyPose event in case VrmModel listens
+  useEffect(() => {
+    if (!poseUrl) return;
+    const evt = new CustomEvent('applyPose', { detail: { poseUrl } });
+    window.dispatchEvent(evt as any);
+  }, [poseUrl]);
+
   return (
     <div style={{ width: '100%', height: '100%', minHeight: '600px', background: '#020617', borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
-       {/* Не-костяные точки раскидываем по углам и краям для эстетики */}
+      {/* Non-bone points rendered as buttons */}
       {(() => {
         const unmapped = availablePoints.filter((pt: any) => !BONE_MAPPING[pt.id]);
         return unmapped.map((pt: any, i: number) => {
-          // Раскидываем по кругу или по краям:
-          // Четные слева, нечетные справа. По высоте распределяем.
           const isLeft = i % 2 === 0;
           const indexOnSide = Math.floor(i / 2);
-          const topPosition = 20 + indexOnSide * 40; // 20px, 60px, 100px...
-          
+          const topPosition = 20 + indexOnSide * 40;
           return (
-            <button 
+            <button
               key={pt.id}
               onClick={() => onSelectPoint(pt.id)}
               style={{
@@ -309,10 +309,10 @@ export function VrmAnatomyView({ subjectState, activeContexts, availablePoints, 
                 zIndex: 10,
                 background: selectedPoint === pt.id ? '#38bdf8' : '#1e293b',
                 color: selectedPoint === pt.id ? '#000' : '#bac4d4',
-                border: '1px solid #334155', 
-                padding: '6px 12px', 
-                borderRadius: 8, 
-                fontSize: 12, 
+                border: '1px solid #334155',
+                padding: '6px 12px',
+                borderRadius: 8,
+                fontSize: 12,
                 cursor: 'pointer',
                 boxShadow: selectedPoint === pt.id ? '0 0 8px rgba(56, 189, 248, 0.5)' : 'none',
                 transition: 'all 0.2s',
@@ -326,25 +326,25 @@ export function VrmAnatomyView({ subjectState, activeContexts, availablePoints, 
         });
       })()}
 
-       {mounted ? (
-         <Canvas camera={{ position: [0, 1.2, 2.5], fov: 40 }}>
-           {/* Three.js light jsx types are provided by @react-three/fiber; sometimes TSX intrinsic types are missing in this repo config */}
-           {/* @ts-ignore-next-line */}
-           <ambientLight intensity={0.7} />
-           {/* @ts-ignore-next-line */}
-           <directionalLight position={[2, 2, 2]} intensity={1} />
-           <VrmModel 
-              vrmUrl={modelUrl} 
-              availablePoints={availablePoints} 
-              selectedPoint={selectedPoint}
-              onSelectPoint={onSelectPoint}
-              activeContexts={activeContexts}
-           />
-           <OrbitControls target={[0, 1.0, 0]} minDistance={0.5} maxDistance={4} enablePan={false} />
-         </Canvas>
-       ) : (
-         <div style={{ width: '100%', height: '100%', minHeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>Загрузка 3D...</div>
-       )}
+      {mounted ? (
+        <Canvas camera={{ position: [0, 1.2, 2.5], fov: 40 }}>
+          {/* @ts-ignore */}
+          <ambientLight intensity={0.7} />
+          {/* @ts-ignore */}
+          <directionalLight position={[2, 2, 2]} intensity={1} />
+          <VrmModel
+            vrmUrl={modelUrl}
+            availablePoints={availablePoints}
+            selectedPoint={selectedPoint}
+            onSelectPoint={onSelectPoint}
+            activeContexts={activeContexts}
+            poseUrl={poseUrl}
+          />
+          <OrbitControls target={[0, 1.0, 0]} minDistance={0.5} maxDistance={4} enablePan={false} />
+        </Canvas>
+      ) : (
+        <div style={{ width: '100%', height: '100%', minHeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>Загрузка 3D...</div>
+      )}
     </div>
   );
 }
