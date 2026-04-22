@@ -615,6 +615,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       }
 
       if (data.success) {
+        const actionApplied = !!data.actionApplied;
         await Promise.all([
           refreshSceneInfo(),
           fetchInteractionState(targetCharId, true)
@@ -628,16 +629,34 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
           });
           const reaction = data.narratorReaction || data.actorReplies[0]?.reaction;
           if (reaction) {
-            addMessage({ role: 'narrator', text: reaction });
+            if (actionApplied) {
+              addMessage({ role: 'narrator', text: reaction });
+            } else {
+              addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
+            }
           }
         } else if (data.reply) {
           if (data.reply.speech) addMessage({ role: 'subject', text: data.reply.speech, actorId: targetCharId });
-          if (data.reply.reaction) addMessage({ role: 'narrator', text: data.reply.reaction });
+          if (data.reply.reaction) {
+            if (actionApplied) {
+              addMessage({ role: 'narrator', text: data.reply.reaction });
+            } else {
+              addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
+            }
+          }
         } else if (data.narratorReaction) {
-          addMessage({ role: 'narrator', text: data.narratorReaction });
+          if (actionApplied) {
+            addMessage({ role: 'narrator', text: data.narratorReaction });
+          } else {
+            addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
+          }
         } else {
           const fallback = data.diagnostics?.semanticNarrative || data.llmResponse?.content || 'Действие выполнено.';
-          addMessage({ role: 'narrator', text: fallback });
+          if (actionApplied) {
+            addMessage({ role: 'narrator', text: fallback });
+          } else {
+            addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
+          }
         }
       }
     } catch (e) {

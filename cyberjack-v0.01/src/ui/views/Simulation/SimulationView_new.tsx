@@ -127,6 +127,7 @@ const SimulationViewNew: React.FC = () => {
       console.debug('tick response', body);
 
       if (body && body.success) {
+        const actionApplied = !!body.actionApplied;
         const d = body.diagnostics || {};
         // Build message pieces: prefer textual reactionSummary but always show numeric effects
         const parts: string[] = [];
@@ -140,7 +141,11 @@ const SimulationViewNew: React.FC = () => {
         if (skipLLM) parts.push('(LLM пропущен)');
 
         const sysText = parts.length > 0 ? parts.join(' ') : (d.reactionSummary || 'нейтральная реакция');
-        setChatLog(prev => [...prev, { role: 'system', text: sysText }]);
+        if (actionApplied) {
+          setChatLog(prev => [...prev, { role: 'system', text: sysText }]);
+        } else {
+          setChatLog(prev => [...prev, { role: 'system', text: 'Команда принята. Ожидается выполнение.' }]);
+        }
         // refresh subject state
         await fetchState();
       } else {
