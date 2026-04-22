@@ -281,6 +281,8 @@ safeAddColumn('scenes', 'slots', "TEXT DEFAULT '[]'");
 
 safeAddColumn('characters', 'current_scene_id', 'TEXT');
 safeAddColumn('action_presets', 'requires_item', 'TEXT');
+// Allow presets to include an optional model URL for avatar/VRM selection
+safeAddColumn('action_presets', 'model_url', 'TEXT');
 
 safeAddColumn('subjects', 'baseline_sensitivity', 'REAL');
 safeAddColumn('subjects', 'baseline_capacity', 'REAL');

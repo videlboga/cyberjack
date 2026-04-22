@@ -999,6 +999,8 @@
         "contact_mult": 0.5
       }
     }
+    ,
+    "model_url": "/models/anna_vaiolet.vrm"
   },
   {
     "id": "eq_strip_jumpsuit",

@@ -124,7 +124,8 @@ db.transaction(() => {
             tags = excluded.tags,
             values_json = excluded.values_json,
             context_config_json = excluded.context_config_json,
-            requires_item = excluded.requires_item
+            requires_item = excluded.requires_item,
+            model_url = excluded.model_url
     `);
     for (const act of rawActions) {
         const validAct = act as any;
@@ -136,7 +137,8 @@ db.transaction(() => {
             JSON.stringify(validAct.tags),
             JSON.stringify(valuesWithReqs),
             validAct.contextConfig ? JSON.stringify(validAct.contextConfig) : null,
-            (validAct as any).requiresItem || null
+            (validAct as any).requiresItem || null,
+            (validAct as any).model_url || (validAct as any).modelUrl || null
         );
     }
     
@@ -260,13 +262,14 @@ db.transaction(() => {
     ];
     const upsertActionStmt = db.prepare(`
         INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             label = excluded.label,
             type = excluded.type,
             tags = excluded.tags,
             values_json = excluded.values_json,
-            context_config_json = excluded.context_config_json
+            context_config_json = excluded.context_config_json,
+            model_url = excluded.model_url
     `);
     for (const act of actions) {
         const valJson = { ...(act as any).values || {}, requireContexts: (act as any).requireContexts || null, removeContexts: (act as any).removeContexts || null };
@@ -276,7 +279,8 @@ db.transaction(() => {
             (act as any).type || 'physical',
             JSON.stringify((act as any).tags || []),
             JSON.stringify(valJson),
-            (act as any).contextConfig ? JSON.stringify((act as any).contextConfig) : null
+            (act as any).contextConfig ? JSON.stringify((act as any).contextConfig) : null,
+            (act as any).model_url || (act as any).modelUrl || null
         );
     }
 
