@@ -1,0 +1,10 @@
+{
+  "leftUpperArm": { "euler": [-1.2, 0.0, 0.1] },
+  "rightUpperArm": { "euler": [-1.2, 0.0, -0.1] },
+  "leftLowerArm": { "euler": [-0.8, 0.0, 0.05] },
+  "rightLowerArm": { "euler": [-0.8, 0.0, -0.05] },
+  "leftHand": { "euler": [0.0, 0.0, 0.0] },
+  "rightHand": { "euler": [0.0, 0.0, 0.0] },
+  "spine": { "euler": [-0.1, 0.0, 0.0] },
+  "neck": { "euler": [0.15, 0.0, 0.0] }
+}
