@@ -5,6 +5,7 @@ import * as THREE from 'three';
 // @ts-ignore
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { VRMLoaderPlugin, VRMHumanBoneName } from '@pixiv/three-vrm';
+import { clothingModelMap } from './clothingModelMap';
 
 interface VrmAnatomyProps {
   vrmUrl?: string; // URL к файлу VRM
@@ -263,9 +264,25 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
   );
 }
 
-export function VrmAnatomyView({ subjectState, activeContexts, availablePoints, selectedPoint, onSelectPoint }: any) {
-  // URL можно брать из профиля персонажа (character.profileUrl) или хардкодить демо-модель
-  const modelUrl = '/models/base.vrm';
+export function VrmAnatomyView({ subjectState, activeContexts, availablePoints, selectedPoint, onSelectPoint, clothingModelMap: injectedModelMap }: any) {
+  // Determine model URL based on active clothing contexts and a mapping.
+  const modelMap = injectedModelMap || clothingModelMap || { base: '/models/base.vrm' };
+
+  const clothingCtxIds = (activeContexts || [])
+    .map((c: any) => c.actionId)
+    .filter((id: string) => typeof id === 'string' && id.startsWith('eq_clothe'))
+    .filter(Boolean as any) as string[];
+
+  const comboKey = clothingCtxIds.length ? clothingCtxIds.slice().sort().join('+') : '';
+  let modelUrl = modelMap.base || '/models/base.vrm';
+  if (comboKey && modelMap[comboKey]) {
+    modelUrl = modelMap[comboKey];
+  } else if (clothingCtxIds.length) {
+    for (let i = clothingCtxIds.length - 1; i >= 0; i--) {
+      const id = clothingCtxIds[i];
+      if (modelMap[id]) { modelUrl = modelMap[id]; break; }
+    }
+  }
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 

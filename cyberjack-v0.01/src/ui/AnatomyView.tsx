@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { VrmAnatomyView } from "./VrmAnatomyView";
+import clothingModelMap from './clothingModelMap';
 import "./AnatomyView.css";
 
 interface AnatomyViewProps {
@@ -279,6 +280,7 @@ export function AnatomyView({
             availablePoints={availablePoints}
             selectedPoint={selectedPoint}
             onSelectPoint={(id: string) => setSelectedPoint(id)}
+            clothingModelMap={clothingModelMap}
           />
         </div>
       </div>
