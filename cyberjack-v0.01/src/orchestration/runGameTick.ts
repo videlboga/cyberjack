@@ -92,6 +92,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     (compiledAction as any)._baseAction = baseAction || compiledAction;
 
     const commandIntent = payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent;
+    // preserve any action preset referenced by the parsed command so we can apply its effects later
+    let commandActionPreset: any = undefined;
     if (commandIntent && commandIntent.type && commandIntent.type !== 'none') {
         (compiledAction as any).commandIntent = commandIntent;
         if ((compiledAction as any)._baseAction) {
@@ -120,10 +122,18 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // Here we perform dynamic context modification dictated directly by the LLM classification,
     // intercepting and modifying the subject's conditions immediately.
     let addedContextNotes: string[] = [];
+    // Did this tick actually change contexts / apply effects?
+    let actionApplied = false;
     if (commandIntent && commandIntent.type !== 'none') {
         
         const activeContextsRepo2 = activeContextsRepo;
         
+
+        // Track forced-action narrative/effects so we only log a "performed"
+        // system_trigger after the effects actually changed state.
+        let forcedNarrativeToLog: string | undefined = undefined;
+        let forcedAttempted = false;
+        let forcedApplied = false;
 
         let targetCtxId: string | undefined;
         if (commandIntent.type === 'change_pose') targetCtxId = commandIntent.targetPoseId;
@@ -137,6 +147,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 const removalNarrative = `Состояние отменено: ${actionPreset?.label || deactivateId}`;
                 eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
                 addedContextNotes.push(removalNarrative);
+                actionApplied = true;
             }
         } else if (commandIntent.type === 'move') {
             const tgtLoc = commandIntent.targetLocation;
@@ -197,20 +208,23 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 }
             }
         } else if (commandIntent.type === 'perform_action') {
-            const actionPreset = presetRepo.getActionPreset(commandIntent.actionId);
-            if (actionPreset) {
-                const requiredCompliance = (actionPreset.priority || 1) * 20;
+            commandActionPreset = presetRepo.getActionPreset(commandIntent.actionId);
+            if (commandActionPreset) {
+                forcedAttempted = true;
+                const requiredCompliance = (commandActionPreset.priority || 1) * 20;
                 const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
                 const targetName = commandIntent.targetId || 'не указана';
-                
+
                 if (currentCompliance >= requiredCompliance) {
                     let reason = state.relation?.attitude > 70 ? "из симпатии и покорности" : "вынужденно подчиняясь сломленной воле";
                     if (state.core.attitude < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
-                    const forcedNarrative = `[Система]: Актив выполняет указание "${actionPreset.label}" (цель: ${targetName}), ${reason}.`;
-                    addedContextNotes.push(forcedNarrative);
-                    eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
+                    forcedNarrativeToLog = `[Система]: Актив выполняет указание "${commandActionPreset.label}" (цель: ${targetName}), ${reason}.`;
+                    // keep a short local note for immediate UI feedback; don't
+                    // persist the formal system_trigger until effects are applied
+                    // (see later in the effects block).
+                    addedContextNotes.push(forcedNarrativeToLog);
                 } else {
-                    const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${actionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
+                    const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${commandActionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
                     addedContextNotes.push(refusedNarrative);
                 }
             }
@@ -236,6 +250,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                         const forcedNarrative = `[Система]: Актив принимает состояние "${actionPreset.label}", ${reason}. Примени это состояние.`;
                         eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative }, { added: true });
                         addedContextNotes.push(forcedNarrative);
+                        actionApplied = true;
                     }
                 } else {
                     const refusedNarrative = `[Система]: Актив мысленно отклоняет требование перейти в состояние "${actionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
@@ -243,6 +258,43 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 }
             }
         }
+
+                    // Execute effects of the commanded actionPreset (apply/remove contexts)
+                    try {
+                        const initiator = payload.playerId || payload.subjectId;
+                        // If the commanded actionPreset itself defines contextConfig, apply it to the subject
+                        if (commandActionPreset && (commandActionPreset as any).contextConfig) {
+                            ContextManager.applyContext(payload.subjectId, commandIntent.actionId, commandActionPreset as any, undefined, initiator);
+                            const applyNarrative = `[Система]: Применено действие "${commandActionPreset.label}" к активу.`;
+                            eventLogRepo.append(payload.subjectId, 'context_change', { presetId: commandIntent.actionId, action: null, actionLabel: applyNarrative, narrative: applyNarrative }, { added: true });
+                            addedContextNotes.push(applyNarrative);
+                            // mark that the forced action produced an actual state change
+                            forcedApplied = true;
+                            actionApplied = true;
+                        }
+
+                        // If the commanded actionPreset declares removeContexts, remove them from the subject
+                        if (commandActionPreset && (commandActionPreset as any).removeContexts && Array.isArray((commandActionPreset as any).removeContexts)) {
+                            for (const remCtx of (commandActionPreset as any).removeContexts) {
+                                activeContextsRepo.removeByActionId(payload.subjectId, remCtx);
+                                // mark that the forced action produced an actual state change
+                                forcedApplied = true;
+                                actionApplied = true;
+                            }
+                            const removedNarrative = `[Система]: Удалены связанные контексты в результате действия "${commandActionPreset.label}".`;
+                            eventLogRepo.append(payload.subjectId, 'context_change', { presetId: commandIntent.actionId, action: null, actionLabel: removedNarrative, narrative: removedNarrative }, { removed: true });
+                            addedContextNotes.push(removedNarrative);
+                        }
+                    } catch (err) {
+                        console.error('[runGameTick] failed to apply commanded action preset effects', err);
+                    }
+                    // After attempting effects, if the forced action was attempted and effects
+                    // were actually applied, log the system-trigger narrative tying the
+                    // narration to the factual state change (so "сделал" appears when it
+                    // actually happened).
+                    if (forcedAttempted && forcedNarrativeToLog && forcedApplied) {
+                        eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrativeToLog, narrative: forcedNarrativeToLog }, { added: true });
+                    }
     }
 
     // "Neutral pose" heuristic: If saying "встань", stand up.
@@ -265,6 +317,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     activeContextsRepo2.remove(ctx.id);
                     eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
                     addedContextNotes.push(removalNarrative);
+                    actionApplied = true;
                 }
             } else {
                 addedContextNotes.push('Ты уже стоишь, поэтому дополнительных изменений нет.');
@@ -275,10 +328,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     if (compiledAction.contextConfig) {
         const initiator = payload.playerId || payload.subjectId;
         ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction, undefined, initiator);
+        actionApplied = true;
     }
     if (compiledAction.removeContexts) {
         for (const remCtx of compiledAction.removeContexts) {
             activeContextsRepo.removeByActionId(payload.subjectId, remCtx);
+            actionApplied = true;
         }
     }
 
@@ -490,5 +545,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         metadata: {
             commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent
         },
+        actionApplied,
     };
 }

@@ -3,13 +3,15 @@
 // formed by joining sorted actionIds with '+' (e.g. 'eq_clothe_shirt+eq_clothe_pants').
 export const clothingModelMap: Record<string, string> = {
   // single-item examples
-  'eq_clothe_jumpsuit': '/models/jumpsuit.vrm',
+  // Map the jumpsuit clothing action to the provided VRM filename (vaiolet)
+  'eq_clothe_jumpsuit': '/models/anna_vaiolet.vrm',
 
-  // example combination (shirt + pants)
+  // You can add combination keys like 'eq_clothe_shirt+eq_clothe_pants' -> '/models/..'
+  // Example:
   // 'eq_clothe_shirt+eq_clothe_pants': '/models/shirt_pants.vrm',
 
-  // fallback 'base' key can be used for a generic model if needed
-  'base': '/models/base.vrm'
+  // Fallback base model (nude)
+  'base': '/models/anna_nude.vrm'
 };
 
 export default clothingModelMap;

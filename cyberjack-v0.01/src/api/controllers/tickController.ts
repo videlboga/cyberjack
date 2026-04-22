@@ -136,6 +136,7 @@ export const processTick = async (req: Request, res: Response) => {
             resources: normalizePlayer(resourceRepo.get(playerId)),
             diagnostics: bundle.diagnostics,
             bundle,
+            actionApplied: (bundle as any).actionApplied || false,
             reply: turnExecutionMetrics?.reply || null,
             promptMessages: turnExecutionMetrics?.promptMessages || null,
             actorReplies: turnExecutionMetrics?.actorReplies || [],
