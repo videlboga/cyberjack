@@ -171,6 +171,7 @@ export interface TickInput {
     core: SubjectCoreState;
     point: SubjectPointState;
     config?: EngineConfig;
+    deltaTime?: number;
 }
 
 export interface TickResult {

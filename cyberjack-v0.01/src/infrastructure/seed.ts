@@ -116,8 +116,8 @@ db.transaction(() => {
 
     // Load Actions
     const insertActionStmt = db.prepare(`
-        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json, requires_item)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json, requires_item, model_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             label = excluded.label,
             type = excluded.type,
@@ -261,7 +261,7 @@ db.transaction(() => {
         { id: 'context_pleasure_burn', label: 'Ожог удовольствием', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: -0.1, contact: 0, sharpness: 0.1, novelty: 0 }, contextConfig: { duration: -1 } }
     ];
     const upsertActionStmt = db.prepare(`
-        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json)
+        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json, model_url)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             label = excluded.label,

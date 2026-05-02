@@ -12,7 +12,8 @@ export function applyLearning(
     point: Partial<SubjectPointState>,
     action: Partial<CompiledAction>,
     result: any,
-    config: EngineConfig = DEFAULT_CONFIG
+    config: EngineConfig = DEFAULT_CONFIG,
+    deltaTime: number = 1.0
 ): { nextCore: SubjectCoreState; nextPoint: SubjectPointState } {
     validateConfig(config);
     const safeCore = normalizeCore(core, config);
@@ -28,58 +29,60 @@ export function applyLearning(
     // Calculate new tension
     // Grows based on action intensity (pleasure/discomfort), scaled by sensitivity.
     // Drops when action intensity is very low (wait/rest), scaled by openness.
-    const tensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * (safeCore.sensitivity / 50) * (f.tensionGrowthMultiplier ?? 0.3);
-    const tensionDrop = (result.experiencedIntensity < 5) ? Math.max(1, safeCore.openness / 10) : 0;
+    const tensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * (safeCore.sensitivity / 50) * (f.tensionGrowthMultiplier ?? 0.3) * (safeAction.actionKey === 'wait' ? deltaTime : 1.0);
+    const tensionDrop = (result.experiencedIntensity < 5) ? Math.max(1, safeCore.openness / 10) * deltaTime : 0;
     const nextTension = clamp(
         tension + tensionGrowth - tensionDrop,
         0,
         150 // Allow exceeding 100 temporarily to trigger Discharge
     );
 
-    const coreRegen = regenAllowed ? (f.sensitivityRegenRate ?? 0) : 0;
+    const coreRegen = regenAllowed ? (f.sensitivityRegenRate ?? 0) * deltaTime : 0;
     const localRegen =
         (result.experiencedIntensity < (f.localSensitivityTarget ?? 5) &&
             (result.overload || 0) < (f.sensitivityRegenThreshold ?? 8))
-            ? (f.localSensitivityRegenRate ?? 0)
+            ? (f.localSensitivityRegenRate ?? 0) * deltaTime
             : 0;
 
     let baseCapacityDrop = (result.overload * (f.capacityDropMultiplier ?? 0.25));
     if (isEdging) {
-        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.3); // Burn capacity when on the brink
+        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.3) * deltaTime; // Burn capacity when on the brink
     }
 
     const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
+
+    const timeScale = safeAction.actionKey === 'wait' ? deltaTime : 1.0;
 
     const nextCore: SubjectCoreState = {
         tension: nextTension,
         sensitivity: clamp(
             safeCore.sensitivity +
-                ((f.sensitivityTarget - result.experiencedIntensity) * f.sensitivityFromIntensity +
+                (((f.sensitivityTarget - result.experiencedIntensity) * f.sensitivityFromIntensity) * timeScale +
                 coreRegen + (isEdging ? 1.5 : 0)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         capacity: clamp(
-            safeCore.capacity - (baseCapacityDrop - ((result.overload < 10 && !isEdging) ? (f.capacityRecoveryRate ?? 1.0) : 0)) * tensionModifier,
+            safeCore.capacity - (baseCapacityDrop - ((result.overload < 10 && !isEdging) ? (f.capacityRecoveryRate ?? 1.0) * deltaTime : 0)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         openness: clamp(
-            safeCore.openness + ((result.pleasure - result.discomfort) * f.opennessFromPleasureDiscomfort + (isEdging ? 0.5 : 0)) * tensionModifier,
+            safeCore.openness + (((result.pleasure - result.discomfort) * f.opennessFromPleasureDiscomfort + (isEdging ? 0.5 : 0)) * timeScale) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         plasticity: clamp(
             safeCore.plasticity +
-            ((result.learningEffect - f.plasticityTarget) * f.plasticityFromLearning -
-            result.overload * f.plasticityFromOverload + (isEdging ? 1.0 : 0)) * tensionModifier,
+            (((result.learningEffect - f.plasticityTarget) * f.plasticityFromLearning -
+            result.overload * f.plasticityFromOverload + (isEdging ? 1.0 : 0)) * timeScale) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         attitude: clamp(
             safeCore.attitude +
-            ((result.pleasure - result.discomfort) * f.attitudeFromPleasureDiscomfort -
-            result.overload * f.attitudeFromOverload) * tensionModifier,
+            (((result.pleasure - result.discomfort) * f.attitudeFromPleasureDiscomfort -
+            result.overload * f.attitudeFromOverload) * timeScale) * tensionModifier,
             config.core.min,
             config.core.max
         ),

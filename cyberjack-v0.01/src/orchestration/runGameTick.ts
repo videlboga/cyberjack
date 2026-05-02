@@ -32,6 +32,7 @@ export interface GameEventPayload {
     textMessage?: string;
     parserVersion?: string;
     customPayload?: Record<string, unknown>;
+    deltaTime?: number;
 }
 
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
@@ -108,7 +109,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         action: compiledAction,
         core: state.core,
         point: state.point,
-        config: undefined
+        config: undefined,
+        deltaTime: payload.deltaTime ?? (payload.presetId === 'wait' ? 20.0 : 1.0)
     });
 
     if (engineOutput.tickMeta?.inputs) {

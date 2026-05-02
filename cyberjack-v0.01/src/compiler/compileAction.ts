@@ -14,6 +14,7 @@ export interface ActionInput {
     sourceText?: string;
     parserVersion?: string;
     activeContexts?: any[]; // IDs of active contexts
+    deltaTime?: number;
 }
 
 /**

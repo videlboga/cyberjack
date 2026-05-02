@@ -4,7 +4,9 @@ import express from 'express';
 // Declare process to avoid a compile-time error here.
 declare const process: any;
 import cors from 'cors';
+import http from 'http';
 import { activeConfig } from '../prompts/config';
+import { initWebSocket, broadcastEvent } from './socket';
 
 import tickRoutes from './routes/tickRoutes';
 import stateRoutes from './routes/stateRoutes';
@@ -30,13 +32,20 @@ app.use('/api', stateRoutes);
 app.use('/api', playerRoutes);
 app.use('/api', sceneRoutes);
 app.use('/api', metaRoutes);
+app.get('/api/test-ws', (req, res) => {
+    broadcastEvent('MOVE', { target: 'Box_350x250x300_Mesh', x: 0, y: 5, z: 0 });
+    res.json({ success: true, message: 'Command sent to Unity' });
+});
+
 
 const PORT = process.env.PORT || 3000;
 // Start server only when not in test mode. When running tests we import `app` and
 // let Supertest handle requests without starting a dedicated listener.
 if (process.env.NODE_ENV !== 'test') {
-    app.listen(PORT, () => {
-        console.log(`[Engine API] Running on http://localhost:${PORT}`);
+    const server = http.createServer(app);
+    initWebSocket(server);
+    server.listen(PORT, () => {
+        console.log(`[Engine API + WS] Running on http://localhost:${PORT}`);
     });
 }
 

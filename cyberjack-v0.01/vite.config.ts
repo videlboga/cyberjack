@@ -5,6 +5,7 @@ export default defineConfig({
   optimizeDeps: { include: ['three', '@pixiv/three-vrm', '@react-three/fiber', '@react-three/drei'] }, plugins: [react()],
   server: {
     port: 5173,
+    host: '0.0.0.0',
     strictPort: true,
     open: false,
     proxy: {

@@ -145,6 +145,7 @@ function BoneMarker({ boneNode, offset = [0,0,0], content }: { boneNode: THREE.O
 function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activeContexts }: VrmAnatomyProps) {
   const [vrm, setVrm] = useState<any>(null);
   const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
+  const [poseData, setPoseData] = useState<any>(null);
   const sceneRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
@@ -158,8 +159,44 @@ function VrmModel({ vrmUrl, availablePoints, selectedPoint, onSelectPoint, activ
     });
   }, [vrmUrl]);
 
+  // Загрузка позы на основе активных контекстов (или idle, если их нет)
+  useEffect(() => {
+    const poseCtx = activeContexts?.find(c => c.actionId?.startsWith('pose_') || c.type === 'pose');
+    const poseName = poseCtx ? poseCtx.actionId : 'pose_idle';
+    
+    fetch(`/poses/${poseName}.json`)
+      .then(res => {
+        if (!res.ok) throw new Error(`Pose ${poseName} not found`);
+        return res.json();
+      })
+      .then(data => {
+        setPoseData(data);
+      })
+      .catch(err => {
+        console.warn('Pose fetch error:', err);
+        // Fallback to empty pose if not found (or idle if available)
+        setPoseData({});
+      });
+  }, [activeContexts]);
+
+  // Применение позы (slerp)
   useFrame((state, delta) => {
-    if (vrm) vrm.update(delta);
+    if (vrm) {
+      vrm.update(delta);
+      
+      if (poseData && vrm.humanoid) {
+        // Плавно применяем вращения
+        for (const [boneName, transform] of Object.entries(poseData)) {
+          const boneNode = vrm.humanoid.getNormalizedBoneNode(boneName);
+          if (boneNode && (transform as any).euler) {
+            const [x, y, z] = (transform as any).euler;
+            const targetQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(x, y, z));
+            // Интерполяция для плавного перехода
+            boneNode.quaternion.slerp(targetQuat, 5.0 * delta);
+          }
+        }
+      }
+    }
   });
 
   if (!vrm) {

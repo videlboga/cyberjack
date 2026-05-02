@@ -25,6 +25,7 @@ function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; 
 export const processWait = async (req: Request, res: Response) => {
     try {
         const { subjectId = 'S-AV-01', ticks = 1, eventId = 'lab', callLLM = false } = req.body;
+        const deltaTime = req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 20.0;
         let lastBundle: Awaited<ReturnType<typeof runGameTick>> | null = null;
 
         for (let i = 0; i < ticks; i++) {
@@ -33,7 +34,8 @@ export const processWait = async (req: Request, res: Response) => {
                 pointId: 'systemic',
                 playerId: 'PL-1',
                 sceneId: eventId,
-                presetId: 'wait'
+                presetId: 'wait',
+                deltaTime
             });
         }
 
@@ -85,7 +87,8 @@ export const processTick = async (req: Request, res: Response) => {
 
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
         // Note: dispatchEvent now calls runGameTick
-        const { bundle, dynamicModifiers, pointIdUsed } = await dispatchEvent(req.body);
+        const dispatchPayload = { ...req.body, deltaTime: req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 1.0 };
+        const { bundle, dynamicModifiers, pointIdUsed } = await dispatchEvent(dispatchPayload);
         const eventId = tickSceneId;
         const actionId = req.body.presetId || bundle.compiledAction?.actionKey || (bundle.compiledAction as any)?.action || 'unknown_action';
         const actionLabel = bundle.compiledAction?.label || req.body.labelOverride || req.body.presetId || 'неизвестное воздействие';

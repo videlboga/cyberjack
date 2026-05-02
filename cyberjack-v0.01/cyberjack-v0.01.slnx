@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Project Path="org.nuget.voltrpc.csproj" />
+  <Project Path="VoltstroStudios.UnityWebBrowser.csproj" />
+  <Project Path="org.nuget.voltrpc.communication.pipes.csproj" />
+  <Project Path="VoltstroStudios.NativeArraySpanExtensions.csproj" />
+  <Project Path="VoltstroStudios.UnityWebBrowser.Communication.Pipes.csproj" />
+</Solution>
