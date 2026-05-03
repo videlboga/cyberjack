@@ -89,7 +89,7 @@ export const moveScene = (req: Request, res: Response) => {
 
 export const getSceneLayout = (req: Request, res: Response) => {
     try {
-        const sceneId = (req.query.sceneId as string) || 'lab';
+        const sceneId = (req.query.sceneId as string) || 'scene_lab_calibrator';
         const layout = sceneLayoutsRepo.get(sceneId);
         res.json({ success: true, layout });
     } catch (error: any) {

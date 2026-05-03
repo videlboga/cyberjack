@@ -16,7 +16,7 @@ export async function buildPromptPayload(
     pointStatesRow: any[],
     activeContextNames: string[],
     latestResult?: TickOutput,
-    eventId: string = 'lab',
+    eventId: string = 'scene_lab_calibrator',
     options?: { suppressTickIds?: string[]; initiatorId?: string }
 ): Promise<PromptPayload & { systemPrompt: string }> {
 

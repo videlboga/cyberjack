@@ -21,60 +21,12 @@ const subjects: { id: string, name: string, state: any, profile: CharacterProfil
         }
     },
     {
-        id: 'C-BROKER',
-        name: 'Шепот',
-        state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
+        id: 'S-AV-01',
+        name: 'Сера',
+        state: { sensitivity: 60, capacity: 50, openness: 40, plasticity: 70, attitude: 50 },
         profile: {
-            base: { name: 'Шепот', age: 40, gender: 'male', anatomy: 'none', status: 'calibrator' },
-            origin: { birthplaceId: 'loc-001', professionId: 'prof-001', biography: 'Торговец информацией.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
-        }
-    },
-    {
-        id: 'C-LIAISON',
-        name: 'Куратор',
-        state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
-        profile: {
-            base: { name: 'Куратор', age: 35, gender: 'female', anatomy: 'none', status: 'calibrator' },
-            origin: { birthplaceId: 'loc-001', professionId: 'prof-001', biography: 'Представитель Корпорации.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
-        }
-    },
-    {
-        id: 'S-ASSET-1',
-        name: 'Эли',
-        state: { sensitivity: 50, capacity: 60, openness: 50, plasticity: 80, attitude: 50 },
-        profile: {
-            base: { name: 'Эли', age: 22, gender: 'female', anatomy: 'none', status: 'asset' },
-            origin: { birthplaceId: 'loc-004', professionId: 'prof-002', biography: 'S-ASSET-1.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
-        }
-    },
-    {
-        id: 'S-ASSET-2',
-        name: 'Никс',
-        state: { sensitivity: 40, capacity: 50, openness: 60, plasticity: 30, attitude: 20 },
-        profile: {
-            base: { name: 'Никс', age: 28, gender: 'female', anatomy: 'none', status: 'asset' },
-            origin: { birthplaceId: 'loc-002', professionId: 'prof-002', biography: 'S-ASSET-2.', coreTrauma: undefined },
-            personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
-            knowledge: { common: [], personal: [], secrets: [] },
-            memory: { knownCharacters: {}, scars: [] }
-        }
-    },
-    {
-        id: 'S-ASSET-3',
-        name: 'Рэй',
-        state: { sensitivity: 30, capacity: 40, openness: 70, plasticity: 40, attitude: 30 },
-        profile: {
-            base: { name: 'Рэй', age: 25, gender: 'male', anatomy: 'none', status: 'asset' },
-            origin: { birthplaceId: 'loc-003', professionId: 'prof-002', biography: 'S-ASSET-3.', coreTrauma: undefined },
+            base: { name: 'Serah', age: 24, gender: 'female', anatomy: 'none', status: 'asset' },
+            origin: { birthplaceId: 'loc-004', professionId: 'prof-002', biography: 'S-AV-01', coreTrauma: undefined },
             personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
             knowledge: { common: [], personal: [], secrets: [] },
             memory: { knownCharacters: {}, scars: [] }
@@ -168,8 +120,26 @@ db.transaction(() => {
         insertProfileStmt.run(
             subject.id, subject.name, characterKind, subject.id, playerId, JSON.stringify(subject.profile)
         );
+
+        // Добавляем начальные ресурсы персонажам (особенно игроку PL-1)
+        const insertRes = db.prepare(`
+            INSERT INTO character_resources (character_id, resource_key, amount, max_amount, regen_rate)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(character_id, resource_key) DO UPDATE SET
+                amount = excluded.amount
+        `);
+        
+        console.log(`Inserting resources for ${subject.id}, isCalibrator: ${isCalibrator}`);
+        if (isCalibrator) {
+            insertRes.run(subject.id, 'energy', 100, 100, 1);
+            insertRes.run(subject.id, 'credits', 1000, 1000000, 0);
+            insertRes.run(subject.id, 'authority', 50, 100, 0);
+            console.log(`Resources inserted for ${subject.id}`);
+        }
     }
-})();const insertPointStmt = db.prepare(`
+})();
+
+const insertPointStmt = db.prepare(`
     INSERT OR IGNORE INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) 
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET 
@@ -334,12 +304,8 @@ db.transaction(() => {
     );
 
     const placements = [
-        { characterId: 'PL-1', role: 'calibrator', slotId: 'slot_terminal', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true },
-        { characterId: 'C-BROKER', role: 'npc', slotId: 'slot_broker_desk', sceneId: 'scene_broker', presenceState: 'present', canAct: true },
-        { characterId: 'S-ASSET-1', role: 'asset', slotId: 'slot_table', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true },
-        { characterId: 'S-ASSET-2', role: 'asset', slotId: 'slot_display_2', sceneId: 'scene_broker', presenceState: 'present', canAct: true },
-        { characterId: 'S-ASSET-3', role: 'asset', slotId: 'slot_display_3', sceneId: 'scene_broker', presenceState: 'present', canAct: true },
-        { characterId: 'C-LIAISON', role: 'npc', slotId: 'slot_liaison_desk', sceneId: 'scene_liaison', presenceState: 'present', canAct: true }
+        { characterId: 'PL-1', role: 'calibrator', slotId: 'slot_table', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true },
+        { characterId: 'S-AV-01', role: 'asset', slotId: 'slot_table', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true }
     ];
 
     for (const placement of placements) {

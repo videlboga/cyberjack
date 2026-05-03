@@ -24,7 +24,7 @@ function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; 
 
 export const processWait = async (req: Request, res: Response) => {
     try {
-        const { subjectId = 'S-AV-01', ticks = 1, eventId = 'lab', callLLM = false } = req.body;
+        const { subjectId = 'S-AV-01', ticks = 1, eventId = 'scene_lab_calibrator', callLLM = false } = req.body;
         const deltaTime = req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 20.0;
         let lastBundle: Awaited<ReturnType<typeof runGameTick>> | null = null;
 
@@ -80,14 +80,14 @@ export const processWait = async (req: Request, res: Response) => {
 export const processTick = async (req: Request, res: Response) => {
     try {
         const { subjectId = 'S-AV-01', textMessage, playerId = 'PL-1' } = req.body;
-        const tickSceneId = req.body.sceneId || 'lab';
+        const tickSceneId = req.body.sceneId || 'scene_lab_calibrator';
 
 
         const baseUserMessage = typeof textMessage === 'string' && textMessage.trim().length ? textMessage.trim() : null;
 
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
         // Note: dispatchEvent now calls runGameTick
-        const dispatchPayload = { ...req.body, deltaTime: req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 1.0 };
+        const dispatchPayload = { ...req.body, pointId: (req.body.pointId || 'systemic').toLowerCase(), deltaTime: req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 1.0 };
         const { bundle, dynamicModifiers, pointIdUsed } = await dispatchEvent(dispatchPayload);
         const eventId = tickSceneId;
         const actionId = req.body.presetId || bundle.compiledAction?.actionKey || (bundle.compiledAction as any)?.action || 'unknown_action';

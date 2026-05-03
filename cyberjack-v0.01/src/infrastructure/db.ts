@@ -278,6 +278,7 @@ safeAddColumn('scenes', 'action_costs', "TEXT DEFAULT '{}'");
 safeAddColumn('scenes', 'transitions', "TEXT DEFAULT '[]'");
 safeAddColumn('scenes', 'description', "TEXT DEFAULT ''");
 safeAddColumn('scenes', 'slots', "TEXT DEFAULT '[]'");
+safeAddColumn('scenes', 'is_global_map', "INTEGER DEFAULT 0");
 
 safeAddColumn('characters', 'current_scene_id', 'TEXT');
 safeAddColumn('action_presets', 'requires_item', 'TEXT');

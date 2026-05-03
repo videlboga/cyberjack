@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnatomyView } from './AnatomyView';
-import DiegeticUI from './DiegeticUI';
 import './GameApp.css';
 
 const API_BASE = '';
@@ -174,13 +173,12 @@ const classifyAction = (action: ActionPreset): string | null => {
 };
 
 const filterActionsForPoint = (actions: ActionPreset[], pointId?: string | null) => {
-  if (!pointId || pointId === 'systemic') {
+  if (!pointId) {
     return actions.filter(action => !action.occupiesPoints || action.occupiesPoints.length === 0);
   }
-  const pid = pointId.toLowerCase();
   return actions.filter(action => {
     if (!action.occupiesPoints || action.occupiesPoints.length === 0) return true;
-    return action.occupiesPoints.some(p => p.toLowerCase() === pid);
+    return action.occupiesPoints.includes(pointId);
   });
 };
 
@@ -234,18 +232,11 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   const [sceneId, setSceneId] = useState(() => {
     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams('');
-    return urlParams.get('sceneId') || 'scene_lab_calibrator';
+    return urlParams.get('sceneId') || 'lab';
   });
 
   const [allScenes, setAllScenes] = useState<any[]>([]);
   const sceneCharacters: SceneCharacterPresence[] = sceneData?.characters || [];
-
-  useEffect(() => {
-    if (!focusedCharId && !!sceneCharacters?.length) {
-      const npc = sceneCharacters.find(c => c.character.id !== PLAYER_CHARACTER_ID);
-      if (npc) setFocusedCharId(npc.character.id);
-    }
-  }, [sceneCharacters, focusedCharId]);
 
 
   const fetchInteractionState = async (targetId: string, hydrateState: boolean) => {
@@ -266,11 +257,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         setPlayerInventory(body.player.inventory);
       }
       if (hydrateState && focusedCharId === targetId) {
-        const pointsMap = (body.availablePoints || []).reduce((acc: any, pt: any) => {
-          acc[pt.id] = pt;
-          return acc;
-        }, {});
-        setSubjectState({ ...body.subject, points: pointsMap });
+        setSubjectState(body.subject);
         setRelationsList(body.relations || []);
         setAvailablePointsList(body.availablePoints || []);
         if (!body.availablePoints?.some((pt: any) => pt.id === selectedPoint)) {
@@ -363,15 +350,14 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
     fetchInteractionState(focusedCharId, true);
   }, [focusedCharId, selectedPoint]);
 
-  // Relaxed focus dropping to allow targeting entities outside the explicit scene config
-  // useEffect(() => {
-  //   if (focusedCharId && sceneCharacters.length) {
-  //     const stillPresent = sceneCharacters.some(entry => entry.character.id === focusedCharId);
-  //     if (!stillPresent) {
-  //       setFocusedCharId(null);
-  //     }
-  //   }
-  // }, [sceneCharacters, focusedCharId]);
+  useEffect(() => {
+    if (focusedCharId && sceneCharacters.length) {
+      const stillPresent = sceneCharacters.some(entry => entry.character.id === focusedCharId);
+      if (!stillPresent) {
+        setFocusedCharId(null);
+      }
+    }
+  }, [sceneCharacters, focusedCharId]);
 
   useEffect(() => {
     setActiveGroup(null);
@@ -728,21 +714,422 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const radialCategories = RADIAL_GROUPS.filter(group => groupedActions[group.id]?.length);
 
   return (
-    <>
-      <DiegeticUI 
-        messages={messages}
-        groupedActions={groupedActions}
-        radialCategories={radialCategories}
-        sendAction={sendAction}
-        isProcessing={isProcessing}
-        focusedCharacter={focusedCharacter}
-        targetSubjectId={focusedCharId}
-        playerResources={playerResources}
-        playerInventory={playerInventory}
-        subjectState={subjectState}
-        setSelectedPoint={setSelectedPoint}
-        onFocusSubject={setFocusedCharId}
-      />
-    </>
+    <div className="game-app-container">
+      <div className="map-stage">
+        <div className="map-canvas" onClick={clearFocus}>
+          {layout?.edges?.length && (
+            <svg className="map-edges" viewBox="0 0 100 100" preserveAspectRatio="none">
+              {layout.edges.map((edge: any, idx: number) => {
+                const fromId = getEdgeNode(edge, 'from');
+                const toId = getEdgeNode(edge, 'to');
+                const fromPos = fromId ? nodePositions[fromId] : null;
+                const toPos = toId ? nodePositions[toId] : null;
+                if (!fromPos || !toPos) return null;
+                return (
+                  <line key={`${fromId}-${toId}-${idx}`} x1={fromPos.leftValue} y1={fromPos.topValue} x2={toPos.leftValue} y2={toPos.topValue} />
+                );
+              })}
+            </svg>
+          )}
+
+          {layoutNodes.length === 0 && (
+            <div className="map-empty">Нет данных о карте сцены</div>
+          )}
+
+          {layoutNodes.map(node => {
+            const nodePosition = nodePositions[node.id];
+            const nodeLabel = nodeLabelMap.get(node.id) || node.id;
+            const slotMeta = slotMap.get(node.id);
+            const nodeChars = sceneCharacters.filter(entry => entry.slotId === node.id);
+            return (
+              <div
+                key={node.id}
+                className={`map-node ${focusedNodeId === node.id ? 'active' : ''}`}
+                style={nodePosition}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFocusedNodeId(node.id);
+                  setFocusedCharId(null);
+                }}
+              >
+                <button
+                  className="node-core"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFocusedNodeId(node.id);
+                    setFocusedCharId(null);
+                  }}
+                >
+                  <span className="node-label">{nodeLabel}</span>
+                  <span className="node-capacity">
+                    {nodeChars.length}
+                    {slotMeta?.capacity ? `/${slotMeta.capacity}` : ''}
+                  </span>
+                </button>
+
+                <div className="node-avatars" onClick={e => e.stopPropagation()}>
+                  {nodeChars.map(entry => {
+                    const avatarUrl = getAvatarUrl(entry.character.name);
+                    return (
+                      <div
+                        key={entry.character.id}
+                        className={`avatar ${entry.character.playerId ? 'player' : 'subject'} ${focusedCharId === entry.character.id ? 'focused' : ''}`}
+                        title={entry.character.name}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFocusedCharId(entry.character.id);
+                          setFocusedNodeId(null);
+                        }}
+                        style={avatarUrl ? {
+                          backgroundImage: `url("${avatarUrl}")`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          color: 'transparent'
+                        } : {}}
+                      >
+                        {!avatarUrl ? entry.character.name.split(' ').slice(0, 2).map(part => part[0]).join('') : ''}
+                        {speechBubbles.get(entry.character.id) && (
+                          <div className="avatar-bubble" style={{color: '#fff'}}>{speechBubbles.get(entry.character.id)}</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+
+
+          {focusedNodeId && (
+            <div className="sector-card" style={sectorCardStyle} onClick={e => e.stopPropagation()}>
+              <div className="sector-card-header">
+                <div>
+                  <span className="card-label">Сектор</span>
+                  <h3>{focusedNodeLabel || focusedNodeId}</h3>
+                </div>
+                {focusedNodeMeta?.capacity && (
+                  <span className="presence-state">{sectorCharacters.length}/{focusedNodeMeta.capacity}</span>
+                )}
+              </div>
+              <div className="sector-body">
+                <div className="sector-meta">
+                  <button
+                    type="button"
+                    onClick={() => movePlayerToSector(focusedNodeId, focusedNodeLabel || focusedNodeId)}
+                    disabled={isProcessing}
+                  >
+                    Перейти
+                  </button>
+                </div>
+                <div className="sector-occupants">
+                  <span className="card-label">Оборудование</span>
+                  <div className="occupant-list">
+                    {(() => {
+                      const objs = sceneObjects.filter(o => o.nodeId === focusedNodeId);
+                      if (objs.length === 0) return <span className="node-menu-empty">Нет оборудования</span>;
+                      return objs.map(obj => {
+                        const label = actionPresetMap[obj.itemId] || availableActions.find(a => a.id === obj.itemId)?.label || ITEM_LABELS[obj.itemId] || obj.itemId;
+                        return (
+                          <div key={obj.id} style={{ padding: '6px 8px', margin: '4px 0', background: '#0b1220', border: '1px solid #233044', borderRadius: 6 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ color: '#fff' }}>{label}</div>
+                              <div style={{ color: '#94a3b8', fontSize: 12 }}>{obj.state || '—'}</div>
+                            </div>
+                            {obj.metadata && Object.keys(obj.metadata).length > 0 && (
+                              <div style={{ color: '#98a8c7', fontSize: 12, marginTop: 6 }}>{JSON.stringify(obj.metadata)}</div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {focusedCharacter && (
+            <div
+              className="anatomy-modal-container"
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'flex',
+                flexDirection: 'row',
+                gap: '16px',
+                background: 'transparent',
+                zIndex: 1000
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              
+                <AnatomyView relationsList={relationsList}
+                subjectState={subjectState}
+                character={focusedCharacter}
+                avatarUrl={getAvatarUrl(focusedCharacter.name)}
+                activeContexts={subjectState?.contexts || []}
+                availablePoints={availablePointsList}
+                availableActions={availableActions}
+                onActionSelect={(pointId: string, actionId: string, intensity: number) => {
+                  if (!focusedCharId) return;
+                  sendAction(actionId, undefined, pointId, focusedCharId, intensity);
+                }}
+              />
+
+            </div>
+          )}
+        </div>
+
+        {actionCache.length > 0 && (
+          <div className="action-cache-panel" style={{
+            position: 'absolute', bottom: 120, right: 20, // Меню кэша в нижнем правом углу
+            background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: 8,
+            padding: 12, display: 'flex', flexDirection: 'column', gap: 8, zIndex: 1000,
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)', minWidth: 500, maxWidth: 800
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <h4 style={{ margin: 0, fontSize: 13, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Кэш действий ({actionCache.length} / 10)</h4>
+              <button onClick={() => setActionCache([])} style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', fontSize: 11, cursor: 'pointer', padding: '2px 8px', borderRadius: 4 }}>Очистить всё</button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 300, overflowY: 'auto' }}>
+            {actionCache.map(cacheItem => (
+              <div key={cacheItem.uid} style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(30, 41, 59, 0.8)', padding: '8px 12px', border: '1px solid #475569', borderRadius: 6, fontSize: 13 }}>
+                
+                <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', minWidth: 150 }}>
+                  <span style={{ color: '#e2e8f0', fontWeight: 'bold' }} title={cacheItem.label}>{cacheItem.label}</span>
+                  <span style={{ color: '#94a3b8', fontSize: 11 }}>Цель: {cacheItem.targetCharName}</span>
+                </div>
+
+                <select
+                  value={cacheItem.pointId || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setActionCache(prev => prev.map(p => p.uid === cacheItem.uid ? { ...p, pointId: val } : p));
+                  }}
+                  style={{ width: 140, padding: '4px 8px', background: '#0f172a', color: '#fff', border: '1px solid #64748b', borderRadius: 4, fontSize: 12, outline: 'none' }}
+                >
+                  <option value="" disabled>Выберите точку</option>
+                  {availablePointsList.map(pt => (
+                    <option key={pt.id} value={pt.id}>{pt.label}</option>
+                  ))}
+                </select>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#0f172a', padding: '4px 8px', borderRadius: 4, border: '1px solid #64748b' }}>
+                  <span style={{ fontSize: 11, color: '#94a3b8' }}>Сила:</span>
+                  <input
+                    type="range" min="0.1" max="2.0" step="0.1"
+                    value={cacheItem.intensity}
+                    title={`Интенсивность: ${cacheItem.intensity.toFixed(1)}`}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setActionCache(prev => prev.map(p => p.uid === cacheItem.uid ? { ...p, intensity: val } : p));
+                    }}
+                    style={{ width: 80, cursor: 'pointer', accentColor: '#3b82f6' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#e2e8f0', width: 24, textAlign: 'right', fontWeight: 'bold' }}>{cacheItem.intensity.toFixed(1)}</span>
+                </div>
+
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button 
+                    type="button" 
+                    disabled={isProcessing || !cacheItem.pointId}
+                    onClick={() => {
+                        sendAction(cacheItem.presetId, undefined, cacheItem.pointId, cacheItem.targetCharId, cacheItem.intensity);
+                    }}
+                    style={{ background: isProcessing || !cacheItem.pointId ? '#475569' : '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: isProcessing || !cacheItem.pointId ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: 12, transition: 'background 0.2s' }}
+                    title={!cacheItem.pointId ? "Выберите точку применения" : "Применить действие"}
+                  >
+                    Применить
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setActionCache(prev => prev.filter(p => p.uid !== cacheItem.uid))}
+                    style={{ background: '#7f1d1d', color: '#fca5a5', border: 'none', borderRadius: 4, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16, transition: 'background 0.2s' }}
+                    title="Удалить из списка"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+              </div>
+            ))}
+            </div>
+          </div>
+        )}
+
+        <div className="hud-panel">
+          <div className="resource-strip">
+            {Object.entries(playerResources).map(([key, value]) => (
+              <div key={key} className="resource-chip">
+                <span>{key}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="hud-buttons">
+            <button type="button" onClick={() => { setShowLocations(!showLocations); setShowInventory(false); }}>Локации</button>
+            <button type="button" onClick={() => { setShowInventory(!showInventory); setShowLocations(false); }}>Инвентарь</button>
+            <button type="button">Журнал</button>
+            <button type="button" onClick={() => sendAction('wait')} disabled={isProcessing}>
+              {isProcessing ? 'Ход...' : 'Ждать тик'}
+            </button>
+          </div>
+          <div className="narrator-card">
+            <span className="card-label">Рассказчик</span>
+            <p>{latestNarrative}</p>
+          </div>
+        </div>
+
+        {showLocations && (
+          <div style={{
+            position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: 8, padding: 20, zIndex: 2000,
+            width: 450, color: '#e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 16 }}>Навигация</h3>
+              <button 
+                onClick={() => setShowLocations(false)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}
+              >×</button>
+            </div>
+            
+            <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid #475569' }}>
+               <h4 style={{ margin: '0 0 8px 0', color: '#e2e8f0', fontSize: 14 }}>{sceneData?.description || sceneData?.id}</h4>
+               <p style={{ margin: 0, color: '#94a3b8', fontSize: 13 }}>Доступные переходы в другие сектора:</p>
+               
+               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                 {sceneData?.transitions?.length > 0 ? (
+                   sceneData.transitions.map((tr: any) => {
+                     const target = allScenes.find(s => s.id === (tr.targetSceneId || tr.toSceneId));
+                     const label = target?.description ? target.description.split('.')[0] : tr.targetSceneId || tr.toSceneId;
+                     return (
+                       <button
+                         key={tr.targetSceneId || tr.toSceneId}
+                         onClick={() => {
+                           const searchParams = new URLSearchParams(window.location.search);
+                           searchParams.set('sceneId', tr.targetSceneId || tr.toSceneId);
+                           window.history.pushState({}, '', '?' + searchParams.toString());
+                           setSceneId(tr.targetSceneId || tr.toSceneId);
+                           setShowLocations(false);
+                         }}
+                         style={{ textAlign: 'left', background: '#3b82f6', color: '#fff', border: 'none', padding: '10px 14px', borderRadius: 6, cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
+                       >
+                         <span>{label}</span>
+                         <span>→</span>
+                       </button>
+                     );
+                   })
+                 ) : (
+                   <div style={{ padding: '12px', background: 'rgba(30, 41, 59, 0.5)', borderRadius: 6, color: '#64748b', fontSize: 13 }}>Нет доступных путей из этой локации</div>
+                 )}
+               </div>
+            </div>
+
+            <div>
+              <h4 style={{ margin: '0 0 10px 0', color: '#64748b', fontSize: 12, textTransform: 'uppercase', letterSpacing: '1px' }}>Системный телепорт</h4>
+              <select 
+                value={sceneId}
+                onChange={(e) => {
+                  const newId = e.target.value;
+                  const searchParams = new URLSearchParams(window.location.search);
+                  searchParams.set('sceneId', newId);
+                  window.history.pushState({}, '', '?' + searchParams.toString());
+                  setSceneId(newId);
+                  setShowLocations(false);
+                }}
+                style={{ width: '100%', background: '#0f172a', color: '#fff', border: '1px solid #475569', borderRadius: '4px', padding: '8px 12px', outline: 'none', cursor: 'pointer' }}
+              >
+                {allScenes.map(sc => (
+                  <option key={sc.id} value={sc.id}>{sc.description ? sc.description.slice(0, 30) + '...' : sc.id}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {showInventory && (
+          <div style={{
+            position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: 8, padding: 20, zIndex: 2000,
+            width: 500, color: '#e2e8f0', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, color: '#f8fafc', fontSize: 16 }}>Инвентарь</h3>
+              <button 
+                onClick={() => setShowInventory(false)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer' }}
+              >×</button>
+            </div>
+            {playerInventory.length === 0 ? (
+              <p style={{ color: '#64748b', fontSize: 13 }}>Инвентарь пуст</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
+                {playerInventory.map(item => (
+                  <div key={item.id} style={{
+                    background: 'rgba(30, 41, 59, 0.8)', padding: 12, borderRadius: 6, border: '1px solid #475569'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <strong style={{ color: '#e2e8f0', fontSize: 14 }}>{item.name}</strong>
+                      <span style={{ fontSize: 11, color: '#94a3b8', background: '#0f172a', padding: '2px 6px', borderRadius: 4 }}>{item.type}</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 12, color: '#cbd5e1' }}>{item.description}</p>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 8, fontSize: 11, color: '#64748b' }}>
+                      <span>Состояние: <span style={{ color: item.state === 'active' ? '#4ade80' : '#f87171' }}>{item.state}</span></span>
+                      {item.charges >= 0 && <span>Заряды: {item.charges}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="chat-overlay">
+          <div className="chat-header">
+            <div>
+              <span>Адресат:</span>
+              <strong>{focusedCharacter ? focusedCharacter.name : 'нет фокуса'}</strong>
+            </div>
+            {focusedNodeId && (
+              <div className="chat-node-indicator">
+                <span>Сектор:</span>
+                <strong>{nodeLabelMap.get(focusedNodeId) || focusedNodeId}</strong>
+              </div>
+            )}
+          </div>
+          <div className="chat-body">
+            <div className="log-entries" ref={logRef}>
+              {messages.filter(m => m.role !== 'narrator').map((m, i) => (
+                <div key={`${m.id}-${i}`} className={`log-entry ${m.role}`}>
+                  <strong>{getActorName(m.actorId, m.role)}:</strong> {m.text}
+                </div>
+              ))}
+            </div>
+            <form className="chat-input-bar" onSubmit={handleChatSubmit}>
+              <div className="chat-target-hint">
+                {focusedCharacter ? `Фраза адресована: ${focusedCharacter.name}` : 'Выберите персонажа на карте, чтобы активировать чат'}
+              </div>
+              <div className="chat-input-row">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  placeholder={focusedCharacter ? `Сообщение для ${focusedCharacter.name}` : 'Нет активного фокуса'}
+                  disabled={isProcessing || !focusedCharacter}
+                />
+                <button type="submit" disabled={isProcessing || !focusedCharacter}>
+                  Отправить
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

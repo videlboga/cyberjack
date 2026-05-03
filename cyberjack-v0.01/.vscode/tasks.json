@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "API Server",
+			"type": "shell",
+			"command": "npx tsx src/api/server.ts",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "API Server",
+			"type": "shell",
+			"command": "npx tsx src/api/server.ts"
+		}
+	]
+}

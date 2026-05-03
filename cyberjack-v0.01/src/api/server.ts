@@ -1,4 +1,5 @@
-import express from 'express';
+console.log("Starting server.ts...");
+console.log('Importing express...'); import express from 'express'; console.log('express ok');
 
 // Tests run in environments where @types/node may not be present for TS checks.
 // Declare process to avoid a compile-time error here.

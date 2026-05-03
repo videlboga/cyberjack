@@ -17,7 +17,7 @@ export interface RouteResponse {
 export async function dispatchEvent(payload: any): Promise<RouteResponse> {
     let pointId = payload.pointId || 'systemic';
     let dynamicModifiers = undefined;
-    const sceneId = payload.sceneId || 'lab';
+    const sceneId = payload.sceneId || 'scene_lab_calibrator';
 
     // Optional text semantic classification
     if (payload.textMessage) {
@@ -50,7 +50,7 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
         subjectId: payload.subjectId || 'S-01',
         playerId: payload.playerId || 'PL-1',
         pointId,
-        sceneId: payload.sceneId || 'lab',
+        sceneId: payload.sceneId || 'scene_lab_calibrator',
         presetId: payload.presetId || payload.actionId || 'verbal_pressure',
         playerIntensity: payload.intensity !== undefined ? payload.intensity : 1.0,
         dynamicModifiers,

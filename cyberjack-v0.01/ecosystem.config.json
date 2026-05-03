@@ -1,0 +1,1 @@
+{ "name": "cyberjack-api-ui", "apps": [ { "name": "api", "script": "npx", "args": "tsx watch src/api/server.ts" }, { "name": "ui", "script": "npm", "args": "run dev" } ] }

@@ -73,7 +73,7 @@ const SimulationViewNew: React.FC = () => {
     if (!focusedCharId) return;
     const fetchState = async () => {
       try {
-        const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'lab', pointId: 'systemic' });
+        const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'scene_lab_calibrator', pointId: 'systemic' });
         const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
         const body = await res.json();
         if (body && body.success) setSubjectState(body.subject);
@@ -87,7 +87,7 @@ const SimulationViewNew: React.FC = () => {
   const fetchState = async () => {
     if (!focusedCharId) return;
     try {
-      const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'lab', pointId: 'systemic' });
+      const search = new URLSearchParams({ subjectId: focusedCharId, sceneId: 'scene_lab_calibrator', pointId: 'systemic' });
       const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
       const body = await res.json();
       if (body && body.success) setSubjectState(body.subject);
@@ -104,7 +104,7 @@ const SimulationViewNew: React.FC = () => {
         subjectId: focusedCharId,
         pointId: targetPointId,
         intensity,
-        sceneId: 'lab',
+        sceneId: 'scene_lab_calibrator',
         playerId: 'PL-1'
       } as any;
       if (actionId) reqBody.presetId = actionId;

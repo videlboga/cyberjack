@@ -15,11 +15,12 @@ export interface TickState {
 }
 
 export function loadTickState(subjectId: string, pointId: string, playerId: string, sceneId: string): TickState {
+    const pId = pointId.toLowerCase();
     const core = subjectRepo.get(subjectId);
     if (!core) throw new Error(`Subject ${subjectId} not found`);
 
-    const point = pointStateRepo.get(subjectId, pointId);
-    if (!point) throw new Error(`Point ${pointId} for Subject ${subjectId} not found`);
+    const point = pointStateRepo.get(subjectId, pId);
+    if (!point) throw new Error(`Point ${pId} for Subject ${subjectId} not found`);
 
     const resources = resourceRepo.get(playerId);
     if (!resources) throw new Error(`Resources for ${playerId} not found`);

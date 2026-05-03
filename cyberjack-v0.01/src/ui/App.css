@@ -9,48 +9,24 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: transparent;
+  background-color: transparent !important;
   color: #e3e3e3;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 #root {
   min-height: 100vh;
+  background-color: transparent !important;
 }
 
-button,
-input,
-select,
-textarea {
-  background-color: #1f1f1f;
-  color: #e3e3e3;
-  border: 1px solid #303030;
-  border-radius: 6px;
-  padding: 6px 8px;
-  font-size: 13px;
-}
-
-button {
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-button:hover:not(:disabled) {
-  background-color: #343434;
-}
-
-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
+/* Remove default background panel rendering to be fully transparent on Unity camera */
 .app-shell {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle at top, rgba(40, 40, 40, 0.25), transparent 55%), #0f0f0f;
+  background: transparent !important;
 }
 
 .app-header {

@@ -6,7 +6,7 @@ export async function buildPromptPayloadWithDB(
     ownerId: string,
     targetId: string,
     latestResult?: any,
-    eventId: string = 'lab',
+    eventId: string = 'scene_lab_calibrator',
     options?: { suppressTickIds?: string[]; initiatorId?: string }
 ) {
     const ownerQueryId = ownerId;

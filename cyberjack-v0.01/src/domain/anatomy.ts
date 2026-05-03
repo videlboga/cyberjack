@@ -27,16 +27,12 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
         { id: 'belly', label: 'Живот', sens: 50, att: 40 },
         { id: 'back', label: 'Спина', sens: 40, att: 60, providesFunctions: ['stabilize_posture'] },
         { id: 'waist', label: 'Талия', sens: 65, att: 45 },
-        { id: 'hips', label: 'Бедра (снаружи)', sens: 40, att: 50 },
         
-        { id: 'left_arm', label: 'Левая рука', sens: 20, att: 90, providesFunctions: ['reach'] },
-        { id: 'right_arm', label: 'Правая рука', sens: 20, att: 90, providesFunctions: ['reach'] },
-        { id: 'left_hand', label: 'Левая кисть', sens: 70, att: 85, providesFunctions: ['touch', 'manipulate'], parentId: 'left_arm' },
-        { id: 'right_hand', label: 'Правая кисть', sens: 70, att: 85, providesFunctions: ['touch', 'manipulate'], parentId: 'right_arm' },
+        { id: 'arms', label: 'Руки', sens: 20, att: 90, providesFunctions: ['reach'] },
+        { id: 'hands', label: 'Кисти', sens: 70, att: 85, providesFunctions: ['touch', 'manipulate'], parentId: 'arms' },
         
         { id: 'inner_thighs', label: 'Внутренняя сторона бедер', sens: 85, att: 10 },
-        { id: 'left_leg', label: 'Левая нога', sens: 25, att: 75, providesFunctions: ['walk'] },
-        { id: 'right_leg', label: 'Правая нога', sens: 25, att: 75, providesFunctions: ['walk'] },
+        { id: 'legs', label: 'Ноги', sens: 25, att: 75, providesFunctions: ['walk'] },
         { id: 'knees', label: 'Колени', sens: 20, att: 70, providesFunctions: ['kneel', 'stand', 'shift_posture'] },
         { id: 'feet', label: 'Ступни', sens: 75, att: 50, providesFunctions: ['stand'] },
         

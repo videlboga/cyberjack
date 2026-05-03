@@ -52,7 +52,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         if (rel.target?.id) relationMap.set(rel.target.id, rel);
     });
 
-    const eventSceneId = bundle.event.sceneId || 'lab';
+    const eventSceneId = bundle.event.sceneId || 'scene_lab_calibrator';
     const presentChars = sceneCharacterRepo.list(eventSceneId);
     
     const presentSubjectIds = presentChars

@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import DiegeticUI from './DiegeticUI'; // Импортируем наш новый интерфейс
+import { GameApp } from './GameApp'; 
 import './App.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <DiegeticUI />
+    <GameApp />
   </React.StrictMode>
 );

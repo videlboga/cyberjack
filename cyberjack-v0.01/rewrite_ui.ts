@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import * as fs from 'fs';
+
+const txt = `import React, { useEffect, useState } from 'react';
 
 interface HoverData {
-  subjectId?: string;
   partId: string;
   x: number;
   y: number;
@@ -20,7 +21,6 @@ export interface DiegeticUIProps {
   
   subjectState?: any;
   setSelectedPoint: (point: string) => void;
-  onFocusSubject?: (subjectId: string) => void;
 }
 
 const DiegeticUI: React.FC<DiegeticUIProps> = ({
@@ -34,11 +34,10 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
   playerResources,
   playerInventory,
   subjectState,
-  setSelectedPoint,
-  onFocusSubject
+  setSelectedPoint
 }) => {
   const [hover, setHover] = useState<HoverData | null>(null);
-  const [radial, setRadial] = useState<{subjectId?: string, partId: string, x: number, y: number} | null>(null);
+  const [radial, setRadial] = useState<{partId: string, x: number, y: number} | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   
   const getPartStats = (id: string) => {
@@ -46,12 +45,10 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
     let status = 'UNKNOWN';
     let label = id.toUpperCase();
     
-    const lookupId = id.toLowerCase();
-    
     if (subjectState && subjectState.points) {
-      const ptState = subjectState.points[id] || subjectState.points[lookupId];
+      const ptState = subjectState.points[id];
       if (ptState) {
-        synch = ptState.localAttitude !== undefined ? ptState.localAttitude : (ptState.local_attitude !== undefined ? ptState.local_attitude : 50);
+        synch = ptState.attitude !== undefined ? ptState.attitude : ((ptState.local_attitude ?? 50) + (ptState.local_sensitivity ?? 50)) / 2;
         label = ptState.preset?.label || id.toUpperCase();
         if (synch >= 80) status = 'OPTIMAL';
         else if (synch >= 40) status = 'STABLE';
@@ -68,20 +65,14 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
 
   useEffect(() => {
     (window as any).CyberjackUI = {
-      showHoverInfo: (subjectId: string, partId: string, x: number, y: number) => {
-        if (subjectId && targetSubjectId !== subjectId) {
-          onFocusSubject?.(subjectId);
-        }
-        setHover({ subjectId, partId, x, y });
+      showHoverInfo: (partId: string, x: number, y: number) => {
+        setHover({ partId, x, y });
       },
       hideHoverInfo: () => {
         setHover(null);
       },
-      showRadialMenu: (subjectId: string, partId: string, x: number, y: number) => {
-        if (subjectId && targetSubjectId !== subjectId) {
-          onFocusSubject?.(subjectId);
-        }
-        setRadial({ subjectId, partId, x, y });
+      showRadialMenu: (partId: string, x: number, y: number) => {
+        setRadial({ partId, x, y });
         setActiveCategory(null);
         setSelectedPoint(partId);
       },
@@ -126,7 +117,7 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
                 <span>{stat.label}</span><span>{stat.val != null ? stat.val.toFixed(1) : 'N/A'}</span>
               </div>
               <div style={{ width: '100%', height: '2px', background: 'rgba(0, 240, 255, 0.1)', marginTop: '2px' }}>
-                <div style={{ width: `${Math.max(0, Math.min(100, stat.val || 0))}%`, height: '100%', background: '#00f0ff' }} />
+                <div style={{ width: \`\${Math.max(0, Math.min(100, stat.val || 0))}%\`, height: '100%', background: '#00f0ff' }} />
               </div>
             </div>
           ))}
@@ -165,27 +156,23 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
             <div style={{ fontSize: '18px', fontWeight: 'bold', margin: '4px 0' }}>{stats.label}</div>
             
             <div style={{ marginTop: '10px' }}>
-              {(subjectState?.points?.[hover.partId] || subjectState?.points?.[hover.partId.toLowerCase()]) && (() => {
-                  const pt = subjectState.points[hover.partId] || subjectState.points[hover.partId.toLowerCase()];
-                  return (
-                      <div style={{ fontSize: '10px', display: 'flex', flexDirection: 'column', gap: '4px', opacity: 0.8 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Sensitivity:</span><span>{Math.round(pt.localSensitivity || pt.local_sensitivity || 0)}%</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Attitude:</span><span>{Math.round(pt.localAttitude || pt.local_attitude || 0)}%</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Familiarity:</span><span>Lvl {Math.round(pt.familiarity || 0)}</span>
-                        </div>
-                      </div>
-                  );
-              })()}
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', marginBottom: '4px' }}>
+                <span>SYNC_RATE</span><span>{stats.synch}%</span>
+              </div>
+              <div style={{ width: '100%', height: '3px', background: 'rgba(0, 240, 255, 0.1)' }}>
+                <div style={{ width: \`\${Math.max(0, Math.min(100, stats.synch))}%\`, height: '100%', background: '#00f0ff', boxShadow: '0 0 5px #00f0ff' }} />
+              </div>
             </div>
 
-            <div style={{ fontSize: '12px', marginTop: '12px', color: '#ff0055' }}>
-              STATUS: [{stats.status}]
+            <div style={{ fontSize: '11px', marginTop: '12px', color: stats.status === 'OPTIMAL' ? '#00ffaa' : (stats.status === 'STABLE' ? '#00f0ff' : '#ff0055') }}>
+              STATUS: {stats.status}
             </div>
+            
+            {subjectState?.points && subjectState.points[hover.partId] && (
+              <div style={{ marginTop: '8px', fontSize: '9px', opacity: 0.5, borderTop: '1px solid rgba(0,240,255,0.2)', paddingTop: '4px' }}>
+                L_ATT: {subjectState.points[hover.partId]?.local_attitude?.toFixed(1) || '0'} | L_SENS: {subjectState.points[hover.partId]?.local_sensitivity?.toFixed(1) || '0'}
+              </div>
+            )}
           </div>
         );
       })()}
@@ -235,22 +222,21 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
                const isLocked = isProcessing && activeCategory;
                const radius = activeCategory ? 120 : 90;
                return (
-                <div
-                  key={item.id}
+                <button
+                  key={item.id} disabled={isLocked}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isLocked) return;
                     if (!activeCategory) {
                       setActiveCategory(item.id);
                     } else {
-                      sendAction(item.id, undefined, radial.partId, radial.subjectId || targetSubjectId || undefined);
+                      sendAction(item.id, undefined, radial.partId, targetSubjectId || undefined);
                       setRadial(null);
                       setActiveCategory(null);
                     }
                   }}
                   style={{
                     position: 'absolute', top: '50%', left: '50%',
-                    transform: `translate(-50%, -50%) rotate(${baseAngle}deg) translate(${radius}px) rotate(${-baseAngle}deg)`,
+                    transform: \`translate(-50%, -50%) rotate(\${baseAngle}deg) translate(\${radius}px) rotate(\${-baseAngle}deg)\`,
                     width: activeCategory ? '120px' : '100px', 
                     height: '34px',
                     background: isLocked ? 'rgba(50, 0, 0, 0.9)' : 'rgba(0, 20, 20, 0.9)',
@@ -258,16 +244,13 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
                     color: isLocked ? '#ff0055' : '#00f0ff', 
                     cursor: isLocked ? 'not-allowed' : 'pointer',
                     fontSize: '10px', fontWeight: 'bold', padding: '0 10px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                     whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden',
-                    clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0% 100%)',
-                    pointerEvents: 'auto',
-                    zIndex: 10
+                    clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0% 100%)'
                   }}
                   title={item.label}
                 >
                   {item.label}
-                </div>
+                </button>
                );
             })}
             <div onClick={() => { setRadial(null); setActiveCategory(null); }} style={{ position: 'fixed', top: -2000, left: -2000, width: 4000, height: 4000, zIndex: -1 }} />
@@ -284,13 +267,10 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
         <div style={{ fontSize: '20px', fontWeight: 'bold' }}>SYSTEM_CALIBRATOR_v.0.2</div>
         <div style={{ fontSize: '10px', opacity: 0.8 }}>TARGET UID: {targetSubjectId || 'AWAITING_LOCK'}</div>
         <div style={{ marginTop: '15px', color: '#ffaa00', fontSize: '12px' }}>
-          RSRC_ENERGY: {playerResources?.['energy'] || playerResources?.['energy'] || 0}
+          RSRC_ENERGY: {playerResources?.['energy'] || 0}
         </div>
         <div style={{ color: '#ffaa00', fontSize: '12px' }}>
-          RSRC_CREDITS: {playerResources?.['credits'] || playerResources?.['credit'] || 0}
-        </div>
-        <div style={{ color: '#ffaa00', fontSize: '12px' }}>
-          RSRC_AUTH: {playerResources?.['authority'] || 0}
+          RSRC_AP: {playerResources?.['action_points'] || 0}
         </div>
       </div>
     </div>
@@ -298,3 +278,5 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
 };
 
 export default DiegeticUI;
+`;
+fs.writeFileSync('./src/ui/DiegeticUI.tsx', txt);

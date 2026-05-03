@@ -6,13 +6,14 @@ import { normalizePlayer } from './playerController';
 
 export const getState = (req: Request, res: Response) => {
     const subjectId = (req.query.subjectId as string) || 'S-01';
-    const pointId = (req.query.pointId as string) || 'hands';
+    let pointId = (req.query.pointId as string) || 'hands';
+    pointId = pointId.toLowerCase();
     const requestedSceneId = req.query.sceneId as string | undefined;
     
     try {
         const uiState = subjectRepo.getUIState(subjectId, pointId);
         const subjectCharacter = characterRepo.ensureSubject(subjectId, uiState.subject?.name || subjectId);
-        const targetSceneId = requestedSceneId || subjectCharacter.currentSceneId || 'lab';
+        const targetSceneId = requestedSceneId || subjectCharacter.currentSceneId || 'scene_lab_calibrator';
         const scene = sceneRepo.get(targetSceneId);
         const player = normalizePlayer(resourceRepo.get('PL-1'));
         const relations = characterRelationRepo.listFor(subjectCharacter.id);
