@@ -52,12 +52,13 @@ const insertProfileStmt = db.prepare(`
         profile_json = excluded.profile_json
 `);
 
+const rawActions = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/actions.json', 'utf8'));
+const rawItems = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/items.json', 'utf8'));
+const rawTraits = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/traits.json', 'utf8'));
+
 db.transaction(() => {
 
     console.log("Loading and validating JSON presets...");
-    const rawActions = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/actions.json', 'utf8'));
-    const rawItems = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/items.json', 'utf8'));
-    const rawTraits = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/traits.json', 'utf8'));
 
     // Load Items
     const insertItemStmt = db.prepare('INSERT OR IGNORE INTO items (id, name, type, tags, description) VALUES (?, ?, ?, ?, ?)');
@@ -255,7 +256,7 @@ db.transaction(() => {
     }
 
     
-    const availableActionsStr = JSON.stringify(["gentle_stroke","tickle","light_kiss","deep_kiss","feather_stroke","deep_massage","licking","firm_grip","light_bite","hard_bite","pinch","scratching","slap","hard_slap","needle_prick","belt_strike","whip_strike","taser_shock","ice_cube","hot_wax","vibrator_pulse","hair_pull","spit","breath_blow","verbal_pressure","stare","close_inspection","feint_strike","pose_kneeling","act_apply_handcuffs","act_remove_handcuffs","act_struggle_cuffs","act_suspend_wrists","act_release_wrists", "act_buy_active"]);
+    const availableActionsStr = JSON.stringify(rawActions.map((a: any) => a.id));
 
     const insertSceneStmt = db.prepare('INSERT OR REPLACE INTO scenes (id, available_actions, description, slots, transitions, is_global_map) VALUES (?, ?, ?, ?, ?, ?)');
 

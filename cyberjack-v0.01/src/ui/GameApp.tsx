@@ -605,10 +605,11 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       if (text) reqBody.textMessage = text;
 
       if (presetId && presetId !== 'wait') {
-        const actionLabel = availableActions.find(a => a.id === presetId)?.label || presetId;
-        addMessage({ role: 'player', text: `[Действие] ${actionLabel} -> ${resolvedPoint}`, actorId: 'player' });
+        // Мы не добавляем сообщение о физическом действии в лог здесь, 
+        // чтобы не засорять художественный нарратив техническими строками.
+        // Оно все равно отобразится через реакцию Рассказчика.
       } else if (presetId === 'wait') {
-        addMessage({ role: 'system', text: `Вы ждете... Проходит время.`, actorId: 'system' });
+        // addMessage({ role: 'system', text: `Вы ждете... Проходит время.`, actorId: 'system' });
       } else if (text) {
         addMessage({ role: 'player', text, actorId: 'player' });
       }
@@ -642,35 +643,18 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
             }
           });
           const reaction = data.narratorReaction || data.actorReplies[0]?.reaction;
-          if (reaction) {
-            if (actionApplied) {
-              addMessage({ role: 'narrator', text: reaction });
-            } else {
-              addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
-            }
+          if (reaction && actionApplied) {
+            addMessage({ role: 'narrator', text: reaction });
           }
         } else if (data.reply) {
           if (data.reply.speech) addMessage({ role: 'subject', text: data.reply.speech, actorId: targetCharId });
-          if (data.reply.reaction) {
-            if (actionApplied) {
-              addMessage({ role: 'narrator', text: data.reply.reaction });
-            } else {
-              addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
-            }
+          if (data.reply.reaction && actionApplied) {
+            addMessage({ role: 'narrator', text: data.reply.reaction });
           }
-        } else if (data.narratorReaction) {
-          if (actionApplied) {
-            addMessage({ role: 'narrator', text: data.narratorReaction });
-          } else {
-            addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
-          }
+        } else if (data.narratorReaction && actionApplied) {
+          addMessage({ role: 'narrator', text: data.narratorReaction });
         } else {
-          const fallback = data.diagnostics?.semanticNarrative || data.llmResponse?.content || 'Действие выполнено.';
-          if (actionApplied) {
-            addMessage({ role: 'narrator', text: fallback });
-          } else {
-            addMessage({ role: 'system', text: 'Команда принята. Ожидается выполнение.' });
-          }
+          // Если нет ни речи, ни реакции нарратора, и действие не выполнилось (филлерная заглушка) - ничего не выводим
         }
       }
     } catch (e) {
@@ -696,17 +680,23 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   };
 
   const groupedActions = useMemo(() => {
-    // 1. Ограничение: физические действия недоступны, если сектора разные
-    // 2. Не отображаем вербальные действия
-    // 3. Только доступные по ресурсам
-    const playerSector = sceneCharacters.find(c => c.character.id === PLAYER_CHARACTER_ID)?.slotId;
-    const targetSector = sceneCharacters.find(c => c.character.id === focusedCharId)?.slotId;
-    const sameSector = playerSector === targetSector;
-
+    // 1. Убрано ограничение на сектора: теперь мы полагаемся на то, что если 
+    //    игрок смог кликнуть на персонажа (в Unity или интерфейсе), значит он рядом.
+    // 2. Не отображаем вербальные действия (они идут через инпут чата).
+    // 3. Проверка предметов пока идет по инвентарю (позже Unity сможет передавать фокус на предметы сцены).
+    
+    // Получаем список предметов в текущей сцене или инвентаре для проверки access'а
+    // (Пока оставляем проверку по playerInventory)
     const validActions = availableActions.filter(a => {
-      if (a.requiresItem && !playerInventory.some(item => item.id === a.requiresItem)) return false;
+      // Если предмет не в руках, проверяем, нет ли его в комнате (в sceneObjects)
+      if (a.requiresItem) {
+        const hasInInventory = playerInventory.some(item => item.id === a.requiresItem);
+        // Если у нас будет механизм проверки предметов сцены - можно добавить его сюда
+        // const hasInRoom = sceneObjects.some(obj => obj.itemId === a.requiresItem);
+        if (!hasInInventory) return false;
+      }
+      
       if (a.type === 'verbal') return false;
-      if (a.type === 'physical' && !sameSector) return false;
       return true;
     });
 
@@ -742,6 +732,10 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         subjectState={subjectState}
         setSelectedPoint={setSelectedPoint}
         onFocusSubject={setFocusedCharId}
+        chatInput={chatInput}
+        setChatInput={setChatInput}
+        handleChatSubmit={handleChatSubmit}
+        relationsList={relationsList}
       />
     </>
   );

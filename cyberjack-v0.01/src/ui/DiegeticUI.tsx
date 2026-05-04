@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface HoverData {
   subjectId?: string;
@@ -21,6 +21,10 @@ export interface DiegeticUIProps {
   subjectState?: any;
   setSelectedPoint: (point: string) => void;
   onFocusSubject?: (subjectId: string) => void;
+  chatInput: string;
+  setChatInput: React.Dispatch<React.SetStateAction<string>>;
+  handleChatSubmit: (e: React.FormEvent) => void;
+  relationsList: any[];
 }
 
 const DiegeticUI: React.FC<DiegeticUIProps> = ({
@@ -35,12 +39,20 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
   playerInventory,
   subjectState,
   setSelectedPoint,
-  onFocusSubject
+  onFocusSubject,
+  chatInput,
+  setChatInput,
+  handleChatSubmit,
+  relationsList
 }) => {
   const [hover, setHover] = useState<HoverData | null>(null);
   const [radial, setRadial] = useState<{subjectId?: string, partId: string, x: number, y: number} | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  
+
+  const radialStateRef = useRef<boolean>(false);
+  const radialDataRef = useRef<{subjectId?: string, partId: string} | null>(null);
+  const ignoreNextRadialRef = useRef<number>(0);
+
   const getPartStats = (id: string) => {
     let synch = 50.0;
     let status = 'UNKNOWN';
@@ -67,25 +79,42 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
   };
 
   useEffect(() => {
+    const isPointerOverMenu = (normX: number, normY: number) => {
+        if (typeof document === 'undefined') return false;
+        // normX and normY are 0..1 scale relative to the browser window viewport.
+        const px = normX * window.innerWidth;
+        const py = normY * window.innerHeight;
+        const el = document.elementFromPoint(px, py);
+        return el && el.closest('.radial-menu-container') !== null;
+    };
+
     (window as any).CyberjackUI = {
-      showHoverInfo: (subjectId: string, partId: string, x: number, y: number) => {
+      showHoverInfo: (subjectId: string, partId: string, normX: number, normY: number) => {
+        if (radialStateRef.current) return;
         if (subjectId && targetSubjectId !== subjectId) {
           onFocusSubject?.(subjectId);
         }
-        setHover({ subjectId, partId, x, y });
+        setHover({ subjectId, partId, x: normX, y: normY });
       },
       hideHoverInfo: () => {
+        if (radialStateRef.current) return;
         setHover(null);
       },
-      showRadialMenu: (subjectId: string, partId: string, x: number, y: number) => {
+      showRadialMenu: (subjectId: string, partId: string, normX: number, normY: number) => {
+        if (isPointerOverMenu(normX, normY)) return;
+
         if (subjectId && targetSubjectId !== subjectId) {
           onFocusSubject?.(subjectId);
         }
-        setRadial({ subjectId, partId, x, y });
+        radialStateRef.current = true;
+        setRadial({ subjectId, partId, x: normX, y: normY });
         setActiveCategory(null);
         setSelectedPoint(partId);
       },
-      hideRadialMenu: () => {
+      hideRadialMenu: (normX: number, normY: number) => {
+        if (isPointerOverMenu(normX, normY)) return;
+
+        radialStateRef.current = false;
         setRadial(null);
         setActiveCategory(null);
       }
@@ -96,7 +125,7 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
         delete (window as any).CyberjackUI;
       }
     };
-  }, [setSelectedPoint]);
+  }, [setSelectedPoint, targetSubjectId, onFocusSubject]);
 
   return (
     <div style={{ 
@@ -133,29 +162,71 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
         </div>
       )}
 
-      {/* НИЖНЯЯ ПАНЕЛЬ: ЛОГИ */}
+      {/* НИЖНЯЯ ПАНЕЛЬ: ЛОГИ И ЧАТ */}
       <div style={{
         position: 'absolute', bottom: '30px', left: '30px', width: '450px',
-        pointerEvents: 'none', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '6px'
+        display: 'flex', flexDirection: 'column', gap: '8px'
       }}>
-        {messages.slice(-6).map((m, i) => (
-          <div key={i} style={{ 
-            background: 'rgba(0, 20, 25, 0.85)', 
-            borderLeft: m.role === 'narrator' ? '2px solid #00f0ff' : '2px solid #ff0055',
-            padding: '8px 12px', color: m.role === 'narrator' ? '#ccffff' : '#ffaaaa',
-            textShadow: '0 0 2px rgba(0,0,0,0.8)'
-          }}>
-            {m.text}
-          </div>
-        ))}
-      </div>
-
-      {/* ХОВЕР ПО ЧАСТЯМ ТЕЛА */}
+        <div style={{ 
+          pointerEvents: 'none', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '10px'
+        }}>
+          {messages.filter(m => m.role === 'narrator' || m.role === 'subject' || m.role === 'player').slice(-6).map((m, i) => (
+            <div key={i} style={{ 
+              background: 'rgba(0, 5, 10, 0.7)',
+              borderLeft: m.role === 'narrator' ? '3px solid #00f0ff' : (m.role === 'player' ? '3px solid #00ffaa' : '3px solid #ff0055'),
+              padding: '10px 15px', 
+              color: m.role === 'narrator' ? '#ccffff' : (m.role === 'player' ? '#aaffff' : '#ffcccc'),
+              textShadow: '0 0 2px rgba(0,0,0,0.8)',
+              fontStyle: m.role === 'narrator' ? 'italic' : 'normal'
+            }}>
+              {m.role === 'player' && <span style={{ opacity: 0.5, fontSize: '9px', display: 'block', marginBottom: '4px' }}>ВЫ:</span>}
+              {m.role === 'subject' && <span style={{ opacity: 0.5, fontSize: '9px', display: 'block', marginBottom: '4px' }}>{m.actorId?.toUpperCase() || 'ЦЕЛЬ'}:</span>}
+              {m.text}
+            </div>
+          ))}
+        </div>
+        
+        {/* INPUT FORM */}
+        <form onSubmit={handleChatSubmit} style={{ pointerEvents: 'auto', display: 'flex' }}>
+          <input 
+            type="text" 
+            value={chatInput} 
+            onChange={(e) => setChatInput(e.target.value)} 
+            placeholder="Ввести команду/реплику..."
+            style={{ 
+              flex: 1, 
+              background: 'rgba(0, 20, 25, 0.85)', 
+              border: '1px solid #00f0ff', 
+              color: '#00f0ff', 
+              padding: '8px 12px', 
+              fontFamily: 'monospace',
+              outline: 'none'
+            }} 
+            disabled={isProcessing}
+          />
+          <button 
+            type="submit" 
+            disabled={isProcessing}
+            style={{
+              background: 'rgba(0, 240, 255, 0.1)',
+              border: '1px solid #00f0ff',
+              borderLeft: 'none',
+              color: '#00f0ff',
+              padding: '0 15px',
+              cursor: isProcessing ? 'default' : 'pointer',
+              fontFamily: 'monospace',
+              fontWeight: 'bold'
+            }}
+          >
+            {isProcessing ? '...' : '>_'}
+          </button>
+        </form>
+      </div>      {/* ХОВЕР ПО ЧАСТЯМ ТЕЛА */}
       {hover && (() => {
         const stats = getPartStats(hover.partId);
         return (
           <div style={{
-            position: 'absolute', left: hover.x, top: hover.y, transform: 'translate(40px, -50%)',
+            position: 'absolute', left: `${hover.x * 100}vw`, top: `${hover.y * 100}vh`, transform: 'translate(40px, -50%)',
             background: 'linear-gradient(135deg, rgba(0, 40, 40, 0.9) 0%, rgba(0, 20, 25, 0.95) 100%)',
             border: '1px solid #00f0ff', borderRadius: '2px', padding: '12px', minWidth: '180px',
             boxShadow: '0 0 20px rgba(0, 240, 255, 0.2)', pointerEvents: 'none'
@@ -201,10 +272,22 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
 
         return (
           <div style={{
-              position: 'absolute', left: radial.x, top: radial.y, transform: 'translate(-50%, -50%)',
-              width: '340px', height: '340px', pointerEvents: 'auto'
+              position: 'absolute', left: `${radial.x * 100}vw`, top: `${radial.y * 100}vh`, transform: 'translate(-50%, -50%)',
+              width: '380px', height: '380px', pointerEvents: 'auto', zIndex: 50,
+              background: 'radial-gradient(circle at center, rgba(0, 40, 50, 0.7) 0%, rgba(0, 20, 25, 0.4) 60%, transparent 100%)',
+              borderRadius: '50%',
+              backdropFilter: 'blur(2px)'
+          }}
+          className="radial-menu-container"
+          onClick={(e) => {
+              // Просто поглощаем клик, не закрывая меню
+              e.stopPropagation();
+          }}
+          onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
           }}>
-            <div 
+              <div 
               style={{
                 position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
                 width: '60px', height: '60px', background: 'rgba(0, 240, 255, 0.1)',
@@ -215,7 +298,8 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
               }}
               onClick={(e) => { 
                 e.stopPropagation(); 
-                if (activeCategory) setActiveCategory(null); 
+                ignoreNextRadialRef.current = Date.now() + 1500;
+                if (activeCategory) setActiveCategory(null);
               }}
             >
               {activeCategory ? 'BACK' : 'CMD'}
@@ -241,9 +325,13 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
                     e.stopPropagation();
                     if (isLocked) return;
                     if (!activeCategory) {
+                      ignoreNextRadialRef.current = Date.now() + 1500;
                       setActiveCategory(item.id);
                     } else {
                       sendAction(item.id, undefined, radial.partId, radial.subjectId || targetSubjectId || undefined);
+                      ignoreNextRadialRef.current = Date.now() + 1500;
+                      radialStateRef.current = false;
+                      radialDataRef.current = null;
                       setRadial(null);
                       setActiveCategory(null);
                     }
@@ -270,20 +358,51 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
                 </div>
                );
             })}
-            <div onClick={() => { setRadial(null); setActiveCategory(null); }} style={{ position: 'fixed', top: -2000, left: -2000, width: 4000, height: 4000, zIndex: -1 }} />
           </div>
         );
       })()}
 
-      {/* ПРАВАЯ ПАНЕЛЬ: РЕСУРСЫ */}
+      {/* ПРАВАЯ ПАНЕЛЬ: РЕСУРСЫ и ОТНОШЕНИЯ */}
       <div style={{
         position: 'absolute', bottom: '30px', right: '30px', color: '#00f0ff', textAlign: 'right',
-        pointerEvents: 'none', borderRight: '2px solid #00f0ff', paddingRight: '15px'
+        pointerEvents: 'auto', borderRight: '2px solid #00f0ff', paddingRight: '15px'
       }}>
         <div style={{ fontSize: '10px', opacity: 0.5 }}>STATUS: ACTIVE</div>
         <div style={{ fontSize: '20px', fontWeight: 'bold' }}>SYSTEM_CALIBRATOR_v.0.2</div>
         <div style={{ fontSize: '10px', opacity: 0.8 }}>TARGET UID: {targetSubjectId || 'AWAITING_LOCK'}</div>
-        <div style={{ marginTop: '15px', color: '#ffaa00', fontSize: '12px' }}>
+        
+        {/* RELATIONS SECTION */}
+        {relationsList && relationsList.length > 0 && (
+          <div style={{ marginTop: '15px', borderBottom: '1px solid rgba(0, 240, 255, 0.2)', paddingBottom: '10px', marginBottom: '10px' }}>
+            <div style={{ fontSize: '10px', opacity: 0.6, marginBottom: '5px' }}>TARGET_RELATIONS</div>
+            {relationsList.map((rel: any, i: number) => {
+              const metrics = [
+                { axisId: 'Attitude', value: (rel.attitude != null ? rel.attitude : 50) - 50 },
+                { axisId: 'Openness', value: rel.openness || 0 },
+                { axisId: 'Plasticity', value: rel.plasticity || 0 }
+              ];
+              return (
+                <div key={i} style={{ marginBottom: '8px' }}>
+                  <div style={{ fontSize: '9px', opacity: 0.5, textAlign: 'right', marginBottom: '2px' }}>TO: {rel.to_id}</div>
+                  {metrics.map((m, j) => (
+                    <div key={`${i}-${j}`} style={{ 
+                      display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px',
+                      fontSize: '11px', marginBottom: '4px', opacity: 0.9
+                    }}>
+                      <div style={{ width: '80px', height: '2px', background: 'rgba(0, 240, 255, 0.1)', flexShrink: 0 }}>
+                        <div style={{ width: `${Math.max(0, Math.min(100, Math.abs(m.value * 2)))}%`, height: '100%', background: m.value >= 0 ? '#00f0ff' : '#ff0055', float: 'right' }} />
+                      </div>
+                      <div>[{m.value > 0 ? '+' : ''}{m.value.toFixed(1)}]</div>
+                      <div style={{ color: '#fff', textTransform: 'uppercase' }}>{m.axisId.substring(0, 12)}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{ marginTop: '10px', color: '#ffaa00', fontSize: '12px' }}>
           RSRC_ENERGY: {playerResources?.['energy'] || playerResources?.['energy'] || 0}
         </div>
         <div style={{ color: '#ffaa00', fontSize: '12px' }}>
