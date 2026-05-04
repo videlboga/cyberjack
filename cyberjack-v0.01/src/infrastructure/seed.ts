@@ -23,7 +23,7 @@ const subjects: { id: string, name: string, state: any, profile: CharacterProfil
     {
         id: 'S-AV-01',
         name: 'Сера',
-        state: { sensitivity: 60, capacity: 50, openness: 40, plasticity: 70, attitude: 50 },
+        state: { sensitivity: 60, capacity: 50, openness: 100, plasticity: 100, attitude: 100 },
         profile: {
             base: { name: 'Serah', age: 24, gender: 'female', anatomy: 'none', status: 'asset' },
             origin: { birthplaceId: 'loc-004', professionId: 'prof-002', biography: 'S-AV-01', coreTrauma: undefined },
@@ -38,7 +38,12 @@ const insertSubjectStmt = db.prepare(`
     INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
-        name = excluded.name
+        name = excluded.name,
+        sensitivity = excluded.sensitivity,
+        capacity = excluded.capacity,
+        openness = excluded.openness,
+        plasticity = excluded.plasticity,
+        attitude = excluded.attitude
 `);
 
 const insertProfileStmt = db.prepare(`
@@ -256,7 +261,8 @@ db.transaction(() => {
     }
 
     
-    const availableActionsStr = JSON.stringify(rawActions.map((a: any) => a.id));
+    const availableActions = actions.map(a => a.id);
+    const availableActionsStr = JSON.stringify(availableActions);
 
     const insertSceneStmt = db.prepare('INSERT OR REPLACE INTO scenes (id, available_actions, description, slots, transitions, is_global_map) VALUES (?, ?, ?, ?, ?, ?)');
 

@@ -983,24 +983,36 @@
         "breasts"
       ],
       "blocksPoints": [
+        "neck",
+        "shoulders",
+        "chest",
+        "nipples",
+        "belly",
+        "back",
+        "waist",
+        "hips",
+        "left_arm",
+        "right_arm",
+        "inner_thighs",
+        "left_leg",
+        "right_leg",
+        "knees",
+        "buttocks",
+        "anus",
         "vulva",
         "vagina",
         "clitoris",
-        "anus",
-        "nipples",
-        "breasts",
+        "torso",
+        "legs",
         "groin",
-        "penis",
-        "testicles"
+        "breasts"
       ],
       "modifiers": {
-        "intensity_mult": 0.3,
-        "sharpness_mult": 0.1,
-        "contact_mult": 0.5
+        "intensity": -5,
+        "sharpness": -8,
+        "contact": -8
       }
     }
-    ,
-    "model_url": "/models/anna_vaiolet.vrm"
   },
   {
     "id": "eq_strip_jumpsuit",

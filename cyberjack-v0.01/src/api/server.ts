@@ -1,3 +1,4 @@
+import 'dotenv/config';
 console.log("Starting server.ts...");
 console.log('Importing express...'); import express from 'express'; console.log('express ok');
 
@@ -33,7 +34,15 @@ app.use('/api', stateRoutes);
 app.use('/api', playerRoutes);
 app.use('/api', sceneRoutes);
 app.use('/api', metaRoutes);
-app.get('/api/test-ws', (req, res) => {
+
+app.get('/api/debug-env', (req: any, res: any) => {
+    res.json({
+        hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
+        keyPrefix: process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.substring(0, 10) + '...' : 'none'
+    });
+});
+
+app.get('/api/test-ws', (req: any, res: any) => {
     broadcastEvent('MOVE', { target: 'Box_350x250x300_Mesh', x: 0, y: 5, z: 0 });
     res.json({ success: true, message: 'Command sent to Unity' });
 });

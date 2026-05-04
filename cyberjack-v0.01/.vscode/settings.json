@@ -68,5 +68,6 @@
         "*.slnx": "*.csproj"
     },
     "dotnet.defaultSolution": "cyberjack-v0.01.slnx",
-    "dotnet.enableWorkspaceBasedDevelopment": false
+    "dotnet.enableWorkspaceBasedDevelopment": false,
+    "git.ignoreLimitWarning": true
 }

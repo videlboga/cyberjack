@@ -6,10 +6,10 @@ export interface ChatMessage {
 }
 
 const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
-const LLM_API_KEY = process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || process.env.SILLYTAVERN_API_KEY || '';
 const LLM_MODEL = process.env.LLM_MODEL || 'deepseek/deepseek-chat';
 
 export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, sentMessages: ChatMessage[] }> {
+    const LLM_API_KEY = process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || process.env.SILLYTAVERN_API_KEY || '';
     const messages: ChatMessage[] = [
         { role: 'system', content: systemPrompt }
     ];

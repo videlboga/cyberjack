@@ -7,6 +7,15 @@ interface HoverData {
   y: number;
 }
 
+interface SpeechBubbleData {
+  id: string;
+  actorId: string;
+  text: string;
+  x: number;
+  y: number;
+  expiresAt: number;
+}
+
 export interface DiegeticUIProps {
   messages: any[];
   groupedActions: Record<string, any[]>;
@@ -47,6 +56,7 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
 }) => {
   const [hover, setHover] = useState<HoverData | null>(null);
   const [radial, setRadial] = useState<{subjectId?: string, partId: string, x: number, y: number} | null>(null);
+  const [speechBubbles, setSpeechBubbles] = useState<Record<string, SpeechBubbleData>>({});
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const radialStateRef = useRef<boolean>(false);
@@ -79,6 +89,53 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
   };
 
   useEffect(() => {
+    // Sync messages to speech bubbles
+    const lastMessage = messages[messages.length - 1];
+    
+    // RADICAL FIX: We NEVER want bubbles for player roles.
+    // Explicitly check role and actorId.
+    const isPlayer = lastMessage?.role === 'player' || 
+                     lastMessage?.actorId === 'PLAYER' || 
+                     lastMessage?.actorId === 'PL-1';
+
+    if (lastMessage && lastMessage.role === 'subject' && !isPlayer) {
+        const actorId = lastMessage.actorId || 'UNKNOWN';
+        
+        setSpeechBubbles(prev => {
+            const current = prev[actorId];
+            return {
+                ...prev,
+                [actorId]: {
+                    id: current?.id || `${Date.now()}`,
+                    actorId,
+                    text: lastMessage.text,
+                    x: current?.x || 0.5,
+                    y: current?.y || 0.3,
+                    expiresAt: Date.now() + 5000
+                }
+            };
+        });
+    }
+
+    // Immediate cleanup for any player bubbles that might have leaked
+    setSpeechBubbles(prev => {
+        const now = Date.now();
+        let hasChanges = false;
+        const next = { ...prev };
+
+        for (const id in next) {
+            const isInvalid = id === 'PLAYER' || id === 'PL-1' || next[id].expiresAt < now;
+            if (isInvalid) {
+                delete next[id];
+                hasChanges = true;
+            }
+        }
+
+        return hasChanges ? next : prev;
+    });
+  }, [messages]);
+
+  useEffect(() => {
     const isPointerOverMenu = (normX: number, normY: number) => {
         if (typeof document === 'undefined') return false;
         // normX and normY are 0..1 scale relative to the browser window viewport.
@@ -99,6 +156,22 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
       hideHoverInfo: () => {
         if (radialStateRef.current) return;
         setHover(null);
+      },
+      updateSpeechBubblePosition: (actorId: string, normX: number, normY: number) => {
+        // Log to verify coordinates are coming through
+        // console.log(`UI: Update bubble pos for ${actorId}: ${normX}, ${normY}`);
+        setSpeechBubbles(prev => {
+          if (!prev[actorId]) return prev;
+          if (prev[actorId].x === normX && prev[actorId].y === normY) return prev;
+          return {
+            ...prev,
+            [actorId]: { 
+              ...prev[actorId], 
+              x: normX, 
+              y: normY 
+            }
+          };
+        });
       },
       showRadialMenu: (subjectId: string, partId: string, normX: number, normY: number) => {
         if (isPointerOverMenu(normX, normY)) return;
@@ -127,12 +200,101 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
     };
   }, [setSelectedPoint, targetSubjectId, onFocusSubject]);
 
+  useEffect(() => {
+    // Sync messages to speech bubbles
+    const lastMessage = messages[messages.length - 1];
+    
+    // RADICAL FIX: We NEVER want bubbles for player roles.
+    const isPlayer = lastMessage?.role === 'player' || 
+                     lastMessage?.actorId === 'PLAYER' || 
+                     lastMessage?.actorId === 'PL-1' ||
+                     lastMessage?.actorName === 'Калибратор';
+
+    if (lastMessage && lastMessage.role === 'subject' && !isPlayer) {
+      const actorId = lastMessage.actorId || 'UNKNOWN';
+      
+      setSpeechBubbles(prev => {
+        const current = prev[actorId];
+        return {
+          ...prev,
+          [actorId]: {
+            id: current?.id || `${Date.now()}`,
+            actorId,
+            text: lastMessage.text,
+            x: current?.x ?? 0.5,
+            y: current?.y ?? 0.3,
+            expiresAt: Date.now() + 5000
+          }
+        };
+      });
+    }
+
+    // Force remove player bubbles from state immediately
+    setSpeechBubbles(prev => {
+        if (prev['PLAYER'] || prev['PL-1']) {
+            const next = { ...prev };
+            delete next['PLAYER'];
+            delete next['PL-1'];
+            return next;
+        }
+        return prev;
+    });
+  }, [messages]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      setSpeechBubbles(prev => {
+        let changed = false;
+        const next = { ...prev };
+        for (const key in next) {
+          if (next[key].expiresAt < now) {
+            delete next[key];
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    }, 500);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div style={{ 
       width: '100vw', height: '100vh', background: 'transparent', overflow: 'hidden',
       position: 'relative', pointerEvents: 'none', fontFamily: 'monospace', color: '#00f0ff'
     }}>
       
+      {/* SPEECH BUBBLES */}
+      {Object.values(speechBubbles).map(bubble => (
+        <div 
+          key={bubble.id}
+          style={{
+            position: 'absolute',
+            left: `${bubble.x * 100}vw`,
+            top: `${bubble.y * 100}vh`,
+            transform: 'translate(-50%, -120%)',
+            background: 'rgba(0, 5, 10, 0.85)',
+            border: bubble.actorId === 'PLAYER' ? '1px solid #00ffaa' : '1px solid #ff0055',
+            padding: '10px 15px',
+            color: '#fff',
+            fontSize: '14px',
+            maxWidth: '280px',
+            pointerEvents: 'none',
+            zIndex: 100,
+            boxShadow: '0 0 20px rgba(0,0,0,0.8)',
+            clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 55% 85%, 50% 100%, 45% 85%, 0% 85%)',
+            paddingBottom: '25px',
+            textShadow: '0 1px 2px rgba(0,0,0,1)'
+          }}
+        >
+          <div style={{ fontSize: '10px', opacity: 0.6, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            {bubble.actorId}
+          </div>
+          {bubble.text}
+        </div>
+      ))}
+
       {/* ЛЕВАЯ ПАНЕЛЬ: CORE STATE */}
       {subjectState && (
         <div style={{
