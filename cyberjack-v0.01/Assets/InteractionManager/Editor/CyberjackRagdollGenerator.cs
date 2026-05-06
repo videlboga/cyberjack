@@ -252,7 +252,7 @@ namespace Cyberjack.Editor
             col.radius = (worldDist * 0.25f) / s;
             col.center = new Vector3(0, (worldDist * 0.5f) / s, 0);
 
-            if (p.gameObject.GetComponent<Rigidbody>() == null) p.gameObject.AddComponent<Rigidbody>();
+            Rigidbody rb = p.gameObject.GetComponent<Rigidbody>(); if (rb == null) rb = p.gameObject.AddComponent<Rigidbody>(); rb.isKinematic = true; rb.useGravity = false;
 
             BodyPartUIAnchor ui = p.gameObject.GetComponent<BodyPartUIAnchor>();
             if (ui == null) ui = p.gameObject.AddComponent<BodyPartUIAnchor>();
