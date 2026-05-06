@@ -231,6 +231,7 @@ namespace Cyberjack.Editor
             Transform p = map.bone.Find(objName);
             if (p == null) { p = new GameObject(objName).transform; p.SetParent(map.bone); }
             
+            p.gameObject.layer = 3; // Interactable Layer
             p.localPosition = Vector3.zero;
 
             if (endT != null) {
@@ -266,6 +267,8 @@ namespace Cyberjack.Editor
             string objName = "Anchor_" + map.partId + "_" + map.bone.name;
             Transform a = map.bone.Find(objName);
             if (a == null) { a = new GameObject(objName).transform; a.SetParent(map.bone); }
+            
+            a.gameObject.layer = 3; // Interactable Layer
             a.localScale = Vector3.one;
 
             float dist = (endT != null) ? Vector3.Distance(map.bone.position, endT.position) : 0.2f;
