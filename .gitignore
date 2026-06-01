@@ -1,7 +1,73 @@
+# Dependencies
 node_modules/
 dist/
 build/
-*.sqlite
-*.log
+
+# Next.js
+.next/
+out/
+
+# Environment
 .env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.jsonl
+logs/
+cyberjack-v0.01/logs/
+
+# SQLite
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Backups & migration artifacts
+backups/
+migration-results/
+*.backup
+*.bak
+
+# Large binaries
+talent-architect-gdd.zip
+*.zip
+*.7z
+*.gz
+
+# Media
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.mp4
+*.avi
+*.mov
+*.svg
+
+# 3D model files
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+
+# Runtime
+*.pid
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output
+
+# Test results
+__tests__/results/
+test-results/
