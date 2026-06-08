@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "npx tsx watch src/api/server.ts",
+    "seed:diegetic": "npx tsx scripts/bootstrap_diegetic_scene.ts",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest --run --threads=1"

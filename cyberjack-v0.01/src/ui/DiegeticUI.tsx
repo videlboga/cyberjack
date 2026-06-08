@@ -1,4 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
+import {
+  createCyberjackUiApi,
+  destroyCyberjackUiApi,
+  isCyberjackBridgeMessage,
+  isPointerPosition,
+  normalizeCyberjackPointerPosition
+} from './bridge/cyberjackUiBridge';
 
 interface HoverData {
   subjectId?: string;
@@ -20,10 +27,13 @@ export interface DiegeticUIProps {
   messages: any[];
   groupedActions: Record<string, any[]>;
   radialCategories: any[];
+  hoveredActions?: any[];
+  availablePoints?: any[];
   sendAction: (presetId?: string, text?: string, targetPoint?: string, targetCharIdOverride?: string, customIntensity?: number) => void;
   isProcessing: boolean;
   focusedCharacter: any;
   targetSubjectId: string | null;
+  playerCharacterId?: string;
   playerResources: Record<string, number>;
   playerInventory: any[];
   
@@ -34,16 +44,27 @@ export interface DiegeticUIProps {
   setChatInput: React.Dispatch<React.SetStateAction<string>>;
   handleChatSubmit: (e: React.FormEvent) => void;
   relationsList: any[];
+  onSceneBinding?: (binding: {
+    sceneId: string;
+    playerId: string;
+    subjectId: string;
+    playerName?: string;
+    subjectName?: string;
+  }) => void;
+  onHoverPointChange?: (pointId: string | null) => void;
 }
 
 const DiegeticUI: React.FC<DiegeticUIProps> = ({
   messages,
   groupedActions,
   radialCategories,
+  hoveredActions,
+  availablePoints,
   sendAction,
   isProcessing,
   focusedCharacter,
   targetSubjectId,
+  playerCharacterId,
   playerResources,
   playerInventory,
   subjectState,
@@ -52,16 +73,27 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
   chatInput,
   setChatInput,
   handleChatSubmit,
-  relationsList
+  relationsList,
+  onSceneBinding,
+  onHoverPointChange
 }) => {
   const [hover, setHover] = useState<HoverData | null>(null);
   const [radial, setRadial] = useState<{subjectId?: string, partId: string, x: number, y: number} | null>(null);
   const [speechBubbles, setSpeechBubbles] = useState<Record<string, SpeechBubbleData>>({});
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const chatInputRef = useRef<HTMLInputElement | null>(null);
+  const [isChatFocused, setIsChatFocused] = useState(false);
+  const [bridgeStatus, setBridgeStatus] = useState('bridge: idle');
 
   const radialStateRef = useRef<boolean>(false);
   const radialDataRef = useRef<{subjectId?: string, partId: string} | null>(null);
   const ignoreNextRadialRef = useRef<number>(0);
+  const hoverHideTimeoutRef = useRef<number | null>(null);
+
+  const notifyCyberjackHost = (kind: string) => {
+    if (typeof window === 'undefined' || typeof window.console?.log !== 'function') return;
+    console.log(`__CYBERJACK__:${kind}`);
+  };
 
   const getPartStats = (id: string) => {
     let synch = 50.0;
@@ -70,8 +102,9 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
     
     const lookupId = id.toLowerCase();
     
-    if (subjectState && subjectState.points) {
-      const ptState = subjectState.points[id] || subjectState.points[lookupId];
+    const anatomySource = subjectState?.points || subjectState?.anatomy || null;
+    if (anatomySource) {
+      const ptState = anatomySource[id] || anatomySource[lookupId];
       if (ptState) {
         synch = ptState.localAttitude !== undefined ? ptState.localAttitude : (ptState.local_attitude !== undefined ? ptState.local_attitude : 50);
         label = ptState.preset?.label || id.toUpperCase();
@@ -88,6 +121,23 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
     };
   };
 
+  const getPointData = (id: string) => {
+    const lookupId = id.toLowerCase();
+    const fromSubject = subjectState?.points?.[id] || subjectState?.points?.[lookupId] || subjectState?.anatomy?.[id] || subjectState?.anatomy?.[lookupId];
+    if (fromSubject) {
+      return fromSubject;
+    }
+
+    if (Array.isArray(availablePoints)) {
+      return availablePoints.find((pt: any) => {
+        const pointId = String(pt?.id || '').toLowerCase();
+        return pointId === lookupId;
+      }) || null;
+    }
+
+    return null;
+  };
+
   useEffect(() => {
     // Sync messages to speech bubbles
     const lastMessage = messages[messages.length - 1];
@@ -96,7 +146,7 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
     // Explicitly check role and actorId.
     const isPlayer = lastMessage?.role === 'player' || 
                      lastMessage?.actorId === 'PLAYER' || 
-                     lastMessage?.actorId === 'PL-1';
+                     (!!playerCharacterId && lastMessage?.actorId === playerCharacterId);
 
     if (lastMessage && lastMessage.role === 'subject' && !isPlayer) {
         const actorId = lastMessage.actorId || 'UNKNOWN';
@@ -124,7 +174,7 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
         const next = { ...prev };
 
         for (const id in next) {
-            const isInvalid = id === 'PLAYER' || id === 'PL-1' || next[id].expiresAt < now;
+            const isInvalid = id === 'PLAYER' || (!!playerCharacterId && id === playerCharacterId) || next[id].expiresAt < now;
             if (isInvalid) {
                 delete next[id];
                 hasChanges = true;
@@ -145,17 +195,123 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
         return el && el.closest('.radial-menu-container') !== null;
     };
 
-    (window as any).CyberjackUI = {
+    const applyHoverInfo = (subjectId: string, partId: string, normX: number, normY: number) => {
+      if (radialStateRef.current) return;
+      if (hoverHideTimeoutRef.current !== null) {
+        window.clearTimeout(hoverHideTimeoutRef.current);
+        hoverHideTimeoutRef.current = null;
+      }
+      const pointer = normalizeCyberjackPointerPosition(normX, normY);
+      if (subjectId && targetSubjectId !== subjectId) {
+        onFocusSubject?.(subjectId);
+      }
+      onHoverPointChange?.(partId);
+      setHover({ subjectId, partId, x: pointer.x, y: pointer.y });
+    };
+
+    const applyHideHover = () => {
+      if (radialStateRef.current) return;
+      if (hoverHideTimeoutRef.current !== null) {
+        window.clearTimeout(hoverHideTimeoutRef.current);
+      }
+
+      hoverHideTimeoutRef.current = window.setTimeout(() => {
+        setHover(null);
+        onHoverPointChange?.(null);
+        hoverHideTimeoutRef.current = null;
+      }, 650);
+    };
+
+    const applyRadialMenu = (subjectId: string, partId: string, normX: number, normY: number) => {
+      const pointer = normalizeCyberjackPointerPosition(normX, normY);
+      if (isPointerOverMenu(pointer.x, pointer.y)) return;
+
+      if (subjectId && targetSubjectId !== subjectId) {
+        onFocusSubject?.(subjectId);
+      }
+      radialStateRef.current = true;
+      setRadial({ subjectId, partId, x: pointer.x, y: pointer.y });
+      setActiveCategory(null);
+      setSelectedPoint(partId);
+    };
+
+    const applyHideRadial = (normX: number, normY: number) => {
+      const pointer = normalizeCyberjackPointerPosition(normX, normY);
+      if (isPointerOverMenu(pointer.x, pointer.y)) return;
+
+      radialStateRef.current = false;
+      setRadial(null);
+      setActiveCategory(null);
+      notifyCyberjackHost('radialClose');
+    };
+
+    const handleExternalMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (!isCyberjackBridgeMessage(data)) return;
+
+      setBridgeStatus(`bridge: ${data.type}${typeof data.partId === 'string' ? ` / ${data.partId}` : ''}`);
+      switch (data.type) {
+        case 'hover':
+          if (typeof data.subjectId === 'string' && typeof data.partId === 'string' && isPointerPosition(data)) {
+            const pointer = normalizeCyberjackPointerPosition(data.x, data.y);
+            applyHoverInfo(data.subjectId, data.partId, pointer.x, pointer.y);
+          }
+          break;
+        case 'hideHover':
+          applyHideHover();
+          break;
+        case 'click':
+        case 'radial':
+          if (typeof data.subjectId === 'string' && typeof data.partId === 'string' && isPointerPosition(data)) {
+            const pointer = normalizeCyberjackPointerPosition(data.x, data.y);
+            applyRadialMenu(data.subjectId, data.partId, pointer.x, pointer.y);
+          }
+          break;
+        case 'hideRadial':
+          if (isPointerPosition(data)) {
+            applyHideRadial(data.x, data.y);
+          }
+          break;
+        case 'focusSubject':
+          if (typeof data.subjectId === 'string') {
+            onFocusSubject?.(data.subjectId);
+          }
+          break;
+        case 'focusChat':
+          requestAnimationFrame(() => {
+            chatInputRef.current?.focus();
+            setIsChatFocused(true);
+          });
+          break;
+        case 'sceneBinding':
+          if (
+            typeof data.sceneId === 'string' &&
+            typeof data.playerId === 'string' &&
+            typeof data.subjectId === 'string'
+          ) {
+            onSceneBinding?.({
+              sceneId: data.sceneId,
+              playerId: data.playerId,
+              subjectId: data.subjectId,
+              playerName: typeof data.playerName === 'string' ? data.playerName : undefined,
+              subjectName: typeof data.subjectName === 'string' ? data.subjectName : undefined
+            });
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    createCyberjackUiApi({
       showHoverInfo: (subjectId: string, partId: string, normX: number, normY: number) => {
-        if (radialStateRef.current) return;
-        if (subjectId && targetSubjectId !== subjectId) {
-          onFocusSubject?.(subjectId);
-        }
-        setHover({ subjectId, partId, x: normX, y: normY });
+        setBridgeStatus(`bridge: hover / ${partId}`);
+        const pointer = normalizeCyberjackPointerPosition(normX, normY);
+        applyHoverInfo(subjectId, partId, pointer.x, pointer.y);
       },
       hideHoverInfo: () => {
-        if (radialStateRef.current) return;
-        setHover(null);
+        setBridgeStatus('bridge: hideHover');
+        applyHideHover();
       },
       updateSpeechBubblePosition: (actorId: string, normX: number, normY: number) => {
         // Log to verify coordinates are coming through
@@ -174,29 +330,58 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
         });
       },
       showRadialMenu: (subjectId: string, partId: string, normX: number, normY: number) => {
-        if (isPointerOverMenu(normX, normY)) return;
-
-        if (subjectId && targetSubjectId !== subjectId) {
-          onFocusSubject?.(subjectId);
-        }
-        radialStateRef.current = true;
-        setRadial({ subjectId, partId, x: normX, y: normY });
-        setActiveCategory(null);
-        setSelectedPoint(partId);
+        setBridgeStatus(`bridge: radial / ${partId}`);
+        const pointer = normalizeCyberjackPointerPosition(normX, normY);
+        applyRadialMenu(subjectId, partId, pointer.x, pointer.y);
       },
       hideRadialMenu: (normX: number, normY: number) => {
-        if (isPointerOverMenu(normX, normY)) return;
+        setBridgeStatus('bridge: hideRadial');
+        applyHideRadial(normX, normY);
+      },
+      focusSubject: (subjectId: string) => {
+        if (typeof subjectId === 'string') {
+          setBridgeStatus(`bridge: focusSubject / ${subjectId}`);
+          onFocusSubject?.(subjectId);
+        }
+      },
+      focusChat: () => {
+        setBridgeStatus('bridge: focusChat');
+        requestAnimationFrame(() => {
+          chatInputRef.current?.focus();
+          setIsChatFocused(true);
+        });
+      }
+    });
 
+    window.addEventListener('message', handleExternalMessage);
+    const handleDocumentMouseDown = (event: MouseEvent) => {
+      const activeEl = document.activeElement;
+      const target = event.target as Node | null;
+      if (activeEl === chatInputRef.current && target && chatInputRef.current && !chatInputRef.current.contains(target)) {
+        chatInputRef.current.blur();
+        setIsChatFocused(false);
+        setBridgeStatus('bridge: chatBlur');
+      }
+
+      if (radialStateRef.current && target instanceof Element && !target.closest('.radial-menu-container')) {
         radialStateRef.current = false;
+        radialDataRef.current = null;
         setRadial(null);
         setActiveCategory(null);
+        setBridgeStatus('bridge: hideRadial');
+        notifyCyberjackHost('radialClose');
       }
     };
+    document.addEventListener('mousedown', handleDocumentMouseDown, true);
 
     return () => { 
-      if ((window as any).CyberjackUI) {
-        delete (window as any).CyberjackUI;
+      window.removeEventListener('message', handleExternalMessage);
+      document.removeEventListener('mousedown', handleDocumentMouseDown, true);
+      if (hoverHideTimeoutRef.current !== null) {
+        window.clearTimeout(hoverHideTimeoutRef.current);
+        hoverHideTimeoutRef.current = null;
       }
+      destroyCyberjackUiApi();
     };
   }, [setSelectedPoint, targetSubjectId, onFocusSubject]);
 
@@ -231,12 +416,14 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
 
     // Force remove player bubbles from state immediately
     setSpeechBubbles(prev => {
-        if (prev['PLAYER'] || prev['PL-1']) {
-            const next = { ...prev };
-            delete next['PLAYER'];
-            delete next['PL-1'];
-            return next;
+      if (prev['PLAYER'] || (playerCharacterId && prev[playerCharacterId])) {
+        const next = { ...prev };
+        delete next['PLAYER'];
+        if (playerCharacterId) {
+          delete next[playerCharacterId];
         }
+        return next;
+      }
         return prev;
     });
   }, [messages]);
@@ -260,10 +447,67 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
   }, []);
 
   return (
-    <div style={{ 
+      <div style={{ 
       width: '100vw', height: '100vh', background: 'transparent', overflow: 'hidden',
       position: 'relative', pointerEvents: 'none', fontFamily: 'monospace', color: '#00f0ff'
     }}>
+      {isChatFocused && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'auto',
+            background: 'transparent',
+            zIndex: 8
+          }}
+          onMouseDown={(event) => {
+            const target = event.target as Node | null;
+            if (target && chatInputRef.current && !chatInputRef.current.contains(target)) {
+              chatInputRef.current.blur();
+              setIsChatFocused(false);
+              setBridgeStatus('bridge: chatBlur');
+              notifyCyberjackHost('chatBlur');
+            }
+          }}
+        />
+      )}
+
+      <div style={{
+        position: 'fixed',
+        top: '12px',
+        right: '12px',
+        zIndex: 120,
+        padding: '6px 10px',
+        border: '1px solid rgba(0, 240, 255, 0.45)',
+        background: 'rgba(0, 10, 16, 0.75)',
+        color: '#8ffcff',
+        fontSize: '11px',
+        fontFamily: 'monospace',
+        pointerEvents: 'none',
+        userSelect: 'none'
+      }}>
+        {bridgeStatus}
+      </div>
+
+      {hover && (
+        <div style={{
+          position: 'fixed',
+          top: '42px',
+          right: '12px',
+          zIndex: 261,
+          padding: '8px 10px',
+          border: '1px solid rgba(0, 240, 255, 0.9)',
+          background: 'rgba(0, 20, 28, 0.92)',
+          color: '#ffffff',
+          fontSize: '12px',
+          fontFamily: 'monospace',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          boxShadow: '0 0 18px rgba(0, 240, 255, 0.35)'
+        }}>
+          HOVER ACTIVE: {hover.partId}
+        </div>
+      )}
       
       {/* SPEECH BUBBLES */}
       {Object.values(speechBubbles).map(bubble => (
@@ -327,6 +571,7 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
       {/* НИЖНЯЯ ПАНЕЛЬ: ЛОГИ И ЧАТ */}
       <div style={{
         position: 'absolute', bottom: '30px', left: '30px', width: '450px',
+        zIndex: 20,
         display: 'flex', flexDirection: 'column', gap: '8px'
       }}>
         <div style={{ 
@@ -351,9 +596,20 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
         {/* INPUT FORM */}
         <form onSubmit={handleChatSubmit} style={{ pointerEvents: 'auto', display: 'flex' }}>
           <input 
+            ref={chatInputRef}
             type="text" 
             value={chatInput} 
             onChange={(e) => setChatInput(e.target.value)} 
+            onFocus={() => {
+              setIsChatFocused(true);
+              setBridgeStatus('bridge: chatFocus');
+              notifyCyberjackHost('chatFocus');
+            }}
+            onBlur={() => {
+              setIsChatFocused(false);
+              setBridgeStatus('bridge: chatBlur');
+              notifyCyberjackHost('chatBlur');
+            }}
             placeholder="Ввести команду/реплику..."
             style={{ 
               flex: 1, 
@@ -386,20 +642,21 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
       </div>      {/* ХОВЕР ПО ЧАСТЯМ ТЕЛА */}
       {hover && (() => {
         const stats = getPartStats(hover.partId);
+        const pointData = getPointData(hover.partId);
         return (
           <div style={{
-            position: 'absolute', left: `${hover.x * 100}vw`, top: `${hover.y * 100}vh`, transform: 'translate(40px, -50%)',
+            position: 'fixed', left: `${hover.x * 100}vw`, top: `${hover.y * 100}vh`, transform: 'translate(40px, -50%)',
             background: 'linear-gradient(135deg, rgba(0, 40, 40, 0.9) 0%, rgba(0, 20, 25, 0.95) 100%)',
-            border: '1px solid #00f0ff', borderRadius: '2px', padding: '12px', minWidth: '180px',
-            boxShadow: '0 0 20px rgba(0, 240, 255, 0.2)', pointerEvents: 'none'
+            border: '1px solid #00f0ff', borderRadius: '2px', padding: '12px', minWidth: '220px',
+            boxShadow: '0 0 20px rgba(0, 240, 255, 0.2)', pointerEvents: 'none', zIndex: 260
           }}>
             <div style={{ position: 'absolute', top: -1, left: -1, width: 10, height: 10, borderLeft: '3px solid #00f0ff', borderTop: '3px solid #00f0ff' }} />
-            <div style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '2px' }}>NODE_ID: {hover.partId.toUpperCase()}</div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', margin: '4px 0' }}>{stats.label}</div>
+          <div style={{ fontSize: '10px', opacity: 0.6, letterSpacing: '2px' }}>NODE_ID: {hover.partId.toUpperCase()}</div>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', margin: '4px 0' }}>{stats.label}</div>
             
             <div style={{ marginTop: '10px' }}>
-              {(subjectState?.points?.[hover.partId] || subjectState?.points?.[hover.partId.toLowerCase()]) && (() => {
-                  const pt = subjectState.points[hover.partId] || subjectState.points[hover.partId.toLowerCase()];
+              {pointData && (() => {
+                  const pt = pointData;
                   return (
                       <div style={{ fontSize: '10px', display: 'flex', flexDirection: 'column', gap: '4px', opacity: 0.8 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -408,13 +665,25 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span>Attitude:</span><span>{Math.round(pt.localAttitude || pt.local_attitude || 0)}%</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Familiarity:</span><span>Lvl {Math.round(pt.familiarity || 0)}</span>
-                        </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Familiarity:</span><span>Lvl {Math.round(pt.familiarity || 0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Openness:</span><span>{Math.round(pt.localOpenness || pt.local_openness || 0)}%</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Exposures:</span><span>{Math.round(pt.exposureCount || pt.exposure_count || 0)}</span>
+                      </div>
                       </div>
                   );
               })()}
+              {!pointData && (
+                <div style={{ fontSize: '10px', opacity: 0.6 }}>
+                  core point data unavailable for {hover.partId}
+                </div>
+              )}
             </div>
+
 
             <div style={{ fontSize: '12px', marginTop: '12px', color: '#ff0055' }}>
               STATUS: [{stats.status}]
@@ -496,6 +765,7 @@ const DiegeticUI: React.FC<DiegeticUIProps> = ({
                       radialDataRef.current = null;
                       setRadial(null);
                       setActiveCategory(null);
+                      notifyCyberjackHost('radialAction');
                     }
                   }}
                   style={{

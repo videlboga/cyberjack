@@ -21,6 +21,7 @@ pkill -f "src/api/server.ts" 2>/dev/null || true
 
 echo "Запуск сидирования БД..."
 npx tsx src/infrastructure/seed.ts || exit 1
+npx tsx scripts/bootstrap_diegetic_scene.ts || exit 1
 npx tsx fix_char.ts 2>/dev/null || true
 npx tsx add_player_resources.ts 2>/dev/null || true
 

@@ -4,8 +4,9 @@ import DiegeticUI from './DiegeticUI';
 import './GameApp.css';
 
 const API_BASE = '';
-const PLAYER_CHARACTER_ID = 'PL-1';
-const PLAYER_RESOURCE_ID = 'PL-1';
+const FALLBACK_PLAYER_CHARACTER_ID = 'PL-1';
+const FALLBACK_PLAYER_RESOURCE_ID = 'PL-1';
+const FALLBACK_SUBJECT_CHARACTER_ID = 'S-AV-01';
 
 type ActionPreset = {
   id: string;
@@ -229,6 +230,10 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const [actionCache, setActionCache] = useState<{ uid: string; presetId: string; label: string; pointId: string; intensity: number; targetCharId: string; targetCharName: string }[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [playerCharacterId, setPlayerCharacterId] = useState(FALLBACK_PLAYER_CHARACTER_ID);
+  const [playerResourceId, setPlayerResourceId] = useState(FALLBACK_PLAYER_RESOURCE_ID);
+  const [sceneSubjectId, setSceneSubjectId] = useState(FALLBACK_SUBJECT_CHARACTER_ID);
+  const [hoveredPointId, setHoveredPointId] = useState<string | null>(null);
 
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -242,10 +247,10 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     if (!focusedCharId && !!sceneCharacters?.length) {
-      const npc = sceneCharacters.find(c => c.character.id !== PLAYER_CHARACTER_ID);
+      const npc = sceneCharacters.find(c => c.character.id !== playerCharacterId);
       if (npc) setFocusedCharId(npc.character.id);
     }
-  }, [sceneCharacters, focusedCharId]);
+  }, [sceneCharacters, focusedCharId, playerCharacterId]);
 
 
   const fetchInteractionState = async (targetId: string, hydrateState: boolean) => {
@@ -302,7 +307,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       }
       // additionally fetch scene objects (furniture / equipment) via state endpoint
       try {
-        const stateRes = await fetch(`${API_BASE}/api/state?subjectId=S-01&sceneId=${sceneId}`);
+      const stateRes = await fetch(`${API_BASE}/api/state?subjectId=${encodeURIComponent(sceneSubjectId || FALLBACK_SUBJECT_CHARACTER_ID)}&sceneId=${encodeURIComponent(sceneId)}`);
         const stateBody = await stateRes.json();
         if (stateBody && stateBody.success) {
           setSceneObjects(stateBody.sceneObjects || []);
@@ -321,7 +326,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       await Promise.all([
         refreshSceneInfo(),
         // Just fetch the lab scene state, the UI will focus the first character if needed.
-        fetchInteractionState('S-AV-01', false)
+      fetchInteractionState(sceneSubjectId || FALLBACK_SUBJECT_CHARACTER_ID, false)
       ]);
 
       setMessages(prev => [
@@ -347,7 +352,13 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         console.warn('failed to load action presets', e);
       }
     })();
-  }, [sceneId]);
+  }, [sceneId, sceneSubjectId]);
+
+  useEffect(() => {
+    if (!focusedCharId && sceneSubjectId) {
+      setFocusedCharId(sceneSubjectId);
+    }
+  }, [sceneSubjectId, focusedCharId]);
 
   useEffect(() => {
     if (logRef.current) {
@@ -548,7 +559,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          characterId: PLAYER_CHARACTER_ID,
+          characterId: playerCharacterId,
           sceneId,
           slotId: nodeId
         })
@@ -579,8 +590,8 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
   const sendAction = async (presetId?: string, text?: string, targetPoint?: string, targetCharIdOverride?: string, customIntensity?: number) => {
     let targetCharId = targetCharIdOverride || focusedCharId;
     if (!targetCharId && presetId === 'wait') {
-      const npcInScene = sceneCharacters.find(c => c.character.id !== PLAYER_CHARACTER_ID)?.character.id;
-      targetCharId = npcInScene || 'S-01'; // Fallback so tick has a subject context
+      const npcInScene = sceneCharacters.find(c => c.character.id !== playerCharacterId)?.character.id;
+      targetCharId = npcInScene || sceneSubjectId; // Fallback so tick has a subject context
     }
     
     if (!targetCharId) {
@@ -597,7 +608,7 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         pointId: resolvedPoint,
         intensity: actualIntensity,
         sceneId,
-        playerId: PLAYER_RESOURCE_ID,
+        playerId: playerResourceId,
         skipLLM: false
       };
 
@@ -713,9 +724,12 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
       }
     });
     return base;
-  }, [availableActions, selectedPoint, sceneCharacters, focusedCharId, playerResources]);
+  }, [availableActions, selectedPoint, sceneCharacters, focusedCharId, playerResources, playerCharacterId, sceneSubjectId]);
 
   const radialCategories = RADIAL_GROUPS.filter(group => groupedActions[group.id]?.length);
+  const hoveredActions = useMemo(() => {
+    return filterActionsForPoint(availableActions, hoveredPointId);
+  }, [availableActions, hoveredPointId]);
 
   return (
     <>
@@ -723,10 +737,13 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         messages={messages}
         groupedActions={groupedActions}
         radialCategories={radialCategories}
+        hoveredActions={hoveredActions}
+        availablePoints={availablePointsList}
         sendAction={sendAction}
         isProcessing={isProcessing}
         focusedCharacter={focusedCharacter}
         targetSubjectId={focusedCharId}
+        playerCharacterId={playerCharacterId}
         playerResources={playerResources}
         playerInventory={playerInventory}
         subjectState={subjectState}
@@ -736,6 +753,24 @@ export function GameApp({ embedded = false }: { embedded?: boolean }) {
         setChatInput={setChatInput}
         handleChatSubmit={handleChatSubmit}
         relationsList={relationsList}
+        onSceneBinding={({ sceneId: boundSceneId, playerId, subjectId }) => {
+          if (boundSceneId && boundSceneId !== sceneId) {
+            setSceneId(boundSceneId);
+          }
+          if (playerId) {
+            setPlayerCharacterId(playerId);
+            setPlayerResourceId(playerId);
+          }
+          if (subjectId) {
+            setSceneSubjectId(subjectId);
+            if (!focusedCharId || focusedCharId === FALLBACK_SUBJECT_CHARACTER_ID) {
+              setFocusedCharId(subjectId);
+            }
+          }
+        }}
+        onHoverPointChange={(pointId) => {
+          setHoveredPointId(pointId);
+        }}
       />
     </>
   );
