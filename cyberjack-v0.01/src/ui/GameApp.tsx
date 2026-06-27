@@ -252,8 +252,12 @@ export function GameApp() {
         if (data.tickResult) setLastResult(data.tickResult);
 
         // Narrator goes first (cinematic description)
-        if (data.narratorReaction?.reaction) {
-          addMsg('narrator', data.narratorReaction.reaction);
+        // API returns narratorReaction as string, not {reaction: string}
+        const narratorText = typeof data.narratorReaction === 'string'
+          ? data.narratorReaction
+          : data.narratorReaction?.reaction;
+        if (narratorText) {
+          addMsg('narrator', narratorText);
         }
 
         // Then character speech
