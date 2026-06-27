@@ -10,9 +10,6 @@
     "test": "vitest --run --threads=1"
   },
   "dependencies": {
-    "@pixiv/three-vrm": "^2.1.2",
-    "@react-three/drei": "^9.106.0",
-    "@react-three/fiber": "^8.16.8",
     "better-sqlite3": "^12.9.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -20,7 +17,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "styled-components": "^6.4.0",
-    "three": "^0.164.1",
     "ws": "^8.20.0"
   },
   "devDependencies": {
