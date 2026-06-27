@@ -225,7 +225,7 @@ export async function buildPromptPayload(
     const instructionsSection = `[Инструкции]\n${cfg.formatInstructions}${voiceInstructions}`;
     const memorySection = memoryBlock ? memoryBlock.trim() : '';
 
-    const narratorEventsText = buildRecentEventsSummary(recentEvents.slice(-2), actorDetails.name);
+    const narratorEventsText = buildRecentEventsSummary(recentEvents.slice(-1), actorDetails.name);
 
     const narratorPrompt: NarratorPromptPayload = {
         subjectId: targetQueryId,
