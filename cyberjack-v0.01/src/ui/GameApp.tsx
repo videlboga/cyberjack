@@ -261,12 +261,15 @@ export function GameApp() {
         }
 
         // Then character speech
+        // reply is the primary (subject) reply; actorReplies includes ALL actors
+        // actorReplies already contains the subject's reply, so only show extras
         if (data.reply?.speech) {
           addMsg('actor', data.reply.speech, focusedCharId, subjectState?.name || focusedCharId);
         }
         if (data.actorReplies) {
           for (const ar of data.actorReplies) {
-            if (ar.speech) {
+            // Skip the subject — already shown via data.reply above
+            if (ar.speech && ar.actorId !== focusedCharId) {
               addMsg('actor', ar.speech, ar.actorId, ar.actorName);
             }
           }
