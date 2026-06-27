@@ -141,7 +141,23 @@ const Bar: React.FC<{ value: number; max?: number; color?: string; baseline?: nu
 // ─── Main Component ──────────────────────────────────────
 
 export function GameApp() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem('cyberjack_chat');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        localStorage.setItem('cyberjack_chat', JSON.stringify(messages.slice(-200)));
+      } else {
+        localStorage.removeItem('cyberjack_chat');
+      }
+    } catch {}
+  }, [messages]);
   const [subjectState, setSubjectState] = useState<SubjectState | null>(null);
   const [availableActions, setAvailableActions] = useState<ActionPreset[]>([]);
   const [availablePoints, setAvailablePoints] = useState<PointInfo[]>([]);
@@ -193,7 +209,10 @@ export function GameApp() {
 
   useEffect(() => {
     fetchScenes();
-    setMessages([{ id: Date.now(), role: 'system', text: `Связь установлена. Сцена: ${sceneId}` }]);
+    // Only show init message if no saved messages
+    if (messages.length === 0) {
+      setMessages([{ id: Date.now(), role: 'system', text: `Связь установлена. Сцена: ${sceneId}` }]);
+    }
   }, []);
 
   useEffect(() => {
@@ -318,7 +337,16 @@ export function GameApp() {
       .sort((a, b) => (b.localSensitivity || 0) - (a.localSensitivity || 0));
   }, [subjectState]);
 
-  const activeContexts = subjectState?.contexts || [];
+  const activeContexts = useMemo(() => {
+    const ctxs = subjectState?.contexts || [];
+    // Deduplicate by actionId — one pose can occupy multiple points
+    const seen = new Set<string>();
+    return ctxs.filter(c => {
+      if (seen.has(c.actionId)) return false;
+      seen.add(c.actionId);
+      return true;
+    });
+  }, [subjectState]);
 
   // Actions for the selected category, filtered by point
   const categoryActionList = useMemo(() => {
