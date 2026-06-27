@@ -27,6 +27,7 @@ export class ContextManager {
                     if (existingAction.contextConfig.priority && config.priority && existingAction.contextConfig.priority > config.priority) {
                         return; // Blocked by higher priority
                     }
+                    // Remove existing context occupying the same point if exclusive
                     if (config.exclusiveWithinPoint) {
                         activeContextsRepo.removeByActionIdAndPoint(subjectId, existingAction.actionKey || existingAction.id, pt);
                     }
@@ -39,7 +40,11 @@ export class ContextManager {
             : [pointId || null];
 
         for (const pt of pointsToOccupy) {
-            activeContextsRepo.add(randomUUID(), subjectId, actionId, config.duration || -1, pt, initiatorId);
+            // Skip if this exact actionId is already active for this point
+            const alreadyActive = currentContexts.some(c => c.actionId === actionId && c.pointId === pt);
+            if (!alreadyActive) {
+                activeContextsRepo.add(randomUUID(), subjectId, actionId, config.duration || -1, pt, initiatorId);
+            }
         }
     }
     
