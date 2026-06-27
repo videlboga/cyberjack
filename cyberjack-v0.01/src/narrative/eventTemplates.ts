@@ -18,7 +18,7 @@ const actionTemplates: Record<
     hair_pull: (actor, point) => `${actor} тянет за ${point}, контролируя каждое движение`,
     spit: (actor, point) => `${actor} брезгливо плюёт в ${point}`,
     breath_blow: (actor, point) => `${actor} дышит на ${point}, заставляя замереть`,
-    verbal_pressure: (actor) => `${actor} давит словами, не меняя интонации`,
+    verbal_pressure: (actor) => `${actor} обращается словами`,
     stare: (actor) => `${actor} упирается взглядом, будто взвешивает реакцию`
 };
 
