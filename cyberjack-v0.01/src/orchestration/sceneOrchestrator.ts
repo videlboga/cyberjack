@@ -4,7 +4,8 @@ import {
     OrchestratedTurn,
     ActorDecision,
     NarratorDecision,
-    CharacterRelation
+    CharacterRelation,
+    ScenePromptPayload
 } from '../domain/types';
 import { activeConfig } from '../prompts/config';
 import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo, pointStateRepo, sceneRepo, characterRepo } from '../infrastructure/repositories';
@@ -237,7 +238,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
 
 import { db } from '../infrastructure/db';
 import { chatMemoryRepo } from '../infrastructure/repositories';
-import { generateCharacterReply, generateNarratorReply } from '../adapters/llmAdapter';
+import { generateCharacterReply, generateNarratorReply, generateSceneForCharacter } from '../adapters/llmAdapter';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { recordMemoryEvent } from '../services/memoryLayer';
 import { maybeSummarizeChat } from '../services/chatSummary';
@@ -359,10 +360,38 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         }
     }
 
-    let narratorReaction: string | null = null;
-    if (orchestration.narrator?.enabled && promptPayload.narratorPrompt) {
-        const narratorRes = await generateNarratorReply(promptPayload.narratorPrompt);
-        narratorReaction = narratorRes?.reaction || null;
+    // ── Narrator A: compressed sensory scene for the character ──
+    // Generated BEFORE character speech, injected into character's prompt
+    const activeContextIds = activeContextsRepo.getAllForSubject(subjectId);
+    const activeContextLabels = activeContextIds
+        .map((c: any) => presetRepo.getActionPreset(c.actionId)?.label || c.actionId)
+        .filter(Boolean);
+    let sceneForChar: string | null = null;
+    if (orchestration.narrator?.enabled) {
+        const tickResult = bundle.output?.result;
+        const tickResultText = tickResult
+            ? `Удовольствие: ${tickResult.pleasure?.toFixed(1)}, дискомфорт: ${tickResult.discomfort?.toFixed(1)}, перегрузка: ${tickResult.overload?.toFixed(1)}, вовлечённость: ${tickResult.engagement?.toFixed(1)}`
+            : '';
+        const stateText = `Чувствительность: ${bundle.stateAfter.core.sensitivity?.toFixed(0)}, выносливость: ${bundle.stateAfter.core.capacity?.toFixed(0)}, напряжение: ${bundle.stateAfter.core.tension?.toFixed(0)}`;
+        const contextsText = activeContextLabels.length
+            ? `Активные состояния: ${activeContextLabels.join(', ')}`
+            : '';
+        const scenePrompt: ScenePromptPayload = {
+            subjectId,
+            actionLabel,
+            pointLabel,
+            actorName: 'Калибратор',
+            targetName: fullStateName || subjectId,
+            stateText,
+            contextsText,
+            tickResultText
+        };
+        try {
+            const sceneRes = await generateSceneForCharacter(scenePrompt);
+            sceneForChar = sceneRes?.reaction || null;
+        } catch (e) {
+            console.error('[Scene A] failed:', e);
+        }
     }
 
     const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; reaction: string }> = [];
@@ -375,8 +404,11 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             let currentHistory = chatHistory;
             let userMsgOverride = autoUserMessage || actionLabelMessage || undefined;
 
-                if (narratorReaction) {
-                userMsgOverride = userMsgOverride ? `${userMsgOverride}\n\n[Твоя физическая реакция (Рассказчик)]: ${narratorReaction}` : `[Твоя физическая реакция (Рассказчик)]: ${narratorReaction}`;
+            // Inject Narrator A (sensory scene) into the character's prompt
+            if (sceneForChar) {
+                userMsgOverride = userMsgOverride
+                    ? `${userMsgOverride}\n\n[Твоё телесное восприятие]: ${sceneForChar}`
+                    : `[Твоё телесное восприятие]: ${sceneForChar}`;
             }
 
             if (decision.actorId !== subjectId) {
@@ -391,8 +423,10 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                     content: entry.content
                 }));
                 let observerOverride = historyMessage || actionLabelMessage || undefined;
-                if (narratorReaction) {
-                    observerOverride = observerOverride ? `${observerOverride}\n\n[Общая сцена - реакция ${subjectId} (Рассказчик)]: ${narratorReaction}` : `[Общая сцена - реакция ${subjectId} (Рассказчик)]: ${narratorReaction}`;
+                if (sceneForChar) {
+                    observerOverride = observerOverride
+                        ? `${observerOverride}\n\n[Общая сцена - восприятие ${subjectId}]: ${sceneForChar}`
+                        : `[Общая сцена - восприятие ${subjectId}]: ${sceneForChar}`;
                 }
                 userMsgOverride = observerOverride;
             }
@@ -400,7 +434,6 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             let structuredReply = { speech: '' };
             let sentMessages: any = null;
 
-            // Log the prompt payload that will be sent to the LLM for this actor
             try {
                 appendJsonLog('prompt_payloads.jsonl', {
                     tickId: bundle.event.id || null,
@@ -414,7 +447,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             } catch (e) { /* ignore */ }
 
             if (decision.kind === "proactive" && decision.reason) {
-                userMsgOverride = userMsgOverride 
+                userMsgOverride = userMsgOverride
                     ? `${userMsgOverride}\n\n[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`
                     : `[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`;
             }
@@ -429,7 +462,6 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 ? (res.reply as { speech: string })
                 : { speech: String(res.reply || '') };
 
-            // Log the LLM response for this actor
             try {
                 appendJsonLog('prompt_payloads.jsonl', {
                     tickId: bundle.event.id || null,
@@ -442,7 +474,6 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 });
             } catch (e) { /* ignore */ }
 
-
             return { decision, structuredReply, sentMessages };
         });
 
@@ -450,7 +481,6 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
 
         for (const { decision, structuredReply, sentMessages } of results) {
             if (decision.kind === 'proactive' && decision.mechanicalAction) {
-                // Execute the mechanical game tick for the proactive action
                 try {
                     await runGameTick({
                         subjectId: decision.mechanicalAction.targetId || subjectId,
@@ -460,18 +490,16 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                         presetId: decision.mechanicalAction.actionId,
                         textMessage: structuredReply.speech
                     });
-                    const actionLabel = presetRepo.getActionPreset(decision.mechanicalAction.actionId)?.label || decision.mechanicalAction.actionId;
+                    const actionLabel2 = presetRepo.getActionPreset(decision.mechanicalAction.actionId)?.label || decision.mechanicalAction.actionId;
                     const actorName = subjectRepo.get(decision.actorId)?.name || decision.actorId;
                     const tgtId = decision.mechanicalAction.targetId || subjectId;
                     const targetName = subjectRepo.get(tgtId)?.name || tgtId;
-                    const pointLabel = presetRepo.getPointPreset(decision.mechanicalAction.pointId)?.label || decision.mechanicalAction.pointId;
-                    const notice = `*(Сцена: ${actorName} применяет ${actionLabel} к ${targetName} (${pointLabel}))*`;
-                    
+                    const pointLabel2 = presetRepo.getPointPreset(decision.mechanicalAction.pointId)?.label || decision.mechanicalAction.pointId;
+                    const notice = `*(Сцена: ${actorName} применяет ${actionLabel2} к ${targetName} (${pointLabel2}))*`;
                     if (tgtId !== decision.actorId) {
                         chatMemoryRepo.append(tgtId, 'user', notice);
                     }
                     chatMemoryRepo.append(decision.actorId, 'user', notice);
-
                 } catch (err) {
                     console.error('Failed to run proactive tick for NPC:', err);
                 }
@@ -482,11 +510,11 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 kind: decision.kind,
                 tone: decision.reason,
                 speech: structuredReply.speech,
-                reaction: narratorReaction || ''
+                reaction: sceneForChar || ''
             });
 
             if (decision.actorId === subjectId || !primaryReply) {
-                primaryReply = { speech: structuredReply.speech, reaction: narratorReaction || '' };
+                primaryReply = { speech: structuredReply.speech, reaction: sceneForChar || '' };
                 promptMessages = sentMessages;
             }
 
@@ -498,13 +526,44 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         promptMessages = [];
     }
 
+    // ── Narrator B: chronicle for chat (AFTER character speech) ──
+    // Sees the action, tick result, character speech, and state
+    let narratorReaction: string | null = null;
+    if (orchestration.narrator?.enabled && promptPayload.narratorPrompt) {
+        const tickResult = bundle.output?.result;
+        const tickResultSummary = tickResult
+            ? `Удовольствие: ${tickResult.pleasure?.toFixed(1)}, дискомфорт: ${tickResult.discomfort?.toFixed(1)}, перегрузка: ${tickResult.overload?.toFixed(1)}`
+            : '';
+        // Enrich narrator prompt with speech, contexts, and result
+        promptPayload.narratorPrompt.characterSpeech = primaryReply?.speech || undefined;
+        promptPayload.narratorPrompt.activeContexts = activeContextLabels.length ? activeContextLabels : undefined;
+        promptPayload.narratorPrompt.tickResultSummary = tickResultSummary || undefined;
+
+        try {
+            const narratorRes = await generateNarratorReply(promptPayload.narratorPrompt);
+            narratorReaction = narratorRes?.reaction || null;
+        } catch (e) {
+            console.error('[Narrator B] failed:', e);
+        }
+    }
+
+    // Update reactions in replies with narrator B text
+    if (narratorReaction) {
+        for (const ar of actorReplies) {
+            ar.reaction = narratorReaction;
+        }
+        if (primaryReply) {
+            primaryReply.reaction = narratorReaction;
+        }
+    }
+
     recordMemoryEvent({
         subjectId,
         bundle,
         userText: autoUserMessage || actionLabelMessage || undefined,
         assistantText: primaryReply?.speech || '',
         infoTag: reqBodyInfoTag,
-        reactionText: primaryReply?.reaction || narratorReaction || ''
+        reactionText: narratorReaction || sceneForChar || ''
     });
     maybeSummarizeChat(subjectId);
 

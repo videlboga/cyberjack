@@ -355,6 +355,21 @@ export interface NarratorPromptPayload {
     recentEventsText: string;
     stateText: string;
     instructions?: string;
+    // Narrator B: speech and context for a richer chronicle
+    characterSpeech?: string;
+    activeContexts?: string[];
+    tickResultSummary?: string;
+}
+
+export interface ScenePromptPayload {
+    subjectId: string;
+    actionLabel: string;
+    pointLabel: string;
+    actorName: string;
+    targetName: string;
+    stateText: string;
+    contextsText: string;
+    tickResultText: string;
 }
 
 export interface NarratorReply {

@@ -87,7 +87,7 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     }
 }
 
-import { PromptPayload, NarratorPromptPayload } from '../domain/types';
+import { PromptPayload, NarratorPromptPayload, ScenePromptPayload } from '../domain/types';
 
 
 
@@ -210,6 +210,20 @@ function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
     if (prompt.recentEventsText) {
         sections.push(prompt.recentEventsText);
     }
+    // Narrator B: include character speech and contexts if available
+    const extras: string[] = [];
+    if (prompt.activeContexts && prompt.activeContexts.length) {
+        extras.push(`[Активные состояния]: ${prompt.activeContexts.join(', ')}`);
+    }
+    if (prompt.tickResultSummary) {
+        extras.push(`[Результат воздействия]: ${prompt.tickResultSummary}`);
+    }
+    if (prompt.characterSpeech) {
+        extras.push(`[Реплика персонажа]: "${prompt.characterSpeech}"`);
+    }
+    const userContent = extras.length
+        ? `${extras.join('\n\n')}\n\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`
+        : `Ознакомься с последними логами воздействий. Опиши ТОЛЬКО внешние физические реакции на самые последние события в логах. Требования:\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`;
     const messages: ChatMessage[] = [
         {
             role: 'system',
@@ -217,7 +231,42 @@ function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
         },
         {
             role: 'user',
-            content: `Ознакомься с последними логами воздействий. Опиши ТОЛЬКО внешние физические реакции на самые последние события в логах. Требования:\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`
+            content: userContent
+        }
+    ];
+    return messages;
+}
+
+// Narrator A: compressed sensory scene FOR the character (injected into their prompt)
+function generateSceneForCharacterPayload(prompt: ScenePromptPayload): ChatMessage[] {
+    const sections: string[] = [];
+    if (activeConfig.adapters.sceneForCharacterSystem) {
+        sections.push(activeConfig.adapters.sceneForCharacterSystem);
+    }
+    const contextParts: string[] = [];
+    if (prompt.actionLabel) {
+        contextParts.push(`Воздействие: ${prompt.actionLabel} → ${prompt.pointLabel}`);
+    }
+    if (prompt.actorName && prompt.targetName) {
+        contextParts.push(`От: ${prompt.actorName}, на: ${prompt.targetName}`);
+    }
+    if (prompt.stateText) {
+        contextParts.push(prompt.stateText);
+    }
+    if (prompt.contextsText) {
+        contextParts.push(prompt.contextsText);
+    }
+    if (prompt.tickResultText) {
+        contextParts.push(prompt.tickResultText);
+    }
+    const messages: ChatMessage[] = [
+        {
+            role: 'system',
+            content: sections.filter(Boolean).join('\n\n')
+        },
+        {
+            role: 'user',
+            content: `${contextParts.filter(Boolean).join('\n')}\n\n${activeConfig.adapters.sceneForCharacterInput}`
         }
     ];
     return messages;
@@ -448,5 +497,41 @@ export async function generateNarratorReply(
             reaction: `*Ошибка связи с LLM (narrator): ${err.message}*`,
             sentMessages: messages
         };
+    }
+}
+
+// Narrator A: compressed sensory scene for the character
+export async function generateSceneForCharacter(
+    prompt: ScenePromptPayload
+): Promise<{ reaction: string; sentMessages: ChatMessage[] }> {
+    const messages = generateSceneForCharacterPayload(prompt);
+
+    console.log(`\n========== СЦЕНА ДЛЯ ПЕРСОНАЖА (Narrator A) ==========`);
+    messages.forEach(m => {
+        console.log(`[Роль: ${m.role.toUpperCase()}]`);
+        console.log(m.content);
+        console.log(`----------------------------------------`);
+    });
+
+    try {
+        await ensureHealthy();
+        const rawText = await requestCompletion(messages, ST_NARRATOR_SCHEMA);
+        try {
+            const parsed = JSON.parse(sanitizeJson(rawText));
+            let reactionText = '';
+            if (typeof parsed.reaction === 'string') {
+                reactionText = parsed.reaction;
+            } else if (typeof parsed === 'string') {
+                reactionText = parsed;
+            } else {
+                reactionText = JSON.stringify(parsed);
+            }
+            return { reaction: reactionText.trim(), sentMessages: messages };
+        } catch {
+            return { reaction: rawText.trim(), sentMessages: messages };
+        }
+    } catch (err: any) {
+        console.error(`[ST Adapter] Scene-for-character failed: ${err.message}`);
+        return { reaction: '', sentMessages: messages };
     }
 }
