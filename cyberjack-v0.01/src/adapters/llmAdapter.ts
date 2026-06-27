@@ -218,7 +218,12 @@ function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
     if (prompt.tickResultSummary) {
         extras.push(`[Результат воздействия]: ${prompt.tickResultSummary}`);
     }
-    if (prompt.characterSpeech) {
+    if (prompt.playerSpeech) {
+        extras.push(`[Сказал Калибратор]: "${prompt.playerSpeech}"`);
+    }
+    if (prompt.characterSpeech && prompt.characterName) {
+        extras.push(`[Ответила ${prompt.characterName}]: "${prompt.characterSpeech}"`);
+    } else if (prompt.characterSpeech) {
         extras.push(`[Реплика персонажа]: "${prompt.characterSpeech}"`);
     }
     const userContent = extras.length

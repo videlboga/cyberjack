@@ -536,6 +536,8 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             : '';
         // Enrich narrator prompt with speech, contexts, and result
         promptPayload.narratorPrompt.characterSpeech = primaryReply?.speech || undefined;
+        promptPayload.narratorPrompt.characterName = fullStateName || subjectId;
+        promptPayload.narratorPrompt.playerSpeech = autoUserMessage || undefined;
         promptPayload.narratorPrompt.activeContexts = activeContextLabels.length ? activeContextLabels : undefined;
         promptPayload.narratorPrompt.tickResultSummary = tickResultSummary || undefined;
 

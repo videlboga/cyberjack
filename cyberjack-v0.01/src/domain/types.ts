@@ -357,6 +357,8 @@ export interface NarratorPromptPayload {
     instructions?: string;
     // Narrator B: speech and context for a richer chronicle
     characterSpeech?: string;
+    characterName?: string;
+    playerSpeech?: string;
     activeContexts?: string[];
     tickResultSummary?: string;
 }
