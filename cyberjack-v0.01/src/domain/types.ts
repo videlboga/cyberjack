@@ -440,4 +440,6 @@ export interface TickBundle {
     metadata?: Record<string, unknown>;
     // Whether this tick actually applied any state-changing effects
     actionApplied?: boolean;
+    // System messages generated during the tick (refusals, context changes, etc.)
+    systemNotes?: string[];
 }

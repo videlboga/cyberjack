@@ -22,17 +22,19 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
     // Optional text semantic classification
     if (payload.textMessage) {
         let sceneContextStr = '';
+        let sceneCharacters: { id: string; name: string }[] = [];
         try {
             const scene = sceneRepo.get(sceneId);
             const chars = sceneCharacterRepo.list(sceneId);
             const nodesLine = scene?.slots?.length ? `Доступные зоны (сектора): ${scene.slots.map(s => typeof s === 'string' ? s : (s as any).id || s).join(', ')}` : 'Доступные зоны: не определены';
             const charsLine = chars.length ? `Персонажи рядом: ${chars.map(c => c.character.name || c.character.id).join(', ')}` : 'Персонажи рядом: никого';
             sceneContextStr = `${nodesLine}. ${charsLine}.`;
+            sceneCharacters = chars.map(c => ({ id: c.character.id, name: c.character.name || c.character.id }));
         } catch (err) {
             sceneContextStr = '';
         }
 
-        dynamicModifiers = await parseVerbalInput(payload.textMessage, sceneContextStr);
+        dynamicModifiers = await parseVerbalInput(payload.textMessage, sceneContextStr, sceneCharacters, payload.playerId);
 
         if (dynamicModifiers.pointId) {
             // Check repo instead of direct db query

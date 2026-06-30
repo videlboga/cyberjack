@@ -6,7 +6,7 @@ import { saveTickState } from './saveTickState';
 import { compileAction } from '../compiler/compileAction';
 import { runTick } from '../engine/runTick';
 import { eventQueries } from '../infrastructure/eventQueries';
-import { activeContextsRepo, resourceRepo, sceneRepo, presetRepo, eventLogRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, resourceRepo, sceneRepo, presetRepo, eventLogRepo, characterRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
@@ -228,6 +228,38 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 } else {
                     const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${commandActionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
                     addedContextNotes.push(refusedNarrative);
+                }
+            }
+        } else if (commandIntent.type === 'perform_described_action') {
+            // RP-style described action: *Глажу по щеке*, *бью хлыстом* etc.
+            // The parser already resolved a matching preset (or null) and checked inventory.
+            if (commandIntent.refusal) {
+                // Refused — missing item, no match, or other reason
+                const refusalNarrative = `[Система]: ${commandIntent.refusal}`;
+                addedContextNotes.push(refusalNarrative);
+                eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: refusalNarrative, narrative: refusalNarrative }, { added: true });
+                actionApplied = false;
+            } else if (commandIntent.matchedActionId) {
+                // Matched a preset — apply its effects similar to perform_action
+                commandActionPreset = presetRepo.getActionPreset(commandIntent.matchedActionId);
+                if (commandActionPreset) {
+                    forcedAttempted = true;
+                    const requiredCompliance = (commandActionPreset.priority || 1) * 20;
+                    const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
+                    // Default target is the subject being acted upon
+                    const targetChar = characterRepo.get(commandIntent.targetId || payload.subjectId);
+                    const targetName = targetChar?.name || commandIntent.targetId || payload.subjectId;
+                    const descText = commandIntent.description || '';
+
+                    if (currentCompliance >= requiredCompliance) {
+                        let reason = state.relation?.attitude > 70 ? "из симпатии и покорности" : "вынужденно подчиняясь сломленной воле";
+                        if (state.core.attitude < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
+                        forcedNarrativeToLog = `[Система]: *${descText}* → Актив реагирует на "${commandActionPreset.label}" (цель: ${targetName}), ${reason}.`;
+                        addedContextNotes.push(forcedNarrativeToLog);
+                    } else {
+                        const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${commandActionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
+                        addedContextNotes.push(refusedNarrative);
+                    }
                 }
             }
         }
@@ -483,6 +515,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         }
     }
 
+    // Inject addedContextNotes into systemPrompt so the LLM can react to
+    // system events (refusals, moves, context changes) in its reply.
+    if (addedContextNotes.length > 0 && prompt.systemPrompt) {
+        prompt.systemPrompt += `\n\n[Системные события тика]:\n${addedContextNotes.join('\n')}`;
+    }
+
     const event: GameEvent = {
         id: tickId,
         type: payload.eventType || (payload.textMessage ? 'verbal_input' : 'ui_action'),
@@ -548,5 +586,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent
         },
         actionApplied,
+        systemNotes: addedContextNotes,
     };
 }

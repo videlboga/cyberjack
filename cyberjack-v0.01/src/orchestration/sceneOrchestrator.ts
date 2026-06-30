@@ -539,6 +539,25 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         promptPayload.narratorPrompt.characterName = fullStateName || subjectId;
         promptPayload.narratorPrompt.playerSpeech = autoUserMessage || undefined;
         promptPayload.narratorPrompt.activeContexts = activeContextLabels.length ? activeContextLabels : undefined;
+
+        // Add WHO is in each state so the narrator doesn't confuse subject vs player
+        const subjectChar = characterRepo.get(bundle.event.subjectId || subjectId);
+        const subjectNameForNarrator = subjectChar?.name || fullStateName || subjectId;
+        const narratorPlayerId = bundle.event.playerId || 'PL-1';
+        const playerChar = characterRepo.get(narratorPlayerId);
+        const playerNameForNarrator = playerChar?.name || 'Калибратор';
+        if (activeContextLabels.length) {
+            promptPayload.narratorPrompt.activeContexts = activeContextLabels.map(label => `${subjectNameForNarrator}: ${label}`);
+        }
+        // Also include player's active contexts if any
+        const playerContexts = activeContextsRepo.getAllForSubject(narratorPlayerId);
+        if (playerContexts.length) {
+            const playerContextLabels = playerContexts.map(ctx => presetRepo.getActionPreset(ctx.actionId)?.label).filter(Boolean);
+            if (playerContextLabels.length) {
+                const existing = promptPayload.narratorPrompt.activeContexts || [];
+                promptPayload.narratorPrompt.activeContexts = [...existing, ...playerContextLabels.map(label => `${playerNameForNarrator}: ${label}`)];
+            }
+        }
         promptPayload.narratorPrompt.tickResultSummary = tickResultSummary || undefined;
 
         try {

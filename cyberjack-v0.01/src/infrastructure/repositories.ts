@@ -81,6 +81,29 @@ export const characterItemsRepo = {
     }
 };
 
+export const itemRepo = {
+    getAll(): { id: string; name: string; type: string; tags: string[]; description: string }[] {
+        return db.prepare('SELECT * FROM items').all().map((row: any) => ({
+            id: row.id,
+            name: row.name,
+            type: row.type,
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            description: row.description || ''
+        }));
+    },
+    get(id: string): { id: string; name: string; type: string; tags: string[]; description: string } | null {
+        const row = db.prepare('SELECT * FROM items WHERE id = ?').get(id) as any;
+        if (!row) return null;
+        return {
+            id: row.id,
+            name: row.name,
+            type: row.type,
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            description: row.description || ''
+        };
+    }
+};
+
 export const sceneObjectsRepo = {
     save(obj: { id: string; sceneId: string; nodeId?: string; itemId: string; ownerId?: string; state?: string; metadata?: Record<string, unknown> }) {
         db.prepare(`

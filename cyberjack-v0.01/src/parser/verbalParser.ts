@@ -1,6 +1,6 @@
 import { CompiledAction } from '../domain/types';
 import { CommandIntent } from '../domain/resolver';
-import { presetRepo } from '../infrastructure/repositories';
+import { presetRepo, characterItemsRepo, itemRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 
 export interface ParsedVerbalAction extends Partial<CompiledAction> {
@@ -10,10 +10,291 @@ export interface ParsedVerbalAction extends Partial<CompiledAction> {
     commandIntent: CommandIntent;
 }
 
-export async function parseVerbalInput(text: string, sceneContextStr?: string, sceneCharacters?: { id: string; name: string }[]): Promise<ParsedVerbalAction> {
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+// Extract text wrapped in *asterisks* — RP-style action descriptions.
+// Returns the first match (trimmed) or null.
+export function extractDescribedAction(text: string): string | null {
+    // Match *...* but not **...** (bold) and not empty
+    // We want single-asterisk RP actions: *Глажу по щеке*
+    const match = text.match(/(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/);
+    if (match && match[1].trim().length > 0) {
+        return match[1].trim();
+    }
+    return null;
+}
+
+// Levenshtein distance for fuzzy matching
+function levenshtein(a: string, b: string): number {
+    if (a === b) return 0;
+    const la = a.length, lb = b.length;
+    if (la === 0) return lb;
+    if (lb === 0) return la;
+    const v = new Array(lb + 1).fill(0).map((_, i) => i);
+    for (let i = 0; i < la; i++) {
+        let prev = i + 1;
+        for (let j = 0; j < lb; j++) {
+            const cost = a[i] === b[j] ? 0 : 1;
+            const cur = Math.min(v[j + 1] + 1, prev + 1, v[j] + cost);
+            v[j] = prev;
+            prev = cur;
+        }
+        v[lb] = prev;
+    }
+    return v[lb];
+}
+
+// ─── Described Action Parser ────────────────────────────────────────────────
+// Parses RP-style actions like *Глажу по щеке* or *бью по спине хлыстом*.
+// Returns a perform_described_action intent with either a matched preset
+// or a refusal with reasoning (e.g. missing item).
+
+interface DescribedActionLLMResult {
+    matchedActionId: string | null;  // best matching action preset ID or null
+    matchConfidence: number;          // 0.0–1.0 — how close the match is
+    pointId: string;                  // body point target
+    targetId?: string;                // target character name/id
+    requiredItem?: string;            // item ID if the action implies a tool
+    itemMentioned?: string;            // raw item name the user mentioned (for refusal message)
+    modifiers: {
+        intensity: number;
+        valence: number;
+        contact: number;
+        sharpness: number;
+        novelty: number;
+    };
+    refusalReason?: string;           // if LLM already knows it can't map
+}
+
+async function parseDescribedAction(
+    actionText: string,
+    sceneContextStr?: string,
+    sceneCharacters?: { id: string; name: string }[]
+): Promise<{ result: DescribedActionLLMResult; model: string }> {
+    const ctxList = presetRepo.getAllActionPresets()
+        .filter(act => act.contextConfig)
+        .map(act => `- "${act.id}": ${act.label}`)
+        .join('\n');
+
+    const actionList = presetRepo.getAllActionPresets()
+        .filter(act => !act.contextConfig && act.type !== 'system' && act.type !== 'wait')
+        .map(act => `- "${act.id}": ${act.label} — ${act.vector?.description || ''}`)
+        .join('\n');
+
+    // Build items list for the LLM to reference
+    const itemsList = itemRepo.getAll()
+        .map(item => `- "${item.id}": ${item.name} (${item.type})`)
+        .join('\n');
+
+    let charactersListForPrompt = '';
+    if (sceneCharacters && sceneCharacters.length) {
+        charactersListForPrompt = '\nТекущие персонажи в сцене:' + sceneCharacters.map(c => `\n- "${c.name}" -> ${c.id}`).join('');
+    }
+
+    const messages: any[] = [
+        {
+            role: 'system',
+            content: `Ты — классификатор описанных действий в RP-формате (текст в звёздочках).
+Пользователь описывает физическое действие в формате *действие*. Твоя задача — сопоставить это описание с известными пресетами действий.
+
+Текущий список доступных ID для контекстов/поз:
+${ctxList}
+
+Текущий список доступных ID для простых действий:
+${actionList}
+
+Текущий список предметов в игре:
+${itemsList}
+
+Правила:
+1. Найди НАИБОЛЕЕ ПОХОЖИЙ пресет действия. Если есть прямое соответствие (например "глажу" → act_caress, "бью" → act_slap) — используй его ID.
+2. Если прямого соответствия нет, выбери БЛИЖАЙШИЙ по смыслу (например "шлёпаю" → act_slap, "целую в лоб" → act_kiss).
+3. Если действие требует предмета (оружие, инструмент, препарат) — укажи его ID в requiredItem. Если пользователь упоминает предмет, которого нет в списке — оставь requiredItem пустым и укажи refusalReason с описанием проблемы.
+4. Определи точку воздействия (pointId) по русскому названию части тела.
+5. Если действие вообще не сопоставимо ни с чем из списка — установи matchedActionId в null и объясни причину в refusalReason.
+
+Синонимы частей тела: голова=head, лицо=face, губы=lips, шея=neck, плечи=shoulders, спина=back, грудь=chest, соски=nipples, живот=belly, талия=waist, бедра=hips, пах=groin, ягодицы=buttocks, икры=calves, колени=knees, ступни=feet, руки=hands, кисти=hands, запястья=wrists
+
+Ответь ТОЛЬКО валидным JSON:
+{
+    "matchedActionId": "act_xxx" | null,
+    "matchConfidence": 0.0-1.0,
+    "pointId": "face",
+    "targetId": "имя или null",
+    "requiredItem": "eq_xxx" | null,
+    "itemMentioned": "название предмета из текста или null",
+    "modifiers": { "intensity": 0.0-1.0, "valence": -1.0-1.0, "contact": 0.0-1.0, "sharpness": 0.0-1.0, "novelty": 0.0-1.0 },
+    "refusalReason": "текст или null"
+}` + charactersListForPrompt
+        },
+        { role: 'user', content: `*${actionText}*` }
+    ];
+
+    console.log(`[VerbalParser] Analyzing described action: "*${actionText}*"`);
+
+    const { parsed, model } = await parseVerbalInputWithLLM(messages);
+    console.log('[VerbalParser] described action raw parsed:', JSON.stringify(parsed));
+
+    // Normalize pointId
+    const synonyms: Record<string, string> = {
+        голова: 'head', лицо: 'face', губы: 'lips', шея: 'neck', плечи: 'shoulders',
+        спина: 'back', грудь: 'chest', соски: 'nipples', живот: 'belly',
+        талия: 'waist', бедра: 'hips', пах: 'groin', ягодицы: 'buttocks',
+        икры: 'calves', колени: 'knees', ступни: 'feet',
+        руки: 'hands', кисти: 'hands', запястья: 'wrists'
+    };
+    const normalizePoint = (candidate?: string, txt?: string) => {
+        if (!candidate && !txt) return 'systemic';
+        if (candidate) {
+            const c = candidate.toString().toLowerCase();
+            if (synonyms[c]) return synonyms[c];
+        }
+        if (txt) {
+            const lowerTxt = txt.toString().toLowerCase();
+            for (const key of Object.keys(synonyms)) {
+                const re = new RegExp(`\\b${key}\\b`, 'i');
+                if (re.test(lowerTxt)) return synonyms[key];
+            }
+        }
+        return candidate ?? 'systemic';
+    };
+
+    const result: DescribedActionLLMResult = {
+        matchedActionId: parsed.matchedActionId ?? null,
+        matchConfidence: parsed.matchConfidence ?? 0,
+        pointId: normalizePoint(parsed.pointId, actionText),
+        targetId: parsed.targetId && parsed.targetId !== 'null' ? parsed.targetId : undefined,
+        requiredItem: parsed.requiredItem && parsed.requiredItem !== 'null' ? parsed.requiredItem : undefined,
+        itemMentioned: parsed.itemMentioned && parsed.itemMentioned !== 'null' ? parsed.itemMentioned : undefined,
+        modifiers: {
+            intensity: parsed.modifiers?.intensity ?? 0.3,
+            valence: parsed.modifiers?.valence ?? 0,
+            contact: parsed.modifiers?.contact ?? 0.3,
+            sharpness: parsed.modifiers?.sharpness ?? 0,
+            novelty: parsed.modifiers?.novelty ?? 0.5
+        },
+        refusalReason: parsed.refusalReason && parsed.refusalReason !== 'null' ? parsed.refusalReason : undefined
+    };
+
+    return { result, model };
+}
+
+// ─── Main Parser ────────────────────────────────────────────────────────────
+
+export async function parseVerbalInput(
+    text: string,
+    sceneContextStr?: string,
+    sceneCharacters?: { id: string; name: string }[],
+    playerId?: string
+): Promise<ParsedVerbalAction> {
     if (!text || text.trim() === "") {
         return { intensity: 0.1, valence: 0, contact: 0.1, sharpness: 0, novelty: 0.5, pointId: 'systemic', commandIntent: { type: 'none' } };
     }
+
+    // ── Check for described action in asterisks: *...* ──
+    const describedAction = extractDescribedAction(text);
+    if (describedAction) {
+        try {
+            const { result, model } = await parseDescribedAction(describedAction, sceneContextStr, sceneCharacters);
+
+            // Resolve target character if needed
+            // Default: the target is the subject (the character being acted upon).
+            // If the LLM returned a targetId, try to resolve it against scene characters.
+            // If no targetId, find the first non-player character in the scene (the subject).
+            let resolvedTargetId: string | undefined = undefined;
+            if (result.targetId && sceneCharacters && sceneCharacters.length) {
+                const raw = result.targetId.toString().trim();
+                const cleanName = (s?: string) => s ? s.toLowerCase().trim() : '';
+                const parsedNorm = cleanName(raw);
+                const found = sceneCharacters.find(c => {
+                    const nameNorm = cleanName(c.name);
+                    return nameNorm === parsedNorm || nameNorm.includes(parsedNorm) || parsedNorm.includes(nameNorm);
+                });
+                if (found) resolvedTargetId = found.id;
+            }
+            // If still unresolved, default to the first non-player character (the subject)
+            if (!resolvedTargetId && sceneCharacters && sceneCharacters.length) {
+                const subject = sceneCharacters.find(c => !c.id.startsWith('PL-'));
+                if (subject) resolvedTargetId = subject.id;
+            }
+
+            // ── Check inventory for requiredItem ──
+            let refusal: string | undefined;
+            if (result.refusalReason) {
+                // LLM already determined a refusal
+                refusal = result.refusalReason;
+            } else if (result.matchedActionId === null) {
+                // No match found
+                refusal = result.refusalReason || `Не удалось сопоставить действие "*${describedAction}*" с известными действиями.`;
+            } else if (result.requiredItem && playerId) {
+                // Check if the player has the required item
+                // Find the player's character in the scene
+                const sceneId = sceneContextStr; // not ideal but we don't have sceneId here directly
+                // We need the character id for inventory lookup
+                // The playerId might be a character id or a player id — try both paths
+                let charId: string | undefined = playerId;
+                // If sceneCharacters are available, try to find the player among them
+                if (sceneCharacters && sceneCharacters.length) {
+                    // Try to match playerId against scene character ids
+                    const match = sceneCharacters.find(c => c.id === playerId || c.id === `PL-${playerId}`);
+                    if (match) charId = match.id;
+                }
+
+                const item = characterItemsRepo.get(charId, result.requiredItem);
+                if (!item || item.state === 'consumed' || item.state === 'broken') {
+                    // Get the human-readable item name
+                    const itemInfo = itemRepo.get(result.requiredItem);
+                    const itemDisplayName = itemInfo?.name || result.itemMentioned || result.requiredItem;
+                    refusal = `У вас нет предмета "${itemDisplayName}".`;
+                }
+            }
+
+            const commandIntent: CommandIntent = {
+                type: 'perform_described_action',
+                description: describedAction,
+                matchedActionId: result.matchedActionId,
+                targetId: resolvedTargetId,
+                pointId: result.pointId,
+                requiredItem: result.requiredItem,
+                refusal,
+                modifiers: result.modifiers
+            };
+
+            return {
+                intensity: result.modifiers.intensity,
+                valence: result.modifiers.valence,
+                contact: result.modifiers.contact,
+                sharpness: result.modifiers.sharpness,
+                novelty: result.modifiers.novelty,
+                pointId: result.pointId,
+                commandIntent,
+                raw: JSON.stringify(result),
+                model
+            };
+        } catch (error: any) {
+            console.error('[VerbalParser] Described action parsing failed:', error.message);
+            // Fallback: return a refusal
+            return {
+                intensity: 0.2,
+                valence: 0,
+                contact: 0.1,
+                sharpness: 0.1,
+                novelty: 0.5,
+                pointId: 'systemic',
+                commandIntent: {
+                    type: 'perform_described_action',
+                    description: describedAction,
+                    matchedActionId: null,
+                    pointId: 'systemic',
+                    refusal: `Ошибка разбора действия: ${error.message}`
+                },
+                raw: error.message,
+                model: 'google/gemini-3.1-flash-lite-preview'
+            };
+        }
+    }
+
+    // ── Regular verbal command parsing (existing logic) ──
 
     const ctxList = presetRepo.getAllActionPresets()
         .filter(act => act.contextConfig)
@@ -28,20 +309,19 @@ export async function parseVerbalInput(text: string, sceneContextStr?: string, s
     let moveInstructions = '';
     if (sceneContextStr) {
         moveInstructions = `Текущая сцена: ${sceneContextStr}
-ЕСЛИ текст является требованием или просьбой переместиться (например "подойди ко мне", "отойти в угол", "иди к Вексу"), добавь в JSON поле "intent": "move", а целевое место укажи в поле "targetLocation". В качестве "targetLocation" используй ТОЛЬКО имя зоны из списка, имя персонажа из списка, либо значение "initiator" (если запрос "подойди ко мне" или "ближе").\n`;
+ЕСЛИ текст является требованием или просьбой переместиться (например "подойди ко мне", "отойти в угол", "иди к Вексу"), добавь в JSON поле "intent": "move", а целевое место укажи в поле "targetLocation". В качестве "targetLocation" используй ТОЛЬКО имя зоны из списка, имя персонажа из списка, либо значение "initiator" (если запрос "подойди ко мне" или "ближе").
+`;
     }
 
-    // If we have a structured list of characters, include it in the system prompt so the
-    // LLM can resolve names to scene characters (name -> id).
     let charactersListForPrompt = '';
     if (sceneCharacters && sceneCharacters.length) {
         charactersListForPrompt = '\nТекущие персонажи в сцене:' + sceneCharacters.map(c => `\n- "${c.name}" -> ${c.id}`).join('');
     }
 
-        const messages: any[] = [
-                {
-                        role: 'system',
-                        content: `Ты — классификатор семантических параметров речи в симуляторе. В симуляторе сейчас можно изменять позу, применять состояние или давать команду на действие.
+    const messages: any[] = [
+        {
+            role: 'system',
+            content: `Ты — классификатор семантических параметров речи в симуляторе. В симуляторе сейчас можно изменять позу, применять состояние или давать команду на действие.
 Текущий список доступных ID для контекстов/поз:
 ${ctxList}
 
@@ -62,14 +342,14 @@ ${moveInstructions}
 }
 
 Ответь ТОЛЬКО валидным JSON.` + charactersListForPrompt
-                },
-                { role: 'user', content: text }
-        ];
+        },
+        { role: 'user', content: text }
+    ];
 
     try {
     console.log(`[VerbalParser] Analyzing text: "${text}"`);
-        
-    const { parsed, model } = await parseVerbalInputWithLLM(messages); console.log("[VerbalParser] raw parsed:", JSON.stringify(parsed));
+
+    const { parsed, model } = await parseVerbalInputWithLLM(messages); console.log('[VerbalParser] raw parsed:', JSON.stringify(parsed));
 
         const synonyms: Record<string, string> = {
             голова: 'head', лицо: 'face', губы: 'lips', шея: 'neck', плечи: 'shoulders',
@@ -113,16 +393,13 @@ ${moveInstructions}
             const cleanName = (s?: string) => {
                 if (!s) return '';
                 const noDiac = stripDiacritics(s);
-                // replace non-letters/numbers with space, collapse spaces, lowercase
                 return noDiac.replace(/[^\p{L}\p{N}]+/gu, ' ').trim().toLowerCase().replace(/\s+/g, ' ');
             };
 
-            // crude russian stemmer: remove common case endings from the last token
             const stemRussian = (s: string) => {
                 if (!s) return '';
                 const tokens = s.split(' ');
                 const last = tokens.pop() || '';
-                // common simple endings (not exhaustive) to strip from names/roles
                 const endings = ['а','я','у','ю','ом','ем','ой','ей','е','и','ы','ов','ев','ова','ева','ину','ину','ин','ын','ьи','ью','ях','ами','ами'];
                 let base = last;
                 for (const e of endings) {
@@ -135,36 +412,14 @@ ${moveInstructions}
                 return tokens.join(' ');
             };
 
-            // Levenshtein distance for fuzzy matching
-            const levenshtein = (a: string, b: string) => {
-                if (a === b) return 0;
-                const la = a.length, lb = b.length;
-                if (la === 0) return lb;
-                if (lb === 0) return la;
-                const v = new Array(lb + 1).fill(0).map((_, i) => i);
-                for (let i = 0; i < la; i++) {
-                    let prev = i + 1;
-                    for (let j = 0; j < lb; j++) {
-                        const cost = a[i] === b[j] ? 0 : 1;
-                        const cur = Math.min(v[j + 1] + 1, prev + 1, v[j] + cost);
-                        v[j] = prev;
-                        prev = cur;
-                    }
-                    v[lb] = prev;
-                }
-                return v[lb];
-            };
-
             const parsedNorm = cleanName(raw);
             const parsedStem = stemRussian(parsedNorm);
 
-            // exact id match (case-insensitive)
             const idMatch = sceneCharacters.find(c => c.id.toLowerCase() === parsedNorm || c.id.toLowerCase() === raw.toLowerCase());
             if (idMatch) {
                 resolvedTargetId = idMatch.id;
                 console.log(`[VerbalParser] Resolved targetId '${raw}' -> id '${idMatch.id}' (exact id match)`);
             } else {
-                // prepare normalized variants of scene characters
                 const variants = sceneCharacters.map(c => {
                     const name = c.name || '';
                     const norm = cleanName(name);
@@ -172,14 +427,12 @@ ${moveInstructions}
                     return { id: c.id, rawName: name, norm, stem };
                 });
 
-                // 1) exact normalized name
                 let found = variants.find(v => v.norm === parsedNorm || v.norm === parsedStem || v.stem === parsedStem);
                 if (found) {
                     resolvedTargetId = found.id;
                     console.log(`[VerbalParser] Resolved by normalized equality '${raw}' -> id '${found.id}' (name: '${found.rawName}')`);
                 }
 
-                // 2) contains / startsWith checks
                 if (!resolvedTargetId) {
                     const contains = variants.find(v => v.norm.includes(parsedNorm) || parsedNorm.includes(v.norm) || v.stem.includes(parsedStem) || parsedStem.includes(v.stem));
                     if (contains) {
@@ -188,7 +441,6 @@ ${moveInstructions}
                     }
                 }
 
-                // 3) fuzzy match using Levenshtein (pick best with ratio threshold)
                 if (!resolvedTargetId) {
                     let best: { id: string; score: number; rawName: string } | null = null;
                     for (const v of variants) {
@@ -232,7 +484,7 @@ ${moveInstructions}
             model: model ?? 'google/gemini-3.1-flash-lite-preview'
         };
     } catch (error: any) {
-        console.error("[VerbalParser] Failed to classify text:", error.message);
+        console.error('[VerbalParser] Failed to classify text:', error.message);
         return { intensity: 0.3, valence: 0, contact: 0.1, sharpness: 0.1, novelty: 0.5, pointId: 'systemic', raw: error.message, model: 'google/gemini-3.1-flash-lite-preview', commandIntent: { type: 'none' } };
     }
 }

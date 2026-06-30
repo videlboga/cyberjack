@@ -15,6 +15,14 @@ import stateRoutes from './routes/stateRoutes';
 import playerRoutes from './routes/playerRoutes';
 import sceneRoutes from './routes/sceneRoutes';
 import metaRoutes from './routes/metaRoutes';
+import contractRoutes from './routes/contractRoutes';
+
+// Seed contracts on startup
+try {
+    await import('../infrastructure/seedContracts');
+} catch (e: any) {
+    console.warn('[Server] seedContracts failed (non-fatal):', e.message);
+}
 
 const app = express();
 app.use(express.json());
@@ -34,6 +42,7 @@ app.use('/api', stateRoutes);
 app.use('/api', playerRoutes);
 app.use('/api', sceneRoutes);
 app.use('/api', metaRoutes);
+app.use('/api', contractRoutes);
 
 app.get('/api/debug-env', (req: any, res: any) => {
     res.json({

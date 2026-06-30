@@ -69,6 +69,32 @@ type ChatMessage = {
   actorName?: string;
 };
 
+type SuggestedChip = {
+  text: string;
+  actionId?: string;
+  pointId?: string;
+  type: string;
+  speech?: string;
+  description?: string;
+};
+
+type ContractProgress = {
+  contractTitle: string;
+  contractDescription: string;
+  conditions: { label: string; current: number | boolean; operator: string; value: number; met: boolean }[];
+  metAll: boolean;
+} | null;
+
+type ContractInfo = {
+  id: string;
+  title: string;
+  description: string;
+  issuerId: string;
+  conditions: any[];
+  rewards: any;
+  state: string;
+};
+
 // ─── Constants ──────────────────────────────────────────
 
 const CORE_METRICS: { key: keyof SubjectState; label: string; baselineKey?: keyof SubjectState; color: string }[] = [
@@ -173,10 +199,62 @@ export function GameApp() {
   const [lastResult, setLastResult] = useState<TickResult | null>(null);
   const [sceneId, setSceneId] = useState('scene_lab_calibrator');
   const [error, setError] = useState<string | null>(null);
+  const [suggestedChips, setSuggestedChips] = useState<SuggestedChip[]>([]);
+  const [stateDescription, setStateDescription] = useState<string>('');
+  const [contractProgress, setContractProgress] = useState<ContractProgress>(null);
+  const [availableContracts, setAvailableContracts] = useState<ContractInfo[]>([]);
 
   const logRef = useRef<HTMLDivElement>(null);
 
   // ─── Data fetching ────────────────────────────────────
+
+  const fetchContracts = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/contracts`);
+      const body = await res.json();
+      if (body.success) {
+        setAvailableContracts(body.available || []);
+      }
+    } catch {}
+  };
+
+  useEffect(() => { fetchContracts(); }, []);
+
+  const acceptContract = async (contractId: string) => {
+    if (!focusedCharId) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/contracts/${contractId}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subjectId: focusedCharId, playerId: PLAYER_CHARACTER_ID }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addMsg('system', `Контракт принят: ${data.contract?.title || contractId}`);
+        fetchContracts();
+      } else {
+        setError(data.error || 'Не удалось принять контракт');
+      }
+    } catch (e: any) { setError(e.message); }
+  };
+
+  const deliverContract = async (contractId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/contracts/${contractId}/deliver`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addMsg('system', `Контракт выполнен! Награда зачислена.`);
+        fetchContracts();
+      } else if (data.metRequirements === false) {
+        const unmet = (data.unmet || []).join('; ');
+        addMsg('system', `Условия не выполнены: ${unmet}`);
+      }
+    } catch (e: any) { setError(e.message); }
+  };
 
   const fetchState = async (targetId: string) => {
     try {
@@ -270,6 +348,22 @@ export function GameApp() {
       } else {
         if (data.tickResult) setLastResult(data.tickResult);
 
+        // System notes (refusals, context changes, described action results)
+        if (data.systemNotes && data.systemNotes.length > 0) {
+          for (const note of data.systemNotes) {
+            addMsg('system', note);
+          }
+        }
+
+        // Update narrative state description + chips + contract progress
+        if (data.stateDescription) setStateDescription(data.stateDescription);
+        if (data.contractProgress) setContractProgress(data.contractProgress);
+        if (data.suggestedChips && data.suggestedChips.length > 0) {
+          setSuggestedChips(data.suggestedChips);
+        } else {
+          setSuggestedChips([]);
+        }
+
         // Narrator goes first (cinematic description)
         // API returns narratorReaction as string, not {reaction: string}
         const narratorText = typeof data.narratorReaction === 'string'
@@ -304,6 +398,31 @@ export function GameApp() {
       addMsg('error', `Сеть: ${e.message}`);
     }
     setIsProcessing(false);
+  };
+
+  const handleChipClick = (chip: SuggestedChip) => {
+    if (chip.type === 'wait') {
+      sendWait();
+      return;
+    }
+    if (chip.type === 'verbal' && chip.speech) {
+      // Verbal: send speech as plain text (what calibrator says)
+      setChatInput(chip.speech);
+      setTimeout(() => sendAction(), 50);
+      return;
+    }
+    if (chip.type === 'action') {
+      if (chip.actionId) setSelectedAction(chip.actionId);
+      if (chip.pointId) setSelectedPoint(chip.pointId);
+      if (chip.description) {
+        // Action with RP description: send as *description*
+        setChatInput(`*${chip.description}*`);
+      }
+      setTimeout(() => sendAction(), 50);
+      return;
+    }
+    // Default: just set the text
+    setChatInput(chip.text);
   };
 
   const sendWait = async () => {
@@ -409,55 +528,42 @@ export function GameApp() {
 
         {error && <div className="error-bar">{error}</div>}
 
+        {/* Narrative state description */}
+        {stateDescription && (
+          <div className="state-description">
+            <span className="state-label">Состояние: </span>
+            {stateDescription}
+          </div>
+        )}
+
         {/* Action area */}
         <div className="action-area">
-          {/* Quick action category buttons */}
-          <div className="quick-categories">
-            {ACTION_CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                className={`qbtn ${activeCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Actions in selected category */}
-          {activeCategory && categoryActionList.length > 0 && (
-            <div className="quick-actions">
-              {categoryActionList.map(a => (
+          {/* Suggested chips — LLM-generated contextual action hints */}
+          {suggestedChips.length > 0 && (
+            <div className="suggested-chips">
+              {suggestedChips.map((chip, i) => (
                 <button
-                  key={a.id}
-                  className={`qbtn-small ${selectedAction === a.id ? 'active' : ''}`}
-                  onClick={() => setSelectedAction(selectedAction === a.id ? '' : a.id)}
+                  key={i}
+                  className={`chip chip-${chip.type}`}
+                  onClick={() => handleChipClick(chip)}
+                  disabled={isProcessing}
                 >
-                  {a.label}
+                  {chip.text}
                 </button>
               ))}
-              {categoryActionList.length === 0 && <span className="muted small">Нет действий для этой точки</span>}
             </div>
           )}
 
-          {/* Point selector + text input */}
-          <div className="action-row">
-            <select value={selectedPoint} onChange={e => setSelectedPoint(e.target.value)} className="select">
-              <option value="systemic">— точка воздействия —</option>
-              {availablePoints.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-            </select>
-          </div>
-
           <div className="input-row">
-            <input type="text" placeholder="Сказать что-то..." value={chatInput}
+            <input type="text" placeholder="Сказать что-то... или *описать действие*" value={chatInput}
               onChange={e => setChatInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !isProcessing && (selectedAction || chatInput.trim())) sendAction(); }}
+              onKeyDown={e => { if (e.key === 'Enter' && !isProcessing && chatInput.trim()) sendAction(); }}
               className="text-input" />
             <label className="checkbox-label">
               <input type="checkbox" checked={useLLM} onChange={e => setUseLLM(e.target.checked)} /> LLM
             </label>
-            <button onClick={sendAction} disabled={isProcessing || (!selectedAction && !chatInput.trim())} className="btn btn-primary">
-              {isProcessing ? '...' : 'Выполнить'}
+            <button onClick={sendAction} disabled={isProcessing || !chatInput.trim()} className="btn btn-primary">
+              {isProcessing ? '...' : 'Отправить'}
             </button>
             <button onClick={sendWait} disabled={isProcessing} className="btn">Ждать</button>
           </div>
@@ -487,6 +593,59 @@ export function GameApp() {
                 <h3>Контексты</h3>
                 {activeContexts.map(c => (
                   <div key={c.actionId} className="context-tag">{c.label}</div>
+                ))}
+              </div>
+            )}
+
+            {/* Active contract */}
+            {contractProgress && (
+              <div className="panel-section contract-panel">
+                <h3>Контракт</h3>
+                <div className="contract-title">{contractProgress.contractTitle}</div>
+                <div className="contract-desc">{contractProgress.contractDescription}</div>
+                <div className="contract-conditions">
+                  {contractProgress.conditions.map((c, i) => (
+                    <div key={i} className={`contract-cond-row ${c.met ? 'met' : 'unmet'}`}>
+                      <span className="contract-cond-label">{c.label}</span>
+                      <span className="contract-cond-val">
+                        {typeof c.current === 'number' ? Math.round(c.current) : String(c.current)} {c.operator} {c.value}
+                      </span>
+                      <span className="contract-cond-status">{c.met ? '✓' : '✗'}</span>
+                    </div>
+                  ))}
+                </div>
+                {contractProgress.metAll && (
+                  <button className="btn btn-contract-deliver" onClick={() => {
+                    const activeContract = availableContracts.find(c => c.state === 'accepted');
+                    if (activeContract) deliverContract(activeContract.id);
+                  }}>
+                    Сдать актив
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Available contracts (if no active) */}
+            {!contractProgress && availableContracts.length > 0 && (
+              <div className="panel-section">
+                <h3>Контракты</h3>
+                {availableContracts.map(c => (
+                  <div key={c.id} className="contract-card">
+                    <div className="contract-card-info">
+                      <span className="contract-name">{c.title}</span>
+                      <span className="contract-desc">{c.description}</span>
+                      <div className="contract-conds-mini">
+                        {c.conditions.map((cond: any, i: number) => (
+                          <span key={i} className="contract-cond-mini">
+                            {cond.type === 'attitude' ? 'Покорность' : cond.key || cond.type} {cond.operator} {cond.value}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {focusedCharId && (
+                      <button className="btn btn-small" onClick={() => acceptContract(c.id)}>Принять</button>
+                    )}
+                  </div>
                 ))}
               </div>
             )}

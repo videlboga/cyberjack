@@ -4,6 +4,7 @@ export type CommandIntent =
   | { type: "deactivate_context"; targetContextId: string }
   | { type: "move"; targetLocation: string }
   | { type: "perform_action"; actionId: string; targetId?: string; pointId?: string }
+  | { type: "perform_described_action"; description: string; matchedActionId: string | null; targetId?: string; pointId?: string; requiredItem?: string; refusal?: string; modifiers?: { intensity?: number; valence?: number; contact?: number; sharpness?: number; novelty?: number } }
   | { type: "none" };
 
 export type ResolvedFunctions = {

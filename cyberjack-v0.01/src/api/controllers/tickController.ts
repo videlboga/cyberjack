@@ -14,6 +14,8 @@ import { maybeSummarizeChat } from '../../services/chatSummary';
 import { recordMemoryEvent } from '../../services/memoryLayer';
 import { chatMemoryRepo } from '../../infrastructure/repositories';
 import { normalizePlayer } from './playerController';
+import { buildStateDescription, getContractProgress, generateSuggestedChips } from '../../services/chipGenerator';
+import { eventQueries } from '../../infrastructure/eventQueries';
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; actorName: string; targetName: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
@@ -132,6 +134,21 @@ export const processTick = async (req: Request, res: Response) => {
             });
         }
 
+        // Generate narrative state description + contract progress + suggested chips
+        const stateDescription = buildStateDescription(subjectId);
+        const contractProgress = getContractProgress(subjectId, playerId);
+        let suggestedChips: any[] = [];
+        if (!req.body.skipLLM) {
+            try {
+                const recentEventsText = eventQueries.getRecentLogs(subjectId, 5)
+                    .map(e => e.actionPayload?.actionLabel || e.actionType)
+                    .filter(Boolean).join('; ');
+                suggestedChips = await generateSuggestedChips(subjectId, playerId, recentEventsText, '');
+            } catch (e: any) {
+                console.warn('[processTick] chip generation failed:', e.message);
+            }
+        }
+
         res.json({
             success: true,
             tickResult: bundle.output.result,
@@ -140,12 +157,16 @@ export const processTick = async (req: Request, res: Response) => {
             diagnostics: bundle.diagnostics,
             bundle,
             actionApplied: (bundle as any).actionApplied || false,
+            systemNotes: (bundle as any).systemNotes || [],
             reply: turnExecutionMetrics?.reply || null,
             promptMessages: turnExecutionMetrics?.promptMessages || null,
             actorReplies: turnExecutionMetrics?.actorReplies || [],
             narratorReaction: turnExecutionMetrics?.narratorReaction || null,
             classifierLog: dynamicModifiers?.raw ?? null,
-            classifierModel: dynamicModifiers?.model ?? null
+            classifierModel: dynamicModifiers?.model ?? null,
+            stateDescription,
+            contractProgress,
+            suggestedChips
         });
     } catch (error: any) {
         console.error(error);
