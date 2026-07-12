@@ -419,6 +419,48 @@ export interface DiagnosticsOutput {
     };
     physicalEffect?: number;
     emotionalEffect?: number;
+    observation?: InteractionObservation;
+}
+
+export type BehavioralState = 'responsive' | 'subspace' | 'overload' | 'freeze' | 'panic' | 'defiance' | 'unresponsive';
+export type ContextRole = 'behavior' | 'physiology' | 'equipment' | 'pose' | 'restraint' | 'environment' | 'other';
+
+export interface ObservationContext {
+    id: string;
+    label: string;
+    role: ContextRole;
+    pointId?: string | null;
+}
+
+export interface InteractionObservation {
+    action: { id: string; label: string; pointId: string; pointLabel?: string };
+    contact: 'none' | 'partial' | 'full' | 'forced';
+    behavioralState: BehavioralState;
+    reaction: {
+        pleasure: number;
+        discomfort: number;
+        overload: number;
+        engagement: number;
+        mixed: boolean;
+    };
+    learning: {
+        effect: number;
+        familiarityDelta: number;
+        sensitivityDelta: number;
+        baselineSensitivityDelta: number;
+    };
+    changes: { tension: number; capacity: number; attitude: number; openness: number };
+    contexts: ObservationContext[];
+    currentState: { title: string; description: string };
+    transitions: Array<{
+        kind: 'state' | 'discharge' | 'breakdown' | 'recovery' | 'contact';
+        title: string;
+        text: string;
+        severity: 'notice' | 'major' | 'danger';
+    }>;
+    uiText: string;
+    subjectiveText: string;
+    technicalText: string;
 }
 
 

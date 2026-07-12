@@ -7,6 +7,7 @@ console.log('Importing express...'); import express from 'express'; console.log(
 declare const process: any;
 import cors from 'cors';
 import http from 'http';
+import path from 'path';
 import { activeConfig } from '../prompts/config';
 import { initWebSocket, broadcastEvent } from './socket';
 
@@ -43,6 +44,9 @@ app.use('/api', playerRoutes);
 app.use('/api', sceneRoutes);
 app.use('/api', metaRoutes);
 app.use('/api', contractRoutes);
+
+// Serve generated scene images
+app.use('/scene-images', express.static(path.resolve(process.cwd(), 'public', 'scene-images')));
 
 app.get('/api/debug-env', (req: any, res: any) => {
     res.json({

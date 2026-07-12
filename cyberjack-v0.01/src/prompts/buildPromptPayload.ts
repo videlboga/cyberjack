@@ -7,6 +7,7 @@ import { ensureGeneratedProfile } from '../orchestration/characterGenerator/prof
 import { selectLongTermMemory, getRecentSummaries } from '../services/memoryLayer';
 import { characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { buildMemoryInsights } from './buildMemoryInsights';
+import { buildInteractionObservation, buildCurrentStateObservationText } from '../narrative/interactionObservation';
 
 export async function buildPromptPayload(
     ownerId: string, // Whose generation this is
@@ -50,7 +51,18 @@ export async function buildPromptPayload(
     const stateSummary = buildStateSummary(core, mappedPoints);
     const eventsText = buildRecentEventsSummary(recentEvents, actorDetails.name);
     const contextSummary = activeContextNames.length > 0 ? activeContextNames.join(', ') : undefined;
-    const interpretationBlock = `${stateSummary}${contextText}`;
+    let sharedObservationText = buildCurrentStateObservationText(targetId || ownerId, core);
+    if (latestResult?.tickMeta?.inputs?.action) {
+        const previousCore = latestResult.tickMeta.inputs.core;
+        sharedObservationText = buildInteractionObservation({
+            subjectId: targetId || ownerId,
+            pointId: latestResult.tickMeta.inputs.point.pointId,
+            action: latestResult.tickMeta.inputs.action,
+            previousCore,
+            output: latestResult,
+        }).subjectiveText;
+    }
+    const interpretationBlock = `${stateSummary}${contextText}\n[Субъективное переживание текущего состояния]: ${sharedObservationText}`;
 
     const averageLocalAttitude = mappedPoints.length
         ? mappedPoints.reduce((acc, point) => acc + point.localAttitude, 0) / mappedPoints.length
@@ -225,12 +237,12 @@ export async function buildPromptPayload(
     const instructionsSection = `[Инструкции]\n${cfg.formatInstructions}${voiceInstructions}`;
     const memorySection = memoryBlock ? memoryBlock.trim() : '';
 
-    const narratorEventsText = buildRecentEventsSummary(recentEvents.slice(-1), actorDetails.name);
+    const narratorEventsText = buildRecentEventsSummary(recentEvents.slice(-5), actorDetails.name);
 
     const narratorPrompt: NarratorPromptPayload = {
         subjectId: targetQueryId,
         recentEventsText: narratorEventsText.trim(),
-        stateText: '',
+        stateText: sharedObservationText,
         instructions: cfg.narratorFormatInstructions
     };
 

@@ -1,0 +1,16 @@
+.current-state { margin: 10px 0; padding: 11px 12px; border-left: 3px solid #72d6bd; background: #101a1d; }
+.current-state small, .current-state strong { display: block; }
+.current-state small { color: #668087; font-size: 9px; letter-spacing: .14em; }
+.current-state strong { margin-top: 3px; color: #bcebdd; font-size: 17px; text-transform: uppercase; }
+.current-state p { margin: 5px 0 0; color: #96a7ac; font-size: 11px; line-height: 1.4; }
+.current-state.state-unresponsive, .current-state.state-panic { border-color: #d06e68; background: #261819; }
+.current-state.state-unresponsive strong, .current-state.state-panic strong { color: #f2aaa5; }
+.current-state.state-subspace { border-color: #9b82d4; background: #1b1827; }
+.current-state.state-subspace strong { color: #c7b4ee; }
+.current-state.state-overload, .current-state.state-freeze { border-color: #d6a15e; background: #251e16; }
+.current-state.state-overload strong, .current-state.state-freeze strong { color: #efc38b; }
+.history-panel li.milestone, .history-panel li.danger { border-left: 3px solid #9b82d4; background: #181522; }
+.history-panel li.danger { border-color: #d06e68; background: #251617; }
+.history-panel li.milestone strong { color: #c7b4ee; }
+.history-panel li.danger strong { color: #f2aaa5; }
+.history-panel li.milestone > span, .history-panel li.danger > span { color: #d9c8ff; }

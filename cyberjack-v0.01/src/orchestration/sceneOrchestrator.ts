@@ -303,7 +303,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         chatMemoryRepo.append(subjectId, 'user', historyMessage);
     }
 
-    const chatHistory = chatMemoryRepo.getRecent(subjectId, 10).map(entry => ({
+    const chatHistory = chatMemoryRepo.getRecent(subjectId, 6).map(entry => ({
         role: entry.role,
         content: entry.content
     }));
@@ -559,6 +559,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             }
         }
         promptPayload.narratorPrompt.tickResultSummary = tickResultSummary || undefined;
+        promptPayload.narratorPrompt.systemEvents = (bundle as any).systemNotes?.length ? (bundle as any).systemNotes : undefined;
 
         try {
             const narratorRes = await generateNarratorReply(promptPayload.narratorPrompt);

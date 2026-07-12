@@ -218,6 +218,9 @@ function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
     if (prompt.tickResultSummary) {
         extras.push(`[Результат воздействия]: ${prompt.tickResultSummary}`);
     }
+    if (prompt.systemEvents && prompt.systemEvents.length) {
+        extras.push(`[Системные события тика]:\n${prompt.systemEvents.join('\n')}`);
+    }
     if (prompt.playerSpeech) {
         extras.push(`[Сказал Калибратор]: "${prompt.playerSpeech}"`);
     }

@@ -99,6 +99,18 @@ export function applyLearning(
     const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
 
     const timeScale = safeAction.actionKey === 'wait' ? deltaTime : 1.0;
+    const affect = (result.pleasure || 0) - (result.discomfort || 0);
+    // Feeling something pleasant is not identical to learning acceptance.
+    // Positive acceptance requires novelty/learning, engagement and enough
+    // cognitive resource to register the experience. Familiar repetition may
+    // remain pleasant, but its relational gain approaches a plateau.
+    const responsiveness = clamp((safeCore.capacity - 10) / 30, 0, 1);
+    const acceptanceLearning = clamp((result.learningEffect || 0) / 12, 0, 1) *
+        clamp((result.engagement || 0) / 30, 0, 1) * responsiveness;
+    const positiveCoreRoom = clamp((100 - safeCore.attitude) / 50, 0, 1);
+    const positiveLocalRoom = clamp((100 - safePoint.localAttitude) / 50, 0, 1);
+    const coreAffectForAcceptance = affect > 0 ? affect * acceptanceLearning * positiveCoreRoom : affect * responsiveness;
+    const localAffectForAcceptance = affect > 0 ? affect * acceptanceLearning * positiveLocalRoom : affect * responsiveness;
 
     const nextCore: SubjectCoreState = {
         tension: nextTension,
@@ -126,7 +138,7 @@ export function applyLearning(
         ),
         attitude: clamp(
             safeCore.attitude +
-            (((result.pleasure - result.discomfort) * f.attitudeFromPleasureDiscomfort -
+            ((coreAffectForAcceptance * f.attitudeFromPleasureDiscomfort -
             result.overload * f.attitudeFromOverload) * timeScale) * tensionModifier,
             config.core.min,
             config.core.max
@@ -142,7 +154,7 @@ export function applyLearning(
         ),
         localAttitude: clamp(
             safePoint.localAttitude +
-            (result.pleasure - result.discomfort) * f.localAttitudeFromPleasureDiscomfort -
+            localAffectForAcceptance * f.localAttitudeFromPleasureDiscomfort -
             safeAction.sharpness * result.overload * f.localAttitudeFromSharpOverload,
             config.point.min,
             config.point.max

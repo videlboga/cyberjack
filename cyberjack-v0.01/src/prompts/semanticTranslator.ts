@@ -31,28 +31,25 @@ export function translateStateToPrompt(
     const openText = (cfg as any)[`openness_L${openIdx}`];
     const attText = (cfg as any)[`attitude_L${attIdx}`];
 
-    let traitsText = cfg.noTraitsFallback;
-    if (core.capacity <= 10 && core.attitude < 60) {
-        traitsText = cfg.stateApathy;
-    } else if (core.capacity <= 25) {
-        if (core.plasticity > 80) {
-            traitsText = cfg.stateSuggestibility;
-        } else if (core.openness <= 20 && core.attitude >= 40) {
-            traitsText = cfg.stateFreeze;
-        } else if (core.attitude > 60 && core.openness > 50) {
-            traitsText = cfg.stateSubspace;
-        } else if (core.attitude < 40) {
-            traitsText = cfg.statePanicAttack;
-        } else {
-            traitsText = cfg.stateSensoryOverload;
-        }
-    } else {
-        if (core.attitude <= 20 && core.capacity > 60 && core.openness <= 30) {
-            traitsText = cfg.stateActiveDefiance;
-        } else if (core.sensitivity >= 85) {
-            traitsText = cfg.stateHyperesthesia;
-        }
-    }
+    // ConditionWatcher is the source of truth. Do not infer a competing state
+    // tree here: delayed/chronic contexts and mutually exclusive presentation
+    // would otherwise be lost in the prompt.
+    const activeContexts = activeContextsRepo.getAllForSubject(subjectId);
+    const activeIds = new Set(activeContexts.map(context => context.actionId));
+    const behaviorTexts: Array<[string[], string]> = [
+        [['effect_apathy', 'effect_chronic_apathy'], cfg.stateApathy],
+        [['effect_panic'], cfg.statePanicAttack],
+        [['effect_active_defiance'], cfg.stateActiveDefiance],
+        [['effect_freeze'], cfg.stateFreeze],
+        [['effect_sensory_overload'], cfg.stateSensoryOverload],
+        [['effect_subspace'], cfg.stateSubspace],
+    ];
+    const traits: string[] = [];
+    const behavior = behaviorTexts.find(([ids]) => ids.some(id => activeIds.has(id)));
+    if (behavior) traits.push(behavior[1]);
+    if (activeIds.has('effect_suggestibility')) traits.push(cfg.stateSuggestibility);
+    if (activeIds.has('effect_hyperesthesia')) traits.push(cfg.stateHyperesthesia);
+    const traitsText = traits.length ? traits.join(' ') : cfg.noTraitsFallback;
 
     const globalSummary = `${sensText} ${capText} ${openText} ${attText} [СОСТОЯНИЕ РАЗУМА: ${traitsText}]`;
 
@@ -81,7 +78,6 @@ export function translateStateToPrompt(
     }
 
     const occupiedSlots: string[] = [];
-    const activeContexts = activeContextsRepo.getAllForSubject(subjectId);
     if (activeContexts && activeContexts.length > 0) {
         for (const ctx of activeContexts) {
             const preset = presetRepo.getActionPreset(ctx.actionId);
@@ -97,14 +93,12 @@ export function translateStateToPrompt(
     }
 
     let speechConstraint = "";
-    if (core.capacity <= 20) {
-        if (core.attitude > 60) {
+    if (activeIds.has('effect_subspace')) {
             speechConstraint = "Твой разум плывет в сабспейсе. Ты физически не можешь выговаривать длинные предложения. Твоя речь сводится к тихому стону, вздохам и бессвязным обрывкам фраз из 1-2 слов.";
-        } else if (core.attitude < 40) {
+    } else if (activeIds.has('effect_panic')) {
             speechConstraint = "Ты в панике и истерике. Твоя воля сломлена. Ты не способен на связные монологи, только на крики, мольбы, всхлипы или короткие, срывающиеся фразы.";
-        } else {
+    } else if (activeIds.has('effect_apathy') || activeIds.has('effect_chronic_apathy') || activeIds.has('effect_sensory_overload')) {
             speechConstraint = "У тебя сильное истощение. Тебе тяжело строить предложения, ты говоришь медленно, с паузами, обрывками фраз.";
-        }
     } else if (core.capacity >= 70 && core.openness > 60) {
         speechConstraint = "У тебя много сил, и ты чувствуешь себя раскованно. Описывай свои развернутые мысли, можешь быть как язвительным, так и весьма откровенным в своих высказываниях.";
     }

@@ -422,6 +422,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // === Edging & Tension Discharge Mechanic ===
     let peakEventToLog: { presetId: string; narrative: string } | null = null;
+    let notableObservationEvent: 'positive_discharge' | 'breakdown' | 'exhaustion' | undefined;
     if (engineOutput.nextCore.tension >= 100) {
         const activeContextIds = activeContextsRepo.getAllForSubject(payload.subjectId).map(context => context.actionId);
         for (const rule of STATE_RULES) {
@@ -437,13 +438,27 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         let dischargeNarrative = '';
 
         if (isPositive) {
+            notableObservationEvent = 'positive_discharge';
             dischargeNarrative = `[Система: ПОЛОЖИТЕЛЬНАЯ РАЗРЯДКА] Накопленное возбуждение достигает пика и завершается глубокой физиологической разрядкой.`;
             const trustFactor = clamp(((engineOutput.nextCore.attitude || 0) - 30) / 70, 0, 1);
             engineOutput.nextCore.openness = Math.min((engineOutput.nextCore.openness || 0) + 5 + 10 * trustFactor, 100);
             engineOutput.nextCore.attitude = Math.min((engineOutput.nextCore.attitude || 0) + 3 + 12 * trustFactor, 100);
             engineOutput.nextCore.sensitivity = Math.max((engineOutput.nextCore.sensitivity || 0) - 20, 0); // refractory period
             engineOutput.nextCore.capacity = Math.max((engineOutput.nextCore.capacity || 0) - 40, 0);
+            if (!presetRepo.getActionPreset('effect_refractory')) {
+                presetRepo.saveActionPreset(
+                    'effect_refractory',
+                    'Рефрактерный период',
+                    { intensity_mult: 0.25, contact_mult: 0.8, novelty_mult: 0.25 },
+                    { type: 'condition', duration: 3, occupiesPoints: [] }
+                );
+            }
+            const refractoryPreset = presetRepo.getActionPreset('effect_refractory');
+            if (refractoryPreset) {
+                ContextManager.applyContext(payload.subjectId, 'effect_refractory', refractoryPreset);
+            }
         } else {
+            notableObservationEvent = 'breakdown';
             dischargeNarrative = `[Система: НЕРВНЫЙ СРЫВ] Накопленная активация разрешается паническим истощением вместо положительной разрядки.`;
             engineOutput.nextCore.attitude = Math.max((engineOutput.nextCore.attitude || 0) - 20, 0);
             engineOutput.nextCore.openness = Math.max((engineOutput.nextCore.openness || 0) - 15, 0);
@@ -458,6 +473,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         peakEventToLog = { presetId: 'discharge', narrative: dischargeNarrative };
 
     } else if ((engineOutput.nextCore.capacity || 0) <= 0 && (state.core.tension || 0) > 85 && (engineOutput.nextCore.tension || 0) < 100) {
+        notableObservationEvent = 'exhaustion';
         // "Ruined" / Exhaustion before peak
         const ruinNarrative = `[Система: ИСТОЩЕНИЕ РЕСУРСА] Выносливость упала до нуля, пока субъект находился на грани. Разрядки не произошло. Оставляя лишь гнетущую апатию и опустошение.`;
         addedContextNotes.push(ruinNarrative);
@@ -533,8 +549,19 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     engineOutput.delta.point.localSensitivity = engineOutput.nextPoint.localSensitivity - stateBefore.point.localSensitivity;
     engineOutput.delta.point.localAttitude = engineOutput.nextPoint.localAttitude - stateBefore.point.localAttitude;
 
-    // 7. Save Atomically (before prompt building)
-    saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
+    const pointPresetForObservation = presetRepo.getPointPreset(payload.pointId);
+    const diagnostics = buildDiagnostics(
+        engineOutput.tickMeta.inputs.action,
+        state.core,
+        engineOutput,
+        payload.subjectId,
+        pointPresetForObservation?.label,
+        { previousContextIds: allContexts.map(context => context.actionId), notableEvent: notableObservationEvent }
+    );
+
+    // 7. Save Atomically (before prompt building). Store the semantic snapshot
+    // with the event so history never has to reinterpret an old tick.
+    saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId, diagnostics.observation);
     if (peakEventToLog) {
         eventLogRepo.append(payload.subjectId, 'system_tick', { presetId: peakEventToLog.presetId, action: null, actionLabel: peakEventToLog.narrative, narrative: peakEventToLog.narrative }, { added: true });
     }
@@ -563,12 +590,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     // 6.5 Update context strain (Escalation / Decay)
-
-    const diagnostics = buildDiagnostics(
-        engineOutput.tickMeta.inputs.action,
-        state.core,
-        engineOutput
-    );
 
     const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId);
 

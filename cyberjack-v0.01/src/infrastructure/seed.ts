@@ -218,6 +218,7 @@ db.transaction(() => {
         { id: 'effect_hyperesthesia', label: 'Гиперестезия', type: 'condition', tags: ['condition', 'hyperesthesia'], values: { intensity_mult: 1.3, sharpness_mult: 1.1 }, contextConfig: { duration: -1, occupiesPoints: [] } },
         { id: 'effect_local_hyperesthesia', label: 'Локальная Гиперестезия', type: 'condition', tags: ['condition', 'hyperesthesia', 'local'], values: { intensity_mult: 1.5, sharpness_mult: 1.2 }, contextConfig: { duration: -1, occupiesPoints: [] } },
         { id: 'effect_local_numbness', label: 'Локальное Онемение', type: 'condition', tags: ['condition', 'numbness', 'local'], values: { intensity_mult: 0.1, sharpness_mult: 0.1, contact_mult: 0.5 }, contextConfig: { duration: -1, occupiesPoints: [] } },
+        { id: 'effect_refractory', label: 'Рефрактерный период', type: 'condition', tags: ['condition', 'physiological', 'refractory'], values: { intensity_mult: 0.25, contact_mult: 0.8, novelty_mult: 0.25 }, contextConfig: { type: 'condition', duration: 3, occupiesPoints: [] } },
 
         // Standard actions
         { id: 'gentle_stroke', label: 'Мягкое поглаживание', values: { intensity: 0.2, valence: 0.6, contact: 0.4, sharpness: 0.1, novelty: 0.2 } },
@@ -243,6 +244,7 @@ db.transaction(() => {
         { id: 'vibrator_pulse', label: 'Импульс вибратором', values: { intensity: 0.6, valence: 0.8, contact: 0.7, sharpness: 0.2, novelty: 0.7 } },
         { id: 'device_sensory_loop', label: 'Установить сенсорный контур', type: 'context', tags: ['equipment', 'passive'], values: { intensity: 0.05, valence: 0.1, contact: 0.2, sharpness: 0, novelty: 0.4 }, contextConfig: { type: 'equipment', occupiesPoints: [], exclusiveWithinPoint: true, duration: -1, modifiers: {} } },
         { id: 'device_sensory_pulse', label: 'Импульс сенсорного контура', type: 'physical', tags: ['equipment', 'passive', 'stimulation'], values: { intensity: 0.25, valence: 0.5, contact: 0.8, sharpness: 0.05, novelty: 0.4 }, requireContexts: ['device_sensory_loop'] },
+        { id: 'device_contrast_pulse', label: 'Контрастный импульс сенсорного контура', type: 'physical', tags: ['equipment', 'passive', 'contrast'], values: { intensity: 0.5, valence: 0.15, contact: 0.7, sharpness: 0.45, novelty: 0.75 }, requireContexts: ['device_sensory_loop'] },
         { id: 'hair_pull', label: 'Рывок за волосы', values: { intensity: 0.6, valence: -0.4, contact: 0.5, sharpness: 0.7, novelty: 0.4 } },
         { id: 'spit', label: 'Плевок', values: { intensity: 0.3, valence: -0.8, contact: 0.2, sharpness: 0.8, novelty: 0.7 } },
         { id: 'breath_blow', label: 'Обдувание дыханием', values: { intensity: 0.1, valence: 0.4, contact: 0.05, sharpness: 0.1, novelty: 0.5 } },

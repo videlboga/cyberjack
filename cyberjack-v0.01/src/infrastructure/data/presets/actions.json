@@ -210,7 +210,8 @@
         "contact": 10,
         "novelty": 0
       }
-    }
+    },
+    "removeNarrative": "Наручники сняты с запястий"
   },
   {
     "id": "act_remove_handcuffs",
@@ -308,7 +309,8 @@
         "sharpness": 0,
         "novelty": 1
       }
-    }
+    },
+    "removeNarrative": "Ошейник расстёгнут и снят с шеи"
   },
   {
     "id": "act_shock_collar",
@@ -513,7 +515,8 @@
         "contact": 10,
         "novelty": 4
       }
-    }
+    },
+    "removeNarrative": "Плаг извлечён"
   },
   {
     "id": "act_activate_plug",
@@ -601,7 +604,8 @@
       "occupiesPoints": [
         "global_pose"
       ]
-    }
+    },
+    "removeNarrative": "{name} меняет положение"
   },
   {
     "id": "pose_all_fours",
@@ -635,7 +639,8 @@
         "knees",
         "hands"
       ]
-    }
+    },
+    "removeNarrative": "{name} меняет положение"
   },
   {
     "id": "pose_spread_eagle",
@@ -666,7 +671,8 @@
       "occupiesPoints": [
         "global_pose"
       ]
-    }
+    },
+    "removeNarrative": "{name} сводит ноги и меняет положение"
   },
   {
     "id": "eq_blindfold_apply",
@@ -702,7 +708,8 @@
         "intensity": 4,
         "sharpness": 2
       }
-    }
+    },
+    "removeNarrative": "Повязка снята с глаз"
   },
   {
     "id": "eq_blindfold_remove",
@@ -765,7 +772,8 @@
         "intensity": 3,
         "sharpness": 3
       }
-    }
+    },
+    "removeNarrative": "Кляп вынут изо рта"
   },
   {
     "id": "eq_gag_remove",
@@ -823,7 +831,8 @@
       "occupiesPoints": [
         "global_pose"
       ]
-    }
+    },
+    "removeNarrative": "{name} поднимается"
   },
   {
     "id": "pose_lying_down",
@@ -853,7 +862,8 @@
       "occupiesPoints": [
         "global_pose"
       ]
-    }
+    },
+    "removeNarrative": "{name} встаёт с пола"
   },
   {
     "id": "act_suspend_wrists",
@@ -898,7 +908,8 @@
         "contact": 8,
         "novelty": 2
       }
-    }
+    },
+    "removeNarrative": "Путы освобождены, руки опущены"
   },
   {
     "id": "act_release_wrists",
@@ -956,31 +967,21 @@
     "contextConfig": {
       "type": "clothing",
       "duration": -1,
-      "exclusiveWithinPoint": false,
+      "exclusiveWithinPoint": true,
       "occupiesPoints": [
-        "neck",
-        "shoulders",
         "chest",
         "nipples",
         "belly",
         "back",
-        "waist",
-        "hips",
-        "left_arm",
-        "right_arm",
-        "inner_thighs",
-        "left_leg",
-        "right_leg",
-        "knees",
+        "arms",
+        "hands",
+        "legs",
         "buttocks",
-        "anus",
+        "groin",
         "vulva",
         "vagina",
-        "clitoris",
-        "torso",
-        "legs",
-        "groin",
-        "breasts"
+        "anus",
+        "clitoris"
       ],
       "blocksPoints": [
         "neck",
@@ -1012,7 +1013,8 @@
         "sharpness": -8,
         "contact": -8
       }
-    }
+    },
+    "removeNarrative": "{name} расстёгивает комбинезон и выходит из него"
   },
   {
     "id": "eq_strip_jumpsuit",
@@ -1042,5 +1044,199 @@
       "novelty": 5,
       "powerBase": 20
     }
+  },
+  {
+    "id": "eq_clothe_dress",
+    "name": "Надеть платье",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "dress"
+    ],
+    "type": "clothing",
+    "contextConfig": {
+      "type": "clothing",
+      "occupiesPoints": [
+        "global_clothing"
+      ],
+      "duration": -1,
+      "modifiers": {
+        "intensity": -3,
+        "contact": -5,
+        "sharpness": -5
+      }
+    },
+    "requiresItem": "eq_dress",
+    "removeNarrative": "{name} снимает платье через голову"
+  },
+  {
+    "id": "eq_clothe_stockings",
+    "name": "Надеть чулки",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "stockings"
+    ],
+    "type": "clothing",
+    "contextConfig": {
+      "type": "clothing",
+      "occupiesPoints": [
+        "legs"
+      ],
+      "duration": -1,
+      "modifiers": {
+        "intensity": 1,
+        "contact": 0
+      }
+    },
+    "requiresItem": "eq_stockings",
+    "removeNarrative": "{name} медленно скатывает чулки вниз по ногам"
+  },
+  {
+    "id": "eq_clothe_underwear",
+    "name": "Надеть бюстгальтер",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "underwear"
+    ],
+    "type": "clothing",
+    "contextConfig": {
+      "type": "clothing",
+      "occupiesPoints": [
+        "chest",
+        "nipples"
+      ],
+      "duration": -1,
+      "modifiers": {
+        "intensity": -2,
+        "contact": -5,
+        "sharpness": -3
+      },
+      "exclusiveWithinPoint": true
+    },
+    "requiresItem": "eq_underwear",
+    "removeNarrative": "{name} снимает бюстгальтер, обнажая грудь"
+  },
+  {
+    "id": "eq_clothe_panties",
+    "name": "Надеть трусики",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "panties"
+    ],
+    "type": "clothing",
+    "contextConfig": {
+      "type": "clothing",
+      "occupiesPoints": [
+        "groin",
+        "vulva",
+        "vagina",
+        "anus",
+        "clitoris",
+        "buttocks"
+      ],
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "blocksPoints": [
+        "groin",
+        "vulva",
+        "vagina",
+        "anus",
+        "clitoris",
+        "buttocks"
+      ],
+      "modifiers": {
+        "intensity": -3,
+        "contact": -8,
+        "sharpness": -5
+      }
+    },
+    "requiresItem": "eq_panties",
+    "removeNarrative": "{name} стягивает трусики, оставляя нижнюю часть тела обнажённой"
+  },
+  {
+    "id": "eq_clothe_underwear_remove",
+    "name": "Снять бюстгальтер",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "remove"
+    ],
+    "type": "physical",
+    "removeContexts": [
+      "eq_clothe_underwear"
+    ]
+  },
+  {
+    "id": "eq_clothe_panties_remove",
+    "name": "Снять трусики",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "remove"
+    ],
+    "type": "physical",
+    "removeContexts": [
+      "eq_clothe_panties"
+    ]
+  },
+  {
+    "id": "eq_clothe_stockings_remove",
+    "name": "Снять чулки",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "remove"
+    ],
+    "type": "physical",
+    "removeContexts": [
+      "eq_clothe_stockings"
+    ]
+  },
+  {
+    "id": "eq_clothe_dress_remove",
+    "name": "Снять платье",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "remove"
+    ],
+    "type": "physical",
+    "removeContexts": [
+      "eq_clothe_dress"
+    ]
+  },
+  {
+    "id": "eq_clothe_jumpsuit_remove",
+    "name": "Снять комбинезон",
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "remove"
+    ],
+    "type": "physical",
+    "removeContexts": [
+      "eq_clothe_jumpsuit"
+    ]
   }
 ]

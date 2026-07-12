@@ -36,3 +36,39 @@ describe('applyLearning metadata whitelist', () => {
     expect((nextCore as any).profileJson).toBe(core.profileJson);
     });
 });
+
+describe('acceptance learning', () => {
+    const core = (capacity = 60): any => ({
+        sensitivity: 50, capacity, openness: 50, plasticity: 60, attitude: 50, tension: 0,
+        baselineSensitivity: 50, baselineCapacity: capacity, baselineOpenness: 50,
+        baselinePlasticity: 60, baselineAttitude: 50,
+    });
+    const point: any = {
+        pointId: 'zone', localSensitivity: 50, localAttitude: 50, localOpenness: 50,
+        familiarity: 0, exposureCount: 0, baselineLocalSensitivity: 50,
+        baselineLocalAttitude: 50, baselineLocalOpenness: 50,
+    };
+    const action: any = { actionKey: 'pleasant', label: 'Pleasant', type: 'physical', tags: [], intensity: .4, valence: 1, contact: .7, sharpness: 0, novelty: .8 };
+    const result = (learningEffect: number, engagement = 40) => ({
+        experiencedIntensity: 20, effectiveSensitivity: 50, overload: 0,
+        pleasure: 20, discomfort: 0, learningEffect, engagement,
+    });
+
+    it('does not turn familiar pleasure into automatic acceptance', () => {
+        const { nextCore, nextPoint } = applyLearning(core(), point, action, result(0), DEFAULT_CONFIG);
+        expect(nextCore.attitude).toBeCloseTo(50);
+        expect(nextPoint.localAttitude).toBeCloseTo(50);
+    });
+
+    it('forms acceptance when the positive experience is learned', () => {
+        const { nextCore, nextPoint } = applyLearning(core(), point, action, result(20), DEFAULT_CONFIG);
+        expect(nextCore.attitude).toBeGreaterThan(50);
+        expect(nextPoint.localAttitude).toBeGreaterThan(50);
+    });
+
+    it('does not form positive acceptance while unresponsive', () => {
+        const { nextCore, nextPoint } = applyLearning(core(10), point, action, result(20), DEFAULT_CONFIG);
+        expect(nextCore.attitude).toBeCloseTo(50);
+        expect(nextPoint.localAttitude).toBeCloseTo(50);
+    });
+});

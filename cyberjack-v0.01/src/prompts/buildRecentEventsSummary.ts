@@ -91,6 +91,15 @@ export function buildRecentEventsSummary(events: EventRecord[], subjectName?: st
             const pLabel = payloadData.pointLabel || payloadData.pointId || 'тело';
             const resultObj = JSON.parse(event.result_payload);
 
+            // New events carry the semantic snapshot created at tick time.
+            // Never reinterpret those events against today's rules/config.
+            if (resultObj?.observation?.uiText) {
+                const targetSuffix = targetName ? ` (цель: ${targetName})` : '';
+                lines.push(`- [${timeSpan}] Событие: ${actorName} — ${narrativeText}${targetSuffix}. Точка воздействия: ${pLabel.toLowerCase()}.`);
+                lines.push(`  ${cfg.reactionPrefix} ${resultObj.observation.uiText}`);
+                continue;
+            }
+
             const safeCore = { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 };
             
             let tickOutputMock = resultObj;

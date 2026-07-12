@@ -2,6 +2,7 @@ import { contractRepo } from '../infrastructure/contractRepo';
 import { subjectRepo, presetRepo, characterItemsRepo, itemRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { evaluateAssetContract } from '../scenario/evaluateAssetContract';
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
+import { buildCurrentStateObservationText } from '../narrative/interactionObservation';
 
 // ─── Нарративное описание состояния ──────────────────────────────────────────
 
@@ -18,42 +19,7 @@ interface ConditionProgress {
 export function buildStateDescription(subjectId: string): string {
     const core = subjectRepo.get(subjectId);
     if (!core) return 'Актив не найден.';
-
-    const att = Math.round(core.attitude);
-    const sens = Math.round(core.sensitivity);
-    const cap = Math.round(core.capacity);
-    const opn = Math.round(core.openness);
-    const plas = Math.round(core.plasticity);
-    const tens = Math.round(core.tension);
-
-    const parts: string[] = [];
-
-    if (att >= 85) parts.push('безоговорочно преданна и покорна');
-    else if (att >= 65) parts.push('доверяет и подчиняется с готовностью');
-    else if (att >= 45) parts.push('нейтральна, но не сопротивляется');
-    else if (att >= 25) parts.push('не доверяет, сопротивляется воле');
-    else parts.push('враждебна и отторгает любые воздействия');
-
-    if (sens >= 80) parts.push('нервы обнажены до предела');
-    else if (sens >= 60) parts.push('очень чувствительна');
-    else if (sens >= 40) parts.push('нормально воспринимает стимулы');
-    else parts.push('чувства притуплены');
-
-    if (cap < 20) parts.push('почти истощена, на грани срыва');
-    else if (cap < 40) parts.push('истощается, силы на исходе');
-    else if (cap >= 70) parts.push('полностью собрана и устойчива');
-
-    if (opn >= 85) parts.push('абсолютно открыта новому опыту');
-    else if (opn >= 60) parts.push('принимает новые воздействия');
-    else if (opn < 25) parts.push('замкнулась в себе');
-
-    if (tens >= 90) parts.push('на грани разрядки');
-    else if (tens >= 70) parts.push('сильно напряжена');
-    else if (tens >= 40) parts.push('накапливается напряжение');
-
-    if (plas >= 80) parts.push('разум податлив к изменениям');
-
-    return parts.join(', ') + '.';
+    return buildCurrentStateObservationText(subjectId, core);
 }
 
 // ─── Прогресс контракта ───────────────────────────────────────────────────────

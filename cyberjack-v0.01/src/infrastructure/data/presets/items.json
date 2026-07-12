@@ -138,5 +138,65 @@
       "clothing",
       "isolation"
     ]
+  },
+  {
+    "id": "eq_dress",
+    "name": "Простое белое платье",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "dress"
+    ],
+    "description": "Лёгкое белое платье лабораторного образца"
+  },
+  {
+    "id": "eq_stockings",
+    "name": "Чулки",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "stockings"
+    ],
+    "description": "Чёрные чулки выше колена"
+  },
+  {
+    "id": "eq_underwear",
+    "name": "Нижнее бельё",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "underwear"
+    ],
+    "description": "Белое бельё"
+  },
+  {
+    "id": "eq_blindfold",
+    "name": "Повязка на глаза",
+    "type": "equipment",
+    "tags": [
+      "bondage",
+      "sensory"
+    ],
+    "description": "Чёрная повязка для глаз"
+  },
+  {
+    "id": "eq_gag",
+    "name": "Кляп",
+    "type": "equipment",
+    "tags": [
+      "bondage",
+      "mouth"
+    ],
+    "description": "Шаровой кляп"
+  },
+  {
+    "id": "eq_panties",
+    "name": "Трусики",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "panties"
+    ],
+    "description": "Белые трусики"
   }
 ]

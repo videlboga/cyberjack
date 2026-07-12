@@ -203,8 +203,42 @@ export function GameApp() {
   const [stateDescription, setStateDescription] = useState<string>('');
   const [contractProgress, setContractProgress] = useState<ContractProgress>(null);
   const [availableContracts, setAvailableContracts] = useState<ContractInfo[]>([]);
+  const [sceneImageUrl, setSceneImageUrl] = useState<string | null>(null);
 
   const logRef = useRef<HTMLDivElement>(null);
+
+  // ─── WebSocket: приём сгенерированных изображений сцены ──
+  useEffect(() => {
+    const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:3001`;
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const connect = () => {
+      try {
+        ws = new WebSocket(wsUrl);
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'scene_image' && msg.payload?.imageUrl) {
+              setSceneImageUrl(msg.payload.imageUrl);
+            }
+          } catch {}
+        };
+        ws.onclose = () => {
+          reconnectTimer = setTimeout(connect, 3000);
+        };
+      } catch {
+        reconnectTimer = setTimeout(connect, 5000);
+      }
+    };
+
+    connect();
+
+    return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) ws.close();
+    };
+  }, []);
 
   // ─── Data fetching ────────────────────────────────────
 
@@ -478,33 +512,105 @@ export function GameApp() {
 
   return (
     <div className="game-app">
-      {/* Left panel: characters + scene */}
+      {/* Left panel: scene image + body state */}
       <div className="panel panel-left">
-        <div className="panel-section">
-          <h3>Персонажи</h3>
-          {sceneChars.map(entry => {
-            const isFocused = entry.character.id === focusedCharId;
-            return (
-              <div
-                key={entry.character.id}
-                className={`char-row ${isFocused ? 'focused' : ''}`}
-                onClick={() => setFocusedCharId(entry.character.id)}
-              >
-                <span className="char-name">{entry.character.name}</span>
-                <span className="char-role">{entry.role || ''}</span>
+        {sceneImageUrl && (
+          <div className="panel-section scene-image-section">
+            <img src={sceneImageUrl} alt="Сцена" style={{ width: '100%', borderRadius: '6px', display: 'block' }} />
+          </div>
+        )}
+        {subjectState && (
+          <div className="panel-section">
+            <h3>{subjectState.name || focusedCharId}</h3>
+            {CORE_METRICS.map(m => (
+              <div key={m.key} className="metric-row">
+                <span className="metric-label">{m.label}</span>
+                <Bar
+                  value={(subjectState as any)[m.key] || 0}
+                  baseline={m.baselineKey ? (subjectState as any)[m.baselineKey] : undefined}
+                  color={m.color}
+                />
               </div>
-            );
-          })}
-          {!sceneChars.length && <div className="muted">Нет персонажей</div>}
-        </div>
+            ))}
+          </div>
+        )}
+        {subjectState && (() => {
+          // Compact body+contexts visualization
+          const TECHNICAL_POINTS = new Set(['global_pose','slot_room','slot_social','posture','mind_state','systemic']);
+          const POINT_LABELS: Record<string, string> = {
+            head: 'Голова', face: 'Лицо', lips: 'Губы', neck: 'Шея',
+            shoulders: 'Плечи', chest: 'Грудь', nipples: 'Соски',
+            belly: 'Живот', back: 'Спина', waist: 'Талия',
+            arms: 'Руки', hands: 'Кисти', inner_thighs: 'Внутр. бёдра',
+            legs: 'Ноги', knees: 'Колени', feet: 'Ступни',
+            buttocks: 'Ягодицы', anus: 'Анус', groin: 'Пах',
+            vulva: 'Вульва', vagina: 'Влагалище', clitoris: 'Клитор',
+            penis: 'Член', testicles: 'Яички', prostate: 'Простата',
+          };
+          const ctxs = subjectState.contexts || [];
+          const anatomy = subjectState.anatomy || {};
+          const byPoint: Record<string, string[]> = {};
+          for (const c of ctxs) {
+            const pt = c.pointId || '';
+            if (TECHNICAL_POINTS.has(pt)) {
+              if (!byPoint['global']) byPoint['global'] = [];
+              if (!byPoint['global'].includes(c.label)) byPoint['global'].push(c.label);
+              continue;
+            }
+            if (!byPoint[pt]) byPoint[pt] = [];
+            if (!byPoint[pt].includes(c.label)) byPoint[pt].push(c.label);
+          }
+          const anatomyEntries = Object.entries(anatomy)
+            .filter(([id]) => !TECHNICAL_POINTS.has(id))
+            .map(([id, data]: [string, any]) => ({
+              id,
+              label: POINT_LABELS[id] || id,
+              ...data
+            }))
+            .sort((a: any, b: any) => (b.localSensitivity || 0) - (a.localSensitivity || 0));
 
-        <div className="panel-section">
-          <h3>Сцена</h3>
-          <select value={sceneId} onChange={e => { setSceneId(e.target.value); setFocusedCharId(null); }} className="select">
-            {allScenes.map(s => <option key={s.id} value={s.id}>{s.title || s.id}</option>)}
-            {!allScenes.find(s => s.id === sceneId) && <option value={sceneId}>{sceneId}</option>}
-          </select>
-        </div>
+          return (
+            <div className="panel-section">
+              <h3>Тело и состояния</h3>
+              <div className="body-state-grid">
+                {byPoint['global'] && byPoint['global'].length > 0 && (
+                  <div className="body-zone active global-zone">
+                    <span className="zone-name">состояние</span>
+                    {byPoint['global'].map((label, i) => (
+                      <span key={i} className="zone-ctx">{label}</span>
+                    ))}
+                  </div>
+                )}
+                {anatomyEntries.map((pt: any) => {
+                  const ctxLabels = byPoint[pt.id] || [];
+                  const hasCtx = ctxLabels.length > 0;
+                  const sens = Math.round(pt.localSensitivity || 0);
+                  const sensHigh = sens > 70;
+                  return (
+                    <div key={pt.id} className={`body-zone ${hasCtx ? 'active' : ''} ${sensHigh ? 'sensitive' : ''}`}>
+                      <span className="zone-name">{pt.label}</span>
+                      {sens > 0 && <span className="zone-sens">чувств. {sens}</span>}
+                      {ctxLabels.map((label, i) => (
+                        <span key={i} className="zone-ctx">{label}</span>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+        {lastResult && (
+          <div className="panel-section">
+            <h3>Последний тик</h3>
+            {RESULT_METRICS.map(m => (
+              <div key={m.key} className="metric-row">
+                <span className="metric-label">{m.label}</span>
+                <Bar value={(lastResult as any)[m.key] || 0} max={120} color={m.color} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Center: chat + actions */}
@@ -570,33 +676,10 @@ export function GameApp() {
         </div>
       </div>
 
-      {/* Right: state + anatomy */}
+      {/* Right: contracts only */}
       <div className="panel panel-right">
         {subjectState ? (
           <>
-            <div className="panel-section">
-              <h3>{subjectState.name || focusedCharId}</h3>
-              {CORE_METRICS.map(m => (
-                <div key={m.key} className="metric-row">
-                  <span className="metric-label">{m.label}</span>
-                  <Bar
-                    value={(subjectState as any)[m.key] || 0}
-                    baseline={m.baselineKey ? (subjectState as any)[m.baselineKey] : undefined}
-                    color={m.color}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {activeContexts.length > 0 && (
-              <div className="panel-section">
-                <h3>Контексты</h3>
-                {activeContexts.map(c => (
-                  <div key={c.actionId} className="context-tag">{c.label}</div>
-                ))}
-              </div>
-            )}
-
             {/* Active contract */}
             {contractProgress && (
               <div className="panel-section contract-panel">
@@ -645,35 +728,6 @@ export function GameApp() {
                     {focusedCharId && (
                       <button className="btn btn-small" onClick={() => acceptContract(c.id)}>Принять</button>
                     )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="panel-section">
-              <h3>Анатомия</h3>
-              <div className="anatomy-list">
-                {anatomyList.map(pt => (
-                  <div
-                    key={pt.id}
-                    className={`anatomy-row ${selectedPoint === pt.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedPoint(pt.id)}
-                  >
-                    <span className="anatomy-name">{pt.id}</span>
-                    <span className="anatomy-sens">S:{Math.round(pt.localSensitivity)}</span>
-                    <span className="anatomy-att">A:{Math.round(pt.localAttitude)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {lastResult && (
-              <div className="panel-section">
-                <h3>Последний тик</h3>
-                {RESULT_METRICS.map(m => (
-                  <div key={m.key} className="metric-row">
-                    <span className="metric-label">{m.label}</span>
-                    <Bar value={(lastResult as any)[m.key] || 0} max={120} color={m.color} />
                   </div>
                 ))}
               </div>

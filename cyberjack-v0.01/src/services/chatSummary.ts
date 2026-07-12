@@ -1,6 +1,6 @@
 import { chatMemoryRepo, chatSummaryRepo } from '../infrastructure/repositories';
 
-const SUMMARY_WINDOW = 10;
+const SUMMARY_WINDOW = 6;
 
 export function maybeSummarizeChat(subjectId: string) {
     if (!subjectId) return;
@@ -20,6 +20,10 @@ export function maybeSummarizeChat(subjectId: string) {
         });
 
         lastProcessedId = window[window.length - 1].id;
+
+        // Delete summarised messages to prevent context pollution.
+        // Keep only the last few messages for continuity.
+        chatMemoryRepo.deleteBefore(subjectId, lastProcessedId - 3);
     }
 }
 

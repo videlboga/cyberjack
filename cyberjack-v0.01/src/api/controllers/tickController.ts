@@ -16,6 +16,7 @@ import { chatMemoryRepo } from '../../infrastructure/repositories';
 import { normalizePlayer } from './playerController';
 import { buildStateDescription, getContractProgress, generateSuggestedChips } from '../../services/chipGenerator';
 import { eventQueries } from '../../infrastructure/eventQueries';
+import { generateSceneImage, shouldGenerateImage } from '../../services/portraitGenerator';
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; actorName: string; targetName: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
@@ -70,6 +71,7 @@ export const processWait = async (req: Request, res: Response) => {
             promptMessages: promptMessages || null,
             actionTrace: null,
             tickResult: lastBundle?.output.result,
+            diagnostics: lastBundle?.diagnostics,
             bundle: lastBundle,
             resources
         });
@@ -146,6 +148,35 @@ export const processTick = async (req: Request, res: Response) => {
                 suggestedChips = await generateSuggestedChips(subjectId, playerId, recentEventsText, '');
             } catch (e: any) {
                 console.warn('[processTick] chip generation failed:', e.message);
+            }
+        }
+
+        // Async scene image generation — does NOT block the response.
+        // Image is pushed to the frontend via WebSocket when ready.
+        if (!req.body.skipLLM && !req.body.skipImageGen) {
+            const tickResult = bundle.output?.result;
+            const doGen = shouldGenerateImage({
+                actionApplied: (bundle as any).actionApplied || false,
+                systemNotes: (bundle as any).systemNotes || [],
+                contextChanged: (bundle as any).actionApplied || false,
+                tickResult: tickResult ? {
+                    pleasure: tickResult.pleasure,
+                    discomfort: tickResult.discomfort,
+                    overload: tickResult.overload,
+                    engagement: tickResult.engagement,
+                } : undefined,
+            });
+            if (doGen) {
+                generateSceneImage(
+                    subjectId, playerId,
+                    tickResult ? {
+                        pleasure: tickResult.pleasure,
+                        discomfort: tickResult.discomfort,
+                        overload: tickResult.overload,
+                        engagement: tickResult.engagement,
+                    } : undefined,
+                    turnExecutionMetrics?.narratorReaction || undefined,
+                ).catch(err => console.error('[processTick] image gen error:', err.message));
             }
         }
 

@@ -1,7 +1,7 @@
 // src/orchestration/saveTickState.ts
 import { subjectRepo, pointStateRepo, eventLogRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
 import { subjectPreferencesRepo, activeContextsRepo } from '../infrastructure/repositories';
-import { SubjectCoreState, SubjectPointState, CompiledAction, TickOutput } from '../domain/types';
+import { SubjectCoreState, SubjectPointState, CompiledAction, TickOutput, InteractionObservation } from '../domain/types';
 import { db } from '../infrastructure/db';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
@@ -14,7 +14,8 @@ export function saveTickState(
     presetId: string,
     action: CompiledAction, 
     output: TickOutput,
-    tickId: string
+    tickId: string,
+    observation?: InteractionObservation
 ) {
     // 1. Save new core state
     const currentSubject = subjectRepo.get(subjectId);
@@ -75,7 +76,7 @@ export function saveTickState(
             tickId,
             delta: output.delta
         },
-        { result: output.result, delta: output.delta }
+        { result: output.result, delta: output.delta, observation }
     );
 
     // 4. Adjust preferences based on psychological and relationship factors
