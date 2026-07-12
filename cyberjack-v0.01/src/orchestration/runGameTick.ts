@@ -19,6 +19,12 @@ import { ContextManager } from './contextManager';
 import { sceneCharacterRepo } from '../infrastructure/repositories';
 
 import { ConditionWatcher } from './conditionWatcher';
+import { evaluateTensionDischarge } from './triggers';
+import { pointStateRepo } from '../infrastructure/repositories';
+import { DEFAULT_CONFIG } from '../engine/config';
+import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
+import { STATE_RULES } from './conditionWatcher';
+import { clamp } from '../engine/utils';
 
 export interface GameEventPayload {
     subjectId: string;
@@ -42,6 +48,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         core: { ...state.core },
         point: { ...state.point }
     };
+    const elapsedTime = payload.deltaTime ?? (payload.presetId === 'wait' ? 20 : 1);
     
     // 2. Scenario layer: доступность действия, ресурсы, локация
     const validation = checkActionAccess.validateAction(
@@ -85,7 +92,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         dynamicModifiers: payload.dynamicModifiers,
         sourceText: payload.textMessage,
         parserVersion: payload.parserVersion, 
-        activeContexts: applicableContexts
+        activeContexts: applicableContexts,
+        familiarity: state.point.familiarity ?? 0
     });
 
     // 4.5 Apply Virtual Contexts (Mental and Body point overloads)
@@ -110,8 +118,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         core: state.core,
         point: state.point,
         config: undefined,
-        deltaTime: payload.deltaTime ?? (payload.presetId === 'wait' ? 20.0 : 1.0)
+        deltaTime: elapsedTime
     });
+
+    // Existing contexts affect this action and age afterwards. Contexts created
+    // by the current action are applied later and start ageing on the next tick.
+    ContextManager.processTick(payload.subjectId, elapsedTime);
 
     if (engineOutput.tickMeta?.inputs) {
         (engineOutput.tickMeta.inputs.action as any)._baseAction = (compiledAction as any)._baseAction;
@@ -126,6 +138,10 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     let addedContextNotes: string[] = [];
     // Did this tick actually change contexts / apply effects?
     let actionApplied = false;
+    // Hoist forced-action tracking to function scope so we can log system_trigger
+    // AFTER saveTickState (ensuring correct id ordering: interaction < system_trigger)
+    let forcedNarrativeToLog: string | undefined = undefined;
+    let forcedAttempted = false;
     if (commandIntent && commandIntent.type !== 'none') {
         
         const activeContextsRepo2 = activeContextsRepo;
@@ -133,8 +149,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
         // Track forced-action narrative/effects so we only log a "performed"
         // system_trigger after the effects actually changed state.
-        let forcedNarrativeToLog: string | undefined = undefined;
-        let forcedAttempted = false;
         let forcedApplied = false;
 
         let targetCtxId: string | undefined;
@@ -146,7 +160,10 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             const currentStatus = activeContextsRepo2.getAllForSubject(payload.subjectId).find((c: any) => c.actionId === deactivateId);
             if (currentStatus) {
                 activeContextsRepo2.remove(currentStatus.id);
-                const removalNarrative = `Состояние отменено: ${actionPreset?.label || deactivateId}`;
+                const removeNarr = (actionPreset as any)?.vector?.removeNarrative || (actionPreset as any)?._baseAction?.vector?.removeNarrative;
+                const subjectChar = characterRepo.get(payload.subjectId);
+                const subjectName = subjectChar?.name || payload.subjectId;
+                const removalNarrative = removeNarr ? removeNarr.replace(/\{name\}/g, subjectName) : `${subjectName} снимает: ${actionPreset?.label || deactivateId}`;
                 eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
                 addedContextNotes.push(removalNarrative);
                 actionApplied = true;
@@ -252,9 +269,18 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     const descText = commandIntent.description || '';
 
                     if (currentCompliance >= requiredCompliance) {
-                        let reason = state.relation?.attitude > 70 ? "из симпатии и покорности" : "вынужденно подчиняясь сломленной воле";
-                        if (state.core.attitude < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
-                        forcedNarrativeToLog = `[Система]: *${descText}* → Актив реагирует на "${commandActionPreset.label}" (цель: ${targetName}), ${reason}.`;
+                        // For described actions, the PLAYER is doing something TO the subject.
+                        // The subject's compliance determines whether they accept or resist,
+                        // but the narrative should describe the player's action, not the subject "following orders".
+                        let reason: string;
+                        if (state.core.attitude < 30) {
+                            reason = "напрягаясь и пытаясь отдёрнуться";
+                        } else if (state.relation?.attitude > 70) {
+                            reason = "с готовностью принимая ласку";
+                        } else {
+                            reason = "покорно позволяя себе касаться";
+                        }
+                        forcedNarrativeToLog = `[Система]: *${descText}* → ${commandActionPreset.label}, ${reason}.`;
                         addedContextNotes.push(forcedNarrativeToLog);
                     } else {
                         const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${commandActionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
@@ -322,12 +348,14 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     } catch (err) {
                         console.error('[runGameTick] failed to apply commanded action preset effects', err);
                     }
-                    // After attempting effects, if the forced action was attempted and effects
-                    // were actually applied, log the system-trigger narrative tying the
-                    // narration to the factual state change (so "сделал" appears when it
-                    // actually happened).
-                    if (forcedAttempted && forcedNarrativeToLog && forcedApplied) {
-                        eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrativeToLog, narrative: forcedNarrativeToLog }, { added: true });
+                    // After attempting effects, if the forced action was attempted and
+                    // the narrative says it was performed (compliance was sufficient),
+                    // we log the system-trigger narrative AFTER saveTickState so its id
+                    // is higher than the interaction log — ensuring correct chronological
+                    // order in recentEvents (interaction first, then system_trigger).
+                    // The actual eventLogRepo.append is moved below saveTickState.
+                    if (forcedAttempted && forcedNarrativeToLog) {
+                        actionApplied = true;
                     }
     }
 
@@ -347,7 +375,10 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             if (poseContexts.length) {
                 for (const { ctx, preset } of poseContexts) {
                     if (!preset?.id) continue;
-                    const removalNarrative = `Состояние отменено: ${preset.label}`;
+                    const poseRemoveNarr = preset?.vector?.removeNarrative;
+                    const poseSubjectChar = characterRepo.get(payload.subjectId);
+                    const poseSubjectName = poseSubjectChar?.name || payload.subjectId;
+                    const removalNarrative = poseRemoveNarr ? poseRemoveNarr.replace(/\{name\}/g, poseSubjectName) : `${poseSubjectName} меняет положение: ${preset.label}`;
                     activeContextsRepo2.remove(ctx.id);
                     eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
                     addedContextNotes.push(removalNarrative);
@@ -371,21 +402,49 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         }
     }
 
-    ContextManager.processTick(payload.subjectId); // Time passes
+    // Passive time affects every local point, not only the synthetic systemic
+    // point used by /wait. Current values recover/damp toward their own
+    // baselines; baselines continue to follow through the normal learning rule.
+    if (payload.presetId === 'wait') {
+        const pointCfg = DEFAULT_CONFIG.formulas.baseline?.point || {};
+        for (const passivePoint of pointStateRepo.getAllForSubject(payload.subjectId)) {
+            if (passivePoint.pointId === payload.pointId) continue;
+            const baselineSensitivity = passivePoint.baselineLocalSensitivity ?? passivePoint.localSensitivity;
+            const baselineAttitude = passivePoint.baselineLocalAttitude ?? passivePoint.localAttitude;
+            const recoveredSensitivity = Math.min(baselineSensitivity, passivePoint.localSensitivity + DEFAULT_CONFIG.formulas.applyLearning.localSensitivityRegenRate * elapsedTime);
+            passivePoint.localSensitivity = dampTowardsBaseline(recoveredSensitivity, baselineSensitivity, { ...pointCfg, timeScale: elapsedTime });
+            passivePoint.localAttitude = dampTowardsBaseline(passivePoint.localAttitude, baselineAttitude, { ...pointCfg, timeScale: elapsedTime });
+            passivePoint.baselineLocalSensitivity = advanceBaseline(baselineSensitivity, passivePoint.localSensitivity, { plasticity: engineOutput.nextCore.plasticity, openness: engineOutput.nextCore.openness, novelty: 0 }, { baseRate: pointCfg.adaptBase, ...pointCfg, timeScale: elapsedTime });
+            passivePoint.baselineLocalAttitude = advanceBaseline(baselineAttitude, passivePoint.localAttitude, { plasticity: engineOutput.nextCore.plasticity, openness: engineOutput.nextCore.openness, novelty: 0 }, { baseRate: pointCfg.adaptBase, ...pointCfg, timeScale: elapsedTime });
+            pointStateRepo.save(payload.subjectId, passivePoint.pointId, passivePoint);
+        }
+    }
 
     // === Edging & Tension Discharge Mechanic ===
+    let peakEventToLog: { presetId: string; narrative: string } | null = null;
     if (engineOutput.nextCore.tension >= 100) {
-        const isPositive = engineOutput.result.pleasure >= engineOutput.result.discomfort;
+        const activeContextIds = activeContextsRepo.getAllForSubject(payload.subjectId).map(context => context.actionId);
+        for (const rule of STATE_RULES) {
+            if (rule.check(engineOutput.nextCore, engineOutput.nextPoint)) activeContextIds.push(rule.actionPresetId);
+        }
+        const discharge = evaluateTensionDischarge({
+            core: engineOutput.nextCore,
+            result: engineOutput.result,
+            recentEvents: history,
+            activeContextIds
+        });
+        const isPositive = discharge.outcome === 'positive';
         let dischargeNarrative = '';
 
         if (isPositive) {
-            dischargeNarrative = `[Система: КАСКАДНЫЙ СРЫВ] Субъект достигает пика эйфории. Мощный оргазм сносит нейронные барьеры, обнуляя волю к сопротивлению.`;
-            engineOutput.nextCore.openness = Math.min((engineOutput.nextCore.openness || 0) + 20, 100);
-            engineOutput.nextCore.attitude = Math.min((engineOutput.nextCore.attitude || 0) + 25, 100);
+            dischargeNarrative = `[Система: ПОЛОЖИТЕЛЬНАЯ РАЗРЯДКА] Накопленное возбуждение достигает пика и завершается глубокой физиологической разрядкой.`;
+            const trustFactor = clamp(((engineOutput.nextCore.attitude || 0) - 30) / 70, 0, 1);
+            engineOutput.nextCore.openness = Math.min((engineOutput.nextCore.openness || 0) + 5 + 10 * trustFactor, 100);
+            engineOutput.nextCore.attitude = Math.min((engineOutput.nextCore.attitude || 0) + 3 + 12 * trustFactor, 100);
             engineOutput.nextCore.sensitivity = Math.max((engineOutput.nextCore.sensitivity || 0) - 20, 0); // refractory period
             engineOutput.nextCore.capacity = Math.max((engineOutput.nextCore.capacity || 0) - 40, 0);
         } else {
-            dischargeNarrative = `[Система: КАСКАДНЫЙ СРЫВ] Субъект не выдерживает чудовищного напряжения. Разум захлебывается в паническом искореняющем шоке.`;
+            dischargeNarrative = `[Система: НЕРВНЫЙ СРЫВ] Накопленная активация разрешается паническим истощением вместо положительной разрядки.`;
             engineOutput.nextCore.attitude = Math.max((engineOutput.nextCore.attitude || 0) - 20, 0);
             engineOutput.nextCore.openness = Math.max((engineOutput.nextCore.openness || 0) - 15, 0);
             engineOutput.nextCore.capacity = 0; // Total exhaustion
@@ -396,7 +455,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         engineOutput.nextCore.tension = 10; // Reset tension down to baseline-ish value
 
         addedContextNotes.push(dischargeNarrative);
-        eventLogRepo.append(payload.subjectId, 'system_tick', { presetId: 'discharge', action: null, actionLabel: dischargeNarrative, narrative: dischargeNarrative }, { added: true });
+        peakEventToLog = { presetId: 'discharge', narrative: dischargeNarrative };
 
     } else if ((engineOutput.nextCore.capacity || 0) <= 0 && (state.core.tension || 0) > 85 && (engineOutput.nextCore.tension || 0) < 100) {
         // "Ruined" / Exhaustion before peak
@@ -405,7 +464,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         engineOutput.nextCore.attitude = Math.max((engineOutput.nextCore.attitude || 0) - 10, 0);
         engineOutput.nextCore.tension = 20; // Tension drops into a frustrating low-burn
         
-        eventLogRepo.append(payload.subjectId, 'system_tick', { presetId: 'ruined', action: null, actionLabel: ruinNarrative, narrative: ruinNarrative }, { added: true });
+        peakEventToLog = { presetId: 'ruined', narrative: ruinNarrative };
     }
 
     // Save player and scene state at the final atomicity boundary
@@ -436,7 +495,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         const cur = state.resources.resources || {};
         for (const [key, res] of Object.entries(cur)) {
             if (res.regenRate && res.regenRate !== 0) {
-                res.amount += res.regenRate;
+                res.amount += res.regenRate * elapsedTime;
                 if (res.maxAmount !== undefined && res.amount > res.maxAmount) {
                     res.amount = res.maxAmount;
                 }
@@ -460,8 +519,32 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // 6.6 Evaluate conditions for state triggers (Trauma, Panic, Subspace) over ticks
     ConditionWatcher.evaluate(payload.subjectId, payload.pointId, engineOutput.nextCore, engineOutput.nextPoint);
 
+    // Orchestration may have changed nextCore after runTick (discharge,
+    // breakdown, scenario consequences). Keep public delta consistent with the
+    // state that is actually persisted.
+    engineOutput.delta.core = {
+        tension: engineOutput.nextCore.tension - stateBefore.core.tension,
+        sensitivity: engineOutput.nextCore.sensitivity - stateBefore.core.sensitivity,
+        capacity: engineOutput.nextCore.capacity - stateBefore.core.capacity,
+        openness: engineOutput.nextCore.openness - stateBefore.core.openness,
+        plasticity: engineOutput.nextCore.plasticity - stateBefore.core.plasticity,
+        attitude: engineOutput.nextCore.attitude - stateBefore.core.attitude,
+    };
+    engineOutput.delta.point.localSensitivity = engineOutput.nextPoint.localSensitivity - stateBefore.point.localSensitivity;
+    engineOutput.delta.point.localAttitude = engineOutput.nextPoint.localAttitude - stateBefore.point.localAttitude;
+
     // 7. Save Atomically (before prompt building)
     saveTickState(payload.subjectId, payload.pointId, payload.playerId, payload.presetId, compiledAction, engineOutput, tickId);
+    if (peakEventToLog) {
+        eventLogRepo.append(payload.subjectId, 'system_tick', { presetId: peakEventToLog.presetId, action: null, actionLabel: peakEventToLog.narrative, narrative: peakEventToLog.narrative }, { added: true });
+    }
+
+    // 7.1 Log system_trigger AFTER saveTickState so its event_log id is higher
+    // than the interaction log written by saveTickState. This ensures the narrator
+    // sees them in correct chronological order: interaction (player acted) → system_trigger (asset complied).
+    if (forcedAttempted && forcedNarrativeToLog) {
+        eventLogRepo.append(payload.subjectId, 'system_trigger', { presetId: 'system_trigger', action: null, actionLabel: forcedNarrativeToLog, narrative: forcedNarrativeToLog }, { added: true });
+    }
 
     // [Async] Background update relations
     // const bgUpdate = require('../workers/backgroundRelationUpdate');

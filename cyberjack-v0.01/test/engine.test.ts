@@ -36,4 +36,18 @@ describe('Engine Core', () => {
 
         expect(output.nextPoint.localSensitivity).toBeLessThanOrEqual(100);
     });
+
+    it('preserves action identity through normalization', () => {
+        const input: TickInput = {
+            subjectId: 'test_subject', pointId: 'general',
+            action: { actionKey: 'wait', label: 'Wait', type: 'system', tags: ['rest'], intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 },
+            core: { ...DEFAULT_CONFIG.core.defaults },
+            point: { pointId: 'general', ...DEFAULT_CONFIG.point.defaults },
+            deltaTime: 10,
+        };
+        const output = runTick(input);
+        expect(output.tickMeta.inputs.action.actionKey).toBe('wait');
+        expect(output.tickMeta.inputs.action.type).toBe('system');
+        expect(output.tickMeta.inputs.action.tags).toContain('rest');
+    });
 });

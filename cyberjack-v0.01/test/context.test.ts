@@ -145,4 +145,41 @@ describe('Context & Slot Engine', () => {
         // r2 remains
         expect(remaining.some(r => r.id === 'r2')).toBe(true);
     });
+
+    it('replaces poses as a category without removing another context kind', () => {
+        const subj = 'sub_ctx_pose';
+        subjectRepo.save(subj, 'Pose Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('pose_old', 'Old Pose', {}, { type:'pose', occupiesPoints:['global_pose'], priority:1 });
+        presetRepo.saveActionPreset('pose_new', 'New Pose', {}, { type:'pose', occupiesPoints:['global_pose'], priority:2 });
+        presetRepo.saveActionPreset('collar', 'Collar', {}, { type:'equipment', occupiesPoints:['neck'], exclusiveWithinPoint:true });
+        activeContextsRepo.add('old_pose_instance', subj, 'pose_old', -1, 'global_pose', null);
+        activeContextsRepo.add('collar_instance', subj, 'collar', -1, 'neck', null);
+
+        ContextManager.applyContext(subj, 'pose_new', presetRepo.getActionPreset('pose_new') as any);
+        const remaining = activeContextsRepo.getAllForSubject(subj);
+        expect(remaining.some(row => row.actionId === 'pose_old')).toBe(false);
+        expect(remaining.some(row => row.actionId === 'pose_new')).toBe(true);
+        expect(remaining.some(row => row.actionId === 'collar')).toBe(true);
+    });
+
+    it('is idempotent when the same context is applied twice', () => {
+        const subj = 'sub_ctx_idempotent';
+        subjectRepo.save(subj, 'Idempotent Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('same_ctx', 'Same', {}, { type:'equipment', occupiesPoints:['neck'], exclusiveWithinPoint:true });
+        const preset = presetRepo.getActionPreset('same_ctx') as any;
+        ContextManager.applyContext(subj, 'same_ctx', preset);
+        ContextManager.applyContext(subj, 'same_ctx', preset);
+        expect(activeContextsRepo.getAllForSubject(subj).filter(row => row.actionId === 'same_ctx')).toHaveLength(1);
+    });
+
+    it('preserves zero duration and expires it on the next processing pass', () => {
+        const subj = 'sub_ctx_zero_duration';
+        subjectRepo.save(subj, 'Duration Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('instant_ctx', 'Instant', {}, { type:'condition', occupiesPoints:[], duration:0 });
+        ContextManager.applyContext(subj, 'instant_ctx', presetRepo.getActionPreset('instant_ctx') as any);
+        const active = activeContextsRepo.getAllForSubject(subj);
+        expect(active[0].duration).toBe(0);
+        ContextManager.processTick(subj, 1);
+        expect(activeContextsRepo.getAllForSubject(subj)).toHaveLength(0);
+    });
 });

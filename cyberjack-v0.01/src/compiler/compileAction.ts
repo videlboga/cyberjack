@@ -15,6 +15,7 @@ export interface ActionInput {
     parserVersion?: string;
     activeContexts?: any[]; // IDs of active contexts
     deltaTime?: number;
+    familiarity?: number;
 }
 
 /**
@@ -82,7 +83,7 @@ export function compileAction(input: ActionInput): CompiledAction {
     }
 
     // 3. Compute Novelty
-    baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || []);
+    baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || [], input.familiarity || 0);
 
     // 4. Get Contexts
     const activeContexts = input.activeContexts || [];

@@ -3,7 +3,7 @@ import { db } from './db';
 
 export const eventQueries = {
     getRecentLogs(subjectId: string, limit: number = 10): any[] {
-        const stmt = db.prepare('SELECT * FROM event_logs WHERE subject_id = ? ORDER BY timestamp DESC LIMIT ?');
+        const stmt = db.prepare('SELECT * FROM event_logs WHERE subject_id = ? ORDER BY id DESC LIMIT ?');
         const rows = stmt.all(subjectId, limit) as any[];
         return rows.map(r => ({
             id: r.id,

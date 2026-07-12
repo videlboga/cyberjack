@@ -203,6 +203,12 @@ export interface TickMeta {
         effectiveAttitude: number;
         attitudeShift: number;
         attitudePower: number;
+        comfortThreshold?: number;
+        emotionalDiscomfort?: number;
+        sharpDiscomfort?: number;
+        strainDiscomfort?: number;
+        overloadDiscomfort?: number;
+        physicalDiscomfort?: number;
     };
     formulas?: Record<string, string>;
 }
@@ -361,6 +367,7 @@ export interface NarratorPromptPayload {
     playerSpeech?: string;
     activeContexts?: string[];
     tickResultSummary?: string;
+    systemEvents?: string[];
 }
 
 export interface ScenePromptPayload {

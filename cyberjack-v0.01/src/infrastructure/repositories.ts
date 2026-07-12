@@ -471,6 +471,7 @@ export const subjectPreferencesRepo = {
 
 export const pointStateRepo = {
     save(subjectId: string, pointId: string, state: SubjectPointState) {
+        const canonicalPointId = pointId.trim().toLowerCase();
         const baselineLocalSensitivity = state.baselineLocalSensitivity ?? state.localSensitivity;
         const baselineLocalAttitude = state.baselineLocalAttitude ?? state.localAttitude;
         const baselineLocalOpenness = state.baselineLocalOpenness ?? state.localOpenness ?? 50;
@@ -489,7 +490,7 @@ export const pointStateRepo = {
         `);
         stmt.run(
             subjectId,
-            pointId,
+            canonicalPointId,
             state.localSensitivity,
             state.localAttitude,
             state.localOpenness ?? 50,
@@ -519,7 +520,7 @@ export const pointStateRepo = {
 
     get(subjectId: string, pointId: string): SubjectPointState | null {
         const stmt = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ? AND point_id = ?');
-        const row = stmt.get(subjectId, pointId) as any;
+        const row = stmt.get(subjectId, pointId.trim().toLowerCase()) as any;
         if (!row) return null;
         return {
             pointId: row.point_id,
@@ -671,7 +672,7 @@ export const activeContextsRepo = {
             id: r.id,
             actionId: r.action_id,
             ticksActive: Number(r.ticks_active) || 0,
-            duration: Number(r.duration) || -1,
+            duration: r.duration === null || r.duration === undefined ? -1 : Number(r.duration),
             pointId: r.point_id,
             initiatorId: r.initiator_id || null
         }));
@@ -931,6 +932,9 @@ export const chatMemoryRepo = {
     },
     updateContent(id: number, content: string) {
         db.prepare('UPDATE chat_memory SET content = ? WHERE id = ?').run(content, id);
+    },
+    deleteBefore(subjectId: string, beforeId: number) {
+        db.prepare('DELETE FROM chat_memory WHERE subject_id = ? AND id < ?').run(subjectId, beforeId);
     }
 };
 

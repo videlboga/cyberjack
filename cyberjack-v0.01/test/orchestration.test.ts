@@ -12,6 +12,7 @@ describe('Orchestration Integration', () => {
         // Seed DB
         subjectRepo.save('sub_1', 'Test Subject', DEFAULT_CONFIG.core.defaults);
         pointStateRepo.save('sub_1', 'point_A', DEFAULT_CONFIG.point.defaults);
+        expect(pointStateRepo.get('sub_1', 'POINT_A')?.pointId).toBe('point_a');
         resourceRepo.save({ id: 'player_1', resources: { energy: 100 } });
         sceneRepo.save({ id: 'scene_main', availableActions: ['act_soft_touch'] });
         presetRepo.saveActionPreset('act_soft_touch', 'Soft Touch', { intensity: 0.35, valence: 0.45, contact: 0.75, sharpness: 0.15, novelty: 0.8 });

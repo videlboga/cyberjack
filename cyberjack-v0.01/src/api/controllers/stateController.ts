@@ -100,6 +100,7 @@ export const updateSubject = (req: Request, res: Response) => {
             capacity: clamp(asNumber(req.body.capacity, current.capacity), 0, 100),
             openness: clamp(asNumber(req.body.openness, current.openness), 0, 100),
             plasticity: clamp(asNumber(req.body.plasticity, current.plasticity), 0, 100),
+            tension: clamp(asNumber(req.body.tension, current.tension ?? 0), 0, 150),
             baselineSensitivity: clamp(asNumber(req.body.baselineSensitivity, current.baselineSensitivity ?? current.sensitivity), 0, 100),
             baselineAttitude: clamp(asNumber(req.body.baselineAttitude, current.baselineAttitude ?? current.attitude), 0, 100),
             baselineCapacity: clamp(asNumber(req.body.baselineCapacity, current.baselineCapacity ?? current.capacity), 0, 100),

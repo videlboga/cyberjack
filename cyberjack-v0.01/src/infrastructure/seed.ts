@@ -143,6 +143,26 @@ db.transaction(() => {
             console.log(`Resources inserted for ${subject.id}`);
         }
     }
+
+    // Стартовые предметы для игрока (Калибратор)
+    const insertCharacterItemStmt = db.prepare(`
+        INSERT OR IGNORE INTO character_items (character_id, item_id, state, charges, metadata)
+        VALUES (?, ?, ?, ?, ?)
+    `);
+    // Базовое оборудование для лаборатории
+    insertCharacterItemStmt.run('PL-1', 'eq_handcuffs', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_collar', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_vibrator', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_plug', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_blindfold', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_gag', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_jumpsuit', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_dress', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_stockings', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_underwear', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'drug_truth_serum', 'active', 3, '{}');
+    insertCharacterItemStmt.run('PL-1', 'drug_painkiller', 'active', 3, '{}');
+    console.log('Starting items added for PL-1');
 })();
 
 const insertPointStmt = db.prepare(`
@@ -221,6 +241,8 @@ db.transaction(() => {
         { id: 'ice_cube', label: 'Прикладывание льда', values: { intensity: 0.6, valence: 0.1, contact: 0.4, sharpness: 0.6, novelty: 0.8 } },
         { id: 'hot_wax', label: 'Капля горячего воска', values: { intensity: 0.7, valence: -0.1, contact: 0.2, sharpness: 0.8, novelty: 0.8 } },
         { id: 'vibrator_pulse', label: 'Импульс вибратором', values: { intensity: 0.6, valence: 0.8, contact: 0.7, sharpness: 0.2, novelty: 0.7 } },
+        { id: 'device_sensory_loop', label: 'Установить сенсорный контур', type: 'context', tags: ['equipment', 'passive'], values: { intensity: 0.05, valence: 0.1, contact: 0.2, sharpness: 0, novelty: 0.4 }, contextConfig: { type: 'equipment', occupiesPoints: [], exclusiveWithinPoint: true, duration: -1, modifiers: {} } },
+        { id: 'device_sensory_pulse', label: 'Импульс сенсорного контура', type: 'physical', tags: ['equipment', 'passive', 'stimulation'], values: { intensity: 0.25, valence: 0.5, contact: 0.8, sharpness: 0.05, novelty: 0.4 }, requireContexts: ['device_sensory_loop'] },
         { id: 'hair_pull', label: 'Рывок за волосы', values: { intensity: 0.6, valence: -0.4, contact: 0.5, sharpness: 0.7, novelty: 0.4 } },
         { id: 'spit', label: 'Плевок', values: { intensity: 0.3, valence: -0.8, contact: 0.2, sharpness: 0.8, novelty: 0.7 } },
         { id: 'breath_blow', label: 'Обдувание дыханием', values: { intensity: 0.1, valence: 0.4, contact: 0.05, sharpness: 0.1, novelty: 0.5 } },
