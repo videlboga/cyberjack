@@ -1,285 +1,204 @@
-import { SubjectCoreState, PromptPayload, TickOutput, NarratorPromptPayload } from '../domain/types';
-import { buildStateSummary } from './buildStateSummary';
-import { buildRecentEventsSummary, EventRecord } from './buildRecentEventsSummary';
-import { activeConfig } from './config';
-import { fetchSillyTavernContext } from './sillyTavernContext';
+import { PromptPayload, SubjectCoreState, TickOutput } from '../domain/types';
+import { EventRecord } from './buildRecentEventsSummary';
 import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
-import { selectLongTermMemory, getRecentSummaries } from '../services/memoryLayer';
-import { characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
-import { buildMemoryInsights } from './buildMemoryInsights';
+import {
+    characterRelationRepo,
+    characterRepo,
+    chatMemoryRepo,
+    memoryRepo,
+    sceneCharacterRepo,
+    sceneRepo
+} from '../infrastructure/repositories';
 import { buildInteractionObservation, buildCurrentStateObservationText } from '../narrative/interactionObservation';
+import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/reactionFrame';
 
+function parseEvent(event: EventRecord) {
+    let action: any = {};
+    let result: any = {};
+    try { action = JSON.parse(event.action_payload || '{}'); } catch { }
+    try { result = JSON.parse(event.result_payload || '{}'); } catch { }
+    return { event, action, result };
+}
+
+function actionIdOf(event: EventRecord): string {
+    const { action } = parseEvent(event);
+    return action.presetId || action.actionId || action.action?.actionKey || '';
+}
+
+function pointIdOf(event: EventRecord): string {
+    return parseEvent(event).action.pointId || '';
+}
+
+function countRepetitions(events: EventRecord[], currentActionId?: string, currentPointId?: string) {
+    if (!currentActionId) return 1;
+    let repeats = 1;
+    for (let i = events.length - 1; i >= 0; i--) {
+        if (actionIdOf(events[i]) === currentActionId && (!currentPointId || pointIdOf(events[i]) === currentPointId)) repeats++;
+        else break;
+    }
+    return repeats;
+}
+
+type EpisodeRecord = { text: string; type: string; metadata: Record<string, any> };
+
+const mentionsLoreTerm = (text = '') => /(резонанс|пустот|бездн|аномали)/i.test(text);
+
+export function stripUnpromptedLoreFromEpisode(record: EpisodeRecord): EpisodeRecord {
+    const playerSpeech = String(record.metadata?.playerSpeech || '');
+    const characterSpeech = String(record.metadata?.characterSpeech || '');
+    if (!mentionsLoreTerm(characterSpeech) || mentionsLoreTerm(playerSpeech)) return record;
+    return {
+        ...record,
+        text: record.text.replace(/\.?\s*Мой ответ: «[^»]*»\.?\s*$/i, '').trim(),
+        metadata: { ...record.metadata, characterSpeech: '', speechAct: null }
+    };
+}
+
+export function selectReactionEpisodes(
+    records: EpisodeRecord[],
+    currentActionId?: string,
+    currentPointId?: string
+): EpisodeRecord[] {
+    const isDialogue = (record: EpisodeRecord) =>
+        Boolean(record.metadata?.playerSpeech) || record.metadata?.actionId === 'verbal_pressure';
+    const score = (record: EpisodeRecord, recency: number) =>
+        (record.metadata?.actionId === currentActionId ? 4 : 0) +
+        (record.metadata?.pointId === currentPointId ? 2 : 0) +
+        (record.metadata?.observation?.reaction?.mixed ? 1 : 0) +
+        ((record.metadata?.observation?.transitions?.length || 0) ? 3 : 0) -
+        recency * 0.05;
+    const ranked = (items: EpisodeRecord[]) => items
+        .map(record => ({ record, recency: records.indexOf(record) }))
+        .sort((a, b) => score(b.record, b.recency) - score(a.record, a.recency))
+        .map(item => item.record);
+    const physical = records.filter(record => !isDialogue(record));
+    const dialogue = records.filter(isDialogue);
+    const chosen = currentActionId === 'verbal_pressure'
+        ? [physical[0], ...ranked(dialogue).slice(0, 2)]
+        : [...ranked(physical).slice(0, 2), dialogue[0]];
+
+    const result: EpisodeRecord[] = [];
+    for (const record of [...chosen, ...records]) {
+        if (record && !result.some(existing => existing.text === record.text)) result.push(record);
+        if (result.length === 3) break;
+    }
+    return result;
+}
+
+/**
+ * Compiles an actor-specific dramatic perspective. Mechanical truth stays in the
+ * engine; the language model receives only facts available to this speaker.
+ */
 export async function buildPromptPayload(
-    ownerId: string, // Whose generation this is
-    targetId: string, // Who received the primary action
-    actorDetails: { name: string, core: SubjectCoreState },
+    ownerId: string,
+    targetId: string,
+    actorDetails: { name: string; core: SubjectCoreState },
     recentEventsIn: EventRecord[],
     pointStatesRow: any[],
     activeContextNames: string[],
     latestResult?: TickOutput,
-    eventId: string = 'scene_lab_calibrator',
+    eventId = 'scene_lab_calibrator',
     options?: { suppressTickIds?: string[]; initiatorId?: string }
 ): Promise<PromptPayload & { systemPrompt: string }> {
+    const suppressed = new Set(options?.suppressTickIds || []);
+    const recentEvents = recentEventsIn.filter(event => {
+        const tickId = parseEvent(event).action.tickId;
+        return !tickId || !suppressed.has(tickId);
+    });
+    const ownerCharacter = characterRepo.get(ownerId);
+    const targetCharacter = characterRepo.get(targetId);
+    const initiatorId = options?.initiatorId || 'PL-1';
+    const initiatorCharacter = characterRepo.get(initiatorId);
+    const ownerName = ownerCharacter?.name || actorDetails.name || ownerId;
+    const targetName = targetCharacter?.name || actorDetails.name || targetId;
+    const profile = ensureGeneratedProfile(ownerCharacter?.subjectId || ownerId);
+    const scene = sceneRepo.get(eventId);
+    const presentCharacters = sceneCharacterRepo.list(eventId)
+        .filter(entry => entry.presenceState === 'present')
+        .map(entry => entry.character.name);
+    if (!presentCharacters.includes(ownerName)) presentCharacters.push(ownerName);
+    if (initiatorCharacter?.name && !presentCharacters.includes(initiatorCharacter.name)) presentCharacters.push(initiatorCharacter.name);
 
-    const core: SubjectCoreState = actorDetails.core;
-    
-    let recentEvents = [...recentEventsIn];
-    if (options?.suppressTickIds?.length) {
-        const suppressSet = new Set(options.suppressTickIds);
-        recentEvents = recentEvents.filter(log => {
-            try {
-                const payload = JSON.parse(log.action_payload || '{}');
-                if (payload?.tickId && suppressSet.has(payload.tickId)) {
-                    return false;
-                }
-            } catch {
-            }
-            return true;
-        });
-    }
-    
-    const contextText = activeContextNames.length > 0
-        ? `\n[Физическое состояние и влияние среды]: ${activeContextNames.join(', ')}`
-        : '';
-
-    const mappedPoints = pointStatesRow.map(row => ({
-        label: row.label,
-        localSensitivity: row.localSensitivity || row.local_sensitivity,
-        localAttitude: row.localAttitude || row.local_attitude
-    }));
-    const relations = characterRelationRepo.listFor(ownerId);
-    const stateSummary = buildStateSummary(core, mappedPoints);
-    const eventsText = buildRecentEventsSummary(recentEvents, actorDetails.name);
-    const contextSummary = activeContextNames.length > 0 ? activeContextNames.join(', ') : undefined;
-    let sharedObservationText = buildCurrentStateObservationText(targetId || ownerId, core);
+    let observation;
     if (latestResult?.tickMeta?.inputs?.action) {
-        const previousCore = latestResult.tickMeta.inputs.core;
-        sharedObservationText = buildInteractionObservation({
-            subjectId: targetId || ownerId,
+        observation = buildInteractionObservation({
+            subjectId: targetId,
             pointId: latestResult.tickMeta.inputs.point.pointId,
             action: latestResult.tickMeta.inputs.action,
-            previousCore,
+            previousCore: latestResult.tickMeta.inputs.core,
             output: latestResult,
-        }).subjectiveText;
+            notableEvent: latestResult.notableEvent
+        });
     }
-    const interpretationBlock = `${stateSummary}${contextText}\n[Субъективное переживание текущего состояния]: ${sharedObservationText}`;
-
-    const averageLocalAttitude = mappedPoints.length
-        ? mappedPoints.reduce((acc, point) => acc + point.localAttitude, 0) / mappedPoints.length
-        : core.attitude;
-
-    const fallbackResult = (() => {
-        for (let i = recentEvents.length - 1; i >= 0; i--) {
-            try {
-                return JSON.parse(recentEvents[i].result_payload || '{}');
-            } catch {
-            }
-        }
-        return undefined;
-    })();
-
-    const lastResult = latestResult?.result || fallbackResult || {};
-    const engagement = Number(lastResult.engagement) || 0;
-    const overload = Number(lastResult.overload) || 0;
-
-    const structuredEvents = recentEvents.map(event => {
-        let interpretation = event.action_type;
-        try {
-            const payload = JSON.parse(event.action_payload || '{}');
-            interpretation =
-                payload?.narrative || payload?.actionLabel || payload?.presetId || interpretation;
-        } catch {
-        }
+    const currentActionId = latestResult?.tickMeta?.inputs?.action.actionKey;
+    const currentPointId = latestResult?.tickMeta?.inputs?.point.pointId;
+    const relation = characterRelationRepo.get(ownerId, initiatorId);
+    const recentDialogue = chatMemoryRepo.getRecent(ownerId, 6).map(entry =>
+        `${entry.role === 'assistant' ? ownerName : initiatorCharacter?.name || 'Собеседник'}: «${entry.content}»`
+    );
+    const allEpisodeRecords = memoryRepo.listRecent(ownerId, 12, 'episode_v2')
+        .filter(entry => !entry.metadata?.sceneId || entry.metadata.sceneId === eventId)
+        .map(stripUnpromptedLoreFromEpisode);
+    const recentSpeechActs = allEpisodeRecords
+        .filter(entry => entry.metadata?.speechAct)
+        .slice(0, 3)
+        .map(entry => String(entry.metadata?.speechAct));
+    const recentSpeechAct = recentSpeechActs[0];
+    const episodeRecords = selectReactionEpisodes(allEpisodeRecords, currentActionId, currentPointId);
+    const relevantEpisodes = episodeRecords.map(entry => entry.text);
+    const repetitionFromLogs = countRepetitions(recentEvents, currentActionId, currentPointId);
+    const exposureBeforeTick = Number(latestResult?.tickMeta?.inputs?.point.exposureCount ?? 0);
+    const frame = compileReactionFrame({
+        speakerId: ownerId,
+        speakerName: ownerName,
+        targetId,
+        targetName,
+        initiatorId,
+        initiatorName: initiatorCharacter?.name || 'Калибратор',
+        sceneTitle: scene?.title,
+        presentCharacters,
+        contexts: activeContextNames,
+        core: actorDetails.core,
+        relation,
+        observation,
+        actionLabel: latestResult?.tickMeta?.inputs?.action.label,
+        pointLabel: currentPointId,
+        repetition: Math.min(repetitionFromLogs, exposureBeforeTick + 1),
+        profileText: profile.personaText,
+        behavioralCore: profile.behavioralCore,
+        recentDialogue,
+        relevantEpisodes,
+        recentSpeechAct,
+        recentSpeechActs
+    });
+    const averageLocalAttitude = pointStatesRow.length
+        ? pointStatesRow.reduce((sum, row) => sum + Number(row.localAttitude ?? row.local_attitude ?? 50), 0) / pointStatesRow.length
+        : actorDetails.core.attitude;
+    const lastResult = latestResult?.result || {} as any;
+    const structuredEvents = recentEvents.slice(-5).map(event => {
+        const parsed = parseEvent(event);
         return {
             type: event.action_type,
-            interpretation
+            interpretation: parsed.action.narrative || parsed.action.actionLabel || parsed.action.presetId || event.action_type
         };
     });
-
-    const diagnostics: string[] = [];
-    stateSummary.split('\n').forEach(line => {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('*')) {
-            diagnostics.push(trimmed);
-        }
-    });
-
-    const targetQueryId = targetId || ownerId;
-    const isObserver = ownerId !== targetQueryId;
-    const stateSection = isObserver
-        ? `[Текущее состояние]\nТы не являешься главной целью текущего действия. Твое состояние:\n${interpretationBlock.trim()}`
-        : `[Текущее состояние]\n${interpretationBlock.trim()}`;
-        
-    const generatedProfile = ensureGeneratedProfile(ownerId);
-    const stContext = await fetchSillyTavernContext(ownerId);
-    const cfg = activeConfig.character;
-
-    const fallbackPersona = `Тебя зовут ${actorDetails.name} (Кодовое имя ${ownerId}).\n${cfg.history || ''}`;
-
-    const personaBlock =
-        generatedProfile?.personaText ||
-        (stContext?.personaText || fallbackPersona);
-
-    let loreBlock = '';
-    if (generatedProfile?.loreNotes?.length) {
-        loreBlock = `[Записки из лора]\n${generatedProfile.loreNotes.join('\n\n')}`;
-    } else if (stContext?.loreText) {
-        loreBlock = `[Записки из лора]\n${stContext.loreText}`;
-    }
-
-    const includeMemory = activeConfig.stContext?.includeMemory ?? false;
-    const memoryBlock =
-        includeMemory && stContext?.memoryText ? `\n[Память]\n${stContext.memoryText}` : '';
-
-    const recentSummaries = getRecentSummaries(ownerId, 5);
-    const highlightSet = new Set<string>();
-    const summaryPieces: string[] = [];
-    const seenSummaries = new Set<string>();
-
-    for (const entry of recentSummaries) {
-        const parts = entry.summary
-            .split('\n')
-            .map(p => p.trim())
-            .filter(Boolean);
-        parts.forEach(part => {
-            if (!part) return;
-            const normalized = part.toLowerCase();
-            if (seenSummaries.has(normalized)) return;
-            seenSummaries.add(normalized);
-            summaryPieces.push(`• ${part}`);
-        });
-        (entry.important || []).forEach(label => {
-            if (label) highlightSet.add(label);
-        });
-    }
-
-    const chatSummaryBlock =
-        summaryPieces.length > 0
-            ? `\n[Конспект беседы]\n${summaryPieces.join('\n')}${
-                  highlightSet.size ? `\n(важно: ${Array.from(highlightSet).join(', ')})` : ''
-              }`
-            : '';
-
-    const voiceInstructions =
-        `\n- Говори от первого лица, оставаясь в рамках своего характера.\n- В своих репликах и интонациях реагируй на текущую сцену.\n- Если обращались к тебе напрямую — обязательно отреагируй на смысл слов, ответь на вопрос или дай понять, что услышал.\n- Если хочешь промолчать, проигнорировать, или слова не нужны — верни пустую строку ("speech": "").\n- Не описывай текстом свои действия — для этого есть другой слой системы, пиши только речь.`;    const describeAttitude = (value: number) => {
-        if (value >= 90) return 'я испытываю к этому человеку глубокую привязанность и преданность';
-        if (value >= 75) return 'я искренне тепло к нему отношусь и симпатизирую';
-        if (value >= 60) return 'он мне приятен, я отношусь к нему с легкой симпатией';
-        if (value >= 40) return 'мое отношение к нему совершенно нейтральное';
-        if (value >= 25) return 'он вызывает у меня раздражение и некоторую неприязнь';
-        if (value >= 10) return 'я испытываю к нему сильную антипатию и презрение';
-        return 'я люто его ненавижу';
-    };
-
-    const describeOpenness = (value: number) => {
-        if (value >= 90) return 'я абсолютно открыт(а) и готов(а) делиться всем';
-        if (value >= 75) return 'я легко и охотно иду с ним на контакт';
-        if (value >= 60) return 'я в целом не против пообщаться с ним';
-        if (value >= 40) return 'я поддерживаю только формальный, сухой диалог';
-        if (value >= 25) return 'я общаюсь с ним очень неохотно и сдержанно';
-        if (value >= 10) return 'я стараюсь всячески избегать разговоров с ним';
-        return 'я полностью игнорирую его и избегаю любых контактов';
-    };
-
-    const sceneCharactersData = sceneCharacterRepo.list(eventId);
-    const mySceneChar = sceneCharactersData.find(sc => sc.character.id === ownerId || sc.character.subjectId === ownerId);
-
-    const relationsSection = relations.length
-        ? `[Персонажи сцены]\n${relations
-            .map(rel => {
-                const targetIdToFind = rel.target?.id || rel.toId;
-                const theirSceneChar = sceneCharactersData.find(sc => sc.character.id === targetIdToFind || sc.character.subjectId === rel.toId);
-                const isNearby = mySceneChar && theirSceneChar && mySceneChar.slotId === theirSceneChar.slotId;
-                const presenceToken = rel.present
-                    ? (isNearby ? 'этот человек рядом, в одной зоне' : 'человек в этой же комнате, но в отдалении')
-                    : 'его сейчас нет поблизости';
-
-                const name = rel.target?.name || rel.toId;
-                
-                // Углубляем "знакомство"
-                const familiarityLabel = (rel.familiarityLevel && rel.familiarityLevel > 0.7) 
-                    ? 'я хорошо его знаю и помню его повадки' 
-                    : (rel.familiarityLevel && rel.familiarityLevel > 0.3)
-                    ? 'мы немного знакомы'
-                    : rel.knows ? 'мы общались, но я мало что о нем знаю' : 'я почти не представляю, чего от него ждать';
-                    
-                const access = rel.canInteract
-                    ? 'у меня есть прямой доступ к нему'
-                    : 'нас разделяют физические барьеры';
-                    
-                const tone = describeAttitude(rel.attitude);
-                const opennessVal = typeof rel.openness === 'number' ? rel.openness : 50;
-                const opennessLabel = describeOpenness(opennessVal);
-
-                let result = `${name}: ${familiarityLabel}, ${presenceToken}, ${access}. По ощущениям: ${tone}. В плане общения: ${opennessLabel}.`;                if (rel.generalOpinion) {
-                    result += ` Мое мнение о нем: ${rel.generalOpinion}`;
-                }
-                if (rel.recentMemories && rel.recentMemories.length > 0) {
-                    result += ` Я помню, что: ${rel.recentMemories.join('; ')}.`;
-                }
-
-                return result;
-              })
-              .join('\n')}`
-        : '';
-
-    const aggregatedMemory = buildMemoryInsights(recentEvents as any); // using recent logs
-    const vectorMemories = aggregatedMemory.length
-        ? []
-        : selectLongTermMemory(ownerId, structuredEvents, core, mappedPoints).slice(0, 2);
-
-    const combinedMemories = [...aggregatedMemory, ...vectorMemories];
-    const longTermSection = combinedMemories.length
-        ? `\n[Долгосрочная память]\n${combinedMemories.map(entry => `- ${entry}`).join('\n')}`
-        : '';
-
-    const personaSection = `[Персона]\n${personaBlock}`;
-    const instructionsSection = `[Инструкции]\n${cfg.formatInstructions}${voiceInstructions}`;
-    const memorySection = memoryBlock ? memoryBlock.trim() : '';
-
-    const narratorEventsText = buildRecentEventsSummary(recentEvents.slice(-5), actorDetails.name);
-
-    const narratorPrompt: NarratorPromptPayload = {
-        subjectId: targetQueryId,
-        recentEventsText: narratorEventsText.trim(),
-        stateText: sharedObservationText,
-        instructions: cfg.narratorFormatInstructions
-    };
-
-    const systemPrompt = [
-        personaSection,
-        loreBlock,
-        instructionsSection,
-        relationsSection,
-        memorySection,
-        chatSummaryBlock.trim(),
-        longTermSection.trim(),
-        stateSection,
-        eventsText.trim()
-    ]
-        .filter(Boolean)
-        .join('\n\n');
-
-    const payload: PromptPayload = {
-        subjectId: ownerId,
-        sceneId: eventId,
-        currentStateSummary: {
-            interpretation: interpretationBlock.trim(),
-            attitude: core.attitude,
-            localAttitude: averageLocalAttitude,
-            engagement,
-            overload
-        },
-        recentEvents: structuredEvents,
-        diagnostics: diagnostics.length ? diagnostics : undefined,
-        sceneContext: contextSummary,
-        relations,
-        longTermMemory: combinedMemories.length ? combinedMemories : undefined,
-        narratorPrompt
-    };
+    const stateText = observation?.subjectiveText || buildCurrentStateObservationText(ownerId, actorDetails.core);
+    const relations = characterRelationRepo.listFor(ownerId);
 
     return {
-        ...payload,
-        systemPrompt
+        subjectId: ownerId,
+        sceneId: eventId,
+        systemPrompt: buildReactionSystemPrompt(frame),
+        reactionFrame: frame,
+        currentStateSummary: {
+            interpretation: `[Субъективное состояние] ${stateText}`,
+            attitude: actorDetails.core.attitude,
+            localAttitude: averageLocalAttitude,
+            engagement: Number(lastResult.engagement) || 0,
+            overload: Number(lastResult.overload) || 0
+        },
+        recentEvents: structuredEvents,
+        sceneContext: activeContextNames.join(', ') || undefined,
+        relations
     };
 }

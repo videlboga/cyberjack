@@ -32,7 +32,14 @@ export function applyLearning(
     const isRestAction = safeAction.actionKey === 'wait';
     const reactivityMultiplier = 0.5 + clamp((result.effectiveSensitivity ?? safeCore.sensitivity) / 100, 0, 1);
     const tensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * reactivityMultiplier * (f.tensionGrowthMultiplier ?? 0.3) * (isRestAction ? deltaTime : 1.0);
-    const tensionDrop = isRestAction ? Math.max(1, safeCore.openness / 10) * deltaTime : 0;
+    // A pause relaxes accumulated activation, but must not resemble an instant
+    // discharge. Openness helps the subject settle, at a deliberately slower
+    // rate than the old openness/10 curve.
+    const tensionRecoveryRate = Math.max(
+        f.tensionRecoveryBase ?? 0.75,
+        safeCore.openness / (f.tensionRecoveryOpennessDivisor ?? 25)
+    );
+    const tensionDrop = isRestAction ? tensionRecoveryRate * deltaTime : 0;
     const nextTension = clamp(
         tension + tensionGrowth - tensionDrop,
         0,

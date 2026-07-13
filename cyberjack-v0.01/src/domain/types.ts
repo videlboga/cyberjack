@@ -79,7 +79,8 @@ export interface TraitRule {
 }
 
 export interface ContextConfig {
-    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition" | "trait";
+    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition" | "trait" | "status";
+    activeLabel?: string;
     occupiesPoints: string[];
     exclusiveWithinPoint?: boolean;
     blocksPoints?: string[];
@@ -155,6 +156,7 @@ export interface CompiledAction {
     removeContexts?: string[];
     requiresItem?: string;
     requiresSceneObject?: string;
+    validTargets?: string[];
 }
 
 export interface EngineConfig {
@@ -219,6 +221,7 @@ export interface TickOutput {
     result: TickResult;
     delta: TickDelta;
     tickMeta: TickMeta;
+    notableEvent?: 'positive_discharge' | 'breakdown' | 'exhaustion';
 }
 
 export interface GameEvent {
@@ -308,7 +311,7 @@ export interface AssetContract {
     description: string;
     state: 'available' | 'accepted' | 'completed' | 'failed' | 'expired';
     acceptedByPlayerId?: string;
-    attachedSubjectId?: string; // asset assigned to order
+    attachedSubjectId?: string; // legacy field; assets are selected only on delivery
     deadlineTick?: number; 
     conditions: AssetContractCondition[];
     rewards: {
@@ -354,6 +357,7 @@ export interface PromptPayload {
     longTermMemory?: string[];
     systemPrompt?: string;
     narratorPrompt?: NarratorPromptPayload;
+    reactionFrame?: import('../narrative/reactionFrame').ReactionFrame;
 }
 
 export interface NarratorPromptPayload {
@@ -449,7 +453,7 @@ export interface InteractionObservation {
         sensitivityDelta: number;
         baselineSensitivityDelta: number;
     };
-    changes: { tension: number; capacity: number; attitude: number; openness: number };
+    changes: { tension: number; capacity: number; attitude: number; openness: number; localAttitude: number };
     contexts: ObservationContext[];
     currentState: { title: string; description: string };
     transitions: Array<{

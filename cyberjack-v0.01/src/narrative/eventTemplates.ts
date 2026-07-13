@@ -9,6 +9,8 @@ const actionTemplates: Record<
     deep_kiss: (actor, point) => `${actor} впивается губами в ${point} без лишних слов`,
     deep_massage: (actor, point) => `${actor} надавливает и проминает ${point} сильными пальцами`,
     firm_grip: (actor, point) => `${actor} сжимает ${point} жёстким хватом`,
+    light_bite: (actor, point) => `${actor} слегка прикусывает ${point}, не стараясь причинить боль`,
+    hard_bite: (actor, point) => `${actor} больно кусает ${point}`,
     slap: (actor, point) => `${actor} шлёпает по ${point}, от чего кожа вспыхивает`,
     hard_slap: (actor, point) => `${actor} врезает по ${point} так, что в теле отзывается гул`,
     belt_strike: (actor, point) => `${actor} оставляет на ${point} полосу ремня`,

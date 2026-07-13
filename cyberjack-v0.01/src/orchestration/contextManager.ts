@@ -1,14 +1,32 @@
 import { activeContextsRepo, presetRepo } from '../infrastructure/repositories';
 import { CompiledAction } from '../domain/types';
 import { randomUUID } from 'crypto';
+import { getActiveContextLabel } from '../domain/contextPresentation';
 
 export class ContextManager {
+    static applyAutonomousCollapse(subjectId: string): { applied: boolean; blocked: boolean; narrative: string; blockedBy?: string } {
+        const lyingPose = presetRepo.getActionPreset('pose_lying_down');
+        if (!lyingPose) return { applied: false, blocked: false, narrative: '' };
+        const result = this.applyContext(subjectId, 'pose_lying_down', lyingPose, undefined, subjectId);
+        if (result.blocked) {
+            const blocker = presetRepo.getActionPreset((result as any).blockedBy);
+            return {
+                ...result,
+                narrative: `Актив обмякает, но фиксация «${getActiveContextLabel(blocker, (result as any).blockedBy)}» удерживает тело в прежнем положении.`
+            };
+        }
+        return {
+            ...result,
+            narrative: result.applied ? 'Актив обмякает и оседает, оказываясь в положении лёжа.' : ''
+        };
+    }
+
     static isPointBlocked(subjectId: string, pointId: string): { blocked: boolean; reason?: string } {
         const currentContexts = activeContextsRepo.getAllForSubject(subjectId);
         for (const ctx of currentContexts) {
             const preset = presetRepo.getActionPreset(ctx.actionId);
             if (preset?.contextConfig?.blocksPoints?.includes(pointId)) {
-                return { blocked: true, reason: `Эта часть тела заблокирована (надето: ${preset.label || ctx.actionId}).` };
+                return { blocked: true, reason: `Эта часть тела заблокирована (надето: ${getActiveContextLabel(preset, ctx.actionId)}).` };
             }
         }
         return { blocked: false };
@@ -28,6 +46,7 @@ export class ContextManager {
             return presetConfig?.occupiesPoints?.includes('global_pose') ? 'pose' : undefined;
         };
         const newKind = contextKind(action);
+        const autonomousPoseChange = newKind === 'pose' && initiatorId === subjectId;
         const newPriority = config.priority ?? 0;
         const conflicts: typeof currentContexts = [];
 
@@ -38,6 +57,14 @@ export class ContextManager {
             const existingAction = presetRepo.getActionPreset(ctx.actionId);
             const existingConfig = existingAction?.contextConfig;
             if (!existingConfig) continue;
+
+            // A subject that has lost control cannot autonomously replace a
+            // whole-body restraint with a new pose. External repositioning is
+            // still governed by the ordinary priority/exclusivity rules.
+            const holdsGlobalPose = ctx.pointId === 'global_pose' || existingConfig.occupiesPoints?.includes('global_pose');
+            if (autonomousPoseChange && holdsGlobalPose && existingAction?.tags?.includes('restraint')) {
+                return { applied: false, blocked: true, blockedBy: ctx.actionId };
+            }
 
             const replacesPose = newKind === 'pose' && contextKind(existingAction) === 'pose';
             const overlapsInstance = pointsToOccupy.includes(ctx.pointId);

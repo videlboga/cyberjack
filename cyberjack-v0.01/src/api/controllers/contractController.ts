@@ -2,13 +2,14 @@ import { Request, Response } from 'express';
 import { contractRepo } from '../../infrastructure/contractRepo';
 import { subjectRepo } from '../../infrastructure/repositories';
 import { evaluateAssetContract } from '../../scenario/evaluateAssetContract';
+import { db } from '../../infrastructure/db';
 
 // GET /api/contracts — список доступных + принятых контрактов
 export const getContracts = (req: Request, res: Response) => {
     try {
         const available = contractRepo.listAvailable();
         const playerId = (req.query.playerId as string) || 'PL-1';
-        const accepted = contractRepo.listForPlayer(playerId);
+        const accepted = contractRepo.listForPlayer(playerId).filter(c => c.state === 'accepted');
 
         res.json({
             success: true,
@@ -40,11 +41,11 @@ export const getContracts = (req: Request, res: Response) => {
     }
 };
 
-// POST /api/contracts/:id/accept — принять контракт, привязать к субъекту
+// POST /api/contracts/:id/accept — принять заказ игроком без резервирования актива
 export const acceptContract = (req: Request, res: Response) => {
     try {
         const contractId = req.params.id;
-        const { subjectId, playerId = 'PL-1' } = req.body;
+        const { playerId = 'PL-1' } = req.body;
 
         const contract = contractRepo.get(contractId);
         if (!contract) {
@@ -56,7 +57,7 @@ export const acceptContract = (req: Request, res: Response) => {
 
         contract.state = 'accepted';
         contract.acceptedByPlayerId = playerId;
-        contract.attachedSubjectId = subjectId;
+        contract.attachedSubjectId = undefined;
         contractRepo.save(contract);
 
         res.json({ success: true, contract });
@@ -65,7 +66,7 @@ export const acceptContract = (req: Request, res: Response) => {
     }
 };
 
-// POST /api/contracts/:id/deliver — сдать актив по контракту (проверка условий)
+// POST /api/contracts/:id/deliver — выбрать и сдать подходящий актив в момент передачи
 export const deliverContract = (req: Request, res: Response) => {
     try {
         const contractId = req.params.id;
@@ -77,9 +78,9 @@ export const deliverContract = (req: Request, res: Response) => {
             return res.status(400).json({ success: false, error: 'Контракт не принят' });
         }
 
-        const subjectId = contract.attachedSubjectId;
+        const subjectId = req.body.subjectId;
         if (!subjectId) {
-            return res.status(400).json({ success: false, error: 'К контракту не привязан актив' });
+            return res.status(400).json({ success: false, error: 'Выберите актив для передачи' });
         }
 
         const core = subjectRepo.get(subjectId);
@@ -107,11 +108,58 @@ export const deliverContract = (req: Request, res: Response) => {
             return res.json({ success: false, metRequirements: false, unmet });
         }
 
-        // Контракт выполнен
-        contract.state = 'completed';
-        contractRepo.save(contract);
+        // Контракт и награда фиксируются одной транзакцией. Выбор актива при
+        // этом не превращается в постоянную связь contract↔subject.
+        const playerId = contract.acceptedByPlayerId || 'PL-1';
+        db.transaction(() => {
+            contract.state = 'completed';
+            contractRepo.save(contract);
+            if (contract.rewards.credits) {
+                db.prepare(`
+                    INSERT INTO character_resources (character_id, resource_key, amount, metadata)
+                    VALUES (?, 'credits', ?, '{}')
+                    ON CONFLICT(character_id, resource_key) DO UPDATE SET amount = amount + excluded.amount
+                `).run(playerId, contract.rewards.credits);
+            }
+            if (contract.rewards.trust) {
+                db.prepare(`
+                    INSERT INTO player_faction_states (player_id, faction_id, relation, trust, access_level, flags)
+                    VALUES (?, ?, 0, ?, 1, '[]')
+                    ON CONFLICT(player_id, faction_id) DO UPDATE SET trust = trust + excluded.trust
+                `).run(playerId, contract.issuerId, contract.rewards.trust);
+            }
+            for (const itemId of contract.rewards.items || []) {
+                db.prepare(`
+                    INSERT INTO character_items (character_id, item_id, state, charges, metadata)
+                    VALUES (?, ?, 'active', -1, '{}')
+                    ON CONFLICT(character_id, item_id) DO UPDATE SET state = 'active'
+                `).run(playerId, itemId);
+            }
+        })();
 
-        res.json({ success: true, metRequirements: true, contract, rewards: contract.rewards });
+        res.json({ success: true, metRequirements: true, contract, deliveredSubjectId: subjectId, rewards: contract.rewards });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+// GET /api/contracts/:id/progress?subjectId=... — чистое сравнение, без привязки
+export const getContractProgress = (req: Request, res: Response) => {
+    try {
+        const contract = contractRepo.get(req.params.id);
+        if (!contract) return res.status(404).json({ success: false, error: 'Контракт не найден' });
+        const subjectId = String(req.query.subjectId || '');
+        const core = subjectRepo.get(subjectId);
+        if (!core) return res.status(404).json({ success: false, error: 'Актив не найден' });
+
+        const conditions = contract.conditions.map((condition: any) => {
+            let current: any;
+            if (condition.type === 'attitude') current = core.attitude;
+            else if (condition.type === 'custom' && condition.key) current = (core as any)[condition.key];
+            else if (condition.type === 'flag' || condition.type === 'trait') current = core.flags?.includes(condition.key || '') || false;
+            return { ...condition, current, met: current !== undefined && compareOp(current, condition.operator || '==', condition.value) };
+        });
+        res.json({ success: true, contract, subjectId, conditions, metAll: conditions.length > 0 && conditions.every(c => c.met) });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -129,7 +177,7 @@ export const getActiveContract = (req: Request, res: Response) => {
         }
 
         // Проверим выполнение условий
-        const subjectId = active.attachedSubjectId;
+        const subjectId = req.query.subjectId as string | undefined;
         let progress = null;
         if (subjectId) {
             const core = subjectRepo.get(subjectId);

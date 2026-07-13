@@ -95,6 +95,9 @@ db.transaction(() => {
 
     // Контракты
     for (const c of contracts) {
+        // Content seeding must not reset a player's accepted/completed order
+        // whenever the API process restarts.
+        if (contractRepo.get(c.id)) continue;
         contractRepo.save({
             id: c.id,
             issuerId: c.issuerId,

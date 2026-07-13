@@ -12,6 +12,10 @@ function createEmptyLibrary(): TagLibrary {
         persona: [],
         physical: [],
         psychological: [],
+        state: [],
+        response: [],
+        bias: [],
+        body: [],
         event: [],
         trait: []
     };
@@ -78,7 +82,9 @@ function normalizeTag(raw: any): LoreTagDefinition | null {
                 : undefined,
         category: typeof raw.category === 'string' && raw.category.trim() ? raw.category.trim() : undefined,
         coreModifiers: raw.coreModifiers,
-        initialContexts: Array.isArray(raw.initialContexts) ? raw.initialContexts : undefined
+        initialContexts: Array.isArray(raw.initialContexts) ? raw.initialContexts : undefined,
+        weightModifiers: raw.weightModifiers && typeof raw.weightModifiers === 'object' ? raw.weightModifiers : undefined,
+        archetypes: Array.isArray(raw.archetypes) ? raw.archetypes : undefined
     };
 }
 
@@ -101,6 +107,10 @@ function loadCustomTagLibrary(): TagLibrary {
         persona: new Map(),
         physical: new Map(),
         psychological: new Map(),
+        state: new Map(),
+        response: new Map(),
+        bias: new Map(),
+        body: new Map(),
         event: new Map(),
         trait: new Map()
     };
@@ -127,6 +137,9 @@ function loadCustomTagLibrary(): TagLibrary {
                 for (const item of collection) {
                     const normalized = normalizeTag(item);
                     if (normalized) {
+                        if (perLevelMaps[normalized.level].has(normalized.id)) {
+                            console.warn(`[TagLoader] Duplicate tag ${normalized.id}; later definition overrides earlier one`);
+                        }
                         perLevelMaps[normalized.level].set(normalized.id, normalized);
                     }
                 }

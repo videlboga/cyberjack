@@ -44,7 +44,7 @@ export function buildStateSummary(core: SubjectCoreState, points?: any[]): strin
     // Динамический расчет Особых состояний (Overload mechanics)
     let traitsText = cfg.noTraitsFallback;
     
-    if (core.capacity <= 10 && core.attitude < 60) {
+    if (core.capacity <= 10) {
         // Total exhaustion and apathy
         traitsText = cfg.stateApathy;
     } else if (core.capacity <= 25) {

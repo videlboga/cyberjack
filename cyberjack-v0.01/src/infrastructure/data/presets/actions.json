@@ -197,6 +197,7 @@
     },
     "contextConfig": {
       "type": "equipment",
+      "activeLabel": "Наручники",
       "duration": -1,
       "exclusiveWithinPoint": true,
       "occupiesPoints": [
@@ -297,6 +298,7 @@
     },
     "contextConfig": {
       "type": "equipment",
+      "activeLabel": "Шоковый ошейник",
       "duration": -1,
       "exclusiveWithinPoint": true,
       "occupiesPoints": [
@@ -397,6 +399,7 @@
     },
     "contextConfig": {
       "type": "status",
+      "activeLabel": "Под действием Veritas-9",
       "duration": 5,
       "exclusiveWithinPoint": false,
       "occupiesPoints": [],
@@ -449,6 +452,7 @@
     },
     "contextConfig": {
       "type": "status",
+      "activeLabel": "Под действием Numb-X",
       "duration": 6,
       "exclusiveWithinPoint": false,
       "occupiesPoints": [],
@@ -503,6 +507,7 @@
     },
     "contextConfig": {
       "type": "equipment",
+      "activeLabel": "Телеметрический плаг",
       "duration": -1,
       "exclusiveWithinPoint": true,
       "occupiesPoints": [
@@ -600,6 +605,7 @@
     },
     "contextConfig": {
       "type": "pose",
+      "activeLabel": "Стоит прямо",
       "duration": -1,
       "occupiesPoints": [
         "global_pose"
@@ -632,6 +638,7 @@
     },
     "contextConfig": {
       "type": "pose",
+      "activeLabel": "На четвереньках",
       "duration": -1,
       "occupiesPoints": [
         "systemic",
@@ -667,6 +674,7 @@
     },
     "contextConfig": {
       "type": "pose",
+      "activeLabel": "Лёжа, руки и ноги разведены",
       "duration": -1,
       "occupiesPoints": [
         "global_pose"
@@ -676,6 +684,7 @@
   },
   {
     "id": "eq_blindfold_apply",
+    "requiresItem": "eq_blindfold",
     "name": "Надеть повязку на глаза",
     "description": "Лишить зрения, обостряя другие чувства.",
     "categories": [
@@ -700,6 +709,7 @@
     },
     "contextConfig": {
       "type": "equipment",
+      "activeLabel": "Повязка на глазах",
       "duration": -1,
       "occupiesPoints": [
         "eyes"
@@ -741,6 +751,7 @@
   },
   {
     "id": "eq_gag_apply",
+    "requiresItem": "eq_gag",
     "name": "Вставить кляп",
     "description": "Заблокировать возможность говорить.",
     "categories": [
@@ -764,6 +775,7 @@
     },
     "contextConfig": {
       "type": "equipment",
+      "activeLabel": "Кляп",
       "duration": -1,
       "occupiesPoints": [
         "mouth"
@@ -827,6 +839,7 @@
     },
     "contextConfig": {
       "type": "pose",
+      "activeLabel": "Сидит",
       "duration": -1,
       "occupiesPoints": [
         "global_pose"
@@ -858,6 +871,7 @@
     },
     "contextConfig": {
       "type": "pose",
+      "activeLabel": "Лежит",
       "duration": -1,
       "occupiesPoints": [
         "global_pose"
@@ -893,6 +907,7 @@
     },
     "contextConfig": {
       "type": "equipment",
+      "activeLabel": "Подвес за запястья",
       "duration": -1,
       "exclusiveWithinPoint": true,
       "occupiesPoints": [
@@ -944,6 +959,7 @@
   },
   {
     "id": "eq_clothe_jumpsuit",
+    "requiresItem": "eq_jumpsuit",
     "name": "Надеть Комбинезон",
     "description": "Плотный изоляционный комбинезон. Закрывает всё тело, кроме лица, ладоней и ступней. Существенно снижает тактильную чувствительность.",
     "categories": [
@@ -966,6 +982,7 @@
     },
     "contextConfig": {
       "type": "clothing",
+      "activeLabel": "Сенсорный комбинезон",
       "duration": -1,
       "exclusiveWithinPoint": true,
       "occupiesPoints": [
@@ -1058,6 +1075,7 @@
     "type": "clothing",
     "contextConfig": {
       "type": "clothing",
+      "activeLabel": "Платье",
       "occupiesPoints": [
         "global_clothing"
       ],
@@ -1084,6 +1102,7 @@
     "type": "clothing",
     "contextConfig": {
       "type": "clothing",
+      "activeLabel": "Чулки",
       "occupiesPoints": [
         "legs"
       ],
@@ -1109,6 +1128,7 @@
     "type": "clothing",
     "contextConfig": {
       "type": "clothing",
+      "activeLabel": "Бюстгальтер",
       "occupiesPoints": [
         "chest",
         "nipples"
@@ -1137,6 +1157,7 @@
     "type": "clothing",
     "contextConfig": {
       "type": "clothing",
+      "activeLabel": "Трусики",
       "occupiesPoints": [
         "groin",
         "vulva",

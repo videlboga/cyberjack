@@ -41,6 +41,22 @@ export interface GameEventPayload {
     deltaTime?: number;
 }
 
+export function constrainCapacityWhileUnresponsive(input: {
+    previousCapacity: number;
+    proposedCapacity: number;
+    isRest: boolean;
+    elapsedTime: number;
+    recoveryRate?: number;
+}) {
+    if (!input.isRest) return Math.min(input.proposedCapacity, input.previousCapacity);
+    const recoveryRate = input.recoveryRate ?? DEFAULT_CONFIG.formulas.applyLearning.capacityRecoveryRate ?? 1;
+    // Collapse recovery is intentionally slower than ordinary rest. Generic
+    // baseline damping may still propose a lower value, but cannot wake the
+    // subject in a single long pause by restoring most of the baseline gap.
+    const recoveryCeiling = input.previousCapacity + recoveryRate * input.elapsedTime * 0.5;
+    return Math.min(input.proposedCapacity, recoveryCeiling);
+}
+
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
     // 1. Load state
     const state = loadTickState(payload.subjectId, payload.pointId, payload.playerId, payload.sceneId);
@@ -49,6 +65,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         point: { ...state.point }
     };
     const elapsedTime = payload.deltaTime ?? (payload.presetId === 'wait' ? 20 : 1);
+    const preTickContextNotes: string[] = [];
     
     // 2. Scenario layer: доступность действия, ресурсы, локация
     const validation = checkActionAccess.validateAction(
@@ -81,7 +98,13 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const history = eventQueries.getRecentLogs(payload.subjectId, 5);
     
     // 4. Compile Action Vector
-    const allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
+    let allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
+    if (allContexts.some(context => context.actionId === 'effect_apathy') &&
+        !allContexts.some(context => context.actionId === 'pose_lying_down')) {
+        const collapse = ContextManager.applyAutonomousCollapse(payload.subjectId);
+        if (collapse.applied && collapse.narrative) preTickContextNotes.push(collapse.narrative);
+        allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
+    }
     const applicableContexts = allContexts.filter(c => !c.pointId || c.pointId === payload.pointId);
 
     let compiledAction = compileAction({
@@ -121,9 +144,34 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         deltaTime: elapsedTime
     });
 
+    const wasUnresponsive = allContexts.some(context =>
+        context.actionId === 'effect_apathy' || context.actionId === 'effect_chronic_apathy'
+    );
+    if (wasUnresponsive) {
+        engineOutput.nextCore.capacity = constrainCapacityWhileUnresponsive({
+            previousCapacity: state.core.capacity,
+            proposedCapacity: engineOutput.nextCore.capacity,
+            isRest: payload.presetId === 'wait',
+            elapsedTime
+        });
+        const baselineCoreCfg = DEFAULT_CONFIG.formulas.baseline?.core || {};
+        engineOutput.nextCore.baselineCapacity = advanceBaseline(
+            state.core.baselineCapacity ?? state.core.capacity,
+            engineOutput.nextCore.capacity,
+            {
+                plasticity: engineOutput.nextCore.plasticity,
+                openness: engineOutput.nextCore.openness,
+                novelty: compiledAction.novelty
+            },
+            { baseRate: baselineCoreCfg.adaptBase, ...baselineCoreCfg, timeScale: elapsedTime }
+        );
+    }
+
     // Existing contexts affect this action and age afterwards. Contexts created
     // by the current action are applied later and start ageing on the next tick.
-    ContextManager.processTick(payload.subjectId, elapsedTime);
+    // A long pause is one gameplay step for finite condition durations; its
+    // elapsed time still drives physiological recovery inside the engine.
+    ContextManager.processTick(payload.subjectId, payload.presetId === 'wait' ? 1 : elapsedTime);
 
     if (engineOutput.tickMeta?.inputs) {
         (engineOutput.tickMeta.inputs.action as any)._baseAction = (compiledAction as any)._baseAction;
@@ -135,7 +183,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // 6.0 Apply Context Overrides (Parser Intention Hook)
     // Here we perform dynamic context modification dictated directly by the LLM classification,
     // intercepting and modifying the subject's conditions immediately.
-    let addedContextNotes: string[] = [];
+    let addedContextNotes: string[] = [...preTickContextNotes];
     // Did this tick actually change contexts / apply effects?
     let actionApplied = false;
     // Hoist forced-action tracking to function scope so we can log system_trigger
@@ -157,9 +205,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         else if (commandIntent.type === 'deactivate_context') {
             const deactivateId = commandIntent.targetContextId;
             const actionPreset = presetRepo.getActionPreset(deactivateId);
-            const currentStatus = activeContextsRepo2.getAllForSubject(payload.subjectId).find((c: any) => c.actionId === deactivateId);
-            if (currentStatus) {
-                activeContextsRepo2.remove(currentStatus.id);
+            const currentStatuses = activeContextsRepo2.getAllForSubject(payload.subjectId)
+                .filter((c: any) => c.actionId === deactivateId);
+            if (currentStatuses.length > 0) {
+                // One wearable context can occupy several body points. A verbal
+                // command removes the item as a whole, not just its first row.
+                activeContextsRepo2.removeByActionId(payload.subjectId, deactivateId);
                 const removeNarr = (actionPreset as any)?.vector?.removeNarrative || (actionPreset as any)?._baseAction?.vector?.removeNarrative;
                 const subjectChar = characterRepo.get(payload.subjectId);
                 const subjectName = subjectChar?.name || payload.subjectId;
@@ -423,7 +474,9 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // === Edging & Tension Discharge Mechanic ===
     let peakEventToLog: { presetId: string; narrative: string } | null = null;
     let notableObservationEvent: 'positive_discharge' | 'breakdown' | 'exhaustion' | undefined;
-    if (engineOutput.nextCore.tension >= 100) {
+    // A discharge is an outcome of active stimulation. Rest can lower tension
+    // or leave a subject near the edge, but cannot itself cause the peak event.
+    if (payload.presetId !== 'wait' && engineOutput.nextCore.tension >= 100) {
         const activeContextIds = activeContextsRepo.getAllForSubject(payload.subjectId).map(context => context.actionId);
         for (const rule of STATE_RULES) {
             if (rule.check(engineOutput.nextCore, engineOutput.nextPoint)) activeContextIds.push(rule.actionPresetId);
@@ -482,6 +535,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         
         peakEventToLog = { presetId: 'ruined', narrative: ruinNarrative };
     }
+    engineOutput.notableEvent = notableObservationEvent;
 
     // Save player and scene state at the final atomicity boundary
     
@@ -533,7 +587,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     // 6.6 Evaluate conditions for state triggers (Trauma, Panic, Subspace) over ticks
-    ConditionWatcher.evaluate(payload.subjectId, payload.pointId, engineOutput.nextCore, engineOutput.nextPoint);
+    addedContextNotes.push(...ConditionWatcher.evaluate(
+        payload.subjectId,
+        payload.pointId,
+        engineOutput.nextCore,
+        engineOutput.nextPoint
+    ));
 
     // Orchestration may have changed nextCore after runTick (discharge,
     // breakdown, scenario consequences). Keep public delta consistent with the
@@ -591,7 +650,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // 6.5 Update context strain (Escalation / Decay)
 
-    const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId);
+    const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId, { initiatorId: payload.playerId || 'PL-1' });
 
     // Log the constructed prompt payload for debugging/inspection
     try {

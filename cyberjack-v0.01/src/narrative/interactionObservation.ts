@@ -1,5 +1,6 @@
 import { CompiledAction, InteractionObservation, ObservationContext, SubjectCoreState, TickOutput } from '../domain/types';
 import { activeContextsRepo, presetRepo } from '../infrastructure/repositories';
+import { getActiveContextLabel } from '../domain/contextPresentation';
 
 const behaviorPriority: Array<[InteractionObservation['behavioralState'], string[]]> = [
     ['unresponsive', ['effect_apathy', 'effect_chronic_apathy']],
@@ -56,7 +57,7 @@ export function buildInteractionObservation(input: {
         const preset = presetRepo.getActionPreset(ctx.actionId);
         return {
             id: ctx.actionId,
-            label: preset?.label || ctx.actionId,
+            label: getActiveContextLabel(preset, ctx.actionId),
             role: roleFor(ctx.actionId, preset?.contextConfig?.type),
             pointId: ctx.pointId,
         };
@@ -64,6 +65,7 @@ export function buildInteractionObservation(input: {
     const ids = new Set(contexts.map(context => context.id));
     const behavioralState = resolveBehavioralState(ids);
     const previousBehavior = resolveBehavioralState(input.previousContextIds || []);
+    const regainingReflexes = behavioralState === 'unresponsive' && output.nextCore.capacity > 10;
     const restrained = contexts.some(context => context.role === 'restraint');
     const contact = action.contact <= 0.05 ? 'none' : restrained && ['panic', 'defiance'].includes(behavioralState) ? 'forced' : action.contact < 0.55 ? 'partial' : 'full';
     const pleasure = Number(result.pleasure || 0);
@@ -79,7 +81,9 @@ export function buildInteractionObservation(input: {
         freeze: 'Актив замирает; отсутствие движения не выглядит согласием или расслаблением.',
         panic: restrained ? 'Актив пытается отстраниться, но фиксация сохраняет контакт.' : 'Актив резко отстраняется и пытается разорвать контакт.',
         defiance: restrained ? 'Актив сопротивляется; фиксация позволяет продолжить контакт, не устраняя негативную реакцию.' : 'Актив активно сопротивляется прикосновению и старается прекратить контакт.',
-        unresponsive: 'Актив обмякает и почти перестаёт реагировать на внешнее воздействие.',
+        unresponsive: regainingReflexes
+            ? 'Дыхание становится ровнее; появляются отдельные рефлекторные движения, но осмысленного контакта ещё нет.'
+            : 'Актив обмякает и почти перестаёт реагировать на внешнее воздействие.',
     };
     if (action.actionKey === 'wait') {
         stateText.responsive = 'Во время паузы актив остаётся доступен наблюдению; текущее состояние постепенно меняется без нового контакта.';
@@ -104,24 +108,65 @@ export function buildInteractionObservation(input: {
         overload: 'Ощущений слишком много, мне трудно их разделить.', freeze: 'Я замираю и не могу свободно ответить движением.',
         panic: restrained ? 'Я пытаюсь отстраниться, но фиксация не даёт разорвать контакт.' : 'Я пытаюсь отстраниться и прекратить контакт.',
         defiance: restrained ? 'Я сопротивляюсь, хотя фиксация удерживает меня в контакте.' : 'Я сопротивляюсь и стараюсь не позволить продолжить.',
-        unresponsive: 'Сил почти не осталось; внешнее воздействие доходит как будто издалека.',
+        unresponsive: regainingReflexes
+            ? 'Ощущения начинают возвращаться отдельными фрагментами, но ответить или удержать контакт ещё не получается.'
+            : 'Сил почти не осталось; внешнее воздействие доходит как будто издалека.',
     };
 
-    const uiText = [stateText[behavioralState], sensation, learningText].filter(Boolean).join(' ');
-    const subjectiveText = `${subjectiveState[behavioralState]} ${mixed ? 'В ощущении одновременно есть приятная и неприятная составляющие.' : discomfort > pleasure ? 'Неприятная составляющая сильнее.' : pleasure > discomfort ? 'Приятная составляющая сильнее.' : 'Я не различаю явной эмоциональной окраски.'}`;
+    const tensionDelta = output.nextCore.tension - previousCore.tension;
+    const attitudeDelta = output.nextCore.attitude - previousCore.attitude;
+    const opennessDelta = output.nextCore.openness - previousCore.openness;
+    const localAttitudeDelta = output.nextPoint.localAttitude - output.tickMeta.inputs.point.localAttitude;
+    const acceptingLess = attitudeDelta < -0.2 || opennessDelta < -0.2;
+    const acceptingMore = attitudeDelta > 0.2 || opennessDelta > 0.2;
+    const forcedArousal = previousBehavior === 'unresponsive' && behavioralState !== 'unresponsive' &&
+        output.nextCore.capacity <= 10 && output.nextCore.tension >= 30;
+    const restText = action.actionKey === 'wait' && tensionDelta < -1
+        ? `Без нового воздействия накопленное напряжение снижается (${signed(tensionDelta)}).`
+        : '';
+    const acceptanceText = pleasure > discomfort && acceptingLess
+        ? 'Положительный телесный отклик не превращается в принятие: актив после контакта сильнее закрывается или хуже принимает происходящее.'
+        : discomfort > pleasure && acceptingMore
+            ? 'Несмотря на неприятное ощущение, общее принятие контакта растёт.'
+            : acceptingLess ? 'Общее принятие контакта снижается.'
+            : acceptingMore ? 'Общее принятие контакта растёт.' : '';
+    const subjectiveAcceptance = pleasure > discomfort && acceptingLess
+        ? 'Телу приятно, но это не означает согласия или доверия: после контакта я сильнее закрываюсь.'
+        : discomfort > pleasure && acceptingMore
+            ? 'Ощущение неприятное, хотя сам контакт я отвергаю чуть меньше.'
+            : acceptingLess ? 'После этого я хуже принимаю происходящее и сильнее закрываюсь.'
+            : acceptingMore ? 'После этого мне легче принимать происходящее.' : '';
+    const arousalText = forcedArousal ? 'Резкий стимул возвращает осмысленную реакцию, но ресурс не восстановлен: контакт удерживается нервной активацией.' : '';
+    const uiText = [stateText[behavioralState], arousalText, restText, sensation, acceptanceText, learningText].filter(Boolean).join(' ');
+    const subjectiveText = `${subjectiveState[behavioralState]} ${forcedArousal ? 'Сил по-прежнему нет, но резкая активация не даёт снова провалиться.' : ''} ${mixed ? 'В ощущении одновременно есть приятная и неприятная составляющие.' : discomfort > pleasure ? 'Неприятная составляющая сильнее.' : pleasure > discomfort ? 'Приятная телесная составляющая сильнее.' : 'Я не различаю явной эмоциональной окраски.'} ${subjectiveAcceptance}`.trim();
     const technicalText = `Контакт: ${contact}. Состояние: ${behavioralState}. P ${pleasure.toFixed(1)}, D ${discomfort.toFixed(1)}, O ${overload.toFixed(1)}, E ${engagement.toFixed(1)}; tension ${signed(output.nextCore.tension - previousCore.tension)}, capacity ${signed(output.nextCore.capacity - previousCore.capacity)}, sensitivity ${signed(sensitivityDelta)}, baseline ${signed(baselineSensitivityDelta)}.`;
 
     const transitions: InteractionObservation['transitions'] = [];
     if (input.notableEvent === 'positive_discharge') transitions.push({ kind: 'discharge', title: 'Разрядка', text: 'Накопленное напряжение достигает пика и разрешается глубокой физиологической разрядкой.', severity: 'major' });
     if (input.notableEvent === 'breakdown') transitions.push({ kind: 'breakdown', title: 'Нервный срыв', text: 'Пиковое напряжение разрешается паническим истощением вместо положительной разрядки.', severity: 'danger' });
     if (input.notableEvent === 'exhaustion') transitions.push({ kind: 'breakdown', title: 'Истощение ресурса', text: 'Ресурс исчерпан до достижения разрядки; актив остаётся опустошённым и слабо реагирует.', severity: 'danger' });
+    if (action.actionKey === 'wait' && tensionDelta <= -8 && !input.notableEvent) {
+        transitions.push({ kind: 'recovery', title: 'Напряжение снижается', text: `Пауза позволяет активу расслабиться: напряжение ${signed(tensionDelta)} без разрядки.`, severity: 'major' });
+    }
+    if (action.actionKey === 'wait' && previousBehavior === 'unresponsive' && behavioralState === 'unresponsive' && previousCore.capacity <= 10 && output.nextCore.capacity > 10) {
+        transitions.push({ kind: 'recovery', title: 'Первые реакции', text: 'Дыхание выравнивается и возвращаются отдельные рефлексы, но осмысленный контакт ещё не восстановлен.', severity: 'major' });
+    }
     if (previousBehavior !== behavioralState) {
-        if (behavioralState === 'unresponsive') transitions.push({ kind: 'state', title: 'Потеря контакта', text: 'Актив обмякает и перестаёт осмысленно отвечать на происходящее.', severity: 'danger' });
-        else if (previousBehavior === 'unresponsive') transitions.push({ kind: 'recovery', title: 'Возвращение реакции', text: `Осмысленная реакция возвращается. Текущее состояние: ${currentStates[behavioralState].title.toLowerCase()}.`, severity: 'major' });
+        if (behavioralState === 'unresponsive') {
+            const exhaustedAgain = output.nextCore.capacity <= 10 && output.nextCore.tension <= 15;
+            transitions.push({ kind: 'state', title: exhaustedAgain ? 'Повторная отключка' : 'Потеря контакта', text: exhaustedAgain ? 'Нервная активация падает; без восстановившегося ресурса актив снова отключается.' : 'Актив обмякает и перестаёт осмысленно отвечать на происходящее.', severity: 'danger' });
+        }
+        else if (previousBehavior === 'unresponsive') transitions.push({ kind: 'recovery', title: forcedArousal ? 'Принудительное пробуждение' : 'Возвращение реакции', text: forcedArousal ? 'Резкое воздействие возвращает контакт без восстановления ресурса. Сознание удерживается только накопленной нервной активацией.' : `Осмысленная реакция возвращается. Текущее состояние: ${currentStates[behavioralState].title.toLowerCase()}.`, severity: 'major' });
         else transitions.push({ kind: 'state', title: currentStates[behavioralState].title, text: currentStates[behavioralState].description, severity: behavioralState === 'panic' ? 'danger' : 'major' });
     }
 
     const currentState = { ...currentStates[behavioralState] };
+    if (regainingReflexes) {
+        currentState.description = 'Появляются отдельные рефлекторные реакции, но осмысленный контакт ещё не восстановлен.';
+    }
+    if (forcedArousal) {
+        currentState.description += ' Контакт удерживается нервной активацией при практически исчерпанном ресурсе.';
+    }
     if (ids.has('effect_refractory')) {
         currentState.description += ' После разрядки общая реактивность временно снижена.';
     }
@@ -133,8 +178,9 @@ export function buildInteractionObservation(input: {
         changes: {
             tension: output.nextCore.tension - previousCore.tension,
             capacity: output.nextCore.capacity - previousCore.capacity,
-            attitude: output.nextCore.attitude - previousCore.attitude,
-            openness: output.nextCore.openness - previousCore.openness,
+            attitude: attitudeDelta,
+            openness: opennessDelta,
+            localAttitude: localAttitudeDelta,
         },
         contexts, currentState, transitions, uiText, subjectiveText, technicalText,
     };

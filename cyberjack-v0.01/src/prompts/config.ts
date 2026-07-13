@@ -53,7 +53,6 @@ export interface PromptConfig {
         recentEventLimit?: number;
     };
     adapters: {
-        sillyTavernSystemPrefix: string;
         emptyInputPrompt: string;
         sceneForCharacterSystem: string;
         sceneForCharacterInput: string;
@@ -75,25 +74,6 @@ export interface PromptConfig {
         fallbackToBestAction?: boolean;
         topActionsToLog?: number;
         verbalReactiveBoost: number;
-    };
-    stContext?: {
-        enabled: boolean;
-        baseUrl: string;
-        characterPresets?: Record<
-            string,
-            {
-                avatarUrl: string;
-                chatFile?: string;
-                worldInfoFiles?: string[];
-                memoryMessageLimit?: number;
-                generatedWorldInfoName?: string;
-            }
-        >;
-        defaultWorldInfoFiles?: string[];
-        memoryMessageLimit?: number;
-        useCharacterCard?: boolean;
-        useWorldInfo?: boolean;
-        includeMemory?: boolean;
     };
 }
 
@@ -164,7 +144,6 @@ export let activeConfig: PromptConfig = {
         recentEventLimit: 10
     },
     adapters: {
-        sillyTavernSystemPrefix: "Вживись в роль Эли (S-01). Опирайся на внутреннее состояние и недавние ощущения. Покажи живого человека.",
         emptyInputPrompt: "[Действие завершено. Сгенерируй JSON-ответ только с твоей репликой на основе текущих ощущений. Если хочешь промолчать - верни пустую строку в speech]",
         // Narrator A: compressed scene FOR the character (injected into their prompt)
         sceneForCharacterSystem: "Ты — модуль телесного восприятия. Опиши ОЧЕНЬ КРАТКО (1-2 предложения, от первого лица) что субъект физически чувствует прямо сейчас. Только сенсорика и тело, без мыслей и эмоций. Никаких имён, никакого художественного стиля — сухой протокол ощущений.",
@@ -193,24 +172,6 @@ export let activeConfig: PromptConfig = {
         // How many top scored actions to include in diagnostics/logs.
         topActionsToLog: 5,
         verbalReactiveBoost: 0.15
-    },
-        stContext: {
-        enabled: true,
-        baseUrl: 'http://127.0.0.1:8181',
-        characterPresets: {
-            'S-01': {
-                avatarUrl: 'default_Assistant.png',
-                chatFile: 'Assistant - 2025-10-30 @23h 23m 34s 115ms',
-                worldInfoFiles: ['Omnicron_Lore'],
-                memoryMessageLimit: 6,
-                generatedWorldInfoName: 'S-01_Generated'
-            }
-        },
-        defaultWorldInfoFiles: ['Omnicron_Lore'],
-        memoryMessageLimit: 6,
-        useCharacterCard: false,
-        useWorldInfo: false,
-        includeMemory: false
     }
 };
 
@@ -220,18 +181,4 @@ export function updateConfig(newConfig: Partial<PromptConfig>) {
     if (newConfig.somaticSense) activeConfig.somaticSense = { ...activeConfig.somaticSense, ...newConfig.somaticSense };
     if (newConfig.perception) activeConfig.perception = { ...activeConfig.perception, ...newConfig.perception };
     if (newConfig.adapters) activeConfig.adapters = { ...activeConfig.adapters, ...newConfig.adapters };
-    if (newConfig.stContext) {
-        activeConfig.stContext = {
-            ...(activeConfig.stContext || {
-                enabled: false,
-                baseUrl: 'http://127.0.0.1:8181',
-                characterPresets: {}
-            }),
-            ...newConfig.stContext,
-            characterPresets: {
-                ...(activeConfig.stContext?.characterPresets || {}),
-                ...(newConfig.stContext.characterPresets || {})
-            }
-        };
-    }
 }

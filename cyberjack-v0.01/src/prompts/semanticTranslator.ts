@@ -3,6 +3,7 @@ import { activeConfig } from './config.js';
 import { PromptPhysicalState } from './openRouterPromptBuilder.js';
 import { getBaseHumanAnatomy, AnatomyMod, Gender } from '../domain/anatomy.js';
 import { activeContextsRepo, presetRepo } from '../infrastructure/repositories.js';
+import { getActiveContextLabel } from '../domain/contextPresentation.js';
 
 export function translateStateToPrompt(
     subjectId: string,
@@ -87,7 +88,7 @@ export function translateStateToPrompt(
                     const mapped = myAnatomyDef.find(a => a.id === ptId);
                     return mapped ? mapped.label : ptId;
                 });
-                occupiedSlots.push(`Действие [${preset.label}] занимает: ${slotLabels.join(', ')}.`);
+                occupiedSlots.push(`[${getActiveContextLabel(preset, ctx.actionId)}] занимает: ${slotLabels.join(', ')}.`);
             }
         }
     }

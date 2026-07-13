@@ -60,6 +60,7 @@ export const TraitRuleSchema = z.object({
 
 export const ContextConfigSchema = z.object({
   type: z.enum(["pose", "clothing", "equipment", "environment", "social", "restraint", "condition", "trait", "status"]),
+  activeLabel: z.string().optional(),
   duration: z.number().optional(),
   exclusiveWithinPoint: z.boolean().optional(),
   occupiesPoints: z.array(AnatomyTargetSchema).optional(),
@@ -105,4 +106,3 @@ export const TraitPresetSchema = z.object({
   description: z.string().optional(),
   rules: z.array(TraitRuleSchema)
 });
-

@@ -148,6 +148,8 @@ export const DEFAULT_CONFIG: any =
       capacityLoadFromIntensity: 0.015,
       capacityLoadFromDiscomfort: 0.02,
       capacityRecoveryRate: 1.0,    // Regen per silent tick
+      tensionRecoveryBase: 0.75,
+      tensionRecoveryOpennessDivisor: 25,
       opennessFromPleasureDiscomfort: 0.14,
       plasticityFromLearning: 0.04,
       plasticityFromOverload: 0.1,

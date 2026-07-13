@@ -19,8 +19,16 @@ export function compileContextVector(
         const presetResult = presetRepo.getActionPreset(ctx.actionId);
         const config = presetResult?.contextConfig;
         
-        // Use config.modifiers if explicitly provided, otherwise fallback to the primary vector.
-        const modifiers = config?.modifiers || (presetResult ? presetResult.vector as Partial<CompiledAction> : null);
+        // Persistent contexts affect later actions only through explicit
+        // modifiers. Condition presets predate that field and intentionally
+        // store their multipliers in the primary vector, so retain that narrow
+        // compatibility path. A pose's one-time application vector must never
+        // turn rest or conversation into continuous stimulation.
+        const modifiers = config?.modifiers || (
+            config?.type === 'condition' && presetResult
+                ? presetResult.vector as Partial<CompiledAction>
+                : null
+        );
 
         if (modifiers) {
             for (const [key, val] of Object.entries(modifiers)) {

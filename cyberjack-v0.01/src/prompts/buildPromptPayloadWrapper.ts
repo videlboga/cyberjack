@@ -22,13 +22,14 @@ export async function buildPromptPayloadWithDB(
 
     const targetRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(targetQueryId) as any;
     
-    const core = targetRow ? {
-        sensitivity: targetRow.sensitivity,
-        capacity: targetRow.capacity,
-        openness: targetRow.openness,
-        plasticity: targetRow.plasticity,
-        attitude: targetRow.attitude,
-        tension: targetRow.tension
+    const perspectiveRow = ownerRow || targetRow;
+    const core = perspectiveRow ? {
+        sensitivity: perspectiveRow.sensitivity,
+        capacity: perspectiveRow.capacity,
+        openness: perspectiveRow.openness,
+        plasticity: perspectiveRow.plasticity,
+        attitude: perspectiveRow.attitude,
+        tension: perspectiveRow.tension
     } : { sensitivity: 50, capacity:50, openness:50, plasticity:50, attitude:50, tension: 0 };
 
     const recentLogLimit = activeConfig.perception?.recentEventLimit ?? 10;
@@ -50,10 +51,12 @@ export async function buildPromptPayloadWithDB(
         JOIN action_presets cp ON ac.action_id = cp.id
         WHERE ac.subject_id = ?
     `).all(targetQueryId) as {label: string; id: string; context_config_json?: string}[];
-    const activeContextNames = activeContextRow.map(r => {
+    const activeContextNames = activeContextRow.flatMap(r => {
         let role = 'other';
         try { role = JSON.parse(r.context_config_json || '{}')?.type || role; } catch { }
-        return `${role}: ${r.label}`;
+        const externallyVisible = ['pose', 'clothing', 'equipment', 'restraint', 'environment', 'social', 'other'];
+        if (ownerQueryId !== targetQueryId && !externallyVisible.includes(role)) return [];
+        return [`${role}: ${r.label}`];
     });
 
     const pointStatesRow = db.prepare(`
@@ -70,7 +73,7 @@ export async function buildPromptPayloadWithDB(
     const payload = await buildPromptPayload(
         ownerId,
         targetId,
-        { name: targetRow?.name || targetQueryId, core: core as any },
+        { name: ownerRow?.name || ownerQueryId, core: core as any },
         recentEvents,
         pointStatesRow,
         activeContextNames,

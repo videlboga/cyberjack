@@ -24,14 +24,15 @@ export function buildStateDescription(subjectId: string): string {
 
 // ─── Прогресс контракта ───────────────────────────────────────────────────────
 
-export function getContractProgress(subjectId: string, playerId: string): {
+export function getContractProgress(subjectId: string, playerId: string, contractId?: string): {
     contractTitle: string | null;
     contractDescription: string | null;
     conditions: ConditionProgress[];
     metAll: boolean;
 } | null {
     const accepted = contractRepo.listForPlayer(playerId);
-    const active = accepted.find(c => c.state === 'accepted');
+    // A contract affects suggestions only when the caller explicitly selects it.
+    const active = contractId ? accepted.find(c => c.state === 'accepted' && c.id === contractId) : undefined;
     if (!active) return null;
 
     const core = subjectRepo.get(subjectId);

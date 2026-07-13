@@ -14,3 +14,15 @@
 .history-panel li.milestone strong { color: #c7b4ee; }
 .history-panel li.danger strong { color: #f2aaa5; }
 .history-panel li.milestone > span, .history-panel li.danger > span { color: #d9c8ff; }
+.protocol-mode { margin: 8px 0 10px; padding: 8px; border: 1px solid #314147; background: #0d1518; }
+.protocol-mode button { padding: 6px 9px; border: 1px solid #3a4b51; background: #111b1e; color: #809399; cursor: pointer; }
+.protocol-mode button + button { margin-left: 5px; }
+.protocol-mode button.active { border-color: #72d6bd; color: #a9ead8; background: #153029; }
+.protocol-mode p { margin: 6px 0 0; color: #71858b; font-size: 10px; line-height: 1.35; }
+.action-tabs { display: flex; gap: 5px; margin: 8px 0; }
+.action-tabs button { flex: 1; padding: 7px 5px; border: 1px solid #34454b; background: #0e171a; color: #74878d; font-size: 10px; cursor: pointer; }
+.action-tabs button.active { border-color: #72d6bd; color: #afe9da; background: #153029; }
+.context-rack { margin: 8px 0; padding: 8px; border: 1px solid #2e3c41; background: #0c1316; }
+.context-rack > small { display: block; margin-bottom: 5px; color: #667b82; font-size: 8px; letter-spacing: .12em; }
+.context-rack > div { display: flex; flex-wrap: wrap; gap: 4px; }
+.context-rack span { padding: 3px 6px; border: 1px solid #46585e; color: #a8b7bb; background: #151e21; font-size: 9px; }

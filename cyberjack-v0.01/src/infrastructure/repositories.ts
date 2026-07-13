@@ -570,6 +570,10 @@ export const presetRepo = {
             tags: row.tags ? JSON.parse(row.tags) : [],
             vector: valJson,
             removeContexts: valJson.removeContexts,
+            requireContexts: valJson.requireContexts,
+            requiresItem: row.requires_item || valJson.requiresItem || null,
+            requiresSceneObject: valJson.requiresSceneObject || null,
+            validTargets: valJson.validTargets || null,
             contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
         };
     },
@@ -584,6 +588,10 @@ export const presetRepo = {
                 tags: row.tags ? JSON.parse(row.tags) : [],
                 vector: valJson,
                 removeContexts: valJson.removeContexts,
+                requireContexts: valJson.requireContexts,
+                requiresItem: row.requires_item || valJson.requiresItem || null,
+                requiresSceneObject: valJson.requiresSceneObject || null,
+                validTargets: valJson.validTargets || null,
                 contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
             };
         });
@@ -935,6 +943,9 @@ export const chatMemoryRepo = {
     },
     deleteBefore(subjectId: string, beforeId: number) {
         db.prepare('DELETE FROM chat_memory WHERE subject_id = ? AND id < ?').run(subjectId, beforeId);
+    },
+    clear(subjectId: string) {
+        db.prepare('DELETE FROM chat_memory WHERE subject_id = ?').run(subjectId);
     }
 };
 
@@ -973,6 +984,9 @@ export const chatSummaryRepo = {
             summary: row.summary_text,
             important: JSON.parse(row.important_events || '[]')
         }));
+    },
+    clear(subjectId: string) {
+        db.prepare('DELETE FROM chat_memory_summary WHERE subject_id = ?').run(subjectId);
     }
 };
 
@@ -1033,6 +1047,24 @@ export const memoryRepo = {
             .sort((a, b) => b.score - a.score)
             .slice(0, limit)
             .filter(entry => entry.score > 0);
+    },
+    listRecent(subjectId: string, limit = 5, type?: string): Array<{ text: string; type: string; metadata: Record<string, any> }> {
+        const rows = type
+            ? db.prepare('SELECT text, type, metadata FROM memory_embeddings WHERE subject_id = ? AND type = ? ORDER BY id DESC LIMIT ?').all(subjectId, type, limit)
+            : db.prepare('SELECT text, type, metadata FROM memory_embeddings WHERE subject_id = ? ORDER BY id DESC LIMIT ?').all(subjectId, limit);
+        return (rows as Array<{ text: string; type: string; metadata: string }>).map(row => {
+            let metadata: Record<string, any> = {};
+            try { metadata = JSON.parse(row.metadata || '{}'); } catch { }
+            return { text: row.text, type: row.type, metadata };
+        });
+    },
+    deleteEpisodesForScene(subjectId: string, sceneId: string) {
+        db.prepare(
+            `DELETE FROM memory_embeddings
+             WHERE subject_id = ?
+               AND type = 'episode_v2'
+               AND json_extract(metadata, '$.sceneId') = ?`
+        ).run(subjectId, sceneId);
     }
 };
 

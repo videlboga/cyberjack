@@ -12,6 +12,7 @@ import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRel
 import { ActionScorer } from './actionScorer';
 import { appendJsonLog } from '../utils/fileLogs';
 import { explainPromptLog, explainOrchestratorDecision } from '../utils/logExplainers';
+import { getActiveContextLabel } from '../domain/contextPresentation';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -72,7 +73,7 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
     const lastActionNovelty = clamp01(bundle.compiledAction.novelty ?? 1); // If no novelty, assume 1 (new action)
     const activeContextIds = activeContextsRepo.getAllForSubject(bundle.event.subjectId || 'S-01');
     const activeContextLabels = activeContextIds
-        .map(ctx => presetRepo.getActionPreset(ctx.actionId)?.label)
+        .map(ctx => getActiveContextLabel(presetRepo.getActionPreset(ctx.actionId), ctx.actionId))
         .filter(Boolean);
 
     const isVerbalInput = bundle.event.type === 'verbal_input';
@@ -156,9 +157,11 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
             effectiveProactiveProb
         });
 
-        // Пытаемся сначала сделать проактивное действие
+        // Инициатива уместна в свободный тик/паузу. На конкретное действие игрока
+        // персонаж сначала реагирует, а не перебивает его случайным новым действием.
         let becameProactive = false;
-        if (sampleProbability(effectiveProactiveProb)) {
+        const initiativeWindow = bundle.compiledAction.actionKey === 'wait' || bundle.event.type === 'system_tick';
+        if (initiativeWindow && sampleProbability(effectiveProactiveProb)) {
             // Если персонаж хочет действовать проактивно, узнаем ЧТО он хочет сделать
             let proactiveReason = describeTone(relationToCalibrator?.attitude);
             let decidedAction = undefined;
@@ -218,14 +221,23 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         }
 
         // Если не проактивны (или не смогли найти действие), пробуем отреагировать репликой
-        if (!becameProactive && sampleProbability(reactiveProb)) {
+        const hasMajorTransition = Boolean(bundle.diagnostics?.observation?.transitions?.length);
+        const externallySignificant = (bundle.output.result.overload || 0) > 10 || hasMajorTransition;
+        const shouldReact = isTarget || (isVerbalInput ? reactiveProb >= 0.15 : externallySignificant && reactiveProb >= 0.08);
+        if (!becameProactive && shouldReact) {
             actorDecisions.push({
                 actorId,
                 kind: 'reactive',
                 reason: describeTone(relationToCalibrator?.attitude)
             });
         }
-    }    const narrator: NarratorDecision | undefined = prompt.narratorPrompt
+    }
+    // Не превращаем один тик в хор: цель события и максимум один наблюдатель.
+    const targetDecisions = actorDecisions.filter(decision => decision.actorId === subjectId);
+    const observerDecisions = actorDecisions.filter(decision => decision.actorId !== subjectId).slice(0, 1);
+    actorDecisions.splice(0, actorDecisions.length, ...targetDecisions, ...observerDecisions);
+
+    const narrator: NarratorDecision | undefined = prompt.narratorPrompt
         ? { enabled: true }
         : undefined;
 
@@ -241,7 +253,7 @@ import { chatMemoryRepo } from '../infrastructure/repositories';
 import { generateCharacterReply, generateNarratorReply, generateSceneForCharacter } from '../adapters/llmAdapter';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { recordMemoryEvent } from '../services/memoryLayer';
-import { maybeSummarizeChat } from '../services/chatSummary';
+import { buildReactionTurnMessage } from '../narrative/reactionFrame';
 
 export interface TurnExecutionParams {
     subjectId: string;
@@ -265,7 +277,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         promptPayload
     } = params;
 
-    let actionRepeats = 1;
+    let actionRepeats = 0;
     if (actionId && !autoUserMessage) {
         const recentLogs = db.prepare('SELECT action_payload FROM event_logs WHERE subject_id = ? AND action_type = ? ORDER BY id DESC LIMIT 15').all(subjectId, 'interaction') as { action_payload: string }[];
         for (const row of recentLogs) {
@@ -299,14 +311,14 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         if (actionRepeats > 1) {
             historyMessage += ` *(уже ${actionRepeats}-й раз подряд)*`;
         }
-    }    if (historyMessage.trim().length > 0) {
-        chatMemoryRepo.append(subjectId, 'user', historyMessage);
     }
+    // Dialogue memory stores literal speech only; mechanical events are episodes.
+    if (autoUserMessage?.trim()) chatMemoryRepo.append(subjectId, 'user', autoUserMessage.trim());
 
-    const chatHistory = chatMemoryRepo.getRecent(subjectId, 6).map(entry => ({
-        role: entry.role,
-        content: entry.content
-    }));
+    const chatHistory = chatMemoryRepo.getRecent(subjectId, 12)
+        .filter(entry => !/^\[Текущий контакт\]|^\*\(Без слов\)\*|^\[Игрок \(/.test(entry.content))
+        .slice(-6)
+        .map(entry => ({ role: entry.role, content: entry.content }));
 
     const orchestration = orchestrateSceneActors(bundle);
 
@@ -364,7 +376,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
     // Generated BEFORE character speech, injected into character's prompt
     const activeContextIds = activeContextsRepo.getAllForSubject(subjectId);
     const activeContextLabels = activeContextIds
-        .map((c: any) => presetRepo.getActionPreset(c.actionId)?.label || c.actionId)
+        .map((c: any) => getActiveContextLabel(presetRepo.getActionPreset(c.actionId), c.actionId))
         .filter(Boolean);
     let sceneForChar: string | null = null;
     if (orchestration.narrator?.enabled) {
@@ -394,15 +406,18 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         }
     }
 
-    const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; reaction: string }> = [];
-    let primaryReply: { speech: string; reaction: string } | null = null;
+    const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; speechAct?: string; addressedTo?: string; reaction: string }> = [];
+    let primaryReply: { speech: string; speechAct?: string; addressedTo?: string; reaction: string } | null = null;
     let promptMessages: any = null;
 
     if (orchestration.actorDecisions.length) {
         const actorPromises = orchestration.actorDecisions.map(async (decision) => {
             let currentPayload = promptPayload;
             let currentHistory = chatHistory;
-            let userMsgOverride = autoUserMessage || actionLabelMessage || undefined;
+            let userMsgOverride = currentPayload.reactionFrame
+                ? buildReactionTurnMessage(currentPayload.reactionFrame)
+                : autoUserMessage || actionLabelMessage || undefined;
+            if (autoUserMessage) userMsgOverride = `${userMsgOverride || ''}\n\n[Слова адресата]\n«${autoUserMessage}»`;
 
             // Inject Narrator A (sensory scene) into the character's prompt
             if (sceneForChar) {
@@ -412,26 +427,22 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             }
 
             if (decision.actorId !== subjectId) {
-                currentPayload = await buildPromptPayload(decision.actorId, decision.actorId, undefined, eventId, {
-                    suppressTickIds
+                currentPayload = await buildPromptPayload(decision.actorId, subjectId, bundle.output, eventId, {
+                    suppressTickIds,
+                    initiatorId: bundle.event.playerId || 'PL-1'
                 });
-                if (historyMessage && historyMessage.trim().length > 0) {
-                    chatMemoryRepo.append(decision.actorId, 'user', historyMessage);
-                }
-                currentHistory = chatMemoryRepo.getRecent(decision.actorId, 10).map(entry => ({
-                    role: entry.role,
-                    content: entry.content
-                }));
-                let observerOverride = historyMessage || actionLabelMessage || undefined;
-                if (sceneForChar) {
-                    observerOverride = observerOverride
-                        ? `${observerOverride}\n\n[Общая сцена - восприятие ${subjectId}]: ${sceneForChar}`
-                        : `[Общая сцена - восприятие ${subjectId}]: ${sceneForChar}`;
-                }
-                userMsgOverride = observerOverride;
+                if (autoUserMessage?.trim()) chatMemoryRepo.append(decision.actorId, 'user', autoUserMessage.trim());
+                currentHistory = chatMemoryRepo.getRecent(decision.actorId, 16)
+                    .filter(entry => !/^\[Текущий контакт\]|^\*\(Без слов\)\*|^\[Игрок \(/.test(entry.content))
+                    .slice(-8)
+                    .map(entry => ({ role: entry.role, content: entry.content }));
+                userMsgOverride = currentPayload.reactionFrame
+                    ? buildReactionTurnMessage(currentPayload.reactionFrame)
+                    : actionLabelMessage || undefined;
+                if (autoUserMessage) userMsgOverride = `${userMsgOverride || ''}\n\n[Слова адресата]\n«${autoUserMessage}»`;
             }
 
-            let structuredReply = { speech: '' };
+            let structuredReply: { speech: string; speechAct?: string; addressedTo?: string } = { speech: '' };
             let sentMessages: any = null;
 
             try {
@@ -459,7 +470,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             );
             sentMessages = res.sentMessages;
             structuredReply = res.reply && typeof res.reply === 'object'
-                ? (res.reply as { speech: string })
+                ? (res.reply as { speech: string; speechAct?: string; addressedTo?: string })
                 : { speech: String(res.reply || '') };
 
             try {
@@ -510,11 +521,13 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 kind: decision.kind,
                 tone: decision.reason,
                 speech: structuredReply.speech,
+                speechAct: structuredReply.speechAct,
+                addressedTo: structuredReply.addressedTo,
                 reaction: sceneForChar || ''
             });
 
             if (decision.actorId === subjectId || !primaryReply) {
-                primaryReply = { speech: structuredReply.speech, reaction: sceneForChar || '' };
+                primaryReply = { speech: structuredReply.speech, speechAct: structuredReply.speechAct, addressedTo: structuredReply.addressedTo, reaction: sceneForChar || '' };
                 promptMessages = sentMessages;
             }
 
@@ -552,7 +565,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         // Also include player's active contexts if any
         const playerContexts = activeContextsRepo.getAllForSubject(narratorPlayerId);
         if (playerContexts.length) {
-            const playerContextLabels = playerContexts.map(ctx => presetRepo.getActionPreset(ctx.actionId)?.label).filter(Boolean);
+            const playerContextLabels = playerContexts.map(ctx => getActiveContextLabel(presetRepo.getActionPreset(ctx.actionId), ctx.actionId)).filter(Boolean);
             if (playerContextLabels.length) {
                 const existing = promptPayload.narratorPrompt.activeContexts || [];
                 promptPayload.narratorPrompt.activeContexts = [...existing, ...playerContextLabels.map(label => `${playerNameForNarrator}: ${label}`)];
@@ -582,12 +595,13 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
     recordMemoryEvent({
         subjectId,
         bundle,
-        userText: autoUserMessage || actionLabelMessage || undefined,
+        userText: autoUserMessage || undefined,
         assistantText: primaryReply?.speech || '',
         infoTag: reqBodyInfoTag,
-        reactionText: narratorReaction || sceneForChar || ''
+        reactionText: narratorReaction || sceneForChar || '',
+        speechAct: primaryReply?.speechAct,
+        addressedTo: primaryReply?.addressedTo
     });
-    maybeSummarizeChat(subjectId);
 
     return {
         reply: primaryReply,

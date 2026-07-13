@@ -27,6 +27,8 @@ export function saveTickState(
     const relationCfg = (DEFAULT_CONFIG.formulas.baseline?.relation) || {};
     const relation = characterRelationRepo.ensure(subjectId, playerCharacter.id, {
         attitude: output.nextCore.attitude,
+        openness: currentSubject?.openness ?? output.nextCore.openness,
+        plasticity: currentSubject?.plasticity ?? output.nextCore.plasticity,
         baselineAttitude: currentSubject?.baselineAttitude ?? output.nextCore.attitude
     });
     const relationBaseline = relation.baselineAttitude ?? relation.attitude;
@@ -47,7 +49,12 @@ export function saveTickState(
         { baseRate: relationCfg.adaptBase, ...relationCfg }
     );
     characterRelationRepo.updateAttitude(subjectId, playerCharacter.id, dampedRelationAttitude, {
-        baselineAttitude: nextRelationBaseline
+        baselineAttitude: nextRelationBaseline,
+        openness: output.nextCore.openness,
+        plasticity: output.nextCore.plasticity
+    });
+    characterRelationRepo.updateSocialStats(subjectId, playerCharacter.id, {
+        familiarityDelta: Math.max(0.005, (action.novelty ?? 0.5) * 0.015)
     });
 
     // 2. Save new point state

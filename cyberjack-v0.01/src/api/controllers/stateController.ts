@@ -1,8 +1,9 @@
 import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
-import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo, sceneObjectsRepo } from '../../infrastructure/repositories';
+import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo, sceneObjectsRepo, chatMemoryRepo, chatSummaryRepo, memoryRepo } from '../../infrastructure/repositories';
 import { activeConfig, updateConfig } from '../../prompts/config';
 import { normalizePlayer } from './playerController';
+import { getActiveContextLabel } from '../../domain/contextPresentation';
 
 export const getState = (req: Request, res: Response) => {
     const subjectId = (req.query.subjectId as string) || 'S-01';
@@ -41,7 +42,8 @@ export const getState = (req: Request, res: Response) => {
                     requiresItem: preset?.requiresItem || null,
                     requiresSceneObject: preset?.contextConfig?.requiresSceneObject || null,
                     requireContexts: (preset?.vector && preset.vector.requireContexts) || preset?.requireContexts || null,
-                    removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null
+                    removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null,
+                    validTargets: preset?.validTargets || (preset?.vector && preset.vector.validTargets) || null
                 };
             });
             scene.characters = sceneCharacterRepo.list(scene.id);
@@ -59,7 +61,7 @@ export const getState = (req: Request, res: Response) => {
             const rawContexts = activeContextsRepo.getAllForSubject(subjectId) || [];
             subject.contexts = rawContexts.map(c => {
                 const preset = presetRepo.getActionPreset(c.actionId);
-                return { ...c, label: preset?.label || c.actionId, type: preset?.type || c.actionId };
+                return { ...c, label: getActiveContextLabel(preset, c.actionId), type: preset?.contextConfig?.type || preset?.type || c.actionId, occupiesPoints: preset?.contextConfig?.occupiesPoints || [], blocksPoints: preset?.contextConfig?.blocksPoints || [] };
             });
         }
 
@@ -142,6 +144,21 @@ export const updatePointState = (req: Request, res: Response) => {
         // Persist using repository
         pointStateRepo.save(subjectId, pointId, state);
 
+        res.json({ success: true });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const resetAttemptMemory = (req: Request, res: Response) => {
+    try {
+        const subjectId = req.body.subjectId;
+        const sceneId = req.body.sceneId || 'scene_lab_calibrator';
+        if (!subjectId) return res.status(400).json({ success: false, error: 'subjectId required' });
+
+        chatMemoryRepo.clear(subjectId);
+        chatSummaryRepo.clear(subjectId);
+        memoryRepo.deleteEpisodesForScene(subjectId, sceneId);
         res.json({ success: true });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });

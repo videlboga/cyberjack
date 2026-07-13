@@ -41,7 +41,11 @@ export function compileAction(input: ActionInput): CompiledAction {
         },
         ...baseVector,
         contextConfig: presetRecord?.contextConfig,
-        removeContexts: presetRecord?.removeContexts
+        removeContexts: presetRecord?.removeContexts,
+        requireContexts: presetRecord?.requireContexts,
+        requiresItem: presetRecord?.requiresItem,
+        requiresSceneObject: presetRecord?.requiresSceneObject,
+        validTargets: presetRecord?.validTargets
     };
 
     // 2. Add player direct overrides
