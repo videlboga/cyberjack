@@ -1,5 +1,6 @@
 import { Scene, ResourceState } from '../domain/types';
 import { presetRepo, sceneCharacterRepo, characterItemsRepo, sceneObjectsRepo, activeContextsRepo } from '../infrastructure/repositories';
+import { isActionTargetAllowed } from '../domain/actionTargets';
 
 export interface ActionValidationResult {
     allowed: boolean;
@@ -15,7 +16,8 @@ export function validateAction(
     scene: Scene, 
     player?: ResourceState,
     subjectId?: string,
-    playerId?: string
+    playerId?: string,
+    pointId?: string
 ): ActionValidationResult {
     // 1. Scene Availability Constraint
     const isGlobalAction = actionId === 'wait' || actionId === 'verbal_pressure';
@@ -26,6 +28,10 @@ export function validateAction(
     }
 
     const actionPreset = presetRepo.getActionPreset(actionId);
+
+    if (actionPreset && pointId && !isActionTargetAllowed(actionPreset.validTargets, pointId)) {
+        return { allowed: false, errorReason: `Действие «${actionPreset.label || actionId}» нельзя применить к точке «${pointId}».` };
+    }
     
     // 2. Proximity / Geographical Slot Constraints
     // Proximity check: only enforce sector proximity for explicitly physical actions

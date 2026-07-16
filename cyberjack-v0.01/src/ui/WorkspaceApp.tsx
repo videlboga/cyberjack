@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CoreVisualizer } from './CoreVisualizer';
-import { CalibrationPrototype } from './CalibrationPrototype';
+import { CampaignApp } from './CampaignApp';
 
 export function WorkspaceApp() {
   const [view, setView] = useState<'core' | 'game'>('game');
@@ -9,7 +9,7 @@ export function WorkspaceApp() {
       <button onClick={() => setView('core')} style={buttonStyle(view === 'core')}>Визуализация ядра</button>
       <button onClick={() => setView('game')} style={buttonStyle(view === 'game')}>Игровой прототип</button>
     </nav>
-    {view === 'core' ? <CoreVisualizer/> : <CalibrationPrototype/>}
+    {view === 'core' ? <CoreVisualizer/> : <CampaignApp/>}
   </>;
 }
 

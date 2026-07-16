@@ -108,7 +108,12 @@ describe('Character generator', () => {
         const subjectId = 'profile-v2-test';
         const canonical = {
             base: { name: 'Тестовая Мира', age: 29, gender: 'female', anatomy: 'none', status: 'asset' },
-            personality: { traits: ['legacy'] }
+            personality: {
+                traits: ['наблюдательная'],
+                quirks: ['сверяется с показаниями'],
+                speechStyle: 'Говорит коротко и профессионально.',
+                coreBelief: 'Сначала нужно измерить последствия.'
+            }
         };
         db.prepare("INSERT INTO characters (id, name, kind, subject_id, profile_json) VALUES (?, ?, 'subject', ?, ?)")
             .run(subjectId, canonical.base.name, subjectId, JSON.stringify(canonical));
@@ -124,6 +129,9 @@ describe('Character generator', () => {
         expect(stored.personality).toEqual(canonical.personality);
         expect(stored.generatedProfile.sourceTags).toEqual(second.sourceTags);
         expect(stored.generatedProfile.behavioralCore.centralConflict.desire).toBeTruthy();
+        expect(stored.generatedProfile.behavioralCore.values[0]).toBe(canonical.personality.coreBelief);
+        expect(stored.generatedProfile.behavioralCore.voice[0]).toBe(canonical.personality.speechStyle);
+        expect(stored.generatedProfile.behavioralCore.mannerisms[0]).toBe(canonical.personality.quirks[0]);
         db.prepare('DELETE FROM characters WHERE id = ?').run(subjectId);
     });
 });

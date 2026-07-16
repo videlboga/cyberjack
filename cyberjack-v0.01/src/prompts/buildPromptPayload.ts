@@ -11,6 +11,7 @@ import {
 } from '../infrastructure/repositories';
 import { buildInteractionObservation, buildCurrentStateObservationText } from '../narrative/interactionObservation';
 import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/reactionFrame';
+import { getLaboratorySpatialContext } from '../scenario/spatialContext';
 
 function parseEvent(event: EventRecord) {
     let action: any = {};
@@ -31,12 +32,52 @@ function pointIdOf(event: EventRecord): string {
 
 function countRepetitions(events: EventRecord[], currentActionId?: string, currentPointId?: string) {
     if (!currentActionId) return 1;
-    let repeats = 1;
+    // recentEvents already contains the current tick. Starting at one counted
+    // every first action as its own repetition and forced the dialogue into the
+    // repetitive-control branch immediately.
+    let repeats = 0;
     for (let i = events.length - 1; i >= 0; i--) {
         if (actionIdOf(events[i]) === currentActionId && (!currentPointId || pointIdOf(events[i]) === currentPointId)) repeats++;
         else break;
     }
-    return repeats;
+    return Math.max(1, repeats);
+}
+
+const technicalInteractionMarker = /^\s*\[Воздействие\]/i;
+
+export function selectRecentDialogue(entries: Array<{ role: string; content: string }>, ownerName: string, initiatorName: string) {
+    return entries
+        .filter(entry => !technicalInteractionMarker.test(String(entry.content || '')))
+        .slice(-8)
+        .map(entry => `${entry.role === 'assistant' ? ownerName : initiatorName}: «${entry.content}»`);
+}
+
+const conditionalEquipmentTerms = [
+    /ошейн/i,
+    /наручник|фиксац/i,
+    /кляп/i,
+    /повязк.{0,8}глаз|вслепую/i,
+    /пробк/i
+];
+
+export function contextualizeBehavioralCore<T extends {
+    vulnerabilities: string[];
+    conditionalReactions?: Array<{ facts: string[]; response: string }>;
+}>(
+    core: T,
+    currentFacts: string[]
+): T {
+    const facts = currentFacts.join(' ');
+    const activeConditional = (core.conditionalReactions || [])
+        .filter(reaction => reaction.facts.some(term => facts.toLocaleLowerCase().includes(term.toLocaleLowerCase())))
+        .map(reaction => reaction.response);
+    return {
+        ...core,
+        vulnerabilities: [...core.vulnerabilities.filter(vulnerability => {
+            const equipment = conditionalEquipmentTerms.find(pattern => pattern.test(vulnerability));
+            return !equipment || equipment.test(facts);
+        }), ...activeConditional]
+    };
 }
 
 type EpisodeRecord = { text: string; type: string; metadata: Record<string, any> };
@@ -113,9 +154,10 @@ export async function buildPromptPayload(
     const targetName = targetCharacter?.name || actorDetails.name || targetId;
     const profile = ensureGeneratedProfile(ownerCharacter?.subjectId || ownerId);
     const scene = sceneRepo.get(eventId);
-    const presentCharacters = sceneCharacterRepo.list(eventId)
+    const spatial = eventId === 'scene_lab_calibrator' ? getLaboratorySpatialContext(ownerId, initiatorId) : null;
+    const presentCharacters = (spatial ? spatial.characterNames : sceneCharacterRepo.list(eventId)
         .filter(entry => entry.presenceState === 'present')
-        .map(entry => entry.character.name);
+        .map(entry => entry.character.name));
     if (!presentCharacters.includes(ownerName)) presentCharacters.push(ownerName);
     if (initiatorCharacter?.name && !presentCharacters.includes(initiatorCharacter.name)) presentCharacters.push(initiatorCharacter.name);
 
@@ -133,8 +175,10 @@ export async function buildPromptPayload(
     const currentActionId = latestResult?.tickMeta?.inputs?.action.actionKey;
     const currentPointId = latestResult?.tickMeta?.inputs?.point.pointId;
     const relation = characterRelationRepo.get(ownerId, initiatorId);
-    const recentDialogue = chatMemoryRepo.getRecent(ownerId, 6).map(entry =>
-        `${entry.role === 'assistant' ? ownerName : initiatorCharacter?.name || 'Собеседник'}: «${entry.content}»`
+    const recentDialogue = selectRecentDialogue(
+        chatMemoryRepo.getRecent(ownerId, 20),
+        ownerName,
+        initiatorCharacter?.name || 'Собеседник'
     );
     const allEpisodeRecords = memoryRepo.listRecent(ownerId, 12, 'episode_v2')
         .filter(entry => !entry.metadata?.sceneId || entry.metadata.sceneId === eventId)
@@ -151,13 +195,14 @@ export async function buildPromptPayload(
     const frame = compileReactionFrame({
         speakerId: ownerId,
         speakerName: ownerName,
+        speakerGender: profile.identity.gender,
         targetId,
         targetName,
         initiatorId,
         initiatorName: initiatorCharacter?.name || 'Калибратор',
-        sceneTitle: scene?.title,
+        sceneTitle: spatial?.locationTitle || scene?.title,
         presentCharacters,
-        contexts: activeContextNames,
+        contexts: spatial ? [`Местонахождение: ${spatial.locationTitle}`, spatial.description, ...activeContextNames] : activeContextNames,
         core: actorDetails.core,
         relation,
         observation,
@@ -165,7 +210,11 @@ export async function buildPromptPayload(
         pointLabel: currentPointId,
         repetition: Math.min(repetitionFromLogs, exposureBeforeTick + 1),
         profileText: profile.personaText,
-        behavioralCore: profile.behavioralCore,
+        behavioralCore: contextualizeBehavioralCore(profile.behavioralCore, [
+            ...activeContextNames,
+            latestResult?.tickMeta?.inputs?.action.label || '',
+            observation?.action.label || ''
+        ]),
         recentDialogue,
         relevantEpisodes,
         recentSpeechAct,

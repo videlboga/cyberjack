@@ -152,6 +152,63 @@ db.exec(`
     FOREIGN KEY (issuer_id) REFERENCES factions(id)
   );
 
+  CREATE TABLE IF NOT EXISTS world_state (
+    id TEXT PRIMARY KEY,
+    total_minutes INTEGER NOT NULL DEFAULT 480,
+    day INTEGER NOT NULL DEFAULT 1,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS shop_offers (
+    id TEXT PRIMARY KEY,
+    item_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    category TEXT NOT NULL DEFAULT 'item',
+    price INTEGER NOT NULL,
+    stock INTEGER NOT NULL DEFAULT -1,
+    required_trust INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS laboratory_assets (
+    player_id TEXT NOT NULL,
+    asset_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    state TEXT NOT NULL DEFAULT 'installed',
+    metadata TEXT DEFAULT '{}',
+    PRIMARY KEY (player_id, asset_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS laboratory_rooms (
+    player_id TEXT NOT NULL,
+    room_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    room_type TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    capacity INTEGER NOT NULL DEFAULT 1,
+    state TEXT NOT NULL DEFAULT 'ready',
+    metadata TEXT DEFAULT '{}',
+    PRIMARY KEY (player_id, room_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS laboratory_room_assignments (
+    player_id TEXT NOT NULL,
+    room_id TEXT NOT NULL,
+    character_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'resident',
+    PRIMARY KEY (player_id, character_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS scenario_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    world_minute INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    metadata TEXT DEFAULT '{}'
+  );
+
   CREATE TABLE IF NOT EXISTS event_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id TEXT NOT NULL,
@@ -302,6 +359,7 @@ safeAddColumn('character_relations', 'familiarity_level', 'REAL DEFAULT 0');
 safeAddColumn('character_relations', 'general_opinion', "TEXT DEFAULT ''");
 safeAddColumn('character_relations', 'recent_memories', "TEXT DEFAULT '[]'");
 safeAddColumn('scene_characters', 'slot_id', 'TEXT');
+safeAddColumn('chat_memory', 'context_label', 'TEXT');
 
 db.exec(`
   UPDATE subjects

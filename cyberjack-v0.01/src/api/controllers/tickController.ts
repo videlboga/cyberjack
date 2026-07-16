@@ -15,6 +15,8 @@ import { chatMemoryRepo } from '../../infrastructure/repositories';
 import { normalizePlayer } from './playerController';
 import { buildStateDescription, getContractProgress } from '../../services/chipGenerator';
 import { generateSceneImage, shouldGenerateImage } from '../../services/portraitGenerator';
+import { advanceWorldTime } from '../../scenario/worldService';
+import { deriveTelemetry } from '../../narrative/telemetry';
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; actorName: string; targetName: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
@@ -72,6 +74,7 @@ export function calculateActionSpeechChance(input: {
 export const processWait = async (req: Request, res: Response) => {
     try {
         const { subjectId = 'S-AV-01', ticks = 1, eventId = 'scene_lab_calibrator', callLLM = false } = req.body;
+        const interactionContext = String(req.body.interactionContext || 'Диагностический стол');
         const deltaTime = req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 20.0;
         let lastBundle: Awaited<ReturnType<typeof runGameTick>> | null = null;
 
@@ -95,7 +98,7 @@ export const processWait = async (req: Request, res: Response) => {
             const generated = await generateCharacterReply(lastBundle.prompt, turnMessage, history);
             stReply = typeof generated.reply === 'object' ? generated.reply : { speech: String(generated.reply || '') };
             promptMessages = generated.sentMessages;
-            if (stReply.speech) chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech);
+            if (stReply.speech) chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech, interactionContext);
 
             recordMemoryEvent({
                 subjectId,
@@ -108,17 +111,27 @@ export const processWait = async (req: Request, res: Response) => {
 
         const fullState = subjectRepo.getWithPoint(subjectId, 'systemic');
         const resources = normalizePlayer(resourceRepo.get('PL-1'));
+        const worldClock = advanceWorldTime(10 * Math.max(1, Number(ticks) || 1), undefined, { activeSubjectIds: [subjectId] });
         
+        const telemetry = lastBundle ? deriveTelemetry({
+            core: lastBundle.stateAfter.core,
+            point: lastBundle.stateAfter.point,
+            observation: lastBundle.diagnostics?.observation,
+            contexts: activeContextsRepo.getAllForSubject(subjectId)
+        }) : null;
+
         res.json({
             success: true,
             state: fullState,
+            telemetry,
             reply: stReply || null,
             promptMessages: promptMessages || null,
             actionTrace: null,
             tickResult: lastBundle?.output.result,
             diagnostics: lastBundle?.diagnostics,
             bundle: lastBundle,
-            resources
+            resources,
+            worldClock
         });
     } catch (error: any) {
         console.error(error);
@@ -129,6 +142,10 @@ export const processWait = async (req: Request, res: Response) => {
 export const processTick = async (req: Request, res: Response) => {
     try {
         const { subjectId = 'S-AV-01', textMessage, playerId = 'PL-1' } = req.body;
+        const addressedCharacterId = typeof req.body.addressedCharacterId === 'string' && req.body.addressedCharacterId.trim()
+            ? req.body.addressedCharacterId.trim()
+            : undefined;
+        const interactionContext = String(req.body.interactionContext || 'Диагностический стол');
         const tickSceneId = req.body.sceneId || 'scene_lab_calibrator';
 
 
@@ -148,8 +165,8 @@ export const processTick = async (req: Request, res: Response) => {
         let suppressActionNarrative = actionId === 'wait';
         const actorCharacter = characterRepo.ensureCharacter(playerId, playerId === 'PL-1' ? 'Калибратор' : playerId);
 
-        const chanceSpeech = req.body.llmMode === 'speech_chance';
-        const speechOnly = req.body.llmMode === 'speech_only' || chanceSpeech;
+        const chanceSpeech = req.body.llmMode === 'speech_chance' || req.body.llmMode === 'scene_chance';
+        const speechOnly = req.body.llmMode === 'speech_only' || req.body.llmMode === 'speech_chance';
         let promptPayload = bundle.prompt;
         const suppressTickIds = (suppressActionNarrative || speechOnly) ? [bundle.tickId] : undefined;
         if (suppressTickIds) {
@@ -199,10 +216,11 @@ export const processTick = async (req: Request, res: Response) => {
                 chatMemoryRepo.append(
                     subjectId,
                     'user',
-                    baseUserMessage || physicalHistoryMarker(actionLabel, pointLabel, observation?.subjectiveText)
+                    baseUserMessage || physicalHistoryMarker(actionLabel, pointLabel, observation?.subjectiveText),
+                    interactionContext
                 );
                 if (!llmError) {
-                    if (structured.speech) chatMemoryRepo.append(subjectId, 'assistant', structured.speech);
+                    if (structured.speech) chatMemoryRepo.append(subjectId, 'assistant', structured.speech, interactionContext);
                 }
                 recordMemoryEvent({
                     subjectId,
@@ -227,13 +245,15 @@ export const processTick = async (req: Request, res: Response) => {
                     suppressTickIds,
                     fullStateName: fullState.name || subjectId,
                     reqBodyInfoTag: req.body?.presetId,
-                    promptPayload
+                    promptPayload,
+                    interactionContext,
+                    directedActorId: addressedCharacterId
                 });
             }
         }
         if (llmSkipped) {
             const observation = bundle.diagnostics?.observation;
-            chatMemoryRepo.append(subjectId, 'user', physicalHistoryMarker(actionLabel, pointLabel, observation?.subjectiveText));
+            chatMemoryRepo.append(subjectId, 'user', physicalHistoryMarker(actionLabel, pointLabel, observation?.subjectiveText), interactionContext);
             recordMemoryEvent({ subjectId, bundle });
         }
 
@@ -271,10 +291,19 @@ export const processTick = async (req: Request, res: Response) => {
             }
         }
 
+        const worldClock = advanceWorldTime(5, undefined, { activeSubjectIds: [subjectId] });
+        const telemetry = deriveTelemetry({
+            core: bundle.stateAfter.core,
+            point: bundle.stateAfter.point,
+            observation: bundle.diagnostics?.observation,
+            contexts: activeContextsRepo.getAllForSubject(subjectId)
+        });
+
         res.json({
             success: true,
             tickResult: bundle.output.result,
             state: fullState,
+            telemetry,
             resources: normalizePlayer(resourceRepo.get(playerId)),
             diagnostics: bundle.diagnostics,
             bundle,
@@ -291,7 +320,8 @@ export const processTick = async (req: Request, res: Response) => {
             classifierModel: dynamicModifiers?.model ?? null,
             stateDescription,
             contractProgress,
-            suggestedChips
+            suggestedChips,
+            worldClock
         });
     } catch (error: any) {
         console.error(error);

@@ -58,17 +58,32 @@ describe('acceptance learning', () => {
         const { nextCore, nextPoint } = applyLearning(core(), point, action, result(0), DEFAULT_CONFIG);
         expect(nextCore.attitude).toBeCloseTo(50);
         expect(nextPoint.localAttitude).toBeCloseTo(50);
+        expect(nextCore.openness).toBeCloseTo(50);
+        expect(nextPoint.localOpenness).toBeCloseTo(50);
     });
 
     it('forms acceptance when the positive experience is learned', () => {
         const { nextCore, nextPoint } = applyLearning(core(), point, action, result(20), DEFAULT_CONFIG);
         expect(nextCore.attitude).toBeGreaterThan(50);
         expect(nextPoint.localAttitude).toBeGreaterThan(50);
+        expect(nextCore.openness).toBeGreaterThan(50);
+        expect(nextPoint.localOpenness).toBeGreaterThan(50);
     });
 
     it('does not form positive acceptance while unresponsive', () => {
         const { nextCore, nextPoint } = applyLearning(core(10), point, action, result(20), DEFAULT_CONFIG);
         expect(nextCore.attitude).toBeCloseTo(50);
         expect(nextPoint.localAttitude).toBeCloseTo(50);
+        expect(nextCore.openness).toBeCloseTo(50);
+        expect(nextPoint.localOpenness).toBeCloseTo(50);
+    });
+
+    it('does not turn edge tension into learning by itself', () => {
+        const edged = { ...core(), tension: 90 };
+        const idleResult = { ...result(0, 0), pleasure: 0, discomfort: 0, experiencedIntensity: 0 };
+        const { nextCore } = applyLearning(edged, point, action, idleResult, DEFAULT_CONFIG);
+        expect(nextCore.openness).toBeCloseTo(50);
+        expect(nextCore.plasticity).toBeCloseTo(60);
+        expect(nextCore.sensitivity).toBeCloseTo(50);
     });
 });

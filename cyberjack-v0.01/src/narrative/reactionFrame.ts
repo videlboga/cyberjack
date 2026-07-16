@@ -35,6 +35,10 @@ export interface BehavioralCore {
     vulnerabilities: string[];
     defenses: string[];
     voice: string[];
+    mannerisms?: string[];
+    conditionalReactions?: Array<{ facts: string[]; response: string }>;
+    attentionFocus?: Array<'technique' | 'person' | 'body' | 'risk' | 'rules' | 'change'>;
+    speechDisposition?: 'quiet' | 'normal' | 'expressive';
 }
 
 export interface ExpressionMode {
@@ -47,7 +51,7 @@ export interface ExpressionMode {
 }
 
 export interface ReactionFrame {
-    speaker: { id: string; name: string; role: string; core: BehavioralCore };
+    speaker: { id: string; name: string; gender?: 'male' | 'female' | 'other'; role: string; core: BehavioralCore };
     addressee?: { id: string; name: string; relationship: string };
     scene: { title?: string; presentCharacters: string[]; contexts: string[] };
     event: {
@@ -76,6 +80,7 @@ export interface ReactionFrame {
 interface CompileFrameInput {
     speakerId: string;
     speakerName: string;
+    speakerGender?: 'male' | 'female' | 'other';
     targetId: string;
     targetName: string;
     initiatorId?: string;
@@ -213,7 +218,7 @@ function compileExpressionMode(
         : physiology.kind === 'discharge' || arousal === 'peak' || arousal === 'edge' || core.capacity <= 20 || overload >= 25 ? 'fragmented'
         : arousal === 'high' || core.capacity <= 35 || overload >= 10 ? 'strained' : 'intact';
 
-    const maxWords = control === 'minimal' ? 3 : control === 'fragmented' ? 5 : control === 'strained' ? 8 : 12;
+    const maxWords = control === 'minimal' ? 3 : control === 'fragmented' ? 7 : control === 'strained' ? 12 : 20;
     const requiresDisruption = ['edge', 'peak', 'aftershock'].includes(arousal) && control !== 'intact';
     const instructions: string[] = [];
 
@@ -318,20 +323,24 @@ function dramaticPosition(input: CompileFrameInput, behavioral: BehavioralCore) 
             allowedSpeechActs: ['silence', 'set_boundary', 'warn', 'request'] as SpeechAct[]
         };
     }
-    if (repetition >= 2 || unresolved) {
+    if (repetition >= 3 || unresolved) {
         return {
-            primaryIntent: 'выяснить намерение адресата и вернуть себе часть контроля над повторяющимся взаимодействием',
+            primaryIntent: pleasure > discomfort
+                ? 'показать, как меняется реакция на знакомое воздействие, не повторяя прежнюю реплику'
+                : 'повлиять на продолжающееся воздействие и не повторять уже обозначенную реакцию',
             secondaryConflict: pleasure > discomfort && hasGuardedProfile
                 ? 'не хочется прямо признавать, насколько положительно реагирует тело'
                 : 'не хочется выглядеть беспомощной или предсказуемой',
-            allowedSpeechActs: ['probe', 'challenge', 'bargain', 'conceal', 'silence'] as SpeechAct[]
+            allowedSpeechActs: pleasure > discomfort
+                ? ['acknowledge', 'admit', 'conceal', 'request', 'silence'] as SpeechAct[]
+                : ['set_boundary', 'warn', 'challenge', 'request', 'silence'] as SpeechAct[]
         };
     }
     if (observation?.reaction.mixed) {
         return {
-            primaryIntent: 'обозначить неоднозначность реакции и проверить, понимает ли её адресат',
+            primaryIntent: 'осмыслить или обозначить неоднозначность текущей реакции',
             secondaryConflict: 'телесная реакция не совпадает с простой оценкой «приятно» или «неприятно»',
-            allowedSpeechActs: ['probe', 'bargain', 'conceal', 'admit', 'set_boundary'] as SpeechAct[]
+            allowedSpeechActs: ['acknowledge', 'admit', 'conceal', 'set_boundary', 'silence'] as SpeechAct[]
         };
     }
     if (discomfort > pleasure * 1.25) {
@@ -343,9 +352,9 @@ function dramaticPosition(input: CompileFrameInput, behavioral: BehavioralCore) 
     }
     if (pleasure > discomfort * 1.25) {
         return {
-            primaryIntent: 'решить, показать ли положительную реакцию адресату и что получить взамен',
-            secondaryConflict: hasGuardedProfile ? 'прямое признание отдаёт адресату слишком много контроля' : 'слова могут быть избыточны',
-            allowedSpeechActs: ['conceal', 'bargain', 'probe', 'admit', 'silence'] as SpeechAct[]
+            primaryIntent: 'решить, стоит ли озвучить замеченное ощущение или изменение',
+            secondaryConflict: hasGuardedProfile ? 'прямое признание ощущается уязвимым' : 'слова могут быть избыточны',
+            allowedSpeechActs: ['acknowledge', 'admit', 'conceal', 'request', 'silence'] as SpeechAct[]
         };
     }
     return {
@@ -362,16 +371,19 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
     const lastOwnLine = [...(input.recentDialogue || [])].reverse().find(line => line.includes(`${input.speakerName}:`)) || '';
     const previousWasQuestion = lastOwnLine.includes('?');
     const recentSpeechActs = new Set([...(input.recentSpeechActs || []), input.recentSpeechAct].filter(Boolean));
-    const preferredSpeechAct = basePosition.allowedSpeechActs.find(act =>
-        act !== 'silence' && !recentSpeechActs.has(act) && (!previousWasQuestion || act !== 'probe')
-    ) || basePosition.allowedSpeechActs[0];
-    const position = { ...basePosition, preferredSpeechAct };
     const physiology = physiologicalPosition(input.core, input.observation);
+    const allowedSpeechActs = behavioral.speechDisposition === 'quiet' && !physiology.mandatory
+        ? ['silence', ...basePosition.allowedSpeechActs.filter(act => act !== 'silence')] as SpeechAct[]
+        : basePosition.allowedSpeechActs;
+    const preferredSpeechAct = allowedSpeechActs.find(act =>
+        act !== 'silence' && !recentSpeechActs.has(act) && (!previousWasQuestion || act !== 'probe')
+    ) || allowedSpeechActs[0];
+    const position = { ...basePosition, allowedSpeechActs, preferredSpeechAct };
     const expressionMode = compileExpressionMode(input.core, input.observation, physiology);
     const addresseeId = input.initiatorId || input.targetId;
     const addresseeName = input.initiatorName || input.targetName;
     return {
-        speaker: { id: input.speakerId, name: input.speakerName, role: directlyExperienced ? 'цель воздействия' : 'участник сцены', core: behavioral },
+        speaker: { id: input.speakerId, name: input.speakerName, gender: input.speakerGender, role: directlyExperienced ? 'цель воздействия' : 'участник сцены', core: behavioral },
         addressee: addresseeId === input.speakerId ? undefined : { id: addresseeId, name: addresseeName, relationship: relationText(input.relation) },
         scene: { title: input.sceneTitle, presentCharacters: unique(input.presentCharacters, 8), contexts: unique(input.contexts, 8) },
         event: {
@@ -427,25 +439,38 @@ export function applyVerbalInputToFrame(frame: ReactionFrame, playerSpeech: stri
 
 export function buildReactionSystemPrompt(frame: ReactionFrame): string {
     const core = frame.speaker.core;
+    const genderText = frame.speaker.gender === 'female' ? 'женский' : frame.speaker.gender === 'male' ? 'мужской' : 'не указан';
+    const attentionMeaning: Record<string, string> = {
+        technique: 'как именно выполнено воздействие', person: 'намерение и реакцию собеседника',
+        body: 'конкретное телесное ощущение', risk: 'риск, безопасность и возможность контроля',
+        rules: 'правила, договорённости и последовательность процедуры', change: 'что изменилось по сравнению с прошлым моментом'
+    };
     const behavioralLines = [
         ...core.values.slice(0, 2).map(value => `Ценность: ${value}`),
         ...core.vulnerabilities.slice(0, 2).map(value => `Уязвимость: ${value}`),
-        ...core.defenses.slice(0, 2).map(value => `Защита: ${value}`)
+        ...core.defenses.slice(0, 2).map(value => `Защита: ${value}`),
+        ...(core.mannerisms || []).slice(0, 1).map(value => `Привычка: ${value}`)
     ];
     const dischargeRule = frame.event.physiologicalEvent === 'discharge' && frame.expressionMode.control === 'minimal'
         ? '- Если разрядка совпала с потерей сознания, допустимы короткая непроизвольная вокализация или пустая speech: системное событие уже описывает случившееся.'
         : '- При событии разрядки реплика должна недвусмысленно показать, что пик уже произошёл; одной просьбы о следующем действии недостаточно.';
     return [
-        `Ты формулируешь только произнесённую вслух речь персонажа ${frame.speaker.name}.`,
+        `Ты формулируешь только произнесённую вслух речь персонажа ${frame.speaker.name}. Грамматический род: ${genderText}.`,
         `[Поведенческое ядро]\n${behavioralLines.length ? behavioralLines.map(v => `- ${v}`).join('\n') : '- Сохраняет субъектность и реагирует на конкретную ситуацию, а не пересказывает биографию.'}`,
         `[Голос]\n${core.voice.length ? core.voice.map(v => `- ${voiceStyleOnly(v)}`).join('\n') : '- Краткая естественная речь без литературного монолога.'}`,
-        `[Правила]\n- Не придумывай действий, ощущений, знаний или чужих мыслей.\n- Биография влияет на выбор слов, но не пересказывается без причины.\n- Реализуй одно текущее намерение. Глубина важнее длины.\n- Постоянный голос определяет лексику персонажа, а текущая манера — форму именно этой реплики. При конфликте формы текущее физиологическое состояние важнее обычной гладкости речи.\n- Различай приятную телесную реакцию, принятие конкретной зоны и общее принятие/открытость. Телесное удовольствие само по себе не означает согласия, доверия или желания повторить действие.\n- Если общее принятие или открытость снизились, не проси повторять или усиливать действие; вырази границу, закрытость либо противоречие между телом и отношением.\n- Если действие приятно и одновременно повышает принятие, не проси заменить его другим без указанной причины.\n- При реакции на воздействие сначала опирайся на конкретное доступное ощущение, просьбу или границу.\n- Если физиологический фокус обозначен как обязательный, реплика должна явно исходить из него; нельзя отвечать так, будто персонаж спокоен.\n${dischargeRule}\n- Если текущий кадр требует речи, speech не может быть пустой.\n- Не используй имена, термины, лозунги и цитаты из лора, если адресат не поднял эту тему в текущей реплике и она не является текущим событием. Недавняя собственная метафора не считается таким основанием.\n- Если адресат задал прямой вопрос, сначала ответь на него; не подменяй ответ встречным вопросом.\n- Сохраняй установленную форму обращения: если адресат говорит с тобой на «ты», не переходи на «вы», и наоборот.\n- Не повторяй дословно текущую реплику адресата.\n- Не превышай лимит слов из текущей манеры.\n- Если слова не нужны и кадр не требует речи, верни пустую speech.\n- Не повторяй недавнюю реплику и не своди любую реакцию к «сильнее» или «не надо».`,
+        `[Фокус внимания]\n${core.attentionFocus?.length ? core.attentionFocus.map(focus => `- В первую очередь замечает ${attentionMeaning[focus] || focus}.`).join('\n') : '- Замечает конкретное текущее событие без обязательной профессиональной метафоры.'}\nРечевая склонность: ${core.speechDisposition === 'quiet' ? 'часто оставляет малозначимые события без реплики' : core.speechDisposition === 'expressive' ? 'охотно реагирует вслух' : 'говорит только когда есть что добавить'}.`,
+        `[Правила]\n- Не придумывай действий, ощущений, предметов, знаний или чужих мыслей. Фактом текущей сцены считается только явно указанное в событии и контекстах.\n- Не заменяй указанное текущее действие похожим: поглаживание не является массажем, ударом, царапаньем или иным воздействием.\n- Биография и характер определяют, что персонаж замечает и как об этом говорит, но не пересказываются без причины. Профессия не обязана упоминаться в реплике.\n- Выбери одну естественную реакцию на текущий момент; не пытайся перечислить все доступные мотивы.\n- Постоянный голос определяет лексику персонажа, а текущая манера — форму именно этой реплики. При конфликте формы текущее физиологическое состояние важнее обычной гладкости речи.\n- Различай приятную телесную реакцию, принятие конкретной зоны и общее принятие/открытость. Телесное удовольствие само по себе не означает согласия, доверия или желания повторить действие.\n- Если общее принятие или открытость снизились, не проси повторять или усиливать действие.\n- При реакции на воздействие можно назвать ощущение, заметить технику или изменение, поставить границу, обратиться к собеседнику либо промолчать — в зависимости от характера.\n- Не используй многоточие как универсальный признак эмоции: при спокойной связной речи предпочитай обычную пунктуацию.\n- Если физиологический фокус обозначен как обязательный, реплика должна явно исходить из него; нельзя отвечать так, будто персонаж спокоен.\n${dischargeRule}\n- Если текущий кадр требует речи, speech не может быть пустой.\n- Не используй имена, термины, лозунги и цитаты из лора, если адресат не поднял эту тему в текущей реплике и она не является текущим событием.\n- Если адресат задал прямой вопрос, ответь, явно откажись отвечать либо осознанно промолчи в соответствии с характером.\n- Сохраняй установленную форму обращения и грамматический род персонажа.\n- Не повторяй дословно текущую реплику адресата.\n- Не превышай лимит слов из текущей манеры.\n- Если слова не нужны и кадр не требует речи, верни пустую speech.\n- Не повторяй недавнюю реплику и не своди любую реакцию к «сильнее» или «не надо».`,
         `[Формат]\nВерни только JSON: {"addressedTo":"ID или пустая строка","speechAct":"один из разрешённых","speech":"только прямая речь без ремарок"}`
     ].join('\n\n');
 }
 
 export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: string | null): string {
     const currentSpeech = playerSpeech?.trim() || frame.event.playerSpeech;
+    const directQuestion = Boolean(currentSpeech && (/\?|^(скажи|ответь|объясни|признай|назови)\b/i.test(currentSpeech)));
+    const requiresDirectedAct = directQuestion || frame.event.requiresSpeech || frame.event.physiologicalEvent !== 'normal';
+    const moveGuidance = requiresDirectedAct
+        ? `Требуемый для этого критического момента ход: ${frame.dramaticPosition.preferredSpeechAct} — ${speechActMeaning[frame.dramaticPosition.preferredSpeechAct]}.`
+        : 'Заранее выбранного речевого хода нет: форма реакции должна исходить из характера, фокуса внимания и значимости события.';
     return [
         `[Текущая перспектива ${frame.speaker.name}]`,
         frame.addressee ? `Адресат: ${frame.addressee.name} (${frame.addressee.id}). Отношения: ${frame.addressee.relationship}.` : 'Явного адресата нет.',
@@ -458,6 +483,6 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
         `[Манера текущей реплики]\nВозбуждение: ${frame.expressionMode.arousal}. Окраска: ${frame.expressionMode.affect}. Контроль речи: ${frame.expressionMode.control}. Лимит: ${frame.expressionMode.maxWords} слов.\n${frame.expressionMode.instructions.map(v => `- ${v}`).join('\n')}`,
         frame.event.changes.length ? `Что изменилось: ${frame.event.changes.join('; ')}.` : '',
         frame.continuity.relevantEpisodes.length ? `[Связанные эпизоды]\n${frame.continuity.relevantEpisodes.map(v => `- ${v}`).join('\n')}` : '',
-        `[Текущая драматическая позиция]\nОсновное намерение: ${frame.dramaticPosition.primaryIntent}.\nВнутреннее препятствие: ${frame.dramaticPosition.secondaryConflict}.\nПредпочтительный речевой ход: ${frame.dramaticPosition.preferredSpeechAct} — ${speechActMeaning[frame.dramaticPosition.preferredSpeechAct]}. Используй именно этот тип хода, если персонаж не молчит.\nРазрешённые альтернативы:\n${frame.dramaticPosition.allowedSpeechActs.map(act => `- ${act}: ${speechActMeaning[act]}`).join('\n')}.`
+        `[Импульсы текущего момента]\nВозможное намерение: ${frame.dramaticPosition.primaryIntent}.\nВнутреннее препятствие: ${frame.dramaticPosition.secondaryConflict}.\n${moveGuidance}\nДоступные ходы:\n${frame.dramaticPosition.allowedSpeechActs.map(act => `- ${act}: ${speechActMeaning[act]}`).join('\n')}.`
     ].filter(Boolean).join('\n\n');
 }

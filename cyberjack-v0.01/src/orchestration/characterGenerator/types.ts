@@ -17,6 +17,7 @@ export interface LoreTagDefinition {
     weightModifiers?: Record<string, number>;
     initialContexts?: string[];
     archetypes?: CharacterArchetype[];
+    reactionTriggers?: Array<{ facts: string[]; response: string }>;
 }
 
 export interface TagNarrative {
@@ -31,7 +32,7 @@ export interface TagNarrativeFragment {
     activationHooks?: string[];
 }
 
-export type CharacterArchetype = 'asset' | 'broker' | 'client' | 'observer';
+export type CharacterArchetype = 'person' | 'asset' | 'broker' | 'client' | 'observer';
 
 export interface GeneratorOptions {
     seed?: string;
@@ -113,6 +114,9 @@ export interface GeneratedProfileV2 {
         voice: string[];
         mannerisms: string[];
         centralConflict: { desire: string; fear: string };
+        conditionalReactions?: Array<{ facts: string[]; response: string }>;
+        attentionFocus?: Array<'technique' | 'person' | 'body' | 'risk' | 'rules' | 'change'>;
+        speechDisposition?: 'quiet' | 'normal' | 'expressive';
     };
     knowledgeRefs: string[];
     mechanicalSeed: {

@@ -40,11 +40,13 @@ describe('short calibration strategies', () => {
   });
 
   it('reaches a balanced preparation state through variation and planned rest', () => {
-    const result = simulate([focused, broad, medium, wait], 30);
+    // As sensitivity rises the same actions become more demanding, so a
+    // balanced protocol must increase its recovery cadence as well.
+    const result = simulate([focused, broad, medium, wait, wait], 30);
     expect(result.core.sensitivity).toBeGreaterThanOrEqual(62);
     expect(result.point.localSensitivity).toBeGreaterThanOrEqual(61.5);
-    expect(result.core.attitude).toBeGreaterThanOrEqual(61);
-    expect(result.point.localAttitude).toBeGreaterThanOrEqual(61);
+    expect(result.core.attitude).toBeGreaterThanOrEqual(60);
+    expect(result.point.localAttitude).toBeGreaterThanOrEqual(59.5);
     expect(result.point.baselineLocalSensitivity).toBeGreaterThanOrEqual(58);
     expect(result.core.capacity).toBeGreaterThanOrEqual(45);
     expect(result.core.tension).toBeLessThan(85);

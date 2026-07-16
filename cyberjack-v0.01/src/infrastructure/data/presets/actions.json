@@ -1259,5 +1259,115 @@
     "removeContexts": [
       "eq_clothe_jumpsuit"
     ]
+  },
+  {
+    "id": "eq_clothe_lab_gown",
+    "requiresItem": "eq_lab_gown",
+    "name": "Надеть лабораторную рубашку",
+    "description": "Надеть свободную диагностическую одежду с доступом к спине и датчикам.",
+    "categories": ["clothing"],
+    "tags": ["clothing", "medical", "gown"],
+    "validTargets": ["systemic"],
+    "vector": { "intensity": 1, "valence": 1, "sharpness": 0, "contact": 3, "novelty": 2, "powerBase": 5 },
+    "contextConfig": {
+      "type": "clothing",
+      "activeLabel": "Лабораторная рубашка",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": ["global_clothing"],
+      "modifiers": { "intensity": -1, "contact": -2, "sharpness": -1 }
+    },
+    "removeNarrative": "{name} снимает лабораторную рубашку"
+  },
+  {
+    "id": "eq_clothe_lab_gown_remove",
+    "name": "Снять лабораторную рубашку",
+    "categories": ["clothing"],
+    "tags": ["clothing", "remove"],
+    "removeContexts": ["eq_clothe_lab_gown"]
+  },
+  {
+    "id": "eq_clothe_calibration_set",
+    "requiresItem": "eq_calibration_set",
+    "name": "Надеть калибровочный комплект",
+    "description": "Надеть топ и шорты, не мешающие большинству датчиков и фиксаторов.",
+    "categories": ["clothing"],
+    "tags": ["clothing", "calibration", "sportswear"],
+    "validTargets": ["systemic"],
+    "vector": { "intensity": 1, "valence": 1, "sharpness": 0, "contact": 4, "novelty": 2, "powerBase": 5 },
+    "contextConfig": {
+      "type": "clothing",
+      "activeLabel": "Калибровочный комплект",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": ["global_clothing"],
+      "modifiers": { "intensity": -1, "contact": -2 }
+    },
+    "removeNarrative": "{name} снимает калибровочный комплект"
+  },
+  {
+    "id": "eq_clothe_calibration_set_remove",
+    "name": "Снять калибровочный комплект",
+    "categories": ["clothing"],
+    "tags": ["clothing", "remove"],
+    "removeContexts": ["eq_clothe_calibration_set"]
+  },
+  {
+    "id": "act_apply_ankle_cuffs",
+    "requiresItem": "eq_ankle_cuffs",
+    "name": "Застегнуть ножные манжеты",
+    "description": "Соединить лодыжки короткой цепью, ограничив длину шага.",
+    "categories": ["physical", "context"],
+    "tags": ["restraint", "metal", "ankles"],
+    "validTargets": ["legs"],
+    "vector": { "intensity": 4, "valence": -2, "sharpness": 2, "contact": 8, "novelty": 4, "powerBase": 30 },
+    "contextConfig": {
+      "type": "equipment",
+      "activeLabel": "Ножные манжеты",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": ["left_ankle", "right_ankle"],
+      "modifiers": { "intensity": 2, "valence": -1, "contact": 7 }
+    },
+    "removeNarrative": "Манжеты сняты с лодыжек"
+  },
+  {
+    "id": "act_remove_ankle_cuffs",
+    "name": "Снять ножные манжеты",
+    "categories": ["physical", "context"],
+    "tags": ["comfort", "metal"],
+    "requireContexts": ["act_apply_ankle_cuffs"],
+    "removeContexts": ["act_apply_ankle_cuffs"],
+    "validTargets": ["legs"],
+    "vector": { "intensity": 2, "valence": 4, "sharpness": 0, "contact": 4, "novelty": 1, "powerBase": 10 }
+  },
+  {
+    "id": "act_apply_restraint_belt",
+    "requiresItem": "eq_restraint_belt",
+    "name": "Зафиксировать руки на поясе",
+    "description": "Закрепить запястья в манжетах фиксирующего пояса.",
+    "categories": ["physical", "context"],
+    "tags": ["restraint", "waist", "hands"],
+    "validTargets": ["hands", "waist"],
+    "vector": { "intensity": 5, "valence": -3, "sharpness": 2, "contact": 8, "novelty": 5, "powerBase": 35 },
+    "contextConfig": {
+      "type": "equipment",
+      "activeLabel": "Руки закреплены на поясе",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": ["left_hand", "right_hand", "waist"],
+      "modifiers": { "intensity": 3, "valence": -1, "contact": 8 }
+    },
+    "removeNarrative": "Руки освобождены от фиксирующего пояса"
+  },
+  {
+    "id": "act_remove_restraint_belt",
+    "name": "Освободить руки от пояса",
+    "categories": ["physical", "context"],
+    "tags": ["comfort"],
+    "requireContexts": ["act_apply_restraint_belt"],
+    "removeContexts": ["act_apply_restraint_belt"],
+    "validTargets": ["hands", "waist"],
+    "vector": { "intensity": 2, "valence": 5, "sharpness": 0, "contact": 4, "novelty": 1, "powerBase": 10 }
   }
 ]

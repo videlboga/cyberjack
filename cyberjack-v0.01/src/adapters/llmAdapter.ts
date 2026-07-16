@@ -321,6 +321,41 @@ function contradictsAcceptanceChange(candidate: { speech: string }, payload: Pro
     return /(продолжай|повтори|повторяй|не останавливайся|не прекращай|ещ[её]\s+раз|давай\s+ещ[её]|сильнее|делай\s+так\s+же)/i.test(speech);
 }
 
+const actionVocabulary = [
+    { label: /погла[дж]|перыш|проведение/i, speech: /погла[дж]|глад|перыш/i },
+    { label: /массаж|размять/i, speech: /массаж|массиру|размин/i },
+    { label: /царап/i, speech: /царап/i },
+    { label: /поцел/i, speech: /поцел/i },
+    { label: /укус|прикус/i, speech: /укус|куса/i },
+    { label: /шлеп|удар|пощеч/i, speech: /шл[её]п|удар|пощ[её]ч/i },
+    { label: /облиз|лизан/i, speech: /облиз|лиж|язык/i }
+];
+
+function substitutesCurrentAction(candidate: { speech: string }, payload: PromptPayload) {
+    const current = String(payload.reactionFrame?.event.action || '');
+    const ownIndex = actionVocabulary.findIndex(entry => entry.label.test(current));
+    if (ownIndex < 0) return false;
+    return actionVocabulary.some((entry, index) => index !== ownIndex && entry.speech.test(candidate.speech));
+}
+
+function introducesUnobservedSceneFact(candidate: { speech: string }, payload: PromptPayload) {
+    const frame = payload.reactionFrame;
+    if (!frame) return false;
+    const speech = candidate.speech.toLocaleLowerCase('ru-RU');
+    const facts = JSON.stringify({ scene: frame.scene, event: frame.event }).toLocaleLowerCase('ru-RU');
+    const isConversation = /бесед|реплик|разговор/u.test(frame.event.action);
+    if (isConversation && /(текущ|запущенн|этот)\w*\s+протокол|протокол\s+(ид[её]т|запущен|продолжается)/u.test(speech) && !/протокол/u.test(facts)) {
+        return true;
+    }
+    const observableTerms = [
+        { speech: /дыхан/u, facts: /дыхан/u },
+        { speech: /пульс|сердцебиен/u, facts: /пульс|сердцебиен/u },
+        { speech: /дрож|тремор/u, facts: /дрож|тремор/u },
+        { speech: /пот|испарин/u, facts: /пот|испарин/u }
+    ];
+    return observableTerms.some(term => term.speech.test(speech) && !term.facts.test(facts));
+}
+
 function contradictsExpressionMode(candidate: { speech: string }, payload: PromptPayload) {
     const mode = payload.reactionFrame?.expressionMode;
     const speech = candidate.speech.trim();
@@ -428,6 +463,12 @@ export async function generateCharacterReply(
                 }
                 if (contradictsAcceptanceChange(parsed, payload)) {
                     throw new Error('speech asks to repeat an action while overall acceptance declines');
+                }
+                if (substitutesCurrentAction(parsed, payload)) {
+                    throw new Error('speech substitutes a different physical action for the current one');
+                }
+                if (introducesUnobservedSceneFact(parsed, payload)) {
+                    throw new Error('speech relies on an unobserved protocol or bodily sign');
                 }
                 if (contradictsExpressionMode(parsed, payload)) {
                     throw new Error('speech form contradicts the current physiological expression mode');

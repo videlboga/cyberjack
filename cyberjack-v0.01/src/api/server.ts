@@ -17,6 +17,9 @@ import playerRoutes from './routes/playerRoutes';
 import sceneRoutes from './routes/sceneRoutes';
 import metaRoutes from './routes/metaRoutes';
 import contractRoutes from './routes/contractRoutes';
+import scenarioRoutes from './routes/scenarioRoutes';
+import { ensureActionSpecialization } from '../infrastructure/actionSpecialization';
+import { migrateCharacterLifecycles } from '../scenario/characterLifecycle';
 
 // Seed contracts on startup
 try {
@@ -26,6 +29,8 @@ try {
 }
 
 const app = express();
+ensureActionSpecialization();
+migrateCharacterLifecycles();
 app.use(express.json());
 app.use(cors());
 
@@ -44,6 +49,7 @@ app.use('/api', playerRoutes);
 app.use('/api', sceneRoutes);
 app.use('/api', metaRoutes);
 app.use('/api', contractRoutes);
+app.use('/api', scenarioRoutes);
 
 // Serve generated scene images
 app.use('/scene-images', express.static(path.resolve(process.cwd(), 'public', 'scene-images')));

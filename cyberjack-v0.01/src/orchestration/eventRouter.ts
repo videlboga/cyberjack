@@ -2,6 +2,7 @@
 import { runGameTick, GameEventPayload } from './runGameTick';
 import { parseVerbalInput } from '../parser/verbalParser';
 import { presetRepo, sceneRepo, sceneCharacterRepo } from '../infrastructure/repositories';
+import { getLaboratorySpatialContext, listLaboratoryDestinations } from '../scenario/spatialContext';
 
 export interface RouteResponse {
     bundle: Awaited<ReturnType<typeof runGameTick>>;
@@ -25,10 +26,15 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
         let sceneCharacters: { id: string; name: string }[] = [];
         try {
             const scene = sceneRepo.get(sceneId);
-            const chars = sceneCharacterRepo.list(sceneId);
+            const spatial = sceneId === 'scene_lab_calibrator'
+                ? getLaboratorySpatialContext(payload.subjectId || 'S-01', payload.playerId || 'PL-1')
+                : null;
+            const audibleIds = spatial ? new Set(spatial.characterIds) : null;
+            const chars = sceneCharacterRepo.list(sceneId).filter(c => !audibleIds || audibleIds.has(c.character.id));
             const nodesLine = scene?.slots?.length ? `Доступные зоны (сектора): ${scene.slots.map(s => typeof s === 'string' ? s : (s as any).id || s).join(', ')}` : 'Доступные зоны: не определены';
             const charsLine = chars.length ? `Персонажи рядом: ${chars.map(c => c.character.name || c.character.id).join(', ')}` : 'Персонажи рядом: никого';
-            sceneContextStr = `${nodesLine}. ${charsLine}.`;
+            const destinations = spatial ? `Доступные места и ориентиры: ${listLaboratoryDestinations(payload.playerId || 'PL-1').join(', ')}.` : '';
+            sceneContextStr = `${spatial ? `Текущее место: ${spatial.locationTitle}. ${spatial.description}` : nodesLine}. ${charsLine}. ${destinations}`;
             sceneCharacters = chars.map(c => ({ id: c.character.id, name: c.character.name || c.character.id }));
         } catch (err) {
             sceneContextStr = '';

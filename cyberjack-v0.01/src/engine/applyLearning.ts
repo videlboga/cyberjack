@@ -77,8 +77,13 @@ export function applyLearning(
         const fade = clamp((high * 1.6 - result.experiencedIntensity) / Math.max(high * 0.6, 0.001), 0, 1);
         return rise * fade;
     };
-    const learningQuality = clamp((result.learningEffect || 0) / 100, 0, 1) *
-        clamp((result.engagement || 0) / 100, 0, 1) *
+    // These scales describe a fully useful calibration experience. Multiplying
+    // two raw percentages made the practical sensitisation window nearly inert.
+    const learningQuality = clamp(
+        (result.learningEffect || 0) / (f.sensitivityLearningEffectScale ?? 45), 0, 1
+    ) * clamp(
+        (result.engagement || 0) / (f.sensitivityEngagementScale ?? 65), 0, 1
+    ) *
         clamp(1 - (result.overload || 0) / 100, 0, 1);
     const coreSensitization = learningQuality * manageableBand(coreRecoveryCeiling, coreDesensitizationStart) *
         (f.sensitivityFromLearning ?? 8);
@@ -114,6 +119,9 @@ export function applyLearning(
     const responsiveness = clamp((safeCore.capacity - 10) / 30, 0, 1);
     const acceptanceLearning = clamp((result.learningEffect || 0) / 12, 0, 1) *
         clamp((result.engagement || 0) / 30, 0, 1) * responsiveness;
+    // Positive openness is learned readiness, rather than pleasure itself.
+    // Negative experience can still close a responsive subject immediately.
+    const opennessAffect = affect > 0 ? affect * acceptanceLearning : affect * responsiveness;
     const positiveCoreRoom = clamp((100 - safeCore.attitude) / 50, 0, 1);
     const positiveLocalRoom = clamp((100 - safePoint.localAttitude) / 50, 0, 1);
     const coreAffectForAcceptance = affect > 0 ? affect * acceptanceLearning * positiveCoreRoom : affect * responsiveness;
@@ -122,7 +130,7 @@ export function applyLearning(
     const nextCore: SubjectCoreState = {
         tension: nextTension,
         sensitivity: clamp(
-            safeCore.sensitivity + (coreSensitization - coreDesensitization + coreRecovery + (isEdging ? 1.5 : 0)) * tensionModifier,
+            safeCore.sensitivity + (coreSensitization - coreDesensitization + coreRecovery) * tensionModifier,
             config.core.min,
             config.core.max
         ),
@@ -132,14 +140,14 @@ export function applyLearning(
             config.core.max
         ),
         openness: clamp(
-            safeCore.openness + (((result.pleasure - result.discomfort) * f.opennessFromPleasureDiscomfort + (isEdging ? 0.5 : 0)) * timeScale) * tensionModifier,
+            safeCore.openness + (opennessAffect * f.opennessFromPleasureDiscomfort * timeScale) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         plasticity: clamp(
             safeCore.plasticity +
             ((result.learningEffect * f.plasticityFromLearning * clamp(1 - result.overload / 100, 0, 1) -
-            result.overload * f.plasticityFromOverload + (isEdging ? 1.0 : 0)) * (isRest ? 0 : 1)) * tensionModifier,
+            result.overload * f.plasticityFromOverload) * (isRest ? 0 : 1)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
@@ -168,7 +176,7 @@ export function applyLearning(
         ),
         localOpenness: clamp(
             (safePoint.localOpenness ?? config.point.defaults.localOpenness ?? 50) +
-            (result.pleasure - result.discomfort) * (f.localOpennessFromPleasureDiscomfort ?? f.opennessFromPleasureDiscomfort),
+            opennessAffect * (f.localOpennessFromPleasureDiscomfort ?? f.opennessFromPleasureDiscomfort),
             config.point.min,
             config.point.max
         ),

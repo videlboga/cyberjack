@@ -13,6 +13,7 @@ import { ActionScorer } from './actionScorer';
 import { appendJsonLog } from '../utils/fileLogs';
 import { explainPromptLog, explainOrchestratorDecision } from '../utils/logExplainers';
 import { getActiveContextLabel } from '../domain/contextPresentation';
+import { getLaboratorySpatialContext } from '../scenario/spatialContext';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -41,7 +42,7 @@ function relationTo(targetId: string, relations: CharacterRelation[]): Character
     return relations.find(rel => rel.target?.id === targetId || rel.toId === targetId);
 }
 
-export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
+export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: string): OrchestratedTurn {
     const cfg = activeConfig.orchestrator;
     const prompt = bundle.prompt;
     const relations = prompt.relations || [];
@@ -56,17 +57,21 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
 
     const eventSceneId = bundle.event.sceneId || 'scene_lab_calibrator';
     const presentChars = sceneCharacterRepo.list(eventSceneId);
-    
+    const spatial = eventSceneId === 'scene_lab_calibrator'
+        ? getLaboratorySpatialContext(subjectId, bundle.event.playerId || 'PL-1')
+        : null;
+    const spatialIds = spatial ? new Set(spatial.characterIds) : null;
     const presentSubjectIds = presentChars
         .filter(pc => pc.presenceState === 'present' && pc.canAct && pc.character.subjectId)
+        .filter(pc => !spatialIds || spatialIds.has(pc.character.id))
         .map(pc => pc.character.subjectId as string);
 
     const allActors = Array.from(new Set([
         subjectId,
         ...presentSubjectIds,
-        ...relations
+        ...(spatial ? [] : relations
             .filter(rel => rel.target?.subjectId && rel.present)
-            .map(rel => rel.target!.subjectId!)
+            .map(rel => rel.target!.subjectId!))
     ]));
 
     const lastActionIntensity = clamp01(bundle.compiledAction.intensity ?? 0);
@@ -116,8 +121,9 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         const noveltyFactor = isVerbalInput ? 1.0 : (0.8 + 0.2 * lastActionNovelty);
 
         // Наблюдатели вмешиваются реже. Если это слова к кому-то другому — штраф больше.
-        const isTarget = (actorId === subjectId);
-        const observerPenalty = isTarget ? 1.0 : (isVerbalInput ? 0.2 : 0.1);        const reactiveProb = clamp01(
+        const isTarget = actorId === (directedActorId || subjectId);
+        const observerPenalty = isTarget ? 1.0 : (directedActorId && isVerbalInput ? 0 : (isVerbalInput ? 0.2 : 0.1));
+        const reactiveProb = clamp01(
             (cfg.baseReactiveProbability * noveltyFactor +
                 cfg.sensitivityModifier * (1 - capacityNorm) * noveltyFactor +
                 cfg.attitudeModifier * (1 - relationNorm) * noveltyFactor +
@@ -233,8 +239,9 @@ export function orchestrateSceneActors(bundle: TickBundle): OrchestratedTurn {
         }
     }
     // Не превращаем один тик в хор: цель события и максимум один наблюдатель.
-    const targetDecisions = actorDecisions.filter(decision => decision.actorId === subjectId);
-    const observerDecisions = actorDecisions.filter(decision => decision.actorId !== subjectId).slice(0, 1);
+    const responseTargetId = directedActorId || subjectId;
+    const targetDecisions = actorDecisions.filter(decision => decision.actorId === responseTargetId);
+    const observerDecisions = actorDecisions.filter(decision => decision.actorId !== responseTargetId).slice(0, 1);
     actorDecisions.splice(0, actorDecisions.length, ...targetDecisions, ...observerDecisions);
 
     const narrator: NarratorDecision | undefined = prompt.narratorPrompt
@@ -253,7 +260,8 @@ import { chatMemoryRepo } from '../infrastructure/repositories';
 import { generateCharacterReply, generateNarratorReply, generateSceneForCharacter } from '../adapters/llmAdapter';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { recordMemoryEvent } from '../services/memoryLayer';
-import { buildReactionTurnMessage } from '../narrative/reactionFrame';
+import { applyVerbalInputToFrame, buildReactionSystemPrompt, buildReactionTurnMessage } from '../narrative/reactionFrame';
+import { deriveTelemetry, formatTelemetryForPrompt } from '../narrative/telemetry';
 
 export interface TurnExecutionParams {
     subjectId: string;
@@ -268,14 +276,26 @@ export interface TurnExecutionParams {
     fullStateName: string;
     reqBodyInfoTag?: string;
     promptPayload: any;
+    interactionContext?: string;
+    directedActorId?: string;
 }
 
 export async function executeTurnConversations(bundle: TickBundle, params: TurnExecutionParams) {
     const {
         subjectId, eventId, actionId, actionLabel, pointLabel, pointIdUsed,
         autoUserMessage, actionLabelMessage, suppressTickIds, fullStateName, reqBodyInfoTag,
-        promptPayload
+        promptPayload, interactionContext, directedActorId
     } = params;
+    const recentPhysicalPoint = (() => {
+        const row = db.prepare(`SELECT action_payload FROM event_logs WHERE subject_id = ? AND action_type = 'interaction' ORDER BY id DESC LIMIT 12`).all(subjectId) as Array<{ action_payload: string }>;
+        for (const item of row) {
+            try {
+                const point = String(JSON.parse(item.action_payload || '{}').pointId || '');
+                if (point && point !== 'systemic') return point;
+            } catch { }
+        }
+        return pointIdUsed;
+    })();
 
     let actionRepeats = 0;
     if (actionId && !autoUserMessage) {
@@ -313,14 +333,15 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         }
     }
     // Dialogue memory stores literal speech only; mechanical events are episodes.
-    if (autoUserMessage?.trim()) chatMemoryRepo.append(subjectId, 'user', autoUserMessage.trim());
+    const dialogueOwnerId = directedActorId || subjectId;
+    if (autoUserMessage?.trim()) chatMemoryRepo.append(dialogueOwnerId, 'user', autoUserMessage.trim(), interactionContext);
 
-    const chatHistory = chatMemoryRepo.getRecent(subjectId, 12)
+    const chatHistory = chatMemoryRepo.getRecent(dialogueOwnerId, 12)
         .filter(entry => !/^\[Текущий контакт\]|^\*\(Без слов\)\*|^\[Игрок \(/.test(entry.content))
         .slice(-6)
         .map(entry => ({ role: entry.role, content: entry.content }));
 
-    const orchestration = orchestrateSceneActors(bundle);
+    const orchestration = orchestrateSceneActors(bundle, directedActorId);
 
     // Quick instrumentation: ensure a minimal orchestration record is written (helps guarantee file exists)
     try {
@@ -406,7 +427,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         }
     }
 
-    const actorReplies: Array<{ actorId: string; kind: string; tone?: string; speech: string; speechAct?: string; addressedTo?: string; reaction: string }> = [];
+    const actorReplies: Array<{ actorId: string; actorName: string; kind: string; tone?: string; speech: string; speechAct?: string; addressedTo?: string; reaction: string }> = [];
     let primaryReply: { speech: string; speechAct?: string; addressedTo?: string; reaction: string } | null = null;
     let promptMessages: any = null;
 
@@ -417,7 +438,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             let userMsgOverride = currentPayload.reactionFrame
                 ? buildReactionTurnMessage(currentPayload.reactionFrame)
                 : autoUserMessage || actionLabelMessage || undefined;
-            if (autoUserMessage) userMsgOverride = `${userMsgOverride || ''}\n\n[Слова адресата]\n«${autoUserMessage}»`;
+            if (autoUserMessage) userMsgOverride = `${userMsgOverride || ''}\n\n[Прямое обращение к тебе от Калибратора]\n«${autoUserMessage}»`;
 
             // Inject Narrator A (sensory scene) into the character's prompt
             if (sceneForChar) {
@@ -431,7 +452,10 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                     suppressTickIds,
                     initiatorId: bundle.event.playerId || 'PL-1'
                 });
-                if (autoUserMessage?.trim()) chatMemoryRepo.append(decision.actorId, 'user', autoUserMessage.trim());
+                if (autoUserMessage?.trim() && currentPayload.reactionFrame) {
+                    currentPayload.reactionFrame = applyVerbalInputToFrame(currentPayload.reactionFrame, autoUserMessage.trim());
+                    currentPayload.systemPrompt = buildReactionSystemPrompt(currentPayload.reactionFrame);
+                }
                 currentHistory = chatMemoryRepo.getRecent(decision.actorId, 16)
                     .filter(entry => !/^\[Текущий контакт\]|^\*\(Без слов\)\*|^\[Игрок \(/.test(entry.content))
                     .slice(-8)
@@ -439,7 +463,24 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 userMsgOverride = currentPayload.reactionFrame
                     ? buildReactionTurnMessage(currentPayload.reactionFrame)
                     : actionLabelMessage || undefined;
-                if (autoUserMessage) userMsgOverride = `${userMsgOverride || ''}\n\n[Слова адресата]\n«${autoUserMessage}»`;
+                if (autoUserMessage) userMsgOverride = `${userMsgOverride || ''}
+
+[Твоя роль в этом ходе]
+Ты присутствуешь рядом как наблюдатель. Воздействие направлено на ${fullStateName || subjectId}, не на тебя.
+Текущее событие — прямая беседа, а не запущенный протокол. Не утверждай, что протокол, оборудование или новое физическое действие существуют, если они не перечислены в фактах сцены.
+Если тебя просят оценить состояние или дать рекомендацию, опирайся на «Доступное восприятие» и назови конкретный наблюдаемый признак.
+
+[Телеметрия диагностического стола]
+${formatTelemetryForPrompt(deriveTelemetry({
+    core: bundle.stateAfter.core,
+    point: pointStateRepo.get(subjectId, recentPhysicalPoint) || bundle.stateAfter.point,
+    observation: bundle.diagnostics?.observation,
+    contexts: activeContextsRepo.getAllForSubject(subjectId)
+}))}
+Показатели выше являются доступными измерениями. Не называй скрытые внутренние параметры и отделяй измерение от своей интерпретации.
+
+[Прямое обращение к тебе от Калибратора]
+«${autoUserMessage}»`;
             }
 
             let structuredReply: { speech: string; speechAct?: string; addressedTo?: string } = { speech: '' };
@@ -508,9 +549,9 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                     const pointLabel2 = presetRepo.getPointPreset(decision.mechanicalAction.pointId)?.label || decision.mechanicalAction.pointId;
                     const notice = `*(Сцена: ${actorName} применяет ${actionLabel2} к ${targetName} (${pointLabel2}))*`;
                     if (tgtId !== decision.actorId) {
-                        chatMemoryRepo.append(tgtId, 'user', notice);
+                        chatMemoryRepo.append(tgtId, 'user', notice, interactionContext);
                     }
-                    chatMemoryRepo.append(decision.actorId, 'user', notice);
+                    chatMemoryRepo.append(decision.actorId, 'user', notice, interactionContext);
                 } catch (err) {
                     console.error('Failed to run proactive tick for NPC:', err);
                 }
@@ -518,6 +559,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
 
             actorReplies.push({
                 actorId: decision.actorId,
+                actorName: characterRepo.get(decision.actorId)?.name || subjectRepo.get(decision.actorId)?.name || decision.actorId,
                 kind: decision.kind,
                 tone: decision.reason,
                 speech: structuredReply.speech,
@@ -526,13 +568,13 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 reaction: sceneForChar || ''
             });
 
-            if (decision.actorId === subjectId || !primaryReply) {
+            if (decision.actorId === (directedActorId || subjectId) || !primaryReply) {
                 primaryReply = { speech: structuredReply.speech, speechAct: structuredReply.speechAct, addressedTo: structuredReply.addressedTo, reaction: sceneForChar || '' };
                 promptMessages = sentMessages;
             }
 
             if (structuredReply.speech) {
-                chatMemoryRepo.append(decision.actorId, 'assistant', structuredReply.speech);
+                chatMemoryRepo.append(decision.actorId, 'assistant', structuredReply.speech, interactionContext);
             }
         }
     } else {

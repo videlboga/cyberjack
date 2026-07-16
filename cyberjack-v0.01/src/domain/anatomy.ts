@@ -16,7 +16,8 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
         { id: 'posture', label: 'Поза (Текущее положение тела)', sens: 0, att: 50 },
         { id: 'mind_state', label: 'Психика/Разум', sens: 0, att: 50 },
         
-        { id: 'head', label: 'Голова/Волосы', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
+        { id: 'head', label: 'Голова', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
+        { id: 'hair', label: 'Волосы', sens: 25, att: 65, parentId: 'head', tags: ['hair'] },
         { id: 'face', label: 'Лицо', sens: 60, att: 40, parentId: 'head' },
         { id: 'lips', label: 'Губы', sens: 85, att: 20, providesFunctions: ['speak', 'kiss', 'eat'], parentId: 'face' },
         { id: 'neck', label: 'Шея', sens: 80, att: 30 },

@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-07-15T17:40:39.621Z",
+  "fullCombinations": 7560,
+  "sourceImages": 411,
+  "sourceBreakdown": {
+    "body": 168,
+    "clothing": 126,
+    "restraints": 117
+  },
+  "note": "Одежда и фиксаторы — прозрачные слои на едином холсте. Для ремней с перекрытиями допустимы суффиксы __back и __front."
+}

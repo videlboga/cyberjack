@@ -84,7 +84,12 @@ function normalizeTag(raw: any): LoreTagDefinition | null {
         coreModifiers: raw.coreModifiers,
         initialContexts: Array.isArray(raw.initialContexts) ? raw.initialContexts : undefined,
         weightModifiers: raw.weightModifiers && typeof raw.weightModifiers === 'object' ? raw.weightModifiers : undefined,
-        archetypes: Array.isArray(raw.archetypes) ? raw.archetypes : undefined
+        archetypes: Array.isArray(raw.archetypes) ? raw.archetypes : undefined,
+        reactionTriggers: Array.isArray(raw.reactionTriggers)
+            ? raw.reactionTriggers
+                .filter((entry: any) => Array.isArray(entry?.facts) && typeof entry?.response === 'string')
+                .map((entry: any) => ({ facts: ensureStringArray(entry.facts), response: entry.response.trim() }))
+            : undefined
     };
 }
 

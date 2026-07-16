@@ -5,6 +5,7 @@ import {
     sceneRepo, 
     presetRepo 
 } from '../infrastructure/repositories';
+import { isActionTargetAllowed } from '../domain/actionTargets';
 
 interface PreferenceData {
     points?: Record<string, number>;
@@ -71,6 +72,7 @@ export class ActionScorer {
             }
 
             for (const pointId of targetPointIds) {
+                if (!isActionTargetAllowed(preset.validTargets, pointId)) continue;
                 const pState = pointStates[pointId];
                 if (!pState) continue;
 

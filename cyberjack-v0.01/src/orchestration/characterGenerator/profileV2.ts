@@ -1,7 +1,7 @@
 import { PromptSectionsResult } from './promptComposer';
 import { GeneratedCharacterContext, GeneratedProfileV2, GeneratedTag } from './types';
 
-export const PROFILE_GENERATOR_REVISION = 4;
+export const PROFILE_GENERATOR_REVISION = 8;
 
 const unique = (items: Array<string | undefined>, limit = 6) =>
     Array.from(new Set(items.map(item => item?.trim()).filter((item): item is string => Boolean(item)))).slice(0, limit);
@@ -22,6 +22,7 @@ function agreeGender(text: string, gender: 'male' | 'female' | 'other'): string 
     if (gender !== 'female') return text;
     const forms: Record<string, string> = {
         вырос: 'выросла', помогал: 'помогала', носил: 'носила', начал: 'начала', наблюдал: 'наблюдала',
+        совершил: 'совершила', задал: 'задала', проводил: 'проводила', собирал: 'собирала', сам: 'сама',
         чинил: 'чинила', слушал: 'слушала', делил: 'делила', сортировал: 'сортировала', ходил: 'ходила',
         привык: 'привыкла', жил: 'жила', понял: 'поняла', стал: 'стала', был: 'была', сделал: 'сделала',
         увидел: 'увидела', вмешался: 'вмешалась', мог: 'могла', остался: 'осталась', родился: 'родилась',
@@ -75,7 +76,7 @@ export function compileGeneratedProfile(
         need: 'понятные намерения и последовательные правила'
     };
     const role = context.grouped.persona.find(tag => tag.id.startsWith('role_'));
-    const cause = context.grouped.event.find(tag => tag.category === `${context.archetype}_cause`);
+    const cause = context.archetype === 'person' ? undefined : context.grouped.event.find(tag => tag.category === `${context.archetype}_cause`);
     const formative = context.grouped.event.filter(tag => tag !== cause);
     const gender = context.baseProfile.gender;
     const profileHooks = (tags: GeneratedTag[], limit = 6) => hooks(tags, limit).map(text => agreeGender(text, gender));
@@ -101,11 +102,27 @@ export function compileGeneratedProfile(
         needs: [conflict.need],
         vulnerabilities: unique([...psycheHooks, ...biasHooks], 4),
         defenses: unique([...responseHooks, ...traitHooks], 4),
-        voice: unique(roleHooks.slice(1).map(voiceStyleOnly), 2),
+        // Former profession is biography and knowledge, not a verbal costume
+        // that must colour every line of dialogue.
+        voice: [],
         mannerisms: bodyHooks,
-        centralConflict: { desire: agreeGender(conflict.desire, gender), fear: agreeGender(conflict.fear, gender) }
+        centralConflict: { desire: agreeGender(conflict.desire, gender), fear: agreeGender(conflict.fear, gender) },
+        conditionalReactions: context.tags.flatMap(tag => tag.reactionTriggers || []),
+        attentionFocus: unique([
+            traitHooks.some(text => /наблюд|замеч|свер/i.test(text)) ? 'change' : undefined,
+            traitHooks.some(text => /эмоц|подстраив/i.test(text)) ? 'person' : undefined,
+            traitHooks.some(text => /практич|прям/i.test(text)) ? 'technique' : undefined,
+            psyche?.id === 'psy_curious_masochist' ? 'body' : undefined,
+            psyche?.id === 'psy_defiant' ? 'risk' : undefined,
+            role?.id === 'role_clerk' || role?.id === 'role_researcher' ? 'rules' : undefined
+        ], 3) as GeneratedProfileV2['behavioralCore']['attentionFocus'],
+        speechDisposition: responseHooks.some(text => /молч|замолка/i.test(text))
+            ? 'quiet'
+            : responseHooks.some(text => /сме|говор|отвеч/i.test(text)) ? 'expressive' : 'normal'
     };
-    const identityText = `${context.baseProfile.name}, ${context.baseProfile.age}; роль: ${context.archetype}.`;
+    const identityText = context.archetype === 'person'
+        ? `${context.baseProfile.name}, ${context.baseProfile.age}.`
+        : `${context.baseProfile.name}, ${context.baseProfile.age}; роль: ${context.archetype}.`;
     const historyText = unique([
         ...biography.origin.slice(0, 3),
         biography.formerRole,

@@ -1,0 +1,156 @@
+/* The calibration workspace is a fixed instrument panel: nothing inside it scrolls. */
+.campaign-content:has(> .calibration-workbench),
+.campaign-content > .calibration-workbench,
+.calibration-workbench {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.calibration-workbench { grid-template-rows: 52px 38px minmax(0, 1fr) 40px; }
+.workbench-header { min-width: 0; gap: 12px; padding: 6px 12px; }
+.workbench-header .eyebrow { font-size: 7px; }
+.workbench-header h1 { max-width: 280px; overflow: hidden; font-size: 13px; white-space: nowrap; text-overflow: ellipsis; }
+.header-progress { display: none; }
+
+.objective-strip { min-width: 0; display: grid; grid-template-columns: auto minmax(150px, 230px) minmax(0,1fr) 34px; align-items: center; gap: 9px; padding: 5px 12px; border-bottom: 1px solid #34454a; background: #0d1619; }
+.objective-strip > small { color: #6a837d; font-size: 7px; letter-spacing: .13em; }
+.objective-strip > select { min-width: 0; height: 27px; padding: 3px 7px; border: 1px solid #3a504d; background: #111d1c; color: #c1d0cd; font-size: 9px; }
+.objective-strip > p { margin: 0; color: #667c81; font-size: 8px; }
+.objective-strip > strong { color: #79bca9; font-size: 10px; text-align: right; }
+.objective-conditions { min-width: 0; display: flex; gap: 4px; overflow: hidden; }
+.objective-conditions span { min-width: 0; display: flex; align-items: center; gap: 5px; padding: 5px 7px; background: #121d20; color: #839599; font-size: 8px; white-space: nowrap; }
+.objective-conditions span b { color: #778d91; }
+.objective-conditions span.met { color: #9bd2c3; }
+.objective-conditions span.met b { color: #72d6bd; }
+.objective-conditions span.away b { color: #cc766e; }
+
+.workbench-columns { grid-template-columns: minmax(420px, 1fr) 284px; overflow: hidden; }
+.state-column { display: none; }
+.state-column,
+.operations-column { min-height: 0; padding: 9px; overflow: hidden !important; }
+.current-state { padding: 8px; }
+.current-state p { max-height: 30px; margin: 3px 0 0; overflow: hidden; font-size: 9px; line-height: 1.3; }
+.telemetry-readout { margin-top: 5px; }
+.telemetry-readout > div { grid-template-columns: 46px minmax(0,1fr) 13px; padding: 5px 6px; }
+.behavioral-readout { margin-top: 5px; padding: 6px; }
+.behavioral-readout p { max-height: 24px; overflow: hidden; }
+.state-column h3 { margin: 9px 0 5px; }
+.contract-target { gap: 0; }
+.contract-target > p,
+.contract-target > .goal-list,
+.contract-target > .contract-status { display: none; }
+.state-column > h3:nth-of-type(n+2),
+.state-column > .context-list,
+.state-column > h3:nth-of-type(n+2) + .muted { display: none; }
+
+.character-column { min-height: 0; padding: 9px; }
+.character-chat { top: 9px; right: 9px; bottom: 72px; width: min(330px, 49%); grid-template-rows: minmax(0,1fr); }
+.character-chat > header { display: none; }
+.chat-scroll { overflow: hidden !important; padding: 7px; }
+.chat-line { margin-bottom: 4px; padding: 5px 7px; }
+.chat-line p { display: -webkit-box; max-height: 30px; overflow: hidden; font-size: 10px; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.character-column > .stage-contexts { display: none; }
+.scene-monitor-contexts { position: absolute; z-index: 6; left: 12px; bottom: 82px; display: flex; gap: 4px; max-width: 58%; overflow: hidden; }
+.scene-monitor-contexts span { padding: 3px 6px; border: 1px solid #3a4b50; background: rgba(10,17,19,.92); color: #8ea1a6; font-size: 8px; white-space: nowrap; }
+.scene-monitor { position: absolute; z-index: 6; left: 12px; bottom: 10px; width: min(610px, 58%); box-sizing: border-box; padding: 8px 10px; border-left: 3px solid #72d6bd; background: rgba(9,16,18,.94); }
+.scene-monitor > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.scene-monitor > header > strong { color: #c8e1db; font-size: 11px; text-transform: uppercase; }
+.scene-monitor > header > div { min-width: 0; display: flex; gap: 10px; overflow: hidden; }
+.scene-monitor > header span { display: flex; align-items: center; gap: 3px; color: #a6b6b8; font-size: 8px; white-space: nowrap; }
+.scene-monitor > header span b { color: #72d6bd; font-size: 10px; }
+.scene-monitor > header span i { color: #d0a566; font-style: normal; }
+.scene-monitor > p { max-height: 26px; margin: 5px 0 0; overflow: hidden; color: #91a5a8; font-size: 9px; line-height: 1.35; }
+.speech-input { margin-top: 4px; }
+.speech-input textarea { overflow: hidden; }
+
+.operations-heading p { display: none; }
+.action-tabs { margin-top: 5px; }
+.operation-toolbar { margin-top: 5px; padding: 5px; }
+.operation-list.compact-grid { flex: 1; min-height: 0; height: auto; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(32px, 1fr); margin-top: 5px; overflow: hidden !important; }
+.operation-list.compact-grid > button { min-height: 0; padding: 5px 6px; }
+.selected-operation.compact-execution { margin-top: 5px; padding: 6px; }
+.selected-copy span { display: none; }
+.selected-operation.compact-execution .operation-actions { margin-top: 4px; }
+.compact-protocol { margin-top: 4px; }
+.protocol-overlay,
+.compact-protocol ol { max-height: none; overflow: hidden !important; }
+.protocol-overlay { bottom: 34px; }
+.compact-protocol li { padding: 4px; }
+
+.event-strip { min-width: 0; grid-template-columns: 58px minmax(0,1fr) auto; padding: 5px 12px; }
+.event-strip p { margin-top: 1px; }
+
+.zone-popover { top: 43px; width: min(650px, calc(100vw - 40px)) !important; max-height: none; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); overflow: hidden !important; }
+.zone-popover section { margin: 0; }
+.zone-popover section > div { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); }
+.zone-popover button small { display: none; }
+
+.drawer-backdrop { display: grid; place-items: stretch; padding: 18px; }
+.side-drawer,
+.bottom-drawer { position: static; width: 100%; height: 100%; max-height: none; padding: 18px; overflow: hidden !important; border: 1px solid #42545a; }
+.bottom-drawer ol { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
+.bottom-drawer li { min-height: 0; padding: 5px; }
+.side-drawer:not(.menu-drawer) { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); align-content: start; column-gap: 22px; }
+.side-drawer:not(.menu-drawer) > header { grid-column: 1 / -1; }
+.side-drawer:not(.menu-drawer) h3 { margin: 12px 0 5px; }
+.side-drawer:not(.menu-drawer) p { margin: 3px 0; font-size: 9px; }
+.menu-drawer { width: min(520px, 100%); height: auto; max-height: 100%; place-self: center; }
+
+@media (max-width: 1050px) {
+  .workbench-columns { grid-template-columns: minmax(360px,1fr) 260px; }
+  .character-chat { width: 54%; }
+}
+
+/* Simplified calibration hierarchy: scene, action rail, conversation. */
+.campaign-frame:has(.calibration-workbench) { display: block; }
+.campaign-frame:has(.calibration-workbench) > .campaign-nav { display: none; }
+.campaign-frame:has(.calibration-workbench) > .campaign-content { height: 100%; overflow: hidden; }
+.calibration-workbench { grid-template-rows: 52px minmax(0,1fr); }
+.objective-strip,
+.event-strip { display: none; }
+.workbench-columns { grid-template-columns: minmax(520px,1fr) 310px; }
+.character-column { padding: 9px 9px 7px; }
+.character-stage { display: grid; grid-template-rows: minmax(0,1fr) 84px; }
+.portrait-placeholder { grid-row: 1; min-height: 0; height: auto; }
+.character-chat { position: relative; inset: auto; grid-row: 2; width: auto; border: 0; border-top: 1px solid #34494f; background: #0a1214; box-shadow: none; backdrop-filter: none; }
+.chat-scroll { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 8px; }
+.chat-line { width: auto; max-width: none; margin: 0; }
+.scene-monitor-contexts { bottom: 178px; }
+.scene-monitor { bottom: 94px; width: min(520px, 52%); }
+.scene-monitor > strong { display: block; color: #c8e1db; font-size: 11px; text-transform: uppercase; }
+.scene-monitor-lines { display: grid; gap: 1px; margin-top: 5px; }
+.scene-monitor-lines span { color: #9fb0b2; font-size: 8px; line-height: 1.25; }
+.scene-monitor-lines b { color: #c2d1d2; font-weight: 600; }
+.scene-monitor > p { margin-top: 5px; border-top: 1px solid #28383b; padding-top: 4px; }
+.speech-input { flex: none; }
+
+.operations-column { padding: 9px 10px; }
+.operations-heading h2 { font-size: 13px; }
+.operation-goal { flex: none; margin-top: 6px; padding: 8px; border: 1px solid #314247; background: #0f181b; }
+.operation-goal > small { display: block; margin-bottom: 4px; color: #72d6bd; font-size: 7px; letter-spacing: .13em; }
+.operation-goal > select { width: 100%; min-width: 0; padding: 6px; border: 1px solid #3b514d; background: #111d1c; color: #c1d0cd; font-size: 9px; }
+.operation-goal > div { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 6px; }
+.operation-goal span { display: flex; gap: 5px; padding: 4px 5px; background: #131e21; color: #84969a; font-size: 8px; }
+.operation-goal span i { color: #71868a; font-style: normal; }
+.operation-goal span.met { color: #a8d7ca; }
+.operation-goal span.met i { color: #72d6bd; }
+.operation-goal span.away i { color: #cf746c; }
+.operation-goal > p { margin: 5px 0 0; color: #667b80; font-size: 8px; }
+.operation-list.compact-grid { grid-auto-rows: minmax(29px,1fr); }
+.selected-operation.compact-execution { padding: 5px; }
+
+@media (max-width: 1050px) {
+  .workbench-columns { grid-template-columns: minmax(440px,1fr) 286px; }
+  .scene-monitor { width: 55%; }
+}
+
+/* Conversation belongs to the scene: keep it on the right side of the image. */
+.character-stage { display: block; }
+.portrait-placeholder { height: 100%; }
+.character-chat { position: absolute; z-index: 7; top: 12px; right: 12px; bottom: 12px; left: auto; width: min(350px, 43%); display: grid; grid-template-rows: minmax(0,1fr); border: 1px solid #34494f; background: rgba(8,15,17,.91); box-shadow: 0 12px 30px #0007; backdrop-filter: blur(3px); }
+.chat-scroll { display: block; padding: 8px; }
+.chat-line { width: fit-content; max-width: 92%; margin-bottom: 7px; }
+.chat-line.calibrator { margin-left: auto; }
+.scene-monitor { width: min(520px, 51%); }
+.scene-monitor-contexts { max-width: 51%; }

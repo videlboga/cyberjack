@@ -3,6 +3,7 @@ import { contractRepo } from '../../infrastructure/contractRepo';
 import { subjectRepo } from '../../infrastructure/repositories';
 import { evaluateAssetContract } from '../../scenario/evaluateAssetContract';
 import { db } from '../../infrastructure/db';
+import { advanceWorldTime, getPlayerLocation, getWorldClock } from '../../scenario/worldService';
 
 // GET /api/contracts — список доступных + принятых контрактов
 export const getContracts = (req: Request, res: Response) => {
@@ -47,6 +48,10 @@ export const acceptContract = (req: Request, res: Response) => {
         const contractId = req.params.id;
         const { playerId = 'PL-1' } = req.body;
 
+        if (getPlayerLocation(playerId).id !== 'scene_liaison') {
+            return res.status(400).json({ success: false, error: 'Контракты принимаются в офисе Связного' });
+        }
+
         const contract = contractRepo.get(contractId);
         if (!contract) {
             return res.status(404).json({ success: false, error: 'Контракт не найден' });
@@ -58,7 +63,10 @@ export const acceptContract = (req: Request, res: Response) => {
         contract.state = 'accepted';
         contract.acceptedByPlayerId = playerId;
         contract.attachedSubjectId = undefined;
+        contract.deadlineTick = getWorldClock().totalMinutes + 3 * 1440;
         contractRepo.save(contract);
+
+        advanceWorldTime(15);
 
         res.json({ success: true, contract });
     } catch (error: any) {
@@ -76,6 +84,11 @@ export const deliverContract = (req: Request, res: Response) => {
         }
         if (contract.state !== 'accepted') {
             return res.status(400).json({ success: false, error: 'Контракт не принят' });
+        }
+
+        const playerId = contract.acceptedByPlayerId || 'PL-1';
+        if (getPlayerLocation(playerId).id !== 'scene_liaison') {
+            return res.status(400).json({ success: false, error: 'Передача актива проводится через офис Связного' });
         }
 
         const subjectId = req.body.subjectId;
@@ -110,7 +123,6 @@ export const deliverContract = (req: Request, res: Response) => {
 
         // Контракт и награда фиксируются одной транзакцией. Выбор актива при
         // этом не превращается в постоянную связь contract↔subject.
-        const playerId = contract.acceptedByPlayerId || 'PL-1';
         db.transaction(() => {
             contract.state = 'completed';
             contractRepo.save(contract);
@@ -136,6 +148,8 @@ export const deliverContract = (req: Request, res: Response) => {
                 `).run(playerId, itemId);
             }
         })();
+
+        advanceWorldTime(30);
 
         res.json({ success: true, metRequirements: true, contract, deliveredSubjectId: subjectId, rewards: contract.rewards });
     } catch (error: any) {

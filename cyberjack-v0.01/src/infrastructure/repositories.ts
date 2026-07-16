@@ -179,7 +179,6 @@ export const characterRepo = {
             VALUES (?, ?, 'subject', ?)
             ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
-                kind = excluded.kind,
                 subject_id = excluded.subject_id
         `);
         stmt.run(subjectId, name, subjectId);
@@ -914,17 +913,17 @@ export const sceneCharacterRepo = {
 };
 
 export const chatMemoryRepo = {
-    append(subjectId: string, role: 'user' | 'assistant', content: string): number | null {
+    append(subjectId: string, role: 'user' | 'assistant', content: string, contextLabel?: string): number | null {
         if (!content || !subjectId) return null;
-        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content) VALUES (?, ?, ?)');
-        const info = stmt.run(subjectId, role, content);
+        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content, context_label) VALUES (?, ?, ?, ?)');
+        const info = stmt.run(subjectId, role, content, contextLabel || null);
         return Number(info.lastInsertRowid) || null;
     },
-    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
+    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; createdAt?: string }> {
         const stmt = db.prepare(
-            'SELECT id, role, content FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
+            'SELECT id, role, content, context_label AS contextLabel, created_at AS createdAt FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
         );
-        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string }>;
+        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; createdAt?: string }>;
         return rows.reverse();
     },
     getSince(subjectId: string, afterId: number, limit = 100): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {

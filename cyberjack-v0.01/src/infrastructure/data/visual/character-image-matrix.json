@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "format": "png",
+  "canvas": {
+    "width": 1024,
+    "height": 1536,
+    "anchor": "bottom-center",
+    "background": "transparent"
+  },
+  "characters": [
+    { "id": "S-AV-01", "slug": "mira", "name": "Мира" },
+    { "id": "NPC-LAB-01", "slug": "iona", "name": "Иона" },
+    { "id": "NPC-CAND-01", "slug": "nika", "name": "Ника" }
+  ],
+  "poses": [
+    { "id": "standing", "contextId": "pose_standing", "name": "Стоя" },
+    { "id": "sitting", "contextId": "pose_sitting", "name": "Сидя" },
+    { "id": "kneeling", "contextId": "pose_kneeling", "name": "На коленях" },
+    { "id": "lying", "contextId": "pose_lying_down", "name": "Лёжа" },
+    { "id": "all_fours", "contextId": "pose_all_fours", "name": "На четвереньках" },
+    { "id": "spread_eagle", "contextId": "pose_spread_eagle", "name": "Лёжа, руки и ноги разведены" },
+    { "id": "suspended", "contextId": "act_suspend_wrists", "name": "В подвесе" }
+  ],
+  "clothing": [
+    { "id": "nude", "name": "Без одежды", "contextIds": [] },
+    { "id": "underwear", "name": "Нижнее бельё", "contextIds": ["eq_clothe_underwear", "eq_clothe_panties"] },
+    { "id": "dress", "name": "Платье", "contextIds": ["eq_clothe_dress"] },
+    { "id": "dress_stockings", "name": "Платье и чулки", "contextIds": ["eq_clothe_dress", "eq_clothe_stockings"] },
+    { "id": "jumpsuit", "name": "Сенсорный комбинезон", "contextIds": ["eq_clothe_jumpsuit"] },
+    { "id": "lab_gown", "name": "Лабораторная рубашка", "contextIds": ["eq_clothe_lab_gown"] },
+    { "id": "calibration_set", "name": "Калибровочный комплект", "contextIds": ["eq_clothe_calibration_set"] }
+  ],
+  "restraints": [
+    { "id": "none", "name": "Без фиксации", "contextIds": [], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
+    { "id": "handcuffs", "name": "Наручники", "contextIds": ["act_apply_handcuffs"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
+    { "id": "ankle_cuffs", "name": "Ножные манжеты", "contextIds": ["act_apply_ankle_cuffs"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
+    { "id": "wrist_ankle_cuffs", "name": "Наручники и ножные манжеты", "contextIds": ["act_apply_handcuffs", "act_apply_ankle_cuffs"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
+    { "id": "restraint_belt", "name": "Руки на фиксирующем поясе", "contextIds": ["act_apply_restraint_belt"], "allowedPoses": ["standing", "sitting", "kneeling", "lying"] },
+    { "id": "blindfold", "name": "Повязка на глазах", "contextIds": ["eq_blindfold_apply"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
+    { "id": "gag", "name": "Кляп", "contextIds": ["eq_gag_apply"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
+    { "id": "table_straps", "name": "Ремни диагностического стола", "contextIds": ["lab_diagnostic_table"], "allowedPoses": ["lying", "spread_eagle"] },
+    { "id": "restraint_frame", "name": "Стационарная рама", "contextIds": ["lab_restraint_frame"], "allowedPoses": ["standing", "spread_eagle"] },
+    { "id": "suspension", "name": "Подвес за запястья", "contextIds": ["act_suspend_wrists"], "allowedPoses": ["suspended"] }
+  ],
+  "states": [
+    { "id": "neutral", "name": "Нейтральное состояние", "signals": ["ровное дыхание", "обычный мышечный тонус"] },
+    { "id": "receptive", "name": "Положительная реакция", "signals": ["расслабленная поза", "заметное удовольствие"] },
+    { "id": "guarded", "name": "Настороженность", "signals": ["скованность", "контроль дистанции"] },
+    { "id": "high_positive", "name": "Высокое положительное напряжение", "signals": ["сбитое дыхание", "дрожь", "ожидание разрядки"] },
+    { "id": "high_negative", "name": "Высокое отрицательное напряжение", "signals": ["защитная реакция", "резкое дыхание", "паника или протест"] },
+    { "id": "subspace", "name": "Сабспейс", "signals": ["расфокусированный взгляд", "заторможенная реакция"] },
+    { "id": "climax", "name": "Разрядка", "signals": ["непроизвольное напряжение", "потеря связной речи"] },
+    { "id": "unconscious", "name": "Без сознания", "signals": ["закрытые глаза", "отсутствие произвольной реакции"] }
+  ]
+}

@@ -137,9 +137,11 @@ export const DEFAULT_CONFIG: any =
     applyLearning: {
       sensitivityFromIntensity: 0.06,
       sensitivityFromLearning: 22,
+      sensitivityLearningEffectScale: 45,
+      sensitivityEngagementScale: 65,
       sensitivityFromOverload: 0.02,
       sensitivityRecoveryCeiling: 5,
-      sensitivityDesensitizationStart: 25,
+      sensitivityDesensitizationStart: 30,
       adaptationIntensitySetpoint: 5,
       sensitivityTarget: 5, // legacy alias
       sensitivityRegenRate: 0.4,
@@ -159,7 +161,7 @@ export const DEFAULT_CONFIG: any =
       localSensitivityFromLearning: 42,
       localSensitivityFromOverload: 0.03,
       localSensitivityRecoveryCeiling: 3,
-      localSensitivityDesensitizationStart: 20,
+      localSensitivityDesensitizationStart: 26,
       localAdaptationIntensitySetpoint: 3,
       localSensitivityTarget: 3, // legacy alias
       localSensitivityRegenRate: 0.5,

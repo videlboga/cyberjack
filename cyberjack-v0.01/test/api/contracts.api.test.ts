@@ -26,7 +26,8 @@ describe('contract and asset matching', () => {
         });
         subjectRepo.save('asset_ready', 'Ready', { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 80, tension: 0 });
         subjectRepo.save('asset_unready', 'Unready', { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 40, tension: 0 });
-        db.prepare("INSERT OR IGNORE INTO characters (id, name, kind, player_id) VALUES ('PL-1', 'Player', 'player', 'PL-1')").run();
+        db.prepare("INSERT OR IGNORE INTO scenes (id, available_actions) VALUES ('scene_liaison', '[]')").run();
+        db.prepare("INSERT OR IGNORE INTO characters (id, name, kind, player_id, current_scene_id) VALUES ('PL-1', 'Player', 'player', 'PL-1', 'scene_liaison')").run();
     });
 
     it('accepts an order without attaching an asset and compares either asset', async () => {
@@ -50,6 +51,6 @@ describe('contract and asset matching', () => {
         expect(delivered.body.success).toBe(true);
         expect(contractRepo.get('test_contract')?.state).toBe('completed');
         const credits = db.prepare("SELECT amount FROM character_resources WHERE character_id = 'PL-1' AND resource_key = 'credits'").get() as any;
-        expect(credits.amount).toBe(100);
+        expect(credits.amount).toBe(1100);
     });
 });

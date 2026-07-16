@@ -25,6 +25,7 @@ import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
 import { STATE_RULES } from './conditionWatcher';
 import { clamp } from '../engine/utils';
+import { moveCharacterInLaboratory } from '../scenario/spatialContext';
 
 export interface GameEventPayload {
     subjectId: string;
@@ -69,7 +70,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     
     // 2. Scenario layer: доступность действия, ресурсы, локация
     const validation = checkActionAccess.validateAction(
-        payload.presetId, state.scene, state.resources, payload.subjectId, payload.playerId
+        payload.presetId, state.scene, state.resources, payload.subjectId, payload.playerId, payload.pointId
     );
     if (!validation.allowed && payload.presetId !== 'wait') {
         throw new Error(validation.errorReason || `Action "${payload.presetId}" blocked by scenario.`);
@@ -221,6 +222,28 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             }
         } else if (commandIntent.type === 'move') {
             const tgtLoc = commandIntent.targetLocation;
+            const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
+            const moveCompliance = 30;
+            if (currentCompliance < moveCompliance) {
+                const subjectName = characterRepo.get(payload.subjectId)?.name || payload.subjectId;
+                const refusedNarrative = `[Система]: ${subjectName} отклоняет указание на перемещение в «${tgtLoc}».`;
+                addedContextNotes.push(refusedNarrative);
+            } else {
+                const laboratoryMove = payload.sceneId === 'scene_lab_calibrator'
+                    ? moveCharacterInLaboratory(payload.subjectId, tgtLoc, payload.playerId)
+                    : { handled: false, moved: false };
+                if (laboratoryMove.handled) {
+                    const subjectChar = characterRepo.get(payload.subjectId);
+                    const subjectName = subjectChar?.name || payload.subjectId;
+                    if (laboratoryMove.moved) {
+                        const moveNarrative = `[Система]: ${subjectName} перемещается ${laboratoryMove.label}.`;
+                        eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'move', action: null, actionLabel: moveNarrative, narrative: moveNarrative }, { added: true, slotId: laboratoryMove.slotId });
+                        addedContextNotes.push(moveNarrative);
+                        actionApplied = true;
+                    } else if (laboratoryMove.reason) {
+                        addedContextNotes.push(`[Система]: ${laboratoryMove.reason}`);
+                    }
+                } else {
             let finalSlotId: string | null = null;
             let targetLabel = tgtLoc;
             
@@ -256,10 +279,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             }
 
             if (finalSlotId) {
-                const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
-                const moveCompliance = 30; 
-                
-                if (currentCompliance >= moveCompliance) {
                     const subjCharPresence = sceneChars.find(c => c.character.subjectId === payload.subjectId || c.character.id === payload.subjectId);
                     if (subjCharPresence) {
                         if (subjCharPresence.slotId !== finalSlotId) {
@@ -272,10 +291,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                             addedContextNotes.push(`Ты уже в зоне "${targetLabel}", перемещение не нужно.`);
                         }
                     }
-                } else {
-                    const refusedNarrative = `[Система]: Актив мысленно отклоняет указание на перемещение в "${targetLabel}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${moveCompliance}).`;
-                    addedContextNotes.push(refusedNarrative);
                 }
+            }
             }
         } else if (commandIntent.type === 'perform_action') {
             commandActionPreset = presetRepo.getActionPreset(commandIntent.actionId);
