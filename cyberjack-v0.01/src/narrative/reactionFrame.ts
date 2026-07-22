@@ -1,5 +1,6 @@
 import { CharacterRelation, InteractionObservation, SubjectCoreState } from '../domain/types';
 import { voiceStyleOnly } from '../orchestration/characterGenerator/profileV2';
+import { deriveEdgeProfile } from '../domain/edgeState';
 
 export type SpeechAct =
     | 'silence'
@@ -66,6 +67,12 @@ export interface ReactionFrame {
         repetition: number;
         directlyExperienced: boolean;
         playerSpeech?: string;
+        /** Engine-owned facts used for reply validation; never rendered into the character prompt. */
+        validationFacts?: {
+            sensitivityTrend: 'up' | 'down' | 'stable';
+            sensitivityDelta: number;
+            baselineSensitivityDelta: number;
+        };
     };
     continuity: { recentDialogue: string[]; relevantEpisodes: string[] };
     dramaticPosition: {
@@ -148,10 +155,14 @@ function changeLines(observation?: InteractionObservation): string[] {
     if (observation.changes.openness < -.2) lines.push('персонаж сильнее закрылся');
     if (observation.changes.capacity < -1) lines.push('запас самоконтроля заметно снизился');
     if (observation.changes.tension > 2) lines.push('напряжение заметно выросло');
-    if (observation.learning.effect > 1) lines.push('воздействие оставляет обучающий след');
+    // A character perceives only a sufficiently large qualitative change. Exact
+    // deltas and baseline learning belong to engine/monitor telemetry.
+    const sensitivityDelta = observation.learning.sensitivityDelta || 0;
+    if (sensitivityDelta >= .5) lines.push('ощущение в этой зоне стало заметно ярче');
+    if (sensitivityDelta <= -.5) lines.push('ощущение в этой зоне стало заметно приглушённее');
     if (observation.learning.familiarityDelta > .1) lines.push('воздействие становится знакомым');
     observation.transitions.slice(-2).forEach(t => lines.push(t.text));
-    return unique(lines, 5);
+    return unique(lines, 7);
 }
 
 function physiologicalPosition(core: SubjectCoreState, observation?: InteractionObservation) {
@@ -169,13 +180,13 @@ function physiologicalPosition(core: SubjectCoreState, observation?: Interaction
         kind: 'breakdown' as const
     };
     if (core.tension >= 95) return {
-        state: 'Напряжение у абсолютного предела: дыхание срывается, тело требует немедленного разрешения пика.',
+        state: `${deriveEdgeProfile(core, observation ? [observation] : []).description} Напряжение у абсолютного предела.`,
         mandatory: true,
         requiresSpeech: false,
         kind: 'peak' as const
     };
     if (core.tension >= 85) return {
-        state: 'Напряжение почти достигло пика: контроль над голосом и телесной реакцией заметно ослаблен.',
+        state: deriveEdgeProfile(core, observation ? [observation] : []).description,
         mandatory: true,
         requiresSpeech: false,
         kind: 'edge' as const
@@ -396,7 +407,14 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
             mandatoryPhysiologicalFocus: directlyExperienced && physiology.mandatory,
             requiresSpeech: directlyExperienced && physiology.requiresSpeech && input.observation?.behavioralState !== 'unresponsive',
             repetition: input.repetition ?? 1,
-            directlyExperienced
+            directlyExperienced,
+            validationFacts: input.observation ? {
+                sensitivityTrend: input.observation.learning.sensitivityDelta > .01
+                    ? 'up'
+                    : input.observation.learning.sensitivityDelta < -.01 ? 'down' : 'stable',
+                sensitivityDelta: input.observation.learning.sensitivityDelta,
+                baselineSensitivityDelta: input.observation.learning.baselineSensitivityDelta
+            } : undefined
         },
         continuity: {
             recentDialogue: unique(input.recentDialogue || [], 4),
@@ -459,7 +477,7 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
         `[Поведенческое ядро]\n${behavioralLines.length ? behavioralLines.map(v => `- ${v}`).join('\n') : '- Сохраняет субъектность и реагирует на конкретную ситуацию, а не пересказывает биографию.'}`,
         `[Голос]\n${core.voice.length ? core.voice.map(v => `- ${voiceStyleOnly(v)}`).join('\n') : '- Краткая естественная речь без литературного монолога.'}`,
         `[Фокус внимания]\n${core.attentionFocus?.length ? core.attentionFocus.map(focus => `- В первую очередь замечает ${attentionMeaning[focus] || focus}.`).join('\n') : '- Замечает конкретное текущее событие без обязательной профессиональной метафоры.'}\nРечевая склонность: ${core.speechDisposition === 'quiet' ? 'часто оставляет малозначимые события без реплики' : core.speechDisposition === 'expressive' ? 'охотно реагирует вслух' : 'говорит только когда есть что добавить'}.`,
-        `[Правила]\n- Не придумывай действий, ощущений, предметов, знаний или чужих мыслей. Фактом текущей сцены считается только явно указанное в событии и контекстах.\n- Не заменяй указанное текущее действие похожим: поглаживание не является массажем, ударом, царапаньем или иным воздействием.\n- Биография и характер определяют, что персонаж замечает и как об этом говорит, но не пересказываются без причины. Профессия не обязана упоминаться в реплике.\n- Выбери одну естественную реакцию на текущий момент; не пытайся перечислить все доступные мотивы.\n- Постоянный голос определяет лексику персонажа, а текущая манера — форму именно этой реплики. При конфликте формы текущее физиологическое состояние важнее обычной гладкости речи.\n- Различай приятную телесную реакцию, принятие конкретной зоны и общее принятие/открытость. Телесное удовольствие само по себе не означает согласия, доверия или желания повторить действие.\n- Если общее принятие или открытость снизились, не проси повторять или усиливать действие.\n- При реакции на воздействие можно назвать ощущение, заметить технику или изменение, поставить границу, обратиться к собеседнику либо промолчать — в зависимости от характера.\n- Не используй многоточие как универсальный признак эмоции: при спокойной связной речи предпочитай обычную пунктуацию.\n- Если физиологический фокус обозначен как обязательный, реплика должна явно исходить из него; нельзя отвечать так, будто персонаж спокоен.\n${dischargeRule}\n- Если текущий кадр требует речи, speech не может быть пустой.\n- Не используй имена, термины, лозунги и цитаты из лора, если адресат не поднял эту тему в текущей реплике и она не является текущим событием.\n- Если адресат задал прямой вопрос, ответь, явно откажись отвечать либо осознанно промолчи в соответствии с характером.\n- Сохраняй установленную форму обращения и грамматический род персонажа.\n- Не повторяй дословно текущую реплику адресата.\n- Не превышай лимит слов из текущей манеры.\n- Если слова не нужны и кадр не требует речи, верни пустую speech.\n- Не повторяй недавнюю реплику и не своди любую реакцию к «сильнее» или «не надо».`,
+        `[Правила]\n- Не придумывай действий, ощущений, предметов, знаний или чужих мыслей. Фактом текущей сцены считается только явно указанное в событии и контекстах.\n- Факты текущего события и строка «Что изменилось» всегда важнее старых реплик и связанных эпизодов.\n- Не называй внутренние параметры симулятора, baseline, численные дельты или «обучающий след». Говори только о непосредственно различимом ощущении, если оно явно дано текущим событием.\n- Локальный контекст действует только на подписанную зону; не переноси гиперестезию или иной эффект на текущую цель, если зоны различаются.\n- Не заменяй указанное текущее действие похожим: поглаживание не является массажем, ударом, царапаньем или иным воздействием.\n- Биография и характер определяют, что персонаж замечает и как об этом говорит, но не пересказываются без причины. Профессия не обязана упоминаться в реплике.\n- Выбери одну естественную реакцию на текущий момент; не пытайся перечислить все доступные мотивы.\n- Постоянный голос определяет лексику персонажа, а текущая манера — форму именно этой реплики. При конфликте формы текущее физиологическое состояние важнее обычной гладкости речи.\n- Различай приятную телесную реакцию, принятие конкретной зоны и общее принятие/открытость. Телесное удовольствие само по себе не означает согласия, доверия или желания повторить действие.\n- Если общее принятие или открытость снизились, не проси повторять или усиливать действие.\n- При реакции на воздействие можно назвать ощущение, заметить технику или изменение, поставить границу, обратиться к собеседнику либо промолчать — в зависимости от характера.\n- Не используй многоточие как универсальный признак эмоции: при спокойной связной речи предпочитай обычную пунктуацию.\n- Если физиологический фокус обозначен как обязательный, реплика должна явно исходить из него; нельзя отвечать так, будто персонаж спокоен.\n${dischargeRule}\n- Если текущий кадр требует речи, speech не может быть пустой.\n- Не используй имена, термины, лозунги и цитаты из лора, если адресат не поднял эту тему в текущей реплике и она не является текущим событием.\n- Если адресат задал прямой вопрос, ответь, явно откажись отвечать либо осознанно промолчи в соответствии с характером.\n- Сохраняй установленную форму обращения и грамматический род персонажа.\n- Не повторяй дословно текущую реплику адресата.\n- Не превышай лимит слов из текущей манеры.\n- Если слова не нужны и кадр не требует речи, верни пустую speech.\n- Не повторяй недавнюю реплику и не своди любую реакцию к «сильнее» или «не надо».`,
         `[Формат]\nВерни только JSON: {"addressedTo":"ID или пустая строка","speechAct":"один из разрешённых","speech":"только прямая речь без ремарок"}`
     ].join('\n\n');
 }

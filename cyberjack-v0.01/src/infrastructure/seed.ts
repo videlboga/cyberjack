@@ -4,6 +4,7 @@ import { ActionPresetSchema, ItemPresetSchema, TraitPresetSchema } from '../doma
 import { getBaseHumanAnatomy } from '../domain/anatomy.js';
 import { CharacterProfile } from '../domain/characterProfile.js';
 import { CANON_LOCATIONS, CANON_PROFESSIONS } from '../domain/canon.js';
+import { ensureAllStarterClothing } from './starterClothing.js';
 
 console.log("Начинаем безопасное заполнение базы данных (без удаления существующих данных)...");
 
@@ -162,6 +163,7 @@ db.transaction(() => {
     insertCharacterItemStmt.run('PL-1', 'eq_handcuffs', 'active', -1, '{}');
     insertCharacterItemStmt.run('PL-1', 'eq_collar', 'active', -1, '{}');
     insertCharacterItemStmt.run('PL-1', 'eq_vibrator', 'active', -1, '{}');
+    insertCharacterItemStmt.run('PL-1', 'eq_tens_unit', 'active', -1, '{}');
     insertCharacterItemStmt.run('PL-1', 'eq_plug', 'active', -1, '{}');
     insertCharacterItemStmt.run('PL-1', 'eq_blindfold', 'active', -1, '{}');
     insertCharacterItemStmt.run('PL-1', 'eq_gag', 'active', -1, '{}');
@@ -174,6 +176,8 @@ db.transaction(() => {
     insertCharacterItemStmt.run('PL-1', 'drug_painkiller', 'active', 3, '{}');
     console.log('Starting items added for PL-1');
 })();
+
+ensureAllStarterClothing();
 
 const insertPointStmt = db.prepare(`
     INSERT OR IGNORE INTO point_presets (id, label, values_json, parent_id, provides_functions, tags) 
@@ -302,9 +306,12 @@ db.transaction(() => {
         'act_apply_collar', 'act_remove_collar', 'act_shock_collar',
         'eq_blindfold_apply', 'eq_blindfold_remove',
         'eq_gag_apply', 'eq_gag_remove',
-        'act_insert_plug', 'act_activate_plug', 'act_remove_plug',
+        'act_insert_plug', 'act_activate_plug', 'act_deactivate_plug', 'act_remove_plug',
+        'act_start_vibrator', 'act_adjust_vibration', 'act_stop_vibrator',
+        'act_hold_exposure', 'act_end_exposure', 'act_present_feet', 'act_end_feet_presentation',
+        'act_connect_tens', 'act_start_electrostimulation', 'act_adjust_electrostimulation', 'act_stop_electrostimulation', 'act_disconnect_tens',
         'eq_clothe_jumpsuit', 'eq_clothe_jumpsuit_remove',
-        'eq_clothe_panties', 'eq_clothe_panties_remove'
+        'eq_clothe_underwear', 'eq_clothe_underwear_remove'
     ];
     const availableActions = Array.from(new Set([...actions.map(a => a.id), ...prototypeExpansionActions]));
     const availableActionsStr = JSON.stringify(availableActions);

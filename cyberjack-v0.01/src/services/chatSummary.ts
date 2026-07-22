@@ -21,9 +21,8 @@ export function maybeSummarizeChat(subjectId: string) {
 
         lastProcessedId = window[window.length - 1].id;
 
-        // Delete summarised messages to prevent context pollution.
-        // Keep only the last few messages for continuity.
-        chatMemoryRepo.deleteBefore(subjectId, lastProcessedId - 3);
+        // Summaries limit prompt context; the original dialogue remains available
+        // to the UI as a durable conversation history.
     }
 }
 

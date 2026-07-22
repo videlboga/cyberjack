@@ -99,33 +99,56 @@ export function applyLearning(
         result.experiencedIntensity * (f.capacityLoadFromIntensity ?? 0.015) +
         result.discomfort * (f.capacityLoadFromDiscomfort ?? 0.02) +
         result.overload * (f.capacityDropMultiplier ?? 0.25);
+    // A well-received pleasant action is still tiring, but much less so than
+    // distress or overload at the same raw intensity.
+    const pleasantShare = (result.pleasure || 0) / Math.max(1, (result.pleasure || 0) + (result.discomfort || 0) + (result.overload || 0));
+    baseCapacityDrop *= 1 - clamp(pleasantShare, 0, 1) * 0.45;
     if (isEdging) {
-        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.3) * deltaTime; // Burn capacity when on the brink
+        const edgeDistressFactor = result.pleasure > (result.discomfort || 0) * 1.35 ? 0.25
+            : result.discomfort > (result.pleasure || 0) * 1.35 ? 1 : 0.65;
+        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.08) * edgeDistressFactor * deltaTime;
     }
     const capacityBaseline = safeCore.baselineCapacity ?? safeCore.capacity;
-    const capacityRecovery = isRest && !isEdging ? Math.min(
+    const capacityRecovery = isRest ? Math.min(
         Math.max(0, capacityBaseline - safeCore.capacity),
         (f.capacityRecoveryRate ?? 1.0) * deltaTime
-    ) : 0;
+    ) * (isEdging ? 0.35 : 1) : 0;
 
     const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
+    const routineCapacityLossLimit = (result.overload || 0) >= 15 ? 15 : 6;
+    const capacityLoss = Math.min(baseCapacityDrop * tensionModifier, routineCapacityLossLimit);
 
     const timeScale = safeAction.actionKey === 'wait' ? deltaTime : 1.0;
-    const affect = (result.pleasure || 0) - (result.discomfort || 0);
-    // Feeling something pleasant is not identical to learning acceptance.
-    // Positive acceptance requires novelty/learning, engagement and enough
-    // cognitive resource to register the experience. Familiar repetition may
-    // remain pleasant, but its relational gain approaches a plateau.
+    const bodilyBalance = (result.pleasure || 0) - (result.discomfort || 0);
+    const sensoryMagnitude = (result.pleasure || 0) + (result.discomfort || 0) + (result.overload || 0) * 0.25;
+    // finalValence is the character's psychological appraisal after
+    // preferences, relationship and context have been applied. This allows a
+    // physically uncomfortable experience to be accepted without pretending
+    // that it was pleasant.
+    const affect = Number.isFinite(result.finalValence)
+        ? clamp(result.finalValence, -1, 1) * sensoryMagnitude
+        : bodilyBalance;
+    // Acceptance follows the experienced balance directly. Novelty and
+    // learning amplify a positive experience instead of gating it entirely;
+    // familiar pleasure therefore gives a small gain rather than an opaque
+    // zero or reversal. A subject at zero functional resource still cannot
+    // consolidate a positive experience.
     const responsiveness = clamp((safeCore.capacity - 10) / 30, 0, 1);
-    const acceptanceLearning = clamp((result.learningEffect || 0) / 12, 0, 1) *
-        clamp((result.engagement || 0) / 30, 0, 1) * responsiveness;
-    // Positive openness is learned readiness, rather than pleasure itself.
-    // Negative experience can still close a responsive subject immediately.
-    const opennessAffect = affect > 0 ? affect * acceptanceLearning : affect * responsiveness;
-    const positiveCoreRoom = clamp((100 - safeCore.attitude) / 50, 0, 1);
-    const positiveLocalRoom = clamp((100 - safePoint.localAttitude) / 50, 0, 1);
-    const coreAffectForAcceptance = affect > 0 ? affect * acceptanceLearning * positiveCoreRoom : affect * responsiveness;
-    const localAffectForAcceptance = affect > 0 ? affect * acceptanceLearning * positiveLocalRoom : affect * responsiveness;
+    const learnedQuality = clamp((result.learningEffect || 0) / 12, 0, 1) *
+        clamp((result.engagement || 0) / 30, 0, 1);
+    const positiveLearningFactor = 0.25 + learnedQuality * 0.75;
+    const negativeResponsiveness = 0.5 + responsiveness * 0.5;
+    const opennessAffect = affect > 0
+        ? affect * positiveLearningFactor * responsiveness
+        : affect * negativeResponsiveness;
+    const positiveCoreRoom = 0.2 + clamp((100 - safeCore.attitude) / 50, 0, 1) * 0.8;
+    const positiveLocalRoom = 0.2 + clamp((100 - safePoint.localAttitude) / 50, 0, 1) * 0.8;
+    const coreAffectForAcceptance = affect > 0
+        ? affect * positiveLearningFactor * responsiveness * positiveCoreRoom
+        : affect * negativeResponsiveness;
+    const localAffectForAcceptance = affect > 0
+        ? affect * positiveLearningFactor * responsiveness * positiveLocalRoom
+        : affect * negativeResponsiveness;
 
     const nextCore: SubjectCoreState = {
         tension: nextTension,
@@ -135,7 +158,7 @@ export function applyLearning(
             config.core.max
         ),
         capacity: clamp(
-            safeCore.capacity - (baseCapacityDrop - capacityRecovery) * tensionModifier,
+            safeCore.capacity - capacityLoss + capacityRecovery,
             config.core.min,
             config.core.max
         ),
@@ -192,15 +215,19 @@ export function applyLearning(
         )
     };
 
-    // мягкое взаимное протекание
+    // Only learned changes leak between local and global acceptance. Comparing
+    // their absolute levels made a pleasant action lower global acceptance
+    // merely because the selected zone started below it.
+    const localAttitudeDelta = nextPoint.localAttitude - safePoint.localAttitude;
     nextCore.attitude = clamp(
-        nextCore.attitude + (nextPoint.localAttitude - safeCore.attitude) * f.localToGlobalLeak,
+        nextCore.attitude + localAttitudeDelta * f.localToGlobalLeak,
         config.core.min,
         config.core.max
     );
 
+    const coreAttitudeDelta = nextCore.attitude - safeCore.attitude;
     nextPoint.localAttitude = clamp(
-        nextPoint.localAttitude + (nextCore.attitude - safePoint.localAttitude) * f.globalToLocalLeak,
+        nextPoint.localAttitude + coreAttitudeDelta * f.globalToLocalLeak,
         config.point.min,
         config.point.max
     );
@@ -255,7 +282,7 @@ export function applyLearning(
         { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
-    nextCore.openness = dampTowardsBaseline(nextCore.openness, coreBaselineState.openness, {
+    if (isRest) nextCore.openness = dampTowardsBaseline(nextCore.openness, coreBaselineState.openness, {
         dampingBase: coreConfig.dampingBase,
         dampingDistanceScale: coreConfig.dampingDistanceScale,
         maxDamping: coreConfig.maxDamping,
@@ -281,7 +308,7 @@ export function applyLearning(
         { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
-    nextCore.attitude = dampTowardsBaseline(nextCore.attitude, coreBaselineState.attitude, {
+    if (isRest) nextCore.attitude = dampTowardsBaseline(nextCore.attitude, coreBaselineState.attitude, {
         dampingBase: coreConfig.dampingBase,
         dampingDistanceScale: coreConfig.dampingDistanceScale,
         maxDamping: coreConfig.maxDamping,
@@ -316,7 +343,7 @@ export function applyLearning(
         { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
     );
 
-    nextPoint.localAttitude = dampTowardsBaseline(nextPoint.localAttitude, pointBaselineState.localAttitude, {
+    if (isRest) nextPoint.localAttitude = dampTowardsBaseline(nextPoint.localAttitude, pointBaselineState.localAttitude, {
         dampingBase: pointConfig.dampingBase,
         dampingDistanceScale: pointConfig.dampingDistanceScale,
         maxDamping: pointConfig.maxDamping,
@@ -329,7 +356,7 @@ export function applyLearning(
         { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
     );
 
-    nextPoint.localOpenness = dampTowardsBaseline(nextPoint.localOpenness ?? pointBaselineState.localOpenness, pointBaselineState.localOpenness, {
+    if (isRest) nextPoint.localOpenness = dampTowardsBaseline(nextPoint.localOpenness ?? pointBaselineState.localOpenness, pointBaselineState.localOpenness, {
         dampingBase: pointConfig.dampingBase,
         dampingDistanceScale: pointConfig.dampingDistanceScale,
         maxDamping: pointConfig.maxDamping,

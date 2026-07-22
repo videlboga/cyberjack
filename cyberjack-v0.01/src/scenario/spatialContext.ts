@@ -47,7 +47,7 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
     const nearAsset = !occupiedAsset && nearAssetId ? assets.find(asset => asset.asset_id === nearAssetId) : null;
     const isolated = occupiedAsset?.asset_id === 'lab_recovery_capsule';
     const isolatedCharacterIds = new Set(assets
-        .filter(asset => asset.asset_id === 'lab_recovery_capsule' || asset.asset_id === 'lab_sensory_pod')
+        .filter(asset => ['lab_recovery_capsule', 'lab_sensory_pod', 'lab_sex_machine'].includes(asset.asset_id))
         .map(asset => String(parseMetadata(asset.metadata).subjectId || ''))
         .filter(Boolean));
     const occupants = db.prepare(`

@@ -342,6 +342,77 @@
     }
   },
   {
+    "id": "act_connect_tens",
+    "name": "Закрепить электроды TENS",
+    "description": "Установить контактные электроды для управляемой продолжительной электростимуляции.",
+    "categories": ["physical", "context"],
+    "tags": ["electronic", "equipment", "stimulation"],
+    "requiresItem": "eq_tens_unit",
+    "validTargets": ["nipples", "groin"],
+    "vector": { "intensity": 3, "valence": -1, "sharpness": 2, "contact": 8, "novelty": 6, "powerBase": 20 },
+    "contextConfig": {
+      "type": "equipment", "activeLabel": "Электроды TENS", "duration": -1,
+      "exclusiveWithinPoint": false, "occupiesPoints": [],
+      "modifiers": { "intensity": 1, "valence": -1, "sharpness": 1, "contact": 8, "novelty": 1 }
+    }
+  },
+  {
+    "id": "act_start_electrostimulation",
+    "name": "Включить продолжительную электростимуляцию",
+    "description": "Подать через установленные электроды устойчивую последовательность импульсов.",
+    "categories": ["physical", "context"],
+    "tags": ["electronic", "stimulation", "continuous", "pain"],
+    "requiresItem": "eq_tens_unit",
+    "requireContexts": ["act_connect_tens"],
+    "validTargets": ["nipples", "groin"],
+    "vector": { "intensity": 7, "valence": -3, "sharpness": 7, "contact": 7, "novelty": 6, "powerBase": 48 },
+    "contextConfig": {
+      "type": "interaction", "activeLabel": "Продолжительная электростимуляция", "duration": -1,
+      "exclusiveWithinPoint": false, "occupiesPoints": [],
+      "modifiers": { "intensity": 4, "valence": -3, "sharpness": 5, "contact": 6, "novelty": -1 }
+    }
+  },
+  {
+    "id": "act_adjust_electrostimulation",
+    "name": "Усилить электростимуляцию",
+    "description": "Поднять частоту и амплитуду продолжительной серии импульсов.",
+    "categories": ["physical", "context"],
+    "tags": ["electronic", "stimulation", "continuous", "intense", "pain"],
+    "requiresItem": "eq_tens_unit",
+    "requireContexts": ["act_start_electrostimulation"],
+    "validTargets": ["nipples", "groin"],
+    "vector": { "intensity": 9, "valence": -5, "sharpness": 9, "contact": 8, "novelty": 4, "powerBase": 68 },
+    "contextConfig": {
+      "type": "interaction_level", "activeLabel": "Интенсивная электростимуляция", "duration": -1,
+      "exclusiveWithinPoint": false, "occupiesPoints": [],
+      "modifiers": { "intensity": 3, "valence": -2, "sharpness": 3, "contact": 1, "novelty": -1 }
+    }
+  },
+  {
+    "id": "act_stop_electrostimulation",
+    "name": "Остановить электростимуляцию",
+    "description": "Отключить генератор импульсов, оставив электроды установленными.",
+    "categories": ["physical", "context"],
+    "tags": ["electronic", "stimulation", "comfort"],
+    "requiresItem": "eq_tens_unit",
+    "requireContexts": ["act_start_electrostimulation"],
+    "removeContexts": ["act_start_electrostimulation", "act_adjust_electrostimulation"],
+    "validTargets": ["nipples", "groin"],
+    "vector": { "intensity": 1, "valence": 4, "sharpness": 0, "contact": 2, "novelty": 1, "powerBase": 5 }
+  },
+  {
+    "id": "act_disconnect_tens",
+    "name": "Снять электроды TENS",
+    "description": "Отключить генератор и убрать контактные электроды.",
+    "categories": ["physical", "context"],
+    "tags": ["electronic", "equipment", "comfort"],
+    "requiresItem": "eq_tens_unit",
+    "requireContexts": ["act_connect_tens"],
+    "removeContexts": ["act_connect_tens", "act_start_electrostimulation", "act_adjust_electrostimulation"],
+    "validTargets": ["nipples", "groin"],
+    "vector": { "intensity": 1, "valence": 3, "sharpness": 0, "contact": 2, "novelty": 1, "powerBase": 5 }
+  },
+  {
     "id": "act_remove_collar",
     "name": "Снять ошейник",
     "description": "Отключение и снятие устройства контроля.",
@@ -548,6 +619,120 @@
       "contact": 10,
       "novelty": 3,
       "powerBase": 55
+    },
+    "contextConfig": {
+      "type": "interaction",
+      "activeLabel": "Внутренняя вибрация",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": ["active_vibration_internal"],
+      "modifiers": {
+        "intensity": 4,
+        "valence": 3,
+        "sharpness": 1,
+        "contact": 8,
+        "novelty": -1
+      }
+    }
+  },
+  {
+    "id": "act_deactivate_plug",
+    "name": "Выключить вибрацию плага",
+    "description": "Остановка ритмического внутреннего импульса без извлечения устройства.",
+    "categories": ["physical", "intimate", "context"],
+    "tags": ["electronic", "stimulation", "comfort"],
+    "requireContexts": ["act_activate_plug"],
+    "removeContexts": ["act_activate_plug"],
+    "validTargets": ["groin"],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 1,
+      "powerBase": 5
+    }
+  },
+  {
+    "id": "act_start_vibrator",
+    "name": "Включить продолжительную вибрацию",
+    "description": "Зафиксировать вибратор на выбранной зоне и оставить устойчивый рабочий ритм.",
+    "categories": ["physical", "intimate", "context"],
+    "tags": ["electronic", "stimulation", "continuous"],
+    "requiresItem": "eq_vibrator",
+    "validTargets": ["torso", "groin"],
+    "vector": {
+      "intensity": 6,
+      "valence": 4,
+      "sharpness": 1,
+      "contact": 9,
+      "novelty": 5,
+      "powerBase": 35
+    },
+    "contextConfig": {
+      "type": "interaction",
+      "activeLabel": "Продолжительная вибрация",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": ["active_vibration_handheld"],
+      "modifiers": {
+        "intensity": 3,
+        "valence": 3,
+        "sharpness": 1,
+        "contact": 8,
+        "novelty": -1
+      }
+    }
+  },
+  {
+    "id": "act_adjust_vibration",
+    "name": "Усилить вибрацию",
+    "description": "Перевести закреплённый вибратор в интенсивный режим.",
+    "categories": ["physical", "intimate", "context"],
+    "tags": ["electronic", "stimulation", "continuous", "intense"],
+    "requiresItem": "eq_vibrator",
+    "requireContexts": ["act_start_vibrator"],
+    "validTargets": ["torso", "groin"],
+    "vector": {
+      "intensity": 8,
+      "valence": 4,
+      "sharpness": 2,
+      "contact": 10,
+      "novelty": 3,
+      "powerBase": 55
+    },
+    "contextConfig": {
+      "type": "interaction_level",
+      "activeLabel": "Интенсивная вибрация",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": ["active_vibration_boost"],
+      "modifiers": {
+        "intensity": 3,
+        "valence": 1,
+        "sharpness": 1,
+        "contact": 2,
+        "novelty": -1
+      }
+    }
+  },
+  {
+    "id": "act_stop_vibrator",
+    "name": "Остановить вибрацию",
+    "description": "Выключить и убрать закреплённый вибратор.",
+    "categories": ["physical", "intimate", "context"],
+    "tags": ["electronic", "stimulation", "comfort"],
+    "requiresItem": "eq_vibrator",
+    "requireContexts": ["act_start_vibrator"],
+    "removeContexts": ["act_start_vibrator", "act_adjust_vibration"],
+    "validTargets": ["torso", "groin"],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 1,
+      "powerBase": 5
     }
   },
   {
@@ -567,7 +752,8 @@
       "act_insert_plug"
     ],
     "removeContexts": [
-      "act_insert_plug"
+      "act_insert_plug",
+      "act_activate_plug"
     ],
     "validTargets": [
       "groin"
@@ -585,33 +771,57 @@
     "id": "pose_standing",
     "name": "Стойка: Смирно",
     "description": "Стоять прямо, руки по швам. Базовая стойка подчинения.",
-    "categories": [
-      "pose"
-    ],
-    "tags": [
-      "pose",
-      "neutral"
-    ],
-    "validTargets": [
-      "systemic"
-    ],
-    "vector": {
-      "intensity": 1,
-      "valence": 0,
-      "sharpness": 0,
-      "contact": 0,
-      "novelty": 1,
-      "powerBase": 5
-    },
-    "contextConfig": {
-      "type": "pose",
-      "activeLabel": "Стоит прямо",
-      "duration": -1,
-      "occupiesPoints": [
-        "global_pose"
-      ]
-    },
+    "categories": ["pose"],
+    "tags": ["pose", "neutral"],
+    "validTargets": ["systemic"],
+    "vector": { "intensity": 1, "valence": 0, "sharpness": 0, "contact": 0, "novelty": 1, "powerBase": 5 },
+    "contextConfig": { "type": "pose", "activeLabel": "Стоит прямо", "duration": -1, "occupiesPoints": ["global_pose"] },
     "removeNarrative": "{name} меняет положение"
+  },
+  {
+    "id": "act_hold_exposure",
+    "name": "Удерживать открытую позу",
+    "description": "Оставаться в текущей открытой позе для продолжительной демонстрации и наблюдения.",
+    "categories": ["pose", "intimate", "context"],
+    "tags": ["exposure", "continuous", "vulnerable"],
+    "validTargets": ["systemic"],
+    "vector": { "intensity": 3, "valence": -2, "sharpness": 1, "contact": 1, "novelty": 4, "powerBase": 20 },
+    "contextConfig": { "type": "interaction", "activeLabel": "Удерживает открытую позу", "duration": -1, "exclusiveWithinPoint": true, "occupiesPoints": ["active_visual_interaction"] },
+    "removeNarrative": "{name} больше не удерживает открытую позу"
+  },
+  {
+    "id": "act_end_exposure",
+    "name": "Завершить демонстрацию",
+    "description": "Позволить выйти из удерживаемой открытой позы.",
+    "categories": ["pose", "context"],
+    "tags": ["comfort"],
+    "requireContexts": ["act_hold_exposure"],
+    "removeContexts": ["act_hold_exposure"],
+    "validTargets": ["systemic"],
+    "vector": { "intensity": 1, "valence": 2, "sharpness": 0, "contact": 0, "novelty": 1, "powerBase": 5 }
+  },
+  {
+    "id": "act_present_feet",
+    "name": "Предъявить ступни",
+    "description": "Удерживать ступни в поле зрения для продолжительного осмотра.",
+    "categories": ["pose", "context"],
+    "tags": ["feet", "exposure", "continuous"],
+    "removeContexts": ["pose_standing", "pose_sitting", "pose_kneeling", "pose_lying_down", "pose_all_fours", "pose_spread_eagle"],
+    "validTargets": ["feet"],
+    "vector": { "intensity": 2, "valence": -1, "sharpness": 0, "contact": 1, "novelty": 3, "powerBase": 15 },
+    "contextConfig": { "type": "pose", "activeLabel": "Предъявляет ступни", "duration": -1, "exclusiveWithinPoint": true, "occupiesPoints": ["active_visual_interaction", "global_pose"] },
+    "removeNarrative": "{name} больше не предъявляет ступни"
+  },
+  {
+    "id": "act_end_feet_presentation",
+    "name": "Завершить осмотр ступней",
+    "description": "Разрешить убрать ступни из демонстрационной позы.",
+    "categories": ["pose", "context"],
+    "tags": ["comfort"],
+    "requireContexts": ["act_present_feet"],
+    "removeContexts": ["act_present_feet"],
+    "validTargets": ["feet"],
+    "vector": { "intensity": 1, "valence": 2, "sharpness": 0, "contact": 0, "novelty": 1, "powerBase": 5 }
   },
   {
     "id": "pose_all_fours",
@@ -1117,7 +1327,7 @@
   },
   {
     "id": "eq_clothe_underwear",
-    "name": "Надеть бюстгальтер",
+    "name": "Надеть бельё",
     "categories": [
       "clothing"
     ],
@@ -1128,10 +1338,16 @@
     "type": "clothing",
     "contextConfig": {
       "type": "clothing",
-      "activeLabel": "Бюстгальтер",
+      "activeLabel": "Нижнее бельё",
       "occupiesPoints": [
         "chest",
-        "nipples"
+        "nipples",
+        "groin",
+        "vulva",
+        "vagina",
+        "anus",
+        "clitoris",
+        "buttocks"
       ],
       "duration": -1,
       "modifiers": {
@@ -1139,10 +1355,18 @@
         "contact": -5,
         "sharpness": -3
       },
-      "exclusiveWithinPoint": true
+      "exclusiveWithinPoint": true,
+      "blocksPoints": [
+        "groin",
+        "vulva",
+        "vagina",
+        "anus",
+        "clitoris",
+        "buttocks"
+      ]
     },
     "requiresItem": "eq_underwear",
-    "removeNarrative": "{name} снимает бюстгальтер, обнажая грудь"
+    "removeNarrative": "{name} снимает бельё полностью"
   },
   {
     "id": "eq_clothe_panties",
@@ -1187,7 +1411,7 @@
   },
   {
     "id": "eq_clothe_underwear_remove",
-    "name": "Снять бюстгальтер",
+    "name": "Снять бельё",
     "categories": [
       "clothing"
     ],
@@ -1197,7 +1421,8 @@
     ],
     "type": "physical",
     "removeContexts": [
-      "eq_clothe_underwear"
+      "eq_clothe_underwear",
+      "eq_clothe_panties"
     ]
   },
   {

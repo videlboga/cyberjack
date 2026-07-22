@@ -222,6 +222,48 @@ describe('reaction frame compiler', () => {
         expect(buildReactionTurnMessage(frame)).toContain('персонаж сильнее закрылся');
     });
 
+    it('keeps exact sensitivity and baseline learning out of subjective prompt', () => {
+        const changed = observation();
+        changed.learning = {
+            ...changed.learning,
+            effect: 1.5,
+            sensitivityDelta: -0.1316,
+            baselineSensitivityDelta: 0.0365
+        };
+        const frame = compileReactionFrame({ ...base, observation: changed });
+        const message = buildReactionTurnMessage(frame);
+
+        expect(message).not.toContain('0.13');
+        expect(message).not.toContain('0.04');
+        expect(message).not.toContain('baseline');
+        expect(message).not.toContain('воздействие оставляет обучающий след');
+        expect(frame.event.validationFacts).toMatchObject({ sensitivityTrend: 'down' });
+        expect(buildReactionSystemPrompt(frame)).toContain('Не называй внутренние параметры симулятора');
+    });
+
+    it('rejects a sensitivity claim opposite to hidden engine facts', async () => {
+        const changed = observation();
+        changed.learning = { ...changed.learning, sensitivityDelta: -0.13, baselineSensitivityDelta: 0.04 };
+        const frame = compileReactionFrame({ ...base, observation: changed });
+        const response = (speech: string) => ({
+            ok: true,
+            json: async () => ({ choices: [{ message: { content: JSON.stringify({ addressedTo: 'PL-1', speechAct: 'acknowledge', speech }) } }] })
+        });
+        const fetchMock = vi.fn()
+            .mockResolvedValueOnce(response('Чувствительность повышается.'))
+            .mockResolvedValueOnce(response('Прикосновение ощущается мягко.'));
+        vi.stubGlobal('fetch', fetchMock);
+
+        const result = await generateCharacterReply({
+            subjectId: 'S-AV-01',
+            currentStateSummary: { interpretation: '', attitude: 50, localAttitude: 50, engagement: 0, overload: 0 },
+            recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
+        }, buildReactionTurnMessage(frame));
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(result.reply).toMatchObject({ speech: 'Прикосновение ощущается мягко.' });
+    });
+
     it('regenerates a request to repeat when overall acceptance declines', async () => {
         const conflicted = observation();
         conflicted.changes = { ...conflicted.changes, attitude: -1.2, openness: -0.8 };

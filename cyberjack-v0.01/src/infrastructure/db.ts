@@ -362,6 +362,22 @@ safeAddColumn('scene_characters', 'slot_id', 'TEXT');
 safeAddColumn('chat_memory', 'context_label', 'TEXT');
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS visual_asset_reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_path TEXT NOT NULL,
+    character_id TEXT NOT NULL,
+    decision TEXT NOT NULL,
+    issues_json TEXT NOT NULL DEFAULT '[]',
+    note TEXT DEFAULT '',
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(asset_path, character_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_visual_reviews_decision ON visual_asset_reviews(decision, updated_at DESC);
+`);
+
+db.exec(`
   UPDATE subjects
   SET baseline_sensitivity = COALESCE(baseline_sensitivity, sensitivity),
       baseline_capacity = COALESCE(baseline_capacity, capacity),

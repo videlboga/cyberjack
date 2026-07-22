@@ -446,6 +446,8 @@ export interface InteractionObservation {
         overload: number;
         engagement: number;
         mixed: boolean;
+        /** Psychological appraisal of the action, independently of bodily comfort. */
+        appraisal: number;
     };
     learning: {
         effect: number;
@@ -453,7 +455,7 @@ export interface InteractionObservation {
         sensitivityDelta: number;
         baselineSensitivityDelta: number;
     };
-    changes: { tension: number; capacity: number; attitude: number; openness: number; localAttitude: number };
+    changes: { tension: number; capacity: number; sensitivity: number; attitude: number; openness: number; plasticity: number; localAttitude: number; localOpenness: number };
     contexts: ObservationContext[];
     currentState: { title: string; description: string };
     transitions: Array<{

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { contractRepo } from '../../infrastructure/contractRepo';
 import { subjectRepo } from '../../infrastructure/repositories';
-import { evaluateAssetContract } from '../../scenario/evaluateAssetContract';
+import { contractConditionValue, evaluateAssetContract } from '../../scenario/evaluateAssetContract';
 import { db } from '../../infrastructure/db';
 import { advanceWorldTime, getPlayerLocation, getWorldClock } from '../../scenario/worldService';
 
@@ -106,16 +106,9 @@ export const deliverContract = (req: Request, res: Response) => {
             // Вернём какие условия не выполнены
             const unmet: string[] = [];
             for (const cond of contract.conditions) {
-                if (cond.type === 'attitude') {
-                    const val = core.attitude;
-                    if (!compareOp(val, cond.operator, cond.value)) {
-                        unmet.push(`Покорность: ${Math.round(val)} (нужно ${cond.operator} ${cond.value})`);
-                    }
-                } else if (cond.type === 'custom' && cond.key) {
-                    const val = (core as any)[cond.key];
-                    if (val !== undefined && !compareOp(val, cond.operator, cond.value)) {
-                        unmet.push(`${cond.key}: ${Math.round(val)} (нужно ${cond.operator} ${cond.value})`);
-                    }
+                const val = contractConditionValue(cond, core, {});
+                if (val !== undefined && !compareOp(val, cond.operator, cond.value)) {
+                    unmet.push(`${cond.type === 'attitude' ? 'Принятие' : cond.key || cond.type}: ${typeof val === 'number' ? Math.round(val) : val} (нужно ${cond.operator} ${cond.value})`);
                 }
             }
             return res.json({ success: false, metRequirements: false, unmet });
@@ -167,10 +160,7 @@ export const getContractProgress = (req: Request, res: Response) => {
         if (!core) return res.status(404).json({ success: false, error: 'Актив не найден' });
 
         const conditions = contract.conditions.map((condition: any) => {
-            let current: any;
-            if (condition.type === 'attitude') current = core.attitude;
-            else if (condition.type === 'custom' && condition.key) current = (core as any)[condition.key];
-            else if (condition.type === 'flag' || condition.type === 'trait') current = core.flags?.includes(condition.key || '') || false;
+            const current = contractConditionValue(condition, core, {});
             return { ...condition, current, met: current !== undefined && compareOp(current, condition.operator || '==', condition.value) };
         });
         res.json({ success: true, contract, subjectId, conditions, metAll: conditions.length > 0 && conditions.every(c => c.met) });

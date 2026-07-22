@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, advanceWorldTime, recruitCandidate, changeLaboratoryRole } from '../../scenario/worldService';
+import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, advanceWorldTime, recruitCandidate, changeLaboratoryRole, controlDeviceSession } from '../../scenario/worldService';
 
 export const getScenario = (req: Request, res: Response) => {
     try {
@@ -34,6 +34,18 @@ export const useEquipment = (req: Request, res: Response) => {
         const subjectId = String(req.body.subjectId || '');
         if (!subjectId) throw new Error('Не выбран персонаж');
         const result = useLabAsset(req.params.assetId, subjectId, playerId);
+        res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
+    } catch (error: any) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
+export const controlEquipment = (req: Request, res: Response) => {
+    try {
+        const playerId = String(req.body.playerId || 'PL-1');
+        const command = String(req.body.command || '') as 'configure' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop';
+        if (!['configure', 'start', 'adjust', 'pause', 'resume', 'stop'].includes(command)) throw new Error('Неизвестная команда устройства');
+        const result = controlDeviceSession(req.params.assetId, command, req.body, playerId);
         res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });

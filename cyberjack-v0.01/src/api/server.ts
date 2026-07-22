@@ -19,6 +19,7 @@ import metaRoutes from './routes/metaRoutes';
 import contractRoutes from './routes/contractRoutes';
 import scenarioRoutes from './routes/scenarioRoutes';
 import { ensureActionSpecialization } from '../infrastructure/actionSpecialization';
+import { syncActionPresets } from '../infrastructure/syncActionPresets';
 import { migrateCharacterLifecycles } from '../scenario/characterLifecycle';
 
 // Seed contracts on startup
@@ -29,6 +30,7 @@ try {
 }
 
 const app = express();
+syncActionPresets();
 ensureActionSpecialization();
 migrateCharacterLifecycles();
 app.use(express.json());

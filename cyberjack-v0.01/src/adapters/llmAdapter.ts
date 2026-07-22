@@ -321,6 +321,15 @@ function contradictsAcceptanceChange(candidate: { speech: string }, payload: Pro
     return /(продолжай|повтори|повторяй|не останавливайся|не прекращай|ещ[её]\s+раз|давай\s+ещ[её]|сильнее|делай\s+так\s+же)/i.test(speech);
 }
 
+function contradictsSensitivityTrend(candidate: { speech: string }, payload: PromptPayload) {
+    const trend = payload.reactionFrame?.event.validationFacts?.sensitivityTrend;
+    if (!trend) return false;
+    const speech = candidate.speech.toLocaleLowerCase('ru-RU');
+    const saysUp = /чувствительн[а-яё]*\s+(?:повыш|раст|усил)|стал[аио]?\s+(?:более\s+)?чувствительн|ощуща[а-яё]*\s+(?:ярче|сильнее)/u.test(speech);
+    const saysDown = /чувствительн[а-яё]*\s+(?:сниж|пада|уменьш)|стал[аио]?\s+менее\s+чувствительн|ощуща[а-яё]*\s+(?:слабее|тусклее|приглуш)/u.test(speech);
+    return (saysUp && trend !== 'up') || (saysDown && trend !== 'down');
+}
+
 const actionVocabulary = [
     { label: /погла[дж]|перыш|проведение/i, speech: /погла[дж]|глад|перыш/i },
     { label: /массаж|размять/i, speech: /массаж|массиру|размин/i },
@@ -463,6 +472,9 @@ export async function generateCharacterReply(
                 }
                 if (contradictsAcceptanceChange(parsed, payload)) {
                     throw new Error('speech asks to repeat an action while overall acceptance declines');
+                }
+                if (contradictsSensitivityTrend(parsed, payload)) {
+                    throw new Error('speech contradicts the internally validated direction of sensory change');
                 }
                 if (substitutesCurrentAction(parsed, payload)) {
                     throw new Error('speech substitutes a different physical action for the current one');

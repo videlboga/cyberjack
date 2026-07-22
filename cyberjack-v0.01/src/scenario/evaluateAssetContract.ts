@@ -69,24 +69,33 @@ export function evaluateAssetContract(
     };
 }
 
-function checkCondition(cond: AssetContractCondition, core: SubjectCoreState, context: Record<string, any>): boolean {
+export function contractConditionValue(cond: AssetContractCondition, core: SubjectCoreState, context: Record<string, any>): any {
     if (cond.type === 'attitude') {
-        return compareValues(core.attitude, cond.operator, cond.value);
+        return core.baselineAttitude ?? core.attitude;
     }
     if (cond.type === 'flag' || cond.type === 'trait') {
         const hasFlag = core.flags?.includes(cond.key || '');
-        // Если требуется отсутствие флага? Можно добавить operator '!='
-        if (cond.operator === '!=') return !hasFlag;
         return !!hasFlag;
     }
-    // базовые статы
     if (cond.type === 'custom' && cond.key) {
-        const val = (core as any)[cond.key];
-        if (val !== undefined) {
-             return compareValues(val, cond.operator, cond.value);
-        }
+        // Trainable qualities are evaluated by their adapted baseline. Session
+        // state (resource/tension) intentionally remains momentary.
+        const baselineKeys: Record<string, keyof SubjectCoreState> = {
+            sensitivity: 'baselineSensitivity',
+            openness: 'baselineOpenness',
+            plasticity: 'baselinePlasticity',
+            attitude: 'baselineAttitude',
+        };
+        const baselineKey = baselineKeys[cond.key];
+        if (baselineKey) return core[baselineKey] ?? (core as any)[cond.key];
+        return (core as any)[cond.key];
     }
-    return false;
+    return context[cond.key || cond.type];
+}
+
+function checkCondition(cond: AssetContractCondition, core: SubjectCoreState, context: Record<string, any>): boolean {
+    const value = contractConditionValue(cond, core, context);
+    return value !== undefined && compareValues(value, cond.operator, cond.value);
 }
 
 function compareValues(actual: any, operator: string = '==', target: any): boolean {

@@ -26,11 +26,13 @@ import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
 import { STATE_RULES } from './conditionWatcher';
 import { clamp } from '../engine/utils';
 import { moveCharacterInLaboratory } from '../scenario/spatialContext';
+import { calculateSituationalCompliance, deriveEdgeProfile } from '../domain/edgeState';
 
 export interface GameEventPayload {
     subjectId: string;
     pointId: string;
     playerId: string;
+    actingCharacterId?: string;
     sceneId: string;
     presetId: string; // The base action id
     playerIntensity?: number;
@@ -59,6 +61,7 @@ export function constrainCapacityWhileUnresponsive(input: {
 }
 
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
+    const initiatorId = payload.actingCharacterId || payload.playerId || payload.subjectId;
     // 1. Load state
     const state = loadTickState(payload.subjectId, payload.pointId, payload.playerId, payload.sceneId);
     const stateBefore = {
@@ -97,6 +100,19 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     
     // 3. Get history for novelty
     const history = eventQueries.getRecentLogs(payload.subjectId, 5);
+    const edgeProfile = deriveEdgeProfile(state.core, history);
+    const complianceFor = (action: { id?: string; label?: string; type?: string; pointId?: string } = {}) => {
+        const compliance = calculateSituationalCompliance({
+            attitude: state.relation?.attitude ?? state.core.attitude ?? 0,
+            plasticity: state.core.plasticity || 0,
+            profile: edgeProfile,
+            action,
+        });
+        const contextIds = new Set(activeContextsRepo.getAllForSubject(payload.subjectId).map(context => context.actionId));
+        const stateModifier = (contextIds.has('effect_suggestibility') ? 15 : 0) +
+            (contextIds.has('effect_subspace') ? 10 : 0);
+        return { ...compliance, stateModifier, total: Math.max(0, Math.min(150, compliance.total + stateModifier)) };
+    };
     
     // 4. Compile Action Vector
     let allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
@@ -132,6 +148,14 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         if ((compiledAction as any)._baseAction) {
             ((compiledAction as any)._baseAction as any).commandIntent = commandIntent;
         }
+    }
+
+    // Poses, movement and wardrobe/equipment toggles are scene operations, not
+    // physiological calibration stimuli. Their context effects are applied
+    // below, while this carrier tick remains metabolically neutral.
+    if (commandIntent && ['change_pose', 'activate_context', 'deactivate_context', 'deactivate_contexts', 'move'].includes(commandIntent.type)) {
+        compiledAction = { ...compiledAction, intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
+        (compiledAction as any)._baseAction = { ...(compiledAction as any)._baseAction, intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
     }
 
     // 5. Run Engine Tick
@@ -203,12 +227,21 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         let targetCtxId: string | undefined;
         if (commandIntent.type === 'change_pose') targetCtxId = commandIntent.targetPoseId;
     else if (commandIntent.type === 'activate_context') targetCtxId = commandIntent.targetContextId;
-        else if (commandIntent.type === 'deactivate_context') {
-            const deactivateId = commandIntent.targetContextId;
-            const actionPreset = presetRepo.getActionPreset(deactivateId);
-            const currentStatuses = activeContextsRepo2.getAllForSubject(payload.subjectId)
-                .filter((c: any) => c.actionId === deactivateId);
-            if (currentStatuses.length > 0) {
+        else if (commandIntent.type === 'deactivate_context' || commandIntent.type === 'deactivate_contexts') {
+            const deactivateIds = commandIntent.type === 'deactivate_context'
+                ? [commandIntent.targetContextId]
+                : commandIntent.targetContextIds;
+            for (const deactivateId of [...new Set(deactivateIds)]) {
+                const actionPreset = presetRepo.getActionPreset(deactivateId);
+                const currentStatuses = activeContextsRepo2.getAllForSubject(payload.subjectId)
+                    .filter((c: any) => c.actionId === deactivateId);
+                if (!currentStatuses.length) continue;
+                const requiredCompliance = actionPreset?.type === 'clothing' ? 40 : 25;
+                const compliance = complianceFor({ id: deactivateId, label: actionPreset?.label, type: actionPreset?.type, pointId: payload.pointId });
+                if (compliance.total < requiredCompliance) {
+                    const refusalNarrative = `[Система]: Актив отклоняет требование «${actionPreset?.label || deactivateId}». Податливость ${Math.round(compliance.total)} (база ${Math.round(compliance.base)}, состояние ${compliance.edgeModifier >= 0 ? '+' : ''}${compliance.edgeModifier}); требуется ${requiredCompliance}.`;
+                    addedContextNotes.push(refusalNarrative);
+                } else {
                 // One wearable context can occupy several body points. A verbal
                 // command removes the item as a whole, not just its first row.
                 activeContextsRepo2.removeByActionId(payload.subjectId, deactivateId);
@@ -219,10 +252,11 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'context_change', action: null, actionLabel: removalNarrative, narrative: removalNarrative }, { removed: true });
                 addedContextNotes.push(removalNarrative);
                 actionApplied = true;
+                }
             }
         } else if (commandIntent.type === 'move') {
             const tgtLoc = commandIntent.targetLocation;
-            const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
+            const currentCompliance = complianceFor({ id: 'move', label: tgtLoc, type: 'move' }).total;
             const moveCompliance = 30;
             if (currentCompliance < moveCompliance) {
                 const subjectName = characterRepo.get(payload.subjectId)?.name || payload.subjectId;
@@ -299,7 +333,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             if (commandActionPreset) {
                 forcedAttempted = true;
                 const requiredCompliance = (commandActionPreset.priority || 1) * 20;
-                const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
+                const currentCompliance = complianceFor({ id: commandActionPreset.id || commandIntent.actionId, label: commandActionPreset.label, type: commandActionPreset.type, pointId: commandIntent.pointId }).total;
                 const targetName = commandIntent.targetId || 'не указана';
 
                 if (currentCompliance >= requiredCompliance) {
@@ -330,7 +364,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 if (commandActionPreset) {
                     forcedAttempted = true;
                     const requiredCompliance = (commandActionPreset.priority || 1) * 20;
-                    const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
+                    const currentCompliance = complianceFor({ id: commandActionPreset.id || commandIntent.matchedActionId, label: commandActionPreset.label, type: commandActionPreset.type, pointId: commandIntent.pointId }).total;
                     // Default target is the subject being acted upon
                     const targetChar = characterRepo.get(commandIntent.targetId || payload.subjectId);
                     const targetName = targetChar?.name || commandIntent.targetId || payload.subjectId;
@@ -362,13 +396,13 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             const actionPreset = presetRepo.getActionPreset(targetCtxId);
             if (actionPreset && actionPreset.contextConfig) {
                 const requiredCompliance = (actionPreset.contextConfig.priority || 1) * 20;
-                const currentCompliance = (state.relation?.attitude || state.core.attitude || 0) + ((state.core.plasticity || 0) * 0.5);
+                const currentCompliance = complianceFor({ id: targetCtxId, label: actionPreset.label, type: actionPreset.type, pointId: payload.pointId }).total;
                 
                 if (currentCompliance >= requiredCompliance) {
                     let reason = (state.relation?.attitude > 70) ? "охотно поддаваясь влиянию" : "с неохотой подчиняясь программированию";
                     if (state.core.attitude < 30) reason = "вынужденно и унизительно для себя";
                     // If there is a playerId (actor), mark them as initiator; otherwise default to subject
-                    const initiator = payload.playerId || payload.subjectId;
+                    const initiator = initiatorId;
                     ContextManager.applyContext(payload.subjectId, targetCtxId, actionPreset, undefined, initiator);
                     // Only record a forced narrative state when the action preset explicitly
                     // defines a non-verbal, non-wait type. If the preset has no type, we
@@ -389,7 +423,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
                     // Execute effects of the commanded actionPreset (apply/remove contexts)
                     try {
-                        const initiator = payload.playerId || payload.subjectId;
+                        const initiator = initiatorId;
                         // If the commanded actionPreset itself defines contextConfig, apply it to the subject
                         if (commandActionPreset && (commandActionPreset as any).contextConfig) {
                             ContextManager.applyContext(payload.subjectId, commandIntent.actionId, commandActionPreset as any, undefined, initiator);
@@ -459,8 +493,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     if (compiledAction.contextConfig) {
-        const initiator = payload.playerId || payload.subjectId;
-        ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction, undefined, initiator);
+        const initiator = initiatorId;
+        ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction, payload.pointId, initiator);
         actionApplied = true;
     }
     if (compiledAction.removeContexts) {
@@ -667,7 +701,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // 6.5 Update context strain (Escalation / Decay)
 
-    const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId, { initiatorId: payload.playerId || 'PL-1' });
+    const prompt = await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId, { initiatorId });
 
     // Log the constructed prompt payload for debugging/inspection
     try {

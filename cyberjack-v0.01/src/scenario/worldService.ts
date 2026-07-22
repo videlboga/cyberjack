@@ -1,6 +1,7 @@
 import { db } from '../infrastructure/db';
 import { characterItemsRepo, characterRepo, itemRepo, pointStateRepo, resourceRepo, sceneCharacterRepo, subjectRepo } from '../infrastructure/repositories';
 import { appendRoleHistory, ensureCharacterLifecycle } from './characterLifecycle';
+import { ensureStarterClothing, STARTER_CLOTHING } from '../infrastructure/starterClothing';
 
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
@@ -40,13 +41,16 @@ const SHOP_OFFERS = [
     { id: 'offer_sensitizer', itemId: 'drug_sensitizer', name: 'NeuroSpike', description: 'Расходник для локальной гиперсенсибилизации.', category: 'item', price: 160, stock: 4 },
     { id: 'lab_recovery_capsule', itemId: 'lab_recovery_capsule', name: 'Восстановительная капсула', description: 'Пассивно стабилизирует помещённый внутрь актив и создаёт восстановительный резерв.', category: 'laboratory', price: 700, stock: 1 },
     { id: 'lab_restraint_frame', itemId: 'lab_restraint_frame', name: 'Стационарная рама', description: 'Лабораторная фиксация для продолжительных автоматических протоколов.', category: 'laboratory', price: 850, stock: 1 },
-    { id: 'lab_sensory_pod', itemId: 'lab_sensory_pod', name: 'Сенсорная капсула', description: 'Изолированный модуль для пассивных сенсорных программ.', category: 'laboratory', price: 1100, stock: 1 }
+    { id: 'lab_sensory_pod', itemId: 'lab_sensory_pod', name: 'Сенсорная капсула', description: 'Изолированный модуль для пассивных сенсорных программ.', category: 'laboratory', price: 1100, stock: 1 },
+    { id: 'lab_sex_machine', itemId: 'lab_sex_machine', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.', category: 'laboratory', price: 1450, stock: 1 }
 ] as const;
 
 const BASE_LAB_ASSETS = [
     { id: 'lab_terminal', roomId: 'room_control', name: 'Терминал протоколов', description: 'Сборка и автоматический запуск последовательностей воздействий.' },
     { id: 'lab_diagnostic_table', roomId: 'room_calibration', name: 'Диагностический стол', description: 'Базовая телеметрия и ручная калибровка актива.' },
-    { id: 'lab_background_loop', roomId: 'room_calibration', name: 'Фоновый контур', description: 'Простейшая автоматическая стимуляция во время ручной работы.' }
+    { id: 'lab_background_loop', roomId: 'room_calibration', name: 'Фоновый контур', description: 'Простейшая автоматическая стимуляция во время ручной работы.' },
+    { id: 'lab_sex_machine', roomId: 'room_calibration', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.' },
+    { id: 'lab_sensory_pod', roomId: 'room_calibration', name: 'Сенсорная капсула', description: 'Изолированный модуль для пассивных сенсорных программ.' }
 ];
 
 const BASE_LAB_ROOMS = [
@@ -102,7 +106,7 @@ export function ensureWorldSeed() {
         if (metadata.subjectId) {
             const assignment = db.prepare(`SELECT room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`)
                 .get(PLAYER_ID, metadata.subjectId) as any;
-            if (!metadata.previousRoomId && assignment?.room_id !== metadata.roomId) {
+            if (!metadata.previousRoomId && assignment?.room_id && assignment.room_id !== metadata.roomId) {
                 metadata.previousRoomId = assignment.room_id;
                 db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
                     .run(JSON.stringify(metadata), PLAYER_ID, row.asset_id);
@@ -210,6 +214,10 @@ export function ensureWorldSeed() {
     if (candidate?.currentSceneId === 'scene_broker') {
         sceneCharacterRepo.set('scene_broker', candidate.id, { role: 'candidate', presenceState: 'present' });
     }
+    ensureStarterClothing('PL-1', STARTER_CLOTHING['PL-1']);
+    ensureStarterClothing('S-AV-01', STARTER_CLOTHING['S-AV-01']);
+    ensureStarterClothing('NPC-LAB-01', STARTER_CLOTHING['NPC-LAB-01']);
+    ensureStarterClothing('NPC-CAND-01', STARTER_CLOTHING['NPC-CAND-01']);
     const assignRoom = db.prepare(`
         INSERT OR IGNORE INTO laboratory_room_assignments (player_id, room_id, character_id, status)
         VALUES (?, ?, ?, 'resident')
@@ -267,6 +275,53 @@ function applyExpiredContractPenalties(now: number) {
 
 type TimeAdvanceOptions = { activeSubjectIds?: string[] };
 
+export type DeviceSession = {
+    deviceId: 'sex_machine' | 'capsule';
+    subjectId: string;
+    configuration: string;
+    wardrobe: 'nude' | 'underwear' | 'device_outfit';
+    status: 'loaded' | 'running' | 'paused' | 'stopped';
+    intensity: number;
+    phase: 'sustain' | 'intense' | 'peak';
+    protocolId: string;
+    targetPointIds: string[];
+    startedAtTick: number | null;
+    updatedAtTick: number;
+};
+
+const DEVICE_DEFINITIONS = {
+    lab_sex_machine: {
+        deviceId: 'sex_machine' as const,
+        configurations: {
+            stirrups: ['nude', 'device_outfit'],
+            restrained: ['nude', 'underwear'],
+            suspended: ['nude', 'device_outfit'],
+            milking: ['nude', 'device_outfit'],
+            hmd: ['nude', 'device_outfit'],
+            mind_control: ['nude', 'device_outfit']
+        },
+        defaultConfiguration: 'restrained',
+        defaultWardrobe: 'underwear' as const
+    },
+    lab_sensory_pod: {
+        deviceId: 'capsule' as const,
+        configurations: {
+            hmd: ['nude', 'device_outfit'],
+            machine: ['nude', 'device_outfit'],
+            electric: ['nude', 'device_outfit']
+        },
+        defaultConfiguration: 'hmd',
+        defaultWardrobe: 'device_outfit' as const
+    }
+} as const;
+
+type DeviceAssetId = keyof typeof DEVICE_DEFINITIONS;
+
+const phaseForDeviceIntensity = (intensity: number): DeviceSession['phase'] =>
+    intensity >= 85 ? 'peak' : intensity >= 60 ? 'intense' : 'sustain';
+
+const isControllableDevice = (assetId: string): assetId is DeviceAssetId => assetId in DEVICE_DEFINITIONS;
+
 function recoveryLabel(capacity: number, baselineCapacity: number) {
     if (baselineCapacity <= 25) return 'глубокое хроническое истощение';
     if (baselineCapacity <= 40) return 'хроническое истощение';
@@ -320,6 +375,27 @@ function applyPassiveLaboratoryEffects(minutes: number, excluded = new Set<strin
     }
     for (const [subjectId, assetId] of deviceOccupants) {
         if (assetId === 'lab_recovery_capsule') recover(subjectId, 25, 8, 0.75, 12);
+    }
+
+    for (const device of devices) {
+        if (!isControllableDevice(String(device.asset_id))) continue;
+        let metadata: Record<string, any> = {};
+        try { metadata = JSON.parse(device.metadata || '{}'); } catch { metadata = {}; }
+        const session = metadata.deviceSession as DeviceSession | undefined;
+        if (!session || session.status !== 'running' || excluded.has(session.subjectId)) continue;
+        const core = subjectRepo.get(session.subjectId);
+        if (!core) continue;
+        const power = Math.max(0, Math.min(1, session.intensity / 100));
+        const deviceMultiplier = session.deviceId === 'sex_machine' ? 1 : session.configuration === 'electric' ? 0.9 : 0.7;
+        subjectRepo.save(session.subjectId, core.name || session.subjectId, {
+            ...core,
+            tension: Math.min(100, core.tension + (6 + 16 * power) * deviceMultiplier * hours),
+            capacity: Math.max(0, core.capacity - (2 + 8 * power) * deviceMultiplier * hours)
+        });
+        const now = getWorldClock().totalMinutes + minutes;
+        const nextSession = { ...session, phase: phaseForDeviceIntensity(session.intensity), updatedAtTick: now };
+        db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
+            .run(JSON.stringify({ ...metadata, deviceSession: nextSession }), device.player_id, device.asset_id);
     }
 }
 
@@ -541,15 +617,23 @@ export function buyOffer(offerId: string, playerId = PLAYER_ID) {
 export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYER_ID) {
     if (getPlayerLocation(playerId).id !== LAB_SCENE_ID) throw new Error('Лабораторное оборудование доступно только в лаборатории');
     if (!listLabAssets(playerId).some(asset => asset.id === assetId)) throw new Error('Модуль не установлен');
-    if (!['lab_recovery_capsule', 'lab_diagnostic_table'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
+    if (!['lab_recovery_capsule', 'lab_diagnostic_table', 'lab_sensory_pod', 'lab_sex_machine'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
     const core = subjectRepo.get(subjectId);
     if (!core) throw new Error('Актив не найден');
     const asset = listLabAssets(playerId).find(entry => entry.id === assetId)!;
     const currentSubjectId = String((asset.metadata as any)?.subjectId || '');
     if (currentSubjectId && currentSubjectId !== subjectId) throw new Error('Устройство уже занято');
     const nextSubjectId = currentSubjectId === subjectId ? null : subjectId;
+    const currentSession = (asset.metadata as any)?.deviceSession as DeviceSession | undefined;
+    if (!nextSubjectId && currentSession && ['running', 'paused'].includes(currentSession.status)) {
+        throw new Error('Сначала остановите активный протокол');
+    }
     const assignment = db.prepare(`SELECT room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`).get(playerId, subjectId) as any;
     const previouslyOccupiedAsset = listLabAssets(playerId).find(entry => (entry.metadata as any)?.subjectId === subjectId);
+    const previousSession = (previouslyOccupiedAsset?.metadata as any)?.deviceSession as DeviceSession | undefined;
+    if (nextSubjectId && previouslyOccupiedAsset?.id !== assetId && previousSession && ['running', 'paused'].includes(previousSession.status)) {
+        throw new Error('Сначала остановите протокол текущего устройства');
+    }
     const previousRoomId = String((previouslyOccupiedAsset?.metadata as any)?.previousRoomId || assignment?.room_id || 'room_cell_a');
     const assetRoomId = String((asset.metadata as any)?.roomId || assignment?.room_id || 'room_calibration');
     const returnRoomId = String((asset.metadata as any)?.previousRoomId || assignment?.room_id || previousRoomId);
@@ -566,9 +650,23 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
                 }
             }
         }
+        const definition = isControllableDevice(assetId) ? DEVICE_DEFINITIONS[assetId] : null;
+        const deviceSession: DeviceSession | undefined = definition && nextSubjectId ? {
+            deviceId: definition.deviceId,
+            subjectId: nextSubjectId,
+            configuration: definition.defaultConfiguration,
+            wardrobe: definition.defaultWardrobe,
+            status: 'loaded',
+            intensity: 35,
+            phase: 'sustain',
+            protocolId: 'standard',
+            targetPointIds: ['systemic'],
+            startedAtTick: null,
+            updatedAtTick: getWorldClock().totalMinutes
+        } : undefined;
         db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
             .run(JSON.stringify(nextSubjectId
-                ? { ...asset.metadata, subjectId: nextSubjectId, startedAt: getWorldClock().totalMinutes, previousRoomId }
+                ? { ...asset.metadata, subjectId: nextSubjectId, startedAt: getWorldClock().totalMinutes, previousRoomId, ...(deviceSession ? { deviceSession } : {}) }
                 : { roomId: (asset.metadata as any)?.roomId }), playerId, assetId);
         db.prepare(`UPDATE laboratory_room_assignments SET room_id = ?, status = ? WHERE player_id = ? AND character_id = ?`)
             .run(nextSubjectId ? assetRoomId : returnRoomId, nextSubjectId ? `device:${assetId}` : 'resident', playerId, subjectId);
@@ -577,6 +675,59 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
     })();
     recordScenarioEvent('equipment', nextSubjectId ? 'Актив помещён в устройство' : 'Актив извлечён из устройства', `${core.name || subjectId}: ${asset.name}.`, { subjectId, assetId });
     return { subject: subjectRepo.get(subjectId), assetId, occupied: Boolean(nextSubjectId) };
+}
+
+export function controlDeviceSession(
+    assetId: string,
+    command: 'configure' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop',
+    payload: { configuration?: string; wardrobe?: string; intensity?: number; protocolId?: string; targetPointIds?: string[] } = {},
+    playerId = PLAYER_ID
+) {
+    if (!isControllableDevice(assetId)) throw new Error('Устройство не поддерживает управляемые протоколы');
+    const row = db.prepare(`SELECT asset_id, name, description, state, metadata FROM laboratory_assets WHERE player_id = ? AND asset_id = ?`)
+        .get(playerId, assetId) as any;
+    if (!row) throw new Error('Модуль не установлен');
+    let metadata: Record<string, any> = {};
+    try { metadata = JSON.parse(row.metadata || '{}'); } catch { metadata = {}; }
+    const current = metadata.deviceSession as DeviceSession | undefined;
+    if (!metadata.subjectId || !current) throw new Error('В устройство не помещён персонаж');
+    const definition = DEVICE_DEFINITIONS[assetId];
+    const now = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
+    let next: DeviceSession = { ...current, updatedAtTick: now };
+
+    if (command === 'configure') {
+        if (current.status === 'running') throw new Error('Остановите или приостановите протокол перед настройкой');
+        const configuration = String(payload.configuration || current.configuration);
+        const configurations = definition.configurations as Record<string, readonly string[]>;
+        const wardrobes = configurations[configuration];
+        if (!wardrobes) throw new Error('Эта конфигурация недоступна');
+        const wardrobe = String(payload.wardrobe || current.wardrobe);
+        if (!wardrobes.includes(wardrobe)) throw new Error('Одежда несовместима с выбранной конфигурацией');
+        next = { ...next, configuration, wardrobe: wardrobe as DeviceSession['wardrobe'], protocolId: String(payload.protocolId || current.protocolId) };
+    } else if (command === 'start') {
+        if (current.status === 'running') throw new Error('Протокол уже запущен');
+        next = { ...next, status: 'running', startedAtTick: current.startedAtTick ?? now };
+    } else if (command === 'adjust') {
+        if (!['running', 'paused'].includes(current.status)) throw new Error('Сначала запустите протокол');
+        const intensity = Math.max(10, Math.min(100, Number(payload.intensity) || current.intensity));
+        next = { ...next, intensity, phase: phaseForDeviceIntensity(intensity) };
+    } else if (command === 'pause') {
+        if (current.status !== 'running') throw new Error('Протокол не запущен');
+        next = { ...next, status: 'paused' };
+    } else if (command === 'resume') {
+        if (current.status !== 'paused') throw new Error('Протокол не находится на паузе');
+        next = { ...next, status: 'running' };
+    } else if (command === 'stop') {
+        if (!['running', 'paused'].includes(current.status)) throw new Error('Протокол уже остановлен');
+        next = { ...next, status: 'stopped', phase: 'sustain', startedAtTick: null };
+    }
+
+    db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
+        .run(JSON.stringify({ ...metadata, deviceSession: next }), playerId, assetId);
+    recordScenarioEvent('device_protocol', `Устройство: ${command}`, `${row.name}: ${next.configuration}, интенсивность ${next.intensity}%.`, {
+        subjectId: next.subjectId, assetId, command, configuration: next.configuration, intensity: next.intensity
+    });
+    return { assetId, session: next };
 }
 
 export function getScenarioSnapshot(playerId = PLAYER_ID) {
@@ -634,9 +785,10 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
             return [{ id: `scenario-${event.id}`, worldMinute: event.world_minute, type: event.type, title: event.title, description: event.description }];
         });
         const contexts = db.prepare(`
-            SELECT ac.action_id AS id, COALESCE(ap.label, ac.action_id) AS label, ac.ticks_active AS ticksActive
+            SELECT ac.action_id AS id, COALESCE(ap.label, ac.action_id) AS label, MAX(ac.ticks_active) AS ticksActive
             FROM active_contexts ac LEFT JOIN action_presets ap ON ap.id = ac.action_id
             WHERE ac.subject_id = ?
+            GROUP BY ac.action_id, ap.label
         `).all(simulationId) as any[];
         const points = db.prepare(`
             SELECT sps.point_id AS id, COALESCE(pp.label, sps.point_id) AS label,

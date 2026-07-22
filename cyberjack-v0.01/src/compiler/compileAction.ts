@@ -4,6 +4,7 @@ import { presetRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { compileContextVector } from './compileContextVector';
 import { mergeVectors } from './mergeVectors';
 import { computeNovelty } from './noveltyService';
+import { normalizeAuthoredActionVector, shapeImmediateContextAction } from './actionVectorScale';
 
 export interface ActionInput {
     presetId: string;
@@ -25,9 +26,15 @@ export interface ActionInput {
 export function compileAction(input: ActionInput): CompiledAction {
     const presetRecord = presetRepo.getActionPreset(input.presetId);
 
-    const baseVector = input.presetId === 'wait'
+    const authoredVector = input.presetId === 'wait'
         ? { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }
         : (presetRecord?.vector || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 });
+    const normalizedVector = normalizeAuthoredActionVector(authoredVector as Record<string, any>);
+    const baseVector = shapeImmediateContextAction(
+        normalizedVector,
+        presetRecord?.contextConfig?.type,
+        Boolean(presetRecord?.removeContexts?.length)
+    );
 
     const baseAction: CompiledAction = {
         actionKey: input.presetId,

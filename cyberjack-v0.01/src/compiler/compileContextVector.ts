@@ -1,5 +1,6 @@
 import { CompiledAction } from '../domain/types';
 import { presetRepo } from '../infrastructure/repositories';
+import { normalizeAuthoredActionVector } from './actionVectorScale';
 
 const STRAIN_MULTIPLIERS: Record<string, number> = {
     intensity: 1.5,
@@ -24,11 +25,14 @@ export function compileContextVector(
         // store their multipliers in the primary vector, so retain that narrow
         // compatibility path. A pose's one-time application vector must never
         // turn rest or conversation into continuous stimulation.
-        const modifiers = config?.modifiers || (
+        const authoredModifiers = config?.modifiers || (
             config?.type === 'condition' && presetResult
                 ? presetResult.vector as Partial<CompiledAction>
                 : null
         );
+        const modifiers = authoredModifiers
+            ? normalizeAuthoredActionVector(authoredModifiers as Record<string, any>)
+            : null;
 
         if (modifiers) {
             for (const [key, val] of Object.entries(modifiers)) {

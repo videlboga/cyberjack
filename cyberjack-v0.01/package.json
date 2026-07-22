@@ -7,6 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "build:image-matrix": "node scripts/build-character-image-matrix.mjs",
+    "build:base-avatar-matrix": "node scripts/build-base-avatar-matrix.mjs",
+    "build:interaction-matrix": "node scripts/build-interaction-visual-matrix.mjs",
+    "build:interaction-matrix-expanded": "node scripts/build-interaction-visual-matrix-expanded.mjs",
+    "build:visual-index-v4": "node scripts/build-visual-asset-index-v4.mjs",
+    "validate:visual-v4": "node scripts/validate-visual-matrices-v4.mjs",
+    "build:visual-checklist-v4": "node scripts/build-visual-generation-checklist-v4.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },

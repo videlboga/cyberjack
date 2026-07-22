@@ -24,6 +24,11 @@ yarn-debug.log*
 yarn-error.log*
 .env
 
+# Curated game art is versioned even though the parent repository ignores media.
+!public/backgrounds/
+!public/backgrounds/laboratory/
+!public/backgrounds/laboratory/*.png
+
 # OS files
 .DS_Store
 Thumbs.db

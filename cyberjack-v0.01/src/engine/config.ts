@@ -36,7 +36,7 @@ export const DEFAULT_CONFIG: any =
       novelty: 0.5,
     },
     ranges: {
-      intensity: [0, 5, 0.01],
+      intensity: [0, 1, 0.01],
       valence: [-1, 1, 0.01],
       contact: [0, 1, 0.01],
       sharpness: [0, 1, 0.01],
@@ -146,9 +146,10 @@ export const DEFAULT_CONFIG: any =
       sensitivityTarget: 5, // legacy alias
       sensitivityRegenRate: 0.4,
       sensitivityRegenThreshold: 8,
-      capacityDropMultiplier: 0.25, // For fast draining
-      capacityLoadFromIntensity: 0.015,
-      capacityLoadFromDiscomfort: 0.02,
+      capacityDropMultiplier: 0.2,
+      capacityLoadFromIntensity: 0.008,
+      capacityLoadFromDiscomfort: 0.025,
+      edgingCapacityDropRate: 0.08,
       capacityRecoveryRate: 1.0,    // Regen per silent tick
       tensionRecoveryBase: 0.75,
       tensionRecoveryOpennessDivisor: 25,

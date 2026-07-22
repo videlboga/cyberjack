@@ -8,9 +8,9 @@
     "background": "transparent"
   },
   "characters": [
-    { "id": "S-AV-01", "slug": "mira", "name": "Мира" },
-    { "id": "NPC-LAB-01", "slug": "iona", "name": "Иона" },
-    { "id": "NPC-CAND-01", "slug": "nika", "name": "Ника" }
+    { "id": "S-AV-01", "slug": "mira", "name": "Мира", "appearanceTags": ["very long hair", "black hair", "pink hair", "two-tone hair", "bangs", "blue eyes", "pale skin", "tall girl", "medium breasts"] },
+    { "id": "NPC-LAB-01", "slug": "iona", "name": "Иона", "appearanceTags": ["very long hair", "purple hair", "purple eyes", "glasses", "low-tied long hair", "tall girl", "medium breasts"] },
+    { "id": "NPC-CAND-01", "slug": "nika", "name": "Ника", "appearanceTags": ["short hair", "teal hair", "black hair", "two-tone hair", "teal eyes", "choker", "petite", "small breasts"] }
   ],
   "poses": [
     { "id": "standing", "contextId": "pose_standing", "name": "Стоя" },

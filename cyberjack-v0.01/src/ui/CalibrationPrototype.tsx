@@ -1,4 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
+import {
+  activeVisualInteractionFromContexts,
+  buildCalibrationVisualDescriptorV4,
+  expandedInteractionAssetPath,
+  resolveCalibrationAvatarV4,
+  resolveFirstAvailableVisual,
+} from "../domain/characterVisuals";
+import { deriveEdgeProfile, deriveReactionCharacter } from "../domain/edgeState";
+import { canonicalCharacterPortrait, CharacterPortrait } from "./CharacterPortrait";
+import "./VisualReview.css";
 import "./CalibrationPrototype.css";
 import "./ProtocolControls.css";
 import "./CompactCalibration.css";
@@ -22,10 +32,14 @@ type Point = {
   localAttitude: number;
   localOpenness?: number;
   familiarity?: number;
+  exposureCount?: number;
   baselineLocalSensitivity?: number;
+  baselineLocalAttitude?: number;
+  baselineLocalOpenness?: number;
 };
 type ActiveContext = {
   actionId: string;
+  ticksActive?: number;
   pointId?: string;
   label?: string;
   type?: string;
@@ -34,11 +48,22 @@ type ActiveContext = {
 };
 type State = {
   sensitivity: number;
+  localSensitivity: number;
   capacity: number;
   openness: number;
   attitude: number;
   tension: number;
   plasticity: number;
+  baselineSensitivity?: number;
+  baselineCapacity?: number;
+  baselineOpenness?: number;
+  baselineAttitude?: number;
+  baselinePlasticity?: number;
+  baseline_sensitivity?: number;
+  baseline_capacity?: number;
+  baseline_openness?: number;
+  baseline_attitude?: number;
+  baseline_plasticity?: number;
   anatomy?: Record<string, Point>;
   contexts?: ActiveContext[];
 };
@@ -68,6 +93,63 @@ type Step = {
   pointId?: string;
   pointLabel?: string;
 };
+type ProtocolStepProgress = {
+  status: "pending" | "running" | "completed" | "error";
+  completedRepeats: number;
+  pleasure: number;
+  discomfort: number;
+  tension: number;
+  capacity: number;
+  attitude: number;
+  localAttitude: number;
+  sensitivity: number;
+  openness: number;
+  plasticity: number;
+  localOpenness: number;
+  familiarity: number;
+  baselineLocalSensitivity: number;
+  overload: number;
+  engagement: number;
+  appraisal: number;
+};
+type TrackedMetric = "pleasure" | "discomfort" | "overload" | "engagement" | "appraisal" | "tension" | "capacity" | "attitude" | "localAttitude" | "sensitivity" | "localSensitivity" | "baselineLocalSensitivity" | "openness" | "localOpenness" | "plasticity" | "familiarity";
+type CalibrationVisualEffect = {
+  key: string;
+  family: "electric" | "vibration" | "impact" | "cold" | "heat" | "soft" | "sharp" | "restraint" | "pulse";
+  result: "accepted" | "mixed" | "rejected" | "overload";
+  intensity: number;
+  target: string;
+};
+const trackedMetricOptions: Array<{ id: TrackedMetric; label: string }> = [
+  { id: "attitude", label: "Принятие" },
+  { id: "localAttitude", label: "Принятие зоны" },
+  { id: "sensitivity", label: "Общая чувствительность" },
+  { id: "localSensitivity", label: "Чувствительность зоны" },
+  { id: "baselineLocalSensitivity", label: "База чувствительности зоны" },
+  { id: "openness", label: "Открытость" },
+  { id: "localOpenness", label: "Открытость зоны" },
+  { id: "plasticity", label: "Пластичность" },
+  { id: "familiarity", label: "Знакомство зоны" },
+  { id: "capacity", label: "Ресурс" },
+  { id: "tension", label: "Напряжение" },
+  { id: "pleasure", label: "Удовольствие" },
+  { id: "discomfort", label: "Дискомфорт" },
+  { id: "overload", label: "Перегрузка" },
+  { id: "engagement", label: "Вовлечённость" },
+  { id: "appraisal", label: "Психологическая оценка" },
+];
+const trackedMetricLabel = (id: TrackedMetric) => trackedMetricOptions.find((option) => option.id === id)?.label || id;
+const visualEffectFamily = (actionId: string): CalibrationVisualEffect["family"] => {
+  if (/(shock|taser|electro|tens)/.test(actionId)) return "electric";
+  if (/(vibrat|sensory_loop|sensory_pulse)/.test(actionId)) return "vibration";
+  if (/(slap|strike|punch|belt|whip)/.test(actionId)) return "impact";
+  if (/(ice|cold)/.test(actionId)) return "cold";
+  if (/(wax|hot)/.test(actionId)) return "heat";
+  if (/(kiss|stroke|massage|lick|breath)/.test(actionId)) return "soft";
+  if (/(bite|needle|pinch|scratch)/.test(actionId)) return "sharp";
+  if (/(cuff|restraint|suspend|collar|blindfold|gag)/.test(actionId)) return "restraint";
+  return "pulse";
+};
 type Entry = {
   step: number;
   action: string;
@@ -78,15 +160,56 @@ type Entry = {
 type Obs = {
   behavioralState: string;
   contact?: string;
-  action?: { label: string };
+  action?: { id?: string; label: string; pointId?: string };
   currentState?: { title: string; description: string };
   uiText: string;
   technicalText: string;
-  learning?: { effect: number };
+  reaction?: {
+    pleasure: number;
+    discomfort: number;
+    overload: number;
+    engagement: number;
+    mixed?: boolean;
+    appraisal?: number;
+  };
+  changes?: {
+    tension?: number;
+    capacity?: number;
+    attitude?: number;
+    openness?: number;
+    plasticity?: number;
+    localAttitude?: number;
+    sensitivity?: number;
+    localOpenness?: number;
+  };
+  learning?: {
+    effect: number;
+    sensitivityDelta?: number;
+    baselineSensitivityDelta?: number;
+    attitudeDelta?: number;
+    opennessDelta?: number;
+    familiarityDelta?: number;
+  };
   contexts?: { id: string }[];
-  transitions?: { title: string; text: string; severity: string }[];
+  transitions?: {
+    kind?: string;
+    title: string;
+    text: string;
+    severity: string;
+  }[];
 };
-type ChatLine = { id: string; speaker: string; text: string; context?: string };
+type ChatLine = { id: string; speaker: string; text: string; context?: string; repeat?: number; action?: boolean };
+
+const collapseRepeatedActions = (lines: ChatLine[]) => lines.reduce<ChatLine[]>((result, line) => {
+  const previous = result[result.length - 1];
+  if (line.action && previous?.action && previous.text === line.text) {
+    previous.repeat = (previous.repeat || 1) + (line.repeat || 1);
+    previous.id = line.id;
+    return result;
+  }
+  result.push({ ...line });
+  return result;
+}, []);
 type Telemetry = {
   summary: string;
   signals: Array<{
@@ -101,6 +224,15 @@ type Telemetry = {
   }>;
   behavioral: string[];
   measuredAt: string;
+};
+type StateSnapshot = {
+  at: number;
+  sensitivity: number;
+  attitude: number;
+  openness: number;
+  plasticity: number;
+  capacity: number;
+  tension: number;
 };
 type ContractCondition = {
   type: string;
@@ -281,6 +413,38 @@ const actions: ActionDef[] = [
     pointId: "systemic",
   },
   {
+    id: "act_hold_exposure",
+    label: "Удерживать открытую позу",
+    hint: "Продолжительная демонстрация в текущей позе",
+    group: "pose",
+    pointId: "systemic",
+    hideWhenContext: "act_hold_exposure",
+  },
+  {
+    id: "act_end_exposure",
+    label: "Завершить демонстрацию",
+    hint: "Выйти из удерживаемой открытой позы",
+    group: "pose",
+    pointId: "systemic",
+    requiresContext: "act_hold_exposure",
+  },
+  {
+    id: "act_present_feet",
+    label: "Предъявить ступни",
+    hint: "Удерживать ступни открытыми для осмотра",
+    group: "pose",
+    pointId: "feet",
+    hideWhenContext: "act_present_feet",
+  },
+  {
+    id: "act_end_feet_presentation",
+    label: "Завершить осмотр ступней",
+    hint: "Вернуться из демонстрационной позы",
+    group: "pose",
+    pointId: "feet",
+    requiresContext: "act_present_feet",
+  },
+  {
     id: "act_apply_handcuffs",
     label: "Надеть наручники",
     hint: "Фиксация запястий",
@@ -353,6 +517,43 @@ const actions: ActionDef[] = [
     requiresContext: "act_apply_collar",
   },
   {
+    id: "act_connect_tens",
+    label: "Закрепить электроды TENS",
+    hint: "Выберите соски или пах как рабочую зону",
+    group: "equipment",
+    hideWhenContext: "act_connect_tens",
+  },
+  {
+    id: "act_start_electrostimulation",
+    label: "Включить электростимуляцию",
+    hint: "Устойчивая серия импульсов",
+    group: "equipment",
+    requiresContext: "act_connect_tens",
+    hideWhenContext: "act_start_electrostimulation",
+  },
+  {
+    id: "act_adjust_electrostimulation",
+    label: "Усилить электростимуляцию",
+    hint: "Повысить частоту и амплитуду",
+    group: "equipment",
+    requiresContext: "act_start_electrostimulation",
+    hideWhenContext: "act_adjust_electrostimulation",
+  },
+  {
+    id: "act_stop_electrostimulation",
+    label: "Остановить электростимуляцию",
+    hint: "Отключить ток, сохранив электроды",
+    group: "equipment",
+    requiresContext: "act_start_electrostimulation",
+  },
+  {
+    id: "act_disconnect_tens",
+    label: "Снять электроды TENS",
+    hint: "Полностью убрать электрический контур",
+    group: "equipment",
+    requiresContext: "act_connect_tens",
+  },
+  {
     id: "eq_blindfold_apply",
     label: "Надеть повязку",
     hint: "Убрать зрительный контроль",
@@ -399,6 +600,40 @@ const actions: ActionDef[] = [
     group: "equipment",
     pointId: "groin",
     requiresContext: "act_insert_plug",
+    hideWhenContext: "act_activate_plug",
+  },
+  {
+    id: "act_deactivate_plug",
+    label: "Выключить плаг",
+    hint: "Остановить внутреннюю вибрацию",
+    group: "equipment",
+    pointId: "groin",
+    requiresContext: "act_activate_plug",
+  },
+  {
+    id: "act_start_vibrator",
+    label: "Закрепить вибратор",
+    hint: "Запустить устойчивую вибрацию",
+    group: "equipment",
+    pointId: "groin",
+    hideWhenContext: "act_start_vibrator",
+  },
+  {
+    id: "act_adjust_vibration",
+    label: "Усилить вибрацию",
+    hint: "Перевести устройство в интенсивный режим",
+    group: "equipment",
+    pointId: "groin",
+    requiresContext: "act_start_vibrator",
+    hideWhenContext: "act_adjust_vibration",
+  },
+  {
+    id: "act_stop_vibrator",
+    label: "Убрать вибратор",
+    hint: "Остановить продолжительное воздействие",
+    group: "equipment",
+    pointId: "groin",
+    requiresContext: "act_start_vibrator",
   },
   {
     id: "act_remove_plug",
@@ -425,20 +660,20 @@ const actions: ActionDef[] = [
     requiresContext: "eq_clothe_jumpsuit",
   },
   {
-    id: "eq_clothe_panties",
-    label: "Надеть трусики",
-    hint: "Закрыть интимные зоны",
+    id: "eq_clothe_underwear",
+    label: "Надеть бельё",
+    hint: "Надеть комплект белья",
     group: "equipment",
     pointId: "systemic",
-    hideWhenContext: "eq_clothe_panties",
+    hideWhenContext: "eq_clothe_underwear",
   },
   {
-    id: "eq_clothe_panties_remove",
-    label: "Снять трусики",
-    hint: "Открыть интимные зоны",
+    id: "eq_clothe_underwear_remove",
+    label: "Снять бельё",
+    hint: "Снять комплект белья полностью",
     group: "equipment",
     pointId: "systemic",
-    requiresContext: "eq_clothe_panties",
+    requiresContext: "eq_clothe_underwear",
   },
   {
     id: "eq_clothe_lab_gown",
@@ -476,6 +711,36 @@ const actions: ActionDef[] = [
 const point = (s: State | null) => s?.anatomy?.[ZONE] || null;
 const metricLine = (r: any) =>
   `P ${Number(r?.pleasure || 0).toFixed(1)} · D ${Number(r?.discomfort || 0).toFixed(1)} · O ${Number(r?.overload || 0).toFixed(1)}`;
+function calibrationForecast(action: ActionDef, recent: Obs[], metrics: TrackedMetric[]) {
+  const precedent = recent.find(item => item.action?.id === action.id);
+  const approximate = (value: number | undefined) => `~${Number(value || 0).toFixed(1)}`;
+  const directional = (value: number | undefined) => typeof value !== "number" ? "?" : Math.abs(value) < .05 ? "≈" : value > 0 ? "↑" : "↓";
+  return metrics.map((metric) => {
+    const label = trackedMetricLabel(metric).toLowerCase();
+    if (action.id === "wait") return `${label} ${metric === "capacity" ? "↑" : ["tension", "sensitivity"].includes(metric) ? "↓" : "→ к базе"}`;
+    if (action.group !== "contact") return `${label} —`;
+    if (!precedent) return `${label} ${metric === "capacity" ? "↓" : metric === "tension" ? "вероятно ↑" : "?"}`;
+    const value = metric === "pleasure" ? precedent.reaction?.pleasure
+      : metric === "discomfort" ? precedent.reaction?.discomfort
+      : metric === "overload" ? precedent.reaction?.overload
+      : metric === "engagement" ? precedent.reaction?.engagement
+      : metric === "appraisal" ? precedent.reaction?.appraisal
+      : metric === "localSensitivity" ? precedent.learning?.sensitivityDelta
+      : metric === "baselineLocalSensitivity" ? precedent.learning?.baselineSensitivityDelta
+      : metric === "familiarity" ? precedent.learning?.familiarityDelta
+      : precedent.changes?.[metric as keyof NonNullable<Obs["changes"]>];
+    return `${label} ${["pleasure", "discomfort", "overload", "engagement", "appraisal", "capacity"].includes(metric) ? approximate(value) : directional(value)}`;
+  });
+}
+const observationMetricValue = (observation: Obs, metric: TrackedMetric) => ["pleasure", "discomfort", "overload", "engagement", "appraisal"].includes(metric)
+  ? Number(observation.reaction?.[metric as keyof NonNullable<Obs["reaction"]>] || 0).toFixed(1)
+  : metric === "localSensitivity" ? signed(observation.learning?.sensitivityDelta)
+    : metric === "baselineLocalSensitivity" ? signed(observation.learning?.baselineSensitivityDelta)
+      : metric === "familiarity" ? signed(observation.learning?.familiarityDelta)
+        : signed(observation.changes?.[metric as keyof NonNullable<Obs["changes"]>]);
+const protocolMetricValue = (progress: ProtocolStepProgress, metric: TrackedMetric) => ["pleasure", "discomfort", "overload", "engagement", "appraisal"].includes(metric)
+  ? Number(progress[metric]).toFixed(1)
+  : signed(progress[metric]);
 function observation(id: string, r: any, before: State | null, after: State) {
   const p = Number(r?.pleasure || 0),
     d = Number(r?.discomfort || 0),
@@ -490,7 +755,7 @@ function observation(id: string, r: any, before: State | null, after: State) {
       : "Поверхностный контакт принят, но быстро теряет информационную ценность при повторении.";
   if (id === "gentle_stroke")
     return p > d * 1.5
-      ? "Ровный контакт принят. Повтор укрепляет отношение, но теряет новизну."
+      ? "Ровный контакт телесно приятен. Знакомый повтор может не перекрыть дрейф принятия к базе."
       : "Продолжительность контакта пока вызывает настороженность.";
   if (id === "deep_massage")
     return a && b && b.localSensitivity < a.localSensitivity
@@ -511,12 +776,23 @@ const conditionLabels: Record<string, string> = {
   openness: "Открытость",
   plasticity: "Пластичность",
 };
-const conditionValue = (condition: ContractCondition, state: State | null) => {
+const conditionCurrentValue = (condition: ContractCondition, state: State | null) => {
   if (!state) return undefined;
   if (condition.type === "attitude") return state.attitude;
   if (condition.type === "custom" && condition.key)
     return (state as any)[condition.key];
   return undefined;
+};
+const conditionValue = (condition: ContractCondition, state: State | null) => {
+  if (!state) return undefined;
+  const key = condition.type === "attitude" ? "attitude" : condition.key;
+  const baselineKeys: Record<string, "Sensitivity" | "Openness" | "Plasticity" | "Attitude"> = {
+    sensitivity: "Sensitivity", openness: "Openness", plasticity: "Plasticity", attitude: "Attitude",
+  };
+  const baselineKey = key ? baselineKeys[key] : undefined;
+  return baselineKey
+    ? stateBaseline(state, baselineKey) ?? conditionCurrentValue(condition, state)
+    : conditionCurrentValue(condition, state);
 };
 const conditionMet = (actual: any, operator = "==", target: any) =>
   operator === ">"
@@ -542,6 +818,53 @@ const conditionMovement = (
     closer = (condition.operator || "==").startsWith("<") ? -raw : raw;
   return { delta: raw, closer };
 };
+const signed = (value: number | undefined, digits = 1) =>
+  typeof value === "number" && Number.isFinite(value)
+    ? `${value > 0 ? "+" : ""}${value.toFixed(digits)}`
+    : "—";
+const baselineDelta = (value: number | undefined, baseline: number | undefined) =>
+  typeof value === "number" && typeof baseline === "number"
+    ? value - baseline
+    : undefined;
+const stateBaseline = (
+  state: State | null,
+  key: "Sensitivity" | "Capacity" | "Openness" | "Attitude" | "Plasticity",
+) => {
+  if (!state) return undefined;
+  const camel = `baseline${key}` as keyof State;
+  const snake = `baseline_${key.toLowerCase()}` as keyof State;
+  const value = state[camel] ?? state[snake];
+  return typeof value === "number" ? value : undefined;
+};
+const clampPercent = (value: number) => Math.max(0, Math.min(100, value));
+function Sparkline({
+  values,
+  baseline,
+  tone = "mint",
+}: {
+  values: number[];
+  baseline?: number;
+  tone?: "mint" | "blue" | "amber" | "violet";
+}) {
+  const validValues = values.filter((value) => Number.isFinite(value));
+  const points = validValues.length ? validValues : [0];
+  const line = points
+    .map((value, index) => {
+      const x = points.length === 1 ? 100 : (index / (points.length - 1)) * 100;
+      return `${x},${100 - clampPercent(value)}`;
+    })
+    .join(" ");
+  return (
+    <svg className={`state-sparkline ${tone}`} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      {[25, 50, 75].map((level) => <line className="grid" x1="0" x2="100" y1={level} y2={level} key={level} />)}
+      {typeof baseline === "number" && (
+        <line className="baseline" x1="0" x2="100" y1={100 - clampPercent(baseline)} y2={100 - clampPercent(baseline)} />
+      )}
+      <polyline className="history" points={line} />
+      <circle className="latest" cx="100" cy={100 - clampPercent(points[points.length - 1])} r="2.7" />
+    </svg>
+  );
+}
 const stateFromContexts = (s: State | null) => {
   const ids = new Set((s?.contexts || []).map((c) => c.actionId));
   if (ids.has("effect_apathy") || ids.has("effect_chronic_apathy"))
@@ -580,6 +903,21 @@ const stateFromContexts = (s: State | null) => {
     title: "В контакте",
     description: "Осмысленно реагирует на окружение и воздействие.",
   };
+};
+const visualCharacterSlugs: Record<string, string> = {
+  "S-AV-01": "mira",
+  "NPC-LAB-01": "iona",
+  "NPC-CAND-01": "nika",
+};
+const characterVisualPath = (
+  subjectId: string,
+  state: State | null,
+  behavioralState?: string,
+  climax = false,
+) => {
+  const descriptor = buildCalibrationVisualDescriptorV4(subjectId, state, behavioralState, climax);
+  return resolveCalibrationAvatarV4(descriptor)
+    || `/character-images/rendered/${descriptor.characterSlug}/standing__${descriptor.clothing}__none__neutral.png`;
 };
 const zoneGroups = [
   {
@@ -620,6 +958,8 @@ export function CalibrationPrototype({
   subjectId = "S-AV-01",
   subjectName = "Мира",
   nearbyCharacters = [],
+  uiTheme = "industrial",
+  onThemeChange,
   onExit,
 }: {
   subjectId?: string;
@@ -630,12 +970,14 @@ export function CalibrationPrototype({
     role: string;
     title?: string;
   }>;
+  uiTheme?: "industrial" | "graphite" | "paper" | "mist";
+  onThemeChange?: (theme: "industrial" | "graphite" | "paper" | "mist") => void;
   onExit?: () => void;
 } = {}) {
   const SUBJECT = subjectId;
   const [phase, setPhase] = useState<Phase>("preparation"),
     [actionGroup, setActionGroup] = useState<ActionGroup>("contact"),
-    [selectedActionId, setSelectedActionId] = useState("gentle_stroke"),
+    [selectedActionId, setSelectedActionId] = useState(""),
     [selectedZoneId, setSelectedZoneId] = useState(ZONE),
     [zoneOpen, setZoneOpen] = useState(false),
     [zones, setZones] = useState<Zone[]>([]),
@@ -646,10 +988,34 @@ export function CalibrationPrototype({
     [generatingSpeech, setGeneratingSpeech] = useState(false),
     [llmError, setLlmError] = useState<string | null>(null),
     [protocolOpen, setProtocolOpen] = useState(false),
+    [goalSettingsOpen, setGoalSettingsOpen] = useState(false),
+    [freeTrackedMetrics, setFreeTrackedMetrics] = useState<TrackedMetric[]>(() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(`cyberjack.calibrationMetrics.v2.${SUBJECT}`) || "[]");
+        return Array.isArray(saved) && saved.length ? saved.slice(0, 6) : ["attitude", "localAttitude", "localSensitivity", "capacity"];
+      } catch { return ["attitude", "localAttitude", "localSensitivity", "capacity"]; }
+    }),
     [historyOpen, setHistoryOpen] = useState(false),
     [menuOpen, setMenuOpen] = useState(false),
+    [visualReviewOpen, setVisualReviewOpen] = useState(false),
+    [visualReviewDecision, setVisualReviewDecision] = useState<"keep" | "rework" | "reject">("rework"),
+    [visualReviewIssues, setVisualReviewIssues] = useState<string[]>([]),
+    [visualReviewNote, setVisualReviewNote] = useState(""),
+    [visualReviewSaving, setVisualReviewSaving] = useState(false),
+    [visualReviewSaved, setVisualReviewSaved] = useState(false),
+    [displayedVisualPath, setDisplayedVisualPath] = useState<string | null>(null),
+    [visualEffect, setVisualEffect] = useState<CalibrationVisualEffect | null>(null),
     [diagnosticsOpen, setDiagnosticsOpen] = useState(false),
     [subject, setSubject] = useState<State | null>(null),
+    [relationAttitude, setRelationAttitude] = useState<number | null>(null),
+    [stateHistory, setStateHistory] = useState<StateSnapshot[]>(() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(`cyberjack.stateHistory.${SUBJECT}`) || "[]");
+        return Array.isArray(saved) ? saved.slice(-40) : [];
+      } catch {
+        return [];
+      }
+    }),
     [telemetry, setTelemetry] = useState<Telemetry | null>(null),
     [lastStateBefore, setLastStateBefore] = useState<State | null>(null),
     [contracts, setContracts] = useState<ContractInfo[]>([]),
@@ -657,11 +1023,13 @@ export function CalibrationPrototype({
       localStorage.getItem("cyberjack.trackedContract"),
     ),
     [currentObservation, setCurrentObservation] = useState<Obs | null>(null),
+    [recentObservations, setRecentObservations] = useState<Obs[]>([]),
     [protocolMode, setProtocolMode] = useState<ProtocolMode>("exact"),
     [probes, setProbes] = useState<string[]>([]),
     [findings, setFindings] = useState<string[]>([]),
     [entries, setEntries] = useState<Entry[]>([]),
     [protocol, setProtocol] = useState<Step[]>([]),
+    [protocolProgress, setProtocolProgress] = useState<Record<string, ProtocolStepProgress>>({}),
     [busy, setBusy] = useState(false),
     [running, setRunning] = useState(false),
     [error, setError] = useState<string | null>(null),
@@ -679,7 +1047,13 @@ export function CalibrationPrototype({
     if (!d.success) throw new Error(d.error);
     subjectRef.current = d.subject;
     setSubject(d.subject);
+    setRelationAttitude(d.relations?.find((relation: any) => relation.toId === "PL-1" || relation.to_id === "PL-1")?.attitude ?? null);
     setTelemetry(d.telemetry || null);
+    setRecentObservations(d.recentObservations || []);
+    if (d.recentObservations?.[0]) {
+      observationRef.current = d.recentObservations[0];
+      setCurrentObservation(d.recentObservations[0]);
+    }
     setZones(d.availablePoints || []);
     setActionMeta(d.availableActions || []);
     return d.subject as State;
@@ -690,10 +1064,10 @@ export function CalibrationPrototype({
   };
   const pushChat = (...lines: Array<Omit<ChatLine, "id">>) =>
     setChatLines((current) =>
-      [
+      collapseRepeatedActions([
         ...current,
         ...lines.map((line) => ({ ...line, id: crypto.randomUUID() })),
-      ].slice(-10),
+      ]).slice(-100),
     );
   const loadContracts = async () => {
     const q = await fetch("/api/contracts?playerId=PL-1"),
@@ -703,18 +1077,34 @@ export function CalibrationPrototype({
     return d;
   };
   const loadChat = async () => {
-    const q = await fetch(`/api/characters/${SUBJECT}/chat?limit=10`),
-      d = await q.json();
-    if (!d.success) throw new Error(d.error);
-    setChatLines(
-      (d.messages || []).map((m: any) => ({
-        id: String(m.id),
-        speaker: m.role === "assistant" ? "mira" : "calibrator",
-        text: m.content,
-        context: m.contextLabel,
-      })),
-    );
-    return d;
+    // Dialogue is owned by the character being addressed. A calibration scene
+    // may include the subject and assistants, so restoring only SUBJECT drops
+    // every exchange that was addressed to an assistant.
+    const participants = Array.from(new Set([SUBJECT, ...nearbyCharacters.map(character => character.id)]));
+    const histories = await Promise.all(participants.map(async participantId => {
+      const q = await fetch(`/api/characters/${participantId}/chat?limit=100`),
+        d = await q.json();
+      if (!d.success) return [];
+      return (d.messages || []).map((message: any) => ({ ...message, participantId }));
+    }));
+    const participantNames = new Map(nearbyCharacters.map(character => [character.id, character.name]));
+    const restored = histories
+      .flat()
+      .sort((left: any, right: any) => Number(left.id) - Number(right.id))
+      .map((message: any) => {
+        const action = String(message.content || '').match(/^\[Действие\]\s*(.*)$/s);
+        return {
+          id: String(message.id),
+          speaker: action ? "system" : message.role === "assistant"
+            ? message.participantId === SUBJECT ? "mira" : participantNames.get(message.participantId) || message.participantId
+            : "calibrator",
+          text: action ? action[1] : message.content,
+          context: message.contextLabel,
+          action: Boolean(action),
+        };
+      });
+    setChatLines(collapseRepeatedActions(restored).slice(-100));
+    return restored;
   };
   const trackContract = (id: string | null) => {
     setTrackedContractId(id);
@@ -796,11 +1186,6 @@ export function CalibrationPrototype({
     stopRef.current = true;
     try {
       await toggleContext(false).catch(() => {});
-      await fetch("/api/attempt/reset-memory", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subjectId: SUBJECT, sceneId: SCENE }),
-      });
       await fetch("/api/subject/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -843,7 +1228,6 @@ export function CalibrationPrototype({
       setProtocol([]);
       setPassive(null);
       setPlayerInput("");
-      setChatLines([]);
       setLlmError(null);
       setEntries([
         {
@@ -868,6 +1252,38 @@ export function CalibrationPrototype({
     );
   }, []);
   useEffect(() => {
+    if (!subject) return;
+    const snapshot: StateSnapshot = {
+      at: Date.now(),
+      sensitivity: subject.sensitivity,
+      attitude: subject.attitude,
+      openness: subject.openness,
+      plasticity: subject.plasticity,
+      capacity: subject.capacity,
+      tension: subject.tension,
+    };
+    setStateHistory((current) => {
+      const last = current[current.length - 1];
+      if (
+        last &&
+        ["sensitivity", "attitude", "openness", "plasticity", "capacity", "tension"].every(
+          (key) => Math.abs(last[key as keyof StateSnapshot] as number - snapshot[key as keyof StateSnapshot] as number) < 0.001,
+        )
+      ) return current;
+      const next = [...current, snapshot].slice(-40);
+      localStorage.setItem(`cyberjack.stateHistory.${SUBJECT}`, JSON.stringify(next));
+      return next;
+    });
+  }, [subject?.sensitivity, subject?.attitude, subject?.openness, subject?.plasticity, subject?.capacity, subject?.tension, SUBJECT]);
+  useEffect(() => {
+    localStorage.setItem(`cyberjack.calibrationMetrics.v2.${SUBJECT}`, JSON.stringify(freeTrackedMetrics));
+  }, [freeTrackedMetrics, SUBJECT]);
+  useEffect(() => {
+    if (!visualEffect) return;
+    const timer = window.setTimeout(() => setVisualEffect(null), visualEffect.family === "vibration" ? 1400 : 1200);
+    return () => window.clearTimeout(timer);
+  }, [visualEffect?.key]);
+  useEffect(() => {
     if (
       phase === "diagnosis" &&
       probes.length === 0 &&
@@ -888,10 +1304,12 @@ export function CalibrationPrototype({
             "eq_blindfold_apply",
             "eq_gag_apply",
             "act_insert_plug",
-            "eq_clothe_jumpsuit",
-            "eq_clothe_panties",
-            "eq_clothe_lab_gown",
-            "eq_clothe_calibration_set",
+            "act_activate_plug",
+            "act_start_vibrator",
+            "act_adjust_vibration",
+            "act_connect_tens",
+            "act_start_electrostimulation",
+            "act_adjust_electrostimulation",
             "device_sensory_loop",
           ].includes(c.actionId),
       );
@@ -1007,6 +1425,22 @@ export function CalibrationPrototype({
       const before = subjectRef.current;
       setLastStateBefore(before ? { ...before } : null);
       const d = await request(item, callLLM);
+      if (item.actionId !== "wait") {
+        pushChat({
+          speaker: "system",
+          text: `${item.label} · ${item.pointLabel || selectedZone?.label || "системно"}`,
+          context: "Действие",
+          action: true,
+        });
+      } else if (Array.isArray(d.sustainedEffects) && d.sustainedEffects.length) {
+        pushChat(...d.sustainedEffects.map((effect: any) => ({
+          speaker: "system",
+          text: `${effect.label} · ${effect.pointId}`,
+          context: "Продолжается",
+          action: true,
+          repeat: effect.pulses,
+        })));
+      }
       let after = await load(),
         shared = (d.diagnostics || d.bundle?.diagnostics)?.observation as
           Obs | undefined,
@@ -1014,6 +1448,19 @@ export function CalibrationPrototype({
           shared?.uiText ||
           observation(item.actionId, d.tickResult, before, after);
       recordObservation(item.label, shared, insight, metricLine(d.tickResult));
+      if (item.actionId !== "wait") {
+        const reaction = shared?.reaction || d.tickResult || {};
+        const overload = Number(reaction.overload || 0);
+        const appraisal = Number(reaction.appraisal ?? d.tickResult?.finalValence ?? 0);
+        const mixed = Boolean(reaction.mixed) || (Number(reaction.pleasure || 0) > .5 && Number(reaction.discomfort || 0) > .5);
+        setVisualEffect({
+          key: crypto.randomUUID(),
+          family: visualEffectFamily(item.actionId),
+          result: overload > 8 ? "overload" : mixed ? "mixed" : appraisal < 0 ? "rejected" : "accepted",
+          intensity: clampPercent((Number(reaction.pleasure || 0) + Number(reaction.discomfort || 0) + overload) * 4) / 100,
+          target: item.pointLabel || selectedZone?.label || "системно",
+        });
+      }
       if (callLLM) {
         const replies = (d.actorReplies || []).filter(
           (reply: any) => reply.speech,
@@ -1229,6 +1676,7 @@ export function CalibrationPrototype({
   const add = (a: ActionDef) => {
     if (phase !== "preparation") return;
     const target = resolvedZone(a);
+    setProtocolProgress({});
     setProtocol((x) =>
       [
         ...x,
@@ -1248,21 +1696,32 @@ export function CalibrationPrototype({
       const n = [...x],
         j = i + d;
       if (j < 0 || j >= n.length) return x;
+      setProtocolProgress({});
       [n[i], n[j]] = [n[j], n[i]];
       return n;
     });
   const repeat = (key: string) =>
-    setProtocol((x) =>
-      x.map((s) => (s.key === key ? { ...s, repeat: (s.repeat % 3) + 1 } : s)),
-    );
+    setProtocol((x) => {
+      setProtocolProgress({});
+      return x.map((s) => (s.key === key ? { ...s, repeat: (s.repeat % 3) + 1 } : s));
+    });
   const run = async () => {
     if (!protocol.length || busy) return;
+    const emptyProgress = (status: ProtocolStepProgress["status"] = "pending"): ProtocolStepProgress => ({
+      status, completedRepeats: 0, pleasure: 0, discomfort: 0, overload: 0, engagement: 0, appraisal: 0,
+      tension: 0, capacity: 0, attitude: 0, localAttitude: 0, sensitivity: 0, localSensitivity: 0,
+      baselineLocalSensitivity: 0, openness: 0, localOpenness: 0, plasticity: 0, familiarity: 0,
+    });
+    setProtocolProgress(Object.fromEntries(protocol.map((step) => [step.key, emptyProgress()])));
+    setGoalSettingsOpen(false);
+    setProtocolOpen(true);
     setBusy(true);
     setRunning(true);
     stopRef.current = false;
     try {
       for (const item of protocol) {
         if (stopRef.current) break;
+        setProtocolProgress((current) => ({ ...current, [item.key]: { ...(current[item.key] || emptyProgress()), status: "running" } }));
         for (let i = 0; i < item.repeat; i++) {
           if (stopRef.current) break;
           if (protocolMode === "adaptive" && item.actionId !== "wait") {
@@ -1299,6 +1758,33 @@ export function CalibrationPrototype({
           }
           const outcome = await perform(item, false, item.actionId !== "wait");
           const obs = outcome.observation;
+          setProtocolProgress((current) => {
+            const previous = current[item.key] || emptyProgress("running");
+            return {
+              ...current,
+              [item.key]: {
+                ...previous,
+                status: i === item.repeat - 1 ? "completed" : "running",
+                completedRepeats: previous.completedRepeats + 1,
+                pleasure: previous.pleasure + (obs?.reaction?.pleasure || 0),
+                discomfort: previous.discomfort + (obs?.reaction?.discomfort || 0),
+                overload: previous.overload + (obs?.reaction?.overload || 0),
+                engagement: previous.engagement + (obs?.reaction?.engagement || 0),
+                appraisal: previous.appraisal + (obs?.reaction?.appraisal || 0),
+                tension: previous.tension + (obs?.changes?.tension || 0),
+                capacity: previous.capacity + (obs?.changes?.capacity || 0),
+                attitude: previous.attitude + (obs?.changes?.attitude || 0),
+                localAttitude: previous.localAttitude + (obs?.changes?.localAttitude || 0),
+                sensitivity: previous.sensitivity + (obs?.changes?.sensitivity || 0),
+                localSensitivity: previous.localSensitivity + (obs?.learning?.sensitivityDelta || 0),
+                baselineLocalSensitivity: previous.baselineLocalSensitivity + (obs?.learning?.baselineSensitivityDelta || 0),
+                openness: previous.openness + (obs?.changes?.openness || 0),
+                localOpenness: previous.localOpenness + (obs?.changes?.localOpenness || 0),
+                plasticity: previous.plasticity + (obs?.changes?.plasticity || 0),
+                familiarity: previous.familiarity + (obs?.learning?.familiarityDelta || 0),
+              },
+            };
+          });
           if (protocolMode === "adaptive" && item.actionId !== "wait") {
             if (obs && ["panic", "defiance"].includes(obs.behavioralState)) {
               append({
@@ -1323,9 +1809,16 @@ export function CalibrationPrototype({
             setTimeout(r, obs?.transitions?.length ? 900 : 300),
           );
         }
+        setProtocolProgress((current) => current[item.key]?.status === "running"
+          ? { ...current, [item.key]: { ...current[item.key], status: "completed" } }
+          : current);
       }
     } catch (e: any) {
       setError(e.message);
+      setProtocolProgress((current) => {
+        const runningEntry = Object.entries(current).find(([, progress]) => progress.status === "running");
+        return runningEntry ? { ...current, [runningEntry[0]]: { ...runningEntry[1], status: "error" } } : current;
+      });
     } finally {
       setBusy(false);
       setRunning(false);
@@ -1384,6 +1877,12 @@ export function CalibrationPrototype({
   const activeContextIds = new Set(
       (subject?.contexts || []).map((c) => c.actionId),
     ),
+    submissionModifier = (activeContextIds.has("effect_suggestibility") ? 15 : 0) +
+      (activeContextIds.has("effect_subspace") ? 10 : 0),
+    submission = clampPercent((relationAttitude ?? subject?.attitude ?? 0) + (subject?.plasticity ?? 0) * .5 + submissionModifier),
+    submissionLabel = submission >= 65 && (relationAttitude ?? subject?.attitude ?? 0) < 45
+      ? "Смирение"
+      : submission >= 75 ? "Высокое" : submission >= 50 ? "Умеренное" : "Низкое",
     visibleActions = actions.filter(
       (a) =>
         a.group === actionGroup &&
@@ -1393,9 +1892,7 @@ export function CalibrationPrototype({
           a.id === "wait" ||
           zonesForAction(a).some((z) => z.id === selectedZoneId)),
     ),
-    selectedAction =
-      visibleActions.find((a) => a.id === selectedActionId) ||
-      visibleActions[0],
+    selectedAction = visibleActions.find((a) => a.id === selectedActionId),
     selectedZone =
       actionGroup === "contact"
         ? zones.find((z) => z.id === selectedZoneId) || playableZones()[0]
@@ -1414,11 +1911,6 @@ export function CalibrationPrototype({
     visibleContexts = Array.from(
       new Map(
         (subject?.contexts || [])
-          .filter(
-            (c) =>
-              !c.actionId.startsWith("effect_") &&
-              c.actionId !== "device_sensory_loop",
-          )
           .map((c) => [c.actionId, c]),
       ).values(),
     ),
@@ -1434,13 +1926,24 @@ export function CalibrationPrototype({
         c.type !== "equipment" &&
         c.type !== "restraint",
     ),
+    poseContext = visibleContexts.find(
+      (context) =>
+        context.type === "pose" ||
+        context.actionId.startsWith("pose_") ||
+        context.actionId === "act_suspend_wrists",
+    ),
+    sessionContexts = visibleContexts.filter((context) => context !== poseContext),
     trackedContract = contracts.find((c) => c.id === trackedContractId) || null,
+    trackedMetrics = trackedContract
+      ? Array.from(new Set((trackedContract.conditions || []).map((condition) => condition.type === "attitude" ? "attitude" : condition.key).filter((key): key is TrackedMetric => trackedMetricOptions.some((option) => option.id === key)))).slice(0, 6)
+      : freeTrackedMetrics,
     goalRows = (trackedContract?.conditions || []).map((condition) => {
       const value = conditionValue(condition, subject),
         movement = conditionMovement(condition, lastStateBefore, subject);
       return {
         condition,
         value,
+        currentValue: conditionCurrentValue(condition, subject),
         movement,
         met:
           value !== undefined &&
@@ -1450,6 +1953,76 @@ export function CalibrationPrototype({
     readyCount = goalRows.filter((x) => x.met).length,
     currentState =
       currentObservation?.currentState || stateFromContexts(subject),
+    activePoint = selectedZoneId
+      ? subject?.anatomy?.[selectedZoneId]
+      : undefined,
+    activation = clampPercent(subject?.tension || 0),
+    edgeProfile = deriveEdgeProfile({ tension: subject?.tension || 0, capacity: subject?.capacity || 0 } as any, recentObservations),
+    activationLabel = activation < 20
+      ? "Спокойная"
+      : activation < 45
+        ? "Повышенная"
+        : activation < 70
+          ? "Высокая"
+          : activation < 85
+            ? "Предельная"
+            : edgeProfile.label,
+    activationNature = ({ positive: "положительная", negative: "защитная", mixed: "смешанная", neutral: "нейтральная" } as const)[deriveReactionCharacter(recentObservations)],
+    pulseSignal = telemetry?.signals.find((signal) => signal.id === "pulse"),
+    breathingSignal = telemetry?.signals.find((signal) => signal.id === "breathing"),
+    toneSignal = telemetry?.signals.find((signal) => signal.id === "muscleTone"),
+    enduranceLabel = (subject?.capacity || 0) < 20
+      ? "Истощение"
+      : (subject?.capacity || 0) < 40
+        ? "Утомление"
+        : (subject?.capacity || 0) < 70
+          ? "Рабочий запас"
+          : "Высокий запас",
+    baseVisualPath = characterVisualPath(
+      SUBJECT,
+      subject,
+      currentObservation?.behavioralState,
+      currentObservation?.transitions?.some(
+        (transition) => transition.kind === "discharge",
+      ) || false,
+    ),
+    portraitFallbackPath = canonicalCharacterPortrait(
+      SUBJECT,
+      subjectName,
+      (subject?.contexts || []).map((context) => ({ id: context.actionId })),
+    ),
+    activeVisualInteraction = activeVisualInteractionFromContexts(
+      subject?.contexts || [],
+      subject?.tension || 0,
+    ),
+    criticalVisualState =
+      currentObservation?.behavioralState === "unresponsive" ||
+      currentObservation?.behavioralState === "panic" ||
+      (subject?.contexts || []).some((context) =>
+        ["effect_apathy", "effect_chronic_apathy", "effect_panic", "effect_sensory_overload"].includes(context.actionId),
+      ),
+    interactionVisualPath = activeVisualInteraction
+      ? `/character-images/interactions/${visualCharacterSlugs[SUBJECT] || SUBJECT}/${activeVisualInteraction.family}/${activeVisualInteraction.variant}__${activeVisualInteraction.phase}.png`
+      : null,
+    expandedVisualPath = activeVisualInteraction && !criticalVisualState
+      ? expandedInteractionAssetPath({
+          characterSlug: visualCharacterSlugs[SUBJECT] || SUBJECT,
+          interaction: activeVisualInteraction,
+          contexts: subject?.contexts || [],
+          tension: subject?.tension || 0,
+          attitude: subject?.attitude || 0,
+          openness: subject?.openness || 0,
+          behavioralState: currentObservation?.behavioralState,
+          discharged: currentObservation?.transitions?.some((transition) => transition.kind === "discharge") || false,
+        })
+      : null,
+    visualPath = resolveFirstAvailableVisual([
+      !criticalVisualState ? expandedVisualPath : null,
+      !criticalVisualState ? interactionVisualPath : null,
+      baseVisualPath,
+      portraitFallbackPath,
+    ]) || baseVisualPath,
+    reviewAssetPath = displayedVisualPath || visualPath,
     significantEvent =
       [...entries]
         .reverse()
@@ -1467,6 +2040,62 @@ export function CalibrationPrototype({
         : speaker === "system"
           ? "СИСТЕМА"
           : speaker.toUpperCase();
+  const openVisualReview = async () => {
+    setVisualReviewSaved(false);
+    setVisualReviewOpen(true);
+    try {
+      const response = await fetch(`/api/visual-reviews?assetPath=${encodeURIComponent(reviewAssetPath)}`);
+      const data = await response.json();
+      const review = data.reviews?.find((entry: any) => entry.characterId === SUBJECT);
+      if (review) {
+        setVisualReviewDecision(review.decision);
+        setVisualReviewIssues(review.issues || []);
+        setVisualReviewNote(review.note || "");
+      } else {
+        setVisualReviewDecision("rework");
+        setVisualReviewIssues([]);
+        setVisualReviewNote("");
+      }
+    } catch {
+      setVisualReviewDecision("rework");
+      setVisualReviewIssues([]);
+      setVisualReviewNote("");
+    }
+  };
+  const saveVisualReview = async () => {
+    setVisualReviewSaving(true);
+    setVisualReviewSaved(false);
+    try {
+      const response = await fetch("/api/visual-reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assetPath: reviewAssetPath,
+          characterId: SUBJECT,
+          decision: visualReviewDecision,
+          issues: visualReviewIssues,
+          note: visualReviewNote,
+          metadata: {
+            subjectName,
+            baseVisualPath,
+            interactionVisualPath,
+            expandedVisualPath,
+            tension: subject?.tension,
+            attitude: subject?.attitude,
+            behavioralState: currentObservation?.behavioralState,
+            contexts: (subject?.contexts || []).map(context => ({ actionId: context.actionId, pointId: context.pointId })),
+          },
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error);
+      setVisualReviewSaved(true);
+    } catch (reviewError: any) {
+      setError(reviewError.message || "Не удалось сохранить оценку аватара");
+    } finally {
+      setVisualReviewSaving(false);
+    }
+  };
   return (
     <main className="calibration-workbench">
       <header className="workbench-header">
@@ -1491,6 +2120,7 @@ export function CalibrationPrototype({
           </strong>
         </div>
         <nav>
+          {onThemeChange && <select className="calibration-theme-switcher" aria-label="Тема интерфейса" value={uiTheme} onChange={event => onThemeChange(event.target.value as "industrial" | "graphite" | "paper" | "mist")}><option value="industrial">Industrial</option><option value="graphite">Graphite</option><option value="paper">Sage</option><option value="mist">Mist</option></select>}
           <button onClick={() => setHistoryOpen(true)}>История</button>
           <button onClick={() => setDiagnosticsOpen(true)}>Диагностика</button>
           <button onClick={() => setMenuOpen(true)}>Меню</button>
@@ -1656,7 +2286,9 @@ export function CalibrationPrototype({
               </p>
             )}
           </div>
-          <h3>Надето</h3>
+          <h3>Активные контексты · {visibleContexts.length}</h3>
+          {!visibleContexts.length && <p className="muted">Активных контекстов нет</p>}
+          <h3>Одежда и оборудование</h3>
           {wornContexts.length ? (
             <div className="context-list">
               {wornContexts.map((c, i) => (
@@ -1668,12 +2300,14 @@ export function CalibrationPrototype({
           ) : (
             <p className="muted">Ничего</p>
           )}
-          <h3>Положение и состояние</h3>
+          <h3>Поза, эффекты и состояния</h3>
           {otherContexts.length ? (
             <div className="context-list">
               {otherContexts.map((c, i) => (
                 <div key={`${c.actionId}-${i}`}>
-                  <span>{c.type === "pose" ? "Положение" : "Состояние"}</span>
+                  <span>
+                    {c.type === "pose" || c.actionId.startsWith("pose_") ? "Поза" : c.actionId.startsWith("effect_") ? "Эффект" : c.pointId ? `Контекст · ${c.pointId}` : "Состояние"}
+                  </span>
                   <b>{c.label || c.actionId}</b>
                 </div>
               ))}
@@ -1684,17 +2318,53 @@ export function CalibrationPrototype({
           {error && <div className="outcome failure">{error}</div>}
         </aside>
         <section className="character-column">
-          <div className="character-stage">
+          <div className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""}`}>
             <div className="portrait-placeholder">
-              <span>{subjectName.slice(0, 1).toUpperCase()}</span>
-              <small>ОБЛАСТЬ ИЗОБРАЖЕНИЯ ПЕРСОНАЖА</small>
+              <div className={`calibration-avatar-frame ${visualEffect ? `avatar-effect-${visualEffect.family}` : ""}`}>
+                <span className="portrait-fallback">
+                  {subjectName.slice(0, 1).toUpperCase()}
+                </span>
+                <img
+                  className="calibration-character-image"
+                  key={visualPath}
+                  src={visualPath}
+                  alt={subjectName}
+                  onLoad={(event) => setDisplayedVisualPath(new URL(event.currentTarget.src).pathname)}
+                  onError={(event) => {
+                    if (expandedVisualPath && event.currentTarget.src.endsWith(expandedVisualPath) && interactionVisualPath) {
+                      event.currentTarget.src = interactionVisualPath;
+                    } else if (portraitFallbackPath && event.currentTarget.src.endsWith(portraitFallbackPath)) {
+                      event.currentTarget.hidden = true;
+                    } else if (event.currentTarget.src.endsWith(baseVisualPath)) {
+                      if (portraitFallbackPath && !event.currentTarget.src.endsWith(portraitFallbackPath)) {
+                        event.currentTarget.src = portraitFallbackPath;
+                      } else {
+                        event.currentTarget.hidden = true;
+                      }
+                    } else {
+                      event.currentTarget.src = baseVisualPath;
+                    }
+                  }}
+                />
+              </div>
+              {visualEffect && (
+                <div
+                  className={`calibration-visual-effect effect-${visualEffect.family} result-${visualEffect.result}`}
+                  key={visualEffect.key}
+                  style={{ "--effect-intensity": Math.max(.25, visualEffect.intensity) } as React.CSSProperties}
+                >
+                  <i /><i /><i />
+                  <b>{visualEffect.target}</b>
+                </div>
+              )}
+              <small>ДИАГНОСТИЧЕСКИЙ СТОЛ</small>
             </div>
             {nearbyCharacters.length > 0 && (
               <div className="calibration-presence">
                 <small>ПРИСУТСТВУЮТ</small>
                 {nearbyCharacters.map((character) => (
                   <div key={character.id}>
-                    <b>{character.name.slice(0, 1)}</b>
+                    <b><CharacterPortrait id={character.id} name={character.name} /></b>
                     <span>
                       <strong>{character.name}</strong>
                       <i>{character.title || character.role}</i>
@@ -1709,16 +2379,41 @@ export function CalibrationPrototype({
                 <strong>{selectedZone.label}</strong>
               </div>
             )}
+          </div>
+          <div className="monitor-session-strip avatar-session-strip">
+            <div>
+              <small>ПОЗА</small>
+              <b>{poseContext?.label || "Стоит свободно"}</b>
+            </div>
+            <div>
+              <small>ПОДЧИНЕНИЕ</small>
+              <b>{Math.round(submission)} · {submissionLabel}</b>
+            </div>
+            <div className="monitor-session-contexts">
+              <small>АКТИВНЫЕ КОНТЕКСТЫ · {sessionContexts.length}</small>
+              <b title={sessionContexts.map((context) => context.label || context.actionId).join(" · ")}>
+                {sessionContexts.length
+                  ? sessionContexts.slice(0, 2).map((context) => context.label || context.actionId).join(" · ")
+                  : "Нет"}
+                {sessionContexts.length > 2 ? ` · +${sessionContexts.length - 2}` : ""}
+              </b>
+            </div>
+          </div>
             <div className="character-chat">
               <header>
                 <strong>КАНАЛ КАЛИБРОВКИ</strong>
-                <span>{chatLines.length}/10</span>
+                <span>{chatLines.length}/100</span>
               </header>
               <div className="chat-scroll">
                 {!chatLines.length && !generatingSpeech && (
                   <p className="chat-empty">Реплик пока нет.</p>
                 )}
-                {chatLines.slice(-2).map((line) => (
+                {chatLines.map((line) => line.action ? (
+                  <div className="chat-action" key={line.id}>
+                    <span>{line.text}</span>
+                    {(line.repeat || 1) > 1 && <b>×{line.repeat}</b>}
+                  </div>
+                ) : (
                   <div
                     className={`chat-line ${["mira", "calibrator", "system"].includes(line.speaker) ? line.speaker : "observer"}`}
                     key={line.id}
@@ -1739,44 +2434,73 @@ export function CalibrationPrototype({
                 <div ref={chatEndRef} />
               </div>
             </div>
-            <div className="scene-monitor-contexts">
-              {visibleContexts.slice(0, 3).map((context, index) => (
-                <span key={`${context.actionId}-monitor-${index}`}>
-                  {context.label || context.actionId}
-                </span>
-              ))}
-              {visibleContexts.length > 3 && (
-                <span>+{visibleContexts.length - 3}</span>
-              )}
-            </div>
             <div
               className={`scene-monitor state-${currentObservation?.behavioralState || "responsive"}`}
             >
-              <strong>{currentState.title}</strong>
-              <div className="scene-monitor-lines">
-                {telemetry?.signals
-                  .filter((signal) =>
-                    ["pulse", "breathing", "contact"].includes(signal.id),
-                  )
-                  .map((signal) => (
-                    <span key={`monitor-${signal.id}`}>
-                      <b>{signal.label}:</b> {signal.value}
-                      {signal.trend === "up"
-                        ? ", растёт"
-                        : signal.trend === "down"
-                          ? ", снижается"
-                          : ""}
-                      .
-                    </span>
-                  ))}
+              <div className="physiology-panel">
+                <section className={`activation-scale level-${edgeProfile.kind === "negative" || edgeProfile.kind === "exhausted" ? "danger" : edgeProfile.active || activation >= 85 ? "edge" : activation >= 70 ? "high" : "normal"}`}>
+                  <header><span>ФИЗИОЛОГИЧЕСКАЯ АКТИВАЦИЯ</span><b>{activationLabel} · {Math.round(activation)}%</b></header>
+                  <div><i style={{ width: `${activation}%` }} /><em style={{ left: `${activation}%` }} /></div>
+                  <footer><span>Спокойствие</span><span>Рабочая</span><span>Предел</span></footer>
+                  <p>
+                    <span>Характер <b>{activationNature}</b></span>
+                    <span>Пульс <b>{pulseSignal?.value || "—"}</b></span>
+                    <span>Дыхание <b>{breathingSignal?.value || "—"}</b></span>
+                    <span>Тонус <b>{toneSignal?.value || "—"}</b></span>
+                  </p>
+                  {edgeProfile.active && <p className="edge-profile-note">{edgeProfile.description}</p>}
+                </section>
+                <section className="endurance-scale">
+                  <header><span>ВЫНОСЛИВОСТЬ</span><b>{enduranceLabel}</b></header>
+                  <div><i style={{ width: `${clampPercent(subject?.capacity || 0)}%` }} /></div>
+                  <p><strong>{subject?.capacity.toFixed(0) || "—"}%</strong><span>{signed(currentObservation?.changes?.capacity)} за действие</span></p>
+                </section>
               </div>
-              <p>
-                {currentObservation?.uiText ||
-                  telemetry?.behavioral?.[0] ||
-                  `${subjectName} ожидает следующего действия калибратора.`}
-              </p>
+              <section className="monitor-contract">
+                <header>
+                  <small>ЦЕЛЬ КАЛИБРОВКИ</small>
+                  <div className="monitor-contract-picker">
+                    <select aria-label="Цель калибровки" value={trackedContractId || ""} onChange={(event) => { trackContract(event.target.value || null); setGoalSettingsOpen(false); }}>
+                      <option value="">Свободная работа</option>
+                      {contracts.map((contract) => <option value={contract.id} key={`monitor-goal-${contract.id}`}>{contract.title}</option>)}
+                    </select>
+                    {!trackedContract && <button title="Настроить отслеживаемые параметры" onClick={() => { setProtocolOpen(false); setGoalSettingsOpen((open) => !open); }}>⚙</button>}
+                  </div>
+                </header>
+                {trackedContract && (
+                  <>
+                    <div>
+                      {goalRows.slice(0, 4).map((row, index) => (
+                        <span className={row.met ? "met" : ""} key={`monitor-condition-${index}`}>
+                          <i>{conditionLabels[row.condition.key || row.condition.type] || row.condition.key || row.condition.type}</i>
+                          <b>{typeof row.value === "number" ? row.value.toFixed(0) : "—"} / {String(row.condition.value)}</b>
+                          {typeof row.currentValue === "number" && typeof row.value === "number" && Math.abs(row.currentValue - row.value) >= .5 && <em>сейчас {row.currentValue.toFixed(0)}</em>}
+                          <strong>{row.met ? "✓" : "·"}</strong>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="monitor-contract-extra">
+                      <small>ДОП. ТРЕБОВАНИЯ</small>
+                      <span>Не заданы</span>
+                    </div>
+                  </>
+                )}
+              </section>
+              <div className="state-trends">
+                {([
+                  ["Принятие", "attitude", subject?.attitude, stateBaseline(subject, "Attitude"), "mint"],
+                  ["Открытость", "openness", subject?.openness, stateBaseline(subject, "Openness"), "blue"],
+                  ["Пластичность", "plasticity", subject?.plasticity, stateBaseline(subject, "Plasticity"), "amber"],
+                  ["Чувствительность", "sensitivity", subject?.sensitivity, stateBaseline(subject, "Sensitivity"), "violet"],
+                ] as const).map(([label, key, value, baseline, tone]) => (
+                  <section key={key}>
+                    <header><span>{label}</span><b>{value?.toFixed(0) || "—"}</b></header>
+                    <Sparkline values={stateHistory.map((snapshot) => snapshot[key])} baseline={baseline} tone={tone} />
+                    <footer><span>база {baseline?.toFixed(0) || "—"}</span><b>{signed(baselineDelta(value, baseline))}</b></footer>
+                  </section>
+                ))}
+              </div>
             </div>
-          </div>
           <div className="stage-contexts">
             {selectedZone && (
               <span className="target-chip">Зона: {selectedZone.label}</span>
@@ -1838,6 +2562,62 @@ export function CalibrationPrototype({
           </form>
         </section>
         <aside className="operations-column">
+          {zoneOpen && (
+            <section className="zone-map-panel">
+              <header>
+                <div>
+                  <small>ЦЕЛЬ ВОЗДЕЙСТВИЯ</small>
+                  <h2>Карта тела</h2>
+                  <p>Выберите область по её текущему отклику.</p>
+                </div>
+                <button onClick={() => setZoneOpen(false)}>← К операциям</button>
+              </header>
+              <div className="zone-map-body">
+                {zoneGroups.map((group) => {
+                  const groupZones = compatibleZones.filter((zone) =>
+                    group.points.includes(zone.id),
+                  );
+                  return groupZones.length ? (
+                    <section className={`zone-map-group ${group.id}`} key={group.id}>
+                      <h3>{group.label}</h3>
+                      <div>
+                        {groupZones.map((zone) => {
+                          const blocked = blockedPoints.has(zone.id);
+                          const selected = zone.id === selectedZoneId;
+                          return (
+                            <button
+                              className={selected ? "selected" : ""}
+                              key={zone.id}
+                              disabled={blocked}
+                              onClick={() => {
+                                setSelectedZoneId(zone.id);
+                                setZoneOpen(false);
+                              }}
+                            >
+                              <span>
+                                <strong>{zone.label}</strong>
+                                <small>
+                                  {blocked ? "Закрыта контекстом" : selected ? "Текущая цель" : "Доступна"}
+                                </small>
+                              </span>
+                              <span className="zone-map-values">
+                                <i>Ч {zone.local_sensitivity.toFixed(0)}</i>
+                                <i>П {zone.local_attitude.toFixed(0)}</i>
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ) : null;
+                })}
+              </div>
+              <footer>
+                <span><i>Ч</i> чувствительность</span>
+                <span><i>П</i> принятие контакта</span>
+              </footer>
+            </section>
+          )}
           <div className="operations-heading">
             <div>
               <h2>
@@ -1850,51 +2630,17 @@ export function CalibrationPrototype({
               </p>
             </div>
           </div>
-          <section className="operation-goal">
-            <small>ЦЕЛЬ</small>
-            <select
-              aria-label="Цель калибровки"
-              value={trackedContractId || ""}
-              onChange={(event) => trackContract(event.target.value || null)}
-            >
-              <option value="">Свободная работа</option>
-              {contracts.map((contract) => (
-                <option value={contract.id} key={`goal-${contract.id}`}>
-                  {contract.title}
-                </option>
-              ))}
-            </select>
-            {trackedContract ? (
+          {currentObservation && (
+            <div className="operation-last-result">
+              <header>
+                <small>ПОСЛЕДНЕЕ · {currentObservation.action?.label || "ДЕЙСТВИЕ"}</small>
+                <b>{currentObservation.reaction?.overload > 8 ? "ПЕРЕГРУЗКА" : currentObservation.reaction?.mixed ? "СМЕШАННО" : (currentObservation.reaction?.appraisal || 0) >= 0 ? "ПРИНЯТО" : "ОТВЕРГНУТО"}</b>
+              </header>
               <div>
-                {goalRows.slice(0, 4).map((row, index) => {
-                  const movement = row.movement?.closer || 0;
-                  return (
-                    <span
-                      key={`goal-condition-${index}`}
-                      className={row.met ? "met" : movement < 0 ? "away" : ""}
-                    >
-                      <i>
-                        {row.met
-                          ? "✓"
-                          : movement > 0
-                            ? "↑"
-                            : movement < 0
-                              ? "↓"
-                              : "·"}
-                      </i>
-                      {conditionLabels[
-                        row.condition.key || row.condition.type
-                      ] ||
-                        row.condition.key ||
-                        row.condition.type}
-                    </span>
-                  );
-                })}
+                {trackedMetrics.map((metric) => <span key={`result-${metric}`}>{trackedMetricLabel(metric).toLowerCase()} <b>{observationMetricValue(currentObservation, metric)}</b></span>)}
               </div>
-            ) : (
-              <p>Контракт не выбран</p>
-            )}
-          </section>
+            </div>
+          )}
           {phase === "preparation" && (
             <div className="action-tabs">
               <button
@@ -1917,174 +2663,152 @@ export function CalibrationPrototype({
               </button>
             </div>
           )}
-          {selectedAction && (
-            <div className="operation-toolbar">
-              <div className="target-selector">
-                <small>ЗОНА</small>
-                {selectedAction.pointId ? (
+          <div className="operation-toolbar">
+            <div className="target-selector">
+              <small>ЗОНА</small>
+              {selectedAction?.pointId ? (
                   <div className="fixed-target">
                     <strong>
                       {selectedZone?.label || selectedAction.pointId}
                     </strong>
                     <span>задана</span>
                   </div>
+                ) : actionGroup === "contact" ? (
+                  <button onClick={() => setZoneOpen(true)}>
+                    <strong>{selectedZone?.label || "Выберите"}</strong>
+                    <span>Карта тела →</span>
+                  </button>
                 ) : (
-                  <>
-                    <button onClick={() => setZoneOpen((v) => !v)}>
-                      <strong>{selectedZone?.label || "Выберите"}</strong>
-                      <span>▾</span>
-                    </button>
-                    {zoneOpen && (
-                      <div className="zone-popover">
-                        {zoneGroups.map((group) => {
-                          const groupZones = compatibleZones.filter((z) =>
-                            group.points.includes(z.id),
-                          );
-                          return groupZones.length ? (
-                            <section key={group.id}>
-                              <h4>{group.label}</h4>
-                              <div>
-                                {groupZones.map((z) => {
-                                  const blocked = blockedPoints.has(z.id);
-                                  return (
-                                    <button
-                                      key={z.id}
-                                      disabled={blocked}
-                                      title={
-                                        blocked
-                                          ? "Зона закрыта активным контекстом"
-                                          : ""
-                                      }
-                                      onClick={() => {
-                                        setSelectedZoneId(z.id);
-                                        setZoneOpen(false);
-                                      }}
-                                    >
-                                      <strong>{z.label}</strong>
-                                      <small>
-                                        {blocked
-                                          ? "Недоступна"
-                                          : `чувств. ${z.local_sensitivity.toFixed(0)} · принятие ${z.local_attitude.toFixed(0)}`}
-                                      </small>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </section>
-                          ) : null;
-                        })}
-                      </div>
-                    )}
-                  </>
+                  <div className="fixed-target"><strong>Не применяется</strong><span>системно</span></div>
                 )}
-              </div>
             </div>
-          )}
-          <div className="operation-list compact-grid">
+          </div>
+          <div className="zone-dynamic-row operation-zone-readout">
+            <small>ПАРАМЕТРЫ ЗОНЫ · {selectedZone?.label || "НЕ ВЫБРАНА"}</small>
+            <span title="Локальная чувствительность">Чувствит. <b>{activePoint?.localSensitivity?.toFixed(0) || "—"}</b><i>{signed(baselineDelta(activePoint?.localSensitivity, activePoint?.baselineLocalSensitivity))} от базы</i></span>
+            <span>Принятие <b>{activePoint?.localAttitude?.toFixed(0) || "—"}</b><i>{signed(baselineDelta(activePoint?.localAttitude, activePoint?.baselineLocalAttitude))} от базы</i></span>
+            <span>Знакомство <b>{activePoint?.familiarity?.toFixed(0) || "0"}</b><i>локальный опыт</i></span>
+            <span>Действия <b>{activePoint?.exposureCount || 0}</b><i>на эту зону</i></span>
+          </div>
+          <div className={`action-forecast-strip ${selectedAction ? "" : "empty"}`}>
+            <small>{selectedAction ? `ПРОГНОЗ · ${selectedAction.label}` : "ПРОГНОЗ"}</small>
+            {selectedAction ? (
+              <>
+              <div className="calibration-forecast">
+                {calibrationForecast(selectedAction, recentObservations, trackedMetrics).map(item => <i key={item}>{item}</i>)}
+              </div>
+              {(subject?.capacity || 0) < 25 && selectedAction.id !== "wait" && selectedAction.group === "contact" && (
+                <em className="capacity-learning-warning">Ресурс ниже 25: принятие почти не закрепляется.</em>
+              )}
+              </>
+            ) : <p>Наведите на действие, чтобы увидеть прогноз.</p>}
+          </div>
+          <div
+            className="operation-list compact-grid"
+            onMouseLeave={(event) => {
+              if (event.currentTarget.contains(document.activeElement))
+                (document.activeElement as HTMLElement)?.blur();
+              setSelectedActionId("");
+            }}
+          >
             {visibleActions.map((a) => (
-              <button
-                title={a.hint}
+              <div
                 className={`${selectedAction?.id === a.id ? "selected" : ""} ${probes.includes(a.id) ? "probed" : ""}`}
                 key={a.id}
-                onClick={() => {
-                  setSelectedActionId(a.id);
-                  setZoneOpen(false);
-                }}
+                onMouseEnter={() => setSelectedActionId(a.id)}
               >
-                <strong>{a.label}</strong>
-              </button>
-            ))}
-          </div>
-          {selectedAction && (
-            <div className="selected-operation compact-execution">
-              <div className="selected-copy">
-                <strong>{selectedAction.label}</strong>
-                <span>{selectedAction.hint}</span>
-              </div>
-              <div className="operation-actions">
                 <button
-                  className="execute"
-                  onClick={() => manual(selectedAction)}
-                  disabled={
-                    busy ||
-                    Boolean(selectedZone && blockedPoints.has(selectedZone.id))
-                  }
-                >
-                  Выполнить
-                </button>
+                  className="operation-execute-tile"
+                  title={`${a.hint} · Нажать, чтобы выполнить`}
+                  disabled={busy || Boolean(resolvedZone(a) && blockedPoints.has(resolvedZone(a).id))}
+                  onFocus={() => setSelectedActionId(a.id)}
+                  onClick={() => { setSelectedActionId(a.id); setZoneOpen(false); manual(a); }}
+                ><strong>{a.label}</strong></button>
                 {phase === "preparation" && (
                   <button
-                    onClick={() => add(selectedAction)}
-                    disabled={Boolean(
-                      selectedZone && blockedPoints.has(selectedZone.id),
-                    )}
-                  >
-                    + Протокол
-                  </button>
+                    className="operation-queue-tile"
+                    title="Добавить в протокол"
+                    disabled={Boolean(resolvedZone(a) && blockedPoints.has(resolvedZone(a).id))}
+                    onFocus={() => setSelectedActionId(a.id)}
+                    onClick={() => { setSelectedActionId(a.id); add(a); }}
+                  >＋</button>
                 )}
               </div>
+            ))}
+          </div>
+        </aside>
+        <aside className={`auxiliary-column ${protocolOpen || goalSettingsOpen ? "expanded" : ""}`}>
+          <div className="auxiliary-summary">
+            <small>СЛУЖЕБНЫЙ КАНАЛ</small>
+            <strong>{trackedContract?.title || "Свободная калибровка"}</strong>
+            <span>{protocol.reduce((n, step) => n + step.repeat, 0)} шагов · {trackedMetrics.length} показателей</span>
+            <div>
+              <button className={protocolOpen ? "active" : ""} onClick={() => { setGoalSettingsOpen(false); setProtocolOpen(true); }}>Протокол</button>
+              {!trackedContract && <button className={goalSettingsOpen ? "active" : ""} onClick={() => { setProtocolOpen(false); setGoalSettingsOpen(true); }}>Цели</button>}
             </div>
-          )}
-          {phase === "preparation" && (
-            <div className={`compact-protocol ${protocolOpen ? "open" : ""}`}>
-              <div className="protocol-bar">
-                <button
-                  className="protocol-toggle"
-                  onClick={() => setProtocolOpen((v) => !v)}
-                >
-                  <span>
-                    Протокол · {protocol.reduce((n, s) => n + s.repeat, 0)}{" "}
-                    шагов
-                  </span>
-                  <b>{protocolOpen ? "−" : "+"}</b>
-                </button>
-                <button
-                  className={running ? "protocol-stop" : "protocol-quick-run"}
-                  disabled={!running && (busy || !protocol.length)}
-                  onClick={() => (running ? (stopRef.current = true) : run())}
-                >
-                  {running ? "■" : "▶"}
-                </button>
-              </div>
-              {protocolOpen && (
-                <div className="protocol-overlay">
-                  {protocol.length ? (
-                    <ol>
-                      {protocol.map((s, i) => (
-                        <li key={s.key}>
-                          <span>{i + 1}</span>
-                          <div>
-                            <strong>
-                              {s.label} {s.repeat > 1 && `×${s.repeat}`}
-                            </strong>
-                            <small>
-                              {s.pointLabel || s.pointId || "системно"}
-                            </small>
-                          </div>
-                          <div className="compact-step-tools">
-                            <button onClick={() => move(i, -1)}>↑</button>
-                            <button onClick={() => move(i, 1)}>↓</button>
-                            <button onClick={() => repeat(s.key)}>×</button>
-                            <button
-                              onClick={() =>
-                                setProtocol((x) =>
-                                  x.filter((v) => v.key !== s.key),
-                                )
-                              }
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ol>
-                  ) : (
-                    <p className="muted">Очередь пуста</p>
-                  )}
-                </div>
-              )}
+            <section>
+              <small>ОЧЕРЕДЬ</small>
+              {protocol.length ? protocol.slice(0, 5).map((step, index) => <span key={`aux-step-${step.key}`}><b>{index + 1}</b>{step.label}{step.repeat > 1 ? ` ×${step.repeat}` : ""}</span>) : <i>Добавляйте действия кнопкой ＋</i>}
+              {protocol.length > 5 && <i>Ещё {protocol.length - 5}</i>}
+            </section>
+            <section>
+              <small>ОТСЛЕЖИВАЕТСЯ</small>
+              <p>{trackedMetrics.map(trackedMetricLabel).join(" · ")}</p>
+            </section>
+          </div>
+          <aside className={`protocol-drawer ${protocolOpen ? "active" : ""}`} aria-hidden={!protocolOpen}>
+            <header>
+              <div><small>АВТОМАТИЗАЦИЯ КАЛИБРОВКИ</small><h2>Протокол · {protocol.reduce((n, step) => n + step.repeat, 0)} шагов</h2></div>
+              <button onClick={() => setProtocolOpen(false)}>×</button>
+            </header>
+            <div className="protocol-drawer-list">
+              {protocol.length ? protocol.map((step, index) => {
+                const progress = protocolProgress[step.key];
+                return (
+                  <article className={`protocol-drawer-step status-${progress?.status || "pending"}`} key={step.key}>
+                    <span>{progress?.status === "completed" ? "✓" : progress?.status === "running" ? "▶" : progress?.status === "error" ? "!" : index + 1}</span>
+                    <div className="protocol-step-copy">
+                      <strong>{step.label}{step.repeat > 1 ? ` ×${step.repeat}` : ""}</strong>
+                      <small>{step.pointLabel || step.pointId || "системно"}{progress ? ` · выполнено ${progress.completedRepeats}/${step.repeat}` : ""}</small>
+                    </div>
+                    {progress?.completedRepeats ? (
+                      <div className="protocol-step-effect">
+                        <small>ЭФФЕКТ</small>
+                        {trackedMetrics.map((metric) => <span key={`${step.key}-${metric}`}>{trackedMetricLabel(metric).toLowerCase()} <b>{protocolMetricValue(progress, metric)}</b></span>)}
+                      </div>
+                    ) : <div className="protocol-step-effect empty">Ожидает выполнения</div>}
+                    <div className="protocol-step-tools">
+                      <button disabled={running} onClick={() => move(index, -1)}>↑</button>
+                      <button disabled={running} onClick={() => move(index, 1)}>↓</button>
+                      <button disabled={running} onClick={() => repeat(step.key)}>×</button>
+                      <button disabled={running} onClick={() => { setProtocolProgress({}); setProtocol((current) => current.filter((item) => item.key !== step.key)); }}>✕</button>
+                    </div>
+                  </article>
+                );
+              }) : <p className="protocol-drawer-empty">Протокол пуст. Добавляйте действия кнопкой ＋ в панели операций.</p>}
             </div>
-          )}
+            <footer>
+              <button className={running ? "stop" : "run"} disabled={!running && (busy || !protocol.length)} onClick={() => running ? (stopRef.current = true) : run()}>{running ? "■ Остановить" : "▶ Запустить протокол"}</button>
+            </footer>
+          </aside>
+          <aside className={`goal-settings-panel ${goalSettingsOpen && !trackedContract ? "active" : ""}`} aria-hidden={!goalSettingsOpen || Boolean(trackedContract)}>
+            <header>
+              <div><small>СВОБОДНАЯ КАЛИБРОВКА</small><h2>Отслеживаемые параметры</h2></div>
+              <button onClick={() => setGoalSettingsOpen(false)}>×</button>
+            </header>
+            <p>Выбранные показатели появятся в прогнозе, результате действия и протоколе.</p>
+            <div>
+              {trackedMetricOptions.map((option) => {
+                const checked = freeTrackedMetrics.includes(option.id);
+                const limitReached = !checked && freeTrackedMetrics.length >= 6;
+                return <label className={`${checked ? "selected" : ""} ${limitReached ? "disabled" : ""}`} key={option.id}>
+                  <input type="checkbox" checked={checked} disabled={limitReached} onChange={() => setFreeTrackedMetrics((current) => checked ? current.length > 1 ? current.filter((metric) => metric !== option.id) : current : current.length < 6 ? [...current, option.id] : current)} />
+                  <span>{option.label}</span><b>{checked ? "✓" : "+"}</b>
+                </label>;
+              })}
+            </div>
+            <footer><small>{freeTrackedMetrics.length}/6 показателей выбрано</small><button onClick={() => setGoalSettingsOpen(false)}>Готово</button></footer>
+          </aside>
         </aside>
       </div>
       <footer className={`event-strip ${significantEvent?.kind || ""}`}>
@@ -2095,6 +2819,34 @@ export function CalibrationPrototype({
         </div>
         <button onClick={() => setHistoryOpen(true)}>История ↑</button>
       </footer>
+      {visualReviewOpen && (
+        <div className="drawer-backdrop" onClick={() => setVisualReviewOpen(false)}>
+          <aside className="side-drawer visual-review-drawer" onClick={(event) => event.stopPropagation()}>
+            <header><h2>Ревью аватара</h2><button onClick={() => setVisualReviewOpen(false)}>×</button></header>
+            <img src={reviewAssetPath} alt={subjectName} />
+            <code>{reviewAssetPath}</code>
+            <h3>Решение</h3>
+            <div className="visual-review-decisions">
+              {([['keep', 'Оставить'], ['rework', 'Переделать'], ['reject', 'Исключить']] as const).map(([value, label]) => (
+                <button className={visualReviewDecision === value ? 'active' : ''} key={value} onClick={() => setVisualReviewDecision(value)}>{label}</button>
+              ))}
+            </div>
+            <h3>Что не так</h3>
+            <div className="visual-review-issues">
+              {[
+                ['identity', 'Другой персонаж'], ['wardrobe', 'Неверная одежда'], ['restraint', 'Неверная фиксация'],
+                ['interaction', 'Не читается действие'], ['phase', 'Неверная эмоция/фаза'], ['composition', 'Прыгает композиция'],
+                ['anatomy', 'Анатомия'], ['artifacts', 'Артефакты/текст'], ['duplicate', 'Дубликат'], ['style', 'Не подходит стиль'],
+              ].map(([value, label]) => (
+                <button className={visualReviewIssues.includes(value) ? 'active' : ''} key={value} onClick={() => setVisualReviewIssues(current => current.includes(value) ? current.filter(issue => issue !== value) : [...current, value])}>{label}</button>
+              ))}
+            </div>
+            <h3>Комментарий</h3>
+            <textarea value={visualReviewNote} onChange={event => setVisualReviewNote(event.target.value)} placeholder="Что именно нужно изменить при перегенерации?" />
+            <button className="visual-review-save" disabled={visualReviewSaving} onClick={saveVisualReview}>{visualReviewSaving ? 'Сохранение…' : visualReviewSaved ? 'Сохранено ✓' : 'Записать ревью'}</button>
+          </aside>
+        </div>
+      )}
       {historyOpen && (
         <div className="drawer-backdrop" onClick={() => setHistoryOpen(false)}>
           <section

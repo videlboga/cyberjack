@@ -17,6 +17,7 @@ import { buildStateDescription, getContractProgress } from '../../services/chipG
 import { generateSceneImage, shouldGenerateImage } from '../../services/portraitGenerator';
 import { advanceWorldTime } from '../../scenario/worldService';
 import { deriveTelemetry } from '../../narrative/telemetry';
+import { planSustainedPulses } from '../../orchestration/sustainedEffects';
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; actorName: string; targetName: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
@@ -47,11 +48,6 @@ export function buildPairedSpeechHistory(
     return recent;
 }
 
-function physicalHistoryMarker(actionLabel: string, pointLabel: string, subjectiveText?: string) {
-    const experience = subjectiveText ? ` Ощущение: ${subjectiveText}` : '';
-    return `[Воздействие] ${actionLabel}; зона: ${pointLabel}.${experience}`;
-}
-
 export function calculateActionSpeechChance(input: {
     intensity: number;
     tensionBefore: number;
@@ -76,17 +72,43 @@ export const processWait = async (req: Request, res: Response) => {
         const { subjectId = 'S-AV-01', ticks = 1, eventId = 'scene_lab_calibrator', callLLM = false } = req.body;
         const interactionContext = String(req.body.interactionContext || 'Диагностический стол');
         const deltaTime = req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 20.0;
+        const pulseTargets = ['neck', 'chest', 'nipples', 'belly', 'inner_thighs', 'groin', 'vulva', 'clitoris', 'penis', 'testicles', 'anus'];
+        if (!presetRepo.getActionPreset('sustained_vibration_pulse')) {
+            presetRepo.saveActionPreset('sustained_vibration_pulse', 'Импульс продолжительной вибрации', {
+                intensity: .28, valence: .65, contact: .75, sharpness: .08, novelty: .25, validTargets: pulseTargets
+            });
+        }
+        if (!presetRepo.getActionPreset('sustained_electro_pulse')) {
+            presetRepo.saveActionPreset('sustained_electro_pulse', 'Импульс продолжительной электростимуляции', {
+                intensity: .42, valence: -.25, contact: .65, sharpness: .55, novelty: .3, validTargets: pulseTargets
+            });
+        }
         let lastBundle: Awaited<ReturnType<typeof runGameTick>> | null = null;
+        const sustainedEffects: Array<{ sourceActionId: string; label: string; pointId: string; pulses: number }> = [];
 
         for (let i = 0; i < ticks; i++) {
-            lastBundle = await runGameTick({
-                subjectId,
-                pointId: 'systemic',
-                playerId: 'PL-1',
-                sceneId: eventId,
-                presetId: 'wait',
-                deltaTime
-            });
+            const plans = planSustainedPulses(activeContextsRepo.getAllForSubject(subjectId), deltaTime);
+            if (!plans.length) {
+                lastBundle = await runGameTick({
+                    subjectId, pointId: 'systemic', playerId: 'PL-1', sceneId: eventId,
+                    presetId: 'wait', deltaTime
+                });
+                continue;
+            }
+            for (const plan of plans) {
+                sustainedEffects.push({ sourceActionId: plan.sourceActionId, label: plan.label, pointId: plan.pointId, pulses: plan.pulses });
+                for (let pulse = 0; pulse < plan.pulses; pulse++) {
+                    lastBundle = await runGameTick({
+                        subjectId,
+                        pointId: plan.pointId,
+                        playerId: 'PL-1',
+                        sceneId: eventId,
+                        presetId: plan.presetId,
+                        deltaTime: 1,
+                        customPayload: { sustainedSource: plan.sourceActionId, pulse: pulse + 1, pulseCount: plan.pulses }
+                    });
+                }
+            }
         }
 
         let stReply, promptMessages;
@@ -127,6 +149,7 @@ export const processWait = async (req: Request, res: Response) => {
             reply: stReply || null,
             promptMessages: promptMessages || null,
             actionTrace: null,
+            sustainedEffects,
             tickResult: lastBundle?.output.result,
             diagnostics: lastBundle?.diagnostics,
             bundle: lastBundle,
@@ -141,7 +164,7 @@ export const processWait = async (req: Request, res: Response) => {
 
 export const processTick = async (req: Request, res: Response) => {
     try {
-        const { subjectId = 'S-AV-01', textMessage, playerId = 'PL-1' } = req.body;
+        const { subjectId: requestedSubjectId = 'S-AV-01', textMessage, playerId: requestedPlayerId = 'PL-1' } = req.body;
         const addressedCharacterId = typeof req.body.addressedCharacterId === 'string' && req.body.addressedCharacterId.trim()
             ? req.body.addressedCharacterId.trim()
             : undefined;
@@ -154,7 +177,10 @@ export const processTick = async (req: Request, res: Response) => {
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
         // Note: dispatchEvent now calls runGameTick
         const dispatchPayload = { ...req.body, pointId: (req.body.pointId || 'systemic').toLowerCase(), deltaTime: req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 1.0 };
-        const { bundle, dynamicModifiers, pointIdUsed } = await dispatchEvent(dispatchPayload);
+        const { bundle, dynamicModifiers, pointIdUsed, subjectIdUsed, actorIdUsed } = await dispatchEvent(dispatchPayload);
+        const subjectId = subjectIdUsed || requestedSubjectId;
+        const playerId = requestedPlayerId;
+        const actingCharacterId = actorIdUsed || requestedPlayerId;
         const eventId = tickSceneId;
         const actionId = req.body.presetId || bundle.compiledAction?.actionKey || (bundle.compiledAction as any)?.action || 'unknown_action';
         const actionLabel = bundle.compiledAction?.label || req.body.labelOverride || req.body.presetId || 'неизвестное воздействие';
@@ -163,7 +189,7 @@ export const processTick = async (req: Request, res: Response) => {
         const fullState = subjectRepo.getWithPoint(subjectId, pointIdUsed);
 
         let suppressActionNarrative = actionId === 'wait';
-        const actorCharacter = characterRepo.ensureCharacter(playerId, playerId === 'PL-1' ? 'Калибратор' : playerId);
+        const actorCharacter = characterRepo.ensureCharacter(actingCharacterId, actingCharacterId === 'PL-1' ? 'Калибратор' : actingCharacterId);
 
         const chanceSpeech = req.body.llmMode === 'speech_chance' || req.body.llmMode === 'scene_chance';
         const speechOnly = req.body.llmMode === 'speech_only' || req.body.llmMode === 'speech_chance';
@@ -174,7 +200,14 @@ export const processTick = async (req: Request, res: Response) => {
             bundle.prompt = promptPayload;
         }
         if (baseUserMessage && promptPayload.reactionFrame) {
-            promptPayload.reactionFrame = applyVerbalInputToFrame(promptPayload.reactionFrame, baseUserMessage);
+            const commandType = dynamicModifiers?.commandIntent?.type;
+            const parsedCommand = Boolean(dynamicModifiers?.routing || (commandType && commandType !== 'none'));
+            promptPayload.reactionFrame = parsedCommand
+                ? {
+                    ...promptPayload.reactionFrame,
+                    event: { ...promptPayload.reactionFrame.event, playerSpeech: baseUserMessage }
+                }
+                : applyVerbalInputToFrame(promptPayload.reactionFrame, baseUserMessage);
             promptPayload.systemPrompt = buildReactionSystemPrompt(promptPayload.reactionFrame);
             bundle.prompt = promptPayload;
         }
@@ -183,6 +216,12 @@ export const processTick = async (req: Request, res: Response) => {
         let actionLabelMessage: string | null = null;
         if (!suppressActionNarrative) {
             actionLabelMessage = buildAutoUserMessage({ actionLabel, pointLabel, actorName: actorCharacter?.name || 'Калибратор', targetName: fullState?.name || subjectId });
+        }
+        // Keep physical actions in the same durable timeline as dialogue. They
+        // remain user-role messages for LLM compatibility; the UI presents the
+        // explicit prefix as a system/action row.
+        if (!baseUserMessage && !suppressActionNarrative) {
+            chatMemoryRepo.append(subjectId, 'user', `[Действие] ${actionLabel} · ${pointLabel}`, interactionContext);
         }
 
         let turnExecutionMetrics: any = null;
@@ -213,12 +252,7 @@ export const processTick = async (req: Request, res: Response) => {
                     ? generated.reply as { speech: string; speechAct?: string; addressedTo?: string }
                     : { speech: String(generated.reply || '') };
                 llmError = generated.error || null;
-                chatMemoryRepo.append(
-                    subjectId,
-                    'user',
-                    baseUserMessage || physicalHistoryMarker(actionLabel, pointLabel, observation?.subjectiveText),
-                    interactionContext
-                );
+                if (baseUserMessage) chatMemoryRepo.append(subjectId, 'user', baseUserMessage, interactionContext);
                 if (!llmError) {
                     if (structured.speech) chatMemoryRepo.append(subjectId, 'assistant', structured.speech, interactionContext);
                 }
@@ -247,13 +281,12 @@ export const processTick = async (req: Request, res: Response) => {
                     reqBodyInfoTag: req.body?.presetId,
                     promptPayload,
                     interactionContext,
-                    directedActorId: addressedCharacterId
+                    directedActorId: dynamicModifiers?.routing?.actorId || addressedCharacterId
                 });
             }
         }
         if (llmSkipped) {
             const observation = bundle.diagnostics?.observation;
-            chatMemoryRepo.append(subjectId, 'user', physicalHistoryMarker(actionLabel, pointLabel, observation?.subjectiveText), interactionContext);
             recordMemoryEvent({ subjectId, bundle });
         }
 

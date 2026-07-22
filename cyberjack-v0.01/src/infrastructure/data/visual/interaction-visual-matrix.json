@@ -1,0 +1,198 @@
+{
+  "version": 2,
+  "model": "sparse-interaction-overrides",
+  "baseMatrix": "character-image-matrix.json",
+  "description": "Разреженная матрица продолжительных сцен. Единичные действия используют базовый аватар и эффекты.",
+  "characters": ["S-AV-01", "NPC-LAB-01", "NPC-CAND-01"],
+  "phases": [
+    { "id": "sustain", "name": "Устойчивое воздействие" },
+    { "id": "intense", "name": "Высокая интенсивность" },
+    { "id": "peak", "name": "На грани или разрядка" },
+    { "id": "recovery", "name": "Восстановление", "preferBaseAvatar": true }
+  ],
+  "activationRules": {
+    "intenseAt": 65,
+    "peakAt": 85,
+    "peakEvents": ["discharge"],
+    "criticalStatesOverrideInteraction": ["unconscious", "panic", "sensory_overload"]
+  },
+  "transientEffects": [
+    { "family": "touch", "actionTags": ["affection", "comfort"], "durationMs": 500 },
+    { "family": "impact", "actionTags": ["impact", "blunt"], "durationMs": 650 },
+    { "family": "cold", "actionIds": ["ice_cube"], "durationMs": 800 },
+    { "family": "heat", "actionIds": ["hot_wax"], "durationMs": 850 },
+    { "family": "electric", "actionIds": ["act_shock_collar", "taser_shock"], "durationMs": 900 }
+  ],
+  "families": [
+    {
+      "id": "vibration",
+      "name": "Продолжительная вибрация",
+      "coverage": "verified",
+      "generator": { "concept": "sex_machine_pony_V1.0", "strength": 0.8 },
+      "mechanics": {
+        "existingActionIds": ["act_activate_plug", "act_deactivate_plug", "act_start_vibrator", "act_adjust_vibration", "act_stop_vibrator"],
+        "existingItemIds": ["eq_plug", "eq_vibrator"],
+        "plannedActionIds": []
+      },
+      "variants": [
+        { "id": "handheld", "phases": ["sustain", "intense", "peak"] },
+        { "id": "internal", "phases": ["sustain", "intense", "peak"] },
+        { "id": "machine", "phases": ["sustain", "intense", "peak"] }
+      ],
+      "fallback": ["vibration.*.sustain", "base.$pose.$clothing.$restraint.$affect"]
+    },
+    {
+      "id": "sex_machine",
+      "name": "Секс-машина",
+      "coverage": "verified",
+      "generator": { "concept": "sex_machine_pony_V1.0", "strength": 0.8 },
+      "mechanics": {
+        "existingItemIds": ["eq_fuck_machine"],
+        "plannedActionIds": ["act_mount_sex_machine", "act_start_sex_machine", "act_adjust_sex_machine", "act_stop_sex_machine"]
+      },
+      "variants": [
+        { "id": "stirrups", "phases": ["sustain", "intense", "peak"] },
+        { "id": "restrained", "phases": ["sustain", "intense", "peak"] },
+        { "id": "suspended", "phases": ["sustain", "intense", "peak"] },
+        { "id": "milking", "phases": ["sustain", "intense", "peak"] },
+        { "id": "hmd", "phases": ["sustain", "intense", "peak"] },
+        { "id": "mind_control", "phases": ["sustain", "intense", "peak"] }
+      ],
+      "fallback": ["sex_machine.restrained.$phase", "sex_machine.restrained.sustain", "base.$pose.$clothing.$restraint.$affect"]
+    },
+    {
+      "id": "electrostimulation",
+      "name": "Продолжительная электростимуляция",
+      "coverage": "verified",
+      "generator": { "concept": "Electric_Humiliation_concept", "strength": [0.7, 0.8] },
+      "mechanics": {
+        "existingActionIds": ["act_connect_tens", "act_start_electrostimulation", "act_adjust_electrostimulation", "act_stop_electrostimulation", "act_disconnect_tens"],
+        "existingItemIds": ["eq_tens_unit", "eq_collar"],
+        "plannedItemIds": ["eq_electric_chair", "eq_nipple_clamps"],
+        "plannedActionIds": []
+      },
+      "variants": [
+        { "id": "chair", "phases": ["sustain", "intense", "peak"] },
+        { "id": "clamps", "phases": ["sustain", "intense", "peak"] },
+        { "id": "genital", "phases": ["sustain", "intense", "peak"] },
+        { "id": "tentacles", "phases": ["sustain", "intense", "peak"], "optional": true }
+      ],
+      "fallback": ["electrostimulation.chair.$phase", "electrostimulation.chair.sustain", "base.$pose.$clothing.$restraint.high_negative"]
+    },
+    {
+      "id": "exposure",
+      "name": "Смущённая демонстрация",
+      "coverage": "verified",
+      "generator": { "concept": "embarrassedexposure.pony.v2", "strength": [0.8, 1.0] },
+      "mechanics": {
+        "existingActionIds": ["act_examine"],
+        "plannedActionIds": ["act_order_exposure", "act_hold_exposure", "act_end_exposure"]
+      },
+      "variants": [
+        { "id": "standing", "phases": ["sustain", "peak"] },
+        { "id": "sitting_spread", "phases": ["sustain", "peak"] },
+        { "id": "spread_eagle", "phases": ["sustain", "peak"] },
+        { "id": "covering", "phases": ["sustain"] }
+      ],
+      "fallback": ["base.$pose.$clothing.$restraint.guarded"]
+    },
+    {
+      "id": "foot",
+      "name": "Фокус на ступнях",
+      "coverage": "verified-with-selection",
+      "generator": {
+        "concepts": [
+          { "id": "pantyhose_black_v1_0", "strength": 0.8 },
+          { "id": "FeetTickle_epoch_12", "strength": 0.8 }
+        ]
+      },
+      "mechanics": {
+        "existingItemIds": ["eq_stockings"],
+        "plannedItemIds": ["eq_tickle_stocks"],
+        "plannedActionIds": ["act_place_in_stocks", "act_start_foot_tickle", "act_stop_foot_tickle"]
+      },
+      "variants": [
+        { "id": "bare_presented", "phases": ["sustain"] },
+        { "id": "pantyhose_presented", "phases": ["sustain"] },
+        { "id": "stocks_tickle", "phases": ["sustain", "intense", "peak"] }
+      ],
+      "fallback": ["foot.bare_presented.sustain", "base.$pose.$clothing.$restraint.$affect"]
+    },
+    {
+      "id": "oral",
+      "name": "Оральное взаимодействие",
+      "coverage": "verified",
+      "generator": { "concept": "helpbj", "strength": 0.8 },
+      "mechanics": {
+        "plannedActionIds": ["act_start_oral", "act_deepen_oral", "act_stop_oral", "act_assist_oral"]
+      },
+      "variants": [
+        { "id": "kneeling", "phases": ["sustain", "intense", "peak"] },
+        { "id": "deep", "phases": ["sustain", "intense", "peak"] },
+        { "id": "assisted", "phases": ["sustain", "peak"] }
+      ],
+      "fallback": ["oral.kneeling.$phase", "oral.kneeling.sustain", "base.kneeling.$clothing.$restraint.$affect"]
+    },
+    {
+      "id": "penetration",
+      "name": "Проникновение",
+      "coverage": "verified-no-pov",
+      "mechanics": {
+        "plannedActionIds": ["act_start_penetration", "act_adjust_penetration", "act_stop_penetration"]
+      },
+      "variants": [
+        { "id": "doggy", "phases": ["sustain", "intense", "peak"] },
+        { "id": "missionary", "phases": ["sustain", "intense", "peak"] },
+        { "id": "standing", "phases": ["sustain", "peak"] }
+      ],
+      "fallback": ["penetration.doggy.$phase", "penetration.doggy.sustain", "base.all_fours.$clothing.$restraint.$affect"]
+    },
+    {
+      "id": "capsule",
+      "name": "Капсула и glory wall",
+      "coverage": "experimental",
+      "generator": {
+        "concepts": [
+          { "id": "glory_wall_leg_up_pdxl_goofy", "strength": 0.8 },
+          { "id": "sex_machine_pony_V1.0", "strength": 0.8 },
+          { "id": "Electric_Humiliation_concept", "strength": 0.7 }
+        ]
+      },
+      "mechanics": {
+        "existingItemIds": ["eq_sensory_pod"],
+        "plannedActionIds": ["act_enter_capsule", "act_configure_capsule", "act_start_capsule_protocol", "act_stop_capsule_protocol"]
+      },
+      "variants": [
+        { "id": "hmd", "phases": ["sustain", "intense", "peak"] },
+        { "id": "machine", "phases": ["sustain", "intense", "peak"] },
+        { "id": "electric", "phases": ["sustain", "intense", "peak"] },
+        { "id": "glory", "phases": ["sustain", "peak"], "optional": true }
+      ],
+      "fallback": ["sex_machine.restrained.$phase", "base.lying.$clothing.table_straps.$affect"]
+    },
+    {
+      "id": "lesbian",
+      "name": "Парное взаимодействие",
+      "coverage": "verified-single-character-lora",
+      "constraints": ["Одна персонажная LoRA; второй персонаж задаётся тегами", "Cunnilingus не включён из-за нестабильной анатомии"],
+      "mechanics": {
+        "plannedActionIds": ["act_start_fingering_kiss", "act_start_facesitting", "act_stop_duo_interaction"]
+      },
+      "variants": [
+        { "id": "fingering_kiss", "phases": ["sustain", "intense", "peak"] },
+        { "id": "facesitting", "phases": ["sustain", "intense", "peak"] }
+      ],
+      "fallback": ["base.$pose.$clothing.$restraint.$affect"]
+    }
+  ],
+  "resolverPriority": [
+    "critical-state",
+    "active-interaction-exact",
+    "active-interaction-family-phase",
+    "peak-interaction",
+    "base-pose-clothing-restraint-affect",
+    "base-pose-neutral",
+    "character-neutral"
+  ],
+  "assetConvention": "public/character-images/interactions/$character/$family/$variant__$phase.png"
+}

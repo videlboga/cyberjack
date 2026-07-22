@@ -67,7 +67,14 @@ export const getState = (req: Request, res: Response) => {
             });
         }
 
-        const latestInteraction = db.prepare(`SELECT result_payload FROM event_logs WHERE subject_id = ? AND action_type = 'interaction' ORDER BY id DESC LIMIT 1`).get(subjectId) as any;
+        const recentInteractions = db.prepare(`SELECT result_payload FROM event_logs WHERE subject_id = ? AND action_type = 'interaction' ORDER BY id DESC LIMIT 5`).all(subjectId) as any[];
+        const recentObservations = recentInteractions.flatMap(row => {
+            try {
+                const observation = JSON.parse(row.result_payload || '{}').observation;
+                return observation ? [observation] : [];
+            } catch { return []; }
+        });
+        const latestInteraction = recentInteractions[0];
         let latestObservation: any = null;
         try { latestObservation = JSON.parse(latestInteraction?.result_payload || '{}').observation || null; } catch { }
         const telemetry = subject ? deriveTelemetry({
@@ -81,6 +88,7 @@ export const getState = (req: Request, res: Response) => {
             success: true, 
             subject: subject,
             telemetry,
+            recentObservations,
             availablePoints: uiState.availablePoints,
             availableActions,
             scene: scene ? { id: scene.id, transitions: scene.transitions || [], characters: scene.characters || [] } : null,
@@ -99,7 +107,7 @@ export const getChatHistory = (req: Request, res: Response) => {
     try {
         const subjectId = String(req.params.subjectId || '');
         if (!subjectId || !subjectRepo.get(subjectId)) return res.status(404).json({ success: false, error: 'Персонаж не найден' });
-        const limit = Math.max(1, Math.min(30, Number(req.query.limit) || 10));
+        const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 30));
         const messages = chatMemoryRepo.getRecent(subjectId, Math.min(100, limit * 4))
             .filter(message => !message.content.startsWith('[Воздействие]'))
             .slice(-limit);

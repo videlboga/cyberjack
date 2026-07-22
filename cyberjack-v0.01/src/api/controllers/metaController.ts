@@ -8,6 +8,47 @@ export function getConfig(req: Request, res: Response) {
     res.json({ success: true, config: activeConfig });
 }
 
+export function getVisualAssetReviews(req: Request, res: Response) {
+    try {
+        const assetPath = typeof req.query.assetPath === 'string' ? req.query.assetPath : '';
+        const rows = assetPath
+            ? db.prepare('SELECT * FROM visual_asset_reviews WHERE asset_path = ? ORDER BY updated_at DESC').all(assetPath)
+            : db.prepare('SELECT * FROM visual_asset_reviews ORDER BY updated_at DESC').all();
+        res.json({ success: true, reviews: (rows as any[]).map(row => ({
+            id: row.id, assetPath: row.asset_path, characterId: row.character_id,
+            decision: row.decision, issues: JSON.parse(row.issues_json || '[]'), note: row.note || '',
+            metadata: JSON.parse(row.metadata_json || '{}'), createdAt: row.created_at, updatedAt: row.updated_at
+        })) });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
+export function saveVisualAssetReview(req: Request, res: Response) {
+    try {
+        const assetPath = String(req.body.assetPath || '').trim();
+        const characterId = String(req.body.characterId || '').trim();
+        const decision = String(req.body.decision || '').trim();
+        if (!assetPath || !characterId || !['keep', 'rework', 'reject'].includes(decision)) {
+            return res.status(400).json({ success: false, error: 'assetPath, characterId and a valid decision are required' });
+        }
+        const issues = Array.isArray(req.body.issues) ? req.body.issues.map(String) : [];
+        const note = String(req.body.note || '').trim();
+        const metadata = req.body.metadata && typeof req.body.metadata === 'object' ? req.body.metadata : {};
+        db.prepare(`
+            INSERT INTO visual_asset_reviews (asset_path, character_id, decision, issues_json, note, metadata_json)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(asset_path, character_id) DO UPDATE SET
+              decision = excluded.decision, issues_json = excluded.issues_json,
+              note = excluded.note, metadata_json = excluded.metadata_json,
+              updated_at = CURRENT_TIMESTAMP
+        `).run(assetPath, characterId, decision, JSON.stringify(issues), note, JSON.stringify(metadata));
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
 export function postConfig(req: Request, res: Response) {
     try {
         updateConfig(req.body.config);

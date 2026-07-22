@@ -46,17 +46,18 @@ export async function buildPromptPayloadWithDB(
     })).reverse();
 
     const activeContextRow = db.prepare(`
-        SELECT cp.label, cp.id, cp.context_config_json
+        SELECT cp.label, cp.id, cp.context_config_json, ac.point_id
         FROM active_contexts ac
         JOIN action_presets cp ON ac.action_id = cp.id
         WHERE ac.subject_id = ?
-    `).all(targetQueryId) as {label: string; id: string; context_config_json?: string}[];
+    `).all(targetQueryId) as {label: string; id: string; context_config_json?: string; point_id?: string}[];
     const activeContextNames = activeContextRow.flatMap(r => {
         let role = 'other';
         try { role = JSON.parse(r.context_config_json || '{}')?.type || role; } catch { }
         const externallyVisible = ['pose', 'clothing', 'equipment', 'restraint', 'environment', 'social', 'other'];
         if (ownerQueryId !== targetQueryId && !externallyVisible.includes(role)) return [];
-        return [`${role}: ${r.label}`];
+        const scope = r.point_id ? ` [зона: ${r.point_id}]` : ' [глобально]';
+        return [`${role}: ${r.label}${scope}`];
     });
 
     const pointStatesRow = db.prepare(`

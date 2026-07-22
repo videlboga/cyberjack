@@ -8,6 +8,13 @@ export interface ParsedVerbalAction extends Partial<CompiledAction> {
     raw?: string;
     model?: string;
     commandIntent: CommandIntent;
+    routing?: {
+        actorId: string;
+        targetId: string;
+        actionId: string;
+        confidence: number;
+        source: 'local-command-parser';
+    };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -77,7 +84,7 @@ async function parseDescribedAction(
         .join('\n');
 
     const actionList = presetRepo.getAllActionPresets()
-        .filter(act => !act.contextConfig && act.type !== 'system' && act.type !== 'wait')
+        .filter(act => !['eq_clothe_panties', 'eq_clothe_panties_remove'].includes(act.id) && !act.contextConfig && act.type !== 'system' && act.type !== 'wait')
         .map(act => `- "${act.id}": ${act.label} — ${act.vector?.description || ''}`)
         .join('\n');
 
@@ -296,6 +303,25 @@ export async function parseVerbalInput(
 
     // ── Regular verbal command parsing (existing logic) ──
 
+    // Common aggregate wardrobe commands must not depend on an LLM returning
+    // the singular targetContext shape. The runtime safely ignores items that
+    // are not currently worn.
+    if (/(?:^|\s)(разденься|сними\s+(?:с\s+себя\s+)?(?:всю\s+)?одежду|сними\s+вс[её])(?:[.!?\s]|$)/i.test(text)) {
+        return {
+            intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0,
+            pointId: 'systemic',
+            commandIntent: {
+                type: 'deactivate_contexts',
+                targetContextIds: [
+                    'eq_clothe_jumpsuit', 'eq_clothe_calibration_set', 'eq_clothe_lab_gown',
+                    'eq_clothe_dress', 'eq_clothe_stockings', 'eq_clothe_underwear', 'eq_clothe_panties'
+                ]
+            },
+            raw: JSON.stringify({ intent: 'deactivate_context', deterministic: 'remove_all_clothing' }),
+            model: 'deterministic-command-v1'
+        };
+    }
+
     const ctxList = presetRepo.getAllActionPresets()
         .filter(act => act.contextConfig)
         .map(act => `- "${act.id}": ${act.label}`)
@@ -328,7 +354,7 @@ ${ctxList}
 Текущий список доступных ID для простых действий:
 ${actionList}
 
-ЕСЛИ текст пользователя является требованием/просьбой применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять надетое (одежду, оборудование, позу — например "сними чулки", "сними бельё", "сними платье", "снять ошейник", "встань с колен"), используйте intent "deactivate_context" и соответствующий ID контекста (например "eq_clothe_stockings", "eq_clothe_underwear", "eq_clothe_panties", "eq_clothe_dress", "act_apply_collar", "pose_kneeling"). ЕСЛИ говорят "сними всё" или "разденься", перечислите ВСЕ надетые предметы одежды в массиве "targetContexts".
+ЕСЛИ текст пользователя является требованием/просьбой применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять надетое (одежду, оборудование, позу — например "сними чулки", "сними бельё", "сними трусики", "сними бюстгальтер", "сними платье", "снять ошейник", "встань с колен"), используйте intent "deactivate_context" и соответствующий ID контекста (для трусиков, бюстгальтера и всего комплекта белья всегда используй "eq_clothe_underwear"; другие примеры: "eq_clothe_stockings", "eq_clothe_dress", "act_apply_collar", "pose_kneeling"). ЕСЛИ говорят "сними всё" или "разденься", перечислите ВСЕ надетые предметы одежды в массиве "targetContexts".
 ЕСЛИ текст является запросом или указанием выполнить конкретное действие (например, "поцелуй Векса", "ударь меня", "погладь"), добавь "intent": "perform_action", укажи ID подходящего действия в поле "targetAction", цель действия в поле "targetId" (если требуют ударить себя, укажи "initiator", если другого персонажа — его имя из сцены) и точку в "pointId".
 ВАЖНО: perform_action и perform_described_action используются ТОЛЬКО когда игрок приказывает активу сделать что-то (повелительное наклонение: "поцелуй меня", "встань на колени") ИЛИ когда игрок описывает СВОЁ физическое действие в звёздочках (*глажу по щеке*). Если текст — это обычная речь, вопрос, разговор, эмоциональное высказывание WITHOUT звёздочек (например "тебе нравится это?", "ты красивая", "я хочу тебя", "тебе нравится, когда я трогаю твои ножки?"), то intent должен быть "none" — это просто слова, не команда и не действие.
 ${moveInstructions}
@@ -467,6 +493,8 @@ ${moveInstructions}
             commandIntent = { type: 'activate_context', targetContextId: parsed.targetContext };
         } else if (parsed.intent === 'deactivate_context' && parsed.targetContext) {
             commandIntent = { type: 'deactivate_context', targetContextId: parsed.targetContext };
+        } else if (parsed.intent === 'deactivate_context' && Array.isArray(parsed.targetContexts) && parsed.targetContexts.length) {
+            commandIntent = { type: 'deactivate_contexts', targetContextIds: parsed.targetContexts.filter((id: unknown): id is string => typeof id === 'string') };
         } else if (parsed.intent === 'move' && parsed.targetLocation) {
             commandIntent = { type: 'move', targetLocation: parsed.targetLocation };
         } else if (parsed.intent === 'perform_action' && parsed.targetAction) {

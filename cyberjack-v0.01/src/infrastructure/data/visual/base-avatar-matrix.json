@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "model": "illustrious-clean-base-avatars",
+  "description": "Базовые аватары без взаимодействий и concept LoRA: поза, одежда и состояние независимы.",
+  "checkpoint": "boleromixIllustrious_v402Mature.safetensors",
+  "format": "png",
+  "canvas": { "width": 896, "height": 1152, "background": "plain", "anchor": "bottom-center" },
+  "charactersSource": "character-image-matrix.json#characters",
+  "characters": ["S-AV-01", "NPC-LAB-01", "NPC-CAND-01"],
+  "poses": [
+    { "id": "standing", "tags": ["standing", "full body"] },
+    { "id": "sitting", "tags": ["sitting", "feet visible", "full body"] },
+    { "id": "kneeling", "tags": ["kneeling", "full body"] },
+    { "id": "lying", "tags": ["lying on back", "full body"] },
+    { "id": "all_fours", "tags": ["all fours", "full body"] },
+    { "id": "spread_eagle", "tags": ["lying on back", "arms spread wide", "legs spread wide", "full body"] },
+    { "id": "suspended", "tags": ["suspended pose", "arms up", "arms raised above head", "feet off ground", "hanging from ceiling", "suspended by wrists", "rope bondage suspension", "full body"] }
+  ],
+  "clothing": [
+    { "id": "nude", "tags": ["nude", "completely nude"] },
+    { "id": "underwear", "tags": ["white bra", "white panties", "matching underwear"] },
+    { "id": "dress", "tags": ["simple fitted dress", "closed dress"] },
+    { "id": "dress_stockings", "tags": ["simple fitted dress", "black thighhighs", "garter straps"] },
+    { "id": "jumpsuit", "tags": ["futuristic sensor jumpsuit", "closed bodysuit"] },
+    { "id": "lab_gown", "tags": ["laboratory gown", "closed hospital gown"] },
+    { "id": "calibration_set", "tags": ["white crop top", "white fitted shorts", "calibration outfit"] }
+  ],
+  "restraints": [{ "id": "none", "tags": [] }],
+  "states": [
+    { "id": "neutral", "tags": ["neutral expression", "relaxed face", "closed mouth"], "negativeTags": ["smile", "shocked", "ahegao", "crying"] },
+    { "id": "receptive", "tags": ["gentle smile", "soft eyes", "relaxed face", "slightly parted lips"], "negativeTags": ["shocked", "wide eyes", "terrified", "crying", "ahegao"] },
+    { "id": "guarded", "tags": ["frown", "furrowed brow", "narrowed eyes", "wary expression"], "negativeTags": ["smile", "ahegao", "rolling eyes"] },
+    { "id": "high_positive", "tags": ["heavy blush", "half-closed eyes", "open mouth", "panting", "sweat", "trembling", "aroused", "wet pussy"], "negativeTags": ["terrified", "crying"] },
+    { "id": "high_negative", "tags": ["terrified", "wide eyes", "tears", "clenched teeth", "trembling", "sweat"], "negativeTags": ["smile", "relaxed face", "ahegao"] },
+    { "id": "subspace", "tags": ["dazed", "unfocused eyes", "half-closed eyes", "open mouth", "drooling", "heavy blush", "wet pussy"], "negativeTags": ["terrified", "clenched teeth"] },
+    { "id": "climax", "tags": ["orgasm", "ahegao", "rolling eyes", "open mouth", "tongue out", "drooling", "heavy blush", "trembling", "wet pussy"], "negativeTags": ["neutral expression", "closed mouth"] },
+    { "id": "unconscious", "tags": ["unconscious", "eyes closed", "limp body", "relaxed face", "closed mouth"], "negativeTags": ["smile", "open eyes", "ahegao", "trembling"] }
+  ],
+  "conditionalRules": [
+    {
+      "when": { "poseIn": ["all_fours", "spread_eagle"], "clothing": "nude" },
+      "addPositive": ["pussy", "pussy focus"]
+    },
+    {
+      "when": { "clothingNot": "nude" },
+      "addNegative": ["nude", "bare breasts", "pussy"]
+    },
+    {
+      "when": { "clothing": "underwear" },
+      "addNegative": ["underwear pull", "panties aside", "panties down"]
+    }
+  ],
+  "generationRules": {
+    "conceptLoras": [],
+    "characterLoras": [],
+    "seedKey": ["character", "pose", "clothing"],
+    "lockedAcrossStates": ["camera", "pose", "clothing", "characterAppearance"],
+    "promptLayers": ["quality", "characterAppearance", "pose", "clothing", "state", "conditionalRules"],
+    "assetConvention": "public/character-images/rendered/$character/$pose__$clothing__none__$state.png"
+  }
+}

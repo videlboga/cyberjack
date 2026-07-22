@@ -58,7 +58,7 @@ const CLOTHING_DESC: Record<string, string> = {
     eq_clothe_jumpsuit: 'wearing a futuristic white jumpsuit, fully clothed',
     eq_clothe_dress: 'wearing a simple white dress',
     eq_clothe_stockings: 'wearing black thigh-high stockings',
-    eq_clothe_underwear: 'wearing a white bra',
+    eq_clothe_underwear: 'wearing matching white bra and panties, complete underwear set',
     eq_clothe_panties: 'wearing white panties',
 };
 

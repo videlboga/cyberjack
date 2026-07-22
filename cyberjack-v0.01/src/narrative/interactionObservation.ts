@@ -117,6 +117,7 @@ export function buildInteractionObservation(input: {
     const attitudeDelta = output.nextCore.attitude - previousCore.attitude;
     const opennessDelta = output.nextCore.openness - previousCore.openness;
     const localAttitudeDelta = output.nextPoint.localAttitude - output.tickMeta.inputs.point.localAttitude;
+    const localOpennessDelta = (output.nextPoint.localOpenness || 0) - (output.tickMeta.inputs.point.localOpenness || 0);
     const acceptingLess = attitudeDelta < -0.2 || opennessDelta < -0.2;
     const acceptingMore = attitudeDelta > 0.2 || opennessDelta > 0.2;
     const forcedArousal = previousBehavior === 'unresponsive' && behavioralState !== 'unresponsive' &&
@@ -173,14 +174,17 @@ export function buildInteractionObservation(input: {
 
     return {
         action: { id: action.actionKey, label: action.label, pointId, pointLabel }, contact, behavioralState,
-        reaction: { pleasure, discomfort, overload, engagement, mixed },
+        reaction: { pleasure, discomfort, overload, engagement, mixed, appraisal: output.result.finalValence },
         learning: { effect: learningEffect, familiarityDelta, sensitivityDelta, baselineSensitivityDelta },
         changes: {
             tension: output.nextCore.tension - previousCore.tension,
             capacity: output.nextCore.capacity - previousCore.capacity,
+            sensitivity: output.nextCore.sensitivity - previousCore.sensitivity,
             attitude: attitudeDelta,
             openness: opennessDelta,
+            plasticity: output.nextCore.plasticity - previousCore.plasticity,
             localAttitude: localAttitudeDelta,
+            localOpenness: localOpennessDelta,
         },
         contexts, currentState, transitions, uiText, subjectiveText, technicalText,
     };

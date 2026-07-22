@@ -1,0 +1,136 @@
+[
+  {
+    "family": "vibration",
+    "coverage": "verified",
+    "existingActionIds": [
+      "act_activate_plug",
+      "act_deactivate_plug",
+      "act_start_vibrator",
+      "act_adjust_vibration",
+      "act_stop_vibrator"
+    ],
+    "plannedActionIds": [],
+    "existingItemIds": [
+      "eq_plug",
+      "eq_vibrator"
+    ],
+    "plannedItemIds": []
+  },
+  {
+    "family": "sex_machine",
+    "coverage": "verified",
+    "existingActionIds": [],
+    "plannedActionIds": [
+      "act_mount_sex_machine",
+      "act_start_sex_machine",
+      "act_adjust_sex_machine",
+      "act_stop_sex_machine"
+    ],
+    "existingItemIds": [
+      "eq_fuck_machine"
+    ],
+    "plannedItemIds": []
+  },
+  {
+    "family": "electrostimulation",
+    "coverage": "verified",
+    "existingActionIds": [
+      "act_connect_tens",
+      "act_start_electrostimulation",
+      "act_adjust_electrostimulation",
+      "act_stop_electrostimulation",
+      "act_disconnect_tens"
+    ],
+    "plannedActionIds": [],
+    "existingItemIds": [
+      "eq_tens_unit",
+      "eq_collar"
+    ],
+    "plannedItemIds": [
+      "eq_electric_chair",
+      "eq_nipple_clamps"
+    ]
+  },
+  {
+    "family": "exposure",
+    "coverage": "verified",
+    "existingActionIds": [
+      "act_examine"
+    ],
+    "plannedActionIds": [
+      "act_order_exposure",
+      "act_hold_exposure",
+      "act_end_exposure"
+    ],
+    "existingItemIds": [],
+    "plannedItemIds": []
+  },
+  {
+    "family": "foot",
+    "coverage": "verified-with-selection",
+    "existingActionIds": [],
+    "plannedActionIds": [
+      "act_place_in_stocks",
+      "act_start_foot_tickle",
+      "act_stop_foot_tickle"
+    ],
+    "existingItemIds": [
+      "eq_stockings"
+    ],
+    "plannedItemIds": [
+      "eq_tickle_stocks"
+    ]
+  },
+  {
+    "family": "oral",
+    "coverage": "verified",
+    "existingActionIds": [],
+    "plannedActionIds": [
+      "act_start_oral",
+      "act_deepen_oral",
+      "act_stop_oral",
+      "act_assist_oral"
+    ],
+    "existingItemIds": [],
+    "plannedItemIds": []
+  },
+  {
+    "family": "penetration",
+    "coverage": "verified-no-pov",
+    "existingActionIds": [],
+    "plannedActionIds": [
+      "act_start_penetration",
+      "act_adjust_penetration",
+      "act_stop_penetration"
+    ],
+    "existingItemIds": [],
+    "plannedItemIds": []
+  },
+  {
+    "family": "capsule",
+    "coverage": "experimental",
+    "existingActionIds": [],
+    "plannedActionIds": [
+      "act_enter_capsule",
+      "act_configure_capsule",
+      "act_start_capsule_protocol",
+      "act_stop_capsule_protocol"
+    ],
+    "existingItemIds": [
+      "eq_sensory_pod"
+    ],
+    "plannedItemIds": []
+  },
+  {
+    "family": "lesbian",
+    "coverage": "verified-single-character-lora",
+    "existingActionIds": [],
+    "plannedActionIds": [
+      "act_start_fingering_kiss",
+      "act_start_facesitting",
+      "act_stop_duo_interaction"
+    ],
+    "existingItemIds": [],
+    "plannedItemIds": []
+  }
+]

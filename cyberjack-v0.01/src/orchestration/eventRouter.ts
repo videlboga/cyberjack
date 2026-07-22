@@ -1,6 +1,7 @@
 // src/orchestration/eventRouter.ts
 import { runGameTick, GameEventPayload } from './runGameTick';
 import { parseVerbalInput } from '../parser/verbalParser';
+import { parseLocalCommand } from '../parser/localCommandParser';
 import { presetRepo, sceneRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { getLaboratorySpatialContext, listLaboratoryDestinations } from '../scenario/spatialContext';
 
@@ -8,6 +9,8 @@ export interface RouteResponse {
     bundle: Awaited<ReturnType<typeof runGameTick>>;
     dynamicModifiers?: any;
     pointIdUsed: string;
+    subjectIdUsed: string;
+    actorIdUsed: string;
 }
 
 /**
@@ -19,6 +22,9 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
     let pointId = payload.pointId || 'systemic';
     let dynamicModifiers = undefined;
     const sceneId = payload.sceneId || 'scene_lab_calibrator';
+    let routedSubjectId = payload.subjectId || 'S-01';
+    let routedActorId = payload.playerId || 'PL-1';
+    let routedPresetId = payload.presetId || payload.actionId || 'verbal_pressure';
 
     // Optional text semantic classification
     if (payload.textMessage) {
@@ -40,7 +46,27 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
             sceneContextStr = '';
         }
 
-        dynamicModifiers = await parseVerbalInput(payload.textMessage, sceneContextStr, sceneCharacters, payload.playerId);
+        const localCommand = parseLocalCommand({
+            text: payload.textMessage,
+            characters: sceneCharacters,
+            defaultActorId: payload.addressedCharacterId || payload.playerId || 'PL-1',
+            defaultTargetId: payload.subjectId || 'S-01'
+        });
+        if (localCommand) {
+            routedSubjectId = localCommand.targetId;
+            routedActorId = localCommand.actorId;
+            routedPresetId = localCommand.actionId;
+            pointId = localCommand.pointId;
+            dynamicModifiers = {
+                commandIntent: { type: 'none' },
+                routing: localCommand,
+                raw: JSON.stringify(localCommand),
+                model: localCommand.source
+            };
+            console.log(`[EventRouter] Local command: actor=${routedActorId} action=${routedPresetId} target=${routedSubjectId}`);
+        } else {
+            dynamicModifiers = await parseVerbalInput(payload.textMessage, sceneContextStr, sceneCharacters, payload.playerId);
+        }
 
         if (dynamicModifiers.pointId) {
             // Check repo instead of direct db query
@@ -55,11 +81,12 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
 
     // Run engine logic
     const bundle = await runGameTick({
-        subjectId: payload.subjectId || 'S-01',
+        subjectId: routedSubjectId,
         playerId: payload.playerId || 'PL-1',
+        actingCharacterId: routedActorId,
         pointId,
         sceneId: payload.sceneId || 'scene_lab_calibrator',
-        presetId: payload.presetId || payload.actionId || 'verbal_pressure',
+        presetId: routedPresetId,
         playerIntensity: payload.intensity !== undefined ? payload.intensity : 1.0,
         dynamicModifiers,
         eventType: payload.eventType,
@@ -69,5 +96,5 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
         deltaTime: payload.deltaTime
     });
 
-    return { bundle, dynamicModifiers, pointIdUsed: pointId };
+    return { bundle, dynamicModifiers, pointIdUsed: pointId, subjectIdUsed: routedSubjectId, actorIdUsed: routedActorId };
 }

@@ -25,6 +25,9 @@
 .selected-copy strong, .selected-copy span { display: block; }
 .selected-copy strong { color: #c7d2d5; font-size: 11px; }
 .selected-copy span { margin-top: 2px; overflow: hidden; color: #71858b; font-size: 9px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.calibration-forecast { display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+.calibration-forecast i { padding:3px 5px; border:1px solid #31454a; color:#91aaa7; font-size:8px; font-style:normal; }
+.capacity-learning-warning { display:block; margin-top:5px; color:#e0a37f; font-size:9px; font-style:normal; line-height:1.3; }
 .selected-operation.compact-execution .operation-actions { margin-top: 7px; }
 .compact-protocol { position: relative; z-index: 12; flex: none; margin-top: 7px; }
 .protocol-bar { display: grid; grid-template-columns: 1fr 34px; gap: 4px; }
