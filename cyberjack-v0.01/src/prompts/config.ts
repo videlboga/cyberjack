@@ -53,8 +53,9 @@ export interface PromptConfig {
         recentEventLimit?: number;
     };
     adapters: {
-        sillyTavernSystemPrefix: string;
         emptyInputPrompt: string;
+        sceneForCharacterSystem: string;
+        sceneForCharacterInput: string;
         narratorSystemPrefix: string;
         narratorInputPrompt: string;
     };
@@ -73,25 +74,6 @@ export interface PromptConfig {
         fallbackToBestAction?: boolean;
         topActionsToLog?: number;
         verbalReactiveBoost: number;
-    };
-    stContext?: {
-        enabled: boolean;
-        baseUrl: string;
-        characterPresets?: Record<
-            string,
-            {
-                avatarUrl: string;
-                chatFile?: string;
-                worldInfoFiles?: string[];
-                memoryMessageLimit?: number;
-                generatedWorldInfoName?: string;
-            }
-        >;
-        defaultWorldInfoFiles?: string[];
-        memoryMessageLimit?: number;
-        useCharacterCard?: boolean;
-        useWorldInfo?: boolean;
-        includeMemory?: boolean;
     };
 }
 
@@ -162,10 +144,13 @@ export let activeConfig: PromptConfig = {
         recentEventLimit: 10
     },
     adapters: {
-        sillyTavernSystemPrefix: "Вживись в роль Эли (S-01). Опирайся на внутреннее состояние и недавние ощущения. Покажи живого человека.",
         emptyInputPrompt: "[Действие завершено. Сгенерируй JSON-ответ только с твоей репликой на основе текущих ощущений. Если хочешь промолчать - верни пустую строку в speech]",
+        // Narrator A: compressed scene FOR the character (injected into their prompt)
+        sceneForCharacterSystem: "Ты — модуль телесного восприятия. Опиши ОЧЕНЬ КРАТКО (1-2 предложения, от первого лица) что субъект физически чувствует прямо сейчас. Только сенсорика и тело, без мыслей и эмоций. Никаких имён, никакого художественного стиля — сухой протокол ощущений.",
+        sceneForCharacterInput: "Опиши кратко, что тело чувствует после этого воздействия. Ответь СТРОГО одним JSON-объектом: { \"reaction\": \"текст\" }",
+        // Narrator B: chronicle for chat (sees speech, state, contexts)
         narratorSystemPrefix: "Ты — талантливый писатель-описатель. Обязательно в первых же словах называй участников по ИМЕНАМ. ЗАПРЕЩЕНО называть их абстрактно ('мужчина', 'женщина', 'субъект', 'человек'). Пиши красивым, живым художественным языком — как в хорошей книге. ВНИМАНИЕ: Если в логе было лишь произнесено слово или была пауза, КАТЕГОРИЧЕСКИ ЗАПРЕЩАЕТСЯ выдумывать физические контакты (прикосновения, удары, объятия) — описывай только мимику, взгляды, тон, напряжение позы и сбои в дыхании в ответ на словесную реплику. Превращай отсутствие большой реакции в напряженную паузу или застывшую позу: 'Эли каменеет, не сводя глаз с лица Марка...'. Но НЕ додумывай мысли и эмоции.",
-        narratorInputPrompt: "Напиши связный художественный абзац (3-4 предложения), что происходит в кадре СЕЙЧАС (реакция на самое последнее событие). Кто к кому сделал движение или обратился (с именами), как это выглядело. Если было только слово/пауза — опиши только взгляды, позу и реакцию на голос, БЕЗ вымышленных прикосновений! Никаких списков событий! Ответь СТРОГО одним JSON-объектом: { \"reaction\": \"Связанный текст...\" }"
+        narratorInputPrompt: "Напиши связный художественный абзац (2-3 предложения), что происходит в кадре СЕЙЧАС. Опиши действие и реакцию на него. Если персонаж сказал что-то — органично впиши его реплику в описание. Никаких списков событий! Ответь СТРОГО одним JSON-объектом: { \"reaction\": \"Связанный текст...\" }"
     },
     orchestrator: {
         baseReactiveProbability: 0.85,
@@ -187,24 +172,6 @@ export let activeConfig: PromptConfig = {
         // How many top scored actions to include in diagnostics/logs.
         topActionsToLog: 5,
         verbalReactiveBoost: 0.15
-    },
-        stContext: {
-        enabled: true,
-        baseUrl: 'http://127.0.0.1:8181',
-        characterPresets: {
-            'S-01': {
-                avatarUrl: 'default_Assistant.png',
-                chatFile: 'Assistant - 2025-10-30 @23h 23m 34s 115ms',
-                worldInfoFiles: ['Omnicron_Lore'],
-                memoryMessageLimit: 6,
-                generatedWorldInfoName: 'S-01_Generated'
-            }
-        },
-        defaultWorldInfoFiles: ['Omnicron_Lore'],
-        memoryMessageLimit: 6,
-        useCharacterCard: false,
-        useWorldInfo: false,
-        includeMemory: false
     }
 };
 
@@ -214,18 +181,4 @@ export function updateConfig(newConfig: Partial<PromptConfig>) {
     if (newConfig.somaticSense) activeConfig.somaticSense = { ...activeConfig.somaticSense, ...newConfig.somaticSense };
     if (newConfig.perception) activeConfig.perception = { ...activeConfig.perception, ...newConfig.perception };
     if (newConfig.adapters) activeConfig.adapters = { ...activeConfig.adapters, ...newConfig.adapters };
-    if (newConfig.stContext) {
-        activeConfig.stContext = {
-            ...(activeConfig.stContext || {
-                enabled: false,
-                baseUrl: 'http://127.0.0.1:8181',
-                characterPresets: {}
-            }),
-            ...newConfig.stContext,
-            characterPresets: {
-                ...(activeConfig.stContext?.characterPresets || {}),
-                ...(newConfig.stContext.characterPresets || {})
-            }
-        };
-    }
 }

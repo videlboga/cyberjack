@@ -1,0 +1,24 @@
+.device-control-screen { height: 100%; min-height: 0; display: flex; flex-direction: column; padding: 18px; gap: 16px; background: #080c11; color: #dce8ef; }
+.device-control-header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px; padding: 12px 16px; border: 1px solid #23313a; background: #0d141a; }
+.device-control-header > button { align-self: stretch; padding: 0 18px; }
+.device-control-header small, .device-chat-panel small, .device-monitor-panel small { color: #6e95a8; letter-spacing: .12em; }
+.device-control-header h1 { margin: 2px 0; font-size: 25px; }
+.device-control-header p { margin: 0; color: #82939d; }
+.device-status { display: flex; align-items: center; gap: 8px; min-width: 130px; justify-content: center; padding: 10px 14px; border: 1px solid #33434d; color: #9eabb2; }
+.device-status i { color: #71808a; }.device-status.running i { color: #51e09b; }.device-status.paused i { color: #e8bd59; }.device-status.running { border-color: #277758; color: #78e9b2; }
+.device-control-layout { min-height: 0; flex: 1; display: grid; grid-template-columns: minmax(330px, .9fr) minmax(380px, 1fr) minmax(320px, .85fr); gap: 14px; }
+.device-visual-panel, .device-monitor-panel, .device-chat-panel { min-height: 0; border: 1px solid #23313a; background: #0d141a; }
+.device-visual-panel { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.device-avatar-frame { min-height: 0; display: flex; justify-content: center; align-items: center; padding: 12px; overflow: hidden; background: radial-gradient(circle at 50% 40%, #1a2730, #080c10 70%); }
+.device-avatar-frame img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 34px; }
+.device-configuration { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; border-top: 1px solid #23313a; }
+.device-configuration label { display: grid; gap: 5px; font-size: 12px; color: #7f939e; }.device-configuration select { width: 100%; padding: 9px; background: #111c23; color: #dce8ef; border: 1px solid #31434e; }
+.device-monitor-panel { display: flex; flex-direction: column; padding: 15px; gap: 15px; overflow: auto; }
+.device-monitor-panel > header { display: flex; justify-content: space-between; align-items: center; }.device-monitor-panel > header div { display: grid; gap: 4px; }.device-monitor-panel > header strong { font-size: 20px; }.device-monitor-panel > header > span { color: #7f939e; }
+.device-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.device-metrics article { padding: 12px; border: 1px solid #23333d; background: #101920; display: grid; gap: 3px; }.device-metrics strong { font-size: 27px; }.device-metrics span { color: #748893; font-size: 12px; }
+.device-intensity { padding: 13px; border: 1px solid #263843; background: #0a1116; }.device-intensity header, .device-intensity > div { display: flex; justify-content: space-between; }.device-intensity input { width: 100%; margin: 14px 0 8px; }.device-intensity > div { color: #627985; font-size: 10px; text-transform: uppercase; }
+.device-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }.device-actions button { min-height: 42px; }.device-actions .primary { border-color: #2b8260; color: #72e0ad; }.device-actions .danger { border-color: #86454c; color: #ef9097; }
+.device-error { padding: 9px; margin: 0; border: 1px solid #713941; color: #f09299; }
+.device-chat-panel { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }.device-chat-panel > header { display: grid; padding: 14px; border-bottom: 1px solid #23313a; gap: 4px; }.device-chat-lines { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 9px; }.device-chat-lines p { margin: 0; display: grid; gap: 4px; padding: 9px; background: #111a21; border-left: 2px solid #38586a; }.device-chat-lines b { font-size: 11px; text-transform: uppercase; color: #82aabe; }.device-chat-lines b i { font-weight: normal; color: #637985; }.device-chat-lines span { line-height: 1.4; }
+.device-chat-panel > footer { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px; border-top: 1px solid #23313a; }.device-chat-panel input { min-width: 0; padding: 10px; color: #e5edf1; background: #091016; border: 1px solid #30424d; }
+@media (max-width: 1120px) { .device-control-layout { grid-template-columns: minmax(300px, .9fr) minmax(360px, 1fr); }.device-chat-panel { grid-column: 1 / -1; min-height: 280px; }.device-control-screen { overflow: auto; }.device-control-layout { overflow: visible; } }

@@ -1,0 +1,1622 @@
+/* Readable Japanese industrial UI: hierarchy before decoration. */
+:root {
+  --ji-page: #050605;
+  --ji-bg: #10120f;
+  --ji-surface: #111410;
+  --ji-surface-soft: #171a16;
+  --ji-panel: #1c201b;
+  --ji-raised: #292e27;
+  --ji-control: #373d34;
+  --ji-selected: #4a5145;
+  --ji-line: #3b4238;
+  --ji-text: #e9ebe2;
+  --ji-secondary: #c5cabd;
+  --ji-muted: #a5ad9e;
+  --ji-lcd: #aec3ad;
+  --ji-amber: #d0aa58;
+  --ji-danger: #c17b61;
+  --ji-chart-track:#0d100d;
+  --ji-chart-gap:#292e27;
+  --ji-chart-main:#9eb59e;
+  --ji-chart-alt:#87aaa7;
+  --ji-chart-warm:#c5a354;
+  --ji-chart-violet:#aa9488;
+  --ji-chart-grid:#3c4339;
+  --ji-chart-marker:#f3f0d9;
+  color-scheme: dark;
+}
+
+:root[data-ui-theme="graphite"],
+.campaign-shell[data-theme="graphite"] {
+  --ji-page:#08090a;
+  --ji-bg:#111315;
+  --ji-surface:#15181a;
+  --ji-surface-soft:#1b1f22;
+  --ji-panel:#21262a;
+  --ji-raised:#2d3338;
+  --ji-control:#394047;
+  --ji-selected:#505a63;
+  --ji-line:#414951;
+  --ji-text:#edf0f2;
+  --ji-secondary:#ccd2d6;
+  --ji-muted:#aab4ba;
+  --ji-lcd:#afc6c2;
+  --ji-amber:#c5a76b;
+  --ji-danger:#c9806b;
+  --ji-chart-track:#0c1012;
+  --ji-chart-gap:#30363b;
+  --ji-chart-main:#b8c8d2;
+  --ji-chart-alt:#79a9c2;
+  --ji-chart-warm:#d1ae68;
+  --ji-chart-violet:#b39fc8;
+  --ji-chart-grid:#465057;
+  --ji-chart-marker:#f5f7f8;
+}
+
+:root[data-ui-theme="paper"],
+.campaign-shell[data-theme="paper"] {
+  --ji-page:#bac8bc;
+  --ji-bg:#d4dfd4;
+  --ji-surface:#e2eae1;
+  --ji-surface-soft:#cbd8cc;
+  --ji-panel:#edf3ec;
+  --ji-raised:#d1ddd1;
+  --ji-control:#bdccbe;
+  --ji-selected:#9fb3a2;
+  --ji-line:#96aa99;
+  --ji-text:#1f2a22;
+  --ji-secondary:#34483a;
+  --ji-muted:#4d6153;
+  --ji-lcd:#1f5b48;
+  --ji-amber:#6b5219;
+  --ji-danger:#934b42;
+  --ji-chart-track:#a9b9aa;
+  --ji-chart-gap:#dce6dc;
+  --ji-chart-main:#28634d;
+  --ji-chart-alt:#376879;
+  --ji-chart-warm:#80601d;
+  --ji-chart-violet:#665074;
+  --ji-chart-grid:#9caf9f;
+  --ji-chart-marker:#18271e;
+  color-scheme:light;
+}
+
+:root[data-ui-theme="mist"],
+.campaign-shell[data-theme="mist"] {
+  --ji-page:#c7cdd0;
+  --ji-bg:#dbe0e2;
+  --ji-surface:#e8ecee;
+  --ji-surface-soft:#d1d8db;
+  --ji-panel:#f3f5f6;
+  --ji-raised:#d8dee1;
+  --ji-control:#c4cdd1;
+  --ji-selected:#aab7bd;
+  --ji-line:#9eabb1;
+  --ji-text:#20272a;
+  --ji-secondary:#374247;
+  --ji-muted:#536168;
+  --ji-lcd:#24564d;
+  --ji-amber:#654f13;
+  --ji-danger:#974f42;
+  --ji-chart-track:#aebbc0;
+  --ji-chart-gap:#e0e6e8;
+  --ji-chart-main:#285f72;
+  --ji-chart-alt:#3d718a;
+  --ji-chart-warm:#79601f;
+  --ji-chart-violet:#645274;
+  --ji-chart-grid:#a2b0b6;
+  --ji-chart-marker:#17252a;
+  color-scheme:light;
+}
+
+body { color: var(--ji-text); background:var(--ji-page); font-family: Inter, "Noto Sans", Arial, sans-serif; }
+.workspace-viewport { width:min(100vw,177.7778vh); height:100vh; margin-inline:auto; display:grid; grid-template-rows:minmax(0,1fr); overflow:hidden; background:var(--ji-bg); }
+.workspace-toolbar { position:relative!important; top:auto!important; box-sizing:border-box; min-height:0; border:0!important; background:#292d27!important; }
+.workspace-content { min-width:0; min-height:0; overflow:hidden; }
+.campaign-shell { color: var(--ji-text); background: var(--ji-bg); box-shadow: none; }
+.campaign-shell::after { content: none; }
+.campaign-content { background:var(--ji-surface); background-image:none; }
+.campaign-statusbar { border:0; background:var(--ji-raised); box-shadow:none; }
+.campaign-current,.campaign-stat { border: 0; }
+.campaign-brand { position: relative; padding-left: 11px; transform: none; }
+.campaign-brand::before { content:""; position:absolute; inset:3px auto 3px 0; width:4px; background:#a7683c; }
+.campaign-brand b { color:var(--ji-text); font-style:normal; text-shadow:none; }
+.campaign-brand span,.campaign-statusbar small { color:var(--ji-muted); }
+.campaign-statusbar strong { color:var(--ji-secondary); }
+.campaign-stat.credits strong { color:var(--ji-lcd); }
+.campaign-stat.deadline strong { color:var(--ji-amber); }
+
+.campaign-nav { border:0; background:var(--ji-surface-soft); }
+.campaign-nav section>small { color:#70776b; }
+.campaign-nav section>button { border:0; color:#9ca397; background:transparent; }
+.campaign-nav section>button:hover { color:var(--ji-text); background:var(--ji-raised); transform:none; }
+.campaign-nav section>button.active { color:var(--ji-text); background:var(--ji-selected); box-shadow:none; }
+.campaign-nav section>button.active::after { content:""; position:absolute; right:9px; top:50%; width:5px; height:5px; transform:translateY(-50%); background:var(--ji-amber); }
+
+.screen-heading { border:0; background:var(--ji-raised); }
+.screen-heading::after { content:"運用端末 / OPERATION"; position:absolute; right:32px; top:18px; color:#737a6e; font-size:8px; letter-spacing:.16em; }
+.screen-heading h1 { color:var(--ji-text); font-style:normal; text-transform:none; text-shadow:none; }
+.screen-heading p,.eyebrow { color:var(--ji-amber); }
+.screen-heading span { color:var(--ji-secondary); }
+
+button,select,textarea,input,.fixed-target { border:0!important; border-radius:2px!important; outline:0; box-shadow:none!important; }
+button,.fixed-target { color:var(--ji-text)!important; background:var(--ji-control)!important; }
+button:hover:not(:disabled) { background:var(--ji-selected)!important; filter:none; }
+button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible { box-shadow:inset 0 -2px var(--ji-amber)!important; }
+
+.resident-card,.equipment-grid article,.offer-grid article,.contract-office-list>article,.inventory-grid article,.journal-list article,.directory-card,.character-dossier article,.room-detail-section,.room-equipment article { border:0!important; background:var(--ji-panel)!important; box-shadow:none!important; }
+.resident-card.asset { border:0!important; background:#252a23!important; }
+.resident-card.staff { border:0!important; background:#21251f!important; }
+
+/* Calibration shell */
+.calibration-workbench { color:var(--ji-text); background:var(--ji-bg); }
+.workbench-header,.objective-strip,.event-strip { border:0!important; background:#292e27!important; }
+.workbench-header h1 { color:var(--ji-text); font-style:normal; text-transform:none; text-shadow:none; }
+.workbench-header .eyebrow { color:var(--ji-amber); }
+.character-column { background:#111410; background-image:none; }
+.character-stage,.character-chat,.operations-column,.protocol-drawer,.goal-settings-panel,.zone-map-panel { border:0!important; box-shadow:none!important; }
+.character-chat,.operations-column,.protocol-drawer,.goal-settings-panel,.zone-map-panel { background:var(--ji-panel)!important; }
+.calibration-avatar-frame { border:0!important; background:transparent!important; box-shadow:none!important; }
+.calibration-character-image { filter:none!important; }
+.chat-line { border:0!important; color:var(--ji-secondary); background:#252a23!important; }
+.chat-line.calibrator { color:var(--ji-text); background:#30362d!important; }
+
+.action-tabs button,.operation-list button,.zone-map-group button,.goal-settings-panel label { border:0!important; color:var(--ji-secondary)!important; background:#292e27!important; box-shadow:none!important; }
+.action-tabs button.active,.operation-list button.selected,.goal-settings-panel label.selected { color:var(--ji-text)!important; background:var(--ji-selected)!important; box-shadow:none!important; }
+.operation-list button strong { color:inherit; }
+.action-forecast-strip,.operation-last-result,.selected-operation,.protocol-bar { border:0!important; background:#161915!important; box-shadow:none!important; }
+
+/* Monitor: one strong state, then progressively quieter information. */
+.scene-monitor { top:10px; bottom:auto; max-height:calc(100% - 14px); padding:10px 11px; overflow:hidden; border:0!important; color:var(--ji-text); background:rgba(28,32,27,.98)!important; box-shadow:none!important; font-variant-numeric:tabular-nums; }
+
+/* Stable scene: monitor left, character above conversation on the right. */
+.character-stage .scene-monitor { top:10px; bottom:auto; width:62%; max-height:calc(100% - 20px); }
+.character-stage .calibration-avatar-frame { top:10px; right:10px; bottom:auto; left:auto; height:42%; max-width:none; transform:none; }
+.character-stage .character-chat { top:48%; right:10px; bottom:10px; left:auto; width:32%; }
+
+/* Reserve the scene width permanently. Closed auxiliary space belongs to actions. */
+.workbench-columns { --embedded-panel-width:220px; }
+.workbench-columns { grid-template-columns:minmax(430px,1fr) 340px var(--embedded-panel-width); grid-template-rows:minmax(0,1fr); }
+.workbench-columns>.operations-column { grid-column:2/4; grid-row:1; }
+.workbench-columns:has(>.protocol-drawer),
+.workbench-columns:has(>.goal-settings-panel) { grid-template-columns:minmax(430px,1fr) 340px var(--embedded-panel-width); grid-template-rows:minmax(0,1fr); }
+.workbench-columns:has(>.protocol-drawer)>.operations-column,
+.workbench-columns:has(>.goal-settings-panel)>.operations-column { grid-column:2; }
+.workbench-columns:has(>.protocol-drawer)>.operations-column,
+.workbench-columns:has(>.goal-settings-panel)>.operations-column,
+.workbench-columns:has(>.protocol-drawer) .character-chat,
+.workbench-columns:has(>.goal-settings-panel) .character-chat { transform:none; }
+.workbench-columns>.protocol-drawer,
+.workbench-columns>.goal-settings-panel { position:relative; z-index:15; top:auto; right:auto; bottom:auto; grid-column:3; grid-row:1; align-self:stretch; width:auto; min-width:0; min-height:0; height:auto; overflow:hidden; }
+
+.monitor-heading { display:block; }
+.monitor-heading>div { position:relative; min-width:0; min-height:48px; display:grid; align-content:center; gap:2px; padding:7px 10px 7px 24px; overflow:hidden; background:#0c0f0c; }
+.monitor-heading>div::before { content:""; position:absolute; left:10px; top:50%; width:6px; height:6px; transform:translateY(-50%); background:var(--ji-amber); }
+.monitor-heading small,.monitor-session-strip small { color:var(--ji-muted); font-size:8px; font-weight:700; line-height:10px; letter-spacing:.12em; }
+.monitor-heading strong { display:block; overflow:hidden; color:#f4f5ef; font-size:18px; font-weight:700; line-height:20px; white-space:nowrap; text-overflow:ellipsis; }
+
+.monitor-session-strip { display:grid; grid-template-columns:minmax(95px,.9fr) minmax(90px,.7fr) minmax(0,1.6fr); align-items:stretch; gap:4px; margin-top:4px; }
+.monitor-session-strip>div { min-width:0; min-height:40px; display:grid; grid-template-rows:auto minmax(0,1fr); align-content:center; gap:2px; padding:5px 7px; background:var(--ji-raised); }
+.monitor-session-strip b { display:-webkit-box; align-self:start; overflow:hidden; color:var(--ji-text); font-size:10px; font-weight:600; line-height:12px; white-space:normal; overflow-wrap:normal; word-break:normal; hyphens:none; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.monitor-session-contexts b { color:var(--ji-secondary); font-size:9px; }
+
+.physiology-panel { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(135px,.7fr); align-items:stretch; gap:4px; margin-top:0; }
+.physiology-panel>section { min-width:0; min-height:82px; padding:7px 8px; background:#242922; }
+.physiology-panel header { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.physiology-panel header span { color:var(--ji-muted); font-size:8px; font-weight:700; letter-spacing:.1em; }
+.physiology-panel header b { color:var(--ji-lcd); font-size:13px; }
+.activation-scale>div,.endurance-scale>div { position:relative; height:9px; margin-top:8px; overflow:visible; background:repeating-linear-gradient(90deg,#0d100d 0 12px,#292e27 12px 14px); }
+.activation-scale>div i,.endurance-scale>div i { display:block; height:100%; background:repeating-linear-gradient(90deg,#8fa68f 0 12px,#657865 12px 14px); }
+.activation-scale.level-edge>div i { background:repeating-linear-gradient(90deg,#c4a253 0 12px,#806a38 12px 14px); }
+.activation-scale.level-danger>div i { background:repeating-linear-gradient(90deg,#b87358 0 12px,#75493a 12px 14px); }
+.activation-scale.level-high { background:#353529; }
+.activation-scale.level-high header b { color:#d8bd78; }
+.activation-scale.level-high>div i { background:repeating-linear-gradient(90deg,#b7a063 0 12px,#776b47 12px 14px); }
+.activation-scale.level-edge { background:#403426; }
+.activation-scale.level-edge header span,.activation-scale.level-edge header b { color:#e0bd6c; }
+.activation-scale.level-danger { background:#3d2922; }
+.activation-scale.level-danger header span,.activation-scale.level-danger header b { color:#dda087; }
+.activation-scale>div em { position:absolute; top:-2px; width:2px; height:13px; margin-left:-1px; background:#f3f0d9; box-shadow:none; }
+.activation-scale>footer { display:flex; justify-content:space-between; margin-top:4px; color:#71796d; font-size:8px; }
+.activation-scale>p { display:flex; flex-wrap:wrap; gap:4px; margin:7px 0 0; }
+.activation-scale>p span { padding:3px 5px; color:#959d8f; background:#181c17; font-size:9px; }
+.activation-scale>p b { color:var(--ji-text); }
+.endurance-scale>p { margin-top:6px; }
+.endurance-scale>p strong { color:var(--ji-text); font-size:21px; }
+.endurance-scale>p span { color:var(--ji-muted); font-size:9px; }
+
+.monitor-contract { margin-top:4px; padding:6px 7px; border:0; background:#111410; }
+.monitor-contract>header small { color:var(--ji-amber); font-size:8px; font-weight:700; letter-spacing:.12em; }
+.monitor-contract select,.monitor-contract-picker button { color:var(--ji-text); background:#30362d!important; }
+.monitor-contract>div { align-items:stretch; gap:4px; margin-top:4px; }
+.monitor-contract>div>span { min-height:39px; align-content:center; grid-template-columns:minmax(0,1fr) auto 14px; gap:1px 5px; padding:5px 6px; background:#292e27; }
+.monitor-contract span i { color:#949c8e; font-size:9px; }
+.monitor-contract span b { color:var(--ji-text); font-size:12px; }
+.monitor-contract span em { grid-column:1 / -1; color:var(--ji-muted); font-size:8px; }
+.monitor-contract span strong { display:block; grid-column:3; grid-row:1; align-self:center; color:#687166; font-size:10px; line-height:1; text-align:center; }
+.monitor-contract span.met { background:#384037; box-shadow:none; }
+.monitor-contract span.met strong { color:var(--ji-lcd); }
+
+.state-trends { align-items:stretch; gap:4px; margin-top:4px; }
+.state-trends>section { min-width:0; min-height:76px; padding:6px 7px; overflow:hidden; background:#242922; }
+.state-trends header span { color:#9aa294; font-size:10px; }
+.state-trends header b { color:var(--ji-text); font-size:17px; }
+.state-trends footer { color:#747c70; font-size:9px; }
+.state-trends footer b { color:var(--ji-lcd); }
+.state-sparkline { height:34px; margin-top:3px; }
+.state-sparkline .grid { stroke:#3c4339; stroke-width:.65; }
+.state-sparkline .baseline { stroke:#9f8247; stroke-width:1; stroke-dasharray:3 3; }
+.state-sparkline .history { stroke:#9eb59e; stroke-width:1.7; }
+.state-sparkline.blue .history { stroke:#8fa9a8; }
+.state-sparkline.amber .history { stroke:#c5a354; }
+.state-sparkline.violet .history { stroke:#aa9488; }
+.state-sparkline .latest { fill:#eef0e7; }
+
+.zone-dynamic-row { margin-top:4px; padding:6px 7px; border:0; background:#2b3028; }
+.zone-dynamic-row>small { color:var(--ji-amber); font-size:8px; font-weight:700; letter-spacing:.11em; }
+.zone-dynamic-row>span { padding:4px 6px; color:#9ca496; background:#1d211b; font-size:9px; }
+.zone-dynamic-row>span b { color:var(--ji-text); font-size:14px; }
+.zone-dynamic-row>span i { color:#849080; font-size:8px; }
+.monitor-conclusion { border:0!important; color:var(--ji-secondary)!important; background:#151814; }
+
+.monitor-heading>div,
+.monitor-session-strip>div,
+.physiology-panel>section,
+.monitor-contract,
+.monitor-contract>div>span,
+.state-trends>section,
+.zone-dynamic-row,
+.zone-dynamic-row>span { box-sizing:border-box; }
+
+.chat-scroll,.protocol-drawer-list,.goal-settings-list,.zone-map-body { scrollbar-color:#51594c #171a16; }
+
+/* The desktop composition is authored at 16:9 and enlarged to the requested 140%. */
+@media (min-width:1100px) {
+  .workspace-content>.campaign-shell {
+    width:calc(100% / 1.4);
+    height:calc(100% / 1.4);
+    min-height:0;
+    margin-inline:auto;
+    transform:scale(1.4);
+    transform-origin:top center;
+  }
+}
+
+@media (max-width:1099px) {
+  .workspace-viewport { width:100%; height:auto; min-height:100vh; overflow:visible; }
+  .workspace-content { overflow:visible; }
+  .workspace-content>.campaign-shell { width:100%; height:auto; min-height:calc(100vh - 58px); margin:0; transform:none; }
+}
+
+/* Calibration v2: five stable regions, no overlay geometry. */
+.workspace-viewport:has(.calibration-workbench) { grid-template-rows:minmax(0,1fr); }
+.campaign-shell:has(.calibration-workbench) { grid-template-rows:minmax(0,1fr); }
+.campaign-shell:has(.calibration-workbench)>.campaign-statusbar { display:none; }
+.campaign-shell:has(.calibration-workbench) .calibration-workbench { grid-template-rows:52px minmax(0,1fr); }
+.campaign-shell:has(.calibration-workbench) .workbench-header { min-height:0; height:52px; padding:6px 12px; }
+.campaign-shell:has(.calibration-workbench) .workbench-header h1 { max-width:360px; font-size:15px; }
+.campaign-shell:has(.calibration-workbench) .workbench-header .eyebrow { font-size:7px; }
+.campaign-shell:has(.calibration-workbench) .workbench-header nav { margin-left:auto; }
+
+.calibration-workbench .workbench-columns {
+  --auxiliary-width:minmax(180px,16fr);
+  display:grid;
+  grid-template-columns:minmax(290px,32fr) minmax(300px,29fr) minmax(245px,23fr) var(--auxiliary-width);
+  grid-template-rows:minmax(0,409px) minmax(130px,1fr) 42px;
+  min-height:0;
+  overflow:hidden;
+}
+
+.calibration-workbench .character-column { display:contents; }
+.calibration-workbench .character-stage {
+  position:relative;
+  grid-column:1;
+  grid-row:1/3;
+  min-width:0;
+  min-height:0;
+  margin:8px 4px 8px 8px;
+  overflow:hidden;
+}
+.calibration-workbench .portrait-placeholder { position:absolute; inset:0; width:auto; height:auto; }
+.calibration-workbench .character-stage,
+.calibration-workbench .portrait-placeholder {
+  background:#111410!important;
+  background-image:none!important;
+}
+.calibration-workbench .character-stage .portrait-placeholder::before { content:none!important; }
+.calibration-workbench .character-stage .calibration-avatar-frame {
+  top:auto;
+  right:auto;
+  bottom:2%;
+  left:50%;
+  width:94%;
+  height:auto;
+  aspect-ratio:7/9;
+  max-width:none;
+  max-height:90%;
+  overflow:hidden;
+  border-radius:42px!important;
+  clip-path:inset(0 round 42px);
+  outline:2px solid #454b41;
+  outline-offset:-2px;
+  transform:translateX(-50%);
+}
+.calibration-workbench .calibration-character-image { border-radius:inherit; }
+.calibration-workbench .avatar-session-strip {
+  grid-column:1;
+  grid-row:3;
+  grid-template-columns:minmax(0,.8fr) minmax(0,.9fr) minmax(0,1.5fr);
+  min-width:0;
+  margin:0 4px 8px 8px;
+}
+.calibration-workbench .avatar-session-strip>div {
+  min-height:0;
+  padding:4px 6px;
+}
+
+.calibration-workbench .scene-monitor {
+  position:relative;
+  inset:auto;
+  grid-column:2;
+  grid-row:1;
+  align-self:stretch;
+  width:auto;
+  max-height:none;
+  margin:8px 4px;
+  overflow:hidden;
+}
+
+.calibration-workbench .operations-column {
+  position:relative;
+  grid-column:3;
+  grid-row:1/4;
+  min-width:0;
+  min-height:0;
+  margin:8px 4px 4px;
+  padding:8px;
+  overflow:hidden!important;
+  transform:none!important;
+}
+.calibration-workbench .operation-execute-tile strong {
+  display:block;
+  overflow:hidden;
+  white-space:normal;
+  text-overflow:clip;
+  overflow-wrap:anywhere;
+}
+.calibration-workbench .operation-list.compact-grid {
+  grid-template-columns:1fr;
+  grid-auto-rows:minmax(36px,auto);
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  scrollbar-color:#535b4e #171a16;
+  scrollbar-width:thin;
+}
+
+.calibration-workbench .character-chat {
+  position:relative;
+  inset:auto;
+  grid-column:2;
+  grid-row:2;
+  width:auto;
+  min-width:0;
+  min-height:0;
+  margin:4px;
+  overflow:hidden;
+  transform:none!important;
+}
+.calibration-workbench .chat-scroll { height:100%; }
+.calibration-workbench .speech-input { grid-column:2; grid-row:3; min-width:0; margin:0 4px 8px; }
+.calibration-workbench .stage-contexts { display:none; }
+
+/* Monitor: vertical hierarchy sized for the narrow 140% desktop column. */
+.calibration-workbench .scene-monitor {
+  font-variant-numeric:tabular-nums;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:auto auto minmax(0,1fr);
+  grid-template-areas:
+    "physiology physiology"
+    "contract contract"
+    "trends trends";
+  align-content:stretch;
+  gap:4px;
+}
+.calibration-workbench .physiology-panel {
+  grid-area:physiology;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:4px;
+}
+.calibration-workbench .physiology-panel>section {
+  min-width:0;
+  min-height:0;
+  padding:5px 7px;
+}
+.calibration-workbench .physiology-panel header {
+  align-items:start;
+  gap:8px;
+}
+.calibration-workbench .physiology-panel header span {
+  min-width:0;
+  font-size:8px;
+  line-height:1.25;
+  white-space:normal;
+}
+.calibration-workbench .physiology-panel header b {
+  flex:0 1 auto;
+  max-width:52%;
+  font-size:13px;
+  line-height:1.2;
+  text-align:right;
+  white-space:normal;
+}
+.calibration-workbench .activation-scale>p:not(.edge-profile-note) {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;
+  margin-top:5px;
+  overflow:visible;
+}
+.calibration-workbench .activation-scale>p:not(.edge-profile-note) span {
+  min-width:0;
+  padding:3px 4px;
+  font-size:7px;
+  line-height:1.15;
+  white-space:normal;
+}
+.calibration-workbench .activation-scale>p:not(.edge-profile-note) b {
+  display:block;
+  margin-top:1px;
+  font-size:9px;
+  overflow-wrap:anywhere;
+}
+.calibration-workbench .endurance-scale {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto;
+  column-gap:10px;
+  align-items:center;
+}
+.calibration-workbench .endurance-scale>header { grid-column:1/-1; }
+.calibration-workbench .endurance-scale>div { grid-column:1; margin-top:7px; }
+.calibration-workbench .endurance-scale>p {
+  grid-column:2;
+  display:grid;
+  justify-items:end;
+  gap:0;
+  margin:4px 0 0;
+}
+.calibration-workbench .endurance-scale>p strong { font-size:18px; line-height:1; }
+.calibration-workbench .endurance-scale>p span { font-size:8px; white-space:normal; text-align:right; }
+
+.calibration-workbench .monitor-session-strip {
+  grid-template-columns:minmax(0,.8fr) minmax(0,.9fr) minmax(0,1.5fr);
+  margin-top:0;
+}
+.calibration-workbench .monitor-session-contexts { grid-column:auto; }
+.calibration-workbench .monitor-session-strip>div { min-height:36px; padding:4px 6px; }
+.calibration-workbench .monitor-session-strip small {
+  font-size:7px;
+  letter-spacing:.09em;
+}
+.calibration-workbench .monitor-session-strip b {
+  font-size:10px;
+  line-height:1.25;
+}
+.calibration-workbench .monitor-contract>div {
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;
+}
+.calibration-workbench .monitor-contract {
+  grid-area:contract;
+  align-self:start;
+  min-width:0;
+  margin-top:0;
+  padding:5px 6px;
+}
+.calibration-workbench .monitor-contract>header {
+  grid-template-columns:auto minmax(0,1fr);
+  gap:3px;
+}
+.calibration-workbench .monitor-contract>header small { font-size:7px; }
+.calibration-workbench .monitor-contract select { width:100%; font-size:8px; }
+.calibration-workbench .monitor-contract>div>span { min-height:30px; padding:3px 4px; }
+.calibration-workbench .monitor-contract span i {
+  grid-column:1/-1;
+  grid-row:1;
+  white-space:normal;
+  text-overflow:clip;
+  font-size:7px;
+  line-height:1.15;
+}
+.calibration-workbench .monitor-contract span b { grid-column:1; grid-row:2; font-size:10px; }
+.calibration-workbench .monitor-contract span strong { grid-column:2; grid-row:2; }
+.calibration-workbench .monitor-contract>div>span {
+  grid-template-columns:minmax(0,1fr) 10px;
+  grid-template-rows:auto auto;
+  min-height:36px;
+}
+.calibration-workbench .monitor-contract>.monitor-contract-extra {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:7px;
+  min-height:20px;
+  margin-top:3px;
+  padding:3px 5px;
+  background:#1c211b;
+}
+.calibration-workbench .monitor-contract-extra small {
+  color:var(--ji-muted);
+  font-size:7px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+.calibration-workbench .monitor-contract-extra span {
+  color:var(--ji-secondary);
+  font-size:8px;
+}
+.calibration-workbench .monitor-contract span em { display:none; }
+.calibration-workbench .state-trends {
+  grid-area:trends;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-self:stretch;
+  gap:3px;
+  min-width:0;
+  margin-top:0;
+}
+.calibration-workbench .state-trends>section {
+  min-height:0;
+  padding:2px 5px;
+  overflow:hidden;
+}
+.calibration-workbench .state-trends header span {
+  min-width:0;
+  font-size:8px;
+  line-height:1;
+  overflow-wrap:anywhere;
+}
+.calibration-workbench .state-trends header { min-height:12px; }
+.calibration-workbench .state-trends header b { flex:none; font-size:12px; line-height:1; }
+.calibration-workbench .state-sparkline { height:11px; margin:0; }
+.calibration-workbench .state-trends footer { min-height:9px; margin:0; font-size:8px; line-height:9px; }
+.calibration-workbench .zone-dynamic-row {
+  grid-area:zone;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-self:end;
+  gap:4px;
+  min-width:0;
+  margin-top:0;
+}
+.calibration-workbench .zone-dynamic-row>span {
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1px 5px;
+  min-height:25px;
+  align-content:center;
+  font-size:7px;
+  line-height:1.25;
+}
+.calibration-workbench .zone-dynamic-row>span b { font-size:11px; }
+.calibration-workbench .zone-dynamic-row>span i { display:none; }
+.calibration-workbench .zone-dynamic-row { padding:5px 6px; }
+.calibration-workbench .operation-zone-readout {
+  grid-area:auto;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-self:auto;
+  flex:none;
+  gap:3px;
+  margin:4px 0 0;
+  padding:5px 6px;
+  background:#20251f;
+}
+.calibration-workbench .operation-zone-readout>span {
+  min-height:31px;
+  padding:3px 4px;
+  background:#171b16;
+}
+.calibration-workbench .operation-zone-readout>span i {
+  display:block;
+  font-size:7px;
+}
+
+/* Laboratory: one fixed 16:9 control surface, without page scrolling. */
+.campaign-content:has(>.lab-overview) { overflow:hidden; }
+.lab-overview {
+  height:100%;
+  min-height:0;
+  display:grid;
+  grid-template-rows:58px minmax(0,1fr);
+  overflow:hidden;
+  background:#111410;
+}
+.lab-overview>.lab-heading {
+  min-height:0;
+  height:58px;
+  align-items:center;
+  padding:7px 14px;
+  background:#20241e;
+}
+.lab-overview>.lab-heading::before,
+.lab-overview>.lab-heading::after { content:none; }
+.lab-overview>.lab-heading p { margin:0 0 2px; font-size:7px; }
+.lab-overview>.lab-heading h1 { font-size:23px; line-height:1; }
+.lab-overview>.lab-heading span { max-width:none; margin-top:3px; font-size:9px; line-height:1.2; }
+.lab-overview .lab-capacity { min-width:70px; display:flex; align-items:center; gap:7px; padding:5px 8px; }
+.lab-overview .lab-capacity strong { margin:0; font-size:17px; }
+.lab-overview .lab-capacity small,.lab-overview .lab-capacity span { font-size:8px; }
+
+.lab-overview>.lab-spatial {
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:46px minmax(0,1fr);
+  overflow:hidden;
+}
+.lab-overview .room-rail {
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+  padding:4px 8px;
+  border:0;
+  background:var(--ji-panel);
+}
+.lab-overview .room-rail>small,
+.lab-overview .asset-register { display:none; }
+.lab-overview .room-rail>button {
+  min-width:0;
+  align-content:center;
+  gap:1px;
+  padding:4px 8px;
+  border:0!important;
+  border-bottom:2px solid transparent!important;
+  background:#292e27;
+}
+.lab-overview .room-rail>button.active { border-bottom-color:var(--ji-amber)!important; background:#3a4036; }
+.lab-overview .room-rail>button span { overflow:hidden; font-size:11px; white-space:nowrap; text-overflow:ellipsis; }
+.lab-overview .room-rail>button small { font-size:8px; }
+
+.lab-overview .room-detail {
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(220px,1fr);
+  grid-template-rows:58px minmax(0,1fr) 230px;
+  gap:6px;
+  padding:7px 9px 9px;
+  overflow:hidden;
+}
+.lab-overview .room-detail>header {
+  grid-column:1/-1;
+  grid-row:1;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+  padding:5px 8px;
+  border:0;
+  background:#1c201b;
+}
+.lab-overview .room-detail>header>div { min-width:0; }
+.lab-overview .room-detail>header small { font-size:7px; }
+.lab-overview .room-detail h2 { margin-top:2px; font-size:18px; line-height:1; }
+.lab-overview .room-detail>header p { max-width:none; margin-top:3px; overflow:hidden; font-size:9px; line-height:1.2; white-space:nowrap; text-overflow:ellipsis; }
+.room-active-asset { width:130px; flex:none; display:grid; gap:2px; }
+.room-active-asset span { color:var(--ji-muted); font-size:7px; letter-spacing:.09em; }
+.room-active-asset select { min-width:0; width:100%; padding:4px 6px; color:var(--ji-text); background:#353b32!important; font-size:9px; }
+
+.lab-overview .room-scene {
+  grid-column:1;
+  grid-row:2;
+  align-self:stretch;
+  height:auto;
+  min-height:0;
+  margin:0;
+  border:0;
+  box-shadow:none;
+}
+.lab-overview .room-character-layer { inset:8px; }
+.lab-overview .room-character-layer>button>img { max-width:135px; height:170px; }
+
+.lab-overview .room-people-section {
+  grid-column:2;
+  grid-row:2;
+  min-width:0;
+  min-height:0;
+  padding:9px;
+  overflow:hidden;
+  border:0!important;
+}
+.lab-overview .room-detail-section h3 { margin-bottom:6px; font-size:9px; }
+.lab-overview .room-people { display:grid; gap:4px; }
+.lab-overview .room-people>article {
+  min-width:0;
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr);
+  gap:6px;
+  padding:6px;
+}
+.lab-overview .room-people .resident-avatar { width:28px; height:32px; }
+.lab-overview .room-people strong { font-size:11px; }
+.lab-overview .room-people span { font-size:8px; }
+.lab-overview .room-people>article>button { grid-column:1/-1; width:100%; margin:0; padding:5px; }
+.lab-overview .room-people>article>button { font-size:8px; }
+.lab-overview .passive-note { margin-top:5px; font-size:8px; line-height:1.3; }
+
+.lab-overview .room-equipment-section {
+  grid-column:1/-1;
+  grid-row:3;
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  padding:7px 0 0;
+  overflow:hidden;
+  border:0!important;
+}
+.lab-overview .room-equipment {
+  min-height:0;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:4px;
+}
+.lab-overview .room-equipment>article {
+  min-width:0;
+  min-height:0;
+  padding:6px 7px;
+  overflow:hidden;
+  background:#292e27!important;
+  box-shadow:inset 3px 0 #657b68!important;
+}
+.lab-overview .room-equipment>article:has(.device-occupant) {
+  background:#302f26!important;
+  box-shadow:inset 3px 0 var(--ji-amber)!important;
+}
+.lab-overview .room-equipment article>header small { font-size:7px; }
+.lab-overview .room-equipment article>header strong { font-size:11px; }
+.lab-overview .room-equipment article>p {
+  display:-webkit-box;
+  margin:3px 0;
+  overflow:hidden;
+  color:var(--ji-muted);
+  font-size:8px;
+  line-height:1.25;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+}
+.lab-overview .device-occupant { grid-template-columns:auto minmax(0,1fr); gap:5px; align-items:center; margin-top:3px; padding:3px 5px; }
+.lab-overview .device-occupant b { font-size:9px; }
+.lab-overview .device-occupant span { overflow:hidden; font-size:8px; white-space:nowrap; text-overflow:ellipsis; }
+.lab-overview .room-equipment footer { gap:3px; padding-top:4px; }
+.lab-overview .room-equipment footer button { background:#3a4036!important; }
+.lab-overview .room-equipment footer button.primary { background:#485044!important; }
+.lab-overview .room-equipment button { min-width:0; padding:4px 6px; overflow:hidden; font-size:8px; white-space:nowrap; text-overflow:ellipsis; }
+
+/* Shared theme surfaces. Keep legacy screen CSS behind one palette. */
+.theme-switcher {
+  width:88px;
+  display:grid;
+  gap:2px;
+  margin-left:7px;
+}
+.theme-switcher small { color:var(--ji-muted); font-size:6px; letter-spacing:.1em; }
+.theme-switcher select {
+  width:100%;
+  padding:3px 5px;
+  color:var(--ji-text);
+  background:var(--ji-control)!important;
+  font-size:8px;
+}
+.calibration-theme-switcher {
+  width:78px;
+  padding:6px 7px;
+  color:var(--ji-text);
+  background:var(--ji-control)!important;
+  font-size:8px;
+}
+.workspace-viewport,
+.campaign-shell,
+.calibration-workbench { background:var(--ji-bg)!important; }
+.campaign-content,
+.lab-overview,
+.character-column,
+.calibration-workbench .character-stage,
+.calibration-workbench .portrait-placeholder { background:var(--ji-surface)!important; }
+.campaign-nav,
+.lab-overview .room-rail,
+.auxiliary-column { background:var(--ji-surface-soft)!important; }
+.campaign-statusbar,
+.workbench-header,
+.objective-strip,
+.event-strip,
+.lab-overview>.lab-heading { background:var(--ji-raised)!important; }
+.lab-overview .room-detail>header,
+.lab-overview .room-people-section,
+.lab-overview .room-equipment-section,
+.character-chat,
+.operations-column,
+.protocol-drawer,
+.goal-settings-panel,
+.zone-map-panel { background:var(--ji-panel)!important; }
+.lab-overview .room-rail>button,
+.lab-overview .room-equipment>article,
+.room-people>article,
+.chat-line,
+.state-trends>section,
+.physiology-panel>section,
+.monitor-session-strip>div { background:var(--ji-raised)!important; }
+.lab-overview .room-rail>button.active,
+.action-tabs button.active,
+.operation-list>div.selected,
+.goal-settings-panel label.selected { background:var(--ji-selected)!important; }
+.scene-monitor { background:color-mix(in srgb,var(--ji-panel) 98%,transparent)!important; }
+.monitor-contract,
+.zone-dynamic-row,
+.operation-last-result,
+.action-forecast-strip { background:var(--ji-surface-soft)!important; }
+.monitor-contract>div>span,
+.zone-dynamic-row>span,
+.operation-zone-readout>span { background:var(--ji-raised)!important; }
+.lab-overview .room-equipment>article {
+  box-shadow:inset 3px 0 var(--ji-lcd)!important;
+}
+.lab-overview .room-equipment>article:has(.device-occupant) {
+  background:color-mix(in srgb,var(--ji-raised) 82%,var(--ji-amber))!important;
+  box-shadow:inset 3px 0 var(--ji-amber)!important;
+}
+.lab-overview .room-equipment footer button,
+.room-active-asset select { background:var(--ji-control)!important; }
+.lab-overview .room-equipment footer button.primary { background:var(--ji-selected)!important; }
+
+/* Final token bridge for legacy components with high-specificity colors. */
+.calibration-workbench .action-tabs button,
+.calibration-workbench .operation-list.compact-grid>div,
+.calibration-workbench .operation-execute-tile,
+.calibration-workbench .operation-queue-tile,
+.calibration-workbench .zone-map-group button,
+.calibration-workbench .goal-settings-panel label,
+.calibration-workbench .fixed-target {
+  color:var(--ji-secondary)!important;
+  background:var(--ji-raised)!important;
+}
+.calibration-workbench .action-tabs button.active,
+.calibration-workbench .operation-list.compact-grid>div.selected,
+.calibration-workbench .goal-settings-panel label.selected {
+  color:var(--ji-text)!important;
+  background:var(--ji-selected)!important;
+}
+.calibration-workbench .chat-line.calibrator { background:var(--ji-selected)!important; }
+.calibration-workbench .chat-line.mira,
+.calibration-workbench .chat-line.observer { background:var(--ji-raised)!important; }
+.calibration-workbench .operation-toolbar,
+.calibration-workbench .target-selector,
+.calibration-workbench .target-selector>button,
+.calibration-workbench .speech-input select,
+.calibration-workbench .speech-input textarea {
+  color:var(--ji-text)!important;
+  background:var(--ji-surface-soft)!important;
+}
+.calibration-workbench .physiology-panel>section,
+.calibration-workbench .activation-scale.level-high,
+.calibration-workbench .endurance-scale,
+.calibration-workbench .monitor-session-strip>div,
+.calibration-workbench .state-trends>section {
+  color:var(--ji-text)!important;
+  background:var(--ji-raised)!important;
+}
+.calibration-workbench .activation-scale>p span,
+.calibration-workbench .monitor-contract>div>span,
+.calibration-workbench .monitor-contract>.monitor-contract-extra,
+.calibration-workbench .zone-dynamic-row>span,
+.calibration-workbench .operation-zone-readout>span {
+  background:var(--ji-surface-soft)!important;
+}
+.calibration-workbench .auxiliary-column>.protocol-drawer,
+.calibration-workbench .auxiliary-column>.goal-settings-panel {
+  color:var(--ji-text)!important;
+  background:var(--ji-panel)!important;
+}
+.calibration-workbench .auxiliary-summary>section,
+.calibration-workbench .protocol-drawer-step,
+.calibration-workbench .goal-settings-list label {
+  background:var(--ji-raised)!important;
+}
+.calibration-workbench .calibration-presence,
+.calibration-workbench .target-indicator {
+  color:var(--ji-text)!important;
+  background:color-mix(in srgb,var(--ji-surface) 92%,transparent)!important;
+}
+.calibration-workbench .calibration-presence>div>b,
+.calibration-workbench .target-indicator strong { background:var(--ji-raised)!important; }
+
+.lab-overview .resident-avatar,
+.character-directory .directory-photo,
+.dossier-portrait { background:var(--ji-raised)!important; }
+.lab-overview .device-occupant { background:var(--ji-surface-soft)!important; }
+.lab-overview .room-scene-label,
+.lab-overview .room-character-layer>button>span {
+  color:var(--ji-secondary)!important;
+  background:color-mix(in srgb,var(--ji-surface) 90%,transparent)!important;
+}
+
+.management-screen,
+.character-directory,
+.character-dossier,
+.container-conversation,
+.device-control-screen { color:var(--ji-text); background:var(--ji-surface)!important; }
+.offer-grid article,
+.contract-office-list>article,
+.inventory-grid article,
+.journal-list article,
+.directory-card,
+.character-dossier article,
+.conversation-presence,
+.conversation-chat,
+.device-control-panel,
+.device-telemetry,
+.device-programs {
+  color:var(--ji-text)!important;
+  background:var(--ji-panel)!important;
+}
+.contract-requirements span,
+.dossier-tags span,
+.dossier-points>div,
+.dossier-stats span,
+.conversation-chat p,
+.device-occupant,
+.active-asset {
+  background:var(--ji-raised)!important;
+}
+
+/* Theme-aware typography for cards that previously carried fixed dark-theme text. */
+.lab-overview h1,
+.lab-overview h2,
+.lab-overview .room-rail>button span,
+.lab-overview .room-people strong,
+.lab-overview .room-equipment header strong,
+.lab-overview .device-occupant b,
+.lab-overview .room-character-layer>button,
+.lab-overview .room-character-layer>button>span {
+  color:var(--ji-text)!important;
+}
+.lab-overview .room-detail>header p,
+.lab-overview .room-rail>button small,
+.lab-overview .room-people span,
+.lab-overview .room-equipment article>p,
+.lab-overview .device-occupant span,
+.lab-overview .passive-note {
+  color:var(--ji-muted)!important;
+}
+.lab-overview .room-detail-section h3,
+.lab-overview .room-equipment header small,
+.lab-overview .room-scene-label { color:var(--ji-lcd)!important; }
+
+.calibration-workbench h1,
+.calibration-workbench h2,
+.calibration-workbench strong,
+.calibration-workbench b,
+.calibration-workbench .operation-execute-tile,
+.calibration-workbench .chat-line p { color:var(--ji-text); }
+.calibration-workbench small,
+.calibration-workbench .chat-line small,
+.calibration-workbench .state-trends footer,
+.calibration-workbench .zone-dynamic-row>span,
+.calibration-workbench .operation-zone-readout>span { color:var(--ji-muted); }
+.calibration-workbench .eyebrow,
+.calibration-workbench .monitor-contract>header small,
+.calibration-workbench .zone-dynamic-row>small,
+.calibration-workbench .operation-zone-readout>small { color:var(--ji-amber)!important; }
+
+/* Readability floor: small text must remain legible at the authored 140% scale. */
+.campaign-statusbar small,
+.campaign-nav small,
+.lab-overview small,
+.calibration-workbench small { font-size:8px!important; }
+.campaign-brand span,
+.campaign-nav section>button small,
+.lab-overview .room-detail>header p,
+.lab-overview .room-equipment article>p,
+.calibration-workbench .chat-line p,
+.calibration-workbench .action-forecast-strip p { color:var(--ji-muted)!important; }
+.campaign-nav section>button small,
+.campaign-nav section>button.active small,
+.campaign-nav section>small,
+.campaign-nav-bottom small,
+.campaign-brand span,
+.campaign-statusbar small,
+.lab-overview .room-rail>button small,
+.lab-overview .lab-capacity small,
+.lab-overview .lab-capacity span { color:var(--ji-muted)!important; }
+.campaign-nav section>button.active small { color:var(--ji-secondary)!important; }
+.lab-overview .lab-capacity strong,
+.lab-overview .room-detail>header>b { color:var(--ji-text)!important; }
+.lab-overview .room-detail>header small,
+.lab-overview .room-equipment header small,
+.lab-overview .room-equipment header i,
+.lab-overview .room-detail-section h3 { color:var(--ji-lcd)!important; }
+
+.calibration-workbench .protocol-drawer h2,
+.calibration-workbench .goal-settings-panel h2,
+.calibration-workbench .operation-last-result b,
+.calibration-workbench .operation-last-result span b,
+.calibration-workbench .state-trends header b,
+.calibration-workbench .state-trends footer b,
+.calibration-workbench .zone-dynamic-row b,
+.calibration-workbench .operation-zone-readout b { color:var(--ji-text)!important; }
+.calibration-workbench .monitor-contract span.met b,
+.calibration-workbench .monitor-contract span.met strong,
+.calibration-workbench .goal-settings-list b,
+.calibration-workbench .protocol-drawer-step.status-completed>span,
+.calibration-workbench .operation-last-result>header b { color:var(--ji-lcd)!important; }
+.calibration-workbench .monitor-contract-picker button,
+.calibration-workbench .monitor-contract select { color:var(--ji-text)!important; background:var(--ji-control)!important; }
+.calibration-workbench .activation-scale>footer,
+.calibration-workbench .activation-scale>footer span,
+.calibration-workbench .state-trends footer,
+.calibration-workbench .chat-line small,
+.calibration-workbench .protocol-drawer-empty,
+.calibration-workbench .action-forecast-strip p { color:var(--ji-muted)!important; }
+.calibration-workbench .chat-line.calibrator small { color:var(--ji-secondary)!important; }
+.calibration-workbench .activation-scale.level-high header b,
+.calibration-workbench .activation-scale.level-edge header b,
+.calibration-workbench .activation-scale.level-danger header b { color:var(--ji-amber)!important; }
+
+.calibration-workbench .auxiliary-column {
+  position:relative;
+  grid-column:4;
+  grid-row:1/4;
+  min-width:0;
+  min-height:0;
+  margin:8px 8px 8px 4px;
+  overflow:hidden;
+  background:#171a16;
+}
+.auxiliary-summary { display:grid; align-content:start; gap:5px; height:100%; padding:11px 10px; }
+.auxiliary-summary>small { color:var(--ji-amber); font-size:8px; font-weight:700; letter-spacing:.12em; }
+.auxiliary-summary>strong { overflow:hidden; color:var(--ji-text); font-size:11px; line-height:1.3; }
+.auxiliary-summary>span { color:var(--ji-muted); font-size:8px; line-height:1.35; }
+.auxiliary-summary>div { display:grid; gap:4px; margin-top:5px; }
+.auxiliary-summary button { padding:7px 8px; text-align:left; }
+.auxiliary-summary button.active { background:var(--ji-selected)!important; }
+.auxiliary-summary>section { display:grid; gap:4px; margin-top:7px; padding-top:8px; background:var(--ji-raised); }
+.auxiliary-summary>section small { color:var(--ji-muted); font-size:8px; font-weight:700; letter-spacing:.11em; }
+.auxiliary-summary>section span { display:grid; grid-template-columns:16px minmax(0,1fr); gap:4px; color:var(--ji-secondary); font-size:8px; line-height:1.3; }
+.auxiliary-summary>section span b { color:var(--ji-amber); }
+.auxiliary-summary>section i,.auxiliary-summary>section p { margin:0; color:var(--ji-muted); font-size:8px; font-style:normal; line-height:1.45; }
+
+.auxiliary-column>.protocol-drawer,
+.auxiliary-column>.goal-settings-panel {
+  position:absolute;
+  z-index:2;
+  inset:0;
+  width:auto;
+  min-width:0;
+  height:auto;
+  min-height:0;
+  margin:0;
+  padding:10px;
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+  transform:translateX(104%);
+  transition:transform .24s ease,opacity .18s ease;
+  background:var(--ji-panel)!important;
+}
+.auxiliary-column>.protocol-drawer.active,
+.auxiliary-column>.goal-settings-panel.active { opacity:1; pointer-events:auto; transform:translateX(0); }
+.auxiliary-column .protocol-drawer>header h2,
+.auxiliary-column .goal-settings-panel>header h2 { font-size:13px; }
+.auxiliary-column .protocol-drawer-step { grid-template-columns:22px minmax(0,1fr) auto; gap:5px; padding:6px; }
+.auxiliary-column .protocol-step-effect { grid-column:2/-1; grid-template-columns:1fr; }
+.auxiliary-column .protocol-step-tools { grid-column:3; grid-row:1; }
+
+@media (prefers-reduced-motion:reduce) {
+  .auxiliary-column>.protocol-drawer,
+  .auxiliary-column>.goal-settings-panel { transition:none; }
+}
+
+/*
+ * Final typography bridge.
+ * Feature stylesheets are authored with legacy dark-only hex colours and may be
+ * emitted after this file by Vite.  Keep text roles theme-driven regardless of
+ * bundle order and selector specificity.
+ */
+.campaign-shell,
+.campaign-shell :where(div,section,article,header,footer,aside,main,nav,label,ul,ol,li) {
+  color:var(--ji-text)!important;
+}
+.campaign-shell :where(h1,h2,h3,h4,h5,h6,strong,b) {
+  color:var(--ji-text)!important;
+}
+.campaign-shell :where(p,small,i,em) {
+  color:var(--ji-muted)!important;
+}
+.campaign-shell :where(span) {
+  color:var(--ji-secondary)!important;
+}
+.campaign-shell :where(input,textarea,select,option) {
+  color:var(--ji-text)!important;
+}
+.campaign-shell :where(input,textarea)::placeholder {
+  color:var(--ji-muted)!important;
+  opacity:1;
+}
+
+/* Semantic accents remain distinct, but are sourced from every theme. */
+.campaign-shell :where(
+  .eyebrow,
+  .screen-heading>div>p,
+  .campaign-stat.deadline strong,
+  .monitor-contract>header small,
+  .operation-goal>small,
+  .zone-dynamic-row>small,
+  .operation-zone-readout>small,
+  .trend-up,
+  .level-high header b,
+  .level-edge header b,
+  .level-danger header b
+) { color:var(--ji-amber)!important; }
+
+.campaign-shell :where(
+  .campaign-brand b,
+  .campaign-stat.credits strong,
+  .room-detail-section h3,
+  .room-equipment header small,
+  .monitor-contract .met,
+  .monitor-contract .met b,
+  .goal-settings-list b,
+  .status-completed,
+  .status-completed span,
+  .trend-down,
+  .operation-last-result>header b
+) { color:var(--ji-lcd)!important; }
+
+.campaign-shell :where(
+  .error,
+  .device-error,
+  .trend-away,
+  .away,
+  .away b,
+  .failure,
+  .failure span
+) { color:var(--ji-danger)!important; }
+
+.campaign-shell :where(
+  button,
+  button span,
+  button strong,
+  button b,
+  .fixed-target,
+  .fixed-target span
+) { color:var(--ji-text)!important; }
+
+.campaign-shell :where(
+  button small,
+  .campaign-nav section>button small,
+  .activation-scale>footer span,
+  .state-trends footer,
+  .chat-line small,
+  .protocol-drawer-empty,
+  .action-forecast-strip p
+) { color:var(--ji-muted)!important; }
+
+/* Theme-driven telemetry: tracks, fills, reference lines and data series. */
+.calibration-workbench .activation-scale>div,
+.calibration-workbench .endurance-scale>div {
+  background:repeating-linear-gradient(
+    90deg,
+    var(--ji-chart-track) 0 12px,
+    var(--ji-chart-gap) 12px 14px
+  )!important;
+}
+.calibration-workbench .activation-scale>div i,
+.calibration-workbench .endurance-scale>div i {
+  background:repeating-linear-gradient(
+    90deg,
+    var(--ji-chart-main) 0 12px,
+    color-mix(in srgb,var(--ji-chart-main) 68%,var(--ji-chart-track)) 12px 14px
+  )!important;
+}
+.calibration-workbench .activation-scale.level-high>div i,
+.calibration-workbench .activation-scale.level-edge>div i {
+  background:repeating-linear-gradient(
+    90deg,
+    var(--ji-chart-warm) 0 12px,
+    color-mix(in srgb,var(--ji-chart-warm) 66%,var(--ji-chart-track)) 12px 14px
+  )!important;
+}
+.calibration-workbench .activation-scale.level-danger>div i {
+  background:repeating-linear-gradient(
+    90deg,
+    var(--ji-danger) 0 12px,
+    color-mix(in srgb,var(--ji-danger) 66%,var(--ji-chart-track)) 12px 14px
+  )!important;
+}
+.calibration-workbench .activation-scale>div em {
+  background:var(--ji-chart-marker)!important;
+}
+.calibration-workbench .state-sparkline .grid {
+  stroke:var(--ji-chart-grid)!important;
+}
+.calibration-workbench .state-sparkline .baseline {
+  stroke:var(--ji-chart-warm)!important;
+}
+.calibration-workbench .state-sparkline .history {
+  stroke:var(--ji-chart-main)!important;
+}
+.calibration-workbench .state-sparkline.blue .history {
+  stroke:var(--ji-chart-alt)!important;
+}
+.calibration-workbench .state-sparkline.amber .history {
+  stroke:var(--ji-chart-warm)!important;
+}
+.calibration-workbench .state-sparkline.violet .history {
+  stroke:var(--ji-chart-violet)!important;
+}
+.calibration-workbench .state-sparkline .latest {
+  fill:var(--ji-chart-marker)!important;
+}
+
+/* Legibility floor for the compact 16:9 layouts. */
+.campaign-shell small,
+.campaign-shell .theme-switcher small,
+.campaign-shell .eyebrow,
+.campaign-shell .campaign-brand span,
+.campaign-shell .screen-heading::after {
+  font-size:9px!important;
+}
+.calibration-workbench .physiology-panel header span,
+.calibration-workbench .activation-scale>footer,
+.calibration-workbench .activation-scale>footer span,
+.calibration-workbench .activation-scale>p:not(.edge-profile-note) span,
+.calibration-workbench .endurance-scale>p span,
+.calibration-workbench .monitor-session-strip small,
+.calibration-workbench .monitor-contract>header small,
+.calibration-workbench .monitor-contract span i,
+.calibration-workbench .monitor-contract-extra span,
+.calibration-workbench .state-trends header span,
+.calibration-workbench .state-trends footer,
+.calibration-workbench .zone-dynamic-row>span,
+.calibration-workbench .operation-zone-readout>span i,
+.calibration-workbench .auxiliary-summary>span,
+.calibration-workbench .auxiliary-summary>section span,
+.calibration-workbench .auxiliary-summary>section i,
+.calibration-workbench .auxiliary-summary>section p {
+  font-size:9px!important;
+}
+.lab-overview .lab-capacity span,
+.lab-overview .room-active-asset span,
+.lab-overview .room-people span,
+.lab-overview .passive-note,
+.lab-overview .device-occupant span {
+  font-size:9px!important;
+}
+
+/* Native lists need their own readable type size. */
+.campaign-shell select,
+.campaign-shell select option,
+.calibration-workbench select,
+.calibration-workbench select option {
+  min-height:28px;
+  color:var(--ji-text)!important;
+  background:var(--ji-control)!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+}
+
+/* Anatomy selectors use the same surfaces as the rest of the active theme. */
+.calibration-workbench .zone-popover,
+.calibration-workbench .zone-map-panel {
+  color:var(--ji-text)!important;
+  background:var(--ji-panel)!important;
+}
+.calibration-workbench .zone-popover section,
+.calibration-workbench .zone-map-body,
+.calibration-workbench .zone-map-group {
+  background:var(--ji-panel)!important;
+}
+.calibration-workbench .zone-popover button,
+.calibration-workbench .zone-map-group button,
+.calibration-workbench .target-indicator {
+  color:var(--ji-text)!important;
+  background:var(--ji-raised)!important;
+}
+.calibration-workbench .zone-popover h4,
+.calibration-workbench .zone-popover button small,
+.calibration-workbench .zone-map-panel>header p,
+.calibration-workbench .zone-map-group h3,
+.calibration-workbench .zone-map-group button small,
+.calibration-workbench .zone-map-panel>footer {
+  color:var(--ji-muted)!important;
+}
+
+/* Theme-aware scrollbars for chat, drawers, selectors and management screens. */
+.campaign-shell,
+.campaign-shell * {
+  scrollbar-color:var(--ji-selected) var(--ji-surface-soft)!important;
+  scrollbar-width:thin;
+}
+.campaign-shell *::-webkit-scrollbar { width:8px; height:8px; }
+.campaign-shell *::-webkit-scrollbar-track {
+  background:var(--ji-surface-soft)!important;
+}
+.campaign-shell *::-webkit-scrollbar-thumb {
+  border:2px solid var(--ji-surface-soft)!important;
+  border-radius:8px;
+  background:var(--ji-selected)!important;
+}
+.campaign-shell *::-webkit-scrollbar-thumb:hover {
+  background:var(--ji-secondary)!important;
+}
+
+/* Avatars are native interface content: no decorative gradient backing. */
+.campaign-shell .portrait-placeholder,
+.campaign-shell .calibration-avatar-frame>.portrait-fallback,
+.campaign-shell .device-avatar-frame,
+.campaign-shell .resident-avatar,
+.campaign-shell .directory-photo,
+.campaign-shell .dossier-portrait {
+  background:transparent!important;
+  background-image:none!important;
+}
+.campaign-shell .calibration-avatar-frame {
+  background:transparent!important;
+  background-image:none!important;
+}
+.campaign-shell .calibration-workbench .character-stage,
+.campaign-shell .calibration-workbench .portrait-placeholder,
+.campaign-shell .calibration-workbench .character-column {
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+}
+.campaign-shell .calibration-workbench .calibration-avatar-frame {
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+.campaign-shell .portrait-placeholder::before,
+.campaign-shell .portrait-placeholder::after,
+.campaign-shell .calibration-avatar-frame::before,
+.campaign-shell .calibration-avatar-frame::after {
+  content:none!important;
+  background:none!important;
+}
+
+/* Laboratory portraits sit directly on the room/interface surface. */
+.campaign-shell .lab-overview .room-character-layer>button,
+.campaign-shell .lab-overview .room-character-layer>button:hover,
+.campaign-shell .lab-overview .room-character-layer>button:focus,
+.campaign-shell .lab-overview .room-character-layer>button>b,
+.campaign-shell .lab-overview .room-character-layer>button>span,
+.campaign-shell .lab-overview .resident-avatar,
+.campaign-shell .character-directory .directory-photo,
+.campaign-shell .character-dossier .dossier-portrait,
+.campaign-shell .container-conversation .dossier-portrait,
+.campaign-shell .device-avatar-frame {
+  border:0!important;
+  outline:0!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+.campaign-shell .lab-overview .room-character-layer>button::before,
+.campaign-shell .lab-overview .room-character-layer>button::after,
+.campaign-shell .lab-overview .resident-avatar::before,
+.campaign-shell .lab-overview .resident-avatar::after,
+.campaign-shell .character-directory .directory-photo::before,
+.campaign-shell .character-directory .directory-photo::after,
+.campaign-shell .character-dossier .dossier-portrait::before,
+.campaign-shell .character-dossier .dossier-portrait::after {
+  content:none!important;
+  background:none!important;
+}
+
+/* Dossier and conversation surfaces share the active application theme. */
+.campaign-shell .character-portrait-image {
+  background:transparent!important;
+  background-image:none!important;
+}
+.campaign-shell .character-dossier,
+.campaign-shell .container-conversation {
+  color:var(--ji-text)!important;
+  background:var(--ji-surface)!important;
+}
+.campaign-shell .character-dossier>header,
+.campaign-shell .container-conversation>header {
+  border-color:var(--ji-line)!important;
+  background:var(--ji-raised)!important;
+}
+.campaign-shell .character-dossier>header span,
+.campaign-shell .container-conversation>header p {
+  color:var(--ji-muted)!important;
+}
+.campaign-shell .dossier-layout>aside,
+.campaign-shell .conversation-presence {
+  border-color:var(--ji-line)!important;
+  background:var(--ji-surface-soft)!important;
+}
+.campaign-shell .dossier-layout>section,
+.campaign-shell .conversation-chat {
+  background:var(--ji-surface)!important;
+}
+.campaign-shell .character-context-summary {
+  border:0!important;
+  color:var(--ji-text)!important;
+  background:var(--ji-raised)!important;
+  box-shadow:none!important;
+}
+.campaign-shell .character-context-summary small {
+  color:var(--ji-lcd)!important;
+}
+.campaign-shell .character-context-summary p {
+  color:var(--ji-secondary)!important;
+}
+.campaign-shell .dossier-tags span,
+.campaign-shell .dossier-points>div,
+.campaign-shell .dossier-stats span,
+.campaign-shell .dossier-role-history>div,
+.campaign-shell .conversation-chat p {
+  color:var(--ji-secondary)!important;
+  background:var(--ji-raised)!important;
+}
+.campaign-shell .conversation-chat input,
+.campaign-shell .conversation-chat textarea,
+.campaign-shell .active-asset select,
+.campaign-shell .room-active-asset select {
+  border:0!important;
+  color:var(--ji-text)!important;
+  background:var(--ji-control)!important;
+  box-shadow:none!important;
+}
+.campaign-shell .conversation-chat input::placeholder,
+.campaign-shell .conversation-chat textarea::placeholder {
+  color:var(--ji-muted)!important;
+  opacity:1;
+}
+
+/* Equipment-first laboratory: remove the decorative room scene entirely. */
+.lab-overview .room-detail {
+  grid-template-columns:minmax(0,1fr) minmax(230px,25%);
+  grid-template-rows:58px minmax(0,1fr);
+}
+.lab-overview .room-scene {
+  display:none!important;
+  background:none!important;
+  background-image:none!important;
+}
+.lab-overview .room-equipment-section {
+  grid-column:1;
+  grid-row:2;
+  padding:9px;
+  background:var(--ji-panel)!important;
+}
+.lab-overview .room-people-section {
+  grid-column:2;
+  grid-row:2;
+}
+.lab-overview .room-equipment {
+  gap:7px;
+}
+.lab-overview .room-equipment>article {
+  padding:11px 12px;
+}
+.lab-overview .room-equipment article>header strong {
+  font-size:12px;
+}
+.lab-overview .room-equipment article>p {
+  margin:7px 0;
+  font-size:9px;
+  line-height:1.4;
+  -webkit-line-clamp:3;
+}
+.lab-overview .device-occupant {
+  margin-top:6px;
+  padding:6px 8px;
+}
+.lab-overview .room-equipment footer {
+  gap:5px;
+  padding-top:8px;
+}
+.lab-overview .room-equipment button {
+  padding:7px 9px;
+  font-size:9px;
+}
+.lab-overview .device-card-occupant {
+  min-height:82px;
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr);
+  gap:8px;
+  margin-top:4px;
+  padding:6px;
+  overflow:hidden;
+  background:var(--ji-surface-soft)!important;
+}
+.lab-overview .device-card-avatar {
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  border-radius:14px;
+  background:transparent;
+}
+.lab-overview .device-card-avatar img {
+  width:100%;
+  height:100%;
+  object-fit:cover!important;
+  object-position:center 24%!important;
+  border-radius:14px;
+}
+.lab-overview .device-card-telemetry {
+  min-width:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  gap:4px;
+}
+.lab-overview .device-card-telemetry>b {
+  overflow:hidden;
+  color:var(--ji-text)!important;
+  font-size:10px;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.lab-overview .device-card-telemetry>div {
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3px;
+}
+.lab-overview .lab-metric-chart {
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  padding:2px 3px;
+  background:var(--ji-raised);
+}
+.lab-overview .lab-metric-chart header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:3px;
+}
+.lab-overview .lab-metric-chart header span {
+  color:var(--ji-muted)!important;
+  font-size:8px!important;
+}
+.lab-overview .lab-metric-chart header b {
+  color:var(--ji-text)!important;
+  font-size:9px;
+}
+.lab-overview .lab-metric-chart svg {
+  display:block;
+  width:100%;
+  height:16px;
+  overflow:visible;
+}
+.lab-overview .lab-metric-chart .grid { stroke:var(--ji-chart-grid); stroke-width:.7; vector-effect:non-scaling-stroke; }
+.lab-overview .lab-metric-chart .baseline { stroke:var(--ji-chart-warm); stroke-width:1; stroke-dasharray:3 3; vector-effect:non-scaling-stroke; }
+.lab-overview .lab-metric-chart .history { fill:none; stroke:var(--ji-chart-main); stroke-width:1.6; vector-effect:non-scaling-stroke; }
+.lab-overview .lab-metric-chart.blue .history { stroke:var(--ji-chart-alt); }
+.lab-overview .lab-metric-chart.amber .history { stroke:var(--ji-chart-warm); }
+.lab-overview .lab-metric-chart.violet .history { stroke:var(--ji-chart-violet); }
+.lab-overview .lab-metric-chart .latest { fill:var(--ji-chart-marker); }
+
+/* Global laboratory notifications. */
+.campaign-shell .campaign-toast {
+  border:0!important;
+  color:var(--ji-text)!important;
+  background:var(--ji-panel)!important;
+  box-shadow:inset 4px 0 var(--ji-lcd),0 10px 28px color-mix(in srgb,var(--ji-page) 45%,transparent)!important;
+}
+.campaign-shell .campaign-toast.error {
+  color:var(--ji-text)!important;
+  background:color-mix(in srgb,var(--ji-panel) 88%,var(--ji-danger))!important;
+  box-shadow:inset 4px 0 var(--ji-danger),0 10px 28px color-mix(in srgb,var(--ji-page) 45%,transparent)!important;
+}
+.campaign-shell .campaign-toast button,
+.campaign-shell .campaign-toast button:hover {
+  color:var(--ji-muted)!important;
+  background:transparent!important;
+}

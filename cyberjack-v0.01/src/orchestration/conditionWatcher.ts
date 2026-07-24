@@ -7,17 +7,35 @@ export interface TriggerRule {
     description: string;
     pointSpecific?: boolean; // If true, this condition binds to the specific pointId being interacted with
     check: (core: SubjectCoreState, point: SubjectPointState) => boolean;
+    releaseCheck?: (core: SubjectCoreState, point: SubjectPointState) => boolean;
     requiredTicks: number; // 0 for instant effects, > 0 for chronic
     actionPresetId: string; // The active context to grant
     durationOnTrigger?: number; // How long it stays (-1 forever). Overrides preset logic if needed.
     removeOnFail?: boolean; // If true, removes the context the moment condition fails (perfect for instant conditions).
 }
 
+// Capacity describes available functional reserve, not consciousness itself.
+// An exhausted subject collapses only after nervous activation has fallen low;
+// sufficiently strong stimulation can restore contact without restoring energy.
+export const COLLAPSE_CAPACITY_THRESHOLD = 10;
+export const COLLAPSE_TENSION_THRESHOLD = 15;
+export const FORCED_AROUSAL_TENSION_THRESHOLD = 30;
+export const NATURAL_RECOVERY_CAPACITY_THRESHOLD = 25;
+
+export function isExhaustedCollapse(core: SubjectCoreState): boolean {
+    return core.capacity <= COLLAPSE_CAPACITY_THRESHOLD && core.tension <= COLLAPSE_TENSION_THRESHOLD;
+}
+
+export function hasRecoveredContact(core: SubjectCoreState): boolean {
+    return core.capacity >= NATURAL_RECOVERY_CAPACITY_THRESHOLD || core.tension >= FORCED_AROUSAL_TENSION_THRESHOLD;
+}
+
 export const STATE_RULES: TriggerRule[] = [
     {
         code: 'apathy_instant',
         description: 'Временный Срыв (Пока держится условие)',
-        check: (core) => core.capacity <= 10 && core.attitude < 60,
+        check: isExhaustedCollapse,
+        releaseCheck: hasRecoveredContact,
         requiredTicks: 0,
         actionPresetId: 'effect_apathy',
         removeOnFail: true,
@@ -26,11 +44,12 @@ export const STATE_RULES: TriggerRule[] = [
     {
         code: 'chronic_apathy',
         description: 'Хроническая Апатия (Держится долго после N тиков)',
-        check: (core) => core.capacity <= 10 && core.attitude < 60,
+        check: isExhaustedCollapse,
+        releaseCheck: hasRecoveredContact,
         requiredTicks: 5,
         actionPresetId: 'effect_chronic_apathy',
         durationOnTrigger: 10,
-        removeOnFail: false
+        removeOnFail: true
     },
     {
         code: 'suggestibility',
@@ -111,14 +130,19 @@ export const STATE_RULES: TriggerRule[] = [
 export class ConditionWatcher {
     static evaluate(subjectId: string, pointId: string | null, core: SubjectCoreState, point: SubjectPointState) {
         const activeContexts = activeContextsRepo.getAllForSubject(subjectId);
+        const narratives: string[] = [];
 
         for (const rule of STATE_RULES) {
-            const isConditionMet = rule.check(core, point);
             // If the rule is point-specific, ensure we match the pointId as well
             const hasContext = activeContexts.some(c => 
                 c.actionId === rule.actionPresetId && 
                 (!rule.pointSpecific || c.pointId === pointId)
             );
+            // Some states use hysteresis: entering collapse and recovering from it
+            // must not share the same threshold or the state flickers off immediately.
+            const isConditionMet = hasContext && rule.releaseCheck
+                ? !rule.releaseCheck(core, point)
+                : rule.check(core, point);
             
             // To separate triggers by point, compound the trigger code
             const triggerCode = rule.pointSpecific && pointId ? `${rule.code}_${pointId}` : rule.code;
@@ -145,10 +169,17 @@ export class ConditionWatcher {
                                 const applyPointId = rule.pointSpecific ? pointId : undefined;
                                 ContextManager.applyContext(subjectId, rule.actionPresetId, preset, applyPointId || undefined);
 
-                                const narrative = `[Состояние] Активация: ${rule.description}${rule.pointSpecific ? ` (${pointId})` : ''}`;
+                                let physicalConsequence = '';
+                                if (rule.code === 'apathy_instant') {
+                                    const collapse = ContextManager.applyAutonomousCollapse(subjectId);
+                                    physicalConsequence = collapse.narrative ? ` ${collapse.narrative}` : '';
+                                }
+
+                                const narrative = `[Состояние] Активация: ${rule.description}${rule.pointSpecific ? ` (${pointId})` : ''}.${physicalConsequence}`.trim();
                                 eventLogRepo.append(subjectId, 'system_trigger', {
                                     presetId: 'system_trigger', action: null, actionLabel: narrative, narrative
                                 }, { triggeredRule: triggerCode });
+                                narratives.push(narrative);
 
                                 if (preset.contextConfig && originalDuration !== undefined) {
                                     preset.contextConfig.duration = originalDuration;
@@ -176,9 +207,11 @@ export class ConditionWatcher {
                         eventLogRepo.append(subjectId, 'system_trigger', {
                             presetId: 'system_trigger', action: null, actionLabel: narrative, narrative
                         }, { clearedRule: triggerCode });
+                        narratives.push(narrative);
                     }
                 }
             }
         }
+        return narratives;
     }
 }

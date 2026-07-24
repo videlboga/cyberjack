@@ -22,6 +22,7 @@ export function runTick(input: TickInput, config: EngineConfig = DEFAULT_CONFIG)
             pointId: nextPoint.pointId,
             localSensitivity: nextPoint.localSensitivity - tickMeta.inputs.point.localSensitivity,
             localAttitude: nextPoint.localAttitude - tickMeta.inputs.point.localAttitude,
+            localOpenness: (nextPoint.localOpenness ?? 0) - (tickMeta.inputs.point.localOpenness ?? 0),
             familiarity: (nextPoint.familiarity ?? 0) - (tickMeta.inputs.point.familiarity ?? 0),
             exposureCount: (nextPoint.exposureCount ?? 0) - (tickMeta.inputs.point.exposureCount ?? 0),
         },

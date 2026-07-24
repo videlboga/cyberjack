@@ -1,7 +1,7 @@
 // src/orchestration/saveTickState.ts
 import { subjectRepo, pointStateRepo, eventLogRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
 import { subjectPreferencesRepo, activeContextsRepo } from '../infrastructure/repositories';
-import { SubjectCoreState, SubjectPointState, CompiledAction, TickOutput } from '../domain/types';
+import { SubjectCoreState, SubjectPointState, CompiledAction, TickOutput, InteractionObservation } from '../domain/types';
 import { db } from '../infrastructure/db';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
@@ -14,7 +14,8 @@ export function saveTickState(
     presetId: string,
     action: CompiledAction, 
     output: TickOutput,
-    tickId: string
+    tickId: string,
+    observation?: InteractionObservation
 ) {
     // 1. Save new core state
     const currentSubject = subjectRepo.get(subjectId);
@@ -26,6 +27,8 @@ export function saveTickState(
     const relationCfg = (DEFAULT_CONFIG.formulas.baseline?.relation) || {};
     const relation = characterRelationRepo.ensure(subjectId, playerCharacter.id, {
         attitude: output.nextCore.attitude,
+        openness: currentSubject?.openness ?? output.nextCore.openness,
+        plasticity: currentSubject?.plasticity ?? output.nextCore.plasticity,
         baselineAttitude: currentSubject?.baselineAttitude ?? output.nextCore.attitude
     });
     const relationBaseline = relation.baselineAttitude ?? relation.attitude;
@@ -46,7 +49,12 @@ export function saveTickState(
         { baseRate: relationCfg.adaptBase, ...relationCfg }
     );
     characterRelationRepo.updateAttitude(subjectId, playerCharacter.id, dampedRelationAttitude, {
-        baselineAttitude: nextRelationBaseline
+        baselineAttitude: nextRelationBaseline,
+        openness: output.nextCore.openness,
+        plasticity: output.nextCore.plasticity
+    });
+    characterRelationRepo.updateSocialStats(subjectId, playerCharacter.id, {
+        familiarityDelta: Math.max(0.005, (action.novelty ?? 0.5) * 0.015)
     });
 
     // 2. Save new point state
@@ -75,7 +83,7 @@ export function saveTickState(
             tickId,
             delta: output.delta
         },
-        { result: output.result, delta: output.delta }
+        { result: output.result, delta: output.delta, observation }
     );
 
     // 4. Adjust preferences based on psychological and relationship factors

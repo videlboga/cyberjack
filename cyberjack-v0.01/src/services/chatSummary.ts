@@ -1,6 +1,6 @@
 import { chatMemoryRepo, chatSummaryRepo } from '../infrastructure/repositories';
 
-const SUMMARY_WINDOW = 10;
+const SUMMARY_WINDOW = 6;
 
 export function maybeSummarizeChat(subjectId: string) {
     if (!subjectId) return;
@@ -20,6 +20,9 @@ export function maybeSummarizeChat(subjectId: string) {
         });
 
         lastProcessedId = window[window.length - 1].id;
+
+        // Summaries limit prompt context; the original dialogue remains available
+        // to the UI as a durable conversation history.
     }
 }
 

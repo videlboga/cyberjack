@@ -54,17 +54,37 @@ export function computeResult(
         100
     );
 
-    const discomfort = clamp(
-        Math.max(0, -finalValence) * experiencedIntensity * (f.discomfort.capacityBase - safeCore.capacity / f.discomfort.capacityDivisor),
-        0,
-        100
-    );
-
     const overload = clamp(
         experiencedIntensity * (safeAction.sharpness + safeAction.contact * f.overload.contactFactor) - safeCore.capacity * f.overload.capacityFactor,
         0,
         100
     );
+
+    // Valence describes the emotional sign of an action, not the complete
+    // physiology. A positively perceived action may still be sharp, exceed
+    // the subject's comfortable load, or cause overload. Keeping these
+    // components separate allows pleasure and discomfort to coexist.
+    const emotionalDiscomfort = clamp(
+        Math.max(0, -finalValence) * experiencedIntensity * (f.discomfort.capacityBase - safeCore.capacity / f.discomfort.capacityDivisor),
+        0,
+        100
+    );
+    const physicalCfg = f.physicalDiscomfort || {};
+    const comfortThreshold = clamp(
+        (physicalCfg.comfortBase ?? 15) +
+        safeCore.capacity * (physicalCfg.capacityComfortFactor ?? 0.25) +
+        effectiveAttitude * (physicalCfg.attitudeComfortFactor ?? 0.05),
+        0,
+        100
+    );
+    const physicalVulnerability = clamp(1.4 - safeCore.capacity * 0.008, 0.6, 1.4);
+    const sharpDiscomfort = experiencedIntensity * safeAction.sharpness *
+        (physicalCfg.sharpnessRate ?? 0.18) * physicalVulnerability;
+    const strainDiscomfort = Math.max(0, experiencedIntensity - comfortThreshold) *
+        (physicalCfg.strainRate ?? 0.35) * physicalVulnerability;
+    const overloadDiscomfort = overload * (physicalCfg.overloadRate ?? 0.25);
+    const physicalDiscomfort = sharpDiscomfort + strainDiscomfort + overloadDiscomfort;
+    const discomfort = clamp(emotionalDiscomfort + physicalDiscomfort, 0, 100);
 
     const engagement = clamp(
         experiencedIntensity * f.engagement.intensityFactor +
@@ -95,6 +115,12 @@ export function computeResult(
             effectiveAttitude,
             attitudeShift,
             attitudePower,
+            comfortThreshold,
+            emotionalDiscomfort,
+            sharpDiscomfort,
+            strainDiscomfort,
+            overloadDiscomfort,
+            physicalDiscomfort,
         },
     };
 

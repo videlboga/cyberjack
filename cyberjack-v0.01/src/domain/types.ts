@@ -79,7 +79,8 @@ export interface TraitRule {
 }
 
 export interface ContextConfig {
-    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition" | "trait";
+    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition" | "trait" | "status";
+    activeLabel?: string;
     occupiesPoints: string[];
     exclusiveWithinPoint?: boolean;
     blocksPoints?: string[];
@@ -155,6 +156,7 @@ export interface CompiledAction {
     removeContexts?: string[];
     requiresItem?: string;
     requiresSceneObject?: string;
+    validTargets?: string[];
 }
 
 export interface EngineConfig {
@@ -203,6 +205,12 @@ export interface TickMeta {
         effectiveAttitude: number;
         attitudeShift: number;
         attitudePower: number;
+        comfortThreshold?: number;
+        emotionalDiscomfort?: number;
+        sharpDiscomfort?: number;
+        strainDiscomfort?: number;
+        overloadDiscomfort?: number;
+        physicalDiscomfort?: number;
     };
     formulas?: Record<string, string>;
 }
@@ -213,6 +221,7 @@ export interface TickOutput {
     result: TickResult;
     delta: TickDelta;
     tickMeta: TickMeta;
+    notableEvent?: 'positive_discharge' | 'breakdown' | 'exhaustion';
 }
 
 export interface GameEvent {
@@ -302,7 +311,7 @@ export interface AssetContract {
     description: string;
     state: 'available' | 'accepted' | 'completed' | 'failed' | 'expired';
     acceptedByPlayerId?: string;
-    attachedSubjectId?: string; // asset assigned to order
+    attachedSubjectId?: string; // legacy field; assets are selected only on delivery
     deadlineTick?: number; 
     conditions: AssetContractCondition[];
     rewards: {
@@ -348,6 +357,7 @@ export interface PromptPayload {
     longTermMemory?: string[];
     systemPrompt?: string;
     narratorPrompt?: NarratorPromptPayload;
+    reactionFrame?: import('../narrative/reactionFrame').ReactionFrame;
 }
 
 export interface NarratorPromptPayload {
@@ -355,6 +365,24 @@ export interface NarratorPromptPayload {
     recentEventsText: string;
     stateText: string;
     instructions?: string;
+    // Narrator B: speech and context for a richer chronicle
+    characterSpeech?: string;
+    characterName?: string;
+    playerSpeech?: string;
+    activeContexts?: string[];
+    tickResultSummary?: string;
+    systemEvents?: string[];
+}
+
+export interface ScenePromptPayload {
+    subjectId: string;
+    actionLabel: string;
+    pointLabel: string;
+    actorName: string;
+    targetName: string;
+    stateText: string;
+    contextsText: string;
+    tickResultText: string;
 }
 
 export interface NarratorReply {
@@ -395,6 +423,50 @@ export interface DiagnosticsOutput {
     };
     physicalEffect?: number;
     emotionalEffect?: number;
+    observation?: InteractionObservation;
+}
+
+export type BehavioralState = 'responsive' | 'subspace' | 'overload' | 'freeze' | 'panic' | 'defiance' | 'unresponsive';
+export type ContextRole = 'behavior' | 'physiology' | 'equipment' | 'pose' | 'restraint' | 'environment' | 'other';
+
+export interface ObservationContext {
+    id: string;
+    label: string;
+    role: ContextRole;
+    pointId?: string | null;
+}
+
+export interface InteractionObservation {
+    action: { id: string; label: string; pointId: string; pointLabel?: string };
+    contact: 'none' | 'partial' | 'full' | 'forced';
+    behavioralState: BehavioralState;
+    reaction: {
+        pleasure: number;
+        discomfort: number;
+        overload: number;
+        engagement: number;
+        mixed: boolean;
+        /** Psychological appraisal of the action, independently of bodily comfort. */
+        appraisal: number;
+    };
+    learning: {
+        effect: number;
+        familiarityDelta: number;
+        sensitivityDelta: number;
+        baselineSensitivityDelta: number;
+    };
+    changes: { tension: number; capacity: number; sensitivity: number; attitude: number; openness: number; plasticity: number; localAttitude: number; localOpenness: number };
+    contexts: ObservationContext[];
+    currentState: { title: string; description: string };
+    transitions: Array<{
+        kind: 'state' | 'discharge' | 'breakdown' | 'recovery' | 'contact';
+        title: string;
+        text: string;
+        severity: 'notice' | 'major' | 'danger';
+    }>;
+    uiText: string;
+    subjectiveText: string;
+    technicalText: string;
 }
 
 
@@ -423,4 +495,6 @@ export interface TickBundle {
     metadata?: Record<string, unknown>;
     // Whether this tick actually applied any state-changing effects
     actionApplied?: boolean;
+    // System messages generated during the tick (refusals, context changes, etc.)
+    systemNotes?: string[];
 }

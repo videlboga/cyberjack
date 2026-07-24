@@ -10,42 +10,21 @@ interface RecordMemoryInput {
     assistantText?: string;
     infoTag?: string;
     reactionText?: string;
+    speechAct?: string;
+    addressedTo?: string;
 }
 
 export function recordMemoryEvent(input: RecordMemoryInput) {
-    const parts: string[] = [];
     const actionLabel = input.bundle.compiledAction.label || 'Неизвестное действие';
-    
-    if (input.userText && input.userText.trim().length > 0) {
-        if (input.userText.includes('*(Без слов)*')) {
-            const match = input.userText.match(/\[(.*?)\]/);
-            let actionPart = match ? match[1] : input.userText;
-            actionPart = actionPart.replace('Калибратор применяет воздействие: ', '');
-            parts.push(`Ко мне применили действие: "${actionPart}"`);
-        } else if (input.userText.includes('[Прошло времени')) {
-            parts.push(input.userText);
-        } else {
-            parts.push(`Калибратор сказал: "${input.userText}"`);
-        }
-    } else {
-        if (input.bundle.compiledAction.actionKey !== 'wait') {
-            parts.push(`Ко мне применили действие: "${actionLabel}"`);
-        } else {
-            parts.push(`Время шло, Калибратор просто наблюдал`);
-        }
-    }
-
-    if (input.reactionText) {
-        parts.push(`Моя физическая реакция: ${input.reactionText}`);
-    } else {
-        const reaction = input.bundle.diagnostics?.reactionSummary || 'почти безэмоциональный отклик';
-        parts.push(`Я ощутила: ${reaction}`);
-    }
-
-    if (input.assistantText && input.assistantText.trim().length > 0) {
-        parts.push(`Я ответила: ${summarizeSpeech(input.assistantText)}`);
-    }
-
+    const observation = input.bundle.diagnostics?.observation;
+    const pointLabel = observation?.action.pointLabel || observation?.action.pointId || input.bundle.event.pointId || 'не указана';
+    const parts = input.bundle.compiledAction.actionKey === 'wait'
+        ? ['Событие: прошла пауза без нового воздействия']
+        : [`Действие: ${actionLabel}; зона: ${pointLabel}`];
+    if (observation?.subjectiveText) parts.push(`Переживание: ${observation.subjectiveText}`);
+    else if (input.reactionText) parts.push(`Наблюдаемая реакция: ${input.reactionText}`);
+    if (input.userText?.trim()) parts.push(`Слова собеседника: «${input.userText.trim()}»`);
+    if (input.assistantText?.trim()) parts.push(`Мой ответ: «${input.assistantText.trim()}»`);
     const text = parts.join('. ');
     if (!text.trim()) return;
 
@@ -54,11 +33,18 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
         text,
         embedding: buildEmbedding(text),
         tags: collectMemoryTags(input.bundle),
+        relatedSubjects: [input.bundle.event.playerId || 'PL-1'],
+        type: 'episode_v2',
         metadata: {
             actionId: input.bundle.event.payload?.presetId,
             sceneId: input.bundle.event.sceneId,
-            userText: input.userText || '',
-            assistantText: input.assistantText || '',
+            actionLabel,
+            pointId: observation?.action.pointId || input.bundle.event.pointId || null,
+            playerSpeech: input.userText || '',
+            characterSpeech: input.assistantText || '',
+            speechAct: input.speechAct || null,
+            addressedTo: input.addressedTo || null,
+            observation: observation || null,
             infoTag: input.infoTag || null,
             timestamp: input.bundle.event.timestamp
         }

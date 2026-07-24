@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AnatomyView } from './AnatomyView';
-import DiegeticUI from './DiegeticUI';
 import './GameApp.css';
 
 const API_BASE = '';
 const PLAYER_CHARACTER_ID = 'PL-1';
-const PLAYER_RESOURCE_ID = 'PL-1';
+
+// ─── Types ──────────────────────────────────────────────
 
 type ActionPreset = {
   id: string;
@@ -17,9 +16,9 @@ type ActionPreset = {
   requiresItem?: string | null;
 };
 
-type Character = { id: string; name: string; kind?: string; playerId?: string | null; };
+type Character = { id: string; name: string; kind?: string };
 
-type SceneCharacterPresence = {
+type SceneCharPresence = {
   character: Character;
   role?: string;
   canAct?: boolean;
@@ -27,716 +26,717 @@ type SceneCharacterPresence = {
   slotId?: string | null;
 };
 
-type LayoutNode = {
-  id: string;
-  label?: string;
+type PointInfo = { id: string; label: string };
+
+type SubjectState = {
   name?: string;
-  x?: number;
-  y?: number;
-  position?: { x: number; y: number };
-  coords?: { x: number; y: number };
+  sensitivity: number;
+  capacity: number;
+  openness: number;
+  plasticity: number;
+  attitude: number;
+  tension: number;
+  baselineSensitivity?: number;
+  baselineCapacity?: number;
+  baselineOpenness?: number;
+  baselinePlasticity?: number;
+  baselineAttitude?: number;
+  anatomy?: Record<string, {
+    pointId: string;
+    localSensitivity: number;
+    localAttitude: number;
+    familiarity?: number;
+    exposureCount?: number;
+  }>;
+  contexts?: { actionId: string; label: string; type: string }[];
 };
 
-type NodePosition = {
-  left: string;
-  top: string;
-  leftValue: number;
-  topValue: number;
+type TickResult = {
+  pleasure: number;
+  discomfort: number;
+  overload: number;
+  engagement: number;
+  learningEffect: number;
+  experiencedIntensity: number;
+  finalValence: number;
 };
 
-const sanitizeActions = (actions: ActionPreset[] = []) => actions.filter(action => !action.disabled);
-
-const clampPercent = (value: number, min = 12, max = 88) => Math.max(min, Math.min(max, value));
-const clampRange = (value: number, min = 5, max = 95) => Math.max(min, Math.min(max, value));
-
-const FALLBACK_BOUNDS = { width: 1000, height: 700 };
-
-const avatarNameMap: Record<string, string> = {
-  "Векс": "/avatars/Vex.png",
-  "Сайлас": "/avatars/Silas.png",
-  "Эли": "/avatars/Eli.png",
-  "Никс": "/avatars/Nyx.png",
-  "Мара": "/avatars/Mara.png",
-  "Кай": "/avatars/Kai.png",
-  "Иден": "/avatars/Eden.png",
-  "Рунис": "/avatars/Runis.png",
-  "Рен": "/avatars/Ren.png",
-  "Брокер": "/avatars/Calibrator.png", // Fallback for player
+type ChatMessage = {
+  id: number;
+  role: 'system' | 'narrator' | 'actor' | 'player' | 'error';
+  text: string;
+  actorId?: string;
+  actorName?: string;
 };
 
-const getAvatarUrl = (name: string): string | null => {
-  for (const [ru, filename] of Object.entries(avatarNameMap)) {
-    if (name.includes(ru)) return filename;
-  }
-  return null;
+type SuggestedChip = {
+  text: string;
+  actionId?: string;
+  pointId?: string;
+  type: string;
+  speech?: string;
+  description?: string;
 };
 
-const RADIAL_GROUPS = [
-  { id: 'medical', label: 'Медицинские', tags: ['medical', 'clinical', 'chemical', 'piercing', 'inspection'] },
-  { id: 'intimate', label: 'Интимные', tags: ['intimate', 'sensual', 'stimulation', 'affection'] },
-  { id: 'pain', label: 'Силовые', tags: ['impact', 'pain', 'punishment', 'dominance', 'struggle'] },
-  { id: 'control', label: 'Контроль', tags: ['restraint', 'control', 'metal', 'electronic', 'pose', 'bdsm'] },
-  { id: 'support', label: 'Поддержка', tags: ['mental', 'comfort', 'talk', 'trade', 'praise'] }
+type ContractProgress = {
+  contractTitle: string;
+  contractDescription: string;
+  conditions: { label: string; current: number | boolean; operator: string; value: number; met: boolean }[];
+  metAll: boolean;
+} | null;
+
+type ContractInfo = {
+  id: string;
+  title: string;
+  description: string;
+  issuerId: string;
+  conditions: any[];
+  rewards: any;
+  state: string;
+};
+
+// ─── Constants ──────────────────────────────────────────
+
+const CORE_METRICS: { key: keyof SubjectState; label: string; baselineKey?: keyof SubjectState; color: string }[] = [
+  { key: 'sensitivity', label: 'Чувствительность', baselineKey: 'baselineSensitivity', color: '#2196f3' },
+  { key: 'capacity',    label: 'Выносливость',     baselineKey: 'baselineCapacity',    color: '#2196f3' },
+  { key: 'openness',    label: 'Открытость',         baselineKey: 'baselineOpenness',    color: '#2196f3' },
+  { key: 'plasticity',  label: 'Пластичность',       baselineKey: 'baselinePlasticity',  color: '#2196f3' },
+  { key: 'attitude',    label: 'Отношение',           baselineKey: 'baselineAttitude',    color: '#4caf50' },
+  { key: 'tension',     label: 'Напряжение',                                                color: '#ff5722' },
 ];
 
-const ACTION_GROUP_OVERRIDES: Record<string, string> = {
-  gentle_stroke: 'support',
-  tickle: 'support',
-  feather_stroke: 'support',
-  breath_blow: 'support',
-  verbal_pressure: 'support',
-  stare: 'support',
-  close_inspection: 'support',
-  light_kiss: 'intimate',
-  deep_kiss: 'intimate',
-  deep_massage: 'intimate',
-  licking: 'intimate',
-  vibrator_pulse: 'intimate',
-  gentle_touch: 'intimate',
-  firm_grip: 'pain',
-  light_bite: 'pain',
-  hard_bite: 'pain',
-  pinch: 'pain',
-  scratching: 'pain',
-  slap: 'pain',
-  hard_slap: 'pain',
-  belt_strike: 'pain',
-  whip_strike: 'pain',
-  taser_shock: 'pain',
-  feint_strike: 'pain',
-  hair_pull: 'pain',
-  spit: 'control',
-  needle_prick: 'medical',
-  ice_cube: 'medical',
-  hot_wax: 'medical',
-  pose_kneeling: 'control',
-  restraint_cuffs: 'control'
+const RESULT_METRICS: { key: keyof TickResult; label: string; color: string }[] = [
+  { key: 'pleasure',         label: 'Удовольствие',  color: '#4caf50' },
+  { key: 'discomfort',       label: 'Дискомфорт',    color: '#f44336' },
+  { key: 'overload',         label: 'Перегрузка',    color: '#ff9800' },
+  { key: 'engagement',       label: 'Вовлечённость', color: '#2196f3' },
+  { key: 'learningEffect',   label: 'Обучение',      color: '#9c27b0' },
+];
+
+// Quick action categories — buttons instead of dropdown
+const ACTION_CATEGORIES: { id: string; label: string; tag: string }[] = [
+  { id: 'caress',    label: 'Ласка',    tag: 'affection' },
+  { id: 'kiss',      label: 'Поцелуй',  tag: 'intimate' },
+  { id: 'bite',      label: 'Укус',     tag: 'pain' },
+  { id: 'slap',      label: 'Шлепок',   tag: 'impact' },
+  { id: 'strike',    label: 'Удар',     tag: 'pain' },
+  { id: 'medical',   label: 'Медицина', tag: 'medical' },
+  { id: 'control',   label: 'Контроль', tag: 'restraint' },
+  { id: 'pose',      label: 'Поза',     tag: 'pose' },
+];
+
+// Map category → action IDs (from seed data)
+const CATEGORY_ACTIONS: Record<string, string[]> = {
+  caress:   ['gentle_stroke', 'tickle', 'feather_stroke', 'deep_massage', 'licking', 'breath_blow', 'vibrator_pulse'],
+  kiss:     ['light_kiss', 'deep_kiss'],
+  bite:     ['light_bite', 'hard_bite', 'pinch', 'scratching'],
+  slap:     ['slap', 'hard_slap', 'spit', 'hair_pull'],
+  strike:   ['belt_strike', 'whip_strike', 'taser_shock', 'feint_strike'],
+  medical:  ['needle_prick', 'ice_cube', 'hot_wax'],
+  control:  ['pose_kneeling', 'verbal_pressure', 'stare', 'close_inspection'],
+  pose:     ['pose_standing', 'pose_sitting', 'pose_lying_down', 'pose_all_fours', 'pose_spread_eagle'],
 };
 
-const computeAutoPositions = (nodes: LayoutNode[]): Record<string, NodePosition> => {
-  if (!nodes.length) return {};
-  const count = nodes.length;
-  const rings: number[] = [];
-  let remaining = count;
-  let ring = 0;
-  while (remaining > 0) {
-    const baseCapacity = ring === 0 ? Math.min(count, 6) : 6 + ring * 4;
-    const capacity = Math.min(remaining, baseCapacity);
-    rings.push(capacity);
-    remaining -= capacity;
-    ring += 1;
-  }
-  const baseRadius = 24;
-  const radiusStep = 14;
-  let ringStart = 0;
-  let currentRing = 0;
-  return nodes.reduce((acc, node, index) => {
-    while (index >= ringStart + (rings[currentRing] || 0)) {
-      ringStart += rings[currentRing];
-      currentRing += 1;
-    }
-    const ringSize = rings[currentRing] || count;
-    const angle = (index - ringStart) / Math.max(ringSize, 1) * Math.PI * 2;
-    const radius = baseRadius + currentRing * radiusStep;
-    const leftValue = clampPercent(50 + Math.cos(angle) * radius);
-    const topValue = clampPercent(50 + Math.sin(angle) * radius * 0.75);
-    acc[node.id] = { left: `${leftValue}%`, top: `${topValue}%`, leftValue, topValue };
-    return acc;
-  }, {} as Record<string, NodePosition>);
-};
-
-const getEdgeNode = (edge: any, key: 'from' | 'to') => {
-  if (!edge) return null;
-  return edge[key] ?? edge[key === 'from' ? 'source' : 'target'] ?? edge[key === 'from' ? 'start' : 'end'] ?? null;
-};
-
-const normalizeTags = (tags?: string[]) => (tags || []).map(tag => tag.toLowerCase());
-
-const classifyAction = (action: ActionPreset): string | null => {
-  if (ACTION_GROUP_OVERRIDES[action.id]) {
-    return ACTION_GROUP_OVERRIDES[action.id];
-  }
-  const categories = ((action as any).categories || []) as string[];
-  const baseTags = [...(action.tags || []), ...categories];
-  const tags = normalizeTags(baseTags);
-  for (const group of RADIAL_GROUPS) {
-    if (tags.some(tag => group.tags.includes(tag))) {
-      return group.id;
-    }
-  }
-  if (action.requiresItem) {
-    return 'control';
-  }
-  if (tags.length === 0) {
-    return 'pain';
-  }
-  return null;
-};
+// ─── Helpers ────────────────────────────────────────────
 
 const filterActionsForPoint = (actions: ActionPreset[], pointId?: string | null) => {
   if (!pointId || pointId === 'systemic') {
-    return actions.filter(action => !action.occupiesPoints || action.occupiesPoints.length === 0);
+    return actions.filter(a => !a.occupiesPoints || a.occupiesPoints.length === 0);
   }
   const pid = pointId.toLowerCase();
-  return actions.filter(action => {
-    if (!action.occupiesPoints || action.occupiesPoints.length === 0) return true;
-    return action.occupiesPoints.some(p => p.toLowerCase() === pid);
+  return actions.filter(a => {
+    if (!a.occupiesPoints || a.occupiesPoints.length === 0) return true;
+    return a.occupiesPoints.some(p => p.toLowerCase() === pid);
   });
 };
 
-export function GameApp({ embedded = false }: { embedded?: boolean }) {
-  const [messages, setMessages] = useState<any[]>(() => {
+const Bar: React.FC<{ value: number; max?: number; color?: string; baseline?: number }> = ({ value, max = 100, color = '#4caf50', baseline }) => {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  return (
+    <div className="bar-container">
+      <div className="bar-fill" style={{ width: `${pct}%`, background: color }} />
+      {baseline !== undefined && baseline > 0 && (
+        <div className="bar-baseline" style={{ left: `${(baseline / max) * 100}%` }} />
+      )}
+      <span className="bar-value">{Math.round(value)}</span>
+    </div>
+  );
+};
+
+// ─── Main Component ──────────────────────────────────────
+
+export function GameApp() {
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
-      const saved = localStorage.getItem('cyberjack_ui_messages');
+      const saved = localStorage.getItem('cyberjack_chat');
       if (saved) return JSON.parse(saved);
-    } catch(e) {}
+    } catch {}
     return [];
   });
 
   useEffect(() => {
     try {
       if (messages.length > 0) {
-        localStorage.setItem('cyberjack_ui_messages', JSON.stringify(messages.slice(-500)));
+        localStorage.setItem('cyberjack_chat', JSON.stringify(messages.slice(-200)));
+      } else {
+        localStorage.removeItem('cyberjack_chat');
       }
-    } catch(e) {}
+    } catch {}
   }, [messages]);
-
-  const [playerResources, setPlayerResources] = useState<Record<string, number>>({});
-  const [playerInventory, setPlayerInventory] = useState<any[]>([]);
-  const [showInventory, setShowInventory] = useState(false);
-  const [showLocations, setShowLocations] = useState(false);
-  const [showCardParams, setShowCardParams] = useState(false);
-  const [subjectState, setSubjectState] = useState<any>(null);
+  const [subjectState, setSubjectState] = useState<SubjectState | null>(null);
   const [availableActions, setAvailableActions] = useState<ActionPreset[]>([]);
-  const [sceneObjects, setSceneObjects] = useState<any[]>([]);
-  const [actionPresetMap, setActionPresetMap] = useState<Record<string,string>>({});
-
-  // fallback labels for item IDs that are not present in action presets
-  const ITEM_LABELS: Record<string,string> = {
-    'eq_suspension': 'Подвес',
-    'eq_collar': 'Управляемый ошейник',
-    'eq_handcuffs': 'Наручники'
-  };
-  const [layout, setLayout] = useState<any>(null);
-  const [sceneData, setSceneData] = useState<any>(null);
-  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
+  const [availablePoints, setAvailablePoints] = useState<PointInfo[]>([]);
+  const [sceneChars, setSceneChars] = useState<SceneCharPresence[]>([]);
+  const [allScenes, setAllScenes] = useState<any[]>([]);
   const [focusedCharId, setFocusedCharId] = useState<string | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<string>('systemic');
-  const [intensity, setIntensity] = useState<number>(1.0);
-  const [activeGroup, setActiveGroup] = useState<string | null>(null);
-  const [availablePointsList, setAvailablePointsList] = useState<{ id: string; label: string }[]>([]);
-  const [relationsList, setRelationsList] = useState<any[]>([]);
-  const [actionCache, setActionCache] = useState<{ uid: string; presetId: string; label: string; pointId: string; intensity: number; targetCharId: string; targetCharName: string }[]>([]);
+  const [selectedAction, setSelectedAction] = useState<string>('');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [chatInput, setChatInput] = useState('');
+  const [useLLM, setUseLLM] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastResult, setLastResult] = useState<TickResult | null>(null);
+  const [sceneId, setSceneId] = useState('scene_lab_calibrator');
+  const [error, setError] = useState<string | null>(null);
+  const [suggestedChips, setSuggestedChips] = useState<SuggestedChip[]>([]);
+  const [stateDescription, setStateDescription] = useState<string>('');
+  const [contractProgress, setContractProgress] = useState<ContractProgress>(null);
+  const [availableContracts, setAvailableContracts] = useState<ContractInfo[]>([]);
+  const [sceneImageUrl, setSceneImageUrl] = useState<string | null>(null);
 
   const logRef = useRef<HTMLDivElement>(null);
 
-  const [sceneId, setSceneId] = useState(() => {
-    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams('');
-    return urlParams.get('sceneId') || 'scene_lab_calibrator';
-  });
-
-  const [allScenes, setAllScenes] = useState<any[]>([]);
-  const sceneCharacters: SceneCharacterPresence[] = sceneData?.characters || [];
-
+  // ─── WebSocket: приём сгенерированных изображений сцены ──
   useEffect(() => {
-    if (!focusedCharId && !!sceneCharacters?.length) {
-      const npc = sceneCharacters.find(c => c.character.id !== PLAYER_CHARACTER_ID);
-      if (npc) setFocusedCharId(npc.character.id);
-    }
-  }, [sceneCharacters, focusedCharId]);
+    const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:3001`;
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
+    const connect = () => {
+      try {
+        ws = new WebSocket(wsUrl);
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'scene_image' && msg.payload?.imageUrl) {
+              setSceneImageUrl(msg.payload.imageUrl);
+            }
+          } catch {}
+        };
+        ws.onclose = () => {
+          reconnectTimer = setTimeout(connect, 3000);
+        };
+      } catch {
+        reconnectTimer = setTimeout(connect, 5000);
+      }
+    };
 
-  const fetchInteractionState = async (targetId: string, hydrateState: boolean) => {
+    connect();
+
+    return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) ws.close();
+    };
+  }, []);
+
+  // ─── Data fetching ────────────────────────────────────
+
+  const fetchContracts = async () => {
     try {
-      const search = new URLSearchParams({
-        subjectId: targetId,
-        sceneId,
-        pointId: selectedPoint || 'systemic'
-      });
-      const res = await fetch(`${API_BASE}/api/state?${search.toString()}`);
+      const res = await fetch(`${API_BASE}/api/contracts`);
       const body = await res.json();
-      if (!body.success) return;
-      setAvailableActions(sanitizeActions(body.availableActions || []));
-      if (body.player?.resources) {
-        setPlayerResources(body.player.resources);
+      if (body.success) {
+        setAvailableContracts(body.available || []);
       }
-      if (body.player?.inventory) {
-        setPlayerInventory(body.player.inventory);
-      }
-      if (hydrateState && focusedCharId === targetId) {
-        const pointsMap = (body.availablePoints || []).reduce((acc: any, pt: any) => {
-          acc[pt.id] = pt;
-          return acc;
-        }, {});
-        setSubjectState({ ...body.subject, points: pointsMap });
-        setRelationsList(body.relations || []);
-        setAvailablePointsList(body.availablePoints || []);
-        if (!body.availablePoints?.some((pt: any) => pt.id === selectedPoint)) {
-          setSelectedPoint(body.availablePoints?.[0]?.id || 'systemic');
-        }
-      }
-    } catch (err) {
-      console.error('failed to fetch interaction state', err);
-    }
+    } catch {}
   };
 
-  const refreshSceneInfo = async () => {
+  useEffect(() => { fetchContracts(); }, []);
+
+  const acceptContract = async (contractId: string) => {
+    if (!focusedCharId) return;
     try {
-      const [layoutRes, scenesRes] = await Promise.all([
-        fetch(`${API_BASE}/api/scene/layout?sceneId=${sceneId}`),
-        fetch(`${API_BASE}/api/scenes`)
-      ]);
+      const res = await fetch(`${API_BASE}/api/contracts/${contractId}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subjectId: focusedCharId, playerId: PLAYER_CHARACTER_ID }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addMsg('system', `Контракт принят: ${data.contract?.title || contractId}`);
+        fetchContracts();
+      } else {
+        setError(data.error || 'Не удалось принять контракт');
+      }
+    } catch (e: any) { setError(e.message); }
+  };
 
-      const layoutBody = await layoutRes.json();
-      if (layoutBody.success) {
-        setLayout(layoutBody.layout || null);
+  const deliverContract = async (contractId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/contracts/${contractId}/deliver`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addMsg('system', `Контракт выполнен! Награда зачислена.`);
+        fetchContracts();
+      } else if (data.metRequirements === false) {
+        const unmet = (data.unmet || []).join('; ');
+        addMsg('system', `Условия не выполнены: ${unmet}`);
       }
+    } catch (e: any) { setError(e.message); }
+  };
 
-      const scenesBody = await scenesRes.json();
-      if (scenesBody.success) {
-        setAllScenes(scenesBody.scenes || []);
-        const nextScene = scenesBody.scenes.find((x: any) => x.id === sceneId) || scenesBody.scenes[0];
-        setSceneData(nextScene || null);
+  const fetchState = async (targetId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/state?subjectId=${targetId}&sceneId=${sceneId}&pointId=${selectedPoint}`);
+      const body = await res.json();
+      if (!body.success) { setError(body.error || 'Failed to load state'); return; }
+
+      setSubjectState(body.subject);
+      setAvailableActions((body.availableActions || []).filter((a: ActionPreset) => !a.disabled));
+      setAvailablePoints(body.availablePoints || []);
+      setSceneChars(body.scene?.characters || []);
+      if (!focusedCharId) {
+        const npc = (body.scene?.characters || []).find((c: SceneCharPresence) => c.character.id !== PLAYER_CHARACTER_ID);
+        if (npc) setFocusedCharId(npc.character.id);
       }
-      // additionally fetch scene objects (furniture / equipment) via state endpoint
-      try {
-        const stateRes = await fetch(`${API_BASE}/api/state?subjectId=S-01&sceneId=${sceneId}`);
-        const stateBody = await stateRes.json();
-        if (stateBody && stateBody.success) {
-          setSceneObjects(stateBody.sceneObjects || []);
-        }
-      } catch (e) {
-        console.warn('failed to load scene objects', e);
-      }
-    } catch (err) {
-      console.error('failed to load scene info', err);
+    } catch (e: any) {
+      setError(e.message);
     }
   };
+
+  const fetchScenes = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/scenes`);
+      const body = await res.json();
+      if (body.success) setAllScenes(body.scenes || []);
+    } catch {}
+  };
+
+  // ─── Effects ───────────────────────────────────────────
 
   useEffect(() => {
-    (async () => {
-      clearFocus();
-      await Promise.all([
-        refreshSceneInfo(),
-        // Just fetch the lab scene state, the UI will focus the first character if needed.
-        fetchInteractionState('S-AV-01', false)
-      ]);
+    fetchScenes();
+    // Only show init message if no saved messages
+    if (messages.length === 0) {
+      setMessages([{ id: Date.now(), role: 'system', text: `Связь установлена. Сцена: ${sceneId}` }]);
+    }
+  }, []);
 
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now(),
-          role: 'system',
-          text: `Связь установлена. Карта сцены: ${sceneId}`
-        }
-      ]);
-    })();
-    // fetch global action presets so we can map itemId -> human label
-    (async () => {
-      try {
-        const resp = await fetch(`${API_BASE}/api/actions`);
-        const all = await resp.json();
-        if (Array.isArray(all)) {
-          const map: Record<string,string> = {};
-          all.forEach((a: any) => { if (a.id && a.label) map[a.id] = a.label; });
-          setActionPresetMap(map);
-        }
-      } catch (e) {
-        console.warn('failed to load action presets', e);
-      }
-    })();
+  useEffect(() => {
+    if (focusedCharId) fetchState(focusedCharId);
+  }, [focusedCharId, selectedPoint]);
+
+  useEffect(() => {
+    fetchState(focusedCharId || 'S-AV-01');
   }, [sceneId]);
 
   useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    }
+    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [messages]);
 
-  useEffect(() => {
-    if (!focusedCharId) {
-      setSubjectState(null);
-      return;
-    }
-    fetchInteractionState(focusedCharId, true);
-  }, [focusedCharId, selectedPoint]);
+  // ─── Actions ──────────────────────────────────────────
 
-  // Relaxed focus dropping to allow targeting entities outside the explicit scene config
-  // useEffect(() => {
-  //   if (focusedCharId && sceneCharacters.length) {
-  //     const stillPresent = sceneCharacters.some(entry => entry.character.id === focusedCharId);
-  //     if (!stillPresent) {
-  //       setFocusedCharId(null);
-  //     }
-  //   }
-  // }, [sceneCharacters, focusedCharId]);
-
-  useEffect(() => {
-    setActiveGroup(null);
-  }, [focusedNodeId]);
-
-  useEffect(() => {
-    setActiveGroup(null);
-  }, [focusedCharId]);
-
-  useEffect(() => {
-    if (!focusedCharId) return;
-    setSelectedPoint('systemic');
-  }, [focusedCharId]);
-
-  const slotMap = useMemo(() => {
-    if (!sceneData?.slots) return new Map<string, any>();
-    return new Map(sceneData.slots.map((slot: any) => [slot.id, slot]));
-  }, [sceneData]);
-
-  const layoutNodes: LayoutNode[] = useMemo(() => {
-    if (layout?.nodes?.length) return layout.nodes;
-    if (sceneData?.slots?.length) {
-      return sceneData.slots.map((slot: any) => ({ id: slot.id, label: slot.name, capacity: slot.capacity }));
-    }
-    return [];
-  }, [layout, sceneData]);
-
-  const nodePositions = useMemo(() => {
-    if (!layoutNodes.length) return {} as Record<string, NodePosition>;
-    const bounds = layout?.bounds || FALLBACK_BOUNDS;
-    const nodesWithCoords = layoutNodes.filter(node => {
-      const rawX = node.x ?? node.position?.x ?? node.coords?.x;
-      const rawY = node.y ?? node.position?.y ?? node.coords?.y;
-      return typeof rawX === 'number' && typeof rawY === 'number';
-    });
-
-    if (!nodesWithCoords.length) {
-      return computeAutoPositions(layoutNodes);
-    }
-
-    const xs = nodesWithCoords.map(node => node.x ?? node.position?.x ?? node.coords?.x ?? 0);
-    const ys = nodesWithCoords.map(node => node.y ?? node.position?.y ?? node.coords?.y ?? 0);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    const rangeX = maxX - minX || bounds.width || 1;
-    const rangeY = maxY - minY || bounds.height || 1;
-
-    return layoutNodes.reduce((acc, node, index) => {
-      const rawX = node.x ?? node.position?.x ?? node.coords?.x;
-      const rawY = node.y ?? node.position?.y ?? node.coords?.y;
-      if (typeof rawX === 'number' && typeof rawY === 'number') {
-        const leftValue = clampPercent(25 + ((rawX - minX) / rangeX) * 50);
-        const topValue = clampPercent(25 + ((rawY - minY) / rangeY) * 50);
-        acc[node.id] = { left: `${leftValue}%`, top: `${topValue}%`, leftValue, topValue };
-      } else {
-        const fallback = clampPercent(25 + (index / Math.max(layoutNodes.length - 1, 1)) * 50);
-        acc[node.id] = { left: `${fallback}%`, top: `${50}%`, leftValue: fallback, topValue: 50 };
-      }
-      return acc;
-    }, {} as Record<string, NodePosition>);
-  }, [layoutNodes, layout]);
-
-  const nodeLabelMap = useMemo(() => {
-    const entries = layoutNodes.map(node => [node.id, node.label || node.name || slotMap.get(node.id)?.name || node.id]);
-    return new Map<string, string>(entries as [string, string][]);
-  }, [layoutNodes, slotMap]);
-
-  const speechBubbles = useMemo(() => {
-    const store = new Map<string, string>();
-    // Показываем облачко только для последней партии сообщений (группы с одним timestamp)
-    if (messages.length === 0) return store;
-    
-    // Находим все сообщения, которые пришли одновременно с самым последним
-    const lastMsgTime = messages[messages.length - 1].timestamp || messages[messages.length - 1].id;
-    // Упрощенный подход: берем несколько последних сообщений, если они близки по времени,
-    // или еще надежнее: собираем только из последнего "тика".
-    // Так как у нас нет явного tickId в messages, будем считать,
-    // что мы просто оставляем облачка только для самых недавних сообщений (последние 3 секунды).
-    const recentTimeThreshold = Date.now() - 3000; 
-
-    // Найдем самую позднюю отметку времени генерации ID (id у нас Date.now() + random)
-    const latestIdBase = Math.floor(messages[messages.length - 1].id);
-    
-    messages.forEach(msg => {
-      // Показывать облачко только если сообщение было добавлено только что
-      // Примечание: msg.id это Date.now() + Math.random(), поэтому Math.floor(msg.id) это timestamp
-      if (Math.floor(msg.id) >= latestIdBase - 500) {
-        if (msg.actorId && msg.actorId !== 'player') {
-          store.set(msg.actorId, msg.text);
-        }
-      }
-    });
-    return store;
-  }, [messages]);
-
-  const characterNameMap = useMemo(() => {
-    const map = new Map<string, string>();
-    sceneCharacters.forEach(entry => {
-      map.set(entry.character.id, entry.character.name);
-    });
-    return map;
-  }, [sceneCharacters]);
-
-  const focusedPresence = useMemo(() => {
-    if (!focusedCharId) return null;
-    return sceneCharacters.find(entry => entry.character.id === focusedCharId) || null;
-  }, [sceneCharacters, focusedCharId]);
-
-  const focusedCharacter = focusedPresence?.character || null;
-
-  const focusedBubblePosition = focusedPresence?.slotId ? nodePositions[focusedPresence.slotId] : undefined;
-  const focusedNodePosition = focusedNodeId ? nodePositions[focusedNodeId] : undefined;
-  const focusedNodeLabel = focusedNodeId ? (nodeLabelMap.get(focusedNodeId) || focusedNodeId) : null;
-  const focusedNodeMeta = focusedNodeId ? slotMap.get(focusedNodeId) : null;
-
-  const sectorCharacters = useMemo(() => {
-    if (!focusedNodeId) return [] as SceneCharacterPresence[];
-    return sceneCharacters.filter(entry => entry.slotId === focusedNodeId);
-  }, [sceneCharacters, focusedNodeId]);
-
-  const sectorCardStyle = useMemo(() => {
-    if (!focusedNodePosition) return { left: '50%', top: '40%' };
-    const left = clampRange(focusedNodePosition.leftValue + 4, 10, 85);
-    const top = clampRange(focusedNodePosition.topValue - 15, 10, 75);
-    return { left: `${left}%`, top: `${top}%` };
-  }, [focusedNodePosition]);
-
-  const overlayPlacement = useMemo(() => {
-    if (!focusedBubblePosition) {
-      return {
-        horizontal: 'right',
-        vertical: 'down',
-        style: { left: '55%', top: '40%', transform: 'translate(-40%, -20%)' }
-      } as { horizontal: 'left' | 'right' | 'center'; vertical: 'up' | 'down'; style: React.CSSProperties };
-    }
-    const { leftValue, topValue } = focusedBubblePosition;
-    const horizontal: 'left' | 'right' | 'center' = leftValue > 62 ? 'left' : leftValue < 38 ? 'right' : 'center';
-    const vertical: 'up' | 'down' = topValue > 55 ? 'up' : 'down';
-    const leftOffset = horizontal === 'left' ? -12 : horizontal === 'right' ? 18 : 5;
-    const topOffset = vertical === 'up' ? -14 : 10;
-    const left = clampRange(leftValue + leftOffset, 12, 88);
-    const top = clampRange(topValue + topOffset, 12, 88);
-    const translateX = horizontal === 'left' ? '-90%' : horizontal === 'right' ? '-5%' : '-50%';
-    const translateY = vertical === 'up' ? '-95%' : '-15%';
-    return {
-      horizontal,
-      vertical,
-      style: { left: `${left}%`, top: `${top}%`, transform: `translate(${translateX}, ${translateY})` }
-    };
-  }, [focusedBubblePosition]);
-
-  const latestNarrative = useMemo(() => {
-    const reversed = [...messages].reverse();
-    const narrator = reversed.find(msg => msg.role === 'narrator');
-    const system = reversed.find(msg => msg.role === 'system');
-    return narrator?.text || system?.text || 'Ожидание событий...';
-  }, [messages]);
-
-  const addMessage = (msg: any) => {
-    setMessages(prev => [...prev, { ...msg, id: Date.now() + Math.random() }]);
+  const addMsg = (role: ChatMessage['role'], text: string, actorId?: string, actorName?: string) => {
+    setMessages(prev => [...prev, { id: Date.now() + Math.random(), role, text, actorId, actorName }]);
   };
 
-  const clearFocus = () => {
-    setFocusedNodeId(null);
-    setFocusedCharId(null);
-  };
-
-  const movePlayerToSector = async (nodeId: string, label: string) => {
+  const sendAction = async () => {
+    if (!focusedCharId || (!selectedAction && !chatInput)) return;
     setIsProcessing(true);
+    setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/scene/move`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          characterId: PLAYER_CHARACTER_ID,
-          sceneId,
-          slotId: nodeId
-        })
-      });
-      const body = await res.json();
-      if (!body.success) {
-        throw new Error(body.error || 'move failed');
-      }
-      await refreshSceneInfo();
-      setFocusedNodeId(nodeId);
-      addMessage({ role: 'system', text: `Игрок перемещён в сектор «${label}».` });
-    } catch (error) {
-      console.error('failed to move player', error);
-      addMessage({ role: 'system', text: 'Не удалось перейти в сектор.' });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const getActorName = (actorId?: string, role?: string) => {
-    if (actorId === 'player') return 'Вы';
-    if (actorId) return characterNameMap.get(actorId) || actorId;
-    if (role === 'narrator') return 'Рассказчик';
-    if (role === 'system') return 'Система';
-    return 'Персонаж';
-  };
-
-  const sendAction = async (presetId?: string, text?: string, targetPoint?: string, targetCharIdOverride?: string, customIntensity?: number) => {
-    let targetCharId = targetCharIdOverride || focusedCharId;
-    if (!targetCharId && presetId === 'wait') {
-      const npcInScene = sceneCharacters.find(c => c.character.id !== PLAYER_CHARACTER_ID)?.character.id;
-      targetCharId = npcInScene || 'S-01'; // Fallback so tick has a subject context
-    }
-    
-    if (!targetCharId) {
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const resolvedPoint = targetPoint || selectedPoint || 'systemic';
-      const actualIntensity = customIntensity ?? intensity;
-      const reqBody: any = {
-        subjectId: targetCharId,
-        pointId: resolvedPoint,
-        intensity: actualIntensity,
+      const body: any = {
+        subjectId: focusedCharId,
         sceneId,
-        playerId: PLAYER_RESOURCE_ID,
-        skipLLM: false
+        pointId: selectedPoint,
+        presetId: selectedAction || undefined,
+        textMessage: chatInput.trim() || undefined,
+        skipLLM: !useLLM,
       };
 
-      if (presetId) reqBody.presetId = presetId;
-      if (text) reqBody.textMessage = text;
-
-      if (presetId && presetId !== 'wait') {
-        // Мы не добавляем сообщение о физическом действии в лог здесь, 
-        // чтобы не засорять художественный нарратив техническими строками.
-        // Оно все равно отобразится через реакцию Рассказчика.
-      } else if (presetId === 'wait') {
-        // addMessage({ role: 'system', text: `Вы ждете... Проходит время.`, actorId: 'system' });
-      } else if (text) {
-        addMessage({ role: 'player', text, actorId: 'player' });
+      // Log the action mechanically BEFORE the tick result
+      if (selectedAction) {
+        const actionLabel = availableActions.find(a => a.id === selectedAction)?.label || selectedAction;
+        const pointLabel = availablePoints.find(p => p.id === selectedPoint)?.label || selectedPoint;
+        addMsg('system', `[${actionLabel} → ${pointLabel}]`);
       }
-
-      setChatInput('');
+      if (chatInput.trim()) {
+        addMsg('player', chatInput.trim());
+      }
 
       const res = await fetch(`${API_BASE}/api/tick`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reqBody)
+        body: JSON.stringify(body),
       });
       const data = await res.json();
 
       if (!data.success) {
-        const errorText = data.error || 'Действие недоступно.';
-        addMessage({ role: 'system', text: errorText });
-        return;
-      }
+        setError(data.error || 'Tick failed');
+        addMsg('error', `Ошибка: ${data.error}`);
+      } else {
+        if (data.tickResult) setLastResult(data.tickResult);
 
-      if (data.success) {
-        const actionApplied = !!data.actionApplied;
-        await Promise.all([
-          refreshSceneInfo(),
-          fetchInteractionState(targetCharId, true)
-        ]);
+        // System notes (refusals, context changes, described action results)
+        if (data.systemNotes && data.systemNotes.length > 0) {
+          for (const note of data.systemNotes) {
+            addMsg('system', note);
+          }
+        }
 
-        if (data.actorReplies && data.actorReplies.length > 0) {
-          data.actorReplies.forEach((repl: any) => {
-            if (repl.speech) {
-              addMessage({ role: 'subject', text: repl.speech, actorId: repl.actorId });
-            }
-          });
-          const reaction = data.narratorReaction || data.actorReplies[0]?.reaction;
-          if (reaction && actionApplied) {
-            addMessage({ role: 'narrator', text: reaction });
-          }
-        } else if (data.reply) {
-          if (data.reply.speech) addMessage({ role: 'subject', text: data.reply.speech, actorId: targetCharId });
-          if (data.reply.reaction && actionApplied) {
-            addMessage({ role: 'narrator', text: data.reply.reaction });
-          }
-        } else if (data.narratorReaction && actionApplied) {
-          addMessage({ role: 'narrator', text: data.narratorReaction });
+        // Update narrative state description + chips + contract progress
+        if (data.stateDescription) setStateDescription(data.stateDescription);
+        if (data.contractProgress) setContractProgress(data.contractProgress);
+        if (data.suggestedChips && data.suggestedChips.length > 0) {
+          setSuggestedChips(data.suggestedChips);
         } else {
-          // Если нет ни речи, ни реакции нарратора, и действие не выполнилось (филлерная заглушка) - ничего не выводим
+          setSuggestedChips([]);
+        }
+
+        // Narrator goes first (cinematic description)
+        // API returns narratorReaction as string, not {reaction: string}
+        const narratorText = typeof data.narratorReaction === 'string'
+          ? data.narratorReaction
+          : data.narratorReaction?.reaction;
+        if (narratorText) {
+          addMsg('narrator', narratorText);
+        }
+
+        // Then character speech
+        // reply is the primary (subject) reply; actorReplies includes ALL actors
+        // actorReplies already contains the subject's reply, so only show extras
+        if (data.reply?.speech) {
+          addMsg('actor', data.reply.speech, focusedCharId, subjectState?.name || focusedCharId);
+        }
+        if (data.actorReplies) {
+          for (const ar of data.actorReplies) {
+            // Skip the subject — already shown via data.reply above
+            if (ar.speech && ar.actorId !== focusedCharId) {
+              addMsg('actor', ar.speech, ar.actorId, ar.actorName);
+            }
+          }
         }
       }
-    } catch (e) {
-      console.error(e);
-      addMessage({ role: 'system', text: e instanceof Error ? e.message : 'Ошибка выполнения действия.' });
-    } finally {
-      setIsProcessing(false);
+      // refresh state
+      fetchState(focusedCharId);
+      setChatInput('');
+      setSelectedAction('');
+      setActiveCategory(null);
+    } catch (e: any) {
+      setError(e.message);
+      addMsg('error', `Сеть: ${e.message}`);
     }
+    setIsProcessing(false);
   };
 
-  const handleChatSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim() || !focusedCharId) return;
-    
-    if (chatInput.trim() === '/clear') {
-      setMessages([]);
-      localStorage.removeItem('cyberjack_ui_messages');
-      setChatInput('');
+  const handleChipClick = (chip: SuggestedChip) => {
+    if (chip.type === 'wait') {
+      sendWait();
       return;
     }
-
-    sendAction(undefined, chatInput.trim());
+    if (chip.type === 'verbal' && chip.speech) {
+      // Verbal: send speech as plain text (what calibrator says)
+      setChatInput(chip.speech);
+      setTimeout(() => sendAction(), 50);
+      return;
+    }
+    if (chip.type === 'action') {
+      if (chip.actionId) setSelectedAction(chip.actionId);
+      if (chip.pointId) setSelectedPoint(chip.pointId);
+      if (chip.description) {
+        // Action with RP description: send as *description*
+        setChatInput(`*${chip.description}*`);
+      }
+      setTimeout(() => sendAction(), 50);
+      return;
+    }
+    // Default: just set the text
+    setChatInput(chip.text);
   };
 
-  const groupedActions = useMemo(() => {
-    // 1. Убрано ограничение на сектора: теперь мы полагаемся на то, что если 
-    //    игрок смог кликнуть на персонажа (в Unity или интерфейсе), значит он рядом.
-    // 2. Не отображаем вербальные действия (они идут через инпут чата).
-    // 3. Проверка предметов пока идет по инвентарю (позже Unity сможет передавать фокус на предметы сцены).
-    
-    // Получаем список предметов в текущей сцене или инвентаре для проверки access'а
-    // (Пока оставляем проверку по playerInventory)
-    const validActions = availableActions.filter(a => {
-      // Если предмет не в руках, проверяем, нет ли его в комнате (в sceneObjects)
-      if (a.requiresItem) {
-        const hasInInventory = playerInventory.some(item => item.id === a.requiresItem);
-        // Если у нас будет механизм проверки предметов сцены - можно добавить его сюда
-        // const hasInRoom = sceneObjects.some(obj => obj.itemId === a.requiresItem);
-        if (!hasInInventory) return false;
+  const sendWait = async () => {
+    if (!focusedCharId) return;
+    setIsProcessing(true);
+    try {
+      addMsg('system', '[ждать]');
+      const res = await fetch(`${API_BASE}/api/wait`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subjectId: focusedCharId, ticks: 1, eventId: sceneId, callLLM: useLLM }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.narratorReaction?.reaction) addMsg('narrator', data.narratorReaction.reaction);
+        if (data.reply?.speech) addMsg('actor', data.reply.speech, focusedCharId, subjectState?.name || focusedCharId);
+        fetchState(focusedCharId);
       }
-      
-      if (a.type === 'verbal') return false;
+    } catch (e: any) { setError(e.message); }
+    setIsProcessing(false);
+  };
+
+  // ─── Derived ──────────────────────────────────────────
+
+  const pointActions = useMemo(() => filterActionsForPoint(availableActions, selectedPoint), [availableActions, selectedPoint]);
+
+  const anatomyList = useMemo(() => {
+    if (!subjectState?.anatomy) return [];
+    return Object.entries(subjectState.anatomy)
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => (b.localSensitivity || 0) - (a.localSensitivity || 0));
+  }, [subjectState]);
+
+  const activeContexts = useMemo(() => {
+    const ctxs = subjectState?.contexts || [];
+    // Deduplicate by actionId — one pose can occupy multiple points
+    const seen = new Set<string>();
+    return ctxs.filter(c => {
+      if (seen.has(c.actionId)) return false;
+      seen.add(c.actionId);
       return true;
     });
+  }, [subjectState]);
 
-    const actions = filterActionsForPoint(validActions, selectedPoint);
-    const base: Record<string, ActionPreset[]> = {};
-    RADIAL_GROUPS.forEach(group => {
-      base[group.id] = [];
-    });
-    actions.forEach(action => {
-      const groupId = classifyAction(action);
-      if (groupId) {
-        if (!base[groupId]) base[groupId] = [];
-        base[groupId].push(action);
-      }
-    });
-    return base;
-  }, [availableActions, selectedPoint, sceneCharacters, focusedCharId, playerResources]);
+  // Actions for the selected category, filtered by point
+  const categoryActionList = useMemo(() => {
+    if (!activeCategory) return [];
+    const ids = CATEGORY_ACTIONS[activeCategory] || [];
+    return pointActions.filter(a => ids.includes(a.id));
+  }, [activeCategory, pointActions]);
 
-  const radialCategories = RADIAL_GROUPS.filter(group => groupedActions[group.id]?.length);
+  // ─── Render ────────────────────────────────────────────
 
   return (
-    <>
-      <DiegeticUI 
-        messages={messages}
-        groupedActions={groupedActions}
-        radialCategories={radialCategories}
-        sendAction={sendAction}
-        isProcessing={isProcessing}
-        focusedCharacter={focusedCharacter}
-        targetSubjectId={focusedCharId}
-        playerResources={playerResources}
-        playerInventory={playerInventory}
-        subjectState={subjectState}
-        setSelectedPoint={setSelectedPoint}
-        onFocusSubject={setFocusedCharId}
-        chatInput={chatInput}
-        setChatInput={setChatInput}
-        handleChatSubmit={handleChatSubmit}
-        relationsList={relationsList}
-      />
-    </>
+    <div className="game-app">
+      {/* Left panel: scene image + body state */}
+      <div className="panel panel-left">
+        {sceneImageUrl && (
+          <div className="panel-section scene-image-section">
+            <img src={sceneImageUrl} alt="Сцена" style={{ width: '100%', borderRadius: '6px', display: 'block' }} />
+          </div>
+        )}
+        {subjectState && (
+          <div className="panel-section">
+            <h3>{subjectState.name || focusedCharId}</h3>
+            {CORE_METRICS.map(m => (
+              <div key={m.key} className="metric-row">
+                <span className="metric-label">{m.label}</span>
+                <Bar
+                  value={(subjectState as any)[m.key] || 0}
+                  baseline={m.baselineKey ? (subjectState as any)[m.baselineKey] : undefined}
+                  color={m.color}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+        {subjectState && (() => {
+          // Compact body+contexts visualization
+          const TECHNICAL_POINTS = new Set(['global_pose','slot_room','slot_social','posture','mind_state','systemic']);
+          const POINT_LABELS: Record<string, string> = {
+            head: 'Голова', face: 'Лицо', lips: 'Губы', neck: 'Шея',
+            shoulders: 'Плечи', chest: 'Грудь', nipples: 'Соски',
+            belly: 'Живот', back: 'Спина', waist: 'Талия',
+            arms: 'Руки', hands: 'Кисти', inner_thighs: 'Внутр. бёдра',
+            legs: 'Ноги', knees: 'Колени', feet: 'Ступни',
+            buttocks: 'Ягодицы', anus: 'Анус', groin: 'Пах',
+            vulva: 'Вульва', vagina: 'Влагалище', clitoris: 'Клитор',
+            penis: 'Член', testicles: 'Яички', prostate: 'Простата',
+          };
+          const ctxs = subjectState.contexts || [];
+          const anatomy = subjectState.anatomy || {};
+          const byPoint: Record<string, string[]> = {};
+          for (const c of ctxs) {
+            const pt = c.pointId || '';
+            if (TECHNICAL_POINTS.has(pt)) {
+              if (!byPoint['global']) byPoint['global'] = [];
+              if (!byPoint['global'].includes(c.label)) byPoint['global'].push(c.label);
+              continue;
+            }
+            if (!byPoint[pt]) byPoint[pt] = [];
+            if (!byPoint[pt].includes(c.label)) byPoint[pt].push(c.label);
+          }
+          const anatomyEntries = Object.entries(anatomy)
+            .filter(([id]) => !TECHNICAL_POINTS.has(id))
+            .map(([id, data]: [string, any]) => ({
+              id,
+              label: POINT_LABELS[id] || id,
+              ...data
+            }))
+            .sort((a: any, b: any) => (b.localSensitivity || 0) - (a.localSensitivity || 0));
+
+          return (
+            <div className="panel-section">
+              <h3>Тело и состояния</h3>
+              <div className="body-state-grid">
+                {byPoint['global'] && byPoint['global'].length > 0 && (
+                  <div className="body-zone active global-zone">
+                    <span className="zone-name">состояние</span>
+                    {byPoint['global'].map((label, i) => (
+                      <span key={i} className="zone-ctx">{label}</span>
+                    ))}
+                  </div>
+                )}
+                {anatomyEntries.map((pt: any) => {
+                  const ctxLabels = byPoint[pt.id] || [];
+                  const hasCtx = ctxLabels.length > 0;
+                  const sens = Math.round(pt.localSensitivity || 0);
+                  const sensHigh = sens > 70;
+                  return (
+                    <div key={pt.id} className={`body-zone ${hasCtx ? 'active' : ''} ${sensHigh ? 'sensitive' : ''}`}>
+                      <span className="zone-name">{pt.label}</span>
+                      {sens > 0 && <span className="zone-sens">чувств. {sens}</span>}
+                      {ctxLabels.map((label, i) => (
+                        <span key={i} className="zone-ctx">{label}</span>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+        {lastResult && (
+          <div className="panel-section">
+            <h3>Последний тик</h3>
+            {RESULT_METRICS.map(m => (
+              <div key={m.key} className="metric-row">
+                <span className="metric-label">{m.label}</span>
+                <Bar value={(lastResult as any)[m.key] || 0} max={120} color={m.color} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Center: chat + actions */}
+      <div className="panel panel-center">
+        {/* Chat log — main focus */}
+        <div className="panel-section flex-1 chat-section">
+          <div className="chat-log" ref={logRef}>
+            {messages.map(msg => (
+              <div key={msg.id} className={`msg msg-${msg.role}`}>
+                {msg.role === 'narrator' && <span className="msg-text">*{msg.text}*</span>}
+                {msg.role === 'actor' && <span className="msg-author">{msg.actorName}: </span>}
+                {msg.role === 'actor' && <span className="msg-text">"{msg.text}"</span>}
+                {msg.role === 'player' && <span className="msg-text">→ {msg.text}</span>}
+                {msg.role === 'system' && <span className="msg-text">{msg.text}</span>}
+                {msg.role === 'error' && <span className="msg-text">{msg.text}</span>}
+              </div>
+            ))}
+            {!messages.length && <div className="muted">Нет сообщений</div>}
+          </div>
+        </div>
+
+        {error && <div className="error-bar">{error}</div>}
+
+        {/* Narrative state description */}
+        {stateDescription && (
+          <div className="state-description">
+            <span className="state-label">Состояние: </span>
+            {stateDescription}
+          </div>
+        )}
+
+        {/* Action area */}
+        <div className="action-area">
+          {/* Suggested chips — LLM-generated contextual action hints */}
+          {suggestedChips.length > 0 && (
+            <div className="suggested-chips">
+              {suggestedChips.map((chip, i) => (
+                <button
+                  key={i}
+                  className={`chip chip-${chip.type}`}
+                  onClick={() => handleChipClick(chip)}
+                  disabled={isProcessing}
+                >
+                  {chip.text}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="input-row">
+            <input type="text" placeholder="Сказать что-то... или *описать действие*" value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !isProcessing && chatInput.trim()) sendAction(); }}
+              className="text-input" />
+            <label className="checkbox-label">
+              <input type="checkbox" checked={useLLM} onChange={e => setUseLLM(e.target.checked)} /> LLM
+            </label>
+            <button onClick={sendAction} disabled={isProcessing || !chatInput.trim()} className="btn btn-primary">
+              {isProcessing ? '...' : 'Отправить'}
+            </button>
+            <button onClick={sendWait} disabled={isProcessing} className="btn">Ждать</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Right: contracts only */}
+      <div className="panel panel-right">
+        {subjectState ? (
+          <>
+            {/* Active contract */}
+            {contractProgress && (
+              <div className="panel-section contract-panel">
+                <h3>Контракт</h3>
+                <div className="contract-title">{contractProgress.contractTitle}</div>
+                <div className="contract-desc">{contractProgress.contractDescription}</div>
+                <div className="contract-conditions">
+                  {contractProgress.conditions.map((c, i) => (
+                    <div key={i} className={`contract-cond-row ${c.met ? 'met' : 'unmet'}`}>
+                      <span className="contract-cond-label">{c.label}</span>
+                      <span className="contract-cond-val">
+                        {typeof c.current === 'number' ? Math.round(c.current) : String(c.current)} {c.operator} {c.value}
+                      </span>
+                      <span className="contract-cond-status">{c.met ? '✓' : '✗'}</span>
+                    </div>
+                  ))}
+                </div>
+                {contractProgress.metAll && (
+                  <button className="btn btn-contract-deliver" onClick={() => {
+                    const activeContract = availableContracts.find(c => c.state === 'accepted');
+                    if (activeContract) deliverContract(activeContract.id);
+                  }}>
+                    Сдать актив
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Available contracts (if no active) */}
+            {!contractProgress && availableContracts.length > 0 && (
+              <div className="panel-section">
+                <h3>Контракты</h3>
+                {availableContracts.map(c => (
+                  <div key={c.id} className="contract-card">
+                    <div className="contract-card-info">
+                      <span className="contract-name">{c.title}</span>
+                      <span className="contract-desc">{c.description}</span>
+                      <div className="contract-conds-mini">
+                        {c.conditions.map((cond: any, i: number) => (
+                          <span key={i} className="contract-cond-mini">
+                            {cond.type === 'attitude' ? 'Покорность' : cond.key || cond.type} {cond.operator} {cond.value}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {focusedCharId && (
+                      <button className="btn btn-small" onClick={() => acceptContract(c.id)}>Принять</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="muted panel-section">Загрузка...</div>
+        )}
+      </div>
+    </div>
   );
 }

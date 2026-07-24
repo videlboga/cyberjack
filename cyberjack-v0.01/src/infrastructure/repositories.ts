@@ -81,6 +81,29 @@ export const characterItemsRepo = {
     }
 };
 
+export const itemRepo = {
+    getAll(): { id: string; name: string; type: string; tags: string[]; description: string }[] {
+        return db.prepare('SELECT * FROM items').all().map((row: any) => ({
+            id: row.id,
+            name: row.name,
+            type: row.type,
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            description: row.description || ''
+        }));
+    },
+    get(id: string): { id: string; name: string; type: string; tags: string[]; description: string } | null {
+        const row = db.prepare('SELECT * FROM items WHERE id = ?').get(id) as any;
+        if (!row) return null;
+        return {
+            id: row.id,
+            name: row.name,
+            type: row.type,
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            description: row.description || ''
+        };
+    }
+};
+
 export const sceneObjectsRepo = {
     save(obj: { id: string; sceneId: string; nodeId?: string; itemId: string; ownerId?: string; state?: string; metadata?: Record<string, unknown> }) {
         db.prepare(`
@@ -156,7 +179,6 @@ export const characterRepo = {
             VALUES (?, ?, 'subject', ?)
             ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
-                kind = excluded.kind,
                 subject_id = excluded.subject_id
         `);
         stmt.run(subjectId, name, subjectId);
@@ -448,6 +470,7 @@ export const subjectPreferencesRepo = {
 
 export const pointStateRepo = {
     save(subjectId: string, pointId: string, state: SubjectPointState) {
+        const canonicalPointId = pointId.trim().toLowerCase();
         const baselineLocalSensitivity = state.baselineLocalSensitivity ?? state.localSensitivity;
         const baselineLocalAttitude = state.baselineLocalAttitude ?? state.localAttitude;
         const baselineLocalOpenness = state.baselineLocalOpenness ?? state.localOpenness ?? 50;
@@ -466,7 +489,7 @@ export const pointStateRepo = {
         `);
         stmt.run(
             subjectId,
-            pointId,
+            canonicalPointId,
             state.localSensitivity,
             state.localAttitude,
             state.localOpenness ?? 50,
@@ -496,7 +519,7 @@ export const pointStateRepo = {
 
     get(subjectId: string, pointId: string): SubjectPointState | null {
         const stmt = db.prepare('SELECT * FROM subject_point_states WHERE subject_id = ? AND point_id = ?');
-        const row = stmt.get(subjectId, pointId) as any;
+        const row = stmt.get(subjectId, pointId.trim().toLowerCase()) as any;
         if (!row) return null;
         return {
             pointId: row.point_id,
@@ -546,6 +569,10 @@ export const presetRepo = {
             tags: row.tags ? JSON.parse(row.tags) : [],
             vector: valJson,
             removeContexts: valJson.removeContexts,
+            requireContexts: valJson.requireContexts,
+            requiresItem: row.requires_item || valJson.requiresItem || null,
+            requiresSceneObject: valJson.requiresSceneObject || null,
+            validTargets: valJson.validTargets || null,
             contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
         };
     },
@@ -560,6 +587,10 @@ export const presetRepo = {
                 tags: row.tags ? JSON.parse(row.tags) : [],
                 vector: valJson,
                 removeContexts: valJson.removeContexts,
+                requireContexts: valJson.requireContexts,
+                requiresItem: row.requires_item || valJson.requiresItem || null,
+                requiresSceneObject: valJson.requiresSceneObject || null,
+                validTargets: valJson.validTargets || null,
                 contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
             };
         });
@@ -648,7 +679,7 @@ export const activeContextsRepo = {
             id: r.id,
             actionId: r.action_id,
             ticksActive: Number(r.ticks_active) || 0,
-            duration: Number(r.duration) || -1,
+            duration: r.duration === null || r.duration === undefined ? -1 : Number(r.duration),
             pointId: r.point_id,
             initiatorId: r.initiator_id || null
         }));
@@ -882,17 +913,17 @@ export const sceneCharacterRepo = {
 };
 
 export const chatMemoryRepo = {
-    append(subjectId: string, role: 'user' | 'assistant', content: string): number | null {
+    append(subjectId: string, role: 'user' | 'assistant', content: string, contextLabel?: string): number | null {
         if (!content || !subjectId) return null;
-        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content) VALUES (?, ?, ?)');
-        const info = stmt.run(subjectId, role, content);
+        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content, context_label) VALUES (?, ?, ?, ?)');
+        const info = stmt.run(subjectId, role, content, contextLabel || null);
         return Number(info.lastInsertRowid) || null;
     },
-    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
+    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; createdAt?: string }> {
         const stmt = db.prepare(
-            'SELECT id, role, content FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
+            'SELECT id, role, content, context_label AS contextLabel, created_at AS createdAt FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
         );
-        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string }>;
+        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; createdAt?: string }>;
         return rows.reverse();
     },
     getSince(subjectId: string, afterId: number, limit = 100): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
@@ -908,6 +939,12 @@ export const chatMemoryRepo = {
     },
     updateContent(id: number, content: string) {
         db.prepare('UPDATE chat_memory SET content = ? WHERE id = ?').run(content, id);
+    },
+    deleteBefore(subjectId: string, beforeId: number) {
+        db.prepare('DELETE FROM chat_memory WHERE subject_id = ? AND id < ?').run(subjectId, beforeId);
+    },
+    clear(subjectId: string) {
+        db.prepare('DELETE FROM chat_memory WHERE subject_id = ?').run(subjectId);
     }
 };
 
@@ -946,6 +983,9 @@ export const chatSummaryRepo = {
             summary: row.summary_text,
             important: JSON.parse(row.important_events || '[]')
         }));
+    },
+    clear(subjectId: string) {
+        db.prepare('DELETE FROM chat_memory_summary WHERE subject_id = ?').run(subjectId);
     }
 };
 
@@ -1006,6 +1046,24 @@ export const memoryRepo = {
             .sort((a, b) => b.score - a.score)
             .slice(0, limit)
             .filter(entry => entry.score > 0);
+    },
+    listRecent(subjectId: string, limit = 5, type?: string): Array<{ text: string; type: string; metadata: Record<string, any> }> {
+        const rows = type
+            ? db.prepare('SELECT text, type, metadata FROM memory_embeddings WHERE subject_id = ? AND type = ? ORDER BY id DESC LIMIT ?').all(subjectId, type, limit)
+            : db.prepare('SELECT text, type, metadata FROM memory_embeddings WHERE subject_id = ? ORDER BY id DESC LIMIT ?').all(subjectId, limit);
+        return (rows as Array<{ text: string; type: string; metadata: string }>).map(row => {
+            let metadata: Record<string, any> = {};
+            try { metadata = JSON.parse(row.metadata || '{}'); } catch { }
+            return { text: row.text, type: row.type, metadata };
+        });
+    },
+    deleteEpisodesForScene(subjectId: string, sceneId: string) {
+        db.prepare(
+            `DELETE FROM memory_embeddings
+             WHERE subject_id = ?
+               AND type = 'episode_v2'
+               AND json_extract(metadata, '$.sceneId') = ?`
+        ).run(subjectId, sceneId);
     }
 };
 

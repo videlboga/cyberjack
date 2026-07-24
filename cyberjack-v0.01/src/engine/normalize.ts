@@ -6,7 +6,17 @@ import { clamp, ensureFiniteNumber } from './utils';
 type ActionScalarKey = keyof EngineConfig['action']['ranges'];
 
 export function normalizeAction(action: Partial<CompiledAction>, config: EngineConfig): CompiledAction {
-    const normalized: Partial<CompiledAction> = {};
+    // Scalar normalization must not erase action identity. Engine learning
+    // distinguishes wait/system actions from active stimulation and callers
+    // rely on metadata in tick diagnostics.
+    const normalized: Partial<CompiledAction> = {
+        actionKey: action.actionKey || 'unknown_action',
+        label: action.label || action.actionKey || 'Unknown action',
+        type: action.type || 'physical',
+        tags: action.tags || [],
+        source: action.source,
+        contextConfig: action.contextConfig,
+    };
     const defaults = config.action.defaults as Partial<Record<ActionScalarKey, number>>;
     const source = action as Partial<Record<ActionScalarKey, number>>;
 
@@ -98,6 +108,15 @@ export function normalizePoint(point: Partial<SubjectPointState>, config: Engine
             (point as any).baselineLocalAttitude ?? normalized.localAttitude,
             normalized.localAttitude,
             'baselineLocalAttitude'
+        ),
+        config.point.min,
+        config.point.max
+    );
+    normalized.baselineLocalOpenness = clamp(
+        ensureFiniteNumber(
+            (point as any).baselineLocalOpenness ?? normalized.localOpenness,
+            normalized.localOpenness,
+            'baselineLocalOpenness'
         ),
         config.point.min,
         config.point.max

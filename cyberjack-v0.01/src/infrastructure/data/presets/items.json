@@ -138,5 +138,109 @@
       "clothing",
       "isolation"
     ]
+  },
+  {
+    "id": "eq_dress",
+    "name": "Простое белое платье",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "dress"
+    ],
+    "description": "Лёгкое белое платье лабораторного образца"
+  },
+  {
+    "id": "eq_stockings",
+    "name": "Чулки",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "stockings"
+    ],
+    "description": "Чёрные чулки выше колена"
+  },
+  {
+    "id": "eq_underwear",
+    "name": "Нижнее бельё",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "underwear"
+    ],
+    "description": "Белое бельё"
+  },
+  {
+    "id": "eq_blindfold",
+    "name": "Повязка на глаза",
+    "type": "equipment",
+    "tags": [
+      "bondage",
+      "sensory"
+    ],
+    "description": "Чёрная повязка для глаз"
+  },
+  {
+    "id": "eq_gag",
+    "name": "Кляп",
+    "type": "equipment",
+    "tags": [
+      "bondage",
+      "mouth"
+    ],
+    "description": "Шаровой кляп"
+  },
+  {
+    "id": "eq_panties",
+    "name": "Трусики",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "panties"
+    ],
+    "description": "Белые трусики"
+  },
+  {
+    "id": "eq_lab_gown",
+    "name": "Лабораторная рубашка",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "medical",
+      "gown"
+    ],
+    "description": "Свободная лабораторная рубашка до середины бедра, раскрывающаяся сзади."
+  },
+  {
+    "id": "eq_calibration_set",
+    "name": "Калибровочный комплект",
+    "type": "clothing",
+    "tags": [
+      "clothing",
+      "calibration",
+      "sportswear"
+    ],
+    "description": "Короткий топ и облегающие шорты с открытыми зонами для датчиков."
+  },
+  {
+    "id": "eq_ankle_cuffs",
+    "name": "Ножные манжеты",
+    "type": "equipment",
+    "tags": [
+      "metal",
+      "restraint",
+      "ankles"
+    ],
+    "description": "Пара фиксирующих манжет для лодыжек с короткой соединительной цепью."
+  },
+  {
+    "id": "eq_restraint_belt",
+    "name": "Фиксирующий пояс",
+    "type": "equipment",
+    "tags": [
+      "restraint",
+      "waist",
+      "hands"
+    ],
+    "description": "Широкий пояс с креплениями, удерживающими запястья у талии."
   }
 ]

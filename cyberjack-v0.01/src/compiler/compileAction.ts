@@ -4,6 +4,7 @@ import { presetRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { compileContextVector } from './compileContextVector';
 import { mergeVectors } from './mergeVectors';
 import { computeNovelty } from './noveltyService';
+import { normalizeAuthoredActionVector, shapeImmediateContextAction } from './actionVectorScale';
 
 export interface ActionInput {
     presetId: string;
@@ -15,6 +16,7 @@ export interface ActionInput {
     parserVersion?: string;
     activeContexts?: any[]; // IDs of active contexts
     deltaTime?: number;
+    familiarity?: number;
 }
 
 /**
@@ -24,9 +26,15 @@ export interface ActionInput {
 export function compileAction(input: ActionInput): CompiledAction {
     const presetRecord = presetRepo.getActionPreset(input.presetId);
 
-    const baseVector = input.presetId === 'wait'
+    const authoredVector = input.presetId === 'wait'
         ? { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }
         : (presetRecord?.vector || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 });
+    const normalizedVector = normalizeAuthoredActionVector(authoredVector as Record<string, any>);
+    const baseVector = shapeImmediateContextAction(
+        normalizedVector,
+        presetRecord?.contextConfig?.type,
+        Boolean(presetRecord?.removeContexts?.length)
+    );
 
     const baseAction: CompiledAction = {
         actionKey: input.presetId,
@@ -40,7 +48,11 @@ export function compileAction(input: ActionInput): CompiledAction {
         },
         ...baseVector,
         contextConfig: presetRecord?.contextConfig,
-        removeContexts: presetRecord?.removeContexts
+        removeContexts: presetRecord?.removeContexts,
+        requireContexts: presetRecord?.requireContexts,
+        requiresItem: presetRecord?.requiresItem,
+        requiresSceneObject: presetRecord?.requiresSceneObject,
+        validTargets: presetRecord?.validTargets
     };
 
     // 2. Add player direct overrides
@@ -82,7 +94,7 @@ export function compileAction(input: ActionInput): CompiledAction {
     }
 
     // 3. Compute Novelty
-    baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || []);
+    baseWithDynamic.novelty = computeNovelty(baseWithDynamic, input.history || [], input.familiarity || 0);
 
     // 4. Get Contexts
     const activeContexts = input.activeContexts || [];

@@ -1,5 +1,5 @@
 import { TAG_LIBRARY, findTagById } from './tagDefinitions';
-import { buildLoreNotes } from './loreSource';
+import { buildLoreNotes, getLoreEntry } from './loreSource';
 import { buildNarrativeSummary } from './narrativeBuilder';
 import {
     CharacterArchetype,
@@ -20,14 +20,8 @@ const CORE_WORLD_TAGS = [
     'world_corporations'
 ] as const;
 
-const NAMES_POOL = ['Эли', 'Рен', 'Кай', 'Сайлас', 'Никс', 'Лира', 'Сет', 'Титан', 'Джун', 'Нейт', 'Рунис', 'Векс', 'Зейн', 'Мара', 'Иден', 'Нова'];
-const BODY_KNOWLEDGE_POOL = [
-    'Абсолютно не понимает процессы в своём теле. Воспринимает любую боль, мышечный спазм или удовольствие со страхом и слепым замешательством.',
-    'Слабое знание тела. Ориентируется лишь на базовые животные инстинкты — отдернуть руку от боли, сжаться при страхе.',
-    'Среднее знание собственного тела. Знает свои пределы выносливости, но совершенно не умеет контролировать мелкую моторику, дрожь или сбитое дыхание.',
-    'Хорошее чувство тела. Различает виды боли и стимуляции, умеет частично отключать восприятие или терпеть, сцепив зубы.',
-    'Острое телесное сознание. Детально осознает каждую мышцу, связку и сокращение. Способен к тонкому самоконтролю даже при перегрузке нервной системы.'
-];
+const FEMALE_NAMES = ['Эли', 'Никс', 'Лира', 'Джун', 'Мара', 'Иден', 'Нова'];
+const MALE_NAMES = ['Рен', 'Кай', 'Сайлас', 'Сет', 'Нейт', 'Рунис', 'Векс', 'Зейн'];
 
 const CORE_TRAIT_IDS = [
     'trait_profile_observant',
@@ -45,19 +39,6 @@ const CORE_TRAIT_IDS = [
 const CORE_WORLD_TARGET =
     CORE_WORLD_TAGS.length + Number(process.env.GENERATOR_EXTRA_WORLD ?? 2);
 const CORE_TRAIT_TARGET = Number(process.env.GENERATOR_CORE_TRAITS ?? 2);
-const MIN_ASSET_CAUSE_TAGS = Number(process.env.GENERATOR_ASSET_CAUSE ?? 1);
-const ASSET_CAUSE_CATEGORY = 'asset_cause';
-
-const DEFAULT_LEVEL_COUNTS: Record<LoreLevel, number> = {
-    world: Math.max(CORE_WORLD_TARGET, CORE_WORLD_TAGS.length),
-    faction: 2,
-    origin: 2,
-    persona: 2,
-    physical: 1,
-    psychological: 1,
-    event: 2,
-    trait: Math.max(CORE_TRAIT_TARGET + 1, 2)
-};
 
 function hashSeed(str: string): number {
     let h = 2166136261 >>> 0;
@@ -121,53 +102,83 @@ function addTag(
     grouped[tag.level].push({ ...tag });
 }
 
-function pickCoreTraitProfiles(
+function exclusiveSlot(tag: LoreTagDefinition): string | undefined {
+    if (tag.id.startsWith('origin_place_')) return 'origin_place';
+    if (tag.id.startsWith('origin_activity_')) return 'origin_activity';
+    if (tag.id.startsWith('origin_condition_')) return 'origin_condition';
+    if (/^origin_(inner|mid|outer)_ring$|^origin_perimeter$/.test(tag.id)) return 'region';
+    if (tag.id.startsWith('role_')) return 'former_role';
+    if (tag.id.startsWith('mem_')) return 'origin_memory';
+    if (tag.level === 'physical' || tag.level === 'psychological' || tag.level === 'state' ||
+        tag.level === 'response' || tag.level === 'bias' || tag.level === 'body') return tag.level;
+    if (tag.category?.endsWith('_cause')) return 'status_cause';
+    return undefined;
+}
+
+function tagsCompatible(tag: LoreTagDefinition, selected: Set<string>): boolean {
+    if ((tag.excludes || []).some(id => selected.has(id))) return false;
+    const slot = exclusiveSlot(tag);
+    for (const id of selected) {
+        const existing = findTagById(id);
+        if (existing?.excludes?.includes(tag.id)) return false;
+        if (slot && existing && exclusiveSlot(existing) === slot) return false;
+    }
+    return requirementsMet(tag, selected);
+}
+
+function pickOne(
+    pool: LoreTagDefinition[],
     grouped: Record<LoreLevel, GeneratedTag[]>,
     selected: Set<string>,
     excludeSet: Set<string>,
-    rng: () => number,
-    targetCount: number
-) {
-    if (targetCount <= 0) return;
-    const pool = CORE_TRAIT_IDS.map(id => findTagById(id)).filter(
-        (tag): tag is LoreTagDefinition =>
-            !!tag && !excludeSet.has(tag.id) && !selected.has(tag.id) && !!requirementsMet(tag as any, selected)
-    );
-
-    let picks = Math.min(targetCount, pool.length);
-    while (picks > 0 && pool.length) {
-        const idx = Math.floor(rng() * pool.length);
-        const [tag] = pool.splice(idx, 1);
-        addTag(tag, grouped, selected);
-        picks -= 1;
-    }
+    rng: () => number
+): LoreTagDefinition | undefined {
+    const selectedTags = Array.from(selected).map(ensureTagExists);
+    const candidates = pool
+        .filter(tag => !selected.has(tag.id) && !excludeSet.has(tag.id) && tagsCompatible(tag, selected))
+        .map(tag => {
+            let weight = tag.weight ?? 1;
+            for (const chosen of selectedTags) weight += chosen.weightModifiers?.[tag.id] || 0;
+            return { ...tag, weight: Math.max(0, weight) };
+        })
+        .filter(tag => (tag.weight ?? 1) > 0);
+    if (!candidates.length) return undefined;
+    const chosen = ensureTagExists(pickWeighted(candidates, rng).id);
+    addTag(chosen, grouped, selected);
+    return chosen;
 }
 
-function pickCategoryTags(
-    level: LoreLevel,
-    category: string,
-    grouped: Record<LoreLevel, GeneratedTag[]>,
-    selected: Set<string>,
-    excludeSet: Set<string>,
-    rng: () => number,
-    targetCount: number
-) {
-    if (targetCount <= 0) return;
-    const pool = TAG_LIBRARY[level].filter(
-        tag =>
-            tag.category === category &&
-            !selected.has(tag.id) &&
-            tag && !excludeSet.has(tag.id) &&
-            requirementsMet(tag, selected)
-    );
-    let picks = Math.min(targetCount, pool.length);
-    while (picks > 0 && pool.length) {
-        const idx = Math.floor(rng() * pool.length);
-        const [tag] = pool.splice(idx, 1);
-        addTag(tag, grouped, selected);
-        picks -= 1;
-    }
+function familyOfFaction(id: string): string {
+    return id.match(/^faction_(helix|veil|continuum|lattice)/)?.[1] || id;
 }
+
+const REGION_ROLES: Record<string, string[]> = {
+    origin_inner_ring: ['role_clerk', 'role_pampered', 'role_researcher'],
+    origin_mid_ring: ['role_clerk', 'role_worker', 'role_researcher'],
+    origin_outer_ring: ['role_worker', 'role_thug', 'role_cultist'],
+    origin_perimeter: ['role_worker', 'role_thug', 'role_cultist']
+};
+
+const PSY_TRAITS: Record<string, string[]> = {
+    psy_submissive: ['trait_profile_cautious', 'trait_profile_empathic', 'trait_profile_patient', 'trait_profile_adaptive', 'trait_profile_observant'],
+    psy_defiant: ['trait_profile_stubborn', 'trait_profile_direct', 'trait_profile_patient', 'trait_profile_resilient', 'trait_profile_observant'],
+    psy_curious_masochist: ['trait_profile_observant', 'trait_profile_adaptive', 'trait_profile_direct', 'trait_profile_pragmatic', 'trait_profile_resilient']
+};
+
+const PSY_RESPONSES: Record<string, string[]> = {
+    psy_submissive: ['response_agree_fast', 'response_silence', 'response_observe'],
+    psy_defiant: ['response_push_back', 'response_laugh', 'response_silence'],
+    psy_curious_masochist: ['response_observe', 'response_laugh', 'response_silence']
+};
+
+const ROLE_PHYSIOLOGY: Record<string, string[]> = {
+    role_clerk: ['phys_fragile', 'phys_modified'],
+    role_pampered: ['phys_fragile'],
+    role_researcher: ['phys_fragile', 'phys_modified'],
+    role_worker: ['phys_hardened', 'phys_modified'],
+    role_thug: ['phys_hardened', 'phys_modified'],
+    role_cultist: ['phys_hardened', 'phys_modified']
+};
 
 // No adaptRoleText anymore
 
@@ -198,6 +209,10 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         persona: [],
         physical: [],
         psychological: [],
+        state: [],
+        response: [],
+        bias: [],
+        body: [],
         event: [],
         trait: []
     };
@@ -214,52 +229,66 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         if (excludeSet.has(tag.id)) {
             throw new Error(`Forced tag ${tag.id} is also excluded`);
         }
-        if (!requirementsMet(tag, selected)) {
-            throw new Error(`Requirements for forced tag "${tag.id}" are not met.`);
-        }
+        if (!requirementsMet(tag, selected)) throw new Error(`Requirements for forced tag "${tag.id}" are not met.`);
+        if (!tagsCompatible(tag, selected)) throw new Error(`Forced tag "${tag.id}" conflicts with another selected tag.`);
         addTag(tag, grouped, selected);
     }
 
-    pickCoreTraitProfiles(grouped, selected, excludeSet, rng, CORE_TRAIT_TARGET);
-    pickCategoryTags('event', causeCategory, grouped, selected, excludeSet, rng, MIN_ASSET_CAUSE_TAGS);
+    // World knowledge: fixed setting plus a small amount of individual emphasis.
+    while (grouped.world.length < CORE_WORLD_TARGET) pickOne(TAG_LIBRARY.world, grouped, selected, excludeSet, rng);
 
-    for (const level of LEVEL_ORDER) {
-        const target = options.levelPickCounts?.[level] ?? DEFAULT_LEVEL_COUNTS[level];
-        if (target <= grouped[level].length) {
-            continue;
-        }
-
-        const availablePool = TAG_LIBRARY[level].filter(
-            tag => tag && !excludeSet.has(tag.id)
-        );
-
-        while (grouped[level].length < target) {
-            const allowed = availablePool.filter(
-                tag => !selected.has(tag.id) && requirementsMet(tag, selected)
-            );
-            if (!allowed.length) {
-                break;
-            }
-
-            // Calculate effective weights based on weightModifiers of already selected tags
-            const selectedTags = Array.from(selected).map(ensureTagExists);
-            const candidates = allowed.map(tag => {
-                let effectiveWeight = tag.weight ?? 1;
-                for (const sTag of selectedTags) {
-                    if (sTag.weightModifiers && sTag.weightModifiers[tag.id]) {
-                        effectiveWeight += sTag.weightModifiers[tag.id];
-                    }
-                }
-                return { ...tag, weight: Math.max(effectiveWeight, 0) };
-            });
-
-            const picked = pickWeighted(candidates, rng);
-            addTag(ensureTagExists(picked.id), grouped, selected);
+    // One coherent origin: place, activity and condition are separate slots.
+    for (const prefix of ['origin_place_', 'origin_activity_', 'origin_condition_']) {
+        if (!grouped.origin.some(tag => tag.id.startsWith(prefix))) {
+            pickOne(TAG_LIBRARY.origin.filter(tag => tag.id.startsWith(prefix)), grouped, selected, excludeSet, rng);
         }
     }
 
+    // One region and a former role compatible with it.
+    let region = grouped.persona.find(tag => /^origin_(inner|mid|outer)_ring$|^origin_perimeter$/.test(tag.id));
+    if (!region) region = pickOne(TAG_LIBRARY.persona.filter(tag => /^origin_(inner|mid|outer)_ring$|^origin_perimeter$/.test(tag.id)), grouped, selected, excludeSet, rng);
+    let role = grouped.persona.find(tag => tag.id.startsWith('role_'));
+    if (!role) {
+        const roleIds = REGION_ROLES[region?.id || ''] || TAG_LIBRARY.persona.filter(tag => tag.id.startsWith('role_')).map(tag => tag.id);
+        role = pickOne(roleIds.map(ensureTagExists), grouped, selected, excludeSet, rng);
+    }
+    const regionKey = region?.id.replace('origin_', '').replace('_ring', '').replace('perimeter', 'perim');
+    pickOne(TAG_LIBRARY.persona.filter(tag => tag.id.startsWith(`mem_${regionKey}_`)), grouped, selected, excludeSet, rng);
+
+    // A single factional perspective; all selected faction notes share a family.
+    const forcedFaction = grouped.faction[0];
+    const factionFamily = forcedFaction ? familyOfFaction(forcedFaction.id) : familyOfFaction(pickOne(TAG_LIBRARY.faction.filter(tag => /^faction_(helix|veil|continuum|lattice)$/.test(tag.id)), grouped, selected, excludeSet, rng)?.id || '');
+    while (grouped.faction.length < 2) {
+        if (!pickOne(TAG_LIBRARY.faction.filter(tag => familyOfFaction(tag.id) === factionFamily), grouped, selected, excludeSet, rng)) break;
+    }
+
+    // Physiology follows the former role instead of contradicting it by accident.
+    if (!grouped.physical.length) {
+        const physIds = ROLE_PHYSIOLOGY[role?.id || ''] || TAG_LIBRARY.physical.map(tag => tag.id);
+        pickOne(physIds.map(ensureTagExists), grouped, selected, excludeSet, rng);
+    }
+    const psyche = grouped.psychological[0] || pickOne(TAG_LIBRARY.psychological, grouped, selected, excludeSet, rng);
+
+    if (!grouped.state.length) pickOne(TAG_LIBRARY.state, grouped, selected, excludeSet, rng);
+    if (!grouped.response.length) pickOne((PSY_RESPONSES[psyche?.id || ''] || TAG_LIBRARY.response.map(tag => tag.id)).map(ensureTagExists), grouped, selected, excludeSet, rng);
+    if (!grouped.bias.length) pickOne(TAG_LIBRARY.bias, grouped, selected, excludeSet, rng);
+    if (!grouped.body.length) pickOne(TAG_LIBRARY.body, grouped, selected, excludeSet, rng);
+
+    // Current status has one cause; one additional event provides texture.
+    if (!grouped.event.some(tag => tag.category === causeCategory)) pickOne(TAG_LIBRARY.event.filter(tag => tag.category === causeCategory), grouped, selected, excludeSet, rng);
+    if (grouped.event.filter(tag => !tag.category?.endsWith('_cause')).length < 1) pickOne(TAG_LIBRARY.event.filter(tag => !tag.category?.endsWith('_cause')), grouped, selected, excludeSet, rng);
+
+    // Two compatible core traits, conditioned by the psychological strategy.
+    const traitPool = (PSY_TRAITS[psyche?.id || ''] || CORE_TRAIT_IDS).map(ensureTagExists);
+    while (grouped.trait.filter(tag => CORE_TRAIT_IDS.includes(tag.id)).length < CORE_TRAIT_TARGET) {
+        if (!pickOne(traitPool, grouped, selected, excludeSet, rng)) break;
+    }
+
     const tags = LEVEL_ORDER.flatMap(level => grouped[level]);
-    const loreRefs = Array.from(new Set(tags.flatMap(tag => tag.loreRefs)));
+    // `tag.loreRefs` is legacy compatibility metadata ("this physiology fits a
+    // worker"), not proof that the character has that biography or knowledge.
+    // Runtime knowledge is derived only from tags that were actually selected.
+    const loreRefs = Array.from(new Set(tags.map(tag => tag.id).filter(id => Boolean(getLoreEntry(id)))));
     const maxLoreEntries = Number(process.env.GENERATOR_MAX_LORE ?? 12);
     const loreNoteEntries = buildLoreNotes(loreRefs).slice(
         0,
@@ -306,52 +335,20 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
             initialContexts.push(...t.initialContexts);
         }
     }
-    // Build a simple preferences object from tags and contexts.
-    // This is intentionally lightweight: physical tags that match known point ids
-    // will increase point preferences; initialContexts and personaHooks will
-    // seed context preferences. Action preferences are left empty for now.
-    const POINT_IDS = [
-        'systemic', 'slot_social', 'head', 'face', 'lips', 'neck', 'chest', 'back',
-        'left_arm', 'right_arm', 'anus', 'groin', 'legs', 'knees', 'feet'
-    ];
-
     const preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number> } = {
         actions: {},
         points: {},
         contexts: {}
     };
+    for (const contextId of new Set(initialContexts)) preferences.contexts[contextId] = 1;
 
-    for (const t of tags) {
-        // If this physical tag resembles a point id, bump point preference
-        if (t.level === 'physical') {
-            const tid = t.id;
-            if (POINT_IDS.includes(tid)) {
-                preferences.points[tid] = (preferences.points[tid] || 0) + (t.weight ?? 1);
-            }
-        }
-
-        // Seed contexts from initialContexts
-        if (t.initialContexts && t.initialContexts.length) {
-            for (const ctx of t.initialContexts) {
-                preferences.contexts[ctx] = (preferences.contexts[ctx] || 0) + 1;
-            }
-        }
-
-        // Persona hooks often reflect behavioral inclinations; use them as context seeds
-        if (t.personaHooks && t.personaHooks.length) {
-            for (const hook of t.personaHooks) {
-                // normalize small strings
-                const key = hook.trim();
-                if (!key) continue;
-                preferences.contexts[key] = (preferences.contexts[key] || 0) + 1;
-            }
-        }
-    }
-    
+    const gender = options.identity?.gender ?? (rng() < 0.5 ? 'female' : 'male');
+    const namePool = gender === 'male' ? MALE_NAMES : FEMALE_NAMES;
     const baseProfile = {
-        name: NAMES_POOL[Math.floor(rng() * NAMES_POOL.length)],
-        age: Math.floor(18 + rng() * 15).toString(),
-        anatomy: 'Голова, Лицо, Шея, Грудь, Спина, Левая рука, Правая рука, Губы, Ноги, Живот'
+        name: options.identity?.name || namePool[Math.floor(rng() * namePool.length)],
+        age: String(options.identity?.age ?? Math.floor(18 + rng() * 15)),
+        gender,
+        anatomy: options.identity?.anatomy || 'human'
     };
 
     return {
@@ -368,10 +365,7 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
         seed: seedSource,
         narrative,
         originStatements,
-        assetReasons
-        ,
+        assetReasons,
         preferences
     };
 }
-
-export { DEFAULT_LEVEL_COUNTS };

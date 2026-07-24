@@ -8,7 +8,6 @@ export function ConfigEditor() {
 
     const [generatorSubject, setGeneratorSubject] = useState('S-01');
     const [generatorSeed, setGeneratorSeed] = useState('');
-    const [generatorApply, setGeneratorApply] = useState(true);
     const [generatorLoading, setGeneratorLoading] = useState(false);
     const [generatorError, setGeneratorError] = useState('');
     const [generatorResult, setGeneratorResult] = useState<any>(null);
@@ -94,8 +93,7 @@ export function ConfigEditor() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     subjectId: generatorSubject,
-                    seed: generatorSeed || undefined,
-                    applyToSillyTavern: generatorApply
+                    seed: generatorSeed || undefined
                 })
             });
             const data = await res.json();
@@ -179,8 +177,7 @@ export function ConfigEditor() {
             {renderReadOnly('Persona', currentProfile.personaText || '', 130)}
             {renderReadOnly('Лор', (currentProfile.loreNotes || []).join('\n\n'), 140)}
             {(() => {
-                const stPrefix = config.adapters?.sillyTavernSystemPrefix || '';
-                const systemText = `${stPrefix}${stPrefix ? '\n' : ''}${currentProfile.systemPrompt || ''}`;
+                const systemText = currentProfile.systemPrompt || '';
                 return (
                     <div>
                         {renderReadOnly('Системный промт', systemText, 160)}
@@ -200,7 +197,7 @@ export function ConfigEditor() {
             <section style={{ background: '#1e1e1e', borderRadius: 8, padding: 12, border: '1px solid #373737' }}>
                 <h3 style={{ marginTop: 0 }}>Конфигуратор промптов</h3>
                 <p style={{ fontSize: 12, color: '#aaa' }}>Выберите персонажа, обновите активный профиль и соберите новую карточку. Ниже — редактор fallback-конфига.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
                     <label style={{ display: 'flex', flexDirection: 'column', fontSize: 12, color: '#ccc' }}>
                         Subject ID
                         <input
@@ -218,10 +215,6 @@ export function ConfigEditor() {
                             onChange={e => setGeneratorSeed(e.target.value)}
                             style={{ marginTop: 4, padding: 6, background: '#111', color: '#fff', border: '1px solid #333', borderRadius: 4 }}
                         />
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#ccc', marginTop: 4 }}>
-                        <input type="checkbox" checked={generatorApply} onChange={e => setGeneratorApply(e.target.checked)} />
-                        Обновлять SillyTavern
                     </label>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>

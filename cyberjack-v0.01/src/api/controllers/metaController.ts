@@ -2,11 +2,51 @@ import { getBaseHumanAnatomy } from "../../domain/anatomy";
 import { Request, Response } from 'express';
 import { activeConfig, updateConfig } from '../../prompts/config';
 import { generateCharacterContext } from '../../orchestration/characterGenerator/generator';
-import { composePromptSections } from '../../orchestration/characterGenerator/promptComposer';
-import { ensureGeneratedProfile } from '../../orchestration/characterGenerator/profileManager';
+import { ensureGeneratedProfile, regenerateGeneratedProfile } from '../../orchestration/characterGenerator/profileManager';
 
 export function getConfig(req: Request, res: Response) {
     res.json({ success: true, config: activeConfig });
+}
+
+export function getVisualAssetReviews(req: Request, res: Response) {
+    try {
+        const assetPath = typeof req.query.assetPath === 'string' ? req.query.assetPath : '';
+        const rows = assetPath
+            ? db.prepare('SELECT * FROM visual_asset_reviews WHERE asset_path = ? ORDER BY updated_at DESC').all(assetPath)
+            : db.prepare('SELECT * FROM visual_asset_reviews ORDER BY updated_at DESC').all();
+        res.json({ success: true, reviews: (rows as any[]).map(row => ({
+            id: row.id, assetPath: row.asset_path, characterId: row.character_id,
+            decision: row.decision, issues: JSON.parse(row.issues_json || '[]'), note: row.note || '',
+            metadata: JSON.parse(row.metadata_json || '{}'), createdAt: row.created_at, updatedAt: row.updated_at
+        })) });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
+
+export function saveVisualAssetReview(req: Request, res: Response) {
+    try {
+        const assetPath = String(req.body.assetPath || '').trim();
+        const characterId = String(req.body.characterId || '').trim();
+        const decision = String(req.body.decision || '').trim();
+        if (!assetPath || !characterId || !['keep', 'rework', 'reject'].includes(decision)) {
+            return res.status(400).json({ success: false, error: 'assetPath, characterId and a valid decision are required' });
+        }
+        const issues = Array.isArray(req.body.issues) ? req.body.issues.map(String) : [];
+        const note = String(req.body.note || '').trim();
+        const metadata = req.body.metadata && typeof req.body.metadata === 'object' ? req.body.metadata : {};
+        db.prepare(`
+            INSERT INTO visual_asset_reviews (asset_path, character_id, decision, issues_json, note, metadata_json)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(asset_path, character_id) DO UPDATE SET
+              decision = excluded.decision, issues_json = excluded.issues_json,
+              note = excluded.note, metadata_json = excluded.metadata_json,
+              updated_at = CURRENT_TIMESTAMP
+        `).run(assetPath, characterId, decision, JSON.stringify(issues), note, JSON.stringify(metadata));
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 }
 
 export function postConfig(req: Request, res: Response) {
@@ -31,50 +71,24 @@ export function getCharacterProfile(req: Request, res: Response) {
 
 export async function getCharacterPrompt(req: Request, res: Response) {
     try {
-        const subjectId = req.body.subjectId || 'S-01';
+        const querySubject = typeof req.query.subjectId === 'string' ? req.query.subjectId.trim() : '';
+        const subjectId = req.method === 'GET' ? querySubject || 'S-01' : req.body.subjectId || 'S-01';
         const includeTags = Array.isArray(req.body.includeTags) ? req.body.includeTags : undefined;
         const excludeTags = Array.isArray(req.body.excludeTags) ? req.body.excludeTags : undefined;
         let seed = typeof req.body.seed === 'string' && req.body.seed.trim() ? req.body.seed.trim() : undefined;
         if (req.method === 'GET') {
-            const rawSubject = req.query.subjectId;
-            const sub = typeof rawSubject === 'string' && rawSubject.trim().length > 0 ? rawSubject.trim() : 'S-01';
             seed = typeof req.query.seed === 'string' && req.query.seed.trim() ? req.query.seed.trim() : undefined;
         }
-        
-        const applyToSillyTavern = Boolean(req.body.applyToSillyTavern);
-
-        const context = generateCharacterContext({ seed, includeTags, excludeTags });
-        const narrative = context.narrative || { identityParagraphs: [], historyParagraphs: [], activationParagraphs: [] };
-        const hasGeneratedNarrative = (narrative.identityParagraphs?.length || 0) > 0 || (narrative.historyParagraphs?.length || 0) > 0 || (narrative.activationParagraphs?.length || 0) > 0;
-        
-        const identityBlocks = narrative.identityParagraphs.length ? narrative.identityParagraphs : hasGeneratedNarrative ? [] : [activeConfig.character.identity];
-        const historyBlocks = narrative.historyParagraphs.length ? narrative.historyParagraphs : hasGeneratedNarrative ? [] : [activeConfig.character.history];
-        const activationBlocks = narrative.activationParagraphs || [];
-        
-        const sections = composePromptSections(context, {
-            identity: activeConfig.character.identity,
-            history: activeConfig.character.history,
-            instructions: activeConfig.character.formatInstructions,
-            identityBlocks,
-            historyBlocks,
-            activationBlocks,
-            originBlocks: context.originStatements,
-            assetBlocks: context.assetReasons
-        });
-
-        let stUpdate: { worldInfoName: string } | null = null;
+        const profile = req.method === 'POST'
+            ? regenerateGeneratedProfile(subjectId, { seed, includeTags, excludeTags })
+            : ensureGeneratedProfile(subjectId);
 
         res.json({
             success: true,
             subjectId,
-            seed: context.seed,
-            tags: context.tags,
-            grouped: context.grouped,
-            personaNotes: context.personaNotes,
-            personaText: sections.personaText,
-            loreNotes: context.loreNotes,
-            sections,
-            stUpdate
+            seed: profile.seed,
+            profile,
+            ...profile
         });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
@@ -115,24 +129,42 @@ export function deleteCharacter(req: Request, res: Response) {
 export function generateCharacterEndpoint(req: Request, res: Response) {
     try {
         const subjectId = req.body.subjectId || `CharGen-${Date.now()}`;
-        const profile = ensureGeneratedProfile(subjectId);
+        if (db.prepare('SELECT 1 FROM characters WHERE id = ? OR subject_id = ?').get(subjectId, subjectId)) {
+            return res.status(409).json({ success: false, error: `Character ${subjectId} already exists` });
+        }
+        const seed = typeof req.body.seed === 'string' && req.body.seed.trim() ? req.body.seed.trim() : subjectId;
+        const draft = generateCharacterContext({ seed });
+        const identity = {
+            name: req.body.name || draft.baseProfile!.name,
+            age: Number(req.body.age ?? draft.baseProfile!.age),
+            gender: req.body.gender || draft.baseProfile!.gender,
+            anatomy: req.body.anatomy || draft.baseProfile!.anatomy,
+            status: 'asset'
+        };
 
-        // create character in db
         db.transaction(() => {
-          db.prepare(`
-            INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
-            VALUES (?, ?, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50)
-            ON CONFLICT(id) DO UPDATE SET name = excluded.name
-          `).run(subjectId, req.body.name || profile.personaText.split('\n')[1]?.replace('- Имя: ', '').trim() || subjectId);
+            db.prepare(`INSERT INTO characters (id, name, kind, subject_id, profile_json) VALUES (?, ?, 'subject', ?, ?)`)
+                .run(subjectId, identity.name, subjectId, JSON.stringify({ base: identity }));
+        })();
 
-          db.prepare(`
-            INSERT INTO characters (id, name, kind, subject_id, profile_json) 
-            VALUES (?, ?, 'subject', ?, ?)
-            ON CONFLICT(id) DO UPDATE SET name = excluded.name, profile_json = excluded.profile_json
-          `).run(subjectId, req.body.name || profile.personaText.split('\n')[1]?.replace('- Имя: ', '').trim() || subjectId, subjectId, JSON.stringify(profile));
-        const points = getBaseHumanAnatomy('female', undefined);
-        const stmt = db.prepare(`INSERT OR IGNORE INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude) VALUES (?, ?, ?, ?, 0, 0, ?, ?)`);
-        for (const p of points) stmt.run(subjectId, p.id, p.sens, p.att, p.sens, p.att);
+        const profile = regenerateGeneratedProfile(subjectId, { seed });
+        const core = profile.mechanicalSeed.coreModifiers;
+        const value = (key: string) => Math.max(0, Math.min(100, 50 + Number(core[key] || 0)));
+        db.transaction(() => {
+            db.prepare(`
+                INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, preferences,
+                    baseline_sensitivity, baseline_capacity, baseline_openness, baseline_plasticity, baseline_attitude)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                subjectId, identity.name,
+                value('sensitivity'), value('capacity'), value('openness'), value('plasticity'), value('attitude'),
+                JSON.stringify(profile.mechanicalSeed.preferences),
+                value('sensitivity'), value('capacity'), value('openness'), value('plasticity'), value('attitude')
+            );
+            const anatomyGender = identity.gender === 'other' ? 'androgynous' : identity.gender;
+            const points = getBaseHumanAnatomy(anatomyGender, identity.anatomy === 'none' ? 'none' : undefined);
+            const stmt = db.prepare(`INSERT INTO subject_point_states (subject_id, point_id, local_sensitivity, local_attitude, familiarity, exposure_count, baseline_local_sensitivity, baseline_local_attitude) VALUES (?, ?, ?, ?, 0, 0, ?, ?)`);
+            for (const point of points) stmt.run(subjectId, point.id, point.sens, point.att, point.sens, point.att);
         })();
 
         res.json({ success: true, subjectId, profile });

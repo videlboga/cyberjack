@@ -1,0 +1,278 @@
+{
+  "version": 4,
+  "generatedAt": "2026-07-20T18:36:57.491Z",
+  "outputRoots": {
+    "calibrationAvatar": "public/character-images/calibration-v4",
+    "calibrationInteraction": "public/character-images/calibration-interactions-v4",
+    "device": "public/character-images/devices-v4"
+  },
+  "characterAppearance": {
+    "mira": {
+      "characterId": "S-AV-01",
+      "name": "Мира",
+      "appearanceTags": [
+        "very long hair",
+        "black hair",
+        "pink hair",
+        "two-tone hair",
+        "bangs",
+        "blue eyes",
+        "pale skin",
+        "tall girl",
+        "medium breasts"
+      ]
+    },
+    "iona": {
+      "characterId": "NPC-LAB-01",
+      "name": "Иона",
+      "appearanceTags": [
+        "very long hair",
+        "purple hair",
+        "purple eyes",
+        "glasses",
+        "low-tied long hair",
+        "tall girl",
+        "medium breasts"
+      ]
+    },
+    "nika": {
+      "characterId": "NPC-CAND-01",
+      "name": "Ника",
+      "appearanceTags": [
+        "short hair",
+        "teal hair",
+        "black hair",
+        "two-tone hair",
+        "teal eyes",
+        "choker",
+        "petite",
+        "small breasts"
+      ]
+    }
+  },
+  "totals": {
+    "rows": 23310,
+    "generatedV4": 0,
+    "exactLegacyCovered": 1176,
+    "missingGenerate": 22134,
+    "withLegacyCandidate": 1989
+  },
+  "byMatrix": {
+    "calibration-avatar": {
+      "total": 15792,
+      "generatedV4": 0,
+      "exactLegacyCovered": 1176,
+      "missingGenerate": 14616,
+      "withLegacyCandidate": 138
+    },
+    "calibration-interaction": {
+      "total": 5880,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 5880,
+      "withLegacyCandidate": 1302
+    },
+    "device": {
+      "total": 1638,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1638,
+      "withLegacyCandidate": 549
+    }
+  },
+  "byPriority": {
+    "P0": {
+      "total": 1848,
+      "generatedV4": 0,
+      "exactLegacyCovered": 1176,
+      "missingGenerate": 672,
+      "withLegacyCandidate": 138
+    },
+    "P1": {
+      "total": 1848,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1848,
+      "withLegacyCandidate": 0
+    },
+    "P10": {
+      "total": 126,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 126,
+      "withLegacyCandidate": 24
+    },
+    "P2": {
+      "total": 3696,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 3696,
+      "withLegacyCandidate": 0
+    },
+    "P3": {
+      "total": 3024,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 3024,
+      "withLegacyCandidate": 0
+    },
+    "P4": {
+      "total": 2520,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 2520,
+      "withLegacyCandidate": 0
+    },
+    "P5": {
+      "total": 1008,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1008,
+      "withLegacyCandidate": 0
+    },
+    "P6": {
+      "total": 1848,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1848,
+      "withLegacyCandidate": 0
+    },
+    "P7": {
+      "total": 1176,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1176,
+      "withLegacyCandidate": 294
+    },
+    "P8": {
+      "total": 4704,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 4704,
+      "withLegacyCandidate": 1008
+    },
+    "P9": {
+      "total": 1512,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1512,
+      "withLegacyCandidate": 525
+    }
+  },
+  "byCharacter": {
+    "iona": {
+      "total": 7770,
+      "generatedV4": 0,
+      "exactLegacyCovered": 392,
+      "missingGenerate": 7378,
+      "withLegacyCandidate": 663
+    },
+    "mira": {
+      "total": 7770,
+      "generatedV4": 0,
+      "exactLegacyCovered": 392,
+      "missingGenerate": 7378,
+      "withLegacyCandidate": 663
+    },
+    "nika": {
+      "total": 7770,
+      "generatedV4": 0,
+      "exactLegacyCovered": 392,
+      "missingGenerate": 7378,
+      "withLegacyCandidate": 663
+    }
+  },
+  "byEquipmentPreset": {
+    "ankle_cuffs": {
+      "total": 1176,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1176,
+      "withLegacyCandidate": 0
+    },
+    "blindfold": {
+      "total": 3024,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 3024,
+      "withLegacyCandidate": 294
+    },
+    "blindfold_gag": {
+      "total": 1848,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1848,
+      "withLegacyCandidate": 0
+    },
+    "collar": {
+      "total": 1848,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1848,
+      "withLegacyCandidate": 0
+    },
+    "gag": {
+      "total": 1848,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1848,
+      "withLegacyCandidate": 0
+    },
+    "none": {
+      "total": 3024,
+      "generatedV4": 0,
+      "exactLegacyCovered": 1176,
+      "missingGenerate": 1848,
+      "withLegacyCandidate": 432
+    },
+    "restraint_belt": {
+      "total": 672,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 672,
+      "withLegacyCandidate": 0
+    },
+    "restraint_frame": {
+      "total": 1092,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 1092,
+      "withLegacyCandidate": 126
+    },
+    "suspension": {
+      "total": 168,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 168,
+      "withLegacyCandidate": 0
+    },
+    "table_straps": {
+      "total": 924,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 924,
+      "withLegacyCandidate": 126
+    },
+    "wrist_ankle_cuffs": {
+      "total": 672,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 672,
+      "withLegacyCandidate": 0
+    },
+    "wrist_cuffs": {
+      "total": 2688,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 2688,
+      "withLegacyCandidate": 231
+    },
+    "wrist_cuffs_blindfold": {
+      "total": 2688,
+      "generatedV4": 0,
+      "exactLegacyCovered": 0,
+      "missingGenerate": 2688,
+      "withLegacyCandidate": 231
+    }
+  }
+}

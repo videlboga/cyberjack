@@ -102,6 +102,62 @@ describe('Context & Slot Engine', () => {
         expect(active.some(a => a.actionId === 'effect_apathy')).toBe(true);
     });
 
+    it('keeps unconsciousness until the higher recovery threshold is reached', () => {
+        const subj = 'sub_ctx_apathy_hysteresis';
+        pointStateRepo.save(subj, 'systemic', { pointId:'systemic', localSensitivity:50, localAttitude:50, localOpenness:50, familiarity:0, exposureCount:0 });
+        presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
+        presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
+
+        subjectRepo.save(subj, 'Hysteresis Subject', { sensitivity:50, capacity:5, openness:50, plasticity:50, attitude:50, tension:0 });
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(true);
+
+        subjectRepo.save(subj, 'Hysteresis Subject', { sensitivity:50, capacity:20, openness:50, plasticity:50, attitude:50, tension:0 });
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(true);
+
+        subjectRepo.save(subj, 'Hysteresis Subject', { sensitivity:50, capacity:25, openness:50, plasticity:50, attitude:50, tension:0 });
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(false);
+    });
+
+    it('applies unconsciousness at zero capacity regardless of high attitude', () => {
+        const subj = 'sub_ctx_high_attitude_exhaustion';
+        subjectRepo.save(subj, 'Exhausted Subject', { sensitivity:50, capacity:0, openness:95, plasticity:90, attitude:90, tension:10 });
+        pointStateRepo.save(subj, 'systemic', { pointId:'systemic', localSensitivity:50, localAttitude:80, localOpenness:80, familiarity:0, exposureCount:0 });
+        presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
+        presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
+
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+
+        const active = activeContextsRepo.getAllForSubject(subj);
+        expect(active.some(row => row.actionId === 'effect_apathy')).toBe(true);
+        expect(active.some(row => row.actionId === 'pose_lying_down')).toBe(true);
+    });
+
+    it('uses nervous activation to force and maintain contact without restoring capacity', () => {
+        const subj = 'sub_ctx_forced_arousal';
+        pointStateRepo.save(subj, 'systemic', { pointId:'systemic', localSensitivity:50, localAttitude:50, localOpenness:50, familiarity:0, exposureCount:0 });
+        presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
+        presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
+
+        subjectRepo.save(subj, 'Forced Arousal Subject', { sensitivity:50, capacity:0, openness:50, plasticity:50, attitude:50, tension:0 });
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(true);
+
+        subjectRepo.save(subj, 'Forced Arousal Subject', { sensitivity:50, capacity:0, openness:50, plasticity:50, attitude:50, tension:30 });
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(false);
+
+        subjectRepo.save(subj, 'Forced Arousal Subject', { sensitivity:50, capacity:0, openness:50, plasticity:50, attitude:50, tension:20 });
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(false);
+
+        subjectRepo.save(subj, 'Forced Arousal Subject', { sensitivity:50, capacity:0, openness:50, plasticity:50, attitude:50, tension:15 });
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(true);
+    });
+
     it('compileContextVector combines modifiers and applies strain', () => {
         // Create two presets with modifiers
         presetRepo.saveActionPreset('ctx_mod_a', 'ModA', { intensity: 0.0 }, { modifiers: { intensity: 2, valence: -0.5 } });
@@ -116,6 +172,25 @@ describe('Context & Slot Engine', () => {
         expect(result.valence).toBeDefined();
         // ensure multiplier key was returned for intensity_mult
         expect(result['intensity_mult'] === undefined || typeof result['intensity_mult'] === 'number').toBe(true);
+    });
+
+    it('does not reuse a pose application vector as a persistent modifier', () => {
+        presetRepo.saveActionPreset('pose_test', 'Pose', { intensity: 3, valence: -2 }, {
+            type: 'pose', occupiesPoints: ['global_pose'], duration: -1
+        });
+
+        const result = compileContextVector([{ actionId: 'pose_test' }], { intensity: 0 } as any) as any;
+        expect(result.intensity).toBeUndefined();
+        expect(result.valence).toBeUndefined();
+    });
+
+    it('retains legacy condition vectors as persistent modifiers', () => {
+        presetRepo.saveActionPreset('condition_test', 'Condition', { intensity_mult: 0.5 }, {
+            type: 'condition', occupiesPoints: [], duration: -1
+        });
+
+        const result = compileContextVector([{ actionId: 'condition_test' }], { intensity: 1 } as any) as any;
+        expect(result.intensity_mult).toBe(0.5);
     });
 
     it('removeByActionIdAndPoint deletes only contexts for a given action+point', () => {
@@ -144,5 +219,118 @@ describe('Context & Slot Engine', () => {
         expect(remaining.some(r => r.id === 'r3')).toBe(false);
         // r2 remains
         expect(remaining.some(r => r.id === 'r2')).toBe(true);
+    });
+
+    it('removeByActionId removes every occupied point of one context', () => {
+        const subj = 'sub_ctx_remove_whole_item';
+        subjectRepo.save(subj, 'RemoveWholeItemSubject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('wearable_ctx', 'Wearable', {}, {
+            type: 'clothing',
+            occupiesPoints: ['groin', 'buttocks'],
+            duration: -1
+        });
+        activeContextsRepo.add('wearable_groin', subj, 'wearable_ctx', -1, 'groin', null);
+        activeContextsRepo.add('wearable_buttocks', subj, 'wearable_ctx', -1, 'buttocks', null);
+
+        activeContextsRepo.removeByActionId(subj, 'wearable_ctx');
+
+        expect(activeContextsRepo.getAllForSubject(subj).filter(row => row.actionId === 'wearable_ctx')).toHaveLength(0);
+    });
+
+    it('replaces poses as a category without removing another context kind', () => {
+        const subj = 'sub_ctx_pose';
+        subjectRepo.save(subj, 'Pose Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('pose_old', 'Old Pose', {}, { type:'pose', occupiesPoints:['global_pose'], priority:1 });
+        presetRepo.saveActionPreset('pose_new', 'New Pose', {}, { type:'pose', occupiesPoints:['global_pose'], priority:2 });
+        presetRepo.saveActionPreset('collar', 'Collar', {}, { type:'equipment', occupiesPoints:['neck'], exclusiveWithinPoint:true });
+        activeContextsRepo.add('old_pose_instance', subj, 'pose_old', -1, 'global_pose', null);
+        activeContextsRepo.add('collar_instance', subj, 'collar', -1, 'neck', null);
+
+        ContextManager.applyContext(subj, 'pose_new', presetRepo.getActionPreset('pose_new') as any);
+        const remaining = activeContextsRepo.getAllForSubject(subj);
+        expect(remaining.some(row => row.actionId === 'pose_old')).toBe(false);
+        expect(remaining.some(row => row.actionId === 'pose_new')).toBe(true);
+        expect(remaining.some(row => row.actionId === 'collar')).toBe(true);
+    });
+
+    it('blocks an autonomous collapse pose when a whole-body restraint holds the pose slot', () => {
+        const subj = 'sub_ctx_restrained_collapse';
+        subjectRepo.save(subj, 'Restrained Subject', { sensitivity:50, capacity:5, openness:50, plasticity:50, attitude:30, tension:0 });
+        presetRepo.saveActionPreset('whole_body_restraint', 'Suspension', {}, {
+            type:'equipment', occupiesPoints:['global_pose'], exclusiveWithinPoint:true, duration:-1
+        });
+        db.prepare(`UPDATE action_presets SET type = 'restraint', tags = '["restraint"]' WHERE id = 'whole_body_restraint'`).run();
+        presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, {
+            type:'pose', occupiesPoints:['global_pose'], duration:-1
+        });
+        activeContextsRepo.add('restraint_instance', subj, 'whole_body_restraint', -1, 'global_pose', 'PL-1');
+
+        const result = ContextManager.applyContext(
+            subj,
+            'pose_lying_down',
+            presetRepo.getActionPreset('pose_lying_down') as any,
+            undefined,
+            subj
+        );
+
+        expect(result.blocked).toBe(true);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'whole_body_restraint')).toBe(true);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'pose_lying_down')).toBe(false);
+    });
+
+    it('moves an unrestrained subject into a lying pose when apathy activates', () => {
+        const subj = 'sub_ctx_collapse';
+        subjectRepo.save(subj, 'Collapse Subject', { sensitivity:50, capacity:5, openness:50, plasticity:50, attitude:30, tension:0 });
+        pointStateRepo.save(subj, 'systemic', { pointId:'systemic', localSensitivity:50, localAttitude:50, localOpenness:50, familiarity:0, exposureCount:0 });
+        presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
+        presetRepo.saveActionPreset('pose_standing', 'Standing', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
+        presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
+        activeContextsRepo.add('standing_instance', subj, 'pose_standing', -1, 'global_pose', 'PL-1');
+
+        ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
+
+        const active = activeContextsRepo.getAllForSubject(subj);
+        expect(active.some(row => row.actionId === 'effect_apathy')).toBe(true);
+        expect(active.some(row => row.actionId === 'pose_lying_down')).toBe(true);
+        expect(active.some(row => row.actionId === 'pose_standing')).toBe(false);
+    });
+
+    it('reconciles an already active apathy context into a lying pose', () => {
+        const subj = 'sub_ctx_existing_collapse';
+        subjectRepo.save(subj, 'Existing Collapse Subject', { sensitivity:50, capacity:5, openness:50, plasticity:50, attitude:30, tension:0 });
+        presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
+        presetRepo.saveActionPreset('pose_all_fours', 'All Fours', {}, { type:'pose', occupiesPoints:['global_pose','knees','hands'], duration:-1 });
+        presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
+        activeContextsRepo.add('apathy_instance', subj, 'effect_apathy', -1, null, null);
+        activeContextsRepo.add('all_fours_pose', subj, 'pose_all_fours', -1, 'global_pose', 'PL-1');
+        activeContextsRepo.add('all_fours_knees', subj, 'pose_all_fours', -1, 'knees', 'PL-1');
+
+        const result = ContextManager.applyAutonomousCollapse(subj);
+        const active = activeContextsRepo.getAllForSubject(subj);
+
+        expect(result.applied).toBe(true);
+        expect(active.some(row => row.actionId === 'pose_lying_down')).toBe(true);
+        expect(active.some(row => row.actionId === 'pose_all_fours')).toBe(false);
+    });
+
+    it('is idempotent when the same context is applied twice', () => {
+        const subj = 'sub_ctx_idempotent';
+        subjectRepo.save(subj, 'Idempotent Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('same_ctx', 'Same', {}, { type:'equipment', occupiesPoints:['neck'], exclusiveWithinPoint:true });
+        const preset = presetRepo.getActionPreset('same_ctx') as any;
+        ContextManager.applyContext(subj, 'same_ctx', preset);
+        ContextManager.applyContext(subj, 'same_ctx', preset);
+        expect(activeContextsRepo.getAllForSubject(subj).filter(row => row.actionId === 'same_ctx')).toHaveLength(1);
+    });
+
+    it('preserves zero duration and expires it on the next processing pass', () => {
+        const subj = 'sub_ctx_zero_duration';
+        subjectRepo.save(subj, 'Duration Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('instant_ctx', 'Instant', {}, { type:'condition', occupiesPoints:[], duration:0 });
+        ContextManager.applyContext(subj, 'instant_ctx', presetRepo.getActionPreset('instant_ctx') as any);
+        const active = activeContextsRepo.getAllForSubject(subj);
+        expect(active[0].duration).toBe(0);
+        ContextManager.processTick(subj, 1);
+        expect(activeContextsRepo.getAllForSubject(subj)).toHaveLength(0);
     });
 });

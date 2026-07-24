@@ -1,0 +1,131 @@
+{
+  "version": 3,
+  "model": "compatible-interaction-combinations",
+  "baseMatrix": "character-image-matrix.json",
+  "fallbackMatrix": "interaction-visual-matrix.json",
+  "description": "Расширенный слой продолжительных сцен: только совместимые комбинации взаимодействия, фазы, одежды, фиксации и эмоции.",
+  "characters": ["S-AV-01", "NPC-LAB-01", "NPC-CAND-01"],
+  "axes": {
+    "wardrobes": [
+      { "id": "nude", "name": "Без одежды", "baseClothingIds": ["nude"] },
+      { "id": "underwear", "name": "Нижнее бельё", "baseClothingIds": ["underwear", "calibration_set"] },
+      { "id": "stockings", "name": "Чулки или колготки", "baseClothingIds": ["dress_stockings"], "partial": true },
+      { "id": "open_top", "name": "Открытая грудь", "baseClothingIds": ["lab_gown", "dress", "calibration_set"], "partial": true },
+      { "id": "device_outfit", "name": "Экипировка устройства", "baseClothingIds": ["jumpsuit", "calibration_set"], "deviceDefined": true }
+    ],
+    "restraints": [
+      { "id": "free", "name": "Без фиксации", "baseRestraintIds": ["none"] },
+      { "id": "wrists", "name": "Фиксация рук", "baseRestraintIds": ["handcuffs", "restraint_belt"] },
+      { "id": "spread", "name": "Разведённая фиксация", "baseRestraintIds": ["wrist_ankle_cuffs", "table_straps", "restraint_frame"] },
+      { "id": "machine", "name": "Фиксация устройством", "baseRestraintIds": ["table_straps", "restraint_frame", "suspension"], "deviceDefined": true }
+    ],
+    "affects": [
+      { "id": "guarded", "name": "Настороженность или протест" },
+      { "id": "receptive", "name": "Положительное принятие" },
+      { "id": "high_positive", "name": "Высокое положительное напряжение" },
+      { "id": "high_negative", "name": "Высокое отрицательное напряжение" },
+      { "id": "subspace", "name": "Сабспейс" },
+      { "id": "climax", "name": "На грани или разрядка" }
+    ],
+    "phases": ["sustain", "intense", "peak"]
+  },
+  "affectsByPhase": {
+    "sustain": ["guarded", "receptive"],
+    "intense": ["high_positive", "high_negative", "subspace"],
+    "peak": ["climax", "high_negative"]
+  },
+  "families": [
+    {
+      "id": "vibration",
+      "variants": [
+        { "id": "handheld", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"] },
+        { "id": "internal", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"] },
+        { "id": "machine", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] }
+      ]
+    },
+    {
+      "id": "sex_machine",
+      "variants": [
+        { "id": "stirrups", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] },
+        { "id": "restrained", "wardrobes": ["nude", "underwear"], "restraints": ["spread", "machine"] },
+        { "id": "suspended", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] },
+        { "id": "milking", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] },
+        { "id": "hmd", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] },
+        { "id": "mind_control", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] }
+      ]
+    },
+    {
+      "id": "electrostimulation",
+      "variants": [
+        { "id": "chair", "wardrobes": ["nude", "underwear", "device_outfit"], "restraints": ["machine"] },
+        { "id": "clamps", "wardrobes": ["nude", "open_top"], "restraints": ["free", "wrists", "spread"] },
+        { "id": "genital", "wardrobes": ["nude", "underwear"], "restraints": ["free", "spread"] },
+        { "id": "tentacles", "wardrobes": ["nude"], "restraints": ["free", "machine"], "optional": true }
+      ]
+    },
+    {
+      "id": "exposure",
+      "variants": [
+        { "id": "standing", "wardrobes": ["nude", "underwear", "open_top", "stockings"], "restraints": ["free", "wrists"], "phases": ["sustain", "peak"] },
+        { "id": "sitting_spread", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "spread"], "phases": ["sustain", "peak"] },
+        { "id": "spread_eagle", "wardrobes": ["nude", "underwear"], "restraints": ["spread"], "phases": ["sustain", "peak"] },
+        { "id": "covering", "wardrobes": ["nude", "underwear", "open_top"], "restraints": ["free"], "phases": ["sustain"] }
+      ]
+    },
+    {
+      "id": "foot",
+      "variants": [
+        { "id": "bare_presented", "wardrobes": ["nude", "underwear"], "restraints": ["free"], "phases": ["sustain"] },
+        { "id": "pantyhose_presented", "wardrobes": ["stockings"], "restraints": ["free", "wrists"], "phases": ["sustain"] },
+        { "id": "stocks_tickle", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["machine"] }
+      ]
+    },
+    {
+      "id": "oral",
+      "variants": [
+        { "id": "kneeling", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"] },
+        { "id": "deep", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"] },
+        { "id": "assisted", "wardrobes": ["nude", "underwear"], "restraints": ["free", "wrists"], "phases": ["sustain", "peak"] }
+      ]
+    },
+    {
+      "id": "penetration",
+      "constraints": ["third-person", "no-pov"],
+      "variants": [
+        { "id": "doggy", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"] },
+        { "id": "missionary", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "spread"] },
+        { "id": "standing", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"], "phases": ["sustain", "peak"] }
+      ]
+    },
+    {
+      "id": "capsule",
+      "variants": [
+        { "id": "hmd", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] },
+        { "id": "machine", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] },
+        { "id": "electric", "wardrobes": ["nude", "device_outfit"], "restraints": ["machine"] },
+        { "id": "glory", "wardrobes": ["nude", "underwear"], "restraints": ["machine"], "phases": ["sustain", "peak"], "optional": true }
+      ]
+    },
+    {
+      "id": "lesbian",
+      "variants": [
+        { "id": "fingering_kiss", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"] },
+        { "id": "facesitting", "wardrobes": ["nude", "underwear", "stockings"], "restraints": ["free", "wrists"] }
+      ]
+    }
+  ],
+  "generationRules": {
+    "continuity": "Один seed и одна композиция для всех фаз одной комбинации",
+    "phaseDeltaOnly": ["expression", "muscle_tension", "device_intensity", "physiological_signals"],
+    "lockedAcrossPhases": ["camera", "pose", "wardrobe", "restraint", "device_geometry", "character_identity"],
+    "selection": "Сначала утвердить sustain; intense и peak генерировать как вариации утверждённого кадра"
+  },
+  "resolverPriority": [
+    "critical-state",
+    "expanded-exact",
+    "expanded-same-wardrobe-nearest-affect",
+    "sparse-interaction-family-variant-phase",
+    "base-pose-clothing-restraint-affect"
+  ],
+  "assetConvention": "public/character-images/interactions-expanded/$character/$family/$variant/$wardrobe__$restraint__$affect__$phase.png"
+}

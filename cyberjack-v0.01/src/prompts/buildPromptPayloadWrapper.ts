@@ -22,17 +22,19 @@ export async function buildPromptPayloadWithDB(
 
     const targetRow = db.prepare('SELECT * FROM subjects WHERE id = ?').get(targetQueryId) as any;
     
-    const core = targetRow ? {
-        sensitivity: targetRow.sensitivity,
-        capacity: targetRow.capacity,
-        openness: targetRow.openness,
-        plasticity: targetRow.plasticity,
-        attitude: targetRow.attitude
-    } : { sensitivity: 50, capacity:50, openness:50, plasticity:50, attitude:50 };
+    const perspectiveRow = ownerRow || targetRow;
+    const core = perspectiveRow ? {
+        sensitivity: perspectiveRow.sensitivity,
+        capacity: perspectiveRow.capacity,
+        openness: perspectiveRow.openness,
+        plasticity: perspectiveRow.plasticity,
+        attitude: perspectiveRow.attitude,
+        tension: perspectiveRow.tension
+    } : { sensitivity: 50, capacity:50, openness:50, plasticity:50, attitude:50, tension: 0 };
 
     const recentLogLimit = activeConfig.perception?.recentEventLimit ?? 10;
     const logs = db.prepare(
-        'SELECT * FROM event_logs WHERE subject_id = ? ORDER BY timestamp DESC LIMIT ?'
+        'SELECT * FROM event_logs WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
     ).all(targetQueryId, recentLogLimit) as any[];
 
     const recentEvents = logs.map(log => ({
@@ -44,12 +46,19 @@ export async function buildPromptPayloadWithDB(
     })).reverse();
 
     const activeContextRow = db.prepare(`
-        SELECT cp.label
+        SELECT cp.label, cp.id, cp.context_config_json, ac.point_id
         FROM active_contexts ac
         JOIN action_presets cp ON ac.action_id = cp.id
         WHERE ac.subject_id = ?
-    `).all(targetQueryId) as {label: string}[];
-    const activeContextNames = activeContextRow.map(r => r.label);
+    `).all(targetQueryId) as {label: string; id: string; context_config_json?: string; point_id?: string}[];
+    const activeContextNames = activeContextRow.flatMap(r => {
+        let role = 'other';
+        try { role = JSON.parse(r.context_config_json || '{}')?.type || role; } catch { }
+        const externallyVisible = ['pose', 'clothing', 'equipment', 'restraint', 'environment', 'social', 'other'];
+        if (ownerQueryId !== targetQueryId && !externallyVisible.includes(role)) return [];
+        const scope = r.point_id ? ` [зона: ${r.point_id}]` : ' [глобально]';
+        return [`${role}: ${r.label}${scope}`];
+    });
 
     const pointStatesRow = db.prepare(`
         SELECT sps.point_id as label, sps.local_sensitivity, sps.local_attitude
@@ -65,7 +74,7 @@ export async function buildPromptPayloadWithDB(
     const payload = await buildPromptPayload(
         ownerId,
         targetId,
-        { name: targetRow?.name || targetQueryId, core: { tension: (core as any).tension || 0, ...core } as any },
+        { name: ownerRow?.name || ownerQueryId, core: core as any },
         recentEvents,
         pointStatesRow,
         activeContextNames,

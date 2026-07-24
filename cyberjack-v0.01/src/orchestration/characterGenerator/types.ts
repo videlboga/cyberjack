@@ -1,4 +1,4 @@
-export type LoreLevel = 'world' | 'faction' | 'origin' | 'event' | 'trait' | 'persona' | 'physical' | 'psychological';
+export type LoreLevel = 'world' | 'faction' | 'origin' | 'event' | 'trait' | 'persona' | 'physical' | 'psychological' | 'state' | 'response' | 'bias' | 'body';
 
 export interface LoreTagDefinition {
     id: string;
@@ -17,6 +17,7 @@ export interface LoreTagDefinition {
     weightModifiers?: Record<string, number>;
     initialContexts?: string[];
     archetypes?: CharacterArchetype[];
+    reactionTriggers?: Array<{ facts: string[]; response: string }>;
 }
 
 export interface TagNarrative {
@@ -31,15 +32,20 @@ export interface TagNarrativeFragment {
     activationHooks?: string[];
 }
 
-export type CharacterArchetype = 'asset' | 'broker' | 'client' | 'observer';
+export type CharacterArchetype = 'person' | 'asset' | 'broker' | 'client' | 'observer';
 
 export interface GeneratorOptions {
     seed?: string;
-    levelPickCounts?: Partial<Record<LoreLevel, number>>;
     includeTags?: string[];
     excludeTags?: string[];
     forced?: string[];
     archetype?: CharacterArchetype;
+    identity?: {
+        name: string;
+        age?: number | string;
+        gender?: 'male' | 'female' | 'other';
+        anatomy?: string;
+    };
 }
 
 export interface GeneratedTag extends LoreTagDefinition {
@@ -63,6 +69,7 @@ export interface GeneratedCharacterContext {
     baseProfile?: {
         name: string;
         age: string;
+        gender: 'male' | 'female' | 'other';
         anatomy: string;
     };
     // Preferences to be serialized into subject state (actions, points, contexts)
@@ -79,4 +86,53 @@ export interface NarrativeSummary {
     activationParagraphs: string[];
 }
 
-export const LEVEL_ORDER: LoreLevel[] = ['world', 'origin', 'faction', 'persona', 'physical', 'psychological', 'event', 'trait'];
+export const LEVEL_ORDER: LoreLevel[] = ['world', 'origin', 'faction', 'persona', 'physical', 'psychological', 'state', 'response', 'bias', 'body', 'event', 'trait'];
+
+export interface GeneratedProfileV2 {
+    version: 2;
+    generatorRevision: number;
+    subjectId: string;
+    seed: string;
+    identity: {
+        name: string;
+        age: number;
+        gender: 'male' | 'female' | 'other';
+        anatomy: string;
+        archetype: CharacterArchetype;
+    };
+    biography: {
+        origin: string[];
+        formerRole?: string;
+        statusCause?: string;
+        formativeEvents: string[];
+    };
+    behavioralCore: {
+        values: string[];
+        needs: string[];
+        vulnerabilities: string[];
+        defenses: string[];
+        voice: string[];
+        mannerisms: string[];
+        centralConflict: { desire: string; fear: string };
+        conditionalReactions?: Array<{ facts: string[]; response: string }>;
+        attentionFocus?: Array<'technique' | 'person' | 'body' | 'risk' | 'rules' | 'change'>;
+        speechDisposition?: 'quiet' | 'normal' | 'expressive';
+    };
+    knowledgeRefs: string[];
+    mechanicalSeed: {
+        coreModifiers: Record<string, number>;
+        initialContexts: string[];
+        preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number> };
+    };
+    sourceTags: string[];
+    personaText: string;
+    personaWithoutTraits?: string;
+    traitBlock?: string;
+    loreNotes?: string[];
+    loreRefs?: string[];
+    systemPrompt?: string;
+    identityText?: string;
+    historyText?: string;
+    activationText?: string;
+    updatedAt: string;
+}

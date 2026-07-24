@@ -7,9 +7,18 @@ export interface ChatMessage {
 
 const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
 const LLM_MODEL = process.env.LLM_MODEL || 'deepseek/deepseek-chat';
+const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS ?? 300);
+const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE ?? 0.85);
+const LLM_TOP_P = Number(process.env.LLM_TOP_P ?? 0.9);
+const LLM_FREQUENCY_PENALTY = Number(process.env.LLM_FREQUENCY_PENALTY ?? 0.5);
+const LLM_PRESENCE_PENALTY = Number(process.env.LLM_PRESENCE_PENALTY ?? 0.3);
+const LLM_JSON_RETRY_ATTEMPTS = Math.max(0, Number(process.env.LLM_JSON_RETRY_ATTEMPTS ?? 1));
+const LLM_REQUEST_TIMEOUT = Number(process.env.LLM_REQUEST_TIMEOUT ?? 20000);
+
+const getApiKey = () => process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
 
 export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, sentMessages: ChatMessage[] }> {
-    const LLM_API_KEY = process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || process.env.SILLYTAVERN_API_KEY || '';
+    const LLM_API_KEY = getApiKey();
     const messages: ChatMessage[] = [
         { role: 'system', content: systemPrompt }
     ];
@@ -51,8 +60,8 @@ export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, 
 
 export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any): Promise<any> {
     const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
-    const LLM_API_KEY = process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || process.env.SILLYTAVERN_API_KEY || '';
-    const PARSER_MODEL = process.env.PARSER_MODEL || process.env.SILLYTAVERN_MODEL || 'google/gemini-3.1-flash-lite-preview';
+    const LLM_API_KEY = getApiKey();
+    const PARSER_MODEL = process.env.PARSER_MODEL || 'google/gemini-3.1-flash-lite-preview';
 
     try {
         const response = await fetch(LLM_API_URL, {
@@ -87,48 +96,19 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     }
 }
 
-import { PromptPayload, NarratorPromptPayload } from '../domain/types';
+import { PromptPayload, NarratorPromptPayload, ScenePromptPayload } from '../domain/types';
 
 
 
 
-const ST_COMPLETIONS_URL =
-    process.env.SILLYTAVERN_API_URL ||
-    'http://127.0.0.1:8181/api/backends/chat-completions/generate';
-const ST_COMPLETIONS_ORIGIN = (() => {
-    try {
-        return new URL(ST_COMPLETIONS_URL).origin;
-    } catch {
-        return 'http://127.0.0.1:8181';
-    }
-})();
-const ST_HEALTH_URL = process.env.SILLYTAVERN_HEALTH_URL || `${ST_COMPLETIONS_ORIGIN}/`;
-const ST_API_KEY = process.env.SILLYTAVERN_API_KEY;
-const ST_MODEL =
-    process.env.SILLYTAVERN_MODEL ||
-    'google/gemini-2.5-flash';
-const ST_SOURCE = process.env.SILLYTAVERN_SOURCE || 'openrouter';
-const ST_REQUEST_TYPE = process.env.SILLYTAVERN_REQUEST_TYPE || 'external';
-const ST_MAX_TOKENS = Number(process.env.SILLYTAVERN_MAX_TOKENS ?? 300);
-const ST_TEMPERATURE = Number(process.env.SILLYTAVERN_TEMPERATURE ?? 0.85);
-const ST_TOP_P = Number(process.env.SILLYTAVERN_TOP_P ?? 0.9);
-const ST_FREQUENCY_PENALTY = Number(process.env.SILLYTAVERN_FREQUENCY_PENALTY ?? 0.5);
-const ST_PRESENCE_PENALTY = Number(process.env.SILLYTAVERN_PRESENCE_PENALTY ?? 0.3);
-const ST_JSON_RETRY_ATTEMPTS = Math.max(
-    0,
-    Number(process.env.SILLYTAVERN_JSON_RETRY_ATTEMPTS ?? 1)
-);
-const ST_REQUEST_TIMEOUT = Number(process.env.SILLYTAVERN_REQUEST_TIMEOUT ?? 20000);
-const ST_HEALTH_TIMEOUT = Number(process.env.SILLYTAVERN_HEALTH_TIMEOUT ?? 3000);
-const ST_HEALTH_ATTEMPTS = Math.max(1, Number(process.env.SILLYTAVERN_HEALTH_ATTEMPTS ?? 3));
-const ST_HEALTH_BACKOFF_MS = Number(process.env.SILLYTAVERN_HEALTH_BACKOFF_MS ?? 1000);
-
-const ST_CHARACTER_SCHEMA = {
+const CHARACTER_SCHEMA = {
     name: 'cyberjack_reply',
     strict: true,
     value: {
         type: 'object',
         properties: {
+            addressedTo: { type: 'string' },
+            speechAct: { type: 'string' },
             speech: { type: 'string' }
         },
         required: ['speech'],
@@ -136,7 +116,7 @@ const ST_CHARACTER_SCHEMA = {
     }
 };
 
-const ST_NARRATOR_SCHEMA = {
+const NARRATOR_SCHEMA = {
     name: 'cyberjack_narrator',
     strict: true,
     value: {
@@ -210,6 +190,28 @@ function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
     if (prompt.recentEventsText) {
         sections.push(prompt.recentEventsText);
     }
+    // Narrator B: include character speech and contexts if available
+    const extras: string[] = [];
+    if (prompt.activeContexts && prompt.activeContexts.length) {
+        extras.push(`[Активные состояния]: ${prompt.activeContexts.join(', ')}`);
+    }
+    if (prompt.tickResultSummary) {
+        extras.push(`[Результат воздействия]: ${prompt.tickResultSummary}`);
+    }
+    if (prompt.systemEvents && prompt.systemEvents.length) {
+        extras.push(`[Системные события тика]:\n${prompt.systemEvents.join('\n')}`);
+    }
+    if (prompt.playerSpeech) {
+        extras.push(`[Сказал Калибратор]: "${prompt.playerSpeech}"`);
+    }
+    if (prompt.characterSpeech && prompt.characterName) {
+        extras.push(`[Ответила ${prompt.characterName}]: "${prompt.characterSpeech}"`);
+    } else if (prompt.characterSpeech) {
+        extras.push(`[Реплика персонажа]: "${prompt.characterSpeech}"`);
+    }
+    const userContent = extras.length
+        ? `${extras.join('\n\n')}\n\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`
+        : `Ознакомься с последними логами воздействий. Опиши ТОЛЬКО внешние физические реакции на самые последние события в логах. Требования:\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`;
     const messages: ChatMessage[] = [
         {
             role: 'system',
@@ -217,7 +219,42 @@ function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
         },
         {
             role: 'user',
-            content: `Ознакомься с последними логами воздействий. Опиши ТОЛЬКО внешние физические реакции на самые последние события в логах. Требования:\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`
+            content: userContent
+        }
+    ];
+    return messages;
+}
+
+// Narrator A: compressed sensory scene FOR the character (injected into their prompt)
+function generateSceneForCharacterPayload(prompt: ScenePromptPayload): ChatMessage[] {
+    const sections: string[] = [];
+    if (activeConfig.adapters.sceneForCharacterSystem) {
+        sections.push(activeConfig.adapters.sceneForCharacterSystem);
+    }
+    const contextParts: string[] = [];
+    if (prompt.actionLabel) {
+        contextParts.push(`Воздействие: ${prompt.actionLabel} → ${prompt.pointLabel}`);
+    }
+    if (prompt.actorName && prompt.targetName) {
+        contextParts.push(`От: ${prompt.actorName}, на: ${prompt.targetName}`);
+    }
+    if (prompt.stateText) {
+        contextParts.push(prompt.stateText);
+    }
+    if (prompt.contextsText) {
+        contextParts.push(prompt.contextsText);
+    }
+    if (prompt.tickResultText) {
+        contextParts.push(prompt.tickResultText);
+    }
+    const messages: ChatMessage[] = [
+        {
+            role: 'system',
+            content: sections.filter(Boolean).join('\n\n')
+        },
+        {
+            role: 'user',
+            content: `${contextParts.filter(Boolean).join('\n')}\n\n${activeConfig.adapters.sceneForCharacterInput}`
         }
     ];
     return messages;
@@ -227,11 +264,7 @@ function sanitizeJson(text: string): string {
     return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
-/**
- * Ставит SillyTavern в роль выраженческого слоя: мы строим промпт,
- * а сам рендеринг делегируем локально поднятому экземпляру ST через его backend endpoint.
- */
-function validateCharacterReply(candidate: any): candidate is { speech: string } {
+function validateCharacterReply(candidate: any): candidate is { speech: string; addressedTo?: string; speechAct?: string } {
     if (!candidate || typeof candidate !== 'object') return false;
     return typeof candidate.speech === 'string';
 }
@@ -245,6 +278,104 @@ function validateStructuredReply(candidate: any): candidate is { speech: string 
     return validateCharacterReply(candidate);
 }
 
+function evadesDirectAnswer(candidate: { speech: string; speechAct?: string }, payload: PromptPayload) {
+    const frame = payload.reactionFrame;
+    if (!frame || frame.dramaticPosition.preferredSpeechAct !== 'answer' || !candidate.speech.trim()) return false;
+    const speech = candidate.speech.trim().toLowerCase();
+    const explicitRefusal = /^(не скажу|не отвечу|не хочу отвечать|оставлю это без ответа)/i.test(speech);
+    if (explicitRefusal) {
+        candidate.speechAct = 'set_boundary';
+        return false;
+    }
+    const answerLead = /^(да|нет|лучше|хуже|приятно|неприятно|больно|не больно|холодно|не холодно|тепло|можно|нельзя|хочу|не хочу|продолжай|остановись|убери|оставь|не знаю)/i.test(speech);
+    const counterQuestion = /^(а\s+)?(ты|зачем|почему|что|как|когда|где|кто|какой|какая|какие|хочешь|можешь|понимаешь|чувствуешь)/i.test(speech);
+    const deferredAnswer = /если[\s\S]*(скажу|отвечу)|сначала\s+(скажи|ответь|объясни)/i.test(speech);
+    const invalidAct = Boolean(candidate.speechAct && !frame.dramaticPosition.allowedSpeechActs.includes(candidate.speechAct as any));
+    const questionPresentedAsAnswer = candidate.speechAct === 'answer' && speech.endsWith('?') && !answerLead;
+    return invalidAct || deferredAnswer || (counterQuestion && !answerLead) || questionPresentedAsAnswer;
+}
+
+function contradictsPhysiologicalEvent(candidate: { speech: string }, payload: PromptPayload) {
+    const frame = payload.reactionFrame;
+    if (!frame || frame.event.physiologicalEvent !== 'discharge') return false;
+    // Loss of conscious contact takes precedence over the usual requirement to
+    // name a completed peak. The transition is already shown by the engine;
+    // demanding articulate speech here creates a contradiction the model cannot solve.
+    if (frame.expressionMode.control === 'minimal' && !frame.event.requiresSpeech) return false;
+    const speech = candidate.speech.trim().toLowerCase();
+    if (!speech) return true;
+    // The exact wording may remain character-specific, but the completed peak
+    // must be legible. A generic request such as “be gentler” is not enough.
+    return !/(конч|разряд|пик|накрыл|накрыва|сорвал|прорвало|отпустило|не удержал|не удержала|всё…|всё\.\.\.)/i.test(speech);
+}
+
+function contradictsAcceptanceChange(candidate: { speech: string }, payload: PromptPayload) {
+    const frame = payload.reactionFrame;
+    if (!frame) return false;
+    const observation = payload.reactionFrame;
+    const acceptanceDown = observation.event.changes.some(change =>
+        change === 'отношение к контакту ухудшилось' || change === 'персонаж сильнее закрылся'
+    );
+    if (!acceptanceDown) return false;
+    const speech = candidate.speech.trim().toLowerCase();
+    return /(продолжай|повтори|повторяй|не останавливайся|не прекращай|ещ[её]\s+раз|давай\s+ещ[её]|сильнее|делай\s+так\s+же)/i.test(speech);
+}
+
+function contradictsSensitivityTrend(candidate: { speech: string }, payload: PromptPayload) {
+    const trend = payload.reactionFrame?.event.validationFacts?.sensitivityTrend;
+    if (!trend) return false;
+    const speech = candidate.speech.toLocaleLowerCase('ru-RU');
+    const saysUp = /чувствительн[а-яё]*\s+(?:повыш|раст|усил)|стал[аио]?\s+(?:более\s+)?чувствительн|ощуща[а-яё]*\s+(?:ярче|сильнее)/u.test(speech);
+    const saysDown = /чувствительн[а-яё]*\s+(?:сниж|пада|уменьш)|стал[аио]?\s+менее\s+чувствительн|ощуща[а-яё]*\s+(?:слабее|тусклее|приглуш)/u.test(speech);
+    return (saysUp && trend !== 'up') || (saysDown && trend !== 'down');
+}
+
+const actionVocabulary = [
+    { label: /погла[дж]|перыш|проведение/i, speech: /погла[дж]|глад|перыш/i },
+    { label: /массаж|размять/i, speech: /массаж|массиру|размин/i },
+    { label: /царап/i, speech: /царап/i },
+    { label: /поцел/i, speech: /поцел/i },
+    { label: /укус|прикус/i, speech: /укус|куса/i },
+    { label: /шлеп|удар|пощеч/i, speech: /шл[её]п|удар|пощ[её]ч/i },
+    { label: /облиз|лизан/i, speech: /облиз|лиж|язык/i }
+];
+
+function substitutesCurrentAction(candidate: { speech: string }, payload: PromptPayload) {
+    const current = String(payload.reactionFrame?.event.action || '');
+    const ownIndex = actionVocabulary.findIndex(entry => entry.label.test(current));
+    if (ownIndex < 0) return false;
+    return actionVocabulary.some((entry, index) => index !== ownIndex && entry.speech.test(candidate.speech));
+}
+
+function introducesUnobservedSceneFact(candidate: { speech: string }, payload: PromptPayload) {
+    const frame = payload.reactionFrame;
+    if (!frame) return false;
+    const speech = candidate.speech.toLocaleLowerCase('ru-RU');
+    const facts = JSON.stringify({ scene: frame.scene, event: frame.event }).toLocaleLowerCase('ru-RU');
+    const isConversation = /бесед|реплик|разговор/u.test(frame.event.action);
+    if (isConversation && /(текущ|запущенн|этот)\w*\s+протокол|протокол\s+(ид[её]т|запущен|продолжается)/u.test(speech) && !/протокол/u.test(facts)) {
+        return true;
+    }
+    const observableTerms = [
+        { speech: /дыхан/u, facts: /дыхан/u },
+        { speech: /пульс|сердцебиен/u, facts: /пульс|сердцебиен/u },
+        { speech: /дрож|тремор/u, facts: /дрож|тремор/u },
+        { speech: /пот|испарин/u, facts: /пот|испарин/u }
+    ];
+    return observableTerms.some(term => term.speech.test(speech) && !term.facts.test(facts));
+}
+
+function contradictsExpressionMode(candidate: { speech: string }, payload: PromptPayload) {
+    const mode = payload.reactionFrame?.expressionMode;
+    const speech = candidate.speech.trim();
+    if (!mode || !speech) return false;
+    const words = speech.match(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*/gu) || [];
+    if (words.length > mode.maxWords) return true;
+    if (!mode.requiresDisruption) return false;
+    const hasDisruption = /[…!—]|\.\.\.|(^|\s)(а+|ах|ох|м-м+|мм+|ч[её]рт|нет)[,!.…—\s]/iu.test(speech);
+    return !hasDisruption;
+}
+
 function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -252,45 +383,30 @@ function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
     return fetch(url, mergedInit).finally(() => clearTimeout(timer));
 }
 
-async function checkHealth(): Promise<boolean> {
-    try {
-        const response = await fetchWithTimeout(
-            ST_HEALTH_URL,
-            {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            },
-            ST_HEALTH_TIMEOUT
-        );
-        console.log(`[ST Adapter] Health check response: ${response.status} ${response.statusText} for ${ST_HEALTH_URL}`);
-        return true; // We accept any response as ok if connection established
-    } catch (err: any) {
-        console.warn(`[ST Adapter] Health check failed: ${err.message || err}`);
-        return false;
-    }
+function logRejectedCharacterReply(rawText: string, attempt: number, error: unknown) {
+    const reason = error instanceof Error ? error.message : 'неизвестная ошибка';
+    // JSON.stringify preserves the complete response while escaping line breaks
+    // and control characters so one rejected generation remains one journal entry.
+    console.warn(
+        `[LLM Adapter][Rejected Character Reply] attempt=${attempt + 1}/${LLM_JSON_RETRY_ATTEMPTS + 1}; reason=${reason}; raw=${JSON.stringify(rawText)}`
+    );
 }
 
-async function ensureHealthy() {
-    return;
-}
-
-async function requestCompletion(messages: ChatMessage[], schema: any): Promise<string> {
-    const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
-    const LLM_API_KEY = process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || process.env.SILLYTAVERN_API_KEY || '';
-    const CURRENT_MODEL = process.env.LLM_MODEL || ST_MODEL || 'deepseek/deepseek-chat';
+async function requestCompletion(messages: ChatMessage[], _schema: any): Promise<string> {
+    const LLM_API_KEY = getApiKey();
 
     const body: Record<string, any> = {
-        model: CURRENT_MODEL,
+        model: LLM_MODEL,
         messages,
-        max_tokens: ST_MAX_TOKENS,
-        temperature: ST_TEMPERATURE,
-        frequency_penalty: ST_FREQUENCY_PENALTY,
-        presence_penalty: ST_PRESENCE_PENALTY,
+        max_tokens: LLM_MAX_TOKENS,
+        temperature: LLM_TEMPERATURE,
+        frequency_penalty: LLM_FREQUENCY_PENALTY,
+        presence_penalty: LLM_PRESENCE_PENALTY,
         response_format: { type: 'json_object' }
     };
 
-    if (Number.isFinite(ST_TOP_P)) {
-        body.top_p = ST_TOP_P;
+    if (Number.isFinite(LLM_TOP_P)) {
+        body.top_p = LLM_TOP_P;
     }
 
     const headers: Record<string, string> = {
@@ -312,7 +428,7 @@ async function requestCompletion(messages: ChatMessage[], schema: any): Promise<
             headers,
             body: JSON.stringify(body)
         },
-        ST_REQUEST_TIMEOUT
+        LLM_REQUEST_TIMEOUT
     );
 
     const t1 = performance.now();
@@ -332,61 +448,126 @@ export async function generateCharacterReply(
     payload: PromptPayload,
     userInput?: string,
     history?: MemoryMessage[]
-): Promise<{ reply: { speech: string } | string; sentMessages: ChatMessage[] }> {
+): Promise<{ reply: { speech: string; addressedTo?: string; speechAct?: string } | string; sentMessages: ChatMessage[]; error?: string }> {
     const messages = generateChatPayload(payload, userInput, history);
+    const requestMessages = [...messages];
 
-    console.log(`\n========== ОТПРАВЛЯЕМЫЙ ПРОМПТ В ST ==========`);
-    messages.forEach(m => {
-        console.log(`[Роль: ${m.role.toUpperCase()}]`);
-        console.log(m.content);
-        console.log(`----------------------------------------`);
-    });
+    console.log(`[Adapter] Character request: ${messages.length} messages`);
 
     try {
-        await ensureHealthy();
-
-        for (let attempt = 0; attempt <= ST_JSON_RETRY_ATTEMPTS; attempt++) {
-            const rawText = await requestCompletion(messages, ST_CHARACTER_SCHEMA);
-            console.log(`\n========== ПОЛУЧЕН ОТВЕТ ST ==========\n${rawText}\n========================================\n`);
+        for (let attempt = 0; attempt <= LLM_JSON_RETRY_ATTEMPTS; attempt++) {
+            const rawText = await requestCompletion(requestMessages, CHARACTER_SCHEMA);
+            console.log(`[Adapter] Character response received (${rawText.length} chars)`);
 
             try {
                 const parsed = JSON.parse(sanitizeJson(rawText));
                 if (!validateStructuredReply(parsed)) {
                     throw new Error('invalid structure');
                 }
+                if (payload.reactionFrame?.event.requiresSpeech && !parsed.speech.trim()) {
+                    throw new Error('current physiological event requires a spoken reaction');
+                }
+                if (contradictsPhysiologicalEvent(parsed, payload)) {
+                    throw new Error('discharge reaction does not make the completed peak explicit');
+                }
+                if (contradictsAcceptanceChange(parsed, payload)) {
+                    throw new Error('speech asks to repeat an action while overall acceptance declines');
+                }
+                if (contradictsSensitivityTrend(parsed, payload)) {
+                    throw new Error('speech contradicts the internally validated direction of sensory change');
+                }
+                if (substitutesCurrentAction(parsed, payload)) {
+                    throw new Error('speech substitutes a different physical action for the current one');
+                }
+                if (introducesUnobservedSceneFact(parsed, payload)) {
+                    throw new Error('speech relies on an unobserved protocol or bodily sign');
+                }
+                if (contradictsExpressionMode(parsed, payload)) {
+                    throw new Error('speech form contradicts the current physiological expression mode');
+                }
+                if (evadesDirectAnswer(parsed, payload)) {
+                    throw new Error('direct question was evaded instead of answered, refused, or deliberately left unanswered');
+                }
+                const frame = payload.reactionFrame;
+                if (!parsed.speech.trim() && frame) {
+                    parsed.speechAct = 'silence';
+                    parsed.addressedTo = frame.addressee?.id || '';
+                }
+                if (parsed.speech && frame) {
+                    const allowed = frame.dramaticPosition.allowedSpeechActs;
+                    const normalizedSpeech = parsed.speech.trim().toLowerCase();
+                    const repeatsCurrentInput = Boolean(
+                        frame.event.playerSpeech &&
+                        frame.event.playerSpeech.trim().toLowerCase() === normalizedSpeech
+                    );
+                    const duplicate = (history || []).some(entry =>
+                        entry.role === 'assistant' && entry.content.trim().toLowerCase() === normalizedSpeech
+                    );
+                    // Give the model one chance to replace a verbatim repetition,
+                    // but never discard a second otherwise valid line over it.
+                    if ((duplicate || repeatsCurrentInput) && attempt < LLM_JSON_RETRY_ATTEMPTS) {
+                        throw new Error(repeatsCurrentInput ? 'speech repeats current player input' : 'speech duplicates recent dialogue');
+                    }
+                    if (repeatsCurrentInput) {
+                        parsed.speech = '';
+                        parsed.speechAct = 'silence';
+                    }
+
+                    // These are engine-owned metadata. The model may suggest a valid
+                    // speech act, but it cannot invalidate useful dialogue by mistyping
+                    // an ID or an enum value.
+                    if (!parsed.speechAct || !allowed.includes(parsed.speechAct)) {
+                        parsed.speechAct = frame.dramaticPosition.preferredSpeechAct;
+                    }
+                    parsed.addressedTo = frame.addressee?.id || '';
+                }
                 return {
                     reply: parsed,
-                    sentMessages: messages
+                    sentMessages: requestMessages
                 };
             } catch (parseError) {
-                if (attempt < ST_JSON_RETRY_ATTEMPTS) {
+                logRejectedCharacterReply(rawText, attempt, parseError);
+                if (attempt < LLM_JSON_RETRY_ATTEMPTS) {
                     console.warn(
-                        `[ST Adapter] Reply не в JSON-формате или нарушена структура (попытка ${
+                        `[LLM Adapter] Ответ нарушил контракт (попытка ${
                             attempt + 1
-                        }/${ST_JSON_RETRY_ATTEMPTS + 1}), повторяем запрос`
+                        }/${LLM_JSON_RETRY_ATTEMPTS + 1}): ${parseError instanceof Error ? parseError.message : 'неизвестная ошибка'}, повторяем запрос`
                     );
+                    requestMessages.push({ role: 'assistant', content: rawText });
+                    requestMessages.push({
+                        role: 'user',
+                        content: `[Исправь ответ] ${parseError instanceof Error ? parseError.message : 'нарушен JSON-контракт'}. Не повторяй недавнюю реплику. Верни только исправленный JSON.`
+                    });
                     continue;
                 }
-                console.warn('[ST Adapter] Reply не в JSON-формате, возвращаем как plaintext');
+                console.warn(`[LLM Adapter] Ответ не прошёл проверку после повторной попытки: ${parseError instanceof Error ? parseError.message : 'неизвестная ошибка'}`);
+                const frame = payload.reactionFrame;
+                if (frame && !frame.event.requiresSpeech && frame.dramaticPosition.allowedSpeechActs.includes('silence')) {
+                    return {
+                        reply: { speech: '', speechAct: 'silence', addressedTo: frame.addressee?.id || '' },
+                        sentMessages: requestMessages
+                    };
+                }
                 return {
-                    reply: { speech: rawText },
-                    sentMessages: messages
+                    reply: { speech: '' },
+                    sentMessages: requestMessages,
+                    error: parseError instanceof Error ? parseError.message : 'Ответ нарушил контракт'
                 };
             }
         }
     } catch (err: any) {
-        console.error(`[ST Adapter] Ошибка связи с LLM: ${err.message}`);
+        console.error(`[LLM Adapter] Ошибка связи с LLM: ${err.message}`);
         return {
-            reply: {
-                speech: `*Ошибка соединения с LLM: ${err.message}*`
-            },
-            sentMessages: messages
+            reply: { speech: '' },
+            sentMessages: requestMessages,
+            error: err.message || String(err)
         };
     }
 
     return {
-        reply: { speech: '*Нет ответа от LLM*' },
-        sentMessages: messages
+        reply: { speech: '' },
+        sentMessages: requestMessages,
+        error: 'Нет ответа от LLM'
     };
 }
 
@@ -395,17 +576,9 @@ export async function generateNarratorReply(
 ): Promise<{ reaction: string; sentMessages: ChatMessage[] }> {
     const messages = generateNarratorPayload(prompt);
 
-    console.log(`\n========== НАРРАТОРСКИЙ ПРОМПТ В ST ==========`);
-    messages.forEach(m => {
-        console.log(`[Роль: ${m.role.toUpperCase()}]`);
-        console.log(m.content);
-        console.log(`----------------------------------------`);
-    });
-
+    console.log(`[LLM Adapter] Narrator request: ${messages.length} messages`);
     try {
-        await ensureHealthy();
-
-        const rawText = await requestCompletion(messages, ST_NARRATOR_SCHEMA);
+        const rawText = await requestCompletion(messages, NARRATOR_SCHEMA);
         try {
             const parsed = JSON.parse(sanitizeJson(rawText));
             
@@ -436,17 +609,52 @@ export async function generateNarratorReply(
                 sentMessages: messages
             };
         } catch (err) {
-            console.warn('[ST Adapter] Narrator reply parsing failed, returning raw text');
+            console.warn('[LLM Adapter] Narrator reply parsing failed, returning raw text');
             return {
                 reaction: rawText,
                 sentMessages: messages
             };
         }
     } catch (err: any) {
-        console.error(`[ST Adapter] Narrator request failed: ${err.message}`);
+        console.error(`[LLM Adapter] Narrator request failed: ${err.message}`);
         return {
             reaction: `*Ошибка связи с LLM (narrator): ${err.message}*`,
             sentMessages: messages
         };
+    }
+}
+
+// Narrator A: compressed sensory scene for the character
+export async function generateSceneForCharacter(
+    prompt: ScenePromptPayload
+): Promise<{ reaction: string; sentMessages: ChatMessage[] }> {
+    const messages = generateSceneForCharacterPayload(prompt);
+
+    console.log(`\n========== СЦЕНА ДЛЯ ПЕРСОНАЖА (Narrator A) ==========`);
+    messages.forEach(m => {
+        console.log(`[Роль: ${m.role.toUpperCase()}]`);
+        console.log(m.content);
+        console.log(`----------------------------------------`);
+    });
+
+    try {
+        const rawText = await requestCompletion(messages, NARRATOR_SCHEMA);
+        try {
+            const parsed = JSON.parse(sanitizeJson(rawText));
+            let reactionText = '';
+            if (typeof parsed.reaction === 'string') {
+                reactionText = parsed.reaction;
+            } else if (typeof parsed === 'string') {
+                reactionText = parsed;
+            } else {
+                reactionText = JSON.stringify(parsed);
+            }
+            return { reaction: reactionText.trim(), sentMessages: messages };
+        } catch {
+            return { reaction: rawText.trim(), sentMessages: messages };
+        }
+    } catch (err: any) {
+        console.error(`[LLM Adapter] Scene-for-character failed: ${err.message}`);
+        return { reaction: '', sentMessages: messages };
     }
 }

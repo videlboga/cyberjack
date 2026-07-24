@@ -2,8 +2,10 @@ export type CommandIntent =
   | { type: "change_pose"; targetPoseId: string }
   | { type: "activate_context"; targetContextId: string }
   | { type: "deactivate_context"; targetContextId: string }
+  | { type: "deactivate_contexts"; targetContextIds: string[] }
   | { type: "move"; targetLocation: string }
   | { type: "perform_action"; actionId: string; targetId?: string; pointId?: string }
+  | { type: "perform_described_action"; description: string; matchedActionId: string | null; targetId?: string; pointId?: string; requiredItem?: string; refusal?: string; modifiers?: { intensity?: number; valence?: number; contact?: number; sharpness?: number; novelty?: number } }
   | { type: "none" };
 
 export type ResolvedFunctions = {

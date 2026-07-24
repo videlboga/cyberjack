@@ -135,6 +135,21 @@ describe('API - other endpoints', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBeTruthy();
     const subjectId = res.body.subjectId;
+    expect(res.body.profile.version).toBe(2);
+    expect(res.body.profile.identity.name).toBe('Gen One');
+    const generatedSubject = db.prepare('SELECT * FROM subjects WHERE id = ?').get(subjectId) as any;
+    const modifiers = res.body.profile.mechanicalSeed.coreModifiers;
+    expect(generatedSubject.sensitivity).toBe(Math.max(0, Math.min(100, 50 + Number(modifiers.sensitivity || 0))));
+    expect(generatedSubject.capacity).toBe(Math.max(0, Math.min(100, 50 + Number(modifiers.capacity || 0))));
+    const storedProfile = JSON.parse((db.prepare('SELECT profile_json FROM characters WHERE id = ?').get(subjectId) as any).profile_json);
+    expect(storedProfile.base.name).toBe('Gen One');
+    expect(storedProfile.generatedProfile.version).toBe(2);
+
+    db.prepare('UPDATE subjects SET sensitivity = 7 WHERE id = ?').run(subjectId);
+    res = await request(app).post('/api/characters/prompt').send({ subjectId, seed: 'regenerated-profile' });
+    expect(res.status).toBe(200);
+    expect(res.body.profile.seed).toBe('regenerated-profile');
+    expect((db.prepare('SELECT sensitivity FROM subjects WHERE id = ?').get(subjectId) as any).sensitivity).toBe(7);
 
     // list characters
     res = await request(app).get('/api/characters');

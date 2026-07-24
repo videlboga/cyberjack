@@ -21,67 +21,162 @@ export function applyLearning(
     const safeAction = normalizeAction(action, config);
     const f = config.formulas.applyLearning;
 
-    const lowIntensity = result.experiencedIntensity < (f.sensitivityTarget ?? 5);
-    const regenAllowed = lowIntensity && (result.overload || 0) < (f.sensitivityRegenThreshold ?? 8);
     const tension = safeCore.tension ?? 0;
     const isEdging = tension > 85;
     
     // Calculate new tension
     // Grows based on action intensity (pleasure/discomfort), scaled by sensitivity.
-    // Drops when action intensity is very low (wait/rest), scaled by openness.
-    const tensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * (safeCore.sensitivity / 50) * (f.tensionGrowthMultiplier ?? 0.3) * (safeAction.actionKey === 'wait' ? deltaTime : 1.0);
-    const tensionDrop = (result.experiencedIntensity < 5) ? Math.max(1, safeCore.openness / 10) * deltaTime : 0;
+    // It decays only when time actually passes without stimulation. Result
+    // metrics already include sensitivity, so the extra reactivity multiplier
+    // is deliberately soft rather than another full sensitivity scaling.
+    const isRestAction = safeAction.actionKey === 'wait';
+    const reactivityMultiplier = 0.5 + clamp((result.effectiveSensitivity ?? safeCore.sensitivity) / 100, 0, 1);
+    const tensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * reactivityMultiplier * (f.tensionGrowthMultiplier ?? 0.3) * (isRestAction ? deltaTime : 1.0);
+    // A pause relaxes accumulated activation, but must not resemble an instant
+    // discharge. Openness helps the subject settle, at a deliberately slower
+    // rate than the old openness/10 curve.
+    const tensionRecoveryRate = Math.max(
+        f.tensionRecoveryBase ?? 0.75,
+        safeCore.openness / (f.tensionRecoveryOpennessDivisor ?? 25)
+    );
+    const tensionDrop = isRestAction ? tensionRecoveryRate * deltaTime : 0;
     const nextTension = clamp(
         tension + tensionGrowth - tensionDrop,
         0,
         150 // Allow exceeding 100 temporarily to trigger Discharge
     );
 
-    const coreRegen = regenAllowed ? (f.sensitivityRegenRate ?? 0) * deltaTime : 0;
-    const localRegen =
-        (result.experiencedIntensity < (f.localSensitivityTarget ?? 5) &&
-            (result.overload || 0) < (f.sensitivityRegenThreshold ?? 8))
-            ? (f.localSensitivityRegenRate ?? 0) * deltaTime
-            : 0;
+    // Sensitivity has three continuous bands:
+    // rest restores current state towards baseline; manageable novel load can
+    // sensitize current state; excessive load temporarily desensitizes it.
+    // Baseline itself is never changed directly here: advanceBaseline below
+    // slowly follows whatever current state is sustained over time.
+    const coreRecoveryCeiling = f.sensitivityRecoveryCeiling ?? f.adaptationIntensitySetpoint ?? f.sensitivityTarget ?? 5;
+    const localRecoveryCeiling = f.localSensitivityRecoveryCeiling ?? f.localAdaptationIntensitySetpoint ?? f.localSensitivityTarget ?? 3;
+    const coreDesensitizationStart = f.sensitivityDesensitizationStart ?? 25;
+    const localDesensitizationStart = f.localSensitivityDesensitizationStart ?? 20;
+    const overloadAllowsRecovery = (result.overload || 0) < (f.sensitivityRegenThreshold ?? 8);
+    const coreBaselineSensitivity = safeCore.baselineSensitivity ?? safeCore.sensitivity;
+    const localBaselineSensitivity = safePoint.baselineLocalSensitivity ?? safePoint.localSensitivity;
+    const coreRecoveryFactor = overloadAllowsRecovery
+        ? clamp(1 - result.experiencedIntensity / Math.max(coreRecoveryCeiling, 0.001), 0, 1)
+        : 0;
+    const localRecoveryFactor = overloadAllowsRecovery
+        ? clamp(1 - result.experiencedIntensity / Math.max(localRecoveryCeiling, 0.001), 0, 1)
+        : 0;
+    const coreRecovery = Math.min(
+        Math.max(0, coreBaselineSensitivity - safeCore.sensitivity),
+        (f.sensitivityRegenRate ?? 0) * deltaTime * coreRecoveryFactor
+    );
+    const localRecovery = Math.min(
+        Math.max(0, localBaselineSensitivity - safePoint.localSensitivity),
+        (f.localSensitivityRegenRate ?? 0) * deltaTime * localRecoveryFactor
+    );
+    const manageableBand = (low: number, high: number) => {
+        const rise = clamp((result.experiencedIntensity - low) / Math.max(high - low, 0.001), 0, 1);
+        const fade = clamp((high * 1.6 - result.experiencedIntensity) / Math.max(high * 0.6, 0.001), 0, 1);
+        return rise * fade;
+    };
+    // These scales describe a fully useful calibration experience. Multiplying
+    // two raw percentages made the practical sensitisation window nearly inert.
+    const learningQuality = clamp(
+        (result.learningEffect || 0) / (f.sensitivityLearningEffectScale ?? 45), 0, 1
+    ) * clamp(
+        (result.engagement || 0) / (f.sensitivityEngagementScale ?? 65), 0, 1
+    ) *
+        clamp(1 - (result.overload || 0) / 100, 0, 1);
+    const coreSensitization = learningQuality * manageableBand(coreRecoveryCeiling, coreDesensitizationStart) *
+        (f.sensitivityFromLearning ?? 8);
+    const localSensitization = learningQuality * manageableBand(localRecoveryCeiling, localDesensitizationStart) *
+        (f.localSensitivityFromLearning ?? 14);
+    const coreDesensitization = Math.max(0, result.experiencedIntensity - coreDesensitizationStart) *
+        f.sensitivityFromIntensity + (result.overload || 0) * (f.sensitivityFromOverload ?? 0.02);
+    const localDesensitization = Math.max(0, result.experiencedIntensity - localDesensitizationStart) *
+        f.localSensitivityFromIntensity + (result.overload || 0) * (f.localSensitivityFromOverload ?? 0.03);
 
-    let baseCapacityDrop = (result.overload * (f.capacityDropMultiplier ?? 0.25));
+    const isRest = safeAction.actionKey === 'wait';
+    let baseCapacityDrop = isRest ? 0 :
+        result.experiencedIntensity * (f.capacityLoadFromIntensity ?? 0.015) +
+        result.discomfort * (f.capacityLoadFromDiscomfort ?? 0.02) +
+        result.overload * (f.capacityDropMultiplier ?? 0.25);
+    // A well-received pleasant action is still tiring, but much less so than
+    // distress or overload at the same raw intensity.
+    const pleasantShare = (result.pleasure || 0) / Math.max(1, (result.pleasure || 0) + (result.discomfort || 0) + (result.overload || 0));
+    baseCapacityDrop *= 1 - clamp(pleasantShare, 0, 1) * 0.45;
     if (isEdging) {
-        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.3) * deltaTime; // Burn capacity when on the brink
+        const edgeDistressFactor = result.pleasure > (result.discomfort || 0) * 1.35 ? 0.25
+            : result.discomfort > (result.pleasure || 0) * 1.35 ? 1 : 0.65;
+        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.08) * edgeDistressFactor * deltaTime;
     }
+    const capacityBaseline = safeCore.baselineCapacity ?? safeCore.capacity;
+    const capacityRecovery = isRest ? Math.min(
+        Math.max(0, capacityBaseline - safeCore.capacity),
+        (f.capacityRecoveryRate ?? 1.0) * deltaTime
+    ) * (isEdging ? 0.35 : 1) : 0;
 
     const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
+    const routineCapacityLossLimit = (result.overload || 0) >= 15 ? 15 : 6;
+    const capacityLoss = Math.min(baseCapacityDrop * tensionModifier, routineCapacityLossLimit);
 
     const timeScale = safeAction.actionKey === 'wait' ? deltaTime : 1.0;
+    const bodilyBalance = (result.pleasure || 0) - (result.discomfort || 0);
+    const sensoryMagnitude = (result.pleasure || 0) + (result.discomfort || 0) + (result.overload || 0) * 0.25;
+    // finalValence is the character's psychological appraisal after
+    // preferences, relationship and context have been applied. This allows a
+    // physically uncomfortable experience to be accepted without pretending
+    // that it was pleasant.
+    const affect = Number.isFinite(result.finalValence)
+        ? clamp(result.finalValence, -1, 1) * sensoryMagnitude
+        : bodilyBalance;
+    // Acceptance follows the experienced balance directly. Novelty and
+    // learning amplify a positive experience instead of gating it entirely;
+    // familiar pleasure therefore gives a small gain rather than an opaque
+    // zero or reversal. A subject at zero functional resource still cannot
+    // consolidate a positive experience.
+    const responsiveness = clamp((safeCore.capacity - 10) / 30, 0, 1);
+    const learnedQuality = clamp((result.learningEffect || 0) / 12, 0, 1) *
+        clamp((result.engagement || 0) / 30, 0, 1);
+    const positiveLearningFactor = 0.25 + learnedQuality * 0.75;
+    const negativeResponsiveness = 0.5 + responsiveness * 0.5;
+    const opennessAffect = affect > 0
+        ? affect * positiveLearningFactor * responsiveness
+        : affect * negativeResponsiveness;
+    const positiveCoreRoom = 0.2 + clamp((100 - safeCore.attitude) / 50, 0, 1) * 0.8;
+    const positiveLocalRoom = 0.2 + clamp((100 - safePoint.localAttitude) / 50, 0, 1) * 0.8;
+    const coreAffectForAcceptance = affect > 0
+        ? affect * positiveLearningFactor * responsiveness * positiveCoreRoom
+        : affect * negativeResponsiveness;
+    const localAffectForAcceptance = affect > 0
+        ? affect * positiveLearningFactor * responsiveness * positiveLocalRoom
+        : affect * negativeResponsiveness;
 
     const nextCore: SubjectCoreState = {
         tension: nextTension,
         sensitivity: clamp(
-            safeCore.sensitivity +
-                (((f.sensitivityTarget - result.experiencedIntensity) * f.sensitivityFromIntensity) * timeScale +
-                coreRegen + (isEdging ? 1.5 : 0)) * tensionModifier,
+            safeCore.sensitivity + (coreSensitization - coreDesensitization + coreRecovery) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         capacity: clamp(
-            safeCore.capacity - (baseCapacityDrop - ((result.overload < 10 && !isEdging) ? (f.capacityRecoveryRate ?? 1.0) * deltaTime : 0)) * tensionModifier,
+            safeCore.capacity - capacityLoss + capacityRecovery,
             config.core.min,
             config.core.max
         ),
         openness: clamp(
-            safeCore.openness + (((result.pleasure - result.discomfort) * f.opennessFromPleasureDiscomfort + (isEdging ? 0.5 : 0)) * timeScale) * tensionModifier,
+            safeCore.openness + (opennessAffect * f.opennessFromPleasureDiscomfort * timeScale) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         plasticity: clamp(
             safeCore.plasticity +
-            (((result.learningEffect - f.plasticityTarget) * f.plasticityFromLearning -
-            result.overload * f.plasticityFromOverload + (isEdging ? 1.0 : 0)) * timeScale) * tensionModifier,
+            ((result.learningEffect * f.plasticityFromLearning * clamp(1 - result.overload / 100, 0, 1) -
+            result.overload * f.plasticityFromOverload) * (isRest ? 0 : 1)) * tensionModifier,
             config.core.min,
             config.core.max
         ),
         attitude: clamp(
             safeCore.attitude +
-            (((result.pleasure - result.discomfort) * f.attitudeFromPleasureDiscomfort -
+            ((coreAffectForAcceptance * f.attitudeFromPleasureDiscomfort -
             result.overload * f.attitudeFromOverload) * timeScale) * tensionModifier,
             config.core.min,
             config.core.max
@@ -91,16 +186,20 @@ export function applyLearning(
     const nextPoint: SubjectPointState = {
         pointId: safePoint.pointId,
         localSensitivity: clamp(
-            safePoint.localSensitivity +
-                (f.localSensitivityTarget - result.experiencedIntensity) * f.localSensitivityFromIntensity +
-                localRegen,
+            safePoint.localSensitivity + localSensitization - localDesensitization + localRecovery,
             config.point.min,
             config.point.max
         ),
         localAttitude: clamp(
             safePoint.localAttitude +
-            (result.pleasure - result.discomfort) * f.localAttitudeFromPleasureDiscomfort -
+            localAffectForAcceptance * f.localAttitudeFromPleasureDiscomfort -
             safeAction.sharpness * result.overload * f.localAttitudeFromSharpOverload,
+            config.point.min,
+            config.point.max
+        ),
+        localOpenness: clamp(
+            (safePoint.localOpenness ?? config.point.defaults.localOpenness ?? 50) +
+            opennessAffect * (f.localOpennessFromPleasureDiscomfort ?? f.opennessFromPleasureDiscomfort),
             config.point.min,
             config.point.max
         ),
@@ -116,15 +215,19 @@ export function applyLearning(
         )
     };
 
-    // мягкое взаимное протекание
+    // Only learned changes leak between local and global acceptance. Comparing
+    // their absolute levels made a pleasant action lower global acceptance
+    // merely because the selected zone started below it.
+    const localAttitudeDelta = nextPoint.localAttitude - safePoint.localAttitude;
     nextCore.attitude = clamp(
-        nextCore.attitude + (nextPoint.localAttitude - safeCore.attitude) * f.localToGlobalLeak,
+        nextCore.attitude + localAttitudeDelta * f.localToGlobalLeak,
         config.core.min,
         config.core.max
     );
 
+    const coreAttitudeDelta = nextCore.attitude - safeCore.attitude;
     nextPoint.localAttitude = clamp(
-        nextPoint.localAttitude + (nextCore.attitude - safePoint.localAttitude) * f.globalToLocalLeak,
+        nextPoint.localAttitude + coreAttitudeDelta * f.globalToLocalLeak,
         config.point.min,
         config.point.max
     );
@@ -139,7 +242,8 @@ export function applyLearning(
     };
     const pointBaselineState = {
         localSensitivity: safePoint.baselineLocalSensitivity ?? safePoint.localSensitivity,
-        localAttitude: safePoint.baselineLocalAttitude ?? safePoint.localAttitude
+        localAttitude: safePoint.baselineLocalAttitude ?? safePoint.localAttitude,
+        localOpenness: safePoint.baselineLocalOpenness ?? safePoint.localOpenness ?? 50
     };
     const novelty = safeAction.novelty ?? 0.5;
 
@@ -155,61 +259,66 @@ export function applyLearning(
     nextCore.sensitivity = dampTowardsBaseline(nextCore.sensitivity, coreBaselineState.sensitivity, {
         dampingBase: coreConfig.dampingBase,
         dampingDistanceScale: coreConfig.dampingDistanceScale,
-        maxDamping: coreConfig.maxDamping
+        maxDamping: coreConfig.maxDamping,
+        timeScale: deltaTime
     });
     nextCore.baselineSensitivity = advanceBaseline(
         coreBaselineState.sensitivity,
         nextCore.sensitivity,
         coreDriver,
-        { baseRate: coreConfig.adaptBase, ...coreConfig }
+        { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
     nextCore.capacity = dampTowardsBaseline(nextCore.capacity, coreBaselineState.capacity, {
         dampingBase: coreConfig.dampingBase,
         dampingDistanceScale: coreConfig.dampingDistanceScale,
-        maxDamping: coreConfig.maxDamping
+        maxDamping: coreConfig.maxDamping,
+        timeScale: deltaTime
     });
     nextCore.baselineCapacity = advanceBaseline(
         coreBaselineState.capacity,
         nextCore.capacity,
         coreDriver,
-        { baseRate: coreConfig.adaptBase, ...coreConfig }
+        { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
-    nextCore.openness = dampTowardsBaseline(nextCore.openness, coreBaselineState.openness, {
+    if (isRest) nextCore.openness = dampTowardsBaseline(nextCore.openness, coreBaselineState.openness, {
         dampingBase: coreConfig.dampingBase,
         dampingDistanceScale: coreConfig.dampingDistanceScale,
-        maxDamping: coreConfig.maxDamping
+        maxDamping: coreConfig.maxDamping,
+        timeScale: deltaTime
     });
     nextCore.baselineOpenness = advanceBaseline(
         coreBaselineState.openness,
         nextCore.openness,
         coreDriver,
-        { baseRate: coreConfig.adaptBase, ...coreConfig }
+        { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
     nextCore.plasticity = dampTowardsBaseline(nextCore.plasticity, coreBaselineState.plasticity, {
         dampingBase: coreConfig.dampingBase,
         dampingDistanceScale: coreConfig.dampingDistanceScale,
-        maxDamping: coreConfig.maxDamping
+        maxDamping: coreConfig.maxDamping,
+        timeScale: deltaTime
     });
     nextCore.baselinePlasticity = advanceBaseline(
         coreBaselineState.plasticity,
         nextCore.plasticity,
         coreDriver,
-        { baseRate: coreConfig.adaptBase, ...coreConfig }
+        { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
-    nextCore.attitude = dampTowardsBaseline(nextCore.attitude, coreBaselineState.attitude, {
+    if (isRest) nextCore.attitude = dampTowardsBaseline(nextCore.attitude, coreBaselineState.attitude, {
         dampingBase: coreConfig.dampingBase,
         dampingDistanceScale: coreConfig.dampingDistanceScale,
-        maxDamping: coreConfig.maxDamping
+        maxDamping: coreConfig.maxDamping,
+        timeScale: deltaTime
     });
     nextCore.baselineAttitude = advanceBaseline(
         coreBaselineState.attitude,
         nextCore.attitude,
         coreDriver,
-        { baseRate: coreConfig.adaptBase, ...coreConfig }
+        { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
     
     // Tension actively drops towards its baseline when resting, but doesn't adapt its baseline easily.
@@ -224,25 +333,40 @@ export function applyLearning(
     nextPoint.localSensitivity = dampTowardsBaseline(nextPoint.localSensitivity, pointBaselineState.localSensitivity, {
         dampingBase: pointConfig.dampingBase,
         dampingDistanceScale: pointConfig.dampingDistanceScale,
-        maxDamping: pointConfig.maxDamping
+        maxDamping: pointConfig.maxDamping,
+        timeScale: deltaTime
     });
     nextPoint.baselineLocalSensitivity = advanceBaseline(
         pointBaselineState.localSensitivity,
         nextPoint.localSensitivity,
         pointDriver,
-        { baseRate: pointConfig.adaptBase, ...pointConfig }
+        { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
     );
 
-    nextPoint.localAttitude = dampTowardsBaseline(nextPoint.localAttitude, pointBaselineState.localAttitude, {
+    if (isRest) nextPoint.localAttitude = dampTowardsBaseline(nextPoint.localAttitude, pointBaselineState.localAttitude, {
         dampingBase: pointConfig.dampingBase,
         dampingDistanceScale: pointConfig.dampingDistanceScale,
-        maxDamping: pointConfig.maxDamping
+        maxDamping: pointConfig.maxDamping,
+        timeScale: deltaTime
     });
     nextPoint.baselineLocalAttitude = advanceBaseline(
         pointBaselineState.localAttitude,
         nextPoint.localAttitude,
         pointDriver,
-        { baseRate: pointConfig.adaptBase, ...pointConfig }
+        { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
+    );
+
+    if (isRest) nextPoint.localOpenness = dampTowardsBaseline(nextPoint.localOpenness ?? pointBaselineState.localOpenness, pointBaselineState.localOpenness, {
+        dampingBase: pointConfig.dampingBase,
+        dampingDistanceScale: pointConfig.dampingDistanceScale,
+        maxDamping: pointConfig.maxDamping,
+        timeScale: deltaTime
+    });
+    nextPoint.baselineLocalOpenness = advanceBaseline(
+        pointBaselineState.localOpenness,
+        nextPoint.localOpenness,
+        pointDriver,
+        { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
     );
 
     // Preserve a small explicit whitelist of metadata fields that callers may

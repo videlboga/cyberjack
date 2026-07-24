@@ -1,8 +1,11 @@
 import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
-import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo, sceneObjectsRepo } from '../../infrastructure/repositories';
+import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo, sceneObjectsRepo, chatMemoryRepo, chatSummaryRepo, memoryRepo } from '../../infrastructure/repositories';
 import { activeConfig, updateConfig } from '../../prompts/config';
 import { normalizePlayer } from './playerController';
+import { getActiveContextLabel } from '../../domain/contextPresentation';
+import { deriveTelemetry } from '../../narrative/telemetry';
+import { db } from '../../infrastructure/db';
 
 export const getState = (req: Request, res: Response) => {
     const subjectId = (req.query.subjectId as string) || 'S-01';
@@ -41,7 +44,8 @@ export const getState = (req: Request, res: Response) => {
                     requiresItem: preset?.requiresItem || null,
                     requiresSceneObject: preset?.contextConfig?.requiresSceneObject || null,
                     requireContexts: (preset?.vector && preset.vector.requireContexts) || preset?.requireContexts || null,
-                    removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null
+                    removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null,
+                    validTargets: preset?.validTargets || (preset?.vector && preset.vector.validTargets) || null
                 };
             });
             scene.characters = sceneCharacterRepo.list(scene.id);
@@ -59,13 +63,32 @@ export const getState = (req: Request, res: Response) => {
             const rawContexts = activeContextsRepo.getAllForSubject(subjectId) || [];
             subject.contexts = rawContexts.map(c => {
                 const preset = presetRepo.getActionPreset(c.actionId);
-                return { ...c, label: preset?.label || c.actionId, type: preset?.type || c.actionId };
+                return { ...c, label: getActiveContextLabel(preset, c.actionId), type: preset?.contextConfig?.type || preset?.type || c.actionId, occupiesPoints: preset?.contextConfig?.occupiesPoints || [], blocksPoints: preset?.contextConfig?.blocksPoints || [] };
             });
         }
+
+        const recentInteractions = db.prepare(`SELECT result_payload FROM event_logs WHERE subject_id = ? AND action_type = 'interaction' ORDER BY id DESC LIMIT 5`).all(subjectId) as any[];
+        const recentObservations = recentInteractions.flatMap(row => {
+            try {
+                const observation = JSON.parse(row.result_payload || '{}').observation;
+                return observation ? [observation] : [];
+            } catch { return []; }
+        });
+        const latestInteraction = recentInteractions[0];
+        let latestObservation: any = null;
+        try { latestObservation = JSON.parse(latestInteraction?.result_payload || '{}').observation || null; } catch { }
+        const telemetry = subject ? deriveTelemetry({
+            core: subject,
+            point: anatomyDict[pointId],
+            observation: latestObservation,
+            contexts: subject.contexts
+        }) : null;
 
         res.json({ 
             success: true, 
             subject: subject,
+            telemetry,
+            recentObservations,
             availablePoints: uiState.availablePoints,
             availableActions,
             scene: scene ? { id: scene.id, transitions: scene.transitions || [], characters: scene.characters || [] } : null,
@@ -75,6 +98,20 @@ export const getState = (req: Request, res: Response) => {
             relations,
             characters
         });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const getChatHistory = (req: Request, res: Response) => {
+    try {
+        const subjectId = String(req.params.subjectId || '');
+        if (!subjectId || !subjectRepo.get(subjectId)) return res.status(404).json({ success: false, error: 'Персонаж не найден' });
+        const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 30));
+        const messages = chatMemoryRepo.getRecent(subjectId, Math.min(100, limit * 4))
+            .filter(message => !message.content.startsWith('[Воздействие]'))
+            .slice(-limit);
+        res.json({ success: true, subjectId, messages });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -100,6 +137,7 @@ export const updateSubject = (req: Request, res: Response) => {
             capacity: clamp(asNumber(req.body.capacity, current.capacity), 0, 100),
             openness: clamp(asNumber(req.body.openness, current.openness), 0, 100),
             plasticity: clamp(asNumber(req.body.plasticity, current.plasticity), 0, 100),
+            tension: clamp(asNumber(req.body.tension, current.tension ?? 0), 0, 150),
             baselineSensitivity: clamp(asNumber(req.body.baselineSensitivity, current.baselineSensitivity ?? current.sensitivity), 0, 100),
             baselineAttitude: clamp(asNumber(req.body.baselineAttitude, current.baselineAttitude ?? current.attitude), 0, 100),
             baselineCapacity: clamp(asNumber(req.body.baselineCapacity, current.baselineCapacity ?? current.capacity), 0, 100),
@@ -141,6 +179,21 @@ export const updatePointState = (req: Request, res: Response) => {
         // Persist using repository
         pointStateRepo.save(subjectId, pointId, state);
 
+        res.json({ success: true });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const resetAttemptMemory = (req: Request, res: Response) => {
+    try {
+        const subjectId = req.body.subjectId;
+        const sceneId = req.body.sceneId || 'scene_lab_calibrator';
+        if (!subjectId) return res.status(400).json({ success: false, error: 'subjectId required' });
+
+        chatMemoryRepo.clear(subjectId);
+        chatSummaryRepo.clear(subjectId);
+        memoryRepo.deleteEpisodesForScene(subjectId, sceneId);
         res.json({ success: true });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
