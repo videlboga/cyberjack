@@ -1,0 +1,860 @@
+{
+  "version": 1,
+  "provider": "elevenlabs-sound-effects-v2",
+  "jobs": [
+    {
+      "id": "age__18yo",
+      "axis": "age",
+      "tag": "18yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 18-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__20yo",
+      "axis": "age",
+      "tag": "20yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 20-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__22yo",
+      "axis": "age",
+      "tag": "22yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 22-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__24yo",
+      "axis": "age",
+      "tag": "24yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 24-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__26yo",
+      "axis": "age",
+      "tag": "26yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__28yo",
+      "axis": "age",
+      "tag": "28yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 28-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__30yo",
+      "axis": "age",
+      "tag": "30yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 30-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__32yo",
+      "axis": "age",
+      "tag": "32yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 32-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__34yo",
+      "axis": "age",
+      "tag": "34yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 34-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "age__36yo",
+      "axis": "age",
+      "tag": "36yo",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 36-year-old adult woman. A neutral attentive hum, then a short soft surprised inhale."
+    },
+    {
+      "id": "profession__clinical-telemetry-operator",
+      "axis": "profession",
+      "tag": "clinical telemetry operator",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, clinical telemetry operator. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "profession__station-engineer",
+      "axis": "profession",
+      "tag": "station engineer",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, station engineer. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "profession__corporate-records-clerk",
+      "axis": "profession",
+      "tag": "corporate records clerk",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, corporate records clerk. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "profession__security-officer",
+      "axis": "profession",
+      "tag": "security officer",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, security officer. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "profession__laboratory-researcher",
+      "axis": "profession",
+      "tag": "laboratory researcher",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, laboratory researcher. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "profession__freight-pilot",
+      "axis": "profession",
+      "tag": "freight pilot",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, freight pilot. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "profession__night-shift-medic",
+      "axis": "profession",
+      "tag": "night-shift medic",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, night-shift medic. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "profession__cabaret-performer",
+      "axis": "profession",
+      "tag": "cabaret performer",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cabaret performer. A neutral attentive hum, then a short guarded breath catch."
+    },
+    {
+      "id": "archetype__tsundere",
+      "axis": "archetype",
+      "tag": "tsundere",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a tsundere anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "archetype__yandere",
+      "axis": "archetype",
+      "tag": "yandere",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a yandere anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "archetype__kuudere",
+      "axis": "archetype",
+      "tag": "kuudere",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a kuudere anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "archetype__dandere",
+      "axis": "archetype",
+      "tag": "dandere",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a dandere anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "archetype__genki-girl",
+      "axis": "archetype",
+      "tag": "genki girl",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a genki girl anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "archetype__onee-san",
+      "axis": "archetype",
+      "tag": "onee-san",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a onee-san anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "archetype__ojou-sama",
+      "axis": "archetype",
+      "tag": "ojou-sama",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a ojou-sama anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "archetype__deredere",
+      "axis": "archetype",
+      "tag": "deredere",
+      "duration": 2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman with a deredere anime archetype. A neutral attentive hum, then a brief pleased exhale. Keep it human and non-caricatured."
+    },
+    {
+      "id": "emotion__neutral-1",
+      "axis": "emotion",
+      "tag": "neutral-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: neutral. Performance: a quiet attentive hum and soft inhale. Variation take 1."
+    },
+    {
+      "id": "emotion__neutral-2",
+      "axis": "emotion",
+      "tag": "neutral-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: neutral. Performance: a quiet attentive hum and soft inhale. Variation take 2."
+    },
+    {
+      "id": "emotion__neutral-3",
+      "axis": "emotion",
+      "tag": "neutral-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: neutral. Performance: a quiet attentive hum and soft inhale. Variation take 3."
+    },
+    {
+      "id": "emotion__curious-1",
+      "axis": "emotion",
+      "tag": "curious-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: curious. Performance: a questioning hum with a small surprised inhale. Variation take 1."
+    },
+    {
+      "id": "emotion__curious-2",
+      "axis": "emotion",
+      "tag": "curious-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: curious. Performance: a questioning hum with a small surprised inhale. Variation take 2."
+    },
+    {
+      "id": "emotion__curious-3",
+      "axis": "emotion",
+      "tag": "curious-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: curious. Performance: a questioning hum with a small surprised inhale. Variation take 3."
+    },
+    {
+      "id": "emotion__guarded-1",
+      "axis": "emotion",
+      "tag": "guarded-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: guarded. Performance: a restrained breath catch and wary exhale. Variation take 1."
+    },
+    {
+      "id": "emotion__guarded-2",
+      "axis": "emotion",
+      "tag": "guarded-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: guarded. Performance: a restrained breath catch and wary exhale. Variation take 2."
+    },
+    {
+      "id": "emotion__guarded-3",
+      "axis": "emotion",
+      "tag": "guarded-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: guarded. Performance: a restrained breath catch and wary exhale. Variation take 3."
+    },
+    {
+      "id": "emotion__defiant-1",
+      "axis": "emotion",
+      "tag": "defiant-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: defiant. Performance: a controlled irritated grunt through clenched breath. Variation take 1."
+    },
+    {
+      "id": "emotion__defiant-2",
+      "axis": "emotion",
+      "tag": "defiant-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: defiant. Performance: a controlled irritated grunt through clenched breath. Variation take 2."
+    },
+    {
+      "id": "emotion__defiant-3",
+      "axis": "emotion",
+      "tag": "defiant-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: defiant. Performance: a controlled irritated grunt through clenched breath. Variation take 3."
+    },
+    {
+      "id": "emotion__angry-1",
+      "axis": "emotion",
+      "tag": "angry-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: angry. Performance: a sharp angry exhale and low frustrated vocal sound. Variation take 1."
+    },
+    {
+      "id": "emotion__angry-2",
+      "axis": "emotion",
+      "tag": "angry-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: angry. Performance: a sharp angry exhale and low frustrated vocal sound. Variation take 2."
+    },
+    {
+      "id": "emotion__angry-3",
+      "axis": "emotion",
+      "tag": "angry-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: angry. Performance: a sharp angry exhale and low frustrated vocal sound. Variation take 3."
+    },
+    {
+      "id": "emotion__disgust-1",
+      "axis": "emotion",
+      "tag": "disgust-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: disgust. Performance: a brief recoiling breath and disgusted nonverbal sound. Variation take 1."
+    },
+    {
+      "id": "emotion__disgust-2",
+      "axis": "emotion",
+      "tag": "disgust-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: disgust. Performance: a brief recoiling breath and disgusted nonverbal sound. Variation take 2."
+    },
+    {
+      "id": "emotion__disgust-3",
+      "axis": "emotion",
+      "tag": "disgust-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: disgust. Performance: a brief recoiling breath and disgusted nonverbal sound. Variation take 3."
+    },
+    {
+      "id": "emotion__surprise-1",
+      "axis": "emotion",
+      "tag": "surprise-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: surprise. Performance: a sudden short startled gasp. Variation take 1."
+    },
+    {
+      "id": "emotion__surprise-2",
+      "axis": "emotion",
+      "tag": "surprise-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: surprise. Performance: a sudden short startled gasp. Variation take 2."
+    },
+    {
+      "id": "emotion__surprise-3",
+      "axis": "emotion",
+      "tag": "surprise-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: surprise. Performance: a sudden short startled gasp. Variation take 3."
+    },
+    {
+      "id": "emotion__fear-1",
+      "axis": "emotion",
+      "tag": "fear-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: fear. Performance: a shaky frightened inhale and restrained whimper. Variation take 1."
+    },
+    {
+      "id": "emotion__fear-2",
+      "axis": "emotion",
+      "tag": "fear-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: fear. Performance: a shaky frightened inhale and restrained whimper. Variation take 2."
+    },
+    {
+      "id": "emotion__fear-3",
+      "axis": "emotion",
+      "tag": "fear-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: fear. Performance: a shaky frightened inhale and restrained whimper. Variation take 3."
+    },
+    {
+      "id": "emotion__distressed-1",
+      "axis": "emotion",
+      "tag": "distressed-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: distressed. Performance: uneven distressed breathing and a small broken gasp. Variation take 1."
+    },
+    {
+      "id": "emotion__distressed-2",
+      "axis": "emotion",
+      "tag": "distressed-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: distressed. Performance: uneven distressed breathing and a small broken gasp. Variation take 2."
+    },
+    {
+      "id": "emotion__distressed-3",
+      "axis": "emotion",
+      "tag": "distressed-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: distressed. Performance: uneven distressed breathing and a small broken gasp. Variation take 3."
+    },
+    {
+      "id": "emotion__pain-1",
+      "axis": "emotion",
+      "tag": "pain-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: pain. Performance: a brief strained cry followed by a controlled breath hiss. Variation take 1."
+    },
+    {
+      "id": "emotion__pain-2",
+      "axis": "emotion",
+      "tag": "pain-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: pain. Performance: a brief strained cry followed by a controlled breath hiss. Variation take 2."
+    },
+    {
+      "id": "emotion__pain-3",
+      "axis": "emotion",
+      "tag": "pain-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: pain. Performance: a brief strained cry followed by a controlled breath hiss. Variation take 3."
+    },
+    {
+      "id": "emotion__crying-1",
+      "axis": "emotion",
+      "tag": "crying-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: crying. Performance: a choked sob and trembling exhale, no words. Variation take 1."
+    },
+    {
+      "id": "emotion__crying-2",
+      "axis": "emotion",
+      "tag": "crying-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: crying. Performance: a choked sob and trembling exhale, no words. Variation take 2."
+    },
+    {
+      "id": "emotion__crying-3",
+      "axis": "emotion",
+      "tag": "crying-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: crying. Performance: a choked sob and trembling exhale, no words. Variation take 3."
+    },
+    {
+      "id": "emotion__sad-1",
+      "axis": "emotion",
+      "tag": "sad-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: sad. Performance: a low defeated sigh with unsteady breath. Variation take 1."
+    },
+    {
+      "id": "emotion__sad-2",
+      "axis": "emotion",
+      "tag": "sad-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: sad. Performance: a low defeated sigh with unsteady breath. Variation take 2."
+    },
+    {
+      "id": "emotion__sad-3",
+      "axis": "emotion",
+      "tag": "sad-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: sad. Performance: a low defeated sigh with unsteady breath. Variation take 3."
+    },
+    {
+      "id": "emotion__bored-1",
+      "axis": "emotion",
+      "tag": "bored-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: bored. Performance: a flat impatient nasal exhale. Variation take 1."
+    },
+    {
+      "id": "emotion__bored-2",
+      "axis": "emotion",
+      "tag": "bored-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: bored. Performance: a flat impatient nasal exhale. Variation take 2."
+    },
+    {
+      "id": "emotion__bored-3",
+      "axis": "emotion",
+      "tag": "bored-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: bored. Performance: a flat impatient nasal exhale. Variation take 3."
+    },
+    {
+      "id": "emotion__smile-1",
+      "axis": "emotion",
+      "tag": "smile-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: smile. Performance: a warm pleased breath with a tiny wordless laugh. Variation take 1."
+    },
+    {
+      "id": "emotion__smile-2",
+      "axis": "emotion",
+      "tag": "smile-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: smile. Performance: a warm pleased breath with a tiny wordless laugh. Variation take 2."
+    },
+    {
+      "id": "emotion__smile-3",
+      "axis": "emotion",
+      "tag": "smile-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: smile. Performance: a warm pleased breath with a tiny wordless laugh. Variation take 3."
+    },
+    {
+      "id": "emotion__shy-1",
+      "axis": "emotion",
+      "tag": "shy-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: shy. Performance: a hesitant soft gasp and embarrassed breath. Variation take 1."
+    },
+    {
+      "id": "emotion__shy-2",
+      "axis": "emotion",
+      "tag": "shy-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: shy. Performance: a hesitant soft gasp and embarrassed breath. Variation take 2."
+    },
+    {
+      "id": "emotion__shy-3",
+      "axis": "emotion",
+      "tag": "shy-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: shy. Performance: a hesitant soft gasp and embarrassed breath. Variation take 3."
+    },
+    {
+      "id": "emotion__blush-1",
+      "axis": "emotion",
+      "tag": "blush-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: blush. Performance: a flustered breath catch and quiet warm exhale. Variation take 1."
+    },
+    {
+      "id": "emotion__blush-2",
+      "axis": "emotion",
+      "tag": "blush-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: blush. Performance: a flustered breath catch and quiet warm exhale. Variation take 2."
+    },
+    {
+      "id": "emotion__blush-3",
+      "axis": "emotion",
+      "tag": "blush-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: blush. Performance: a flustered breath catch and quiet warm exhale. Variation take 3."
+    },
+    {
+      "id": "emotion__receptive-1",
+      "axis": "emotion",
+      "tag": "receptive-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: receptive. Performance: a relaxed pleased sigh and soft responsive hum. Variation take 1."
+    },
+    {
+      "id": "emotion__receptive-2",
+      "axis": "emotion",
+      "tag": "receptive-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: receptive. Performance: a relaxed pleased sigh and soft responsive hum. Variation take 2."
+    },
+    {
+      "id": "emotion__receptive-3",
+      "axis": "emotion",
+      "tag": "receptive-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: receptive. Performance: a relaxed pleased sigh and soft responsive hum. Variation take 3."
+    },
+    {
+      "id": "emotion__excited-1",
+      "axis": "emotion",
+      "tag": "excited-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: excited. Performance: a bright eager gasp with quickened breathing. Variation take 1."
+    },
+    {
+      "id": "emotion__excited-2",
+      "axis": "emotion",
+      "tag": "excited-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: excited. Performance: a bright eager gasp with quickened breathing. Variation take 2."
+    },
+    {
+      "id": "emotion__excited-3",
+      "axis": "emotion",
+      "tag": "excited-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: excited. Performance: a bright eager gasp with quickened breathing. Variation take 3."
+    },
+    {
+      "id": "emotion__aroused-1",
+      "axis": "emotion",
+      "tag": "aroused-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: aroused. Performance: a breathy restrained moan and trembling exhale. Variation take 1."
+    },
+    {
+      "id": "emotion__aroused-2",
+      "axis": "emotion",
+      "tag": "aroused-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: aroused. Performance: a breathy restrained moan and trembling exhale. Variation take 2."
+    },
+    {
+      "id": "emotion__aroused-3",
+      "axis": "emotion",
+      "tag": "aroused-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: aroused. Performance: a breathy restrained moan and trembling exhale. Variation take 3."
+    },
+    {
+      "id": "emotion__pleasure-1",
+      "axis": "emotion",
+      "tag": "pleasure-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: pleasure. Performance: a clear involuntary moan rising then settling. Variation take 1."
+    },
+    {
+      "id": "emotion__pleasure-2",
+      "axis": "emotion",
+      "tag": "pleasure-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: pleasure. Performance: a clear involuntary moan rising then settling. Variation take 2."
+    },
+    {
+      "id": "emotion__pleasure-3",
+      "axis": "emotion",
+      "tag": "pleasure-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: pleasure. Performance: a clear involuntary moan rising then settling. Variation take 3."
+    },
+    {
+      "id": "emotion__high-positive-1",
+      "axis": "emotion",
+      "tag": "high_positive-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: high_positive. Performance: an intense pleasure cry with rapid breath, controlled ending. Variation take 1."
+    },
+    {
+      "id": "emotion__high-positive-2",
+      "axis": "emotion",
+      "tag": "high_positive-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: high_positive. Performance: an intense pleasure cry with rapid breath, controlled ending. Variation take 2."
+    },
+    {
+      "id": "emotion__high-positive-3",
+      "axis": "emotion",
+      "tag": "high_positive-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: high_positive. Performance: an intense pleasure cry with rapid breath, controlled ending. Variation take 3."
+    },
+    {
+      "id": "emotion__mixed-1",
+      "axis": "emotion",
+      "tag": "mixed-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: mixed. Performance: a conflicted gasp blending pleasure and discomfort. Variation take 1."
+    },
+    {
+      "id": "emotion__mixed-2",
+      "axis": "emotion",
+      "tag": "mixed-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: mixed. Performance: a conflicted gasp blending pleasure and discomfort. Variation take 2."
+    },
+    {
+      "id": "emotion__mixed-3",
+      "axis": "emotion",
+      "tag": "mixed-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: mixed. Performance: a conflicted gasp blending pleasure and discomfort. Variation take 3."
+    },
+    {
+      "id": "emotion__mixed-overload-1",
+      "axis": "emotion",
+      "tag": "mixed_overload-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: mixed_overload. Performance: a broken overwhelmed moan with uneven breath. Variation take 1."
+    },
+    {
+      "id": "emotion__mixed-overload-2",
+      "axis": "emotion",
+      "tag": "mixed_overload-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: mixed_overload. Performance: a broken overwhelmed moan with uneven breath. Variation take 2."
+    },
+    {
+      "id": "emotion__mixed-overload-3",
+      "axis": "emotion",
+      "tag": "mixed_overload-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: mixed_overload. Performance: a broken overwhelmed moan with uneven breath. Variation take 3."
+    },
+    {
+      "id": "emotion__submissive-1",
+      "axis": "emotion",
+      "tag": "submissive-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: submissive. Performance: a yielding sigh and soft compliant nonverbal sound. Variation take 1."
+    },
+    {
+      "id": "emotion__submissive-2",
+      "axis": "emotion",
+      "tag": "submissive-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: submissive. Performance: a yielding sigh and soft compliant nonverbal sound. Variation take 2."
+    },
+    {
+      "id": "emotion__submissive-3",
+      "axis": "emotion",
+      "tag": "submissive-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: submissive. Performance: a yielding sigh and soft compliant nonverbal sound. Variation take 3."
+    },
+    {
+      "id": "emotion__subspace-1",
+      "axis": "emotion",
+      "tag": "subspace-1",
+      "duration": 3.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: subspace. Performance: a distant unfocused moan with slow drifting breathing. Variation take 1."
+    },
+    {
+      "id": "emotion__subspace-2",
+      "axis": "emotion",
+      "tag": "subspace-2",
+      "duration": 3.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: subspace. Performance: a distant unfocused moan with slow drifting breathing. Variation take 2."
+    },
+    {
+      "id": "emotion__subspace-3",
+      "axis": "emotion",
+      "tag": "subspace-3",
+      "duration": 3.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: subspace. Performance: a distant unfocused moan with slow drifting breathing. Variation take 3."
+    },
+    {
+      "id": "emotion__climax-1",
+      "axis": "emotion",
+      "tag": "climax-1",
+      "duration": 3.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: climax. Performance: a rising involuntary peak cry followed by broken after-breath. Variation take 1."
+    },
+    {
+      "id": "emotion__climax-2",
+      "axis": "emotion",
+      "tag": "climax-2",
+      "duration": 3.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: climax. Performance: a rising involuntary peak cry followed by broken after-breath. Variation take 2."
+    },
+    {
+      "id": "emotion__climax-3",
+      "axis": "emotion",
+      "tag": "climax-3",
+      "duration": 3.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: climax. Performance: a rising involuntary peak cry followed by broken after-breath. Variation take 3."
+    },
+    {
+      "id": "emotion__afterglow-1",
+      "axis": "emotion",
+      "tag": "afterglow-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: afterglow. Performance: a relieved settling sigh and slow warm breathing. Variation take 1."
+    },
+    {
+      "id": "emotion__afterglow-2",
+      "axis": "emotion",
+      "tag": "afterglow-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: afterglow. Performance: a relieved settling sigh and slow warm breathing. Variation take 2."
+    },
+    {
+      "id": "emotion__afterglow-3",
+      "axis": "emotion",
+      "tag": "afterglow-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: afterglow. Performance: a relieved settling sigh and slow warm breathing. Variation take 3."
+    },
+    {
+      "id": "emotion__exhausted-1",
+      "axis": "emotion",
+      "tag": "exhausted-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: exhausted. Performance: a long tired exhale and weak recovery breath. Variation take 1."
+    },
+    {
+      "id": "emotion__exhausted-2",
+      "axis": "emotion",
+      "tag": "exhausted-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: exhausted. Performance: a long tired exhale and weak recovery breath. Variation take 2."
+    },
+    {
+      "id": "emotion__exhausted-3",
+      "axis": "emotion",
+      "tag": "exhausted-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: exhausted. Performance: a long tired exhale and weak recovery breath. Variation take 3."
+    },
+    {
+      "id": "emotion__sleepy-1",
+      "axis": "emotion",
+      "tag": "sleepy-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: sleepy. Performance: slow drowsy breathing with a faint contented hum. Variation take 1."
+    },
+    {
+      "id": "emotion__sleepy-2",
+      "axis": "emotion",
+      "tag": "sleepy-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: sleepy. Performance: slow drowsy breathing with a faint contented hum. Variation take 2."
+    },
+    {
+      "id": "emotion__sleepy-3",
+      "axis": "emotion",
+      "tag": "sleepy-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: sleepy. Performance: slow drowsy breathing with a faint contented hum. Variation take 3."
+    },
+    {
+      "id": "emotion__smug-1",
+      "axis": "emotion",
+      "tag": "smug-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: smug. Performance: a confident amused breath and quiet satisfied hum. Variation take 1."
+    },
+    {
+      "id": "emotion__smug-2",
+      "axis": "emotion",
+      "tag": "smug-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: smug. Performance: a confident amused breath and quiet satisfied hum. Variation take 2."
+    },
+    {
+      "id": "emotion__smug-3",
+      "axis": "emotion",
+      "tag": "smug-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: smug. Performance: a confident amused breath and quiet satisfied hum. Variation take 3."
+    },
+    {
+      "id": "emotion__high-negative-1",
+      "axis": "emotion",
+      "tag": "high_negative-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: high_negative. Performance: a sharp overwhelmed cry and panicked uneven breathing. Variation take 1."
+    },
+    {
+      "id": "emotion__high-negative-2",
+      "axis": "emotion",
+      "tag": "high_negative-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: high_negative. Performance: a sharp overwhelmed cry and panicked uneven breathing. Variation take 2."
+    },
+    {
+      "id": "emotion__high-negative-3",
+      "axis": "emotion",
+      "tag": "high_negative-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: high_negative. Performance: a sharp overwhelmed cry and panicked uneven breathing. Variation take 3."
+    },
+    {
+      "id": "emotion__unconscious-1",
+      "axis": "emotion",
+      "tag": "unconscious-1",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: unconscious. Performance: quiet natural breathing only, no vocal reaction. Variation take 1."
+    },
+    {
+      "id": "emotion__unconscious-2",
+      "axis": "emotion",
+      "tag": "unconscious-2",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: unconscious. Performance: quiet natural breathing only, no vocal reaction. Variation take 2."
+    },
+    {
+      "id": "emotion__unconscious-3",
+      "axis": "emotion",
+      "tag": "unconscious-3",
+      "duration": 2.2,
+      "prompt": "Clean close-mic studio recording of one adult woman, nonverbal vocalization only, no intelligible words, no music, no ambience, no Foley, no echo, natural human voice, single take. Voice identity: 26-year-old adult woman, cool expressive game-character voice. Emotion: unconscious. Performance: quiet natural breathing only, no vocal reaction. Variation take 3."
+    }
+  ]
+}

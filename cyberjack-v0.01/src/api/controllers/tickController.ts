@@ -5,19 +5,104 @@ import { subjectRepo, resourceRepo, presetRepo, sceneCharacterRepo, activeContex
 import { db } from '../../infrastructure/db';
 import { executeTurnConversations } from '../../orchestration/sceneOrchestrator';
 import { describeActionNarrative } from '../../narrative/eventTemplates';
-import { ContextManager } from '../../orchestration/contextManager';
 import { buildPromptPayloadWithDB } from '../../prompts/buildPromptPayloadWrapper';
-import { runGameTick } from '../../orchestration/runGameTick';
-import { generateCharacterReply } from '../../adapters/llmAdapter';
+import { classifySpokenEmotion, generateCharacterReply } from '../../adapters/llmAdapter';
 import { applyVerbalInputToFrame, buildReactionSystemPrompt, buildReactionTurnMessage } from '../../narrative/reactionFrame';
 import { recordMemoryEvent } from '../../services/memoryLayer';
 import { chatMemoryRepo } from '../../infrastructure/repositories';
 import { normalizePlayer } from './playerController';
 import { buildStateDescription, getContractProgress } from '../../services/chipGenerator';
 import { generateSceneImage, shouldGenerateImage } from '../../services/portraitGenerator';
-import { advanceWorldTime } from '../../scenario/worldService';
+import { getWorldClock } from '../../scenario/worldService';
 import { deriveTelemetry } from '../../narrative/telemetry';
-import { planSustainedPulses } from '../../orchestration/sustainedEffects';
+import { resolvePortraitEmotion } from '../../domain/portraitEmotion';
+import { randomUUID } from 'crypto';
+import { actionTimePolicy } from '../../domain/actionTimePolicy';
+import { advanceSimulationTime } from '../../scenario/simulationTime';
+import { buildPairedDialogueHistory } from '../../narrative/dialogueHistory';
+
+const deferredReplyJobs = new Map<string, {
+    done: boolean;
+    metrics?: any;
+    error?: string | null;
+    completion?: Promise<void>;
+    chunks?: string[];
+    subscribers?: Set<Response>;
+}>();
+
+const physiologyLockedPortraits = new Set([
+    'unconscious', 'climax', 'afterglow', 'subspace', 'pain',
+    'mixed_overload', 'high_negative', 'exhausted', 'sleepy'
+]);
+
+const settleClassifiedEmotion = (previous: string | null, proposed: string, confidence: number) => {
+    if (confidence < 0.58) return previous || proposed;
+    if (!previous || previous === proposed) return proposed;
+    // A very confident observation may cross the full emotional space. With
+    // weaker evidence, retain the previous expression instead of flickering.
+    return confidence >= 0.78 ? proposed : previous;
+};
+
+function publicDeferredJob(job: any) {
+    const { completion: _completion, subscribers: _subscribers, ...publicJob } = job;
+    return publicJob;
+}
+
+export const getDeferredReply = (req: Request, res: Response) => {
+    const id = String(req.params.jobId || '');
+    const job = deferredReplyJobs.get(id);
+    if (!job) return res.status(404).json({ success: false, error: 'Ожидаемый ответ не найден' });
+    res.json({ success: true, ...publicDeferredJob(job) });
+    if (job.done) deferredReplyJobs.delete(id);
+};
+
+export const waitForDeferredReply = async (req: Request, res: Response) => {
+    const id = String(req.params.jobId || '');
+    const job = deferredReplyJobs.get(id);
+    if (!job) return res.status(404).json({ success: false, error: 'Ожидаемый ответ не найден' });
+    if (!job.done && job.completion) {
+        await Promise.race([
+            job.completion,
+            new Promise(resolve => setTimeout(resolve, 60_000))
+        ]);
+    }
+    const completed = deferredReplyJobs.get(id);
+    if (!completed) return res.status(404).json({ success: false, error: 'Ожидаемый ответ не найден' });
+    res.json({ success: true, ...publicDeferredJob(completed) });
+    if (completed.done) deferredReplyJobs.delete(id);
+};
+
+export const streamDeferredReply = (req: Request, res: Response) => {
+    const id = String(req.params.jobId || '');
+    const job = deferredReplyJobs.get(id);
+    if (!job) return res.status(404).end();
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    for (const chunk of job.chunks || []) res.write(`event: token\ndata: ${JSON.stringify({ chunk })}\n\n`);
+    if (job.done) {
+        res.write(`event: done\ndata: ${JSON.stringify(publicDeferredJob(job))}\n\n`);
+        return res.end();
+    }
+    if (!job.subscribers) job.subscribers = new Set();
+    job.subscribers.add(res);
+    req.on('close', () => job.subscribers?.delete(res));
+};
+
+function publishDeferredToken(job: any, chunk: string) {
+    if (!chunk) return;
+    (job.chunks ||= []).push(chunk);
+    for (const subscriber of job.subscribers || []) subscriber.write(`event: token\ndata: ${JSON.stringify({ chunk })}\n\n`);
+}
+
+function finishDeferredStream(job: any) {
+    for (const subscriber of job.subscribers || []) {
+        subscriber.write(`event: done\ndata: ${JSON.stringify(publicDeferredJob(job))}\n\n`);
+        subscriber.end();
+    }
+    job.subscribers?.clear();
+}
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; actorName: string; targetName: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
@@ -28,33 +113,17 @@ export function buildPairedSpeechHistory(
     entries: Array<{ role: 'user' | 'assistant'; content: string }>,
     limit = 12
 ) {
-    const mentionsLoreTerm = (text = '') => /(резонанс|пустот|бездн|аномали)/i.test(text);
-    const usable = entries.filter(entry =>
-        entry.content && !/^\[Текущий контакт\]|^\*\(Без слов\)\*|^\[Игрок \(/.test(entry.content)
-    );
-    const paired: Array<{ role: 'user' | 'assistant'; content: string }> = [];
-    for (const entry of usable) {
-        if (entry.role === 'user') {
-            paired.push({ role: entry.role, content: entry.content });
-        } else if (paired.length && paired[paired.length - 1].role === 'user') {
-            const precedingInput = paired[paired.length - 1].content;
-            if (!mentionsLoreTerm(entry.content) || mentionsLoreTerm(precedingInput)) {
-                paired.push({ role: entry.role, content: entry.content });
-            }
-        }
-    }
-    const recent = paired.slice(-limit);
-    while (recent[0]?.role === 'assistant') recent.shift();
-    return recent;
+    return buildPairedDialogueHistory(entries, limit);
 }
 
 export function calculateActionSpeechChance(input: {
     intensity: number;
     tensionBefore: number;
     tensionAfter: number;
+    sensoryAmplification?: number;
     transitions?: Array<{ kind?: string }>;
 }) {
-    if ((input.transitions || []).some(transition => transition.kind === 'discharge' || transition.kind === 'breakdown')) return 1;
+    if ((input.transitions || []).some(transition => ['discharge', 'overload', 'breakdown'].includes(transition.kind || ''))) return 1;
     let chance = 0.4;
     if (input.intensity >= 0.6) chance += 0.15;
     if (input.intensity >= 0.9) chance += 0.1;
@@ -62,97 +131,47 @@ export function calculateActionSpeechChance(input: {
     if (tension >= 50) chance += 0.1;
     if (tension >= 75) chance += 0.15;
     if (tension >= 90) chance += 0.1;
+    const sensoryAmplification = Number(input.sensoryAmplification || 1);
+    if (sensoryAmplification >= 5) return 0.95;
+    if (sensoryAmplification >= 3) chance += 0.3;
+    else if (sensoryAmplification >= 2) chance += 0.15;
     return Math.min(0.95, chance);
+}
+
+export function resolveDirectedActorId(
+    addressedCharacterId?: string,
+    inferredActorId?: string,
+    fallbackSubjectId?: string,
+): string | undefined {
+    // An explicit UI selection is authoritative. The semantic parser may infer
+    // a different nearby actor from an ambiguous pronoun, but it must never
+    // reroute a direct conversation away from the selected addressee.
+    return addressedCharacterId || inferredActorId || fallbackSubjectId;
 }
 
 
 
 export const processWait = async (req: Request, res: Response) => {
     try {
-        const { subjectId = 'S-AV-01', ticks = 1, eventId = 'scene_lab_calibrator', callLLM = false } = req.body;
-        const interactionContext = String(req.body.interactionContext || 'Диагностический стол');
-        const deltaTime = req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 20.0;
-        const pulseTargets = ['neck', 'chest', 'nipples', 'belly', 'inner_thighs', 'groin', 'vulva', 'clitoris', 'penis', 'testicles', 'anus'];
-        if (!presetRepo.getActionPreset('sustained_vibration_pulse')) {
-            presetRepo.saveActionPreset('sustained_vibration_pulse', 'Импульс продолжительной вибрации', {
-                intensity: .28, valence: .65, contact: .75, sharpness: .08, novelty: .25, validTargets: pulseTargets
-            });
-        }
-        if (!presetRepo.getActionPreset('sustained_electro_pulse')) {
-            presetRepo.saveActionPreset('sustained_electro_pulse', 'Импульс продолжительной электростимуляции', {
-                intensity: .42, valence: -.25, contact: .65, sharpness: .55, novelty: .3, validTargets: pulseTargets
-            });
-        }
-        let lastBundle: Awaited<ReturnType<typeof runGameTick>> | null = null;
-        const sustainedEffects: Array<{ sourceActionId: string; label: string; pointId: string; pulses: number }> = [];
-
-        for (let i = 0; i < ticks; i++) {
-            const plans = planSustainedPulses(activeContextsRepo.getAllForSubject(subjectId), deltaTime);
-            if (!plans.length) {
-                lastBundle = await runGameTick({
-                    subjectId, pointId: 'systemic', playerId: 'PL-1', sceneId: eventId,
-                    presetId: 'wait', deltaTime
-                });
-                continue;
-            }
-            for (const plan of plans) {
-                sustainedEffects.push({ sourceActionId: plan.sourceActionId, label: plan.label, pointId: plan.pointId, pulses: plan.pulses });
-                for (let pulse = 0; pulse < plan.pulses; pulse++) {
-                    lastBundle = await runGameTick({
-                        subjectId,
-                        pointId: plan.pointId,
-                        playerId: 'PL-1',
-                        sceneId: eventId,
-                        presetId: plan.presetId,
-                        deltaTime: 1,
-                        customPayload: { sustainedSource: plan.sourceActionId, pulse: pulse + 1, pulseCount: plan.pulses }
-                    });
-                }
-            }
-        }
-
-        let stReply, promptMessages;
-        if (callLLM && lastBundle) {
-            const turnMessage = lastBundle.prompt.reactionFrame
-                ? buildReactionTurnMessage(lastBundle.prompt.reactionFrame)
-                : `[Пауза] Прошло времени: ${ticks} тиков. Говорить необязательно.`;
-            const history = chatMemoryRepo.getRecent(subjectId, 8).map(entry => ({ role: entry.role, content: entry.content }));
-            const generated = await generateCharacterReply(lastBundle.prompt, turnMessage, history);
-            stReply = typeof generated.reply === 'object' ? generated.reply : { speech: String(generated.reply || '') };
-            promptMessages = generated.sentMessages;
-            if (stReply.speech) chatMemoryRepo.append(subjectId, 'assistant', (stReply as any).speech, interactionContext);
-
-            recordMemoryEvent({
-                subjectId,
-                bundle: lastBundle,
-                assistantText: stReply.speech,
-                speechAct: (stReply as any).speechAct,
-                addressedTo: (stReply as any).addressedTo
-            });
-        }
-
+        const { subjectId = 'S-AV-01', ticks = 1 } = req.body;
+        const deltaTime = Math.max(1, Math.round(
+            req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : Number(ticks) || 1
+        ));
+        const worldClock = await advanceSimulationTime(deltaTime);
         const fullState = subjectRepo.getWithPoint(subjectId, 'systemic');
         const resources = normalizePlayer(resourceRepo.get('PL-1'));
-        const worldClock = advanceWorldTime(10 * Math.max(1, Number(ticks) || 1), undefined, { activeSubjectIds: [subjectId] });
-        
-        const telemetry = lastBundle ? deriveTelemetry({
-            core: lastBundle.stateAfter.core,
-            point: lastBundle.stateAfter.point,
-            observation: lastBundle.diagnostics?.observation,
-            contexts: activeContextsRepo.getAllForSubject(subjectId)
-        }) : null;
 
         res.json({
             success: true,
             state: fullState,
-            telemetry,
-            reply: stReply || null,
-            promptMessages: promptMessages || null,
+            telemetry: null,
+            reply: null,
+            promptMessages: null,
             actionTrace: null,
-            sustainedEffects,
-            tickResult: lastBundle?.output.result,
-            diagnostics: lastBundle?.diagnostics,
-            bundle: lastBundle,
+            sustainedEffects: [],
+            tickResult: null,
+            diagnostics: null,
+            bundle: null,
             resources,
             worldClock
         });
@@ -176,7 +195,17 @@ export const processTick = async (req: Request, res: Response) => {
 
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
         // Note: dispatchEvent now calls runGameTick
-        const dispatchPayload = { ...req.body, pointId: (req.body.pointId || 'systemic').toLowerCase(), deltaTime: req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 1.0 };
+        const requestedActionId = String(req.body.presetId || '');
+        const timePolicy = actionTimePolicy(requestedActionId);
+        const dispatchPayload = {
+            ...req.body,
+            pointId:(req.body.pointId || 'systemic').toLowerCase(),
+            deltaTime:req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 1.0,
+            stateDeltaScale:timePolicy.stateDeltaScale,
+            // Context duration belongs to the world-minute service. The action
+            // tick computes the action itself but must not age processes again.
+            skipContextTimeAdvance:true,
+        };
         const { bundle, dynamicModifiers, pointIdUsed, subjectIdUsed, actorIdUsed } = await dispatchEvent(dispatchPayload);
         const subjectId = subjectIdUsed || requestedSubjectId;
         const playerId = requestedPlayerId;
@@ -200,6 +229,16 @@ export const processTick = async (req: Request, res: Response) => {
             bundle.prompt = promptPayload;
         }
         if (baseUserMessage && promptPayload.reactionFrame) {
+            // runGameTick appends authoritative command outcomes after the
+            // reaction frame is compiled. Rebuilding the reaction prompt for a
+            // spoken command used to discard those outcomes, leaving the model
+            // with only the new context and making a just-completed pose look
+            // as though it had already been active before the command.
+            const systemEventsMarker = '[Системные события тика]:';
+            const systemEventsOffset = promptPayload.systemPrompt?.indexOf(systemEventsMarker) ?? -1;
+            const systemEvents = systemEventsOffset >= 0
+                ? promptPayload.systemPrompt.slice(systemEventsOffset)
+                : '';
             const commandType = dynamicModifiers?.commandIntent?.type;
             const parsedCommand = Boolean(dynamicModifiers?.routing || (commandType && commandType !== 'none'));
             promptPayload.reactionFrame = parsedCommand
@@ -209,6 +248,7 @@ export const processTick = async (req: Request, res: Response) => {
                 }
                 : applyVerbalInputToFrame(promptPayload.reactionFrame, baseUserMessage);
             promptPayload.systemPrompt = buildReactionSystemPrompt(promptPayload.reactionFrame);
+            if (systemEvents) promptPayload.systemPrompt += `\n\n${systemEvents}`;
             bundle.prompt = promptPayload;
         }
 
@@ -226,48 +266,125 @@ export const processTick = async (req: Request, res: Response) => {
 
         let turnExecutionMetrics: any = null;
         let llmError: string | null = null;
+        const deferLLM = Boolean(req.body.deferLLM);
         const observationTransitions = bundle.diagnostics?.observation?.transitions || [];
         const llmChance = chanceSpeech
             ? calculateActionSpeechChance({
                 intensity: Number(bundle.compiledAction.intensity) || 0,
                 tensionBefore: Number(bundle.stateBefore.core.tension) || 0,
                 tensionAfter: Number(bundle.stateAfter.core.tension) || 0,
+                sensoryAmplification: Number(bundle.output.result.sensoryAmplification) || 1,
                 transitions: observationTransitions
             })
             : 1;
         const llmSkipped = chanceSpeech && Math.random() >= llmChance;
         
-        if (!req.body.skipLLM && !llmSkipped) {
+        const generateTurnReply = async () => {
+            let generatedMetrics: any = null;
+            let generatedError: string | null = null;
             if (speechOnly) {
                 const observation = bundle.diagnostics?.observation;
-                const previousHistory = buildPairedSpeechHistory(chatMemoryRepo.getRecent(subjectId, 32), 12);
-                const currentInput = promptPayload.reactionFrame
-                    ? buildReactionTurnMessage(promptPayload.reactionFrame, baseUserMessage)
-                    : [
+                // The reaction frame already carries a compact recent-dialogue
+                // section. Keep only a short verbatim tail for conversational
+                // cadence instead of sending the same exchange twice.
+                const previousHistory = buildPairedSpeechHistory(chatMemoryRepo.getRecent(subjectId, 16), 6);
+                let currentInput: string;
+                if (promptPayload.reactionFrame && baseUserMessage) {
+                    const lastSpeechBlock = `[Последняя реплика собеседника]\n${baseUserMessage}`;
+                    const reactionContext = buildReactionTurnMessage(promptPayload.reactionFrame, baseUserMessage)
+                        .replace(lastSpeechBlock, '')
+                        .trim();
+                    // Preserve the ordinary chat contract: the latest thing the
+                    // model sees in the user role is the player's actual line,
+                    // not a long instruction document containing that line.
+                    promptPayload = {
+                        ...promptPayload,
+                        systemPrompt: `${promptPayload.systemPrompt}\n\n[Контекст текущей реакции]\n${reactionContext}`,
+                    };
+                    currentInput = baseUserMessage;
+                } else {
+                    currentInput = promptPayload.reactionFrame
+                        ? buildReactionTurnMessage(promptPayload.reactionFrame, baseUserMessage)
+                        : [
                         baseUserMessage ? `[Реплика адресата]\n${baseUserMessage}` : '',
                         `[Текущий контакт]\nКалибратор применяет: ${actionLabel}. Зона: ${pointLabel}.\nТвоё фактическое внутреннее ощущение: ${observation?.subjectiveText || 'реакция неясна'}.`
-                    ].filter(Boolean).join('\n\n');
-                const generated = await generateCharacterReply(promptPayload, currentInput, previousHistory);
+                        ].filter(Boolean).join('\n\n');
+                }
+                const generated = await generateCharacterReply(promptPayload, currentInput, previousHistory, (chunk) => {
+                    if (replyJobId) {
+                        const job = deferredReplyJobs.get(replyJobId);
+                        if (job) publishDeferredToken(job, chunk);
+                    }
+                });
                 const structured = generated.reply && typeof generated.reply === 'object'
                     ? generated.reply as { speech: string; speechAct?: string; addressedTo?: string }
                     : { speech: String(generated.reply || '') };
-                llmError = generated.error || null;
-                if (baseUserMessage) chatMemoryRepo.append(subjectId, 'user', baseUserMessage, interactionContext);
-                if (!llmError) {
-                    if (structured.speech) chatMemoryRepo.append(subjectId, 'assistant', structured.speech, interactionContext);
-                }
-                recordMemoryEvent({
-                    subjectId,
-                    bundle,
-                    userText: baseUserMessage || undefined,
-                    assistantText: llmError ? '' : structured.speech || '',
-                    speechAct: llmError ? undefined : structured.speechAct,
-                    addressedTo: llmError ? undefined : structured.addressedTo
+                let portraitEmotion = resolvePortraitEmotion({
+                    speech: structured.speech,
+                    behavioralState: observation?.behavioralState,
+                    reaction: observation?.reaction,
+                    transitions: observation?.transitions,
+                    state: {
+                        ...bundle.stateAfter.core,
+                        contexts: (observation?.contexts || []).map((context: any) => ({ actionId: context.id }))
+                    }
                 });
-                turnExecutionMetrics = { reply: { speech: structured.speech || '', speechAct: structured.speechAct || null, addressedTo: structured.addressedTo || null, reaction: '' }, promptMessages: generated.sentMessages, actorReplies: [], narratorReaction: null };
+                generatedError = generated.error || null;
+                if (baseUserMessage) chatMemoryRepo.append(subjectId, 'user', baseUserMessage, interactionContext);
+                let assistantMessageId: number | null = null;
+                if (!generatedError) {
+                    if (structured.speech) {
+                        const previousEmotion = [...chatMemoryRepo.getRecent(subjectId, 12)]
+                            .reverse()
+                            .find(message => message.role === 'assistant' && message.portraitEmotion)
+                            ?.portraitEmotion || null;
+                        assistantMessageId = chatMemoryRepo.append(subjectId, 'assistant', structured.speech, interactionContext, portraitEmotion);
+                        if (assistantMessageId) {
+                            chatMemoryRepo.updatePortraitEmotion(assistantMessageId, portraitEmotion, 'simulation+speech-fallback', 0.55);
+                            if (!physiologyLockedPortraits.has(portraitEmotion)) {
+                                try {
+                                    const classified = await classifySpokenEmotion({
+                                        playerSpeech: baseUserMessage,
+                                        characterSpeech: structured.speech,
+                                        previousEmotion,
+                                        simulationPrior: portraitEmotion,
+                                        tension: bundle.stateAfter.core.tension,
+                                        attitude: bundle.stateAfter.core.attitude,
+                                        openness: bundle.stateAfter.core.openness,
+                                    });
+                                    const settled = settleClassifiedEmotion(previousEmotion, classified.emotion, classified.confidence);
+                                    portraitEmotion = settled;
+                                    chatMemoryRepo.updatePortraitEmotion(
+                                        assistantMessageId!,
+                                        settled,
+                                        'speech-classifier',
+                                        classified.confidence,
+                                    );
+                                } catch (error: any) {
+                                    console.warn('[PortraitEmotion] speech classification failed:', error?.message || error);
+                                }
+                            }
+                        }
+                    }
+                }
+                generatedMetrics = { reply: { speech: structured.speech || '', speechAct: structured.speechAct || null, addressedTo: structured.addressedTo || null, reaction: '', portraitEmotion }, promptMessages: generated.sentMessages, actorReplies: [], narratorReaction: null };
+                queueMicrotask(() => {
+                    try {
+                        recordMemoryEvent({
+                            subjectId,
+                            bundle,
+                            userText: baseUserMessage || undefined,
+                            assistantText: generatedError ? '' : structured.speech || '',
+                            speechAct: generatedError ? undefined : structured.speechAct,
+                            addressedTo: generatedError ? undefined : structured.addressedTo
+                        });
+                    } catch (error) {
+                        console.error('[Memory] deferred speech memory failed:', error);
+                    }
+                });
             } else {
                 // Full multi-actor orchestration remains available to the main simulator.
-                turnExecutionMetrics = await executeTurnConversations(bundle, {
+                generatedMetrics = await executeTurnConversations(bundle, {
                     subjectId,
                     eventId,
                     actionId,
@@ -281,8 +398,44 @@ export const processTick = async (req: Request, res: Response) => {
                     reqBodyInfoTag: req.body?.presetId,
                     promptPayload,
                     interactionContext,
-                    directedActorId: dynamicModifiers?.routing?.actorId || addressedCharacterId
+                    directedActorId: resolveDirectedActorId(
+                        addressedCharacterId,
+                        dynamicModifiers?.routing?.actorId,
+                        baseUserMessage ? subjectId : undefined,
+                    ),
+                    onToken: (chunk) => {
+                        if (replyJobId) {
+                            const job = deferredReplyJobs.get(replyJobId);
+                            if (job) publishDeferredToken(job, chunk);
+                        }
+                    }
                 });
+            }
+            return { metrics: generatedMetrics, error: generatedError };
+        };
+        const replyPending = deferLLM && !req.body.skipLLM && !llmSkipped;
+        const replyJobId = replyPending ? randomUUID() : null;
+        if (!req.body.skipLLM && !llmSkipped) {
+            if (deferLLM) {
+                const job = { done: false, chunks: [], subscribers: new Set<Response>() } as { done: boolean; metrics?: any; error?: string | null; completion?: Promise<void>; chunks?: string[]; subscribers?: Set<Response> };
+                deferredReplyJobs.set(replyJobId!, job);
+                job.completion = generateTurnReply()
+                    .then(generated => {
+                        job.done = true;
+                        job.metrics = generated.metrics;
+                        job.error = generated.error;
+                        finishDeferredStream(job);
+                    })
+                    .catch(error => {
+                        console.error('[processTick] deferred character reply failed:', error);
+                        job.done = true;
+                        job.error = error?.message || String(error);
+                        finishDeferredStream(job);
+                    });
+            } else {
+                const generated = await generateTurnReply();
+                turnExecutionMetrics = generated.metrics;
+                llmError = generated.error;
             }
         }
         if (llmSkipped) {
@@ -324,7 +477,13 @@ export const processTick = async (req: Request, res: Response) => {
             }
         }
 
-        const worldClock = advanceWorldTime(5, undefined, { activeSubjectIds: [subjectId] });
+        // Process controls alter what is happening now. They do not fast-forward
+        // the world; their sustained consequences arrive through minute ticks.
+        // A discrete action occupies one game minute.
+        const actionMinutes = timePolicy.worldMinutes;
+        const worldClock = actionMinutes
+            ? await advanceSimulationTime(actionMinutes, undefined, { activeSubjectIds: [subjectId] })
+            : getWorldClock();
         const telemetry = deriveTelemetry({
             core: bundle.stateAfter.core,
             point: bundle.stateAfter.point,
@@ -349,6 +508,8 @@ export const processTick = async (req: Request, res: Response) => {
             llmError,
             llmChance,
             llmSkipped,
+            replyPending,
+            replyJobId,
             classifierLog: dynamicModifiers?.raw ?? null,
             classifierModel: dynamicModifiers?.model ?? null,
             stateDescription,

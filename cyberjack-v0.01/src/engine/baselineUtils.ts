@@ -1,4 +1,4 @@
-import { clamp } from './utils';
+import { clamp, softMechanicalScale } from './utils';
 
 export interface DampingConfig {
     dampingBase?: number;
@@ -51,7 +51,7 @@ export function advanceBaseline(
     const noveltyScale = cfg.noveltyScale ?? 0;
 
     const plasticityFactor =
-        driver.plasticity === undefined ? 1 : Math.pow(clamp(driver.plasticity / 100, 0, 1), plasticityWeight);
+        driver.plasticity === undefined ? 1 : Math.pow(clamp(softMechanicalScale(driver.plasticity, 100, 150) / 100, 0, 1.5), plasticityWeight);
     const opennessFactor =
         driver.openness === undefined ? 1 : Math.pow(clamp(driver.openness / 100, 0, 1), opennessWeight);
     const noveltyFactor = noveltyBase + (driver.novelty ?? 0.5) * noveltyScale;

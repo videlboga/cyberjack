@@ -130,6 +130,27 @@
     ]
   },
   {
+    "id": "drug_regenerative",
+    "name": "Регенеративный раствор (Regen-R)",
+    "description": "Капсульная ампула для ускоренного восстановления и снижения физиологической нагрузки.",
+    "type": "consumable",
+    "tags": ["chemical", "medical", "capsule", "recovery"]
+  },
+  {
+    "id": "drug_neurostabilizer",
+    "name": "Нейростабилизатор (NeuroCalm)",
+    "description": "Капсульная ампула, сглаживающая реактивность и риск перегрузки.",
+    "type": "consumable",
+    "tags": ["chemical", "medical", "capsule", "stabilizer"]
+  },
+  {
+    "id": "drug_plasticity_catalyst",
+    "name": "Пластический катализатор (Mnemosyne-P)",
+    "description": "Капсульная ампула, усиливающая закрепление последующего опыта.",
+    "type": "consumable",
+    "tags": ["chemical", "medical", "capsule", "plasticity"]
+  },
+  {
     "id": "eq_jumpsuit",
     "name": "Сенсорный Комбинезон",
     "description": "Плотный изоляционный комбинезон, закрывающий почти всё тело. Значительно снижает тактильную чувствительность.",

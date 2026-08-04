@@ -1,4 +1,5 @@
 import { activeContextsRepo, presetRepo } from '../infrastructure/repositories';
+import { db } from '../infrastructure/db';
 import { CompiledAction } from '../domain/types';
 import { randomUUID } from 'crypto';
 import { getActiveContextLabel } from '../domain/contextPresentation';
@@ -46,6 +47,13 @@ export class ContextManager {
             return presetConfig?.occupiesPoints?.includes('global_pose') ? 'pose' : undefined;
         };
         const newKind = contextKind(action);
+        // A pose is one scene-level state. Its occupied anatomy slots describe
+        // conflicts, not separate active-context instances. Older builds stored
+        // one row per slot, which made one pose appear several times and leaked
+        // duplicate context lines into prompts.
+        const pointsToStore: Array<string | null> = newKind === 'pose'
+            ? [pointsToOccupy.includes('global_pose') ? 'global_pose' : (pointId ?? pointsToOccupy[0] ?? null)]
+            : pointsToOccupy;
         const autonomousPoseChange = newKind === 'pose' && initiatorId === subjectId;
         const newPriority = config.priority ?? 0;
         const conflicts: typeof currentContexts = [];
@@ -82,7 +90,7 @@ export class ContextManager {
         for (const ctx of conflicts) activeContextsRepo.remove(ctx.id);
 
         let added = 0;
-        for (const pt of pointsToOccupy) {
+        for (const pt of pointsToStore) {
             const alreadyActive = currentContexts.some(c =>
                 c.actionId === actionId && c.pointId === pt && !conflicts.some(conflict => conflict.id === c.id)
             );
@@ -91,16 +99,36 @@ export class ContextManager {
                 added += 1;
             }
         }
+
+        // Reapplying a legacy multi-row pose also repairs it in place.
+        if (newKind === 'pose') {
+            const canonicalPoint = pointsToStore[0];
+            const poseRows = activeContextsRepo.getAllForSubject(subjectId)
+                .filter(context => context.actionId === actionId);
+            const canonical = poseRows.find(context => context.pointId === canonicalPoint) ?? poseRows[0];
+            for (const context of poseRows) {
+                if (context.id !== canonical?.id) activeContextsRepo.remove(context.id);
+            }
+        }
         return { applied: added > 0 || conflicts.length > 0, blocked: false };
     }
     
-    static processTick(subjectId: string, deltaTime: number = 1) {
-        activeContextsRepo.incrementTicks(subjectId, Math.max(0, deltaTime));
-        const currentContexts = activeContextsRepo.getAllForSubject(subjectId);
-        for (const ctx of currentContexts) {
-            if (ctx.duration >= 0 && ctx.ticksActive >= ctx.duration) {
-                activeContextsRepo.remove(ctx.id);
-            }
-        }
+    static processTick(subjectId: string, deltaTime: number = 1, elapsedMinutes: number = deltaTime) {
+        const tickAmount = Math.max(0, deltaTime);
+        const minuteAmount = Math.max(0, elapsedMinutes);
+        db.transaction(() => {
+            db.prepare(`
+                UPDATE active_contexts
+                SET ticks_active = COALESCE(ticks_active, 0) + CASE
+                    WHEN COALESCE((SELECT json_extract(ap.context_config_json, '$.durationUnit')
+                                   FROM action_presets ap WHERE ap.id = active_contexts.action_id), '') = 'minutes'
+                    THEN ? ELSE ? END
+                WHERE subject_id = ?
+            `).run(minuteAmount, tickAmount, subjectId);
+            db.prepare(`
+                DELETE FROM active_contexts
+                WHERE subject_id = ? AND duration >= 0 AND COALESCE(ticks_active, 0) >= duration
+            `).run(subjectId);
+        })();
     }
 }

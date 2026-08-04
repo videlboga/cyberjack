@@ -1,0 +1,2304 @@
+/* ============================================
+   MANGA THEME — flat ink-on-paper aesthetic
+   Applied when [data-ui-theme="manga"]
+   Strategy: override --ji-* vars + targeted selectors
+   ============================================ */
+
+/* === FOUNDATION: Override industrial CSS vars === */
+html[data-ui-theme="manga"] {
+  --ink: #1a1a1a;
+  --ink-soft: #2d2d2d;
+  --paper: #f5f1e8;
+  --paper-bright: #fdfaf3;
+  --paper-aged: #ede6d6;
+  --screentone-light: rgba(26, 26, 26, 0.04);
+  --screentone-mid: rgba(26, 26, 26, 0.09);
+  --screentone-heavy: rgba(26, 26, 26, 0.18);
+  --accent-red: #d43a2f;
+  --accent-blue: #2b5f8e;
+  --accent-gold: #c8981a;
+  --accent-teal: #2e7a6a;
+  --line-thin: 1px solid var(--ink);
+  --line-med: 2px solid var(--ink);
+  --line-bold: 3px solid var(--ink);
+  --line-heavy: 4px solid var(--ink);
+  --font-display: "Impact", "Arial Black", "Helvetica Neue", sans-serif;
+  --font-body: "Courier New", "Courier", monospace;
+  --font-accent: "Georgia", "Times New Roman", serif;
+
+  /* Override industrial/JI vars to manga palette */
+  --ji-bg: var(--paper) !important;
+  --ji-panel: var(--paper-bright) !important;
+  --ji-raised: var(--paper-aged) !important;
+  --ji-control: var(--paper-aged) !important;
+  --ji-selected: var(--screentone-mid) !important;
+  --ji-text: var(--ink) !important;
+  --ji-secondary: var(--ink-soft) !important;
+  --ji-muted: var(--ink-soft) !important;
+  --ji-lcd: var(--ink) !important;
+  --ji-amber: var(--accent-gold) !important;
+  --ji-danger: var(--accent-red) !important;
+  --ji-chart: var(--ink) !important;
+  --ji-chart-alt: var(--accent-blue) !important;
+  --ji-chart-warm: var(--accent-gold) !important;
+  --ring-color: var(--ink) !important;
+  --ji-surface-soft: var(--paper-aged) !important;
+  --ji-surface: var(--paper-bright) !important;
+  --ji-border: var(--ink) !important;
+  --ji-accent: var(--accent-red) !important;
+  --ji-page: var(--paper) !important;
+  --ji-line: var(--ink) !important;
+  --ji-chart-gap: var(--screentone-light) !important;
+  --ji-chart-grid: var(--screentone-mid) !important;
+  --ji-chart-main: var(--ink) !important;
+  --ji-chart-marker: var(--accent-red) !important;
+  --ji-chart-track: var(--paper-aged) !important;
+  --ji-chart-violet: var(--accent-blue) !important;
+}
+
+html[data-ui-theme="manga"] body {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Screentone dot pattern overlay on background */
+html[data-ui-theme="manga"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--screentone-light) 0.5px,
+    transparent 0.5px
+  );
+  background-size: 8px 8px;
+  opacity: 0.6;
+}
+
+html[data-ui-theme="manga"] .campaign-shell {
+  position: relative;
+  z-index: 1;
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+}
+
+/* === TOP STATUS BAR — black ink band === */
+html[data-ui-theme="manga"] .campaign-statusbar {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border-bottom: var(--line-heavy) !important;
+  padding: 6px 16px !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga"] .campaign-brand b {
+  font-family: var(--font-display) !important;
+  font-size: 22px !important;
+  letter-spacing: 3px !important;
+  color: var(--paper) !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .campaign-brand span {
+  font-size: 10px !important;
+  letter-spacing: 2px !important;
+  color: rgba(245, 241, 232, 0.7) !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .campaign-current,
+html[data-ui-theme="manga"] .campaign-stat {
+  border-left-color: rgba(245, 241, 232, 0.2) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-current small,
+html[data-ui-theme="manga"] .campaign-stat small,
+html[data-ui-theme="manga"] .theme-switcher small {
+  font-size: 9px !important;
+  letter-spacing: 1.5px !important;
+  color: rgba(245, 241, 232, 0.6) !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .campaign-current strong,
+html[data-ui-theme="manga"] .campaign-stat strong {
+  font-family: var(--font-display) !important;
+  font-size: 15px !important;
+  color: var(--paper) !important;
+  letter-spacing: 1px;
+}
+
+html[data-ui-theme="manga"] .campaign-stat.credits strong {
+  color: var(--accent-gold) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-time-control {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 rgba(245, 241, 232, 0.3) !important;
+  font-family: var(--font-body) !important;
+  padding: 6px 14px !important;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .campaign-time-control:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 rgba(245, 241, 232, 0.3) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-time-control:active {
+  transform: translate(4px, 4px) !important;
+  box-shadow: 0 0 0 rgba(245, 241, 232, 0.3) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-time-control i {
+  font-style: normal;
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+html[data-ui-theme="manga"] .campaign-time-control.paused i {
+  color: var(--accent-red);
+}
+
+html[data-ui-theme="manga"] .campaign-time-control small {
+  color: var(--ink-soft) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-time-control strong {
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .theme-switcher select {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-body) !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  box-shadow: 3px 3px 0 rgba(245, 241, 232, 0.3) !important;
+  cursor: pointer;
+}
+
+/* === NAVIGATION SIDEBAR === */
+html[data-ui-theme="manga"] .campaign-frame {
+  background: var(--paper) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav {
+  background: var(--paper-aged) !important;
+  border-right: var(--line-bold) !important;
+  padding: 8px 0 !important;
+  box-shadow: none !important;
+  overflow-y: auto !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section small {
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  color: var(--ink-soft) !important;
+  text-transform: uppercase;
+  padding: 0 14px 4px !important;
+  display: block;
+  border-bottom: var(--line-thin) !important;
+  margin-bottom: 4px !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section > button {
+  background: transparent !important;
+  color: var(--ink) !important;
+  border: none !important;
+  border-left: 4px solid transparent !important;
+  border-radius: 0 !important;
+  font-family: var(--font-body) !important;
+  text-align: left !important;
+  padding: 7px 14px !important;
+  margin: 1px 0 !important;
+  cursor: pointer;
+  transition: all 0.15s !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section > button:hover {
+  background: var(--screentone-mid) !important;
+  border-left-color: var(--ink) !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section > button.active {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border-left-color: var(--accent-red) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section > button.active span {
+  color: var(--paper) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section > button.active small {
+  color: rgba(245, 241, 232, 0.7) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section > button span {
+  font-family: var(--font-display) !important;
+  font-size: 12px !important;
+  letter-spacing: 1px !important;
+  display: block;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-nav section > button small {
+  font-size: 10px !important;
+  color: var(--ink-soft) !important;
+  letter-spacing: 0.5px;
+}
+
+/* === MAIN CONTENT AREA === */
+html[data-ui-theme="manga"] .campaign-content {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  padding: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Screen heading — manga title block */
+html[data-ui-theme="manga"] .screen-heading {
+  background: var(--paper-bright) !important;
+  border-bottom: var(--line-bold) !important;
+  padding: 16px 24px 14px !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+}
+
+html[data-ui-theme="manga"] .screen-heading p {
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  font-style: normal !important;
+}
+
+html[data-ui-theme="manga"] .screen-heading h1 {
+  font-family: var(--font-display) !important;
+  font-size: 24px !important;
+  letter-spacing: 1.5px !important;
+  color: var(--ink) !important;
+  text-transform: uppercase !important;
+  margin: 0 !important;
+  line-height: 1.1 !important;
+  text-shadow: 2px 2px 0 var(--screentone-mid) !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+
+html[data-ui-theme="manga"] .screen-heading h1::after {
+  content: "";
+  display: inline-block;
+  width: 60px;
+  height: 4px;
+  background: var(--accent-red);
+  margin-left: 16px;
+  vertical-align: middle;
+}
+
+html[data-ui-theme="manga"] .screen-heading span {
+  font-family: var(--font-accent) !important;
+  font-style: italic;
+  font-size: 13px !important;
+  color: var(--ink-soft) !important;
+  max-width: 690px;
+  line-height: 1.5;
+}
+
+html[data-ui-theme="manga"] .screen-heading > b {
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 14px !important;
+}
+
+/* Lab capacity badge */
+html[data-ui-theme="manga"] .lab-capacity {
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="manga"] .lab-capacity small {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+html[data-ui-theme="manga"] .lab-capacity strong {
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 28px !important;
+}
+
+html[data-ui-theme="manga"] .lab-capacity span {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  text-transform: uppercase;
+}
+
+/* === LAB SECTIONS === */
+html[data-ui-theme="manga"] .lab-section,
+html[data-ui-theme="manga"] .management-section {
+  padding: 24px 34px !important;
+  background: var(--paper) !important;
+}
+
+html[data-ui-theme="manga"] .lab-section + .lab-section {
+  border-top: var(--line-bold) !important;
+}
+
+html[data-ui-theme="manga"] .lab-section > header small,
+html[data-ui-theme="manga"] .management-section > header small {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .lab-section h2,
+html[data-ui-theme="manga"] .management-section h2 {
+  font-family: var(--font-display) !important;
+  font-size: 18px !important;
+  letter-spacing: 1.5px !important;
+  color: var(--ink) !important;
+  text-transform: uppercase !important;
+  margin: 3px 0 0 !important;
+}
+
+html[data-ui-theme="manga"] .lab-section > header > b {
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+}
+
+/* === RESIDENT CARDS === */
+html[data-ui-theme="manga"] .resident-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(280px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+html[data-ui-theme="manga"] .resident-card {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 5px 5px 0 var(--ink) !important;
+  padding: 12px !important;
+  display: grid !important;
+  grid-template-columns: 50px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 86px !important;
+}
+
+html[data-ui-theme="manga"] .resident-card.asset {
+  border-left: var(--line-heavy) !important;
+  border-left-color: var(--accent-red) !important;
+}
+
+html[data-ui-theme="manga"] .resident-card.staff {
+  border-left: var(--line-heavy) !important;
+  border-left-color: var(--accent-blue) !important;
+}
+
+html[data-ui-theme="manga"] .resident-avatar {
+  width: 48px !important;
+  height: 58px !important;
+  background: var(--paper-aged) !important;
+  border: var(--line-thin) !important;
+  border-radius: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  font-size: 25px !important;
+  font-weight: 800 !important;
+  color: var(--ink-soft) !important;
+}
+
+html[data-ui-theme="manga"] .resident-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: top !important;
+  border: none !important;
+  border-radius: 0 !important;
+  filter: none !important;
+}
+
+html[data-ui-theme="manga"] .resident-copy small {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .resident-copy strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 14px !important;
+  letter-spacing: 0.5px;
+}
+
+html[data-ui-theme="manga"] .resident-copy p {
+  margin: 5px 0 0 !important;
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+}
+
+html[data-ui-theme="manga"] .resident-card > button {
+  padding: 8px 12px !important;
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  font-size: 10px !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .resident-card > button:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .resident-role {
+  padding: 5px 7px !important;
+  border: var(--line-thin) !important;
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 0 !important;
+}
+
+/* === EQUIPMENT GRID === */
+html[data-ui-theme="manga"] .equipment-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(190px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+html[data-ui-theme="manga"] .equipment-grid article {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  min-height: 130px !important;
+  padding: 13px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+html[data-ui-theme="manga"] .equipment-grid strong {
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.5px;
+}
+
+html[data-ui-theme="manga"] .equipment-grid p {
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+  line-height: 1.45;
+  margin: 6px 0 !important;
+}
+
+html[data-ui-theme="manga"] .equipment-grid footer span {
+  color: var(--accent-teal) !important;
+  font-size: 9px !important;
+}
+
+html[data-ui-theme="manga"] .equipment-grid button {
+  padding: 7px 9px !important;
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  font-size: 9px !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .equipment-grid button:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .equipment-grid button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* === CHARACTER PORTRAIT (full, no crop) === */
+html[data-ui-theme="manga"] .character-portrait,
+html[data-ui-theme="manga"] .character-portrait img {
+  object-fit: contain !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  background: var(--paper-bright) !important;
+  box-shadow: 6px 6px 0 var(--ink) !important;
+  filter: none !important;
+}
+
+/* === CHANNEL LOG — manga speech bubbles === */
+html[data-ui-theme="manga"] [class*="channel"],
+html[data-ui-theme="manga"] [class*="chat-feed"],
+html[data-ui-theme="manga"] [class*="chat-container"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="channel"] > div,
+html[data-ui-theme="manga"] [class*="chat-feed"] > div {
+  background: transparent !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="channel"] p,
+html[data-ui-theme="manga"] [class*="chat-feed"] p,
+html[data-ui-theme="manga"] [class*="chat-container"] p {
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="channel"] small,
+html[data-ui-theme="manga"] [class*="chat-feed"] small,
+html[data-ui-theme="manga"] [class*="chat-container"] small {
+  color: var(--ink-soft) !important;
+}
+
+/* === POPUP / FLOATING MENU === */
+html[data-ui-theme="manga"] [class*="popup"],
+html[data-ui-theme="manga"] [class*="overlay"],
+html[data-ui-theme="manga"] [class*="modal"],
+html[data-ui-theme="manga"] [class*="floating"],
+html[data-ui-theme="manga"] [class*="context-menu"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 6px 6px 0 var(--ink) !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="popup"] button,
+html[data-ui-theme="manga"] [class*="overlay"] button,
+html[data-ui-theme="manga"] [class*="floating"] button,
+html[data-ui-theme="manga"] [class*="context-menu"] button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: var(--line-thin) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  padding: 8px 12px !important;
+  text-align: left !important;
+}
+
+html[data-ui-theme="manga"] [class*="popup"] button:hover,
+html[data-ui-theme="manga"] [class*="overlay"] button:hover,
+html[data-ui-theme="manga"] [class*="floating"] button:hover,
+html[data-ui-theme="manga"] [class*="context-menu"] button:hover {
+  background: var(--screentone-mid) !important;
+}
+
+/* === OBSERVATION / STAT FIELDS === */
+html[data-ui-theme="manga"] [class*="observation"],
+html[data-ui-theme="manga"] [class*="stat-field"],
+html[data-ui-theme="manga"] [class*="info-row"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="observation"] span,
+html[data-ui-theme="manga"] [class*="stat-field"] span {
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="observation"] small,
+html[data-ui-theme="manga"] [class*="stat-field"] small {
+  color: var(--ink-soft) !important;
+}
+
+/* === SCROLLABLE AREAS === */
+html[data-ui-theme="manga"] [class*="scroll"] {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+}
+
+/* === DARK TEXT ON DARK BG FIX — global text color === */
+html[data-ui-theme="manga"] .campaign-content * {
+  color: var(--ink);
+}
+
+html[data-ui-theme="manga"] .campaign-content strong,
+html[data-ui-theme="manga"] .campaign-content b {
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-content small {
+  color: var(--ink-soft) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-content p {
+  color: var(--ink-soft) !important;
+}
+
+/* === CALIBRATION HEADER === */
+html[data-ui-theme="manga"] .calibration-header,
+html[data-ui-theme="manga"] [class*="calibration-header"],
+html[data-ui-theme="manga"] [class*="session-header"] {
+  background: var(--paper) !important;
+  border-bottom: var(--line-bold) !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .calibration-header h1,
+html[data-ui-theme="manga"] [class*="session-header"] h1,
+html[data-ui-theme="manga"] [class*="session-header"] h2 {
+  font-family: var(--font-display) !important;
+  color: var(--ink) !important;
+  text-transform: uppercase !important;
+}
+
+/* === GOAL PANEL === */
+html[data-ui-theme="manga"] [class*="goal-panel"],
+html[data-ui-theme="manga"] [class*="goals"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="goal-panel"] h3,
+html[data-ui-theme="manga"] [class*="goals"] h3 {
+  font-family: var(--font-display) !important;
+  color: var(--ink) !important;
+  text-transform: uppercase !important;
+}
+
+/* === BACK BUTTON === */
+html[data-ui-theme="manga"] .workbench-back {
+  padding: 7px 12px !important;
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  font-family: var(--font-body) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 11px !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .workbench-back:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+/* === FIX: Any remaining dark backgrounds === */
+html[data-ui-theme="manga"] [style*="background: #0"],
+html[data-ui-theme="manga"] [style*="background: #1"],
+html[data-ui-theme="manga"] [style*="background:#0"],
+html[data-ui-theme="manga"] [style*="background:#1"],
+html[data-ui-theme="manga"] [style*="background-color: #0"],
+html[data-ui-theme="manga"] [style*="background-color: #1"],
+html[data-ui-theme="manga"] [style*="background-color:#0"],
+html[data-ui-theme="manga"] [style*="background-color:#1"] {
+  background: var(--paper-bright) !important;
+}
+
+/* Dark text on dark bg — force ink color */
+html[data-ui-theme="manga"] [style*="color: #5"],
+html[data-ui-theme="manga"] [style*="color: #6"],
+html[data-ui-theme="manga"] [style*="color: #7"],
+html[data-ui-theme="manga"] [style*="color: #8"],
+html[data-ui-theme="manga"] [style*="color:#5"],
+html[data-ui-theme="manga"] [style*="color:#6"],
+html[data-ui-theme="manga"] [style*="color:#7"],
+html[data-ui-theme="manga"] [style*="color:#8"] {
+  color: var(--ink) !important;
+}
+
+/* === CHARACTER CHAT — manga speech panel === */
+html[data-ui-theme="manga"] .character-chat,
+html[data-ui-theme="manga"] .character-chat > div,
+html[data-ui-theme="manga"] .character-chat > div > div {
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .character-chat {
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .character-chat textarea {
+  background: var(--paper-aged) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .character-chat textarea::placeholder {
+  color: var(--ink-soft) !important;
+}
+
+/* === UNIVERSAL DARK BG KILLER (within manga theme) === */
+html[data-ui-theme="manga"] .campaign-content div[style*="background: rgb(23"],
+html[data-ui-theme="manga"] .campaign-content div[style*="background: rgb(8"],
+html[data-ui-theme="manga"] .campaign-content div[style*="background: rgb(10"],
+html[data-ui-theme="manga"] .campaign-content div[style*="background: rgb(11"],
+html[data-ui-theme="manga"] .campaign-content div[style*="background: rgb(13"],
+html[data-ui-theme="manga"] .campaign-content div[style*="background: rgb(15"],
+html[data-ui-theme="manga"] .campaign-content div[style*="background: rgb(16"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: rgb(23"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: rgb(8"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: rgb(10"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: rgb(11"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: rgb(13"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: rgb(15"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: rgb(16"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: rgb(23"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: rgb(8"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: rgb(10"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: rgb(11"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: rgb(13"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: rgb(15"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: rgb(16"] {
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+}
+
+/* Also catch hex dark backgrounds */
+html[data-ui-theme="manga"] .campaign-content div[style*="background: #0"],
+html[data-ui-theme="manga"] .campaign-content div[style*="background: #1"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: #0"],
+html[data-ui-theme="manga"] .campaign-content span[style*="background: #1"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: #0"],
+html[data-ui-theme="manga"] .campaign-content textarea[style*="background: #1"],
+html[data-ui-theme="manga"] .campaign-content section[style*="background: #0"],
+html[data-ui-theme="manga"] .campaign-content section[style*="background: #1"],
+html[data-ui-theme="manga"] .campaign-content article[style*="background: #0"],
+html[data-ui-theme="manga"] .campaign-content article[style*="background: #1"] {
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+}
+
+/* === BUTTONS GLOBAL === */
+html[data-ui-theme="manga"] .campaign-content button {
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-body) !important;
+  font-size: 12px !important;
+  padding: 6px 14px !important;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+html[data-ui-theme="manga"] .campaign-content button:hover:not(:disabled) {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-content button:active:not(:disabled) {
+  transform: translate(3px, 3px) !important;
+  box-shadow: 0 0 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-content button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* === JOURNAL === */
+html[data-ui-theme="manga"] .journal-list {
+  display: grid !important;
+  gap: 8px !important;
+  padding: 24px 34px !important;
+}
+
+html[data-ui-theme="manga"] .journal-list article {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-left: var(--line-heavy) !important;
+  border-left-color: var(--accent-blue) !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  padding: 12px !important;
+}
+
+html[data-ui-theme="manga"] .journal-list small {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .journal-list strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px;
+}
+
+html[data-ui-theme="manga"] .journal-list p {
+  margin: 5px 0 0 !important;
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+}
+
+/* === INVENTORY === */
+html[data-ui-theme="manga"] .inventory-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(230px, 1fr)) !important;
+  gap: 12px !important;
+  padding: 24px 34px !important;
+}
+
+html[data-ui-theme="manga"] .inventory-grid article {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  padding: 13px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 15px !important;
+}
+
+html[data-ui-theme="manga"] .inventory-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 12px !important;
+}
+
+html[data-ui-theme="manga"] .inventory-grid p {
+  margin: 5px 0 0 !important;
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+}
+
+html[data-ui-theme="manga"] .inventory-grid article > b {
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 10px !important;
+}
+
+/* === CONTRACT OFFICE === */
+html[data-ui-theme="manga"] .contract-office-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(310px, 1fr)) !important;
+  gap: 12px !important;
+  padding: 24px 34px !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list > article {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  padding: 15px !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list > article.accepted {
+  border-left: var(--line-heavy) !important;
+  border-left-color: var(--accent-gold) !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list article header strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list article header > b {
+  color: var(--accent-teal) !important;
+  font-size: 10px !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list article > p {
+  margin: 9px 0 !important;
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+  line-height: 1.45;
+}
+
+html[data-ui-theme="manga"] .contract-requirements span {
+  padding: 5px 6px !important;
+  background: var(--paper-aged) !important;
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  border: var(--line-thin) !important;
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="manga"] .contract-requirements span.met {
+  color: var(--accent-teal) !important;
+  background: var(--paper-bright) !important;
+  border-color: var(--accent-teal) !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list article > button {
+  width: 100% !important;
+  padding: 8px !important;
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  font-size: 10px !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  text-transform: uppercase;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list article > button.deliver {
+  border-color: var(--accent-teal) !important;
+  background: var(--paper-bright) !important;
+}
+
+html[data-ui-theme="manga"] .contract-office-list article > button:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+/* === OFFER GRID (Supply) === */
+html[data-ui-theme="manga"] .offer-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(210px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+html[data-ui-theme="manga"] .offer-grid article {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  min-height: 130px !important;
+  padding: 13px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+html[data-ui-theme="manga"] .offer-grid article.owned {
+  opacity: 0.6;
+}
+
+html[data-ui-theme="manga"] .offer-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 12px !important;
+}
+
+html[data-ui-theme="manga"] .offer-grid footer > b {
+  color: var(--accent-gold) !important;
+  font-size: 11px !important;
+}
+
+html[data-ui-theme="manga"] .offer-grid button {
+  padding: 7px 9px !important;
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  font-size: 9px !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  text-transform: uppercase;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .offer-grid button:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .offer-grid button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* === TOASTS === */
+html[data-ui-theme="manga"] .campaign-toast {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border: var(--line-med) !important;
+  border-color: var(--paper) !important;
+  border-radius: 0 !important;
+  box-shadow: 5px 5px 0 rgba(26, 26, 26, 0.3) !important;
+  font-family: var(--font-body) !important;
+  padding: 10px 13px !important;
+}
+
+html[data-ui-theme="manga"] .campaign-toast.error {
+  background: var(--accent-red) !important;
+  color: var(--paper) !important;
+  border-color: var(--paper) !important;
+}
+
+/* === LOADING === */
+html[data-ui-theme="manga"] .campaign-loading {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 24px !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100vh !important;
+}
+
+/* === SCROLLBAR === */
+html[data-ui-theme="manga"] ::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+html[data-ui-theme="manga"] ::-webkit-scrollbar-track {
+  background: var(--paper-aged) !important;
+  border-left: var(--line-thin) !important;
+}
+
+html[data-ui-theme="manga"] ::-webkit-scrollbar-thumb {
+  background: var(--ink) !important;
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="manga"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-soft) !important;
+}
+
+/* === EMPTY STATE === */
+html[data-ui-theme="manga"] .empty-screen {
+  color: var(--ink-soft) !important;
+  font-family: var(--font-accent) !important;
+  font-style: italic;
+  font-size: 14px !important;
+}
+
+/* === LAB SPATIAL LAYOUT === */
+html[data-ui-theme="manga"] .lab-spatial {
+  display: grid !important;
+  grid-template-columns: 210px minmax(0, 1fr) !important;
+  grid-template-rows: minmax(430px, auto) !important;
+  min-height: 430px !important;
+  background: var(--paper) !important;
+  align-items: stretch !important;
+}
+
+html[data-ui-theme="manga"] .room-rail {
+  padding: 20px 12px !important;
+  border-right: var(--line-bold) !important;
+  background: var(--paper-aged) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+html[data-ui-theme="manga"] .room-rail > small {
+  display: block !important;
+  padding: 0 9px 8px !important;
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+  border-bottom: var(--line-thin) !important;
+  margin-bottom: 8px !important;
+}
+
+html[data-ui-theme="manga"] .room-rail > button {
+  width: 100% !important;
+  display: grid !important;
+  gap: 4px !important;
+  padding: 11px 10px !important;
+  border: none !important;
+  border-left: 4px solid transparent !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+  text-align: left !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: var(--font-body) !important;
+  transition: all 0.15s !important;
+}
+
+html[data-ui-theme="manga"] .room-rail > button:hover {
+  background: var(--screentone-mid) !important;
+  border-left-color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .room-rail > button.active {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border-left-color: var(--accent-red) !important;
+}
+
+html[data-ui-theme="manga"] .room-rail > button.active span {
+  color: var(--paper) !important;
+}
+
+html[data-ui-theme="manga"] .room-rail > button.active small {
+  color: rgba(245, 241, 232, 0.7) !important;
+}
+
+html[data-ui-theme="manga"] .room-rail > button span {
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px !important;
+  color: var(--ink) !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .room-rail > button small {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+}
+
+/* === ROOM DETAIL === */
+html[data-ui-theme="manga"] .room-detail {
+  min-width: 0 !important;
+  padding: 14px 18px !important;
+  background: var(--paper) !important;
+  overflow-y: auto !important;
+}
+
+html[data-ui-theme="manga"] .room-detail > header {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding-bottom: 10px !important;
+  border-bottom: var(--line-bold) !important;
+  flex-wrap: wrap !important;
+}
+
+html[data-ui-theme="manga"] .room-detail > header > div {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+html[data-ui-theme="manga"] .room-detail > header small {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .room-detail h2 {
+  font-family: var(--font-display) !important;
+  font-size: 20px !important;
+  letter-spacing: 1px !important;
+  color: var(--ink) !important;
+  text-transform: uppercase !important;
+  margin: 2px 0 0 !important;
+  line-height: 1.1 !important;
+}
+
+html[data-ui-theme="manga"] .room-detail > header p {
+  max-width: 620px !important;
+  margin: 7px 0 0 !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--font-accent) !important;
+  font-style: italic;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+html[data-ui-theme="manga"] .room-detail > header > b {
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 14px !important;
+}
+
+html[data-ui-theme="manga"] .room-detail-section {
+  padding: 10px 0 !important;
+}
+
+html[data-ui-theme="manga"] .room-detail-section + .room-detail-section {
+  border-top: var(--line-bold) !important;
+}
+
+html[data-ui-theme="manga"] .room-detail-section h3 {
+  margin: 0 0 12px !important;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  border-bottom: var(--line-thin) !important;
+  padding-bottom: 6px !important;
+}
+
+/* === ROOM PEOPLE CARDS === */
+html[data-ui-theme="manga"] .room-people {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+}
+
+html[data-ui-theme="manga"] .room-people > article {
+  min-width: 220px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Text content area in room-people card */
+html[data-ui-theme="manga"] .room-people > article > div,
+html[data-ui-theme="manga"] .room-people .room-person-identity {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+html[data-ui-theme="manga"] .room-people .resident-avatar {
+  width: 56px !important;
+  height: 72px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
+  font-size: 18px !important;
+  background: var(--paper-aged) !important;
+  border: var(--line-thin) !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+html[data-ui-theme="manga"] .room-people .resident-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center top !important;
+  border: none !important;
+  filter: none !important;
+}
+
+/* Override lab-overview resident-avatar sizing */
+html[data-ui-theme="manga"] .lab-overview .room-person-identity .resident-avatar {
+  width: 56px !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
+  max-width: 56px !important;
+  align-self: start !important;
+  grid-area: auto !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+html[data-ui-theme="manga"] .campaign-shell .lab-overview .room-person-identity .resident-avatar {
+  width: 56px !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
+  max-width: 56px !important;
+  margin: 0 !important;
+  line-height: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+html[data-ui-theme="manga"] .campaign-shell .lab-overview .room-person-identity .resident-avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  object-fit: contain !important;
+}
+
+html[data-ui-theme="manga"] .room-people strong {
+  display: block !important;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .room-people span {
+  margin-top: 2px !important;
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  display: block;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Buttons column inside room-people card */
+html[data-ui-theme="manga"] .room-people > article > div:last-child {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  margin-left: auto !important;
+}
+
+html[data-ui-theme="manga"] .room-people > article button {
+  padding: 6px 10px !important;
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  font-size: 10px !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .room-people > article button:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .room-people > p {
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+  font-style: italic;
+}
+
+html[data-ui-theme="manga"] .passive-note {
+  display: block !important;
+  margin-top: 9px !important;
+  color: var(--accent-teal) !important;
+  font-size: 9px !important;
+  font-style: italic;
+}
+
+/* === ROOM EQUIPMENT === */
+html[data-ui-theme="manga"] .room-equipment {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(230px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment > article {
+  min-height: 145px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 12px !important;
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment article > header {
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment header small {
+  display: block !important;
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .room-equipment header strong {
+  display: block !important;
+  margin-top: 3px !important;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px;
+}
+
+html[data-ui-theme="manga"] .room-equipment header i {
+  color: var(--accent-teal) !important;
+  font-size: 9px !important;
+  font-style: normal;
+}
+
+html[data-ui-theme="manga"] .room-equipment article > p {
+  margin: 7px 0 !important;
+  color: var(--ink-soft) !important;
+  font-size: 10px !important;
+  line-height: 1.4;
+}
+
+html[data-ui-theme="manga"] .device-occupant {
+  display: grid !important;
+  gap: 2px !important;
+  padding: 7px !important;
+  background: var(--paper-aged) !important;
+  border: var(--line-thin) !important;
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="manga"] .device-occupant b {
+  color: var(--ink) !important;
+  font-size: 10px !important;
+  font-family: var(--font-display) !important;
+}
+
+html[data-ui-theme="manga"] .device-occupant span {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment footer {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: auto !important;
+  padding-top: 9px !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment button {
+  padding: 7px 10px !important;
+  border: var(--line-med) !important;
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  font-size: 10px !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-body) !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment button.primary {
+  border-color: var(--accent-red) !important;
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  box-shadow: 3px 3px 0 var(--accent-red) !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment button:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment button.primary:hover {
+  box-shadow: 2px 2px 0 var(--accent-red) !important;
+}
+
+html[data-ui-theme="manga"] .room-equipment button:disabled {
+  opacity: 0.4;
+}
+
+/* === ASSET REGISTER === */
+html[data-ui-theme="manga"] .asset-register {
+  margin-top: 24px !important;
+  padding-top: 15px !important;
+  border-top: var(--line-bold) !important;
+}
+
+html[data-ui-theme="manga"] .asset-register > small {
+  display: block !important;
+  padding: 0 9px 8px !important;
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+}
+
+html[data-ui-theme="manga"] .asset-register > button {
+  width: 100% !important;
+  display: grid !important;
+  gap: 3px !important;
+  padding: 8px 9px !important;
+  border: none !important;
+  border-left: 3px solid transparent !important;
+  background: var(--paper-bright) !important;
+  text-align: left !important;
+  cursor: pointer;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+  margin-bottom: 4px !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] .asset-register > button:hover {
+  background: var(--screentone-mid) !important;
+  border-left-color: var(--ink) !important;
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] .asset-register button b {
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: 10px !important;
+}
+
+html[data-ui-theme="manga"] .asset-register button span {
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  line-height: 1.4;
+}
+
+html[data-ui-theme="manga"] .asset-register .register-heading {
+  display: block !important;
+  margin: 8px 9px 4px !important;
+  color: var(--ink-soft) !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+}
+
+/* === ANIMATION === */
+@keyframes manga-ink-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+/* === CALIBRATION PROTOTYPE SPECIFIC === */
+/* Dark panels → manga paper */
+html[data-ui-theme="manga"] .calibration-shell,
+html[data-ui-theme="manga"] .calibration-workbench,
+html[data-ui-theme="manga"] [class*="calibration"],
+html[data-ui-theme="manga"] [class*="workbench"] {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+}
+
+/* Metric panels */
+html[data-ui-theme="manga"] [class*="metric"],
+html[data-ui-theme="manga"] [class*="biometric"],
+html[data-ui-theme="manga"] [class*="pulse"],
+html[data-ui-theme="manga"] [class*="breath"],
+html[data-ui-theme="manga"] [class*="vitals"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+/* Pulse/Breath chart areas */
+html[data-ui-theme="manga"] [class*="pulse"] > div,
+html[data-ui-theme="manga"] [class*="breath"] > div {
+  background: var(--paper-aged) !important;
+}
+
+/* Chart SVG overrides */
+html[data-ui-theme="manga"] [class*="pulse"] svg,
+html[data-ui-theme="manga"] [class*="breath"] svg,
+html[data-ui-theme="manga"] [class*="chart"] svg,
+html[data-ui-theme="manga"] [class*="biometric"] svg {
+  background: var(--paper-bright) !important;
+}
+
+html[data-ui-theme="manga"] [class*="pulse"] svg path,
+html[data-ui-theme="manga"] [class*="chart"] svg path[stroke] {
+  stroke: var(--ink) !important;
+}
+
+/* Pulse gets red accent */
+html[data-ui-theme="manga"] [class*="pulse"] svg path[stroke]:first-of-type {
+  stroke: var(--accent-red) !important;
+}
+
+/* Breath gets blue accent */
+html[data-ui-theme="manga"] [class*="breath"] svg path[stroke],
+html[data-ui-theme="manga"] [class*="breath"] svg ellipse {
+  stroke: var(--accent-blue) !important;
+  fill: var(--accent-blue) !important;
+}
+
+/* Segment bar (Активация) */
+html[data-ui-theme="manga"] [class*="activation"] [class*="segment"],
+html[data-ui-theme="manga"] [class*="segment-bar"] > div {
+  background: var(--paper-aged) !important;
+  border: 1px solid var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="activation"] [class*="segment"].filled,
+html[data-ui-theme="manga"] [class*="segment-bar"] > div.filled {
+  background: var(--ink) !important;
+}
+
+/* Balance bar */
+html[data-ui-theme="manga"] [class*="balance"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+}
+
+/* Acceptance/progress bars */
+html[data-ui-theme="manga"] [class*="acceptance"],
+html[data-ui-theme="manga"] [class*="progress-bar"] {
+  background: var(--paper-aged) !important;
+  border: var(--line-thin) !important;
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="manga"] [class*="acceptance"] [class*="fill"],
+html[data-ui-theme="manga"] [class*="progress-bar"] [class*="fill"] {
+  background: var(--ink) !important;
+}
+
+/* Slider labels and values */
+html[data-ui-theme="manga"] [class*="slider"] label,
+html[data-ui-theme="manga"] [class*="slider"] span {
+  color: var(--ink) !important;
+}
+
+/* Numeric readouts */
+html[data-ui-theme="manga"] [class*="readout"],
+html[data-ui-theme="manga"] [class*="value-display"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+}
+
+/* Channel/chat messages */
+html[data-ui-theme="manga"] [class*="channel"] [class*="message"],
+html[data-ui-theme="manga"] [class*="chat"] [class*="line"] {
+  background: transparent !important;
+  border-bottom: var(--line-thin) !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="channel"] [class*="message"] strong,
+html[data-ui-theme="manga"] [class*="chat"] [class*="line"] strong {
+  color: var(--ink) !important;
+}
+
+/* Message avatar in channel */
+html[data-ui-theme="manga"] [class*="channel"] img,
+html[data-ui-theme="manga"] [class*="chat"] img {
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  object-fit: contain !important;
+  background: var(--paper-aged) !important;
+}
+
+/* Goal/target selector */
+html[data-ui-theme="manga"] [class*="goal"] select,
+html[data-ui-theme="manga"] [class*="target"] select {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+/* Settings gear icon */
+html[data-ui-theme="manga"] [class*="settings"] button,
+html[data-ui-theme="manga"] [class*="gear"] button {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+/* Tab buttons in calibration */
+html[data-ui-theme="manga"] [class*="calibration"] [class*="tab"],
+html[data-ui-theme="manga"] [class*="workbench"] [class*="tab"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+}
+
+/* Dark overlay backgrounds */
+html[data-ui-theme="manga"] [class*="overlay"],
+html[data-ui-theme="manga"] [class*="modal"],
+html[data-ui-theme="manga"] [class*="popup"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 6px 6px 0 var(--ink) !important;
+  color: var(--ink) !important;
+}
+
+/* Dark info boxes */
+html[data-ui-theme="manga"] [class*="info-box"],
+html[data-ui-theme="manga"] [class*="stat-box"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+/* Observation fields */
+html[data-ui-theme="manga"] [class*="observation"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+/* Result section */
+html[data-ui-theme="manga"] [class*="result"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="result"] [class*="value"] {
+  color: var(--ink) !important;
+  font-family: var(--font-display) !important;
+}
+
+/* Positive/negative values */
+html[data-ui-theme="manga"] [class*="result"] [class*="positive"],
+html[data-ui-theme="manga"] [class*="delta"][class*="positive"] {
+  color: var(--accent-teal) !important;
+}
+
+html[data-ui-theme="manga"] [class*="result"] [class*="negative"],
+html[data-ui-theme="manga"] [class*="delta"][class*="negative"] {
+  color: var(--accent-red) !important;
+}
+
+/* Action buttons grid at bottom */
+html[data-ui-theme="manga"] [class*="actions-grid"] > button,
+html[data-ui-theme="manga"] [class*="action-bar"] > button {
+  background: var(--paper-bright) !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+}
+
+html[data-ui-theme="manga"] [class*="actions-grid"] > button:hover,
+html[data-ui-theme="manga"] [class*="action-bar"] > button:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="actions-grid"] > button img,
+html[data-ui-theme="manga"] [class*="action-bar"] > button img {
+  width: 100% !important;
+  object-fit: cover !important;
+  border-bottom: var(--line-med) !important;
+  filter: none !important;
+  display: block;
+}
+
+html[data-ui-theme="manga"] [class*="actions-grid"] > button span,
+html[data-ui-theme="manga"] [class*="action-bar"] > button span {
+  font-family: var(--font-display) !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  color: var(--ink) !important;
+  padding: 6px 8px !important;
+  display: block;
+}
+
+html[data-ui-theme="manga"] [class*="actions-grid"] > button small,
+html[data-ui-theme="manga"] [class*="action-bar"] > button small {
+  font-size: 9px !important;
+  color: var(--ink-soft) !important;
+  letter-spacing: 0.5px;
+  padding: 0 8px 6px !important;
+  display: block;
+}
+
+/* Action intensity bars (mini bars on action buttons) */
+html[data-ui-theme="manga"] [class*="actions-grid"] [class*="intensity"],
+html[data-ui-theme="manga"] [class*="action-bar"] [class*="intensity"] {
+  background: var(--paper-aged) !important;
+}
+
+html[data-ui-theme="manga"] [class*="actions-grid"] [class*="intensity"] [class*="fill"],
+html[data-ui-theme="manga"] [class*="action-bar"] [class*="intensity"] [class*="fill"] {
+  background: var(--ink) !important;
+}
+
+/* Endurance/gauge circle */
+html[data-ui-theme="manga"] [class*="endurance"],
+html[data-ui-theme="manga"] [class*="stamina"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+}
+
+html[data-ui-theme="manga"] [class*="endurance"] svg circle,
+html[data-ui-theme="manga"] [class*="stamina"] svg circle {
+  stroke: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="endurance"] svg circle[class*="fill"],
+html[data-ui-theme="manga"] [class*="endurance"] svg circle[class*="progress"] {
+  stroke: var(--accent-teal) !important;
+}
+
+/* Overload indicator */
+html[data-ui-theme="manga"] [class*="overload"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--accent-red) !important;
+}
+
+/* Time/acceptance panel */
+html[data-ui-theme="manga"] [class*="time-panel"],
+html[data-ui-theme="manga"] [class*="acceptance-panel"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+/* Top bar buttons in calibration */
+html[data-ui-theme="manga"] [class*="calibration"] .campaign-time-control,
+html[data-ui-theme="manga"] [class*="workbench"] .campaign-time-control {
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  border: var(--line-med) !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="calibration"] .campaign-time-control small,
+html[data-ui-theme="manga"] [class*="workbench"] .campaign-time-control small {
+  color: var(--ink-soft) !important;
+}
+
+html[data-ui-theme="manga"] [class*="calibration"] .campaign-time-control strong,
+html[data-ui-theme="manga"] [class*="workbench"] .campaign-time-control strong {
+  color: var(--ink) !important;
+}
+
+/* Theme selector in calibration */
+html[data-ui-theme="manga"] [class*="calibration"] .theme-switcher select,
+html[data-ui-theme="manga"] [class*="workbench"] .theme-switcher select {
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  border: var(--line-med) !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+}
+
+/* History/Diagnostics/Menu buttons */
+html[data-ui-theme="manga"] [class*="calibration"] header button,
+html[data-ui-theme="manga"] [class*="workbench"] header button {
+  background: var(--paper-bright) !important;
+  color: var(--ink) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  font-family: var(--font-display) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+}
+
+/* Dropdown menus */
+html[data-ui-theme="manga"] [class*="dropdown"],
+html[data-ui-theme="manga"] [class*="menu-list"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 5px 5px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="dropdown"] button,
+html[data-ui-theme="manga"] [class*="menu-list"] button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: var(--line-thin) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+}
+
+html[data-ui-theme="manga"] [class*="dropdown"] button:hover,
+html[data-ui-theme="manga"] [class*="menu-list"] button:hover {
+  background: var(--screentone-mid) !important;
+}
+
+/* Portrait in calibration session */
+html[data-ui-theme="manga"] [class*="calibration"] [class*="portrait"],
+html[data-ui-theme="manga"] [class*="calibration"] [class*="avatar"],
+html[data-ui-theme="manga"] [class*="workbench"] [class*="portrait"] {
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  background: var(--paper-bright) !important;
+  box-shadow: 5px 5px 0 var(--ink) !important;
+  overflow: hidden !important;
+}
+
+html[data-ui-theme="manga"] [class*="calibration"] [class*="portrait"] img,
+html[data-ui-theme="manga"] [class*="workbench"] [class*="portrait"] img {
+  object-fit: contain !important;
+  object-position: top !important;
+  filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Witness/nearby characters */
+html[data-ui-theme="manga"] [class*="witness"],
+html[data-ui-theme="manga"] [class*="nearby"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+/* Zone map in calibration */
+html[data-ui-theme="manga"] [class*="zone-map"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-bold) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="zone-map"] img {
+  object-fit: contain !important;
+  filter: none !important;
+}
+
+/* Zone selector buttons */
+html[data-ui-theme="manga"] [class*="zone-selector"] button,
+html[data-ui-theme="manga"] [class*="zone"] button {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  text-transform: uppercase !important;
+}
+
+html[data-ui-theme="manga"] [class*="zone-selector"] button.active,
+html[data-ui-theme="manga"] [class*="zone"] button.active {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+}
+
+/* Device control panels */
+html[data-ui-theme="manga"] [class*="device-control"] {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+}
+
+html[data-ui-theme="manga"] [class*="device-control"] h2 {
+  font-family: var(--font-display) !important;
+  font-size: 24px !important;
+  letter-spacing: 2px !important;
+  color: var(--ink) !important;
+  text-transform: uppercase !important;
+}
+
+/* Drug/capsule selector cards */
+html[data-ui-theme="manga"] [class*="drug"],
+html[data-ui-theme="manga"] [class*="capsule-select"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+  color: var(--ink) !important;
+}
+
+/* Chart timeline */
+html[data-ui-theme="manga"] [class*="timeline"],
+html[data-ui-theme="manga"] [class*="history-chart"] {
+  background: var(--paper-bright) !important;
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+}
+
+/* Toggle switches */
+html[data-ui-theme="manga"] [class*="toggle"],
+html[data-ui-theme="manga"] [class*="switch"] {
+  border: var(--line-med) !important;
+  border-radius: 0 !important;
+  background: var(--paper-aged) !important;
+}
+
+html[data-ui-theme="manga"] [class*="toggle"].on,
+html[data-ui-theme="manga"] [class*="switch"].on {
+  background: var(--ink) !important;
+}
+
+/* Section dividers */
+html[data-ui-theme="manga"] hr {
+  border: none !important;
+  border-top: var(--line-med) !important;
+  margin: 16px 0 !important;
+}
+
+/* Loading spinner */
+html[data-ui-theme="manga"] [class*="spinner"],
+html[data-ui-theme="manga"] [class*="loading"] {
+  border-color: var(--ink) !important;
+}
+
+/* Tooltips */
+html[data-ui-theme="manga"] [class*="tooltip"] {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border: var(--line-thin) !important;
+  border-color: var(--paper) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-body) !important;
+  box-shadow: 3px 3px 0 rgba(26, 26, 26, 0.3) !important;
+}
+
+html[data-ui-theme="manga"] .campaign-time-control.running i {
+  animation: manga-ink-pulse 2s infinite;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1050px) {
+  html[data-ui-theme="manga"] .resident-grid,
+  html[data-ui-theme="manga"] .contract-office-list {
+    grid-template-columns: 1fr !important;
+  }
+  html[data-ui-theme="manga"] .equipment-grid,
+  html[data-ui-theme="manga"] .offer-grid,
+  html[data-ui-theme="manga"] .inventory-grid {
+    grid-template-columns: repeat(2, minmax(200px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 750px) {
+  html[data-ui-theme="manga"] .equipment-grid,
+  html[data-ui-theme="manga"] .offer-grid,
+  html[data-ui-theme="manga"] .inventory-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* === DRAWERS / POPUPS === */
+html[data-ui-theme="manga"] .drawer-backdrop {
+  background: rgba(245, 241, 232, 0.85) !important;
+}
+
+html[data-ui-theme="manga"] .side-drawer,
+html[data-ui-theme="manga"] .bottom-drawer {
+  background: var(--manga-paper, #f5f1e8) !important;
+  border-color: var(--manga-ink, #1a1a1a) !important;
+  color: var(--manga-ink, #1a1a1a) !important;
+}
+
+html[data-ui-theme="manga"] .side-drawer h2,
+html[data-ui-theme="manga"] .bottom-drawer h2 {
+  color: var(--manga-ink, #1a1a1a) !important;
+}
+
+html[data-ui-theme="manga"] .side-drawer h3 {
+  color: var(--manga-ink, #1a1a1a) !important;
+  border-bottom: 2px solid var(--manga-ink, #1a1a1a) !important;
+}
+
+html[data-ui-theme="manga"] .side-drawer p,
+html[data-ui-theme="manga"] .side-drawer li,
+html[data-ui-theme="manga"] .bottom-drawer p,
+html[data-ui-theme="manga"] .bottom-drawer li {
+  color: var(--manga-ink, #1a1a1a) !important;
+}
+
+html[data-ui-theme="manga"] .side-drawer .technical {
+  color: var(--manga-ink, #1a1a1a) !important;
+  font-family: var(--manga-mono, "Courier New", monospace) !important;
+}
+
+html[data-ui-theme="manga"] .side-drawer button,
+html[data-ui-theme="manga"] .bottom-drawer button,
+html[data-ui-theme="manga"] .menu-drawer > button {
+  background: var(--manga-paper, #f5f1e8) !important;
+  border: 2px solid var(--manga-ink, #1a1a1a) !important;
+  color: var(--manga-ink, #1a1a1a) !important;
+}
+
+html[data-ui-theme="manga"] .side-drawer button:hover,
+html[data-ui-theme="manga"] .bottom-drawer button:hover,
+html[data-ui-theme="manga"] .menu-drawer > button:hover {
+  background: var(--manga-ink, #1a1a1a) !important;
+  color: var(--manga-paper, #f5f1e8) !important;
+}
+
+html[data-ui-theme="manga"] .menu-drawer hr {
+  border-top: 1px solid var(--manga-ink, #1a1a1a) !important;
+}
+
+html[data-ui-theme="manga"] .menu-drawer .danger-action {
+  border-color: #8b1a1a !important;
+  color: #8b1a1a !important;
+}
+
+html[data-ui-theme="manga"] .menu-drawer .danger-action:hover {
+  background: #8b1a1a !important;
+  color: var(--manga-paper, #f5f1e8) !important;
+}
+
+html[data-ui-theme="manga"] .bottom-drawer li {
+  border-top-color: var(--manga-ink, #1a1a1a) !important;
+}
+
+html[data-ui-theme="manga"] .bottom-drawer li small,
+html[data-ui-theme="manga"] .bottom-drawer li p {
+  color: var(--manga-ink, #1a1a1a) !important;
+}
+
+/* === CALIBRATION WORKBENCH LAYOUT === */
+html[data-ui-theme="manga"] .calibration-workbench {
+  min-height: 580px !important;
+}
+
+html[data-ui-theme="manga"] .workbench-columns {
+  grid-template-columns: minmax(280px, 1fr) minmax(200px, 300px) minmax(180px, 240px) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
+html[data-ui-theme="manga"] .workbench-columns > .operations-column {
+  grid-column: 2 / 4 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+  overflow: auto !important;
+}
+
+html[data-ui-theme="manga"] .workbench-columns:has(> .goal-settings-panel) > .operations-column,
+html[data-ui-theme="manga"] .workbench-columns:has(> .protocol-drawer) > .operations-column {
+  grid-column: 2 !important;
+}
+
+html[data-ui-theme="manga"] .workbench-columns > .goal-settings-panel,
+html[data-ui-theme="manga"] .workbench-columns > .protocol-drawer {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  z-index: 15 !important;
+}
+
+html[data-ui-theme="manga"] .workbench-columns > .auxiliary-column {
+  position: relative !important;
+  width: auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* State column (left panel) */
+html[data-ui-theme="manga"] .state-column {
+  min-width: 0 !important;
+  overflow: auto !important;
+}
+
+/* Character column (center) */
+html[data-ui-theme="manga"] .character-column {
+  min-width: 0 !important;
+}
+
+/* Operations column inner grid */
+html[data-ui-theme="manga"] .operations-column {
+  display: grid !important;
+  grid-template-columns: minmax(120px, 160px) minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  gap: 4px !important;
+}
+
+html[data-ui-theme="manga"] .operation-mode-bar {
+  position: relative !important;
+  width: auto !important;
+}
+
+html[data-ui-theme="manga"] .operation-toolbar {
+  position: relative !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+html[data-ui-theme="manga"] .operation-list {
+  min-width: 0 !important;
+}
+
+/* Responsive fallback */
+@media (max-width: 900px) {
+  html[data-ui-theme="manga"] .workbench-columns {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  html[data-ui-theme="manga"] .workbench-columns > .operations-column,
+  html[data-ui-theme="manga"] .workbench-columns > .state-column,
+  html[data-ui-theme="manga"] .workbench-columns > .character-column,
+  html[data-ui-theme="manga"] .workbench-columns > .auxiliary-column {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+  html[data-ui-theme="manga"] .operations-column {
+    grid-template-columns: 1fr !important;
+  }
+}

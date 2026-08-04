@@ -25,7 +25,7 @@
       { "id": "high_positive", "name": "Высокое положительное напряжение" },
       { "id": "high_negative", "name": "Высокое отрицательное напряжение" },
       { "id": "subspace", "name": "Сабспейс" },
-      { "id": "climax", "name": "На грани или разрядка" }
+      { "id": "climax", "name": "На грани или оргазм" }
     ],
     "phases": ["sustain", "intense", "peak"]
   },

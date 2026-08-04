@@ -41,7 +41,8 @@ const contracts = [
         conditions: [
             { type: 'attitude' as const, operator: '>' as const, value: 75 },
             { type: 'custom' as const, key: 'sensitivity', operator: '>' as const, value: 70 },
-            { type: 'custom' as const, key: 'capacity', operator: '<' as const, value: 40 }
+            { type: 'custom' as const, key: 'capacity', operator: '<' as const, value: 40 },
+            { type: 'acquired_trait' as const, key: 'trait_masochist', operator: '>=' as const, value: 2 }
         ],
         rewards: { credits: 800, trust: 15, items: ['drug_sensitizer'] },
         penalties: { credits: -100, trust: -5 }
@@ -55,7 +56,8 @@ const contracts = [
         conditions: [
             { type: 'attitude' as const, operator: '>' as const, value: 80 },
             { type: 'custom' as const, key: 'openness', operator: '>' as const, value: 75 },
-            { type: 'custom' as const, key: 'plasticity', operator: '>' as const, value: 60 }
+            { type: 'custom' as const, key: 'plasticity', operator: '>' as const, value: 60 },
+            { type: 'acquired_trait' as const, key: 'trait_conditioned_submission', operator: '>=' as const, value: 2 }
         ],
         rewards: { credits: 600, trust: 10, items: ['eq_handcuffs'] },
         penalties: { credits: -50, trust: -3 }
@@ -97,13 +99,14 @@ db.transaction(() => {
     for (const c of contracts) {
         // Content seeding must not reset a player's accepted/completed order
         // whenever the API process restarts.
-        if (contractRepo.get(c.id)) continue;
+        const existing = contractRepo.get(c.id);
+        if (existing && existing.state !== 'available') continue;
         contractRepo.save({
             id: c.id,
             issuerId: c.issuerId,
             title: c.title,
             description: c.description,
-            state: c.state,
+            state: existing?.state || c.state,
             acceptedByPlayerId: undefined,
             attachedSubjectId: undefined,
             deadlineTick: undefined,

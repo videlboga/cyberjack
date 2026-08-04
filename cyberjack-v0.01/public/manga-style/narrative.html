@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberJack — Диалог</title>
+  <link rel="stylesheet" href="./manga-core.css" />
+  <style>
+    .nar-grid { display: grid; grid-template-columns: 1fr 280px; gap: 14px; min-height: 0; }
+    .nar-main { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+    .nar-side { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+
+    /* Chat log */
+    .chat-log { flex: 1; overflow-y: auto; padding: 14px; background: var(--m-paper-dark); background-image: var(--st-10); border: 3px solid var(--m-ink); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); min-height: 300px; max-height: calc(100vh - 240px); }
+
+    /* Speech bubbles */
+    .msg { margin-bottom: 12px; max-width: 85%; }
+    .msg-narrator { max-width: 92%; }
+    .msg-narrator .m-bubble { font-style: italic; border-style: double; border-width: 3px; font-size: 14px; line-height: 1.6; color: var(--m-ink-soft); }
+    .msg-actor .m-bubble { font-size: 14px; line-height: 1.55; }
+    .msg-actor .msg-author { font-size: 11px; font-weight: 800; color: var(--m-ink-fade); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .msg-actor .msg-author::before { content: "▼ "; color: var(--m-red); }
+    .msg-player { margin-left: auto; }
+    .msg-player .m-bubble { background: var(--m-paper-light); background-image: var(--st-line-10); border-color: var(--m-ink); font-size: 13px; }
+    .msg-player .m-bubble::before { content: "→ "; font-weight: 900; }
+    .msg-system .m-bubble { font-size: 11px; color: var(--m-ink-fade); background: var(--m-paper-dark); background-image: var(--st-20); border-style: dashed; border-width: 2px; padding: 6px 10px; }
+    .msg-system .m-bubble::before { content: "⟦ "; font-weight: 900; }
+    .msg-system .m-bubble::after { content: " ⟧"; font-weight: 900; }
+    .msg-error .m-bubble { border-color: var(--m-red); background: rgba(200,49,42,0.05); color: var(--m-red); font-size: 11px; }
+
+    /* SFX inline */
+    .msg-sfx { text-align: center; margin: 16px 0; }
+    .msg-sfx .m-sfx { font-size: 32px; }
+
+    /* State description */
+    .state-desc { padding: 8px 14px; border: 2px solid var(--m-blue); background: rgba(42,92,138,0.05); font-size: 13px; color: var(--m-blue); font-style: italic; clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px)); }
+    .state-desc::before { content: "状態: "; font-weight: 900; font-style: normal; }
+
+    /* Action area */
+    .action-area { padding: 12px; border: 3px solid var(--m-ink); background: var(--m-paper-light); clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); display: flex; flex-direction: column; gap: 8px; }
+
+    /* Chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { padding: 4px 12px; border: 2px solid var(--m-ink); background: var(--m-paper-light); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .1s; clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px)); }
+    .chip:hover { background: var(--m-paper-dark); transform: translate(-1px,-1px); box-shadow: 2px 2px 0 var(--m-ink); }
+    .chip.verbal { border-color: var(--m-green); color: var(--m-green); }
+    .chip.verbal:hover { background: var(--m-green); color: var(--m-paper); }
+    .chip.action { border-color: var(--m-yellow); color: var(--m-yellow); }
+    .chip.action:hover { background: var(--m-yellow); color: var(--m-paper); }
+    .chip.wait { border-color: var(--m-ink-fade); color: var(--m-ink-fade); }
+
+    /* Input row */
+    .input-row { display: flex; gap: 8px; align-items: center; }
+    .input-row .m-input { flex: 1; }
+
+    /* Quick category buttons */
+    .cat-row { display: flex; flex-wrap: wrap; gap: 4px; }
+    .cat-btn { padding: 3px 10px; border: 2px solid var(--m-ink-fade); background: var(--m-paper-light); font-size: 10px; font-weight: 700; cursor: pointer; transition: all .1s; clip-path: polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px)); }
+    .cat-btn:hover { border-color: var(--m-ink); }
+    .cat-btn.active { background: var(--m-ink); color: var(--m-paper); border-color: var(--m-ink); }
+
+    /* Scene image placeholder */
+    .scene-img { width: 100%; height: 140px; border: 3px solid var(--m-ink); background: var(--m-paper-dark); background-image: var(--st-30); display: grid; place-items: center; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); }
+    .scene-img .m-sfx { font-size: 24px; }
+
+    /* Contract card mini */
+    .contract-mini { padding: 8px 10px; border: 2px solid var(--m-ink); background: var(--m-paper-light); margin-bottom: 8px; clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px)); }
+    .contract-mini .title { font-size: 12px; font-weight: 800; color: var(--m-red); margin-bottom: 4px; }
+    .contract-mini .desc { font-size: 10px; color: var(--m-ink-fade); margin-bottom: 6px; }
+    .contract-mini .cond { display: flex; justify-content: space-between; font-size: 10px; padding: 2px 0; border-bottom: 1px solid var(--m-ink-fade); }
+    .contract-mini .cond:last-child { border-bottom: none; }
+    .contract-mini .cond .met { color: var(--m-green); font-weight: 900; }
+    .contract-mini .cond .unmet { color: var(--m-red); font-weight: 900; }
+  </style>
+</head>
+<body>
+  <div class="m-shell">
+    <header class="m-hud">
+      <div class="m-hud-brand">
+        <span class="m-logo-mark">◈</span>
+        <div class="m-brand-text"><b>S-01 SIMULATOR</b><small>манга интерфейс</small></div>
+      </div>
+      <nav class="m-hud-nav">
+        <a href="./index.html">Обзор</a>
+        <a href="./dashboard.html">Дашборд</a>
+        <a href="./station.html">Станция</a>
+        <a href="./calibration.html">Калибровка</a>
+        <a class="active" href="./narrative.html">Диалог</a>
+      </nav>
+      <div class="m-hud-clock"><small>ЦИКЛ</small><b>07:14:09</b></div>
+    </header>
+
+    <main class="m-screen">
+      <div class="nar-grid">
+
+        <!-- ═══ MAIN: Chat + Actions ═══ -->
+        <div class="nar-main">
+          <!-- Scene image -->
+          <div class="scene-img">
+            <span class="m-sfx">シーン</span>
+            <span style="position:absolute; font-size:10px; color:var(--m-ink-fade); margin-top:60px;">сцена: лаборатория-калибратор</span>
+          </div>
+
+          <!-- Chat log -->
+          <div class="chat-log">
+            <div class="msg msg-system">
+              <div class="m-bubble">Связь установлена. Сцена: scene_lab_calibrator</div>
+            </div>
+
+            <div class="msg msg-narrator">
+              <div class="m-bubble">
+                Mira лежит на кушетке в центре лаборатории, её запястья зафиксированы мягкими ремнями.
+                Тёплый свет падает сверху, выхватывая контуры тела. Воздух пахнет озоном и чем-то сладковатым.
+                Она слегка поворачивает голову, прислушиваясь.
+              </div>
+            </div>
+
+            <div class="msg msg-sfx">
+              <span class="m-sfx">ドキドキ...</span>
+            </div>
+
+            <div class="msg msg-actor">
+              <div class="msg-author">Mira</div>
+              <div class="m-bubble">
+                — Опять вы... Что на этот раз? Я даже не вижу вас толком из-за этого света.
+                <span style="color:var(--m-ink-fade); font-style:italic;">*голос звучит настороженно, но не испуганно*</span>
+              </div>
+            </div>
+
+            <div class="msg msg-system">
+              <div class="m-bubble">мягко погладить → Грудь</div>
+            </div>
+
+            <div class="msg msg-narrator">
+              <div class="m-bubble">
+                Ладонь скользит по ключице, спускается к верхней части груди — медленно, почти невесомо.
+                Mira вздрагивает, но не отстраняется. Кожа реагирует раньше, чем разум.
+              </div>
+            </div>
+
+            <div class="msg msg-sfx">
+              <span class="m-sfx" style="font-size:20px;">ピクッ</span>
+            </div>
+
+            <div class="msg msg-actor">
+              <div class="msg-author">Mira</div>
+              <div class="m-bubble">
+                — Мм... Вы начинаете с этого? Хитро.
+                <span style="color:var(--m-ink-fade); font-style:italic;">*уголок губ дёргается в полуулыбке*</span>
+              </div>
+            </div>
+
+            <div class="msg msg-player">
+              <div class="m-bubble">Тише. Не двигайся. Я ещё не начал.</div>
+            </div>
+
+            <div class="msg msg-narrator">
+              <div class="m-bubble">
+                Mira замирает. Только дыхание выдаёт её — чуть более частое, чем секунду назад.
+              </div>
+            </div>
+
+            <div class="msg msg-system">
+              <div class="m-bubble">Состояние: открытость растёт, напряжение 12%</div>
+            </div>
+          </div>
+
+          <!-- State description -->
+          <div class="state-desc">
+            Mira насторожена, но расслаблена. Открытость растёт. Напряжение 12%.
+          </div>
+
+          <!-- Action area -->
+          <div class="action-area">
+            <!-- Quick categories -->
+            <div class="cat-row">
+              <button class="cat-btn active">Ласка</button>
+              <button class="cat-btn">Поцелуй</button>
+              <button class="cat-btn">Укус</button>
+              <button class="cat-btn">Шлепок</button>
+              <button class="cat-btn">Удар</button>
+              <button class="cat-btn">Медицина</button>
+              <button class="cat-btn">Контроль</button>
+              <button class="cat-btn">Поза</button>
+            </div>
+
+            <!-- Suggested chips -->
+            <div style="font-size:9px; font-weight:800; color:var(--m-ink-fade); letter-spacing:0.08em; text-transform:uppercase; margin-top:4px;">Подсказки</div>
+            <div class="chips">
+              <button class="chip action">*провести пальцами по шее*</button>
+              <button class="chip verbal">«Расслабься для меня»</button>
+              <button class="chip action">*приблизиться к лицу*</button>
+              <button class="chip wait">Ждать</button>
+            </div>
+
+            <!-- Input row -->
+            <div class="input-row">
+              <input type="text" class="m-input" placeholder="Сказать что-то... или *описать действие*" />
+              <label class="m-check"><input type="checkbox" checked /><span class="m-check-box"></span>LLM</label>
+              <button class="m-btn active">Отправить</button>
+              <button class="m-btn quiet">Ждать</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SIDE: Subject + Contract ═══ -->
+        <div class="nar-side">
+          <!-- Subject mini-stats -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">対象</span>Mira</div>
+            <div class="m-panel-body">
+              <div class="m-gauge" style="margin-bottom:8px;">
+                <div class="m-gauge-head"><small>Чувствительность</small><b>62%</b></div>
+                <div class="m-gauge-track"><div class="m-gauge-fill blue" style="width:62%;"></div><div class="m-gauge-baseline" style="left:55%;"></div></div>
+              </div>
+              <div class="m-gauge" style="margin-bottom:8px;">
+                <div class="m-gauge-head"><small>Выносливость</small><b>58%</b></div>
+                <div class="m-gauge-track"><div class="m-gauge-fill green" style="width:58%;"></div><div class="m-gauge-baseline" style="left:60%;"></div></div>
+              </div>
+              <div class="m-gauge" style="margin-bottom:8px;">
+                <div class="m-gauge-head"><small>Открытость</small><b>54%</b></div>
+                <div class="m-gauge-track"><div class="m-gauge-fill green" style="width:54%;"></div><div class="m-gauge-baseline" style="left:50%;"></div></div>
+              </div>
+              <div class="m-gauge" style="margin-bottom:8px;">
+                <div class="m-gauge-head"><small>Отношение</small><b>52%</b></div>
+                <div class="m-gauge-track"><div class="m-gauge-fill purple" style="width:52%;"></div><div class="m-gauge-baseline" style="left:50%;"></div></div>
+              </div>
+              <div class="m-gauge">
+                <div class="m-gauge-head"><small>Напряжение</small><b>12%</b></div>
+                <div class="m-gauge-track"><div class="m-gauge-fill red" style="width:12%;"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contract -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">依頼</span>Контракт</div>
+            <div class="m-panel-body">
+              <div class="contract-mini">
+                <div class="title">«Калибровка чувствительности»</div>
+                <div class="desc">Достичь чувствительности 80+ без перегрузки.</div>
+                <div class="cond"><span>Чувствительность ≥ 80</span><span class="unmet">62 ✗</span></div>
+                <div class="cond"><span>Перегрузка ≤ 20</span><span class="met">8 ✓</span></div>
+                <div class="cond"><span>Циклов ≤ 20</span><span class="met">14 ✓</span></div>
+                <button class="m-btn quiet" style="width:100%; margin-top:8px; font-size:10px; padding:4px;">Сдать</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Body zones quick -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">身体</span>Анатомия</div>
+            <div class="m-panel-body">
+              <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                <span class="m-tag red">Соски 85</span>
+                <span class="m-tag red">Шея 78</span>
+                <span class="m-tag">Грудь 45</span>
+                <span class="m-tag">Бёдра 45</span>
+                <span class="m-tag">Живот 30</span>
+                <span class="m-tag">Губы 70</span>
+                <span class="m-tag blue">Руки 25</span>
+                <span class="m-tag">Спина 40</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

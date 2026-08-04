@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>CyberJack Visual Review</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #1a1a2e; color: #e0e0e0; font-family: system-ui, sans-serif; padding: 16px; }
+h1 { color: #8be9fd; margin-bottom: 10px; font-size: 18px; }
+#filters { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+#filters select { background: #2a2a4a; color: #e0e0e0; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; }
+#stats { margin-bottom: 10px; color: #888; font-size: 13px; }
+#gallery { display: flex; flex-wrap: wrap; gap: 10px; }
+#gallery .card { flex: 1 1 300px; max-width: 400px; min-width: 200px; background: #2a2a4a; border-radius: 6px; overflow: hidden; border: 2px solid transparent; margin-bottom: 8px; }
+.card.rejected { border-color: #ff5555; }
+.card img { width: 100%; height: auto; display: block; cursor: pointer; }
+.badges { padding: 4px 7px 0; display: flex; flex-wrap: wrap; gap: 3px; }
+.badge { padding: 1px 5px; border-radius: 2px; font-size: 9px; }
+.badge-char { background: #bd93f9; color: #1a1a2e; }
+.badge-family { background: #ffb86c; color: #1a1a2e; }
+.badge-wardrobe { background: #f1fa8c; color: #1a1a2e; }
+.badge-phase { background: #ff79c6; color: #1a1a2e; }
+.badge-affect { background: #8be9fd; color: #1a1a2e; }
+.desc { padding: 5px 7px; font-size: 10px; line-height: 1.3; color: #aaa; }
+.desc b { color: #8be9fd; }
+.actions { padding: 5px 7px; display: flex; gap: 5px; }
+.actions button { flex: 1; padding: 4px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+.btn-approve { background: #50fa7b; color: #1a1a2e; }
+.btn-reject { background: #ff5555; color: #fff; }
+.btn-approve:hover { background: #40e06b; }
+.btn-reject:hover { background: #e04545; }
+.reject-reasons { padding: 4px 7px 7px; display: flex; flex-direction: column; gap: 3px; }
+.reject-reasons label { font-size: 11px; color: #aaa; display: flex; align-items: center; gap: 4px; }
+.reject-reasons textarea { width: 100%; background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; border-radius: 3px; padding: 3px; font-size: 11px; resize: vertical; }
+#pager { margin-top: 12px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+#pager button { background: #2a2a4a; color: #e0e0e0; border: 1px solid #444; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
+#pager button:disabled { opacity: 0.3; cursor: default; }
+#pager span { color: #888; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>CyberJack Visual Review</h1>
+<div id="filters">
+  <select id="filterCategory"><option value="">Все категории</option></select>
+  <select id="filterChar"><option value="">Все персонажи</option><option value="mira">Мира</option><option value="iona">Иона</option><option value="nika">Ника</option></select>
+  <select id="filterTab"><option value="standard">Стандарт</option><option value="wide">Широкие</option></select>
+</div>
+<div id="stats"></div>
+<div id="gallery"></div>
+<div id="pager">
+  <button id="prevBtn">← Назад</button>
+  <span id="pageInfo"></span>
+  <button id="nextBtn">Вперёд →</button>
+</div>
+
+<script>
+let RU = {};
+let reviewed = {};
+let currentPage = 0;
+let totalPages = 0;
+let totalItems = 0;
+const PAGE_SIZE = 42;
+
+async function loadPage(page) {
+  const category = document.getElementById('filterCategory').value;
+  const char = document.getElementById('filterChar').value;
+  let url = `/review-api/index?page=${page}&page_size=${PAGE_SIZE}`;
+  if (category) url += `&category=${encodeURIComponent(category)}`;
+  if (char) url += `&char=${encodeURIComponent(char)}`;
+  
+  const res = await fetch(url);
+  const data = await res.json();
+  RU = data.ru || {};
+  totalPages = data.pages || 1;
+  totalItems = data.total || 0;
+  currentPage = data.page;
+  
+  render(data.items);
+}
+
+function render(items) {
+  document.getElementById('pageInfo').textContent = `Стр. ${currentPage+1} / ${totalPages} (всего ${totalItems})`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+  
+  const approved = Object.values(reviewed).filter(r=>r.status==='approved').length;
+  const rejected = Object.values(reviewed).filter(r=>r.status==='rejected').length;
+  document.getElementById('stats').textContent = `Одобрено: ${approved} | Отклонено: ${rejected}`;
+  
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = '';
+  
+  // Populate categories on first load
+  const catSel = document.getElementById('filterCategory');
+  if (catSel.options.length <= 1 && RU.categories) {
+    for (const [k, v] of Object.entries(RU.categories)) {
+      const o = document.createElement('option');
+      o.value = k; o.textContent = v;
+      catSel.appendChild(o);
+    }
+  }
+  
+  for (const item of items) {
+    const path = item.path || item.url;
+    const st = reviewed[path]?.status || 'pending';
+    if (st !== 'pending') continue;
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.url = item.url;
+    
+    const desc = item.description || item.path || item.url;
+    const badges = [];
+    if (item.char && RU.chars?.[item.char]) badges.push(`<span class="badge badge-char">${RU.chars[item.char]}</span>`);
+    if (item.family && RU.families?.[item.family]) badges.push(`<span class="badge badge-family">${RU.families[item.family]}</span>`);
+    if (item.wardrobe && RU.wardrobes?.[item.wardrobe]) badges.push(`<span class="badge badge-wardrobe">${RU.wardrobes[item.wardrobe]}</span>`);
+    if (item.phase && RU.phases?.[item.phase]) badges.push(`<span class="badge badge-phase">${RU.phases[item.phase]}</span>`);
+    if (item.affect && RU.affects?.[item.affect]) badges.push(`<span class="badge badge-affect">${RU.affects[item.affect]}</span>`);
+    
+    card.innerHTML = `
+      <img src="${item.url}" loading="lazy" onclick="window.open('${item.url}')">
+      <div class="badges">${badges.join('')}</div>
+      <div class="desc"><b>${desc}</b></div>
+      <div class="actions">
+        <button class="btn-approve" onclick="approve('${item.url}')">✓ Одобрить</button>
+        <button class="btn-reject" onclick="reject('${item.url}')">✕ Отклонить</button>
+      </div>
+      <div class="reject-reasons">
+        <label><input type="checkbox" onchange="toggleReason('${item.url}', 'bad_anatomy')"> Плохая анатомия</label>
+        <label><input type="checkbox" onchange="toggleReason('${item.url}', 'wrong_scene')"> Неверная сцена</label>
+        <label><input type="checkbox" onchange="toggleReason('${item.url}', 'wrong_wardrobe')"> Неверная одежда</label>
+        <label><input type="checkbox" onchange="toggleReason('${item.url}', 'bad_face')"> Плохое лицо</label>
+        <textarea placeholder="Комментарий..." onchange="setNote('${item.url}', this.value)"></textarea>
+      </div>
+    `;
+    gallery.appendChild(card);
+  }
+  
+  // If all items on page are already reviewed, auto-advance to next page
+  if (gallery.children.length === 0 && currentPage < totalPages - 1) {
+    loadPage(currentPage + 1);
+  }
+}
+
+function saveReviewed() { localStorage.setItem('cj_reviewed', JSON.stringify(reviewed)); }
+
+async function sendToServer(path, status, reasons, note) {
+  await fetch('/review-api/submit', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({path, status, reasons: reasons || [], note: note || ''})
+  });
+}
+
+function approve(url) {
+  const path = url.replace('/character-images/', '');
+  reviewed[path] = {status: 'approved', reasons: [], note: ''};
+  saveReviewed();
+  sendToServer(path, 'approved', [], '');
+  const card = document.querySelector(`[data-url="${url}"]`);
+  if (card) card.remove();
+  const approved = Object.values(reviewed).filter(r=>r.status==='approved').length;
+  const rejected = Object.values(reviewed).filter(r=>r.status==='rejected').length;
+  document.getElementById('stats').textContent = `Одобрено: ${approved} | Отклонено: ${rejected}`;
+}
+
+function reject(url) {
+  const path = url.replace('/character-images/', '');
+  const card = document.querySelector(`[data-url="${url}"]`);
+  if (card && card.classList.contains('rejected')) {
+    sendToServer(path, 'rejected', reviewed[path]?.reasons || [], reviewed[path]?.note || '');
+    card.remove();
+    return;
+  }
+  reviewed[path] = {status: 'rejected', reasons: [], note: ''};
+  saveReviewed();
+  sendToServer(path, 'rejected', [], '');
+  if (card) card.classList.add('rejected');
+}
+
+function toggleReason(url, reason) {
+  const path = url.replace('/character-images/', '');
+  const r = reviewed[path];
+  if (!r) return;
+  if (r.reasons.includes(reason)) r.reasons = r.reasons.filter(x => x !== reason);
+  else r.reasons.push(reason);
+  saveReviewed();
+  sendToServer(path, r.status, r.reasons, r.note);
+}
+
+function setNote(url, note) {
+  const path = url.replace('/character-images/', '');
+  const r = reviewed[path];
+  if (!r) return;
+  r.note = note;
+  saveReviewed();
+  sendToServer(path, r.status, r.reasons, r.note);
+}
+
+// Init
+const saved = localStorage.getItem('cj_reviewed');
+if (saved) reviewed = JSON.parse(saved);
+
+document.getElementById('filterCategory').onchange = () => { currentPage = 0; loadPage(0); };
+document.getElementById('filterChar').onchange = () => { currentPage = 0; loadPage(0); };
+document.getElementById('prevBtn').onclick = () => { if (currentPage > 0) loadPage(currentPage - 1); };
+document.getElementById('nextBtn').onclick = () => { loadPage(currentPage + 1); };
+
+loadPage(0);
+</script>
+</body>
+</html>

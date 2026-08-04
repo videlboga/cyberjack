@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>CyberJack — 16:9 Manga Layout</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   16:9 MANGA LAYOUT — based on actual calibration-workbench
+   structure: workbench-columns (state | character | operations | auxiliary)
+   + header + objective-strip + scene-monitor + bottom event-strip
+   White manga page. No decoration. Illustrations on white.
+   ═══════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #2a2520;
+  --ink-soft: #6b6258;
+  --ink-light: #a8a096;
+  --paper: #ffffff;
+  --off: #faf8f5;
+  --warm: #b8995e;
+  --cool: #6b8a7c;
+  --rose: #b07878;
+  --violet: #7a7088;
+  --danger: #a86054;
+}
+
+html, body {
+  font-family: 'Georgia', 'Noto Serif JP', serif;
+  background: #e8e4de;
+  color: var(--ink);
+  line-height: 1.3;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.screen-wrap {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+}
+
+.screen {
+  width: 100%;
+  max-width: 1920px;
+  aspect-ratio: 16/9;
+  background: var(--paper);
+  display: grid;
+  grid-template-rows: 28px auto 1fr auto 22px;
+  grid-template-columns: 190px 1fr 240px 190px;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+.workbench-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 12px;
+  border-bottom: 1px solid var(--off);
+}
+.workbench-back { font-size: 9px; color: var(--ink-soft); cursor: pointer; }
+.workbench-header .eyebrow { font-size: 7px; color: var(--ink-light); letter-spacing: 0.08em; }
+.workbench-header h1 { font-size: 12px; font-weight: 700; }
+.header-progress { font-size: 8px; color: var(--ink-soft); margin-left: auto; }
+.workbench-header nav { display: flex; gap: 4px; align-items: center; }
+.calibration-time-control {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 8px; padding: 2px 6px; border: 0.5px solid var(--ink-light);
+  background: var(--paper); cursor: pointer; font-family: inherit;
+}
+.hdr-btn {
+  font-size: 8px; padding: 2px 6px; border: 0.5px solid var(--ink-light);
+  background: var(--paper); cursor: pointer; font-family: inherit;
+}
+.hdr-btn:hover { background: var(--off); }
+
+/* ── OBJECTIVE STRIP ── */
+.objective-strip {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 2px 12px; font-size: 8px; color: var(--ink-soft);
+  border-bottom: 1px solid var(--off);
+}
+.objective-strip select { font-family: inherit; font-size: 8px; border: 0.5px solid var(--ink-light); padding: 1px 3px; background: var(--paper); }
+.obj-cond {
+  display: inline-flex; align-items: center; gap: 1px;
+  padding: 1px 4px; border: 0.5px solid var(--ink-light); font-size: 8px;
+}
+.obj-cond.met { border-color: var(--cool); color: var(--cool); }
+.obj-cond b { font-size: 8px; }
+
+/* ── WORKBENCH COLUMNS ── */
+.workbench-columns {
+  display: contents;
+}
+
+/* ═══ STATE COLUMN ═══ */
+.state-column {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  overflow: hidden;
+  border-right: 1px solid var(--off);
+}
+
+.current-state { padding: 4px 6px; background: var(--off); }
+.current-state small { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.current-state strong { display: block; font-size: 10px; }
+.current-state p { font-size: 8px; color: var(--ink-soft); margin-top: 1px; line-height: 1.2; }
+
+.telemetry-readout { display: grid; gap: 1px; margin-top: 3px; }
+.telemetry-readout > div {
+  display: flex; align-items: center; gap: 4px;
+  padding: 2px 4px; background: var(--off);
+}
+.telemetry-readout span { font-size: 7px; color: var(--ink-light); width: 42px; }
+.telemetry-readout strong { font-size: 9px; font-weight: 700; flex: 1; }
+.telemetry-readout i { font-size: 8px; color: var(--cool); }
+
+.behavioral-readout { padding: 3px 6px; margin-top: 2px; }
+.behavioral-readout small { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.behavioral-readout p { font-size: 8px; color: var(--ink-soft); font-style: italic; margin-top: 1px; }
+
+.state-column h3 { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; margin-top: 5px; }
+.contract-target select { width: 100%; font-family: inherit; font-size: 8px; border: 0.5px solid var(--ink-light); padding: 1px 3px; }
+.contract-target p { font-size: 8px; color: var(--ink-soft); margin-top: 2px; }
+.context-list div { display: flex; gap: 4px; font-size: 8px; padding: 1px 0; }
+.context-list span { color: var(--ink-light); }
+.context-list b { font-weight: 600; }
+.state-column p.muted { font-size: 8px; color: var(--ink-light); }
+
+/* ═══ CHARACTER COLUMN ═══ */
+.character-column {
+  grid-column: 2;
+  display: grid;
+  grid-template-rows: 1fr 80px 1fr auto;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Character stage — large illustration */
+.character-stage {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 0;
+}
+.character-stage img {
+  height: 100%; width: auto; object-fit: contain; object-position: center bottom;
+}
+.character-stage .stage-lbl {
+  position: absolute; bottom: 4px; left: 8px;
+  font-size: 7px; color: var(--ink-light);
+}
+
+/* Sustained effect overlay */
+.sustain-ovl {
+  position: absolute; top: 4px; left: 4px;
+  display: flex; align-items: center; gap: 4px;
+  padding: 2px 5px; background: rgba(255,255,255,0.92);
+  font-size: 8px;
+}
+.sustain-ovl .si { width: 24px; height: 14px; overflow: hidden; }
+.sustain-ovl .si img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Chat — middle of center column */
+.character-chat {
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--off); border-bottom: 1px solid var(--off);
+  overflow: hidden;
+  min-height: 0;
+}
+.character-chat header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 2px 8px; background: var(--off);
+}
+.character-chat header strong { font-size: 8px; }
+.character-chat header span { font-size: 7px; color: var(--ink-light); }
+.chat-scroll {
+  flex: 1; overflow-y: auto; padding: 3px 6px;
+}
+.chat-line { margin-bottom: 2px; display: flex; gap: 4px; }
+.chat-line .cl-speaker { font-size: 7px; color: var(--ink-light); }
+.chat-line .cl-text { font-size: 9px; color: var(--ink); }
+.chat-action { font-size: 7px; color: var(--ink-soft); margin-bottom: 1px; padding-left: 10px; }
+
+.speech-input { display: flex; gap: 2px; padding: 2px 6px; align-items: center; }
+.speech-input textarea {
+  flex: 1; font-family: inherit; font-size: 9px; padding: 2px 4px;
+  border: 0.5px solid var(--ink-light); background: var(--paper); resize: none; height: 20px;
+}
+.speech-input button {
+  font-family: inherit; font-size: 9px; padding: 2px 8px;
+  border: 0.5px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer;
+}
+.chat-target { width: 22px; height: 22px; overflow: hidden; border: 0.5px solid var(--ink-light); flex-shrink: 0; }
+.chat-target img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Scene monitor — bottom of center column */
+.scene-monitor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px 6px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Physiology panel */
+.physiology-panel { display: flex; flex-direction: column; gap: 2px; }
+.activation-scale { }
+.activation-scale header { display: flex; justify-content: space-between; font-size: 7px; }
+.activation-scale header span { color: var(--ink-light); }
+.activation-scale header b { font-size: 8px; }
+.activation-scale .act-bar { height: 6px; background: var(--off); position: relative; margin-top: 1px; }
+.activation-scale .act-bar i { display: block; height: 100%; background: var(--cool); }
+.activation-scale footer { display: flex; justify-content: space-between; font-size: 6px; color: var(--ink-light); }
+
+.pulse-biosignal, .breathing-biosignal { margin-top: 2px; }
+.pulse-biosignal header, .breathing-biosignal header { display: flex; justify-content: space-between; font-size: 7px; }
+.pulse-biosignal header b, .breathing-biosignal header b { font-size: 9px; }
+.pulse-cardiogram { height: 16px; background: var(--off); margin-top: 1px; }
+.pulse-cardiogram svg { width: 100%; height: 100%; }
+.pulse-cardiogram path { fill: none; stroke: var(--ink); stroke-width: 1; stroke-linecap: round; }
+.breathing-field { height: 8px; background: var(--off); margin-top: 1px; position: relative; }
+.breathing-field i, .breathing-field em { display: block; height: 100%; }
+.breathing-field i { background: var(--cool); opacity: 0.3; }
+
+/* Endurance card */
+.endurance-card { display: flex; gap: 4px; margin-top: 2px; }
+.endurance-scale { text-align: center; }
+.endurance-scale header span { font-size: 6px; color: var(--ink-light); }
+.endurance-scale header b { display: none; }
+.endurance-scale .es-bar { width: 10px; height: 36px; background: var(--off); position: relative; margin: 2px auto; }
+.endurance-scale .es-bar i { position: absolute; bottom: 0; left: 0; right: 0; background: var(--warm); }
+.endurance-scale p strong { font-size: 11px; display: block; }
+.endurance-scale p span { font-size: 6px; color: var(--ink-light); }
+.endurance-infographics { display: flex; gap: 4px; flex: 1; }
+.endurance-metric { text-align: center; flex: 1; }
+.endurance-metric p span { font-size: 7px; color: var(--ink-soft); display: block; }
+.endurance-metric p b { font-size: 10px; }
+.endurance-metric .em-track { height: 26px; width: 6px; background: var(--off); margin: 2px auto; position: relative; }
+.endurance-metric .em-track i { position: absolute; bottom: 0; left: 0; right: 0; }
+.balance-indicator .em-track i { background: var(--cool); }
+.overload-indicator .em-track i { background: var(--violet); }
+.endurance-metric small { font-size: 6px; color: var(--ink-light); display: block; }
+
+/* State trends */
+.state-trends { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 2px; }
+.state-trends article { padding: 2px; }
+.state-trends header { display: flex; justify-content: space-between; align-items: baseline; font-size: 7px; }
+.state-trends header span { color: var(--ink-soft); }
+.state-trends header b { font-size: 9px; }
+.state-trends header em { font-size: 7px; color: var(--cool); }
+.state-trends svg { width: 100%; height: 20px; display: block; }
+.state-trends .grid { stroke: var(--ink-light); stroke-width: 0.3; opacity: 0.15; }
+.state-trends .base { stroke: var(--warm); stroke-width: 0.5; stroke-dasharray: 2 1; opacity: 0.3; }
+.state-trends .line { fill: none; stroke-width: 1; stroke-linecap: round; }
+.state-trends .area { opacity: 0.08; }
+
+/* Monitor session strip */
+.monitor-session-strip { display: grid; grid-template-columns: 1fr 1.5fr; gap: 3px; margin-top: 2px; }
+.monitor-condition-pose, .monitor-session-contexts { padding: 2px 4px; background: var(--off); }
+.monitor-condition-pose small, .monitor-session-contexts small { font-size: 6px; color: var(--ink-light); }
+.monitor-condition-pose b, .monitor-session-contexts b { font-size: 8px; display: block; }
+.monitor-condition-pose p, .monitor-session-contexts p { font-size: 7px; color: var(--ink-soft); }
+.monitor-context-list span { font-size: 7px; display: block; }
+
+/* Recommendations */
+.monitor-control-layout__recommendations { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2px; }
+.control-recommendation-card {
+  position: relative; height: 30px; overflow: hidden; cursor: pointer;
+  display: flex; align-items: center; gap: 3px; padding: 0 4px;
+}
+.control-recommendation-card::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--action-image); background-size: cover; background-position: center;
+  opacity: 0.85; filter: saturate(0.85);
+}
+.control-recommendation-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.75) 0%, transparent 50%);
+}
+.control-recommendation-card kbd { position: relative; z-index: 2; font-size: 8px; font-weight: 700; font-family: inherit; color: var(--ink); }
+.control-recommendation-card strong { position: relative; z-index: 2; font-size: 7px; color: var(--ink); }
+.control-recommendation-card small { display: none; }
+
+/* Processes / intimacy */
+.monitor-control-layout__processes { margin-top: 2px; }
+.intimacy-readiness-panel { padding: 3px 4px; background: var(--off); }
+.intimacy-readiness-panel header { display: flex; justify-content: space-between; }
+.intimacy-readiness-panel header small { font-size: 6px; color: var(--ink-light); }
+.intimacy-readiness-panel header strong { font-size: 9px; }
+.intimacy-readiness-metrics { display: flex; gap: 6px; margin-top: 2px; }
+.intimacy-readiness-metrics span { flex: 1; }
+.intimacy-readiness-metrics small { font-size: 6px; color: var(--ink-soft); display: block; }
+.intimacy-readiness-metrics b { font-size: 8px; }
+.intimacy-readiness-metrics i { display: block; height: 2px; background: var(--off); margin-top: 1px; }
+.intimacy-readiness-metrics em { display: block; height: 100%; }
+
+/* Outcome stack */
+.monitor-outcome-stack { margin-top: 2px; }
+.monitor-goal { padding: 2px 4px; }
+.footer-goal-picker { display: flex; align-items: center; gap: 3px; }
+.footer-goal-picker small { font-size: 6px; color: var(--ink-light); }
+.footer-goal-current { font-family: inherit; font-size: 8px; border: 0.5px solid var(--ink-light); padding: 1px 4px; background: var(--paper); cursor: pointer; }
+.goal-core-conditions { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 2px; }
+.goal-core-conditions span { display: flex; align-items: center; gap: 1px; font-size: 7px; padding: 1px 3px; border: 0.5px solid var(--ink-light); }
+.goal-core-conditions span.met { border-color: var(--cool); color: var(--cool); }
+.goal-core-conditions i { font-size: 6px; }
+.goal-core-conditions b { font-size: 7px; }
+
+.operation-last-result { padding: 3px 4px; background: var(--off); margin-top: 2px; }
+.operation-last-result header { display: flex; justify-content: space-between; align-items: baseline; }
+.operation-last-result header small { font-size: 7px; color: var(--ink-light); }
+.operation-last-result header b { font-size: 9px; }
+.monitor-reaction-readout, .monitor-change-readout { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 2px; }
+.monitor-reaction-readout span, .monitor-change-readout span { display: flex; align-items: center; gap: 1px; }
+.monitor-reaction-readout i, .monitor-change-readout i { font-size: 6px; color: var(--ink-light); }
+.monitor-reaction-readout b, .monitor-change-readout b { font-size: 8px; font-variant-numeric: tabular-nums; }
+.monitor-experience-readout { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 1px; }
+.monitor-experience-readout span { font-size: 6px; padding: 0 2px; border: 0.5px solid var(--ink-light); }
+.monitor-experience-readout i { color: var(--ink-light); }
+.monitor-experience-readout b { color: var(--cool); }
+
+.stage-contexts { display: flex; gap: 4px; padding: 2px 6px; border-top: 1px solid var(--off); }
+.stage-contexts span { font-size: 7px; color: var(--ink-soft); }
+.stage-contexts .target-chip { color: var(--warm); font-weight: 600; }
+
+/* ═══ OPERATIONS COLUMN ═══ */
+.operations-column {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px;
+  overflow: hidden;
+  border-left: 1px solid var(--off);
+}
+
+.operation-mode-bar { display: flex; gap: 2px; align-items: center; }
+.session-pause-action {
+  font-family: inherit; font-size: 8px; padding: 2px 6px;
+  border: 0.5px solid var(--ink-light); background: var(--paper); cursor: pointer;
+  display: flex; align-items: center; gap: 2px;
+}
+.action-tabs { display: flex; flex: 1; }
+.action-tabs button {
+  flex: 1; font-family: inherit; font-size: 8px; padding: 2px 4px;
+  border: 0.5px solid var(--ink-light); background: var(--paper); cursor: pointer;
+}
+.action-tabs button.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.game-dock-tools { display: flex; gap: 2px; }
+.game-dock-tools button {
+  font-family: inherit; font-size: 8px; padding: 1px 6px;
+  border: 0.5px solid var(--ink-light); background: var(--paper); cursor: pointer;
+}
+
+.operation-toolbar { margin-top: 2px; }
+.target-selector small { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.target-zone-card {
+  display: block; width: 100%; height: 50px; margin-top: 2px;
+  border: 0.5px solid var(--ink-light); background: var(--off); cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.target-zone-card::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--zone-image); background-size: cover; background-position: center;
+  opacity: 0.9;
+}
+.target-zone-card .tzc {
+  position: absolute; bottom: 2px; left: 4px;
+  font-size: 8px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.target-zone-card .tzc strong { display: block; font-weight: 600; }
+.target-zone-card .tzc small { font-size: 7px; }
+
+.zone-dynamic-row { margin-top: 3px; }
+.zone-dynamic-row small { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.zone-dynamic-row span { display: inline-flex; align-items: center; gap: 2px; font-size: 8px; margin-right: 6px; }
+.zone-dynamic-row b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.zone-dynamic-row i { font-size: 7px; color: var(--ink-light); font-style: normal; }
+
+/* Operation list — action tiles */
+.operation-list { margin-top: 3px; flex: 1; overflow-y: auto; }
+.operation-list.compact-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+}
+.operation-section-heading {
+  grid-column: 1 / -1; font-size: 7px; color: var(--ink-light);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-top: 3px; margin-bottom: 1px;
+}
+.operation-list > div {
+  display: grid; grid-template-columns: 1fr 20px; gap: 0;
+  position: relative;
+}
+.operation-execute-tile {
+  position: relative; height: 44px; border: 0;
+  background: var(--off); cursor: pointer;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 2px 4px; overflow: hidden;
+}
+.operation-execute-tile::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.25) 100%), var(--action-image);
+  background-size: cover; background-position: center;
+  opacity: 0.92; filter: saturate(0.85) contrast(0.96);
+}
+.operation-execute-tile strong { font-size: 8px; color: var(--ink); position: relative; z-index: 1; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
+.action-intensity { display: flex; gap: 1px; position: relative; z-index: 1; }
+.action-intensity i { width: 2px; height: 4px; background: rgba(0,0,0,0.15); }
+.action-intensity i.active { background: var(--warm); }
+.action-card-tags { display: flex; gap: 1px; position: relative; z-index: 1; }
+.action-card-tags span { font-size: 6px; padding: 0 2px; background: rgba(255,255,255,0.7); color: var(--ink-soft); }
+.operation-queue-tile {
+  display: grid; place-items: center; border: 0;
+  background: var(--paper); cursor: pointer; font-size: 10px; color: var(--ink-light);
+  border-left: 0.5px solid var(--ink-light);
+}
+.operation-queue-tile:hover { color: var(--ink); }
+.operation-list > div.selected .operation-execute-tile::before {
+  opacity: 1; filter: saturate(1) contrast(1);
+}
+.operation-list > div.selected { box-shadow: inset 0 0 0 1.5px var(--warm); }
+.operation-list > div.just-performed .operation-execute-tile::before {
+  filter: saturate(1.2) contrast(1.1) brightness(1.1);
+}
+
+/* ═══ AUXILIARY COLUMN ═══ */
+.auxiliary-column {
+  grid-column: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px;
+  overflow: hidden;
+  border-left: 1px solid var(--off);
+}
+
+.auxiliary-summary small { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.auxiliary-summary strong { display: block; font-size: 10px; }
+.auxiliary-summary > span { font-size: 8px; color: var(--ink-soft); }
+.auxiliary-summary > div { display: flex; gap: 3px; margin-top: 3px; }
+.auxiliary-summary > div button {
+  font-family: inherit; font-size: 8px; padding: 2px 8px;
+  border: 0.5px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer;
+}
+.auxiliary-summary section { margin-top: 4px; }
+.auxiliary-summary section small { font-size: 7px; color: var(--ink-light); }
+.auxiliary-summary section i { display: block; font-size: 8px; color: var(--ink-soft); font-style: italic; }
+.auxiliary-summary section p { font-size: 8px; color: var(--ink-soft); }
+
+.calibration-presence { margin-top: 4px; }
+.calibration-presence small { font-size: 7px; color: var(--ink-light); }
+.calibration-presence > div { display: flex; gap: 3px; margin-top: 2px; }
+.presence-chip {
+  width: 28px; height: 28px; border: 0.5px solid var(--ink-light); overflow: hidden;
+}
+.presence-chip img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Protocol drawer */
+.protocol-drawer, .goal-settings-panel {
+  margin-top: 4px; padding: 4px; background: var(--off);
+  display: none;
+}
+.protocol-drawer.open, .goal-settings-panel.open { display: block; }
+.protocol-drawer header, .goal-settings-panel header { display: flex; justify-content: space-between; align-items: center; }
+.protocol-drawer header div { font-size: 8px; font-weight: 600; }
+.protocol-drawer header button, .goal-settings-panel header button { font-size: 10px; border: 0; background: transparent; cursor: pointer; }
+.protocol-drawer-list { margin-top: 3px; }
+.protocol-drawer-empty { font-size: 8px; color: var(--ink-light); font-style: italic; }
+.protocol-drawer footer { margin-top: 3px; }
+.protocol-drawer footer button {
+  font-family: inherit; font-size: 8px; padding: 2px 8px;
+  border: 0.5px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer;
+}
+
+/* Goal settings */
+.goal-settings-panel p { font-size: 8px; color: var(--ink-soft); margin-top: 2px; }
+.goal-settings-panel div label {
+  display: flex; align-items: center; gap: 3px; font-size: 8px; padding: 2px 4px;
+  border: 0.5px solid var(--ink-light); margin-bottom: 1px; cursor: pointer;
+}
+.goal-settings-panel div label.selected { border-color: var(--cool); color: var(--cool); }
+.goal-settings-panel footer { margin-top: 3px; display: flex; justify-content: space-between; align-items: center; }
+.goal-settings-panel footer small { font-size: 7px; color: var(--ink-light); }
+.goal-settings-panel footer button {
+  font-family: inherit; font-size: 8px; padding: 2px 8px;
+  border: 0.5px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer;
+}
+
+/* ═══ EVENT STRIP ═══ */
+.event-strip {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 12px;
+  border-top: 1px solid var(--off);
+  font-size: 8px;
+}
+.event-strip span { color: var(--ink-light); letter-spacing: 0.06em; }
+.event-strip strong { font-size: 9px; }
+.event-strip p { color: var(--ink-soft); flex: 1; }
+.event-strip button { font-family: inherit; font-size: 8px; border: 0.5px solid var(--ink-light); background: var(--paper); cursor: pointer; padding: 1px 6px; }
+</style>
+</head>
+<body>
+
+<div class="screen-wrap">
+<div class="screen">
+
+<!-- ── HEADER ── -->
+<div class="workbench-header">
+  <button class="workbench-back">← Лаборатория</button>
+  <div>
+    <p class="eyebrow">СЕССИЯ ВЗАИМОДЕЙСТВИЯ · МАЙ</p>
+    <h1>Май · В контакте</h1>
+  </div>
+  <div class="header-progress"><strong>Без ориентира</strong></div>
+  <nav>
+    <button class="calibration-time-control"><i>Ⅱ</i><span><small>ВРЕМЯ · ИДЁТ</small><strong>04:06</strong></span></button>
+    <select class="calibration-theme-switcher" style="font-family:inherit;font-size:8px;border:0.5px solid var(--ink-light);padding:1px 3px">
+      <option>Industrial</option><option>Graphite</option><option>Sage</option><option>Mist</option>
+    </select>
+    <button class="hdr-btn">История</button>
+    <button class="hdr-btn">Диагностика</button>
+    <button class="hdr-btn">Меню</button>
+  </nav>
+</div>
+
+<!-- ── OBJECTIVE STRIP ── -->
+<div class="objective-strip">
+  <small>ОРИЕНТИР</small>
+  <select>
+    <option>Свободная калибровка</option>
+    <option>Болевой резонанс (Veil Biotech)</option>
+    <option>Долгосрочное наблюдение (Continuum Archive)</option>
+  </select>
+  <p>Работа без заданных критериев</p>
+  <strong>—</strong>
+</div>
+
+<!-- ── WORKBENCH COLUMNS ── -->
+
+<!-- STATE COLUMN -->
+<div class="state-column">
+  <div class="current-state state-responsive">
+    <small>СЕЙЧАС</small>
+    <strong>В контакте</strong>
+    <p>В контакте. Критических признаков не зафиксировано.</p>
+  </div>
+  <div class="telemetry-readout">
+    <div><span>Пульс</span><strong>94 уд/мин</strong><i>↓</i></div>
+    <div><span>Дыхание</span><strong>18/мин</strong><i>↓</i></div>
+    <div><span>Контакт</span><strong>устойчивый</strong><i>→</i></div>
+  </div>
+  <div class="behavioral-readout">
+    <small>НАБЛЮДАЕМОЕ ПОВЕДЕНИЕ</small>
+    <p>отношение к контакту без явного сдвига</p>
+  </div>
+  <h3>Ориентир</h3>
+  <div class="contract-target">
+    <select>
+      <option>Без ориентира</option>
+      <option>Доступен · Болевой резонанс</option>
+      <option>Доступен · Долгосрочное наблюдение</option>
+    </select>
+    <p>Работайте свободно или выберите заказ.</p>
+  </div>
+  <h3>Активные контексты · 1</h3>
+  <h3>Одежда и оборудование</h3>
+  <p class="muted">Ничего</p>
+  <h3>Поза, эффекты и состояния</h3>
+  <div class="context-list">
+    <div><span>Поза</span><b>На четвереньках</b></div>
+  </div>
+</div>
+
+<!-- CHARACTER COLUMN -->
+<div class="character-column">
+
+  <!-- Character stage -->
+  <div class="character-stage">
+    <div class="sustain-ovl">
+      <div class="si"><img src="/character-images/actions/contact/deep_massage.png" onerror="this.style.display='none'"></div>
+      <span>Игровой прикус · 4 мин</span>
+      <strong style="color:var(--warm)">АВТО</strong>
+    </div>
+    <img src="/character-images/rendered/mira/all_fours__calibration_set__none__guarded.png"
+         onerror="this.onerror=null;this.src='/character-images/rendered/mira/standing__calibration_set__none__neutral.png'">
+    <div class="stage-lbl">ДИАГНОСТИЧЕСКИЙ СТОЛ</div>
+  </div>
+
+  <!-- Chat -->
+  <div class="character-chat">
+    <header>
+      <strong>КАНАЛ КАЛИБРОВКИ</strong>
+      <span>КАНАЛ ОТКРЫТ</span>
+    </header>
+    <div class="chat-scroll">
+      <div class="chat-line calibrator">
+        <div><div class="cl-speaker">КАЛИБРАТОР</div><div class="cl-text">Раздвинь ножки</div></div>
+      </div>
+      <div class="chat-line character">
+        <div><div class="cl-speaker">МАЙ</div><div class="cl-text">... Уже.</div></div>
+      </div>
+      <div class="chat-action">— Обдувание дыханием · Вульва</div>
+      <div class="chat-line character">
+        <div><div class="cl-speaker">МАЙ</div><div class="cl-text">Тёплый воздух... я... чувствую это сильнее, чем должна.</div></div>
+      </div>
+      <div class="chat-action">— Проведение перышком · Вульва</div>
+      <div class="chat-action">— Мягкое поглаживание · Вульва</div>
+      <div class="chat-action">— Игровой прикус · Клитор</div>
+      <div class="chat-line character">
+        <div><div class="cl-speaker">МАЙ</div><div class="cl-text">Я... ещё... не останавливайся...</div></div>
+      </div>
+      <div class="chat-line observer">
+        <div><div class="cl-speaker">СУМИ</div><div class="cl-text">Я вижу, что вы уже начали без меня.</div></div>
+      </div>
+      <div class="chat-line calibrator">
+        <div><div class="cl-speaker">КАЛИБРАТОР</div><div class="cl-text">Хочешь присоединиться?</div></div>
+      </div>
+    </div>
+    <form class="speech-input">
+      <div class="chat-target"><img src="/character-images/portraits/mira/neutral.png" onerror="this.style.display='none'"></div>
+      <textarea placeholder="Реплика калибратора..."></textarea>
+      <button type="submit">➤</button>
+    </form>
+  </div>
+
+  <!-- Scene monitor -->
+  <div class="scene-monitor">
+    <div class="physiology-panel">
+      <section class="activation-scale level-normal">
+        <header><span>ФИЗИОЛ. АКТИВАЦИЯ</span><b>Высокая · 72%</b></header>
+        <div class="act-bar"><i style="width:72%"></i></div>
+        <footer><span>Спокойствие</span><span>Рабочая</span><span>Предел</span></footer>
+      </section>
+      <section class="pulse-biosignal">
+        <header><span>ПУЛЬС</span><b>94 <i>уд/мин</i></b></header>
+        <div class="pulse-cardiogram">
+          <svg viewBox="0 0 180 32" preserveAspectRatio="none">
+            <path d="M0 16 H24 C29 16 30 12 35 12 C40 12 42 16 47 16 H58 L63 19 L68 5 L74 28 L81 16 H96 C103 16 105 10 113 10 C122 10 126 16 135 16 H180"/>
+          </svg>
+        </div>
+      </section>
+      <section class="breathing-biosignal">
+        <header><span>ДЫХАНИЕ</span><b>18 <i>вд/м</i></b></header>
+        <div class="breathing-field"><i style="width:55%"></i></div>
+      </section>
+      <section class="endurance-card">
+        <div class="endurance-scale">
+          <header><span>ВЫНОСЛ.</span><b>Рабочая</b></header>
+          <div class="es-bar"><i style="height:68%"></i></div>
+          <p><strong>68%</strong><span>индекс 54 · -2</span></p>
+        </div>
+        <div class="endurance-infographics">
+          <div class="endurance-metric balance-indicator">
+            <p><span>Баланс</span><b>+12</b></p>
+            <div class="em-track"><i style="height:56%"></i></div>
+            <small>положит.</small>
+          </div>
+          <div class="endurance-metric overload-indicator">
+            <p><span>Перегруз.</span><b>3.2</b></p>
+            <div class="em-track"><i style="height:16%"></i></div>
+            <small>низкая</small>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div>
+      <section class="state-trends">
+        <article class="metric-attitude">
+          <header><span>Принятие</span><b>58%</b><em>+0.04</em></header>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+            <polyline class="line" style="stroke:var(--cool)" points="0,55 10,52 20,48 30,50 40,45 50,42 60,40 70,38 80,42 90,40 100,42"/>
+            <polygon class="area" points="0,55 10,52 20,48 30,50 40,45 50,42 60,40 70,38 80,42 90,40 100,42 100,100 0,100" style="fill:var(--cool)"/>
+          </svg>
+        </article>
+        <article class="metric-openness">
+          <header><span>Открытость</span><b>72%</b><em>+0.08</em></header>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+            <polyline class="line" style="stroke:var(--rose)" points="0,60 10,55 20,50 30,42 40,35 50,28 60,22 70,18 80,15 90,14 100,16"/>
+            <polygon class="area" points="0,60 10,55 20,50 30,42 40,35 50,28 60,22 70,18 80,15 90,14 100,16 100,100 0,100" style="fill:var(--rose)"/>
+          </svg>
+        </article>
+        <article class="metric-plasticity">
+          <header><span>Пластич.</span><b>41%</b></header>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+            <polyline class="line" style="stroke:var(--warm)" points="0,65 10,63 20,60 30,58 40,56 50,54 60,53 70,52 80,51 90,51 100,50"/>
+          </svg>
+        </article>
+        <article class="metric-sensitivity">
+          <header><span>Чувствит.</span><b>85%</b><em>+0.03</em></header>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+            <line class="base" x1="0" x2="100" y1="40" y2="40"/>
+            <polyline class="line" style="stroke:var(--violet)" points="0,45 10,42 20,38 30,35 40,30 50,25 60,22 70,18 80,15 90,14 100,12"/>
+            <polygon class="area" points="0,45 10,42 20,38 30,35 40,30 50,25 60,22 70,18 80,15 90,14 100,12 100,100 0,100" style="fill:var(--violet)"/>
+          </svg>
+        </article>
+      </section>
+
+      <div class="monitor-session-strip">
+        <div class="monitor-condition-pose">
+          <small>ПОЗА</small>
+          <b>На четвереньках</b>
+          <p>без доп. эффектов</p>
+        </div>
+        <div class="monitor-session-contexts">
+          <small>КОНТЕКСТЫ · 1</small>
+          <div class="monitor-context-list">
+            <span><b>На четвереньках</b><i>не влияет на опыт</i></span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="monitor-control-layout__recommendations">
+        <button class="control-recommendation-card" style="--action-image:url('/character-images/actions/contact/feather_stroke.png')">
+          <kbd>1</kbd><strong>Перо · Шея</strong>
+        </button>
+        <button class="control-recommendation-card" style="--action-image:url('/character-images/actions/contact/deep_massage.png')">
+          <kbd>2</kbd><strong>Массаж · Шея</strong>
+        </button>
+        <button class="control-recommendation-card" style="--action-image:url('/character-images/actions/equipment/act_activate_plug.png')">
+          <kbd>3</kbd><strong>Плаг · всё тело</strong>
+        </button>
+        <button class="control-recommendation-card" style="--action-image:url('/character-images/actions/contact/wait.png')">
+          <kbd>4</kbd><strong>Подождать</strong>
+        </button>
+      </aside>
+
+      <section class="monitor-control-layout__processes">
+        <div class="intimacy-readiness-panel">
+          <header>
+            <small>ИНТИМНАЯ ГОТОВНОСТЬ</small>
+            <strong>ДОПУСКАЕТ</strong>
+          </header>
+          <div class="intimacy-readiness-metrics">
+            <span><small>Готовность</small><b>42%</b><i><em style="width:42%;background:var(--warm)"></em></i></span>
+            <span><small>Возбуждение</small><b>58%</b><i><em style="width:58%;background:var(--rose)"></em></i></span>
+            <span><small>Доверие</small><b>71%</b><i><em style="width:71%;background:var(--cool)"></em></i></span>
+          </div>
+          <p style="font-size:7px;color:var(--ink-soft);margin-top:2px;font-style:italic">Допускает тактильность. Продолжить прогрев.</p>
+        </div>
+      </section>
+
+      <div class="monitor-outcome-stack">
+        <section class="calibration-footer-goal monitor-goal">
+          <div class="footer-goal-picker">
+            <small>ЦЕЛЬ</small>
+            <button class="footer-goal-current">Свободная работа</button>
+          </div>
+          <div class="goal-core-conditions">
+            <span><i>Принятие</i><b>набл.</b></span>
+            <span><i>Чувств. зоны</i><b>набл.</b></span>
+            <span><i>Открыт.</i><b>набл.</b></span>
+            <span><i>Прин. зоны</i><b>набл.</b></span>
+          </div>
+        </section>
+        <div class="operation-last-result">
+          <header>
+            <small>РЕЗУЛЬТАТ · ИГРОВОЙ ПРИКУС · КЛИТОР</small>
+            <b style="color:var(--cool)">ПРИНЯТО</b>
+          </header>
+          <div class="monitor-reaction-readout">
+            <span><i>Удовол.</i><b style="color:var(--cool)">0.72</b></span>
+            <span><i>Диском.</i><b>0.12</b></span>
+            <span><i>Перегр.</i><b>0.03</b></span>
+            <span><i>Вовлеч.</i><b style="color:var(--cool)">0.81</b></span>
+          </div>
+          <div class="monitor-change-readout">
+            <span><i>Прин.</i><b style="color:var(--cool)">+0.04</b></span>
+            <span><i>Напряж.</i><b style="color:var(--danger)">+0.12</b></span>
+            <span><i>Открыт.</i><b style="color:var(--rose)">+0.02</b></span>
+            <span><i>Чувств.</i><b style="color:var(--violet)">+0.03</b></span>
+          </div>
+          <div class="monitor-experience-readout">
+            <span><i>мягкость</i> <b>+0.003</b></span>
+            <span><i>клитор</i> <b>+0.008</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage contexts -->
+  <div class="stage-contexts">
+    <span class="target-chip">Зона: Клитор</span>
+    <span>На четвереньках</span>
+  </div>
+
+</div>
+
+<!-- OPERATIONS COLUMN -->
+<div class="operations-column">
+  <div class="operation-mode-bar">
+    <button class="session-pause-action"><span>Ⅱ</span>Подождать</button>
+    <div class="action-tabs">
+      <button class="active">Воздействия</button>
+      <button>Подготовка</button>
+    </div>
+  </div>
+  <div class="game-dock-tools">
+    <button>Цели</button>
+  </div>
+  <div class="operation-toolbar">
+    <div class="target-selector">
+      <small>ЗОНА</small>
+      <button class="target-zone-card" style="--zone-image:url('/character-images/bodyparts/mira/vulva.png')">
+        <span class="tzc"><strong>Вульва</strong><small>Карта тела →</small></span>
+      </button>
+    </div>
+  </div>
+  <div class="zone-dynamic-row">
+    <small>ПАРАМЕТРЫ ЗОНЫ · ВУЛЬВА</small>
+    <span>Чувств. <b>113%</b><i>индекс 85</i></span>
+    <span>Принят. <b>38%</b><i>индекс 31</i></span>
+    <span>Знаком. <b>0</b><i>опыт</i></span>
+    <span>Воздейст. <b>7</b><i>на зону</i></span>
+  </div>
+  <div class="operation-list compact-grid">
+    <h3 class="operation-section-heading">Мягкий и сенсорный контакт</h3>
+    <div class="selected">
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/contact/feather_stroke.png')">
+        <strong>Перо</strong>
+        <span class="action-intensity"><i class="active"></i><i></i><i></i></span>
+        <small class="action-card-tags"><span>мягкий</span></small>
+      </button>
+      <button class="operation-queue-tile">＋</button>
+    </div>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/contact/deep_massage.png')">
+        <strong>Массаж</strong>
+        <span class="action-intensity"><i class="active"></i><i class="active"></i><i></i></span>
+      </button>
+      <button class="operation-queue-tile">＋</button>
+    </div>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/contact/tickle.png')">
+        <strong>Щекотка</strong>
+        <span class="action-intensity"><i class="active"></i><i></i><i></i></span>
+      </button>
+      <button class="operation-queue-tile">＋</button>
+    </div>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/contact/light_bite.png')">
+        <strong>Прикус</strong>
+        <span class="action-intensity"><i class="active"></i><i class="active"></i><i></i></span>
+      </button>
+      <button class="operation-queue-tile">＋</button>
+    </div>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/contact/hot_wax.png')">
+        <strong>Воск</strong>
+        <span class="action-intensity"><i class="active"></i><i class="active"></i><i></i></span>
+      </button>
+      <button class="operation-queue-tile">＋</button>
+    </div>
+    <h3 class="operation-section-heading">Близость</h3>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/intimacy/act_decrease_friction.png')">
+        <strong>Снижение трения</strong>
+        <span class="action-intensity"><i class="active"></i><i></i><i></i></span>
+      </button>
+    </div>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/intimacy/act_increase_friction.png')">
+        <strong>Поцелуй</strong>
+        <span class="action-intensity"><i class="active"></i><i class="active"></i><i></i></span>
+      </button>
+    </div>
+    <h3 class="operation-section-heading">Болевое воздействие</h3>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/contact/pinch.png')">
+        <strong>Щипок</strong>
+        <span class="action-intensity"><i class="active"></i><i class="active"></i><i></i></span>
+      </button>
+      <button class="operation-queue-tile">＋</button>
+    </div>
+    <div>
+      <button class="operation-execute-tile" style="--action-image:url('/character-images/actions/contact/scratching.png')">
+        <strong>Царапины</strong>
+        <span class="action-intensity"><i class="active"></i><i class="active"></i><i class="active"></i></span>
+      </button>
+      <button class="operation-queue-tile">＋</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUXILIARY COLUMN -->
+<div class="auxiliary-column">
+  <div class="auxiliary-summary">
+    <small>СЛУЖЕБНЫЙ КАНАЛ</small>
+    <strong>Свободная калибровка</strong>
+    <span>0 шагов · 4 показателей</span>
+    <div>
+      <button>Протокол</button>
+      <button>Цели</button>
+    </div>
+    <section>
+      <small>ОЧЕРЕДЬ</small>
+      <i>Добавляйте действия кнопкой ＋</i>
+    </section>
+    <section>
+      <small>ОТСЛЕЖИВАЕТСЯ</small>
+      <p>Принятие · Принятие зоны · Чувствительность зоны · Открытость</p>
+    </section>
+  </div>
+  <div class="calibration-presence">
+    <small>ПРИСУТСТВУЮТ</small>
+    <div>
+      <div class="presence-chip"><img src="/character-images/portraits/mira/neutral.png" onerror="this.style.display='none'"></div>
+      <div class="presence-chip"><img src="/character-images/portraits/sumi/neutral.png" onerror="this.style.display='none'"></div>
+    </div>
+    <div style="font-size:8px;color:var(--ink-soft);margin-top:2px">
+      <div><b>Май</b> · диагностический стол</div>
+      <div><b>Суми</b> · наблюдает</div>
+    </div>
+  </div>
+  <!-- Protocol drawer (hidden by default) -->
+  <aside class="protocol-drawer">
+    <header><div>Протокол</div><button>×</button></header>
+    <div class="protocol-drawer-list">
+      <p class="protocol-drawer-empty">Протокол пуст. Добавляйте действия кнопкой ＋</p>
+    </div>
+    <footer><button class="run">▶ Запустить</button></footer>
+  </aside>
+  <!-- Goal settings (hidden by default) -->
+  <aside class="goal-settings-panel">
+    <header><div>Параметры цели</div><button>×</button></header>
+    <p>Выбранные показатели появятся в прогнозе.</p>
+    <div>
+      <label class="selected">Принятие</label>
+      <label class="selected">Открытость</label>
+      <label>Пластичность</label>
+      <label class="selected">Чувствительность</label>
+      <label>Напряжение</label>
+      <label>Выносливость</label>
+      <label>Удовольствие</label>
+      <label>Дискомфорт</label>
+      <label>Перегрузка</label>
+      <label class="selected">Вовлечённость</label>
+      <label>Принятие зоны</label>
+      <label>Чувств. зоны</label>
+      <label>Возбуждение</label>
+      <label>Доверие</label>
+      <label>Готовность</label>
+    </div>
+    <footer><small>4/6 показателей</small><button>Готово</button></footer>
+  </aside>
+</div>
+
+<!-- ── EVENT STRIP ── -->
+<div class="event-strip">
+  <span>СОБЫТИЕ</span>
+  <strong>Наблюдение начато</strong>
+  <p>Значимых изменений пока нет.</p>
+  <button>История ↑</button>
+</div>
+
+</div>
+</div>
+
+<script>
+// No scroll
+document.body.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+</script>
+
+</body>
+</html>

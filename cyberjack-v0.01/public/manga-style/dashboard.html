@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberJack — Дашборд</title>
+  <link rel="stylesheet" href="./manga-core.css" />
+  <style>
+    .dash-grid { display: grid; grid-template-columns: 280px 1fr 240px; gap: 14px; min-height: 0; }
+    .dash-side { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+    .dash-center { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+
+    /* Subject panel */
+    .subj-name { font-size: 20px; font-weight: 900; margin-bottom: 12px; border-bottom: 3px solid var(--m-ink); padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .subj-name .m-sfx { font-size: 14px; }
+
+    /* Chart container */
+    .chart-svg { width: 100%; height: 200px; display: block; }
+    .chart-multi { width: 100%; height: 260px; display: block; }
+
+    /* Annotation labels */
+    .chart-anno { font-size: 8px; font-weight: 800; fill: var(--m-ink); }
+    .chart-anno.red { fill: var(--m-red); }
+    .chart-anno.blue { fill: var(--m-blue); }
+
+    /* Legend */
+    .chart-legend { display: flex; gap: 16px; padding: 8px 12px; border-top: 2px solid var(--m-ink); }
+    .chart-legend span { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; }
+    .chart-legend i { width: 14px; height: 4px; display: block; border: 1px solid var(--m-ink); }
+
+    /* Tick result meters */
+    .result-meter { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .result-meter small { min-width: 90px; font-size: 10px; font-weight: 700; color: var(--m-ink-fade); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* Body zones */
+    .body-zone { display: flex; align-items: center; gap: 6px; padding: 4px 8px; margin-bottom: 4px; border: 2px solid var(--m-ink); font-size: 11px; background: var(--m-paper-light); clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px)); }
+    .body-zone.active { background: var(--m-paper-dark); background-image: var(--st-line-10); }
+    .body-zone.sensitive { border-color: var(--m-red); }
+    .body-zone .zone-name { font-weight: 700; min-width: 70px; }
+    .body-zone .zone-sens { color: var(--m-red); font-family: var(--m-font-mono); font-size: 10px; font-weight: 800; }
+    .body-zone .zone-ctx { font-size: 9px; color: var(--m-ink-soft); background: var(--m-paper-dark); border: 1px solid var(--m-ink-fade); padding: 1px 4px; }
+
+    /* Risk zone band */
+    .risk-band { position: relative; height: 8px; margin-bottom: 6px; }
+    .risk-band-fill { position: absolute; inset: 0; background-image: repeating-linear-gradient(90deg, var(--m-red) 0 4px, transparent 4px 8px); }
+  </style>
+</head>
+<body>
+  <div class="m-shell">
+    <header class="m-hud">
+      <div class="m-hud-brand">
+        <span class="m-logo-mark">◈</span>
+        <div class="m-brand-text"><b>S-01 SIMULATOR</b><small>манга интерфейс</small></div>
+      </div>
+      <nav class="m-hud-nav">
+        <a href="./index.html">Обзор</a>
+        <a class="active" href="./dashboard.html">Дашборд</a>
+        <a href="./station.html">Станция</a>
+        <a href="./calibration.html">Калибровка</a>
+        <a href="./narrative.html">Диалог</a>
+      </nav>
+      <div class="m-hud-clock"><small>ЦИКЛ</small><b>07:14:09</b></div>
+    </header>
+
+    <main class="m-screen">
+      <div class="dash-grid">
+
+        <!-- ═══ LEFT: Subject state ═══ -->
+        <div class="dash-side">
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">対象</span>Субъект: Mira</div>
+            <div class="m-panel-body">
+              <div class="subj-name">MIRA <span class="m-sfx">ドキッ</span></div>
+
+              <!-- Core gauges with screentone fills -->
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="m-gauge">
+                  <div class="m-gauge-head"><small>Чувствительность</small><b>62%</b></div>
+                  <div class="m-gauge-track">
+                    <div class="m-gauge-fill blue" style="width: 62%;"></div>
+                    <div class="m-gauge-baseline" style="left: 55%;"></div>
+                  </div>
+                </div>
+                <div class="m-gauge">
+                  <div class="m-gauge-head"><small>Выносливость</small><b>38%</b></div>
+                  <div class="m-gauge-track">
+                    <div class="m-gauge-fill red" style="width: 38%;"></div>
+                    <div class="m-gauge-baseline" style="left: 60%;"></div>
+                  </div>
+                </div>
+                <div class="m-gauge">
+                  <div class="m-gauge-head"><small>Открытость</small><b>71%</b></div>
+                  <div class="m-gauge-track">
+                    <div class="m-gauge-fill green" style="width: 71%;"></div>
+                    <div class="m-gauge-baseline" style="left: 50%;"></div>
+                  </div>
+                </div>
+                <div class="m-gauge">
+                  <div class="m-gauge-head"><small>Пластичность</small><b>55%</b></div>
+                  <div class="m-gauge-track">
+                    <div class="m-gauge-fill yellow" style="width: 55%;"></div>
+                    <div class="m-gauge-baseline" style="left: 60%;"></div>
+                  </div>
+                </div>
+                <div class="m-gauge">
+                  <div class="m-gauge-head"><small>Отношение</small><b>68%</b></div>
+                  <div class="m-gauge-track">
+                    <div class="m-gauge-fill purple" style="width: 68%;"></div>
+                    <div class="m-gauge-baseline" style="left: 50%;"></div>
+                  </div>
+                </div>
+                <div class="m-gauge">
+                  <div class="m-gauge-head"><small>Напряжение</small><b>44%</b></div>
+                  <div class="m-gauge-track">
+                    <div class="m-gauge-fill red" style="width: 44%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Body state -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">身体</span>Тело и состояния</div>
+            <div class="m-panel-body">
+              <div class="body-zone active">
+                <span class="zone-name">состояние</span>
+                <span class="zone-ctx">Поза: лежа</span>
+                <span class="zone-ctx">Связана</span>
+              </div>
+              <div class="body-zone sensitive">
+                <span class="zone-name">Соски</span>
+                <span class="zone-sens">чувств. 85%</span>
+                <span class="zone-ctx">стимуляция</span>
+              </div>
+              <div class="body-zone sensitive">
+                <span class="zone-name">Шея</span>
+                <span class="zone-sens">чувств. 78%</span>
+              </div>
+              <div class="body-zone active">
+                <span class="zone-name">Грудь</span>
+                <span class="zone-ctx">ласка</span>
+              </div>
+              <div class="body-zone">
+                <span class="zone-name">Бёдра</span>
+                <span class="zone-sens">чувств. 45%</span>
+              </div>
+              <div class="body-zone">
+                <span class="zone-name">Живот</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Last tick -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">結果</span>Последний тик</div>
+            <div class="m-panel-body">
+              <div class="result-meter">
+                <small>Удовольствие</small>
+                <div class="m-gauge-track" style="flex:1; height:12px;">
+                  <div class="m-gauge-fill green" style="width: 72%;"></div>
+                </div>
+              </div>
+              <div class="result-meter">
+                <small>Дискомфорт</small>
+                <div class="m-gauge-track" style="flex:1; height:12px;">
+                  <div class="m-gauge-fill red" style="width: 18%;"></div>
+                </div>
+              </div>
+              <div class="result-meter">
+                <small>Перегрузка</small>
+                <div class="m-gauge-track" style="flex:1; height:12px;">
+                  <div class="m-gauge-fill red" style="width: 8%;"></div>
+                </div>
+              </div>
+              <div class="result-meter">
+                <small>Вовлечён.</small>
+                <div class="m-gauge-track" style="flex:1; height:12px;">
+                  <div class="m-gauge-fill blue" style="width: 65%;"></div>
+                </div>
+              </div>
+              <div class="result-meter">
+                <small>Обучение</small>
+                <div class="m-gauge-track" style="flex:1; height:12px;">
+                  <div class="m-gauge-fill purple" style="width: 28%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ CENTER: Charts ═══ -->
+        <div class="dash-center">
+          <!-- Multi-line history chart -->
+          <div class="m-panel-headed m-impact">
+            <div class="m-panel-title"><span class="m-jp">推移</span>Долговременная динамика</div>
+            <div class="m-panel-body" style="padding: 0;">
+              <!-- SVG with halftone pattern defs -->
+              <svg class="chart-multi" viewBox="0 0 800 260" preserveAspectRatio="none">
+                <defs>
+                  <!-- Halftone dot patterns for chart fills -->
+                  <pattern id="st30-pattern" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.8" fill="#1a1410" opacity="0.30" />
+                  </pattern>
+                  <pattern id="st50-pattern" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                    <circle cx="0.7" cy="0.7" r="0.7" fill="#1a1410" opacity="0.50" />
+                  </pattern>
+                  <pattern id="st30-red" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.8" fill="#c8312a" opacity="0.30" />
+                  </pattern>
+                  <pattern id="st30-blue" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.8" fill="#2a5c8a" opacity="0.30" />
+                  </pattern>
+                  <pattern id="st30-green" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.8" fill="#3a7d3a" opacity="0.30" />
+                  </pattern>
+                  <pattern id="st30-yellow" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.8" fill="#d4a020" opacity="0.30" />
+                  </pattern>
+                  <!-- Diagonal line pattern -->
+                  <pattern id="line30" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <line x1="0" y1="0" x2="0" y2="6" stroke="#1a1410" stroke-width="1" opacity="0.25" />
+                  </pattern>
+                </defs>
+
+                <!-- Grid: dashed ink lines -->
+                <g class="m-chart-grid">
+                  <line x1="0" y1="50" x2="800" y2="50" class="m-chart-grid" />
+                  <line x1="0" y1="100" x2="800" y2="100" class="m-chart-grid" />
+                  <line x1="0" y1="150" x2="800" y2="150" class="m-chart-grid" />
+                  <line x1="0" y1="200" x2="800" y2="200" class="m-chart-grid" />
+                </g>
+
+                <!-- Y-axis labels -->
+                <g font-family="monospace" font-size="10" fill="#8a7d6e" font-weight="700">
+                  <text x="4" y="55">100</text>
+                  <text x="4" y="105">75</text>
+                  <text x="4" y="155">50</text>
+                  <text x="4" y="205">25</text>
+                  <text x="4" y="250">0</text>
+                </g>
+
+                <!-- Risk zone band (red diagonal) -->
+                <rect x="420" y="0" width="120" height="260" fill="url(#line30)" />
+                <text x="430" y="14" font-size="9" font-weight="900" fill="#c8312a" font-family="sans-serif">РИСК</text>
+
+                <!-- Activation line (warm/yellow) with halftone fill -->
+                <polygon points="0,140 60,120 120,100 180,110 240,80 300,60 360,50 420,30 480,20 540,35 600,25 660,15 720,10 800,8 800,260 0,260" fill="url(#st30-yellow)" opacity="0.6" />
+                <polyline points="0,140 60,120 120,100 180,110 240,80 300,60 360,50 420,30 480,20 540,35 600,25 660,15 720,10 800,8" class="m-chart-line" stroke="#d4a020" />
+
+                <!-- Endurance line (green) with halftone fill -->
+                <polygon points="0,80 60,85 120,90 180,100 240,110 300,120 360,130 420,145 480,160 540,155 600,170 660,180 720,185 800,190 800,260 0,260" fill="url(#st30-green)" opacity="0.5" />
+                <polyline points="0,80 60,85 120,90 180,100 240,110 300,120 360,130 420,145 480,160 540,155 600,170 660,180 720,185 800,190" class="m-chart-line" stroke="#3a7d3a" />
+
+                <!-- Strain line (red) with halftone -->
+                <polygon points="0,220 60,210 120,200 180,195 240,180 300,170 360,160 420,140 480,120 540,130 600,115 660,100 720,90 800,80 800,260 0,260" fill="url(#st30-red)" opacity="0.4" />
+                <polyline points="0,220 60,210 120,200 180,195 240,180 300,170 360,160 420,140 480,120 540,130 600,115 660,100 720,90 800,80" class="m-chart-line" stroke="#c8312a" />
+
+                <!-- Baseline capacity (dashed) -->
+                <line x1="0" y1="120" x2="800" y2="120" stroke="#1a1410" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4" />
+                <text x="710" y="115" font-size="9" font-weight="800" fill="#1a1410" opacity="0.5">baseline</text>
+
+                <!-- Outcome markers — SFX stars -->
+                <g>
+                  <text x="480" y="18" font-size="20" font-weight="900" fill="#c8312a" font-family="serif" font-style="italic" text-anchor="middle">✦</text>
+                  <text x="486" y="32" class="chart-anno red" text-anchor="middle">ОРГАЗМ</text>
+                </g>
+                <g>
+                  <text x="660" y="10" font-size="20" font-weight="900" fill="#c8312a" font-family="serif" font-style="italic" text-anchor="middle">✦</text>
+                  <text x="666" y="24" class="chart-anno red" text-anchor="middle">ПЕРЕГРУЗ</text>
+                </g>
+
+                <!-- Action annotation labels -->
+                <g>
+                  <rect x="115" y="244" width="80" height="14" fill="#1a1410" />
+                  <text x="120" y="254" font-size="9" font-weight="800" fill="#f4ede0" font-family="sans-serif">массаж</text>
+                </g>
+                <g>
+                  <rect x="295" y="244" width="90" height="14" fill="#1a1410" />
+                  <text x="300" y="254" font-size="9" font-weight="800" fill="#f4ede0" font-family="sans-serif">вибратор</text>
+                </g>
+                <g>
+                  <rect x="535" y="244" width="70" height="14" fill="#c8312a" />
+                  <text x="540" y="254" font-size="9" font-weight="800" fill="#f4ede0" font-family="sans-serif">поза: сидя</text>
+                </g>
+
+                <!-- X-axis time labels -->
+                <g font-family="monospace" font-size="9" fill="#8a7d6e" font-weight="700">
+                  <text x="0" y="258">01 янв</text>
+                  <text x="380" y="258">06 ч</text>
+                  <text x="760" y="258">текущее</text>
+                </g>
+              </svg>
+
+              <!-- Legend -->
+              <div class="chart-legend">
+                <span><i style="background:#d4a020; border-color:#d4a020;"></i>Активация</span>
+                <span><i style="background:#3a7d3a; border-color:#3a7d3a;"></i>Выносливость</span>
+                <span><i style="background:#c8312a; border-color:#c8312a;"></i>Напряжение</span>
+                <span style="margin-left:auto; color:var(--m-ink-fade);">24 замера</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bar chart: last 8 ticks -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">比較</span>Последние 8 тиков</div>
+            <div class="m-panel-body" style="padding: 0;">
+              <svg class="chart-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
+                <defs>
+                  <pattern id="bar-st30" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                    <circle cx="0.7" cy="0.7" r="0.6" fill="#f4ede0" opacity="0.3" />
+                  </pattern>
+                </defs>
+
+                <!-- Grid -->
+                <g>
+                  <line x1="0" y1="50" x2="600" y2="50" class="m-chart-grid" />
+                  <line x1="0" y1="100" x2="600" y2="100" class="m-chart-grid" />
+                  <line x1="0" y1="150" x2="600" y2="150" class="m-chart-grid" />
+                </g>
+
+                <!-- Y labels -->
+                <g font-family="monospace" font-size="9" fill="#8a7d6e" font-weight="700">
+                  <text x="2" y="48">100</text>
+                  <text x="2" y="98">50</text>
+                  <text x="2" y="148">0</text>
+                </g>
+
+                <!-- Bars: pleasure (green) + discomfort (red) side by side -->
+                <!-- Each group: 60px wide, bar 20px -->
+                <!-- Tick 1 -->
+                <rect x="30" y="120" width="20" height="30" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="52" y="170" width="20" height="10" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+                <!-- Tick 2 -->
+                <rect x="100" y="100" width="20" height="50" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="122" y="165" width="20" height="15" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+                <!-- Tick 3 -->
+                <rect x="170" y="80" width="20" height="70" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="192" y="160" width="20" height="20" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+                <!-- Tick 4 -->
+                <rect x="240" y="60" width="20" height="90" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="262" y="150" width="20" height="30" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+                <!-- Tick 5 -->
+                <rect x="310" y="40" width="20" height="110" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="332" y="140" width="20" height="40" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+                <!-- Tick 6 (orgasm spike) -->
+                <rect x="380" y="20" width="20" height="130" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="380" y="20" width="20" height="130" fill="url(#bar-st30)" />
+                <rect x="402" y="130" width="20" height="50" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+                <!-- Tick 7 (recovery) -->
+                <rect x="450" y="90" width="20" height="60" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="472" y="160" width="20" height="20" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+                <!-- Tick 8 -->
+                <rect x="520" y="70" width="20" height="80" fill="#3a7d3a" stroke="#1a1410" stroke-width="1.5" />
+                <rect x="542" y="155" width="20" height="25" fill="#c8312a" stroke="#1a1410" stroke-width="1.5" />
+
+                <!-- X labels -->
+                <g font-family="monospace" font-size="8" fill="#8a7d6e" font-weight="700" text-anchor="middle">
+                  <text x="51" y="195">T-7</text>
+                  <text x="121" y="195">T-6</text>
+                  <text x="191" y="195">T-5</text>
+                  <text x="261" y="195">T-4</text>
+                  <text x="331" y="195">T-3</text>
+                  <text x="411" y="195">T-2</text>
+                  <text x="481" y="195">T-1</text>
+                  <text x="551" y="195">T</text>
+                </g>
+
+                <!-- SFX on orgasm tick -->
+                <text x="390" y="15" font-size="14" font-weight="900" fill="#c8312a" font-family="serif" font-style="italic">ドン!</text>
+              </svg>
+
+              <div class="chart-legend">
+                <span><i style="background:#3a7d3a; border-color:#3a7d3a;"></i>Удовольствие</span>
+                <span><i style="background:#c8312a; border-color:#c8312a;"></i>Дискомфорт</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pie/radial chart: resource distribution -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">配分</span>Распределение воздействия</div>
+            <div class="m-panel-body" style="display: flex; gap: 16px; align-items: center;">
+              <svg width="160" height="160" viewBox="0 0 100 100">
+                <defs>
+                  <pattern id="pie-st20" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                    <circle cx="0.6" cy="0.6" r="0.5" fill="#1a1410" opacity="0.25" />
+                  </pattern>
+                  <pattern id="pie-st40" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                    <circle cx="0.7" cy="0.7" r="0.6" fill="#1a1410" opacity="0.45" />
+                  </pattern>
+                  <pattern id="pie-st60" x="0" y="0" width="2.5" height="2.5" patternUnits="userSpaceOnUse">
+                    <circle cx="0.7" cy="0.7" r="0.6" fill="#1a1410" opacity="0.65" />
+                  </pattern>
+                </defs>
+                <!-- Pie slices using stroke-dasharray trick on circles -->
+                <circle cx="50" cy="50" r="36" fill="none" stroke="#3a7d3a" stroke-width="72" stroke-dasharray="113 226" transform="rotate(-90 50 50)" />
+                <circle cx="50" cy="50" r="36" fill="none" stroke="#d4a020" stroke-width="72" stroke-dasharray="68 226" stroke-dashoffset="-113" transform="rotate(-90 50 50)" />
+                <circle cx="50" cy="50" r="36" fill="none" stroke="#c8312a" stroke-width="72" stroke-dasharray="34 226" stroke-dashoffset="-181" transform="rotate(-90 50 50)" />
+                <circle cx="50" cy="50" r="36" fill="none" stroke="#2a5c8a" stroke-width="72" stroke-dasharray="11 226" stroke-dashoffset="-215" transform="rotate(-90 50 50)" />
+                <!-- Center hole -->
+                <circle cx="50" cy="50" r="20" fill="#f4ede0" stroke="#1a1410" stroke-width="2" />
+                <text x="50" y="48" font-size="10" font-weight="900" fill="#1a1410" text-anchor="middle" font-family="monospace">100%</text>
+                <text x="50" y="58" font-size="6" fill="#8a7d6e" text-anchor="middle" font-weight="700">ИТОГО</text>
+              </svg>
+              <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width:14px; height:14px; background:#3a7d3a; border:2px solid #1a1410;"></span><small style="font-size:11px; font-weight:700;">Ласка</small><b style="font-family:var(--m-font-mono); margin-left:auto; font-size:13px;">50%</b></div>
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width:14px; height:14px; background:#d4a020; border:2px solid #1a1410;"></span><small style="font-size:11px; font-weight:700;">Вибрация</small><b style="font-family:var(--m-font-mono); margin-left:auto; font-size:13px;">30%</b></div>
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width:14px; height:14px; background:#c8312a; border:2px solid #1a1410;"></span><small style="font-size:11px; font-weight:700;">Удар</small><b style="font-family:var(--m-font-mono); margin-left:auto; font-size:13px;">15%</b></div>
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width:14px; height:14px; background:#2a5c8a; border:2px solid #1a1410;"></span><small style="font-size:11px; font-weight:700;">Медиц.</small><b style="font-family:var(--m-font-mono); margin-left:auto; font-size:13px;">5%</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ RIGHT: Contracts ═══ -->
+        <div class="dash-side">
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">依頼</span>Контракт</div>
+            <div class="m-panel-body">
+              <div style="font-size: 13px; font-weight: 800; color: var(--m-red); margin-bottom: 6px;">«Калибровка чувствительности»</div>
+              <p style="font-size: 11px; color: var(--m-ink-soft); margin-bottom: 10px; line-height: 1.5;">Достичь чувствительности 80+ без перегрузки субъекта.</p>
+
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px; padding: 4px; border-bottom: 1px solid var(--m-ink-fade);">
+                  <span style="flex:1; font-size:11px;">Чувствительность ≥ 80</span>
+                  <span style="font-family:var(--m-font-mono); font-size:11px; color:var(--m-ink-fade);">62/80</span>
+                  <span style="font-weight:900; color:var(--m-red); font-size:13px;">✗</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; padding: 4px; border-bottom: 1px solid var(--m-ink-fade);">
+                  <span style="flex:1; font-size:11px;">Перегрузка ≤ 20</span>
+                  <span style="font-family:var(--m-font-mono); font-size:11px;">8/20</span>
+                  <span style="font-weight:900; color:var(--m-green); font-size:13px;">✓</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; padding: 4px;">
+                  <span style="flex:1; font-size:11px;">Циклов ≤ 20</span>
+                  <span style="font-family:var(--m-font-mono); font-size:11px;">14/20</span>
+                  <span style="font-weight:900; color:var(--m-green); font-size:13px;">✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Available contracts -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">依頼</span>Доступные</div>
+            <div class="m-panel-body">
+              <div style="padding: 8px 0; border-bottom: 1px solid var(--m-ink-fade);">
+                <div style="font-weight: 800; font-size: 12px; color: var(--m-purple);">«Глубокая адаптация»</div>
+                <p style="font-size: 10px; color: var(--m-ink-fade); margin: 3px 0 6px;">Пластичность 70+ за 15 циклов</p>
+                <button class="m-btn quiet" style="font-size: 10px; padding: 3px 10px;">Принять</button>
+              </div>
+              <div style="padding: 8px 0;">
+                <div style="font-weight: 800; font-size: 12px; color: var(--m-purple);">«Предел выносливости»</div>
+                <p style="font-size: 10px; color: var(--m-ink-fade); margin: 3px 0 6px;">Истощение без срыва</p>
+                <button class="m-btn quiet" style="font-size: 10px; padding: 3px 10px;">Принять</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick stats -->
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">状況</span>Статус</div>
+            <div class="m-panel-body" style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="m-stat ok"><small>СВЯЗЬ</small><b>OK</b></div>
+              <div class="m-stat warn"><small>ЦИКЛ</small><b>14</b></div>
+              <div class="m-stat alert"><small>НАГРУЗКА</small><b>92</b></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -22,7 +22,7 @@ const avatarNames = [
   'Никс',
   'Мара',
   'Кай',
-  'Иден',
+  'Май',
   'Рунис',
   'Рен'
 ];
@@ -35,7 +35,7 @@ const AVATAR_MAP: Record<string, string> = {
   'Никс': '/avatars/Nyx.png',
   'Мара': '/avatars/Mara.png',
   'Кай': '/avatars/Kai.png',
-  'Иден': '/avatars/Eden.png',
+  'Май': '/character-images/rendered/mai/standing__underwear__none__neutral.png',
   'Рунис': '/avatars/Runis.png',
   'Рен': '/avatars/Ren.png'
 };

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberJack — Калибровка</title>
+  <link rel="stylesheet" href="./manga-core.css" />
+  <style>
+    .calib-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .calib-flow { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border: 3px solid var(--m-ink); background: var(--m-paper-light); margin-bottom: 16px; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); }
+    .calib-flow span { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+    .calib-flow i { font-size: 16px; color: var(--m-red); font-weight: 900; font-style: normal; }
+    .calib-flow span:nth-child(1) { color: var(--m-red); }
+    .calib-flow span:nth-child(3) { color: var(--m-blue); }
+    .calib-flow span:nth-child(5) { color: var(--m-green); }
+    .calib-flow span:nth-child(7) { color: var(--m-purple); }
+
+    /* Meter (delta meters — signed) */
+    .delta-meter { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .delta-meter small { min-width: 130px; font-size: 10px; font-weight: 700; color: var(--m-ink-fade); text-transform: uppercase; letter-spacing: 0.04em; }
+    .delta-meter-track { position: relative; flex: 1; height: 12px; background: var(--m-paper-dark); border: 2px solid var(--m-ink); overflow: hidden; display: flex; }
+    .delta-meter-center { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--m-ink); opacity: 0.3; z-index: 1; }
+    .delta-meter-bar { position: absolute; top: 0; bottom: 0; }
+    .delta-meter-bar.pos { background: var(--m-green); left: 50%; }
+    .delta-meter-bar.pos::after { content:""; position:absolute; inset:0; background-image: radial-gradient(circle, var(--m-paper) 0.5px, transparent 0.6px); background-size: 3px 3px; opacity:0.2; }
+    .delta-meter-bar.neg { background: var(--m-red); right: 50%; }
+    .delta-meter-bar.neg::after { content:""; position:absolute; inset:0; background-image: radial-gradient(circle, var(--m-paper) 0.5px, transparent 0.6px); background-size: 3px 3px; opacity:0.2; }
+    .delta-meter b { font-family: var(--m-font-mono); font-size: 11px; font-weight: 800; min-width: 40px; text-align: right; }
+    .delta-meter b.pos { color: var(--m-green); }
+    .delta-meter b.neg { color: var(--m-red); }
+
+    /* Action preset selector */
+    .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .preset-btn { padding: 6px 8px; border: 2px solid var(--m-ink); background: var(--m-paper-light); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .1s; clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px)); text-align: left; }
+    .preset-btn:hover { background: var(--m-paper-dark); }
+    .preset-btn.active { background: var(--m-ink); color: var(--m-paper); border-color: var(--m-ink); }
+    .preset-btn small { display: block; font-size: 8px; font-weight: 600; color: var(--m-ink-fade); margin-top: 2px; }
+    .preset-btn.active small { color: var(--m-paper); opacity: 0.5; }
+
+    /* Vector display */
+    .vector-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .vector-row small { min-width: 80px; font-size: 10px; font-weight: 700; color: var(--m-ink-fade); text-transform: uppercase; }
+    .vector-bar { flex:1; position: relative; height: 16px; border: 2px solid var(--m-ink); background: var(--m-paper-dark); overflow: hidden; }
+    .vector-fill { position: absolute; top:0; bottom:0; }
+    .vector-fill.pos { left: 50%; background: var(--m-green); }
+    .vector-fill.neg { right: 50%; background: var(--m-red); }
+    .vector-fill::after { content:""; position:absolute; inset:0; background-image: radial-gradient(circle, var(--m-paper) 0.5px, transparent 0.6px); background-size: 3px 3px; opacity:0.2; }
+    .vector-fill.neutral { left: 0; background: var(--m-ink-soft); }
+    .vector-center { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--m-ink); z-index: 1; }
+    .vector-row b { font-family: var(--m-font-mono); font-size: 11px; font-weight: 800; min-width: 36px; text-align: right; }
+
+    /* Note box */
+    .m-note { padding: 8px 12px; border: 2px dashed var(--m-ink-fade); background: var(--m-paper-dark); background-image: var(--st-10); font-size: 11px; color: var(--m-ink-soft); line-height: 1.5; }
+
+    /* Result meters */
+    .result-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .result-bar small { min-width: 100px; font-size: 10px; font-weight: 700; color: var(--m-ink-fade); text-transform: uppercase; }
+    .result-bar .m-gauge-track { flex: 1; height: 14px; }
+    .result-bar b { font-family: var(--m-font-mono); font-size: 13px; font-weight: 800; min-width: 32px; text-align: right; }
+  </style>
+</head>
+<body>
+  <div class="m-shell">
+    <header class="m-hud">
+      <div class="m-hud-brand">
+        <span class="m-logo-mark">◈</span>
+        <div class="m-brand-text"><b>S-01 SIMULATOR</b><small>манга интерфейс</small></div>
+      </div>
+      <nav class="m-hud-nav">
+        <a href="./index.html">Обзор</a>
+        <a href="./dashboard.html">Дашборд</a>
+        <a href="./station.html">Станция</a>
+        <a class="active" href="./calibration.html">Калибровка</a>
+        <a href="./narrative.html">Диалог</a>
+      </nav>
+      <div class="m-hud-clock"><small>ЦИКЛ</small><b>07:14:09</b></div>
+    </header>
+
+    <main class="m-screen">
+      <div class="m-heading"><span class="m-jp">調整</span>Интерактивная модель одного тика</div>
+
+      <!-- Flow indicator -->
+      <div class="calib-flow">
+        <span>1. Действие</span>
+        <i>→</i>
+        <span>2. Восприятие</span>
+        <i>→</i>
+        <span>3. Реакция</span>
+        <i>→</i>
+        <span>4. Обучение</span>
+        <div style="margin-left:auto; display:flex; gap:8px;">
+          <button class="m-btn active">Применить тик</button>
+          <button class="m-btn quiet">Сбросить</button>
+        </div>
+      </div>
+
+      <div class="calib-grid">
+
+        <!-- ═══ Action card ═══ -->
+        <div class="m-panel-headed">
+          <div class="m-panel-title"><span class="m-jp">行動</span>1. Действие</div>
+          <div class="m-panel-body">
+            <div class="preset-grid" style="margin-bottom: 14px;">
+              <button class="preset-btn">Провести пером<small>intensity .1 · valence .5</small></button>
+              <button class="preset-btn active">Мягко погладить<small>intensity .2 · valence .6</small></button>
+              <button class="preset-btn">Массаж<small>intensity .6 · valence .8</small></button>
+              <button class="preset-btn">Приложить лёд<small>intensity .6 · valence .1</small></button>
+              <button class="preset-btn">Укол иглой<small>intensity .4 · valence -.7</small></button>
+              <button class="preset-btn danger">Сильный шлепок<small>intensity .8 · valence -.6</small></button>
+            </div>
+
+            <div style="font-size:11px; font-weight:800; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--m-ink-fade);">Вектор воздействия</div>
+
+            <div class="vector-row">
+              <small>Сила</small>
+              <div class="vector-bar">
+                <div class="vector-fill neutral" style="width: 20%;"></div>
+              </div>
+              <b>0.20</b>
+            </div>
+            <div class="vector-row">
+              <small>Знак</small>
+              <div class="vector-bar">
+                <div class="vector-center"></div>
+                <div class="vector-fill pos" style="width: 30%;"></div>
+              </div>
+              <b>+0.60</b>
+            </div>
+            <div class="vector-row">
+              <small>Контакт</small>
+              <div class="vector-bar">
+                <div class="vector-fill neutral" style="width: 40%;"></div>
+              </div>
+              <b>0.40</b>
+            </div>
+            <div class="vector-row">
+              <small>Резкость</small>
+              <div class="vector-bar">
+                <div class="vector-fill neutral" style="width: 10%;"></div>
+              </div>
+              <b>0.10</b>
+            </div>
+            <div class="vector-row">
+              <small>Новизна</small>
+              <div class="vector-bar">
+                <div class="vector-fill neutral" style="width: 20%;"></div>
+              </div>
+              <b>0.20</b>
+            </div>
+
+            <div class="m-note" style="margin-top: 12px;">
+              Эффективная новизна: <b>0.15</b>. Повторение и привычность зоны снижают её.
+            </div>
+
+            <div class="m-slider" style="margin-top: 12px;">
+              <div class="m-slider-head"><small>Длительность тика</small><b>1.0</b></div>
+              <div class="m-slider-track">
+                <input type="range" min="0.1" max="20" step="0.1" value="1" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ State card ═══ -->
+        <div class="m-panel-headed">
+          <div class="m-panel-title"><span class="m-jp">状態</span>2. Скрытое состояние</div>
+          <div class="m-panel-body">
+            <div style="font-size:11px; font-weight:800; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--m-ink-fade); border-bottom: 2px solid var(--m-ink); padding-bottom: 4px;">Глобально · текущее</div>
+
+            <div class="m-slider"><div class="m-slider-head"><small>Чувствительность</small><b>55</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="55" /></div></div>
+            <div class="m-slider"><div class="m-slider-head"><small>Выносливость</small><b>60</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="60" /></div></div>
+            <div class="m-slider"><div class="m-slider-head"><small>Открытость</small><b>50</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="50" /></div></div>
+            <div class="m-slider"><div class="m-slider-head"><small>Пластичность</small><b>60</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="60" /></div></div>
+            <div class="m-slider"><div class="m-slider-head"><small>Отношение</small><b>50</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="50" /></div></div>
+            <div class="m-slider"><div class="m-slider-head"><small>Напряжение</small><b>0</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="0" /></div></div>
+
+            <div style="font-size:11px; font-weight:800; margin: 14px 0 10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--m-ink-fade); border-bottom: 2px solid var(--m-ink); padding-bottom: 4px;">Зона · текущее</div>
+
+            <div class="m-slider"><div class="m-slider-head"><small>Локальная чувств.</small><b>55</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="55" /></div></div>
+            <div class="m-slider"><div class="m-slider-head"><small>Локальное отн.</small><b>50</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="50" /></div></div>
+            <div class="m-slider"><div class="m-slider-head"><small>Привычность</small><b>0</b></div><div class="m-slider-track"><input type="range" min="0" max="100" value="0" /></div></div>
+          </div>
+        </div>
+
+        <!-- ═══ Reaction + Learning ═══ -->
+        <div class="m-col">
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">反応</span>3. Реакция</div>
+            <div class="m-panel-body">
+              <div class="result-bar">
+                <small>Интенсивность</small>
+                <div class="m-gauge-track"><div class="m-gauge-fill blue" style="width: 35%;"></div></div>
+                <b>35.2</b>
+              </div>
+              <div class="result-bar">
+                <small>Удовольствие</small>
+                <div class="m-gauge-track"><div class="m-gauge-fill green" style="width: 28%;"></div></div>
+                <b>28.1</b>
+              </div>
+              <div class="result-bar">
+                <small>Дискомфорт</small>
+                <div class="m-gauge-track"><div class="m-gauge-fill red" style="width: 5%;"></div></div>
+                <b>5.0</b>
+              </div>
+              <div class="result-bar">
+                <small>Перегрузка</small>
+                <div class="m-gauge-track"><div class="m-gauge-fill red" style="width: 2%;"></div></div>
+                <b>2.0</b>
+              </div>
+              <div class="result-bar">
+                <small>Вовлечённость</small>
+                <div class="m-gauge-track"><div class="m-gauge-fill blue" style="width: 45%;"></div></div>
+                <b>45.0</b>
+              </div>
+              <div class="result-bar">
+                <small>Обучение</small>
+                <div class="m-gauge-track"><div class="m-gauge-fill purple" style="width: 15%;"></div></div>
+                <b>15.0</b>
+              </div>
+
+              <div class="m-note" style="margin-top: 12px;">
+                <b>Эффективная чувствительность 55.0</b><br/>
+                65% глобальной + 35% локальной.
+              </div>
+            </div>
+          </div>
+
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">学習</span>4. Изменение после тика</div>
+            <div class="m-panel-body">
+              <div class="delta-meter">
+                <small>Чувствительность</small>
+                <div class="delta-meter-track">
+                  <div class="delta-meter-center"></div>
+                  <div class="delta-meter-bar pos" style="width: 8%;"></div>
+                </div>
+                <b class="pos">+0.8</b>
+              </div>
+              <div class="delta-meter">
+                <small>Выносливость</small>
+                <div class="delta-meter-track">
+                  <div class="delta-meter-center"></div>
+                  <div class="delta-meter-bar neg" style="width: 5%;"></div>
+                </div>
+                <b class="neg">-0.5</b>
+              </div>
+              <div class="delta-meter">
+                <small>Открытость</small>
+                <div class="delta-meter-track">
+                  <div class="delta-meter-center"></div>
+                  <div class="delta-meter-bar pos" style="width: 12%;"></div>
+                </div>
+                <b class="pos">+1.2</b>
+              </div>
+              <div class="delta-meter">
+                <small>Пластичность</small>
+                <div class="delta-meter-track">
+                  <div class="delta-meter-center"></div>
+                  <div class="delta-meter-bar pos" style="width: 3%;"></div>
+                </div>
+                <b class="pos">+0.3</b>
+              </div>
+              <div class="delta-meter">
+                <small>Отношение</small>
+                <div class="delta-meter-track">
+                  <div class="delta-meter-center"></div>
+                  <div class="delta-meter-bar pos" style="width: 15%;"></div>
+                </div>
+                <b class="pos">+1.5</b>
+              </div>
+              <div class="delta-meter">
+                <small>Напряжение</small>
+                <div class="delta-meter-track">
+                  <div class="delta-meter-center"></div>
+                  <div class="delta-meter-bar pos" style="width: 2%;"></div>
+                </div>
+                <b class="pos">+0.2</b>
+              </div>
+
+              <div class="m-note" style="margin-top: 10px;">
+                Положительная реакция повышает отношение и открытость.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

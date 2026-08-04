@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyVerbalInputToFrame, buildReactionSystemPrompt, buildReactionTurnMessage, compileReactionFrame } from '../src/narrative/reactionFrame';
 import { InteractionObservation, SubjectCoreState } from '../src/domain/types';
 import { generateCharacterReply } from '../src/adapters/llmAdapter';
-import { contextualizeBehavioralCore, selectReactionEpisodes, selectRecentDialogue, stripUnpromptedLoreFromEpisode } from '../src/prompts/buildPromptPayload';
-import { buildPairedSpeechHistory, calculateActionSpeechChance } from '../src/api/controllers/tickController';
+import { contextualizeBehavioralCore, deriveOpenDialogueThreads, selectReactionEpisodes, selectRecentDialogue, stripUnpromptedLoreFromEpisode } from '../src/prompts/buildPromptPayload';
+import { buildPairedSpeechHistory, calculateActionSpeechChance, resolveDirectedActorId } from '../src/api/controllers/tickController';
 
 const core: SubjectCoreState = {
     sensitivity: 55, capacity: 72, openness: 58, plasticity: 72, attitude: 50, tension: 0
@@ -28,6 +28,40 @@ const base = {
 };
 
 describe('reaction frame compiler', () => {
+    it('keeps feminine grammar and current role knowledge explicit in both prompt layers', () => {
+        const frame = compileReactionFrame({
+            ...base,
+            speakerGender: 'female',
+            sceneTitle: 'Калибровочная',
+            roleContext: ['Ты знаешь, что находишься здесь как актив для подготовки к экспериментам.']
+        });
+        const system = buildReactionSystemPrompt(frame);
+        const turn = buildReactionTurnMessage(frame);
+        expect(system).toContain('Ты женщина');
+        expect(system).toContain('Никогда не используй о себе мужские формы');
+        expect(system).toContain('как актив для подготовки к экспериментам');
+        expect(turn).toContain('Что ты знаешь о своём положении');
+    });
+    it('keeps an explicitly selected addressee above parser inference', () => {
+        expect(resolveDirectedActorId('NPC-LAB-01', 'NPC-CAND-01')).toBe('NPC-LAB-01');
+        expect(resolveDirectedActorId(undefined, 'NPC-CAND-01')).toBe('NPC-CAND-01');
+    });
+    it('does not keep answered questions or action markers as open dialogue threads', () => {
+        const entries = [
+            { role: 'user', content: '[Действие] Облизывание языком · Ступни' },
+            { role: 'user', content: 'Хочешь продолжить?' },
+            { role: 'assistant', content: 'Да.' },
+            { role: 'user', content: 'Что именно?' },
+            { role: 'assistant', content: 'Продолжи воздействие.' },
+        ];
+        expect(selectRecentDialogue(entries, 'Ника', 'Калибратор')).toEqual([
+            'Калибратор: «Хочешь продолжить?»',
+            'Ника: «Да.»',
+            'Калибратор: «Что именно?»',
+            'Ника: «Продолжи воздействие.»',
+        ]);
+        expect(deriveOpenDialogueThreads(entries, 'Ника', 'Калибратор')).toEqual([]);
+    });
     afterEach(() => {
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
@@ -69,13 +103,32 @@ describe('reaction frame compiler', () => {
     });
 
     it('makes approaching the peak an explicit focus of the reply', () => {
-        const frame = compileReactionFrame({ ...base, core: { ...core, tension: 92 } });
+        const frame = compileReactionFrame({
+            ...base,
+            core: { ...core, tension: 92 },
+            observation: observation({ pleasure: 12, discomfort: 1 }),
+        });
         expect(frame.event.mandatoryPhysiologicalFocus).toBe(true);
         expect(frame.event.physiologicalState).toContain('почти достигло пика');
         expect(frame.dramaticPosition.primaryIntent).toContain('приближение пика');
-        expect(buildReactionTurnMessage(frame)).toContain('обязательный фокус реплики');
-        expect(frame.expressionMode).toMatchObject({ arousal: 'edge', affect: 'positive', control: 'fragmented', maxWords: 7, requiresDisruption: true });
-        expect(buildReactionTurnMessage(frame)).toContain('[Манера текущей реплики]');
+        expect(frame.expressionMode).toMatchObject({ arousal: 'edge', affect: 'positive', control: 'strained', maxWords: 12, requiresDisruption: false });
+        expect(buildReactionTurnMessage(frame)).toContain('почти достигло пика');
+    });
+
+    it('makes superhuman sensory amplification mandatory in reaction framing', () => {
+        const extreme = observation({
+            pleasure: 8,
+            discomfort: 2,
+            sensoryAmplification: 4.2,
+            exceptionalSensoryLoad: 12,
+            experiencedIntensity: 60
+        });
+        extreme.subjectiveText = 'Сенсорное усиление запредельное (4.2×): обычное прикосновение захватывает внимание целиком.';
+        const frame = compileReactionFrame({ ...base, observation: extreme });
+        expect(frame.dramaticPosition.primaryIntent.toLowerCase()).toContain('непропорционально мощное ощущение');
+        expect(frame.expressionMode.control).toBe('strained');
+        expect(frame.expressionMode.requiresDisruption).toBe(true);
+        expect(buildReactionTurnMessage(frame)).toContain('Сенсорное усиление запредельное');
     });
 
     it('gives the same high tension a different delivery for negative affect', () => {
@@ -95,7 +148,7 @@ describe('reaction frame compiler', () => {
         expect(frame.expressionMode.instructions.join(' ')).toContain('противоречие');
     });
 
-    it('regenerates a calm complete sentence at the edge', async () => {
+    it('allows a controlled complete sentence at the edge when capacity remains', async () => {
         const frame = compileReactionFrame({ ...base, core: { ...core, tension: 92 } });
         const response = (speech: string) => ({
             ok: true,
@@ -112,11 +165,11 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-        expect(result.reply).toMatchObject({ speech: 'А-а… не сбивайся…' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(result.reply).toMatchObject({ speech: 'Мне действительно очень нравится это воздействие.' });
     });
 
-    it('requires a spoken reaction when discharge happens', async () => {
+    it('passes a discharge reaction through without content validation', async () => {
         const dischargeObservation = observation();
         dischargeObservation.transitions = [{ kind: 'discharge', title: 'Разрядка', text: 'Происходит разрядка.', severity: 'major' }];
         const frame = compileReactionFrame({ ...base, core: { ...core, tension: 10 }, observation: dischargeObservation });
@@ -135,8 +188,8 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-        expect(result.reply).toMatchObject({ speech: 'Я… кончила. Не могу отдышаться.' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(result.reply).toMatchObject({ speech: 'Ты можешь быть нежнее?' });
     });
 
     it('allows silence when discharge coincides with loss of consciousness', async () => {
@@ -151,7 +204,6 @@ describe('reaction frame compiler', () => {
         expect(frame.event.requiresSpeech).toBe(false);
         expect(frame.expressionMode.control).toBe('minimal');
         expect(frame.dramaticPosition.allowedSpeechActs).toContain('silence');
-        expect(buildReactionSystemPrompt(frame)).toContain('допустимы короткая непроизвольная вокализация или пустая speech');
 
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
@@ -172,7 +224,7 @@ describe('reaction frame compiler', () => {
         expect(result.reply).toMatchObject({ speech: '', speechAct: 'silence', addressedTo: 'PL-1' });
     });
 
-    it('falls back to silence instead of exposing a validation error while unconscious', async () => {
+    it('does not rewrite model speech while the character is unconscious', async () => {
         const unconscious = observation();
         unconscious.behavioralState = 'unresponsive';
         unconscious.transitions = [
@@ -183,7 +235,6 @@ describe('reaction frame compiler', () => {
         const rejectedRaw = JSON.stringify({
             addressedTo: 'PL-1', speechAct: 'acknowledge', speech: 'Я совершенно спокойно объясняю своё состояние.'
         });
-        const warningSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
             json: async () => ({ choices: [{ message: { content: rejectedRaw } }] })
@@ -196,13 +247,13 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(result.error).toBeUndefined();
-        expect(result.reply).toMatchObject({ speech: '', speechAct: 'silence', addressedTo: 'PL-1' });
-        const diagnostics = warningSpy.mock.calls.flat().join('\n');
-        expect(diagnostics).toContain('[Rejected Character Reply] attempt=1/2');
-        expect(diagnostics).toContain('[Rejected Character Reply] attempt=2/2');
-        expect(diagnostics).toContain(`raw=${JSON.stringify(rejectedRaw)}`);
+        expect(result.reply).toMatchObject({
+            speech: 'Я совершенно спокойно объясняю своё состояние.',
+            speechAct: 'acknowledge',
+            addressedTo: 'PL-1'
+        });
     });
 
     it('preserves the engine discharge marker while rebuilding the observation', () => {
@@ -217,9 +268,9 @@ describe('reaction frame compiler', () => {
         conflicted.changes = { ...conflicted.changes, attitude: -1.2, openness: -0.8, localAttitude: 0.5 };
         const frame = compileReactionFrame({ ...base, observation: conflicted, repetition: 1 });
 
-        expect(frame.dramaticPosition.primaryIntent).toContain('не дать адресату принять');
+        expect(frame.dramaticPosition.primaryIntent).toContain('Ты не хочешь');
         expect(frame.dramaticPosition.allowedSpeechActs).not.toContain('request');
-        expect(buildReactionTurnMessage(frame)).toContain('персонаж сильнее закрылся');
+        expect(buildReactionTurnMessage(frame)).toContain('Тебе всё труднее принимать происходящее');
     });
 
     it('keeps exact sensitivity and baseline learning out of subjective prompt', () => {
@@ -237,11 +288,10 @@ describe('reaction frame compiler', () => {
         expect(message).not.toContain('0.04');
         expect(message).not.toContain('baseline');
         expect(message).not.toContain('воздействие оставляет обучающий след');
-        expect(frame.event.validationFacts).toMatchObject({ sensitivityTrend: 'down' });
-        expect(buildReactionSystemPrompt(frame)).toContain('Не называй внутренние параметры симулятора');
+        expect(frame.event).not.toHaveProperty('validationFacts');
     });
 
-    it('rejects a sensitivity claim opposite to hidden engine facts', async () => {
+    it('does not validate a sensitivity claim against hidden engine facts', async () => {
         const changed = observation();
         changed.learning = { ...changed.learning, sensitivityDelta: -0.13, baselineSensitivityDelta: 0.04 };
         const frame = compileReactionFrame({ ...base, observation: changed });
@@ -260,11 +310,11 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-        expect(result.reply).toMatchObject({ speech: 'Прикосновение ощущается мягко.' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(result.reply).toMatchObject({ speech: 'Чувствительность повышается.' });
     });
 
-    it('regenerates a request to repeat when overall acceptance declines', async () => {
+    it('does not rewrite a request when overall acceptance declines', async () => {
         const conflicted = observation();
         conflicted.changes = { ...conflicted.changes, attitude: -1.2, openness: -0.8 };
         const frame = compileReactionFrame({ ...base, observation: conflicted, repetition: 1 });
@@ -283,11 +333,11 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-        expect(result.reply).toMatchObject({ speech: 'Телу приятно. Но я всё равно закрываюсь.' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(result.reply).toMatchObject({ speech: 'Да… продолжай.' });
     });
 
-    it('regenerates a reply that substitutes massage for the current stroke', async () => {
+    it('does not rewrite the model choice of action wording', async () => {
         const frame = compileReactionFrame({ ...base, repetition: 1, speakerGender: 'female' });
         const response = (speech: string) => ({
             ok: true,
@@ -301,11 +351,11 @@ describe('reaction frame compiler', () => {
             subjectId: 'S-AV-01', currentStateSummary: { interpretation: '', attitude: 50, localAttitude: 50, engagement: 0, overload: 0 },
             recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
         }, buildReactionTurnMessage(frame));
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-        expect(result.reply).toMatchObject({ speech: 'Ладонь движется ровнее.' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(result.reply).toMatchObject({ speech: 'Неплохо массируешь.' });
     });
 
-    it('regenerates an observer reply based on an unobserved bodily sign', async () => {
+    it('does not content-validate an observer reply', async () => {
         const frame = compileReactionFrame({ ...base, actionLabel: 'Обычная беседа', speakerGender: 'female' });
         const response = (speech: string) => ({
             ok: true,
@@ -319,8 +369,8 @@ describe('reaction frame compiler', () => {
             subjectId: 'S-AV-01', currentStateSummary: { interpretation: '', attitude: 50, localAttitude: 50, engagement: 0, overload: 0 },
             recentEvents: [], systemPrompt: buildReactionSystemPrompt(frame), reactionFrame: frame
         }, buildReactionTurnMessage(frame));
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-        expect(result.reply).toMatchObject({ speech: 'Она отвечает связно и сохраняет контакт.' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(result.reply).toMatchObject({ speech: 'Её дыхание ровное, продолжай текущий протокол.' });
     });
 
     it('does not treat a second occurrence as a forced control struggle', () => {
@@ -352,22 +402,21 @@ describe('reaction frame compiler', () => {
     it('includes the calibrator input in the current reaction turn', () => {
         const frame = compileReactionFrame({ ...base, repetition: 1 });
         const message = buildReactionTurnMessage(frame, 'Скажи, что ты сейчас чувствуешь.');
-        expect(message).toContain('[Реплика адресата]');
+        expect(message).toContain('[Слова, обращённые к тебе]');
         expect(message).toContain('Скажи, что ты сейчас чувствуешь.');
     });
 
-    it('gives a direct question an answer-oriented position', () => {
+    it('passes a direct question without assigning an answer strategy', () => {
         const frame = applyVerbalInputToFrame(
             compileReactionFrame({ ...base, repetition: 3 }),
             'Тебе неприятно?'
         );
         expect(frame.event.playerSpeech).toBe('Тебе неприятно?');
         expect(frame.event.experience).toContain('физического воздействия');
-        expect(frame.dramaticPosition.preferredSpeechAct).toBe('answer');
-        expect(frame.dramaticPosition.primaryIntent).toContain('ответить');
+        expect(frame.dramaticPosition.allowedSpeechActs).toEqual([]);
     });
 
-    it('keeps lore names out of the voice instruction for an ordinary reaction', () => {
+    it('keeps the authored voice instruction intact', () => {
         const frame = compileReactionFrame({
             ...base,
             behavioralCore: {
@@ -376,10 +425,9 @@ describe('reaction frame compiler', () => {
             }
         });
         const prompt = buildReactionSystemPrompt(frame);
-        expect(prompt).not.toContain('Резонанс');
-        expect(prompt).not.toContain('Пустоту');
-        expect(prompt).toContain('не подменяешь его терминами или цитатами из лора');
-        expect(prompt).toContain('если адресат не поднял эту тему');
+        expect(prompt).toContain('Резонанс');
+        expect(prompt).toContain('Пустоту');
+        expect(prompt).toContain('Самостоятельно реши');
     });
 
     it('normalizes model-owned metadata instead of discarding valid speech', async () => {
@@ -402,12 +450,12 @@ describe('reaction frame compiler', () => {
         expect(result.error).toBeUndefined();
         expect(result.reply).toMatchObject({
             addressedTo: 'PL-1',
-            speechAct: frame.dramaticPosition.preferredSpeechAct,
+            speechAct: 'неизвестный-ход',
             speech: 'Я всё ещё тебя слышу.'
         });
     });
 
-    it('regenerates a verbatim echo of the current player input', async () => {
+    it('does not rewrite a verbatim echo of the current player input', async () => {
         const frame = applyVerbalInputToFrame(compileReactionFrame({ ...base, repetition: 1 }), 'Тебе неприятно?');
         const response = (content: object) => ({
             ok: true,
@@ -424,12 +472,12 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: 'test', reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(result.error).toBeUndefined();
-        expect(result.reply).toMatchObject({ speech: 'Нет. Скорее непривычно.', addressedTo: 'PL-1' });
+        expect(result.reply).toMatchObject({ speech: 'Тебе неприятно?', addressedTo: 'PL-1' });
     });
 
-    it('regenerates a counter-question mislabeled as a direct answer', async () => {
+    it('does not rewrite a counter-question based on its speech-act label', async () => {
         const frame = applyVerbalInputToFrame(compileReactionFrame({ ...base, repetition: 1 }), 'Лёд убрать?');
         const response = (content: object) => ({
             ok: true,
@@ -446,8 +494,8 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: 'test', reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(fetchMock).toHaveBeenCalledTimes(2);
-        expect(result.reply).toMatchObject({ speech: 'Да, убери.', speechAct: 'answer' });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(result.reply).toMatchObject({ speech: 'А зачем тебе это знать?', speechAct: 'answer' });
     });
 
     it('preserves a deliberate refusal to answer', async () => {
@@ -465,7 +513,7 @@ describe('reaction frame compiler', () => {
             recentEvents: [], systemPrompt: 'test', reactionFrame: frame
         }, buildReactionTurnMessage(frame));
 
-        expect(result.reply).toMatchObject({ speech: 'Не скажу.', speechAct: 'set_boundary' });
+        expect(result.reply).toMatchObject({ speech: 'Не скажу.', speechAct: 'answer' });
     });
 
     it('carries the latest physical episode into a verbal turn', () => {
@@ -476,11 +524,11 @@ describe('reaction frame compiler', () => {
         ];
 
         const selected = selectReactionEpisodes(records, 'verbal_pressure', 'systemic');
-        expect(selected[0].text).toBe('Лёд на шее был неприятен');
+        expect(selected[0].text).toBe('Недавний разговор');
         expect(selected.map(entry => entry.text)).toContain('Недавний разговор');
     });
 
-    it('drops orphaned character lines but preserves deliberate unanswered input', () => {
+    it('preserves autonomous character lines and unanswered input', () => {
         const history = buildPairedSpeechHistory([
             { role: 'assistant', content: 'Старая реплика без причины.' },
             { role: 'user', content: '[Воздействие] Мягко погладить; зона: шея.' },
@@ -492,28 +540,46 @@ describe('reaction frame compiler', () => {
         ]);
 
         expect(history.map(entry => entry.content)).toEqual([
+            'Старая реплика без причины.',
             '[Воздействие] Мягко погладить; зона: шея.',
             'Неожиданно мягко.',
+            'Ещё одна сиротская реплика.',
             'Почему ты молчишь?',
             '[Воздействие] Коснуться льдом; зона: шея.',
             'Убери лёд.'
         ]);
     });
 
-    it('keeps an unprompted lore quote out of continuity without losing the physical event', () => {
+    it('keeps generated speech in chat metadata without promoting it to episodic truth', () => {
         const history = buildPairedSpeechHistory([
             { role: 'user', content: '[Воздействие] Мягко погладить; зона: шея.' },
             { role: 'assistant', content: 'Резонанс проходит сквозь меня.' }
         ]);
-        expect(history).toEqual([{ role: 'user', content: '[Воздействие] Мягко погладить; зона: шея.' }]);
+        expect(history).toEqual([
+            { role: 'user', content: '[Воздействие] Мягко погладить; зона: шея.' },
+            { role: 'assistant', content: 'Резонанс проходит сквозь меня.' }
+        ]);
 
         const episode = stripUnpromptedLoreFromEpisode({
             text: 'Действие: поглаживание. Переживание: контакт приятен. Мой ответ: «Пустота отвечает мне.»',
             type: 'episode_v2',
             metadata: { playerSpeech: '', characterSpeech: 'Пустота отвечает мне.', speechAct: 'conceal' }
         });
-        expect(episode.text).toBe('Действие: поглаживание. Переживание: контакт приятен');
-        expect(episode.metadata.characterSpeech).toBe('');
+        expect(episode.text).not.toContain('Пустота отвечает мне');
+        expect(episode.text).toContain('Переживание: контакт приятен');
+        expect(episode.metadata.characterSpeech).toBe('Пустота отвечает мне.');
+
+        const objectiveEpisode = stripUnpromptedLoreFromEpisode({
+            text: 'Объективные факты симуляции: место — Восстановительная капсула. Внутри находится тёплая вязкая жидкость. Субъективное переживание: тело расслабляется. Моя реплика в тот момент (не объективный факт): «Здесь совершенно темно.»',
+            type: 'episode_v2',
+            metadata: {
+                characterSpeech: 'Здесь совершенно темно.',
+                objectiveFacts: { location: 'Восстановительная капсула' },
+            },
+        });
+        expect(objectiveEpisode.text).toContain('Объективные факты симуляции');
+        expect(objectiveEpisode.text).toContain('тёплая вязкая жидкость');
+        expect(objectiveEpisode.text).not.toContain('совершенно темно');
     });
 
     it('keeps lore dialogue when the player explicitly raises it', () => {
@@ -528,6 +594,8 @@ describe('reaction frame compiler', () => {
         expect(calculateActionSpeechChance({ intensity: .2, tensionBefore: 10, tensionAfter: 15 })).toBe(.4);
         expect(calculateActionSpeechChance({ intensity: .7, tensionBefore: 55, tensionAfter: 60 })).toBeCloseTo(.65);
         expect(calculateActionSpeechChance({ intensity: 1, tensionBefore: 80, tensionAfter: 85 })).toBeCloseTo(.9);
+        expect(calculateActionSpeechChance({ intensity: .2, tensionBefore: 10, tensionAfter: 15, sensoryAmplification: 3 })).toBeCloseTo(.7);
+        expect(calculateActionSpeechChance({ intensity: .2, tensionBefore: 10, tensionAfter: 15, sensoryAmplification: 5 })).toBe(.95);
     });
 
     it('always generates speech at a peak discharge', () => {

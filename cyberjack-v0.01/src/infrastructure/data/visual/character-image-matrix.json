@@ -8,48 +8,426 @@
     "background": "transparent"
   },
   "characters": [
-    { "id": "S-AV-01", "slug": "mira", "name": "Мира", "appearanceTags": ["very long hair", "black hair", "pink hair", "two-tone hair", "bangs", "blue eyes", "pale skin", "tall girl", "medium breasts"] },
-    { "id": "NPC-LAB-01", "slug": "iona", "name": "Иона", "appearanceTags": ["very long hair", "purple hair", "purple eyes", "glasses", "low-tied long hair", "tall girl", "medium breasts"] },
-    { "id": "NPC-CAND-01", "slug": "nika", "name": "Ника", "appearanceTags": ["short hair", "teal hair", "black hair", "two-tone hair", "teal eyes", "choker", "petite", "small breasts"] }
+    {
+      "id": "S-AV-01",
+      "slug": "mira",
+      "name": "Мира",
+      "appearanceTags": [
+        "very long hair",
+        "black hair",
+        "pink hair",
+        "two-tone hair",
+        "bangs",
+        "blue eyes",
+        "pale skin",
+        "tall girl",
+        "medium breasts"
+      ]
+    },
+    {
+      "id": "NPC-LAB-01",
+      "slug": "iona",
+      "name": "Иона",
+      "appearanceTags": [
+        "very long hair",
+        "purple hair",
+        "purple eyes",
+        "glasses",
+        "low-tied long hair",
+        "tall girl",
+        "medium breasts"
+      ]
+    },
+    {
+      "id": "NPC-CAND-01",
+      "slug": "nika",
+      "name": "Ника",
+      "appearanceTags": [
+        "short hair",
+        "teal hair",
+        "black hair",
+        "two-tone hair",
+        "teal eyes",
+        "choker",
+        "petite",
+        "small breasts"
+      ]
+    },
+    {
+      "id": "NPC-SUMI-01",
+      "name": "Sumi",
+      "appearanceTags": [
+        "short hair",
+        "curly hair",
+        "pink hair",
+        "short stature",
+        "petite",
+        "flat chest",
+        "small breasts",
+        "heart pendant",
+        "necklace"
+      ]
+    },
+    {
+      "id": "NPC-ELI-01",
+      "name": "Eli",
+      "appearanceTags": [
+        "dark brown skin",
+        "afro puff",
+        "brown eyes",
+        "tall",
+        "athletic build",
+        "large breasts",
+        "gold hoop earrings"
+      ]
+    },
+    {
+      "id": "NPC-MAI-01",
+      "name": "Mai",
+      "appearanceTags": [
+        "long purple hair",
+        "golden eyes",
+        "tan skin",
+        "medium height",
+        "medium breasts",
+        "flower hair ornament"
+      ]
+    },
+    {
+      "id": "NPC-RIN-01",
+      "slug": "rin",
+      "appearanceTags": [
+        "medium length green hair",
+        "messy bun",
+        "pale skin",
+        "petite",
+        "flat chest",
+        "glasses"
+      ],
+      "portraits": {
+        "count": 32,
+        "size": "768x768"
+      },
+      "bodyparts": {
+        "count": 20,
+        "size": "768x768"
+      },
+      "rendered": {
+        "count": 392,
+        "size": "896x1152"
+      },
+      "calibrationCore": {
+        "count": 2072,
+        "size": "896x1152"
+      },
+      "calibrationV4": {
+        "count": 1568,
+        "size": "896x1152"
+      },
+      "intimacy": {
+        "count": 1053,
+        "size": "896x1152"
+      },
+      "sexMachine": {
+        "count": 12,
+        "size": "896x1152"
+      },
+      "capsule": {
+        "count": 7,
+        "size": "896x1152"
+      }
+    }
   ],
   "poses": [
-    { "id": "standing", "contextId": "pose_standing", "name": "Стоя" },
-    { "id": "sitting", "contextId": "pose_sitting", "name": "Сидя" },
-    { "id": "kneeling", "contextId": "pose_kneeling", "name": "На коленях" },
-    { "id": "lying", "contextId": "pose_lying_down", "name": "Лёжа" },
-    { "id": "all_fours", "contextId": "pose_all_fours", "name": "На четвереньках" },
-    { "id": "spread_eagle", "contextId": "pose_spread_eagle", "name": "Лёжа, руки и ноги разведены" },
-    { "id": "suspended", "contextId": "act_suspend_wrists", "name": "В подвесе" }
+    {
+      "id": "standing",
+      "contextId": "pose_standing",
+      "name": "Стоя"
+    },
+    {
+      "id": "sitting",
+      "contextId": "pose_sitting",
+      "name": "Сидя"
+    },
+    {
+      "id": "kneeling",
+      "contextId": "pose_kneeling",
+      "name": "На коленях"
+    },
+    {
+      "id": "lying",
+      "contextId": "pose_lying_down",
+      "name": "Лёжа"
+    },
+    {
+      "id": "all_fours",
+      "contextId": "pose_all_fours",
+      "name": "На четвереньках"
+    },
+    {
+      "id": "spread_eagle",
+      "contextId": "pose_spread_eagle",
+      "name": "Лёжа, руки и ноги разведены"
+    },
+    {
+      "id": "suspended",
+      "contextId": "act_suspend_wrists",
+      "name": "В подвесе"
+    }
   ],
   "clothing": [
-    { "id": "nude", "name": "Без одежды", "contextIds": [] },
-    { "id": "underwear", "name": "Нижнее бельё", "contextIds": ["eq_clothe_underwear", "eq_clothe_panties"] },
-    { "id": "dress", "name": "Платье", "contextIds": ["eq_clothe_dress"] },
-    { "id": "dress_stockings", "name": "Платье и чулки", "contextIds": ["eq_clothe_dress", "eq_clothe_stockings"] },
-    { "id": "jumpsuit", "name": "Сенсорный комбинезон", "contextIds": ["eq_clothe_jumpsuit"] },
-    { "id": "lab_gown", "name": "Лабораторная рубашка", "contextIds": ["eq_clothe_lab_gown"] },
-    { "id": "calibration_set", "name": "Калибровочный комплект", "contextIds": ["eq_clothe_calibration_set"] }
+    {
+      "id": "nude",
+      "name": "Без одежды",
+      "contextIds": []
+    },
+    {
+      "id": "underwear",
+      "name": "Нижнее бельё",
+      "contextIds": [
+        "eq_clothe_underwear",
+        "eq_clothe_panties"
+      ]
+    },
+    {
+      "id": "dress",
+      "name": "Платье",
+      "contextIds": [
+        "eq_clothe_dress"
+      ]
+    },
+    {
+      "id": "dress_stockings",
+      "name": "Платье и чулки",
+      "contextIds": [
+        "eq_clothe_dress",
+        "eq_clothe_stockings"
+      ]
+    },
+    {
+      "id": "jumpsuit",
+      "name": "Сенсорный комбинезон",
+      "contextIds": [
+        "eq_clothe_jumpsuit"
+      ]
+    },
+    {
+      "id": "lab_gown",
+      "name": "Лабораторная рубашка",
+      "contextIds": [
+        "eq_clothe_lab_gown"
+      ]
+    },
+    {
+      "id": "calibration_set",
+      "name": "Калибровочный комплект",
+      "contextIds": [
+        "eq_clothe_calibration_set"
+      ]
+    }
   ],
   "restraints": [
-    { "id": "none", "name": "Без фиксации", "contextIds": [], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
-    { "id": "handcuffs", "name": "Наручники", "contextIds": ["act_apply_handcuffs"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
-    { "id": "ankle_cuffs", "name": "Ножные манжеты", "contextIds": ["act_apply_ankle_cuffs"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
-    { "id": "wrist_ankle_cuffs", "name": "Наручники и ножные манжеты", "contextIds": ["act_apply_handcuffs", "act_apply_ankle_cuffs"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
-    { "id": "restraint_belt", "name": "Руки на фиксирующем поясе", "contextIds": ["act_apply_restraint_belt"], "allowedPoses": ["standing", "sitting", "kneeling", "lying"] },
-    { "id": "blindfold", "name": "Повязка на глазах", "contextIds": ["eq_blindfold_apply"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
-    { "id": "gag", "name": "Кляп", "contextIds": ["eq_gag_apply"], "allowedPoses": ["standing", "sitting", "kneeling", "lying", "all_fours", "spread_eagle"] },
-    { "id": "table_straps", "name": "Ремни диагностического стола", "contextIds": ["lab_diagnostic_table"], "allowedPoses": ["lying", "spread_eagle"] },
-    { "id": "restraint_frame", "name": "Стационарная рама", "contextIds": ["lab_restraint_frame"], "allowedPoses": ["standing", "spread_eagle"] },
-    { "id": "suspension", "name": "Подвес за запястья", "contextIds": ["act_suspend_wrists"], "allowedPoses": ["suspended"] }
+    {
+      "id": "none",
+      "name": "Без фиксации",
+      "contextIds": [],
+      "allowedPoses": [
+        "standing",
+        "sitting",
+        "kneeling",
+        "lying",
+        "all_fours",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "handcuffs",
+      "name": "Наручники",
+      "contextIds": [
+        "act_apply_handcuffs"
+      ],
+      "allowedPoses": [
+        "standing",
+        "sitting",
+        "kneeling",
+        "lying",
+        "all_fours",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "ankle_cuffs",
+      "name": "Ножные манжеты",
+      "contextIds": [
+        "act_apply_ankle_cuffs"
+      ],
+      "allowedPoses": [
+        "standing",
+        "sitting",
+        "kneeling",
+        "lying",
+        "all_fours",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "wrist_ankle_cuffs",
+      "name": "Наручники и ножные манжеты",
+      "contextIds": [
+        "act_apply_handcuffs",
+        "act_apply_ankle_cuffs"
+      ],
+      "allowedPoses": [
+        "standing",
+        "sitting",
+        "kneeling",
+        "lying",
+        "all_fours",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "restraint_belt",
+      "name": "Руки на фиксирующем поясе",
+      "contextIds": [
+        "act_apply_restraint_belt"
+      ],
+      "allowedPoses": [
+        "standing",
+        "sitting",
+        "kneeling",
+        "lying"
+      ]
+    },
+    {
+      "id": "blindfold",
+      "name": "Повязка на глазах",
+      "contextIds": [
+        "eq_blindfold_apply"
+      ],
+      "allowedPoses": [
+        "standing",
+        "sitting",
+        "kneeling",
+        "lying",
+        "all_fours",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "gag",
+      "name": "Кляп",
+      "contextIds": [
+        "eq_gag_apply"
+      ],
+      "allowedPoses": [
+        "standing",
+        "sitting",
+        "kneeling",
+        "lying",
+        "all_fours",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "table_straps",
+      "name": "Ремни диагностического стола",
+      "contextIds": [
+        "lab_diagnostic_table"
+      ],
+      "allowedPoses": [
+        "lying",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "restraint_frame",
+      "name": "Стационарная рама",
+      "contextIds": [
+        "lab_restraint_frame"
+      ],
+      "allowedPoses": [
+        "standing",
+        "spread_eagle"
+      ]
+    },
+    {
+      "id": "suspension",
+      "name": "Подвес за запястья",
+      "contextIds": [
+        "act_suspend_wrists"
+      ],
+      "allowedPoses": [
+        "suspended"
+      ]
+    }
   ],
   "states": [
-    { "id": "neutral", "name": "Нейтральное состояние", "signals": ["ровное дыхание", "обычный мышечный тонус"] },
-    { "id": "receptive", "name": "Положительная реакция", "signals": ["расслабленная поза", "заметное удовольствие"] },
-    { "id": "guarded", "name": "Настороженность", "signals": ["скованность", "контроль дистанции"] },
-    { "id": "high_positive", "name": "Высокое положительное напряжение", "signals": ["сбитое дыхание", "дрожь", "ожидание разрядки"] },
-    { "id": "high_negative", "name": "Высокое отрицательное напряжение", "signals": ["защитная реакция", "резкое дыхание", "паника или протест"] },
-    { "id": "subspace", "name": "Сабспейс", "signals": ["расфокусированный взгляд", "заторможенная реакция"] },
-    { "id": "climax", "name": "Разрядка", "signals": ["непроизвольное напряжение", "потеря связной речи"] },
-    { "id": "unconscious", "name": "Без сознания", "signals": ["закрытые глаза", "отсутствие произвольной реакции"] }
+    {
+      "id": "neutral",
+      "name": "Нейтральное состояние",
+      "signals": [
+        "ровное дыхание",
+        "обычный мышечный тонус"
+      ]
+    },
+    {
+      "id": "receptive",
+      "name": "Положительная реакция",
+      "signals": [
+        "расслабленная поза",
+        "заметное удовольствие"
+      ]
+    },
+    {
+      "id": "guarded",
+      "name": "Настороженность",
+      "signals": [
+        "скованность",
+        "контроль дистанции"
+      ]
+    },
+    {
+      "id": "high_positive",
+      "name": "Высокое положительное напряжение",
+      "signals": [
+        "сбитое дыхание",
+        "дрожь",
+        "ожидание оргазма"
+      ]
+    },
+    {
+      "id": "high_negative",
+      "name": "Высокое отрицательное напряжение",
+      "signals": [
+        "защитная реакция",
+        "резкое дыхание",
+        "паника или протест"
+      ]
+    },
+    {
+      "id": "subspace",
+      "name": "Сабспейс",
+      "signals": [
+        "расфокусированный взгляд",
+        "заторможенная реакция"
+      ]
+    },
+    {
+      "id": "climax",
+      "name": "Оргазм",
+      "signals": [
+        "непроизвольное напряжение",
+        "потеря связной речи"
+      ]
+    },
+    {
+      "id": "unconscious",
+      "name": "Без сознания",
+      "signals": [
+        "закрытые глаза",
+        "отсутствие произвольной реакции"
+      ]
+    }
   ]
 }

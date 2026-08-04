@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberJack — Manga Panel Layout</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   MANGA PANEL LAYOUT
+   Pure white. Illustrations divided by irregular white gutters.
+   No decoration. No borders. No frames. Just panels and gaps.
+   Charts keep full informativeness but render in ink-on-paper.
+   ═══════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #2a2520;
+  --ink-soft: #6b6258;
+  --ink-light: #a8a096;
+  --paper: #ffffff;
+  --paper-off: #faf8f5;
+  --warm: #b8995e;
+  --cool: #6b8a7c;
+  --rose: #b07878;
+  --violet: #7a7088;
+  --danger: #a86054;
+}
+
+body {
+  font-family: 'Georgia', 'Noto Serif JP', serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+/* The page is a manga page — panels separated by white gutters of varying width */
+.page {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Each panel is a section with its own background (illustration or white) */
+.panel {
+  background: var(--paper);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Irregular gutters — the white space IS the separation */
+.panel.gutter-sm { margin-bottom: 6px; }
+.panel.gutter-md { margin-bottom: 14px; }
+.panel.gutter-lg { margin-bottom: 28px; }
+.panel.gutter-xl { margin-bottom: 44px; }
+
+/* Panel content padding — varies too */
+.panel.pad-sm { padding: 10px 14px; }
+.panel.pad-md { padding: 16px 20px; }
+.panel.pad-lg { padding: 24px 28px; }
+
+/* Panel heading — minimal, no decoration */
+.panel-h {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+.panel-h sub {
+  font-size: 8px;
+  font-weight: 400;
+  color: var(--ink-light);
+  margin-left: 6px;
+  letter-spacing: 0.06em;
+}
+
+/* ═══ ILLUSTRATION TILES ═══
+   The existing illustrated action buttons, unchanged in spirit.
+   Just sitting on white, separated by thin white gutters. */
+
+.tile-strip {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.tile {
+  position: relative;
+  width: 140px;
+  height: 58px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 100ms;
+}
+
+.tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--img);
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.88) contrast(0.96);
+  transition: filter 140ms;
+}
+
+.tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.45) 100%);
+}
+
+.tile:hover { transform: translateY(-1px); }
+.tile:hover::before { filter: saturate(1) contrast(1); }
+
+.tile.sel::before { filter: saturate(1) contrast(1); }
+.tile.sel { box-shadow: inset 0 0 0 2px var(--warm); }
+
+.tile .lbl {
+  position: absolute;
+  bottom: 3px; left: 6px; right: 6px;
+  z-index: 2;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+.tile .int {
+  position: absolute;
+  top: 3px; right: 4px;
+  z-index: 2;
+  display: flex; gap: 2px;
+}
+.tile .int i { width: 3px; height: 5px; background: rgba(255,255,255,0.2); }
+.tile .int i.on { background: var(--warm); }
+
+/* Tile grid for action palettes */
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 3px;
+}
+
+/* ═══ METRICS — horizontal, ink-on-paper, no chrome ═══ */
+
+.metric {
+  display: grid;
+  grid-template-columns: 80px 1fr 28px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.metric .ml { font-size: 10px; color: var(--ink-soft); text-align: right; }
+
+.metric .mt {
+  height: 14px;
+  position: relative;
+  background: var(--paper-off);
+}
+
+.metric .mf {
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: var(--ink);
+  transition: width 280ms;
+}
+.metric .mf.cool { background: var(--cool); }
+.metric .mf.warm { background: var(--warm); }
+.metric .mf.rose { background: var(--rose); }
+.metric .mf.violet { background: var(--violet); }
+.metric .mf.danger { background: var(--danger); }
+
+/* Baseline tick */
+.metric .mb {
+  position: absolute; top: -1px; bottom: -1px;
+  width: 0;
+  border-left: 1px dashed var(--ink-light);
+}
+
+.metric .mv {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* ═══ CHART — pure ink, no decoration, maximum readability ═══ */
+
+.chart {
+  position: relative;
+}
+
+.chart-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.chart-h .cl { font-size: 9px; color: var(--ink-soft); }
+.chart-h .cv { font-size: 14px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.chart-h .cd { font-size: 8px; color: var(--ink-light); margin-left: 6px; }
+
+.chart svg {
+  width: 100%;
+  height: 70px;
+  display: block;
+}
+
+.chart .grid { stroke: var(--ink-light); stroke-width: 0.4; opacity: 0.2; }
+.chart .base { stroke: var(--warm); stroke-width: 0.8; stroke-dasharray: 3 2; opacity: 0.4; }
+.chart .line { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.chart .line.cool { stroke: var(--cool); }
+.chart .line.warm { stroke: var(--warm); }
+.chart .line.rose { stroke: var(--rose); }
+.chart .line.violet { stroke: var(--violet); }
+.chart .area { opacity: 0.08; }
+.chart .dot { fill: var(--ink); }
+.chart .dot.warm { fill: var(--warm); }
+
+/* Multi-series chart */
+.chart-multi .series-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 8px;
+  color: var(--ink-soft);
+  margin-right: 10px;
+}
+.chart-multi .series-label i {
+  width: 8px; height: 2px;
+}
+
+/* ═══ WAVEFORM — minimal ink trace ═══ */
+
+.wave {
+  height: 32px;
+  position: relative;
+  background: var(--paper-off);
+}
+
+.wave svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wave .trace {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wave .trace.peak { stroke: var(--warm); stroke-width: 1.6; }
+
+/* ═══ VERTICAL SCALE — endurance ═══ */
+
+.vscale-group {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  height: 90px;
+}
+
+.vscale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.vscale .vt {
+  width: 10px;
+  height: 72px;
+  background: var(--paper-off);
+  position: relative;
+}
+
+.vscale .vf {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--ink);
+}
+.vscale .vf.warm { background: var(--warm); }
+.vscale .vf.cool { background: var(--cool); }
+.vscale .vf.violet { background: var(--violet); }
+.vscale .vf.danger { background: var(--danger); }
+
+.vscale .vl { font-size: 7px; color: var(--ink-soft); letter-spacing: 0.04em; }
+.vscale .vv { font-size: 10px; font-weight: 700; color: var(--ink); }
+
+/* Balance marker */
+.vscale .vb {
+  position: absolute;
+  left: -2px; right: -2px;
+  height: 0;
+  border-top: 1px solid var(--warm);
+}
+
+/* ═══ DIAL ═══ */
+
+.dial-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.dial {
+  text-align: center;
+}
+
+.dial svg { width: 84px; height: 52px; }
+.dial .bg-arc { fill: none; stroke: var(--paper-off); stroke-width: 5; stroke-linecap: round; }
+.dial .fill-arc { fill: none; stroke-width: 5; stroke-linecap: round; }
+.dial .needle { stroke: var(--ink); stroke-width: 1.2; stroke-linecap: round; }
+.dial .dv { font-size: 16px; font-weight: 700; margin-top: -6px; font-variant-numeric: tabular-nums; }
+.dial .dl { font-size: 8px; color: var(--ink-soft); letter-spacing: 0.04em; }
+
+/* ═══ ZONE MAP ═══ */
+
+.zone-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.zone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: background 100ms;
+}
+
+.zone:hover { background: var(--paper-off); }
+.zone.sel { background: var(--paper-off); }
+
+.zone .zi {
+  width: 24px; height: 24px;
+  border: 0.5px solid var(--ink-light);
+  background: var(--paper-off);
+  display: grid; place-items: center;
+  font-size: 8px; color: var(--ink-light);
+  flex-shrink: 0;
+}
+
+.zone .zn { font-size: 10px; font-weight: 600; color: var(--ink); }
+.zone .zs { font-size: 8px; color: var(--ink-light); font-variant-numeric: tabular-nums; }
+
+.zone .zb {
+  width: 32px; height: 3px;
+  background: var(--paper-off);
+  margin-left: auto;
+}
+.zone .zb i { display: block; height: 100%; background: var(--ink); }
+
+.zone.blocked { opacity: 0.35; }
+
+/* ═══ STATION ═══ */
+
+.station {
+  width: 160px; height: 160px;
+  margin: 0 auto;
+}
+.station svg { width: 100%; height: 100%; }
+.station .ring { fill: none; stroke: var(--ink-light); stroke-width: 0.6; stroke-dasharray: 2 2; opacity: 0.3; }
+.station .ring.on { stroke: var(--warm); stroke-dasharray: none; stroke-width: 1; opacity: 0.6; }
+.station .sec { fill: var(--paper-off); stroke: var(--ink-light); stroke-width: 0.4; opacity: 0.5; }
+.station .sec.on { fill: var(--warm); opacity: 0.15; stroke: var(--warm); }
+.station .sl { font-size: 6px; fill: var(--ink-soft); text-anchor: middle; }
+
+/* ═══ PROTOCOL ═══ */
+
+.proto {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.proto-step {
+  flex-shrink: 0;
+  width: 110px;
+  padding: 8px 10px;
+  position: relative;
+}
+
+.proto-step + .proto-step::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 12px;
+  height: 0.5px;
+  background: var(--ink-light);
+}
+
+.proto-step .pn { font-size: 7px; color: var(--ink-light); }
+.proto-step .pt { font-size: 10px; font-weight: 600; margin-top: 1px; }
+.proto-step .ps { font-size: 8px; margin-top: 3px; color: var(--ink-light); }
+
+.proto-step.done .ps { color: var(--cool); }
+.proto-step.now { background: var(--paper-off); }
+.proto-step.now .ps { color: var(--warm); }
+.proto-step.now::before { background: var(--warm); }
+
+/* ═══ CHAT ═══ */
+
+.chat {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.chat-msg {
+  margin-bottom: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.chat-msg.sys { justify-content: center; }
+.chat-msg.sys .cb {
+  font-size: 9px;
+  color: var(--ink-light);
+  font-style: italic;
+  text-align: center;
+  max-width: 80%;
+  padding: 4px 0;
+}
+
+.chat-port {
+  width: 28px; height: 28px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--paper-off);
+}
+.chat-port img { width: 100%; height: 100%; object-fit: cover; }
+
+.cb {
+  font-size: 10px;
+  color: var(--ink);
+  max-width: 75%;
+  line-height: 1.35;
+}
+
+.chat-name {
+  font-size: 7px;
+  color: var(--ink-light);
+  margin-bottom: 1px;
+}
+
+.chat-msg.right { flex-direction: row-reverse; }
+.chat-msg.right .chat-name { text-align: right; }
+
+/* ═══ READOUT ═══ */
+
+.readout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 1px;
+  background: var(--paper-off);
+  padding: 1px;
+}
+
+.ro-item {
+  background: var(--paper);
+  padding: 6px 8px;
+}
+
+.ro-l {
+  font-size: 7px;
+  color: var(--ink-light);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ro-v {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+
+.ro-s {
+  font-size: 7px;
+  color: var(--ink-light);
+  margin-top: 1px;
+}
+
+/* ═══ BUTTONS — minimal ═══ */
+
+.btn {
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  border: 0.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 100ms;
+}
+.btn:hover { background: var(--paper-off); }
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.primary:hover { background: var(--ink-soft); }
+.btn.ghost { border-color: var(--ink-light); color: var(--ink-soft); }
+
+/* ═══ TAGS ═══ */
+
+.tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag {
+  padding: 1px 6px;
+  font-size: 8px;
+  font-weight: 600;
+  border: 0.5px solid var(--ink-light);
+  color: var(--ink-soft);
+}
+.tag.warm { border-color: var(--warm); color: var(--warm); }
+.tag.cool { border-color: var(--cool); color: var(--cool); }
+.tag.rose { border-color: var(--rose); color: var(--rose); }
+
+/* ═══ COMPOSITE PAGE ═══
+   The actual manga page — panels flow with irregular white gutters */
+
+.composite {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.composite .col-span { grid-column: 1 / -1; }
+
+/* Title header — minimal */
+.page-title {
+  padding: 20px 0 30px;
+  text-align: center;
+}
+
+.page-title h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.page-title p {
+  font-size: 10px;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
+
+/* Section label between panels — like manga chapter markers */
+.sec-label {
+  font-size: 9px;
+  color: var(--ink-light);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 18px 0 8px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="rough">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" seed="3"/>
+      <feDisplacementMap in="SourceGraphic" scale="1"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="page">
+
+<!-- ═══════════════════════════════════════ -->
+<!-- TITLE                                   -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page-title">
+  <h1>Калибровка · S-01</h1>
+  <p>Мира · протокол 02 · тест реакции шеи</p>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- COMPOSITE PAGE — manga panels           -->
+<!-- ═══════════════════════════════════════ -->
+
+<!-- Full-width: illustrated scene -->
+<div class="panel" style="margin-bottom:3px">
+  <img src="/character-images/rendered/mira/standing__calibration_set__none__neutral.png"
+       style="width:100%;display:block"
+       onerror="this.style.display='none'">
+</div>
+
+<!-- Two columns: portrait small + core metrics -->
+<div class="composite" style="margin-bottom:28px">
+
+  <!-- Portrait -->
+  <div class="panel pad-sm">
+    <div style="display:flex;gap:8px;align-items:flex-start">
+      <img src="/character-images/portraits/mira/neutral.png"
+           style="width:80px;height:80px;object-fit:cover"
+           onerror="this.style.display='none'">
+      <div>
+        <div style="font-size:12px;font-weight:700">Мира</div>
+        <div style="font-size:8px;color:var(--ink-light);margin-top:2px">S-01 · калибровка</div>
+        <div style="margin-top:6px">
+          <div class="tags">
+            <span class="tag cool">спокойна</span>
+            <span class="tag warm">открыта</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core metrics -->
+  <div class="panel pad-md">
+    <div class="panel-h">Состояние<sub>базовые метрики</sub></div>
+    <div class="metric"><div class="ml">Чувств.</div><div class="mt"><div class="mf cool" style="width:72%"></div><div class="mb" style="left:45%"></div></div><div class="mv">72</div></div>
+    <div class="metric"><div class="ml">Отнош.</div><div class="mt"><div class="mf warm" style="width:58%"></div><div class="mb" style="left:50%"></div></div><div class="mv">58</div></div>
+    <div class="metric"><div class="ml">Открыт.</div><div class="mt"><div class="mf rose" style="width:84%"></div><div class="mb" style="left:60%"></div></div><div class="mv">84</div></div>
+    <div class="metric"><div class="ml">Пластич.</div><div class="mt"><div class="mf cool" style="width:41%"></div><div class="mb" style="left:50%"></div></div><div class="mv">41</div></div>
+    <div class="metric"><div class="ml">Напряж.</div><div class="mt"><div class="mf danger" style="width:91%"></div></div><div class="mv">91</div></div>
+    <div class="metric"><div class="ml">Перегр.</div><div class="mt"><div class="mf violet" style="width:34%"></div><div class="mb" style="left:80%"></div></div><div class="mv">34</div></div>
+  </div>
+</div>
+
+<!-- Section break -->
+<div class="sec-label">Калибровочные данные</div>
+
+<!-- Two columns: charts + waveform -->
+<div class="composite" style="margin-bottom:28px">
+
+  <!-- History charts -->
+  <div class="panel pad-md">
+    <div class="panel-h">Динамика<sub>последние 12 тиков</sub></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="chart">
+        <div class="chart-h"><div><span class="cl">Чувств.</span><span class="cd">↑ +12</span></div><span class="cv">72</span></div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line class="grid" x1="0" x2="100" y1="33" y2="33"/><line class="grid" x1="0" x2="100" y1="66" y2="66"/>
+          <line class="base" x1="0" x2="100" y1="55" y2="55"/>
+          <polygon class="area" points="0,60 9,58 18,52 27,54 36,46 45,40 54,36 63,32 72,28 81,26 90,24 100,28 100,100 0,100" style="fill:var(--cool)"/>
+          <polyline class="line cool" points="0,60 9,58 18,52 27,54 36,46 45,40 54,36 63,32 72,28 81,26 90,24 100,28"/>
+          <circle class="dot" cx="100" cy="28" r="2.5" style="fill:var(--cool)"/>
+        </svg>
+      </div>
+
+      <div class="chart">
+        <div class="chart-h"><div><span class="cl">Открыт.</span><span class="cd">↑ +8</span></div><span class="cv">84</span></div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line class="grid" x1="0" x2="100" y1="33" y2="33"/><line class="grid" x1="0" x2="100" y1="66" y2="66"/>
+          <line class="base" x1="0" x2="100" y1="40" y2="40"/>
+          <polygon class="area" points="0,50 9,48 18,44 27,38 36,32 45,28 54,24 63,20 72,16 81,14 90,12 100,16 100,100 0,100" style="fill:var(--rose)"/>
+          <polyline class="line rose" points="0,50 9,48 18,44 27,38 36,32 45,28 54,24 63,20 72,16 81,14 90,12 100,16"/>
+          <circle class="dot" cx="100" cy="16" r="2.5" style="fill:var(--rose)"/>
+        </svg>
+      </div>
+
+      <div class="chart">
+        <div class="chart-h"><div><span class="cl">Отнош.</span><span class="cd">→ стаб.</span></div><span class="cv">58</span></div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line class="grid" x1="0" x2="100" y1="33" y2="33"/><line class="grid" x1="0" x2="100" y1="66" y2="66"/>
+          <line class="base" x1="0" x2="100" y1="50" y2="50"/>
+          <polygon class="area" points="0,52 9,48 18,54 27,46 36,50 45,44 54,48 63,42 72,46 81,40 90,44 100,42 100,100 0,100" style="fill:var(--warm)"/>
+          <polyline class="line warm" points="0,52 9,48 18,54 27,46 36,50 45,44 54,48 63,42 72,46 81,40 90,44 100,42"/>
+          <circle class="dot" cx="100" cy="42" r="2.5" style="fill:var(--warm)"/>
+        </svg>
+      </div>
+
+      <div class="chart">
+        <div class="chart-h"><div><span class="cl">Напряж.</span><span class="cd">↑ +34!</span></div><span class="cv">91</span></div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line class="grid" x1="0" x2="100" y1="33" y2="33"/><line class="grid" x1="0" x2="100" y1="66" y2="66"/>
+          <line class="base" x1="0" x2="100" y1="80" y2="80"/>
+          <polygon class="area" points="0,85 9,82 18,78 27,72 36,68 45,58 54,48 63,38 72,28 81,22 90,18 100,12 100,100 0,100" style="fill:var(--danger)"/>
+          <polyline class="line" points="0,85 9,82 18,78 27,72 36,68 45,58 54,48 63,38 72,28 81,22 90,18 100,12" style="stroke:var(--danger)"/>
+          <circle class="dot" cx="100" cy="12" r="2.5" style="fill:var(--danger)"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pulse + endurance -->
+  <div class="panel pad-md">
+    <div class="panel-h">Биосигналы<sub>пульс · выносливость</sub></div>
+
+    <div class="wave" style="margin-bottom:10px">
+      <svg viewBox="0 0 300 32" preserveAspectRatio="none">
+        <path class="trace" d="M0 16 H40 C45 16 47 12 52 12 C57 12 60 16 65 16 H90 L95 19 L100 5 L106 27 L113 16 H140 C147 16 150 10 158 10 C168 10 172 16 180 16 H210 L215 19 L220 5 L226 27 L233 16 H260 C267 16 270 10 278 10 C288 10 292 16 300 16"/>
+      </svg>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-bottom:12px">
+      <div class="vscale">
+        <div class="vt"><div class="vf cool" style="height:62%"></div><div class="vb" style="bottom:50%"></div></div>
+        <div class="vv">62</div>
+        <div class="vl">БАЛАНС</div>
+      </div>
+      <div class="vscale">
+        <div class="vt"><div class="vf warm" style="height:78%"></div></div>
+        <div class="vv">78</div>
+        <div class="vl">ВЫНОСЛ.</div>
+      </div>
+      <div class="vscale">
+        <div class="vt"><div class="vf violet" style="height:34%"></div></div>
+        <div class="vv">34</div>
+        <div class="vl">ПЕРЕГР.</div>
+      </div>
+      <div class="vscale">
+        <div class="vt"><div class="vf danger" style="height:91%"></div></div>
+        <div class="vv">91</div>
+        <div class="vl">НАПРЯЖ.</div>
+      </div>
+    </div>
+
+    <!-- Dials compact -->
+    <div class="dial-row" style="gap:10px">
+      <div class="dial">
+        <svg viewBox="0 0 84 52">
+          <path class="bg-arc" d="M8 48 A34 34 0 0 1 76 48"/>
+          <path class="fill-arc" d="M8 48 A34 34 0 0 1 76 48" stroke="var(--cool)" stroke-dasharray="107" stroke-dashoffset="30"/>
+          <line class="needle" x1="42" y1="48" x2="62" y2="18"/>
+        </svg>
+        <div class="dv">72</div>
+        <div class="dl">ЧУВСТ</div>
+      </div>
+      <div class="dial">
+        <svg viewBox="0 0 84 52">
+          <path class="bg-arc" d="M8 48 A34 34 0 0 1 76 48"/>
+          <path class="fill-arc" d="M8 48 A34 34 0 0 1 76 48" stroke="var(--warm)" stroke-dasharray="107" stroke-dashoffset="45"/>
+          <line class="needle" x1="42" y1="48" x2="56" y2="20"/>
+        </svg>
+        <div class="dv">58</div>
+        <div class="dl">ОТНОШ</div>
+      </div>
+      <div class="dial">
+        <svg viewBox="0 0 84 52">
+          <path class="bg-arc" d="M8 48 A34 34 0 0 1 76 48"/>
+          <path class="fill-arc" d="M8 48 A34 34 0 0 1 76 48" stroke="var(--rose)" stroke-dasharray="107" stroke-dashoffset="17"/>
+          <line class="needle" x1="42" y1="48" x2="68" y2="16"/>
+        </svg>
+        <div class="dv">84</div>
+        <div class="dl">ОТКРЫТ</div>
+      </div>
+      <div class="dial">
+        <svg viewBox="0 0 84 52">
+          <path class="bg-arc" d="M8 48 A34 34 0 0 1 76 48"/>
+          <path class="fill-arc" d="M8 48 A34 34 0 0 1 76 48" stroke="var(--violet)" stroke-dasharray="107" stroke-dashoffset="70"/>
+          <line class="needle" x1="42" y1="48" x2="50" y2="26"/>
+        </svg>
+        <div class="dv">34</div>
+        <div class="dl">ПЕРЕГР</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section break -->
+<div class="sec-label">Карта зон · Действия</div>
+
+<!-- Two columns: zone map + action tiles -->
+<div class="composite" style="margin-bottom:28px">
+
+  <!-- Zone map -->
+  <div class="panel pad-md">
+    <div class="panel-h">Зоны<sub>доступные для воздействия</sub></div>
+    <div class="zone-grid">
+      <div class="zone sel">
+        <div class="zi">◇</div>
+        <div><div class="zn">Шея</div><div class="zs">sens 85 · att 12</div></div>
+        <div class="zb"><i style="width:85%"></i></div>
+      </div>
+      <div class="zone">
+        <div class="zi">◆</div>
+        <div><div class="zn">Губы</div><div class="zs">sens 90 · att 20</div></div>
+        <div class="zb"><i style="width:90%"></i></div>
+      </div>
+      <div class="zone">
+        <div class="zi">○</div>
+        <div><div class="zn">Плечи</div><div class="zs">sens 30 · att 80</div></div>
+        <div class="zb"><i style="width:30%"></i></div>
+      </div>
+      <div class="zone blocked">
+        <div class="zi">▣</div>
+        <div><div class="zn">Грудь</div><div class="zs">sens 70 · att 45</div></div>
+        <div class="zb"><i style="width:70%"></i></div>
+      </div>
+      <div class="zone">
+        <div class="zi">◐</div>
+        <div><div class="zn">Талия</div><div class="zs">sens 55 · att 60</div></div>
+        <div class="zb"><i style="width:55%"></i></div>
+      </div>
+      <div class="zone">
+        <div class="zi">◢</div>
+        <div><div class="zn">Бёдра</div><div class="zs">sens 92 · att 15</div></div>
+        <div class="zb"><i style="width:92%"></i></div>
+      </div>
+      <div class="zone">
+        <div class="zi">△</div>
+        <div><div class="zn">Спина</div><div class="zs">sens 40 · att 50</div></div>
+        <div class="zb"><i style="width:40%"></i></div>
+      </div>
+      <div class="zone">
+        <div class="zi">○</div>
+        <div><div class="zn">Руки</div><div class="zs">sens 25 · att 70</div></div>
+        <div class="zb"><i style="width:25%"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action tiles -->
+  <div class="panel pad-md">
+    <div class="panel-h">Действия<sub>Шея · контакт</sub></div>
+    <div class="tile-grid">
+      <div class="tile" style="--img:url('/character-images/actions/contact/feather_stroke.png')">
+        <div class="int"><i class="on"></i><i></i><i></i></div>
+        <div class="lbl">Перо</div>
+      </div>
+      <div class="tile sel" style="--img:url('/character-images/actions/contact/deep_massage.png')">
+        <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+        <div class="lbl">Массаж</div>
+      </div>
+      <div class="tile" style="--img:url('/character-images/actions/contact/light_bite.png')">
+        <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+        <div class="lbl">Укус</div>
+      </div>
+      <div class="tile" style="--img:url('/character-images/actions/contact/hair_pull.png')">
+        <div class="int"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+        <div class="lbl">Волосы</div>
+      </div>
+      <div class="tile" style="--img:url('/character-images/actions/contact/tickle.png')">
+        <div class="int"><i class="on"></i><i></i><i></i></div>
+        <div class="lbl">Щекотка</div>
+      </div>
+      <div class="tile" style="--img:url('/character-images/actions/contact/scratching.png')">
+        <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+        <div class="lbl">Царапины</div>
+      </div>
+      <div class="tile" style="--img:url('/character-images/actions/contact/pinch.png')">
+        <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+        <div class="lbl">Щипок</div>
+      </div>
+      <div class="tile" style="--img:url('/character-images/actions/contact/wait.png')">
+        <div class="int"><i></i><i></i><i></i></div>
+        <div class="lbl">Ждать</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:4px;margin-top:8px">
+      <button class="btn primary">Выполнить</button>
+      <button class="btn ghost">Ждать</button>
+      <button class="btn ghost">В очередь</button>
+    </div>
+  </div>
+</div>
+
+<!-- Section break -->
+<div class="sec-label">Протокол · Журнал</div>
+
+<!-- Two columns: protocol + chat -->
+<div class="composite" style="margin-bottom:28px">
+
+  <!-- Protocol -->
+  <div class="panel pad-md">
+    <div class="panel-h">Протокол<sub>02 · калибровка шеи</sub></div>
+    <div class="proto">
+      <div class="proto-step done">
+        <div class="pn">01</div>
+        <div class="pt">Подготовка</div>
+        <div class="ps">✓ выполнено</div>
+      </div>
+      <div class="proto-step done">
+        <div class="pn">02</div>
+        <div class="pt">Фиксация</div>
+        <div class="ps">✓ выполнено</div>
+      </div>
+      <div class="proto-step now">
+        <div class="pn">03</div>
+        <div class="pt">Реакция</div>
+        <div class="ps">● в процессе</div>
+      </div>
+      <div class="proto-step">
+        <div class="pn">04</div>
+        <div class="pt">Порог</div>
+        <div class="ps">○ ожидание</div>
+      </div>
+      <div class="proto-step">
+        <div class="pn">05</div>
+        <div class="pt">Отчёт</div>
+        <div class="ps">○ ожидание</div>
+      </div>
+    </div>
+
+    <!-- Readout under protocol -->
+    <div style="margin-top:14px">
+      <div class="panel-h">Результат тика<sub>последний</sub></div>
+      <div class="readout">
+        <div class="ro-item">
+          <div class="ro-l">Эфф. sens</div>
+          <div class="ro-v">68.4</div>
+          <div class="ro-s">65% глоб</div>
+        </div>
+        <div class="ro-item">
+          <div class="ro-l">Валентн.</div>
+          <div class="ro-v">+0.72</div>
+          <div class="ro-s">положит.</div>
+        </div>
+        <div class="ro-item">
+          <div class="ro-l">Вовлеч.</div>
+          <div class="ro-v">0.81</div>
+          <div class="ro-s">растёт</div>
+        </div>
+        <div class="ro-item">
+          <div class="ro-l">Новизна</div>
+          <div class="ro-v">0.34</div>
+          <div class="ro-s">эфф. 0.28</div>
+        </div>
+        <div class="ro-item">
+          <div class="ro-l">Дискомф.</div>
+          <div class="ro-v">0.12</div>
+          <div class="ro-s">низкий</div>
+        </div>
+        <div class="ro-item">
+          <div class="ro-l">Обуч.</div>
+          <div class="ro-v">+0.04</div>
+          <div class="ro-s">прогресс</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="panel pad-md">
+    <div class="panel-h">Журнал<sub>наблюдения и реплики</sub></div>
+    <div class="chat">
+      <div class="chat-msg sys">
+        <div class="cb">Сера зафиксирована в калибровочном костюме. Начало протокола 02.</div>
+      </div>
+      <div class="chat-msg">
+        <div class="chat-port">
+          <img src="/character-images/portraits/mira/neutral.png" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <div class="chat-name">Мира</div>
+          <div class="cb">Мне нравится быть рядом с тобой...</div>
+        </div>
+      </div>
+      <div class="chat-msg right">
+        <div class="chat-port">
+          <img src="/character-images/portraits/male_test/neutral.png" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <div class="chat-name">Калибратор</div>
+          <div class="cb">Тебе нравится стоять на коленях?</div>
+        </div>
+      </div>
+      <div class="chat-msg sys">
+        <div class="cb">Калибратор, склонившись, спокойно спросил стоящую на коленях Серу, нравится ли ей эта поза. Сера, не меняя положения, мягко ответила, что ей нравится быть рядом с ним.</div>
+      </div>
+      <div class="chat-msg">
+        <div class="chat-port">
+          <img src="/character-images/portraits/mira/neutral.png" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <div class="chat-name">Мира</div>
+          <div class="cb">Да... мне нравится...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- GALLERY — all element types             -->
+<!-- ═══════════════════════════════════════ -->
+
+<div class="sec-label">Полный каталог элементов</div>
+
+<!-- Multi-series chart -->
+<div class="panel pad-md gutter-lg">
+  <div class="panel-h">Мульти-график<sub>4 серии на одном поле</sub></div>
+  <div class="chart chart-multi" style="margin-bottom:6px">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="height:90px">
+      <line class="grid" x1="0" x2="100" y1="25" y2="25"/><line class="grid" x1="0" x2="100" y1="50" y2="50"/><line class="grid" x1="0" x2="100" y1="75" y2="75"/>
+      <polyline class="line cool" points="0,60 10,55 20,50 30,48 40,40 50,35 60,30 70,28 80,25 90,22 100,28"/>
+      <polyline class="line rose" points="0,50 10,48 20,44 30,38 40,32 50,28 60,24 70,20 80,16 90,14 100,18"/>
+      <polyline class="line warm" points="0,55 10,50 20,54 30,46 40,50 50,44 60,48 70,42 80,46 90,40 100,42"/>
+      <polyline class="line" points="0,80 10,78 20,72 30,65 40,58 50,48 60,38 70,28 80,20 90,14 100,10" style="stroke:var(--danger)"/>
+    </svg>
+  </div>
+  <div style="display:flex;flex-wrap:wrap">
+    <span class="series-label"><i style="background:var(--cool)"></i> Чувств.</span>
+    <span class="series-label"><i style="background:var(--rose)"></i> Открыт.</span>
+    <span class="series-label"><i style="background:var(--warm)"></i> Отнош.</span>
+    <span class="series-label"><i style="background:var(--danger)"></i> Напряж.</span>
+  </div>
+</div>
+
+<!-- Waveform variants -->
+<div class="panel pad-md gutter-lg">
+  <div class="panel-h">Волны<sub>варианты осциллоскопа</sub></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="wave">
+      <svg viewBox="0 0 300 32" preserveAspectRatio="none">
+        <path class="trace" d="M0 16 H40 C45 16 47 12 52 12 C57 12 60 16 65 16 H90 L95 19 L100 5 L106 27 L113 16 H140 C147 16 150 10 158 10 C168 10 172 16 180 16 H300"/>
+      </svg>
+    </div>
+    <div class="wave">
+      <svg viewBox="0 0 300 32" preserveAspectRatio="none">
+        <path class="trace peak" d="M0 16 H30 C40 16 45 6 55 6 C65 6 70 16 80 16 H110 C120 16 125 1 135 1 C145 1 150 16 160 16 H190 C200 16 205 4 215 4 C225 4 230 16 240 16 H300"/>
+      </svg>
+    </div>
+    <div class="wave">
+      <svg viewBox="0 0 300 32" preserveAspectRatio="none">
+        <path class="trace" d="M0 16 Q15 14 30 16 T60 16 T90 16 T120 16 T150 16 T180 16 T210 16 T240 16 T270 16 T300 16"/>
+      </svg>
+    </div>
+    <div class="wave">
+      <svg viewBox="0 0 300 32" preserveAspectRatio="none">
+        <path class="trace" d="M0 16 C10 10 20 22 30 16 C40 10 50 22 60 16 C70 10 80 22 90 16 C100 10 110 22 120 16 C130 10 140 22 150 16 C160 10 170 22 180 16 C190 10 200 22 210 16 C220 10 230 22 240 16 C250 10 260 22 270 16 C280 10 290 22 300 16"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- Station -->
+<div class="panel pad-md gutter-lg">
+  <div class="panel-h">Станция<sub>S-01 · сектора</sub></div>
+  <div class="station">
+    <svg viewBox="0 0 160 160">
+      <circle class="ring on" cx="80" cy="80" r="72"/>
+      <circle class="ring" cx="80" cy="80" r="52"/>
+      <circle class="ring" cx="80" cy="80" r="32"/>
+      <path class="sec on" d="M80 80 L80 8 A72 72 0 0 1 152 80 Z"/>
+      <path class="sec" d="M80 80 L152 80 A72 72 0 0 1 80 152 Z"/>
+      <path class="sec" d="M80 80 L80 152 A72 72 0 0 1 8 80 Z"/>
+      <path class="sec" d="M80 80 L8 80 A72 72 0 0 1 80 8 Z"/>
+      <text class="sl" x="116" y="40">ПЕРИМ</text>
+      <text class="sl" x="116" y="124">КУЛЬТ</text>
+      <text class="sl" x="44" y="124">АРХИВ</text>
+      <text class="sl" x="44" y="40">СКАН</text>
+      <circle cx="80" cy="80" r="5" fill="var(--warm)" opacity="0.5"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Tags gallery -->
+<div class="panel pad-md gutter-lg">
+  <div class="panel-h">Теги<sub>семантика действий</sub></div>
+  <div class="tags">
+    <span class="tag">контакт</span>
+    <span class="tag cool">мягкий</span>
+    <span class="tag warm">прогрев</span>
+    <span class="tag rose">эмоц.</span>
+    <span class="tag">шея</span>
+    <span class="tag cool">успокаив.</span>
+    <span class="tag warm">интенсив.</span>
+    <span class="tag rose">интимн.</span>
+    <span class="tag">обучающ.</span>
+    <span class="tag">порог</span>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

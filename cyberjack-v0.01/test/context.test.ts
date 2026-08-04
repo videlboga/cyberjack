@@ -88,8 +88,8 @@ describe('Context & Slot Engine', () => {
 
     it('ConditionWatcher should apply context when rule is met', () => {
         const subj = 'sub_ctx_trigger';
-        // Core low capacity and low attitude should trigger 'apathy_instant' rule
-    subjectRepo.save(subj, 'TriggerSubject', { sensitivity:50, capacity:5, openness:50, plasticity:50, attitude:30, tension: 0 });
+        // Near-zero reserve with subsided activation triggers collapse.
+    subjectRepo.save(subj, 'TriggerSubject', { sensitivity:50, capacity:3, openness:50, plasticity:50, attitude:30, tension: 0 });
     pointStateRepo.save(subj, 'systemic', { pointId: 'systemic', localSensitivity:50, localAttitude:50, localOpenness:50, familiarity:0, exposureCount:0 });
 
         // Ensure the preset exists for effect_apathy
@@ -108,7 +108,7 @@ describe('Context & Slot Engine', () => {
         presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
         presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
 
-        subjectRepo.save(subj, 'Hysteresis Subject', { sensitivity:50, capacity:5, openness:50, plasticity:50, attitude:50, tension:0 });
+        subjectRepo.save(subj, 'Hysteresis Subject', { sensitivity:50, capacity:3, openness:50, plasticity:50, attitude:50, tension:0 });
         ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
         expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(true);
 
@@ -121,9 +121,28 @@ describe('Context & Slot Engine', () => {
         expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(false);
     });
 
+    it('uses sensitivity above the local baseline for hyperesthesia', () => {
+        const subj = 'sub_ctx_local_hyperesthesia';
+        const core = { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 };
+        subjectRepo.save(subj, 'Sensitive Subject', core);
+        presetRepo.saveActionPreset('effect_local_hyperesthesia', 'Local Hyperesthesia', { intensity_mult:1.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
+
+        const natural = { pointId:'nipples', localSensitivity:95, baselineLocalSensitivity:95, localAttitude:50, localOpenness:50, familiarity:0, exposureCount:0 };
+        ConditionWatcher.evaluate(subj, 'nipples', core as any, natural);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_local_hyperesthesia')).toBe(false);
+
+        const elevated = { ...natural, localSensitivity:110 };
+        ConditionWatcher.evaluate(subj, 'nipples', core as any, elevated);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_local_hyperesthesia')).toBe(true);
+
+        const recovered = { ...natural, localSensitivity:103 };
+        ConditionWatcher.evaluate(subj, 'nipples', core as any, recovered);
+        expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_local_hyperesthesia')).toBe(false);
+    });
+
     it('applies unconsciousness at zero capacity regardless of high attitude', () => {
         const subj = 'sub_ctx_high_attitude_exhaustion';
-        subjectRepo.save(subj, 'Exhausted Subject', { sensitivity:50, capacity:0, openness:95, plasticity:90, attitude:90, tension:10 });
+        subjectRepo.save(subj, 'Exhausted Subject', { sensitivity:50, capacity:0, openness:95, plasticity:90, attitude:90, tension:8 });
         pointStateRepo.save(subj, 'systemic', { pointId:'systemic', localSensitivity:50, localAttitude:80, localOpenness:80, familiarity:0, exposureCount:0 });
         presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
         presetRepo.saveActionPreset('pose_lying_down', 'Lying', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
@@ -153,7 +172,7 @@ describe('Context & Slot Engine', () => {
         ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
         expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(false);
 
-        subjectRepo.save(subj, 'Forced Arousal Subject', { sensitivity:50, capacity:0, openness:50, plasticity:50, attitude:50, tension:15 });
+        subjectRepo.save(subj, 'Forced Arousal Subject', { sensitivity:50, capacity:0, openness:50, plasticity:50, attitude:50, tension:8 });
         ConditionWatcher.evaluate(subj, 'systemic', subjectRepo.get(subj) as any, pointStateRepo.get(subj, 'systemic') as any);
         expect(activeContextsRepo.getAllForSubject(subj).some(row => row.actionId === 'effect_apathy')).toBe(true);
     });
@@ -280,7 +299,7 @@ describe('Context & Slot Engine', () => {
 
     it('moves an unrestrained subject into a lying pose when apathy activates', () => {
         const subj = 'sub_ctx_collapse';
-        subjectRepo.save(subj, 'Collapse Subject', { sensitivity:50, capacity:5, openness:50, plasticity:50, attitude:30, tension:0 });
+        subjectRepo.save(subj, 'Collapse Subject', { sensitivity:50, capacity:3, openness:50, plasticity:50, attitude:30, tension:0 });
         pointStateRepo.save(subj, 'systemic', { pointId:'systemic', localSensitivity:50, localAttitude:50, localOpenness:50, familiarity:0, exposureCount:0 });
         presetRepo.saveActionPreset('effect_apathy', 'Apathy', { intensity_mult:0.5 }, { type:'condition', occupiesPoints:[], duration:-1 });
         presetRepo.saveActionPreset('pose_standing', 'Standing', {}, { type:'pose', occupiesPoints:['global_pose'], duration:-1 });
@@ -323,6 +342,42 @@ describe('Context & Slot Engine', () => {
         expect(activeContextsRepo.getAllForSubject(subj).filter(row => row.actionId === 'same_ctx')).toHaveLength(1);
     });
 
+    it('stores a multi-slot pose as one scene-level context', () => {
+        const subj = 'sub_ctx_multislot_pose';
+        subjectRepo.save(subj, 'Multi-slot Pose Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('pose_all_fours', 'All Fours', {}, {
+            type:'pose',
+            occupiesPoints:['systemic', 'global_pose', 'knees', 'hands'],
+            duration:-1
+        });
+
+        ContextManager.applyContext(subj, 'pose_all_fours', presetRepo.getActionPreset('pose_all_fours') as any);
+
+        const rows = activeContextsRepo.getAllForSubject(subj).filter(row => row.actionId === 'pose_all_fours');
+        expect(rows).toHaveLength(1);
+        expect(rows[0].pointId).toBe('global_pose');
+    });
+
+    it('repairs legacy duplicate pose rows when the pose is reapplied', () => {
+        const subj = 'sub_ctx_legacy_pose';
+        subjectRepo.save(subj, 'Legacy Pose Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('pose_all_fours', 'All Fours', {}, {
+            type:'pose',
+            occupiesPoints:['systemic', 'global_pose', 'knees', 'hands'],
+            duration:-1
+        });
+        activeContextsRepo.add('legacy_systemic', subj, 'pose_all_fours', -1, 'systemic', null);
+        activeContextsRepo.add('legacy_global', subj, 'pose_all_fours', -1, 'global_pose', null);
+        activeContextsRepo.add('legacy_knees', subj, 'pose_all_fours', -1, 'knees', null);
+        activeContextsRepo.add('legacy_hands', subj, 'pose_all_fours', -1, 'hands', null);
+
+        ContextManager.applyContext(subj, 'pose_all_fours', presetRepo.getActionPreset('pose_all_fours') as any);
+
+        const rows = activeContextsRepo.getAllForSubject(subj).filter(row => row.actionId === 'pose_all_fours');
+        expect(rows).toHaveLength(1);
+        expect(rows[0].pointId).toBe('global_pose');
+    });
+
     it('preserves zero duration and expires it on the next processing pass', () => {
         const subj = 'sub_ctx_zero_duration';
         subjectRepo.save(subj, 'Duration Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
@@ -332,5 +387,33 @@ describe('Context & Slot Engine', () => {
         expect(active[0].duration).toBe(0);
         ContextManager.processTick(subj, 1);
         expect(activeContextsRepo.getAllForSubject(subj)).toHaveLength(0);
+    });
+
+    it('ages drug effects by game minutes while legacy contexts still age by ticks', () => {
+        const subj = 'sub_ctx_drug_duration';
+        subjectRepo.save(subj, 'Drug Duration Subject', { sensitivity:50, capacity:50, openness:50, plasticity:50, attitude:50, tension:0 });
+        presetRepo.saveActionPreset('drug_day', 'Daily Drug', {}, {
+            type:'condition',
+            occupiesPoints:[],
+            duration:1440,
+            durationUnit:'minutes'
+        });
+        presetRepo.saveActionPreset('legacy_ticks', 'Tick Context', {}, {
+            type:'condition',
+            occupiesPoints:[],
+            duration:12
+        });
+        ContextManager.applyContext(subj, 'drug_day', presetRepo.getActionPreset('drug_day') as any);
+        ContextManager.applyContext(subj, 'legacy_ticks', presetRepo.getActionPreset('legacy_ticks') as any);
+
+        ContextManager.processTick(subj, 1, 720);
+        let active = activeContextsRepo.getAllForSubject(subj);
+        expect(active.find(row => row.actionId === 'drug_day')?.ticksActive).toBe(720);
+        expect(active.find(row => row.actionId === 'legacy_ticks')?.ticksActive).toBe(1);
+
+        ContextManager.processTick(subj, 1, 720);
+        active = activeContextsRepo.getAllForSubject(subj);
+        expect(active.some(row => row.actionId === 'drug_day')).toBe(false);
+        expect(active.find(row => row.actionId === 'legacy_ticks')?.ticksActive).toBe(2);
     });
 });

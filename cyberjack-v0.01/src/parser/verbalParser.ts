@@ -7,6 +7,7 @@ export interface ParsedVerbalAction extends Partial<CompiledAction> {
     pointId?: string;
     raw?: string;
     model?: string;
+    verbalIntent?: 'conversation' | 'question' | 'praise' | 'insult' | 'command';
     commandIntent: CommandIntent;
     routing?: {
         actorId: string;
@@ -29,6 +30,17 @@ export function extractDescribedAction(text: string): string | null {
         return match[1].trim();
     }
     return null;
+}
+
+/**
+ * Questions about a character's wishes or consent may mention an executable
+ * action, but must remain dialogue even if the semantic classifier mistakes
+ * the infinitive for an instruction.
+ */
+export function isNonExecutingCommandDiscussion(text: string): boolean {
+    const normalized = text.toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
+    return /(?:^|[,;]\s*)(?:а\s+)?(?:ты\s+)?(?:не\s+)?(?:хочешь|хотел(?:а)?\s+бы|можешь\s+ли|готов(?:а)?\s+ли|соглас(?:на|ен)\s+ли)(?:[\s?!.,]|$)/u.test(normalized)
+        || /(?:^|\s)(?:что\s+если|как\s+(?:ты\s+)?относишься\s+к|как\s+насчет)(?:[\s?!.,]|$)/u.test(normalized);
 }
 
 // Levenshtein distance for fuzzy matching
@@ -188,6 +200,9 @@ ${itemsList}
 
 // ─── Main Parser ────────────────────────────────────────────────────────────
 
+export const commandClassificationAllowsExecution = (speechType: unknown, text: string) =>
+    speechType === 'command' || (!speechType && !text.includes('?'));
+
 export async function parseVerbalInput(
     text: string,
     sceneContextStr?: string,
@@ -197,6 +212,7 @@ export async function parseVerbalInput(
     if (!text || text.trim() === "") {
         return { intensity: 0.1, valence: 0, contact: 0.1, sharpness: 0, novelty: 0.5, pointId: 'systemic', commandIntent: { type: 'none' } };
     }
+    const commandDiscussionOnly = isNonExecutingCommandDiscussion(text);
 
     // ── Check for described action in asterisks: *...* ──
     const describedAction = extractDescribedAction(text);
@@ -306,7 +322,7 @@ export async function parseVerbalInput(
     // Common aggregate wardrobe commands must not depend on an LLM returning
     // the singular targetContext shape. The runtime safely ignores items that
     // are not currently worn.
-    if (/(?:^|\s)(разденься|сними\s+(?:с\s+себя\s+)?(?:всю\s+)?одежду|сними\s+вс[её])(?:[.!?\s]|$)/i.test(text)) {
+    if (!commandDiscussionOnly && /(?:^|\s)(разденься|сними\s+(?:с\s+себя\s+)?(?:всю\s+)?одежду|сними\s+вс[её])(?:[.!?\s]|$)/i.test(text)) {
         return {
             intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0,
             pointId: 'systemic',
@@ -355,11 +371,13 @@ ${ctxList}
 ${actionList}
 
 ЕСЛИ текст пользователя является требованием/просьбой применить одно из этих состояний (например, "на колени!", "надень наручники", "сними это немедленно", "встань"), добавь в JSON поле "intent": "activate_context" и поле "targetContext" со значением соответствующего ID контекста. ЕСЛИ требуют снять надетое (одежду, оборудование, позу — например "сними чулки", "сними бельё", "сними трусики", "сними бюстгальтер", "сними платье", "снять ошейник", "встань с колен"), используйте intent "deactivate_context" и соответствующий ID контекста (для трусиков, бюстгальтера и всего комплекта белья всегда используй "eq_clothe_underwear"; другие примеры: "eq_clothe_stockings", "eq_clothe_dress", "act_apply_collar", "pose_kneeling"). ЕСЛИ говорят "сними всё" или "разденься", перечислите ВСЕ надетые предметы одежды в массиве "targetContexts".
-ЕСЛИ текст является запросом или указанием выполнить конкретное действие (например, "поцелуй Векса", "ударь меня", "погладь"), добавь "intent": "perform_action", укажи ID подходящего действия в поле "targetAction", цель действия в поле "targetId" (если требуют ударить себя, укажи "initiator", если другого персонажа — его имя из сцены) и точку в "pointId".
+ЕСЛИ текст просит изменить уже продолжающееся взаимодействие без обязательного называния конкретной кнопки (например, "хватит", "прикройся", "сдвинь ноги", "закончи с этим", "продолжай", "сделай сильнее"), добавь "intent": "change_current_interaction", поле "interactionGoal": "stop" | "start" | "adjust". В targetAction можешь указать наиболее вероятный пресет как подсказку, но окончательный выбор сделает движок по активному состоянию.
+ЕСЛИ текст является запросом или указанием выполнить конкретное новое действие (например, "поцелуй Векса", "ударь меня", "погладь"), добавь "intent": "perform_action", укажи ID подходящего действия в поле "targetAction", цель действия в поле "targetId" (если требуют ударить себя, укажи "initiator", если другого персонажа — его имя из сцены) и точку в "pointId".
 ВАЖНО: perform_action и perform_described_action используются ТОЛЬКО когда игрок приказывает активу сделать что-то (повелительное наклонение: "поцелуй меня", "встань на колени") ИЛИ когда игрок описывает СВОЁ физическое действие в звёздочках (*глажу по щеке*). Если текст — это обычная речь, вопрос, разговор, эмоциональное высказывание WITHOUT звёздочек (например "тебе нравится это?", "ты красивая", "я хочу тебя", "тебе нравится, когда я трогаю твои ножки?"), то intent должен быть "none" — это просто слова, не команда и не действие.
 ${moveInstructions}
-Твоя задача — классифицировать фразу по 5 параметрам и намерению. Возможные дополнительные поля: "intent" ("activate_context", "deactivate_context", "move", "perform_action"), "targetContext" (для контекстов), "targetLocation" (для перемещения) или "targetAction" и "targetId" (для действий).
+Твоя задача — классифицировать фразу по 5 параметрам и намерению. Возможные дополнительные поля: "intent" ("activate_context", "deactivate_context", "move", "change_current_interaction", "perform_action"), "interactionGoal" ("stop", "start", "adjust"), "targetContext" (для контекстов), "targetLocation" (для перемещения) или "targetAction" и "targetId" (для действий).
 {
+    "speechType": "conversation" | "question" | "praise" | "insult" | "command",
     "intensity": 0.0-1.0,
     "valence": -1.0..1.0,
     "contact": 0.0-1.0,
@@ -486,20 +504,61 @@ ${moveInstructions}
             }
         }
 
+        // The classifier can occasionally return a contradictory pair such as
+        // speechType="question" + intent="perform_action". A question may
+        // discuss or clarify an action, but must not mutate the scene unless
+        // the classifier has actually identified it as a command.
+        const allowsCommandExecution = commandClassificationAllowsExecution(parsed.speechType, text);
         let commandIntent: CommandIntent = { type: 'none' };
-        if ((parsed.intent === 'change_pose' || parsed.intent === 'activate_context') && parsed.targetContext) {
+        if (commandDiscussionOnly) {
+            commandIntent = { type: 'none' };
+        } else if (allowsCommandExecution && (parsed.intent === 'change_pose' || parsed.intent === 'activate_context') && parsed.targetContext) {
             commandIntent = { type: 'activate_context', targetContextId: parsed.targetContext };
-        } else if (parsed.intent === 'change_context' && parsed.targetContext) {
+        } else if (allowsCommandExecution && parsed.intent === 'change_context' && parsed.targetContext) {
             commandIntent = { type: 'activate_context', targetContextId: parsed.targetContext };
-        } else if (parsed.intent === 'deactivate_context' && parsed.targetContext) {
+        } else if (allowsCommandExecution && parsed.intent === 'deactivate_context' && parsed.targetContext) {
             commandIntent = { type: 'deactivate_context', targetContextId: parsed.targetContext };
-        } else if (parsed.intent === 'deactivate_context' && Array.isArray(parsed.targetContexts) && parsed.targetContexts.length) {
+        } else if (allowsCommandExecution && parsed.intent === 'deactivate_context' && Array.isArray(parsed.targetContexts) && parsed.targetContexts.length) {
             commandIntent = { type: 'deactivate_contexts', targetContextIds: parsed.targetContexts.filter((id: unknown): id is string => typeof id === 'string') };
-        } else if (parsed.intent === 'move' && parsed.targetLocation) {
+        } else if (allowsCommandExecution && parsed.intent === 'move' && parsed.targetLocation) {
             commandIntent = { type: 'move', targetLocation: parsed.targetLocation };
-        } else if (parsed.intent === 'perform_action' && parsed.targetAction) {
-            commandIntent = { type: 'perform_action', actionId: parsed.targetAction, targetId: resolvedTargetId || parsed.targetId || 'initiator', pointId: normalizedPoint };
+        } else if (allowsCommandExecution && parsed.intent === 'change_current_interaction') {
+            const goal = ['stop', 'start', 'adjust'].includes(parsed.interactionGoal)
+                ? parsed.interactionGoal
+                : 'stop';
+            commandIntent = {
+                type: 'change_current_interaction',
+                goal,
+                suggestedActionId: parsed.targetAction || undefined,
+                targetId: resolvedTargetId || parsed.targetId || undefined,
+                pointId: normalizedPoint
+            };
+        } else if (allowsCommandExecution && parsed.intent === 'perform_action' && parsed.targetAction) {
+            const targetPreset = presetRepo.getActionPreset(parsed.targetAction);
+            const requiredContexts = (targetPreset as any)?.requireContexts || [];
+            const removeContexts = (targetPreset as any)?.removeContexts || [];
+            const describesStoppingCurrentInteraction = requiredContexts.length > 0
+                && removeContexts.some((contextId: string) => requiredContexts.includes(contextId));
+            commandIntent = describesStoppingCurrentInteraction
+                ? {
+                    type: 'change_current_interaction',
+                    goal: 'stop',
+                    suggestedActionId: parsed.targetAction,
+                    targetId: resolvedTargetId || parsed.targetId || undefined,
+                    pointId: normalizedPoint
+                }
+                : { type: 'perform_action', actionId: parsed.targetAction, targetId: resolvedTargetId || parsed.targetId || 'initiator', pointId: normalizedPoint };
         }
+        const parsedSpeechType = ['conversation', 'question', 'praise', 'insult', 'command'].includes(parsed.speechType)
+            ? parsed.speechType
+            : undefined;
+        const verbalIntent: ParsedVerbalAction['verbalIntent'] = commandIntent.type !== 'none'
+            ? 'command'
+            : parsedSpeechType
+                || (text.includes('?') ? 'question'
+                    : /\b(молодец|умница|хорош(?:ая|ий)|красива(?:я|ый)|горжусь|спасибо)\b/i.test(text) ? 'praise'
+                    : /\b(дура|идиот|ничтожество|жалк(?:ая|ий)|ненавижу)\b/i.test(text) ? 'insult'
+                    : 'conversation');
 
         return {
             intensity: parsed.intensity ?? 0.3,
@@ -509,6 +568,7 @@ ${moveInstructions}
             novelty: parsed.novelty ?? 0,
             pointId: normalizedPoint ?? 'systemic',
             commandIntent,
+            verbalIntent,
             raw: JSON.stringify(parsed),
             model: model ?? 'google/gemini-3.1-flash-lite-preview'
         };

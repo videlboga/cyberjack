@@ -2,7 +2,7 @@ const targetGroups: Record<string, string[]> = {
     head: ['head', 'hair', 'face', 'lips', 'neck'],
     torso: ['shoulders', 'chest', 'nipples', 'belly', 'back', 'waist'],
     limbs: ['arms', 'hands', 'inner_thighs', 'legs', 'knees', 'feet'],
-    intimate: ['buttocks', 'anus', 'groin', 'penis', 'testicles', 'prostate', 'vulva', 'vagina', 'clitoris']
+    intimate: ['buttocks', 'anus', 'penis', 'testicles', 'prostate', 'vulva', 'vagina', 'clitoris']
 };
 
 export function expandActionTargets(targets?: string[] | null): string[] {

@@ -4,6 +4,7 @@ export type CommandIntent =
   | { type: "deactivate_context"; targetContextId: string }
   | { type: "deactivate_contexts"; targetContextIds: string[] }
   | { type: "move"; targetLocation: string }
+  | { type: "change_current_interaction"; goal: "stop" | "start" | "adjust"; suggestedActionId?: string; targetId?: string; pointId?: string }
   | { type: "perform_action"; actionId: string; targetId?: string; pointId?: string }
   | { type: "perform_described_action"; description: string; matchedActionId: string | null; targetId?: string; pointId?: string; requiredItem?: string; refusal?: string; modifiers?: { intensity?: number; valence?: number; contact?: number; sharpness?: number; novelty?: number } }
   | { type: "none" };
@@ -12,6 +13,45 @@ export type ResolvedFunctions = {
   availableFunctions: string[];
   blockedFunctions: Record<string, string[]>;
 };
+
+export function resolveInteractionActionCandidate(input: {
+  presets: any[];
+  activeContextIds: string[];
+  goal: "stop" | "start" | "adjust";
+  suggestedActionId?: string;
+  pointId?: string;
+}) {
+  const activeIds = new Set(input.activeContextIds);
+  const suggested = input.presets.find(preset => preset.id === input.suggestedActionId);
+  const suggestedTags = new Set(suggested?.tags || []);
+  return input.presets
+    .filter(preset => {
+      const required: string[] = preset.requireContexts || [];
+      const removed: string[] = preset.removeContexts || [];
+      const requirementsMet = required.every(contextId => activeIds.has(contextId));
+      if (!requirementsMet) return false;
+      if (input.goal === 'stop') {
+        return required.length > 0 && removed.some(contextId => activeIds.has(contextId));
+      }
+      if (input.goal === 'adjust') {
+        return required.length > 0 && (
+          preset.contextConfig?.type === 'interaction_level'
+          || /adjust|increase|decrease|усил|ослаб/i.test(`${preset.id} ${preset.label || preset.name || ''}`)
+        );
+      }
+      return Boolean(preset.contextConfig) && !activeIds.has(preset.id);
+    })
+    .map(preset => {
+      const sharedTags = (preset.tags || []).filter((tag: string) => suggestedTags.has(tag)).length;
+      const pointMatch = input.pointId && (preset.validTargets || []).includes(input.pointId) ? 1 : 0;
+      const exact = preset.id === input.suggestedActionId ? 1 : 0;
+      return { preset, score: exact * 100 + pointMatch * 10 + sharedTags };
+    })
+    .sort((left, right) => right.score - left.score)[0]?.preset;
+}
+
+export const resolveStopActionCandidate = (input: Omit<Parameters<typeof resolveInteractionActionCandidate>[0], 'goal'>) =>
+  resolveInteractionActionCandidate({ ...input, goal: 'stop' });
 
 export function resolveAvailableFunctions(input: {
   anatomyPoints: any[];

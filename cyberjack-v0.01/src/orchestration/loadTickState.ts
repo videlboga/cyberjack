@@ -14,7 +14,7 @@ export interface TickState {
     contracts: AssetContract[];
 }
 
-export function loadTickState(subjectId: string, pointId: string, playerId: string, sceneId: string): TickState {
+export function loadTickState(subjectId: string, pointId: string, playerId: string, sceneId: string, actorId = playerId): TickState {
     const pId = pointId.toLowerCase();
     const core = subjectRepo.get(subjectId);
     if (!core) throw new Error(`Subject ${subjectId} not found`);
@@ -29,10 +29,12 @@ export function loadTickState(subjectId: string, pointId: string, playerId: stri
     if (!scene) throw new Error(`Scene ${sceneId} not found`);
 
     const subjectCharacter = characterRepo.ensureSubject(subjectId, core.name || subjectId);
-    const playerCharacter = characterRepo.ensureCharacter(playerId, playerId);
+    const playerCharacter = characterRepo.get(actorId) || characterRepo.ensureCharacter(actorId, actorId);
 
     const relation = characterRelationRepo.ensure(subjectCharacter.id, playerCharacter.id, {
         attitude: core.attitude,
+        openness: core.openness,
+        plasticity: core.plasticity,
         baselineAttitude: core.baselineAttitude ?? core.attitude
     });
 

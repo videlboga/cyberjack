@@ -120,6 +120,7 @@ export const DEFAULT_CONFIG: any =
     overload: {
       contactFactor: 0.3,
       capacityFactor: 0.6,
+      exceptionalSensitivityFactor: 0.12,
     },
     engagement: {
       intensityFactor: 0.25,
@@ -147,12 +148,15 @@ export const DEFAULT_CONFIG: any =
       sensitivityRegenRate: 0.4,
       sensitivityRegenThreshold: 8,
       capacityDropMultiplier: 0.2,
-      capacityLoadFromIntensity: 0.008,
+      capacityLoadFromIntensity: 0.027,
       capacityLoadFromDiscomfort: 0.025,
       edgingCapacityDropRate: 0.08,
       capacityRecoveryRate: 1.0,    // Regen per silent tick
-      tensionRecoveryBase: 0.75,
-      tensionRecoveryOpennessDivisor: 25,
+      // Recovery uses sqrt(elapsed time), so both a short pause and a standard
+      // 20-unit wait matter without making the latter an implicit discharge.
+      tensionRecoveryBase: 10,
+      tensionRecoveryOpennessDivisor: 8,
+      tensionRecoveryMaxPerAction: 18,
       opennessFromPleasureDiscomfort: 0.14,
       plasticityFromLearning: 0.04,
       plasticityFromOverload: 0.1,

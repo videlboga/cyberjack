@@ -44,21 +44,31 @@ describe('tension discharge classification', () => {
     expect(decision.outcome).toBe('positive');
   });
 
-  it('forces breakdown when a crisis context is active', () => {
+  it('does not turn positive activation into a breakdown only because a crisis context is active', () => {
     const decision = evaluateTensionDischarge({
       core: core(), result: result(),
       recentEvents: [event(25, 0), event(20, 0)],
       activeContextIds: ['effect_panic']
     });
-    expect(decision.outcome).toBe('breakdown');
+    expect(decision.outcome).toBe('overload');
     expect(decision.blockedByContext).toBe(true);
   });
 
-  it('requires remaining capacity for a positive discharge', () => {
+  it('resolves a positive peak as overload when functional capacity is exhausted', () => {
     const decision = evaluateTensionDischarge({
       core: core({ capacity: 5 }), result: result(),
       recentEvents: [event(25, 0), event(20, 0)]
     });
-    expect(decision.outcome).toBe('breakdown');
+    expect(decision.outcome).toBe('overload');
+  });
+
+  it('keeps a genuinely mixed peak distinct from discharge and breakdown', () => {
+    const decision = evaluateTensionDischarge({
+      core: core(),
+      result: result({ pleasure: 20, discomfort: 15, overload: 10 }),
+      recentEvents: [event(18, 12, 8), event(14, 13, 4)]
+    });
+    expect(decision.outcome).toBe('overload');
+    expect(Math.abs(decision.activationBalance)).toBeLessThan(20);
   });
 });

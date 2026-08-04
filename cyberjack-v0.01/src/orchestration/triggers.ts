@@ -1,7 +1,9 @@
 import { clamp } from '../engine/utils';
 import { SubjectCoreState, TickResult } from '../domain/types';
+import { deriveActivationPressure } from '../domain/edgeState';
+import { OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
 
-export type TensionDischargeOutcome = 'positive' | 'breakdown';
+export type TensionDischargeOutcome = 'positive' | 'overload' | 'breakdown';
 
 export interface TensionDischargeInput {
     core: SubjectCoreState;
@@ -14,7 +16,26 @@ export interface TensionDischargeDecision {
     outcome: TensionDischargeOutcome;
     score: number;
     recentBalance: number;
+    activationBalance: number;
     blockedByContext: boolean;
+}
+
+export function peakResolutionReady(
+    decision: Pick<TensionDischargeDecision, 'outcome'>,
+    result: Pick<TickResult, 'pleasure' | 'discomfort' | 'overload' | 'experiencedIntensity'>,
+    capacity: number,
+    forced = false,
+): boolean {
+    if (forced) return true;
+    if (decision.outcome === 'positive') {
+        const releaseImpulse = Math.max(0, result.pleasure || 0);
+        const dynamicThreshold = Math.max(6, Math.min(14, (result.experiencedIntensity || 0) * 0.18));
+        return releaseImpulse >= dynamicThreshold;
+    }
+    if (decision.outcome === 'breakdown') {
+        return capacity <= 10 || (result.discomfort || 0) + (result.overload || 0) * 0.5 >= 10;
+    }
+    return capacity <= 10 || (result.overload || 0) >= OVERLOAD_NOTICEABLE;
 }
 
 const NEGATIVE_PEAK_CONTEXTS = new Set([
@@ -30,29 +51,15 @@ function resultFromEvent(event: any): Partial<TickResult> | null {
     return event?.resultPayload?.result || event?.result?.result || event?.result || null;
 }
 
-function signedActivation(result: Partial<TickResult>): number {
-    const pleasure = result.pleasure || 0;
-    const discomfort = result.discomfort || 0;
-    const overload = result.overload || 0;
-    const magnitude = pleasure + discomfort + overload * 0.5;
-    if (magnitude <= 0) return 0;
-    return clamp((pleasure - discomfort - overload * 0.5) / magnitude, -1, 1);
-}
-
 export function evaluateTensionDischarge(input: TensionDischargeInput): TensionDischargeDecision {
     const historical = (input.recentEvents || [])
         .map(resultFromEvent)
         .filter((value): value is Partial<TickResult> => !!value)
         .slice(0, 5);
-    const samples = [input.result, ...historical];
-    let weightedBalance = 0;
-    let totalWeight = 0;
-    samples.forEach((sample, index) => {
-        const weight = index === 0 ? 2 : Math.max(0.35, 1 - index * 0.15);
-        weightedBalance += signedActivation(sample) * weight;
-        totalWeight += weight;
-    });
-    const recentBalance = totalWeight > 0 ? weightedBalance / totalWeight : 0;
+    const pressure = deriveActivationPressure(
+        [input.result, ...historical].map(reaction => ({ reaction }))
+    );
+    const recentBalance = pressure.activationBalance / 100;
     const attitudeSignal = clamp((input.core.attitude - 50) / 50, -1, 1);
     const opennessSignal = clamp((input.core.openness - 50) / 50, -1, 1);
     const capacitySignal = clamp((input.core.capacity - 20) / 80, -0.25, 1);
@@ -65,12 +72,22 @@ export function evaluateTensionDischarge(input: TensionDischargeInput): TensionD
         opennessSignal * 0.2 +
         capacitySignal * 0.1 -
         overloadPenalty * 0.25;
-    const positive = !blockedByContext && input.core.capacity > 10 && score >= 0.05;
+    // Peak outcome is driven by the legible character of activation. Acceptance
+    // can affect the diagnostic score, but cannot secretly turn pleasurable
+    // activation into a nervous breakdown.
+    const positive = !blockedByContext && input.core.capacity > 10 && recentBalance >= 0.2;
+    const breakdown = recentBalance <= -0.2;
+    const outcome: TensionDischargeOutcome = positive
+        ? 'positive'
+        : breakdown
+            ? 'breakdown'
+            : 'overload';
 
     return {
-        outcome: positive ? 'positive' : 'breakdown',
+        outcome,
         score,
         recentBalance,
+        activationBalance: pressure.activationBalance,
         blockedByContext,
     };
 }

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberJack — Станция</title>
+  <link rel="stylesheet" href="./manga-core.css" />
+  <style>
+    .station-layout { display: grid; grid-template-columns: 72px 1fr; min-height: 0; }
+    .rail { display: flex; flex-direction: column; gap: 6px; padding: 12px 8px; background: var(--m-ink); color: var(--m-paper); border-right: 4px solid var(--m-ink); }
+    .rail button { width: 100%; aspect-ratio: 1; display: grid; place-items: center; border: 2px solid var(--m-paper); background: transparent; color: var(--m-paper); font-size: 20px; cursor: pointer; transition: background .1s; clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px)); }
+    .rail button:hover { background: rgba(244,237,224,0.1); }
+    .rail button.active { background: var(--m-red); border-color: var(--m-paper); }
+
+    .station-body { padding: 16px 20px; overflow-y: auto; }
+    .station-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* Radial map */
+    .map-area { position: relative; display: grid; place-items: center; min-height: 320px; background: var(--m-paper-dark); background-image: var(--st-10); border: 3px solid var(--m-ink); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); overflow: hidden; }
+    .map-ring { position: absolute; border: 3px solid var(--m-ink); border-radius: 50%; display: grid; place-items: center; transition: border-color .15s, transform .15s; }
+    .map-ring:hover { border-color: var(--m-red); transform: scale(1.02); }
+    .map-ring.active { border-color: var(--m-red); background: rgba(200,49,42,0.04); }
+    .map-ring.core { width: 18%; border-color: var(--m-red); }
+    .map-ring.inner { width: 38%; border-style: dashed; }
+    .map-ring.middle { width: 58%; }
+    .map-ring.outer { width: 78%; border-style: dashed; }
+    .map-ring.danger { width: 95%; border-color: var(--m-red); border-style: solid; }
+    .map-center { width: 22px; height: 22px; background: var(--m-red); border: 3px solid var(--m-ink); transform: rotate(45deg); }
+
+    /* Sector labels on rings */
+    .map-label { position: absolute; font-size: 9px; font-weight: 800; color: var(--m-ink-soft); letter-spacing: 0.06em; text-transform: uppercase; background: var(--m-paper); padding: 1px 6px; border: 1px solid var(--m-ink-fade); }
+    .map-label.danger { color: var(--m-red); border-color: var(--m-red); }
+    .map-label.active { color: var(--m-paper); background: var(--m-red); border-color: var(--m-ink); }
+
+    /* Sector list */
+    .sector-row { display: grid; grid-template-columns: 42px minmax(0,1fr) 90px; align-items: center; gap: 12px; padding: 10px 12px; border: 2px solid var(--m-ink); background: var(--m-paper-light); cursor: pointer; transition: background .1s; clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px)); margin-bottom: 8px; }
+    .sector-row:hover { background: var(--m-paper-dark); transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--m-ink); }
+    .sector-row.active { background: rgba(200,49,42,0.06); border-color: var(--m-red); }
+    .sector-row .dot { width: 12px; height: 12px; background: var(--m-ink-fade); border: 2px solid var(--m-ink); }
+    .sector-row.active .dot { background: var(--m-red); border-color: var(--m-red); }
+    .sector-row.danger .dot { background: var(--m-red); }
+    .sector-row b { font-size: 13px; font-weight: 800; }
+    .sector-row p { margin: 0; color: var(--m-ink-fade); font-size: 10px; }
+    .sector-row .status { text-align: right; font-size: 9px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+    .sector-row .status.active { color: var(--m-red); }
+    .sector-row .status.idle { color: var(--m-ink-fade); }
+    .sector-row .status.danger { color: var(--m-red); }
+
+    /* Live strip */
+    .live-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+    .live-card { display: grid; grid-template-columns: 18px minmax(0,1fr); gap: 8px; padding: 10px 12px; border: 2px solid var(--m-ink); background: var(--m-paper-light); clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px)); }
+    .live-card .dot { width: 10px; height: 10px; background: var(--m-green); border: 2px solid var(--m-ink); margin-top: 3px; }
+    .live-card.warn .dot { background: var(--m-yellow); }
+    .live-card.danger .dot { background: var(--m-red); }
+    .live-card small { font-size: 8px; font-weight: 800; color: var(--m-ink-fade); letter-spacing: 0.1em; }
+    .live-card b { font-size: 11px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="m-shell">
+    <header class="m-hud">
+      <div class="m-hud-brand">
+        <span class="m-logo-mark">◈</span>
+        <div class="m-brand-text"><b>S-01 SIMULATOR</b><small>манга интерфейс</small></div>
+      </div>
+      <nav class="m-hud-nav">
+        <a href="./index.html">Обзор</a>
+        <a href="./dashboard.html">Дашборд</a>
+        <a class="active" href="./station.html">Станция</a>
+        <a href="./calibration.html">Калибровка</a>
+        <a href="./narrative.html">Диалог</a>
+      </nav>
+      <div class="m-hud-clock"><small>ЦИКЛ</small><b>07:14:09</b></div>
+    </header>
+
+    <main class="station-layout">
+      <aside class="rail">
+        <button class="active">◎</button>
+        <button>⚙</button>
+        <button>✉</button>
+        <button>▣</button>
+        <button>⛭</button>
+      </aside>
+
+      <div class="station-body">
+        <div class="m-heading"><span class="m-jp">配置</span>Станция S-01</div>
+        <p style="max-width: 580px; color: var(--m-ink-soft); font-size: 13px; margin-bottom: 18px;">
+          Концентрические кольца — сектора. Центр — ядро. Выбор сектора подсвечивает кольцо красным.
+        </p>
+
+        <div class="station-grid-2">
+          <!-- Radial map -->
+          <div class="map-area">
+            <span class="m-jp-watermark" style="font-size: 80px; bottom: -10px;">配置</span>
+            <div class="map-ring danger">
+              <span class="map-label danger" style="top: 8px; left: 50%; transform: translateX(-50%);">ПЕРИМЕТР</span>
+              <div class="map-ring outer">
+                <span class="map-label" style="top: 12px; left: 50%; transform: translateX(-50%);">АРХИВ</span>
+                <div class="map-ring middle active">
+                  <span class="map-label active" style="top: 10px; left: 50%; transform: translateX(-50%);">КУЛЬТИВАЦИЯ</span>
+                  <div class="map-ring inner">
+                    <span class="map-label" style="bottom: 12px; left: 50%; transform: translateX(-50%);">СКОЛАСТЕРИУМ</span>
+                    <div class="map-ring core">
+                      <div class="map-center"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sector list -->
+          <div>
+            <div class="sector-row active">
+              <span class="dot"></span>
+              <div><b>КУЛЬТИВАЦИЯ</b><p>Среднее кольцо · 4 объекта · калибровка</p></div>
+              <span class="status active">АКТИВНО</span>
+            </div>
+            <div class="sector-row">
+              <span class="dot"></span>
+              <div><b>АРХИВ</b><p>Внутреннее кольцо · хранилище данных</p></div>
+              <span class="status idle">ОЖИДАЕТ</span>
+            </div>
+            <div class="sector-row">
+              <span class="dot"></span>
+              <div><b>СКОЛАСТЕРИУМ</b><p>Внутреннее кольцо · обучение</p></div>
+              <span class="status idle">ОЖИДАЕТ</span>
+            </div>
+            <div class="sector-row danger">
+              <span class="dot"></span>
+              <div><b>ПЕРИМЕТР</b><p>Внешнее кольцо · требуется внимание</p></div>
+              <span class="status danger">ТРЕВОГА</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live strip -->
+        <div class="live-strip">
+          <article class="live-card">
+            <span class="dot"></span>
+            <div><small>СИГНАЛ</small><b>Mira: капсула готова</b></div>
+          </article>
+          <article class="live-card warn">
+            <span class="dot"></span>
+            <div><small>ПРЕДУПРЕЖДЕНИЕ</small><b>Периметр: щит 18%</b></div>
+          </article>
+          <article class="live-card">
+            <span class="dot"></span>
+            <div><small>ОПЕРАЦИЯ</small><b>Калибровка S-01: фаза 2</b></div>
+          </article>
+        </div>
+
+        <!-- SFX decoration -->
+        <div style="text-align: right; margin-top: 16px;">
+          <span class="m-sfx" style="font-size: 28px;">ガガガ</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

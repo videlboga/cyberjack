@@ -1,6 +1,6 @@
 import { contractRepo } from '../infrastructure/contractRepo';
 import { subjectRepo, presetRepo, characterItemsRepo, itemRepo, activeContextsRepo } from '../infrastructure/repositories';
-import { evaluateAssetContract } from '../scenario/evaluateAssetContract';
+import { contractConditionValue, evaluateAssetContract } from '../scenario/evaluateAssetContract';
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { buildCurrentStateObservationText } from '../narrative/interactionObservation';
 
@@ -57,6 +57,9 @@ export function getContractProgress(subjectId: string, playerId: string, contrac
         } else if (cond.type === 'flag' || cond.type === 'trait') {
             current = core.flags?.includes(cond.key || '') ? true : false;
             label = `Трейт: ${cond.key}`;
+        } else if (cond.type === 'preference' || cond.type === 'acquired_trait') {
+            current = contractConditionValue(cond, core, {});
+            label = cond.type === 'acquired_trait' ? `Приобретённая черта: ${cond.key}` : `Предпочтение: ${cond.key}`;
         }
         return {
             type: cond.type,

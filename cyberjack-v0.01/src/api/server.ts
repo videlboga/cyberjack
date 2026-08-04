@@ -18,9 +18,12 @@ import sceneRoutes from './routes/sceneRoutes';
 import metaRoutes from './routes/metaRoutes';
 import contractRoutes from './routes/contractRoutes';
 import scenarioRoutes from './routes/scenarioRoutes';
+import eventDirectorRoutes from './routes/eventDirectorRoutes';
 import { ensureActionSpecialization } from '../infrastructure/actionSpecialization';
 import { syncActionPresets } from '../infrastructure/syncActionPresets';
 import { migrateCharacterLifecycles } from '../scenario/characterLifecycle';
+import { setTimeFlowPaused, startTimeFlow } from '../scenario/timeFlow';
+import { warmSemanticParser } from '../parser/semanticVerbalParser';
 
 // Seed contracts on startup
 try {
@@ -45,6 +48,15 @@ app.use((err: any, req: any, res: any, next: any) => {
     next(err);
 });
 
+// Any state-changing game interaction resumes world time. The dedicated time
+// control is excluded because it must remain able to put the world on pause.
+app.use('/api', (req: any, _res: any, next: any) => {
+    if (req.method !== 'GET' && req.path !== '/scenario/time/flow') {
+        setTimeFlowPaused(false);
+    }
+    next();
+});
+
 app.use('/api', tickRoutes);
 app.use('/api', stateRoutes);
 app.use('/api', playerRoutes);
@@ -52,6 +64,7 @@ app.use('/api', sceneRoutes);
 app.use('/api', metaRoutes);
 app.use('/api', contractRoutes);
 app.use('/api', scenarioRoutes);
+app.use('/api', eventDirectorRoutes);
 
 // Serve generated scene images
 app.use('/scene-images', express.static(path.resolve(process.cwd(), 'public', 'scene-images')));
@@ -68,6 +81,17 @@ app.get('/api/test-ws', (req: any, res: any) => {
     res.json({ success: true, message: 'Command sent to Unity' });
 });
 
+// Keep every API failure machine-readable. Without this, an unexpected route
+// error can reach the client as an empty/HTML response and fail during JSON parsing.
+app.use('/api', (err: any, req: any, res: any, next: any) => {
+    if (res.headersSent) return next(err);
+    console.error('[API] Unhandled request error:', err);
+    res.status(Number(err?.status) || 500).json({
+        success: false,
+        error: err?.message || 'Внутренняя ошибка сервера'
+    });
+});
+
 
 const PORT = process.env.PORT || 3000;
 // Start server only when not in test mode. When running tests we import `app` and
@@ -77,6 +101,9 @@ if (process.env.NODE_ENV !== 'test') {
     initWebSocket(server);
     server.listen(PORT, () => {
         console.log(`[Engine API + WS] Running on http://localhost:${PORT}`);
+        // Make HTTP available before background simulation and model warmup.
+        startTimeFlow();
+        void warmSemanticParser().catch(error => console.warn('[SemanticParser] warmup failed:', error?.message || error));
     });
 }
 

@@ -1,4 +1,10 @@
 import { SubjectCoreState } from '../domain/types';
+import {
+    exceptionalCoreStateLines,
+    interpretPointSensitivity,
+    isAcquiredHyperSensitivity,
+    sensitivityBand
+} from '../domain/parameterInterpretation';
 import { activeConfig } from './config';
 
 /**
@@ -31,9 +37,9 @@ export function buildStateSummary(core: SubjectCoreState, points?: any[]): strin
     let tensionAddon = "";
     if (core.tension !== undefined) {
         if (core.tension >= 95) {
-            tensionAddon = "\n- [АБСОЛЮТНАЯ ПРЕДЕЛ] Ты находишься на грани разрядки (оргазма или срыва). В глазах темнеет, дыхание срывается. Мысли путаются в кашу из-за невыносимого напряжения. Тебе физически тяжело строить сложные фразы, тело требует конца.";
+            tensionAddon = "\n- [АБСОЛЮТНЫЙ ПРЕДЕЛ] Ты находишься на грани оргазма или нервного срыва. В глазах темнеет, дыхание срывается. Мысли путаются в кашу из-за невыносимого напряжения. Тебе физически тяжело строить сложные фразы, тело требует конца.";
         } else if (core.tension >= 85) {
-            tensionAddon = "\n- [НА ГРАНИ] Напряжение почти достигло пика. Твое тело дрожит, каждая клеточка молит о разрядке. Ты теряешь контроль над собой.";
+            tensionAddon = "\n- [НА ГРАНИ] Напряжение почти достигло пика. Твоё тело дрожит, приближаясь к оргазму или срыву. Ты теряешь контроль над собой.";
         } else if (core.tension >= 60) {
             tensionAddon = "\n- [СИЛЬНОЕ НАПРЯЖЕНИЕ] Внутри тебя скопилось интенсивное напряжение. Дыхание сбито, ощущения обострены.";
         } else if (core.tension <= 15) {
@@ -75,12 +81,39 @@ export function buildStateSummary(core: SubjectCoreState, points?: any[]): strin
         }
     }
 
-    let pointOverloads = "";
+    const exceptionalCore = exceptionalCoreStateLines(core);
+    let pointOverloads = exceptionalCore.length
+        ? `\n* ${exceptionalCore.join('\n* ')}`
+        : "";
     if (points && points.length > 0) {
-        const sensitivePoints = points.filter(p => p.localSensitivity >= 85);
+        const interpretedPoints = points.map(p => ({
+            point: p,
+            interpreted: interpretPointSensitivity(
+                p.pointId || p.id || p.label,
+                p.localSensitivity,
+                p.baselineLocalSensitivity
+            )
+        }));
+        const sensitivePoints = interpretedPoints.filter(entry => isAcquiredHyperSensitivity(entry.interpreted));
         if (sensitivePoints.length > 0) {
-            const labels = sensitivePoints.map(p => p.label).join(', ');
-            pointOverloads += `\n* [Фокусная гиперсенситизация] Твои точки: ${labels} перестимулированы. Любое касание к ним отдается болью или невыносимым контрастом.`;
+            const descriptions = sensitivePoints.map(entry =>
+                `${entry.point.label} — ${sensitivityBand(entry.interpreted)}`
+            ).join('; ');
+            const extreme = sensitivePoints.some(entry =>
+                entry.interpreted.humanRatio >= 1.5 || entry.interpreted.personalRatio >= 2
+            );
+            pointOverloads += extreme
+                ? `\n* [ЭКСТРЕМАЛЬНАЯ ФОКУСНАЯ ГИПЕРСЕНСИТИЗАЦИЯ] ${descriptions}. Обычное касание вызывает непропорционально сильный, трудно контролируемый отклик и не может описываться как рядовое ощущение.`
+                : `\n* [Фокусная гиперсенситизация] ${descriptions}. Прикосновение ощущается заметно сильнее привычного.`;
+        }
+        const unusualPoints = interpretedPoints
+            .filter(entry => !isAcquiredHyperSensitivity(entry.interpreted) && entry.interpreted.humanRatio >= 1.5)
+            .slice(0, 5);
+        if (unusualPoints.length > 0) {
+            const descriptions = unusualPoints.map(entry =>
+                `${entry.point.label} — ${sensitivityBand(entry.interpreted)}`
+            ).join('; ');
+            pointOverloads += `\n* [Анатомический профиль чувствительности] ${descriptions}. Это высокая абсолютная чувствительность, но не обязательно приобретённая гиперсенситизация.`;
         }
 
         const dissonantPoints = points.filter(p => p.localAttitude >= 85 && core.attitude < 40);

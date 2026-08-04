@@ -7,7 +7,7 @@ import './CoreVisualizer.css';
 const PRESETS: Record<string, { label: string; vector: Pick<CompiledAction, 'intensity' | 'valence' | 'contact' | 'sharpness' | 'novelty'> }> = {
   feather_stroke: { label: 'Провести пером', vector: { intensity: .1, valence: .5, contact: .1, sharpness: 0, novelty: .7 } },
   gentle_stroke: { label: 'Мягко погладить', vector: { intensity: .2, valence: .6, contact: .4, sharpness: .1, novelty: .2 } },
-  deep_massage: { label: 'Глубокий массаж', vector: { intensity: .6, valence: .8, contact: .9, sharpness: .1, novelty: .3 } },
+  deep_massage: { label: 'Массаж', vector: { intensity: .6, valence: .8, contact: .9, sharpness: .1, novelty: .3 } },
   ice_cube: { label: 'Приложить лёд', vector: { intensity: .6, valence: .1, contact: .4, sharpness: .6, novelty: .8 } },
   needle_prick: { label: 'Укол иглой', vector: { intensity: .4, valence: -.7, contact: .1, sharpness: 1, novelty: .6 } },
   hard_slap: { label: 'Сильный удар ладонью', vector: { intensity: .8, valence: -.6, contact: .8, sharpness: .8, novelty: .5 } },

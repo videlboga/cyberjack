@@ -1,0 +1,353 @@
+{
+  "version": 3,
+  "basePath": "/audio/reactions",
+  "reactions": {
+    "generic_afterglow": {
+      "character": "generic",
+      "state": "afterglow",
+      "label": "Общий голос · afterglow",
+      "oneShot": "nika_afterglow_01.mp3",
+      "variants": [
+        "nika_afterglow_full_02.mp3",
+        "mira_afterglow_01.mp3",
+        "mira_afterglow_full_02.mp3",
+        "iona_afterglow_01.mp3",
+        "iona_afterglow_full_02.mp3",
+        "../sources/voice-experiments/emotion__afterglow-1.mp3",
+        "../sources/voice-experiments/emotion__afterglow-2.mp3",
+        "../sources/voice-experiments/emotion__afterglow-3.mp3"
+      ]
+    },
+    "generic_angry": {
+      "character": "generic",
+      "state": "angry",
+      "label": "Общий голос · angry",
+      "oneShot": "../sources/voice-experiments/emotion__angry-2.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__angry-3.mp3"
+      ]
+    },
+    "generic_aroused": {
+      "character": "generic",
+      "state": "aroused",
+      "label": "Общий голос · aroused",
+      "oneShot": "../sources/voice-experiments/emotion__aroused-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__aroused-2.mp3",
+        "../sources/voice-experiments/emotion__aroused-3.mp3"
+      ]
+    },
+    "generic_blush": {
+      "character": "generic",
+      "state": "blush",
+      "label": "Общий голос · blush",
+      "oneShot": "../sources/voice-experiments/emotion__blush-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__blush-2.mp3",
+        "../sources/voice-experiments/emotion__blush-3.mp3"
+      ]
+    },
+    "generic_bored": {
+      "character": "generic",
+      "state": "bored",
+      "label": "Общий голос · bored",
+      "oneShot": "../sources/voice-experiments/emotion__bored-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__bored-2.mp3"
+      ]
+    },
+    "generic_climax": {
+      "character": "generic",
+      "state": "climax",
+      "label": "Общий голос · climax",
+      "oneShot": "nika_climax_full_02.mp3",
+      "variants": [
+        "mira_climax_01.mp3",
+        "mira_climax_full_02.mp3",
+        "iona_climax_01.mp3",
+        "iona_climax_full_02.mp3",
+        "../sources/voice-experiments/emotion__climax-1.mp3",
+        "../sources/voice-experiments/emotion__climax-2.mp3",
+        "../sources/voice-experiments/emotion__climax-3.mp3"
+      ]
+    },
+    "generic_crying": {
+      "character": "generic",
+      "state": "crying",
+      "label": "Общий голос · crying",
+      "oneShot": "../sources/voice-experiments/emotion__crying-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__crying-2.mp3",
+        "../sources/voice-experiments/emotion__crying-3.mp3"
+      ]
+    },
+    "generic_curious": {
+      "character": "generic",
+      "state": "curious",
+      "label": "Общий голос · curious",
+      "oneShot": "nika_curious_full_02.mp3",
+      "variants": [
+        "mira_curious_full_02.mp3",
+        "../sources/voice-experiments/emotion__curious-1.mp3",
+        "../sources/voice-experiments/emotion__curious-2.mp3",
+        "../sources/voice-experiments/emotion__curious-3.mp3"
+      ]
+    },
+    "generic_defiant": {
+      "character": "generic",
+      "state": "defiant",
+      "label": "Общий голос · defiant",
+      "oneShot": "mira_defiant_01.mp3",
+      "variants": [
+        "mira_defiant_full_02.mp3",
+        "iona_defiant_02.mp3",
+        "iona_defiant_grunt_01.mp3",
+        "iona_defiant_full_02.mp3",
+        "../sources/voice-experiments/emotion__defiant-1.mp3",
+        "../sources/voice-experiments/emotion__defiant-2.mp3",
+        "../sources/voice-experiments/emotion__defiant-3.mp3"
+      ]
+    },
+    "generic_disgust": {
+      "character": "generic",
+      "state": "disgust",
+      "label": "Общий голос · disgust",
+      "oneShot": "../sources/voice-experiments/emotion__disgust-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__disgust-2.mp3",
+        "../sources/voice-experiments/emotion__disgust-3.mp3"
+      ]
+    },
+    "generic_distressed": {
+      "character": "generic",
+      "state": "distressed",
+      "label": "Общий голос · distressed",
+      "oneShot": "../sources/voice-experiments/emotion__distressed-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__distressed-2.mp3",
+        "../sources/voice-experiments/emotion__distressed-3.mp3"
+      ]
+    },
+    "generic_excited": {
+      "character": "generic",
+      "state": "excited",
+      "label": "Общий голос · excited",
+      "oneShot": "../sources/voice-experiments/emotion__excited-2.mp3"
+    },
+    "generic_exhausted": {
+      "character": "generic",
+      "state": "exhausted",
+      "label": "Общий голос · exhausted",
+      "oneShot": "nika_exhausted_sigh_01.mp3",
+      "variants": [
+        "nika_exhausted_full_02.mp3",
+        "mira_exhausted_sigh_01.mp3",
+        "mira_exhausted_full_02.mp3",
+        "iona_exhausted_sigh_01.mp3",
+        "iona_exhausted_full_02.mp3",
+        "../sources/voice-experiments/emotion__exhausted-1.mp3",
+        "../sources/voice-experiments/emotion__exhausted-2.mp3"
+      ]
+    },
+    "generic_fear": {
+      "character": "generic",
+      "state": "fear",
+      "label": "Общий голос · fear",
+      "oneShot": "nika_fear_01.mp3",
+      "variants": [
+        "nika_fear_full_02.mp3",
+        "mira_fear_whimper_01.mp3",
+        "mira_fear_full_02.mp3",
+        "iona_fear_01.mp3",
+        "iona_fear_full_02.mp3",
+        "../sources/voice-experiments/emotion__fear-2.mp3",
+        "../sources/voice-experiments/emotion__fear-3.mp3"
+      ]
+    },
+    "generic_guarded": {
+      "character": "generic",
+      "state": "guarded",
+      "label": "Общий голос · guarded",
+      "oneShot": "nika_guarded_gasp_02.mp3",
+      "variants": [
+        "nika_guarded_gasp_01.mp3",
+        "nika_guarded_full_02.mp3",
+        "mira_guarded_gasp_01.mp3",
+        "iona_guarded_full_02.mp3",
+        "../sources/voice-experiments/emotion__guarded-1.mp3",
+        "../sources/voice-experiments/emotion__guarded-2.mp3",
+        "../sources/voice-experiments/emotion__guarded-3.mp3"
+      ]
+    },
+    "generic_high_negative": {
+      "character": "generic",
+      "state": "high_negative",
+      "label": "Общий голос · high_negative",
+      "oneShot": "../sources/voice-experiments/emotion__high-negative-2.mp3"
+    },
+    "generic_high_positive": {
+      "character": "generic",
+      "state": "high_positive",
+      "label": "Общий голос · high_positive",
+      "oneShot": "../sources/voice-experiments/emotion__high-positive-3.mp3"
+    },
+    "generic_mixed": {
+      "character": "generic",
+      "state": "mixed",
+      "label": "Общий голос · mixed",
+      "oneShot": "../sources/voice-experiments/emotion__mixed-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__mixed-2.mp3",
+        "../sources/voice-experiments/emotion__mixed-3.mp3"
+      ]
+    },
+    "generic_mixed_overload": {
+      "character": "generic",
+      "state": "mixed_overload",
+      "label": "Общий голос · mixed_overload",
+      "oneShot": "nika_overload_01.mp3",
+      "variants": [
+        "mira_overload_01.mp3",
+        "iona_overload_01.mp3",
+        "iona_overload_full_02.mp3",
+        "../sources/voice-experiments/emotion__mixed-overload-2.mp3",
+        "../sources/voice-experiments/emotion__mixed-overload-3.mp3"
+      ]
+    },
+    "generic_neutral": {
+      "character": "generic",
+      "state": "neutral",
+      "label": "Общий голос · neutral",
+      "oneShot": "../sources/voice-experiments/emotion__neutral-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__neutral-2.mp3",
+        "../sources/voice-experiments/emotion__neutral-3.mp3"
+      ]
+    },
+    "generic_pain": {
+      "character": "generic",
+      "state": "pain",
+      "label": "Общий голос · pain",
+      "oneShot": "nika_pain_cry_01.mp3",
+      "variants": [
+        "nika_pain_cry_02.mp3",
+        "nika_pain_full_02.mp3",
+        "mira_pain_02.mp3",
+        "mira_pain_cry_01.mp3",
+        "mira_pain_full_02.mp3",
+        "iona_pain_02.mp3",
+        "iona_pain_cry_01.mp3",
+        "iona_pain_full_02.mp3",
+        "../sources/voice-experiments/emotion__pain-1.mp3",
+        "../sources/voice-experiments/emotion__pain-2.mp3"
+      ]
+    },
+    "generic_pleasure": {
+      "character": "generic",
+      "state": "pleasure",
+      "label": "Общий голос · pleasure",
+      "oneShot": "nika_pleasure_02.mp3",
+      "variants": [
+        "nika_pleasure_moan_01.mp3",
+        "nika_pleasure_full_02.mp3",
+        "mira_pleasure_03.mp3",
+        "mira_pleasure_moan_01.mp3",
+        "mira_pleasure_moan_02.mp3",
+        "mira_pleasure_full_02.mp3",
+        "iona_pleasure_02.mp3",
+        "iona_pleasure_full_02.mp3",
+        "../sources/voice-experiments/emotion__pleasure-2.mp3",
+        "../sources/voice-experiments/emotion__pleasure-3.mp3"
+      ]
+    },
+    "generic_receptive": {
+      "character": "generic",
+      "state": "receptive",
+      "label": "Общий голос · receptive",
+      "oneShot": "../sources/voice-experiments/emotion__receptive-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__receptive-2.mp3",
+        "../sources/voice-experiments/emotion__receptive-3.mp3"
+      ]
+    },
+    "generic_shy": {
+      "character": "generic",
+      "state": "shy",
+      "label": "Общий голос · shy",
+      "oneShot": "../sources/voice-experiments/emotion__shy-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__shy-2.mp3",
+        "../sources/voice-experiments/emotion__shy-3.mp3"
+      ]
+    },
+    "generic_sleepy": {
+      "character": "generic",
+      "state": "sleepy",
+      "label": "Общий голос · sleepy",
+      "oneShot": "../sources/voice-experiments/emotion__sleepy-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__sleepy-2.mp3"
+      ]
+    },
+    "generic_smile": {
+      "character": "generic",
+      "state": "smile",
+      "label": "Общий голос · smile",
+      "oneShot": "../sources/voice-experiments/emotion__smile-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__smile-2.mp3"
+      ]
+    },
+    "generic_smug": {
+      "character": "generic",
+      "state": "smug",
+      "label": "Общий голос · smug",
+      "oneShot": "../sources/voice-experiments/emotion__smug-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__smug-2.mp3",
+        "../sources/voice-experiments/emotion__smug-3.mp3"
+      ]
+    },
+    "generic_submissive": {
+      "character": "generic",
+      "state": "submissive",
+      "label": "Общий голос · submissive",
+      "oneShot": "../sources/voice-experiments/emotion__submissive-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__submissive-2.mp3",
+        "../sources/voice-experiments/emotion__submissive-3.mp3"
+      ]
+    },
+    "generic_subspace": {
+      "character": "generic",
+      "state": "subspace",
+      "label": "Общий голос · subspace",
+      "oneShot": "nika_subspace_01.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__subspace-1.mp3",
+        "../sources/voice-experiments/emotion__subspace-2.mp3",
+        "../sources/voice-experiments/emotion__subspace-3.mp3"
+      ]
+    },
+    "generic_surprise": {
+      "character": "generic",
+      "state": "surprise",
+      "label": "Общий голос · surprise",
+      "oneShot": "../sources/voice-experiments/emotion__surprise-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__surprise-2.mp3",
+        "../sources/voice-experiments/emotion__surprise-3.mp3"
+      ]
+    },
+    "generic_unconscious": {
+      "character": "generic",
+      "state": "unconscious",
+      "label": "Общий голос · unconscious",
+      "oneShot": "../sources/voice-experiments/emotion__unconscious-1.mp3",
+      "variants": [
+        "../sources/voice-experiments/emotion__unconscious-2.mp3",
+        "../sources/voice-experiments/emotion__unconscious-3.mp3"
+      ]
+    }
+  }
+}

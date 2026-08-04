@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberJack — Illustrated UI Concept</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   ILLUSTRATED UI CONCEPT
+   Principle: every element looks like it belongs in the same
+   soft anime/manga illustration world as the action tiles.
+   No flat web borders, no generic CSS charts.
+   ═══════════════════════════════════════════════════════ */
+
+/* --- Palette derived from actual illustration pixel analysis --- */
+:root {
+  /* Paper/canvas — matches the light backgrounds of action tiles (avg brightness 192) */
+  --ill-paper: #f2ede8;
+  --ill-paper-warm: #ebe4dc;
+  --ill-paper-cool: #e8ecea;
+  --ill-paper-dark: #d9d2cc;
+
+  /* Ink — soft, not pure black (matches portrait lineart avg #4e4f58) */
+  --ill-ink: #3a3530;
+  --ill-ink-soft: #5c544c;
+  --ill-ink-light: #8a8278;
+
+  /* Accent tones — low saturation earth palette from illustrations */
+  --ill-warm: #c4a87a;      /* amber/wood — from action tile warm tones */
+  --ill-warm-deep: #a8855a;
+  --ill-cool: #8aa89a;      /* sage/teal — from rendered scene backgrounds */
+  --ill-cool-deep: #6b8a7c;
+  --ill-rose: #c4a0a0;      /* muted rose — from intimacy action tones */
+  --ill-rose-deep: #a88484;
+  --ill-violet: #9a92a8;    /* muted violet — for strain/overload */
+  --ill-violet-deep: #7a7088;
+
+  /* Feedback colors */
+  --ill-positive: #8aa89a;
+  --ill-negative: #c49a8a;
+  --ill-neutral: #c4a87a;
+  --ill-danger: #b8786a;
+
+  /* Manga panel framing */
+  --ill-panel-bg: var(--ill-paper);
+  --ill-panel-border: var(--ill-ink);
+  --ill-shadow: rgba(58, 53, 48, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Georgia', 'Noto Serif JP', serif;
+  background: var(--ill-paper-warm);
+  color: var(--ill-ink);
+  line-height: 1.5;
+  /* Subtle paper texture via gradient noise */
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(196,168,122,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(138,168,154,0.03) 0%, transparent 50%);
+}
+
+/* ═══ MANGA PANEL FRAME ═══
+   Every major section sits in a panel that looks like a
+   manga frame: double border, soft shadow, slightly textured */
+.ill-panel {
+  background: var(--ill-paper);
+  border: 1px solid var(--ill-ink);
+  box-shadow:
+    3px 3px 0 var(--ill-shadow),
+    inset 0 0 0 3px var(--ill-paper),
+    inset 0 0 0 4px var(--ill-ink-light);
+  margin: 16px;
+  padding: 20px;
+  position: relative;
+}
+
+/* Decorative corner — like speed lines / corner hatching */
+.ill-panel::before,
+.ill-panel::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ill-ink-light);
+  opacity: 0.3;
+}
+.ill-panel::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+.ill-panel::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+.ill-panel-title {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--ill-ink);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ill-ink-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ill-panel-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  background: var(--ill-warm);
+}
+
+/* ═══ ILLUSTRATED ACTION TILES (reference) ═══
+   These already exist with real illustrations.
+   Showing them with the new frame styling. */
+.ill-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.ill-action-tile {
+  position: relative;
+  height: 80px;
+  border: 1.5px solid var(--ill-ink);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--ill-paper-dark);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.ill-action-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--action-image);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.92;
+  filter: saturate(0.85) contrast(0.95);
+  transition: opacity 140ms, filter 140ms;
+}
+
+.ill-action-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    transparent 40%,
+    rgba(58, 53, 48, 0.55) 100%);
+}
+
+.ill-action-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--ill-shadow);
+}
+
+.ill-action-tile:hover::before {
+  opacity: 1;
+  filter: saturate(1) contrast(1);
+}
+
+.ill-action-tile.selected {
+  border-color: var(--ill-warm-deep);
+  border-width: 2px;
+  box-shadow: 0 0 0 1px var(--ill-warm), 0 0 8px rgba(196,168,122,0.3);
+}
+
+.ill-action-tile .tile-label {
+  position: absolute;
+  bottom: 4px;
+  left: 8px;
+  right: 8px;
+  z-index: 2;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ill-paper);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  line-height: 1.2;
+}
+
+.ill-action-tile .tile-intensity {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 2;
+  display: flex;
+  gap: 2px;
+}
+
+.ill-action-tile .tile-intensity i {
+  width: 4px;
+  height: 6px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px;
+}
+
+.ill-action-tile .tile-intensity i.active {
+  background: var(--ill-warm);
+}
+
+.ill-action-tile .tile-tags {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  z-index: 2;
+  display: flex;
+  gap: 3px;
+}
+
+.ill-action-tile .tile-tags span {
+  padding: 1px 5px;
+  background: rgba(58,53,48,0.55);
+  color: var(--ill-paper);
+  font-size: 7px;
+  border-radius: 1px;
+  letter-spacing: 0.04em;
+}
+
+/* ═══ ILLUSTRATED METERS / GAUGES ═══
+   Instead of flat progress bars, these look like
+   ink-and-watercolor gauge instruments. */
+
+.ill-meter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.ill-meter-label {
+  width: 90px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ill-ink-soft);
+  text-align: right;
+}
+
+.ill-meter-track {
+  flex: 1;
+  height: 22px;
+  position: relative;
+  /* Soft textured background like watercolor paper */
+  background: var(--ill-paper-cool);
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+/* Hatching texture for the empty part */
+.ill-meter-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    rgba(138,130,120,0.12) 3px,
+    rgba(138,130,120,0.12) 4px
+  );
+}
+
+.ill-meter-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  /* Watercolor-like gradient fill */
+  background: linear-gradient(90deg,
+    var(--ill-cool-deep) 0%,
+    var(--ill-cool) 60%,
+    color-mix(in srgb, var(--ill-cool) 80%, white) 100%);
+  border-right: 1.5px solid var(--ill-ink);
+  transition: width 300ms ease;
+}
+
+.ill-meter-fill.warm {
+  background: linear-gradient(90deg,
+    var(--ill-warm-deep) 0%,
+    var(--ill-warm) 60%,
+    color-mix(in srgb, var(--ill-warm) 80%, white) 100%);
+}
+
+.ill-meter-fill.rose {
+  background: linear-gradient(90deg,
+    var(--ill-rose-deep) 0%,
+    var(--ill-rose) 60%,
+    color-mix(in srgb, var(--ill-rose) 80%, white) 100%);
+}
+
+.ill-meter-fill.violet {
+  background: linear-gradient(90deg,
+    var(--ill-violet-deep) 0%,
+    var(--ill-violet) 60%,
+    color-mix(in srgb, var(--ill-violet) 80%, white) 100%);
+}
+
+.ill-meter-fill.danger {
+  background: linear-gradient(90deg,
+    var(--ill-danger) 0%,
+    #d4988a 60%,
+    color-mix(in srgb, var(--ill-danger) 70%, white) 100%);
+}
+
+/* Tick marks on the meter — like ink ticks on a gauge */
+.ill-meter-ticks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.ill-meter-ticks span {
+  width: 1px;
+  background: var(--ill-ink-light);
+  opacity: 0.4;
+}
+
+.ill-meter-ticks span:nth-child(odd) { height: 50%; align-self: flex-start; }
+.ill-meter-ticks span:nth-child(even) { height: 30%; align-self: flex-start; }
+
+.ill-meter-value {
+  width: 36px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ill-ink);
+  font-family: 'Georgia', serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Baseline marker — like an ink dash on the gauge */
+.ill-meter-baseline {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 0;
+  border-left: 1.5px dashed var(--ill-warm-deep);
+  z-index: 3;
+}
+
+/* ═══ ILLUSTRATED LINE CHART ═══
+   SVG chart that looks hand-drawn on paper.
+   Replaces lab-metric-chart. */
+
+.ill-chart {
+  background: var(--ill-paper-cool);
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 1px;
+  padding: 12px;
+  position: relative;
+}
+
+.ill-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.ill-chart-header span {
+  font-size: 10px;
+  color: var(--ill-ink-soft);
+  font-weight: 600;
+}
+
+.ill-chart-header b {
+  font-size: 16px;
+  color: var(--ill-ink);
+  font-family: 'Georgia', serif;
+}
+
+.ill-chart svg {
+  width: 100%;
+  height: 80px;
+  display: block;
+}
+
+/* Hand-drawn style lines */
+.ill-chart .grid-line {
+  stroke: var(--ill-ink-light);
+  stroke-width: 0.5;
+  opacity: 0.25;
+  stroke-dasharray: 2 3;
+}
+
+.ill-chart .baseline {
+  stroke: var(--ill-warm-deep);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.5;
+}
+
+.ill-chart .history-line {
+  fill: none;
+  stroke: var(--ill-cool-deep);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Slight wobble for hand-drawn feel */
+  filter: url(#hand-drawn);
+}
+
+.ill-chart .history-area {
+  fill: var(--ill-cool);
+  opacity: 0.12;
+}
+
+.ill-chart .latest-dot {
+  fill: var(--ill-warm-deep);
+  stroke: var(--ill-paper);
+  stroke-width: 1.5;
+}
+
+/* ═══ ILLUSTRATED WAVEFORM / OSCILLOSCOPE ═══
+   Looks like a hand-drawn pulse on paper,
+   not a digital oscilloscope. */
+
+.ill-waveform {
+  background: var(--ill-paper-cool);
+  border: 1px solid var(--ill-ink-light);
+  padding: 8px 12px;
+  position: relative;
+  height: 44px;
+  overflow: hidden;
+}
+
+.ill-waveform::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 20px,
+    rgba(138,130,120,0.08) 20px,
+    rgba(138,130,120,0.08) 21px
+  );
+}
+
+.ill-waveform svg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.ill-waveform .trace {
+  fill: none;
+  stroke: var(--ill-cool-deep);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  filter: url(#hand-drawn);
+}
+
+.ill-waveform .trace-peak {
+  stroke: var(--ill-warm-deep);
+  stroke-width: 2;
+}
+
+/* ═══ ILLUSTRATED VERTICAL SCALE (endurance/balance) ═══
+   Looks like an ink scale instrument, not CSS bars. */
+
+.ill-vscale-group {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.ill-vscale {
+  width: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ill-vscale-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ill-ink-soft);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.ill-vscale-track {
+  width: 14px;
+  flex: 1;
+  min-height: 80px;
+  position: relative;
+  background: var(--ill-paper-cool);
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.ill-vscale-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 6px,
+    rgba(138,130,120,0.1) 6px,
+    rgba(138,130,120,0.1) 7px
+  );
+}
+
+.ill-vscale-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg,
+    var(--ill-cool-deep),
+    var(--ill-cool));
+  border-top: 1.5px solid var(--ill-ink);
+  transition: height 300ms ease;
+}
+
+.ill-vscale-fill.warm {
+  background: linear-gradient(0deg, var(--ill-warm-deep), var(--ill-warm));
+}
+
+.ill-vscale-fill.violet {
+  background: linear-gradient(0deg, var(--ill-violet-deep), var(--ill-violet));
+}
+
+.ill-vscale-fill.danger {
+  background: linear-gradient(0deg, var(--ill-danger), #d4988a);
+}
+
+/* Center marker for balance indicator */
+.ill-vscale-balance-marker {
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  height: 2px;
+  background: var(--ill-warm-deep);
+  z-index: 3;
+}
+
+.ill-vscale-value {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ill-ink);
+  font-family: 'Georgia', serif;
+}
+
+/* ═══ ILLUSTRATED ZONE MAP ═══
+   Body zone selector that looks like an anatomical
+   ink illustration, not a button grid. */
+
+.ill-zone-map {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ill-zone {
+  position: relative;
+  padding: 8px 10px;
+  background: var(--ill-paper-cool);
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 120ms ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ill-zone:hover {
+  background: var(--ill-paper);
+  border-color: var(--ill-ink-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 0 var(--ill-shadow);
+}
+
+.ill-zone.active {
+  background: color-mix(in srgb, var(--ill-warm) 15%, var(--ill-paper));
+  border-color: var(--ill-warm-deep);
+  border-width: 1.5px;
+}
+
+.ill-zone.blocked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ill-zone.blocked::after {
+  content: '×';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: var(--ill-danger);
+  font-weight: bold;
+}
+
+/* Mini body-part icon space — for future illustrated icons */
+.ill-zone-icon {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 2px;
+  background: var(--ill-paper-dark);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  color: var(--ill-ink-light);
+}
+
+.ill-zone-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ill-zone-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ill-ink);
+  line-height: 1.2;
+}
+
+.ill-zone-stats {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.ill-zone-stats span {
+  font-size: 8px;
+  color: var(--ill-ink-soft);
+  font-family: 'Georgia', serif;
+}
+
+.ill-zone-stats b {
+  color: var(--ill-ink);
+}
+
+/* Sensitivity mini-bar inside zone */
+.ill-zone-sens {
+  width: 40px;
+  height: 4px;
+  background: var(--ill-paper-dark);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.ill-zone-sens i {
+  display: block;
+  height: 100%;
+  background: var(--ill-cool);
+}
+
+/* ═══ ILLUSTRATED RADIAL / DIAL GAUGE ═══
+   For core metrics — looks like an ink dial instrument. */
+
+.ill-dial-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ill-dial {
+  width: 100px;
+  text-align: center;
+}
+
+.ill-dial svg {
+  width: 100px;
+  height: 60px;
+}
+
+.ill-dial .dial-bg {
+  fill: var(--ill-paper-cool);
+  stroke: var(--ill-ink-light);
+  stroke-width: 1;
+}
+
+.ill-dial .dial-arc {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.ill-dial .dial-arc-track {
+  stroke: var(--ill-paper-dark);
+}
+
+.ill-dial .dial-arc-fill {
+  stroke: var(--ill-cool-deep);
+  transition: stroke-dashoffset 300ms ease;
+}
+
+.ill-dial .dial-arc-fill.warm { stroke: var(--ill-warm-deep); }
+.ill-dial .dial-arc-fill.rose { stroke: var(--ill-rose-deep); }
+.ill-dial .dial-arc-fill.violet { stroke: var(--ill-violet-deep); }
+
+.ill-dial .dial-needle {
+  stroke: var(--ill-ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.ill-dial .dial-ticks {
+  stroke: var(--ill-ink-light);
+  stroke-width: 0.5;
+  opacity: 0.5;
+}
+
+.ill-dial-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ill-ink);
+  font-family: 'Georgia', serif;
+  margin-top: -8px;
+}
+
+.ill-dial-label {
+  font-size: 9px;
+  color: var(--ill-ink-soft);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ═══ ILLUSTRATED STATION SCHEMATIC ═══
+   Looks like an ink map/plan, not SVG rings. */
+
+.ill-station-map {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
+
+.ill-station-map svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ill-station-map .ring {
+  fill: none;
+  stroke: var(--ill-ink-light);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+  opacity: 0.4;
+}
+
+.ill-station-map .ring.active {
+  stroke: var(--ill-warm-deep);
+  stroke-width: 1.5;
+  stroke-dasharray: none;
+  opacity: 0.8;
+}
+
+.ill-station-map .sector {
+  fill: var(--ill-paper-cool);
+  stroke: var(--ill-ink-light);
+  stroke-width: 0.8;
+  opacity: 0.6;
+  transition: all 200ms;
+}
+
+.ill-station-map .sector:hover {
+  fill: var(--ill-warm);
+  opacity: 0.4;
+}
+
+.ill-station-map .sector.current {
+  fill: var(--ill-warm);
+  opacity: 0.5;
+  stroke: var(--ill-warm-deep);
+  stroke-width: 1.5;
+}
+
+.ill-station-map .sector-label {
+  font-size: 7px;
+  fill: var(--ill-ink-soft);
+  text-anchor: middle;
+  font-family: 'Georgia', serif;
+}
+
+/* ═══ ILLUSTRATED PROTOCOL STEPS ═══
+   Looks like a manga flow / storyboard frames. */
+
+.ill-protocol {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.ill-protocol-step {
+  flex-shrink: 0;
+  width: 120px;
+  padding: 8px;
+  background: var(--ill-paper-cool);
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 2px;
+  position: relative;
+  transition: all 150ms;
+}
+
+.ill-protocol-step.done {
+  background: color-mix(in srgb, var(--ill-cool) 12%, var(--ill-paper));
+  border-color: var(--ill-cool-deep);
+}
+
+.ill-protocol-step.current {
+  background: color-mix(in srgb, var(--ill-warm) 15%, var(--ill-paper));
+  border-color: var(--ill-warm-deep);
+  border-width: 1.5px;
+  box-shadow: 0 0 0 1px var(--ill-warm);
+}
+
+.ill-protocol-step.pending {
+  opacity: 0.5;
+}
+
+.ill-protocol-step::after {
+  content: '→';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--ill-ink-light);
+  z-index: 2;
+}
+
+.ill-protocol-step:last-child::after { display: none; }
+
+.ill-protocol-num {
+  font-size: 8px;
+  color: var(--ill-ink-light);
+  font-weight: 700;
+}
+
+.ill-protocol-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ill-ink);
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.ill-protocol-status {
+  font-size: 8px;
+  margin-top: 4px;
+  color: var(--ill-ink-soft);
+}
+
+.ill-protocol-step.done .ill-protocol-status { color: var(--ill-cool-deep); }
+.ill-protocol-step.current .ill-protocol-status { color: var(--ill-warm-deep); }
+
+/* ═══ ILLUSTRATED CHAT / NARRATIVE ═══
+   Manga-style speech bubbles and narrative boxes. */
+
+.ill-chat {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.ill-chat-msg {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.ill-chat-msg.system {
+  justify-content: center;
+}
+
+.ill-chat-msg.system .ill-chat-bubble {
+  background: var(--ill-paper-dark);
+  border: 1px solid var(--ill-ink-light);
+  font-style: italic;
+  color: var(--ill-ink-soft);
+  font-size: 10px;
+  padding: 6px 12px;
+  border-radius: 0;
+  max-width: 80%;
+  text-align: center;
+}
+
+.ill-chat-portrait {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 2px;
+  background: var(--ill-paper-dark);
+  overflow: hidden;
+}
+
+.ill-chat-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ill-chat-bubble {
+  position: relative;
+  padding: 8px 12px;
+  background: var(--ill-paper);
+  border: 1px solid var(--ill-ink-soft);
+  border-radius: 12px 12px 12px 2px;
+  max-width: 70%;
+  font-size: 11px;
+  color: var(--ill-ink);
+  line-height: 1.4;
+}
+
+.ill-chat-msg.right .ill-chat-bubble {
+  border-radius: 12px 12px 2px 12px;
+}
+
+.ill-chat-name {
+  font-size: 8px;
+  color: var(--ill-ink-soft);
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+/* ═══ ILLUSTRATED TAGS / CHIPS ═══ */
+
+.ill-tag-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ill-tag {
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 600;
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 10px;
+  background: var(--ill-paper-cool);
+  color: var(--ill-ink-soft);
+  letter-spacing: 0.03em;
+}
+
+.ill-tag.warm { border-color: var(--ill-warm-deep); color: var(--ill-warm-deep); background: color-mix(in srgb, var(--ill-warm) 10%, var(--ill-paper)); }
+.ill-tag.cool { border-color: var(--ill-cool-deep); color: var(--ill-cool-deep); background: color-mix(in srgb, var(--ill-cool) 10%, var(--ill-paper)); }
+.ill-tag.rose { border-color: var(--ill-rose-deep); color: var(--ill-rose-deep); background: color-mix(in srgb, var(--ill-rose) 10%, var(--ill-paper)); }
+
+/* ═══ ILLUSTRATED INFO READOUT ═══
+   Telemetry / readout that looks like handwritten notes on paper. */
+
+.ill-readout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.ill-readout-item {
+  padding: 6px 8px;
+  background: var(--ill-paper-cool);
+  border-left: 2px solid var(--ill-cool-deep);
+}
+
+.ill-readout-item.warm { border-left-color: var(--ill-warm-deep); }
+.ill-readout-item.rose { border-left-color: var(--ill-rose-deep); }
+.ill-readout-item.violet { border-left-color: var(--ill-violet-deep); }
+
+.ill-readout-label {
+  font-size: 8px;
+  color: var(--ill-ink-soft);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ill-readout-value {
+  font-size: 14px;
+  color: var(--ill-ink);
+  font-weight: 700;
+  font-family: 'Georgia', serif;
+  margin-top: 1px;
+}
+
+.ill-readout-sub {
+  font-size: 8px;
+  color: var(--ill-ink-light);
+  margin-top: 1px;
+}
+
+/* ═══ ILLUSTRATED BUTTONS ═══
+   For non-action buttons (wait, execute, etc.) */
+
+.ill-btn {
+  padding: 8px 16px;
+  font-family: 'Georgia', serif;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid var(--ill-ink);
+  background: var(--ill-paper);
+  color: var(--ill-ink);
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 120ms ease;
+  position: relative;
+}
+
+.ill-btn:hover {
+  background: var(--ill-paper-warm);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 0 var(--ill-shadow);
+}
+
+.ill-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.ill-btn.primary {
+  background: var(--ill-warm);
+  border-color: var(--ill-warm-deep);
+  color: var(--ill-paper);
+}
+
+.ill-btn.primary:hover {
+  background: var(--ill-warm-deep);
+}
+
+.ill-btn.danger {
+  border-color: var(--ill-danger);
+  color: var(--ill-danger);
+}
+
+.ill-btn.ghost {
+  border-color: var(--ill-ink-light);
+  color: var(--ill-ink-soft);
+  background: transparent;
+}
+
+/* ═══ LAYOUT ═══ */
+
+.concept-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.concept-header {
+  text-align: center;
+  padding: 30px 20px;
+  margin-bottom: 20px;
+}
+
+.concept-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ill-ink);
+  margin-bottom: 8px;
+}
+
+.concept-header p {
+  font-size: 13px;
+  color: var(--ill-ink-soft);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.concept-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.concept-full {
+  grid-column: 1 / -1;
+}
+
+/* Section navigation */
+.concept-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.concept-nav a {
+  padding: 4px 10px;
+  font-size: 11px;
+  border: 1px solid var(--ill-ink-light);
+  border-radius: 2px;
+  text-decoration: none;
+  color: var(--ill-ink-soft);
+  background: var(--ill-paper);
+}
+
+.concept-nav a:hover {
+  background: var(--ill-warm);
+  color: var(--ill-paper);
+}
+
+/* SVG filter for hand-drawn wobble */
+</style>
+</head>
+<body>
+
+<!-- SVG filters for hand-drawn effect -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="hand-drawn">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3"/>
+      <feDisplacementMap in="SourceGraphic" scale="1.5"/>
+    </filter>
+    <filter id="hand-drawn-strong">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="5"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+    </filter>
+    <filter id="ink-bleed">
+      <feGaussianBlur stdDeviation="0.3"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" scale="0.5"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="concept-page">
+
+  <div class="concept-header">
+    <h1>CyberJack — Illustrated UI</h1>
+    <p>Концепт: весь интерфейс в едином стиле мягких аниме-иллюстраций.
+       Иллюстрированные кнопки — основа. Графики, метрики, карты —
+       рендерятся как нарисованные от руки на бумаге.</p>
+  </div>
+
+  <nav class="concept-nav">
+    <a href="#tiles">Action Tiles</a>
+    <a href="#meters">Meters</a>
+    <a href="#charts">Charts</a>
+    <a href="#waveform">Waveform</a>
+    <a href="#vscale">Endurance</a>
+    <a href="#dials">Dials</a>
+    <a href="#zones">Zone Map</a>
+    <a href="#station">Station</a>
+    <a href="#protocol">Protocol</a>
+    <a href="#chat">Chat</a>
+    <a href="#readout">Readout</a>
+    <a href="#composite">Composite</a>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       1. ACTION TILES (existing illustrations)
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel concept-full" id="tiles">
+    <div class="ill-panel-title">1. Иллюстрированные кнопки действий — уже есть, сохраняем</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+      78 иллюстраций (1536×640): contact(19), poses(12), clothing(12), intimacy(9), equipment(26).
+      Стиль: мягкая аниме-рисовка, светлый фон, низкая насыщенность. Этот язык — основа для всего остального.</p>
+    <div class="ill-action-grid">
+      <div class="ill-action-tile" style="--action-image:url('/character-images/actions/contact/slap.png')">
+        <div class="tile-tags"><span>КОНТАКТ</span></div>
+        <div class="tile-intensity"><i class="active"></i><i class="active"></i><i class="active"></i></div>
+        <div class="tile-label">Шлепок</div>
+      </div>
+      <div class="ill-action-tile" style="--action-image:url('/character-images/actions/contact/feather_stroke.png')">
+        <div class="tile-tags"><span>КОНТАКТ</span></div>
+        <div class="tile-intensity"><i class="active"></i><i></i><i></i></div>
+        <div class="tile-label">Перо</div>
+      </div>
+      <div class="ill-action-tile" style="--action-image:url('/character-images/actions/poses/pose_kneeling.png')">
+        <div class="tile-tags"><span>ПОЗА</span></div>
+        <div class="tile-intensity"><i></i><i></i><i></i></div>
+        <div class="tile-label">На коленях</div>
+      </div>
+      <div class="ill-action-tile selected" style="--action-image:url('/character-images/actions/contact/deep_massage.png')">
+        <div class="tile-tags"><span>КОНТАКТ</span></div>
+        <div class="tile-intensity"><i class="active"></i><i class="active"></i><i></i></div>
+        <div class="tile-label">Глубокий массаж</div>
+      </div>
+      <div class="ill-action-tile" style="--action-image:url('/character-images/actions/clothing/eq_clothe_calibration_set.png')">
+        <div class="tile-tags"><span>ОДЕЖДА</span></div>
+        <div class="tile-intensity"><i></i><i></i><i></i></div>
+        <div class="tile-label">Калибров. костюм</div>
+      </div>
+      <div class="ill-action-tile" style="--action-image:url('/character-images/actions/equipment/act_activate_plug.png')">
+        <div class="tile-tags"><span>ОБОРУД.</span></div>
+        <div class="tile-intensity"><i class="active"></i><i class="active"></i><i></i></div>
+        <div class="tile-label">Актив. плаг</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       2. METERS — horizontal gauges
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="meters">
+    <div class="ill-panel-title">2. Метрики — акварельные измерители</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяют плоские progress bars. Заполнение — акварельный градиент,
+       фон — штриховка как на бумаге, риски — чернильные засечки.</p>
+
+    <div class="ill-meter-row">
+      <div class="ill-meter-label">Чувствительность</div>
+      <div class="ill-meter-track">
+        <div class="ill-meter-fill" style="width:72%"></div>
+        <div class="ill-meter-baseline" style="left:45%"></div>
+        <div class="ill-meter-ticks">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="ill-meter-value">72</div>
+    </div>
+
+    <div class="ill-meter-row">
+      <div class="ill-meter-label">Отношение</div>
+      <div class="ill-meter-track">
+        <div class="ill-meter-fill warm" style="width:58%"></div>
+        <div class="ill-meter-baseline" style="left:50%"></div>
+        <div class="ill-meter-ticks">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="ill-meter-value">58</div>
+    </div>
+
+    <div class="ill-meter-row">
+      <div class="ill-meter-label">Открытость</div>
+      <div class="ill-meter-track">
+        <div class="ill-meter-fill rose" style="width:84%"></div>
+        <div class="ill-meter-baseline" style="left:60%"></div>
+        <div class="ill-meter-ticks">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="ill-meter-value">84</div>
+    </div>
+
+    <div class="ill-meter-row">
+      <div class="ill-meter-label">Перегрузка</div>
+      <div class="ill-meter-track">
+        <div class="ill-meter-fill violet" style="width:34%"></div>
+        <div class="ill-meter-baseline" style="left:80%"></div>
+        <div class="ill-meter-ticks">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="ill-meter-value">34</div>
+    </div>
+
+    <div class="ill-meter-row">
+      <div class="ill-meter-label">Напряжение</div>
+      <div class="ill-meter-track">
+        <div class="ill-meter-fill danger" style="width:91%"></div>
+        <div class="ill-meter-ticks">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="ill-meter-value">91</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       3. CHARTS — hand-drawn line graphs
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="charts">
+    <div class="ill-panel-title">3. Графики — нарисованные от руки на бумаге</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяют lab-metric-chart. SVG с фильтром hand-drawn (turbulence + displacement):
+       линии дрожат как от руки, область под графиком — акварельная заливка.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="ill-chart">
+        <div class="ill-chart-header"><span>Чувствительность</span><b>72</b></div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line class="grid-line" x1="0" x2="100" y1="25" y2="25"/>
+          <line class="grid-line" x1="0" x2="100" y1="50" y2="50"/>
+          <line class="grid-line" x1="0" x2="100" y1="75" y2="75"/>
+          <line class="baseline" x1="0" x2="100" y1="55" y2="55"/>
+          <polygon class="history-area" points="0,60 10,55 20,48 30,52 40,40 50,35 60,30 70,28 80,25 90,22 100,28 100,100 0,100"/>
+          <polyline class="history-line" points="0,60 10,55 20,48 30,52 40,40 50,35 60,30 70,28 80,25 90,22 100,28"/>
+          <circle class="latest-dot" cx="100" cy="28" r="3"/>
+        </svg>
+      </div>
+
+      <div class="ill-chart">
+        <div class="ill-chart-header"><span>Открытость</span><b>84</b></div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line class="grid-line" x1="0" x2="100" y1="25" y2="25"/>
+          <line class="grid-line" x1="0" x2="100" y1="50" y2="50"/>
+          <line class="grid-line" x1="0" x2="100" y1="75" y2="75"/>
+          <line class="baseline" x1="0" x2="100" y1="40" y2="40"/>
+          <polygon class="history-area" points="0,45 10,50 20,42 30,35 40,30 50,25 60,20 70,18 80,15 90,12 100,16 100,100 0,100" style="fill:var(--ill-rose);opacity:0.12"/>
+          <polyline class="history-line" points="0,45 10,50 20,42 30,35 40,30 50,25 60,20 70,18 80,15 90,12 100,16" style="stroke:var(--ill-rose-deep)"/>
+          <circle class="latest-dot" cx="100" cy="16" r="3" style="fill:var(--ill-rose-deep)"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       4. WAVEFORM — pulse / oscilloscope
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="waveform">
+    <div class="ill-panel-title">4. Пульс / осциллоскоп — hand-drawn trace</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяет pulse-cardiogram и sex-machine-oscilloscope.
+       Волна рисуется как от руки, с фильтром turbulence. На фоне — бумажная сетка.</p>
+
+    <div class="ill-waveform">
+      <svg viewBox="0 0 400 40" preserveAspectRatio="none">
+        <path class="trace" d="M0 20 H60 C65 20 67 16 72 16 C77 16 80 20 85 20 H120 L125 23 L130 8 L136 32 L143 20 H180 C187 20 190 14 198 14 C208 14 212 20 220 20 H260 L265 23 L270 8 L276 32 L283 20 H320 C327 20 330 14 338 14 C348 14 352 20 360 20 H400"/>
+      </svg>
+    </div>
+
+    <div style="height:8px"></div>
+
+    <div class="ill-waveform">
+      <svg viewBox="0 0 400 40" preserveAspectRatio="none">
+        <path class="trace trace-peak" d="M0 20 H40 C50 20 55 10 65 10 C75 10 80 20 90 20 H130 C140 20 145 5 155 5 C165 5 170 20 180 20 H220 C230 20 235 8 245 8 C255 8 260 20 270 20 H310 C320 20 325 12 335 12 C345 12 350 20 360 20 H400"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       5. VERTICAL SCALES — endurance / balance
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="vscale">
+    <div class="ill-panel-title">5. Выносливость / баланс — вертикальные шкалы</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяют endurance-infographics. Чернильные шкалы как измерительные приборы.</p>
+
+    <div class="ill-vscale-group" style="justify-content:center">
+      <div class="ill-vscale">
+        <div class="ill-vscale-label">БАЛАНС</div>
+        <div class="ill-vscale-track">
+          <div class="ill-vscale-fill" style="height:62%"></div>
+          <div class="ill-vscale-balance-marker" style="bottom:50%"></div>
+        </div>
+        <div class="ill-vscale-value">62</div>
+      </div>
+
+      <div class="ill-vscale">
+        <div class="ill-vscale-label">ВЫНОСЛ.</div>
+        <div class="ill-vscale-track">
+          <div class="ill-vscale-fill warm" style="height:78%"></div>
+        </div>
+        <div class="ill-vscale-value">78</div>
+      </div>
+
+      <div class="ill-vscale">
+        <div class="ill-vscale-label">ПЕРЕГРУЗ.</div>
+        <div class="ill-vscale-track">
+          <div class="ill-vscale-fill violet" style="height:34%"></div>
+        </div>
+        <div class="ill-vscale-value">34</div>
+      </div>
+
+      <div class="ill-vscale">
+        <div class="ill-vscale-label">НАПРЯЖ.</div>
+        <div class="ill-vscale-track">
+          <div class="ill-vscale-fill danger" style="height:91%"></div>
+        </div>
+        <div class="ill-vscale-value">91</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       6. DIAL GAUGES — core metrics radial
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="dials">
+    <div class="ill-panel-title">6. Контурные датчики — для ключевых метрик</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Альтернатива горизонтальным метрикам для главного экрана.
+       Выглядят как нарисованные циферблаты.</p>
+
+    <div class="ill-dial-group" style="justify-content:center">
+      <div class="ill-dial">
+        <svg viewBox="0 0 100 60">
+          <path class="dial-bg" d="M10 55 A40 40 0 0 1 90 55 L10 55 Z" />
+          <path class="dial-arc dial-arc-track" d="M15 55 A35 35 0 0 1 85 55" fill="none"/>
+          <path class="dial-arc dial-arc-fill" d="M15 55 A35 35 0 0 1 85 55" stroke-dasharray="110" stroke-dashoffset="31"/>
+          <line class="dial-needle" x1="50" y1="55" x2="72" y2="22"/>
+          <line class="dial-ticks" x1="15" y1="55" x2="18" y2="50"/>
+          <line class="dial-ticks" x1="32" y1="24" x2="35" y2="29"/>
+          <line class="dial-ticks" x1="50" y1="18" x2="50" y2="23"/>
+          <line class="dial-ticks" x1="68" y1="24" x2="65" y2="29"/>
+          <line class="dial-ticks" x1="85" y1="55" x2="82" y2="50"/>
+        </svg>
+        <div class="ill-dial-value">72</div>
+        <div class="ill-dial-label">Чувств.</div>
+      </div>
+
+      <div class="ill-dial">
+        <svg viewBox="0 0 100 60">
+          <path class="dial-bg" d="M10 55 A40 40 0 0 1 90 55 L10 55 Z" />
+          <path class="dial-arc dial-arc-track" d="M15 55 A35 35 0 0 1 85 55" fill="none"/>
+          <path class="dial-arc dial-arc-fill warm" d="M15 55 A35 35 0 0 1 85 55" stroke-dasharray="110" stroke-dashoffset="46"/>
+          <line class="dial-needle" x1="50" y1="55" x2="65" y2="25"/>
+        </svg>
+        <div class="ill-dial-value">58</div>
+        <div class="ill-dial-label">Отнош.</div>
+      </div>
+
+      <div class="ill-dial">
+        <svg viewBox="0 0 100 60">
+          <path class="dial-bg" d="M10 55 A40 40 0 0 1 90 55 L10 55 Z" />
+          <path class="dial-arc dial-arc-track" d="M15 55 A35 35 0 0 1 85 55" fill="none"/>
+          <path class="dial-arc dial-arc-fill rose" d="M15 55 A35 35 0 0 1 85 55" stroke-dasharray="110" stroke-dashoffset="17"/>
+          <line class="dial-needle" x1="50" y1="55" x2="78" y2="20"/>
+        </svg>
+        <div class="ill-dial-value">84</div>
+        <div class="ill-dial-label">Открыт.</div>
+      </div>
+
+      <div class="ill-dial">
+        <svg viewBox="0 0 100 60">
+          <path class="dial-bg" d="M10 55 A40 40 0 0 1 90 55 L10 55 Z" />
+          <path class="dial-arc dial-arc-track" d="M15 55 A35 35 0 0 1 85 55" fill="none"/>
+          <path class="dial-arc dial-arc-fill violet" d="M15 55 A35 35 0 0 1 85 55" stroke-dasharray="110" stroke-dashoffset="72"/>
+          <line class="dial-needle" x1="50" y1="55" x2="58" y2="30"/>
+        </svg>
+        <div class="ill-dial-value">34</div>
+        <div class="ill-dial-label">Перегр.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       7. ZONE MAP — illustrated body selector
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="zones">
+    <div class="ill-panel-title">7. Карта зон — анатомическая иллюстрация</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяет zone-map-group. Каждая зона — карточка с мини-иконкой,
+       именем, sens/att значениями и мини-баром чувствительности.
+       Слоты под будущие иллюстрации частей тела.</p>
+
+    <div class="ill-zone-map">
+      <div class="ill-zone active">
+        <div class="ill-zone-icon">◇</div>
+        <div class="ill-zone-info">
+          <div class="ill-zone-name">Шея</div>
+          <div class="ill-zone-stats"><span>sens <b>85</b></span><span>att <b>12</b></span></div>
+          <div class="ill-zone-sens"><i style="width:85%"></i></div>
+        </div>
+      </div>
+      <div class="ill-zone">
+        <div class="ill-zone-icon">◆</div>
+        <div class="ill-zone-info">
+          <div class="ill-zone-name">Губы</div>
+          <div class="ill-zone-stats"><span>sens <b>90</b></span><span>att <b>20</b></span></div>
+          <div class="ill-zone-sens"><i style="width:90%"></i></div>
+        </div>
+      </div>
+      <div class="ill-zone">
+        <div class="ill-zone-icon">○</div>
+        <div class="ill-zone-info">
+          <div class="ill-zone-name">Плечи</div>
+          <div class="ill-zone-stats"><span>sens <b>30</b></span><span>att <b>80</b></span></div>
+          <div class="ill-zone-sens"><i style="width:30%"></i></div>
+        </div>
+      </div>
+      <div class="ill-zone blocked">
+        <div class="ill-zone-icon">▣</div>
+        <div class="ill-zone-info">
+          <div class="ill-zone-name">Грудь</div>
+          <div class="ill-zone-stats"><span>sens <b>70</b></span><span>att <b>45</b></span></div>
+          <div class="ill-zone-sens"><i style="width:70%"></i></div>
+        </div>
+      </div>
+      <div class="ill-zone">
+        <div class="ill-zone-icon">◐</div>
+        <div class="ill-zone-info">
+          <div class="ill-zone-name">Талия</div>
+          <div class="ill-zone-stats"><span>sens <b>55</b></span><span>att <b>60</b></span></div>
+          <div class="ill-zone-sens"><i style="width:55%"></i></div>
+        </div>
+      </div>
+      <div class="ill-zone">
+        <div class="ill-zone-icon">◢</div>
+        <div class="ill-zone-info">
+          <div class="ill-zone-name">Внутр. бёдра</div>
+          <div class="ill-zone-stats"><span>sens <b>92</b></span><span>att <b>15</b></span></div>
+          <div class="ill-zone-sens"><i style="width:92%"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       8. STATION SCHEMATIC — ink map
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="station">
+    <div class="ill-panel-title">8. Схема станций — чернильная карта</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяет station-code-schematic (SVG rings). Концентрические кольца
+       с секторами, рисованные засечки.</p>
+
+    <div class="ill-station-map">
+      <svg viewBox="0 0 200 200">
+        <!-- Outer ring: perimeter -->
+        <circle class="ring active" cx="100" cy="100" r="90"/>
+        <!-- Middle ring: cultivation -->
+        <circle class="ring" cx="100" cy="100" r="65"/>
+        <!-- Inner ring: archive -->
+        <circle class="ring" cx="100" cy="100" r="40"/>
+
+        <!-- Sectors on outer ring -->
+        <path class="sector current" d="M100 100 L100 10 A90 90 0 0 1 190 100 Z"/>
+        <path class="sector" d="M100 100 L190 100 A90 90 0 0 1 100 190 Z"/>
+        <path class="sector" d="M100 100 L100 190 A90 90 0 0 1 10 100 Z"/>
+        <path class="sector" d="M100 100 L10 100 A90 90 0 0 1 100 10 Z"/>
+
+        <!-- Sector labels -->
+        <text class="sector-label" x="145" y="50">ПЕРИМЕТР</text>
+        <text class="sector-label" x="145" y="155">КУЛЬТИВ.</text>
+        <text class="sector-label" x="55" y="155">АРХИВ</text>
+        <text class="sector-label" x="55" y="50">СКАНЕР</text>
+
+        <!-- Center -->
+        <circle cx="100" cy="100" r="6" fill="var(--ill-warm-deep)" opacity="0.6"/>
+        <text class="sector-label" x="100" y="103" style="font-size:6px;fill:var(--ill-paper)">S-01</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       9. PROTOCOL STEPS — storyboard flow
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel concept-full" id="protocol">
+    <div class="ill-panel-title">9. Протокол — раскадровка</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяет protocol-drawer-step. Каждый шаг — фрейм из манги,
+       со стрелкой к следующему. Статус: done / current / pending.</p>
+
+    <div class="ill-protocol">
+      <div class="ill-protocol-step done">
+        <div class="ill-protocol-num">01</div>
+        <div class="ill-protocol-name">Подготовка</div>
+        <div class="ill-protocol-status">✓ выполнено</div>
+      </div>
+      <div class="ill-protocol-step done">
+        <div class="ill-protocol-num">02</div>
+        <div class="ill-protocol-name">Калибровка шеи</div>
+        <div class="ill-protocol-status">✓ выполнено</div>
+      </div>
+      <div class="ill-protocol-step current">
+        <div class="ill-protocol-num">03</div>
+        <div class="ill-protocol-name">Тестирование реакции</div>
+        <div class="ill-protocol-status">● в процессе</div>
+      </div>
+      <div class="ill-protocol-step pending">
+        <div class="ill-protocol-num">04</div>
+        <div class="ill-protocol-name">Порог дискомфорта</div>
+        <div class="ill-protocol-status">○ ожидание</div>
+      </div>
+      <div class="ill-protocol-step pending">
+        <div class="ill-protocol-num">05</div>
+        <div class="ill-protocol-name">Отчёт</div>
+        <div class="ill-protocol-status">○ ожидание</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       10. CHAT — manga speech bubbles
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="chat">
+    <div class="ill-panel-title">10. Чат — манга-облака</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Реплики в облачах диалога, нарратор — курсивом в рамках.
+       Портреты с эмоциями рядом.</p>
+
+    <div class="ill-chat">
+      <div class="ill-chat-msg system">
+        <div class="ill-chat-bubble">
+          Сера зафиксирована в калибровочном костюме. Начало протокола.
+        </div>
+      </div>
+      <div class="ill-chat-msg">
+        <div class="ill-chat-portrait">
+          <img src="/character-images/portraits/mira/neutral.png" alt="Сера" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <div class="ill-chat-name">Сера</div>
+          <div class="ill-chat-bubble">Мне нравится быть рядом с тобой...</div>
+        </div>
+      </div>
+      <div class="ill-chat-msg right">
+        <div>
+          <div class="ill-chat-name" style="text-align:right">Калибратор</div>
+          <div class="ill-chat-bubble">Тебе нравится стоять на коленях?</div>
+        </div>
+        <div class="ill-chat-portrait">
+          <img src="/character-images/portraits/male_test/neutral.png" alt="Калибратор" onerror="this.style.display='none'">
+        </div>
+      </div>
+      <div class="ill-chat-msg system">
+        <div class="ill-chat-bubble">
+          Калибратор, склонившись, спокойно спросил стоящую на коленях Серу,
+          нравится ли ей эта поза. Сера, не меняя положения, мягко ответила,
+          что ей нравится быть рядом с ним.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       11. READOUT — telemetry
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel" id="readout">
+    <div class="ill-panel-title">11. Телеметрия — записи на бумаге</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:12px">
+       Заменяет telemetry-readout / behavioral-readout. Каждое значение —
+       как запись в журнале: чернильная полоса слева, подпись, число.</p>
+
+    <div class="ill-readout">
+      <div class="ill-readout-item">
+        <div class="ill-readout-label">Эфф. чувств.</div>
+        <div class="ill-readout-value">68.4</div>
+        <div class="ill-readout-sub">65% глоб · 35% лок</div>
+      </div>
+      <div class="ill-readout-item warm">
+        <div class="ill-readout-label">Эфф. отнош.</div>
+        <div class="ill-readout-value">42.1</div>
+        <div class="ill-readout-sub">40% глоб · 60% лок</div>
+      </div>
+      <div class="ill-readout-item rose">
+        <div class="ill-readout-label">Валентность</div>
+        <div class="ill-readout-value">+0.72</div>
+        <div class="ill-readout-sub">положительная</div>
+      </div>
+      <div class="ill-readout-item violet">
+        <div class="ill-readout-label">Перегрузка</div>
+        <div class="ill-readout-value">12.3</div>
+        <div class="ill-readout-sub">вын. 78 · резерв 65</div>
+      </div>
+      <div class="ill-readout-item">
+        <div class="ill-readout-label">НОВИЗНА</div>
+        <div class="ill-readout-value">0.34</div>
+        <div class="ill-readout-sub">эффект. 0.28</div>
+      </div>
+      <div class="ill-readout-item warm">
+        <div class="ill-readout-label">Вовлечён.</div>
+        <div class="ill-readout-value">0.81</div>
+        <div class="ill-readout-sub">растёт</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       12. COMPOSITE — full panel mockup
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel concept-full" id="composite">
+    <div class="ill-panel-title">12. Композитный экран — всё вместе</div>
+    <p style="font-size:11px;color:var(--ill-ink-soft);margin-bottom:16px">
+       Так выглядит рабочий экран калибровки: портрет + метрики + пульс +
+       карта зон + кнопки действий + протокол + чат — в едином стиле.</p>
+
+    <div style="display:grid;grid-template-columns:200px 1fr 240px;gap:12px;min-height:400px">
+
+      <!-- Left: portrait + vitals -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="border:1px solid var(--ill-ink-light);background:var(--ill-paper-cool);padding:8px;text-align:center">
+          <img src="/character-images/rendered/mira/standing__calibration_set__none__neutral.png"
+               alt="Мира" style="width:100%;height:auto;border:1px solid var(--ill-ink-light)"
+               onerror="this.style.display='none'">
+          <div style="font-size:10px;font-weight:600;margin-top:4px">Мира · S-01</div>
+          <div style="font-size:8px;color:var(--ill-ink-soft)">калибровочный костюм · нейтрально</div>
+        </div>
+
+        <div style="border:1px solid var(--ill-ink-light);background:var(--ill-paper-cool);padding:8px">
+          <div style="font-size:8px;color:var(--ill-ink-soft);font-weight:600;margin-bottom:6px">ПУЛЬС</div>
+          <div class="ill-waveform" style="padding:4px;height:36px;border:0">
+            <svg viewBox="0 0 200 30" preserveAspectRatio="none">
+              <path class="trace" d="M0 15 H30 C35 15 37 11 42 11 C47 11 50 15 55 15 H80 L85 18 L90 4 L96 26 L103 15 H130 C137 15 140 9 148 9 C158 9 162 15 170 15 H200"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ill-dial-group" style="justify-content:center;gap:8px">
+          <div class="ill-dial" style="width:70px">
+            <svg viewBox="0 0 100 60" style="width:70px;height:42px">
+              <path class="dial-bg" d="M10 55 A40 40 0 0 1 90 55 L10 55 Z"/>
+              <path class="dial-arc dial-arc-track" d="M15 55 A35 35 0 0 1 85 55" fill="none"/>
+              <path class="dial-arc dial-arc-fill" d="M15 55 A35 35 0 0 1 85 55" stroke-dasharray="110" stroke-dashoffset="31"/>
+              <line class="dial-needle" x1="50" y1="55" x2="72" y2="22"/>
+            </svg>
+            <div class="ill-dial-value" style="font-size:14px">72</div>
+            <div class="ill-dial-label" style="font-size:7px">ЧУВСТ.</div>
+          </div>
+          <div class="ill-dial" style="width:70px">
+            <svg viewBox="0 0 100 60" style="width:70px;height:42px">
+              <path class="dial-bg" d="M10 55 A40 40 0 0 1 90 55 L10 55 Z"/>
+              <path class="dial-arc dial-arc-track" d="M15 55 A35 35 0 0 1 85 55" fill="none"/>
+              <path class="dial-arc dial-arc-fill warm" d="M15 55 A35 35 0 0 1 85 55" stroke-dasharray="110" stroke-dashoffset="46"/>
+              <line class="dial-needle" x1="50" y1="55" x2="65" y2="25"/>
+            </svg>
+            <div class="ill-dial-value" style="font-size:14px">58</div>
+            <div class="ill-dial-label" style="font-size:7px">ОТНОШ.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: actions + zones -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="font-size:9px;color:var(--ill-ink-soft);font-weight:600;margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">Зоны доступа</div>
+          <div class="ill-zone-map" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="ill-zone active">
+              <div class="ill-zone-icon">◇</div>
+              <div class="ill-zone-info">
+                <div class="ill-zone-name">Шея</div>
+                <div class="ill-zone-sens"><i style="width:85%"></i></div>
+              </div>
+            </div>
+            <div class="ill-zone">
+              <div class="ill-zone-icon">◆</div>
+              <div class="ill-zone-info">
+                <div class="ill-zone-name">Губы</div>
+                <div class="ill-zone-sens"><i style="width:90%"></i></div>
+              </div>
+            </div>
+            <div class="ill-zone">
+              <div class="ill-zone-icon">◢</div>
+              <div class="ill-zone-info">
+                <div class="ill-zone-name">Бёдра</div>
+                <div class="ill-zone-sens"><i style="width:92%"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:9px;color:var(--ill-ink-soft);font-weight:600;margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">Действия · Шея</div>
+          <div class="ill-action-grid" style="grid-template-columns:repeat(4,1fr)">
+            <div class="ill-action-tile" style="--action-image:url('/character-images/actions/contact/feather_stroke.png')">
+              <div class="tile-intensity"><i class="active"></i><i></i><i></i></div>
+              <div class="tile-label">Перо</div>
+            </div>
+            <div class="ill-action-tile selected" style="--action-image:url('/character-images/actions/contact/deep_massage.png')">
+              <div class="tile-intensity"><i class="active"></i><i class="active"></i><i></i></div>
+              <div class="tile-label">Массаж</div>
+            </div>
+            <div class="ill-action-tile" style="--action-image:url('/character-images/actions/contact/light_bite.png')">
+              <div class="tile-intensity"><i class="active"></i><i class="active"></i><i></i></div>
+              <div class="tile-label">Лёгкий укус</div>
+            </div>
+            <div class="ill-action-tile" style="--action-image:url('/character-images/actions/contact/hair_pull.png')">
+              <div class="tile-intensity"><i class="active"></i><i class="active"></i><i class="active"></i></div>
+              <div class="tile-label">Волосы</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:6px;margin-top:4px">
+          <button class="ill-btn primary">Выполнить</button>
+          <button class="ill-btn ghost">Ждать</button>
+          <button class="ill-btn ghost">В очередь</button>
+        </div>
+      </div>
+
+      <!-- Right: protocol + chat -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="font-size:9px;color:var(--ill-ink-soft);font-weight:600;margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">Протокол</div>
+          <div class="ill-protocol" style="flex-direction:column;overflow:visible;gap:4px">
+            <div class="ill-protocol-step done" style="width:auto">
+              <div style="display:flex;justify-content:space-between">
+                <div class="ill-protocol-num">01</div>
+                <div class="ill-protocol-status">✓</div>
+              </div>
+              <div class="ill-protocol-name">Подготовка</div>
+            </div>
+            <div class="ill-protocol-step current" style="width:auto">
+              <div style="display:flex;justify-content:space-between">
+                <div class="ill-protocol-num">02</div>
+                <div class="ill-protocol-status">●</div>
+              </div>
+              <div class="ill-protocol-name">Калибровка шеи</div>
+            </div>
+            <div class="ill-protocol-step pending" style="width:auto">
+              <div style="display:flex;justify-content:space-between">
+                <div class="ill-protocol-num">03</div>
+                <div class="ill-protocol-status">○</div>
+              </div>
+              <div class="ill-protocol-name">Тест реакции</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:9px;color:var(--ill-ink-soft);font-weight:600;margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">Журнал</div>
+          <div class="ill-chat" style="max-height:160px">
+            <div class="ill-chat-msg system">
+              <div class="ill-chat-bubble" style="font-size:9px">Калибровка шеи начата. Мира реагирует спокойно.</div>
+            </div>
+            <div class="ill-chat-msg" style="align-items:flex-start">
+              <div class="ill-chat-portrait" style="width:24px;height:24px">
+                <img src="/character-images/portraits/mira/neutral.png" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+              </div>
+              <div>
+                <div class="ill-chat-name" style="font-size:7px">Мира</div>
+                <div class="ill-chat-bubble" style="font-size:9px;padding:4px 8px">Мне нравится...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div>
+          <div style="font-size:9px;color:var(--ill-ink-soft);font-weight:600;margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">Теги</div>
+          <div class="ill-tag-row">
+            <span class="ill-tag cool">мягкий</span>
+            <span class="ill-tag warm">прогрев</span>
+            <span class="ill-tag rose">эмоц.</span>
+            <span class="ill-tag">шея</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SUMMARY
+       ═══════════════════════════════════════════ -->
+  <div class="ill-panel concept-full">
+    <div class="ill-panel-title">Сводка</div>
+    <div style="font-size:11px;line-height:1.7;color:var(--ill-ink-soft)">
+      <b style="color:var(--ill-ink)">Что меняется:</b><br>
+      1. <b>Метрики</b> — progress bars → акварельные измерители со штриховкой и чернильными рисками<br>
+      2. <b>Графики</b> — SVG line charts → hand-drawn линии (turbulence filter) с акварельной заливкой<br>
+      3. <b>Пульс/осциллоскоп</b> — digital waveforms → hand-drawn traces на бумажной сетке<br>
+      4. <b>Выносливость</b> — CSS bars → вертикальные чернильные шкалы<br>
+      5. <b>Карта зон</b> — button grid → карточки с мини-иконками и sens-барами (слоты под иллюстрации)<br>
+      6. <b>Станции</b> — SVG rings → чернильная карта с секторами<br>
+      7. <b>Протокол</b> — list → раскадровка со стрелками<br>
+      8. <b>Чат</b> — plain text → манга-облака диалогов с портретами<br>
+      9. <b>Телеметрия</b> — flat readout → записи в журнале с чернильными полосами<br>
+      10. <b>Кнопки</b> — flat CSS → с double-border и soft shadow<br>
+      11. <b>Панели</b> — flat backgrounds → manga-фреймы с уголками<br>
+      12. <b>Шрифт</b> — monospace → Georgia/serif (более книжный, рисованый)<br><br>
+      <b style="color:var(--ill-ink)">Что НЕ меняется:</b><br>
+      — Иллюстрированные кнопки действий (78 PNG) — основа, сохраняются как есть<br>
+      — Портреты, rendered-сцены, sex-machine, инфузии — все иллюстрации остаются<br>
+      — Логика, API, движок — только presentation layer<br><br>
+      <b style="color:var(--ill-ink)">Палитра (из анализа иллюстраций):</b><br>
+      — Фон: тёплая бумага #f2ede8 (соответствует avg brightness 192 у action tiles)<br>
+      — Чернила: #3a3530 (соответствует lineart #4e4f58 у портретов)<br>
+      — Акценты: warm #c4a87a, cool #8aa89a, rose #c4a0a0, violet #9a92a8<br>
+      — Насыщенность: ~25-31% (низкая, как в иллюстрациях)<br>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -3,9 +3,11 @@
 import { CompiledAction, SubjectCoreState, SubjectPointState, EngineConfig } from '../domain/types';
 import { validateConfig } from './validate';
 import { normalizeAction, normalizeCore, normalizePoint } from './normalize';
-import { clamp } from './utils';
+import { applySoftPositiveGain, clamp, softMechanicalScale } from './utils';
 import { DEFAULT_CONFIG } from './config';
 import { advanceBaseline, dampTowardsBaseline } from './baselineUtils';
+import { OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
+import { arousalDirection } from '../domain/arousalDynamics';
 
 export function applyLearning(
     core: Partial<SubjectCoreState>,
@@ -30,16 +32,33 @@ export function applyLearning(
     // metrics already include sensitivity, so the extra reactivity multiplier
     // is deliberately soft rather than another full sensitivity scaling.
     const isRestAction = safeAction.actionKey === 'wait';
-    const reactivityMultiplier = 0.5 + clamp((result.effectiveSensitivity ?? safeCore.sensitivity) / 100, 0, 1);
-    const tensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * reactivityMultiplier * (f.tensionGrowthMultiplier ?? 0.3) * (isRestAction ? deltaTime : 1.0);
+    const arousal = arousalDirection(safeAction, safePoint.pointId, Number(result.finalValence || 0), tension);
+    const mechanicalSensitivity = softMechanicalScale(result.effectiveSensitivity ?? safeCore.sensitivity);
+    const reactivityMultiplier = 0.5 + clamp(mechanicalSensitivity / 100, 0, 2);
+    const rawTensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * reactivityMultiplier * (f.tensionGrowthMultiplier ?? 0.3) * (isRestAction ? deltaTime : 1.0) * arousal.excitation;
+    // The edge is a playable band rather than one ordinary action away from an
+    // automatic outcome. Growth compresses as activation approaches the peak;
+    // emotionally meaningful results still enter learning at full strength.
+    const edgeGrowthWindow = tension <= 85 ? 1 : clamp((100 - tension) / 15, 0.08, 1);
+    const tensionGrowth = rawTensionGrowth * edgeGrowthWindow;
     // A pause relaxes accumulated activation, but must not resemble an instant
-    // discharge. Openness helps the subject settle, at a deliberately slower
-    // rate than the old openness/10 curve.
+    // discharge. A normal 20-unit pause should preserve most of an edge state;
+    // openness only modestly accelerates settling.
     const tensionRecoveryRate = Math.max(
         f.tensionRecoveryBase ?? 0.75,
         safeCore.openness / (f.tensionRecoveryOpennessDivisor ?? 25)
     );
-    const tensionDrop = isRestAction ? tensionRecoveryRate * deltaTime : 0;
+    // Recovery grows sub-linearly with elapsed time: a one-tick pause remains
+    // mechanically meaningful, while a long 20-unit wait cannot erase an
+    // entire high-tension state in one click.
+    const passiveTensionDrop = isRestAction
+        ? Math.min(
+            f.tensionRecoveryMaxPerAction ?? 18,
+            tensionRecoveryRate * Math.sqrt(Math.max(deltaTime, 0))
+        )
+        : 0;
+    const regulatedTensionDrop = isRestAction ? 0 : arousal.regulation * (4 + tension * .1);
+    const tensionDrop = passiveTensionDrop + regulatedTensionDrop;
     const nextTension = clamp(
         tension + tensionGrowth - tensionDrop,
         0,
@@ -115,7 +134,7 @@ export function applyLearning(
     ) * (isEdging ? 0.35 : 1) : 0;
 
     const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
-    const routineCapacityLossLimit = (result.overload || 0) >= 15 ? 15 : 6;
+    const routineCapacityLossLimit = (result.overload || 0) >= OVERLOAD_NOTICEABLE ? 15 : 6;
     const capacityLoss = Math.min(baseCapacityDrop * tensionModifier, routineCapacityLossLimit);
 
     const timeScale = safeAction.actionKey === 'wait' ? deltaTime : 1.0;
@@ -134,28 +153,40 @@ export function applyLearning(
     // zero or reversal. A subject at zero functional resource still cannot
     // consolidate a positive experience.
     const responsiveness = clamp((safeCore.capacity - 10) / 30, 0, 1);
+    // Arousal strengthens emotional encoding in either direction. The old
+    // positive-only consolidation window reached zero near the edge, making
+    // edging useful for teaching aversion but useless for positive rewiring.
+    const emotionalEncoding = clamp(0.8 + 1.2 * tension / 100, 0.8, 2);
     const learnedQuality = clamp((result.learningEffect || 0) / 12, 0, 1) *
         clamp((result.engagement || 0) / 30, 0, 1);
-    const positiveLearningFactor = 0.25 + learnedQuality * 0.75;
+    // Familiar pleasure can reinforce acceptance a little, but cannot train it
+    // almost as efficiently as a novel, engaging experience. The old 25% floor
+    // let identical pleasant actions drive acceptance to ~100 in a few ticks.
+    // High activation strengthens the *meaningful* (novel/engaging) part of
+    // learning. It must not amplify the tiny familiarity floor, otherwise one
+    // repeated pleasant action becomes an acceptance exploit near the edge.
+    const positiveLearningFactor = 0.03 + learnedQuality * 0.555 * emotionalEncoding;
     const negativeResponsiveness = 0.5 + responsiveness * 0.5;
     const opennessAffect = affect > 0
         ? affect * positiveLearningFactor * responsiveness
         : affect * negativeResponsiveness;
-    const positiveCoreRoom = 0.2 + clamp((100 - safeCore.attitude) / 50, 0, 1) * 0.8;
-    const positiveLocalRoom = 0.2 + clamp((100 - safePoint.localAttitude) / 50, 0, 1) * 0.8;
+    // Positive conditioning asymptotically loses room near the ceiling. It can
+    // reach exceptional values, but no finite repetition receives a hidden
+    // minimum gain all the way to 100.
+    const positiveCoreRoom = Math.pow(clamp((100 - safeCore.attitude) / 50, 0, 1), 1.5);
+    const positiveLocalRoom = Math.pow(clamp((100 - safePoint.localAttitude) / 50, 0, 1), 1.5);
     const coreAffectForAcceptance = affect > 0
         ? affect * positiveLearningFactor * responsiveness * positiveCoreRoom
-        : affect * negativeResponsiveness;
+        : affect * negativeResponsiveness * emotionalEncoding;
     const localAffectForAcceptance = affect > 0
         ? affect * positiveLearningFactor * responsiveness * positiveLocalRoom
-        : affect * negativeResponsiveness;
+        : affect * negativeResponsiveness * emotionalEncoding;
 
     const nextCore: SubjectCoreState = {
         tension: nextTension,
-        sensitivity: clamp(
-            safeCore.sensitivity + (coreSensitization - coreDesensitization + coreRecovery) * tensionModifier,
-            config.core.min,
-            config.core.max
+        sensitivity: applySoftPositiveGain(
+            safeCore.sensitivity,
+            (coreSensitization - coreDesensitization + coreRecovery) * tensionModifier
         ),
         capacity: clamp(
             safeCore.capacity - capacityLoss + capacityRecovery,
@@ -163,21 +194,19 @@ export function applyLearning(
             config.core.max
         ),
         openness: clamp(
-            safeCore.openness + (opennessAffect * f.opennessFromPleasureDiscomfort * timeScale) * tensionModifier,
+            safeCore.openness + (opennessAffect * f.opennessFromPleasureDiscomfort * timeScale),
             config.core.min,
             config.core.max
         ),
-        plasticity: clamp(
-            safeCore.plasticity +
+        plasticity: applySoftPositiveGain(
+            safeCore.plasticity,
             ((result.learningEffect * f.plasticityFromLearning * clamp(1 - result.overload / 100, 0, 1) -
-            result.overload * f.plasticityFromOverload) * (isRest ? 0 : 1)) * tensionModifier,
-            config.core.min,
-            config.core.max
+            result.overload * f.plasticityFromOverload) * (isRest ? 0 : 1)) * tensionModifier
         ),
         attitude: clamp(
             safeCore.attitude +
-            ((coreAffectForAcceptance * f.attitudeFromPleasureDiscomfort -
-            result.overload * f.attitudeFromOverload) * timeScale) * tensionModifier,
+            (coreAffectForAcceptance * f.attitudeFromPleasureDiscomfort -
+            result.overload * f.attitudeFromOverload) * timeScale,
             config.core.min,
             config.core.max
         ),
@@ -185,10 +214,9 @@ export function applyLearning(
 
     const nextPoint: SubjectPointState = {
         pointId: safePoint.pointId,
-        localSensitivity: clamp(
-            safePoint.localSensitivity + localSensitization - localDesensitization + localRecovery,
-            config.point.min,
-            config.point.max
+        localSensitivity: applySoftPositiveGain(
+            safePoint.localSensitivity,
+            localSensitization - localDesensitization + localRecovery
         ),
         localAttitude: clamp(
             safePoint.localAttitude +

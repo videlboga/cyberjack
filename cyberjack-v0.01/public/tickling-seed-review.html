@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Tickling Seed Review</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#1a1a2e; color:#eee; font-family:system-ui,sans-serif; padding:16px; }
+h1 { font-size:18px; margin-bottom:12px; }
+#controls { position:sticky; top:0; background:#1a1a2e; padding:8px 0; z-index:100; border-bottom:1px solid #333; margin-bottom:16px; }
+#controls select,button { background:#333; color:#eee; border:1px solid #555; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:14px; margin-right:8px; }
+#progress { display:inline-block; margin-left:8px; font-size:13px; color:#888; }
+.group { margin-bottom:24px; border:1px solid #333; border-radius:8px; padding:12px; background:#16213e; }
+.group-header { font-size:15px; margin-bottom:8px; color:#8ecae6; }
+.variants { display:flex; gap:12px; flex-wrap:wrap; }
+.variant { text-align:center; cursor:pointer; border:3px solid transparent; border-radius:6px; overflow:hidden; }
+.variant:hover { border-color:#555; }
+.variant.selected { border-color:#06d6a0; }
+.variant img { width:280px; height:auto; display:block; }
+.variant .label { padding:4px; font-size:12px; background:#0f3460; }
+.variant.selected .label { background:#06d6a0; color:#000; }
+</style>
+</head>
+<body>
+<h1>Tickling Seed Selection</h1>
+<div id="controls">
+  <select id="charFilter"><option value="">All chars</option></select>
+  <button onclick="saveAll()">Save</button>
+  <span id="progress"></span>
+</div>
+<div id="gallery"></div>
+<script>
+let groups=[], selections={};
+async function load(){
+  const r=await fetch('/review-api/tickling-seeds'); const d=await r.json();
+  groups=d.groups;
+  const sel=document.getElementById('charFilter');
+  d.chars.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  render();
+}
+function render(){
+  const f=document.getElementById('charFilter').value;
+  const g=document.getElementById('gallery'); g.innerHTML='';
+  (f?groups.filter(x=>x.char===f):groups).forEach(group=>{
+    const div=document.createElement('div'); div.className='group';
+    const h=document.createElement('div'); h.className='group-header';
+    let icon=selections[group.key]?' ✅':'';
+    h.textContent=group.char+' — '+group.affect+icon;
+    div.appendChild(h);
+    const vs=document.createElement('div'); vs.className='variants';
+    group.images.forEach(img=>{
+      const v=document.createElement('div'); v.className='variant';
+      if(selections[group.key]===img.seed) v.classList.add('selected');
+      v.onclick=()=>{ if(selections[group.key]===img.seed) delete selections[group.key]; else selections[group.key]=img.seed; render(); updateProgress(); autoSave(); };
+      const im=document.createElement('img'); im.src=img.url; im.loading='lazy'; v.appendChild(im);
+      const l=document.createElement('div'); l.className='label'; l.textContent=img.seedLabel; v.appendChild(l);
+      vs.appendChild(v);
+    });
+    div.appendChild(vs); g.appendChild(div);
+  });
+  updateProgress();
+}
+function updateProgress(){ document.getElementById('progress').textContent=Object.keys(selections).length+'/'+groups.length+' selected'; }
+function saveAll(){ fetch('/review-api/tickling-seed-selections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(selections)}).then(()=>{console.log('saved');}); }
+let st=null; function autoSave(){ if(st)clearTimeout(st); st=setTimeout(saveAll,800); }
+document.getElementById('charFilter').onchange=render;
+load();
+</script>
+</body>
+</html>

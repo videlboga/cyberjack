@@ -23,6 +23,23 @@ export function appendRoleHistory(characterId: string, entry: RoleHistoryEntry) 
     profile.currentRole = entry.role;
     profile.roleHistory = [...history, entry].sort((a, b) => a.worldMinute - b.worldMinute);
     profile.base = { ...(profile.base || {}), status: entry.role };
+    if (entry.role === 'asset' && entry.previousRole !== 'asset') {
+        profile.roleState = {
+            assignedRole: 'asset',
+            previousRole: entry.previousRole || history.at(-1)?.role || 'candidate',
+            awareness: 'partial',
+            internalization: 'denial',
+            assignedAt: entry.worldMinute,
+        };
+    } else if (entry.role === 'candidate') {
+        profile.roleState = {
+            assignedRole: 'candidate',
+            previousRole: entry.previousRole,
+            awareness: 'unaware',
+            internalization: 'candidate',
+            assignedAt: entry.worldMinute,
+        };
+    }
     db.prepare(`UPDATE characters SET profile_json = ? WHERE id = ?`).run(JSON.stringify(profile), characterId);
 }
 

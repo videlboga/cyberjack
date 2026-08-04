@@ -13,7 +13,7 @@ export function buildDiagnostics(
     output: TickOutput,
     subjectId?: string,
     pointLabel?: string,
-    observationOptions?: { previousContextIds?: string[]; notableEvent?: 'positive_discharge' | 'breakdown' | 'exhaustion' }
+    observationOptions?: { previousContextIds?: string[]; notableEvent?: 'positive_discharge' | 'peak_overload' | 'breakdown' | 'exhaustion' }
 ): DiagnosticsOutput {
     
     const reactionSummary = buildReactionSummary(output.result);

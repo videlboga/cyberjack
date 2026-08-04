@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>CyberJack — 16:9 Layout</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   16:9 SINGLE SCREEN — NO SCROLL
+   White manga page. All calibration data on one screen.
+   Everything visible simultaneously.
+   ═══════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #2a2520;
+  --ink-soft: #6b6258;
+  --ink-light: #a8a096;
+  --paper: #ffffff;
+  --off: #faf8f5;
+  --warm: #b8995e;
+  --cool: #6b8a7c;
+  --rose: #b07878;
+  --violet: #7a7088;
+  --danger: #a86054;
+}
+
+html, body {
+  font-family: 'Georgia', 'Noto Serif JP', serif;
+  background: #e8e4de;
+  color: var(--ink);
+  line-height: 1.3;
+  overflow: hidden;
+}
+
+/* 16:9 container — scales to viewport */
+.screen-wrap {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+
+.screen {
+  width: 100%;
+  max-width: 1920px;
+  aspect-ratio: 16/9;
+  background: var(--paper);
+  display: grid;
+  grid-template-columns: 210px 1fr 260px;
+  grid-template-rows: 32px 1fr 130px;
+  gap: 0;
+  /* Panels separated by thin white lines — like manga panel borders */
+  position: relative;
+}
+
+/* Gutter = white space between panels */
+.screen > * { padding: 8px 10px; }
+
+/* ── HEADER ── */
+.hdr {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 14px;
+  border-bottom: 1px solid var(--off);
+}
+.hdr-l { display: flex; align-items: center; gap: 10px; }
+.hdr-title { font-size: 12px; font-weight: 700; }
+.hdr-sub { font-size: 9px; color: var(--ink-light); }
+.hdr-r { display: flex; align-items: center; gap: 8px; }
+.hdr-time {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; padding: 2px 8px; border: 0.5px solid var(--ink-light);
+}
+.hdr-btn {
+  font-size: 9px; padding: 2px 8px; border: 0.5px solid var(--ink-light);
+  background: var(--paper); cursor: pointer; font-family: inherit;
+}
+.hdr-btn:hover { background: var(--off); }
+
+/* Objective strip — inside header */
+.obj-strip {
+  display: flex; align-items: center; gap: 6px; font-size: 9px;
+}
+.obj-strip .lbl { color: var(--ink-light); letter-spacing: 0.06em; }
+.obj-cond {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 1px 4px; border: 0.5px solid var(--ink-light);
+}
+.obj-cond.met { border-color: var(--cool); color: var(--cool); }
+.obj-cond b { font-size: 10px; }
+
+/* ═══ LEFT COLUMN — state, portrait, contexts ═══ */
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+/* Portrait */
+.port {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.port img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center top;
+}
+.port .port-lbl {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 3px 6px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.5), transparent);
+  color: #fff; font-size: 9px; font-weight: 600;
+}
+
+/* Current state */
+.state-now {
+  padding: 5px 8px; background: var(--off);
+}
+.state-now .sn-l { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.state-now .sn-t { font-size: 10px; font-weight: 700; }
+.state-now .sn-d { font-size: 8px; color: var(--ink-soft); margin-top: 1px; }
+
+/* Telemetry */
+.telem { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; margin-top: 4px; }
+.telem > div { padding: 3px 4px; background: var(--off); }
+.telem .tl { font-size: 7px; color: var(--ink-light); }
+.telem .tv { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.telem .tv i { font-size: 8px; font-weight: 400; color: var(--ink-light); }
+
+/* Core metrics — compact bars */
+.core-metrics { margin-top: 4px; }
+.cm-row {
+  display: grid; grid-template-columns: 52px 1fr 22px;
+  align-items: center; gap: 4px; margin-bottom: 2px;
+}
+.cm-l { font-size: 8px; color: var(--ink-soft); text-align: right; }
+.cm-t { height: 8px; position: relative; background: var(--off); }
+.cm-f { position: absolute; top: 0; left: 0; height: 100%; }
+.cm-b { position: absolute; top: -1px; bottom: -1px; width: 0; border-left: 0.5px dashed var(--ink-light); }
+.cm-v { font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Contexts */
+.ctx-list { margin-top: 6px; }
+.ctx-h { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; margin-bottom: 2px; }
+.ctx-item { font-size: 8px; padding: 1px 4px; margin-bottom: 1px; }
+.ctx-item b { font-weight: 600; }
+.ctx-item span { color: var(--ink-light); margin-left: 4px; }
+
+/* ═══ CENTER COLUMN — character, chat, actions ═══ */
+.center-col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Character stage — large illustration */
+.char-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.char-stage img {
+  height: 100%; width: auto; object-fit: contain; object-position: center bottom;
+}
+.char-stage .stage-lbl {
+  position: absolute; bottom: 4px; left: 8px;
+  font-size: 7px; color: var(--ink-light);
+}
+
+/* Sustained effect overlay */
+.sustain-ovl {
+  position: absolute; top: 6px; left: 6px;
+  display: flex; align-items: center; gap: 4px;
+  padding: 2px 6px; background: rgba(255,255,255,0.9);
+  font-size: 8px;
+}
+.sustain-ovl .si {
+  width: 22px; height: 14px; overflow: hidden;
+}
+.sustain-ovl .si img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Chat — bottom strip of center */
+.chat-strip {
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 1px solid var(--off);
+}
+.chat-feed {
+  flex: 1; overflow-y: auto; padding: 3px 6px;
+}
+.chat-msg { margin-bottom: 3px; display: flex; gap: 4px; align-items: flex-start; }
+.chat-msg.sys { justify-content: center; }
+.chat-msg.sys .cb { font-size: 8px; color: var(--ink-light); font-style: italic; text-align: center; max-width: 90%; }
+.chat-port { width: 18px; height: 18px; flex-shrink: 0; overflow: hidden; background: var(--off); }
+.chat-port img { width: 100%; height: 100%; object-fit: cover; }
+.chat-name { font-size: 7px; color: var(--ink-light); }
+.cb { font-size: 9px; color: var(--ink); max-width: 80%; line-height: 1.25; }
+.chat-msg.right { flex-direction: row-reverse; }
+
+.chat-input { display: flex; gap: 2px; padding: 2px 6px 3px; }
+.chat-input input {
+  flex: 1; font-family: inherit; font-size: 9px; padding: 2px 6px;
+  border: 0.5px solid var(--ink-light); background: var(--paper);
+}
+.chat-input button {
+  font-family: inherit; font-size: 9px; padding: 2px 8px;
+  border: 0.5px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer;
+}
+.chat-target {
+  width: 20px; height: 20px; overflow: hidden; border: 0.5px solid var(--ink-light);
+  flex-shrink: 0;
+}
+.chat-target img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ═══ RIGHT COLUMN — actions, zones ═══ */
+.right-col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 4px;
+}
+
+/* Zone selector */
+.zone-sel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+.zone {
+  display: flex; align-items: center; gap: 3px;
+  padding: 2px 4px; cursor: pointer;
+  background: var(--off);
+}
+.zone:hover { background: var(--paper); }
+.zone.sel { background: var(--paper); box-shadow: inset 0 0 0 1px var(--warm); }
+.zone.blocked { opacity: 0.3; }
+.zone .zi { width: 18px; height: 14px; border: 0.5px solid var(--ink-light); background: var(--paper); flex-shrink: 0; display: grid; place-items: center; font-size: 7px; color: var(--ink-light); }
+.zone .zn { font-size: 8px; font-weight: 600; }
+.zone .zs { font-size: 7px; color: var(--ink-light); margin-left: auto; }
+
+/* Action tiles */
+.act-h { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; margin: 2px 0 2px; }
+.act-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+.tile {
+  position: relative;
+  height: 42px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.tile::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--img); background-size: cover; background-position: center;
+  filter: saturate(0.88) contrast(0.96);
+}
+.tile::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5) 100%);
+}
+.tile:hover::before { filter: saturate(1) contrast(1); }
+.tile.sel { box-shadow: inset 0 0 0 1.5px var(--warm); }
+.tile .lbl {
+  position: absolute; bottom: 1px; left: 3px; right: 3px;
+  font-size: 7px; font-weight: 600; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.tile .int { position: absolute; top: 1px; right: 2px; display: flex; gap: 1px; }
+.tile .int i { width: 2px; height: 3px; background: rgba(255,255,255,0.2); }
+.tile .int i.on { background: var(--warm); }
+
+/* Quick actions — numbered recommendations */
+.quick-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+  margin-top: 2px;
+}
+.quick {
+  position: relative; height: 34px; overflow: hidden; cursor: pointer;
+  display: flex; align-items: flex-end;
+}
+.quick::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--img); background-size: cover; background-position: center;
+  opacity: 0.9; filter: saturate(0.85);
+}
+.quick::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.5) 0%, transparent 60%);
+}
+.quick kbd {
+  position: relative; z-index: 2; font-size: 8px; font-weight: 700;
+  color: #fff; padding: 1px 3px; background: rgba(0,0,0,0.4); margin: 2px;
+  font-family: inherit;
+}
+.quick .qlbl {
+  position: relative; z-index: 2;
+  font-size: 7px; font-weight: 600; color: #fff;
+  padding: 1px 3px; text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* Action buttons */
+.act-btns { display: flex; gap: 3px; margin-top: 3px; }
+.btn {
+  font-family: inherit; font-size: 9px; font-weight: 600;
+  padding: 3px 10px; border: 0.5px solid var(--ink);
+  background: var(--paper); color: var(--ink); cursor: pointer;
+}
+.btn:hover { background: var(--off); }
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.ghost { border-color: var(--ink-light); color: var(--ink-soft); }
+
+/* ═══ BOTTOM ROW — biometrics, trends, results ═══ */
+.bottom-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr 260px;
+  gap: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--off);
+}
+.bottom-row > * { padding: 5px 8px; }
+
+/* Biosignals */
+.bio { display: flex; flex-direction: column; gap: 3px; }
+.bio-h { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.bio-row { display: flex; align-items: center; gap: 6px; }
+.bio-l { font-size: 8px; color: var(--ink-soft); width: 40px; }
+.bio-v { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; width: 36px; }
+.bio-v i { font-size: 7px; font-weight: 400; color: var(--ink-light); }
+
+.wave { height: 18px; flex: 1; background: var(--off); position: relative; }
+.wave svg { width: 100%; height: 100%; }
+.wave .trace { fill: none; stroke: var(--ink); stroke-width: 1; stroke-linecap: round; }
+
+/* Endurance compact */
+.endur { display: flex; gap: 4px; align-items: flex-end; height: 44px; margin-top: 2px; }
+.esc { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.esc .et { width: 7px; height: 30px; background: var(--off); position: relative; }
+.esc .ef { position: absolute; bottom: 0; left: 0; right: 0; }
+.esc .el { font-size: 6px; color: var(--ink-light); }
+.esc .ev { font-size: 8px; font-weight: 700; }
+
+/* Trends — 4 mini charts */
+.trends { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; overflow: hidden; }
+.trend { position: relative; }
+.trend-h {
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.trend-l { font-size: 7px; color: var(--ink-soft); }
+.trend-v { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.trend-d { font-size: 7px; color: var(--ink-light); margin-left: 3px; }
+.trend svg { width: 100%; height: 32px; display: block; }
+.trend .grid { stroke: var(--ink-light); stroke-width: 0.3; opacity: 0.15; }
+.trend .base { stroke: var(--warm); stroke-width: 0.5; stroke-dasharray: 2 1; opacity: 0.3; }
+.trend .line { fill: none; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.trend .area { opacity: 0.08; }
+.trend .dot { }
+
+/* Result + goal */
+.result { display: flex; flex-direction: column; gap: 3px; }
+.res-h { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.res-verdict { font-size: 11px; font-weight: 700; }
+.res-react { display: flex; gap: 4px; }
+.res-react > span { display: flex; flex-direction: column; }
+.res-react i { font-size: 7px; color: var(--ink-light); }
+.res-react b { font-size: 10px; font-variant-numeric: tabular-nums; }
+
+.res-changes { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.res-changes > span { display: flex; align-items: center; gap: 2px; font-size: 8px; }
+.res-changes i { color: var(--ink-light); }
+.res-changes b { font-variant-numeric: tabular-nums; }
+
+.res-exp { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.res-exp > span { font-size: 7px; padding: 0 3px; border: 0.5px solid var(--ink-light); }
+.res-exp i { color: var(--ink-light); }
+.res-exp b { color: var(--cool); }
+
+/* Goal conditions */
+.goal-conds { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
+.goal-cond {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 1px 4px; border: 0.5px solid var(--ink-light);
+  font-size: 8px;
+}
+.goal-cond.met { border-color: var(--cool); color: var(--cool); }
+.goal-cond i { font-size: 7px; }
+.goal-cond b { font-variant-numeric: tabular-nums; }
+.goal-cond em { font-size: 8px; font-style: normal; }
+
+/* Processes / recommendations compact */
+.proc-area { display: flex; flex-direction: column; gap: 2px; }
+.proc-h { font-size: 7px; color: var(--ink-light); letter-spacing: 0.06em; }
+.proc-card {
+  position: relative; height: 28px; overflow: hidden;
+  display: flex; align-items: center; gap: 4px; padding: 0 4px;
+  cursor: pointer;
+}
+.proc-card::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--img); background-size: cover; background-position: center;
+  opacity: 0.85; filter: saturate(0.85);
+}
+.proc-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.7) 0%, transparent 50%);
+}
+.proc-card .pc-num { position: relative; z-index: 2; font-size: 8px; font-weight: 700; color: var(--ink); }
+.proc-card .pc-lbl { position: relative; z-index: 2; font-size: 8px; font-weight: 600; color: var(--ink); }
+.proc-card .pc-min { position: relative; z-index: 2; font-size: 7px; color: var(--ink-soft); margin-left: auto; }
+.proc-card .pc-int { position: relative; z-index: 2; display: flex; gap: 1px; }
+.proc-card .pc-int i { width: 2px; height: 4px; background: rgba(0,0,0,0.15); }
+.proc-card .pc-int i.on { background: var(--warm); }
+
+/* Intimacy readiness (when no processes) */
+.intim { padding: 4px; }
+.intim-h { display: flex; justify-content: space-between; align-items: baseline; }
+.intim-h .il { font-size: 7px; color: var(--ink-light); }
+.intim-h .iv { font-size: 10px; font-weight: 700; }
+.intim-rows { display: flex; gap: 6px; margin-top: 3px; }
+.intim-row { flex: 1; }
+.intim-row .irl { font-size: 7px; color: var(--ink-soft); }
+.intim-row .irv { font-size: 10px; font-weight: 700; }
+.intim-row .irt { height: 3px; background: var(--off); margin-top: 1px; }
+.intim-row .irt i { display: block; height: 100%; }
+.intim-recs { display: flex; gap: 2px; margin-top: 3px; }
+.intim-rec {
+  position: relative; height: 22px; flex: 1; overflow: hidden; cursor: pointer;
+}
+.intim-rec::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--img); background-size: cover;
+  opacity: 0.85;
+}
+.intim-rec::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.5) 100%);
+}
+.intim-rec kbd {
+  position: relative; z-index: 2; font-size: 7px; font-weight: 700;
+  color: #fff; padding: 0 2px; background: rgba(0,0,0,0.4); margin: 1px;
+  font-family: inherit;
+}
+.intim-rec .irl { position: relative; z-index: 2; font-size: 7px; color: #fff; padding: 0 3px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+
+/* Tag pills */
+.tags { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 2px; }
+.tag { font-size: 7px; padding: 0 3px; border: 0.5px solid var(--ink-light); color: var(--ink-soft); }
+.tag.warm { border-color: var(--warm); color: var(--warm); }
+.tag.cool { border-color: var(--cool); color: var(--cool); }
+.tag.rose { border-color: var(--rose); color: var(--rose); }
+
+</style>
+</head>
+<body>
+
+<div class="screen-wrap">
+<div class="screen">
+
+<!-- ═══ HEADER ═══ -->
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="hdr-title">Мира · Откликается</div>
+    <div class="hdr-sub">СЕССИЯ ВЗАИМОДЕЙСТВИЯ · S-01</div>
+  </div>
+  <div class="obj-strip">
+    <span class="lbl">ОРИЕНТИР</span>
+    <select style="font-family:inherit;font-size:8px;border:0.5px solid var(--ink-light);padding:1px 4px;background:var(--paper)">
+      <option>Свободная калибровка</option>
+      <option>Калибровка шеи · 02</option>
+    </select>
+    <span class="obj-cond met">Чувств. <b>72≥50</b> ✓</span>
+    <span class="obj-cond">Отнош. <b>58≥40</b> ·</span>
+    <span class="obj-cond met">Открыт. <b>84≥60</b> ✓</span>
+  </div>
+  <div class="hdr-r">
+    <div class="hdr-time">Ⅱ ВРЕМЯ · МИНУТА 12</div>
+    <button class="hdr-btn">История</button>
+    <button class="hdr-btn">Диагностика</button>
+    <button class="hdr-btn">Меню</button>
+  </div>
+</div>
+
+<!-- ═══ LEFT COLUMN ═══ -->
+<div class="left-col">
+
+  <!-- Portrait -->
+  <div class="port">
+    <img src="/character-images/rendered/mira/standing__calibration_set__none__neutral.png"
+         onerror="this.style.display='none'">
+    <div class="port-lbl">Мира · калибровочный костюм · нейтрально</div>
+  </div>
+
+  <!-- Current state -->
+  <div class="state-now">
+    <div class="sn-l">СЕЙЧАС</div>
+    <div class="sn-t">Откликается</div>
+    <div class="sn-d">Спокойна, принимает воздействие, телесный контакт не вызывает сопротивления.</div>
+  </div>
+
+  <!-- Telemetry -->
+  <div class="telem">
+    <div><div class="tl">ПУЛЬС</div><div class="tv">78 <i>уд/м</i></div></div>
+    <div><div class="tl">ДЫХАН.</div><div class="tv">14 <i>вд/м</i></div></div>
+    <div><div class="tl">КОНТАКТ</div><div class="tv">живой <i>↑</i></div></div>
+  </div>
+
+  <!-- Core metrics -->
+  <div class="core-metrics">
+    <div class="cm-row">
+      <div class="cm-l">Чувств.</div>
+      <div class="cm-t"><div class="cm-f" style="width:72%;background:var(--cool)"></div><div class="cm-b" style="left:45%"></div></div>
+      <div class="cm-v">72</div>
+    </div>
+    <div class="cm-row">
+      <div class="cm-l">Отнош.</div>
+      <div class="cm-t"><div class="cm-f" style="width:58%;background:var(--warm)"></div><div class="cm-b" style="left:50%"></div></div>
+      <div class="cm-v">58</div>
+    </div>
+    <div class="cm-row">
+      <div class="cm-l">Открыт.</div>
+      <div class="cm-t"><div class="cm-f" style="width:84%;background:var(--rose)"></div><div class="cm-b" style="left:60%"></div></div>
+      <div class="cm-v">84</div>
+    </div>
+    <div class="cm-row">
+      <div class="cm-l">Пластич.</div>
+      <div class="cm-t"><div class="cm-f" style="width:41%;background:var(--cool)"></div><div class="cm-b" style="left:50%"></div></div>
+      <div class="cm-v">41</div>
+    </div>
+    <div class="cm-row">
+      <div class="cm-l">Напряж.</div>
+      <div class="cm-t"><div class="cm-f" style="width:91%;background:var(--danger)"></div></div>
+      <div class="cm-v">91</div>
+    </div>
+    <div class="cm-row">
+      <div class="cm-l">Перегр.</div>
+      <div class="cm-t"><div class="cm-f" style="width:34%;background:var(--violet)"></div><div class="cm-b" style="left:80%"></div></div>
+      <div class="cm-v">34</div>
+    </div>
+  </div>
+
+  <!-- Contexts -->
+  <div class="ctx-list">
+    <div class="ctx-h">ОДЕЖДА И ОБОРУД.</div>
+    <div class="ctx-item"><b>Калибровочный костюм</b></div>
+    <div class="ctx-h" style="margin-top:4px">ПОЗА И СОСТОЯНИЯ</div>
+    <div class="ctx-item"><b>Стоит свободно</b></div>
+    <div class="ctx-h" style="margin-top:4px">НАБЛЮДЕНИЕ</div>
+    <div class="ctx-item" style="font-style:italic;color:var(--ink-soft)">Дыхание ровное, мышцы расслаблены, контакт принимается без сопротивления.</div>
+  </div>
+
+</div>
+
+<!-- ═══ CENTER COLUMN ═══ -->
+<div class="center-col">
+
+  <!-- Character stage -->
+  <div class="char-stage">
+    <div class="sustain-ovl">
+      <div class="si"><img src="/character-images/actions/contact/deep_massage.png" onerror="this.style.display='none'"></div>
+      <span>Глубокий массаж · 4 мин</span>
+      <span style="color:var(--warm);font-weight:600">АВТО</span>
+    </div>
+    <img src="/character-images/rendered/mira/standing__calibration_set__none__neutral.png"
+         onerror="this.style.display='none'">
+    <div class="stage-lbl">ДИАГНОСТИЧЕСКИЙ СТОЛ</div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-strip">
+    <div class="chat-feed">
+      <div class="chat-msg sys">
+        <div class="cb">Мира зафиксирована в калибровочном костюме. Начало протокола 02.</div>
+      </div>
+      <div class="chat-msg">
+        <div class="chat-port"><img src="/character-images/portraits/mira/neutral.png" onerror="this.style.display='none'"></div>
+        <div>
+          <div class="chat-name">Мира</div>
+          <div class="cb">Мне нравится быть рядом с тобой...</div>
+        </div>
+      </div>
+      <div class="chat-msg right">
+        <div class="chat-port"><img src="/character-images/portraits/male_test/neutral.png" onerror="this.style.display='none'"></div>
+        <div>
+          <div class="chat-name">Калибратор</div>
+          <div class="cb">Тебе нравится стоять на коленях?</div>
+        </div>
+      </div>
+      <div class="chat-msg sys">
+        <div class="cb">Калибратор спросил, нравится ли поза. Мира мягко ответила, что ей нравится быть рядом.</div>
+      </div>
+    </div>
+    <div class="chat-input">
+      <div class="chat-target"><img src="/character-images/portraits/mira/neutral.png" onerror="this.style.display='none'"></div>
+      <input placeholder="Реплика калибратора..." />
+      <button>➤</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ RIGHT COLUMN ═══ -->
+<div class="right-col">
+
+  <!-- Zone selector -->
+  <div class="act-h">ЗОНА · Шея</div>
+  <div class="zone-sel">
+    <div class="zone sel">
+      <div class="zi">◇</div><div class="zn">Шея</div><div class="zs">85/12</div>
+    </div>
+    <div class="zone">
+      <div class="zi">◆</div><div class="zn">Губы</div><div class="zs">90/20</div>
+    </div>
+    <div class="zone">
+      <div class="zi">○</div><div class="zn">Плечи</div><div class="zs">30/80</div>
+    </div>
+    <div class="zone blocked">
+      <div class="zi">▣</div><div class="zn">Грудь</div><div class="zs">70/45</div>
+    </div>
+    <div class="zone">
+      <div class="zi">◐</div><div class="zn">Талия</div><div class="zs">55/60</div>
+    </div>
+    <div class="zone">
+      <div class="zi">◢</div><div class="zn">Бёдра</div><div class="zs">92/15</div>
+    </div>
+    <div class="zone">
+      <div class="zi">△</div><div class="zn">Спина</div><div class="zs">40/50</div>
+    </div>
+    <div class="zone">
+      <div class="zi">○</div><div class="zn">Руки</div><div class="zs">25/70</div>
+    </div>
+  </div>
+
+  <!-- Zone params -->
+  <div style="font-size:7px;color:var(--ink-light);display:flex;gap:8px;margin-bottom:2px">
+    <span>Чувств. <b style="color:var(--ink)">85%</b></span>
+    <span>Принят. <b style="color:var(--ink)">12%</b></span>
+    <span>Знаком. <b style="color:var(--ink)">3</b></span>
+  </div>
+
+  <!-- Action tiles -->
+  <div class="act-h">ДЕЙСТВИЯ · КОНТАКТ</div>
+  <div class="act-grid">
+    <div class="tile" style="--img:url('/character-images/actions/contact/feather_stroke.png')">
+      <div class="int"><i class="on"></i><i></i><i></i></div>
+      <div class="lbl">Перо</div>
+    </div>
+    <div class="tile sel" style="--img:url('/character-images/actions/contact/deep_massage.png')">
+      <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+      <div class="lbl">Массаж</div>
+    </div>
+    <div class="tile" style="--img:url('/character-images/actions/contact/light_bite.png')">
+      <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+      <div class="lbl">Укус</div>
+    </div>
+    <div class="tile" style="--img:url('/character-images/actions/contact/hair_pull.png')">
+      <div class="int"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <div class="lbl">Волосы</div>
+    </div>
+    <div class="tile" style="--img:url('/character-images/actions/contact/tickle.png')">
+      <div class="int"><i class="on"></i><i></i><i></i></div>
+      <div class="lbl">Щекотка</div>
+    </div>
+    <div class="tile" style="--img:url('/character-images/actions/contact/scratching.png')">
+      <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+      <div class="lbl">Царап.</div>
+    </div>
+    <div class="tile" style="--img:url('/character-images/actions/contact/pinch.png')">
+      <div class="int"><i class="on"></i><i class="on"></i><i></i></div>
+      <div class="lbl">Щипок</div>
+    </div>
+    <div class="tile" style="--img:url('/character-images/actions/contact/wait.png')">
+      <div class="int"><i></i><i></i><i></i></div>
+      <div class="lbl">Ждать</div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="act-h" style="margin-top:3px">БЫСТРЫЕ · 1-4</div>
+  <div class="quick-grid">
+    <div class="quick" style="--img:url('/character-images/actions/contact/feather_stroke.png')">
+      <kbd>1</kbd><span class="qlbl">Перо · Шея</span>
+    </div>
+    <div class="quick" style="--img:url('/character-images/actions/contact/deep_massage.png')">
+      <kbd>2</kbd><span class="qlbl">Массаж · Шея</span>
+    </div>
+    <div class="quick" style="--img:url('/character-images/actions/equipment/act_activate_plug.png')">
+      <kbd>3</kbd><span class="qlbl">Плаг · все</span>
+    </div>
+    <div class="quick" style="--img:url('/character-images/actions/contact/wait.png')">
+      <kbd>4</kbd><span class="qlbl">Подождать</span>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="act-btns">
+    <button class="btn primary">Выполнить</button>
+    <button class="btn ghost">Ждать</button>
+    <button class="btn ghost">В очередь</button>
+  </div>
+
+</div>
+
+<!-- ═══ BOTTOM ROW ═══ -->
+<div class="bottom-row">
+
+  <!-- Biosignals + endurance -->
+  <div class="bio">
+    <div class="bio-h">БИОСИГНАЛЫ</div>
+    <div class="bio-row">
+      <div class="bio-l">ПУЛЬС</div>
+      <div class="bio-v">78 <i>уд/м</i></div>
+      <div class="wave">
+        <svg viewBox="0 0 200 18" preserveAspectRatio="none">
+          <path class="trace" d="M0 9 H25 C29 9 31 5 36 5 C41 5 43 9 48 9 H60 L65 12 L70 2 L76 16 L83 9 H100 C107 9 109 5 117 5 C126 5 130 9 140 9 H200"/>
+        </svg>
+      </div>
+    </div>
+    <div class="bio-row">
+      <div class="bio-l">ДЫХАН.</div>
+      <div class="bio-v">14 <i>вд/м</i></div>
+      <div class="wave">
+        <svg viewBox="0 0 200 18" preserveAspectRatio="none">
+          <path class="trace" d="M0 9 Q15 4 30 9 T60 9 T90 9 T120 9 T150 9 T180 9 T200 9" style="stroke:var(--cool)"/>
+        </svg>
+      </div>
+    </div>
+    <div class="bio-h" style="margin-top:2px">ВЫНОСЛИВОСТЬ</div>
+    <div class="endur">
+      <div class="esc">
+        <div class="et"><div class="ef" style="height:78%;background:var(--warm)"></div></div>
+        <div class="ev">78</div>
+        <div class="el">ВЫНОС</div>
+      </div>
+      <div class="esc">
+        <div class="et"><div class="ef" style="height:62%;background:var(--cool)"></div><div style="position:absolute;left:-2px;right:-2px;border-top:0.5px solid var(--warm);bottom:50%"></div></div>
+        <div class="ev">62</div>
+        <div class="el">БАЛАНС</div>
+      </div>
+      <div class="esc">
+        <div class="et"><div class="ef" style="height:34%;background:var(--violet)"></div></div>
+        <div class="ev">34</div>
+        <div class="el">ПЕРЕГР</div>
+      </div>
+      <div class="esc">
+        <div class="et"><div class="ef" style="height:91%;background:var(--danger)"></div></div>
+        <div class="ev">91</div>
+        <div class="el">НАПРЯЖ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trends — 4 mini charts -->
+  <div class="trends">
+    <div class="trend">
+      <div class="trend-h"><div><span class="trend-l">Чувств.</span><span class="trend-d">↑+12</span></div><span class="trend-v">72</span></div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+        <line class="base" x1="0" x2="100" y1="55" y2="55"/>
+        <polygon class="area" points="0,60 10,55 20,48 30,52 40,44 50,38 60,34 70,30 80,28 90,25 100,28 100,100 0,100" style="fill:var(--cool)"/>
+        <polyline class="line" style="stroke:var(--cool)" points="0,60 10,55 20,48 30,52 40,44 50,38 60,34 70,30 80,28 90,25 100,28"/>
+        <circle cx="100" cy="28" r="2" style="fill:var(--cool)"/>
+      </svg>
+    </div>
+    <div class="trend">
+      <div class="trend-h"><div><span class="trend-l">Открыт.</span><span class="trend-d">↑+8</span></div><span class="trend-v">84</span></div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+        <line class="base" x1="0" x2="100" y1="40" y2="40"/>
+        <polygon class="area" points="0,50 10,46 20,42 30,36 40,32 50,26 60,22 70,18 80,15 90,12 100,16 100,100 0,100" style="fill:var(--rose)"/>
+        <polyline class="line" style="stroke:var(--rose)" points="0,50 10,46 20,42 30,36 40,32 50,26 60,22 70,18 80,15 90,12 100,16"/>
+        <circle cx="100" cy="16" r="2" style="fill:var(--rose)"/>
+      </svg>
+    </div>
+    <div class="trend">
+      <div class="trend-h"><div><span class="trend-l">Отнош.</span><span class="trend-d">→стаб</span></div><span class="trend-v">58</span></div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+        <line class="base" x1="0" x2="100" y1="50" y2="50"/>
+        <polyline class="line" style="stroke:var(--warm)" points="0,52 10,48 18,54 27,46 36,50 45,44 54,48 63,42 72,46 81,40 90,44 100,42"/>
+        <circle cx="100" cy="42" r="2" style="fill:var(--warm)"/>
+      </svg>
+    </div>
+    <div class="trend">
+      <div class="trend-h"><div><span class="trend-l">Напряж.</span><span class="trend-d" style="color:var(--danger)">↑+34!</span></div><span class="trend-v">91</span></div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line class="grid" x1="0" x2="100" y1="50" y2="50"/>
+        <line class="base" x1="0" x2="100" y1="80" y2="80"/>
+        <polygon class="area" points="0,85 10,82 20,78 30,72 40,68 50,58 60,48 70,38 80,28 90,18 100,12 100,100 0,100" style="fill:var(--danger)"/>
+        <polyline class="line" style="stroke:var(--danger)" points="0,85 10,82 20,78 30,72 40,68 50,58 60,48 70,38 80,28 90,18 100,12"/>
+        <circle cx="100" cy="12" r="2" style="fill:var(--danger)"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Result + goal -->
+  <div class="result">
+    <div class="res-h">РЕЗУЛЬТАТ · ГЛУБОКИЙ МАССАЖ</div>
+    <div class="res-verdict" style="color:var(--cool)">ПРИНЯТО</div>
+    <div class="res-react">
+      <span><i>Удовол.</i><b style="color:var(--cool)">0.72</b></span>
+      <span><i>Диском.</i><b>0.12</b></span>
+      <span><i>Перегр.</i><b>0.03</b></span>
+      <span><i>Вовлеч.</i><b style="color:var(--cool)">0.81</b></span>
+    </div>
+    <div class="res-changes">
+      <span><i>Прин.</i><b style="color:var(--cool)">+0.04</b></span>
+      <span><i>Напряж.</i><b style="color:var(--danger)">+0.12</b></span>
+      <span><i>Открыт.</i><b style="color:var(--rose)">+0.02</b></span>
+      <span><i>Чувств.</i><b style="color:var(--cool)">+0.03</b></span>
+    </div>
+    <div class="res-exp">
+      <span><i>мягкость</i> <b>+0.003</b></span>
+      <span><i>шея</i> <b>+0.008</b></span>
+    </div>
+    <div class="res-h" style="margin-top:2px">ОРИЕНТИР · 2/3</div>
+    <div class="goal-conds">
+      <div class="goal-cond met"><i>Чувств.</i><b>72</b>/<i>50</i><em>✓</em></div>
+      <div class="goal-cond"><i>Отнош.</i><b>58</b>/<i>40</i><em>·</em></div>
+      <div class="goal-cond met"><i>Открыт.</i><b>84</b>/<i>60</i><em>✓</em></div>
+    </div>
+  </div>
+
+  <!-- Processes / intimacy readiness -->
+  <div class="proc-area">
+    <div class="proc-h">ПРОЦЕСС · АВТО</div>
+    <div class="proc-card" style="--img:url('/character-images/actions/contact/deep_massage.png')">
+      <div class="pc-num">W/S</div>
+      <div class="pc-lbl">Глубокий массаж · Шея</div>
+      <div class="pc-min">4 мин</div>
+      <div class="pc-int"><i class="on"></i><i class="on"></i><i></i></div>
+    </div>
+    <div style="display:flex;gap:2px;margin-top:2px">
+      <button class="btn ghost" style="font-size:7px;padding:1px 4px;flex:1">A слабее</button>
+      <button class="btn ghost" style="font-size:7px;padding:1px 4px;flex:1">D сильнее</button>
+      <button class="btn ghost" style="font-size:7px;padding:1px 4px;flex:1">E стоп</button>
+    </div>
+
+    <div class="proc-h" style="margin-top:3px">ИНТИМНАЯ ГОТОВНОСТЬ</div>
+    <div class="intim">
+      <div class="intim-rows">
+        <div class="intim-row">
+          <div class="irl">Готовн.</div>
+          <div class="irv">42%</div>
+          <div class="irt"><i style="width:42%;background:var(--warm)"></i></div>
+        </div>
+        <div class="intim-row">
+          <div class="irl">Возбуж.</div>
+          <div class="irv">28%</div>
+          <div class="irt"><i style="width:28%;background:var(--rose)"></i></div>
+        </div>
+        <div class="intim-row">
+          <div class="irl">Довер.</div>
+          <div class="irv">71%</div>
+          <div class="irt"><i style="width:71%;background:var(--cool)"></i></div>
+        </div>
+      </div>
+      <div style="font-size:7px;color:var(--ink-soft);margin-top:2px;font-style:italic">Допускает тактильность, но не готова к интимности. Продолжить прогрев.</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+// Prevent scroll
+document.body.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+</script>
+
+</body>
+</html>

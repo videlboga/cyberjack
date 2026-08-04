@@ -17,10 +17,18 @@ export interface TriggerRule {
 // Capacity describes available functional reserve, not consciousness itself.
 // An exhausted subject collapses only after nervous activation has fallen low;
 // sufficiently strong stimulation can restore contact without restoring energy.
-export const COLLAPSE_CAPACITY_THRESHOLD = 10;
-export const COLLAPSE_TENSION_THRESHOLD = 15;
+// Loss of conscious contact is reserved for near-total exhaustion after the
+// nervous activation has also subsided. Low resource alone means fatigue,
+// panic or overload — not unconsciousness.
+export const COLLAPSE_CAPACITY_THRESHOLD = 3;
+export const COLLAPSE_TENSION_THRESHOLD = 8;
 export const FORCED_AROUSAL_TENSION_THRESHOLD = 30;
 export const NATURAL_RECOVERY_CAPACITY_THRESHOLD = 25;
+export const LOCAL_HYPERESTHESIA_ENTER_DELTA = 15;
+export const LOCAL_HYPERESTHESIA_RELEASE_DELTA = 8;
+
+const localSensitivityDelta = (point: SubjectPointState) =>
+    point.localSensitivity - (point.baselineLocalSensitivity ?? point.localSensitivity);
 
 export function isExhaustedCollapse(core: SubjectCoreState): boolean {
     return core.capacity <= COLLAPSE_CAPACITY_THRESHOLD && core.tension <= COLLAPSE_TENSION_THRESHOLD;
@@ -78,9 +86,11 @@ export const STATE_RULES: TriggerRule[] = [
     {
         code: 'panic_attack',
         description: 'Паническая Атака',
-        check: (core) => core.capacity <= 25 && core.attitude < 40,
+        check: (core) => core.capacity <= 25 && core.attitude < 40 && core.tension >= 30,
+        releaseCheck: (core) => core.capacity >= 35 || core.tension <= 20,
         requiredTicks: 2,
         actionPresetId: 'effect_panic',
+        durationOnTrigger: 30,
         removeOnFail: true
     },
     {
@@ -111,7 +121,8 @@ export const STATE_RULES: TriggerRule[] = [
         code: 'local_hyperesthesia',
         description: 'Локальная Гиперестезия (Точка)',
         pointSpecific: true,
-        check: (core, point) => point.localSensitivity >= 85,
+        check: (core, point) => localSensitivityDelta(point) >= LOCAL_HYPERESTHESIA_ENTER_DELTA,
+        releaseCheck: (core, point) => localSensitivityDelta(point) <= LOCAL_HYPERESTHESIA_RELEASE_DELTA,
         requiredTicks: 0,
         actionPresetId: 'effect_local_hyperesthesia',
         removeOnFail: true
@@ -120,7 +131,10 @@ export const STATE_RULES: TriggerRule[] = [
         code: 'local_numbness',
         description: 'Локальное Онемение (Точка)',
         pointSpecific: true,
-        check: (core, point) => point.localSensitivity <= 10,
+        check: (core, point) => ![
+            'mind_state', 'systemic', 'posture', 'global_pose',
+            'global_clothing', 'slot_room', 'slot_social',
+        ].includes(point.pointId) && point.localSensitivity <= 10,
         requiredTicks: 0,
         actionPresetId: 'effect_local_numbness',
         removeOnFail: true

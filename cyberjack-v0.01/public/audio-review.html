@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYBERJACK · Audio Review</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#090d0d; --panel:#111817; --panel-2:#151f1d; --line:#2b3b37;
+      --text:#dbe7e3; --muted:#788c86; --mint:#72d6bd; --amber:#d2a65d;
+      --red:#df7169; --blue:#73afd0;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(circle at 75% 0,#16302b 0,transparent 28%),var(--bg); color:var(--text); font:13px/1.45 Inter,system-ui,sans-serif; }
+    button,input,textarea,select { font:inherit; }
+    button { cursor:pointer; }
+    header { position:sticky; z-index:10; top:0; display:grid; grid-template-columns:minmax(250px,1fr) auto; gap:16px; padding:18px 24px; border-bottom:1px solid var(--line); background:#090d0ded; backdrop-filter:blur(16px); }
+    h1 { margin:0; color:var(--mint); font-size:15px; letter-spacing:.16em; text-transform:uppercase; }
+    header p { margin:4px 0 0; color:var(--muted); }
+    .progress { min-width:260px; align-self:center; }
+    .progress div { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+    .progress-track { display:block!important; height:5px; margin-top:6px; overflow:hidden; background:#24302d; }
+    .progress-track i { display:block; width:0; height:100%; background:var(--mint); transition:width .2s; }
+    .toolbar { position:sticky; z-index:9; top:82px; display:flex; flex-wrap:wrap; gap:8px; padding:12px 24px; border-bottom:1px solid var(--line); background:#0c1110ed; backdrop-filter:blur(14px); }
+    .toolbar input,.toolbar select { min-height:34px; border:1px solid var(--line); background:#101817; color:var(--text); padding:6px 10px; }
+    .toolbar input { flex:1; min-width:220px; }
+    .toolbar button { border:1px solid var(--line); background:#131d1b; color:var(--muted); padding:6px 11px; }
+    .toolbar button:hover { color:var(--text); border-color:#526a64; }
+    main { max-width:1280px; margin:auto; padding:18px 24px 80px; }
+    .group { margin:24px 0 34px; }
+    .group>h2 { margin:0 0 10px; color:#8ea49e; font-size:11px; letter-spacing:.15em; text-transform:uppercase; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:10px; }
+    article { min-width:0; padding:13px; border:1px solid var(--line); background:linear-gradient(145deg,var(--panel),#0d1312); transition:border-color .15s,opacity .15s; }
+    article[data-status="approved"] { border-left:3px solid var(--mint); }
+    article[data-status="redo"] { border-left:3px solid var(--red); }
+    article[data-status="skip"] { opacity:.58; border-left:3px solid var(--muted); }
+    article.playing { outline:1px solid var(--blue); background:var(--panel-2); }
+    .card-head { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:8px; }
+    h3 { overflow:hidden; margin:0; color:#d7e4e0; font-size:13px; line-height:1.3; text-overflow:ellipsis; white-space:nowrap; }
+    h3 code { display:block; margin-top:3px; color:var(--muted); font:9px/1.2 ui-monospace,SFMono-Regular,monospace; letter-spacing:.03em; }
+    .badge { padding:2px 6px; background:#1b2926; color:var(--mint); font-size:9px; letter-spacing:.08em; text-transform:uppercase; }
+    .tracks { display:grid; gap:7px; margin:10px 0; }
+    .track { display:grid; grid-template-columns:60px minmax(0,1fr) 30px; align-items:center; gap:7px; }
+    .track small { overflow:hidden; color:var(--muted); font-size:9px; text-overflow:ellipsis; text-transform:uppercase; }
+    audio { width:100%; height:30px; filter:saturate(.5) hue-rotate(105deg); }
+    .loop-toggle { border:1px solid var(--line); background:transparent; color:var(--muted); font-size:12px; }
+    .loop-toggle.active { border-color:var(--mint); color:var(--mint); }
+    .review { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+    .review button { min-height:30px; border:1px solid var(--line); background:#111a18; color:var(--muted); font-size:10px; text-transform:uppercase; }
+    .review button[data-value="approved"].active { border-color:var(--mint); color:var(--mint); background:#173029; }
+    .review button[data-value="redo"].active { border-color:var(--red); color:var(--red); background:#301a19; }
+    .review button[data-value="skip"].active { border-color:#788c86; color:#b0beb9; }
+    textarea { width:100%; min-height:42px; margin-top:7px; resize:vertical; border:1px solid #263430; background:#0a100f; color:#b9c8c4; padding:7px; }
+    .empty { padding:50px; text-align:center; color:var(--muted); }
+    @media(max-width:650px) {
+      header { grid-template-columns:1fr; }
+      .progress { min-width:0; }
+      .toolbar { top:111px; padding:10px; }
+      main { padding:12px 10px 60px; }
+      .cards { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Audio Review Console</h1>
+      <p>Действия · one-shots · контекстные петли</p>
+    </div>
+    <div class="progress">
+      <div><span id="progress-label">0 / 0 проверено</span><b id="progress-percent">0%</b></div>
+      <span class="progress-track"><i id="progress-bar"></i></span>
+    </div>
+  </header>
+  <nav class="toolbar">
+    <select id="library-filter">
+      <option value="actions">Действия</option>
+      <option value="reactions">Реакции</option>
+    </select>
+    <input id="search" type="search" placeholder="Найти actionId…" />
+    <select id="status-filter">
+      <option value="">Все статусы</option>
+      <option value="pending">Не проверено</option>
+      <option value="approved">Принято</option>
+      <option value="redo">Переделать</option>
+      <option value="skip">Пропустить</option>
+    </select>
+    <select id="kind-filter">
+      <option value="">Все типы</option>
+      <option value="oneShot">One-shot</option>
+      <option value="loop">Loop</option>
+      <option value="variants">Варианты</option>
+      <option value="silent">Silent</option>
+    </select>
+    <button id="stop-all">■ Остановить всё</button>
+    <button id="export">Экспорт ревью</button>
+  </nav>
+  <main id="root"><p class="empty">Загрузка манифеста…</p></main>
+  <script type="module">
+    const STORAGE_KEY = "cyberjack.audio-review.v1";
+    const LABELS = {
+      act_slap:"Пощёчина", act_kiss:"Поцелуй", act_punch:"Удар кулаком", act_caress:"Поглаживание",
+      act_interrogate:"Жёсткий допрос", act_praise:"Похвала", act_examine:"Строгий осмотр",
+      act_apply_handcuffs:"Надеть наручники", act_remove_handcuffs:"Снять наручники",
+      act_struggle_cuffs:"Вырываться из наручников", act_apply_collar:"Застегнуть шоковый ошейник",
+      act_shock_collar:"Ударить током через ошейник", act_connect_tens:"Закрепить электроды TENS",
+      act_start_electrostimulation:"Включить продолжительную электростимуляцию",
+      act_adjust_electrostimulation:"Усилить электростимуляцию", act_stop_electrostimulation:"Остановить электростимуляцию",
+      act_disconnect_tens:"Снять электроды TENS", act_remove_collar:"Снять ошейник",
+      act_inject_truth_serum:"Ввести сыворотку Veritas-9", act_inject_painkiller:"Ввести болеутоляющее Numb-X",
+      act_insert_plug:"Ввести телеметрический плаг", act_activate_plug:"Включить вибрацию плага",
+      act_deactivate_plug:"Выключить вибрацию плага", act_start_vibrator:"Включить продолжительную вибрацию",
+      act_adjust_vibration:"Усилить вибрацию", act_stop_vibrator:"Остановить вибрацию", act_remove_plug:"Извлечь плаг",
+      pose_standing:"Стойка: смирно", act_hold_exposure:"Показать тело", act_end_exposure:"Прекратить показ",
+      act_present_feet:"Предъявить ступни", act_end_feet_presentation:"Завершить осмотр ступней",
+      pose_all_fours:"Поза: на четвереньках", pose_spread_eagle:"Поза: широко раскрыто",
+      eq_blindfold_apply:"Надеть повязку на глаза", eq_blindfold_remove:"Снять повязку",
+      eq_gag_apply:"Вставить кляп", eq_gag_remove:"Вынуть кляп", pose_sitting:"Поза: сидя",
+      pose_lying_down:"Поза: лёжа", act_suspend_wrists:"Подвешивание за запястья",
+      act_release_wrists:"Развязать запястья и снять с подвеса", eq_clothe_jumpsuit:"Надеть комбинезон",
+      eq_strip_jumpsuit:"Снять комбинезон", eq_clothe_dress:"Надеть платье", eq_clothe_stockings:"Надеть чулки",
+      eq_clothe_underwear:"Надеть бельё", eq_clothe_panties:"Надеть трусики",
+      eq_clothe_underwear_remove:"Снять бельё", eq_clothe_panties_remove:"Снять трусики",
+      eq_clothe_stockings_remove:"Снять чулки", eq_clothe_dress_remove:"Снять платье",
+      eq_clothe_jumpsuit_remove:"Снять комбинезон", eq_clothe_lab_gown:"Надеть лабораторную рубашку",
+      eq_clothe_lab_gown_remove:"Снять лабораторную рубашку",
+      eq_clothe_calibration_set:"Надеть калибровочный комплект",
+      eq_clothe_calibration_set_remove:"Снять калибровочный комплект",
+      act_apply_ankle_cuffs:"Застегнуть ножные манжеты", act_remove_ankle_cuffs:"Снять ножные манжеты",
+      act_apply_restraint_belt:"Зафиксировать руки на поясе", act_remove_restraint_belt:"Освободить руки от пояса",
+      finger_insertion:"Начать стимуляцию пальцами", act_start_penetration:"Начать проникновение",
+      act_increase_friction:"Ускорить фрикции", act_decrease_friction:"Замедлить фрикции",
+      act_sexual_climax:"Резко усилить", act_end_sexual_contact:"Завершить сексуальный контакт"
+    };
+    const GROUPS = [
+      ["Контакт и клиника", /^(act_(slap|kiss|punch|caress|examine|interrogate|praise|inject))/],
+      ["Фиксация", /^(act_(apply|remove|struggle|suspend|release)|eq_(blindfold|gag))/],
+      ["Устройства", /^(act_(shock|connect|disconnect|start_electro|adjust_electro|stop_electro|insert_plug|remove_plug|activate_plug|deactivate_plug|start_vibrator|adjust_vibration|stop_vibrator))/],
+      ["Позы", /^(pose_|act_(hold_exposure|end_exposure|present_feet|end_feet))/],
+      ["Одежда", /^eq_(clothe|strip)/],
+      ["Интимная механика", /^(finger_|act_(start_penetration|increase_friction|decrease_friction|sexual_climax|end_sexual))/]
+    ];
+    const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    let manifest;
+    let library = "actions";
+    const root = document.querySelector("#root");
+    const libraryFilter = document.querySelector("#library-filter");
+    const search = document.querySelector("#search");
+    const statusFilter = document.querySelector("#status-filter");
+    const kindFilter = document.querySelector("#kind-filter");
+    const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const reviewKey = id => library === "actions" ? id : `reactions:${id}`;
+    const stopAll = except => document.querySelectorAll("audio").forEach(audio => {
+      if (audio !== except) { audio.pause(); audio.currentTime = 0; }
+    });
+    const classify = (id,entry) => library === "reactions"
+      ? ({ nika:"Ника", mira:"Мира", iona:"Иона" }[entry.character] || "Реакции")
+      : GROUPS.find(([,pattern]) => pattern.test(id))?.[0] || "Прочее";
+    const tracksOf = entry => {
+      if (entry.silent) return [];
+      const tracks = [];
+      if (entry.oneShot) tracks.push(["one-shot", entry.oneShot, false]);
+      if (entry.loop) tracks.push(["loop", entry.loop, true]);
+      (entry.variants || []).forEach((path,index) => tracks.push([`вариант ${index + 1}`, path, false]));
+      if (entry.replacesLoop) tracks.push(["заменяет loop", entry.replacesLoop, true]);
+      if (entry.stopsLoop) tracks.push(["останавливает", entry.stopsLoop, true]);
+      return tracks;
+    };
+    function updateProgress() {
+      const records = manifest[library];
+      const ids = Object.keys(records);
+      const checked = ids.filter(id => state[reviewKey(id)]?.status).length;
+      const percent = ids.length ? Math.round(checked / ids.length * 100) : 0;
+      document.querySelector("#progress-label").textContent = `${checked} / ${ids.length} проверено`;
+      document.querySelector("#progress-percent").textContent = `${percent}%`;
+      document.querySelector("#progress-bar").style.width = `${percent}%`;
+    }
+    function render() {
+      const query = search.value.trim().toLowerCase();
+      const wantedStatus = statusFilter.value;
+      const wantedKind = kindFilter.value;
+      const records = manifest[library];
+      const entries = Object.entries(records).filter(([id,entry]) => {
+        const review = state[reviewKey(id)]?.status || "pending";
+        const kindMatch = !wantedKind || (wantedKind === "silent" ? entry.silent : wantedKind === "variants" ? entry.variants?.length : entry[wantedKind]);
+        return `${entry.label || LABELS[id] || ""} ${id}`.toLowerCase().includes(query) && (!wantedStatus || review === wantedStatus) && kindMatch;
+      });
+      root.innerHTML = "";
+      if (!entries.length) {
+        root.innerHTML = '<p class="empty">Ничего не найдено</p>';
+        updateProgress();
+        return;
+      }
+      const grouped = Map.groupBy ? Map.groupBy(entries, ([id,entry]) => classify(id,entry)) : entries.reduce((map,item) => {
+        const key = classify(item[0],item[1]); map.set(key,[...(map.get(key) || []),item]); return map;
+      }, new Map());
+      for (const [groupName,items] of grouped) {
+        const section = document.createElement("section");
+        section.className = "group";
+        section.innerHTML = `<h2>${groupName} · ${items.length}</h2><div class="cards"></div>`;
+        const cards = section.querySelector(".cards");
+        for (const [id,entry] of items) {
+          const stateKey = reviewKey(id);
+          const review = state[stateKey] || {};
+          const article = document.createElement("article");
+          article.dataset.status = review.status || "pending";
+          const tracks = tracksOf(entry);
+          article.innerHTML = `
+            <div class="card-head"><h3 title="${id}">${entry.label || LABELS[id] || id}<code>${id}</code></h3><span class="badge">${entry.silent ? "silent" : entry.loop ? "loop" : entry.variants ? `${entry.variants.length} var` : "one-shot"}</span></div>
+            <div class="tracks">${tracks.length ? tracks.map(([label,path,isLoop]) => `
+              <div class="track"><small title="${path}">${label}</small><audio controls preload="none" src="${manifest.basePath}/${path}" ${isLoop ? "loop" : ""}></audio><button class="loop-toggle ${isLoop ? "active" : ""}" title="Повтор">↻</button></div>
+            `).join("") : '<small>Звук намеренно не назначен</small>'}</div>
+            <div class="review">
+              <button data-value="approved" class="${review.status === "approved" ? "active" : ""}">✓ принять</button>
+              <button data-value="redo" class="${review.status === "redo" ? "active" : ""}">↻ переделать</button>
+              <button data-value="skip" class="${review.status === "skip" ? "active" : ""}">— пропустить</button>
+            </div>
+            <textarea placeholder="Заметка…">${review.note || ""}</textarea>`;
+          article.querySelectorAll("audio").forEach(audio => {
+            audio.addEventListener("play", () => { stopAll(audio); article.classList.add("playing"); });
+            audio.addEventListener("pause", () => article.classList.remove("playing"));
+          });
+          article.querySelectorAll(".loop-toggle").forEach((button,index) => button.addEventListener("click", () => {
+            const audio = article.querySelectorAll("audio")[index];
+            audio.loop = !audio.loop;
+            button.classList.toggle("active", audio.loop);
+          }));
+          article.querySelectorAll(".review button").forEach(button => button.addEventListener("click", () => {
+            const next = button.dataset.value;
+            state[stateKey] = { ...state[stateKey], status: state[stateKey]?.status === next ? "" : next };
+            save(); render();
+          }));
+          article.querySelector("textarea").addEventListener("input", event => {
+            state[stateKey] = { ...state[stateKey], note:event.target.value };
+            save();
+          });
+          cards.append(article);
+        }
+        root.append(section);
+      }
+      updateProgress();
+    }
+    document.querySelector("#stop-all").addEventListener("click", () => stopAll());
+    document.querySelector("#export").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify({ exportedAt:new Date().toISOString(), reviews:state }, null, 2)], { type:"application/json" });
+      const link = Object.assign(document.createElement("a"), { href:URL.createObjectURL(blob), download:"cyberjack-audio-review.json" });
+      link.click(); URL.revokeObjectURL(link.href);
+    });
+    async function loadLibrary(nextLibrary) {
+      library = nextLibrary;
+      const manifestName = library === "reactions" ? "reaction-audio-manifest.json" : "action-audio-manifest.json";
+      manifest = await fetch(`/audio/${manifestName}`).then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      });
+      search.placeholder = library === "reactions" ? "Найти персонажа или состояние…" : "Найти действие…";
+      render();
+    }
+    libraryFilter.addEventListener("change", async () => {
+      stopAll();
+      await loadLibrary(libraryFilter.value);
+    });
+    [search,statusFilter,kindFilter].forEach(control => control.addEventListener("input", render));
+    try {
+      await loadLibrary("actions");
+    } catch (error) {
+      root.innerHTML = `<p class="empty">Не удалось загрузить манифест: ${error.message}</p>`;
+    }
+  </script>
+</body>
+</html>

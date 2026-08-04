@@ -4,8 +4,8 @@ export interface SubjectCoreState {
     openness: number;    // Открытость (восприимчивость к новому опыту, снятие психологических барьеров)
     plasticity: number;  // Пластичность (податливость разума к изменениям, формированию новых привязанностей/трейтов)
     attitude: number;    // Отношение / Лояльность (позитивное/негативное отношение к оператору, покорность)
-    tension: number;     // Напряжение (накопленный физиологический/психологический накал для механики разрядки)
-    preferences?: string; // JSON string of preferences (points, actions, contexts)
+    tension: number;     // Напряжение: накопленный физиологический/психологический накал для оргазма, перегрузки или срыва
+    preferences?: string; // JSON string of preferences (points, actions, contexts, learned semantic tags)
     baselineSensitivity?: number;
     baselineCapacity?: number;
     baselineOpenness?: number;
@@ -89,6 +89,8 @@ export interface ContextConfig {
     requiredFunctions?: string[];
     priority?: number;
     duration?: number;
+    durationUnit?: "ticks" | "minutes";
+    promptEffect?: string;
     requiresItem?: string;
     requiresSceneObject?: string;
     modifiers?: Partial<CompiledAction>;
@@ -157,6 +159,16 @@ export interface CompiledAction {
     requiresItem?: string;
     requiresSceneObject?: string;
     validTargets?: string[];
+    /** Authored, non-technical description used to ground the character's perception. */
+    description?: string;
+    /** Optional sensory facets. Missing facets are inferred from the action vector. */
+    sensory?: {
+        stimulus?: string;
+        texture?: string;
+        rhythm?: string;
+        bodilyResponse?: string;
+        aftereffect?: string;
+    };
 }
 
 export interface EngineConfig {
@@ -187,6 +199,8 @@ export interface TickResult {
     overload: number;
     engagement: number;
     learningEffect: number;
+    sensoryAmplification?: number;
+    exceptionalSensoryLoad?: number;
 }
 
 export interface TickDelta {
@@ -211,6 +225,8 @@ export interface TickMeta {
         strainDiscomfort?: number;
         overloadDiscomfort?: number;
         physicalDiscomfort?: number;
+        sensoryAmplification?: number;
+        exceptionalSensoryLoad?: number;
     };
     formulas?: Record<string, string>;
 }
@@ -221,7 +237,7 @@ export interface TickOutput {
     result: TickResult;
     delta: TickDelta;
     tickMeta: TickMeta;
-    notableEvent?: 'positive_discharge' | 'breakdown' | 'exhaustion';
+    notableEvent?: 'positive_discharge' | 'peak_overload' | 'breakdown' | 'exhaustion';
 }
 
 export interface GameEvent {
@@ -298,9 +314,9 @@ export interface PlayerFactionState {
 }
 
 export interface AssetContractCondition {
-    type: 'flag' | 'attitude' | 'trait' | 'resource' | 'custom';
+    type: 'flag' | 'attitude' | 'trait' | 'resource' | 'custom' | 'preference' | 'acquired_trait';
     key?: string; // e.g. "masochistic_tendencies"
-    operator?: '>' | '<' | '==' | '!=';
+    operator?: '>' | '<' | '>=' | '<=' | '==' | '!=';
     value?: any; 
 }
 
@@ -437,7 +453,14 @@ export interface ObservationContext {
 }
 
 export interface InteractionObservation {
-    action: { id: string; label: string; pointId: string; pointLabel?: string };
+    action: {
+        id: string;
+        label: string;
+        pointId: string;
+        pointLabel?: string;
+        description?: string;
+        sensory?: CompiledAction['sensory'];
+    };
     contact: 'none' | 'partial' | 'full' | 'forced';
     behavioralState: BehavioralState;
     reaction: {
@@ -448,7 +471,24 @@ export interface InteractionObservation {
         mixed: boolean;
         /** Psychological appraisal of the action, independently of bodily comfort. */
         appraisal: number;
+        experiencedIntensity?: number;
+        sensoryAmplification?: number;
+        exceptionalSensoryLoad?: number;
     };
+    reactionSnapshot?: {
+        sensation: { pleasure: number; discomfort: number; overload: number; intensity: number };
+        appraisal: { valence: number; willingness: number; agency: number; trust: number };
+        affect: { valence: number; arousal: number; control: number; emotion: string };
+        behavior: {
+            state: BehavioralState;
+            resistance: number;
+            desiredResponse: 'continue' | 'slow_down' | 'stop' | 'escape' | 'silent_compliance' | 'forced_rationalization' | 'assimilated_acceptance';
+        };
+        dynamics: { subjectId: string; actorId: string; resistance: number; learnedCompliance: number; dependency: number; dissociation: number; fear: number };
+        boundary: null | { request: 'none' | 'slow_down' | 'stop'; ignored: boolean; respected: boolean; intensity: number };
+    };
+    physicalReaction?: import('../narrative/physicalReaction').PhysicalReactionFrame;
+    boundaryExpression?: import('../narrative/boundaryExpression').BoundaryExpressionFrame;
     learning: {
         effect: number;
         familiarityDelta: number;
@@ -459,7 +499,7 @@ export interface InteractionObservation {
     contexts: ObservationContext[];
     currentState: { title: string; description: string };
     transitions: Array<{
-        kind: 'state' | 'discharge' | 'breakdown' | 'recovery' | 'contact';
+        kind: 'state' | 'discharge' | 'overload' | 'breakdown' | 'recovery' | 'contact';
         title: string;
         text: string;
         severity: 'notice' | 'major' | 'danger';

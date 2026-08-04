@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberJack — Manga Style Demos</title>
+  <link rel="stylesheet" href="./manga-core.css" />
+  <style>
+    .demo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 900px; }
+    .demo-card { display: block; text-decoration: none; color: inherit; }
+    .demo-card .m-panel-body { padding: 20px; }
+    .demo-card:hover .m-panel { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--m-ink); }
+    .demo-card .m-panel { transition: transform .1s, box-shadow .1s; }
+    .demo-card .demo-thumb { height: 120px; margin-bottom: 14px; border: 2px solid var(--m-ink); position: relative; overflow: hidden; }
+    .demo-card h3 { font-size: 16px; font-weight: 900; margin-bottom: 6px; }
+    .demo-card p { font-size: 12px; color: var(--m-ink-fade); line-height: 1.5; }
+    .demo-thumb-1 { background: var(--m-paper-dark); background-image: var(--st-30); }
+    .demo-thumb-2 { background: var(--m-paper-dark); background-image: var(--st-line-20); }
+    .demo-thumb-3 { background: var(--m-paper-dark); background-image: radial-gradient(circle, var(--m-ink) 0.8px, transparent 0.9px); background-size: 3px 3px; }
+    .demo-thumb-4 { background: var(--m-ink); }
+    .demo-thumb-4::after { content: "吹き出し"; position: absolute; bottom: 8px; right: 10px; font-family: var(--m-font-display); font-size: 24px; color: var(--m-paper); opacity: 0.3; }
+  </style>
+</head>
+<body>
+  <div class="m-shell">
+    <header class="m-hud">
+      <div class="m-hud-brand">
+        <span class="m-logo-mark">◈</span>
+        <div class="m-brand-text"><b>S-01 SIMULATOR</b><small>манга интерфейс</small></div>
+      </div>
+      <nav class="m-hud-nav">
+        <a class="active" href="./index.html">Обзор</a>
+        <a href="./dashboard.html">Дашборд</a>
+        <a href="./station.html">Станция</a>
+        <a href="./calibration.html">Калибровка</a>
+        <a href="./narrative.html">Диалог</a>
+      </nav>
+      <div class="m-hud-clock"><small>ЦИКЛ</small><b>07:14:09</b></div>
+    </header>
+
+    <main class="m-screen">
+      <div style="margin-bottom: 24px; position: relative;">
+        <div class="m-heading"><span class="m-jp">見本</span>Стиль манги для CyberJack</div>
+        <p style="max-width: 640px; color: var(--m-ink-soft); font-size: 14px;">
+          Полный отказ от веб-элементов: никаких border-radius, градиентов, скруглённых теней.
+          Всё рисуется как манга — бумажный фон, жирные черные контуры, скринтоны, угловатые панели-кадры,
+          hand-drawn типографика. Графики — через SVG с halftone-заливками.
+        </p>
+        <span class="m-jp-watermark">漫画</span>
+      </div>
+
+      <div class="demo-grid">
+        <a class="demo-card" href="./dashboard.html">
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">計器</span>Дашборд</div>
+            <div class="m-panel-body">
+              <div class="demo-thumb demo-thumb-1"></div>
+              <h3>Метрики и графики</h3>
+              <p>Gauges с screentone-заливками, линейные графики с halftone, stat-блоки. Главное — графики читаемые без веб-эстетики.</p>
+            </div>
+          </div>
+        </a>
+
+        <a class="demo-card" href="./station.html">
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">配置</span>Станция</div>
+            <div class="m-panel-body">
+              <div class="demo-thumb demo-thumb-2"></div>
+              <h3>Карта и навигация</h3>
+              <p>Радиальная карта секторов в виде манга-кадра. Список секторов с ink-бордерами. Live-уведомления как SFX.</p>
+            </div>
+          </div>
+        </a>
+
+        <a class="demo-card" href="./calibration.html">
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">調整</span>Калибровка</div>
+            <div class="m-panel-body">
+              <div class="demo-thumb demo-thumb-3"></div>
+              <h3>Слайдеры и метры</h3>
+              <p>Слайдеры с угловатыми thumb-элементами. Полосковые метры с screentone-заливками. Контракты как manga-карточки.</p>
+            </div>
+          </div>
+        </a>
+
+        <a class="demo-card" href="./narrative.html">
+          <div class="m-panel-headed">
+            <div class="m-panel-title"><span class="m-jp">対話</span>Диалог</div>
+            <div class="m-panel-body">
+              <div class="demo-thumb demo-thumb-4"></div>
+              <h3>Чат и нарратив</h3>
+              <p>Спич-баблы, нарратор-текст курсивом с двойной рамкой. SFX-надписи. Чипы действий как manga-теги.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div style="margin-top: 28px;">
+        <div class="m-heading"><span class="m-jp">要素</span>Компоненты</div>
+        <div class="m-row" style="flex-wrap: wrap; gap: 10px;">
+          <button class="m-btn">Обычная</button>
+          <button class="m-btn active">Активная</button>
+          <button class="m-btn danger">Опасная</button>
+          <button class="m-btn quiet">Вторичная</button>
+          <span class="m-tag">мягкий контакт</span>
+          <span class="m-tag red">болевое</span>
+          <span class="m-tag blue">медицина</span>
+          <span class="m-tag green">OK</span>
+          <span class="m-sfx">ドンッ!</span>
+        </div>
+        <div class="m-row" style="margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+          <div class="m-stat"><small>РЕСУРС</small><b>74</b></div>
+          <div class="m-stat alert"><small>НАГРУЗКА</small><b>92</b></div>
+          <div class="m-stat ok"><small>СТАТУС</small><b>OK</b></div>
+          <div class="m-stat warn"><small>ЦИКЛ</small><b>14</b></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

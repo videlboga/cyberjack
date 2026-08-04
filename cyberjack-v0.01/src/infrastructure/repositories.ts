@@ -340,7 +340,7 @@ export const subjectRepo = {
             try {
                 const parsed = typeof state.preferences === 'string' ? JSON.parse(state.preferences) : state.preferences;
                 const hasAny = (obj: any) => obj && Object.keys(obj).length > 0;
-                const meaningful = hasAny(parsed.actions) || hasAny(parsed.points) || hasAny(parsed.contexts);
+                const meaningful = hasAny(parsed.actions) || hasAny(parsed.points) || hasAny(parsed.contexts) || hasAny(parsed.tags);
                 if (meaningful) {
                     preferences = typeof state.preferences === 'string' ? state.preferences : JSON.stringify(parsed);
                 } else {
@@ -427,7 +427,14 @@ export const subjectRepo = {
     getUIState(id: string, pointId: string): any {
         const subject = this.getWithPoint(id, pointId);
         const actions = db.prepare('SELECT id, label FROM action_presets').all();
-        const points = db.prepare('SELECT p.id, p.label, sps.local_sensitivity, sps.local_attitude, sps.local_openness, sps.familiarity, sps.exposure_count FROM point_presets p JOIN subject_point_states sps ON p.id = sps.point_id WHERE sps.subject_id = ?').all(id);
+        const points = db.prepare(`
+            SELECT p.id, p.label, sps.local_sensitivity, sps.local_attitude, sps.local_openness,
+                   sps.familiarity, sps.exposure_count, sps.baseline_local_sensitivity,
+                   sps.baseline_local_attitude, sps.baseline_local_openness
+            FROM point_presets p
+            JOIN subject_point_states sps ON p.id = sps.point_id
+            WHERE sps.subject_id = ?
+        `).all(id);
 
         return {
             subject,
@@ -438,26 +445,27 @@ export const subjectRepo = {
 };
 
 export const subjectPreferencesRepo = {
-    get(subjectId: string): { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number> } {
+    get(subjectId: string): { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number>; tags: Record<string, number> } {
         const row = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(subjectId) as any;
-        if (!row || !row.preferences) return { actions: {}, points: {}, contexts: {} };
+        if (!row || !row.preferences) return { actions: {}, points: {}, contexts: {}, tags: {} };
         try {
             const parsed = JSON.parse(row.preferences);
             return {
                 actions: parsed.actions || {},
                 points: parsed.points || {},
-                contexts: parsed.contexts || {}
+                contexts: parsed.contexts || {},
+                tags: parsed.tags || {}
             };
         } catch (e) {
-            return { actions: {}, points: {}, contexts: {} };
+            return { actions: {}, points: {}, contexts: {}, tags: {} };
         }
     },
-    set(subjectId: string, prefs: { actions?: Record<string, number>; points?: Record<string, number>; contexts?: Record<string, number> }) {
-        const asJson = JSON.stringify({ actions: prefs.actions || {}, points: prefs.points || {}, contexts: prefs.contexts || {} });
+    set(subjectId: string, prefs: { actions?: Record<string, number>; points?: Record<string, number>; contexts?: Record<string, number>; tags?: Record<string, number> }) {
+        const asJson = JSON.stringify({ actions: prefs.actions || {}, points: prefs.points || {}, contexts: prefs.contexts || {}, tags: prefs.tags || {} });
         db.prepare('UPDATE subjects SET preferences = ? WHERE id = ?').run(asJson, subjectId);
     },
     /** Adjust a single preference entry by delta and clamp to [-5,5] */
-    adjust(subjectId: string, category: 'actions' | 'points' | 'contexts', key: string, delta: number) {
+    adjust(subjectId: string, category: 'actions' | 'points' | 'contexts' | 'tags', key: string, delta: number) {
         const prefs = this.get(subjectId);
         const bucket = (prefs as any)[category] as Record<string, number>;
         const current = bucket[key] ?? 0;
@@ -573,6 +581,8 @@ export const presetRepo = {
             requiresItem: row.requires_item || valJson.requiresItem || null,
             requiresSceneObject: valJson.requiresSceneObject || null,
             validTargets: valJson.validTargets || null,
+            description: valJson.description || null,
+            sensory: valJson.sensory || null,
             contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
         };
     },
@@ -591,6 +601,8 @@ export const presetRepo = {
                 requiresItem: row.requires_item || valJson.requiresItem || null,
                 requiresSceneObject: valJson.requiresSceneObject || null,
                 validTargets: valJson.validTargets || null,
+                description: valJson.description || null,
+                sensory: valJson.sensory || null,
                 contextConfig: row.context_config_json ? JSON.parse(row.context_config_json) : undefined
             };
         });
@@ -687,6 +699,9 @@ export const activeContextsRepo = {
     incrementTicks(subjectId: string, amount: number = 1) {
         const stmt = db.prepare('UPDATE active_contexts SET ticks_active = ticks_active + ? WHERE subject_id = ?');
         stmt.run(amount, subjectId);
+    },
+    incrementContext(id: string, amount: number = 1) {
+        db.prepare('UPDATE active_contexts SET ticks_active = ticks_active + ? WHERE id = ?').run(amount, id);
     },
     remove(id: string) {
         const stmt = db.prepare('DELETE FROM active_contexts WHERE id = ?');
@@ -913,17 +928,18 @@ export const sceneCharacterRepo = {
 };
 
 export const chatMemoryRepo = {
-    append(subjectId: string, role: 'user' | 'assistant', content: string, contextLabel?: string): number | null {
+    append(subjectId: string, role: 'user' | 'assistant', content: string, contextLabel?: string, portraitEmotion?: string): number | null {
         if (!content || !subjectId) return null;
-        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content, context_label) VALUES (?, ?, ?, ?)');
-        const info = stmt.run(subjectId, role, content, contextLabel || null);
+        const worldMinute = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes);
+        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content, context_label, portrait_emotion, world_minute) VALUES (?, ?, ?, ?, ?, ?)');
+        const info = stmt.run(subjectId, role, content, contextLabel || null, portraitEmotion || null, Number.isFinite(worldMinute) ? worldMinute : null);
         return Number(info.lastInsertRowid) || null;
     },
-    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; createdAt?: string }> {
+    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }> {
         const stmt = db.prepare(
-            'SELECT id, role, content, context_label AS contextLabel, created_at AS createdAt FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
+            'SELECT id, role, content, context_label AS contextLabel, portrait_emotion AS portraitEmotion, portrait_emotion_source AS portraitEmotionSource, portrait_emotion_confidence AS portraitEmotionConfidence, created_at AS createdAt, world_minute AS worldMinute FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
         );
-        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; createdAt?: string }>;
+        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }>;
         return rows.reverse();
     },
     getSince(subjectId: string, afterId: number, limit = 100): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
@@ -939,6 +955,10 @@ export const chatMemoryRepo = {
     },
     updateContent(id: number, content: string) {
         db.prepare('UPDATE chat_memory SET content = ? WHERE id = ?').run(content, id);
+    },
+    updatePortraitEmotion(id: number, emotion: string, source: string, confidence: number) {
+        db.prepare('UPDATE chat_memory SET portrait_emotion = ?, portrait_emotion_source = ?, portrait_emotion_confidence = ? WHERE id = ?')
+            .run(emotion, source, confidence, id);
     },
     deleteBefore(subjectId: string, beforeId: number) {
         db.prepare('DELETE FROM chat_memory WHERE subject_id = ? AND id < ?').run(subjectId, beforeId);
@@ -986,6 +1006,87 @@ export const chatSummaryRepo = {
     },
     clear(subjectId: string) {
         db.prepare('DELETE FROM chat_memory_summary WHERE subject_id = ?').run(subjectId);
+    }
+};
+
+export type SocialMemoryKind = 'promise' | 'personal_fact' | 'subjective_report' | 'preference' | 'boundary' | 'shared_plan';
+export type SocialMemoryOwner = 'character' | 'other';
+
+export const socialMemoryRepo = {
+    save(record: {
+        subjectId: string;
+        relatedSubjectId: string;
+        kind: SocialMemoryKind;
+        owner: SocialMemoryOwner;
+        content: string;
+        importance?: number;
+        confidence?: number;
+        sourceMessageId?: number | null;
+    }): number | null {
+        const content = record.content.trim();
+        if (!record.subjectId || !record.relatedSubjectId || !content) return null;
+        const duplicate = db.prepare(`
+            SELECT id FROM social_memories
+            WHERE subject_id = ? AND related_subject_id = ? AND kind = ? AND owner = ?
+              AND status = 'active' AND lower(content) = lower(?)
+            ORDER BY id DESC LIMIT 1
+        `).get(record.subjectId, record.relatedSubjectId, record.kind, record.owner, content) as { id: number } | undefined;
+        if (duplicate) return duplicate.id;
+        const info = db.prepare(`
+            INSERT INTO social_memories
+                (subject_id, related_subject_id, kind, owner, content, importance, confidence, source_message_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+            record.subjectId,
+            record.relatedSubjectId,
+            record.kind,
+            record.owner,
+            content,
+            record.importance ?? 0.5,
+            record.confidence ?? 0.7,
+            record.sourceMessageId ?? null
+        );
+        return Number(info.lastInsertRowid) || null;
+    },
+    listActive(subjectId: string, relatedSubjectId: string, limit = 8, filters?: {
+        kind?: SocialMemoryKind;
+        owner?: SocialMemoryOwner;
+    }): Array<{
+        id: number;
+        kind: SocialMemoryKind;
+        owner: SocialMemoryOwner;
+        content: string;
+        importance: number;
+        confidence: number;
+    }> {
+        const clauses = [
+            'subject_id = ?',
+            'related_subject_id = ?',
+            `status = 'active'`
+        ];
+        const params: Array<string | number> = [subjectId, relatedSubjectId];
+        if (filters?.kind) {
+            clauses.push('kind = ?');
+            params.push(filters.kind);
+        }
+        if (filters?.owner) {
+            clauses.push('owner = ?');
+            params.push(filters.owner);
+        }
+        params.push(limit);
+        return db.prepare(`
+            SELECT id, kind, owner, content, importance, confidence
+            FROM social_memories
+            WHERE ${clauses.join(' AND ')}
+            ORDER BY importance DESC, id DESC LIMIT ?
+        `).all(...params) as any;
+    },
+    resolve(id: number, evidence: string, outcome: 'fulfilled' | 'broken' = 'fulfilled') {
+        db.prepare(`
+            UPDATE social_memories
+            SET status = ?, resolved_by = ?, resolved_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND status = 'active'
+        `).run(outcome, evidence, id);
     }
 };
 

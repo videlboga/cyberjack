@@ -5,6 +5,8 @@ import { composePromptSections } from './promptComposer';
 import { compileGeneratedProfile, PROFILE_GENERATOR_REVISION } from './profileV2';
 import { CharacterArchetype, GeneratedProfileV2, GeneratorOptions } from './types';
 import { roleHistoryPrompt } from '../../scenario/characterLifecycle';
+import { compileAuthoredProfile } from '../../scenario/characters/authoredProfiles';
+import { applyCharacterStartingTraits } from '../../scenario/characterStartingTraits';
 
 type CharacterRow = {
     id: string;
@@ -25,6 +27,18 @@ function parseJson(value?: string | null): Record<string, any> {
 function findCharacter(subjectId: string): CharacterRow | undefined {
     return db.prepare('SELECT id, name, subject_id, profile_json FROM characters WHERE subject_id = ? OR id = ? LIMIT 1')
         .get(subjectId, subjectId) as CharacterRow | undefined;
+}
+
+function effectiveCurrentRole(character: CharacterRow | undefined, canonical: Record<string, any>): string | undefined {
+    if (!character) return canonical.currentRole;
+    const presence = db.prepare(`
+        SELECT role FROM scene_characters
+        WHERE character_id = ? AND presence_state = 'present'
+        ORDER BY CASE role WHEN 'asset' THEN 0 WHEN 'staff' THEN 1 ELSE 2 END
+        LIMIT 1
+    `).get(character.id) as { role?: string } | undefined;
+    if (presence?.role && ['asset', 'staff'].includes(presence.role)) return presence.role;
+    return canonical.currentRole;
 }
 
 function determineArchetype(character: CharacterRow | undefined, canonical: Record<string, any>): CharacterArchetype {
@@ -75,6 +89,7 @@ function applyCanonicalPersonality(profile: GeneratedProfileV2, canonical: Recor
     const speechStyle = String(personality.speechStyle || '').trim();
     const profession = `${canonical.origin?.professionId || ''} ${canonical.origin?.biography || ''}`;
     const traitText = traits.join(' ');
+    const personalityText = `${traitText} ${quirks.join(' ')} ${belief} ${speechStyle}`;
     const attentionFocus = Array.from(new Set([
         /наблюд|вниматель|свер/i.test(`${traitText} ${quirks.join(' ')}`) ? 'change' : undefined,
         /практич|клиник|санитар|техник|оператор/i.test(`${traitText} ${profession}`) ? 'technique' : undefined,
@@ -85,6 +100,18 @@ function applyCanonicalPersonality(profile: GeneratedProfileV2, canonical: Recor
     if (!traits.length && !quirks.length && !belief && !speechStyle) return profile;
 
     const values = [belief, ...traits.map((trait: string) => `Устойчивая черта: ${trait}`)].filter(Boolean);
+    const authoredDefenses = [
+        /язв|сарказ|ирон/i.test(personalityText) ? 'При уязвимости сначала возвращает себе контроль иронией или колкостью, а не прямым признанием.' : '',
+        /молчал|немногослов|сдержан|закрыт/i.test(personalityText) ? 'Под давлением сокращает речь и скрывает значимую реакцию за молчанием или сухим ответом.' : '',
+        /упрям|дерз|непокор|независ/i.test(personalityText) ? 'Когда решение навязывают, оспаривает рамку или ставит встречное условие, даже если само действие переносимо.' : '',
+        /рацион|аналит|точн|практич|клиник|техник/i.test(personalityText) ? 'При тревоге переводит внимание на конкретные факты, технику и управляемый следующий шаг.' : '',
+        /мягк|эмпат|забот|добр/i.test(personalityText) ? 'Собственное раздражение сначала выражает через заботу о другом или попытку снизить конфликт.' : ''
+    ].filter(Boolean);
+    const authoredVulnerabilities = [
+        /контрол|независ|свобод|субъект/i.test(personalityText) ? 'Особенно остро реагирует, когда её выбор считают несущественным.' : '',
+        /точн|ошиб|опас|безопас|ответствен/i.test(personalityText) ? 'Боится пропустить важный риск или сделать вывод на недостаточных данных.' : '',
+        /довер|предат|обман/i.test(personalityText) ? 'Уязвима к непоследовательности между словами и поступками.' : ''
+    ].filter(Boolean);
     return {
         ...profile,
         behavioralCore: {
@@ -94,10 +121,10 @@ function applyCanonicalPersonality(profile: GeneratedProfileV2, canonical: Recor
             // role colour remains available only as a secondary influence.
             voice: speechStyle ? [speechStyle] : profile.behavioralCore.voice,
             mannerisms: Array.from(new Set([...quirks, ...profile.behavioralCore.mannerisms])).slice(0, 4),
-            // A complete authored dossier must not silently acquire a random
-            // phobia, hostility script or conditional equipment trigger.
-            vulnerabilities: [],
-            defenses: [],
+            // Deterministic defenses are derived from authored traits. This
+            // preserves psychological mechanisms without adding random lore.
+            vulnerabilities: authoredVulnerabilities.slice(0, 2),
+            defenses: authoredDefenses.slice(0, 3),
             conditionalReactions: [],
             attentionFocus: attentionFocus?.slice(0, 3),
             speechDisposition: /молчал|немногослов|редко говорит/i.test(`${speechStyle} ${traitText}`) ? 'quiet' : 'normal'
@@ -133,7 +160,8 @@ function buildProfile(
         assetBlocks: context.assetReasons,
         assetTitle: archetype === 'asset' ? '[Почему ты стал активом]' : '[Причина текущего статуса]'
     });
-    return applyCanonicalPersonality(compileGeneratedProfile(subjectId, context, sections), canonical);
+    const generated = applyCanonicalPersonality(compileGeneratedProfile(subjectId, context, sections), canonical);
+    return canonical.storySeed ? { ...generated, storySeed:canonical.storySeed } : generated;
 }
 
 function persistProfile(character: CharacterRow, canonical: Record<string, any>, generatedProfile: GeneratedProfileV2) {
@@ -146,14 +174,19 @@ function persistProfile(character: CharacterRow, canonical: Record<string, any>,
 export function ensureGeneratedProfile(subjectId: string): GeneratedProfileV2 {
     const character = findCharacter(subjectId);
     const canonical = parseJson(character?.profile_json);
+    const authored = compileAuthoredProfile(subjectId, effectiveCurrentRole(character, canonical), canonical.roleState);
+    if (authored) return withLifecycle(applyCharacterStartingTraits(authored), character, canonical);
     const existing = canonical.generatedProfile || (canonical.version === 2 ? canonical : undefined);
+    if (existing?.version === 2 && existing.authored === true) {
+        return withLifecycle(applyCharacterStartingTraits(existing as GeneratedProfileV2), character, canonical);
+    }
     if (existing?.version === 2 && existing.generatorRevision >= PROFILE_GENERATOR_REVISION) {
-        return withLifecycle(existing as GeneratedProfileV2, character, canonical);
+        return withLifecycle(applyCharacterStartingTraits(existing as GeneratedProfileV2), character, canonical);
     }
 
     const generated = buildProfile(subjectId, character, canonical);
     if (character) persistProfile(character, canonical, generated);
-    return withLifecycle(generated, character, canonical);
+    return withLifecycle(applyCharacterStartingTraits(generated), character, canonical);
 }
 
 export function regenerateGeneratedProfile(
@@ -165,5 +198,5 @@ export function regenerateGeneratedProfile(
     const canonical = parseJson(character.profile_json);
     const generated = buildProfile(subjectId, character, canonical, options);
     persistProfile(character, canonical, generated);
-    return withLifecycle(generated, character, canonical);
+    return withLifecycle(applyCharacterStartingTraits(generated), character, canonical);
 }

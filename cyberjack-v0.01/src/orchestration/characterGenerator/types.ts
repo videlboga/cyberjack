@@ -122,9 +122,17 @@ export interface GeneratedProfileV2 {
     mechanicalSeed: {
         coreModifiers: Record<string, number>;
         initialContexts: string[];
-        preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number> };
+        preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number>; tags: Record<string, number> };
     };
     sourceTags: string[];
+    storySeed?: {
+        unresolvedPast: string;
+        externalLink: string;
+        concealedFact: string;
+        pressure: string;
+        activationTriggers: string[];
+        possibleDirections: string[];
+    };
     personaText: string;
     personaWithoutTraits?: string;
     traitBlock?: string;
@@ -135,4 +143,6 @@ export interface GeneratedProfileV2 {
     historyText?: string;
     activationText?: string;
     updatedAt: string;
+    authored?: boolean;
+    authoredProfile?: Record<string, any>;
 }

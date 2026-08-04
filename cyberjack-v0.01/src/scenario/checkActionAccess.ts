@@ -59,7 +59,7 @@ export function validateAction(
                 return { allowed: false, errorReason: `Персонаж-инициатор не найден в сцене.` };
             }
             const item = characterItemsRepo.get(theChar.id, requiredItem);
-            if (!item || item.state === 'consumed' || item.state === 'broken') {
+            if (!item || item.state === 'consumed' || item.state === 'broken' || item.charges === 0) {
                 return { allowed: false, errorReason: `Требуется предмет "${requiredItem}" в инвентаре для этого действия.` };
             }
         }

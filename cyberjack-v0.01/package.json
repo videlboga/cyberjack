@@ -13,10 +13,15 @@
     "build:visual-index-v4": "node scripts/build-visual-asset-index-v4.mjs",
     "validate:visual-v4": "node scripts/validate-visual-matrices-v4.mjs",
     "build:visual-checklist-v4": "node scripts/build-visual-generation-checklist-v4.mjs",
+    "audio:voice-experiments": "node scripts/generate-reaction-voice-experiments.mjs",
+    "audio:integrate-emotions": "node scripts/integrate-selected-emotion-audio.mjs",
+    "benchmark:chat-models": "node scripts/benchmark-chat-models.mjs",
+    "test:semantic-parser": "tsx scripts/test-semantic-parser.ts",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "dependencies": {
+    "@antv/g2": "^5.4.8",
     "better-sqlite3": "^12.9.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

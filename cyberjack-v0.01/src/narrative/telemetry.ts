@@ -1,4 +1,5 @@
 import { InteractionObservation, SubjectCoreState, SubjectPointState } from '../domain/types';
+import { interpretPointSensitivity, sensitivityBand } from '../domain/parameterInterpretation';
 
 export type TelemetryTrend = 'up' | 'down' | 'stable';
 
@@ -50,7 +51,12 @@ export function deriveTelemetry(input: {
     const motorValue = unresponsive ? 'реакция почти отсутствует' : panic ? 'резкие защитные движения' : overload ? 'дрожь и запаздывание' : core.capacity < 20 ? 'слабая реакция' : subspace ? 'замедленная реакция' : 'движения стабильны';
     const contactValue = unresponsive ? 'утрачен' : panic ? 'отвергается' : observation?.behavioralState === 'defiance' ? 'конфликтный' : subspace ? 'замедленный' : core.capacity < 25 ? 'нестабильный' : 'устойчивый';
     const localSensitivity = Number(point?.localSensitivity ?? core.sensitivity);
-    const localValue = localSensitivity >= 85 ? 'гиперреактивный' : localSensitivity >= 65 ? 'выраженный' : localSensitivity >= 40 ? 'нормальный' : localSensitivity >= 20 ? 'слабый' : 'сниженный';
+    const localInterpretation = interpretPointSensitivity(
+        point?.pointId || 'systemic',
+        localSensitivity,
+        point?.baselineLocalSensitivity
+    );
+    const localValue = sensitivityBand(localInterpretation);
 
     const stateTitle = observation?.currentState?.title || (unresponsive ? 'Осмысленный контакт потерян' : panic ? 'Защитная реакция' : subspace ? 'Внимание погружено в ощущения' : 'Контакт сохраняется');
     const summary = discharged
@@ -81,8 +87,12 @@ export function deriveTelemetry(input: {
 export function formatTelemetryForPrompt(snapshot: TelemetrySnapshot): string {
     const arrow = (value: TelemetryTrend) => value === 'up' ? 'растёт' : value === 'down' ? 'снижается' : 'стабильно';
     return [
-        snapshot.summary,
+        `Ты читаешь на доступном тебе экране: ${snapshot.summary}`,
         ...snapshot.signals.map(signal => `- ${signal.label}: ${signal.value}${signal.unit && !signal.value.includes(signal.unit) ? ` ${signal.unit}` : ''}; ${arrow(signal.trend)}.`),
-        `Наблюдаемое поведение: ${snapshot.behavioral.join('; ')}.`
+        `Одновременно ты видишь внешнее поведение: ${snapshot.behavioral.join('; ')}.`
     ].join('\n');
+}
+
+export function formatVisibleConditionForPrompt(snapshot: TelemetrySnapshot): string {
+    return `Ты можешь судить только по внешним признакам: ${snapshot.behavioral.join('; ')}. Точные внутренние показатели тебе недоступны.`;
 }

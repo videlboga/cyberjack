@@ -1,0 +1,770 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANGA-CORE — CyberJack manga UI framework
+   Flat manga-style: ink lines, screentones, angular panels,
+   hand-drawn feel, no web conventions.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Palette ── */
+:root {
+  /* Paper / ink */
+  --m-paper: #f4ede0;        /* warm manga paper */
+  --m-paper-dark: #e6dcc8;   /* aged paper */
+  --m-paper-light: #fbf6ec;  /* highlight */
+  --m-ink: #1a1410;          /* deep black-brown ink */
+  --m-ink-soft: #4a3f35;     /* lighter ink */
+  --m-ink-fade: #8a7d6e;     /* faded ink */
+
+  /* Screentone grays (via dot density) */
+  --m-tone-10: rgba(26,20,16,0.06);
+  --m-tone-20: rgba(26,20,16,0.12);
+  --m-tone-30: rgba(26,20,16,0.20);
+  --m-tone-40: rgba(26,20,16,0.30);
+  --m-tone-50: rgba(26,20,16,0.45);
+  --m-tone-60: rgba(26,20,16,0.60);
+  --m-tone-70: rgba(26,20,16,0.75);
+  --m-tone-80: rgba(26,20,16,0.88);
+
+  /* Accent inks */
+  --m-red: #c8312a;          /* manga red */
+  --m-red-dark: #9c1a1a;
+  --m-blue: #2a5c8a;          /* manga blue */
+  --m-blue-dark: #1a3e5e;
+  --m-green: #3a7d3a;         /* manga green */
+  --m-purple: #6a3a7a;
+  --m-yellow: #d4a020;        /* manga yellow */
+  --m-orange: #c87020;
+  --m-cyan: #2a8a8a;
+
+  /* Screentone backgrounds — CSS dot patterns */
+  --st-10: radial-gradient(circle, var(--m-ink) 0.4px, transparent 0.5px) 0 0 / 4px 4px;
+  --st-20: radial-gradient(circle, var(--m-ink) 0.6px, transparent 0.7px) 0 0 / 4px 4px;
+  --st-30: radial-gradient(circle, var(--m-ink) 0.8px, transparent 0.9px) 0 0 / 3px 3px;
+  --st-40: radial-gradient(circle, var(--m-ink) 1px, transparent 1px) 0 0 / 3px 3px;
+  --st-50: radial-gradient(circle, var(--m-ink) 1.2px, transparent 1.2px) 0 0 / 2.5px 2.5px;
+  --st-60: radial-gradient(circle, var(--m-ink) 1.4px, transparent 1.4px) 0 0 / 2.2px 2.2px;
+  --st-70: radial-gradient(circle, var(--m-ink) 1.6px, transparent 1.6px) 0 0 / 2px 2px;
+
+  /* Line screentone (diagonal lines) */
+  --st-line-10: repeating-linear-gradient(45deg, transparent 0 5px, var(--m-tone-10) 5px 6px);
+  --st-line-20: repeating-linear-gradient(45deg, transparent 0 4px, var(--m-tone-20) 4px 5px);
+  --st-line-30: repeating-linear-gradient(45deg, transparent 0 3px, var(--m-tone-30) 3px 4px);
+  --st-line-40: repeating-linear-gradient(45deg, transparent 0 3px, var(--m-tone-40) 3px 4px);
+
+  /* Font */
+  --m-font: "Zen Maru Gothic", "M+ 1p", "Noto Sans JP", "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
+  --m-font-mono: "M+ 1m", "JetBrains Mono", "Courier New", monospace;
+  --m-font-display: "ZEN OLD MINCHO", "Yu Mincho", "Noto Serif JP", serif;
+}
+
+/* ── Reset ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Base page: manga paper ── */
+body {
+  background: var(--m-paper);
+  background-image:
+    /* subtle paper texture via tiny dots */
+    radial-gradient(circle, rgba(26,20,16,0.03) 0.3px, transparent 0.4px),
+    radial-gradient(circle, rgba(26,20,16,0.02) 0.3px, transparent 0.4px);
+  background-size: 7px 7px, 11px 11px;
+  background-position: 0 0, 3px 3px;
+  color: var(--m-ink);
+  font-family: var(--m-font);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* ── Manga panel: angular border, no radius ── */
+.m-panel {
+  background: var(--m-paper-light);
+  border: 3px solid var(--m-ink);
+  position: relative;
+  /* Slight angular skew suggestion via clip-path corners */
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  padding: 16px;
+}
+
+/* Panel with ink header bar */
+.m-panel-headed {
+  border: 3px solid var(--m-ink);
+  background: var(--m-paper-light);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  overflow: hidden;
+}
+
+.m-panel-headed > .m-panel-title {
+  background: var(--m-ink);
+  color: var(--m-paper);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.m-panel-headed > .m-panel-title .m-jp {
+  font-family: var(--m-font-display);
+  font-weight: 400;
+  font-size: 14px;
+  opacity: 0.5;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.m-panel-headed > .m-panel-body {
+  padding: 14px 16px;
+}
+
+/* ── Screentone fills ── */
+.st-10 { background-image: var(--st-10); }
+.st-20 { background-image: var(--st-20); }
+.st-30 { background-image: var(--st-30); }
+.st-40 { background-image: var(--st-40); }
+.st-50 { background-image: var(--st-50); }
+.st-60 { background-image: var(--st-60); }
+.st-70 { background-image: var(--st-70); }
+
+.st-line-10 { background-image: var(--st-line-10); }
+.st-line-20 { background-image: var(--st-line-20); }
+.st-line-30 { background-image: var(--st-line-30); }
+.st-line-40 { background-image: var(--st-line-40); }
+
+/* Solid dark panel with screentone over ink */
+.m-panel-dark {
+  background: var(--m-ink);
+  color: var(--m-paper);
+  border: 3px solid var(--m-ink);
+}
+
+.m-panel-dark .st-on-ink-10 {
+  background-image: radial-gradient(circle, var(--m-paper) 0.4px, transparent 0.5px);
+  background-size: 4px 4px;
+}
+.m-panel-dark .st-on-ink-20 {
+  background-image: radial-gradient(circle, var(--m-paper) 0.6px, transparent 0.7px);
+  background-size: 4px 4px;
+}
+.m-panel-dark .st-on-ink-30 {
+  background-image: radial-gradient(circle, var(--m-paper) 0.8px, transparent 0.9px);
+  background-size: 3px 3px;
+}
+
+/* ── Top HUD bar ── */
+.m-hud {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 52px;
+  background: var(--m-ink);
+  color: var(--m-paper);
+  border-bottom: 4px solid var(--m-ink);
+}
+
+.m-hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  height: 100%;
+  border-right: 3px solid var(--m-paper);
+}
+
+.m-hud-brand .m-logo-mark {
+  width: 36px;
+  height: 36px;
+  background: var(--m-red);
+  color: var(--m-paper);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 900;
+  font-family: var(--m-font-display);
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+}
+
+.m-hud-brand .m-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.m-hud-brand .m-brand-text b {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.m-hud-brand .m-brand-text small {
+  font-size: 9px;
+  opacity: 0.5;
+  letter-spacing: 0.12em;
+}
+
+.m-hud-nav {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  gap: 0;
+}
+
+.m-hud-nav a {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--m-paper);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-right: 2px solid rgba(244,237,224,0.15);
+  transition: background .1s, color .1s;
+  position: relative;
+}
+
+.m-hud-nav a:hover {
+  background: rgba(244,237,224,0.08);
+}
+
+.m-hud-nav a.active {
+  background: var(--m-paper);
+  color: var(--m-ink);
+}
+
+.m-hud-nav a.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--m-red);
+}
+
+.m-hud-clock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  height: 100%;
+  border-left: 3px solid var(--m-paper);
+}
+
+.m-hud-clock small {
+  font-size: 8px;
+  opacity: 0.5;
+  letter-spacing: 0.16em;
+}
+
+.m-hud-clock b {
+  font-family: var(--m-font-mono);
+  font-size: 16px;
+  color: var(--m-paper-light);
+}
+
+/* ── Manga button: angular, thick border ── */
+.m-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: var(--m-paper);
+  border: 3px solid var(--m-ink);
+  color: var(--m-ink);
+  font-family: var(--m-font);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform .08s, background .08s, box-shadow .08s;
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  user-select: none;
+}
+
+.m-btn:hover {
+  background: var(--m-paper-dark);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--m-ink);
+}
+
+.m-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.m-btn.active {
+  background: var(--m-ink);
+  color: var(--m-paper);
+}
+
+.m-btn.active:hover {
+  background: var(--m-ink-soft);
+  box-shadow: 3px 3px 0 var(--m-red);
+}
+
+.m-btn.danger {
+  border-color: var(--m-red);
+  color: var(--m-red);
+}
+
+.m-btn.danger:hover {
+  background: var(--m-red);
+  color: var(--m-paper);
+  border-color: var(--m-red);
+  box-shadow: 3px 3px 0 var(--m-red-dark);
+}
+
+.m-btn.quiet {
+  border-color: var(--m-ink-fade);
+  color: var(--m-ink-fade);
+  background: transparent;
+  border-width: 2px;
+}
+
+.m-btn.quiet:hover {
+  border-color: var(--m-ink);
+  color: var(--m-ink);
+}
+
+.m-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Manga tag / label ── */
+.m-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 2px solid var(--m-ink);
+  background: var(--m-paper-light);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+}
+
+.m-tag.red { border-color: var(--m-red); color: var(--m-red); background: rgba(200,49,42,0.06); }
+.m-tag.blue { border-color: var(--m-blue); color: var(--m-blue); background: rgba(42,92,138,0.06); }
+.m-tag.green { border-color: var(--m-green); color: var(--m-green); background: rgba(58,125,58,0.06); }
+.m-tag.yellow { border-color: var(--m-yellow); color: var(--m-yellow); background: rgba(212,160,32,0.06); }
+.m-tag.purple { border-color: var(--m-purple); color: var(--m-purple); background: rgba(106,58,122,0.06); }
+
+/* ── Speed lines / impact effect ── */
+.m-impact {
+  position: relative;
+}
+
+.m-impact::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent 0 6px,
+    var(--m-ink) 6px 7px,
+    transparent 7px 12px
+  );
+  z-index: -1;
+  clip-path: inherit;
+  opacity: 0.15;
+}
+
+/* ── Manga gauge: angular bar with screentone fill ── */
+.m-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.m-gauge-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.m-gauge-head small {
+  color: var(--m-ink-fade);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 9px;
+}
+
+.m-gauge-head b {
+  font-family: var(--m-font-mono);
+  font-size: 14px;
+  color: var(--m-ink);
+}
+
+.m-gauge-track {
+  position: relative;
+  height: 14px;
+  background: var(--m-paper-dark);
+  border: 2px solid var(--m-ink);
+  overflow: hidden;
+}
+
+.m-gauge-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background-image: var(--st-30);
+  background-color: var(--m-ink-soft);
+  transition: width .2s;
+}
+
+.m-gauge-fill.red { background-color: var(--m-red); }
+.m-gauge-fill.blue { background-color: var(--m-blue); }
+.m-gauge-fill.green { background-color: var(--m-green); }
+.m-gauge-fill.yellow { background-color: var(--m-yellow); }
+.m-gauge-fill.purple { background-color: var(--m-purple); }
+
+/* Add screentone overlay on fills */
+.m-gauge-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--m-paper) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
+  opacity: 0.25;
+}
+
+/* Baseline marker — vertical ink line */
+.m-gauge-baseline {
+  position: absolute;
+  top: -2px; bottom: -2px;
+  width: 2px;
+  background: var(--m-paper);
+  border: 1px solid var(--m-ink);
+  z-index: 2;
+}
+
+/* ── Manga stat block ── */
+.m-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 12px;
+  background: var(--m-paper-light);
+  border: 2px solid var(--m-ink);
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+}
+
+.m-stat small {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--m-ink-fade);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.m-stat b {
+  font-family: var(--m-font-mono);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--m-ink);
+}
+
+.m-stat.alert b { color: var(--m-red); }
+.m-stat.ok b { color: var(--m-green); }
+.m-stat.warn b { color: var(--m-yellow); }
+
+/* ── Manga speech bubble ── */
+.m-bubble {
+  position: relative;
+  background: var(--m-paper-light);
+  border: 3px solid var(--m-ink);
+  padding: 12px 16px;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.m-bubble.narrator {
+  background: var(--m-paper-light);
+  border-style: double;
+  border-width: 3px;
+}
+
+.m-bubble.system {
+  background: var(--m-paper-dark);
+  background-image: var(--st-10);
+  border-style: dashed;
+}
+
+.m-bubble.error {
+  border-color: var(--m-red);
+  background: rgba(200,49,42,0.05);
+}
+
+.m-bubble.player {
+  background: var(--m-paper-light);
+  background-image: var(--st-line-10);
+}
+
+.m-bubble .m-bubble-tail {
+  position: absolute;
+  bottom: -10px;
+  left: 24px;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: var(--m-ink);
+  border-bottom: 0;
+}
+
+/* ── Manga chart: SVG with halftone fills ── */
+.m-chart {
+  background: var(--m-paper-light);
+  border: 3px solid var(--m-ink);
+  position: relative;
+  overflow: hidden;
+}
+
+.m-chart-grid {
+  stroke: var(--m-ink);
+  stroke-width: 0.4;
+  opacity: 0.15;
+  stroke-dasharray: 2 3;
+}
+
+.m-chart-axis {
+  stroke: var(--m-ink);
+  stroke-width: 1.2;
+}
+
+.m-chart-line {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Halftone dot pattern for chart fills */
+.m-chart-fill-st30 {
+  fill: url(#st30-pattern);
+}
+
+.m-chart-fill-st50 {
+  fill: url(#st50-pattern);
+}
+
+/* ── Manga checkbox / toggle ── */
+.m-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.m-check input { display: none; }
+
+.m-check .m-check-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--m-ink);
+  background: var(--m-paper-light);
+  display: grid;
+  place-items: center;
+  transition: background .1s;
+}
+
+.m-check input:checked + .m-check-box {
+  background: var(--m-ink);
+}
+
+.m-check input:checked + .m-check-box::after {
+  content: "✕";
+  color: var(--m-paper);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* ── Manga slider: angular track ── */
+.m-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.m-slider-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.m-slider-head small {
+  color: var(--m-ink-fade);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.m-slider-head b {
+  font-family: var(--m-font-mono);
+  color: var(--m-ink);
+}
+
+.m-slider-track {
+  position: relative;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.m-slider-track input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 20px;
+  margin: 0;
+}
+
+.m-slider-track input[type="range"]::-webkit-slider-runnable-track {
+  height: 10px;
+  background: var(--m-paper-dark);
+  border: 2px solid var(--m-ink);
+}
+
+.m-slider-track input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 22px;
+  background: var(--m-ink);
+  border: 2px solid var(--m-ink);
+  margin-top: -8px;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+}
+
+.m-slider-track input[type="range"]::-moz-range-track {
+  height: 10px;
+  background: var(--m-paper-dark);
+  border: 2px solid var(--m-ink);
+}
+
+.m-slider-track input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 22px;
+  background: var(--m-ink);
+  border: 2px solid var(--m-ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* ── Manga input field ── */
+.m-input {
+  background: var(--m-paper-light);
+  border: 2px solid var(--m-ink);
+  color: var(--m-ink);
+  padding: 6px 10px;
+  font-family: var(--m-font);
+  font-size: 13px;
+  outline: none;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  transition: background .1s;
+}
+
+.m-input:focus {
+  background: var(--m-paper);
+  box-shadow: inset 0 0 0 1px var(--m-ink);
+}
+
+/* ── Layout helpers ── */
+.m-row { display: flex; gap: 12px; }
+.m-col { display: flex; flex-direction: column; gap: 12px; }
+.m-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.m-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.m-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.m-flex-1 { flex: 1; }
+.m-grow { flex-grow: 1; }
+
+/* ── Section heading: thick ink bar ── */
+.m-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+}
+
+.m-heading::before {
+  content: "";
+  width: 8px;
+  height: 22px;
+  background: var(--m-ink);
+}
+
+.m-heading .m-jp {
+  font-family: var(--m-font-display);
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--m-ink-fade);
+  margin-left: -4px;
+}
+
+/* ── SFX text (sound effects) ── */
+.m-sfx {
+  font-family: var(--m-font-display);
+  font-weight: 900;
+  font-style: italic;
+  color: var(--m-red);
+  text-shadow: 2px 2px 0 var(--m-ink);
+  letter-spacing: -0.02em;
+  display: inline-block;
+  transform: rotate(-3deg);
+}
+
+/* ── Japanese watermark ── */
+.m-jp-watermark {
+  position: absolute;
+  font-family: var(--m-font-display);
+  font-size: 120px;
+  color: var(--m-ink);
+  opacity: 0.04;
+  right: 8px;
+  bottom: -20px;
+  pointer-events: none;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--m-paper-dark); border: 1px solid var(--m-ink); }
+::-webkit-scrollbar-thumb { background: var(--m-ink); border: 2px solid var(--m-paper-dark); }
+
+/* ── Main shell ── */
+.m-shell {
+  display: grid;
+  grid-template-rows: 52px minmax(0, 1fr);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.m-screen {
+  min-height: 0;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1000px) {
+  .m-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .m-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .m-grid-2, .m-grid-3, .m-grid-4 { grid-template-columns: 1fr; }
+  .m-hud-nav { overflow-x: auto; }
+  .m-hud-nav a { padding: 0 10px; font-size: 10px; }
+}

@@ -19,7 +19,7 @@ describe('Engine Core', () => {
         expect(firstRun).toEqual(secondRun);
     });
 
-    it('should clamp bounds correctly (never exceed 100 or drop below 0)', () => {
+    it('keeps bounded state in range while preserving experimental sensory values', () => {
         const input: TickInput = {
             subjectId: 'test_subject',
             pointId: 'general',
@@ -30,11 +30,15 @@ describe('Engine Core', () => {
 
         const output = runTick(input);
 
-        expect(output.nextCore.sensitivity).toBeLessThanOrEqual(100);
+        expect(output.nextCore.sensitivity).toBeGreaterThan(100);
+        expect(Number.isFinite(output.nextCore.sensitivity)).toBe(true);
         expect(output.nextCore.capacity).toBeGreaterThanOrEqual(0);
+        expect(output.nextCore.capacity).toBeLessThanOrEqual(100);
+        expect(output.nextCore.openness).toBeLessThanOrEqual(100);
         expect(output.nextCore.attitude).toBeGreaterThanOrEqual(0);
 
-        expect(output.nextPoint.localSensitivity).toBeLessThanOrEqual(100);
+        expect(output.nextPoint.localSensitivity).toBeGreaterThan(100);
+        expect(output.nextPoint.localAttitude).toBeLessThanOrEqual(100);
     });
 
     it('preserves action identity through normalization', () => {

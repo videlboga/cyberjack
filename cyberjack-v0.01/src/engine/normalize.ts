@@ -35,7 +35,8 @@ export function normalizeCore(core: Partial<SubjectCoreState>, config: EngineCon
     for (const k of Object.keys(config.core.defaults)) {
         const key = k as keyof SubjectCoreState;
         const raw = core[key] ?? config.core.defaults[key];
-        normalized[key] = clamp(ensureFiniteNumber(raw, (config.core.defaults as any)[key] || 0, key), config.core.min, config.core.max);
+        const max = key === 'sensitivity' || key === 'plasticity' ? Number.MAX_SAFE_INTEGER : config.core.max;
+        normalized[key] = clamp(ensureFiniteNumber(raw, (config.core.defaults as any)[key] || 0, key), config.core.min, max);
     }
     normalized.baselineSensitivity = clamp(
         ensureFiniteNumber(
@@ -44,7 +45,7 @@ export function normalizeCore(core: Partial<SubjectCoreState>, config: EngineCon
             'baselineSensitivity'
         ),
         config.core.min,
-        config.core.max
+        Number.MAX_SAFE_INTEGER
     );
     normalized.baselineCapacity = clamp(
         ensureFiniteNumber(
@@ -71,7 +72,7 @@ export function normalizeCore(core: Partial<SubjectCoreState>, config: EngineCon
             'baselinePlasticity'
         ),
         config.core.min,
-        config.core.max
+        Number.MAX_SAFE_INTEGER
     );
     normalized.baselineAttitude = clamp(
         ensureFiniteNumber(
@@ -92,7 +93,8 @@ export function normalizePoint(point: Partial<SubjectPointState>, config: Engine
     for (const k of Object.keys(config.point.defaults)) {
         const key = k as keyof SubjectPointState;
         const raw = (point as any)[key] ?? (config.point.defaults as any)[key];
-        normalized[key] = clamp(ensureFiniteNumber(raw, (config.point.defaults as any)[key], key), config.point.min, config.point.max);
+        const max = key === 'localSensitivity' ? Number.MAX_SAFE_INTEGER : config.point.max;
+        normalized[key] = clamp(ensureFiniteNumber(raw, (config.point.defaults as any)[key], key), config.point.min, max);
     }
     normalized.baselineLocalSensitivity = clamp(
         ensureFiniteNumber(
@@ -101,7 +103,7 @@ export function normalizePoint(point: Partial<SubjectPointState>, config: Engine
             'baselineLocalSensitivity'
         ),
         config.point.min,
-        config.point.max
+        Number.MAX_SAFE_INTEGER
     );
     normalized.baselineLocalAttitude = clamp(
         ensureFiniteNumber(

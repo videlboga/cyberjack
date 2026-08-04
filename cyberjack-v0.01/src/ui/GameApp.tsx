@@ -1,4 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  formatRelativeValue,
+  interpretCoreMetric,
+  interpretPointSensitivity,
+  InterpretableCoreMetric,
+} from '../domain/parameterInterpretation';
 import './GameApp.css';
 
 const API_BASE = '';
@@ -45,6 +51,8 @@ type SubjectState = {
     pointId: string;
     localSensitivity: number;
     localAttitude: number;
+    baselineLocalSensitivity?: number;
+    baselineLocalAttitude?: number;
     familiarity?: number;
     exposureCount?: number;
   }>;
@@ -134,7 +142,7 @@ const CATEGORY_ACTIONS: Record<string, string[]> = {
   slap:     ['slap', 'hard_slap', 'spit', 'hair_pull'],
   strike:   ['belt_strike', 'whip_strike', 'taser_shock', 'feint_strike'],
   medical:  ['needle_prick', 'ice_cube', 'hot_wax'],
-  control:  ['pose_kneeling', 'verbal_pressure', 'stare', 'close_inspection'],
+  control:  ['pose_kneeling', 'stare', 'close_inspection'],
   pose:     ['pose_standing', 'pose_sitting', 'pose_lying_down', 'pose_all_fours', 'pose_spread_eagle'],
 };
 
@@ -151,7 +159,7 @@ const filterActionsForPoint = (actions: ActionPreset[], pointId?: string | null)
   });
 };
 
-const Bar: React.FC<{ value: number; max?: number; color?: string; baseline?: number }> = ({ value, max = 100, color = '#4caf50', baseline }) => {
+const Bar: React.FC<{ value: number; max?: number; color?: string; baseline?: number; displayValue?: string; title?: string }> = ({ value, max = 100, color = '#4caf50', baseline, displayValue, title }) => {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <div className="bar-container">
@@ -159,7 +167,7 @@ const Bar: React.FC<{ value: number; max?: number; color?: string; baseline?: nu
       {baseline !== undefined && baseline > 0 && (
         <div className="bar-baseline" style={{ left: `${(baseline / max) * 100}%` }} />
       )}
-      <span className="bar-value">{Math.round(value)}</span>
+      <span className="bar-value" title={title}>{displayValue || Math.round(value)}</span>
     </div>
   );
 };
@@ -523,14 +531,23 @@ export function GameApp() {
           <div className="panel-section">
             <h3>{subjectState.name || focusedCharId}</h3>
             {CORE_METRICS.map(m => (
-              <div key={m.key} className="metric-row">
-                <span className="metric-label">{m.label}</span>
-                <Bar
-                  value={(subjectState as any)[m.key] || 0}
-                  baseline={m.baselineKey ? (subjectState as any)[m.baselineKey] : undefined}
-                  color={m.color}
-                />
-              </div>
+              (() => {
+                const value = Number((subjectState as any)[m.key] || 0);
+                const baseline = m.baselineKey ? Number((subjectState as any)[m.baselineKey] ?? value) : undefined;
+                const relative = ['sensitivity', 'capacity', 'openness', 'plasticity'].includes(String(m.key))
+                  ? interpretCoreMetric(m.key as InterpretableCoreMetric, value, baseline)
+                  : null;
+                return <div key={m.key} className="metric-row">
+                  <span className="metric-label">{m.label}</span>
+                  <Bar
+                    value={value}
+                    baseline={baseline}
+                    color={m.color}
+                    displayValue={relative ? `${relative.humanPercent}% · ${Math.round(value)}` : undefined}
+                    title={relative ? formatRelativeValue(relative) : undefined}
+                  />
+                </div>;
+              })()
             ))}
           </div>
         )}
@@ -543,7 +560,7 @@ export function GameApp() {
             belly: 'Живот', back: 'Спина', waist: 'Талия',
             arms: 'Руки', hands: 'Кисти', inner_thighs: 'Внутр. бёдра',
             legs: 'Ноги', knees: 'Колени', feet: 'Ступни',
-            buttocks: 'Ягодицы', anus: 'Анус', groin: 'Пах',
+            buttocks: 'Ягодицы', anus: 'Анус',
             vulva: 'Вульва', vagina: 'Влагалище', clitoris: 'Клитор',
             penis: 'Член', testicles: 'Яички', prostate: 'Простата',
           };
@@ -585,11 +602,14 @@ export function GameApp() {
                   const ctxLabels = byPoint[pt.id] || [];
                   const hasCtx = ctxLabels.length > 0;
                   const sens = Math.round(pt.localSensitivity || 0);
+                  const interpretedSensitivity = interpretPointSensitivity(pt.id, sens, pt.baselineLocalSensitivity);
                   const sensHigh = sens > 70;
                   return (
                     <div key={pt.id} className={`body-zone ${hasCtx ? 'active' : ''} ${sensHigh ? 'sensitive' : ''}`}>
                       <span className="zone-name">{pt.label}</span>
-                      {sens > 0 && <span className="zone-sens">чувств. {sens}</span>}
+                      {sens > 0 && <span className="zone-sens" title={formatRelativeValue(interpretedSensitivity)}>
+                        чувств. {interpretedSensitivity.humanPercent}% · индекс {sens}
+                      </span>}
                       {ctxLabels.map((label, i) => (
                         <span key={i} className="zone-ctx">{label}</span>
                       ))}

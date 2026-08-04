@@ -3,7 +3,13 @@ import { activeConfig } from './config.js';
 import { PromptPhysicalState } from './openRouterPromptBuilder.js';
 import { getBaseHumanAnatomy, AnatomyMod, Gender } from '../domain/anatomy.js';
 import { activeContextsRepo, presetRepo } from '../infrastructure/repositories.js';
-import { getActiveContextLabel } from '../domain/contextPresentation.js';
+import { getActiveContextLabel, getActiveContextPromptText } from '../domain/contextPresentation.js';
+import {
+    exceptionalCoreStateLines,
+    interpretPointSensitivity,
+    isAcquiredHyperSensitivity,
+    sensitivityBand
+} from '../domain/parameterInterpretation.js';
 
 export function translateStateToPrompt(
     subjectId: string,
@@ -52,7 +58,8 @@ export function translateStateToPrompt(
     if (activeIds.has('effect_hyperesthesia')) traits.push(cfg.stateHyperesthesia);
     const traitsText = traits.length ? traits.join(' ') : cfg.noTraitsFallback;
 
-    const globalSummary = `${sensText} ${capText} ${openText} ${attText} [СОСТОЯНИЕ РАЗУМА: ${traitsText}]`;
+    const exceptionalCore = exceptionalCoreStateLines(core);
+    const globalSummary = `${sensText} ${capText} ${openText} ${attText} [СОСТОЯНИЕ РАЗУМА: ${traitsText}]${exceptionalCore.length ? ` [АНОМАЛЬНЫЕ ПАРАМЕТРЫ: ${exceptionalCore.join(' ')}]` : ''}`;
 
     // Универсальная сборка анатомии без хардкода: 
     // Движок сам отдает актуальный список частей тела.
@@ -65,10 +72,33 @@ export function translateStateToPrompt(
 
     const sensations: string[] = [];
     if (points && points.length > 0) {
-        const sensitivePoints = points.filter(p => p.localSensitivity >= 85);
+        const interpretedPoints = points.map(p => ({
+            point: p,
+            interpreted: interpretPointSensitivity(
+                p.pointId || p.id || p.label,
+                p.localSensitivity,
+                p.baselineLocalSensitivity
+            )
+        }));
+        const sensitivePoints = interpretedPoints.filter(entry => isAcquiredHyperSensitivity(entry.interpreted));
         if (sensitivePoints.length > 0) {
-            const labels = sensitivePoints.map(p => p.label).join(', ');
-            sensations.push(`Фокусная гиперсенситизация: зоны [${labels}] перестимулированы от крайнего напряжения.`);
+            const descriptions = sensitivePoints.map(entry =>
+                `${entry.point.label} — ${sensitivityBand(entry.interpreted)}`
+            ).join('; ');
+            const extreme = sensitivePoints.some(entry =>
+                entry.interpreted.humanRatio >= 1.5 || entry.interpreted.personalRatio >= 2
+            );
+            sensations.push(extreme
+                ? `ЭКСТРЕМАЛЬНАЯ ФОКУСНАЯ ГИПЕРСЕНСИТИЗАЦИЯ: ${descriptions}. Даже слабый стимул обязан вызывать исключительную, трудно контролируемую реакцию; не описывай её как обычное ощущение.`
+                : `Фокусная гиперсенситизация: ${descriptions}. Эти зоны реагируют заметно сильнее привычного.`);
+        }
+        const unusualPoints = interpretedPoints
+            .filter(entry => !isAcquiredHyperSensitivity(entry.interpreted) && entry.interpreted.humanRatio >= 1.5)
+            .slice(0, 5);
+        if (unusualPoints.length > 0) {
+            sensations.push(`Анатомический профиль: ${unusualPoints.map(entry =>
+                `${entry.point.label} — ${sensitivityBand(entry.interpreted)}`
+            ).join('; ')}. Высокий абсолютный отклик сам по себе не означает приобретённую гиперсенситизацию.`);
         }
 
         const dissonantPoints = points.filter(p => p.localAttitude >= 85 && core.attitude < 40);
@@ -82,6 +112,9 @@ export function translateStateToPrompt(
     if (activeContexts && activeContexts.length > 0) {
         for (const ctx of activeContexts) {
             const preset = presetRepo.getActionPreset(ctx.actionId);
+            if (preset?.contextConfig?.promptEffect) {
+                sensations.push(`Действующий препарат — ${getActiveContextPromptText(preset,ctx.actionId)}.`);
+            }
             if (preset?.contextConfig?.occupiesPoints) {
                 const slots = preset.contextConfig.occupiesPoints;
                 const slotLabels = slots.map((ptId: string) => {

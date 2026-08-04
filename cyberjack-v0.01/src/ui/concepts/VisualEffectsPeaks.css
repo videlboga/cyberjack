@@ -1,0 +1,331 @@
+.fx-peak-montage {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  --peak-accent: var(--ji-lcd);
+}
+.fx-peak-montage::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 15%,
+    color-mix(in srgb, var(--ji-bg) 72%, transparent) 100%
+  );
+  animation: fx-peak-exposure 3.05s ease both;
+}
+.fx-peak-action,
+.fx-peak-face {
+  position: absolute;
+  overflow: hidden;
+  background: var(--ji-bg);
+}
+.fx-peak-action img,
+.fx-peak-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fx-peak-action {
+  z-index: 1;
+  left: 5%;
+  bottom: 9%;
+  width: 58%;
+  height: 35%;
+  animation: fx-peak-action 3.05s cubic-bezier(0.18, 0.72, 0.18, 1) both;
+}
+.fx-peak-face {
+  z-index: 2;
+  width: 30%;
+  height: 40%;
+}
+.fx-peak-face--primary {
+  left: 34%;
+  bottom: 24%;
+  animation: fx-peak-primary 3.05s cubic-bezier(0.18, 0.72, 0.18, 1) both;
+}
+.fx-peak-face--secondary {
+  z-index: 3;
+  right: 18%;
+  top: 17%;
+  width: 34%;
+  height: 46%;
+  animation: fx-peak-secondary 3.05s cubic-bezier(0.18, 0.72, 0.18, 1) both;
+}
+.fx-peak-face--tertiary {
+  z-index: 4;
+  right: 3%;
+  top: 5%;
+  width: 38%;
+  height: 51%;
+  animation: fx-peak-tertiary 3.05s cubic-bezier(0.18, 0.72, 0.18, 1) both;
+}
+.fx-peak-copy {
+  position: absolute;
+  z-index: 4;
+  right: 5%;
+  bottom: 11%;
+  width: min(41%, 310px);
+  padding: 12px 15px;
+  border-left: 3px solid var(--peak-accent);
+  background: color-mix(in srgb, var(--ji-bg) 88%, transparent);
+  animation: fx-peak-copy 3.05s ease both;
+}
+.fx-peak-copy small,
+.fx-peak-copy b,
+.fx-peak-copy span {
+  display: block;
+}
+.fx-peak-copy small {
+  color: var(--peak-accent);
+  font-size: 7px;
+  letter-spacing: 0.14em;
+}
+.fx-peak-copy b {
+  margin: 2px 0 4px;
+  color: var(--ji-text);
+  font-size: 20px;
+  line-height: 1;
+}
+.fx-peak-copy span {
+  color: var(--ji-secondary);
+  font-size: 9px;
+}
+
+.fx-peak-overload {
+  --peak-accent: #ff654f;
+}
+.fx-peak-overload .fx-peak-action,
+.fx-peak-overload .fx-peak-face {
+  animation-timing-function: steps(1, end);
+}
+.fx-peak-overload .fx-peak-action {
+  animation-name: fx-peak-overload-action;
+}
+.fx-peak-overload .fx-peak-face--primary {
+  animation-name: fx-peak-overload-primary;
+}
+.fx-peak-breakdown {
+  --peak-accent: #ff7b72;
+}
+.fx-peak-breakdown .fx-peak-face--primary {
+  left: auto;
+  right: 5%;
+}
+.fx-peak-breakdown .fx-peak-face--secondary {
+  right: 24%;
+}
+.fx-peak-breakdown .fx-peak-face--tertiary {
+  right: 38%;
+  top: 6%;
+}
+.fx-peak-exhaustion {
+  --peak-accent: #a7b0ad;
+}
+.fx-peak-exhaustion .fx-peak-action {
+  filter: saturate(0.35);
+  animation-name: fx-peak-exhaustion-action;
+}
+.fx-peak-exhaustion .fx-peak-face--primary {
+  animation-name: fx-peak-exhaustion-primary;
+}
+.fx-peak-exhaustion .fx-peak-face--secondary {
+  top: 25%;
+}
+.fx-peak-exhaustion .fx-peak-face--tertiary {
+  top: 39%;
+}
+
+@keyframes fx-peak-exposure {
+  0%,
+  6% {
+    opacity: 0;
+  }
+  16%,
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fx-peak-action {
+  0%,
+  5% {
+    opacity: 0;
+    transform: translate(-16%, 12%) scale(0.94);
+  }
+  18%,
+  68% {
+    opacity: 1;
+    transform: none;
+  }
+  84%,
+  100% {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+}
+@keyframes fx-peak-primary {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translate(18%, -4%) scale(0.93);
+  }
+  21%,
+  42% {
+    opacity: 1;
+    transform: none;
+  }
+  55%,
+  100% {
+    opacity: 0;
+    transform: translate(-4%, 2%) scale(1.025);
+  }
+}
+@keyframes fx-peak-secondary {
+  0%,
+  29% {
+    opacity: 0;
+    transform: translate(12%, 4%) scale(0.95);
+  }
+  40%,
+  65% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+@keyframes fx-peak-tertiary {
+  0%,
+  48% {
+    opacity: 0;
+    transform: translate(14%, -8%) scale(0.94);
+  }
+  59%,
+  89% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(2%, -2%) scale(1.015);
+  }
+}
+@keyframes fx-peak-copy {
+  0%,
+  55% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  66%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fx-peak-overload-action {
+  0%,
+  7% {
+    opacity: 0;
+  }
+  8%,
+  14% {
+    opacity: 1;
+    filter: contrast(1.6) brightness(1.15);
+  }
+  15%,
+  21% {
+    opacity: 0.08;
+  }
+  22%,
+  71% {
+    opacity: 1;
+    filter: contrast(1.22);
+  }
+  86%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fx-peak-overload-primary {
+  0%,
+  15% {
+    opacity: 0;
+  }
+  16%,
+  24% {
+    opacity: 1;
+    filter: contrast(1.5);
+  }
+  25%,
+  31% {
+    opacity: 0.08;
+  }
+  32%,
+  59% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fx-peak-exhaustion-action {
+  0%,
+  6% {
+    opacity: 0;
+    transform: translateY(-5%);
+  }
+  20%,
+  55% {
+    opacity: 0.78;
+    transform: none;
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translateY(8%) scale(0.98);
+  }
+}
+@keyframes fx-peak-exhaustion-primary {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateY(-8%) scale(0.96);
+  }
+  21%,
+  55% {
+    opacity: 1;
+    transform: translateY(5%);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateY(10%);
+  }
+}
+
+@media (max-width: 900px) {
+  .fx-peak-action {
+    width: 67%;
+    height: 31%;
+  }
+  .fx-peak-face {
+    width: 45%;
+    height: 48%;
+  }
+  .fx-peak-copy {
+    width: 46%;
+  }
+}

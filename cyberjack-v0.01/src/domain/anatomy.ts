@@ -23,7 +23,7 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
         { id: 'neck', label: 'Шея', sens: 80, att: 30 },
         
         { id: 'shoulders', label: 'Плечи', sens: 30, att: 80 },
-        { id: 'chest', label: gender === 'female' ? 'Грудь (Молочные железы)' : 'Грудь', sens: gender === 'female' ? 85 : 60, att: 30 },
+        { id: 'chest', label: 'Грудь', sens: gender === 'female' ? 85 : 60, att: 30 },
         { id: 'nipples', label: 'Соски', sens: 95, att: 10, parentId: 'chest' },
         { id: 'belly', label: 'Живот', sens: 50, att: 40 },
         { id: 'back', label: 'Спина', sens: 40, att: 60, providesFunctions: ['stabilize_posture'] },
@@ -42,9 +42,8 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
     ];
 
     if (gender === 'male' || gender === 'androgynous') {
-        points.push({ id: 'groin', label: 'Пах', sens: 90, att: 10 });
-        points.push({ id: 'penis', label: 'Член', sens: 100, att: 5, parentId: 'groin' });
-        points.push({ id: 'testicles', label: 'Яички', sens: 100, att: 5, parentId: 'groin' });
+        points.push({ id: 'penis', label: 'Член', sens: 100, att: 5 });
+        points.push({ id: 'testicles', label: 'Яички', sens: 100, att: 5 });
         points.push({ id: 'prostate', label: 'Простата', sens: 100, att: 5, parentId: 'anus' });
     }
     if (gender === 'female' || gender === 'androgynous') {
@@ -76,7 +75,7 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
         
         { id: 'slot_room', label: 'Слот: Окружение (Комната)', sens: 50, att: 50 },
         { id: 'slot_social', label: 'Слот: Социальное', sens: 50, att: 50 },
-        { id: 'systemic', label: 'Организм (Системное)', sens: 50, att: 50 }
+        { id: 'systemic', label: 'Всё тело', sens: 50, att: 50 }
     );
 
     return points;

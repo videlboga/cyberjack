@@ -15,7 +15,7 @@ describe('derived telemetry', () => {
             }
         });
         expect(snapshot.signals.find(item => item.id === 'pulse')?.trend).toBe('up');
-        expect(snapshot.signals.find(item => item.id === 'localResponse')?.value).toBe('гиперреактивный');
+        expect(snapshot.signals.find(item => item.id === 'localResponse')?.value).toBe('аномально высокий');
         expect(formatTelemetryForPrompt(snapshot)).not.toMatch(/пластичност|открытост|attitude/i);
     });
 

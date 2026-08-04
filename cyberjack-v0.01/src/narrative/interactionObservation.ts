@@ -37,7 +37,46 @@ function roleFor(id: string, type?: string): ObservationContext['role'] {
 }
 
 function signed(value: number): string {
-    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}`;
+    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}`;
+}
+
+function sensoryExperienceText(
+    action: CompiledAction,
+    experiencedIntensity: number,
+    overload: number,
+    pointLabel?: string
+): string {
+    if (action.actionKey === 'verbal_pressure' || action.tags?.includes('mental')) {
+        return 'Ты слышишь содержание и тон сказанного; нового физического воздействия в этот момент нет.';
+    }
+    const authored = action.sensory;
+    const details = [
+        authored?.stimulus || action.description,
+        authored?.texture,
+        authored?.rhythm,
+        authored?.bodilyResponse,
+        authored?.aftereffect,
+    ].filter(Boolean);
+    const intensity = experiencedIntensity >= 12
+        ? 'Ощущение подавляет остальные сигналы тела и почти не оставляет места для связной мысли.'
+        : experiencedIntensity >= 7
+            ? 'Ощущение яркое, настойчивое и всё время возвращает внимание к месту контакта.'
+            : experiencedIntensity >= 3
+                ? 'Ощущение отчётливое, но его детали ещё можно разделять.'
+                : 'Ощущение слабое и локальное.';
+    const texture = action.sharpness >= 0.7
+        ? 'Контакт воспринимается резко, с отчётливой границей каждого импульса.'
+        : action.sharpness <= -0.15
+            ? 'Контакт мягкий, растянутый и без резкой границы.'
+            : action.contact >= 0.75
+                ? 'Контакт плотный и непрерывно ощущается телом.'
+                : '';
+    const overloadText = overload >= 8
+        ? 'Отдельные нюансы начинают сливаться в общий сенсорный напор.'
+        : '';
+    const zone = pointLabel ? `Ты яснее всего чувствуешь это в области «${pointLabel.toLowerCase()}».` : '';
+    const feltDetails = details.map(detail => /^ты\b/iu.test(String(detail)) ? String(detail) : `Ты ощущаешь: ${detail}`);
+    return [zone, ...feltDetails, intensity, texture, overloadText].filter(Boolean).join(' ');
 }
 
 export function buildInteractionObservation(input: {
@@ -48,7 +87,7 @@ export function buildInteractionObservation(input: {
     previousCore: SubjectCoreState;
     output: TickOutput;
     previousContextIds?: string[];
-    notableEvent?: 'positive_discharge' | 'breakdown' | 'exhaustion';
+    notableEvent?: 'positive_discharge' | 'peak_overload' | 'breakdown' | 'exhaustion';
 }): InteractionObservation {
     const { subjectId, pointId, pointLabel, action, previousCore, output } = input;
     const result = output.result;
@@ -72,7 +111,11 @@ export function buildInteractionObservation(input: {
     const discomfort = Number(result.discomfort || 0);
     const overload = Number(result.overload || 0);
     const engagement = Number(result.engagement || 0);
+    const experiencedIntensity = Number(result.experiencedIntensity || 0);
+    const sensoryAmplification = Number(result.sensoryAmplification || 1);
+    const exceptionalSensoryLoad = Number(result.exceptionalSensoryLoad || 0);
     const mixed = pleasure > 0.5 && discomfort > 0.5;
+    const sensoryExperience = sensoryExperienceText(action, experiencedIntensity, overload, pointLabel);
 
     const stateText: Record<InteractionObservation['behavioralState'], string> = {
         responsive: 'Актив остаётся в контакте и реагирует на воздействие.',
@@ -94,6 +137,15 @@ export function buildInteractionObservation(input: {
         : pleasure > Math.max(discomfort * 1.25, 2) ? 'Преобладает положительный телесный отклик.'
         : overload > 5 ? 'Главный наблюдаемый эффект — нарастающая перегрузка.'
         : 'Реакция сдержанная, без явного преобладания удовольствия или дискомфорта.';
+    const amplificationText = sensoryAmplification >= 3
+        ? `Даже слабейшие детали воздействия разрастаются до исключительной силы и захватывают твоё внимание целиком.`
+        : sensoryAmplification >= 2
+            ? `Обычное воздействие ощущается тебе непропорционально мощным и не оставляет места для будничной реакции.`
+            : sensoryAmplification >= 1.5
+                ? `Ты переживаешь воздействие заметно ярче и сильнее обычного.`
+                : sensoryAmplification >= 1.15
+                    ? `Ты ощущаешь воздействие ярче обычного.`
+                    : '';
     const learningEffect = Number(result.learningEffect || 0);
     const familiarityDelta = (output.nextPoint.familiarity || 0) - (output.tickMeta.inputs.point.familiarity || 0);
     const sensitivityDelta = output.nextPoint.localSensitivity - output.tickMeta.inputs.point.localSensitivity;
@@ -104,13 +156,13 @@ export function buildInteractionObservation(input: {
         : sensitivityDelta > 0.05 ? 'Текущая локальная чувствительность выросла, но ещё не закрепилась.'
         : sensitivityDelta < -0.05 ? 'Текущая локальная чувствительность снизилась.' : '';
     const subjectiveState: Record<InteractionObservation['behavioralState'], string> = {
-        responsive: 'Я сохраняю контакт и различаю воздействие.', subspace: 'Мысли расплываются, реакции становятся медленнее.',
-        overload: 'Ощущений слишком много, мне трудно их разделить.', freeze: 'Я замираю и не могу свободно ответить движением.',
-        panic: restrained ? 'Я пытаюсь отстраниться, но фиксация не даёт разорвать контакт.' : 'Я пытаюсь отстраниться и прекратить контакт.',
-        defiance: restrained ? 'Я сопротивляюсь, хотя фиксация удерживает меня в контакте.' : 'Я сопротивляюсь и стараюсь не позволить продолжить.',
+        responsive: 'Ты сохраняешь осмысленный контакт и различаешь воздействие.', subspace: 'Твои мысли расплываются, а реакции становятся медленнее.',
+        overload: 'Ощущений слишком много, и тебе трудно разделить их.', freeze: 'Ты замираешь и не можешь свободно ответить движением.',
+        panic: restrained ? 'Ты пытаешься отстраниться, но фиксация не даёт разорвать контакт.' : 'Ты пытаешься отстраниться и прекратить контакт.',
+        defiance: restrained ? 'Ты сопротивляешься, хотя фиксация удерживает тебя в контакте.' : 'Ты сопротивляешься и стараешься не позволить продолжить.',
         unresponsive: regainingReflexes
             ? 'Ощущения начинают возвращаться отдельными фрагментами, но ответить или удержать контакт ещё не получается.'
-            : 'Сил почти не осталось; внешнее воздействие доходит как будто издалека.',
+            : 'Сил почти не осталось; внешнее воздействие доходит до тебя как будто издалека.',
     };
 
     const tensionDelta = output.nextCore.tension - previousCore.tension;
@@ -132,22 +184,33 @@ export function buildInteractionObservation(input: {
             : acceptingLess ? 'Общее принятие контакта снижается.'
             : acceptingMore ? 'Общее принятие контакта растёт.' : '';
     const subjectiveAcceptance = pleasure > discomfort && acceptingLess
-        ? 'Телу приятно, но это не означает согласия или доверия: после контакта я сильнее закрываюсь.'
+        ? 'Твоему телу приятно, но это не означает согласия или доверия: после контакта ты сильнее закрываешься.'
         : discomfort > pleasure && acceptingMore
-            ? 'Ощущение неприятное, хотя сам контакт я отвергаю чуть меньше.'
-            : acceptingLess ? 'После этого я хуже принимаю происходящее и сильнее закрываюсь.'
-            : acceptingMore ? 'После этого мне легче принимать происходящее.' : '';
+            ? 'Ощущение неприятное, хотя сам контакт ты отвергаешь чуть меньше.'
+            : acceptingLess ? 'После этого ты хуже принимаешь происходящее и сильнее закрываешься.'
+            : acceptingMore ? 'После этого тебе легче принимать происходящее.' : '';
     const arousalText = forcedArousal ? 'Резкий стимул возвращает осмысленную реакцию, но ресурс не восстановлен: контакт удерживается нервной активацией.' : '';
-    const uiText = [stateText[behavioralState], arousalText, restText, sensation, acceptanceText, learningText].filter(Boolean).join(' ');
-    const subjectiveText = `${subjectiveState[behavioralState]} ${forcedArousal ? 'Сил по-прежнему нет, но резкая активация не даёт снова провалиться.' : ''} ${mixed ? 'В ощущении одновременно есть приятная и неприятная составляющие.' : discomfort > pleasure ? 'Неприятная составляющая сильнее.' : pleasure > discomfort ? 'Приятная телесная составляющая сильнее.' : 'Я не различаю явной эмоциональной окраски.'} ${subjectiveAcceptance}`.trim();
-    const technicalText = `Контакт: ${contact}. Состояние: ${behavioralState}. P ${pleasure.toFixed(1)}, D ${discomfort.toFixed(1)}, O ${overload.toFixed(1)}, E ${engagement.toFixed(1)}; tension ${signed(output.nextCore.tension - previousCore.tension)}, capacity ${signed(output.nextCore.capacity - previousCore.capacity)}, sensitivity ${signed(sensitivityDelta)}, baseline ${signed(baselineSensitivityDelta)}.`;
+    const verbal = action.actionKey === 'verbal_pressure' || action.tags?.includes('mental');
+    const valenceExperience = verbal
+        ? (mixed ? 'Смысл сказанного вызывает противоречивое отношение.'
+            : discomfort > pleasure ? 'Сказанное воспринимается неприятно.'
+            : pleasure > discomfort ? 'Сказанное воспринимается положительно.'
+            : 'Сказанное не вызывает ясной эмоциональной оценки.')
+        : (mixed ? 'В ощущении одновременно есть приятная и неприятная составляющие.'
+            : discomfort > pleasure ? 'Неприятная составляющая сильнее.'
+            : pleasure > discomfort ? 'Приятная телесная составляющая сильнее.'
+            : 'Ты не различаешь явной эмоциональной окраски.');
+    const uiText = [stateText[behavioralState], arousalText, restText, amplificationText, sensation, acceptanceText, learningText].filter(Boolean).join(' ');
+    const subjectiveText = `${subjectiveState[behavioralState]} ${sensoryExperience} ${forcedArousal ? 'Сил по-прежнему нет, но резкая активация не даёт тебе снова провалиться.' : ''} ${verbal ? '' : amplificationText} ${valenceExperience} ${subjectiveAcceptance}`.trim();
+    const technicalText = `Контакт: ${contact}. Состояние: ${behavioralState}. P ${pleasure.toFixed(1)}, D ${discomfort.toFixed(1)}, O ${overload.toFixed(1)}, E ${engagement.toFixed(1)}; интенсивность ${experiencedIntensity.toFixed(1)}, сенсорное усиление ${sensoryAmplification.toFixed(2)}×, сверхнагрузка ${exceptionalSensoryLoad.toFixed(1)}; tension ${signed(output.nextCore.tension - previousCore.tension)}, capacity ${signed(output.nextCore.capacity - previousCore.capacity)}, sensitivity ${signed(sensitivityDelta)}, baseline ${signed(baselineSensitivityDelta)}.`;
 
     const transitions: InteractionObservation['transitions'] = [];
-    if (input.notableEvent === 'positive_discharge') transitions.push({ kind: 'discharge', title: 'Разрядка', text: 'Накопленное напряжение достигает пика и разрешается глубокой физиологической разрядкой.', severity: 'major' });
-    if (input.notableEvent === 'breakdown') transitions.push({ kind: 'breakdown', title: 'Нервный срыв', text: 'Пиковое напряжение разрешается паническим истощением вместо положительной разрядки.', severity: 'danger' });
-    if (input.notableEvent === 'exhaustion') transitions.push({ kind: 'breakdown', title: 'Истощение ресурса', text: 'Ресурс исчерпан до достижения разрядки; актив остаётся опустошённым и слабо реагирует.', severity: 'danger' });
+    if (input.notableEvent === 'positive_discharge') transitions.push({ kind: 'discharge', title: 'Оргазм', text: 'Накопленное напряжение достигает пика и разрешается оргазмом.', severity: 'major' });
+    if (input.notableEvent === 'peak_overload') transitions.push({ kind: 'overload', title: 'Смешанная перегрузка', text: 'Активация достигает предела, но остаётся смешанной: оргазма или нервного срыва не происходит.', severity: 'major' });
+    if (input.notableEvent === 'breakdown') transitions.push({ kind: 'breakdown', title: 'Нервный срыв', text: 'Устойчиво негативная активация срывает контроль, но не означает автоматической потери сознания.', severity: 'danger' });
+    if (input.notableEvent === 'exhaustion') transitions.push({ kind: 'breakdown', title: 'Истощение ресурса', text: 'Ресурс исчерпан до достижения оргазма; актив остаётся опустошённым и слабо реагирует.', severity: 'danger' });
     if (action.actionKey === 'wait' && tensionDelta <= -8 && !input.notableEvent) {
-        transitions.push({ kind: 'recovery', title: 'Напряжение снижается', text: `Пауза позволяет активу расслабиться: напряжение ${signed(tensionDelta)} без разрядки.`, severity: 'major' });
+        transitions.push({ kind: 'recovery', title: 'Напряжение снижается', text: `Пауза позволяет активу расслабиться: напряжение ${signed(tensionDelta)} без оргазма.`, severity: 'major' });
     }
     if (action.actionKey === 'wait' && previousBehavior === 'unresponsive' && behavioralState === 'unresponsive' && previousCore.capacity <= 10 && output.nextCore.capacity > 10) {
         transitions.push({ kind: 'recovery', title: 'Первые реакции', text: 'Дыхание выравнивается и возвращаются отдельные рефлексы, но осмысленный контакт ещё не восстановлен.', severity: 'major' });
@@ -169,12 +232,19 @@ export function buildInteractionObservation(input: {
         currentState.description += ' Контакт удерживается нервной активацией при практически исчерпанном ресурсе.';
     }
     if (ids.has('effect_refractory')) {
-        currentState.description += ' После разрядки общая реактивность временно снижена.';
+        currentState.description += ' После оргазма общая реактивность временно снижена.';
     }
 
     return {
-        action: { id: action.actionKey, label: action.label, pointId, pointLabel }, contact, behavioralState,
-        reaction: { pleasure, discomfort, overload, engagement, mixed, appraisal: output.result.finalValence },
+        action: {
+            id: action.actionKey,
+            label: action.label,
+            pointId,
+            pointLabel,
+            description: action.description,
+            sensory: action.sensory,
+        }, contact, behavioralState,
+        reaction: { pleasure, discomfort, overload, engagement, mixed, appraisal: output.result.finalValence, experiencedIntensity, sensoryAmplification, exceptionalSensoryLoad },
         learning: { effect: learningEffect, familiarityDelta, sensitivityDelta, baselineSensitivityDelta },
         changes: {
             tension: output.nextCore.tension - previousCore.tension,
@@ -199,6 +269,6 @@ export function buildCurrentStateObservationText(subjectId: string, core: Subjec
         overload: 'Актив перегружен ощущениями и реагирует с задержкой.', freeze: 'Актив неподвижен и скован.', panic: 'Актив находится в панике и стремится прекратить воздействие.',
         defiance: 'Актив собран и активно отвергает воздействие.', unresponsive: 'Актив истощён и почти не отвечает на внешние стимулы.',
     };
-    const tension = core.tension >= 80 ? 'Напряжение близко к разрядке.' : core.tension >= 45 ? 'Напряжение заметно накоплено.' : 'Напряжение остаётся управляемым.';
+    const tension = core.tension >= 80 ? 'Напряжение близко к оргазму.' : core.tension >= 45 ? 'Напряжение заметно накоплено.' : 'Напряжение остаётся управляемым.';
     return `${stateDescriptions[state]} ${tension}`;
 }

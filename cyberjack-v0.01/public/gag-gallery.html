@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Gag Gallery — Matrix</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #1a1a2e; color: #e0e0e0; font-family: system-ui, sans-serif; padding: 16px; }
+h1 { color: #8be9fd; margin-bottom: 10px; font-size: 18px; }
+#filters { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+#filters select { background: #2a2a4a; color: #e0e0e0; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; }
+#stats { margin-bottom: 10px; color: #888; font-size: 13px; }
+#gallery { display: flex; flex-wrap: wrap; gap: 8px; }
+.card { flex: 1 1 280px; max-width: 350px; background: #2a2a4a; border-radius: 6px; overflow: hidden; border: 2px solid transparent; margin-bottom: 8px; }
+.card.rejected { border-color: #ff5555; }
+.card.approved { border-color: #50fa7b; opacity: 0.4; }
+.card img { width: 100%; height: auto; display: block; cursor: pointer; }
+.card .label { padding: 4px 7px; font-size: 10px; color: #aaa; word-break: break-all; }
+.card .label b { color: #8be9fd; }
+.card .actions { padding: 4px 7px; display: flex; gap: 5px; }
+.card .actions button { flex: 1; padding: 4px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+.btn-approve { background: #50fa7b; color: #1a1a2e; }
+.btn-reject { background: #ff5555; color: #fff; }
+#pager { margin-top: 12px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+#pager button { background: #2a2a4a; color: #e0e0e0; border: 1px solid #444; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
+#pager button:disabled { opacity: 0.3; }
+#pager span { color: #888; font-size: 13px; }
+#savebar { position: fixed; bottom: 16px; right: 16px; display: flex; gap: 8px; align-items: center; }
+#savebar button { background: #50fa7b; color: #1a1a2e; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; }
+#savebar span { color: #888; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Gag Gallery — Calibration Matrix</h1>
+<div id="filters">
+  <select id="fMatrix"><option value="">Both</option><option value="calibration-core">calibration-core</option><option value="calibration-v4">calibration-v4</option></select>
+  <select id="fChar"><option value="">All chars</option><option value="mira">Mira</option><option value="iona">Iona</option><option value="nika">Nika</option></select>
+  <select id="fBlindfold"><option value="">All gag types</option><option value="__gag__">gag only</option><option value="__blindfold_gag__">blindfold+gag</option></select>
+</div>
+<div id="stats"></div>
+<div id="gallery"></div>
+<div id="pager">
+  <button id="prevBtn">← Назад</button>
+  <span id="pageInfo"></span>
+  <button id="nextBtn">Вперёд →</button>
+</div>
+<div id="savebar">
+  <span id="countInfo">0</span>
+  <button onclick="saveList()">Скопировать список</button>
+</div>
+<script>
+let allItems = [];
+let filtered = [];
+let reviewed = {};
+let currentPage = 0;
+const PAGE_SIZE = 30;
+
+async function loadIndex() {
+  // Fetch all files from both calibration dirs via review-api
+  const res = await fetch('/review-api/index?page=0&page_size=1&category=calibration-core');
+  const data = await res.json();
+  const totalCore = data.total;
+  
+  // Fetch all calibration-core items (paginated internally)
+  const allCore = [];
+  for (let p = 0; p < Math.ceil(totalCore / 500); p++) {
+    const r = await fetch(`/review-api/index?page=${p}&page_size=500&category=calibration-core`);
+    const d = await r.json();
+    allCore.push(...d.items);
+  }
+  
+  // Fetch calibration-v4
+  const res2 = await fetch('/review-api/index?page=0&page_size=1&category=calibration-v4');
+  const data2 = await res2.json();
+  const totalV4 = data2.total;
+  const allV4 = [];
+  for (let p = 0; p < Math.ceil(totalV4 / 500); p++) {
+    const r = await fetch(`/review-api/index?page=${p}&page_size=500&category=calibration-v4`);
+    const d = await r.json();
+    allV4.push(...d.items);
+  }
+  
+  // Filter only gag images
+  allItems = [...allCore, ...allV4].filter(i => {
+    const fname = i.path.split('/').pop();
+    return fname.includes('__gag__') || fname.includes('__blindfold_gag__');
+  });
+  
+  // Load reviewed
+  reviewed = JSON.parse(localStorage.getItem('gag_matrix_reviewed') || '{}');
+  applyFilters();
+}
+
+function applyFilters() {
+  const fMatrix = document.getElementById('fMatrix').value;
+  const fChar = document.getElementById('fChar').value;
+  const fBlindfold = document.getElementById('fBlindfold').value;
+  
+  filtered = allItems.filter(i => {
+    if (fMatrix && i.category !== fMatrix) return false;
+    if (fChar && i.char !== fChar) return false;
+    const fname = i.path.split('/').pop();
+    if (fBlindfold === '__gag__' && !fname.includes('__gag__')) return false;
+    if (fBlindfold === '__blindfold_gag__' && !fname.includes('__blindfold_gag__')) return false;
+    return true;
+  });
+  
+  currentPage = 0;
+  render();
+}
+
+function approve(path) {
+  reviewed[path] = 'approved';
+  localStorage.setItem('gag_matrix_reviewed', JSON.stringify(reviewed));
+  const card = document.querySelector(`[data-path="${CSS.escape(path)}"]`);
+  if (card) { card.classList.add('approved'); card.classList.remove('rejected'); }
+  updateCount();
+}
+
+function reject(path) {
+  if (reviewed[path] === 'rejected') {
+    delete reviewed[path];
+    const card = document.querySelector(`[data-path="${CSS.escape(path)}"]`);
+    if (card) card.classList.remove('rejected');
+  } else {
+    reviewed[path] = 'rejected';
+    localStorage.setItem('gag_matrix_reviewed', JSON.stringify(reviewed));
+    const card = document.querySelector(`[data-path="${CSS.escape(path)}"]`);
+    if (card) card.classList.add('rejected');
+  }
+  updateCount();
+}
+
+function updateCount() {
+  const r = Object.entries(reviewed).filter(([_,s]) => s === 'rejected').length;
+  const a = Object.entries(reviewed).filter(([_,s]) => s === 'approved').length;
+  document.getElementById('countInfo').textContent = `Отклонено: ${r} | Одобрено: ${a}`;
+  document.getElementById('stats').textContent = `Всего: ${filtered.length} | Отклонено: ${r} | Одобрено: ${a}`;
+}
+
+function saveList() {
+  const rejected = Object.entries(reviewed).filter(([_,s]) => s === 'rejected').map(([p]) => p).join('\n');
+  navigator.clipboard.writeText(rejected);
+  alert('Скопировано');
+}
+
+function render() {
+  const start = currentPage * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  
+  document.getElementById('pageInfo').textContent = `Стр. ${currentPage+1} / ${totalPages || 1}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+  
+  updateCount();
+  
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = '';
+  
+  for (const item of pageItems) {
+    const path = item.path;
+    const fname = path.split('/').pop();
+    const st = reviewed[path];
+    
+    const card = document.createElement('div');
+    card.className = 'card' + (st === 'rejected' ? ' rejected' : '') + (st === 'approved' ? ' approved' : '');
+    card.dataset.path = path;
+    
+    // Parse filename for display
+    const parts = fname.replace('.png','').split('__');
+    const pose = path.split('/')[2] || '';
+    
+    card.innerHTML = `
+      <img src="${item.url}" loading="lazy" onclick="window.open('${item.url}')">
+      <div class="label"><b>${item.char || '?'}</b> — ${pose} — ${parts[0] || ''} — ${parts[2] || ''}</div>
+      <div class="actions">
+        <button class="btn-approve" onclick="approve('${path.replace(/'/g, '&#39;')}')">✓ OK</button>
+        <button class="btn-reject" onclick="reject('${path.replace(/'/g, '&#39;')}')">✕ Перегенерить</button>
+      </div>
+    `;
+    gallery.appendChild(card);
+  }
+}
+
+document.getElementById('fMatrix').onchange = applyFilters;
+document.getElementById('fChar').onchange = applyFilters;
+document.getElementById('fBlindfold').onchange = applyFilters;
+document.getElementById('prevBtn').onclick = () => { if (currentPage > 0) { currentPage--; render(); } };
+document.getElementById('nextBtn').onclick = () => { currentPage++; render(); };
+
+loadIndex();
+</script>
+</body>
+</html>

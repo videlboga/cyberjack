@@ -11,6 +11,7 @@ interface PreferenceData {
     points?: Record<string, number>;
     actions?: Record<string, number>;
     contexts?: Record<string, number>;
+    tags?: Record<string, number>;
 }
 
 export interface ActionScoreResult {
@@ -65,9 +66,12 @@ export class ActionScorer {
             
             // Если действие имеет определенные тэги, мы можем их проверить
             let contextBonus = 0;
-            if (preset.tags && preferences.contexts) {
+            if (preset.tags) {
                 for (const tag of preset.tags) {
-                    contextBonus += (preferences.contexts[tag] || 0) * 5;
+                    // Older saves accidentally looked for semantic tags in the
+                    // context-id bucket. Keep that fallback while using the
+                    // dedicated learned tag bucket going forward.
+                    contextBonus += ((preferences.tags?.[tag] ?? preferences.contexts?.[tag]) || 0) * 5;
                 }
             }
 

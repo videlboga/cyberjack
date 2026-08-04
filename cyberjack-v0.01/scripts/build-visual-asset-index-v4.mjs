@@ -10,6 +10,7 @@ const roots = [
   'character-images/rendered',
   'character-images/interactions-expanded',
   'character-images/interactions',
+  'character-images/intimacy',
   'character-images/calibration-v4',
   'character-images/calibration-interactions-v4',
   'character-images/devices-v4'
@@ -49,6 +50,7 @@ const generated = {
     rendered: countBelow('/character-images/rendered/'),
     interactionsExpanded: countBelow('/character-images/interactions-expanded/'),
     interactionsSparse: countBelow('/character-images/interactions/'),
+    intimacy: countBelow('/character-images/intimacy/'),
     calibrationV4: countBelow('/character-images/calibration-v4/'),
     calibrationInteractionsV4: countBelow('/character-images/calibration-interactions-v4/'),
     devicesV4: countBelow('/character-images/devices-v4/')

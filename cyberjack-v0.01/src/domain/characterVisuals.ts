@@ -11,6 +11,10 @@ export type InteractionFamily =
     | 'foot'
     | 'oral'
     | 'penetration'
+    | 'manual'
+    | 'toy'
+    | 'kissing'
+    | 'partner'
     | 'capsule'
     | 'lesbian';
 
@@ -150,18 +154,28 @@ export const equipmentPresetFromContexts = (contexts: VisualContext[] = []): Equ
 const characterSlugFor = (characterId: string) => characterId === 'S-AV-01' ? 'mira'
     : characterId === 'NPC-LAB-01' ? 'iona'
         : characterId === 'NPC-CAND-01' ? 'nika'
-            : characterId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            : characterId === 'NPC-CAND-SUMI' ? 'sumi'
+                : characterId === 'NPC-CAND-GEN-02' ? 'eli'
+                    : characterId === 'NPC-CAND-GEN-04' ? 'mai'
+                : characterId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
 const calibrationPoseFromContexts = (contexts: VisualContext[] = []) => {
     const ids = new Set(contexts.map(context => context.actionId));
     if (ids.has('act_present_feet')) return 'feet_presented';
+    if (ids.has('act_end_exposure')) return 'covering';
     if (ids.has('act_suspend_wrists')) return 'suspended';
     if (ids.has('pose_spread_eagle')) return 'spread_eagle';
+    if (ids.has('act_hold_exposure') && ids.has('pose_sitting')) return 'sitting_spread';
+    const hasExplicitPose = hasAny(ids, [
+        'pose_standing', 'pose_sitting', 'pose_kneeling',
+        'pose_lying_down', 'pose_all_fours', 'pose_spread_eagle'
+    ]);
+    if (ids.has('act_hold_exposure') && (ids.has('pose_standing') || !hasExplicitPose)) return 'standing_exposed';
+    if (ids.has('act_hold_exposure')) return 'covering';
     if (ids.has('pose_all_fours')) return 'all_fours';
     if (ids.has('pose_lying_down')) return 'lying';
     if (ids.has('pose_kneeling')) return 'kneeling';
-    if (ids.has('pose_sitting')) return ids.has('act_hold_exposure') ? 'sitting_spread' : 'sitting';
-    if (ids.has('act_hold_exposure')) return 'standing_exposed';
+    if (ids.has('pose_sitting')) return 'sitting';
     return 'standing';
 };
 
@@ -170,7 +184,10 @@ const calibrationClothingFromContexts = (contexts: VisualContext[] = []) => {
     if (ids.has('eq_clothe_jumpsuit')) return 'jumpsuit';
     if (ids.has('eq_clothe_calibration_set')) return 'calibration_set';
     if (ids.has('eq_clothe_lab_gown')) return 'lab_gown';
-    if (ids.has('eq_clothe_dress') && ids.has('eq_clothe_stockings')) return 'dress_stockings';
+    // v4 currently has no stockings-only axis. Preserve the visible stockings
+    // with the closest authored wardrobe instead of incorrectly falling back
+    // to a nude avatar.
+    if (ids.has('eq_clothe_stockings')) return 'dress_stockings';
     if (ids.has('eq_clothe_dress')) return 'dress';
     if (ids.has('eq_clothe_underwear') || ids.has('eq_clothe_panties')) return 'underwear';
     return 'nude';
@@ -235,14 +252,33 @@ const calibrationCoreEquipmentFallbacks: Partial<Record<EquipmentPreset, Equipme
 export const calibrationAvatarCandidatesV4 = (descriptor: CharacterVisualDescriptorV4): string[] => {
     const equipmentPreset = descriptor.equipmentPreset || 'none';
     const coreEquipment = [equipmentPreset, ...(calibrationCoreEquipmentFallbacks[equipmentPreset] || [])];
+    const v4 = coreEquipment.flatMap(equipment => [
+        `/character-images/calibration-v4/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__${descriptor.affect}.png`,
+        `/character-images/calibration-v4/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__neutral.png`,
+    ]);
     const core = coreEquipment.flatMap(equipment => [
         `/character-images/calibration-core/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__${descriptor.affect}.png`,
         `/character-images/calibration-core/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__neutral.png`,
     ]);
-    const exact = `/character-images/calibration-v4/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${descriptor.equipmentPreset || 'none'}__${descriptor.affect}.png`;
     const legacy = `/character-images/rendered/${descriptor.characterSlug}/${descriptor.pose}__${descriptor.clothing}__none__${descriptor.affect}.png`;
     const legacyNeutral = `/character-images/rendered/${descriptor.characterSlug}/${descriptor.pose}__${descriptor.clothing}__none__neutral.png`;
-    return [...core, exact, legacy, legacyNeutral];
+    // Some newer characters only have their unrestrained sitting frame in the
+    // expanded pose set. Prefer that truthful sitting image to standing when
+    // the exact sitting cell is absent.
+    const nearbyPoseFallbacks = descriptor.pose === 'sitting'
+        ? [
+            `/character-images/calibration-v4/${descriptor.characterSlug}/sitting_spread/${descriptor.clothing}__${equipmentPreset}__${descriptor.affect}.png`,
+            `/character-images/calibration-v4/${descriptor.characterSlug}/sitting_spread/${descriptor.clothing}__${equipmentPreset}__neutral.png`,
+        ]
+        : [];
+    // Some newly generated characters currently have no unrestrained core
+    // frames. Their authored neutral render is a truthful character fallback
+    // (preferable to a broken image or another character's avatar).
+    const characterNeutral = `/character-images/rendered/${descriptor.characterSlug}/standing__nude__none__neutral.png`;
+    const expandedPose = ['sitting_spread', 'standing_exposed', 'covering', 'feet_presented'].includes(descriptor.pose || '');
+    return expandedPose
+        ? [...v4, ...core, legacy, legacyNeutral, characterNeutral]
+        : [...core, ...v4, legacy, legacyNeutral, ...nearbyPoseFallbacks, characterNeutral];
 };
 
 export const resolveCalibrationAvatarV4 = (descriptor: CharacterVisualDescriptorV4): string | null =>
@@ -287,11 +323,21 @@ const electroTargetPoint = ({ contexts, start }: InteractionRuleContext) =>
  */
 export const INTERACTION_VISUAL_RULES: readonly InteractionVisualRule[] = [
     {
+        id: 'manual-stimulation',
+        startActionId: 'finger_insertion',
+        modifierActionIds: ['act_increase_friction'],
+        family: 'manual',
+        variant: ({ start }) => start.pointId === 'anus' ? 'anal_fingering' : 'vaginal_fingering',
+        defaultIntensity: 0.55,
+        modifiedIntensity: 0.85,
+        targetPoint: ({ start }) => start.pointId || undefined,
+    },
+    {
         id: 'electrostimulation',
         startActionId: 'act_start_electrostimulation',
         modifierActionIds: ['act_adjust_electrostimulation'],
         family: 'electrostimulation',
-        variant: context => electroTargetPoint(context) === 'groin' ? 'genital' : 'clamps',
+        variant: context => ['vulva', 'vagina', 'clitoris', 'penis', 'testicles'].includes(electroTargetPoint(context) || '') ? 'genital' : 'clamps',
         sourceItemId: 'eq_tens_unit',
         defaultIntensity: 0.65,
         modifiedIntensity: 0.9,
@@ -317,12 +363,22 @@ export const INTERACTION_VISUAL_RULES: readonly InteractionVisualRule[] = [
         modifiedIntensity: 0.85,
     },
     {
+        id: 'penetration',
+        startActionId: 'act_start_penetration',
+        modifierActionIds: ['act_increase_friction'],
+        family: 'penetration',
+        variant: ({ ids }) => ids.has('pose_all_fours') ? 'doggy'
+            : ids.has('pose_standing') ? 'standing' : 'missionary',
+        defaultIntensity: 0.65,
+        modifiedIntensity: 0.9,
+    },
+    {
         id: 'held-exposure',
         startActionId: 'act_hold_exposure',
         family: 'exposure',
         variant: ({ ids }) => ids.has('pose_spread_eagle') ? 'spread_eagle'
             : ids.has('pose_sitting') ? 'sitting_spread'
-                : ids.has('pose_standing') ? 'standing' : 'covering',
+                : 'standing',
         defaultIntensity: 0.35,
         phases: { intense: 'sustain' },
     },
@@ -361,6 +417,11 @@ export const expandedInteractionAssetPath = (input: ExpandedVisualInput): string
     } else if (family === 'electrostimulation' && variant === 'genital') {
         wardrobe = wardrobe === 'nude' ? 'nude' : 'underwear';
         restraint = restraint === 'spread' ? 'spread' : 'free';
+    } else if (family === 'penetration') {
+        if (wardrobe === 'open_top') wardrobe = 'underwear';
+        restraint = variant === 'missionary'
+            ? (restraint === 'spread' ? 'spread' : 'free')
+            : (restraint === 'wrists' ? 'wrists' : 'free');
     } else if (family === 'exposure') {
         if (variant === 'standing') restraint = restraint === 'wrists' ? 'wrists' : 'free';
         else if (variant === 'sitting_spread') {
@@ -393,12 +454,94 @@ export const expandedInteractionAssetPath = (input: ExpandedVisualInput): string
     return `/character-images/interactions-expanded/${input.characterSlug}/${family}/${variant}/${wardrobe}__${restraint}__${affect}__${phase}.png`;
 };
 
+type IntimacyFamilyVariant = {
+    family: 'manual' | 'penetration' | 'toy';
+    variant: string;
+};
+
+const intimacyFamilyVariant = (interaction: ActiveVisualInteraction): IntimacyFamilyVariant | null => {
+    if (interaction.family === 'manual') {
+        return { family: 'manual', variant: interaction.variant };
+    }
+    if (interaction.family === 'penetration') {
+        const target = interaction.targetPointId === 'anus' ? 'anal' : 'vaginal';
+        const pose = ['doggy', 'standing'].includes(interaction.variant) ? interaction.variant : 'missionary';
+        return { family: 'penetration', variant: `${target}_${pose}` };
+    }
+    if (interaction.family === 'vibration') {
+        return {
+            family: 'toy',
+            variant: interaction.variant === 'internal' ? 'internal_vibrator' : 'external_vibrator',
+        };
+    }
+    return null;
+};
+
+export const intimacyInteractionAssetCandidates = (input: ExpandedVisualInput): string[] => {
+    const mapped = intimacyFamilyVariant(input.interaction);
+    if (!mapped) return [];
+
+    const ids = new Set((input.contexts || []).map(context => context.actionId));
+    const wardrobe = ids.has('eq_clothe_stockings')
+        ? 'stockings_displaced'
+        : hasAny(ids, ['eq_clothe_lab_gown', 'eq_clothe_dress'])
+            ? 'open_top'
+            : hasAny(ids, ['eq_clothe_underwear', 'eq_clothe_panties', 'eq_clothe_calibration_set', 'eq_clothe_jumpsuit'])
+                ? 'underwear_displaced'
+                : 'nude';
+    const restraint = ids.has('act_suspend_wrists')
+        ? 'suspended'
+        : hasAny(ids, ['act_apply_handcuffs', 'act_apply_restraint_belt'])
+            ? 'wrists_bound'
+            : 'free';
+    const blindfold = ids.has('eq_blindfold_apply') ? 'blindfold' : 'none';
+    const release = Boolean(input.discharged);
+    const negative = (input.attitude ?? 50) < 45
+        || ['panic', 'defiance', 'freeze'].includes(input.behavioralState || '');
+    const mixed = input.behavioralState === 'overload'
+        || ((input.tension ?? 0) >= 65 && (input.attitude ?? 50) < 65);
+    const reaction = release ? 'climax' : negative ? 'guarded' : mixed ? 'mixed' : 'receptive';
+    const phase = release ? 'release' : 'sustain';
+    const wardrobeFallbacks = [wardrobe, 'nude'];
+    const reactionFallbacks = release
+        ? ['climax']
+        : [reaction, reaction === 'receptive' ? 'mixed' : 'receptive', 'guarded'];
+
+    const equipmentFallbacks = [
+        [restraint, blindfold],
+        ...(blindfold === 'blindfold' ? [[restraint, 'none']] : []),
+        ...(restraint !== 'free' ? [['free', blindfold], ['free', 'none']] : []),
+    ];
+    const expanded = wardrobeFallbacks.flatMap(clothing =>
+        equipmentFallbacks.flatMap(([restraintVariant, blindfoldVariant]) =>
+            reactionFallbacks.map(affect =>
+                `/character-images/intimacy/${input.characterSlug}/${mapped.family}/${mapped.variant}/${clothing}__${restraintVariant}__${blindfoldVariant}__${phase}__${affect}.png`
+            )
+        )
+    );
+    const legacy = wardrobeFallbacks.flatMap(clothing =>
+        reactionFallbacks.map(affect =>
+            `/character-images/intimacy/${input.characterSlug}/${mapped.family}/${mapped.variant}/${clothing}__${phase}__${affect}.png`
+        )
+    );
+    return [...new Set([...expanded, ...legacy])];
+};
+
+export const resolveIntimacyInteractionVisual = (input: ExpandedVisualInput): string | null =>
+    resolveFirstAvailableVisual(intimacyInteractionAssetCandidates(input));
+
 export const activeVisualInteractionFromContexts = (
     contexts: VisualContext[] = [],
     tension = 0,
 ): ActiveVisualInteraction | undefined => {
     const ids = new Set(contexts.map(context => context.actionId));
-    const rule = INTERACTION_VISUAL_RULES.find(candidate => ids.has(candidate.startActionId));
+    const rule = INTERACTION_VISUAL_RULES
+        .filter(candidate => ids.has(candidate.startActionId))
+        .sort((left, right) => {
+            const leftTicks = contexts.find(entry => entry.actionId === left.startActionId)?.ticksActive ?? Number.MAX_SAFE_INTEGER;
+            const rightTicks = contexts.find(entry => entry.actionId === right.startActionId)?.ticksActive ?? Number.MAX_SAFE_INTEGER;
+            return leftTicks - rightTicks;
+        })[0];
     if (!rule) return undefined;
 
     const start = contexts.find(entry => entry.actionId === rule.startActionId)!;
@@ -411,7 +554,7 @@ export const activeVisualInteractionFromContexts = (
         : modifier || tension >= 65 ? 'intense' : 'sustain';
     const phase = rule.phases?.[rawPhase] || rawPhase;
     const targetPointId = rule.targetPoint?.(ruleContext)
-        || (rule.id === 'internal-vibration' ? 'groin' : start.pointId || undefined);
+        || (rule.id === 'internal-vibration' ? 'vagina' : start.pointId || undefined);
 
     return {
         family: rule.family,

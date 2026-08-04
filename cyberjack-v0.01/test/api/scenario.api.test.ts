@@ -4,11 +4,12 @@ import app from '../../src/api/server';
 import { db } from '../../src/infrastructure/db';
 import { contractRepo } from '../../src/infrastructure/contractRepo';
 import { subjectRepo } from '../../src/infrastructure/repositories';
+import { VISUALLY_SUPPORTED_PORTABLE_ITEMS } from '../../src/scenario/worldService';
 
 describe('scenario campaign API', () => {
   beforeEach(() => {
     db.prepare('PRAGMA foreign_keys = OFF').run();
-    for (const table of ['scenario_events', 'laboratory_room_assignments', 'laboratory_rooms', 'laboratory_assets', 'shop_offers', 'world_state', 'character_items', 'character_resources', 'scene_characters', 'characters', 'scenes', 'asset_contracts', 'factions']) {
+    for (const table of ['scenario_events', 'story_threads', 'laboratory_room_assignments', 'laboratory_rooms', 'laboratory_assets', 'shop_offers', 'world_state', 'character_items', 'character_resources', 'scene_characters', 'characters', 'scenes', 'asset_contracts', 'factions']) {
       db.prepare(`DELETE FROM ${table}`).run();
     }
     db.prepare('PRAGMA foreign_keys = ON').run();
@@ -21,9 +22,15 @@ describe('scenario campaign API', () => {
     const initial = await request(app).get('/api/scenario');
     expect(initial.status).toBe(200);
     expect(initial.body.location.id).toBe('scene_lab_calibrator');
-    expect(initial.body.clock.label).toBe('День 1 · 08:00');
+    expect(initial.body.clock.label).toBe('01 января 17349 · 08:00');
     expect(initial.body.credits).toBe(1000);
     expect(initial.body.residents.some((resident: any) => resident.role === 'assistant' && resident.kind === 'npc')).toBe(true);
+    const portableOffers = initial.body.shop.filter((offer:any) =>
+      offer.category === 'item' && !offer.itemId.startsWith('drug_')
+    );
+    expect(portableOffers.length).toBeGreaterThan(0);
+    expect(portableOffers.every((offer:any) => VISUALLY_SUPPORTED_PORTABLE_ITEMS.has(offer.itemId))).toBe(true);
+    expect(initial.body.shop.some((offer:any) => offer.itemId === 'eq_speculum')).toBe(false);
 
     const travel = await request(app).post('/api/scenario/travel').send({ locationId: 'scene_broker' });
     expect(travel.status).toBe(200);
@@ -31,20 +38,16 @@ describe('scenario campaign API', () => {
     expect(travel.body.scenario.clock.totalMinutes).toBeGreaterThan(initial.body.clock.totalMinutes);
   });
 
-  it('buys portable items and installed laboratory modules only at the broker', async () => {
+  it('orders portable items and laboratory modules through station supply', async () => {
     await request(app).get('/api/scenario');
-    const rejected = await request(app).post('/api/scenario/shop/offer_tens/buy').send({});
-    expect(rejected.status).toBe(400);
-
-    await request(app).post('/api/scenario/travel').send({ locationId: 'scene_broker' });
-    const item = await request(app).post('/api/scenario/shop/offer_tens/buy').send({});
+    const item = await request(app).post('/api/scenario/shop/offer_handcuffs/buy').send({});
     expect(item.status).toBe(200);
-    expect(item.body.scenario.inventory.some((entry: any) => entry.itemId === 'eq_tens_unit')).toBe(true);
+    expect(item.body.scenario.inventory.some((entry: any) => entry.itemId === 'eq_handcuffs')).toBe(true);
 
     const module = await request(app).post('/api/scenario/shop/lab_recovery_capsule/buy').send({});
     expect(module.status).toBe(200);
     expect(module.body.scenario.laboratory.some((entry: any) => entry.id === 'lab_recovery_capsule')).toBe(true);
-    expect(module.body.scenario.credits).toBe(40);
+    expect(module.body.scenario.credits).toBe(190);
   });
 
   it('requires a visit to the liaison and gives accepted contracts a world-time deadline', async () => {

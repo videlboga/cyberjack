@@ -6,14 +6,27 @@ export interface ChatMessage {
 }
 
 const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
-const LLM_MODEL = process.env.LLM_MODEL || 'deepseek/deepseek-chat';
-const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS ?? 300);
+// V4 Flash 0731 gave the best balance of character voice and latency in the
+// provider-pinned dialogue benchmark. Reasoning is disabled below: audible
+// dialogue does not benefit from spending the short output budget on thought.
+const LLM_MODEL = process.env.LLM_MODEL || 'deepseek/deepseek-v4-flash-0731';
+const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS ?? 180);
 const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE ?? 0.85);
 const LLM_TOP_P = Number(process.env.LLM_TOP_P ?? 0.9);
 const LLM_FREQUENCY_PENALTY = Number(process.env.LLM_FREQUENCY_PENALTY ?? 0.5);
 const LLM_PRESENCE_PENALTY = Number(process.env.LLM_PRESENCE_PENALTY ?? 0.3);
-const LLM_JSON_RETRY_ATTEMPTS = Math.max(0, Number(process.env.LLM_JSON_RETRY_ATTEMPTS ?? 1));
-const LLM_REQUEST_TIMEOUT = Number(process.env.LLM_REQUEST_TIMEOUT ?? 20000);
+const LLM_TTFT_TIMEOUT = Number(process.env.LLM_TTFT_TIMEOUT ?? 4000);
+const LLM_REQUEST_TIMEOUT = Number(process.env.LLM_REQUEST_TIMEOUT ?? 8000);
+const PARSER_MODEL = process.env.PARSER_MODEL || 'google/gemini-3.1-flash-lite-preview';
+const LLM_PROVIDER_ORDER = (process.env.LLM_PROVIDER_ORDER || 'novita,siliconflow,deepinfra')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean);
+const LLM_FALLBACK_MODELS = (process.env.LLM_FALLBACK_MODELS || 'deepseek/deepseek-v4-flash,google/gemini-2.5-flash-lite')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean)
+    .filter(value => value !== LLM_MODEL);
 
 const getApiKey = () => process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
 
@@ -26,6 +39,7 @@ export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, 
     const payload = {
         model: LLM_MODEL,
         messages,
+        reasoning: { enabled: false },
         temperature: 0.7,
         max_tokens: 300,
         top_p: 0.9,
@@ -61,8 +75,6 @@ export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, 
 export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any): Promise<any> {
     const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
     const LLM_API_KEY = getApiKey();
-    const PARSER_MODEL = process.env.PARSER_MODEL || 'google/gemini-3.1-flash-lite-preview';
-
     try {
         const response = await fetch(LLM_API_URL, {
             method: 'POST',
@@ -96,25 +108,53 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     }
 }
 
+const socialPortraitEmotions = [
+    'angry', 'crying', 'curious', 'defiant', 'disgust', 'distressed',
+    'excited', 'fear', 'guarded', 'neutral', 'sad', 'shy', 'smile',
+    'smug', 'surprise'
+] as const;
+
+export async function classifySpokenEmotion(input: {
+    playerSpeech?: string | null;
+    characterSpeech: string;
+    previousEmotion?: string | null;
+    simulationPrior?: string | null;
+    tension?: number;
+    attitude?: number;
+    openness?: number;
+}): Promise<{ emotion: string; confidence: number; valence: number; arousal: number; control: number }> {
+    const messages: ChatMessage[] = [{
+        role: 'system',
+        content: `Определи внешне читаемую эмоцию персонажа после короткого диалога. Не оценивай тон слов собеседника вместо реакции персонажа. Учитывай, что персонаж может скрывать страх раздражением. Выбери primary только из: ${socialPortraitEmotions.join(', ')}. Верни JSON {"primary":"...","confidence":0..1,"valence":-1..1,"arousal":0..1,"control":-1..1}.`
+    }, {
+        role: 'user',
+        content: [
+            `Собеседник: ${input.playerSpeech || '(нет новой реплики)'}`,
+            `Персонаж: ${input.characterSpeech}`,
+            `Предыдущая эмоция: ${input.previousEmotion || 'неизвестна'}`,
+            `Приоритет симуляции: ${input.simulationPrior || 'neutral'}`,
+            `Состояние: напряжение ${Number(input.tension || 0).toFixed(1)}, отношение ${Number(input.attitude ?? 50).toFixed(1)}, открытость ${Number(input.openness ?? 50).toFixed(1)}.`
+        ].join('\n')
+    }];
+    const { parsed } = await parseVerbalInputWithLLM(messages);
+    const primary = socialPortraitEmotions.includes(parsed?.primary) ? parsed.primary : 'neutral';
+    const bounded = (value: unknown, min: number, max: number, fallback: number) => {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? Math.max(min, Math.min(max, numeric)) : fallback;
+    };
+    return {
+        emotion: primary,
+        confidence: bounded(parsed?.confidence, 0, 1, 0),
+        valence: bounded(parsed?.valence, -1, 1, 0),
+        arousal: bounded(parsed?.arousal, 0, 1, 0),
+        control: bounded(parsed?.control, -1, 1, 0),
+    };
+}
+
 import { PromptPayload, NarratorPromptPayload, ScenePromptPayload } from '../domain/types';
 
 
 
-
-const CHARACTER_SCHEMA = {
-    name: 'cyberjack_reply',
-    strict: true,
-    value: {
-        type: 'object',
-        properties: {
-            addressedTo: { type: 'string' },
-            speechAct: { type: 'string' },
-            speech: { type: 'string' }
-        },
-        required: ['speech'],
-        additionalProperties: false
-    }
-};
 
 const NARRATOR_SCHEMA = {
     name: 'cyberjack_narrator',
@@ -130,6 +170,15 @@ const NARRATOR_SCHEMA = {
 };
 
 type MemoryMessage = { role: 'user' | 'assistant'; content: string };
+
+export function extractAudibleSpeech(text: string) {
+    const trimmed = text.trim();
+    // Some models occasionally render a third-person delivery note followed by
+    // an em-dash despite the audible-speech-only prompt. Keep the spoken part;
+    // do not otherwise rewrite or validate character language.
+    const staged = trimmed.match(/^[^\n:]{3,120}:\s*(?:\n\s*)?[—–-]\s*(.+)$/su);
+    return staged ? staged[1].trim() : trimmed;
+}
 
 export function generateChatPayload(
     payload: PromptPayload,
@@ -264,151 +313,13 @@ function sanitizeJson(text: string): string {
     return text.replace(/```json/g, '').replace(/```/g, '').trim();
 }
 
-function validateCharacterReply(candidate: any): candidate is { speech: string; addressedTo?: string; speechAct?: string } {
-    if (!candidate || typeof candidate !== 'object') return false;
-    return typeof candidate.speech === 'string';
-}
-
 function validateNarratorReply(candidate: any): candidate is { reaction: string } {
     if (!candidate || typeof candidate !== 'object') return false;
     return typeof candidate.reaction === 'string';
 }
 
-function validateStructuredReply(candidate: any): candidate is { speech: string } {
-    return validateCharacterReply(candidate);
-}
-
-function evadesDirectAnswer(candidate: { speech: string; speechAct?: string }, payload: PromptPayload) {
-    const frame = payload.reactionFrame;
-    if (!frame || frame.dramaticPosition.preferredSpeechAct !== 'answer' || !candidate.speech.trim()) return false;
-    const speech = candidate.speech.trim().toLowerCase();
-    const explicitRefusal = /^(не скажу|не отвечу|не хочу отвечать|оставлю это без ответа)/i.test(speech);
-    if (explicitRefusal) {
-        candidate.speechAct = 'set_boundary';
-        return false;
-    }
-    const answerLead = /^(да|нет|лучше|хуже|приятно|неприятно|больно|не больно|холодно|не холодно|тепло|можно|нельзя|хочу|не хочу|продолжай|остановись|убери|оставь|не знаю)/i.test(speech);
-    const counterQuestion = /^(а\s+)?(ты|зачем|почему|что|как|когда|где|кто|какой|какая|какие|хочешь|можешь|понимаешь|чувствуешь)/i.test(speech);
-    const deferredAnswer = /если[\s\S]*(скажу|отвечу)|сначала\s+(скажи|ответь|объясни)/i.test(speech);
-    const invalidAct = Boolean(candidate.speechAct && !frame.dramaticPosition.allowedSpeechActs.includes(candidate.speechAct as any));
-    const questionPresentedAsAnswer = candidate.speechAct === 'answer' && speech.endsWith('?') && !answerLead;
-    return invalidAct || deferredAnswer || (counterQuestion && !answerLead) || questionPresentedAsAnswer;
-}
-
-function contradictsPhysiologicalEvent(candidate: { speech: string }, payload: PromptPayload) {
-    const frame = payload.reactionFrame;
-    if (!frame || frame.event.physiologicalEvent !== 'discharge') return false;
-    // Loss of conscious contact takes precedence over the usual requirement to
-    // name a completed peak. The transition is already shown by the engine;
-    // demanding articulate speech here creates a contradiction the model cannot solve.
-    if (frame.expressionMode.control === 'minimal' && !frame.event.requiresSpeech) return false;
-    const speech = candidate.speech.trim().toLowerCase();
-    if (!speech) return true;
-    // The exact wording may remain character-specific, but the completed peak
-    // must be legible. A generic request such as “be gentler” is not enough.
-    return !/(конч|разряд|пик|накрыл|накрыва|сорвал|прорвало|отпустило|не удержал|не удержала|всё…|всё\.\.\.)/i.test(speech);
-}
-
-function contradictsAcceptanceChange(candidate: { speech: string }, payload: PromptPayload) {
-    const frame = payload.reactionFrame;
-    if (!frame) return false;
-    const observation = payload.reactionFrame;
-    const acceptanceDown = observation.event.changes.some(change =>
-        change === 'отношение к контакту ухудшилось' || change === 'персонаж сильнее закрылся'
-    );
-    if (!acceptanceDown) return false;
-    const speech = candidate.speech.trim().toLowerCase();
-    return /(продолжай|повтори|повторяй|не останавливайся|не прекращай|ещ[её]\s+раз|давай\s+ещ[её]|сильнее|делай\s+так\s+же)/i.test(speech);
-}
-
-function contradictsSensitivityTrend(candidate: { speech: string }, payload: PromptPayload) {
-    const trend = payload.reactionFrame?.event.validationFacts?.sensitivityTrend;
-    if (!trend) return false;
-    const speech = candidate.speech.toLocaleLowerCase('ru-RU');
-    const saysUp = /чувствительн[а-яё]*\s+(?:повыш|раст|усил)|стал[аио]?\s+(?:более\s+)?чувствительн|ощуща[а-яё]*\s+(?:ярче|сильнее)/u.test(speech);
-    const saysDown = /чувствительн[а-яё]*\s+(?:сниж|пада|уменьш)|стал[аио]?\s+менее\s+чувствительн|ощуща[а-яё]*\s+(?:слабее|тусклее|приглуш)/u.test(speech);
-    return (saysUp && trend !== 'up') || (saysDown && trend !== 'down');
-}
-
-const actionVocabulary = [
-    { label: /погла[дж]|перыш|проведение/i, speech: /погла[дж]|глад|перыш/i },
-    { label: /массаж|размять/i, speech: /массаж|массиру|размин/i },
-    { label: /царап/i, speech: /царап/i },
-    { label: /поцел/i, speech: /поцел/i },
-    { label: /укус|прикус/i, speech: /укус|куса/i },
-    { label: /шлеп|удар|пощеч/i, speech: /шл[её]п|удар|пощ[её]ч/i },
-    { label: /облиз|лизан/i, speech: /облиз|лиж|язык/i }
-];
-
-function substitutesCurrentAction(candidate: { speech: string }, payload: PromptPayload) {
-    const current = String(payload.reactionFrame?.event.action || '');
-    const ownIndex = actionVocabulary.findIndex(entry => entry.label.test(current));
-    if (ownIndex < 0) return false;
-    return actionVocabulary.some((entry, index) => index !== ownIndex && entry.speech.test(candidate.speech));
-}
-
-function introducesUnobservedSceneFact(candidate: { speech: string }, payload: PromptPayload) {
-    const frame = payload.reactionFrame;
-    if (!frame) return false;
-    const speech = candidate.speech.toLocaleLowerCase('ru-RU');
-    const facts = JSON.stringify({ scene: frame.scene, event: frame.event }).toLocaleLowerCase('ru-RU');
-    const isConversation = /бесед|реплик|разговор/u.test(frame.event.action);
-    if (isConversation && /(текущ|запущенн|этот)\w*\s+протокол|протокол\s+(ид[её]т|запущен|продолжается)/u.test(speech) && !/протокол/u.test(facts)) {
-        return true;
-    }
-    const observableTerms = [
-        { speech: /дыхан/u, facts: /дыхан/u },
-        { speech: /пульс|сердцебиен/u, facts: /пульс|сердцебиен/u },
-        { speech: /дрож|тремор/u, facts: /дрож|тремор/u },
-        { speech: /пот|испарин/u, facts: /пот|испарин/u }
-    ];
-    return observableTerms.some(term => term.speech.test(speech) && !term.facts.test(facts));
-}
-
-function contradictsExpressionMode(candidate: { speech: string }, payload: PromptPayload) {
-    const mode = payload.reactionFrame?.expressionMode;
-    const speech = candidate.speech.trim();
-    if (!mode || !speech) return false;
-    const words = speech.match(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*/gu) || [];
-    if (words.length > mode.maxWords) return true;
-    if (!mode.requiresDisruption) return false;
-    const hasDisruption = /[…!—]|\.\.\.|(^|\s)(а+|ах|ох|м-м+|мм+|ч[её]рт|нет)[,!.…—\s]/iu.test(speech);
-    return !hasDisruption;
-}
-
-function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    const mergedInit: RequestInit = { ...init, signal: controller.signal };
-    return fetch(url, mergedInit).finally(() => clearTimeout(timer));
-}
-
-function logRejectedCharacterReply(rawText: string, attempt: number, error: unknown) {
-    const reason = error instanceof Error ? error.message : 'неизвестная ошибка';
-    // JSON.stringify preserves the complete response while escaping line breaks
-    // and control characters so one rejected generation remains one journal entry.
-    console.warn(
-        `[LLM Adapter][Rejected Character Reply] attempt=${attempt + 1}/${LLM_JSON_RETRY_ATTEMPTS + 1}; reason=${reason}; raw=${JSON.stringify(rawText)}`
-    );
-}
-
-async function requestCompletion(messages: ChatMessage[], _schema: any): Promise<string> {
+async function requestCompletion(messages: ChatMessage[], options: { json?: boolean; purpose?: string; onToken?: (chunk: string) => void } = {}): Promise<string> {
     const LLM_API_KEY = getApiKey();
-
-    const body: Record<string, any> = {
-        model: LLM_MODEL,
-        messages,
-        max_tokens: LLM_MAX_TOKENS,
-        temperature: LLM_TEMPERATURE,
-        frequency_penalty: LLM_FREQUENCY_PENALTY,
-        presence_penalty: LLM_PRESENCE_PENALTY,
-        response_format: { type: 'json_object' }
-    };
-
-    if (Number.isFinite(LLM_TOP_P)) {
-        body.top_p = LLM_TOP_P;
-    }
-
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'HTTP-Referer': 'http://localhost:3000',
@@ -419,154 +330,126 @@ async function requestCompletion(messages: ChatMessage[], _schema: any): Promise
         headers['Authorization'] = `Bearer ${LLM_API_KEY}`;
     }
 
-    const t0 = performance.now();
-    
-    const response = await fetchWithTimeout(
-        LLM_API_URL,
-        {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body)
-        },
-        LLM_REQUEST_TIMEOUT
-    );
-
-    const t1 = performance.now();
-    const elapsedMs = Math.round(t1 - t0);
-    console.log(`[Adapter][Timing] Completion request to ${LLM_API_URL} took ${elapsedMs}ms`);
-
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errText}`);
+    const attempts = [
+        ...LLM_PROVIDER_ORDER.map(provider => ({ model: LLM_MODEL, provider })),
+        ...LLM_FALLBACK_MODELS.map(model => ({ model, provider: '' })),
+    ];
+    let lastError: unknown;
+    for (const [index, attempt] of attempts.entries()) {
+        const { model, provider } = attempt;
+        const body: Record<string, any> = {
+            model, messages, max_tokens: LLM_MAX_TOKENS,
+            temperature: LLM_TEMPERATURE,
+            frequency_penalty: LLM_FREQUENCY_PENALTY,
+            presence_penalty: LLM_PRESENCE_PENALTY,
+            reasoning: { enabled: false },
+        };
+        if (provider) body.provider = { only: [provider], allow_fallbacks: false };
+        if (options.json) body.response_format = { type: 'json_object' };
+        if (options.onToken && !options.json) body.stream = true;
+        if (Number.isFinite(LLM_TOP_P)) body.top_p = LLM_TOP_P;
+        const t0 = performance.now();
+        const controller = new AbortController();
+        let timer = setTimeout(() => controller.abort(), LLM_TTFT_TIMEOUT);
+        let result = '';
+        try {
+            const response = await fetch(LLM_API_URL, {
+                method: 'POST', headers, body: JSON.stringify(body), signal: controller.signal
+            });
+            const headersMs = Math.round(performance.now() - t0);
+            clearTimeout(timer);
+            timer = setTimeout(() => controller.abort(), LLM_REQUEST_TIMEOUT);
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+            if (options.onToken && response.body) {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let pending = '';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    pending += decoder.decode(value, { stream: true });
+                    const lines = pending.split('\n');
+                    pending = lines.pop() || '';
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ') || line === 'data: [DONE]') continue;
+                        try {
+                            const event = JSON.parse(line.slice(6));
+                            const chunk = event.choices?.[0]?.delta?.content || '';
+                            if (chunk) { result += chunk; options.onToken(chunk); }
+                        } catch { /* provider keep-alive */ }
+                    }
+                }
+            } else {
+                const data = await response.json() as any;
+                result = data.choices?.[0]?.message?.content || data.reply || '';
+            }
+            if (!result.trim()) throw new Error('Empty completion');
+            console.log(`[Adapter][Timing] purpose=${options.purpose || 'completion'} model=${model} provider=${provider || 'auto'} headersMs=${headersMs} totalMs=${Math.round(performance.now() - t0)}`);
+            return result;
+        } catch (error) {
+            // If streaming already reached the player, keep the audible part
+            // instead of starting a second provider and duplicating the line.
+            if (result.trim()) {
+                console.warn(`[Adapter] stream timed out after partial output model=${model} provider=${provider || 'auto'}; keeping ${result.length} chars`);
+                return result;
+            }
+            lastError = error;
+            if (index < attempts.length - 1) {
+                const next = attempts[index + 1];
+                console.warn(`[Adapter] ${model}/${provider || 'auto'} failed, falling back to ${next.model}/${next.provider || 'auto'}:`, (error as any)?.message || error);
+            }
+        } finally {
+            clearTimeout(timer);
+        }
     }
-
-    const data = await response.json() as any;
-    return data.choices?.[0]?.message?.content || data.reply || '';
+    throw lastError instanceof Error ? lastError : new Error(String(lastError || 'All completion models failed'));
 }
 
 export async function generateCharacterReply(
     payload: PromptPayload,
     userInput?: string,
-    history?: MemoryMessage[]
+    history?: MemoryMessage[],
+    onToken?: (chunk: string) => void
 ): Promise<{ reply: { speech: string; addressedTo?: string; speechAct?: string } | string; sentMessages: ChatMessage[]; error?: string }> {
     const messages = generateChatPayload(payload, userInput, history);
-    const requestMessages = [...messages];
-
     console.log(`[Adapter] Character request: ${messages.length} messages`);
 
     try {
-        for (let attempt = 0; attempt <= LLM_JSON_RETRY_ATTEMPTS; attempt++) {
-            const rawText = await requestCompletion(requestMessages, CHARACTER_SCHEMA);
-            console.log(`[Adapter] Character response received (${rawText.length} chars)`);
-
+        const rawText = await requestCompletion(messages, { purpose: 'character-speech', onToken });
+        let speech = rawText.trim();
+        let modelSpeechAct: string | undefined;
+        // Compatibility only: old providers/mocks may still return the former
+        // object. This does not validate, reject, or retry model content.
+        if (speech.startsWith('{')) {
             try {
-                const parsed = JSON.parse(sanitizeJson(rawText));
-                if (!validateStructuredReply(parsed)) {
-                    throw new Error('invalid structure');
-                }
-                if (payload.reactionFrame?.event.requiresSpeech && !parsed.speech.trim()) {
-                    throw new Error('current physiological event requires a spoken reaction');
-                }
-                if (contradictsPhysiologicalEvent(parsed, payload)) {
-                    throw new Error('discharge reaction does not make the completed peak explicit');
-                }
-                if (contradictsAcceptanceChange(parsed, payload)) {
-                    throw new Error('speech asks to repeat an action while overall acceptance declines');
-                }
-                if (contradictsSensitivityTrend(parsed, payload)) {
-                    throw new Error('speech contradicts the internally validated direction of sensory change');
-                }
-                if (substitutesCurrentAction(parsed, payload)) {
-                    throw new Error('speech substitutes a different physical action for the current one');
-                }
-                if (introducesUnobservedSceneFact(parsed, payload)) {
-                    throw new Error('speech relies on an unobserved protocol or bodily sign');
-                }
-                if (contradictsExpressionMode(parsed, payload)) {
-                    throw new Error('speech form contradicts the current physiological expression mode');
-                }
-                if (evadesDirectAnswer(parsed, payload)) {
-                    throw new Error('direct question was evaded instead of answered, refused, or deliberately left unanswered');
-                }
-                const frame = payload.reactionFrame;
-                if (!parsed.speech.trim() && frame) {
-                    parsed.speechAct = 'silence';
-                    parsed.addressedTo = frame.addressee?.id || '';
-                }
-                if (parsed.speech && frame) {
-                    const allowed = frame.dramaticPosition.allowedSpeechActs;
-                    const normalizedSpeech = parsed.speech.trim().toLowerCase();
-                    const repeatsCurrentInput = Boolean(
-                        frame.event.playerSpeech &&
-                        frame.event.playerSpeech.trim().toLowerCase() === normalizedSpeech
-                    );
-                    const duplicate = (history || []).some(entry =>
-                        entry.role === 'assistant' && entry.content.trim().toLowerCase() === normalizedSpeech
-                    );
-                    // Give the model one chance to replace a verbatim repetition,
-                    // but never discard a second otherwise valid line over it.
-                    if ((duplicate || repeatsCurrentInput) && attempt < LLM_JSON_RETRY_ATTEMPTS) {
-                        throw new Error(repeatsCurrentInput ? 'speech repeats current player input' : 'speech duplicates recent dialogue');
-                    }
-                    if (repeatsCurrentInput) {
-                        parsed.speech = '';
-                        parsed.speechAct = 'silence';
-                    }
-
-                    // These are engine-owned metadata. The model may suggest a valid
-                    // speech act, but it cannot invalidate useful dialogue by mistyping
-                    // an ID or an enum value.
-                    if (!parsed.speechAct || !allowed.includes(parsed.speechAct)) {
-                        parsed.speechAct = frame.dramaticPosition.preferredSpeechAct;
-                    }
-                    parsed.addressedTo = frame.addressee?.id || '';
-                }
-                return {
-                    reply: parsed,
-                    sentMessages: requestMessages
-                };
-            } catch (parseError) {
-                logRejectedCharacterReply(rawText, attempt, parseError);
-                if (attempt < LLM_JSON_RETRY_ATTEMPTS) {
-                    console.warn(
-                        `[LLM Adapter] Ответ нарушил контракт (попытка ${
-                            attempt + 1
-                        }/${LLM_JSON_RETRY_ATTEMPTS + 1}): ${parseError instanceof Error ? parseError.message : 'неизвестная ошибка'}, повторяем запрос`
-                    );
-                    requestMessages.push({ role: 'assistant', content: rawText });
-                    requestMessages.push({
-                        role: 'user',
-                        content: `[Исправь ответ] ${parseError instanceof Error ? parseError.message : 'нарушен JSON-контракт'}. Не повторяй недавнюю реплику. Верни только исправленный JSON.`
-                    });
-                    continue;
-                }
-                console.warn(`[LLM Adapter] Ответ не прошёл проверку после повторной попытки: ${parseError instanceof Error ? parseError.message : 'неизвестная ошибка'}`);
-                const frame = payload.reactionFrame;
-                if (frame && !frame.event.requiresSpeech && frame.dramaticPosition.allowedSpeechActs.includes('silence')) {
-                    return {
-                        reply: { speech: '', speechAct: 'silence', addressedTo: frame.addressee?.id || '' },
-                        sentMessages: requestMessages
-                    };
-                }
-                return {
-                    reply: { speech: '' },
-                    sentMessages: requestMessages,
-                    error: parseError instanceof Error ? parseError.message : 'Ответ нарушил контракт'
-                };
-            }
+                const legacy = JSON.parse(sanitizeJson(speech));
+                if (typeof legacy?.speech === 'string') speech = legacy.speech;
+                if (typeof legacy?.speechAct === 'string') modelSpeechAct = legacy.speechAct;
+            } catch { /* plain speech beginning with a brace remains untouched */ }
         }
+        speech = extractAudibleSpeech(speech);
+        const frame = payload.reactionFrame;
+        console.log(`[Adapter] Character response received (${speech.length} chars)`);
+        return {
+            reply: {
+                speech,
+                speechAct: speech ? (modelSpeechAct || 'acknowledge') : 'silence',
+                addressedTo: frame?.addressee?.id || ''
+            },
+            sentMessages: messages
+        };
     } catch (err: any) {
         console.error(`[LLM Adapter] Ошибка связи с LLM: ${err.message}`);
         return {
             reply: { speech: '' },
-            sentMessages: requestMessages,
+            sentMessages: messages,
             error: err.message || String(err)
         };
     }
 
     return {
         reply: { speech: '' },
-        sentMessages: requestMessages,
+        sentMessages: messages,
         error: 'Нет ответа от LLM'
     };
 }
@@ -578,7 +461,7 @@ export async function generateNarratorReply(
 
     console.log(`[LLM Adapter] Narrator request: ${messages.length} messages`);
     try {
-        const rawText = await requestCompletion(messages, NARRATOR_SCHEMA);
+        const rawText = await requestCompletion(messages, { json: true, purpose: 'narrator' });
         try {
             const parsed = JSON.parse(sanitizeJson(rawText));
             
@@ -638,7 +521,7 @@ export async function generateSceneForCharacter(
     });
 
     try {
-        const rawText = await requestCompletion(messages, NARRATOR_SCHEMA);
+        const rawText = await requestCompletion(messages, { json: true, purpose: 'scene-for-character' });
         try {
             const parsed = JSON.parse(sanitizeJson(rawText));
             let reactionText = '';

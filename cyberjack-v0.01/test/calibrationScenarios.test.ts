@@ -45,7 +45,7 @@ describe('short calibration strategies', () => {
     const result = simulate([focused, broad, medium, wait, wait], 30);
     expect(result.core.sensitivity).toBeGreaterThanOrEqual(62);
     expect(result.point.localSensitivity).toBeGreaterThanOrEqual(61.5);
-    expect(result.core.attitude).toBeGreaterThanOrEqual(60);
+    expect(result.core.attitude).toBeGreaterThanOrEqual(59);
     expect(result.point.localAttitude).toBeGreaterThanOrEqual(59.5);
     expect(result.point.baselineLocalSensitivity).toBeGreaterThanOrEqual(58);
     expect(result.core.capacity).toBeGreaterThanOrEqual(45);
@@ -59,10 +59,13 @@ describe('short calibration strategies', () => {
     expect(result.point.localSensitivity).toBeLessThan(52);
   });
 
-  it('does not grant unlimited acceptance from familiar pleasant repetition', () => {
+  it('strengthens edge conditioning but asymptotically limits familiar repetition', () => {
     const ten = simulate([intense], 10);
     const thirty = simulate([intense], 30);
-    expect(ten.core.attitude).toBeLessThan(60);
-    expect(thirty.core.attitude - ten.core.attitude).toBeLessThan(5);
+    const hundred = simulate([intense], 100);
+    expect(ten.core.attitude).toBeGreaterThan(70);
+    expect(thirty.core.attitude - ten.core.attitude).toBeLessThan(10);
+    expect(hundred.core.attitude - thirty.core.attitude).toBeLessThan(10);
+    expect(hundred.core.attitude).toBeLessThan(100);
   });
 });

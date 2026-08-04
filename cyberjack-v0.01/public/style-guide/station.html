@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberJack — Навигация по станции</title>
+  <link rel="stylesheet" href="./cyberjack-game-style.css" />
+  <style>
+    .station-shell { display: grid; grid-template-columns: 64px minmax(0, 1fr); height: 100%; }
+    .rail {
+      background: var(--bg-panel);
+      border-right: 2px solid var(--line-strong);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 6px;
+    }
+    .rail button {
+      width: 100%;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      background: var(--bg-well);
+      color: var(--text-dim);
+      font-size: 18px;
+      cursor: pointer;
+      transition: .12s;
+    }
+    .rail button:hover { color: var(--text); border-color: var(--line-strong); }
+    .rail button.active { border-color: var(--accent); color: var(--accent); background: var(--bg-active); }
+    .station-body { padding: 18px; overflow-y: auto; }
+    .sector-list { display: grid; gap: 8px; }
+    .sector-row {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) 90px;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      transition: .12s;
+    }
+    .sector-row:hover { border-color: var(--line-strong); background: var(--bg-well); }
+    .sector-row.active { border-color: var(--accent); background: rgba(217,164,65,.06); }
+    .sector-row .dot { width: 10px; height: 10px; background: var(--text-muted); }
+    .sector-row.active .dot { background: var(--accent); }
+    .sector-row .danger .dot { background: var(--danger); }
+    .sector-row b { font-size: 13px; }
+    .sector-row p { margin: 0; color: var(--text-dim); font-size: 10px; }
+    .sector-row .status { text-align: right; font-size: 9px; font-weight: 700; color: var(--text-muted); }
+    .sector-row.active .status { color: var(--accent); }
+    .live-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .live-card {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 8px;
+      padding: 10px;
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+    }
+    .live-card i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); margin-top: 4px; }
+    .live-card.warn i { background: var(--warn); }
+    .live-card small { font-size: 7px; color: var(--text-muted); letter-spacing: 0.1em; }
+    .live-card b { font-size: 10px; }
+  </style>
+</head>
+<body class="page-station">
+  <div class="game-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-mark">◈</span>
+        <div><b>S-01 SIMULATOR</b><span>тактическая калибровка</span></div>
+      </div>
+      <nav class="top-tabs">
+        <a href="./index.html">Обзор стиля</a>
+        <a class="active" href="./station.html">Станция</a>
+        <a href="./calibration.html">Калибровка</a>
+        <a href="./machine.html">Пульт машины</a>
+        <a href="./cards.html">Карточки</a>
+        <a href="./fx.html">Эффекты</a>
+      </nav>
+      <div class="top-clock"><small>ЦИКЛ</small><b>07:14:09</b></div>
+    </header>
+
+    <main class="station-shell">
+      <aside class="rail">
+        <button class="active">◎</button>
+        <button>⚙</button>
+        <button>✉</button>
+        <button>▣</button>
+        <button>⛭</button>
+      </aside>
+
+      <div class="station-body">
+        <section class="hero-panel">
+          <div class="hero-label">СТАНЦИЯ S-01</div>
+          <h1>Радиальная навигация</h1>
+          <p>Концентрические кольца — сектора. Центр — ядро. Выбор сектора подсвечивает кольцо и открывает операции справа. Всё в одном экране, без выпадающих меню.</p>
+        </section>
+
+        <div class="grid-2">
+          <div class="map-zone">
+            <div class="map-ring danger">
+              <div class="map-ring outer">
+                <div class="map-ring middle active">
+                  <div class="map-ring inner">
+                    <div class="map-ring core">
+                      <div class="map-center"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sector-list">
+            <div class="sector-row active">
+              <span class="dot"></span>
+              <div><b>КУЛЬТИВАЦИЯ / Cultivation</b><p>Среднее кольцо · 4 объекта · калибровка в процессе</p></div>
+              <span class="status">АКТИВНО</span>
+            </div>
+            <div class="sector-row">
+              <span class="dot"></span>
+              <div><b>АРХИВ / Archive</b><p>Внутреннее кольцо · хранилище данных</p></div>
+              <span class="status">ОЖИДАЕТ</span>
+            </div>
+            <div class="sector-row">
+              <span class="dot"></span>
+              <div><b>СКОЛАСТЕРИУМ / Scholarium</b><p>Внутреннее кольцо · обучение и тесты</p></div>
+              <span class="status">ОЖИДАЕТ</span>
+            </div>
+            <div class="sector-row danger">
+              <span class="dot"></span>
+              <div><b>ПЕРИМЕТР / Perimeter</b><p>Внешнее кольцо · требуется внимание</p></div>
+              <span class="status">ТРЕВОГА</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="live-strip">
+          <article class="live-card">
+            <i></i>
+            <div><small>СИГНАЛ</small><b>Субъект Mira: капсула готова</b></div>
+          </article>
+          <article class="live-card warn">
+            <i></i>
+            <div><small>ПРЕДУПРЕЖДЕНИЕ</small><b>Периметр: низкий заряд щита</b></div>
+          </article>
+          <article class="live-card">
+            <i></i>
+            <div><small>ОПЕРАЦИЯ</small><b>Калибровка S-01: фаза 2</b></div>
+          </article>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

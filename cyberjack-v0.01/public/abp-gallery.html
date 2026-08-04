@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Actions-by-Point Gallery</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #1a1a2e; color: #e0e0e0; font-family: system-ui, sans-serif; padding: 16px; }
+h1 { color: #8be9fd; margin-bottom: 10px; font-size: 18px; }
+#filters { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+#filters select { background: #2a2a4a; color: #e0e0e0; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; }
+#stats { margin-bottom: 10px; color: #888; font-size: 13px; }
+#gallery { display: flex; flex-wrap: wrap; gap: 8px; }
+.card { flex: 1 1 400px; max-width: 600px; background: #2a2a4a; border-radius: 6px; overflow: hidden; border: 2px solid transparent; margin-bottom: 8px; }
+.card.rejected { border-color: #ff5555; }
+.card.approved { border-color: #50fa7b; opacity: 0.4; }
+.card img { width: 100%; height: auto; display: block; cursor: pointer; }
+.card .label { padding: 4px 7px; font-size: 11px; color: #aaa; }
+.card .label b { color: #8be9fd; }
+.card .actions { padding: 4px 7px; display: flex; gap: 5px; }
+.card .actions button { flex: 1; padding: 4px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+.btn-approve { background: #50fa7b; color: #1a1a2e; }
+.btn-reject { background: #ff5555; color: #fff; }
+#pager { margin-top: 12px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+#pager button { background: #2a2a4a; color: #e0e0e0; border: 1px solid #444; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
+#pager button:disabled { opacity: 0.3; }
+#pager span { color: #888; font-size: 13px; }
+#savebar { position: fixed; bottom: 16px; right: 16px; display: flex; gap: 8px; align-items: center; }
+#savebar button { background: #ff5555; color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; }
+#savebar span { color: #888; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Actions-by-Point Gallery</h1>
+<div id="filters">
+  <select id="fPoint"><option value="">Все точки</option></select>
+  <select id="fAction"><option value="">Все действия</option></select>
+</div>
+<div id="stats"></div>
+<div id="gallery"></div>
+<div id="pager">
+  <button id="prevBtn">← Назад</button>
+  <span id="pageInfo"></span>
+  <button id="nextBtn">Вперёд →</button>
+</div>
+<div id="savebar">
+  <span id="countInfo">0</span>
+  <button onclick="saveList()">Скопировать список</button>
+</div>
+<script>
+let allItems = [];
+let filtered = [];
+let reviewed = {};
+let currentPage = 0;
+const PAGE_SIZE = 24;
+
+const POINT_RU = {
+  hair: 'волосы', face: 'лицо', lips: 'губы', neck: 'шея',
+  shoulders: 'плечи', chest: 'грудь', nipples: 'соски',
+  belly: 'живот', back: 'спина', waist: 'талия',
+  arms: 'руки', hands: 'кисти', inner_thighs: 'внутр. бёдра',
+  legs: 'ноги', knees: 'колени', feet: 'ступни',
+  buttocks: 'ягодицы', vulva: 'вульва', clitoris: 'клитор',
+  vagina: 'влагалище', anus: 'анус',
+};
+const ACTION_RU = {
+  feather_stroke: 'Провести пером', gentle_stroke: 'Мягко погладить',
+  tickle: 'Пощекотать', light_kiss: 'Коротко поцеловать',
+  deep_kiss: 'Поцеловать глубоко', licking: 'Провести языком',
+  deep_massage: 'Надавить и размять', ice_cube: 'Коснуться льдом',
+  hot_wax: 'Капнуть воском', light_bite: 'Прикусить',
+  hard_bite: 'Укусить до боли', pinch: 'Ущипнуть',
+  scratching: 'Провести ногтями', slap: 'Шлёпнуть',
+  hard_slap: 'Ударить ладонью', firm_grip: 'Сильно сжать',
+  needle_prick: 'Сделать укол иглой', belt_strike: 'Ударить ремнём',
+  whip_strike: 'Ударить хлыстом', taser_shock: 'Дать разряд электрошокером',
+  hair_pull: 'Потянуть за волосы', finger_insertion: 'Начать пальцами',
+  act_start_penetration: 'Начать проникновение',
+};
+
+async function loadIndex() {
+  // Fetch all actions-by-point items
+  const all = [];
+  for (let p = 0; p < 20; p++) {
+    const r = await fetch(`/review-api/index?page=${p}&page_size=500&category=actions-by-point`);
+    const d = await r.json();
+    if (!d.items.length) break;
+    all.push(...d.items);
+  }
+  allItems = all;
+  
+  // Populate filters
+  const points = [...new Set(all.map(i => i.variant || i.path.split('/')[1]))];
+  const actions = [...new Set(all.map(i => i.path.split('/').pop().replace('.png','')))];
+  
+  const pSel = document.getElementById('fPoint');
+  points.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = POINT_RU[p] || p; pSel.appendChild(o); });
+  
+  const aSel = document.getElementById('fAction');
+  actions.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = ACTION_RU[a] || a; aSel.appendChild(o); });
+  
+  reviewed = {};
+  localStorage.removeItem('abp_reviewed');
+  applyFilters();
+}
+
+function applyFilters() {
+  const fPoint = document.getElementById('fPoint').value;
+  const fAction = document.getElementById('fAction').value;
+  
+  filtered = allItems.filter(i => {
+    const point = i.path.split('/')[1];
+    const action = i.path.split('/').pop().replace('.png','');
+    if (fPoint && point !== fPoint) return false;
+    if (fAction && action !== fAction) return false;
+    return true;
+  });
+  
+  currentPage = 0;
+  render();
+}
+
+function approve(path) {
+  reviewed[path] = 'approved';
+  localStorage.setItem('abp_reviewed', JSON.stringify(reviewed));
+  const card = document.querySelector(`[data-path="${CSS.escape(path)}"]`);
+  if (card) { card.classList.add('approved'); card.classList.remove('rejected'); }
+  updateCount();
+}
+
+function reject(path) {
+  if (reviewed[path] === 'rejected') {
+    delete reviewed[path];
+    const card = document.querySelector(`[data-path="${CSS.escape(path)}"]`);
+    if (card) card.classList.remove('rejected');
+  } else {
+    reviewed[path] = 'rejected';
+    localStorage.setItem('abp_reviewed', JSON.stringify(reviewed));
+    const card = document.querySelector(`[data-path="${CSS.escape(path)}"]`);
+    if (card) card.classList.add('rejected');
+  }
+  updateCount();
+}
+
+function updateCount() {
+  const r = Object.entries(reviewed).filter(([_,s]) => s === 'rejected').length;
+  const a = Object.entries(reviewed).filter(([_,s]) => s === 'approved').length;
+  document.getElementById('countInfo').textContent = `Перегенерить: ${r} | OK: ${a}`;
+  document.getElementById('stats').textContent = `Всего: ${filtered.length} | Перегенерить: ${r} | OK: ${a}`;
+}
+
+function saveList() {
+  const rejected = Object.entries(reviewed).filter(([_,s]) => s === 'rejected').map(([p]) => p).join('\n');
+  navigator.clipboard.writeText(rejected);
+  alert('Скопировано ' + rejected.split('\n').filter(Boolean).length + ' путей');
+}
+
+function render() {
+  const start = currentPage * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  
+  document.getElementById('pageInfo').textContent = `Стр. ${currentPage+1} / ${totalPages || 1}`;
+  document.getElementById('prevBtn').disabled = currentPage === 0;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+  
+  updateCount();
+  
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = '';
+  
+  for (const item of pageItems) {
+    const path = item.path;
+    const point = path.split('/')[1];
+    const action = path.split('/').pop().replace('.png','');
+    const st = reviewed[path];
+    
+    const card = document.createElement('div');
+    card.className = 'card' + (st === 'rejected' ? ' rejected' : '') + (st === 'approved' ? ' approved' : '');
+    card.dataset.path = path;
+    
+    const pointRu = POINT_RU[point] || point;
+    const actionRu = ACTION_RU[action] || action;
+    
+    card.innerHTML = `
+      <img src="${item.url}" loading="lazy" onclick="window.open('${item.url}')">
+      <div class="label"><b>${actionRu}</b> — точка: ${pointRu}</div>
+      <div class="actions">
+        <button class="btn-approve" onclick="approve('${path.replace(/'/g, '&#39;')}')">✓ OK</button>
+        <button class="btn-reject" onclick="reject('${path.replace(/'/g, '&#39;')}')">✕ Перегенерить</button>
+      </div>
+    `;
+    gallery.appendChild(card);
+  }
+}
+
+document.getElementById('fPoint').onchange = applyFilters;
+document.getElementById('fAction').onchange = applyFilters;
+document.getElementById('prevBtn').onclick = () => { if (currentPage > 0) { currentPage--; render(); } };
+document.getElementById('nextBtn').onclick = () => { currentPage++; render(); };
+
+loadIndex();
+</script>
+</body>
+</html>

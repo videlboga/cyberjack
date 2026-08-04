@@ -1,0 +1,168 @@
+{
+  "version": 2,
+  "basePath": "/audio/actions",
+  "actions": {
+    "act_slap": {
+      "oneShot": "slap-variants/skin_slap_01.mp3",
+      "variants": [
+        "slap-variants/skin_slap_01.mp3",
+        "slap-variants/skin_slap_02.mp3",
+        "slap-variants/skin_slap_03.mp3",
+        "slap-variants/skin_slap_04.mp3",
+        "slap-variants/skin_slap_05.mp3",
+        "slap-variants/skin_slap_06.mp3",
+        "slap-variants/skin_slap_07.mp3",
+        "slap-variants/skin_slap_08.mp3",
+        "slap-variants/skin_slap_09.mp3"
+      ]
+    },
+    "act_kiss": { "oneShot": "act_kiss_01.mp3" },
+    "act_punch": { "oneShot": "act_punch_01.mp3" },
+    "act_caress": { "oneShot": "act_caress_01.mp3" },
+    "act_interrogate": { "silent": true },
+    "act_praise": { "silent": true },
+    "act_examine": { "oneShot": "act_examine_01.mp3" },
+
+    "act_apply_handcuffs": { "oneShot": "act_apply_handcuffs_01.mp3" },
+    "act_remove_handcuffs": { "oneShot": "act_remove_handcuffs_01.mp3" },
+    "act_struggle_cuffs": { "oneShot": "act_struggle_cuffs_01.mp3" },
+    "act_apply_ankle_cuffs": { "oneShot": "act_apply_handcuffs_01.mp3" },
+    "act_remove_ankle_cuffs": { "oneShot": "act_remove_handcuffs_01.mp3" },
+    "act_apply_collar": { "oneShot": "act_apply_collar_01.mp3" },
+    "act_remove_collar": { "oneShot": "act_remove_collar_01.mp3" },
+    "act_shock_collar": { "oneShot": "act_shock_collar_02.mp3" },
+    "act_apply_restraint_belt": { "oneShot": "act_apply_restraint_belt_01.mp3" },
+    "act_remove_restraint_belt": { "oneShot": "act_remove_restraint_belt_01.mp3" },
+
+    "act_connect_tens": { "oneShot": "act_connect_tens_01.mp3" },
+    "act_start_electrostimulation": {
+      "oneShot": "act_start_electrostimulation_01.mp3",
+      "loop": "act_electrostimulation_loop_01.mp3"
+    },
+    "act_adjust_electrostimulation": { "oneShot": "act_adjust_electrostimulation_01.mp3" },
+    "act_stop_electrostimulation": {
+      "oneShot": "act_stop_electrostimulation_01.mp3",
+      "stopsLoop": "act_electrostimulation_loop_01.mp3"
+    },
+    "act_disconnect_tens": {
+      "oneShot": "act_disconnect_tens_01.mp3",
+      "stopsLoop": "act_electrostimulation_loop_01.mp3"
+    },
+
+    "act_inject_truth_serum": { "oneShot": "act_inject_truth_serum_01.mp3" },
+    "act_inject_painkiller": { "oneShot": "act_inject_painkiller_01.mp3" },
+    "act_insert_plug": { "oneShot": "act_insert_plug_01.mp3" },
+    "act_activate_plug": {
+      "oneShot": "act_start_vibrator_01.mp3",
+      "loop": "act_start_vibrator_loop_06.mp3"
+    },
+    "act_deactivate_plug": {
+      "oneShot": "act_deactivate_plug_01.mp3",
+      "stopsLoop": "act_start_vibrator_loop_06.mp3"
+    },
+    "act_remove_plug": {
+      "oneShot": "act_remove_plug_01.mp3",
+      "stopsLoop": "act_start_vibrator_loop_06.mp3"
+    },
+    "act_start_vibrator": {
+      "oneShot": "act_start_vibrator_01.mp3",
+      "loop": "act_start_vibrator_loop_06.mp3"
+    },
+    "act_adjust_vibration": { "oneShot": "act_adjust_vibration_01.mp3" },
+    "act_stop_vibrator": {
+      "oneShot": "act_stop_vibrator_01.mp3",
+      "stopsLoop": "act_start_vibrator_loop_06.mp3"
+    },
+
+    "pose_standing": { "oneShot": "act_end_exposure_01.mp3" },
+    "pose_sitting": { "oneShot": "pose_sitting_01.mp3" },
+    "pose_lying_down": { "oneShot": "pose_sitting_01.mp3" },
+    "pose_all_fours": { "oneShot": "pose_all_fours_01.mp3" },
+    "pose_spread_eagle": { "oneShot": "pose_spread_eagle_01.mp3" },
+    "act_hold_exposure": { "oneShot": "act_hold_exposure_01.mp3" },
+    "act_end_exposure": { "oneShot": "act_end_exposure_01.mp3" },
+    "act_present_feet": { "oneShot": "act_present_feet_01.mp3" },
+    "act_end_feet_presentation": { "oneShot": "act_end_feet_presentation_01.mp3" },
+
+    "eq_blindfold_apply": { "oneShot": "eq_blindfold_apply_01.mp3" },
+    "eq_blindfold_remove": { "oneShot": "eq_blindfold_remove_01.mp3" },
+    "eq_gag_apply": { "oneShot": "eq_gag_apply_01.mp3" },
+    "eq_gag_remove": { "oneShot": "act_kiss_01.mp3" },
+    "act_suspend_wrists": { "oneShot": "act_suspend_wrists_01.mp3" },
+    "act_release_wrists": { "oneShot": "act_release_wrists_01.mp3" },
+
+    "eq_clothe_jumpsuit": { "oneShot": "clothing_dress_on_01.mp3" },
+    "eq_strip_jumpsuit": { "oneShot": "clothing_dress_off_01.mp3" },
+    "eq_clothe_dress": { "oneShot": "clothing_dress_on_01.mp3" },
+    "eq_clothe_stockings": { "oneShot": "clothing_dress_on_01.mp3" },
+    "eq_clothe_underwear": { "oneShot": "clothing_dress_on_01.mp3" },
+    "eq_clothe_panties": { "oneShot": "clothing_dress_on_01.mp3" },
+    "eq_clothe_underwear_remove": { "oneShot": "clothing_dress_off_01.mp3" },
+    "eq_clothe_panties_remove": { "oneShot": "clothing_dress_off_01.mp3" },
+    "eq_clothe_stockings_remove": { "oneShot": "clothing_dress_off_01.mp3" },
+    "eq_clothe_dress_remove": { "oneShot": "clothing_dress_off_01.mp3" },
+    "eq_clothe_jumpsuit_remove": { "oneShot": "clothing_dress_off_01.mp3" },
+    "eq_clothe_lab_gown": { "oneShot": "clothing_dress_on_01.mp3" },
+    "eq_clothe_lab_gown_remove": { "oneShot": "clothing_dress_off_01.mp3" },
+    "eq_clothe_calibration_set": { "oneShot": "clothing_dress_on_01.mp3" },
+    "eq_clothe_calibration_set_remove": { "oneShot": "clothing_dress_off_01.mp3" },
+
+    "finger_insertion": {
+      "oneShot": "finger_insertion_03.mp3",
+      "loop": "intimate_contact_loop_03.mp3",
+      "variants": [
+        "finger_insertion_01.mp3",
+        "finger_insertion_02.mp3",
+        "finger_insertion_04.mp3",
+        "intimate_contact_loop_01.mp3",
+        "intimate_contact_loop_02.mp3"
+      ]
+    },
+    "act_start_penetration": {
+      "oneShot": "act_start_penetration_01.mp3",
+      "loop": "intimate_contact_loop_04.mp3",
+      "variants": [
+        "act_start_penetration_02.mp3",
+        "act_start_penetration_03.mp3",
+        "act_start_penetration_04.mp3",
+        "intimate_contact_loop_01.mp3",
+        "intimate_contact_loop_02.mp3",
+        "intimate_contact_loop_03.mp3"
+      ]
+    },
+    "act_increase_friction": {
+      "loop": "intimate_contact_loop_fast_01.mp3",
+      "replacesLoop": "intimate_contact_loop_04.mp3"
+    },
+    "act_decrease_friction": {
+      "oneShot": "act_decrease_friction_01.mp3",
+      "loop": "intimate_contact_loop_04.mp3",
+      "replacesLoop": "intimate_contact_loop_fast_01.mp3",
+      "variants": ["act_decrease_friction_02.mp3"]
+    },
+    "sex_machine_slow": {
+      "loop": "intimate_contact_loop_04.mp3",
+      "replacesLoop": "intimate_contact_loop_fast_01.mp3"
+    },
+    "sex_machine_fast": {
+      "loop": "intimate_contact_loop_fast_01.mp3",
+      "replacesLoop": "intimate_contact_loop_04.mp3"
+    },
+    "sex_machine_peak": {
+      "loop": "intimate_contact_loop_fast_01.mp3",
+      "replacesLoop": "intimate_contact_loop_04.mp3"
+    },
+    "sex_machine_stop": {
+      "stopsLoop": "intimate_contact_loop_04.mp3"
+    },
+    "act_sexual_climax": {
+      "oneShot": "act_sexual_climax_01.mp3",
+      "variants": ["act_sexual_climax_02.mp3"]
+    },
+    "act_end_sexual_contact": {
+      "oneShot": "act_end_sexual_contact_01.mp3",
+      "variants": ["act_end_sexual_contact_02.mp3"],
+      "stopsLoop": "intimate_contact_loop_01.mp3"
+    }
+  }
+}

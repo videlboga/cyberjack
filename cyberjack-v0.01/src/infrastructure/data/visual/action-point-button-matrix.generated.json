@@ -1,0 +1,2149 @@
+{
+  "version": 1,
+  "purpose": "Mechanical point-action compatibility and generation checklist for calibration action-card illustrations.",
+  "assetConvention": "/character-images/actions-by-point/$pointId/$actionId.png",
+  "imageRequirements": {
+    "format": "png",
+    "aspectRatio": "1:1",
+    "framing": "full-bleed, no margins, no border",
+    "content": "show the selected body point and make the action immediately readable",
+    "forbidden": [
+      "text",
+      "labels",
+      "UI controls",
+      "decorative frame"
+    ]
+  },
+  "actions": {
+    "feather_stroke": "Провести пером",
+    "gentle_stroke": "Мягко погладить",
+    "tickle": "Пощекотать",
+    "light_kiss": "Коротко поцеловать",
+    "deep_kiss": "Поцеловать глубоко",
+    "licking": "Провести языком",
+    "deep_massage": "Массаж",
+    "ice_cube": "Коснуться льдом",
+    "hot_wax": "Капнуть воском",
+    "light_bite": "Прикусить",
+    "hard_bite": "Укусить до боли",
+    "pinch": "Ущипнуть",
+    "scratching": "Провести ногтями",
+    "slap": "Шлёпнуть",
+    "hard_slap": "Ударить ладонью",
+    "firm_grip": "Сильно сжать",
+    "needle_prick": "Сделать укол иглой",
+    "belt_strike": "Ударить ремнём",
+    "whip_strike": "Ударить хлыстом",
+    "taser_shock": "Дать разряд электрошокером",
+    "hair_pull": "Потянуть за волосы",
+    "finger_insertion": "Начать пальцами",
+    "act_start_penetration": "Начать проникновение"
+  },
+  "points": {
+    "hair": [
+      "gentle_stroke",
+      "hair_pull"
+    ],
+    "face": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "needle_prick"
+    ],
+    "lips": [
+      "feather_stroke",
+      "gentle_stroke",
+      "light_kiss",
+      "deep_kiss",
+      "licking",
+      "light_bite",
+      "hard_bite",
+      "ice_cube"
+    ],
+    "neck": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "hard_bite",
+      "scratching",
+      "firm_grip",
+      "taser_shock"
+    ],
+    "shoulders": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "deep_massage"
+    ],
+    "chest": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "belt_strike",
+      "whip_strike",
+      "deep_massage",
+      "hot_wax"
+    ],
+    "nipples": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "hot_wax"
+    ],
+    "belly": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "deep_massage",
+      "hot_wax",
+      "belt_strike"
+    ],
+    "back": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "belt_strike",
+      "whip_strike",
+      "deep_massage",
+      "hot_wax"
+    ],
+    "waist": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "deep_massage",
+      "belt_strike"
+    ],
+    "arms": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "deep_massage"
+    ],
+    "hands": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "pinch",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock"
+    ],
+    "inner_thighs": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "belt_strike",
+      "whip_strike",
+      "hot_wax"
+    ],
+    "legs": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "belt_strike",
+      "whip_strike",
+      "deep_massage",
+      "hot_wax"
+    ],
+    "knees": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "pinch",
+      "scratching",
+      "slap",
+      "hard_slap",
+      "needle_prick"
+    ],
+    "feet": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "tickle",
+      "deep_massage",
+      "scratching",
+      "slap",
+      "needle_prick",
+      "taser_shock"
+    ],
+    "buttocks": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "slap",
+      "hard_slap",
+      "firm_grip",
+      "needle_prick",
+      "taser_shock",
+      "hard_bite",
+      "scratching",
+      "belt_strike",
+      "whip_strike",
+      "deep_massage",
+      "hot_wax"
+    ],
+    "vulva": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "tickle",
+      "hot_wax",
+      "firm_grip"
+    ],
+    "clitoris": [
+      "feather_stroke",
+      "gentle_stroke",
+      "ice_cube",
+      "light_kiss",
+      "licking",
+      "light_bite",
+      "pinch",
+      "tickle"
+    ],
+    "vagina": [
+      "finger_insertion",
+      "act_start_penetration"
+    ],
+    "anus": [
+      "feather_stroke",
+      "gentle_stroke",
+      "light_kiss",
+      "licking",
+      "ice_cube",
+      "finger_insertion",
+      "act_start_penetration"
+    ]
+  },
+  "combinations": [
+    {
+      "pointId": "hair",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/hair/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on hair; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hair",
+      "actionId": "hair_pull",
+      "actionLabel": "Потянуть за волосы",
+      "assetPath": "/character-images/actions-by-point/hair/hair_pull.png",
+      "prompt": "a hand pulling the character by the hair; close-up interaction illustration clearly centered on hair; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/face/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/face/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/face/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/face/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/face/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/face/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/face/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/face/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/face/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "face",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/face/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on face; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/lips/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/lips/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/lips/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "deep_kiss",
+      "actionLabel": "Поцеловать глубоко",
+      "assetPath": "/character-images/actions-by-point/lips/deep_kiss.png",
+      "prompt": "an intense lingering kiss focused on the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/lips/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/lips/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/lips/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "lips",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/lips/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on lips; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/neck/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/neck/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/neck/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/neck/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/neck/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/neck/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/neck/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/neck/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/neck/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/neck/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "neck",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/neck/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on neck; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/shoulders/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/shoulders/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/shoulders/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/shoulders/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/shoulders/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/shoulders/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/shoulders/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/shoulders/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/shoulders/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/shoulders/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/shoulders/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/shoulders/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/shoulders/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/shoulders/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "shoulders",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/shoulders/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on shoulders; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/chest/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/chest/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/chest/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/chest/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/chest/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/chest/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/chest/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/chest/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/chest/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/chest/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/chest/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/chest/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/chest/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/chest/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "belt_strike",
+      "actionLabel": "Ударить ремнём",
+      "assetPath": "/character-images/actions-by-point/chest/belt_strike.png",
+      "prompt": "a leather belt striking the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "whip_strike",
+      "actionLabel": "Ударить хлыстом",
+      "assetPath": "/character-images/actions-by-point/chest/whip_strike.png",
+      "prompt": "a thin whip striking the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/chest/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "chest",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/chest/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on chest; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/nipples/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/nipples/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/nipples/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/nipples/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/nipples/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/nipples/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/nipples/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/nipples/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/nipples/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/nipples/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/nipples/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/nipples/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/nipples/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/nipples/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "nipples",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/nipples/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on nipples; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/belly/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/belly/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/belly/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/belly/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/belly/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/belly/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/belly/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/belly/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/belly/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/belly/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/belly/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/belly/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/belly/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/belly/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/belly/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/belly/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "belly",
+      "actionId": "belt_strike",
+      "actionLabel": "Ударить ремнём",
+      "assetPath": "/character-images/actions-by-point/belly/belt_strike.png",
+      "prompt": "a leather belt striking the selected body point; close-up interaction illustration clearly centered on belly; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/back/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/back/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/back/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/back/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/back/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/back/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/back/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/back/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/back/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/back/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/back/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/back/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/back/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/back/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "belt_strike",
+      "actionLabel": "Ударить ремнём",
+      "assetPath": "/character-images/actions-by-point/back/belt_strike.png",
+      "prompt": "a leather belt striking the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "whip_strike",
+      "actionLabel": "Ударить хлыстом",
+      "assetPath": "/character-images/actions-by-point/back/whip_strike.png",
+      "prompt": "a thin whip striking the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/back/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "back",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/back/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on back; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/waist/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/waist/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/waist/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/waist/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/waist/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/waist/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/waist/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/waist/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/waist/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/waist/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/waist/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/waist/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/waist/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/waist/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/waist/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "waist",
+      "actionId": "belt_strike",
+      "actionLabel": "Ударить ремнём",
+      "assetPath": "/character-images/actions-by-point/waist/belt_strike.png",
+      "prompt": "a leather belt striking the selected body point; close-up interaction illustration clearly centered on waist; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/arms/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/arms/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/arms/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/arms/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/arms/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/arms/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/arms/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/arms/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/arms/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/arms/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/arms/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/arms/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/arms/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/arms/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "arms",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/arms/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on arms; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/hands/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/hands/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/hands/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/hands/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/hands/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/hands/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/hands/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/hands/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "hands",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/hands/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on hands; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "belt_strike",
+      "actionLabel": "Ударить ремнём",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/belt_strike.png",
+      "prompt": "a leather belt striking the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "whip_strike",
+      "actionLabel": "Ударить хлыстом",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/whip_strike.png",
+      "prompt": "a thin whip striking the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "inner_thighs",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/inner_thighs/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on inner_thighs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/legs/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/legs/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/legs/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/legs/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/legs/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/legs/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/legs/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/legs/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/legs/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/legs/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/legs/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/legs/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/legs/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/legs/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "belt_strike",
+      "actionLabel": "Ударить ремнём",
+      "assetPath": "/character-images/actions-by-point/legs/belt_strike.png",
+      "prompt": "a leather belt striking the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "whip_strike",
+      "actionLabel": "Ударить хлыстом",
+      "assetPath": "/character-images/actions-by-point/legs/whip_strike.png",
+      "prompt": "a thin whip striking the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/legs/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "legs",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/legs/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on legs; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/knees/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/knees/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/knees/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/knees/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/knees/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/knees/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/knees/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/knees/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/knees/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "knees",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/knees/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on knees; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/feet/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/feet/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/feet/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/feet/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/feet/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/feet/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/feet/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "tickle",
+      "actionLabel": "Пощекотать",
+      "assetPath": "/character-images/actions-by-point/feet/tickle.png",
+      "prompt": "fingertips lightly tickling the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/feet/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/feet/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/feet/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/feet/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "feet",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/feet/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on feet; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/buttocks/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/buttocks/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/buttocks/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/buttocks/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/buttocks/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/buttocks/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/buttocks/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "slap",
+      "actionLabel": "Шлёпнуть",
+      "assetPath": "/character-images/actions-by-point/buttocks/slap.png",
+      "prompt": "an open palm slapping the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "hard_slap",
+      "actionLabel": "Ударить ладонью",
+      "assetPath": "/character-images/actions-by-point/buttocks/hard_slap.png",
+      "prompt": "a forceful open-palm strike to the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/buttocks/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "needle_prick",
+      "actionLabel": "Сделать укол иглой",
+      "assetPath": "/character-images/actions-by-point/buttocks/needle_prick.png",
+      "prompt": "a clinical needle touching the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "taser_shock",
+      "actionLabel": "Дать разряд электрошокером",
+      "assetPath": "/character-images/actions-by-point/buttocks/taser_shock.png",
+      "prompt": "a compact electroshock device contacting the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "hard_bite",
+      "actionLabel": "Укусить до боли",
+      "assetPath": "/character-images/actions-by-point/buttocks/hard_bite.png",
+      "prompt": "a firm painful bite on the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "scratching",
+      "actionLabel": "Провести ногтями",
+      "assetPath": "/character-images/actions-by-point/buttocks/scratching.png",
+      "prompt": "fingernails scratching across the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "belt_strike",
+      "actionLabel": "Ударить ремнём",
+      "assetPath": "/character-images/actions-by-point/buttocks/belt_strike.png",
+      "prompt": "a leather belt striking the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "whip_strike",
+      "actionLabel": "Ударить хлыстом",
+      "assetPath": "/character-images/actions-by-point/buttocks/whip_strike.png",
+      "prompt": "a thin whip striking the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "deep_massage",
+      "actionLabel": "Массаж",
+      "assetPath": "/character-images/actions-by-point/buttocks/deep_massage.png",
+      "prompt": "two hands applying deep massage to the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "buttocks",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/buttocks/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on buttocks; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/vulva/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/vulva/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/vulva/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/vulva/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/vulva/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/vulva/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/vulva/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "tickle",
+      "actionLabel": "Пощекотать",
+      "assetPath": "/character-images/actions-by-point/vulva/tickle.png",
+      "prompt": "fingertips lightly tickling the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "hot_wax",
+      "actionLabel": "Капнуть воском",
+      "assetPath": "/character-images/actions-by-point/vulva/hot_wax.png",
+      "prompt": "a small drop of warm wax falling onto the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vulva",
+      "actionId": "firm_grip",
+      "actionLabel": "Сильно сжать",
+      "assetPath": "/character-images/actions-by-point/vulva/firm_grip.png",
+      "prompt": "a hand gripping and squeezing the selected body point; close-up interaction illustration clearly centered on vulva; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/clitoris/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/clitoris/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/clitoris/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/clitoris/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/clitoris/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "light_bite",
+      "actionLabel": "Прикусить",
+      "assetPath": "/character-images/actions-by-point/clitoris/light_bite.png",
+      "prompt": "a light playful bite on the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "pinch",
+      "actionLabel": "Ущипнуть",
+      "assetPath": "/character-images/actions-by-point/clitoris/pinch.png",
+      "prompt": "fingers pinching the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "clitoris",
+      "actionId": "tickle",
+      "actionLabel": "Пощекотать",
+      "assetPath": "/character-images/actions-by-point/clitoris/tickle.png",
+      "prompt": "fingertips lightly tickling the selected body point; close-up interaction illustration clearly centered on clitoris; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vagina",
+      "actionId": "finger_insertion",
+      "actionLabel": "Начать пальцами",
+      "assetPath": "/character-images/actions-by-point/vagina/finger_insertion.png",
+      "prompt": "manual intimate stimulation focused on the selected body point; close-up interaction illustration clearly centered on vagina; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "vagina",
+      "actionId": "act_start_penetration",
+      "actionLabel": "Начать проникновение",
+      "assetPath": "/character-images/actions-by-point/vagina/act_start_penetration.png",
+      "prompt": "the beginning of penetrative contact at the selected body point; close-up interaction illustration clearly centered on vagina; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "anus",
+      "actionId": "feather_stroke",
+      "actionLabel": "Провести пером",
+      "assetPath": "/character-images/actions-by-point/anus/feather_stroke.png",
+      "prompt": "feather tracing lightly across the selected body point; close-up interaction illustration clearly centered on anus; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "anus",
+      "actionId": "gentle_stroke",
+      "actionLabel": "Мягко погладить",
+      "assetPath": "/character-images/actions-by-point/anus/gentle_stroke.png",
+      "prompt": "a gentle open hand stroking the selected body point; close-up interaction illustration clearly centered on anus; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "anus",
+      "actionId": "light_kiss",
+      "actionLabel": "Коротко поцеловать",
+      "assetPath": "/character-images/actions-by-point/anus/light_kiss.png",
+      "prompt": "a brief soft kiss on the selected body point; close-up interaction illustration clearly centered on anus; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "anus",
+      "actionId": "licking",
+      "actionLabel": "Провести языком",
+      "assetPath": "/character-images/actions-by-point/anus/licking.png",
+      "prompt": "a tongue tracing the selected body point; close-up interaction illustration clearly centered on anus; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "anus",
+      "actionId": "ice_cube",
+      "actionLabel": "Коснуться льдом",
+      "assetPath": "/character-images/actions-by-point/anus/ice_cube.png",
+      "prompt": "an ice cube touching the selected body point; close-up interaction illustration clearly centered on anus; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "anus",
+      "actionId": "finger_insertion",
+      "actionLabel": "Начать пальцами",
+      "assetPath": "/character-images/actions-by-point/anus/finger_insertion.png",
+      "prompt": "manual intimate stimulation focused on the selected body point; close-up interaction illustration clearly centered on anus; no text, no UI, no frame, full-bleed square composition"
+    },
+    {
+      "pointId": "anus",
+      "actionId": "act_start_penetration",
+      "actionLabel": "Начать проникновение",
+      "assetPath": "/character-images/actions-by-point/anus/act_start_penetration.png",
+      "prompt": "the beginning of penetrative contact at the selected body point; close-up interaction illustration clearly centered on anus; no text, no UI, no frame, full-bleed square composition"
+    }
+  ],
+  "totals": {
+    "points": 21,
+    "actions": 23,
+    "images": 257
+  }
+}

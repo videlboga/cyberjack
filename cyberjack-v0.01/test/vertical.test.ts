@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { runGameTick } from '../src/orchestration/runGameTick';
 import { checkActionAccess } from '../src/scenario/checkActionAccess';
 import { db } from '../src/infrastructure/db';
-import { subjectRepo, pointStateRepo, sceneRepo, resourceRepo, presetRepo } from '../src/infrastructure/repositories';
+import { subjectRepo, pointStateRepo, sceneRepo, resourceRepo, presetRepo, characterItemsRepo } from '../src/infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../src/engine/config';
 
 describe('Vertical Slice Integration (Full System Pipeline)', () => {
@@ -56,5 +56,37 @@ describe('Vertical Slice Integration (Full System Pipeline)', () => {
            console.error("DEBUG PROMPT PAYLOAD ERROR", e);
            throw e;
         }
+    });
+
+    it('consumes one capsule ampoule and blocks the next infusion at zero charges', async () => {
+        db.prepare(`
+            INSERT OR REPLACE INTO items (id,name,type,tags,description)
+            VALUES ('drug_test_ampoule','Test ampoule','consumable','[]','')
+        `).run();
+        presetRepo.saveActionPreset('capsule_test_infusion', 'Test infusion', {
+            intensity:0.1,valence:0.1,contact:0.1,sharpness:0,novelty:0.2,
+            requiresItem:'drug_test_ampoule',
+        }, { type:'condition',duration:2,occupiesPoints:['capsule_medication'] });
+        sceneRepo.save({ id:'scene_v',availableActions:['capsule_test_infusion'] });
+        db.prepare(`
+            INSERT OR REPLACE INTO scene_characters
+                (scene_id,character_id,role,can_act,presence_state)
+            VALUES ('scene_v','player_v','player',1,'present')
+        `).run();
+        characterItemsRepo.save({
+            characterId:'player_v',itemId:'drug_test_ampoule',state:'active',charges:1,
+        });
+
+        await runGameTick({
+            subjectId:'sub_vertical',playerId:'player_v',pointId:'point_v',
+            sceneId:'scene_v',presetId:'capsule_test_infusion',skipPrompt:true,
+        });
+        expect(characterItemsRepo.get('player_v','drug_test_ampoule')).toMatchObject({
+            charges:0,state:'consumed',
+        });
+        await expect(runGameTick({
+            subjectId:'sub_vertical',playerId:'player_v',pointId:'point_v',
+            sceneId:'scene_v',presetId:'capsule_test_infusion',skipPrompt:true,
+        })).rejects.toThrow(/Требуется предмет/);
     });
 });

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberJack — Единый игровой визуальный стиль</title>
+  <link rel="stylesheet" href="./cyberjack-game-style.css" />
+</head>
+<body class="page-index">
+  <div class="game-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-mark">◈</span>
+        <div>
+          <b>S-01 SIMULATOR</b>
+          <span>тактическая калибровка</span>
+        </div>
+      </div>
+      <nav class="top-tabs">
+        <a class="active" href="./index.html">Обзор стиля</a>
+        <a href="./station.html">Станция</a>
+        <a href="./calibration.html">Калибровка</a>
+        <a href="./machine.html">Пульт машины</a>
+        <a href="./cards.html">Карточки</a>
+        <a href="./fx.html">Эффекты</a>
+      </nav>
+      <div class="top-clock">
+        <small>ЦИКЛ</small>
+        <b>07:14:09</b>
+      </div>
+    </header>
+
+    <main class="screen">
+      <section class="hero-panel">
+        <div class="hero-label">ВИЗУАЛЬНЫЙ СТИЛЬ v0.1</div>
+        <h1>Плоский игровой интерфейс<br/>в духе манги и JRPG</h1>
+        <p>Отказываемся от «вебового» вида: убираем скругления, тени, градиенты, serif-заголовки, пастельные акценты. Делаем всё плоским, с чёткой сеткой, японской типографикой, анимированными состояниями и игровой навигацией.</p>
+      </section>
+
+      <section class="grid-2">
+        <article class="style-card">
+          <header>
+            <small>ПРИНЦИП 01</small>
+            <b>Плоскость и контраст</b>
+          </header>
+          <p>Никаких градиентов и объёмных теней. Фон — тёмный, панели чуть светлее, линии разделителей яркие. Акценты — насыщенные: янтарный, бирюзовый, коралловый.</p>
+          <div class="chip-row">
+            <span class="chip chip-amber">#d9a441</span>
+            <span class="chip chip-cyan">#4fd1c5</span>
+            <span class="chip chip-coral">#e06c75</span>
+          </div>
+        </article>
+
+        <article class="style-card">
+          <header>
+            <small>ПРИНЦИП 02</small>
+            <b>Манга / JRPG типографика</b>
+          </header>
+          <p>Крупные заголовки с иероглифами-водяными знаками, узкие лейблы, цифры табличными цифрами. Мало текста, много иконок и пиктограмм.</p>
+        </article>
+
+        <article class="style-card">
+          <header>
+            <small>ПРИНЦИП 03</small>
+            <b>Отзывчивые состояния</b>
+          </header>
+          <p>Каждый интерактивный элемент реагирует: hover — обводка и смещение; active — вдавливание; selected — яркая полоса слева или сверху; danger — пульсация.</p>
+        </article>
+
+        <article class="style-card">
+          <header>
+            <small>ПРИНЦИП 04</small>
+            <b>Игровая навигация</b>
+          </header>
+          <p>Меню как HUD: горизонтальная плашка, иконки + короткие подписи. Нет вертикальных длинных списков. Всё в пределах одного экрана, без прокрутки основного UI.</p>
+        </article>
+      </section>
+
+      <section class="demo-zone">
+        <h2><span class="jp-watermark">見本</span>Живые компоненты</h2>
+        <div class="component-row">
+          <button class="game-btn">Обычная</button>
+          <button class="game-btn active">Активная</button>
+          <button class="game-btn danger">Опасная</button>
+          <button class="game-btn quiet">Вторичная</button>
+          <button class="game-btn icon-btn"><span>▶</span> Запуск</button>
+        </div>
+        <div class="component-row">
+          <div class="stat-pill"><small>РЕСУРС</small><b>74%</b></div>
+          <div class="stat-pill alert"><small>НАГРУЗКА</small><b>92%</b></div>
+          <div class="stat-pill ok"><small>СТАТУС</small><b>OK</b></div>
+          <div class="tag">мягкий контакт</div>
+          <div class="tag tag-hot">болевое</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

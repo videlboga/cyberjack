@@ -1,4 +1,5 @@
 import { AssetContract, SubjectCoreState, AssetContractCondition } from '../domain/types';
+import { acquiredTraitValue, parsePreferences } from '../domain/conditioning';
 
 export interface EvaluationResult {
     contract: AssetContract;
@@ -90,6 +91,12 @@ export function contractConditionValue(cond: AssetContractCondition, core: Subje
         if (baselineKey) return core[baselineKey] ?? (core as any)[cond.key];
         return (core as any)[cond.key];
     }
+    if (cond.type === 'preference' && cond.key) {
+        return parsePreferences(core.preferences).tags[cond.key] || 0;
+    }
+    if (cond.type === 'acquired_trait' && cond.key) {
+        return acquiredTraitValue(core.preferences, cond.key);
+    }
     return context[cond.key || cond.type];
 }
 
@@ -102,6 +109,8 @@ function compareValues(actual: any, operator: string = '==', target: any): boole
     switch (operator) {
         case '>': return actual > target;
         case '<': return actual < target;
+        case '>=': return actual >= target;
+        case '<=': return actual <= target;
         case '==': return actual == target;
         case '!=': return actual != target;
         default: return actual === target;

@@ -22,7 +22,9 @@ export const ActionTagSchema = z.enum([
   'mental', 'pressure', 'command', 'clinical', 'vulnerable', 'restraint', 
   'metal', 'humiliation', 'struggle', 'electronic', 'control', 'punishment',
   'chemical', 'piercing', 'stretching', 'machine', 'isolation', 'stimulation',
-  'torture', 'medical', 'hands', 'feet', 'chest', 'groin' // specific trigger tags
+  'torture', 'medical', 'drug', 'sexual', 'oral', 'biomaterial', 'fluid',
+  'hands', 'feet', 'chest', 'groin', 'tickling', 'submission', 'exposure',
+  'penetration', 'deprivation' // specific trigger and learnable tags
 ]);
 
 export const CategorySchema = z.enum([

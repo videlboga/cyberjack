@@ -1,45 +1,64 @@
 // src/orchestration/saveTickState.ts
-import { subjectRepo, pointStateRepo, eventLogRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
+import { subjectRepo, pointStateRepo, eventLogRepo, characterRepo, characterRelationRepo, presetRepo } from '../infrastructure/repositories';
 import { subjectPreferencesRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { SubjectCoreState, SubjectPointState, CompiledAction, TickOutput, InteractionObservation } from '../domain/types';
 import { db } from '../infrastructure/db';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
+import { clamp } from '../engine/utils';
 import { describeActionNarrative } from '../narrative/eventTemplates';
+import {
+    clothingConditioningTags,
+    conditioningSignal,
+    conditioningTags,
+    contextConditioningTags,
+    isLearnablePreferenceContext,
+    LEARNABLE_PREFERENCE_TAGS,
+} from '../domain/conditioning';
+import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 
 export function saveTickState(
     subjectId: string, 
     pointId: string, 
-    playerId: string,
+    actorId: string,
     presetId: string,
     action: CompiledAction, 
     output: TickOutput,
     tickId: string,
-    observation?: InteractionObservation
+    observation?: InteractionObservation,
+    eventMetadata?: Record<string, unknown>,
+    learningScale: number = 1
 ) {
+    const persistenceScale = clamp(Number(learningScale), 0, 1);
     // 1. Save new core state
     const currentSubject = subjectRepo.get(subjectId);
     const subjectName = currentSubject?.name || 'Unknown';
     subjectRepo.save(subjectId, subjectName, output.nextCore);
     characterRepo.ensureSubject(subjectId, subjectName);
-    const playerCharacter = characterRepo.ensureCharacter(playerId, playerId === 'PL-1' ? 'Калибратор' : playerId);
-    const actorName = playerCharacter.name || 'Калибратор';
+    const actorCharacter = characterRepo.get(actorId) || characterRepo.ensureCharacter(actorId, actorId === 'PL-1' ? 'Калибратор' : actorId);
+    const actorName = actorCharacter.name || 'Калибратор';
     const relationCfg = (DEFAULT_CONFIG.formulas.baseline?.relation) || {};
-    const relation = characterRelationRepo.ensure(subjectId, playerCharacter.id, {
+    const relation = characterRelationRepo.ensure(subjectId, actorCharacter.id, {
         attitude: output.nextCore.attitude,
         openness: currentSubject?.openness ?? output.nextCore.openness,
         plasticity: currentSubject?.plasticity ?? output.nextCore.plasticity,
         baselineAttitude: currentSubject?.baselineAttitude ?? output.nextCore.attitude
     });
     const relationBaseline = relation.baselineAttitude ?? relation.attitude;
-    const dampedRelationAttitude = dampTowardsBaseline(output.nextCore.attitude, relationBaseline, {
+    const boundary = observation?.reactionSnapshot?.boundary;
+    const experiencedIntensity = Number(output.result.experiencedIntensity || 0);
+    const relationalScale = Math.max(.15, Math.min(1.5, experiencedIntensity / 10));
+    const boundarySignal = boundary?.ignored ? -2.5 : boundary?.respected ? .5 : 0;
+    const relationalSignal = clamp(output.result.finalValence * relationalScale + boundarySignal, -4, 2) * persistenceScale;
+    const proposedRelationAttitude = clamp(relation.attitude + relationalSignal, 0, 100);
+    const dampedRelationAttitude = dampTowardsBaseline(proposedRelationAttitude, relationBaseline, {
         dampingBase: relationCfg.dampingBase,
         dampingDistanceScale: relationCfg.dampingDistanceScale,
         maxDamping: relationCfg.maxDamping
     });
     const relationDriver = {
-        plasticity: output.nextCore.plasticity,
-        openness: output.nextCore.openness,
+        plasticity: relation.plasticity ?? output.nextCore.plasticity,
+        openness: relation.openness ?? output.nextCore.openness,
         novelty: action.novelty ?? 0.5
     };
     const nextRelationBaseline = advanceBaseline(
@@ -48,13 +67,44 @@ export function saveTickState(
         relationDriver,
         { baseRate: relationCfg.adaptBase, ...relationCfg }
     );
-    characterRelationRepo.updateAttitude(subjectId, playerCharacter.id, dampedRelationAttitude, {
+    characterRelationRepo.updateAttitude(subjectId, actorCharacter.id, dampedRelationAttitude, {
         baselineAttitude: nextRelationBaseline,
-        openness: output.nextCore.openness,
-        plasticity: output.nextCore.plasticity
+        openness: clamp((relation.openness ?? 0) + relationalSignal * .35, 0, 100),
+        plasticity: relation.plasticity ?? output.nextCore.plasticity
     });
-    characterRelationRepo.updateSocialStats(subjectId, playerCharacter.id, {
+    characterRelationRepo.updateSocialStats(subjectId, actorCharacter.id, {
         familiarityDelta: Math.max(0.005, (action.novelty ?? 0.5) * 0.015)
+    });
+    const dynamics = relationshipDynamicsRepo.get(subjectId, actorCharacter.id);
+    const ignored = Boolean(boundary?.ignored);
+    const respected = Boolean(boundary?.respected);
+    const lowReserve = Math.max(0, (45 - output.nextCore.capacity) / 45);
+    const plasticity = Math.max(0, Math.min(1, output.nextCore.plasticity / 100));
+    const activeIds = new Set(activeContextsRepo.getAllForSubject(subjectId).map(context => context.actionId));
+    const constrained = [...activeIds].some(id =>
+        /suspend|cuff|restraint|machine|collar|spread_eagle|hold_exposure/.test(id)
+    );
+    const lackOfControl = ignored ? 1 : constrained ? .55 : 0;
+    const negativeAppraisal = Math.max(0, -Number(output.result.finalValence || 0));
+    const repetition = Math.max(0, Math.min(1, Number(output.nextPoint?.exposureCount || 0) / 8));
+    const resignationGain = negativeAppraisal * lackOfControl *
+        (.45 + repetition * .9) * (.35 + plasticity * .65) * (.5 + dynamics.fear / 100);
+    const neuroCalm = activeIds.has('capsule_infusion_neurostabilizer');
+    const truthSerum = presetId === 'act_inject_truth_serum' || activeIds.has('act_inject_truth_serum');
+    const distressState = [...activeIds].some(id => [
+        'effect_panic', 'effect_sensory_overload', 'effect_freeze',
+        'effect_apathy', 'effect_chronic_apathy',
+    ].includes(id));
+    const breakdown = output.notableEvent === 'breakdown';
+    relationshipDynamicsRepo.change(subjectId, actorCharacter.id, {
+        fear: ((ignored ? 1.2 + Math.max(0, -output.result.finalValence) * 1.8 : respected ? -1 : output.result.finalValence > .3 ? -.15 : 0) - (neuroCalm ? .35 : 0)) * persistenceScale,
+        resistance: (ignored ? (output.nextCore.capacity > 40 ? .45 : -.35 - lowReserve * .45) : respected ? .25 : 0) * persistenceScale,
+        learnedCompliance: (resignationGain +
+            (ignored ? lowReserve * plasticity * (.35 + (boundary?.intensity || 0) * .45) : 0) +
+            (truthSerum ? .7 : 0)) * persistenceScale,
+        dissociation: ((ignored ? lowReserve * .3 + Math.max(0, output.result.overload) * .015 : respected ? -.2 : 0) + (truthSerum ? .2 : 0) - (neuroCalm ? .08 : 0)) * persistenceScale,
+        dependency: (respected && dynamics.fear > 15 ? dynamics.fear / 100 * .18
+            : output.result.finalValence > .4 && dynamics.fear > 20 ? output.result.pleasure * .012 : 0) * persistenceScale,
     });
 
     // 2. Save new point state
@@ -81,7 +131,8 @@ export function saveTickState(
             narrative: actionNarrative,
             actorName,
             tickId,
-            delta: output.delta
+            delta: output.delta,
+            ...eventMetadata
         },
         { result: output.result, delta: output.delta, observation }
     );
@@ -91,37 +142,86 @@ export function saveTickState(
         const result = output.result;
         
         // --- TARGET (Receiver) Preference Update ---
-        // Base reward: direct sensations + relation shift
-        let targetReward = (result.pleasure || 0) - (result.discomfort || 0) + (result.attitudeShift || 0) * 0.2;
-
-        const targetRelation = characterRelationRepo.get(subjectId, playerId);
+        const targetRelation = characterRelationRepo.get(subjectId, actorId);
         const targetAttitude = targetRelation?.attitude ?? 50;
         const targetRelPlasticity = targetRelation?.plasticity ?? 50;
-        const targetSympathy = (targetAttitude - 50) / 50; // [-1..1]
-        // Dominance: low plasticity towards actor = dominant (>0), high plasticity = submissive (<0)
-        const targetDominance = (50 - targetRelPlasticity) / 50; 
-
-        // Masochistic/Submissive learning: if target is submissive and likes the actor, 
-        // they can learn to prefer pain/discomfort from them (Stockholm/Masochism effect)
-        if (targetDominance < 0 && targetSympathy > 0) {
-            const submissiveness = -targetDominance; // [0..1]
-            targetReward += (result.discomfort || 0) * submissiveness * targetSympathy;
-        }
-
-        const targetPlasticity = (output.nextCore?.plasticity ?? 50) / 100;
-        const targetDelta = Math.sign(targetReward) * Math.min(1, Math.abs(targetReward)) * 0.5 * targetPlasticity;
+        const signal = conditioningSignal({
+            pleasure: result.pleasure,
+            discomfort: result.discomfort,
+            overload: result.overload,
+            finalValence: result.finalValence,
+            attitudeShift: result.attitudeShift,
+            learningEffect: result.learningEffect,
+            engagement: result.engagement,
+            corePlasticity: output.nextCore?.plasticity,
+            relationAttitude: targetAttitude,
+            relationPlasticity: targetRelPlasticity,
+            learnedCompliance: dynamics.learnedCompliance + resignationGain,
+            lackOfControl,
+            distressState,
+            breakdown,
+        });
+        const targetReward = signal.reward;
+        const targetPlasticity = Math.max(0, Math.min(1, (output.nextCore?.plasticity ?? 50) / 100));
+        const catalystMultiplier = activeContextsRepo.getAllForSubject(subjectId).some(context => context.actionId === 'capsule_infusion_plasticity') ? 1.75 : 1;
+        const targetDelta = Math.sign(targetReward) * Math.min(1, Math.abs(targetReward)) * 0.5 * targetPlasticity * catalystMultiplier * persistenceScale;
 
         if (presetId) subjectPreferencesRepo.adjust(subjectId, 'actions', presetId, targetDelta);
         if (pointId) subjectPreferencesRepo.adjust(subjectId, 'points', pointId, targetDelta);
 
         const targetActive = activeContextsRepo.getAllForSubject(subjectId) || [];
         for (const ctx of targetActive) {
-            if (ctx?.actionId) subjectPreferencesRepo.adjust(subjectId, 'contexts', ctx.actionId, targetDelta * 0.6);
+            if (ctx?.actionId && isLearnablePreferenceContext(ctx.actionId)) {
+                subjectPreferencesRepo.adjust(subjectId, 'contexts', ctx.actionId, targetDelta * 0.6);
+            }
+        }
+
+        // Semantic conditioning remains slower than learning one concrete
+        // action, while accepted difficulty now accumulates at a visible pace.
+        const preferences = subjectPreferencesRepo.get(subjectId);
+        const directActionTags = conditioningTags(presetId, action.tags || []);
+        for (const tag of directActionTags) {
+            if (!LEARNABLE_PREFERENCE_TAGS.has(tag)) continue;
+            const current = preferences.tags[tag] || 0;
+            const saturation = Math.max(0.08, 1 - Math.abs(current) / 5);
+            subjectPreferencesRepo.adjust(subjectId, 'tags', tag, signal.generalizedDelta * saturation * catalystMultiplier * persistenceScale);
+        }
+
+        // Ongoing embodied contexts participate in the same experience. Their
+        // semantic tags learn more slowly than the immediate action, allowing
+        // pleasant stimulation during painful restraint to condition both
+        // restraint and pain without double-counting tags already on the action.
+        const contextTags = presetId === 'wait' ? [] : contextConditioningTags(
+                targetActive.map(ctx => {
+                    const preset = presetRepo.getActionPreset(ctx.actionId);
+                    return {
+                        id: ctx.actionId,
+                        type: preset?.contextConfig?.type || preset?.type,
+                        tags: conditioningTags(ctx.actionId, preset?.tags || []),
+                    };
+                }),
+                directActionTags,
+            );
+        for (const { tag, weight } of contextTags) {
+            const current = preferences.tags[tag] || 0;
+            const saturation = Math.max(0.08, 1 - Math.abs(current) / 5);
+            subjectPreferencesRepo.adjust(subjectId, 'tags', tag, signal.generalizedDelta * saturation * weight);
+        }
+        const clothingTags = clothingConditioningTags({
+            contextIds: targetActive.map(ctx => ctx.actionId),
+            directTags: directActionTags,
+            pointId,
+            contact: Number(action.contact || 0),
+        });
+        for (const { tag, weight } of clothingTags) {
+            const current = preferences.tags[tag] || 0;
+            const saturation = Math.max(0.08, 1 - Math.abs(current) / 5);
+            subjectPreferencesRepo.adjust(subjectId, 'tags', tag, signal.generalizedDelta * saturation * weight);
         }
 
         // --- ACTOR (Initiator) Preference Update ---
         // Actor evaluates the action based on their own relationship to the target (empathy, dominance/submission).
-        const actorChar = characterRepo.get(playerId); // playerId is actually actorId in this context
+        const actorChar = characterRepo.get(actorId);
         if (actorChar && actorChar.subjectId) { // Only update preferences for NPCs with a subjectId
             const actorSubject = subjectRepo.get(actorChar.subjectId);
             if (actorSubject) {

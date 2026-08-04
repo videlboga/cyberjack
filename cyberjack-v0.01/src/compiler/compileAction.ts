@@ -52,7 +52,9 @@ export function compileAction(input: ActionInput): CompiledAction {
         requireContexts: presetRecord?.requireContexts,
         requiresItem: presetRecord?.requiresItem,
         requiresSceneObject: presetRecord?.requiresSceneObject,
-        validTargets: presetRecord?.validTargets
+        validTargets: presetRecord?.validTargets,
+        description: presetRecord?.description,
+        sensory: presetRecord?.sensory
     };
 
     // 2. Add player direct overrides
@@ -77,6 +79,21 @@ export function compileAction(input: ActionInput): CompiledAction {
             if (typeof input.dynamicModifiers[key] === 'number') {
                 baseWithDynamic[key] = input.dynamicModifiers[key] as number;
             }
+        }
+        if (typeof input.dynamicModifiers.label === 'string') {
+            baseWithDynamic.label = input.dynamicModifiers.label;
+        }
+        if (Array.isArray(input.dynamicModifiers.tags)) {
+            baseWithDynamic.tags = input.dynamicModifiers.tags;
+        }
+        if (typeof input.dynamicModifiers.description === 'string') {
+            baseWithDynamic.description = input.dynamicModifiers.description;
+        }
+        if (input.dynamicModifiers.sensory) {
+            baseWithDynamic.sensory = {
+                ...(baseWithDynamic.sensory || {}),
+                ...input.dynamicModifiers.sensory,
+            };
         }
     }
 

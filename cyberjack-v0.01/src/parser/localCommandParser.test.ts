@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseLocalCommand } from './localCommandParser';
+import { isNonExecutingCommandDiscussion } from './verbalParser';
 
 const characters = [
     { id: 'iona', name: 'Иона' },
@@ -41,5 +42,26 @@ describe('parseLocalCommand', () => {
         'Почему Ника сидит?'
     ])('does not execute ambiguous dialogue: %s', text => {
         expect(parse(text)).toBeNull();
+    });
+});
+
+describe('verbal command safety', () => {
+    it.each([
+        'Хочешь снять вибратор?',
+        'Ты не хочешь встать?',
+        'Хотела бы снять ошейник?',
+        'Готова ли ты лечь?',
+        'Как насчёт снять повязку?',
+        'Что если снять вибратор?'
+    ])('keeps desire and consent questions as dialogue: %s', text => {
+        expect(isNonExecutingCommandDiscussion(text)).toBe(true);
+    });
+
+    it.each([
+        'Сними вибратор',
+        'Ника, встань',
+        'Сними с себя всю одежду'
+    ])('does not block explicit commands: %s', text => {
+        expect(isNonExecutingCommandDiscussion(text)).toBe(false);
     });
 });

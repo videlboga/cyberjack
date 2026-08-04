@@ -64,9 +64,11 @@ describe('continuous interaction visuals', () => {
 
     it('registers only mechanics with a persistent start context', () => {
         expect(INTERACTION_VISUAL_RULES.map(rule => rule.startActionId)).toEqual([
+            'finger_insertion',
             'act_start_electrostimulation',
             'act_activate_plug',
             'act_start_vibrator',
+            'act_start_penetration',
             'act_hold_exposure',
             'act_present_feet',
         ]);
@@ -145,7 +147,7 @@ describe('continuous interaction visuals', () => {
     it('uses tension to intensify an unmodified persistent interaction', () => {
         expect(activeVisualInteractionFromContexts([
             { actionId: 'act_activate_plug', ticksActive: 2 },
-        ], 70)).toMatchObject({ variant: 'internal', phase: 'intense', intensity: 0.85, targetPointId: 'groin' });
+        ], 70)).toMatchObject({ variant: 'internal', phase: 'intense', intensity: 0.85, targetPointId: 'vagina' });
     });
 
     it('selects an electrostimulation visual from the electrode target', () => {
@@ -161,9 +163,9 @@ describe('continuous interaction visuals', () => {
         });
 
         expect(activeVisualInteractionFromContexts([
-            { actionId: 'act_connect_tens', pointId: 'groin' },
-            { actionId: 'act_start_electrostimulation', pointId: 'groin' },
-            { actionId: 'act_adjust_electrostimulation', pointId: 'groin' },
+            { actionId: 'act_connect_tens', pointId: 'vulva' },
+            { actionId: 'act_start_electrostimulation', pointId: 'vulva' },
+            { actionId: 'act_adjust_electrostimulation', pointId: 'vulva' },
         ], 55)).toMatchObject({ variant: 'genital', phase: 'intense' });
     });
 

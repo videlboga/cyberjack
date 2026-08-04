@@ -38,6 +38,7 @@ export const getContracts = (req: Request, res: Response) => {
             }))
         });
     } catch (error: any) {
+        console.error('[getContracts]', error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
@@ -70,6 +71,7 @@ export const acceptContract = (req: Request, res: Response) => {
 
         res.json({ success: true, contract });
     } catch (error: any) {
+        console.error('[acceptContract]', error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
@@ -146,6 +148,7 @@ export const deliverContract = (req: Request, res: Response) => {
 
         res.json({ success: true, metRequirements: true, contract, deliveredSubjectId: subjectId, rewards: contract.rewards });
     } catch (error: any) {
+        console.error('[deliverContract]', error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
@@ -190,12 +193,7 @@ export const getActiveContract = (req: Request, res: Response) => {
                 progress = {
                     metRequirements: evaluation.metRequirements,
                     conditions: active.conditions.map((cond: any) => {
-                        let current: any = undefined;
-                        if (cond.type === 'attitude') current = core.attitude;
-                        else if (cond.type === 'custom' && cond.key) current = (core as any)[cond.key];
-                        else if (cond.type === 'flag' || cond.type === 'trait') {
-                            current = core.flags?.includes(cond.key || '') ? true : false;
-                        }
+                        const current = contractConditionValue(cond, core, {});
                         return {
                             ...cond,
                             current,

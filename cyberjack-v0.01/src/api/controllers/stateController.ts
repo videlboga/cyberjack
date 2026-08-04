@@ -5,6 +5,7 @@ import { activeConfig, updateConfig } from '../../prompts/config';
 import { normalizePlayer } from './playerController';
 import { getActiveContextLabel } from '../../domain/contextPresentation';
 import { deriveTelemetry } from '../../narrative/telemetry';
+import { resolvePortraitEmotion } from '../../domain/portraitEmotion';
 import { db } from '../../infrastructure/db';
 
 export const getState = (req: Request, res: Response) => {
@@ -45,7 +46,9 @@ export const getState = (req: Request, res: Response) => {
                     requiresSceneObject: preset?.contextConfig?.requiresSceneObject || null,
                     requireContexts: (preset?.vector && preset.vector.requireContexts) || preset?.requireContexts || null,
                     removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null,
-                    validTargets: preset?.validTargets || (preset?.vector && preset.vector.validTargets) || null
+                    validTargets: preset?.validTargets || (preset?.vector && preset.vector.validTargets) || null,
+                    intensity: Number(preset?.vector?.intensity ?? 0),
+                    sharpness: Number(preset?.vector?.sharpness ?? 0)
                 };
             });
             scene.characters = sceneCharacterRepo.list(scene.id);
@@ -67,8 +70,21 @@ export const getState = (req: Request, res: Response) => {
             });
         }
 
-        const recentInteractions = db.prepare(`SELECT result_payload FROM event_logs WHERE subject_id = ? AND action_type = 'interaction' ORDER BY id DESC LIMIT 5`).all(subjectId) as any[];
+        const recentInteractions = db.prepare(`SELECT id, result_payload FROM event_logs WHERE subject_id = ? AND action_type = 'interaction' ORDER BY id DESC LIMIT 5`).all(subjectId) as any[];
         const recentObservations = recentInteractions.flatMap(row => {
+            try {
+                const observation = JSON.parse(row.result_payload || '{}').observation;
+                return observation ? [{ ...observation, eventLogId: Number(row.id) }] : [];
+            } catch { return []; }
+        });
+        const recommendationInteractions = db.prepare(`
+            SELECT result_payload
+            FROM event_logs
+            WHERE subject_id = ? AND action_type = 'interaction'
+            ORDER BY id DESC
+            LIMIT 160
+        `).all(subjectId) as any[];
+        const recommendationObservations = recommendationInteractions.flatMap(row => {
             try {
                 const observation = JSON.parse(row.result_payload || '{}').observation;
                 return observation ? [observation] : [];
@@ -89,6 +105,7 @@ export const getState = (req: Request, res: Response) => {
             subject: subject,
             telemetry,
             recentObservations,
+            recommendationObservations,
             availablePoints: uiState.availablePoints,
             availableActions,
             scene: scene ? { id: scene.id, transitions: scene.transitions || [], characters: scene.characters || [] } : null,
@@ -108,9 +125,42 @@ export const getChatHistory = (req: Request, res: Response) => {
         const subjectId = String(req.params.subjectId || '');
         if (!subjectId || !subjectRepo.get(subjectId)) return res.status(404).json({ success: false, error: 'Персонаж не найден' });
         const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 30));
+        const currentSubject = subjectRepo.get(subjectId);
+        const historicalObservations = db.prepare(`
+            SELECT timestamp, result_payload
+            FROM event_logs
+            WHERE subject_id = ? AND action_type = 'interaction'
+            ORDER BY timestamp ASC, id ASC
+        `).all(subjectId) as Array<{ timestamp: string; result_payload: string }>;
         const messages = chatMemoryRepo.getRecent(subjectId, Math.min(100, limit * 4))
             .filter(message => !message.content.startsWith('[Воздействие]'))
-            .slice(-limit);
+            .slice(-limit)
+            .map(message => {
+                if (message.role !== 'assistant' || message.portraitEmotion) return message;
+                const messageTime = String(message.createdAt || '');
+                const historical = [...historicalObservations].reverse().find(event => event.timestamp <= messageTime);
+                let observation:any = null;
+                try {
+                    if (historical) observation = JSON.parse(historical.result_payload || '{}').observation;
+                } catch { }
+                return {
+                    ...message,
+                    portraitEmotion: resolvePortraitEmotion({
+                        speech: message.content,
+                        behavioralState: observation?.behavioralState,
+                        reaction: observation?.reaction,
+                        transitions: observation?.transitions,
+                        state: {
+                            tension: currentSubject?.tension,
+                            capacity: currentSubject?.capacity,
+                            attitude: currentSubject?.attitude,
+                            openness: currentSubject?.openness,
+                            plasticity: currentSubject?.plasticity,
+                            contexts: (observation?.contexts || []).map((context: any) => ({ actionId: context.id }))
+                        }
+                    })
+                };
+            });
         res.json({ success: true, subjectId, messages });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
@@ -132,17 +182,17 @@ export const updateSubject = (req: Request, res: Response) => {
         };
 
         const updated = {
-            sensitivity: clamp(asNumber(req.body.sensitivity, current.sensitivity), 0, 100),
+            sensitivity: Math.max(0, asNumber(req.body.sensitivity, current.sensitivity)),
             attitude: clamp(asNumber(req.body.attitude, current.attitude), 0, 100),
             capacity: clamp(asNumber(req.body.capacity, current.capacity), 0, 100),
             openness: clamp(asNumber(req.body.openness, current.openness), 0, 100),
-            plasticity: clamp(asNumber(req.body.plasticity, current.plasticity), 0, 100),
+            plasticity: Math.max(0, asNumber(req.body.plasticity, current.plasticity)),
             tension: clamp(asNumber(req.body.tension, current.tension ?? 0), 0, 150),
-            baselineSensitivity: clamp(asNumber(req.body.baselineSensitivity, current.baselineSensitivity ?? current.sensitivity), 0, 100),
+            baselineSensitivity: Math.max(0, asNumber(req.body.baselineSensitivity, current.baselineSensitivity ?? current.sensitivity)),
             baselineAttitude: clamp(asNumber(req.body.baselineAttitude, current.baselineAttitude ?? current.attitude), 0, 100),
             baselineCapacity: clamp(asNumber(req.body.baselineCapacity, current.baselineCapacity ?? current.capacity), 0, 100),
             baselineOpenness: clamp(asNumber(req.body.baselineOpenness, current.baselineOpenness ?? current.openness), 0, 100),
-            baselinePlasticity: clamp(asNumber(req.body.baselinePlasticity, current.baselinePlasticity ?? current.plasticity), 0, 100)
+            baselinePlasticity: Math.max(0, asNumber(req.body.baselinePlasticity, current.baselinePlasticity ?? current.plasticity))
         };
 
         subjectRepo.save(subjectId, current.name || subjectId, updated as any);

@@ -1,0 +1,692 @@
+/* ============================================
+   MANGA 2 THEME — minimal ink-on-white
+   White backgrounds, thin black frames, no color.
+   COLORS ONLY — no layout changes.
+   Applied when [data-ui-theme="manga2"]
+   ============================================ */
+
+/* === CSS VARIABLES — override JI color vars === */
+html[data-ui-theme="manga2"] {
+  --m2-paper: #ffffff;
+  --m2-ink: #111111;
+  --m2-ink-soft: #555555;
+
+  --ji-bg: #ffffff !important;
+  --ji-panel: #ffffff !important;
+  --ji-raised: #f8f8f8 !important;
+  --ji-control: #f8f8f8 !important;
+  --ji-selected: #f0f0f0 !important;
+  --ji-text: #111111 !important;
+  --ji-secondary: #555555 !important;
+  --ji-muted: #555555 !important;
+  --ji-lcd: #111111 !important;
+  --ji-amber: #111111 !important;
+  --ji-danger: #111111 !important;
+  --ji-chart: #111111 !important;
+  --ji-chart-alt: #555555 !important;
+  --ji-chart-warm: #555555 !important;
+  --ji-chart-main: #111111 !important;
+  --ji-chart-marker: #555555 !important;
+  --ji-chart-violet: #555555 !important;
+  --ji-chart-track: #eeeeee !important;
+  --ji-chart-gap: #f5f5f5 !important;
+  --ji-chart-grid: #eeeeee !important;
+  --ji-border: #111111 !important;
+  --ji-line: #111111 !important;
+  --ji-accent: #111111 !important;
+  --ji-page: #ffffff !important;
+  --ji-surface: #ffffff !important;
+  --ji-surface-soft: #f8f8f8 !important;
+  --ring-color: #111111 !important;
+}
+
+/* === BASE === */
+html[data-ui-theme="manga2"] body {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+html[data-ui-theme="manga2"] .workspace-viewport,
+html[data-ui-theme="manga2"] .workspace-content {
+  background: #ffffff !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-shell {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+/* === STATUS BAR === */
+html[data-ui-theme="manga2"] .campaign-statusbar {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border-bottom: 1px solid #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-brand b { color: #111 !important; }
+html[data-ui-theme="manga2"] .campaign-brand span { color: #555 !important; }
+html[data-ui-theme="manga2"] .campaign-statusbar small { color: #555 !important; }
+html[data-ui-theme="manga2"] .campaign-statusbar strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .campaign-current strong,
+html[data-ui-theme="manga2"] .campaign-stat strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .campaign-stat.deadline strong,
+html[data-ui-theme="manga2"] .campaign-stat.credits strong { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .theme-switcher { background: #fff !important; }
+html[data-ui-theme="manga2"] .theme-switcher select {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-statusbar button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+/* === NAVIGATION === */
+html[data-ui-theme="manga2"] .campaign-frame { background: #fff !important; }
+
+html[data-ui-theme="manga2"] .campaign-nav {
+  background: #fff !important;
+  border-right: 1px solid #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section small {
+  color: #555 !important;
+  border-bottom: 1px solid #ccc !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button {
+  background: transparent !important;
+  color: #111 !important;
+  border: none !important;
+  border-left: 2px solid transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button:hover {
+  background: #f5f5f5 !important;
+  border-left-color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button.active {
+  background: #111 !important;
+  color: #fff !important;
+  border-left-color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .campaign-nav section > button span { color: inherit !important; }
+html[data-ui-theme="manga2"] .campaign-nav section > button small { color: inherit !important; opacity: 0.7 !important; }
+html[data-ui-theme="manga2"] .campaign-nav section > button.active span,
+html[data-ui-theme="manga2"] .campaign-nav section > button.active small { color: #fff !important; }
+
+/* === MAIN CONTENT === */
+html[data-ui-theme="manga2"] .campaign-content {
+  background: #fff !important;
+  color: #111 !important;
+}
+
+/* === SCREEN HEADING === */
+html[data-ui-theme="manga2"] .screen-heading {
+  background: #fff !important;
+  border-bottom: 1px solid #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .screen-heading p { color: #555 !important; }
+html[data-ui-theme="manga2"] .screen-heading h1 { color: #111 !important; text-shadow: none !important; }
+html[data-ui-theme="manga2"] .screen-heading span { color: #555 !important; }
+html[data-ui-theme="manga2"] .screen-heading > b { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .lab-capacity { border: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .lab-capacity small { color: #555 !important; }
+html[data-ui-theme="manga2"] .lab-capacity strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .lab-capacity span { color: #555 !important; }
+
+/* === LAB SECTIONS === */
+html[data-ui-theme="manga2"] .lab-section + .lab-section { border-top: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .lab-section > header small { color: #555 !important; }
+html[data-ui-theme="manga2"] .lab-section h2,
+html[data-ui-theme="manga2"] .management-section h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .lab-section > header > b { color: #555 !important; }
+
+/* === LAB PLAN (room buttons) === */
+html[data-ui-theme="manga2"] .lab-plan button,
+html[data-ui-theme="manga2"] .room-plan button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .lab-plan button:hover,
+html[data-ui-theme="manga2"] .room-plan button:hover { background: #f5f5f5 !important; }
+html[data-ui-theme="manga2"] .lab-plan button.active,
+html[data-ui-theme="manga2"] .room-plan button.active { background: #111 !important; color: #fff !important; }
+
+/* === ROOM DETAIL === */
+html[data-ui-theme="manga2"] .room-detail { background: #fff !important; }
+html[data-ui-theme="manga2"] .room-detail > header { border-bottom: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .room-detail h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .room-detail > header small { color: #555 !important; }
+html[data-ui-theme="manga2"] .room-detail > header p { color: #555 !important; }
+html[data-ui-theme="manga2"] .room-detail > header > b { color: #111 !important; }
+
+/* === ROOM DETAIL SECTIONS === */
+html[data-ui-theme="manga2"] .room-detail-section + .room-detail-section { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .room-detail-section h3 {
+  color: #111 !important;
+  border-bottom: 1px solid #ccc !important;
+}
+
+/* === ROOM PEOPLE CARDS === */
+html[data-ui-theme="manga2"] .room-people > article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .resident-avatar {
+  background: #f8f8f8 !important;
+  border: 1px solid #ccc !important;
+}
+
+html[data-ui-theme="manga2"] .resident-avatar img {
+  object-fit: contain !important;
+  object-position: center top !important;
+}
+
+html[data-ui-theme="manga2"] .room-people strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .room-people span { color: #555 !important; }
+
+/* === BUTTONS (generic) === */
+html[data-ui-theme="manga2"] .room-people > article button,
+html[data-ui-theme="manga2"] .resident-card > button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .room-people > article button:hover,
+html[data-ui-theme="manga2"] .resident-card > button:hover { background: #f5f5f5 !important; }
+
+html[data-ui-theme="manga2"] .resident-role {
+  border: 1px solid #ccc !important;
+  color: #555 !important;
+}
+
+/* === EQUIPMENT / OFFER / INVENTORY GRIDS === */
+html[data-ui-theme="manga2"] .equipment-grid article,
+html[data-ui-theme="manga2"] .offer-grid article,
+html[data-ui-theme="manga2"] .inventory-grid article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .equipment-grid strong,
+html[data-ui-theme="manga2"] .offer-grid strong,
+html[data-ui-theme="manga2"] .inventory-grid strong,
+html[data-ui-theme="manga2"] .journal-list strong { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .equipment-grid p,
+html[data-ui-theme="manga2"] .offer-grid p,
+html[data-ui-theme="manga2"] .inventory-grid p,
+html[data-ui-theme="manga2"] .journal-list p { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .equipment-grid footer span,
+html[data-ui-theme="manga2"] .offer-grid footer > b { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .equipment-grid button,
+html[data-ui-theme="manga2"] .offer-grid button,
+html[data-ui-theme="manga2"] .inventory-grid button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .equipment-grid button:hover,
+html[data-ui-theme="manga2"] .offer-grid button:hover { background: #f5f5f5 !important; }
+
+/* === CONTRACT LIST === */
+html[data-ui-theme="manga2"] .contract-office-list > article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+}
+
+html[data-ui-theme="manga2"] .contract-office-list article header strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .contract-office-list article header > b { color: #111 !important; }
+html[data-ui-theme="manga2"] .contract-office-list article > p { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .contract-requirements span {
+  background: #f5f5f5 !important;
+  color: #555 !important;
+  border: 1px solid #ccc !important;
+}
+
+html[data-ui-theme="manga2"] .contract-requirements span.met {
+  color: #111 !important;
+  background: #f0f0f0 !important;
+}
+
+html[data-ui-theme="manga2"] .contract-office-list article > button {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+/* === JOURNAL === */
+html[data-ui-theme="manga2"] .journal-list article {
+  border-left: 2px solid #111 !important;
+  background: #fff !important;
+}
+
+/* === EMPTY / TOAST === */
+html[data-ui-theme="manga2"] .empty-screen { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .campaign-toast {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: 2px 2px 0 #111 !important;
+}
+
+/* === CALIBRATION WORKBENCH === */
+html[data-ui-theme="manga2"] .calibration-workbench {
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .workbench-header {
+  background: #fff !important;
+  border-bottom: 1px solid #111 !important;
+}
+
+html[data-ui-theme="manga2"] .workbench-header h1 { color: #111 !important; }
+html[data-ui-theme="manga2"] .workbench-header .eyebrow { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .workbench-header button,
+html[data-ui-theme="manga2"] .workbench-back {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .calibration-theme-switcher {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+/* State column */
+html[data-ui-theme="manga2"] .state-column { background: #fff !important; }
+html[data-ui-theme="manga2"] .state-column h3 { color: #555 !important; }
+html[data-ui-theme="manga2"] .core-readout span { background: #f8f8f8 !important; color: #555 !important; }
+html[data-ui-theme="manga2"] .core-readout b { color: #111 !important; }
+html[data-ui-theme="manga2"] .goal-list div { background: #f8f8f8 !important; color: #555 !important; }
+html[data-ui-theme="manga2"] .goal-list div.ok { color: #111 !important; }
+html[data-ui-theme="manga2"] .goal-list b { color: #111 !important; }
+html[data-ui-theme="manga2"] .context-list div { background: #f8f8f8 !important; border-left: 2px solid #111 !important; }
+html[data-ui-theme="manga2"] .context-list span { color: #555 !important; }
+html[data-ui-theme="manga2"] .context-list b { color: #111 !important; }
+html[data-ui-theme="manga2"] .muted { color: #555 !important; }
+
+/* Character column */
+html[data-ui-theme="manga2"] .character-column { background: #fff !important; }
+html[data-ui-theme="manga2"] .character-stage { border: none !important; background: #fff !important; }
+html[data-ui-theme="manga2"] .scene-caption {
+  background: rgba(255,255,255,0.92) !important;
+  border-left: 3px solid #111 !important;
+}
+html[data-ui-theme="manga2"] .scene-caption strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .scene-caption p { color: #555 !important; }
+html[data-ui-theme="manga2"] .stage-contexts span { border: 1px solid #ccc !important; background: #f8f8f8 !important; color: #555 !important; }
+
+/* Operations column */
+html[data-ui-theme="manga2"] .operations-column { background: transparent !important; }
+html[data-ui-theme="manga2"] .operations-heading h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .operations-heading p { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .operation-list > button {
+  border: 1px solid #ccc !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .operation-list > button:hover { background: #f5f5f5 !important; }
+html[data-ui-theme="manga2"] .operation-list > button.selected { border-color: #111 !important; background: #f0f0f0 !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .operation-list > button.probed:after { color: #555 !important; }
+
+html[data-ui-theme="manga2"] .selected-operation { border: 1px solid #111 !important; background: #fff !important; }
+
+html[data-ui-theme="manga2"] .strength-switch button,
+html[data-ui-theme="manga2"] .operation-actions button {
+  border: 1px solid #ccc !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .strength-switch button.active { border-color: #111 !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .operation-actions .execute {
+  border-color: #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+}
+
+/* Protocol */
+html[data-ui-theme="manga2"] .compact-protocol { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .protocol-toggle { color: #111 !important; }
+html[data-ui-theme="manga2"] .compact-protocol li { border-top: 1px solid #ccc !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .compact-protocol li small { color: #555 !important; }
+html[data-ui-theme="manga2"] .compact-step-tools button { border: 1px solid #ccc !important; background: #fff !important; color: #555 !important; }
+html[data-ui-theme="manga2"] .protocol-run button { border-color: #111 !important; background: #111 !important; color: #fff !important; }
+
+/* Event strip */
+html[data-ui-theme="manga2"] .event-strip { background: #fff !important; border-top: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .event-strip > span { color: #555 !important; }
+html[data-ui-theme="manga2"] .event-strip p { color: #555 !important; }
+html[data-ui-theme="manga2"] .event-strip button { border: 1px solid #111 !important; background: #fff !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .event-strip.danger,
+html[data-ui-theme="manga2"] .event-strip.milestone { border-top-color: #111 !important; }
+
+/* === DRAWERS === */
+html[data-ui-theme="manga2"] .drawer-backdrop { background: rgba(255,255,255,0.8) !important; }
+
+html[data-ui-theme="manga2"] .side-drawer,
+html[data-ui-theme="manga2"] .bottom-drawer {
+  background: #fff !important;
+  border-color: #111 !important;
+  color: #111 !important;
+}
+
+html[data-ui-theme="manga2"] .side-drawer h2,
+html[data-ui-theme="manga2"] .bottom-drawer h2 { color: #111 !important; }
+html[data-ui-theme="manga2"] .side-drawer h3 { color: #111 !important; border-bottom: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .side-drawer p,
+html[data-ui-theme="manga2"] .side-drawer li,
+html[data-ui-theme="manga2"] .bottom-drawer p,
+html[data-ui-theme="manga2"] .bottom-drawer li { color: #111 !important; }
+html[data-ui-theme="manga2"] .side-drawer .technical { color: #111 !important; }
+
+html[data-ui-theme="manga2"] .side-drawer button,
+html[data-ui-theme="manga2"] .bottom-drawer button,
+html[data-ui-theme="manga2"] .menu-drawer > button {
+  background: #fff !important;
+  border: 1px solid #111 !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .side-drawer button:hover,
+html[data-ui-theme="manga2"] .bottom-drawer button:hover,
+html[data-ui-theme="manga2"] .menu-drawer > button:hover { background: #f5f5f5 !important; }
+
+html[data-ui-theme="manga2"] .menu-drawer hr { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .menu-drawer .danger-action { border-color: #111 !important; color: #111 !important; }
+html[data-ui-theme="manga2"] .bottom-drawer li { border-top: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .bottom-drawer li small,
+html[data-ui-theme="manga2"] .bottom-drawer li p { color: #555 !important; }
+
+/* === CHAT FEED === */
+html[data-ui-theme="manga2"] .character-chat,
+html[data-ui-theme="manga2"] .chat-feed { background: #fff !important; }
+
+/* === CALIBRATION SVG CHARTS — unified illustration language === */
+
+/* Panel frame: 1px black border, light interior */
+html[data-ui-theme="manga2"] .physiology-panel > section,
+html[data-ui-theme="manga2"] .physiology-panel.legacy-physiology-panel,
+html[data-ui-theme="manga2"] .trend-instrument {
+  background: #f8f8f8 !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-ui-theme="manga2"] .physiology-panel header { color: #111 !important; }
+
+/* Activation scale — no color, screentone via density */
+html[data-ui-theme="manga2"] .activation-scale { border: 1px solid #111 !important; background: #f8f8f8 !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-normal,
+html[data-ui-theme="manga2"] .activation-scale.level-high,
+html[data-ui-theme="manga2"] .activation-scale.level-edge {
+  background: #f8f8f8 !important;
+}
+/* The bar fill */
+html[data-ui-theme="manga2"] .activation-scale > div > i {
+  background: #111 !important;
+}
+/* The marker dot */
+html[data-ui-theme="manga2"] .activation-scale > div > em {
+  background: #111 !important;
+  border: 1px solid #fff !important;
+}
+/* Scale labels */
+html[data-ui-theme="manga2"] .activation-scale footer span { color: #555 !important; }
+
+/* Pulse cardiogram — thin black line on white */
+html[data-ui-theme="manga2"] .scope-trace-live {
+  stroke: #111 !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+}
+html[data-ui-theme="manga2"] .pulse-cardiogram { background: #fff !important; }
+html[data-ui-theme="manga2"] .pulse-biosignal header span,
+html[data-ui-theme="manga2"] .pulse-biosignal header b { color: #111 !important; }
+html[data-ui-theme="manga2"] .pulse-biosignal header i { color: #555 !important; }
+
+/* Breathing — no color */
+html[data-ui-theme="manga2"] .breathing-biosignal header span,
+html[data-ui-theme="manga2"] .breathing-biosignal header b { color: #111 !important; }
+html[data-ui-theme="manga2"] .breathing-biosignal header i { color: #555 !important; }
+html[data-ui-theme="manga2"] .breathing-field { background: #fff !important; border: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .breathing-field > i { background: #111 !important; opacity: 0.3 !important; }
+html[data-ui-theme="manga2"] .breathing-field > em { background: #111 !important; opacity: 0.15 !important; }
+
+/* Endurance card — no border, no background */
+html[data-ui-theme="manga2"] .endurance-card {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .endurance-scale header span,
+html[data-ui-theme="manga2"] .endurance-scale header b { color: #111 !important; }
+html[data-ui-theme="manga2"] .endurance-scale > div { border: none !important; background: transparent !important; display: block !important; }
+html[data-ui-theme="manga2"] .endurance-scale > div > i { background: #111 !important; }
+
+/* Hide donut chart (::before) and "RES" label (::after) from JI theme */
+html[data-ui-theme="manga2"] .endurance-scale::before,
+html[data-ui-theme="manga2"] .endurance-scale::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Hide percentage text — shown by liquid wave */
+html[data-ui-theme="manga2"] .endurance-scale p strong { display: none !important; }
+
+/* Liquid chart container — no border, no background, no overlay */
+html[data-ui-theme="manga2"] .endurance-liquid-container {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  width: 120px !important;
+  height: 120px !important;
+  min-height: 120px !important;
+  display: block !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+}
+html[data-ui-theme="manga2"] .endurance-liquid-container::after {
+  content: none !important;
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .endurance-liquid-container > div {
+  width: 120px !important;
+  height: 120px !important;
+}
+html[data-ui-theme="manga2"] .endurance-liquid-container canvas {
+  filter: grayscale(1) contrast(1.2);
+  width: 120px !important;
+  height: 120px !important;
+}
+html[data-ui-theme="manga2"] .endurance-scale p span { color: #555 !important; }
+
+/* Endurance metrics (balance, overload) — no borders */
+html[data-ui-theme="manga2"] .endurance-metric {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+html[data-ui-theme="manga2"] .endurance-metric p span { color: #555 !important; }
+html[data-ui-theme="manga2"] .endurance-metric p b { color: #111 !important; }
+html[data-ui-theme="manga2"] .endurance-metric small { color: #555 !important; }
+
+/* Track + fill in endurance metrics — no border */
+html[data-ui-theme="manga2"] .endurance-metric__track {
+  border: none !important;
+  background: #eee !important;
+  border-radius: 0 !important;
+}
+html[data-ui-theme="manga2"] .endurance-metric__track > i {
+  background: #111 !important;
+}
+
+/* === TREND INSTRUMENT SVG — unified === */
+
+/* Norm line: thin dashed gray */
+html[data-ui-theme="manga2"] .indicator-norm {
+  stroke: #999 !important;
+  stroke-width: 0.5 !important;
+  stroke-dasharray: 2 2 !important;
+  opacity: 1 !important;
+}
+
+/* Track: thin light gray */
+html[data-ui-theme="manga2"] .indicator-track {
+  stroke: #ddd !important;
+  stroke-width: 1 !important;
+}
+
+/* Current value marker: solid black circle with white ring */
+html[data-ui-theme="manga2"] .indicator-current {
+  fill: #111 !important;
+  stroke: #fff !important;
+  stroke-width: 1 !important;
+}
+
+/* Acceptance (attitude): negative = light gray thick, positive = black thick */
+html[data-ui-theme="manga2"] .acceptance-negative {
+  stroke: #ccc !important;
+  stroke-width: 3 !important;
+  opacity: 1 !important;
+}
+html[data-ui-theme="manga2"] .acceptance-positive {
+  stroke: #111 !important;
+  stroke-width: 3 !important;
+}
+/* Chevron: thin black */
+html[data-ui-theme="manga2"] .acceptance-chevron {
+  stroke: #111 !important;
+  stroke-width: 1 !important;
+  fill: none !important;
+  opacity: 1 !important;
+}
+
+/* Openness: frame light, opening dark fill, center line subtle */
+html[data-ui-theme="manga2"] .openness-frame {
+  fill: #fff !important;
+  stroke: #ccc !important;
+  stroke-width: 0.75 !important;
+}
+html[data-ui-theme="manga2"] .openness-opening {
+  fill: rgba(0,0,0,0.12) !important;
+  stroke: #111 !important;
+  stroke-width: 1 !important;
+}
+html[data-ui-theme="manga2"] .openness-center {
+  stroke: #ccc !important;
+  stroke-width: 0.5 !important;
+  opacity: 1 !important;
+}
+
+/* Plasticity: shadow invisible, ribbon bold black, anchors black */
+html[data-ui-theme="manga2"] .plasticity-shadow {
+  stroke: #ccc !important;
+  stroke-width: 4 !important;
+  opacity: 0.3 !important;
+}
+html[data-ui-theme="manga2"] .plasticity-ribbon {
+  stroke: #111 !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+}
+html[data-ui-theme="manga2"] .plasticity-anchor {
+  fill: #111 !important;
+}
+
+/* Sensitivity: pulse line thin black */
+html[data-ui-theme="manga2"] .sensitivity-pulse {
+  stroke: #111 !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+}
+
+/* === TREND LABELS — unified caption style === */
+html[data-ui-theme="manga2"] .trend-lane-label span,
+html[data-ui-theme="manga2"] .trend-lane-label b { color: #111 !important; }
+html[data-ui-theme="manga2"] .capsule-trend-reading span { color: #111 !important; }
+html[data-ui-theme="manga2"] .capsule-trend-reading small { color: #555 !important; }
+html[data-ui-theme="manga2"] .capsule-trend-reading em { color: #111 !important; }
+
+/* State trends container */
+html[data-ui-theme="manga2"] .state-trends,
+html[data-ui-theme="manga2"] .unified-state-trends {
+  border: 1px solid #111 !important;
+  background: #f8f8f8 !important;
+}
+
+/* === MONITOR / SESSION STRIP === */
+html[data-ui-theme="manga2"] .monitor-heading > div { background: #f8f8f8 !important; border: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .monitor-heading > div::before { background: #111 !important; }
+html[data-ui-theme="manga2"] .monitor-heading small,
+html[data-ui-theme="manga2"] .monitor-session-strip small { color: #555 !important; }
+html[data-ui-theme="manga2"] .monitor-heading strong { color: #111 !important; }
+html[data-ui-theme="manga2"] .monitor-session-strip > div { background: #fff !important; border: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .monitor-session-strip b { color: #111 !important; }
+
+/* === MONITOR OUTCOME / RESULT BLOCK === */
+html[data-ui-theme="manga2"] .monitor-outcome-stack { background: #f8f8f8 !important; border: 1px solid #111 !important; }
+html[data-ui-theme="manga2"] .operation-last-result,
+html[data-ui-theme="manga2"] .monitor-last-result {
+  background: #fff !important;
+  border: 1px solid #ccc !important;
+}
+html[data-ui-theme="manga2"] .monitor-last-result header small { color: #555 !important; }
+html[data-ui-theme="manga2"] .monitor-last-result header b { color: #111 !important; }
+
+/* === OBJECTIVE STRIP === */
+html[data-ui-theme="manga2"] .objective-strip { display: none !important; }
+
+/* Hide goal section only — keep result block */
+html[data-ui-theme="manga2"] .calibration-footer-goal,
+html[data-ui-theme="manga2"] .monitor-goal,
+html[data-ui-theme="manga2"] .footer-goal-picker,
+html[data-ui-theme="manga2"] .footer-goal-settings {
+  display: none !important;
+}
+
+/* === GOAL SETTINGS PANEL === */
+html[data-ui-theme="manga2"] .goal-settings-panel { background: #fff !important; border: 1px solid #111 !important; }
+
+/* === TREND INSTRUMENT === */
+html[data-ui-theme="manga2"] .trend-instrument { background: #fff !important; border: 1px solid #ccc !important; }

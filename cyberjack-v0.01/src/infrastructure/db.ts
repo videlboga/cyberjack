@@ -2,7 +2,9 @@ import Database from 'better-sqlite3';
 
 // Use an in-memory database when running tests to avoid file locks and make tests hermetic.
 const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === '1';
-export const db = new Database(isTest ? ':memory:' : 'cyberjack.sqlite', { verbose: console.log });
+const databasePath = isTest ? ':memory:' : (process.env.CYBERJACK_DB_PATH || 'cyberjack.sqlite');
+const verbose = process.env.CYBERJACK_SQL_DEBUG === '1' ? console.log : undefined;
+export const db = new Database(databasePath, { verbose });
 
 // Initialize schema
 db.exec(`
@@ -167,7 +169,11 @@ db.exec(`
     category TEXT NOT NULL DEFAULT 'item',
     price INTEGER NOT NULL,
     stock INTEGER NOT NULL DEFAULT -1,
-    required_trust INTEGER NOT NULL DEFAULT 0
+    required_trust INTEGER NOT NULL DEFAULT 0,
+    metadata TEXT NOT NULL DEFAULT '{}',
+    available_from INTEGER,
+    expires_at INTEGER,
+    source_event_id TEXT
   );
 
   CREATE TABLE IF NOT EXISTS laboratory_assets (
@@ -284,7 +290,8 @@ db.exec(`
     subject_id TEXT NOT NULL,
     role TEXT NOT NULL,
     content TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    world_minute INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS memory_embeddings (
@@ -312,6 +319,124 @@ db.exec(`
   );
   
   CREATE INDEX IF NOT EXISTS idx_chat_summary_subject ON chat_memory_summary(subject_id, created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS social_memories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_id TEXT NOT NULL,
+    related_subject_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    owner TEXT NOT NULL,
+    content TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active',
+    importance REAL NOT NULL DEFAULT 0.5,
+    confidence REAL NOT NULL DEFAULT 0.7,
+    source_message_id INTEGER,
+    resolved_by TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    resolved_at DATETIME
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_social_memory_active
+    ON social_memories(subject_id, related_subject_id, status, created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS story_threads (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    stage TEXT NOT NULL DEFAULT 'seed',
+    subject_id TEXT,
+    related_character_ids TEXT NOT NULL DEFAULT '[]',
+    faction_id TEXT,
+    location_id TEXT,
+    facts TEXT NOT NULL DEFAULT '[]',
+    tags TEXT NOT NULL DEFAULT '[]',
+    tension REAL NOT NULL DEFAULT 0.2,
+    importance REAL NOT NULL DEFAULT 0.5,
+    visibility TEXT NOT NULL DEFAULT 'known',
+    source_type TEXT NOT NULL,
+    source_id TEXT,
+    last_event_minute INTEGER,
+    cooldown_until INTEGER,
+    created_minute INTEGER NOT NULL,
+    updated_minute INTEGER NOT NULL,
+    metadata TEXT NOT NULL DEFAULT '{}'
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_story_threads_active
+    ON story_threads(status, subject_id, importance DESC, updated_minute DESC);
+
+  CREATE TABLE IF NOT EXISTS event_opportunities (
+    id TEXT PRIMARY KEY,
+    template_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'available',
+    channel TEXT NOT NULL,
+    priority REAL NOT NULL DEFAULT 0.5,
+    urgency REAL NOT NULL DEFAULT 0,
+    subject_id TEXT,
+    actor_ids TEXT NOT NULL DEFAULT '[]',
+    thread_ids TEXT NOT NULL DEFAULT '[]',
+    location_id TEXT,
+    available_from INTEGER NOT NULL,
+    expires_at INTEGER,
+    payload TEXT NOT NULL DEFAULT '{}',
+    generated_content TEXT,
+    offered_minute INTEGER,
+    resolved_minute INTEGER,
+    resolution TEXT,
+    source_event_id INTEGER
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_event_opportunities_available
+    ON event_opportunities(status, available_from, priority DESC);
+
+  CREATE TABLE IF NOT EXISTS event_instances (
+    id TEXT PRIMARY KEY,
+    opportunity_id TEXT,
+    template_id TEXT NOT NULL,
+    phase TEXT NOT NULL,
+    world_minute INTEGER NOT NULL,
+    participants TEXT NOT NULL DEFAULT '[]',
+    presented_content TEXT NOT NULL DEFAULT '{}',
+    selected_choice TEXT,
+    outcome TEXT NOT NULL DEFAULT '{}',
+    created_fact_ids TEXT NOT NULL DEFAULT '[]',
+    created_thread_ids TEXT NOT NULL DEFAULT '[]',
+    scenario_event_id INTEGER,
+    metadata TEXT NOT NULL DEFAULT '{}'
+  );
+
+  CREATE TABLE IF NOT EXISTS world_facts (
+    id TEXT PRIMARY KEY,
+    scope TEXT NOT NULL,
+    scope_id TEXT,
+    predicate TEXT NOT NULL,
+    value TEXT NOT NULL,
+    confidence REAL NOT NULL DEFAULT 1,
+    visibility TEXT NOT NULL DEFAULT 'known',
+    status TEXT NOT NULL DEFAULT 'active',
+    source_type TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    valid_from INTEGER NOT NULL,
+    valid_until INTEGER,
+    supersedes_fact_id TEXT,
+    tags TEXT NOT NULL DEFAULT '[]',
+    metadata TEXT NOT NULL DEFAULT '{}'
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_world_facts_scope
+    ON world_facts(scope, scope_id, predicate, status);
+
+  CREATE TABLE IF NOT EXISTS director_signals (
+    id TEXT PRIMARY KEY,
+    signal_type TEXT NOT NULL,
+    source_type TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    payload TEXT NOT NULL DEFAULT '{}',
+    world_minute INTEGER NOT NULL,
+    processed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(signal_type, source_type, source_id)
+  );
 `);
 
 const safeAddColumn = (table: string, column: string, definition: string) => {
@@ -330,6 +455,71 @@ safeAddColumn('subject_point_states', 'baseline_local_sensitivity', 'REAL');
 safeAddColumn('subject_point_states', 'baseline_local_attitude', 'REAL');
 safeAddColumn('subject_point_states', 'local_openness', 'REAL DEFAULT 50');
 safeAddColumn('subject_point_states', 'baseline_local_openness', 'REAL');
+// These columns are referenced by cleanup migrations below, so a fresh
+// database must receive them before those queries run.
+safeAddColumn('active_contexts', 'point_id', 'TEXT');
+safeAddColumn('active_contexts', 'initiator_id', 'TEXT');
+safeAddColumn('shop_offers', 'metadata', "TEXT NOT NULL DEFAULT '{}'");
+safeAddColumn('shop_offers', 'available_from', 'INTEGER');
+safeAddColumn('shop_offers', 'expires_at', 'INTEGER');
+safeAddColumn('shop_offers', 'source_event_id', 'TEXT');
+
+// Speech generated for a character is a remembered self-report, not authored
+// canon. Reclassify records written by older builds so they cannot silently
+// turn an improvised line into a confirmed biographical fact.
+db.prepare(`
+  UPDATE social_memories
+  SET kind = 'subjective_report'
+  WHERE owner = 'character' AND kind = 'personal_fact'
+`).run();
+
+// A pose is a single scene-level context. Before this migration every entry in
+// occupiesPoints produced another row, so e.g. pose_all_fours was stored four
+// times. Keep one row per pose and use global_pose as its canonical slot.
+db.prepare(`
+  DELETE FROM active_contexts
+  WHERE rowid NOT IN (
+    SELECT MIN(ac.rowid)
+    FROM active_contexts ac
+    JOIN action_presets ap ON ap.id = ac.action_id
+    WHERE COALESCE(json_extract(ap.context_config_json, '$.type'), ap.type, '') = 'pose'
+    GROUP BY ac.subject_id, ac.action_id
+  )
+    AND action_id IN (
+      SELECT id FROM action_presets
+      WHERE COALESCE(json_extract(context_config_json, '$.type'), type, '') = 'pose'
+    )
+`).run();
+db.prepare(`
+  UPDATE active_contexts
+  SET point_id = 'global_pose'
+  WHERE action_id IN (
+    SELECT id FROM action_presets
+    WHERE COALESCE(json_extract(context_config_json, '$.type'), type, '') = 'pose'
+  )
+`).run();
+
+// Keep the engine id stable while presenting it as a human-readable target.
+// The old generic groin node is superseded by concrete anatomy points.
+db.prepare(`UPDATE point_presets SET label = 'Всё тело' WHERE id = 'systemic'`).run();
+db.prepare(`UPDATE point_presets SET label = 'Грудь' WHERE id = 'chest'`).run();
+db.prepare(`DELETE FROM active_contexts WHERE point_id = 'groin'`).run();
+db.prepare(`DELETE FROM subject_point_states WHERE point_id = 'groin'`).run();
+db.prepare(`DELETE FROM point_presets WHERE id = 'groin'`).run();
+
+// Older builds treated naturally sensitive anatomy (85+) as hyperesthesia.
+// Preserve only contexts whose sensitivity is genuinely elevated above baseline.
+db.prepare(`
+  DELETE FROM active_contexts
+  WHERE action_id = 'effect_local_hyperesthesia'
+    AND NOT EXISTS (
+      SELECT 1 FROM subject_point_states point
+      WHERE point.subject_id = active_contexts.subject_id
+        AND point.point_id = active_contexts.point_id
+        AND point.local_sensitivity >= COALESCE(point.baseline_local_sensitivity, point.local_sensitivity) + 15
+    )
+`).run();
+db.prepare(`DELETE FROM state_triggers WHERE trigger_code LIKE 'local_hyperesthesia_%'`).run();
 
 safeAddColumn('scenes', 'action_costs', "TEXT DEFAULT '{}'");
 safeAddColumn('scenes', 'transitions', "TEXT DEFAULT '[]'");
@@ -360,6 +550,48 @@ safeAddColumn('character_relations', 'general_opinion', "TEXT DEFAULT ''");
 safeAddColumn('character_relations', 'recent_memories', "TEXT DEFAULT '[]'");
 safeAddColumn('scene_characters', 'slot_id', 'TEXT');
 safeAddColumn('chat_memory', 'context_label', 'TEXT');
+safeAddColumn('chat_memory', 'portrait_emotion', 'TEXT');
+safeAddColumn('chat_memory', 'portrait_emotion_source', 'TEXT');
+safeAddColumn('chat_memory', 'portrait_emotion_confidence', 'REAL');
+safeAddColumn('chat_memory', 'world_minute', 'INTEGER');
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS interaction_stances (
+    subject_id TEXT NOT NULL,
+    actor_id TEXT NOT NULL,
+    request TEXT NOT NULL DEFAULT 'none',
+    scope_points TEXT NOT NULL DEFAULT '[]',
+    scope_tags TEXT NOT NULL DEFAULT '[]',
+    intensity REAL NOT NULL DEFAULT 0,
+    source_action_id TEXT,
+    ignored_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (subject_id, actor_id)
+  );
+  CREATE TABLE IF NOT EXISTS relationship_dynamics (
+    subject_id TEXT NOT NULL,
+    actor_id TEXT NOT NULL,
+    resistance REAL NOT NULL DEFAULT 0,
+    learned_compliance REAL NOT NULL DEFAULT 0,
+    dependency REAL NOT NULL DEFAULT 0,
+    dissociation REAL NOT NULL DEFAULT 0,
+    fear REAL NOT NULL DEFAULT 0,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (subject_id, actor_id)
+  );
+  CREATE TABLE IF NOT EXISTS pending_command_focus (
+    subject_id TEXT NOT NULL,
+    player_id TEXT NOT NULL,
+    scene_id TEXT NOT NULL,
+    source_text TEXT NOT NULL,
+    description TEXT NOT NULL,
+    intent_json TEXT NOT NULL,
+    routing_json TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (subject_id, player_id)
+  );
+`);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS visual_asset_reviews (
@@ -375,6 +607,38 @@ db.exec(`
     UNIQUE(asset_path, character_id)
   );
   CREATE INDEX IF NOT EXISTS idx_visual_reviews_decision ON visual_asset_reviews(decision, updated_at DESC);
+`);
+
+// Earlier builds converted negative dialogue into an unscoped physical
+// boundary. Those rows make every later touch look like a violation forever.
+db.exec(`
+  UPDATE interaction_stances
+  SET status='resolved', updated_at=CURRENT_TIMESTAMP
+  WHERE status='active'
+    AND scope_points='[]'
+    AND source_action_id IN ('verbal_pressure', 'conversation')
+`);
+
+// Reconcile live stop requests that were verbally confirmed before the
+// acknowledgement-aware lifecycle existed. This closes only the immediate
+// command; relationship and episodic memory of an earlier violation remain.
+db.exec(`
+  UPDATE interaction_stances AS stance
+  SET status='resolved', intensity=0, updated_at=CURRENT_TIMESTAMP
+  WHERE status='active'
+    AND EXISTS (
+      SELECT 1 FROM chat_memory AS message
+      WHERE message.subject_id=stance.subject_id
+        AND message.role='user'
+        AND message.created_at >= stance.updated_at
+        AND (
+          message.content LIKE '%остановил%'
+          OR message.content LIKE '%перестал%'
+          OR message.content LIKE '%прекратил%'
+          OR message.content LIKE '%больше не буду%'
+          OR message.content LIKE '%не повторится%'
+        )
+    )
 `);
 
 db.exec(`

@@ -335,10 +335,11 @@ export function generateCharacterContext(options: GeneratorOptions = {}): Genera
             initialContexts.push(...t.initialContexts);
         }
     }
-    const preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number> } = {
+    const preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number>; tags: Record<string, number> } = {
         actions: {},
         points: {},
-        contexts: {}
+        contexts: {},
+        tags: {}
     };
     for (const contextId of new Set(initialContexts)) preferences.contexts[contextId] = 1;
 

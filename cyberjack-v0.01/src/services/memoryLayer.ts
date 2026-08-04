@@ -2,6 +2,8 @@ import { activeConfig } from '../prompts/config';
 import { memoryRepo, chatSummaryRepo } from '../infrastructure/repositories';
 import { buildEmbedding } from './embeddingService';
 import { TickBundle, SubjectCoreState } from '../domain/types';
+import { rememberSocialExchange } from './socialMemory';
+import { getLaboratorySpatialContext } from '../scenario/spatialContext';
 
 interface RecordMemoryInput {
     subjectId: string;
@@ -21,10 +23,24 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
     const parts = input.bundle.compiledAction.actionKey === 'wait'
         ? ['Событие: прошла пауза без нового воздействия']
         : [`Действие: ${actionLabel}; зона: ${pointLabel}`];
-    if (observation?.subjectiveText) parts.push(`Переживание: ${observation.subjectiveText}`);
+    const spatialContext = getLaboratorySpatialContext(
+        input.subjectId,
+        input.bundle.event.playerId || 'PL-1',
+    );
+    const objectiveFacts = spatialContext ? {
+        location: spatialContext.locationTitle,
+        roomId: spatialContext.roomId,
+        container: spatialContext.containerName,
+        isolated: spatialContext.isolated,
+        environment: spatialContext.description,
+    } : null;
+    if (objectiveFacts) {
+        parts.push(`Объективные факты симуляции: место — ${objectiveFacts.location}. ${objectiveFacts.environment}`);
+    }
+    if (observation?.subjectiveText) parts.push(`Субъективное переживание: ${observation.subjectiveText}`);
     else if (input.reactionText) parts.push(`Наблюдаемая реакция: ${input.reactionText}`);
-    if (input.userText?.trim()) parts.push(`Слова собеседника: «${input.userText.trim()}»`);
-    if (input.assistantText?.trim()) parts.push(`Мой ответ: «${input.assistantText.trim()}»`);
+    if (input.userText?.trim()) parts.push(`Высказывание собеседника (не объективный факт): «${input.userText.trim()}»`);
+    if (input.assistantText?.trim()) parts.push(`Моя реплика в тот момент (не объективный факт): «${input.assistantText.trim()}»`);
     const text = parts.join('. ');
     if (!text.trim()) return;
 
@@ -45,9 +61,17 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
             speechAct: input.speechAct || null,
             addressedTo: input.addressedTo || null,
             observation: observation || null,
+            objectiveFacts,
             infoTag: input.infoTag || null,
             timestamp: input.bundle.event.timestamp
         }
+    });
+
+    rememberSocialExchange({
+        subjectId: input.subjectId,
+        relatedSubjectId: input.bundle.event.playerId || 'PL-1',
+        userText: input.userText,
+        assistantText: input.assistantText
     });
 }
 

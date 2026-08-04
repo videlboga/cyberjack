@@ -3,8 +3,9 @@
 import { CompiledAction, SubjectCoreState, SubjectPointState, EngineConfig, TickResult, TickMeta } from '../domain/types';
 import { validateConfig } from './validate';
 import { normalizeAction, normalizeCore, normalizePoint } from './normalize';
-import { clamp } from './utils';
+import { clamp, softMechanicalScale } from './utils';
 import { DEFAULT_CONFIG } from './config';
+import { HUMAN_CORE_NORMS, humanPointSensitivityNorm } from '../domain/parameterInterpretation';
 
 export function computeResult(
     action: Partial<CompiledAction>,
@@ -18,11 +19,14 @@ export function computeResult(
     const safePoint = normalizePoint(point, config);
     const f = config.formulas;
 
-    const effectiveSensitivity = clamp(
-        safeCore.sensitivity * f.effectiveSensitivity.globalWeight + safePoint.localSensitivity * f.effectiveSensitivity.localWeight,
-        0,
-        100
-    );
+    const rawEffectiveSensitivity =
+        safeCore.sensitivity * f.effectiveSensitivity.globalWeight + safePoint.localSensitivity * f.effectiveSensitivity.localWeight;
+    const effectiveSensitivity = softMechanicalScale(rawEffectiveSensitivity);
+    const physicalSensoryAmplification =
+        safeCore.sensitivity / HUMAN_CORE_NORMS.sensitivity * f.effectiveSensitivity.globalWeight +
+        safePoint.localSensitivity / humanPointSensitivityNorm(safePoint.pointId) * f.effectiveSensitivity.localWeight;
+    const isVerbalAction = safeAction.actionKey === 'verbal_pressure' || safeAction.tags.includes('mental');
+    const sensoryAmplification = isVerbalAction ? 1 : physicalSensoryAmplification;
 
     const effectiveAttitude = clamp(
         safeCore.attitude * f.effectiveAttitude.globalWeight + safePoint.localAttitude * f.effectiveAttitude.localWeight,
@@ -33,14 +37,17 @@ export function computeResult(
     const attitudeShift = (effectiveAttitude - 50) / 50;
     const attitudePower = Math.sign(attitudeShift) * Math.pow(Math.abs(attitudeShift), f.attitude.shiftPow);
 
-    const experiencedIntensity = clamp(
-        safeAction.intensity *
+    // Speech has psychological force, but it is not amplified by skin/body
+    // sensitivity and must never become a fictitious physical overload. A
+    // compact 0..10 scale still permits weaker appraisal and associative
+    // learning from explicit mentions (for example, a warning about pain).
+    const experiencedIntensity = isVerbalAction
+        ? clamp(safeAction.intensity * 10, 0, 10)
+        : clamp(safeAction.intensity *
         (f.intensity.baseOffset + Math.pow(effectiveSensitivity / 100, f.intensity.sensitivityPow)) *
         (f.intensity.contactBase + safeAction.contact * f.intensity.contactScale) *
         f.intensity.toPercent,
-        0,
-        100
-    );
+        0, 100);
 
     const finalValence = clamp(
         safeAction.valence + attitudePower * f.attitude.shiftMultiplier,
@@ -54,8 +61,13 @@ export function computeResult(
         100
     );
 
-    const overload = clamp(
-        experiencedIntensity * (safeAction.sharpness + safeAction.contact * f.overload.contactFactor) - safeCore.capacity * f.overload.capacityFactor,
+    const exceptionalSensoryLoad = isVerbalAction ? 0 : experiencedIntensity *
+        Math.max(0, Math.log2(Math.max(1, sensoryAmplification)) - 0.5) *
+        (f.overload.exceptionalSensitivityFactor ?? 0.12);
+    const overload = isVerbalAction ? 0 : clamp(
+        experiencedIntensity * (safeAction.sharpness + safeAction.contact * f.overload.contactFactor) +
+        exceptionalSensoryLoad -
+        safeCore.capacity * f.overload.capacityFactor,
         0,
         100
     );
@@ -83,7 +95,7 @@ export function computeResult(
     const strainDiscomfort = Math.max(0, experiencedIntensity - comfortThreshold) *
         (physicalCfg.strainRate ?? 0.35) * physicalVulnerability;
     const overloadDiscomfort = overload * (physicalCfg.overloadRate ?? 0.25);
-    const physicalDiscomfort = sharpDiscomfort + strainDiscomfort + overloadDiscomfort;
+    const physicalDiscomfort = isVerbalAction ? 0 : sharpDiscomfort + strainDiscomfort + overloadDiscomfort;
     const discomfort = clamp(emotionalDiscomfort + physicalDiscomfort, 0, 100);
 
     const engagement = clamp(
@@ -98,7 +110,7 @@ export function computeResult(
     );
 
     const learningEffect = clamp(
-        safeAction.novelty * experiencedIntensity * (f.learning.plasticityBase + safeCore.plasticity / f.learning.plasticityDivisor) -
+        safeAction.novelty * experiencedIntensity * (f.learning.plasticityBase + softMechanicalScale(safeCore.plasticity, 100, 150) / f.learning.plasticityDivisor) -
         overload * f.learning.overloadPenalty,
         0,
         100
@@ -121,6 +133,8 @@ export function computeResult(
             strainDiscomfort,
             overloadDiscomfort,
             physicalDiscomfort,
+            sensoryAmplification,
+            exceptionalSensoryLoad,
         },
     };
 
@@ -135,6 +149,8 @@ export function computeResult(
         overload,
         engagement,
         learningEffect,
+        sensoryAmplification,
+        exceptionalSensoryLoad,
     };
 
     return { result, tickMeta };

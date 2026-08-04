@@ -7,7 +7,7 @@
   "phases": [
     { "id": "sustain", "name": "Устойчивое воздействие" },
     { "id": "intense", "name": "Высокая интенсивность" },
-    { "id": "peak", "name": "На грани или разрядка" },
+    { "id": "peak", "name": "На грани или оргазм" },
     { "id": "recovery", "name": "Восстановление", "preferBaseAvatar": true }
   ],
   "activationRules": {

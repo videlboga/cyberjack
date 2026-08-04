@@ -1,7 +1,7 @@
 import { PromptSectionsResult } from './promptComposer';
 import { GeneratedCharacterContext, GeneratedProfileV2, GeneratedTag } from './types';
 
-export const PROFILE_GENERATOR_REVISION = 8;
+export const PROFILE_GENERATOR_REVISION = 10;
 
 const unique = (items: Array<string | undefined>, limit = 6) =>
     Array.from(new Set(items.map(item => item?.trim()).filter((item): item is string => Boolean(item)))).slice(0, limit);
@@ -33,7 +33,7 @@ function agreeGender(text: string, gender: 'male' | 'female' | 'other'): string 
         беспомощным: 'беспомощной', сломленным: 'сломленной', выживал: 'выживала', запомнил: 'запомнила',
         искал: 'искала', научился: 'научилась', потерял: 'потеряла', выбрал: 'выбрала', говорил: 'говорила',
         думал: 'думала', принимал: 'принимала', терпел: 'терпела', смотрел: 'смотрела', должен: 'должна',
-        готов: 'готова', собран: 'собрана'
+        готов: 'готова', собран: 'собрана', нашёл: 'нашла', делал: 'делала'
     };
     return Object.entries(forms).reduce(
         (result, [from, to]) => result.replace(
@@ -61,6 +61,40 @@ const CENTRAL_CONFLICTS: Record<string, { desire: string; fear: string; need: st
         need: 'безопасный способ исследовать противоречивые ощущения'
     }
 };
+
+function buildStorySeed(
+    context: GeneratedCharacterContext,
+    biography: GeneratedProfileV2['biography'],
+    conflict: { desire:string; fear:string; need:string },
+): GeneratedProfileV2['storySeed'] {
+    const ids = new Set(context.tags.map(tag => tag.id));
+    const externalLink = ids.has('faction_lattice') ? 'Lattice и связанные с ней кураторы'
+        : ids.has('faction_continuum') ? 'Continuum Archive и его разрозненные хранилища'
+            : ids.has('faction_helix') ? 'Helix Dynamics и корпоративная сеть'
+                : ids.has('faction_veil') ? 'Veil Biotech и закрытые клинические каналы'
+                    : 'неустановленный контакт из прежнего сектора';
+    const unresolvedPast = biography.formativeEvents[0]
+        || biography.statusCause
+        || `В прошлом осталось решение, связанное с прежней ролью: ${biography.formerRole || 'станционная работа'}.`;
+    const concealedFact = ids.has('event_saw_wrong_thing') ? 'Увиденное было частью намеренно скрытой операции.'
+        : ids.has('event_found_something') ? 'Находка связана с данными, которые кто-то продолжает искать.'
+            : ids.has('event_left_waiting') ? 'Исчезновение было не случайностью, а чьим-то решением.'
+                : ids.has('event_punished_unfair') ? 'Настоящий виновник или заказчик наказания всё ещё доступен.'
+                    : ids.has('event_helped_and_regretted') ? 'Человек, которому была оказана помощь, сохранил опасную связь с прошлым.'
+                        : 'Официальная версия прошлого скрывает чью-то заинтересованность.';
+    return {
+        unresolvedPast,
+        externalLink,
+        concealedFact,
+        pressure:`Страх — ${conflict.fear} — делает возвращение прошлого особенно опасным.`,
+        activationTriggers:['recruitment','trust_60','relevant_sector','related_faction','biography_chat'],
+        possibleDirections:[
+            'разобраться с прошлым и получить новый контакт',
+            'скрыть следы и разорвать прежнюю связь',
+            'использовать связь в интересах лаборатории',
+        ],
+    };
+}
 
 export function compileGeneratedProfile(
     subjectId: string,
@@ -90,6 +124,14 @@ export function compileGeneratedProfile(
     const bodyHooks = profileHooks(context.grouped.body, 2);
     const psycheHooks = profileHooks(context.grouped.psychological, 2);
     const roleHooks = role ? profileHooks([role], 3) : [];
+    // A hook must have one psychological job. Reusing the same sentence as a
+    // value, vulnerability and defense makes a single selected tag dominate
+    // every reply and flattens otherwise different characters.
+    const values = unique([...traitHooks, ...biasHooks], 4);
+    const vulnerabilities = unique(psycheHooks.filter(hook => !values.includes(hook)), 3);
+    const defenses = unique(responseHooks.filter(hook =>
+        !values.includes(hook) && !vulnerabilities.includes(hook)
+    ), 3);
 
     const biography: GeneratedProfileV2['biography'] = {
         origin: unique(origin, 5),
@@ -98,10 +140,10 @@ export function compileGeneratedProfile(
         formativeEvents: profileHooks(formative, 3)
     };
     const behavioralCore: GeneratedProfileV2['behavioralCore'] = {
-        values: unique([...traitHooks, ...biasHooks], 4),
+        values,
         needs: [conflict.need],
-        vulnerabilities: unique([...psycheHooks, ...biasHooks], 4),
-        defenses: unique([...responseHooks, ...traitHooks], 4),
+        vulnerabilities,
+        defenses,
         // Former profession is biography and knowledge, not a verbal costume
         // that must colour every line of dialogue.
         voice: [],
@@ -161,10 +203,12 @@ export function compileGeneratedProfile(
             preferences: {
                 actions: context.preferences?.actions || {},
                 points: context.preferences?.points || {},
-                contexts: context.preferences?.contexts || {}
+                contexts: context.preferences?.contexts || {},
+                tags: context.preferences?.tags || {}
             }
         },
         sourceTags: context.tags.map(tag => tag.id),
+        storySeed: buildStorySeed(context, biography, conflict),
         personaText,
         personaWithoutTraits: `[Личность]\n${identityText}\n\n[Биография]\n${historyText}`,
         traitBlock,
