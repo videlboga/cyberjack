@@ -557,6 +557,15 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             const notice = `*(Сцена: ${executorName} применяет ${cmdActionLabel} к ${targetCharName} (${cmdPointLabel}))*`;
             chatMemoryRepo.append(commandIntent.targetId, 'user', notice, interactionContext);
             chatMemoryRepo.append(subjectId, 'user', notice, interactionContext);
+            // The target character must react to the received action. Add a
+            // reactive ActorDecision so executeTurnConversations generates an
+            // LLM reply for the target — the orchestration filter above
+            // (line ~402) has already excluded everyone except directedActorId.
+            orchestration.actorDecisions.push({
+                actorId: commandIntent.targetId,
+                kind: 'reactive',
+                reason: `Получила действие «${cmdActionLabel}» от ${executorName} (${cmdPointLabel})`,
+            });
         } catch (err) {
             console.error('[SceneOrchestrator] Failed to run commanded cross-character tick:', err);
         }
@@ -627,7 +636,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 userMsgOverride = currentPayload.reactionFrame ? buildReactionTurnMessage(currentPayload.reactionFrame) : actionLabelMessage || undefined;
                 if (autoUserMessage) {
                     const asksForTelemetry = /(состояни|показател|телеметр|оцени|рекоменду|что\s+с\s+(?:ней|ним)|как\s+(?:она|он|они)|пульс|дыхани|перегруз|вынослив)/i.test(autoUserMessage);
-                    const observerRole = presenceBySubject.get(decision.actorId)?.role || '';
+                    const observerRole = sceneCharacterRepo.list(eventId).find(pc => pc.character.subjectId === decision.actorId)?.role || '';
                     const canReadTelemetry = ['staff', 'assistant'].includes(observerRole);
                     const perceivedCondition = deriveTelemetry({
         core: bundle.stateAfter.core,
