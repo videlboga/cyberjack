@@ -5938,14 +5938,9 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     color:var(--ji-amber)!important;
   }
   .calibration-workbench .chat-line p {
-    display:-webkit-box;
-    max-height:7.25em;
-    overflow:hidden;
     color:var(--ji-text)!important;
     font-size:12px;
     line-height:1.45;
-    -webkit-box-orient:vertical;
-    -webkit-line-clamp:5;
   }
   .calibration-workbench .chat-channel-state {
     color:var(--ji-lcd);
@@ -7254,18 +7249,13 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 }
 .campaign-shell .residential-chat .chat-line.calibrator small { color:var(--ji-amber)!important; }
 .campaign-shell .residential-chat .chat-line p {
-  display:-webkit-box;
-  max-height:7.25em;
   margin:0;
   padding:0;
-  overflow:hidden;
   border:0;
   color:var(--ji-text)!important;
   background:transparent!important;
   font-size:12px;
   line-height:1.45;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:5;
 }
 .campaign-shell .residential-chat .chat-channel-state {
   color:var(--ji-lcd);
