@@ -607,6 +607,10 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                                   ...currentPayload.reactionFrame.event,
                                   playerSpeech: autoUserMessage.trim()
                               },
+                              expressionMode: {
+                                  ...currentPayload.reactionFrame.expressionMode,
+                                  maxWords: Math.max(currentPayload.reactionFrame.expressionMode.maxWords, 40),
+                              },
                               dramaticPosition: bundle.actionApplied
                                   ? {
                                         primaryIntent: 'естественно подтвердить уже выполненное поручение или кратко сообщить его видимый результат',
