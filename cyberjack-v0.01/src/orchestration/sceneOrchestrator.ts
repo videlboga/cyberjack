@@ -656,10 +656,12 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
 [Результат твоего действия в этом ходе]
 Попытка исполнить поручение Калибратора уже позади. ${
                               bundle.actionApplied
-                                  ? `Ты видишь результат собственного действия на ${fullStateName || subjectId}.`
-                                  : `Ты видишь, что твоё действие ничего нового не изменило для ${fullStateName || subjectId}.`
+                                  ? commandIntent?.type === 'perform_action' && commandIntent?.targetId && commandIntent.targetId !== subjectId
+                                      ? `Ты выполнила действие на ${subjectRepo.get(commandIntent.targetId)?.name || commandIntent.targetId}.`
+                                      : `Ты выполнила поручение.`
+                                  : `Ты видишь, что твоё действие ничего нового не изменило.`
                           }
-${systemNotes.length ? systemNotes.map(note => `Ты замечаешь результат: ${note}`).join('\n') : 'Ты не замечаешь никакого дополнительного изменения.'}
+${systemNotes.length ? systemNotes.filter((note: string) => !note.includes('Переход уже показан визуально')).map((note: string) => note.replace(/^\[Система\]:\s*/, '')).join('\n') : 'Ты не замечаешь никакого дополнительного изменения.'}
 Ты находишься уже после этой попытки, а не перед решением. Можешь коротко подтвердить сделанное, назвать непосредственно видимый результат или высказать возникшее после него сомнение.
 `
                         : `
@@ -671,7 +673,11 @@ ${systemNotes.length ? systemNotes.map(note => `Ты замечаешь резу
 [Твоё непосредственное положение в этом ходе]
 ${
     isDirectedCommandActor
-        ? `Калибратор обратился именно к тебе. Ты действуешь в отношении ${fullStateName || subjectId}.`
+        ? `Калибратор обратился именно к тебе. ${
+            commandIntent?.type === 'perform_action' && commandIntent?.targetId && commandIntent.targetId !== subjectId
+                ? `Ты действуешь в отношении ${subjectRepo.get(commandIntent.targetId)?.name || commandIntent.targetId}.`
+                : `Ты выполняешь поручение, касающееся тебя самой.`
+        }`
         : `Ты находишься рядом и видишь, что воздействие направлено на ${fullStateName || subjectId}, а не на твоё тело.
 Ты не можешь видеть протокол, оборудование или действие, если они не присутствуют перед тобой в сцене.`
 }
