@@ -27,8 +27,10 @@ export const ActionTagSchema = z.enum([
   'penetration', 'deprivation' // specific trigger and learnable tags
 ]);
 
+// CompiledAction.type is a single scalar derived from categories[0] at
+// compile time. Keep this enum aligned with the union in types.ts.
 export const CategorySchema = z.enum([
-  'physical', 'verbal', 'clinical', 'intimate', 'context', 'system'
+  'physical', 'verbal', 'context', 'system'
 ]);
 
 export const VectorSchema = z.object({
@@ -43,10 +45,10 @@ export const VectorSchema = z.object({
 export const TraitRuleOverrideSchema = z.object({
   valence: z.number().optional(),
   intensityMult: z.number().optional(),
-  powerMult: z.number().optional(),
-  sharpnessMult: z.number().optional(),
-  contactMult: z.number().optional(),
-  noveltyMult: z.number().optional()
+  attitudeShiftDelta: z.number().optional(),
+  opennessDelta: z.number().optional(),
+  capacityDelta: z.number().optional(),
+  pleasureDelta: z.number().optional()
 });
 
 export const TraitRuleTriggerSchema = z.object({
@@ -61,7 +63,7 @@ export const TraitRuleSchema = z.object({
 });
 
 export const ContextConfigSchema = z.object({
-  type: z.enum(["pose", "clothing", "equipment", "environment", "social", "restraint", "condition", "trait", "status"]),
+  type: z.enum(["pose", "clothing", "equipment", "environment", "social", "restraint", "condition", "trait", "status", "sexual_interaction", "sensory"]),
   activeLabel: z.string().optional(),
   duration: z.number().optional(),
   exclusiveWithinPoint: z.boolean().optional(),

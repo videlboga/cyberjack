@@ -79,7 +79,7 @@ export interface TraitRule {
 }
 
 export interface ContextConfig {
-    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition" | "trait" | "status";
+    type: "pose" | "clothing" | "equipment" | "environment" | "social" | "restraint" | "condition" | "trait" | "status" | "sexual_interaction" | "sensory";
     activeLabel?: string;
     occupiesPoints: string[];
     exclusiveWithinPoint?: boolean;

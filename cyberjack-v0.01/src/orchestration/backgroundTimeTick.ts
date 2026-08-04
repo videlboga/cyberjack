@@ -220,6 +220,26 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
 }
 
 function settleUnstimulatedArousalMinute(stimulatedSubjects:Set<string>) {
+  // Cell residents and recovery capsule occupants have their tension managed
+  // by applyPassiveLaboratoryEffects (worldService) with a controlled
+  // tensionPerHour rate. Applying passive arousal decay on top erases that
+  // recovery in a single background tick loop.
+  const managedSubjects = db.prepare(`
+    SELECT COALESCE(c.subject_id,c.id) AS subject_id
+    FROM laboratory_room_assignments a
+    JOIN laboratory_rooms r ON r.player_id=a.player_id AND r.room_id=a.room_id
+    JOIN characters c ON c.id=a.character_id
+    WHERE r.room_type='cell' AND a.status='resident'
+    UNION
+    SELECT json_extract(metadata,'$.subjectId') AS subject_id
+    FROM laboratory_assets
+    WHERE json_extract(metadata,'$.subjectId') IS NOT NULL
+      AND asset_id IN ('lab_recovery_capsule')
+  `).all() as Array<{subject_id:string}>;
+  for (const { subject_id } of managedSubjects) {
+    if (subject_id) stimulatedSubjects.add(subject_id);
+  }
+
   const subjects = db.prepare(`SELECT id, tension FROM subjects`).all() as Array<{id:string; tension:number}>;
   const update = db.prepare(`UPDATE subjects SET tension = ? WHERE id = ?`);
   for (const subject of subjects) {
