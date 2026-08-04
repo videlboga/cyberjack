@@ -542,6 +542,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                         let reason = state.relation?.attitude > 70 ? "с готовностью выполняя указание" : "выполняя указание без подтверждённого добровольного согласия";
                         if (state.core.attitude < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
                         forcedNarrativeToLog = `[Система]: Актив выполняет указание "${commandActionPreset.label}" (цель: ${targetName}), ${reason}.`;
+                        actionApplied = true;
                         // keep a short local note for immediate UI feedback; don't
                         // persist the formal system_trigger until effects are applied
                         // (see later in the effects block).

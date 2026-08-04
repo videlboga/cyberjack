@@ -526,6 +526,42 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         : actionLabel;
     const systemNotes = Array.isArray((bundle as any).systemNotes) ? (bundle as any).systemNotes.filter((note: unknown): note is string => typeof note === 'string' && note.trim().length > 0) : [];
 
+    // ── Commanded cross-character action ──
+    // When the player orders an NPC to perform a physical action on another
+    // character, runGameTick evaluates the NPC's compliance on itself (the
+    // subject). If the compliance check passed (actionApplied), the actual
+    // engine effects must be applied to the target character via a second
+    // tick — exactly like the proactive NPC→NPC path below, but driven by
+    // commandIntent instead of autonomous initiative.
+    if (
+        hasParsedCommand
+        && commandIntent?.type === 'perform_action'
+        && commandIntent.targetId
+        && commandIntent.targetId !== subjectId
+        && bundle.actionApplied
+    ) {
+        try {
+            const targetCharName = subjectRepo.get(commandIntent.targetId)?.name || commandIntent.targetId;
+            const executorName = subjectRepo.get(subjectId)?.name || subjectId;
+            const cmdPreset = presetRepo.getActionPreset(commandIntent.actionId);
+            const cmdActionLabel = cmdPreset?.label || commandIntent.actionId;
+            const cmdPointLabel = presetRepo.getPointPreset(commandIntent.pointId)?.label || commandIntent.pointId;
+            await runGameTick({
+                subjectId: commandIntent.targetId,
+                pointId: commandIntent.pointId,
+                playerId: bundle.event.playerId || 'PL-1',
+                actingCharacterId: subjectId,
+                sceneId: eventId,
+                presetId: commandIntent.actionId,
+            });
+            const notice = `*(Сцена: ${executorName} применяет ${cmdActionLabel} к ${targetCharName} (${cmdPointLabel}))*`;
+            chatMemoryRepo.append(commandIntent.targetId, 'user', notice, interactionContext);
+            chatMemoryRepo.append(subjectId, 'user', notice, interactionContext);
+        } catch (err) {
+            console.error('[SceneOrchestrator] Failed to run commanded cross-character tick:', err);
+        }
+    }
+
     if (orchestration.actorDecisions.length) {
         const actorPromises = orchestration.actorDecisions.map(async decision => {
             const responseTargetId = directedActorId || subjectId;
