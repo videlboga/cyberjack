@@ -3744,6 +3744,41 @@ function ContainerConversation({
             ? appendCharacterChatLines(withoutStream, completedReplies)
             : withoutStream;
         });
+        // ── Cross-character action visual effect ──
+        // When the player commands an NPC to act on another character, the
+        // second tick produces a reaction on the target. Play the same visual
+        // effect as a player-initiated action so the user sees the result.
+        const cmdIntent = data?.bundle?.metadata?.commandIntent;
+        if (
+          cmdIntent?.type === "perform_action" &&
+          cmdIntent.targetId &&
+          cmdIntent.targetId !== (resident.subjectId || resident.id) &&
+          cmdIntent.actionId
+        ) {
+          const effectFamily = roomVisualEffectFamily(cmdIntent.actionId);
+          const targetReply = (replyData.actorReplies || []).find(
+            (r: any) => r.actorId === cmdIntent.targetId,
+          );
+          const targetEmotion = (targetReply?.portraitEmotion as PortraitEmotion) ||
+            resolvePortraitEmotion({ speech: targetReply?.speech || "" });
+          void gameAudio.playAction(cmdIntent.actionId);
+          setRoomVisualEffect({
+            key: crypto.randomUUID(),
+            family: effectFamily,
+            result: "accepted",
+            intensity: 0.5,
+            sharpness: effectFamily === "soft" ? 0.18 : 0.48,
+            duration: Math.round(1450 + 0.5 * 260),
+            rayRotation: -7 + Math.random() * 14,
+            showRays: effectFamily !== "soft",
+            showPortrait: false,
+            emotion: targetEmotion,
+            actionKey: `${cmdIntent.pointId}/${cmdIntent.actionId}`,
+            actionImage: "",
+            actionLabel: "",
+            targetLabel: "",
+          });
+        }
         if (replyData.llmError) setError(replyData.llmError);
       })
       .catch((e) => setError(e.message))
