@@ -554,7 +554,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 sceneId: eventId,
                 presetId: commandIntent.actionId,
             });
-            const notice = `*(Сцена: ${executorName} применяет ${cmdActionLabel} к ${targetCharName} (${cmdPointLabel}))*`;
+            const notice = `[Действие] ${executorName} → ${targetCharName}: ${cmdActionLabel} · ${cmdPointLabel}`;
             chatMemoryRepo.append(commandIntent.targetId, 'user', notice, interactionContext);
             chatMemoryRepo.append(subjectId, 'user', notice, interactionContext);
             // The target character must react to the received action. Add a
@@ -868,7 +868,7 @@ ${systemNotes.length ? systemNotes.join('\n') : ''}`;
                     const tgtId = decision.mechanicalAction.targetId || subjectId;
                     const targetName = subjectRepo.get(tgtId)?.name || tgtId;
                     const pointLabel2 = presetRepo.getPointPreset(decision.mechanicalAction.pointId)?.label || decision.mechanicalAction.pointId;
-                    const notice = `*(Сцена: ${actorName} применяет ${actionLabel2} к ${targetName} (${pointLabel2}))*`;
+                    const notice = `[Действие] ${actorName} → ${targetName}: ${actionLabel2} · ${pointLabel2}`;
                     if (tgtId !== decision.actorId) {
                         chatMemoryRepo.append(tgtId, 'user', notice, interactionContext);
                     }
