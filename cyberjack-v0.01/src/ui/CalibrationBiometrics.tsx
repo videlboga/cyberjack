@@ -65,7 +65,7 @@ export function CalibrationBiometrics({
       <div className="endurance-scale">
         <header><span>ВЫНОСЛИВОСТЬ</span><b>{enduranceLabel}</b></header>
         {typeof document !== 'undefined' && document.documentElement.dataset.uiTheme === 'manga2' ? (
-          <div className="endurance-liquid-container"><EnduranceLiquid value={capacity} /></div>
+          <div className="endurance-liquid-container"><EnduranceLiquid value={capacity} overload={overload} /></div>
         ) : (
           <div><i style={{ height: `${clamp(capacity)}%` }} /></div>
         )}
