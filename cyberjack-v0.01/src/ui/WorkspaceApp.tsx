@@ -6,6 +6,7 @@ import { VisualEffectsLab } from "./concepts/VisualEffectsLab";
 import { SexMachineEffectsLab } from "./concepts/SexMachineEffectsLab";
 import { VocalizationAudit } from "./concepts/VocalizationAudit";
 import { MangaWorkbenchConcept } from "./concepts/MangaWorkbenchConcept";
+import { EnduranceLiquidDemo } from "./concepts/EnduranceLiquidDemo";
 
 export function WorkspaceApp() {
   if (window.location.pathname.startsWith("/manga"))
@@ -16,6 +17,8 @@ export function WorkspaceApp() {
         </main>
       </div>
     );
+  if (window.location.pathname === "/concept/endurance")
+    return <EnduranceLiquidDemo />;
   if (window.location.pathname.startsWith("/concept/manga-workbench"))
     return <MangaWorkbenchConcept />;
   if (window.location.pathname === "/concept/vocalizations")
