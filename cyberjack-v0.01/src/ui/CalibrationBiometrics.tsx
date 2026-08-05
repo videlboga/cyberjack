@@ -64,11 +64,7 @@ export function CalibrationBiometrics({
     } as React.CSSProperties}>
       <div className="endurance-scale">
         <header><span>ВЫНОСЛИВОСТЬ</span><b>{enduranceLabel}</b></header>
-        {typeof document !== 'undefined' && document.documentElement.dataset.uiTheme === 'manga2' ? (
-          <div className="endurance-liquid-container"><EnduranceLiquid value={capacity} overload={overload} /></div>
-        ) : (
-          <div><i style={{ height: `${clamp(capacity)}%` }} /></div>
-        )}
+        <div className="endurance-liquid-container"><EnduranceLiquid value={capacity} overload={overload} /></div>
         <p><strong>{capacity.toFixed(0)}%</strong><span>{signedDelta}</span></p>
       </div>
       <div className="endurance-infographics">
