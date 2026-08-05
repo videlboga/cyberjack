@@ -29,11 +29,11 @@ const CRACK_SEEDS = [
   // center dip (between lobes)
   { x: 60, y: 44, dx: 0, dy: 8 },
   // lower left
-  { x: 42, y: 75, dx: 8, dy: 10 },
+  { x: 42, y: 68, dx: 8, dy: 8 },
   // lower right
-  { x: 78, y: 75, dx: -8, dy: 10 },
+  { x: 78, y: 68, dx: -8, dy: 8 },
   // tip
-  { x: 60, y: 95, dx: 0, dy: -4 },
+  { x: 60, y: 88, dx: 0, dy: -4 },
 ];
 
 function crackPath(seed: typeof CRACK_SEEDS[0], intensity: number): string {
