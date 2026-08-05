@@ -79,7 +79,7 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
   // Overload glow: orange radial halo behind the heart, grows with overload.
   // 0 overload = no glow, 80+ = max radius and intensity.
   const overloadNorm = Math.max(0, Math.min(1, overload / 80));
-  const glowRadius = 10 + overloadNorm * 40; // 10px .. 50px
+  const glowRadius = 30 + overloadNorm * 120; // 30px .. 150px
   const glowOpacity = overloadNorm * 0.6;
 
   return (
