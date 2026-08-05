@@ -453,28 +453,25 @@ html[data-ui-theme="manga2"] .trend-instrument {
 
 html[data-ui-theme="manga2"] .physiology-panel header { color: #111 !important; }
 
-/* Activation scale — no color, screentone via density */
+/* Activation scale — accent color by level */
 html[data-ui-theme="manga2"] .activation-scale { border: 1px solid #111 !important; background: #f8f8f8 !important; }
-html[data-ui-theme="manga2"] .activation-scale.level-normal,
-html[data-ui-theme="manga2"] .activation-scale.level-high,
-html[data-ui-theme="manga2"] .activation-scale.level-edge {
-  background: #f8f8f8 !important;
-}
-/* The bar fill */
-html[data-ui-theme="manga2"] .activation-scale > div > i {
-  background: #111 !important;
-}
-/* The marker dot */
-html[data-ui-theme="manga2"] .activation-scale > div > em {
-  background: #111 !important;
-  border: 1px solid #fff !important;
-}
+html[data-ui-theme="manga2"] .activation-scale.level-normal { background: #f8f8f8 !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-high { background: #fff8e8 !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-edge { background: #fdf0f0 !important; }
+/* The bar fill — color by level */
+html[data-ui-theme="manga2"] .activation-scale.level-normal > div > i { background: #2d8c6e !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-high > div > i { background: #c89216 !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-edge > div > i { background: #c44545 !important; }
+/* The marker dot — match level color with white ring */
+html[data-ui-theme="manga2"] .activation-scale.level-normal > div > em { background: #2d8c6e !important; border: 1px solid #fff !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-high > div > em { background: #c89216 !important; border: 1px solid #fff !important; }
+html[data-ui-theme="manga2"] .activation-scale.level-edge > div > em { background: #c44545 !important; border: 1px solid #fff !important; }
 /* Scale labels */
 html[data-ui-theme="manga2"] .activation-scale footer span { color: #555 !important; }
 
-/* Pulse cardiogram — thin black line on white */
+/* Pulse cardiogram — teal accent on white */
 html[data-ui-theme="manga2"] .scope-trace-live {
-  stroke: #111 !important;
+  stroke: #2d8c8c !important;
   stroke-width: 1.5 !important;
   fill: none !important;
 }
@@ -483,13 +480,13 @@ html[data-ui-theme="manga2"] .pulse-biosignal header span,
 html[data-ui-theme="manga2"] .pulse-biosignal header b { color: #111 !important; }
 html[data-ui-theme="manga2"] .pulse-biosignal header i { color: #555 !important; }
 
-/* Breathing — no color */
+/* Breathing — soft blue accent */
 html[data-ui-theme="manga2"] .breathing-biosignal header span,
 html[data-ui-theme="manga2"] .breathing-biosignal header b { color: #111 !important; }
 html[data-ui-theme="manga2"] .breathing-biosignal header i { color: #555 !important; }
 html[data-ui-theme="manga2"] .breathing-field { background: #fff !important; border: 1px solid #ccc !important; }
-html[data-ui-theme="manga2"] .breathing-field > i { background: #111 !important; opacity: 0.3 !important; }
-html[data-ui-theme="manga2"] .breathing-field > em { background: #111 !important; opacity: 0.15 !important; }
+html[data-ui-theme="manga2"] .breathing-field > i { background: #4a8cb8 !important; opacity: 0.35 !important; }
+html[data-ui-theme="manga2"] .breathing-field > em { background: #4a8cb8 !important; opacity: 0.15 !important; }
 
 /* Endurance card — no border, no background */
 html[data-ui-theme="manga2"] .endurance-card {
@@ -501,7 +498,7 @@ html[data-ui-theme="manga2"] .endurance-card {
 html[data-ui-theme="manga2"] .endurance-scale header span,
 html[data-ui-theme="manga2"] .endurance-scale header b { color: #111 !important; }
 html[data-ui-theme="manga2"] .endurance-scale > div { border: none !important; background: transparent !important; display: block !important; }
-html[data-ui-theme="manga2"] .endurance-scale > div > i { background: #111 !important; }
+html[data-ui-theme="manga2"] .endurance-scale > div > i { background: #2d8c6e !important; }
 
 /* Hide donut chart (::before) and "RES" label (::after) from JI theme */
 html[data-ui-theme="manga2"] .endurance-scale::before,
@@ -535,7 +532,6 @@ html[data-ui-theme="manga2"] .endurance-liquid-container > div {
   height: 120px !important;
 }
 html[data-ui-theme="manga2"] .endurance-liquid-container canvas {
-  filter: grayscale(1) contrast(1.2);
   width: 120px !important;
   height: 120px !important;
 }
@@ -551,14 +547,25 @@ html[data-ui-theme="manga2"] .endurance-metric p span { color: #555 !important; 
 html[data-ui-theme="manga2"] .endurance-metric p b { color: #111 !important; }
 html[data-ui-theme="manga2"] .endurance-metric small { color: #555 !important; }
 
-/* Track + fill in endurance metrics — no border */
+/* Track + fill in endurance metrics */
 html[data-ui-theme="manga2"] .endurance-metric__track {
   border: none !important;
   background: #eee !important;
   border-radius: 0 !important;
 }
-html[data-ui-theme="manga2"] .endurance-metric__track > i {
-  background: #111 !important;
+/* Balance — teal fill */
+html[data-ui-theme="manga2"] .balance-indicator .endurance-metric__track > i {
+  background: #2d8c8c !important;
+}
+/* Overload — red fill, brighter when active */
+html[data-ui-theme="manga2"] .overload-indicator .endurance-metric__track > i {
+  background: #c44545 !important;
+}
+html[data-ui-theme="manga2"] .overload-indicator.active .endurance-metric__track > i {
+  background: #e03030 !important;
+}
+html[data-ui-theme="manga2"] .overload-indicator.active p b {
+  color: #c44545 !important;
 }
 
 /* === TREND INSTRUMENT SVG — unified === */
@@ -584,33 +591,39 @@ html[data-ui-theme="manga2"] .indicator-current {
   stroke-width: 1 !important;
 }
 
-/* Acceptance (attitude): negative = light gray thick, positive = black thick */
+/* Acceptance (attitude): negative = muted red, positive = teal */
 html[data-ui-theme="manga2"] .acceptance-negative {
-  stroke: #ccc !important;
+  stroke: #c44545 !important;
   stroke-width: 3 !important;
-  opacity: 1 !important;
+  opacity: 0.6 !important;
 }
 html[data-ui-theme="manga2"] .acceptance-positive {
-  stroke: #111 !important;
+  stroke: #2d8c6e !important;
   stroke-width: 3 !important;
 }
-/* Chevron: thin black */
+/* Chevron: teal */
 html[data-ui-theme="manga2"] .acceptance-chevron {
-  stroke: #111 !important;
+  stroke: #2d8c6e !important;
   stroke-width: 1 !important;
   fill: none !important;
   opacity: 1 !important;
 }
+/* Current marker for attitude: teal */
+html[data-ui-theme="manga2"] .metric-attitude .indicator-current {
+  fill: #2d8c6e !important;
+  stroke: #fff !important;
+  stroke-width: 1 !important;
+}
 
-/* Openness: frame light, opening dark fill, center line subtle */
+/* Openness: frame light, opening blue accent, center line subtle */
 html[data-ui-theme="manga2"] .openness-frame {
   fill: #fff !important;
   stroke: #ccc !important;
   stroke-width: 0.75 !important;
 }
 html[data-ui-theme="manga2"] .openness-opening {
-  fill: rgba(0,0,0,0.12) !important;
-  stroke: #111 !important;
+  fill: rgba(74,140,184,0.15) !important;
+  stroke: #4a8cb8 !important;
   stroke-width: 1 !important;
 }
 html[data-ui-theme="manga2"] .openness-center {
@@ -618,32 +631,53 @@ html[data-ui-theme="manga2"] .openness-center {
   stroke-width: 0.5 !important;
   opacity: 1 !important;
 }
+html[data-ui-theme="manga2"] .metric-openness .indicator-current {
+  fill: #4a8cb8 !important;
+  stroke: #fff !important;
+  stroke-width: 1 !important;
+}
 
-/* Plasticity: shadow invisible, ribbon bold black, anchors black */
+/* Plasticity: shadow muted, ribbon amber accent, anchors amber */
 html[data-ui-theme="manga2"] .plasticity-shadow {
-  stroke: #ccc !important;
+  stroke: #c89216 !important;
   stroke-width: 4 !important;
-  opacity: 0.3 !important;
+  opacity: 0.15 !important;
 }
 html[data-ui-theme="manga2"] .plasticity-ribbon {
-  stroke: #111 !important;
+  stroke: #c89216 !important;
   stroke-width: 1.5 !important;
   fill: none !important;
 }
 html[data-ui-theme="manga2"] .plasticity-anchor {
-  fill: #111 !important;
+  fill: #c89216 !important;
+}
+html[data-ui-theme="manga2"] .metric-plasticity .indicator-current {
+  fill: #c89216 !important;
+  stroke: #fff !important;
+  stroke-width: 1 !important;
 }
 
-/* Sensitivity: pulse line thin black */
+/* Sensitivity: pulse line violet accent */
 html[data-ui-theme="manga2"] .sensitivity-pulse {
-  stroke: #111 !important;
+  stroke: #8b5cb8 !important;
   stroke-width: 1.5 !important;
   fill: none !important;
 }
+html[data-ui-theme="manga2"] .metric-sensitivity .indicator-current {
+  fill: #8b5cb8 !important;
+  stroke: #fff !important;
+  stroke-width: 1 !important;
+}
 
-/* === TREND LABELS — unified caption style === */
-html[data-ui-theme="manga2"] .trend-lane-label span,
-html[data-ui-theme="manga2"] .trend-lane-label b { color: #111 !important; }
+/* === TREND LABELS — accent colors per metric === */
+html[data-ui-theme="manga2"] .trend-lane-label.mint span,
+html[data-ui-theme="manga2"] .trend-lane-label.mint b { color: #2d8c6e !important; }
+html[data-ui-theme="manga2"] .trend-lane-label.blue span,
+html[data-ui-theme="manga2"] .trend-lane-label.blue b { color: #4a8cb8 !important; }
+html[data-ui-theme="manga2"] .trend-lane-label.amber span,
+html[data-ui-theme="manga2"] .trend-lane-label.amber b { color: #a87810 !important; }
+html[data-ui-theme="manga2"] .trend-lane-label.violet span,
+html[data-ui-theme="manga2"] .trend-lane-label.violet b { color: #8b5cb8 !important; }
 html[data-ui-theme="manga2"] .capsule-trend-reading span { color: #111 !important; }
 html[data-ui-theme="manga2"] .capsule-trend-reading small { color: #555 !important; }
 html[data-ui-theme="manga2"] .capsule-trend-reading em { color: #111 !important; }
