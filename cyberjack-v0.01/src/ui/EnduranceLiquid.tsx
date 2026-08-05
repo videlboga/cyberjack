@@ -37,11 +37,8 @@ export function EnduranceLiquid({ value }: { value: number }) {
       style: {
         shape: HEART_PATH,
         outlineBorder: 2,
-        outlineBorderFill: "#2d8c6e",
         outlineDistance: 0,
         waveLength: 64,
-        // Liquid fill color — teal to match endurance accent
-        fill: "#2d8c6e",
         // Show percentage text inside heart — black, bold, centered
         textText: `${pct}%`,
         textFontSize: 16,
