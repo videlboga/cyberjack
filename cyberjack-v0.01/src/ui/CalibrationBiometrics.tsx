@@ -73,9 +73,8 @@ export function CalibrationBiometrics({
           <div className="endurance-metric__track"><i /></div>
           <small>{activationNature}{typeof currentValence === 'number' ? ` · сейчас ${currentValence > 0 ? '+' : ''}${Math.round(currentValence * 100)}` : ''}</small>
         </section>
-        <section className={overloadActive || overload >= 10 ? 'endurance-metric overload-indicator active' : 'endurance-metric overload-indicator'}>
+        <section className="endurance-metric overload-indicator">
           <p><span>Перегрузка</span><b>{overload > 0 ? overload.toFixed(1) : '0'}</b></p>
-          <div className="endurance-metric__track"><i /></div>
           <small>{overloadLabel}</small>
         </section>
       </div>
