@@ -87,7 +87,7 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
       style={{
         width: "120px",
         height: "120px",
-        overflow: "hidden",
+        overflow: "visible",
         marginLeft: "-20px",
         position: "relative",
       }}
@@ -98,8 +98,8 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
             position: "absolute",
             top: "50%",
             left: "50%",
-            width: "120px",
-            height: "120px",
+            width: "300px",
+            height: "300px",
             transform: "translate(-50%, -50%)",
             borderRadius: "50%",
             background: `radial-gradient(circle, rgba(232,122,40,${glowOpacity}) 0%, rgba(232,122,40,0) ${glowRadius}%)`,
