@@ -79,8 +79,16 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
   // Overload glow: orange radial halo behind the heart, grows with overload.
   // 0 overload = no glow, 80+ = max radius and intensity.
   const overloadNorm = Math.max(0, Math.min(1, overload / 80));
-  const glowRadius = 30 + overloadNorm * 120; // 30px .. 150px
+  // Glow size scales with overload — larger overload = wider halo
+  const glowSize = 40 + overloadNorm * 160; // 40% .. 200% of div
   const glowOpacity = overloadNorm * 0.6;
+  // Multi-stop gradient for smooth dissipation from center outward
+  const glowStops = [
+    `rgba(232,122,40,${glowOpacity}) 0%`,
+    `rgba(232,122,40,${glowOpacity * 0.5}) 30%`,
+    `rgba(232,122,40,${glowOpacity * 0.2}) 60%`,
+    `rgba(232,122,40,0) 100%`,
+  ].join(', ');
 
   return (
     <div
@@ -101,8 +109,8 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
             width: "300px",
             height: "300px",
             transform: "translate(-50%, -50%)",
-            borderRadius: "50%",
-            background: `radial-gradient(circle, rgba(232,122,40,${glowOpacity}) 0%, rgba(232,122,40,0) ${glowRadius}%)`,
+            borderRadius: "0%",
+            background: `radial-gradient(circle ${glowSize}%, ${glowStops})`,
             pointerEvents: "none",
             zIndex: 0,
           }}
