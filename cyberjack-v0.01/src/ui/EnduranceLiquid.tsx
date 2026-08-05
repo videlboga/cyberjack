@@ -16,24 +16,24 @@ const HEART_PATH = (cx: number, cy: number, r: number) => {
   ].join(' ');
 };
 
-// Crack positions on the heart — each is a jagged line from a start point
-// going inward. Overload level (0-100) determines how many are visible and
-// how far they extend.
+// Crack positions on the heart — coordinates match G2 heart path.
+// Heart occupies approximately x:12..108, y:39..99 on a 120x120 canvas.
+// Center at (60, 69), s=6 (r*0.1), oy=51 (cy - r*0.15).
 const CRACK_SEEDS = [
-  // top-left lobe
-  { x: 38, y: 14, dx: 6, dy: 8 },
-  { x: 28, y: 22, dx: 10, dy: 4 },
+  // top-left lobe (heart top ~y=39)
+  { x: 42, y: 40, dx: 6, dy: 10 },
+  { x: 28, y: 50, dx: 10, dy: 4 },
   // top-right lobe
-  { x: 82, y: 14, dx: -6, dy: 8 },
-  { x: 92, y: 22, dx: -10, dy: 4 },
-  // center dip
-  { x: 60, y: 18, dx: 0, dy: 10 },
-  // bottom left
-  { x: 42, y: 50, dx: 8, dy: 12 },
-  // bottom right
-  { x: 78, y: 50, dx: -8, dy: 12 },
+  { x: 78, y: 40, dx: -6, dy: 10 },
+  { x: 92, y: 50, dx: -10, dy: 4 },
+  // center dip (between lobes)
+  { x: 60, y: 44, dx: 0, dy: 8 },
+  // lower left
+  { x: 42, y: 75, dx: 8, dy: 10 },
+  // lower right
+  { x: 78, y: 75, dx: -8, dy: 10 },
   // tip
-  { x: 60, y: 78, dx: 0, dy: -6 },
+  { x: 60, y: 95, dx: 0, dy: -4 },
 ];
 
 function crackPath(seed: typeof CRACK_SEEDS[0], intensity: number): string {
@@ -124,7 +124,7 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
       <div ref={containerRef} style={{ width: "120px", height: "120px" }} />
       {visibleCracks.length > 0 && (
         <svg
-          viewBox="0 0 120 100"
+          viewBox="0 0 120 120"
           preserveAspectRatio="xMidYMid meet"
           style={{
             position: "absolute",
