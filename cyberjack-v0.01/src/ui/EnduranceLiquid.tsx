@@ -37,11 +37,8 @@ export function EnduranceLiquid({ value }: { value: number }) {
       style: {
         shape: HEART_PATH,
         outlineBorder: 2,
-        outline: {
-          border: 2,
-          stroke: "#111",
-          strokeOpacity: 1,
-        },
+        outlineStroke: "#111",
+        outlineStrokeOpacity: 1,
         outlineDistance: 0,
         waveLength: 64,
         // Liquid fill — soft red
