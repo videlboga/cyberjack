@@ -97,7 +97,7 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
         height: "120px",
         overflow: "visible",
         marginLeft: "-20px",
-        marginTop: "-15px",
+        marginTop: "-45px",
         position: "relative",
       }}
     >
