@@ -1,19 +1,19 @@
 import { useEffect, useRef } from "react";
 import { Chart } from "@antv/g2";
 
-// Heart shape — clean SVG path, symmetric
+// Heart shape — SVG path string, symmetric
 const HEART_PATH = (cx: number, cy: number, r: number) => {
   const s = r * 0.1;
   const ox = cx;
   const oy = cy - r * 0.15;
-  const p: (string | number)[][] = [];
-  p.push(["M", ox, oy - 2 * s]);
-  p.push(["C", ox - 3 * s, oy - 5 * s, ox - 8 * s, oy - 5 * s, ox - 8 * s, oy - 1 * s]);
-  p.push(["C", ox - 8 * s, oy + 3 * s, ox - 4 * s, oy + 5 * s, ox, oy + 8 * s]);
-  p.push(["C", ox + 4 * s, oy + 5 * s, ox + 8 * s, oy + 3 * s, ox + 8 * s, oy - 1 * s]);
-  p.push(["C", ox + 8 * s, oy - 5 * s, ox + 3 * s, oy - 5 * s, ox, oy - 2 * s]);
-  p.push(["Z"]);
-  return p;
+  return [
+    `M ${ox} ${oy - 2 * s}`,
+    `C ${ox - 3 * s} ${oy - 5 * s}, ${ox - 8 * s} ${oy - 5 * s}, ${ox - 8 * s} ${oy - 1 * s}`,
+    `C ${ox - 8 * s} ${oy + 3 * s}, ${ox - 4 * s} ${oy + 5 * s}, ${ox} ${oy + 8 * s}`,
+    `C ${ox + 4 * s} ${oy + 5 * s}, ${ox + 8 * s} ${oy + 3 * s}, ${ox + 8 * s} ${oy - 1 * s}`,
+    `C ${ox + 8 * s} ${oy - 5 * s}, ${ox + 3 * s} ${oy - 5 * s}, ${ox} ${oy - 2 * s}`,
+    `Z`,
+  ].join(' ');
 };
 
 export function EnduranceLiquid({ value }: { value: number }) {
