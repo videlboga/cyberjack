@@ -30,10 +30,22 @@ export function EnduranceLiquid({ value }: { value: number }) {
 
     const pct = Math.round(Math.max(0, Math.min(1, value / 100)) * 100);
 
+    // G2 liquid measures fill level by the bounding box height, not by the
+    // shape's area. A heart is wider at the top and narrows to a point at the
+    // bottom, so the same percentage of box height fills noticeably less of
+    // the visible heart. Compensate by mapping the displayed percentage
+    // through a mild curve that lifts the water level to better match the
+    // perceived fill.
+    const rawRatio = Math.max(0, Math.min(1, value / 100));
+    // Visual compensation: shift the level up so 49% feels like 49% of the
+    // heart, not 49% of the enclosing rectangle. The exponent < 1 lifts low
+    // and mid values without overfilling near 100%.
+    const visualRatio = Math.pow(rawRatio, 0.72);
+
     chart.options({
       type: "liquid",
       autoFit: true,
-      data: Math.max(0, Math.min(1, value / 100)),
+      data: visualRatio,
       style: {
         shape: HEART_PATH,
         outlineBorder: 2,
