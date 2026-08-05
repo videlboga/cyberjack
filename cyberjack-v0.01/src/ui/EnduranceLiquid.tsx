@@ -37,14 +37,45 @@ const CRACK_SEEDS = [
 ];
 
 function crackPath(seed: typeof CRACK_SEEDS[0], intensity: number): string {
-  // intensity 0..1 — how long the crack extends
+  // intensity 0..1 — how far the crack extends from the edge inward.
+  // Build a jagged zigzag with 3-4 segments for a crack-like appearance.
   const len = intensity;
-  const x2 = seed.x + seed.dx * len;
-  const y2 = seed.y + seed.dy * len;
-  // Jagged midpoint offset
-  const mx = (seed.x + x2) / 2 + (seed.dx > 0 ? -1.5 : seed.dx < 0 ? 1.5 : 0) * len;
-  const my = (seed.y + y2) / 2 + 1.5 * len;
-  return `M ${seed.x} ${seed.y} L ${mx} ${my} L ${x2} ${y2}`;
+  const dx = seed.dx * len;
+  const dy = seed.dy * len;
+  // Start point (on the heart outline)
+  const x0 = seed.x;
+  const y0 = seed.y;
+  // End point
+  const x3 = x0 + dx;
+  const y3 = y0 + dy;
+  // Two intermediate points with perpendicular jitter for jaggedness
+  // Perpendicular to (dx,dy) is (-dy,dx) normalized
+  const plen = Math.sqrt(dx * dx + dy * dy) || 1;
+  const px = -dy / plen;
+  const py = dx / plen;
+  // Jitter amounts — alternate sides for zigzag
+  const j1 = plen * 0.18;
+  const j2 = plen * 0.12;
+  const x1 = x0 + dx * 0.33 + px * j1;
+  const y1 = y0 + dy * 0.33 + py * j1;
+  const x2 = x0 + dx * 0.66 - px * j2;
+  const y2 = y0 + dy * 0.66 - py * j2;
+  return `M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3}`;
+}
+
+// Branch off the main crack for a more fractured look
+function crackBranch(seed: typeof CRACK_SEEDS[0], intensity: number): string | null {
+  if (intensity < 0.5) return null;
+  // Small branch at 60% along the main crack
+  const len = intensity;
+  const bx = seed.x + seed.dx * len * 0.6;
+  const by = seed.y + seed.dy * len * 0.6;
+  const plen = Math.sqrt(seed.dx * seed.dx + seed.dy * seed.dy) * len || 1;
+  const px = -seed.dy / Math.sqrt(seed.dx * seed.dx + seed.dy * seed.dy);
+  const py = seed.dx / Math.sqrt(seed.dx * seed.dx + seed.dy * seed.dy);
+  const bx2 = bx + px * plen * 0.2 + seed.dx * 0.1;
+  const by2 = by + py * plen * 0.2 + seed.dy * 0.1;
+  return `M ${bx} ${by} L ${bx2} ${by2}`;
 }
 
 export function EnduranceLiquid({ value, overload = 0 }: { value: number; overload?: number }) {
@@ -110,14 +141,16 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
   // Cracks: show when overload >= 10, scale up to full at overload >= 80.
   // Each crack has a threshold — they appear progressively, not all at once.
   const overloadNorm = Math.max(0, Math.min(1, (overload - 10) / 70));
-  const visibleCracks = CRACK_SEEDS.map((seed, i) => {
-    // Stagger: crack i appears at overloadNorm >= i / CRACK_SEEDS.length
+  const visibleCracks: string[] = [];
+  const visibleBranches: string[] = [];
+  CRACK_SEEDS.forEach((seed, i) => {
     const threshold = i / CRACK_SEEDS.length;
-    if (overloadNorm <= threshold) return null;
-    // Length grows from 0.3 to 1.0 within its visibility window
+    if (overloadNorm <= threshold) return;
     const local = Math.min(1, (overloadNorm - threshold) / (1 - threshold) * 0.7 + 0.3);
-    return crackPath(seed, local);
-  }).filter(Boolean) as string[];
+    visibleCracks.push(crackPath(seed, local));
+    const branch = crackBranch(seed, local);
+    if (branch) visibleBranches.push(branch);
+  });
 
   return (
     <div style={{ width: "120px", height: "120px", overflow: "hidden", marginLeft: "-20px", position: "relative" }}>
@@ -137,13 +170,24 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
         >
           {visibleCracks.map((d, i) => (
             <path
-              key={i}
+              key={`c${i}`}
               d={d}
               fill="none"
               stroke="#111"
-              strokeWidth={overload >= 40 ? 1.5 : 1}
+              strokeWidth={overload >= 40 ? 1.2 : 0.8}
               strokeLinecap="round"
               opacity={Math.min(1, overloadNorm * 1.5)}
+            />
+          ))}
+          {visibleBranches.map((d, i) => (
+            <path
+              key={`b${i}`}
+              d={d}
+              fill="none"
+              stroke="#111"
+              strokeWidth={overload >= 40 ? 0.8 : 0.6}
+              strokeLinecap="round"
+              opacity={Math.min(0.8, overloadNorm * 1.2)}
             />
           ))}
         </svg>
