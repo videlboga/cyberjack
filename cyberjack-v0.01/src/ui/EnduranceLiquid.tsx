@@ -37,10 +37,9 @@ export function EnduranceLiquid({ value }: { value: number }) {
     // through a mild curve that lifts the water level to better match the
     // perceived fill.
     const rawRatio = Math.max(0, Math.min(1, value / 100));
-    // Visual compensation: shift the level up so 49% feels like 49% of the
-    // heart, not 49% of the enclosing rectangle. The exponent < 1 lifts low
-    // and mid values without overfilling near 100%.
-    const visualRatio = Math.pow(rawRatio, 0.72);
+    // Heart is wide at top, narrow at bottom. G2 fills by bounding box height.
+    // Use a steeper curve so low/mid values lift visibly while 100% stays 100%.
+    const visualRatio = Math.pow(rawRatio, 0.58);
 
     chart.options({
       type: "liquid",
