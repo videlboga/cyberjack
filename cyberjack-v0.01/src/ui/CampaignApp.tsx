@@ -3817,9 +3817,7 @@ function ContainerConversation({
     });
   };
   useEffect(() => {
-    const chatParticipants = presentResidents.length
-      ? presentResidents
-      : [resident];
+    const chatParticipants = [resident];
     Promise.all([
       Promise.all(
         chatParticipants.map((character) =>
