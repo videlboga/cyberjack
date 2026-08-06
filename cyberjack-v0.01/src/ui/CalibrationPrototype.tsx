@@ -3639,17 +3639,23 @@ export function CalibrationPrototype({
         )
       : null,
     // The active subject is who's shown large; the other is dimmed.
-    activeVisualPath = activeSubjectId === SUBJECT
-      ? visualPath
-      : nearbyCharacter && activeSubjectId === nearbyCharacter.id
-        ? nearbyVisualPath
-        : visualPath,
-    secondaryVisualPath = activeSubjectId === SUBJECT
-      ? nearbyVisualPath
-      : visualPath,
-    secondaryName = activeSubjectId === SUBJECT
-      ? nearbyCharacter?.name
-      : subjectName,
+    // Both paths stay fixed — only opacity/position changes on swap.
+    activeVisualPath = visualPath,
+    secondaryVisualPath = nearbyCharacter
+      ? characterVisualPath(
+          nearbyCharacter.id,
+          (nearbyCharacter.state as any) || null,
+          undefined,
+          false,
+        )
+      : null,
+    secondaryName = nearbyCharacter?.name,
+    // When swapped: main shows secondary char, secondary shows main char
+    activeIsSecondary = activeSubjectId !== SUBJECT && nearbyCharacter,
+    mainDisplayPath = activeIsSecondary ? secondaryVisualPath : activeVisualPath,
+    sideDisplayPath = activeIsSecondary ? activeVisualPath : secondaryVisualPath,
+    sideName = activeIsSecondary ? subjectName : secondaryName,
+    mainName = activeIsSecondary ? (nearbyCharacter?.name || subjectName) : subjectName,
     reviewAssetPath = displayedVisualPath || visualPath,
     significantEvent =
       [...entries]
@@ -4569,36 +4575,39 @@ export function CalibrationPrototype({
           className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""} ${secondaryVisualPath ? "has-secondary" : ""}`}
           >
             <div className="portrait-placeholder">
-              {secondaryVisualPath && (
+              {sideDisplayPath && (
                 <div
-                  className={`calibration-secondary-avatar ${activeSubjectId === SUBJECT ? "" : "active"}`}
-                  onClick={() => setActiveSubjectId(activeSubjectId === SUBJECT ? (nearbyCharacter?.id || SUBJECT) : SUBJECT)}
+                  className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
+                  onClick={() => setActiveSubjectId(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
                 >
                   <span className="portrait-fallback">
-                    {(secondaryName || "?").slice(0, 1).toUpperCase()}
+                    {(sideName || "?").slice(0, 1).toUpperCase()}
                   </span>
-                  <img
-                    className="calibration-character-image"
-                    src={secondaryVisualPath}
-                    alt={secondaryName || ""}
-                    onError={(e) => { e.currentTarget.hidden = true; }}
-                  />
+                  <div className="avatar-crossfade">
+                    <img
+                      className="calibration-character-image avatar-layer-base"
+                      src={sideDisplayPath}
+                      alt={sideName || ""}
+                      onError={(e) => { e.currentTarget.hidden = true; }}
+                    />
+                  </div>
                 </div>
               )}
               <div className="calibration-avatar-frame">
                 <span className="portrait-fallback">
-                  {(activeSubjectId === SUBJECT ? subjectName : (nearbyCharacter?.name || subjectName)).slice(0, 1).toUpperCase()}
+                  {mainName.slice(0, 1).toUpperCase()}
                 </span>
-                <img
-                  className="calibration-character-image"
-                  src={activeVisualPath}
-                  alt={activeSubjectId === SUBJECT ? subjectName : (nearbyCharacter?.name || subjectName)}
-                  onLoad={(event) =>
-                    setDisplayedVisualPath(
-                      new URL(event.currentTarget.src).pathname,
-                    )
-                  }
-                  onError={(event) => {
+                <div className="avatar-crossfade">
+                  <img
+                    className="calibration-character-image avatar-layer-base"
+                    src={mainDisplayPath}
+                    alt={mainName}
+                    onLoad={(event) =>
+                      setDisplayedVisualPath(
+                        new URL(event.currentTarget.src).pathname,
+                      )
+                    }
+                    onError={(event) => {
                     if (
                       expandedVisualPath &&
                       event.currentTarget.src.endsWith(expandedVisualPath) &&
@@ -4626,6 +4635,7 @@ export function CalibrationPrototype({
                     }
                   }}
                 />
+                </div>
               </div>
               {activeProcesses[0] && (
                 <GameSustainedEffect
