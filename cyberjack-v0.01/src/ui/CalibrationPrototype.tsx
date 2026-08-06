@@ -4300,26 +4300,6 @@ export function CalibrationPrototype({
               </span>
             </button>
           )}
-          {onThemeChange && (
-            <select
-              className="calibration-theme-switcher"
-              aria-label="Тема интерфейса"
-              value={uiTheme}
-              onChange={(event) =>
-                onThemeChange(
-                  event.target.value as
-                    "industrial" | "graphite" | "paper" | "mist" | "manga" | "manga2",
-                )
-              }
-            >
-              <option value="industrial">Industrial</option>
-              <option value="graphite">Graphite</option>
-              <option value="paper">Sage</option>
-              <option value="mist">Mist</option>
-              <option value="manga">Manga</option>
-              <option value="manga2">Manga 2</option>
-            </select>
-          )}
           <button onClick={() => setHistoryOpen(true)}>История</button>
           <button onClick={() => setDiagnosticsOpen(true)}>Диагностика</button>
           <button onClick={() => setMenuOpen(true)}>Меню</button>

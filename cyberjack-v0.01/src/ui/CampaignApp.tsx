@@ -721,11 +721,8 @@ export function CampaignApp() {
     "industrial" | "graphite" | "paper" | "mist" | "manga" | "manga2"
   >(() => {
     if (window.location.pathname.startsWith("/manga2")) return "manga2";
-    if (window.location.pathname.startsWith("/manga")) return "manga";
-    const saved = window.localStorage.getItem("cyberjack-ui-theme");
-    return saved === "graphite" || saved === "paper" || saved === "mist"
-      ? saved
-      : "industrial";
+    if (window.location.pathname.startsWith("/manga")) return "manga2";
+    return "manga2";
   });
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -1068,7 +1065,7 @@ export function CampaignApp() {
             </strong>
           </span>
         </button>
-        <label className="theme-switcher">
+        <label className="theme-switcher" style={{ display: "none" }}>
           <small>ТЕМА</small>
           <select
             aria-label="Тема интерфейса"
@@ -1080,11 +1077,6 @@ export function CampaignApp() {
               )
             }
           >
-            <option value="industrial">Industrial</option>
-            <option value="graphite">Graphite</option>
-            <option value="paper">Sage</option>
-            <option value="mist">Mist</option>
-            <option value="manga">Manga</option>
             <option value="manga2">Manga 2</option>
           </select>
         </label>
