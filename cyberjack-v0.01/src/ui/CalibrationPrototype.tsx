@@ -4566,7 +4566,7 @@ export function CalibrationPrototype({
         </aside>
         <section className="character-column">
           <div
-            className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""}`}
+          className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""} ${secondaryVisualPath ? "has-secondary" : ""}`}
           >
             <div className="portrait-placeholder">
               {secondaryVisualPath && (
