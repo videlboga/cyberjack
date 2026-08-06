@@ -1373,7 +1373,8 @@ const characterVisualPath = (
   );
   return (
     resolveCalibrationAvatarV4(descriptor) ||
-    `/character-images/rendered/${descriptor.characterSlug}/standing__${descriptor.clothing}__none__neutral.png`
+    `/character-images/cutout/rendered/${descriptor.characterSlug}/standing__${descriptor.clothing}__none__neutral.png`
+    || `/character-images/rendered/${descriptor.characterSlug}/standing__${descriptor.clothing}__none__neutral.png`
   );
 };
 const preparationTargetVisual = (
@@ -1436,7 +1437,8 @@ const preparationTargetVisual = (
   descriptor.affect = "neutral";
   const path =
     resolveCalibrationAvatarV4(descriptor) ||
-    `/character-images/rendered/${descriptor.characterSlug}/${descriptor.pose}__${descriptor.clothing}__none__neutral.png`;
+    `/character-images/cutout/rendered/${descriptor.characterSlug}/${descriptor.pose}__${descriptor.clothing}__none__neutral.png`
+    || `/character-images/rendered/${descriptor.characterSlug}/${descriptor.pose}__${descriptor.clothing}__none__neutral.png`;
   return { path, fullBody: true };
 };
 const zoneGroups = [

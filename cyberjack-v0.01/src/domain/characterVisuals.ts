@@ -252,33 +252,35 @@ const calibrationCoreEquipmentFallbacks: Partial<Record<EquipmentPreset, Equipme
 export const calibrationAvatarCandidatesV4 = (descriptor: CharacterVisualDescriptorV4): string[] => {
     const equipmentPreset = descriptor.equipmentPreset || 'none';
     const coreEquipment = [equipmentPreset, ...(calibrationCoreEquipmentFallbacks[equipmentPreset] || [])];
-    const v4 = coreEquipment.flatMap(equipment => [
-        `/character-images/calibration-v4/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__${descriptor.affect}.png`,
-        `/character-images/calibration-v4/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__neutral.png`,
-    ]);
-    const core = coreEquipment.flatMap(equipment => [
-        `/character-images/calibration-core/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__${descriptor.affect}.png`,
-        `/character-images/calibration-core/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__neutral.png`,
-    ]);
+    // Helper: given a path under /character-images/, prepend a cutout/ variant.
+    const withCutout = (path: string) => {
+        const cutoutPath = path.replace('/character-images/', '/character-images/cutout/');
+        return [cutoutPath, path];
+    };
+    const v4 = coreEquipment.flatMap(equipment => withCutout(
+        `/character-images/calibration-v4/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__${descriptor.affect}.png`
+    ).concat(withCutout(
+        `/character-images/calibration-v4/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__neutral.png`
+    ).flat())).flat();
+    const core = coreEquipment.flatMap(equipment => withCutout(
+        `/character-images/calibration-core/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__${descriptor.affect}.png`
+    ).concat(withCutout(
+        `/character-images/calibration-core/${descriptor.characterSlug}/${descriptor.pose}/${descriptor.clothing}__${equipment}__neutral.png`
+    ).flat())).flat();
     const legacy = `/character-images/rendered/${descriptor.characterSlug}/${descriptor.pose}__${descriptor.clothing}__none__${descriptor.affect}.png`;
     const legacyNeutral = `/character-images/rendered/${descriptor.characterSlug}/${descriptor.pose}__${descriptor.clothing}__none__neutral.png`;
-    // Some newer characters only have their unrestrained sitting frame in the
-    // expanded pose set. Prefer that truthful sitting image to standing when
-    // the exact sitting cell is absent.
     const nearbyPoseFallbacks = descriptor.pose === 'sitting'
-        ? [
-            `/character-images/calibration-v4/${descriptor.characterSlug}/sitting_spread/${descriptor.clothing}__${equipmentPreset}__${descriptor.affect}.png`,
-            `/character-images/calibration-v4/${descriptor.characterSlug}/sitting_spread/${descriptor.clothing}__${equipmentPreset}__neutral.png`,
-        ]
+        ? withCutout(
+            `/character-images/calibration-v4/${descriptor.characterSlug}/sitting_spread/${descriptor.clothing}__${equipmentPreset}__${descriptor.affect}.png`
+        ).concat(withCutout(
+            `/character-images/calibration-v4/${descriptor.characterSlug}/sitting_spread/${descriptor.clothing}__${equipmentPreset}__neutral.png`
+        ).flat()).flat()
         : [];
-    // Some newly generated characters currently have no unrestrained core
-    // frames. Their authored neutral render is a truthful character fallback
-    // (preferable to a broken image or another character's avatar).
     const characterNeutral = `/character-images/rendered/${descriptor.characterSlug}/standing__nude__none__neutral.png`;
     const expandedPose = ['sitting_spread', 'standing_exposed', 'covering', 'feet_presented'].includes(descriptor.pose || '');
     return expandedPose
-        ? [...v4, ...core, legacy, legacyNeutral, characterNeutral]
-        : [...core, ...v4, legacy, legacyNeutral, ...nearbyPoseFallbacks, characterNeutral];
+        ? [...v4, ...core, ...withCutout(legacy), ...withCutout(legacyNeutral), ...withCutout(characterNeutral)].flat()
+        : [...core, ...v4, ...withCutout(legacy), ...withCutout(legacyNeutral), ...nearbyPoseFallbacks, ...withCutout(characterNeutral)].flat();
 };
 
 export const resolveCalibrationAvatarV4 = (descriptor: CharacterVisualDescriptorV4): string | null =>
@@ -309,9 +311,11 @@ export const resolveExistingDeviceVisual = (input: {
             : ['guarded', 'high_negative'].includes(affect)),
         ...available,
     ];
-    return resolveFirstAvailableVisual([...new Set(ordered)].map(affect =>
-        `/character-images/interactions-expanded/${input.characterSlug}/${input.family}/${input.configuration}/${input.wardrobe}__machine__${affect}__${phase}.png`
-    ));
+    return resolveFirstAvailableVisual([...new Set(ordered)].map(affect => {
+        const main = `/character-images/interactions-expanded/${input.characterSlug}/${input.family}/${input.configuration}/${input.wardrobe}__machine__${affect}__${phase}.png`;
+        const cutout = main.replace('/character-images/', '/character-images/cutout/');
+        return [cutout, main];
+    }).flat());
 };
 
 const electroTargetPoint = ({ contexts, start }: InteractionRuleContext) =>

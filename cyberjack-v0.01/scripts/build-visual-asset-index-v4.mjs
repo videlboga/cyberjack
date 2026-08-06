@@ -6,6 +6,14 @@ const publicRoot = path.join(root, 'public');
 const outputPath = path.join(root, 'src/infrastructure/data/visual/visual-asset-index-v4.generated.json');
 
 const roots = [
+  'character-images/cutout/calibration-core',
+  'character-images/cutout/rendered',
+  'character-images/cutout/interactions-expanded',
+  'character-images/cutout/interactions',
+  'character-images/cutout/intimacy',
+  'character-images/cutout/calibration-v4',
+  'character-images/cutout/calibration-interactions-v4',
+  'character-images/cutout/devices-v4',
   'character-images/calibration-core',
   'character-images/rendered',
   'character-images/interactions-expanded',

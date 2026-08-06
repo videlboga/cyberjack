@@ -71,6 +71,7 @@ export const canonicalCharacterPortrait = (
       openness: state?.openness,
     }, state?.behavioralState, climax);
     return resolveCalibrationAvatarV4(descriptor)
+      || `/character-images/cutout/rendered/${slug}/${poseFor(contexts)}__${wardrobe}__none__neutral.png`
       || `/character-images/rendered/${slug}/${poseFor(contexts)}__${wardrobe}__none__neutral.png`;
   }
   const normalizedName = String(name || '').trim().toLowerCase();
