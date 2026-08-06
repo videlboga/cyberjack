@@ -5,6 +5,7 @@ import { getBaseHumanAnatomy } from '../domain/anatomy.js';
 import { CharacterProfile } from '../domain/characterProfile.js';
 import { CANON_LOCATIONS, CANON_PROFESSIONS } from '../domain/canon.js';
 import { ensureAllStarterClothing } from './starterClothing.js';
+import { characterRelationRepo } from './repositories.js';
 
 console.log("Начинаем безопасное заполнение базы данных (без удаления существующих данных)...");
 
@@ -402,6 +403,47 @@ db.transaction(() => {
             );
         }
     }
+})();
+
+// ── Seed character relations between NPCs in the same room ──
+(() => {
+    // NPC pairs that share a room and should have relations for proactive interactions
+    const npcPairs = [
+        // room_calibration: Sumi (diagnostic table) and GEN-02 (recovery capsule)
+        { from: 'NPC-CAND-SUMI', to: 'NPC-CAND-GEN-02', attitude: 55, openness: 50 },
+        // room_cell_b: NPC-CAND-01 and NPC-CAND-GEN-04
+        { from: 'NPC-CAND-01', to: 'NPC-CAND-GEN-04', attitude: 40, openness: 30 },
+        { from: 'NPC-CAND-GEN-04', to: 'NPC-CAND-01', attitude: 45, openness: 35 },
+        // Cross-room: Lab assistant knows everyone
+        { from: 'NPC-LAB-01', to: 'NPC-CAND-SUMI', attitude: 50, openness: 40 },
+        { from: 'NPC-LAB-01', to: 'NPC-CAND-01', attitude: 50, openness: 40 },
+        { from: 'NPC-LAB-01', to: 'NPC-CAND-GEN-02', attitude: 50, openness: 40 },
+        { from: 'NPC-LAB-01', to: 'NPC-CAND-GEN-04', attitude: 50, openness: 40 },
+        // S-AV-01 knows lab assistant
+        { from: 'S-AV-01', to: 'NPC-LAB-01', attitude: 60, openness: 50 },
+        { from: 'NPC-LAB-01', to: 'S-AV-01', attitude: 65, openness: 55 },
+        // S-AV-01 knows Sumi (both calibration subjects)
+        { from: 'S-AV-01', to: 'NPC-CAND-SUMI', attitude: 50, openness: 45 },
+        { from: 'NPC-CAND-SUMI', to: 'S-AV-01', attitude: 50, openness: 45 },
+    ];
+
+    for (const pair of npcPairs) {
+        characterRelationRepo.ensure(pair.from, pair.to, {
+            knows: true,
+            present: true,
+            canInteract: true,
+            attitude: pair.attitude,
+            openness: pair.openness,
+            plasticity: 50,
+            baselineAttitude: pair.attitude,
+            baselineOpenness: pair.openness,
+            baselinePlasticity: 50,
+            familiarityLevel: 1,
+            generalOpinion: 'нейтрально',
+            recentMemories: '[]'
+        });
+    }
+    console.log(`[Seed] Создано relations между NPC: ${npcPairs.length} пар.`);
 })();
 
 console.log("Успешное завершение сидирования.");
