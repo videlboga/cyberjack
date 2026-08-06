@@ -4579,7 +4579,6 @@ export function CalibrationPrototype({
                   </span>
                   <img
                     className="calibration-character-image"
-                    key={`secondary-${secondaryVisualPath}`}
                     src={secondaryVisualPath}
                     alt={secondaryName || ""}
                     onError={(e) => { e.currentTarget.hidden = true; }}
@@ -4592,7 +4591,6 @@ export function CalibrationPrototype({
                 </span>
                 <img
                   className="calibration-character-image"
-                  key={activeVisualPath}
                   src={activeVisualPath}
                   alt={activeSubjectId === SUBJECT ? subjectName : (nearbyCharacter?.name || subjectName)}
                   onLoad={(event) =>

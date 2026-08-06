@@ -822,7 +822,7 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   z-index: 3;
   opacity: 0.5;
   filter: grayscale(0.5) brightness(0.8);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.5s ease, filter 0.5s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   display: flex;
   align-items: flex-end;
@@ -831,18 +831,28 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   pointer-events: auto;
 }
 .calibration-secondary-avatar:hover {
-  opacity: 0.55;
+  opacity: 0.65;
 }
 .calibration-secondary-avatar.active {
   opacity: 1;
   filter: none;
 }
-.calibration-secondary-avatar img {
+.calibration-secondary-avatar img,
+.calibration-avatar-frame img {
   max-height: 100%;
   max-width: 100%;
   object-fit: contain;
   object-position: bottom center;
+  transition: opacity 0.4s ease;
 }
 .calibration-secondary-avatar .portrait-fallback {
   display: none;
+}
+/* Crossfade: swap opacity between active/secondary on transition */
+.calibration-avatar-frame {
+  transition: opacity 0.4s ease;
+  will-change: opacity;
+}
+.calibration-secondary-avatar {
+  will-change: opacity, filter;
 }
