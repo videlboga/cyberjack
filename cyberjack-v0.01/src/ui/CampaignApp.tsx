@@ -5216,22 +5216,15 @@ function ContainerConversation({
             avatarSrc={(line) => {
               if (line.avatarPath) return line.avatarPath;
               if (line.role === "calibrator" || line.role === "system") return undefined;
-              const actor = presentResidents.find(
-                (character) =>
-                  character.id === line.actorId || character.subjectId === line.actorId,
-              );
-              const actorId = actor?.subjectId || actor?.id;
-              const slug = actorId === "S-AV-01"
-                ? "mira"
-                : actorId === "NPC-LAB-01"
-                  ? "iona"
-                  : actorId === "NPC-CAND-01"
-                    ? "nika"
-                    : actorId === "NPC-CAND-SUMI"
-                      ? "sumi"
-                      : actorId === "NPC-CAND-GEN-02"
-                        ? "eli"
-                        : residentPortraitSlug;
+              const actorId = line.actorId || resident.subjectId || resident.id;
+              const slug
+                = actorId === "S-AV-01" ? "mira"
+                : actorId === "NPC-LAB-01" ? "iona"
+                : actorId === "NPC-CAND-01" ? "nika"
+                : actorId === "NPC-CAND-SUMI" ? "sumi"
+                : actorId === "NPC-CAND-GEN-02" ? "eli"
+                : actorId === "NPC-CAND-GEN-04" ? "mai"
+                : undefined;
               return slug
                 ? `/character-images/portraits/${slug}/${line.portraitEmotion || "neutral"}.png`
                 : undefined;
