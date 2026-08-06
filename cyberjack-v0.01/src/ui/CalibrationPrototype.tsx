@@ -3639,7 +3639,7 @@ export function CalibrationPrototype({
         )
       : null,
     // The active subject is who's shown large; the other is dimmed.
-    // Both paths stay fixed — only opacity/position changes on swap.
+    // Both paths stay FIXED — swap only toggles CSS opacity, never changes src.
     activeVisualPath = visualPath,
     secondaryVisualPath = nearbyCharacter
       ? characterVisualPath(
@@ -3650,12 +3650,7 @@ export function CalibrationPrototype({
         )
       : null,
     secondaryName = nearbyCharacter?.name,
-    // When swapped: main shows secondary char, secondary shows main char
-    activeIsSecondary = activeSubjectId !== SUBJECT && nearbyCharacter,
-    mainDisplayPath = activeIsSecondary ? secondaryVisualPath : activeVisualPath,
-    sideDisplayPath = activeIsSecondary ? activeVisualPath : secondaryVisualPath,
-    sideName = activeIsSecondary ? subjectName : secondaryName,
-    mainName = activeIsSecondary ? (nearbyCharacter?.name || subjectName) : subjectName,
+    activeIsSecondary = activeSubjectId !== SUBJECT && !!nearbyCharacter,
     reviewAssetPath = displayedVisualPath || visualPath,
     significantEvent =
       [...entries]
@@ -4575,39 +4570,36 @@ export function CalibrationPrototype({
           className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""} ${secondaryVisualPath ? "has-secondary" : ""}`}
           >
             <div className="portrait-placeholder">
-              {sideDisplayPath && (
+              {secondaryVisualPath && (
                 <div
                   className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
                   onClick={() => setActiveSubjectId(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
                 >
                   <span className="portrait-fallback">
-                    {(sideName || "?").slice(0, 1).toUpperCase()}
+                    {(secondaryName || "?").slice(0, 1).toUpperCase()}
                   </span>
-                  <div className="avatar-crossfade">
-                    <img
-                      className="calibration-character-image avatar-layer-base"
-                      src={sideDisplayPath}
-                      alt={sideName || ""}
-                      onError={(e) => { e.currentTarget.hidden = true; }}
-                    />
-                  </div>
+                  <img
+                    className="calibration-character-image"
+                    src={secondaryVisualPath}
+                    alt={secondaryName || ""}
+                    onError={(e) => { e.currentTarget.hidden = true; }}
+                  />
                 </div>
               )}
-              <div className="calibration-avatar-frame">
+              <div className={`calibration-avatar-frame ${activeIsSecondary ? "dimmed" : ""}`}>
                 <span className="portrait-fallback">
-                  {mainName.slice(0, 1).toUpperCase()}
+                  {subjectName.slice(0, 1).toUpperCase()}
                 </span>
-                <div className="avatar-crossfade">
-                  <img
-                    className="calibration-character-image avatar-layer-base"
-                    src={mainDisplayPath}
-                    alt={mainName}
-                    onLoad={(event) =>
-                      setDisplayedVisualPath(
-                        new URL(event.currentTarget.src).pathname,
-                      )
-                    }
-                    onError={(event) => {
+                <img
+                  className="calibration-character-image"
+                  src={activeVisualPath}
+                  alt={subjectName}
+                  onLoad={(event) =>
+                    setDisplayedVisualPath(
+                      new URL(event.currentTarget.src).pathname,
+                    )
+                  }
+                  onError={(event) => {
                     if (
                       expandedVisualPath &&
                       event.currentTarget.src.endsWith(expandedVisualPath) &&
@@ -4635,7 +4627,6 @@ export function CalibrationPrototype({
                     }
                   }}
                 />
-                </div>
               </div>
               {activeProcesses[0] && (
                 <GameSustainedEffect
