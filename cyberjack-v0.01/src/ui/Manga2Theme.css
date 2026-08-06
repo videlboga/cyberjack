@@ -815,13 +815,13 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 /* === DUAL AVATAR — secondary character dimmed beside active === */
 .calibration-secondary-avatar {
   position: absolute;
-  left: 2%;
-  bottom: 2%;
-  width: 26%;
-  height: 60%;
-  z-index: 1;
-  opacity: 0.3;
-  filter: grayscale(0.8) brightness(0.7);
+  left: 0;
+  bottom: 46px;
+  width: 38%;
+  height: 72%;
+  z-index: 3;
+  opacity: 0.5;
+  filter: grayscale(0.5) brightness(0.8);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   display: flex;
@@ -831,7 +831,7 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   pointer-events: auto;
 }
 .calibration-secondary-avatar:hover {
-  opacity: 0.5;
+  opacity: 0.55;
 }
 .calibration-secondary-avatar.active {
   opacity: 1;
@@ -845,10 +845,4 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 }
 .calibration-secondary-avatar .portrait-fallback {
   display: none;
-}
-/* When secondary is present, shift main avatar right to make room */
-.has-secondary .calibration-avatar-frame {
-  left: 42% !important;
-  width: 88% !important;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
