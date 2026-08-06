@@ -1493,8 +1493,14 @@ function LaboratoryOverview({
     const currentRoom = scenario.rooms.find(
       (room) => room.id === roomForCharacter(currentResident.id),
     );
+    // Device name only applies if the character is actually on that device
+    // (status starts with 'device:'). Otherwise use the room name.
+    const occupant = currentRoom?.occupants.find((o) => o.id === currentResident.id);
+    const isOnDevice = occupant?.status?.startsWith('device:');
     const currentContainer =
-      currentDevice?.name || currentRoom?.name || conversation.container;
+      currentDevice && isOnDevice
+        ? currentDevice.name
+        : currentRoom?.name || conversation.container;
     const currentKind = currentDevice
       ? currentDevice.id === "lab_recovery_capsule"
         ? "capsule"
@@ -1534,6 +1540,7 @@ function LaboratoryOverview({
         key={currentResident.id}
         resident={currentResident}
         container={currentContainer}
+        roomName={currentRoom?.name || conversation.container}
         kind={currentKind}
         asset={currentDevice || conversation.asset}
         worldMinute={scenario.clock.totalMinutes}
@@ -3590,6 +3597,7 @@ function DeviceControlScreen({
 function ContainerConversation({
   resident,
   container,
+  roomName,
   kind,
   asset,
   worldMinute,
@@ -3602,6 +3610,7 @@ function ContainerConversation({
 }: {
   resident: Resident;
   container: string;
+  roomName?: string;
   kind: "cell" | "staff" | "room" | "capsule";
   asset?: LabAsset;
   worldMinute: number;
@@ -3840,17 +3849,31 @@ function ContainerConversation({
         const restored = collapseRepeatedChatActions(
           chatHistories
             .flatMap(({ character, messages }) =>
-              messages.map((message: any) => ({
-                ...chatLineFromStoredMessage(
-                  message,
-                  character.name,
-                  character.subjectId || character.id,
-                ),
-                actorId:
-                  message.role === "assistant"
-                    ? character.subjectId || character.id
-                    : undefined,
-              })),
+              messages
+                .filter((message: any) => {
+                  // Chat is room-based. Show messages that belong to this room:
+                  // - System events (contextLabel = 'Система')
+                  // - Messages with context matching the room name
+                  // - Messages with no context (legacy)
+                  // Device/calibration contexts belong to the calibration screen.
+                  const ctx = String(message.contextLabel || "");
+                  if (ctx === "Система") return true;
+                  if (roomName && ctx === roomName) return true;
+                  if (ctx === container) return true;
+                  if (!ctx) return true;
+                  return false;
+                })
+                .map((message: any) => ({
+                  ...chatLineFromStoredMessage(
+                    message,
+                    character.name,
+                    character.subjectId || character.id,
+                  ),
+                  actorId:
+                    message.role === "assistant"
+                      ? character.subjectId || character.id
+                      : undefined,
+                })),
             )
             .sort((left, right) => Number(left.id) - Number(right.id)),
         ).slice(-100);
