@@ -1637,6 +1637,7 @@ export function CalibrationPrototype({
     [ownedItemIds, setOwnedItemIds] = useState<Set<string>>(new Set()),
     [playerInput, setPlayerInput] = useState(""),
     [speechTargetId, setSpeechTargetId] = useState(SUBJECT),
+    [activeSubjectId, setActiveSubjectId] = useState(SUBJECT),
     [speechTargetMenuOpen, setSpeechTargetMenuOpen] = useState(false),
     [chatLines, setChatLines] = useState<ChatLine[]>([]),
     [generatingSpeech, setGeneratingSpeech] = useState(false),
@@ -3627,6 +3628,28 @@ export function CalibrationPrototype({
           ],
     visualPath =
       resolveFirstAvailableVisual(visualCandidates) || baseVisualPath,
+    // Compute visual path for the nearby (secondary) character, if any.
+    nearbyCharacter = nearbyCharacters.find((c) => c.id !== SUBJECT),
+    nearbyVisualPath = nearbyCharacter
+      ? characterVisualPath(
+          nearbyCharacter.id,
+          (nearbyCharacter.state as any) || null,
+          undefined,
+          false,
+        )
+      : null,
+    // The active subject is who's shown large; the other is dimmed.
+    activeVisualPath = activeSubjectId === SUBJECT
+      ? visualPath
+      : nearbyCharacter && activeSubjectId === nearbyCharacter.id
+        ? nearbyVisualPath
+        : visualPath,
+    secondaryVisualPath = activeSubjectId === SUBJECT
+      ? nearbyVisualPath
+      : visualPath,
+    secondaryName = activeSubjectId === SUBJECT
+      ? nearbyCharacter?.name
+      : subjectName,
     reviewAssetPath = displayedVisualPath || visualPath,
     significantEvent =
       [...entries]
@@ -4546,15 +4569,32 @@ export function CalibrationPrototype({
             className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""}`}
           >
             <div className="portrait-placeholder">
+              {secondaryVisualPath && (
+                <div
+                  className={`calibration-secondary-avatar ${activeSubjectId === SUBJECT ? "" : "active"}`}
+                  onClick={() => setActiveSubjectId(activeSubjectId === SUBJECT ? (nearbyCharacter?.id || SUBJECT) : SUBJECT)}
+                >
+                  <span className="portrait-fallback">
+                    {(secondaryName || "?").slice(0, 1).toUpperCase()}
+                  </span>
+                  <img
+                    className="calibration-character-image"
+                    key={`secondary-${secondaryVisualPath}`}
+                    src={secondaryVisualPath}
+                    alt={secondaryName || ""}
+                    onError={(e) => { e.currentTarget.hidden = true; }}
+                  />
+                </div>
+              )}
               <div className="calibration-avatar-frame">
                 <span className="portrait-fallback">
-                  {subjectName.slice(0, 1).toUpperCase()}
+                  {(activeSubjectId === SUBJECT ? subjectName : (nearbyCharacter?.name || subjectName)).slice(0, 1).toUpperCase()}
                 </span>
                 <img
                   className="calibration-character-image"
-                  key={visualPath}
-                  src={visualPath}
-                  alt={subjectName}
+                  key={activeVisualPath}
+                  src={activeVisualPath}
+                  alt={activeSubjectId === SUBJECT ? subjectName : (nearbyCharacter?.name || subjectName)}
                   onLoad={(event) =>
                     setDisplayedVisualPath(
                       new URL(event.currentTarget.src).pathname,
