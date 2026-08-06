@@ -544,6 +544,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         addressedTo?: string;
         reaction: string;
         portraitEmotion?: string;
+        actorId?: string;
     } | null = null;
     let promptMessages: any = null;
     const commandIntent = (bundle.metadata as any)?.commandIntent;
@@ -936,6 +937,7 @@ ${systemNotes.length ? systemNotes.join('\n') : ''}`;
                     addressedTo: structuredReply.addressedTo,
                     reaction: sceneForChar || '',
                     portraitEmotion,
+                    actorId: decision.actorId,
                 };
                 promptMessages = sentMessages;
             }

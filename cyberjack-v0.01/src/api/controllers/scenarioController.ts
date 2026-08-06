@@ -3,6 +3,8 @@ import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, recruitCandidate,
 import { moveCharacterInLaboratory } from '../../scenario/spatialContext';
 import { getTimeFlowState, setTimeFlowPaused } from '../../scenario/timeFlow';
 import { advanceSimulationTime } from '../../scenario/simulationTime';
+import { db } from '../../infrastructure/db';
+import { chatMemoryRepo } from '../../infrastructure/repositories';
 
 export const getScenario = (req: Request, res: Response) => {
     try {
@@ -109,8 +111,29 @@ export const moveLaboratoryCharacter = (req: Request, res: Response) => {
         const playerId = String(req.body.playerId || 'PL-1');
         const target = String(req.body.roomId || '');
         if (!target) throw new Error('Не выбрано помещение');
-        const result = moveCharacterInLaboratory(req.params.characterId, target, playerId);
+        const characterId = req.params.characterId;
+        // Get old room before move
+        const oldAssignment = (db as any).prepare(
+            'SELECT a.room_id, r.name AS room_name FROM laboratory_room_assignments a JOIN laboratory_rooms r ON r.player_id = a.player_id AND r.room_id = a.room_id WHERE a.player_id = ? AND a.character_id = ?'
+        ).get(playerId, characterId) as any;
+        const result = moveCharacterInLaboratory(characterId, target, playerId);
         if (!result.handled || !result.moved) throw new Error(result.reason || 'Перемещение не выполнено');
+        // Record move event in chat memory of all characters in old and new room
+        const character = (db as any).prepare('SELECT name FROM characters WHERE id = ? OR subject_id = ? LIMIT 1').get(characterId, characterId) as any;
+        const charName = character?.name || characterId;
+        const notice = `→ ${charName} переместилась ${result.label || ''}`;
+        // Get characters in old and new room
+        const oldRoomChars = oldAssignment
+            ? ((db as any).prepare('SELECT character_id FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ?').all(playerId, oldAssignment.room_id) as any[])
+            : [];
+        const newRoomChars = (db as any).prepare('SELECT character_id FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ?')
+            .all(playerId, (db as any).prepare('SELECT room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?').get(playerId, characterId)?.room_id) as any[];
+        const allChars = new Map<string, boolean>();
+        for (const c of oldRoomChars) allChars.set(c.character_id, true);
+        for (const c of newRoomChars) allChars.set(c.character_id, true);
+        for (const charId of allChars.keys()) {
+            chatMemoryRepo.append(charId, 'user', notice, 'Система');
+        }
         res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });

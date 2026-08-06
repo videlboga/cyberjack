@@ -3716,13 +3716,17 @@ function ContainerConversation({
             portraitEmotion: reply.portraitEmotion,
           }));
         const primarySpeech = replyData.reply?.speech?.trim();
+        const primaryActorId = replyData.reply?.actorId || resident.subjectId || resident.id;
+        const primaryActorName = replyData.reply?.actorId
+          ? (presentResidents.find((c) => c.subjectId === replyData.reply.actorId || c.id === replyData.reply.actorId)?.name || replyData.reply.actorId)
+          : resident.name;
         const completedReplies = replies.length
           ? replies
           : primarySpeech
             ? [
                 {
-                  actorId: resident.subjectId || resident.id,
-                  speaker: resident.name,
+                  actorId: primaryActorId,
+                  speaker: primaryActorName,
                   role: "character" as const,
                   text: primarySpeech,
                   context: container,
@@ -3817,7 +3821,9 @@ function ContainerConversation({
     });
   };
   useEffect(() => {
-    const chatParticipants = [resident];
+    const chatParticipants = presentResidents.length
+      ? presentResidents
+      : [resident];
     Promise.all([
       Promise.all(
         chatParticipants.map((character) =>
@@ -3851,22 +3857,7 @@ function ContainerConversation({
         // A state/chat refresh may have started before a deferred reply and
         // finished after it. Never let that older snapshot erase streamed or
         // freshly completed lines; merge anything it does not contain yet.
-        // BUT when switching to a different resident, discard old lines entirely.
         setLines((current) => {
-          // Detect resident switch: if current lines have speakers from a
-          // different resident, this is a switch — replace, not merge.
-          const currentHasOtherResident = current.some(
-            (line) =>
-              line.actorId &&
-              line.actorId !== (resident.subjectId || resident.id) &&
-              line.role === "character",
-          );
-          if (currentHasOtherResident) {
-            // Switching residents: replace chat entirely with new resident's history.
-            // Keep only in-flight stream lines.
-            const streams = current.filter((line) => line.id.startsWith("stream:"));
-            return collapseRepeatedChatActions([...restored, ...streams]).slice(-100);
-          }
           const keyFor = (line: CharacterChatLine) =>
             `${line.actorId || ""}\u0000${line.speaker}\u0000${line.text}\u0000${line.context || ""}\u0000${line.action ? 1 : 0}`;
           const restoredKeys = new Set(restored.map(keyFor));

@@ -50,11 +50,12 @@ export function chatLineFromStoredMessage(
   characterId?: string,
 ): CharacterChatLine {
   const action = String(message.content || '').match(/^\[Действие\]\s*(.*)$/s);
+  const isSystem = message.contextLabel === 'Система' || String(message.content || '').startsWith('→');
   return {
     id: String(message.id || crypto.randomUUID()),
     actorId: message.role === 'assistant' ? String(message.participantId || characterId || '') || undefined : undefined,
-    speaker: action ? 'Система' : message.role === 'assistant' ? characterName : 'Калибратор',
-    role: action ? 'system' : message.role === 'assistant' ? 'character' : 'calibrator',
+    speaker: action || isSystem ? 'Система' : message.role === 'assistant' ? characterName : 'Калибратор',
+    role: action || isSystem ? 'system' : message.role === 'assistant' ? 'character' : 'calibrator',
     text: action ? action[1] : String(message.content || ''),
     context: message.contextLabel,
     avatarPath: message.avatarPath,
