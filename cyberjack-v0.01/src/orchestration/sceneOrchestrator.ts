@@ -536,6 +536,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         addressedTo?: string;
         reaction: string;
         portraitEmotion?: string;
+        mechanicalAction?: any;
     }> = [];
     let primaryReply: {
         speech: string;
@@ -925,6 +926,7 @@ ${systemNotes.length ? systemNotes.join('\n') : ''}`;
                 addressedTo: structuredReply.addressedTo,
                 reaction: sceneForChar || '',
                 portraitEmotion,
+                mechanicalAction: decision.mechanicalAction || undefined,
             });
 
             if (decision.actorId === (directedActorId || subjectId) || !primaryReply) {

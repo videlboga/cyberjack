@@ -2662,7 +2662,37 @@ export function CalibrationPrototype({
                         : undefined,
                 })),
               );
-            else if (speech)
+            // Visual effect for proactive NPC physical actions
+            for (const reply of replies) {
+              if (reply.kind === "proactive" && reply.mechanicalAction) {
+                const actionId = reply.mechanicalAction.actionId;
+                const targetId = reply.mechanicalAction.targetId;
+                const pointId = reply.mechanicalAction.pointId;
+                if (actionId && targetId) {
+                  void gameAudio.playAction(actionId);
+                  setVisualEffect({
+                    key: crypto.randomUUID(),
+                    family: visualEffectFamily(actionId),
+                    result: "accepted",
+                    intensity: 0.5,
+                    sharpness: 0.3,
+                    enterMs: 280,
+                    holdMs: 600,
+                    exitMs: 600,
+                    rayRotation: -5 + Math.random() * 10,
+                    rayOriginX: 32 + Math.random() * 12,
+                    rayOriginY: 32 + Math.random() * 12,
+                    showRays: visualEffectFamily(actionId) !== "soft",
+                    showPortrait: false,
+                    target: pointId || "системно",
+                    emotion: reply.portraitEmotion || "neutral",
+                    actionKey: `${pointId}/${actionId}`,
+                    actionImage: `/character-images/actions/contact/${actionId}.png`,
+                  });
+                }
+              }
+            }
+            if (!replies.length && speech)
               pushChat({
                 actorId: SUBJECT,
                 speaker: subjectName,
@@ -2670,7 +2700,7 @@ export function CalibrationPrototype({
                 context: "Диагностический стол",
                 avatarPath,
               });
-            else if (replyPayload.llmError)
+            else if (!replies.length && replyPayload.llmError)
               pushChat({ speaker: "system", text: "Ответ модели недоступен." });
             else if (!replyPayload.llmSkipped)
               pushChat({ speaker: "system", text: `${subjectName} молчит.` });
