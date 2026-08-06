@@ -1902,12 +1902,14 @@ export function CalibrationPrototype({
         const action = String(message.content || "").match(
           /^\[Действие\]\s*(.*)$/s,
         );
+        const isSystem = message.contextLabel === "Система" || String(message.content || "").startsWith("→");
+        const systemAction = isSystem && !action;
         const slug = visualCharacterSlugs[message.participantId];
         return {
           id: String(message.id),
           actorId:
             message.role === "assistant" ? message.participantId : undefined,
-          speaker: action
+          speaker: action || isSystem
             ? "system"
             : message.role === "assistant"
               ? message.participantId === SUBJECT
@@ -1915,7 +1917,7 @@ export function CalibrationPrototype({
                 : participantNames.get(message.participantId) ||
                   message.participantId
               : "calibrator",
-          role: action
+          role: action || isSystem
             ? "system"
             : message.role === "assistant"
               ? message.participantId === SUBJECT
@@ -1924,7 +1926,7 @@ export function CalibrationPrototype({
               : "calibrator",
           text: action ? action[1] : message.content,
           context: message.contextLabel,
-          action: Boolean(action),
+          action: Boolean(action) || systemAction,
           avatarPath:
             message.role === "assistant" && message.portraitEmotion && slug
               ? `/character-images/portraits/${slug}/${message.portraitEmotion}.png`

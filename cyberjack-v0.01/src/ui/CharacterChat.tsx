@@ -51,6 +51,7 @@ export function chatLineFromStoredMessage(
 ): CharacterChatLine {
   const action = String(message.content || '').match(/^\[Действие\]\s*(.*)$/s);
   const isSystem = message.contextLabel === 'Система' || String(message.content || '').startsWith('→');
+  const systemAction = isSystem && !action;
   return {
     id: String(message.id || crypto.randomUUID()),
     actorId: message.role === 'assistant' ? String(message.participantId || characterId || '') || undefined : undefined,
@@ -60,7 +61,7 @@ export function chatLineFromStoredMessage(
     context: message.contextLabel,
     avatarPath: message.avatarPath,
     portraitEmotion: message.portraitEmotion || message.portrait_emotion || undefined,
-    action: Boolean(action),
+    action: Boolean(action) || systemAction,
   };
 }
 
