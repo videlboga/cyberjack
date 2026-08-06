@@ -1,5 +1,6 @@
 import React from 'react';
 import { EnduranceLiquid } from './EnduranceLiquid';
+import { BalancePendulum, BalanceLabels } from './BalancePendulum';
 
 const clamp = (value: number) => Math.max(0, Math.min(100, value));
 
@@ -57,7 +58,7 @@ export function CalibrationBiometrics({
         </section>
       </div>
     </section>
-    <section className="endurance-card" style={{
+    <section className="endurance-card endurance-stack" style={{
       '--endurance-angle': `${clamp(capacity) * 3.6}deg`,
       '--balance-position': `${clamp(50 + activationBalance / 2)}%`,
       '--overload-level': `${clamp(overload)}%`,
@@ -65,20 +66,16 @@ export function CalibrationBiometrics({
       <div className="endurance-scale">
         <header><span>ВЫНОСЛИВОСТЬ</span><b>{enduranceLabel}</b></header>
         <div className="endurance-liquid-container"><EnduranceLiquid value={capacity} overload={overload} /></div>
-        <p><strong>{capacity.toFixed(0)}%</strong><span>{signedDelta}</span></p>
       </div>
-      <div className="endurance-infographics">
-        <section className="endurance-metric balance-indicator">
-          <p><span>Накопленный баланс</span><b>{activationBalance > 0 ? '+' : ''}{activationBalance}</b></p>
-          <div className="endurance-metric__track"><i /></div>
-          <small>{activationNature}{typeof currentValence === 'number' ? ` · сейчас ${currentValence > 0 ? '+' : ''}${Math.round(currentValence * 100)}` : ''}</small>
-        </section>
-        {overload > 0 && (
-          <section className="endurance-metric overload-indicator">
-            <p><span>Перегрузка</span><b>{overload.toFixed(1)}</b></p>
-            <small>{overloadLabel}</small>
-          </section>
-        )}
+      <div className="endurance-overload-row">
+        <small>{overloadLabel}</small>
+        <b>{overload.toFixed(1)}</b>
+      </div>
+      <div className="endurance-pendulum-row">
+        <BalancePendulum balance={activationBalance} nature={activationNature} valence={currentValence} showLabels={false} />
+      </div>
+      <div className="endurance-balance-labels">
+        <BalanceLabels balance={activationBalance} nature={activationNature} valence={currentValence} />
       </div>
     </section>
   </div>;

@@ -26,6 +26,8 @@ import {
   CalibrationBiometrics,
   CalibrationTrendInstrument,
 } from "./CalibrationBiometrics";
+import { EnduranceLiquid } from "./EnduranceLiquid";
+import { BalancePendulum, BalanceLabels } from "./BalancePendulum";
 import {
   acquiredTraitValue,
   conditioningTags,
@@ -2763,6 +2765,11 @@ export function CalibrationPrototype({
       );
     } catch (e: any) {
       setError(e.message);
+      pushChat({
+        speaker: "system",
+        text: e.message,
+        context: "Система",
+      });
     } finally {
       setBusy(false);
     }
@@ -3257,17 +3264,18 @@ export function CalibrationPrototype({
         c.type === "equipment" ||
         c.type === "restraint",
     ),
-    otherContexts = visibleContexts.filter(
-      (c) =>
-        c.type !== "clothing" &&
-        c.type !== "equipment" &&
-        c.type !== "restraint",
-    ),
     poseContext = visibleContexts.find(
       (context) =>
         context.type === "pose" ||
         context.actionId.startsWith("pose_") ||
         context.actionId === "act_suspend_wrists",
+    ),
+    otherContexts = visibleContexts.filter(
+      (c) =>
+        c !== poseContext &&
+        c.type !== "clothing" &&
+        c.type !== "equipment" &&
+        c.type !== "restraint",
     ),
     sessionContexts = visibleContexts.filter(
       (context) => context !== poseContext,
@@ -3484,14 +3492,14 @@ export function CalibrationPrototype({
         (context) => context.actionId === "effect_sensory_overload",
       ),
     overloadLabel = sensoryOverloadActive
-      ? "активна"
-      : currentOverload >= 25
-        ? "критическая"
-        : currentOverload >= 10
-          ? "высокая"
-          : currentOverload >= 3
-            ? "умеренная"
-            : "нет",
+      ? "перегруз"
+      : currentOverload >= 80
+        ? "перегруз"
+        : currentOverload >= 55
+          ? "предел"
+          : currentOverload >= 40
+            ? "напряжение"
+            : "спокойствие",
     enduranceLabel =
       (subject?.capacity || 0) < 20
         ? "Истощение"
@@ -4856,7 +4864,7 @@ export function CalibrationPrototype({
                 )}
               </section>
               <section
-                className="endurance-card"
+                className="endurance-card endurance-stack"
                 style={
                   {
                     "--endurance-angle": `${clampPercent(subject?.capacity || 0) * 3.6}deg`,
@@ -4870,61 +4878,28 @@ export function CalibrationPrototype({
                     <span>ВЫНОСЛИВОСТЬ</span>
                     <b>{enduranceLabel}</b>
                   </header>
-                  <div>
-                    <i
-                      style={{
-                        height: `${clampPercent(subject?.capacity || 0)}%`,
-                      }}
-                    />
+                  <div className="endurance-liquid-container">
+                    <EnduranceLiquid value={subject?.capacity || 0} overload={currentOverload} />
                   </div>
-                  <p title={formatRelativeValue(coreInterpretations.capacity)}>
-                    <strong>
-                      {coreInterpretations.capacity.humanPercent}%
-                    </strong>
-                    <span>
-                      индекс {Math.round(coreInterpretations.capacity.value)} ·{" "}
-                      {signed(currentObservation?.changes?.capacity)} за
-                      действие
-                    </span>
-                  </p>
                 </div>
-                <div className="endurance-infographics">
-                  <section className="endurance-metric balance-indicator">
-                    <p>
-                      <span>Накопленный баланс</span>
-                      <b>
-                        {activationBalance > 0 ? "+" : ""}
-                        {activationBalance}
-                      </b>
-                    </p>
-                    <div className="endurance-metric__track">
-                      <i />
-                    </div>
-                    <small>
-                      {activationNature}
-                      {typeof currentObservation?.reaction?.appraisal === "number"
-                        ? ` · сейчас ${currentObservation.reaction.appraisal > 0 ? "+" : ""}${Math.round(currentObservation.reaction.appraisal * 100)}`
-                        : ""}
-                    </small>
-                  </section>
-                  <section
-                    className={
-                      sensoryOverloadActive || currentOverload >= 10
-                        ? "endurance-metric overload-indicator active"
-                        : "endurance-metric overload-indicator"
-                    }
-                  >
-                    <p>
-                      <span>Перегрузка</span>
-                      <b>
-                        {currentOverload > 0 ? currentOverload.toFixed(1) : "0"}
-                      </b>
-                    </p>
-                    <div className="endurance-metric__track">
-                      <i />
-                    </div>
-                    <small>{overloadLabel}</small>
-                  </section>
+                <div className="endurance-overload-row">
+                  <small>{overloadLabel}</small>
+                  <b>{currentOverload.toFixed(1)}</b>
+                </div>
+                <div className="endurance-pendulum-row">
+                  <BalancePendulum
+                    balance={activationBalance}
+                    nature={activationNature}
+                    valence={currentObservation?.reaction?.appraisal}
+                    showLabels={false}
+                  />
+                </div>
+                <div className="endurance-balance-labels">
+                  <BalanceLabels
+                    balance={activationBalance}
+                    nature={activationNature}
+                    valence={currentObservation?.reaction?.appraisal}
+                  />
                 </div>
               </section>
             </div>
@@ -5003,111 +4978,84 @@ export function CalibrationPrototype({
                 );
               })}
             </section>
-            <div className="monitor-session-strip monitor-status-strip">
-              <div className="monitor-condition-pose">
-                <header>
-                  <small>ПОЗА</small>
-                  <b>{poseContext?.label || "Стоит свободно"}</b>
-                </header>
-                <p>
+            <div className="monitor-status-strip">
+              <div className="condition-main">
+                <div className="condition-pose">
                   {poseContext ? (
                     <>
-                      {(contextLearningBySource.get(poseContext.actionId) || [])
-                        .length > 0 && (
+                      <span className="condition-label">{poseContext.label || poseContext.actionId}</span>
+                      {(contextLearningBySource.get(poseContext.actionId) || []).length > 0 ? (
                         <span className="condition-effect active">
-                          {effectiveSelectedAction
-                            ? "Добавит опыт: "
-                            : "Может добавить опыт: "}
-                          {(
-                            contextLearningBySource.get(poseContext.actionId) ||
-                            []
-                          )
-                            .slice(0, 3)
-                            .map(
-                              (entry) =>
-                                semanticTagLabels[entry.tag] || entry.tag,
-                            )
-                            .join(", ")}
+                          {effectiveSelectedAction ? "+" : "±"} {(contextLearningBySource.get(poseContext.actionId) || []).slice(0, 3).map(e => semanticTagLabels[e.tag] || e.tag).join(", ")}
                         </span>
+                      ) : (
+                        <span className="condition-effect muted">не модифицирует</span>
                       )}
                       {!!poseContext.blocksPoints?.length && (
-                        <span className="condition-effect blocked">
-                          закрыто зон: {poseContext.blocksPoints.length}
-                        </span>
+                        <span className="condition-effect blocked">закрыто зон: {poseContext.blocksPoints.length}</span>
                       )}
-                      {!contextLearningBySource.has(poseContext.actionId) &&
-                        !poseContext.blocksPoints?.length && (
-                          <span>положение не модифицирует действие</span>
-                        )}
                     </>
                   ) : (
-                    <span>без ограничений</span>
+                    <span className="condition-label muted">без ограничений</span>
                   )}
-                </p>
-              </div>
-              <div className="monitor-session-contexts">
-                <header>
-                  <small>КОНТЕКСТЫ</small>
-                  <b>{sessionContexts.length}</b>
-                </header>
-                <div className="monitor-context-list">
-                  {sessionContexts.length ? (
-                    sessionContexts.slice(0, 5).map((context) => (
-                      <span key={`monitor-context-${context.actionId}`}>
-                        <b title={context.label || context.actionId}>
-                          {context.label || context.actionId}
-                        </b>
-                        <i>
-                          {(contextLearningBySource.get(context.actionId) || [])
-                            .length
-                            ? `${effectiveSelectedAction ? "Добавит опыт" : "Может добавить опыт"}: ${(
-                                contextLearningBySource.get(context.actionId) ||
-                                []
-                              )
-                                .slice(0, 3)
-                                .map(
-                                  (entry) =>
-                                    semanticTagLabels[entry.tag] || entry.tag,
-                                )
-                                .join(", ")}`
-                            : "Не влияет на опыт выбранного действия"}
-                        </i>
-                        {lastConditioningChanges.some(
-                          (change) =>
-                            change.source === context.label ||
-                            change.source === context.actionId,
-                        ) && (
-                          <em>
-                            Получено:{" "}
-                            {lastConditioningChanges
-                              .filter(
-                                (change) =>
-                                  change.source === context.label ||
-                                  change.source === context.actionId,
-                              )
-                              .map(
-                                (change) =>
-                                  `${semanticTagLabels[change.tag] || change.tag} ${signed(change.delta, 3)}`,
-                              )
-                              .join(", ")}
-                          </em>
-                        )}
-                      </span>
-                    ))
-                  ) : (
-                    <em>Активных условий нет</em>
+                </div>
+                <div className="condition-contexts">
+                  {wornContexts.length > 0 && (
+                    <div className="condition-group">
+                      <small>надетое</small>
+                      <div className="condition-list">
+                        {wornContexts.map(c => {
+                          const tags = contextLearningBySource.get(c.actionId) || [];
+                          return (
+                            <span key={c.actionId} className={`condition-item ${tags.length > 0 ? "active" : ""}`}>
+                              <b>{c.label || c.actionId}</b>
+                              {tags.length > 0 && (
+                                <i>{effectiveSelectedAction ? "+" : "±"} {tags.slice(0, 2).map(e => semanticTagLabels[e.tag] || e.tag).join(", ")}</i>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
-                  {sessionContexts.length > 5 && (
-                    <em>ещё +{sessionContexts.length - 5}</em>
+                  {otherContexts.length > 0 && (
+                    <div className="condition-group">
+                      <small>условия</small>
+                      <div className="condition-list">
+                        {otherContexts.map(c => {
+                          const tags = contextLearningBySource.get(c.actionId) || [];
+                          return (
+                            <span key={c.actionId} className={`condition-item ${tags.length > 0 ? "active" : ""}`}>
+                              <b>{c.label || c.actionId}</b>
+                              {tags.length > 0 && (
+                                <i>{effectiveSelectedAction ? "+" : "±"} {tags.slice(0, 2).map(e => semanticTagLabels[e.tag] || e.tag).join(", ")}</i>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
+              {lastConditioningChanges.length > 0 && (
+                <div className="condition-changes">
+                  <small>получено</small>
+                  {lastConditioningChanges.slice(0, 3).map(({ tag, delta, source }, i) => (
+                    <span key={i} className="change-entry">
+                      <b>{semanticTagLabels[tag] || tag}</b>
+                      <i>{signed(delta, 3)}</i>
+                      {source && <em>через «{source}»</em>}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             <aside
               className="monitor-control-layout__recommendations"
               aria-label="Область палитры рекомендаций"
             >
-              {Array.from({ length: 4 }, (_, index) => {
+              {Array.from({ length: 3 }, (_, index) => {
                 const quick = quickActions[index];
                 return (
                   <button
@@ -5586,19 +5534,6 @@ export function CalibrationPrototype({
                 </div>
               )}
             </div>
-          </div>
-          <div className="stage-contexts">
-            {selectedZone && (
-              <span className="target-chip">Зона: {selectedZone.label}</span>
-            )}
-            {visibleContexts.slice(0, 2).map((c, i) => (
-              <span key={`${c.actionId}-stage-${i}`}>
-                {c.label || c.actionId}
-              </span>
-            ))}
-            {visibleContexts.length > 2 && (
-              <span>+{visibleContexts.length - 2}</span>
-            )}
           </div>
         </section>
         <aside className="operations-column">

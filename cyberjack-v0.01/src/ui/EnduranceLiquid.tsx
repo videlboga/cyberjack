@@ -2,10 +2,12 @@ import { useEffect, useRef } from "react";
 import { Chart } from "@antv/g2";
 
 // Heart shape — SVG path string, symmetric
+// Scale factor 1.5 to fill more of the canvas (G2 liquid has ~33% padding)
+const HEART_SCALE = 1.6;
 const HEART_PATH = (cx: number, cy: number, r: number) => {
-  const s = r * 0.1;
+  const s = r * 0.1 * HEART_SCALE;
   const ox = cx;
-  const oy = cy - r * 0.15;
+  const oy = cy - r * 0.15 * HEART_SCALE;
   return [
     `M ${ox} ${oy - 2 * s}`,
     `C ${ox - 3 * s} ${oy - 5 * s}, ${ox - 8 * s} ${oy - 5 * s}, ${ox - 8 * s} ${oy - 1 * s}`,
@@ -25,7 +27,9 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
 
     const chart = new Chart({
       container: containerRef.current,
-      autoFit: true,
+      autoFit: false,
+      width: 120,
+      height: 120,
     });
 
     const pct = Math.round(Math.max(0, Math.min(1, value / 100)) * 100);
@@ -43,7 +47,6 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
 
     chart.options({
       type: "liquid",
-      autoFit: true,
       data: visualRatio,
       style: {
         shape: HEART_PATH,
@@ -96,8 +99,8 @@ export function EnduranceLiquid({ value, overload = 0 }: { value: number; overlo
         width: "120px",
         height: "120px",
         overflow: "visible",
-        marginLeft: "-20px",
-        marginTop: "-35px",
+        marginLeft: "0px",
+        marginTop: "0px",
         position: "relative",
       }}
     >

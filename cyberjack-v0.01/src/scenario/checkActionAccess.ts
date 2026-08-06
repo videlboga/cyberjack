@@ -45,7 +45,12 @@ export function validateAction(
         const playerSceneChar = presentChars.find(sc => sc.character.playerId === playerId || sc.character.id === playerId);
         
         if (subjSceneChar && playerSceneChar && subjSceneChar.slotId && playerSceneChar.slotId && subjSceneChar.slotId !== playerSceneChar.slotId) {
-            return { allowed: false, errorReason: 'Слишком далеко для физического воздействия. Сначала подойдите в нужную зону (сектор).' };
+            // Exempt: calibrator (PL-1) at slot_table can reach subjects on lab devices
+            const isCalibratorAtTable = playerSceneChar.slotId === 'slot_table';
+            const isSubjectOnDevice = subjSceneChar.slotId?.startsWith('device:');
+            if (!isCalibratorAtTable || !isSubjectOnDevice) {
+                return { allowed: false, errorReason: 'Слишком далеко для физического воздействия. Сначала подойдите в нужную зону (сектор).' };
+            }
         }
     }
 

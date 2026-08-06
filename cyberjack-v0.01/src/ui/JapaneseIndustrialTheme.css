@@ -3724,30 +3724,45 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   .calibration-workbench .endurance-scale>div {
     display:none;
   }
-  .calibration-workbench .endurance-card {
+  .calibration-workbench .endurance-card.endurance-stack {
     position:absolute!important;
     z-index:3;
     top:0;
-    right:calc(100% + 7px);
-    width:140px;
-    height:160px;
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 46px;
-    gap:5px;
-    min-height:0!important;
+    left:calc(0px - var(--monitor-wing-width));
+    width:calc(var(--monitor-wing-width) - 7px);
+    min-height:311px;
+    display:flex!important;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    min-height:311px!important;
     padding:5px 6px!important;
-    overflow:hidden;
+    overflow:visible;
     background:color-mix(in srgb,var(--ji-raised) 94%,transparent)!important;
   }
-  .calibration-workbench .endurance-card>.endurance-scale {
-    position:relative;
-    display:grid;
-    grid-template-columns:minmax(0,1fr);
-    grid-template-rows:auto minmax(0,1fr);
-    min-width:0;
-    min-height:0!important;
+  .calibration-workbench .endurance-stack .endurance-scale {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
     padding:0!important;
     background:transparent!important;
+  }
+  .calibration-workbench .endurance-stack .endurance-overload-row {
+    display:flex;
+    align-items:baseline;
+    gap:4px;
+    font-size:10px;
+  }
+  .calibration-workbench .endurance-stack .endurance-overload-row span { color:var(--ji-muted); font-size:9px; }
+  .calibration-workbench .endurance-stack .endurance-overload-row b { color:var(--ji-amber); font-size:13px; font-weight:700; }
+  .calibration-workbench .endurance-stack .endurance-overload-row small { color:var(--ji-muted); font-size:8px; }
+  .calibration-workbench .endurance-stack .endurance-pendulum-row {
+    display:flex;
+    justify-content:center;
+  }
+  .calibration-workbench .endurance-stack .endurance-balance-labels {
+    display:flex;
+    justify-content:center;
   }
   .calibration-workbench .endurance-card>.endurance-scale::before {
     left:50%;
@@ -3942,6 +3957,35 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     overflow:visible;
     background:none!important;
   }
+  /* Overload label only — replaces old overload-indicator track bar.
+     Overload is now visualized by the orange glow on EnduranceLiquid heart. */
+  .calibration-workbench .endurance-card .overload-label-only {
+    grid-column:2;
+    grid-row:1;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding:4px 0;
+  }
+  .calibration-workbench .endurance-card .overload-label-only>p {
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin:0;
+  }
+  .calibration-workbench .endurance-card .overload-label-only>p span {
+    font-size:9px;
+    color:var(--ji-muted);
+  }
+  .calibration-workbench .endurance-card .overload-label-only>p b {
+    font-size:14px;
+    color:var(--ji-amber);
+    font-weight:700;
+  }
+  .calibration-workbench .endurance-card .overload-label-only>small {
+    font-size:8px;
+    color:var(--ji-muted);
+  }
   .calibration-workbench .endurance-card .endurance-metric {
     min-width:0;
     display:grid;
@@ -4015,9 +4059,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   }
   /* Wing hierarchy: resource + overload above, bipolar balance below. */
   .calibration-workbench .endurance-card {
-    width:140px;
     grid-template-columns:58px minmax(0,1fr);
-    grid-template-rows:minmax(0,1fr) 36px;
+    grid-template-rows:120px 95px;
     gap:1px 7px;
   }
   .calibration-workbench .endurance-card>.endurance-scale {
@@ -4027,7 +4070,16 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   .calibration-workbench .endurance-card>.endurance-infographics {
     display:contents!important;
   }
-  .calibration-workbench .endurance-card .overload-indicator {
+  /* BalancePendulum (first child) → under heart, column 1 row 2 */
+  .calibration-workbench .endurance-card>.endurance-infographics > *:first-child {
+    grid-column:1;
+    grid-row:2;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  /* overload-label-only → right of heart, column 2 row 1 */
+  .calibration-workbench .endurance-card .overload-label-only {
     grid-column:2;
     grid-row:1;
     display:grid;
@@ -4739,14 +4791,19 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   }
   /* Compact consequence board: outcome, immediate reaction, state delta, learning. */
   .calibration-workbench .scene-monitor {
-    grid-template-rows:auto 104px 74px minmax(0,1fr);
+    grid-template-rows:auto 104px auto minmax(25px,auto) 160px;
     grid-template-areas:
       "physiology"
       "trends"
       "status"
-      "controls";
-    height:calc(100% + 27px);
-    transform:translateY(-15px)!important;
+      "processes"
+      "recommendations";
+  }
+  .calibration-workbench .scene-monitor > .monitor-control-layout__processes {
+    grid-area:auto;
+  }
+  .calibration-workbench .scene-monitor > .monitor-control-layout__recommendations {
+    grid-area:auto;
   }
   .calibration-workbench .scene-monitor .unified-state-trends {
     height:104px;
@@ -4763,25 +4820,15 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     gap:4px;
     pointer-events:none;
   }
-  .calibration-workbench .scene-monitor>.monitor-status-strip {
-    position:static;
-    grid-area:status;
-    width:auto;
-    height:74px;
-    min-height:0;
-    align-self:start;
-    display:grid;
-    grid-template-columns:minmax(0,1fr);
-    grid-template-rows:34px minmax(0,1fr);
-    gap:2px;
-    margin:0;
-    overflow:hidden;
-    background:transparent;
+  .calibration-workbench .scene-monitor > .monitor-status-strip {
+    grid-area: status;
   }
   .calibration-workbench .monitor-control-layout__recommendations,
   .calibration-workbench .monitor-control-layout__processes {
-    position:relative;
-    z-index:2;
+    position:absolute;
+    z-index:5;
+    left:calc(7px - var(--monitor-wing-width));
+    right:7px;
     min-width:0;
     min-height:0;
     box-sizing:border-box;
@@ -4791,28 +4838,24 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     color:var(--ji-muted);
   }
   .calibration-workbench .monitor-control-layout__recommendations {
-    grid-column:1;
-    grid-row:2/5;
-    align-self:stretch;
-    width:var(--monitor-wing-width);
-    margin-top:22px;
-    margin-bottom:114px;
+    top:453px;
+    margin-top:0;
+    margin-bottom:0;
     display:grid;
-    grid-template-rows:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:minmax(54px,auto);
     gap:4px;
-    transform:
-      translateX(calc(-1 * var(--monitor-wing-width) - 4px))
-      translateY(18px);
+    transform:none;
     overflow:visible;
   }
   .calibration-workbench .monitor-control-layout__processes {
-    grid-area:controls;
-    align-self:stretch;
+    top:322px;
+    height:auto;
     display:grid;
     grid-template-rows:repeat(var(--process-count,3),minmax(0,1fr));
     align-content:start;
     gap:4px;
-    margin-bottom:202px;
+    margin-bottom:0;
     overflow:visible;
   }
   .calibration-workbench .control-recommendation-card,
@@ -4825,7 +4868,13 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     box-sizing:border-box;
     overflow:hidden;
     border:0!important;
+    background:transparent!important;
+  }
+  /* Recommendation cards keep a visible raised background so the palette
+     reads as a full-width block; only the pulpit rows stay transparent. */
+  .calibration-workbench .control-recommendation-card {
     background:var(--ji-raised)!important;
+    border:1px solid var(--ji-border)!important;
   }
   .calibration-workbench .control-recommendation-card::before,
   .calibration-workbench .control-process-row::before {
@@ -4854,7 +4903,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     align-content:end;
     gap:4px 6px;
     width:100%;
-    height:100%;
+    min-height:54px;
     padding:8px;
     text-align:left;
   }
@@ -6524,7 +6573,6 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     transform:translateY(23px)!important;
   }
   .calibration-workbench .scene-monitor {
-    transform:translateY(-15px)!important;
   }
 
   .calibration-workbench .avatar-session-strip {
@@ -9978,9 +10026,9 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   display:grid;
   grid-template-rows:auto auto auto minmax(56px,1fr);
   gap:7px;
-  padding:9px;
-  overflow:hidden;
-  background:color-mix(in srgb,var(--ji-raised) 92%,transparent);
+  padding:9px 0 0;
+  overflow:visible;
+  background:transparent;
 }
 .intimacy-readiness-panel>header {
   display:flex;
@@ -10055,9 +10103,9 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   gap:5px;
   padding:6px;
   overflow:hidden;
-  border:0;
+  border:1px solid var(--ji-border)!important;
   color:var(--ji-text);
-  background:var(--ji-control);
+  background:var(--ji-bg)!important;
   text-align:left;
 }
 .intimacy-readiness-actions>button::before {

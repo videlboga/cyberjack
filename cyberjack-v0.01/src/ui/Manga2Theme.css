@@ -348,7 +348,37 @@ html[data-ui-theme="manga2"] .scene-caption {
 }
 html[data-ui-theme="manga2"] .scene-caption strong { color: #111 !important; }
 html[data-ui-theme="manga2"] .scene-caption p { color: #555 !important; }
-html[data-ui-theme="manga2"] .stage-contexts span { border: 1px solid #ccc !important; background: #f8f8f8 !important; color: #555 !important; }
+html[data-ui-theme="manga2"] .monitor-status-strip {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 3px 0;
+  background: transparent !important;
+  border: none !important;
+}
+html[data-ui-theme="manga2"] .calibration-workbench .monitor-status-strip > .condition-main { display: flex !important; align-items: flex-start; gap: 6px; }
+html[data-ui-theme="manga2"] .calibration-workbench .monitor-status-strip > .condition-main > div { display: flex !important; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-contexts { display: flex !important; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-pose { display: flex; align-items: baseline; gap: 3px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-label { font-size: 7px; font-weight: 600; color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-label.muted { color: #999 !important; font-weight: 400; }
+html[data-ui-theme="manga2"] .condition-effect { font-size: 6px; color: #555 !important; }
+html[data-ui-theme="manga2"] .condition-effect.active { color: #111 !important; font-weight: 600; }
+html[data-ui-theme="manga2"] .condition-effect.muted { color: #ccc !important; }
+html[data-ui-theme="manga2"] .condition-effect.blocked { color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-group { display: flex; align-items: baseline; gap: 3px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-group > small { font-size: 5px; letter-spacing: 0.1em; color: #999 !important; text-transform: uppercase; }
+html[data-ui-theme="manga2"] .condition-list { display: flex; flex-wrap: wrap; gap: 2px 4px; }
+html[data-ui-theme="manga2"] .condition-item { display: inline-flex; align-items: baseline; gap: 2px; border: 1px solid #ccc !important; padding: 0 3px; background: #f8f8f8 !important; }
+html[data-ui-theme="manga2"] .condition-item.active { border-color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-item.active b { color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-item b { font-size: 7px; font-weight: 600; color: #555 !important; }
+html[data-ui-theme="manga2"] .condition-item i { font-style: normal; font-size: 6px; color: #111 !important; }
+html[data-ui-theme="manga2"] .condition-item.muted { border: none !important; background: transparent !important; color: #ccc !important; }
+html[data-ui-theme="manga2"] .condition-changes { display: flex; align-items: baseline; gap: 3px; flex-wrap: wrap; }
+html[data-ui-theme="manga2"] .condition-changes > small { font-size: 5px; letter-spacing: 0.1em; color: #999 !important; text-transform: uppercase; }
+html[data-ui-theme="manga2"] .change-entry { display: inline-flex; align-items: baseline; gap: 2px; }
+html[data-ui-theme="manga2"] .change-entry b { font-size: 7px; font-weight: 600; color: #111 !important; }
+html[data-ui-theme="manga2"] .change-entry i { font-style: normal; font-size: 6px; color: #555 !important; }
+html[data-ui-theme="manga2"] .change-entry em { font-style: normal; font-size: 5px; color: #999 !important; }
 
 /* Operations column */
 html[data-ui-theme="manga2"] .operations-column { background: transparent !important; }
@@ -442,11 +472,15 @@ html[data-ui-theme="manga2"] .chat-feed { background: #fff !important; }
 /* === CALIBRATION SVG CHARTS — unified illustration language === */
 
 /* Panel frame: 1px black border, light interior */
-html[data-ui-theme="manga2"] .physiology-panel > section,
 html[data-ui-theme="manga2"] .physiology-panel.legacy-physiology-panel,
 html[data-ui-theme="manga2"] .trend-instrument {
   background: #f8f8f8 !important;
-  border: 1px solid #111 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .physiology-panel > section {
+  background: #f8f8f8 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
@@ -462,19 +496,19 @@ html[data-ui-theme="manga2"] .activation-scale.level-edge {
 }
 /* The bar fill */
 html[data-ui-theme="manga2"] .activation-scale > div > i {
-  background: #111 !important;
+  background: #5b8a72 !important;
 }
 /* The marker dot */
 html[data-ui-theme="manga2"] .activation-scale > div > em {
-  background: #111 !important;
+  background: #e07b3c !important;
   border: 1px solid #fff !important;
 }
 /* Scale labels */
 html[data-ui-theme="manga2"] .activation-scale footer span { color: #555 !important; }
 
-/* Pulse cardiogram — thin black line on white */
+/* Pulse cardiogram — muted red */
 html[data-ui-theme="manga2"] .scope-trace-live {
-  stroke: #111 !important;
+  stroke: #c44545 !important;
   stroke-width: 1.5 !important;
   fill: none !important;
 }
@@ -487,21 +521,21 @@ html[data-ui-theme="manga2"] .pulse-biosignal header i { color: #555 !important;
 html[data-ui-theme="manga2"] .breathing-biosignal header span,
 html[data-ui-theme="manga2"] .breathing-biosignal header b { color: #111 !important; }
 html[data-ui-theme="manga2"] .breathing-biosignal header i { color: #555 !important; }
-html[data-ui-theme="manga2"] .breathing-field { background: #fff !important; border: 1px solid #ccc !important; }
-html[data-ui-theme="manga2"] .breathing-field > i { background: #111 !important; opacity: 0.3 !important; }
-html[data-ui-theme="manga2"] .breathing-field > em { background: #111 !important; opacity: 0.15 !important; }
+html[data-ui-theme="manga2"] .breathing-field { background: #fff !important; border: none !important; }
+html[data-ui-theme="manga2"] .breathing-field > i { background: #6b9bb5 !important; opacity: 0.3 !important; }
+html[data-ui-theme="manga2"] .breathing-field > em { background: #6b9bb5 !important; opacity: 0.15 !important; }
 
-/* Endurance card — no border, no background */
+/* Endurance card — outer frame only */
 html[data-ui-theme="manga2"] .endurance-card {
   background: transparent !important;
-  border: none !important;
+  border: 1px solid #111 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 html[data-ui-theme="manga2"] .endurance-scale header span,
 html[data-ui-theme="manga2"] .endurance-scale header b { color: #111 !important; }
 html[data-ui-theme="manga2"] .endurance-scale > div { border: none !important; background: transparent !important; display: block !important; }
-html[data-ui-theme="manga2"] .endurance-scale > div > i { background: #111 !important; }
+html[data-ui-theme="manga2"] .endurance-scale > div > i { background: #5b8a72 !important; }
 
 /* Hide donut chart (::before) and "RES" label (::after) from JI theme */
 html[data-ui-theme="manga2"] .endurance-scale::before,
@@ -557,8 +591,71 @@ html[data-ui-theme="manga2"] .endurance-metric__track {
   border-radius: 0 !important;
 }
 html[data-ui-theme="manga2"] .endurance-metric__track > i {
-  background: #111 !important;
+  background: #5b8a72 !important;
 }
+
+/* Endurance stack — vertical: heart, overload, pendulum, balance labels */
+html[data-ui-theme="manga2"] .endurance-card.endurance-stack {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  overflow: visible;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-scale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row span { color: #555 !important; font-size: 10px; }
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row b { color: #111 !important; font-size: 13px; font-weight: 700; }
+html[data-ui-theme="manga2"] .endurance-stack .endurance-overload-row small { color: #555 !important; font-size: 9px; }
+html[data-ui-theme="manga2"] .endurance-stack .endurance-pendulum-row {
+  display: flex;
+  justify-content: center;
+}
+html[data-ui-theme="manga2"] .endurance-stack .endurance-balance-labels {
+  display: flex;
+  justify-content: center;
+}
+
+/* Overload label only — no track bar, just text */
+html[data-ui-theme="manga2"] .overload-label-only {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+/* BalancePendulum under heart, overload to the right */
+html[data-ui-theme="manga2"] .endurance-card > .endurance-infographics > *:first-child {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+html[data-ui-theme="manga2"] .endurance-card .overload-label-only {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+html[data-ui-theme="manga2"] .overload-label-only p {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+}
+html[data-ui-theme="manga2"] .overload-label-only p span { color: #555 !important; font-size: 10px; }
+html[data-ui-theme="manga2"] .overload-label-only p b { color: #111 !important; font-size: 14px; font-weight: 700; }
+html[data-ui-theme="manga2"] .overload-label-only small { color: #555 !important; font-size: 9px; }
 
 /* === TREND INSTRUMENT SVG — unified === */
 
@@ -576,21 +673,21 @@ html[data-ui-theme="manga2"] .indicator-track {
   stroke-width: 1 !important;
 }
 
-/* Current value marker: solid black circle with white ring */
+/* Current value marker: muted teal circle with white ring */
 html[data-ui-theme="manga2"] .indicator-current {
-  fill: #111 !important;
+  fill: #5b8a72 !important;
   stroke: #fff !important;
   stroke-width: 1 !important;
 }
 
-/* Acceptance (attitude): negative = light gray thick, positive = black thick */
+/* Acceptance (attitude): negative = muted red, positive = muted teal */
 html[data-ui-theme="manga2"] .acceptance-negative {
-  stroke: #ccc !important;
+  stroke: #c44545 !important;
   stroke-width: 3 !important;
   opacity: 1 !important;
 }
 html[data-ui-theme="manga2"] .acceptance-positive {
-  stroke: #111 !important;
+  stroke: #5b8a72 !important;
   stroke-width: 3 !important;
 }
 /* Chevron: thin black */
@@ -601,15 +698,15 @@ html[data-ui-theme="manga2"] .acceptance-chevron {
   opacity: 1 !important;
 }
 
-/* Openness: frame light, opening dark fill, center line subtle */
+/* Openness: frame light, opening teal fill, center line subtle */
 html[data-ui-theme="manga2"] .openness-frame {
   fill: #fff !important;
   stroke: #ccc !important;
   stroke-width: 0.75 !important;
 }
 html[data-ui-theme="manga2"] .openness-opening {
-  fill: rgba(0,0,0,0.12) !important;
-  stroke: #111 !important;
+  fill: rgba(91,138,114,0.15) !important;
+  stroke: #5b8a72 !important;
   stroke-width: 1 !important;
 }
 html[data-ui-theme="manga2"] .openness-center {
@@ -618,24 +715,24 @@ html[data-ui-theme="manga2"] .openness-center {
   opacity: 1 !important;
 }
 
-/* Plasticity: shadow invisible, ribbon bold black, anchors black */
+/* Plasticity: shadow subtle, ribbon muted purple, anchors muted purple */
 html[data-ui-theme="manga2"] .plasticity-shadow {
   stroke: #ccc !important;
   stroke-width: 4 !important;
   opacity: 0.3 !important;
 }
 html[data-ui-theme="manga2"] .plasticity-ribbon {
-  stroke: #111 !important;
+  stroke: #7a6ba5 !important;
   stroke-width: 1.5 !important;
   fill: none !important;
 }
 html[data-ui-theme="manga2"] .plasticity-anchor {
-  fill: #111 !important;
+  fill: #7a6ba5 !important;
 }
 
-/* Sensitivity: pulse line thin black */
+/* Sensitivity: pulse line muted red */
 html[data-ui-theme="manga2"] .sensitivity-pulse {
-  stroke: #111 !important;
+  stroke: #c44545 !important;
   stroke-width: 1.5 !important;
   fill: none !important;
 }
@@ -660,7 +757,7 @@ html[data-ui-theme="manga2"] .monitor-heading > div::before { background: #111 !
 html[data-ui-theme="manga2"] .monitor-heading small,
 html[data-ui-theme="manga2"] .monitor-session-strip small { color: #555 !important; }
 html[data-ui-theme="manga2"] .monitor-heading strong { color: #111 !important; }
-html[data-ui-theme="manga2"] .monitor-session-strip > div { background: #fff !important; border: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .monitor-session-strip > div { background: #fff !important; border: none !important; }
 html[data-ui-theme="manga2"] .monitor-session-strip b { color: #111 !important; }
 
 /* === MONITOR OUTCOME / RESULT BLOCK === */
@@ -668,7 +765,7 @@ html[data-ui-theme="manga2"] .monitor-outcome-stack { background: #f8f8f8 !impor
 html[data-ui-theme="manga2"] .operation-last-result,
 html[data-ui-theme="manga2"] .monitor-last-result {
   background: #fff !important;
-  border: 1px solid #ccc !important;
+  border: none !important;
 }
 html[data-ui-theme="manga2"] .monitor-last-result header small { color: #555 !important; }
 html[data-ui-theme="manga2"] .monitor-last-result header b { color: #111 !important; }
@@ -688,4 +785,29 @@ html[data-ui-theme="manga2"] .footer-goal-settings {
 html[data-ui-theme="manga2"] .goal-settings-panel { background: #fff !important; border: 1px solid #111 !important; }
 
 /* === TREND INSTRUMENT === */
-html[data-ui-theme="manga2"] .trend-instrument { background: #fff !important; border: 1px solid #ccc !important; }
+html[data-ui-theme="manga2"] .trend-instrument { background: #fff !important; border: none !important; }
+
+/* === CAPSULE BIOMETRY — smaller heart + pendulum === */
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-card.endurance-stack {
+  min-height: 180px !important;
+  height: auto !important;
+  padding-top: 0 !important;
+  border: 1px solid #111 !important;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-scale {
+  margin-top: 0;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-scale > header {
+  margin-top: 0;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-liquid-container,
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-liquid-container > div,
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-liquid-container canvas {
+  width: 80px !important;
+  height: 80px !important;
+  min-height: 80px !important;
+}
+html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg {
+  width: 70px !important;
+  height: 52px !important;
+}
