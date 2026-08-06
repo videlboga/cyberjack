@@ -2262,9 +2262,7 @@ export function CalibrationPrototype({
                 skipLLM: !callLLM,
                 deferLLM: callLLM,
                 llmMode: callLLM
-                  ? nearbyCharacters.length
-                    ? "scene_chance"
-                    : "speech_chance"
+                  ? "scene_chance"
                   : undefined,
                 skipImageGen: true,
                 interactionContext: "Диагностический стол",

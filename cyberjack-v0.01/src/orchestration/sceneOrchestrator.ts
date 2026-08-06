@@ -2,7 +2,7 @@ import { runGameTick } from './runGameTick';
 import { TickBundle, OrchestratedTurn, ActorDecision, NarratorDecision, CharacterRelation, ScenePromptPayload } from '../domain/types';
 import { activeConfig } from '../prompts/config';
 import { activeContextsRepo, presetRepo, resourceRepo, subjectRepo, characterRelationRepo, sceneCharacterRepo, pointStateRepo, sceneRepo, characterRepo } from '../infrastructure/repositories';
-import { ActionScorer } from './actionScorer';
+import { ActionScorer, ActionScoreResult } from './actionScorer';
 import { appendJsonLog } from '../utils/fileLogs';
 import { explainPromptLog, explainOrchestratorDecision } from '../utils/logExplainers';
 import { getActiveContextLabel, getActiveContextPromptText } from '../domain/contextPresentation';
@@ -172,32 +172,48 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
             canInitiatePhysicalAction
         });
 
-        // Инициатива уместна в свободный тик/паузу. На конкретное действие игрока
-        // персонаж сначала реагирует, а не перебивает его случайным новым действием.
+        // ── Proactive initiative ──
+        // NPC can act proactively after any tick, not just wait/system_tick.
+        // Probability scales with event significance so NPCs don't spam actions
+        // on every minor tick, but respond to major moments (overload, transitions).
         let becameProactive = false;
-        const initiativeWindow = bundle.compiledAction.actionKey === 'wait' || bundle.event.type === 'system_tick';
-        if (initiativeWindow && canInitiatePhysicalAction && sampleProbability(effectiveProactiveProb)) {
-            // Если персонаж хочет действовать проактивно, узнаем ЧТО он хочет сделать
-            let proactiveReason = describeTone(relationToCalibrator?.attitude);
-            let decidedAction = undefined;
+        let proactiveReason = describeTone(relationToCalibrator?.attitude);
+        let decidedAction: any = undefined;
+        let proactiveKind: 'physical' | 'verbal' | null = null;
 
-            if (actorId !== playerId) {
-                // Пытаемся найти лучшую цель из присутствующих
+        // Significance: how notable was this tick? Higher = more likely NPC acts.
+        const hasMajorTransition = Boolean(bundle.diagnostics?.observation?.transitions?.length);
+        const externallySignificant = (bundle.output.result.overload || 0) >= OVERLOAD_NOTICEABLE || hasMajorTransition;
+        const reaction = bundle.diagnostics?.observation?.reaction;
+        const reactionMagnitude = Math.max(Number(reaction?.pleasure || 0), Number(reaction?.discomfort || 0), Number(reaction?.overload || 0), Number(reaction?.engagement || 0) * 0.45);
+        const significanceBoost = externallySignificant ? 1.0 : reactionMagnitude >= 12 ? 0.6 : 0.3;
+
+        // Physical initiative: requires proximity (target, near:, or same device area).
+        // deviceBound NPCs (on diagnostic table, in capsule) cannot physically act on others,
+        // but can still speak.
+        const canPhysical = physicallyEngaged && !deviceBound;
+
+        // Verbal initiative: available to all present NPCs, including deviceBound ones.
+        // An NPC strapped to a device can still say something.
+        const canVerbal = true;
+
+        if (sampleProbability(effectiveProactiveProb * significanceBoost)) {
+            if (canPhysical && actorId !== playerId) {
+                // Smart target selection: score all (target, action) pairs, pick the best.
                 const possibleTargets = presentSubjectIds.filter(id => id !== actorId);
-                const targetId = possibleTargets.length > 0 ? possibleTargets[Math.floor(Math.random() * possibleTargets.length)] : actorId === subjectId ? playerId : subjectId;
+                let bestScored: { targetId: string; action: ActionScoreResult } | null = null;
 
-                if (targetId) {
-                    const targetRelation = characterRelationRepo.get(actorId, targetId);
-                    proactiveReason = describeTone(targetRelation?.attitude || relationToCalibrator?.attitude);
+                for (const targetId of possibleTargets) {
+                    const rel = characterRelationRepo.get(actorId, targetId);
+                    if (!rel) continue; // no relation = can't evaluate
 
                     const targetPointRecords = pointStateRepo.getAllForSubject(targetId);
                     const targetPoints = targetPointRecords.map(p => p.pointId);
                     if (targetPoints.length === 0) targetPoints.push('systemic');
 
                     const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints);
-
                     const scene = sceneRepo.get(eventSceneId);
-                    const actorResources = resourceRepo.get(actorId);
+                    const actorRes = resourceRepo.get(actorId);
 
                     const affordable = actions.filter(a => {
                         const sceneCost = scene?.actionCosts?.[a.actionId];
@@ -206,38 +222,49 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
                             const costRecord = (sceneCost as any).consume || sceneCost;
                             requiredAP = Number(costRecord.actionPoints ?? costRecord.ap ?? costRecord.apCost ?? costRecord.action_points ?? 0);
                         }
-                        const curAP = Number(actorResources?.resources?.actionPoints ?? 100);
+                        const curAP = Number(actorRes?.resources?.actionPoints ?? 100);
                         return !(requiredAP > 0 && curAP < requiredAP);
                     });
 
-                    const bestAction = affordable.find(a => a.score > -20); // Лояльнее смотрим на действия - даже если штрафы за барьеры, могут быть триггеры
-                    if (bestAction) {
-                        const targetChar = subjectRepo.get(targetId);
-                        const targetName = targetChar?.name || targetId;
-                        const preset = presetRepo.getActionPreset(bestAction.actionId);
-
-                        decidedAction = { ...bestAction, targetId };
-                        proactiveReason = `Отношение к ${targetName}: ${proactiveReason}. Цель инициативы: применить действие "${preset?.label || bestAction.actionId}" к анатомической зоне "${bestAction.pointId}" персонажа ${targetName} (Мотивация: ${Math.round(bestAction.score)})`;
-                        becameProactive = true;
+                    const best = affordable.find(a => a.score > -20);
+                    if (best && (!bestScored || best.score > bestScored.action.score)) {
+                        bestScored = { targetId, action: best };
                     }
+                }
+
+                if (bestScored) {
+                    const targetChar = subjectRepo.get(bestScored.targetId);
+                    const targetName = targetChar?.name || bestScored.targetId;
+                    const preset = presetRepo.getActionPreset(bestScored.action.actionId);
+                    const targetRelation = characterRelationRepo.get(actorId, bestScored.targetId);
+                    proactiveReason = `Отношение к ${targetName}: ${describeTone(targetRelation?.attitude || relationToCalibrator?.attitude)}. Цель инициативы: применить действие "${preset?.label || bestScored.action.actionId}" к зоне "${bestScored.action.pointId}" персонажа ${targetName} (Мотивация: ${Math.round(bestScored.action.score)})`;
+                    decidedAction = { ...bestScored.action, targetId: bestScored.targetId };
+                    becameProactive = true;
+                    proactiveKind = 'physical';
                 }
             }
 
-            if (becameProactive) {
-                actorDecisions.push({
-                    actorId,
-                    kind: 'proactive',
-                    reason: proactiveReason,
-                    mechanicalAction: decidedAction
-                });
+            // If no physical action was chosen (or NPC is deviceBound), try verbal initiative.
+            if (!becameProactive && canVerbal) {
+                // Verbal proactive: NPC wants to say something on their own.
+                // This is a speech-only proactive decision (no mechanical action).
+                becameProactive = true;
+                proactiveKind = 'verbal';
+                proactiveReason = `${describeTone(relationToCalibrator?.attitude)}; инициативная реплика`;
             }
         }
 
-        // Если не проактивны (или не смогли найти действие), пробуем отреагировать репликой
-        const hasMajorTransition = Boolean(bundle.diagnostics?.observation?.transitions?.length);
-        const externallySignificant = (bundle.output.result.overload || 0) >= OVERLOAD_NOTICEABLE || hasMajorTransition;
-        const reaction = bundle.diagnostics?.observation?.reaction;
-        const reactionMagnitude = Math.max(Number(reaction?.pleasure || 0), Number(reaction?.discomfort || 0), Number(reaction?.overload || 0), Number(reaction?.engagement || 0) * 0.45);
+        if (becameProactive) {
+            actorDecisions.push({
+                actorId,
+                kind: 'proactive',
+                reason: proactiveReason,
+                mechanicalAction: proactiveKind === 'physical' ? decidedAction : undefined
+            });
+        }
+
+        // ── Reactive speech ──
+        // If not proactive, check if NPC should react to what just happened.
         const frameRequiresSpeech = actorId === subjectId && Boolean(prompt.reactionFrame?.event.requiresSpeech);
         const meaningfulTargetMoment =
             isTarget &&
