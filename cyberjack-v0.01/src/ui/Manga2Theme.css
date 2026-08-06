@@ -815,27 +815,27 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 /* === DUAL AVATAR — secondary character dimmed beside active === */
 .calibration-secondary-avatar {
   position: absolute;
-  right: 0;
+  left: -28%;
   bottom: 0;
-  width: 35%;
-  height: 80%;
+  width: 28%;
+  height: 65%;
   z-index: 1;
-  opacity: 0.35;
-  filter: grayscale(0.8);
+  opacity: 0.3;
+  filter: grayscale(0.8) brightness(0.7);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   overflow: visible;
+  pointer-events: auto;
 }
 .calibration-secondary-avatar:hover {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 .calibration-secondary-avatar.active {
   opacity: 1;
   filter: none;
-  width: 35%;
 }
 .calibration-secondary-avatar img {
   max-height: 100%;
@@ -845,9 +845,4 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 }
 .calibration-secondary-avatar .portrait-fallback {
   display: none;
-}
-.calibration-avatar-frame {
-  position: relative;
-  z-index: 2;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
