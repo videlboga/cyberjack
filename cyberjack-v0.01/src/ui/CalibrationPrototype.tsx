@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 import {
   activeVisualInteractionFromContexts,
   buildCalibrationVisualDescriptorV4,
@@ -1591,6 +1591,97 @@ const calibrationTargetOverrides: Record<string, string[]> = {
   whip_strike: ["feet"],
   taser_shock: ["feet"],
 };
+// DualAvatarStage — isolated component for smooth avatar swap.
+// Owns its own swap state. Parent does NOT re-render during animation.
+const DualAvatarStage = memo(function DualAvatarStage({
+  mainSrc,
+  mainAlt,
+  mainFallback,
+  secondarySrc,
+  secondaryAlt,
+  secondaryFallback,
+  mainOnError,
+  mainOnLoad,
+  onSwap,
+}: {
+  mainSrc: string;
+  mainAlt: string;
+  mainFallback: string;
+  secondarySrc: string | null;
+  secondaryAlt: string;
+  secondaryFallback: string;
+  mainOnError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+  mainOnLoad?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+  onSwap: () => void;
+}) {
+  const [swapped, setSwapped] = useState(false);
+  const secRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+
+  const handleClick = () => {
+    const secEl = secRef.current;
+    const frameEl = frameRef.current;
+
+    if (secEl && frameEl) {
+      const duration = 500;
+      const start = performance.now();
+      const secStart = swapped ? 1 : 0.5;
+      const secEnd = swapped ? 0.5 : 1;
+      const frameStart = swapped ? 0.4 : 1;
+      const frameEnd = swapped ? 1 : 0.4;
+
+      function tween(now: number) {
+        const elapsed = now - start;
+        const t = Math.min(elapsed / duration, 1);
+        const eased = t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
+        secEl.style.opacity = String(secStart + (secEnd - secStart) * eased);
+        frameEl.style.opacity = String(frameStart + (frameEnd - frameStart) * eased);
+        if (t < 1) {
+          requestAnimationFrame(tween);
+        } else {
+          setSwapped(s => !s);
+          onSwap();
+        }
+      }
+      requestAnimationFrame(tween);
+    } else {
+      setSwapped(s => !s);
+      onSwap();
+    }
+  };
+
+  return (
+    <>
+      {secondarySrc && (
+        <div
+          ref={secRef}
+          className={`calibration-secondary-avatar ${swapped ? "active" : ""}`}
+          style={{ opacity: swapped ? 1 : 0.5 }}
+          onClick={handleClick}
+        >
+          <span className="portrait-fallback">{secondaryFallback}</span>
+          <img
+            className="calibration-character-image"
+            src={secondarySrc}
+            alt={secondaryAlt}
+            onError={(e) => { e.currentTarget.hidden = true; }}
+          />
+        </div>
+      )}
+      <div ref={frameRef} className={`calibration-avatar-frame ${swapped ? "dimmed" : ""}`}>
+        <span className="portrait-fallback">{mainFallback}</span>
+        <img
+          className="calibration-character-image"
+          src={mainSrc}
+          alt={mainAlt}
+          onLoad={mainOnLoad}
+          onError={mainOnError}
+        />
+      </div>
+    </>
+  );
+});
+
 export function CalibrationPrototype({
   subjectId = "S-AV-01",
   subjectName = "Мира",
@@ -4570,97 +4661,47 @@ export function CalibrationPrototype({
           className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""} ${secondaryVisualPath ? "has-secondary" : ""}`}
           >
             <div className="portrait-placeholder">
-              {secondaryVisualPath && (
-                <div
-                  className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
-                  style={{ opacity: activeIsSecondary ? 1 : 0.5 }}
-                  onClick={() => {
-                    const nextId = activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT);
-                    const stage = document.querySelector('.character-stage');
-                    const sec = stage?.querySelector('.calibration-secondary-avatar') as HTMLElement;
-                    const frame = stage?.querySelector('.calibration-avatar-frame') as HTMLElement;
-
-                    if (sec && frame) {
-                      // Direct JS tween: manipulate style.opacity frame by frame.
-                      // No CSS classes, no Web Animations API — just rAF + style.
-                      const duration = 500;
-                      const start = performance.now();
-                      const secStart = activeIsSecondary ? 1 : 0.5;
-                      const secEnd = activeIsSecondary ? 0.5 : 1;
-                      const frameStart = activeIsSecondary ? 0.4 : 1;
-                      const frameEnd = activeIsSecondary ? 1 : 0.4;
-
-                      function tween(now: number) {
-                        const elapsed = now - start;
-                        const t = Math.min(elapsed / duration, 1);
-                        const eased = t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
-                        sec.style.opacity = String(secStart + (secEnd - secStart) * eased);
-                        frame.style.opacity = String(frameStart + (frameEnd - frameStart) * eased);
-                        if (t < 1) {
-                          requestAnimationFrame(tween);
-                        } else {
-                          setActiveSubjectId(nextId);
-                        }
-                      }
-                      requestAnimationFrame(tween);
-                    } else {
-                      setActiveSubjectId(nextId);
-                    }
-                  }}
-                >
-                  <span className="portrait-fallback">
-                    {(secondaryName || "?").slice(0, 1).toUpperCase()}
-                  </span>
-                  <img
-                    className="calibration-character-image"
-                    src={secondaryVisualPath}
-                    alt={secondaryName || ""}
-                    onError={(e) => { e.currentTarget.hidden = true; }}
-                  />
-                </div>
-              )}
-              <div className={`calibration-avatar-frame ${activeIsSecondary ? "dimmed" : ""}`}>
-                <span className="portrait-fallback">
-                  {subjectName.slice(0, 1).toUpperCase()}
-                </span>
-                <img
-                  className="calibration-character-image"
-                  src={activeVisualPath}
-                  alt={subjectName}
-                  onLoad={(event) =>
-                    setDisplayedVisualPath(
-                      new URL(event.currentTarget.src).pathname,
-                    )
-                  }
-                  onError={(event) => {
+              <DualAvatarStage
+                mainSrc={activeVisualPath}
+                mainAlt={subjectName}
+                mainFallback={subjectName.slice(0, 1).toUpperCase()}
+                secondarySrc={secondaryVisualPath}
+                secondaryAlt={secondaryName || ""}
+                secondaryFallback={(secondaryName || "?").slice(0, 1).toUpperCase()}
+                mainOnError={(e) => {
                     if (
                       expandedVisualPath &&
-                      event.currentTarget.src.endsWith(expandedVisualPath) &&
+                      e.currentTarget.src.endsWith(expandedVisualPath) &&
                       interactionVisualPath
                     ) {
-                      event.currentTarget.src = interactionVisualPath;
+                      e.currentTarget.src = interactionVisualPath;
                     } else if (
                       portraitFallbackPath &&
-                      event.currentTarget.src.endsWith(portraitFallbackPath)
+                      e.currentTarget.src.endsWith(portraitFallbackPath)
                     ) {
-                      event.currentTarget.hidden = true;
+                      e.currentTarget.hidden = true;
                     } else if (
-                      event.currentTarget.src.endsWith(baseVisualPath)
+                      e.currentTarget.src.endsWith(baseVisualPath)
                     ) {
                       if (
                         portraitFallbackPath &&
-                        !event.currentTarget.src.endsWith(portraitFallbackPath)
+                        !e.currentTarget.src.endsWith(portraitFallbackPath)
                       ) {
-                        event.currentTarget.src = portraitFallbackPath;
+                        e.currentTarget.src = portraitFallbackPath;
                       } else {
-                        event.currentTarget.hidden = true;
+                        e.currentTarget.hidden = true;
                       }
                     } else {
-                      event.currentTarget.src = baseVisualPath;
+                      e.currentTarget.src = baseVisualPath;
                     }
-                  }}
-                />
-              </div>
+                }}
+                mainOnLoad={(e) =>
+                    setDisplayedVisualPath(
+                      new URL(e.currentTarget.src).pathname,
+                    )
+                }
+                onSwap={() => setActiveSubjectId(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
+              />
               {activeProcesses[0] && (
                 <GameSustainedEffect
                   actionId={activeProcesses[0].action.id}
