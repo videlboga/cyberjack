@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, memo } from "react";
+import { flushSync } from "react-dom";
 import {
   activeVisualInteractionFromContexts,
   buildCalibrationVisualDescriptorV4,
@@ -1639,17 +1640,19 @@ export function CalibrationPrototype({
     [speechTargetId, setSpeechTargetId] = useState(SUBJECT),
     [activeSubjectId, setActiveSubjectId] = useState(SUBJECT),
     swapSubjects = (nextId: string) => {
-      const swap = () => setActiveSubjectId(nextId);
       if ((document as any).startViewTransition) {
-        (document as any).startViewTransition(swap);
+        (document as any).startViewTransition(() => {
+          flushSync(() => setActiveSubjectId(nextId));
+        });
       } else {
-        swap();
+        setActiveSubjectId(nextId);
       }
     },
-    // Wrap ANY state update in View Transition for smooth visual crossfade
     vtUpdate = (fn: () => void) => {
       if ((document as any).startViewTransition) {
-        (document as any).startViewTransition(fn);
+        (document as any).startViewTransition(() => {
+          flushSync(fn);
+        });
       } else {
         fn();
       }
@@ -1877,9 +1880,11 @@ export function CalibrationPrototype({
       new Set((d.player?.inventory || []).map((item: any) => item.id)),
     );
     };
-    // Execute state updates inside View Transition
+    // Execute state updates inside View Transition with flushSync
     if ((document as any).startViewTransition) {
-      (document as any).startViewTransition(applyState);
+      (document as any).startViewTransition(() => {
+        flushSync(applyState);
+      });
     } else {
       applyState();
     }
