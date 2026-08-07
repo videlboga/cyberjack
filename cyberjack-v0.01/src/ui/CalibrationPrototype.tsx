@@ -1592,6 +1592,65 @@ const calibrationTargetOverrides: Record<string, string[]> = {
   whip_strike: ["feet"],
   taser_shock: ["feet"],
 };
+// DualAvatarStage — isolated component, own swap state.
+// Parent NEVER re-renders on swap. Framer Motion animates smoothly.
+const DualAvatarStage = memo(function DualAvatarStage({
+  mainSrc,
+  mainAlt,
+  mainFallback,
+  secondarySrc,
+  secondaryAlt,
+  secondaryFallback,
+  mainOnError,
+  mainOnLoad,
+  onSwap,
+}: {
+  mainSrc: string;
+  mainAlt: string;
+  mainFallback: string;
+  secondarySrc: string | null;
+  secondaryAlt: string;
+  secondaryFallback: string;
+  mainOnError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+  mainOnLoad?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+  onSwap?: () => void;
+}) {
+  const [swapped, setSwapped] = useState(false);
+
+  const handleSwap = () => {
+    const next = !swapped;
+    setSwapped(next);
+    // Update parent AFTER animation completes (500ms)
+    if (onSwap) setTimeout(onSwap, 500);
+  };
+
+  return (
+    <>
+      {secondarySrc && (
+        <motion.div
+          className={`calibration-secondary-avatar ${swapped ? "active" : ""}`}
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: swapped ? 1 : 0.5 }}
+          transition={{ duration: 0.4 }}
+          onClick={handleSwap}
+        >
+          <span className="portrait-fallback">{secondaryFallback}</span>
+          <img className="calibration-character-image" src={secondarySrc} alt={secondaryAlt} onError={(e) => { e.currentTarget.hidden = true; }} />
+        </motion.div>
+      )}
+      <motion.div
+        className={`calibration-avatar-frame ${swapped ? "dimmed" : ""}`}
+        initial={{ opacity: 1 }}
+        animate={{ opacity: swapped ? 0.4 : 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <span className="portrait-fallback">{mainFallback}</span>
+        <img className="calibration-character-image" src={mainSrc} alt={mainAlt} onLoad={mainOnLoad} onError={mainOnError} />
+      </motion.div>
+    </>
+  );
+});
+
 export function CalibrationPrototype({
   subjectId = "S-AV-01",
   subjectName = "Мира",
@@ -4579,29 +4638,14 @@ export function CalibrationPrototype({
           className={`character-stage ambient-${currentObservation?.behavioralState || "responsive"} ${edgeProfile.active ? `ambient-edge-${edgeProfile.kind}` : ""} ${secondaryVisualPath ? "has-secondary" : ""}`}
           >
             <div className="portrait-placeholder">
-              {secondaryVisualPath && (
-                <motion.div
-                  layout
-                  className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
-                  initial={false}
-                  animate={{ opacity: activeIsSecondary ? 1 : 0.5, filter: activeIsSecondary ? 'none' : 'grayscale(0.5) brightness(0.8)' }}
-                  transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                  onClick={() => swapSubjects(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
-                >
-                  <span className="portrait-fallback">{(secondaryName || "?").slice(0, 1).toUpperCase()}</span>
-                  <img className="calibration-character-image" src={secondaryVisualPath} alt={secondaryName || ""} onError={(e) => { e.currentTarget.hidden = true; }} />
-                </motion.div>
-              )}
-              <motion.div
-                layout
-                className={`calibration-avatar-frame ${activeIsSecondary ? "dimmed" : ""}`}
-                animate={{ opacity: activeIsSecondary ? 0.4 : 1, filter: activeIsSecondary ? 'grayscale(0.6) brightness(0.75)' : 'none' }}
-                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-              >
-                <span className="portrait-fallback">{subjectName.slice(0, 1).toUpperCase()}</span>
-                <img className="calibration-character-image" src={activeVisualPath} alt={subjectName}
-                  onLoad={(e) => setDisplayedVisualPath(new URL(e.currentTarget.src).pathname)}
-                  onError={(e) => {
+              <DualAvatarStage
+                mainSrc={activeVisualPath}
+                mainAlt={subjectName}
+                mainFallback={subjectName.slice(0, 1).toUpperCase()}
+                secondarySrc={secondaryVisualPath}
+                secondaryAlt={secondaryName || ""}
+                secondaryFallback={(secondaryName || "?").slice(0, 1).toUpperCase()}
+                mainOnError={(e) => {
                     if (expandedVisualPath && e.currentTarget.src.endsWith(expandedVisualPath) && interactionVisualPath) {
                       e.currentTarget.src = interactionVisualPath;
                     } else if (portraitFallbackPath && e.currentTarget.src.endsWith(portraitFallbackPath)) {
@@ -4615,9 +4659,9 @@ export function CalibrationPrototype({
                     } else {
                       e.currentTarget.src = baseVisualPath;
                     }
-                  }}
-                />
-              </motion.div>
+                }}
+                mainOnLoad={(e) => setDisplayedVisualPath(new URL(e.currentTarget.src).pathname)}
+              />
               {activeProcesses[0] && (
                 <GameSustainedEffect
                   actionId={activeProcesses[0].action.id}
