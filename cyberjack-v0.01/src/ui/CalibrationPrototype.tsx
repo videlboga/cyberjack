@@ -4575,11 +4575,14 @@ export function CalibrationPrototype({
                   className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
                   onClick={() => {
                     const nextId = activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT);
+                    const stage = document.querySelector('.character-stage');
+                    if (stage) stage.classList.add('swapping');
                     if ((document as any).startViewTransition) {
                       (document as any).startViewTransition(() => setActiveSubjectId(nextId));
                     } else {
                       setActiveSubjectId(nextId);
                     }
+                    setTimeout(() => stage?.classList.remove('swapping'), 600);
                   }}
                 >
                   <span className="portrait-fallback">

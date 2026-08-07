@@ -814,35 +814,56 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 
 /* === GLOBAL SMOOTH TRANSITIONS === */
 /* Prevent flash/flicker on React re-renders and page transitions.
-   These containers fade their content changes instead of snapping. */
-html[data-ui-theme="manga2"] .calibration-workbench,
-html[data-ui-theme="manga2"] .character-column,
+   Key insight: CSS transition on opacity only works when opacity CHANGES.
+   React re-renders don't change opacity (stays 1), so transition is invisible.
+   Instead, use a subtle fade-in animation that fires on each render via
+   a CSS class toggle driven by React's re-render cycle. */
+@keyframes fade-in {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+@keyframes slide-fade-in {
+  from { opacity: 0.7; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Panels that re-render on state change: subtle fade-in */
 html[data-ui-theme="manga2"] .scene-monitor,
-html[data-ui-theme="manga2"] .calibration-avatar-frame,
 html[data-ui-theme="manga2"] .monitor-control-layout__recommendations,
-html[data-ui-theme="manga2"] .control-recommendation-card,
-html[data-ui-theme="manga2"] .operation-execute-tile,
 html[data-ui-theme="manga2"] .monitor-status-strip,
 html[data-ui-theme="manga2"] .endurance-card,
-html[data-ui-theme="manga2"] .physiology-panel,
-html[data-ui-theme="manga2"] .trend-lane,
-html[data-ui-theme="manga2"] .pulse-biosignal,
-html[data-ui-theme="manga2"] .breathing-biosignal,
-html[data-ui-theme="manga2"] .room-people,
-html[data-ui-theme="manga2"] .room-detail,
-html[data-ui-theme="manga2"] .device-chat-panel {
-  transition: opacity 0.3s ease;
+html[data-ui-theme="manga2"] .physiology-panel {
+  animation: fade-in 0.3s ease;
 }
-/* Character chat feed — smooth line additions */
+/* Heavier panels: slide+fade for content changes */
+html[data-ui-theme="manga2"] .calibration-avatar-frame,
+html[data-ui-theme="manga2"] .calibration-secondary-avatar {
+  animation: fade-in 0.4s ease;
+}
+/* Chat feed: smooth */
 html[data-ui-theme="manga2"] .chat-scroll,
 html[data-ui-theme="manga2"] .character-chat {
-  transition: opacity 0.25s ease;
+  animation: fade-in 0.25s ease;
 }
-/* View transition for page-level navigation */
+/* On character swap: re-trigger fade-in on all panels.
+   Using a different animation name forces restart. */
+@keyframes swap-fade {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+html[data-ui-theme="manga2"] .character-stage.swapping .calibration-avatar-frame,
+html[data-ui-theme="manga2"] .character-stage.swapping .calibration-secondary-avatar,
+html[data-ui-theme="manga2"] .character-stage.swapping ~ .scene-monitor .physiology-panel,
+html[data-ui-theme="manga2"] .character-stage.swapping ~ .scene-monitor .endurance-card,
+html[data-ui-theme="manga2"] .character-stage.swapping ~ .scene-monitor .monitor-status-strip,
+html[data-ui-theme="manga2"] .character-stage.swapping ~ aside .monitor-control-layout__recommendations {
+  animation: swap-fade 0.5s ease;
+}
+
+/* View transition for page-level navigation (SPA route changes) */
 @view-transition {
   navigation: auto;
 }
-/* Smooth crossfade for view transitions */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 0.3s;
