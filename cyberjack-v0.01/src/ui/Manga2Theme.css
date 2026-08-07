@@ -812,6 +812,43 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   height: 52px !important;
 }
 
+/* === GLOBAL SMOOTH TRANSITIONS === */
+/* Prevent flash/flicker on React re-renders and page transitions.
+   These containers fade their content changes instead of snapping. */
+html[data-ui-theme="manga2"] .calibration-workbench,
+html[data-ui-theme="manga2"] .character-column,
+html[data-ui-theme="manga2"] .scene-monitor,
+html[data-ui-theme="manga2"] .calibration-avatar-frame,
+html[data-ui-theme="manga2"] .monitor-control-layout__recommendations,
+html[data-ui-theme="manga2"] .control-recommendation-card,
+html[data-ui-theme="manga2"] .operation-execute-tile,
+html[data-ui-theme="manga2"] .monitor-status-strip,
+html[data-ui-theme="manga2"] .endurance-card,
+html[data-ui-theme="manga2"] .physiology-panel,
+html[data-ui-theme="manga2"] .trend-lane,
+html[data-ui-theme="manga2"] .pulse-biosignal,
+html[data-ui-theme="manga2"] .breathing-biosignal,
+html[data-ui-theme="manga2"] .room-people,
+html[data-ui-theme="manga2"] .room-detail,
+html[data-ui-theme="manga2"] .device-chat-panel {
+  transition: opacity 0.3s ease;
+}
+/* Character chat feed — smooth line additions */
+html[data-ui-theme="manga2"] .chat-scroll,
+html[data-ui-theme="manga2"] .character-chat {
+  transition: opacity 0.25s ease;
+}
+/* View transition for page-level navigation */
+@view-transition {
+  navigation: auto;
+}
+/* Smooth crossfade for view transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+}
+
 /* === DUAL AVATAR — secondary character dimmed beside active === */
 .calibration-secondary-avatar {
   position: absolute;

@@ -4573,7 +4573,14 @@ export function CalibrationPrototype({
               {secondaryVisualPath && (
                 <div
                   className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
-                  onClick={() => setActiveSubjectId(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
+                  onClick={() => {
+                    const nextId = activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT);
+                    if ((document as any).startViewTransition) {
+                      (document as any).startViewTransition(() => setActiveSubjectId(nextId));
+                    } else {
+                      setActiveSubjectId(nextId);
+                    }
+                  }}
                 >
                   <span className="portrait-fallback">
                     {(secondaryName || "?").slice(0, 1).toUpperCase()}
