@@ -814,7 +814,7 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 
 /* === AVATAR SWAP — clone overlay animation (no React, no VT API) === */
 
-/* DUAL AVATAR — opacity/filter set via viewTransitionName, not CSS classes */
+/* DUAL AVATAR — opacity/filter controlled by Framer Motion animate prop */
 .calibration-secondary-avatar {
   position: absolute;
   left: 0;
@@ -829,12 +829,6 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   overflow: visible;
   pointer-events: auto;
 }
-.calibration-secondary-avatar.active {
-  opacity: 1;
-}
-.calibration-secondary-avatar:not(.active) {
-  opacity: 0.5;
-}
 .calibration-secondary-avatar img {
   max-height: 100%;
   max-width: 100%;
@@ -844,7 +838,4 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 .calibration-secondary-avatar .portrait-fallback {
   display: none;
 }
-.calibration-avatar-frame.dimmed {
-  opacity: 0.4;
-  filter: grayscale(0.6) brightness(0.75);
-}
+/* dimmed class kept for logic, Framer Motion drives opacity/filter */
