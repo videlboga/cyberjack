@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, memo, useDeferredValue, useTransition } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   activeVisualInteractionFromContexts,
@@ -1639,11 +1639,7 @@ export function CalibrationPrototype({
     [playerInput, setPlayerInput] = useState(""),
     [speechTargetId, setSpeechTargetId] = useState(SUBJECT),
     [activeSubjectId, setActiveSubjectId] = useState(SUBJECT),
-    deferredActiveId = useDeferredValue(activeSubjectId),
-    [isSwapping, startSwapTransition] = useTransition(),
-    swapSubjects = (nextId: string) => {
-      startSwapTransition(() => setActiveSubjectId(nextId));
-    },
+    swapSubjects = (nextId: string) => { setActiveSubjectId(nextId); },
     vtUpdate = (fn: () => void) => { fn(); },
     [speechTargetMenuOpen, setSpeechTargetMenuOpen] = useState(false),
     [chatLines, setChatLines] = useState<ChatLine[]>([]),
@@ -3663,7 +3659,7 @@ export function CalibrationPrototype({
         )
       : null,
     secondaryName = nearbyCharacter?.name,
-    activeIsSecondary = deferredActiveId !== SUBJECT && !!nearbyCharacter,
+    activeIsSecondary = activeSubjectId !== SUBJECT && !!nearbyCharacter,
     reviewAssetPath = displayedVisualPath || visualPath,
     significantEvent =
       [...entries]
