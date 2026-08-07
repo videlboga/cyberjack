@@ -1646,6 +1646,14 @@ export function CalibrationPrototype({
         swap();
       }
     },
+    // Wrap ANY state update in View Transition for smooth visual crossfade
+    vtUpdate = (fn: () => void) => {
+      if ((document as any).startViewTransition) {
+        (document as any).startViewTransition(fn);
+      } else {
+        fn();
+      }
+    },
     [speechTargetMenuOpen, setSpeechTargetMenuOpen] = useState(false),
     [chatLines, setChatLines] = useState<ChatLine[]>([]),
     [generatingSpeech, setGeneratingSpeech] = useState(false),
@@ -1823,6 +1831,8 @@ export function CalibrationPrototype({
       ),
       d = await q.json();
     if (!d.success) throw new Error(d.error);
+    // Apply state updates inside View Transition for smooth visual crossfade
+    const applyState = () => {
     subjectRef.current = d.subject;
     setSubject(d.subject);
     setRelationAttitude(
@@ -1866,6 +1876,13 @@ export function CalibrationPrototype({
     setOwnedItemIds(
       new Set((d.player?.inventory || []).map((item: any) => item.id)),
     );
+    };
+    // Execute state updates inside View Transition
+    if ((document as any).startViewTransition) {
+      (document as any).startViewTransition(applyState);
+    } else {
+      applyState();
+    }
     return d.subject as State;
   };
   const append = (e: Omit<Entry, "step">) => {
@@ -2090,15 +2107,17 @@ export function CalibrationPrototype({
     }
   };
   useEffect(() => {
-    Promise.all([load(), loadContracts(), loadChat()]).catch((e) =>
-      setError(e.message),
-    );
+    vtUpdate(() => {
+      Promise.all([load(), loadContracts(), loadChat()]).catch((e) =>
+        setError(e.message),
+      );
+    });
   }, []);
   useEffect(() => {
     const minute = Math.floor(worldMinute);
     if (minute === lastWorldSyncMinuteRef.current) return;
     lastWorldSyncMinuteRef.current = minute;
-    load().catch((error) => setError(error.message));
+    vtUpdate(() => load().catch((error) => setError(error.message)));
   }, [worldMinute, SUBJECT]);
   useEffect(() => {
     if (!activePeakObservation) return;

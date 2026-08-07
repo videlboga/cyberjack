@@ -834,14 +834,41 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   from { opacity: 0; }
   to { opacity: 1; }
 }
-/* Named avatars: morph between positions */
+/* Named avatars: morph between positions — swap animation */
 ::view-transition-group(avatar-main) {
-  animation-duration: 0.5s;
+  animation-duration: 0.6s;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 ::view-transition-group(avatar-secondary) {
-  animation-duration: 0.5s;
+  animation-duration: 0.6s;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+::view-transition-old(avatar-main) {
+  animation-name: vt-avatar-out;
+  animation-duration: 0.6s;
+  animation-timing-function: ease;
+}
+::view-transition-new(avatar-main) {
+  animation-name: vt-avatar-in;
+  animation-duration: 0.6s;
+  animation-timing-function: ease;
+}
+::view-transition-old(avatar-secondary) {
+  animation-name: vt-avatar-out;
+  animation-duration: 0.6s;
+  animation-timing-function: ease;
+}
+::view-transition-new(avatar-secondary) {
+  animation-name: vt-avatar-in;
+  animation-duration: 0.6s;
+  animation-timing-function: ease;
+}
+@keyframes vt-avatar-out {
+  to { opacity: 0; transform: scale(0.9); }
+}
+@keyframes vt-avatar-in {
+  from { opacity: 0; transform: scale(1.1); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* DUAL AVATAR — opacity/filter set via viewTransitionName, not CSS classes */
