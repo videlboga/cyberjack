@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState, memo } from "react";
-import { flushSync } from "react-dom";
+import React, { useEffect, useRef, useState, memo, useDeferredValue } from "react";
 import {
   activeVisualInteractionFromContexts,
   buildCalibrationVisualDescriptorV4,
@@ -1639,24 +1638,72 @@ export function CalibrationPrototype({
     [playerInput, setPlayerInput] = useState(""),
     [speechTargetId, setSpeechTargetId] = useState(SUBJECT),
     [activeSubjectId, setActiveSubjectId] = useState(SUBJECT),
+    deferredActiveId = useDeferredValue(activeSubjectId),
     swapSubjects = (nextId: string) => {
-      if ((document as any).startViewTransition) {
-        (document as any).startViewTransition(() => {
-          flushSync(() => setActiveSubjectId(nextId));
+      const stage = document.querySelector('.character-stage') as HTMLElement;
+      const secEl = stage?.querySelector('.calibration-secondary-avatar') as HTMLElement;
+      const frameEl = stage?.querySelector('.calibration-avatar-frame') as HTMLElement;
+      
+      if (stage && secEl && frameEl) {
+        const secRect = secEl.getBoundingClientRect();
+        const frameRect = frameEl.getBoundingClientRect();
+        
+        // Clone both avatars as fixed-position overlays
+        const secClone = secEl.cloneNode(true) as HTMLElement;
+        const frameClone = frameEl.cloneNode(true) as HTMLElement;
+        
+        // Set up sec clone at original position — NO transition yet
+        secClone.style.cssText = `position:fixed;left:${secRect.left}px;top:${secRect.top}px;width:${secRect.width}px;height:${secRect.height}px;z-index:9999;margin:0;opacity:0.5;filter:grayscale(0.5) brightness(0.8);pointer-events:none;`;
+        
+        // Set up frame clone at original position — NO transition yet
+        frameClone.style.cssText = `position:fixed;left:${frameRect.left}px;top:${frameRect.top}px;width:${frameRect.width}px;height:${frameRect.height}px;z-index:9999;margin:0;opacity:1;pointer-events:none;`;
+        
+        document.body.appendChild(secClone);
+        document.body.appendChild(frameClone);
+        
+        // Hide originals
+        secEl.style.opacity = '0';
+        frameEl.style.opacity = '0';
+        
+        // RAF 1: add transition
+        requestAnimationFrame(() => {
+          secClone.style.transition = 'transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease,filter 0.5s ease';
+          frameClone.style.transition = 'transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease,filter 0.5s ease';
+          
+          // RAF 2: apply transform → transition fires
+          requestAnimationFrame(() => {
+            // Animate using transform translate + scale (GPU accelerated)
+        const secDx = frameRect.left - secRect.left;
+        const secDy = frameRect.top - secRect.top;
+        const secScale = frameRect.width / secRect.width;
+        
+        const frameDx = secRect.left - frameRect.left;
+        const frameDy = secRect.top - frameRect.top;
+        const frameScale = secRect.width / frameRect.width;
+        
+        secClone.style.transform = `translate(${secDx}px, ${secDy}px) scale(${secScale})`;
+        secClone.style.opacity = '1';
+        secClone.style.filter = 'none';
+        
+        frameClone.style.transform = `translate(${frameDx}px, ${frameDy}px) scale(${frameScale})`;
+        frameClone.style.opacity = '0.5';
+        frameClone.style.filter = 'grayscale(0.5) brightness(0.8)';
+        
+        // After animation: update state, remove clones
+        setTimeout(() => {
+          setActiveSubjectId(nextId);
+          secClone.remove();
+          frameClone.remove();
+          secEl.style.opacity = '';
+          frameEl.style.opacity = '';
+        }, 500);
+          });
         });
       } else {
         setActiveSubjectId(nextId);
       }
     },
-    vtUpdate = (fn: () => void) => {
-      if ((document as any).startViewTransition) {
-        (document as any).startViewTransition(() => {
-          flushSync(fn);
-        });
-      } else {
-        fn();
-      }
-    },
+    vtUpdate = (fn: () => void) => { fn(); },
     [speechTargetMenuOpen, setSpeechTargetMenuOpen] = useState(false),
     [chatLines, setChatLines] = useState<ChatLine[]>([]),
     [generatingSpeech, setGeneratingSpeech] = useState(false),
@@ -1880,14 +1927,7 @@ export function CalibrationPrototype({
       new Set((d.player?.inventory || []).map((item: any) => item.id)),
     );
     };
-    // Execute state updates inside View Transition with flushSync
-    if ((document as any).startViewTransition) {
-      (document as any).startViewTransition(() => {
-        flushSync(applyState);
-      });
-    } else {
-      applyState();
-    }
+    applyState();
     return d.subject as State;
   };
   const append = (e: Omit<Entry, "step">) => {
@@ -3682,7 +3722,7 @@ export function CalibrationPrototype({
         )
       : null,
     secondaryName = nearbyCharacter?.name,
-    activeIsSecondary = activeSubjectId !== SUBJECT && !!nearbyCharacter,
+    activeIsSecondary = deferredActiveId !== SUBJECT && !!nearbyCharacter,
     reviewAssetPath = displayedVisualPath || visualPath,
     significantEvent =
       [...entries]
@@ -4605,14 +4645,14 @@ export function CalibrationPrototype({
               {secondaryVisualPath && (
                 <div
                   className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
-                  style={{ opacity: activeIsSecondary ? 1 : 0.5, viewTransitionName: activeIsSecondary ? 'avatar-main' : 'avatar-secondary' }}
+                  style={{ opacity: activeIsSecondary ? 1 : 0.5 }}
                   onClick={() => swapSubjects(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
                 >
                   <span className="portrait-fallback">{(secondaryName || "?").slice(0, 1).toUpperCase()}</span>
                   <img className="calibration-character-image" src={secondaryVisualPath} alt={secondaryName || ""} onError={(e) => { e.currentTarget.hidden = true; }} />
                 </div>
               )}
-              <div className={`calibration-avatar-frame ${activeIsSecondary ? "dimmed" : ""}`} style={{ viewTransitionName: activeIsSecondary ? 'avatar-secondary' : 'avatar-main' }}>
+              <div className={`calibration-avatar-frame ${activeIsSecondary ? "dimmed" : ""}`}>
                 <span className="portrait-fallback">{subjectName.slice(0, 1).toUpperCase()}</span>
                 <img className="calibration-character-image" src={activeVisualPath} alt={subjectName}
                   onLoad={(e) => setDisplayedVisualPath(new URL(e.currentTarget.src).pathname)}
