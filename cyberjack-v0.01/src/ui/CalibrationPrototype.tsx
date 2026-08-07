@@ -4573,12 +4573,39 @@ export function CalibrationPrototype({
               {secondaryVisualPath && (
                 <div
                   className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : ""}`}
+                  style={{ opacity: activeIsSecondary ? 1 : 0.5 }}
                   onClick={() => {
                     const nextId = activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT);
                     const stage = document.querySelector('.character-stage');
-                    if (stage) stage.classList.add('swapping');
-                    setActiveSubjectId(nextId);
-                    setTimeout(() => stage?.classList.remove('swapping'), 600);
+                    const sec = stage?.querySelector('.calibration-secondary-avatar') as HTMLElement;
+                    const frame = stage?.querySelector('.calibration-avatar-frame') as HTMLElement;
+
+                    if (sec && frame) {
+                      // Direct JS tween: manipulate style.opacity frame by frame.
+                      // No CSS classes, no Web Animations API — just rAF + style.
+                      const duration = 500;
+                      const start = performance.now();
+                      const secStart = activeIsSecondary ? 1 : 0.5;
+                      const secEnd = activeIsSecondary ? 0.5 : 1;
+                      const frameStart = activeIsSecondary ? 0.4 : 1;
+                      const frameEnd = activeIsSecondary ? 1 : 0.4;
+
+                      function tween(now: number) {
+                        const elapsed = now - start;
+                        const t = Math.min(elapsed / duration, 1);
+                        const eased = t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
+                        sec.style.opacity = String(secStart + (secEnd - secStart) * eased);
+                        frame.style.opacity = String(frameStart + (frameEnd - frameStart) * eased);
+                        if (t < 1) {
+                          requestAnimationFrame(tween);
+                        } else {
+                          setActiveSubjectId(nextId);
+                        }
+                      }
+                      requestAnimationFrame(tween);
+                    } else {
+                      setActiveSubjectId(nextId);
+                    }
                   }}
                 >
                   <span className="portrait-fallback">

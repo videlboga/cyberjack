@@ -813,48 +813,9 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 }
 
 /* === GLOBAL SMOOTH TRANSITIONS === */
-/* Prevent flash/flicker on React re-renders and page transitions.
-   Key insight: CSS transition on opacity only works when opacity CHANGES.
-   React re-renders don't change opacity (stays 1), so transition is invisible.
-   Instead, use a subtle fade-in animation that fires on each render via
-   a CSS class toggle driven by React's re-render cycle. */
-@keyframes fade-in {
-  from { opacity: 0.85; }
-  to { opacity: 1; }
-}
-@keyframes slide-fade-in {
-  from { opacity: 0.7; transform: translateY(2px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Panels that re-render on state change: subtle fade-in */
-html[data-ui-theme="manga2"] .scene-monitor,
-html[data-ui-theme="manga2"] .monitor-control-layout__recommendations,
-html[data-ui-theme="manga2"] .monitor-status-strip,
-html[data-ui-theme="manga2"] .endurance-card,
-html[data-ui-theme="manga2"] .physiology-panel {
-  animation: fade-in 0.3s ease;
-}
-/* Heavier panels: slide+fade for content changes */
-html[data-ui-theme="manga2"] .calibration-avatar-frame,
-html[data-ui-theme="manga2"] .calibration-secondary-avatar {
-  animation: fade-in 0.4s ease;
-}
-/* Chat feed: smooth */
-html[data-ui-theme="manga2"] .chat-scroll,
-html[data-ui-theme="manga2"] .character-chat {
-  animation: fade-in 0.25s ease;
-}
-/* On character swap: re-trigger fade-in on avatars only.
-   Panels get smooth transition via CSS class toggle. */
-@keyframes swap-fade {
-  from { opacity: 0.6; }
-  to { opacity: 1; }
-}
-html[data-ui-theme="manga2"] .character-stage.swapping .calibration-avatar-frame,
-html[data-ui-theme="manga2"] .character-stage.swapping .calibration-secondary-avatar {
-  animation: swap-fade 0.5s ease;
-}
+/* Use CSS transitions (not animations) for smooth state changes.
+   Animations fire once on mount and can't be re-triggered reliably.
+   Transitions on opacity/filter fire when CSS properties change via class toggle. */
 
 /* View transition for page-level navigation (SPA route changes) */
 @view-transition {
@@ -866,7 +827,13 @@ html[data-ui-theme="manga2"] .character-stage.swapping .calibration-secondary-av
   animation-timing-function: ease;
 }
 
-/* === DUAL AVATAR — secondary character dimmed beside active === */
+/* On character swap: Web Animations API handles animation in JS.
+   CSS classes (active/dimmed) set final state without !important.
+   No swapping class needed — JS drives the animation directly. */
+
+/* DUAL AVATAR — dim/undim controlled by Web Animations API in JS.
+   CSS classes active/dimmed are for logic only (no opacity/filter in CSS).
+   JS .animate() drives the visual transition. */
 .calibration-secondary-avatar {
   position: absolute;
   left: 0;
@@ -874,22 +841,12 @@ html[data-ui-theme="manga2"] .character-stage.swapping .calibration-secondary-av
   width: 38%;
   height: 72%;
   z-index: 3;
-  opacity: 0.5;
-  filter: grayscale(0.5) brightness(0.8);
-  transition: opacity 0.5s ease, filter 0.5s ease;
   cursor: pointer;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   overflow: visible;
   pointer-events: auto;
-}
-.calibration-secondary-avatar:hover {
-  opacity: 0.65;
-}
-.calibration-secondary-avatar.active {
-  opacity: 1;
-  filter: none;
 }
 .calibration-secondary-avatar img {
   max-height: 100%;
@@ -900,11 +857,6 @@ html[data-ui-theme="manga2"] .character-stage.swapping .calibration-secondary-av
 .calibration-secondary-avatar .portrait-fallback {
   display: none;
 }
-/* When secondary becomes active, dim the main avatar */
 .calibration-avatar-frame {
-  transition: opacity 0.5s ease, filter 0.5s ease;
-}
-.calibration-avatar-frame.dimmed {
-  opacity: 0.4;
-  filter: grayscale(0.6) brightness(0.75);
+  /* opacity/filter set by JS Web Animations API, not CSS classes */
 }
