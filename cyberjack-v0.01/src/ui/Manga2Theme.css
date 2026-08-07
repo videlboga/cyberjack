@@ -812,28 +812,39 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   height: 52px !important;
 }
 
-/* === GLOBAL SMOOTH TRANSITIONS === */
-/* Use CSS transitions (not animations) for smooth state changes.
-   Animations fire once on mount and can't be re-triggered reliably.
-   Transitions on opacity/filter fire when CSS properties change via class toggle. */
-
-/* View transition for page-level navigation (SPA route changes) */
+/* === VIEW TRANSITIONS — smooth crossfade for all state changes === */
 @view-transition {
   navigation: auto;
 }
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.3s;
+/* Root transition: smooth crossfade for the entire page */
+::view-transition-group(root) {
+  animation-duration: 0.4s;
   animation-timing-function: ease;
 }
+::view-transition-old(root) {
+  animation-name: vt-fade-out;
+}
+::view-transition-new(root) {
+  animation-name: vt-fade-in;
+}
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Named avatars: morph between positions */
+::view-transition-group(avatar-main) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+::view-transition-group(avatar-secondary) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-/* On character swap: Web Animations API handles animation in JS.
-   CSS classes (active/dimmed) set final state without !important.
-   No swapping class needed — JS drives the animation directly. */
-
-/* DUAL AVATAR — dim/undim controlled by Web Animations API in JS.
-   CSS classes active/dimmed are for logic only (no opacity/filter in CSS).
-   JS .animate() drives the visual transition. */
+/* DUAL AVATAR — opacity/filter set via viewTransitionName, not CSS classes */
 .calibration-secondary-avatar {
   position: absolute;
   left: 0;
@@ -848,6 +859,12 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   overflow: visible;
   pointer-events: auto;
 }
+.calibration-secondary-avatar.active {
+  opacity: 1;
+}
+.calibration-secondary-avatar:not(.active) {
+  opacity: 0.5;
+}
 .calibration-secondary-avatar img {
   max-height: 100%;
   max-width: 100%;
@@ -857,6 +874,7 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
 .calibration-secondary-avatar .portrait-fallback {
   display: none;
 }
-.calibration-avatar-frame {
-  /* opacity/filter set by JS Web Animations API, not CSS classes */
+.calibration-avatar-frame.dimmed {
+  opacity: 0.4;
+  filter: grayscale(0.6) brightness(0.75);
 }
