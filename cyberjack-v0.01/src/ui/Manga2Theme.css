@@ -845,18 +845,14 @@ html[data-ui-theme="manga2"] .chat-scroll,
 html[data-ui-theme="manga2"] .character-chat {
   animation: fade-in 0.25s ease;
 }
-/* On character swap: re-trigger fade-in on all panels.
-   Using a different animation name forces restart. */
+/* On character swap: re-trigger fade-in on avatars only.
+   Panels get smooth transition via CSS class toggle. */
 @keyframes swap-fade {
   from { opacity: 0.6; }
   to { opacity: 1; }
 }
 html[data-ui-theme="manga2"] .character-stage.swapping .calibration-avatar-frame,
-html[data-ui-theme="manga2"] .character-stage.swapping .calibration-secondary-avatar,
-html[data-ui-theme="manga2"] .character-stage.swapping ~ .scene-monitor .physiology-panel,
-html[data-ui-theme="manga2"] .character-stage.swapping ~ .scene-monitor .endurance-card,
-html[data-ui-theme="manga2"] .character-stage.swapping ~ .scene-monitor .monitor-status-strip,
-html[data-ui-theme="manga2"] .character-stage.swapping ~ aside .monitor-control-layout__recommendations {
+html[data-ui-theme="manga2"] .character-stage.swapping .calibration-secondary-avatar {
   animation: swap-fade 0.5s ease;
 }
 
