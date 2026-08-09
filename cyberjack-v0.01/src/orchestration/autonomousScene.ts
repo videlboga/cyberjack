@@ -1,14 +1,13 @@
 import { db } from '../infrastructure/db';
 import {
     characterRelationRepo,
-    characterRepo,
     memoryRepo,
     pointStateRepo,
     sceneCharacterRepo,
     subjectPreferencesRepo,
     subjectRepo,
 } from '../infrastructure/repositories';
-import { getLaboratorySpatialContext } from '../scenario/spatialContext';
+import { getLaboratoryPresence, getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { runGameTick } from './runGameTick';
 import { ActionScorer, ActionScoreResult } from './actionScorer';
 import { conditioningTags } from '../domain/conditioning';
@@ -65,12 +64,7 @@ function latestObservedEvent(subjectId: string, sceneId: string): ObservedEvent 
 }
 
 function isDeviceBound(subjectId: string, playerId: string): boolean {
-    const character = characterRepo.get(subjectId);
-    if (!character) return false;
-    const row = db.prepare(
-        'SELECT status FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?',
-    ).get(playerId, character.id) as { status?: string } | undefined;
-    return String(row?.status || '').startsWith('device:');
+    return String(getLaboratoryPresence(subjectId, playerId)?.status || '').startsWith('device:');
 }
 
 function chooseAction(actorId: string, observed: ObservedEvent | null, sceneId: string, visibleTargets: string[]): { targetId: string; action: ActionScoreResult } | null {

@@ -6,7 +6,7 @@ import { ActionScorer, ActionScoreResult } from './actionScorer';
 import { appendJsonLog } from '../utils/fileLogs';
 import { explainPromptLog, explainOrchestratorDecision } from '../utils/logExplainers';
 import { getActiveContextLabel, getActiveContextPromptText } from '../domain/contextPresentation';
-import { getLaboratorySpatialContext } from '../scenario/spatialContext';
+import { getLaboratoryPresence, getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
 import { resolvePortraitEmotion } from '../domain/portraitEmotion';
 
@@ -59,22 +59,6 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
         .filter(pc => !spatialIds || spatialIds.has(pc.character.id))
         .map(pc => pc.character.subjectId as string);
     const presenceBySubject = new Map(presentChars.filter(pc => pc.character.subjectId).map(pc => [pc.character.subjectId as string, pc]));
-    const laboratoryStatus = new Map(
-        (
-            db
-                .prepare(
-                    `
-        SELECT character_id, status
-        FROM laboratory_room_assignments
-        WHERE player_id = ?
-    `
-                )
-                .all(bundle.event.playerId || 'PL-1') as Array<{
-                character_id: string;
-                status: string;
-            }>
-        ).map(row => [row.character_id, row.status])
-    );
 
     const allActors = Array.from(new Set([subjectId, ...presentSubjectIds, ...(spatial ? [] : relations.filter(rel => rel.target?.subjectId && rel.present).map(rel => rel.target!.subjectId!))]));
 
@@ -151,7 +135,8 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
         const effectiveProactiveProb = proactiveProb * apNorm;
         const actorPresence = presenceBySubject.get(actorId);
         const slotId = String(actorPresence?.slotId || '');
-        const deviceBound = String(laboratoryStatus.get(actorId) || '').startsWith('device:');
+        const deviceBound = eventSceneId === 'scene_lab_calibrator'
+            && String(getLaboratoryPresence(actorId, bundle.event.playerId || 'PL-1')?.status || '').startsWith('device:');
         // Being audible in the same room is not the same as participating in
         // the procedure. Ambient occupants may observe significant events,
         // while autonomous physical initiatives require explicit proximity.
