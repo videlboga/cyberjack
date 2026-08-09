@@ -10038,9 +10038,15 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   filter:drop-shadow(0 0 3px color-mix(in srgb,var(--ji-lcd) 70%,transparent));
   animation:sex-machine-rhythm-flow .95s linear infinite;
 }
-.campaign-shell .sex-machine-rhythm.running.rhythm-pulse .wave { animation-duration:.62s; }
-.campaign-shell .sex-machine-rhythm.running.rhythm-wave .wave { animation-duration:1.35s; }
-.campaign-shell .sex-machine-rhythm.running.rhythm-random .wave { animation-duration:.78s; }
+.campaign-shell .sex-machine-rhythm.running.protocol-edge .wave { animation-duration:1.05s; }
+.campaign-shell .sex-machine-rhythm.running.protocol-positive .wave { animation-duration:1.45s; }
+.campaign-shell .sex-machine-rhythm.running.protocol-negative .wave { animation-duration:.52s; }
+.campaign-shell .sex-machine-rhythm.running.protocol-mixed .wave { animation-duration:.78s; }
+.campaign-shell .sex-machine-rhythm.running.protocol-orgasm .wave { animation-duration:.42s; }
+.campaign-shell .sex-machine-rhythm.running.protocol-exhaustion .wave { animation-duration:1.15s; }
+.campaign-shell .sex-machine-rhythm.running.rhythm-pulse:not(.protocol-negative) .wave { animation-duration:.62s; }
+.campaign-shell .sex-machine-rhythm.running.rhythm-wave:not(.protocol-edge):not(.protocol-positive) .wave { animation-duration:1.35s; }
+.campaign-shell .sex-machine-rhythm.running.rhythm-random:not(.protocol-mixed) .wave { animation-duration:.78s; }
 @keyframes sex-machine-rhythm-flow {
   from { stroke-dashoffset:36; opacity:.58; }
   50% { opacity:1; }

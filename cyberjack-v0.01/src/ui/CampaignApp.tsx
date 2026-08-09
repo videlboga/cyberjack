@@ -3042,17 +3042,32 @@ function DeviceControlScreen({
     return control("settings", { targetMode, ...targetPresets[targetMode] });
   };
   const rhythm = session.rhythm || "steady";
-  const rhythmWavePaths: Record<string, string> = {
-      steady:
-        "M0 12 C6 5 12 5 18 12 S30 19 36 12 S48 5 54 12 S66 19 72 12 S84 5 90 12 S102 19 108 12 S120 5 126 12",
-      pulse:
-        "M0 12 L14 12 L18 3 L22 21 L26 12 L42 12 L46 3 L50 21 L54 12 L70 12 L74 3 L78 21 L82 12 L98 12 L102 3 L106 21 L110 12 L126 12",
-      wave:
-        "M0 12 C8 3 16 3 24 12 S40 21 48 12 S64 3 72 12 S88 21 96 12 S112 3 120 12 S124 15 128 12",
-      random:
-        "M0 12 L9 6 L17 17 L28 4 L37 14 L48 9 L59 20 L70 5 L81 15 L92 3 L104 18 L115 8 L128 12",
-    };
-  const rhythmWavePath = rhythmWavePaths[rhythm] || "M0 12 H128";
+  const waveformKey = session.targetMode || rhythm;
+  const waveformPaths: Record<string, string> = {
+    manual:
+      "M0 12 C5 8 10 8 15 12 S25 16 30 12 S40 8 45 12 S55 16 60 12 S70 8 75 12 S85 16 90 12 S100 8 105 12 S115 16 120 12 S125 9 128 12",
+    edge:
+      "M0 12 C7 11 10 8 14 6 C18 4 21 4 24 7 C27 10 29 16 34 17 C39 18 42 12 46 8 C50 4 54 3 58 6 C62 10 63 18 69 19 C75 19 78 10 82 6 C86 2 91 3 95 7 C99 12 100 20 107 20 C114 20 117 8 121 5 C124 3 126 6 128 12",
+    positive:
+      "M0 12 C6 12 8 7 13 7 C18 7 19 14 24 14 C29 14 31 5 36 5 C41 5 42 16 48 16 C54 16 55 3 61 3 C67 3 68 18 75 18 C82 18 83 5 89 5 C95 5 96 16 102 16 C108 16 110 7 115 7 C120 7 122 12 128 12",
+    negative:
+      "M0 12 L8 12 L11 4 L14 20 L18 8 L22 17 L26 3 L30 21 L35 11 L43 11 L47 2 L51 22 L56 7 L61 18 L66 4 L70 20 L75 12 L83 12 L87 3 L91 21 L96 6 L101 18 L106 4 L110 20 L115 12 L128 12",
+    mixed:
+      "M0 12 C5 4 10 4 15 12 L22 18 L29 7 C35 2 39 14 45 15 L53 5 L59 20 L67 10 C73 6 78 7 83 13 L91 19 L98 4 L106 16 L114 8 C120 5 124 10 128 12",
+    orgasm:
+      "M0 12 C5 10 8 10 12 12 S19 14 24 12 S31 8 36 12 S43 17 48 12 S55 5 60 12 S67 20 72 12 S79 2 84 12 S91 22 96 12 S103 0 108 12 S115 23 120 12 S125 2 128 12",
+    exhaustion:
+      "M0 12 L7 5 L13 19 L20 3 L27 21 L34 6 L41 18 L48 8 L55 16 L62 9 L69 15 L76 10 L83 14 L90 11 L97 13 L104 11 L111 13 L118 12 L128 12",
+    steady:
+      "M0 12 C6 5 12 5 18 12 S30 19 36 12 S48 5 54 12 S66 19 72 12 S84 5 90 12 S102 19 108 12 S120 5 126 12",
+    pulse:
+      "M0 12 L14 12 L18 3 L22 21 L26 12 L42 12 L46 3 L50 21 L54 12 L70 12 L74 3 L78 21 L82 12 L98 12 L102 3 L106 21 L110 12 L126 12",
+    wave:
+      "M0 12 C8 3 16 3 24 12 S40 21 48 12 S64 3 72 12 S88 21 96 12 S112 3 120 12 S124 15 128 12",
+    random:
+      "M0 12 L9 6 L17 17 L28 4 L37 14 L48 9 L59 20 L70 5 L81 15 L92 3 L104 18 L115 8 L128 12",
+  };
+  const rhythmWavePath = waveformPaths[waveformKey] || "M0 12 H128";
   const machineRunning = session.status === "running";
   const machineEngaged = machineRunning || session.status === "paused";
   const tension = clampMetric(Number(state.tension || 0));
@@ -3174,7 +3189,7 @@ function DeviceControlScreen({
               </span>
             </div>
             <div
-              className={`sex-machine-rhythm rhythm-${rhythm} ${machineRunning ? "running" : ""}`}
+              className={`sex-machine-rhythm rhythm-${rhythm} protocol-${waveformKey} ${machineRunning ? "running" : ""}`}
               aria-label={`Визуализация ритма: ${rhythm}`}
             >
               <small>СИГНАЛ РИТМА</small>
