@@ -55,3 +55,20 @@ export function describeDeviceProtocolEvent(
   }
   return `Механизм перенастраивает воздействие: ${describeDeviceSensation(next)}`;
 }
+
+/** Brief operator-facing log line.  The sensory variant above is for the
+ * affected character's context, never for the public chat feed. */
+export function describeDeviceProtocolSummary(
+  command: 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop',
+): string {
+  const summary = {
+    configure: 'Конфигурация секс-машины изменена.',
+    settings: 'Параметры протокола обновлены.',
+    start: 'Секс-машина запущена.',
+    adjust: 'Интенсивность воздействия изменена.',
+    pause: 'Секс-машина поставлена на паузу.',
+    resume: 'Секс-машина возобновлена.',
+    stop: 'Секс-машина остановлена.',
+  };
+  return summary[command];
+}

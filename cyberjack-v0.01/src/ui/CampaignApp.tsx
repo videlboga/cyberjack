@@ -3047,12 +3047,7 @@ function DeviceControlScreen({
       orgasmTargetCount: targetMode === "orgasm" ? session.orgasmTargetCount || 1 : null,
     });
   };
-  const timerOptions: Array<{ label: string; value: number | null }> = [
-    { label: "ВРУЧНУЮ", value: null },
-    { label: "30 МИН", value: 30 },
-    { label: "60 МИН", value: 60 },
-    { label: "120 МИН", value: 120 },
-  ];
+  const stopAfterMinutes = Math.max(0, Number(session.stopAfterMinutes || 0));
   const orgasmTargetCount = Math.max(1, Number(session.orgasmTargetCount || 1));
   const rhythm = session.rhythm || "steady";
   const waveformKey = session.targetMode || rhythm;
@@ -3268,24 +3263,27 @@ function DeviceControlScreen({
                 </button>
               </div>
               <section className="sex-machine-session-settings">
-                <header>
-                  <small>ЛИМИТ СЕАНСА</small>
-                  <strong>{session.stopAfterMinutes ? `${session.stopAfterMinutes} МИН` : "ВРУЧНУЮ"}</strong>
-                </header>
-                <div className="sex-machine-session-options">
-                  {timerOptions.map((option) => (
+                <div className="sex-machine-session-targets">
+                  <div className="sex-machine-session-target">
+                    <small>ЛИМИТ СЕАНСА</small>
                     <button
-                      className={session.stopAfterMinutes === option.value ? "active" : ""}
-                      disabled={working}
-                      key={option.label}
-                      onClick={() => control("settings", { stopAfterMinutes: option.value })}
+                      aria-label="Уменьшить лимит сеанса на 30 минут"
+                      disabled={working || stopAfterMinutes <= 0}
+                      onClick={() => control("settings", { stopAfterMinutes: Math.max(0, stopAfterMinutes - 30) || null })}
                     >
-                      {option.label}
+                      −
                     </button>
-                  ))}
-                </div>
-                {activeMode[0] === "orgasm" && (
-                  <div className="sex-machine-orgasm-target">
+                    <b>{stopAfterMinutes ? `${stopAfterMinutes} МИН` : "ВРУЧНУЮ"}</b>
+                    <button
+                      aria-label="Увеличить лимит сеанса на 30 минут"
+                      disabled={working || stopAfterMinutes >= 1440}
+                      onClick={() => control("settings", { stopAfterMinutes: Math.min(1440, stopAfterMinutes + 30) })}
+                    >
+                      +
+                    </button>
+                  </div>
+                  {activeMode[0] === "orgasm" && (
+                    <div className="sex-machine-session-target">
                     <small>ЦЕЛЬ: ОРГАЗМОВ</small>
                     <button
                       aria-label="Уменьшить число оргазмов"
@@ -3303,7 +3301,8 @@ function DeviceControlScreen({
                       +
                     </button>
                   </div>
-                )}
+                  )}
+                </div>
               </section>
             </section>
           )}

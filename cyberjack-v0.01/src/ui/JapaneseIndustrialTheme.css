@@ -9637,46 +9637,36 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   padding:7px 8px;
   background:var(--ji-surface-soft);
 }
-.campaign-shell .sex-machine-session-settings>header,
-.campaign-shell .sex-machine-orgasm-target {
-  display:flex;
+.campaign-shell .sex-machine-session-targets,
+.campaign-shell .sex-machine-session-target {
+  display:grid;
   align-items:center;
-  justify-content:space-between;
   gap:6px;
 }
+.campaign-shell .sex-machine-session-targets { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.campaign-shell .sex-machine-session-target { min-width:0; grid-template-columns:minmax(0,1fr) 26px minmax(42px,auto) 26px; gap:3px; }
+.campaign-shell .sex-machine-session-target:only-child { grid-column:1/-1; }
 .campaign-shell .sex-machine-session-settings small {
   color:var(--ji-muted);
   font-size:6px;
   letter-spacing:.1em;
 }
 .campaign-shell .sex-machine-session-settings strong,
-.campaign-shell .sex-machine-orgasm-target b {
+.campaign-shell .sex-machine-session-target b {
   color:var(--ji-lcd);
   font-size:8px;
   letter-spacing:.06em;
 }
-.campaign-shell .sex-machine-session-options {
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:3px;
-}
-.campaign-shell .sex-machine-session-options button,
-.campaign-shell .sex-machine-orgasm-target button {
+.campaign-shell .sex-machine-session-target button {
   min-height:24px;
   border:1px solid var(--ji-border);
   background:var(--ji-control);
   color:var(--ji-secondary);
   font-size:6px;
 }
-.campaign-shell .sex-machine-session-options button.active {
-  border-color:var(--ji-lcd);
-  color:var(--ji-lcd);
-  background:var(--ji-selected);
-}
-.campaign-shell .sex-machine-orgasm-target { justify-content:flex-end; }
-.campaign-shell .sex-machine-orgasm-target small { margin-right:auto; }
-.campaign-shell .sex-machine-orgasm-target button { width:26px; font-size:14px; }
-.campaign-shell .sex-machine-orgasm-target b { min-width:18px; text-align:center; font-size:11px; }
+.campaign-shell .sex-machine-session-target small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.campaign-shell .sex-machine-session-target button { width:26px; font-size:14px; }
+.campaign-shell .sex-machine-session-target b { min-width:42px; text-align:center; font-size:11px; white-space:nowrap; }
 .campaign-shell .sex-machine-fine-tuning {
   min-height:0;
   background:var(--ji-surface-soft);
@@ -10126,8 +10116,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .campaign-shell .sex-machine-protocol-selector p {
   margin:0;
   color:var(--ji-secondary);
-  font-size:6px;
-  line-height:1.2;
+  font-size:8px;
+  line-height:1.3;
 }
 
 /* With the service controls gone, the console can use readable game-scale type. */
@@ -10149,7 +10139,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .campaign-shell .sex-machine-protocol-selector>div { padding:8px 10px; }
 .campaign-shell .sex-machine-protocol-selector small { font-size:6px; }
 .campaign-shell .sex-machine-protocol-selector strong { font-size:14px; }
-.campaign-shell .sex-machine-protocol-selector p { font-size:7px; }
+.campaign-shell .sex-machine-protocol-selector p { font-size:9px; }
 .campaign-shell .sex-machine-console-actions button { min-height:48px; font-size:12px; }
 .campaign-shell .sex-machine-console-actions button small { font-size:6px; }
 @keyframes sex-machine-contact-wave {

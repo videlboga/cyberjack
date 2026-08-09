@@ -9,7 +9,7 @@ import { ensureCharacterStorySeeds } from './characterStorySeeds';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
 import { setLaboratoryPresence } from './spatialContext';
-import { describeDeviceProtocolEvent } from '../narrative/deviceExperience';
+import { describeDeviceProtocolEvent, describeDeviceProtocolSummary } from '../narrative/deviceExperience';
 
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
@@ -547,6 +547,18 @@ const phaseForDeviceIntensity = (intensity: number): DeviceSession['phase'] =>
 
 const isControllableDevice = (assetId: string): assetId is DeviceAssetId => assetId in DEVICE_DEFINITIONS;
 
+function hasPerceptibleDeviceChange(
+    command: 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop',
+    current: DeviceSession,
+    next: DeviceSession,
+) {
+    if (['start', 'adjust', 'pause', 'resume', 'stop'].includes(command)) return true;
+    if (command !== 'settings') return false;
+    return current.intensity !== next.intensity
+        || current.rhythm !== next.rhythm
+        || JSON.stringify(current.targetPointIds) !== JSON.stringify(next.targetPointIds);
+}
+
 function recoveryLabel(capacity: number, baselineCapacity: number) {
     if (baselineCapacity <= 25) return 'глубокое хроническое истощение';
     if (baselineCapacity <= 40) return 'хроническое истощение';
@@ -1040,7 +1052,9 @@ export function controlDeviceSession(
         const hasStopAfter = Object.prototype.hasOwnProperty.call(payload, 'stopAfterMinutes');
         const hasOrgasmTarget = Object.prototype.hasOwnProperty.call(payload, 'orgasmTargetCount');
         const stopAfterMinutes = hasStopAfter
-            ? (Number(payload.stopAfterMinutes) > 0 ? Math.max(10, Math.min(1440, Number(payload.stopAfterMinutes))) : null)
+            ? (Number(payload.stopAfterMinutes) > 0
+                ? Math.max(30, Math.min(1440, Math.round(Number(payload.stopAfterMinutes) / 30) * 30))
+                : null)
             : current.stopAfterMinutes ?? null;
         const orgasmTargetCount = hasOrgasmTarget
             ? (Number(payload.orgasmTargetCount) > 0 ? Math.max(1, Math.min(10, Math.floor(Number(payload.orgasmTargetCount)))) : null)
@@ -1082,11 +1096,18 @@ export function controlDeviceSession(
     db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
         .run(JSON.stringify({ ...metadata, deviceSession: next }), playerId, assetId);
     if (command === 'stop') interactionStanceRepo.softenAll(next.subjectId,.5);
-    const sensoryEvent = describeDeviceProtocolEvent(command, next, current);
-    chatMemoryRepo.append(next.subjectId, 'user', `[Действие] ${sensoryEvent}`, row.name);
-    recordScenarioEvent('device_protocol', `Устройство: ${command}`, sensoryEvent, {
-        subjectId: next.subjectId, assetId, command, configuration: next.configuration, intensity: next.intensity
-    });
+    // A stopped or paused machine does not create a bodily event.  Its
+    // configuration is operator state, not something the occupant perceives.
+    const machineWasOrIsRunning = current.status === 'running' || next.status === 'running';
+    if (machineWasOrIsRunning && hasPerceptibleDeviceChange(command, current, next)) {
+        const sensoryEvent = describeDeviceProtocolEvent(command, next, current);
+        // Technical sensory context remains available to the character but is
+        // deliberately hidden from the dialogue feed by its marker.
+        chatMemoryRepo.append(next.subjectId, 'user', `[Воздействие] ${sensoryEvent}`, row.name);
+        recordScenarioEvent('device_protocol', `Устройство: ${command}`, describeDeviceProtocolSummary(command), {
+            subjectId: next.subjectId, assetId, command, configuration: next.configuration, intensity: next.intensity
+        });
+    }
     return { assetId, session: next };
 }
 
