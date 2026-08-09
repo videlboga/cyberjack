@@ -9644,7 +9644,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   gap:6px;
 }
 .campaign-shell .sex-machine-session-targets { grid-template-columns:repeat(2,minmax(0,1fr)); }
-.campaign-shell .sex-machine-session-target { min-width:0; grid-template-columns:minmax(0,1fr) 26px minmax(42px,auto) 26px; gap:3px; }
+.campaign-shell .sex-machine-session-target { min-width:0; grid-template-columns:minmax(0,1fr) 22px minmax(24px,auto) 22px; gap:2px; }
 .campaign-shell .sex-machine-session-target:only-child { grid-column:1/-1; }
 .campaign-shell .sex-machine-session-settings small {
   color:var(--ji-muted);
@@ -9665,8 +9665,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   font-size:6px;
 }
 .campaign-shell .sex-machine-session-target small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.campaign-shell .sex-machine-session-target button { width:26px; font-size:14px; }
-.campaign-shell .sex-machine-session-target b { min-width:42px; text-align:center; font-size:11px; white-space:nowrap; }
+.campaign-shell .sex-machine-session-target button { width:22px; font-size:13px; }
+.campaign-shell .sex-machine-session-target b { min-width:24px; text-align:center; font-size:9px; white-space:nowrap; }
 .campaign-shell .sex-machine-fine-tuning {
   min-height:0;
   background:var(--ji-surface-soft);

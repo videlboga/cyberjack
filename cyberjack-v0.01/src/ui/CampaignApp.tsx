@@ -3265,7 +3265,7 @@ function DeviceControlScreen({
               <section className="sex-machine-session-settings">
                 <div className="sex-machine-session-targets">
                   <div className="sex-machine-session-target">
-                    <small>ЛИМИТ СЕАНСА</small>
+                    <small title="Лимит сеанса">ЛИМИТ</small>
                     <button
                       aria-label="Уменьшить лимит сеанса на 30 минут"
                       disabled={working || stopAfterMinutes <= 0}
@@ -3273,7 +3273,7 @@ function DeviceControlScreen({
                     >
                       −
                     </button>
-                    <b>{stopAfterMinutes ? `${stopAfterMinutes} МИН` : "ВРУЧНУЮ"}</b>
+                    <b title={stopAfterMinutes ? `${stopAfterMinutes} минут` : "Вручную"}>{stopAfterMinutes ? `${stopAfterMinutes}′` : "—"}</b>
                     <button
                       aria-label="Увеличить лимит сеанса на 30 минут"
                       disabled={working || stopAfterMinutes >= 1440}
@@ -3284,7 +3284,7 @@ function DeviceControlScreen({
                   </div>
                   {activeMode[0] === "orgasm" && (
                     <div className="sex-machine-session-target">
-                    <small>ЦЕЛЬ: ОРГАЗМОВ</small>
+                    <small title="Цель: оргазмов">ОРГАЗМЫ</small>
                     <button
                       aria-label="Уменьшить число оргазмов"
                       disabled={working || orgasmTargetCount <= 1}
