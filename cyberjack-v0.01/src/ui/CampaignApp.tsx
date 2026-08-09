@@ -3242,7 +3242,6 @@ function DeviceControlScreen({
             <section className="sex-machine-protocols">
               <header>
                 <small>ВЫБОР ПРОТОКОЛА</small>
-                <span>{activeMode[3]}</span>
               </header>
               <div className="sex-machine-protocol-selector">
                 <button
@@ -3254,7 +3253,11 @@ function DeviceControlScreen({
                 </button>
                 <div>
                   <small>КАРТРИДЖ {String(activeModeIndex + 1).padStart(2, "0")} / {String(targetModes.length).padStart(2, "0")}</small>
-                  <strong>{activeMode[1]}</strong>
+                  <div className="sex-machine-protocol-title">
+                    <strong>{activeMode[1]}</strong>
+                    <span>{activeMode[3]}</span>
+                  </div>
+                  <p>{activeMode[2]}</p>
                 </div>
                 <button
                   aria-label="Следующий протокол"
@@ -3263,13 +3266,6 @@ function DeviceControlScreen({
                 >
                   ›
                 </button>
-              </div>
-              <div className="sex-machine-protocol-brief">
-                <div>
-                  <strong>{activeMode[1]}</strong>
-                  <span>{activeMode[3]}</span>
-                </div>
-                <p>{activeMode[2]}</p>
               </div>
               <section className="sex-machine-session-settings">
                 <header>
