@@ -9967,6 +9967,121 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   border-color:color-mix(in srgb,var(--ji-amber) 78%,transparent);
   animation-duration:1.1s;
 }
+
+/* Sex machine: compact physical control deck, not a dashboard. */
+.campaign-shell .sex-machine-console {
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+  gap:6px;
+  padding:7px;
+  border:1px solid color-mix(in srgb,var(--ji-line) 85%,var(--ji-bg));
+  background:linear-gradient(135deg,var(--ji-panel),color-mix(in srgb,var(--ji-panel) 80%,#000))!important;
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ji-bg) 72%,transparent),0 8px 24px #0005;
+}
+.campaign-shell .sex-machine-live {
+  gap:6px;
+  padding:9px;
+  border:1px solid var(--ji-line);
+  background:var(--ji-bg);
+  box-shadow:inset 3px 0 var(--ji-muted);
+}
+.campaign-shell .sex-machine-live>header strong { font-size:15px; }
+.campaign-shell .sex-machine-readout {
+  display:grid;
+  grid-template-columns:1.35fr repeat(2,1fr);
+  gap:1px;
+  background:var(--ji-line);
+  border:1px solid var(--ji-line);
+}
+.campaign-shell .sex-machine-readout>span {
+  min-width:0;
+  display:grid;
+  gap:2px;
+  padding:5px 6px;
+  background:var(--ji-control);
+}
+.campaign-shell .sex-machine-readout small,
+.campaign-shell .sex-machine-readout b {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.campaign-shell .sex-machine-readout small {
+  color:var(--ji-muted);
+  font-size:5px;
+  letter-spacing:.12em;
+}
+.campaign-shell .sex-machine-readout b {
+  color:var(--ji-secondary);
+  font-size:8px;
+  letter-spacing:.04em;
+}
+.campaign-shell .sex-machine-live.running .sex-machine-readout b { color:var(--ji-lcd); }
+.campaign-shell .sex-machine-live .sex-machine-power>div {
+  height:27px;
+  gap:2px;
+  padding:2px;
+  background:var(--ji-bg);
+}
+.campaign-shell .sex-machine-power button {
+  border:1px solid color-mix(in srgb,var(--ji-line) 80%,transparent);
+  background:color-mix(in srgb,var(--ji-control) 86%,#000);
+}
+.campaign-shell .sex-machine-power button i { height:30%; }
+.campaign-shell .sex-machine-power button.active i { box-shadow:0 0 8px var(--ji-lcd); }
+.campaign-shell .sex-machine-protocols { gap:5px; }
+.campaign-shell .sex-machine-mode-grid {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3px;
+}
+.campaign-shell .sex-machine-mode-grid button {
+  min-height:38px;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  padding:6px 7px;
+  border:1px solid color-mix(in srgb,var(--ji-line) 88%,transparent);
+  border-left:3px solid var(--ji-muted);
+  background:var(--ji-control);
+}
+.campaign-shell .sex-machine-mode-grid button strong { font-size:8px; }
+.campaign-shell .sex-machine-mode-grid button small {
+  color:var(--ji-muted);
+  font-size:6px;
+  font-variant-numeric:tabular-nums;
+}
+.campaign-shell .sex-machine-mode-grid button.active {
+  border-bottom-color:var(--ji-line);
+  border-left-color:var(--ji-lcd);
+  background:var(--ji-selected)!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ji-lcd) 36%,transparent)!important;
+}
+.campaign-shell .sex-machine-protocol-brief {
+  min-height:0;
+  grid-template-columns:minmax(100px,.48fr) minmax(0,1fr);
+  padding:6px 8px;
+  border-left:2px solid var(--ji-lcd);
+  background:var(--ji-bg);
+}
+.campaign-shell .sex-machine-fine-tuning { border:1px solid var(--ji-line); }
+.campaign-shell .sex-machine-console-actions {
+  min-height:42px;
+  padding-top:1px;
+}
+.campaign-shell .sex-machine-console-actions button.primary:only-child {
+  grid-column:1 / -1;
+  min-height:46px;
+}
+.campaign-shell .sex-machine-console-actions button {
+  border:1px solid var(--ji-line);
+  box-shadow:inset 0 -2px #0005;
+}
+.campaign-shell .sex-machine-console-actions button.primary {
+  color:var(--ji-bg)!important;
+  text-shadow:none;
+}
+@media (max-width:760px) {
+  .campaign-shell .sex-machine-mode-grid { grid-template-columns:1fr; }
+  .campaign-shell .sex-machine-readout { grid-template-columns:1fr 1fr 1fr; }
+}
 @keyframes sex-machine-contact-wave {
   0% { opacity:0; transform:translate(-50%,-50%) scale(.35); }
   18% { opacity:.8; }
