@@ -2,6 +2,7 @@ import { CharacterRelation, InteractionObservation, SubjectCoreState } from '../
 import { deriveEdgeProfile } from '../domain/edgeState';
 import { OVERLOAD_FRAGMENTED_SPEECH, OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
 import { describeObservationSignal } from './interactionObservation';
+import type { CompulsionSignal } from '../domain/conditioning';
 
 export type SpeechAct =
     | 'silence'
@@ -78,6 +79,7 @@ export interface ReactionFrame {
         allowedSpeechActs: SpeechAct[];
     };
     expressionMode: ExpressionMode;
+    compulsions?: CompulsionSignal[];
 }
 
 interface CompileFrameInput {
@@ -107,6 +109,7 @@ interface CompileFrameInput {
     recentSpeechActs?: string[];
     relationshipBeliefs?: string[];
     openThreads?: string[];
+    compulsions?: CompulsionSignal[];
 }
 
 const unique = (values: string[], limit: number) => Array.from(new Set(values.filter(Boolean))).slice(0, limit);
@@ -545,6 +548,15 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
         allowedSpeechActs,
         preferredSpeechAct,
     };
+    const dominantCompulsion = (input.compulsions || [])[0];
+    if (dominantCompulsion?.level === 3) {
+        position.secondaryConflict = [position.secondaryConflict, `Навязчивый импульс требует ${dominantCompulsion.impulse}; он может пересилить прежний план или высказанную ранее границу.`].filter(Boolean).join(' ');
+        position.allowedSpeechActs = unique([
+            ...position.allowedSpeechActs,
+            'request', 'admit', 'bargain', 'conceal'
+        ], 8) as SpeechAct[];
+        if (!previousWasQuestion) position.preferredSpeechAct = 'request';
+    }
     const expressionMode = compileExpressionMode(input.core, ownObservation, physiology, input.contexts);
     const addresseeId = input.initiatorId || input.targetId;
     const addresseeName = input.initiatorName || input.targetName;
@@ -573,7 +585,8 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
             openThreads: unique(input.openThreads || [], 3)
         },
         dramaticPosition: position,
-        expressionMode
+        expressionMode,
+        compulsions: input.compulsions,
     };
 }
 
@@ -627,7 +640,9 @@ export function applyVerbalInputToFrame(frame: ReactionFrame, playerSpeech: stri
             primaryIntent: isQuestion
                 ? 'Ты хочешь ответить на смысл заданного вопроса собственными словами, а не спрятаться за технической формулой'
                 : 'Ты решаешь, как отозваться на обращённые к тебе слова',
-            secondaryConflict: '',
+            secondaryConflict: frame.compulsions?.[0]?.level === 3
+                ? `Навязчивый импульс требует ${frame.compulsions[0].impulse}; не игнорируй его, отвечая на вопрос.`
+                : '',
             preferredSpeechAct: isQuestion ? 'answer' : 'acknowledge',
             allowedSpeechActs: isQuestion ? ['answer', 'set_boundary', 'deflect'] : []
         },

@@ -9,6 +9,7 @@ import { getActiveContextLabel, getActiveContextPromptText } from '../domain/con
 import { getLaboratoryPresence, getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
 import { resolvePortraitEmotion } from '../domain/portraitEmotion';
+import { conditioningTags, deriveCompulsionSignals } from '../domain/conditioning';
 
 const normalize = (value: number, min = 0, max = 100) => {
     if (max === min) return 0;
@@ -99,6 +100,8 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
         const resourceValue = Math.max(0, Number(playerCredits));
         const resourceScale = cfg.resourceScale || 100;
         const resourceNorm = normalize(resourceValue, 0, resourceScale);
+        const activeCompulsions = deriveCompulsionSignals(core?.preferences, bundle.compiledAction.tags || []);
+        const compulsionPressure = activeCompulsions[0]?.pressure || 0;
 
         // Смягчаем штраф за отсутствие новизны: снижение максимум на 20%, чтобы персонажи чаще отвечали.
         const noveltyFactor = isVerbalInput ? 1.0 : 0.8 + 0.2 * lastActionNovelty;
@@ -119,7 +122,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
         );
 
         const proactiveProb = clamp01(
-            (cfg.baseProactiveProbability + cfg.attitudeModifier * relationNorm + cfg.sensitivityModifier * sensitivityNorm + cfg.peerModifier * peerNorm + cfg.contextModifier * contextBonus) *
+            (cfg.baseProactiveProbability + cfg.attitudeModifier * relationNorm + cfg.sensitivityModifier * sensitivityNorm + cfg.peerModifier * peerNorm + cfg.contextModifier * contextBonus + compulsionPressure * .16) *
                 observerPenalty
         );
 
@@ -155,6 +158,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
             deviceBound,
             physicallyEngaged,
             canInitiatePhysicalAction
+            ,compulsions:activeCompulsions
         });
 
         // ── Proactive initiative ──
@@ -162,7 +166,9 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
         // Probability scales with event significance so NPCs don't spam actions
         // on every minor tick, but respond to major moments (overload, transitions).
         let becameProactive = false;
-        let proactiveReason = describeTone(relationToCalibrator?.attitude);
+        let proactiveReason = activeCompulsions[0]?.level === 3
+            ? `Компульсия «${activeCompulsions[0].label}»: ${activeCompulsions[0].impulse}.`
+            : describeTone(relationToCalibrator?.attitude);
         let decidedAction: any = undefined;
         let proactiveKind: 'physical' | 'verbal' | null = null;
 
@@ -196,7 +202,13 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
                     const targetPoints = targetPointRecords.map(p => p.pointId);
                     if (targetPoints.length === 0) targetPoints.push('systemic');
 
-                    const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints);
+                    const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints)
+                        .map(action => {
+                            const actionCompulsion = deriveCompulsionSignals(core?.preferences, conditioningTags(action.actionId))[0];
+                            return actionCompulsion?.level === 3
+                                ? { ...action, score:action.score + actionCompulsion.pressure * 18 }
+                                : action;
+                        });
                     const scene = sceneRepo.get(eventSceneId);
                     const actorRes = resourceRepo.get(actorId);
 

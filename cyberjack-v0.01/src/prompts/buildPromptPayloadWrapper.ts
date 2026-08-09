@@ -31,7 +31,8 @@ export async function buildPromptPayloadWithDB(
         openness: perspectiveRow.openness,
         plasticity: perspectiveRow.plasticity,
         attitude: perspectiveRow.attitude,
-        tension: perspectiveRow.tension
+        tension: perspectiveRow.tension,
+        preferences: perspectiveRow.preferences
     } : { sensitivity: 50, capacity:50, openness:50, plasticity:50, attitude:50, tension: 0 };
 
     const recentLogLimit = activeConfig.perception?.recentEventLimit ?? 10;
@@ -48,11 +49,22 @@ export async function buildPromptPayloadWithDB(
     })).reverse();
 
     const activeContextRow = db.prepare(`
-        SELECT cp.label, cp.id, cp.context_config_json, ac.point_id
+        SELECT cp.label, cp.id, cp.tags, cp.context_config_json, ac.point_id
         FROM active_contexts ac
         JOIN action_presets cp ON ac.action_id = cp.id
         WHERE ac.subject_id = ?
-    `).all(ownerQueryId) as {label: string; id: string; context_config_json?: string; point_id?: string}[];
+    `).all(ownerQueryId) as {label: string; id: string; tags?: string; context_config_json?: string; point_id?: string}[];
+    const activeCueTags = activeContextRow.flatMap(row => {
+        try { return JSON.parse(row.tags || '[]'); } catch { return []; }
+    }).filter((tag: unknown): tag is string => typeof tag === 'string');
+    const runningDeviceRows = db.prepare(`
+        SELECT asset_id FROM laboratory_assets
+        WHERE json_extract(metadata, '$.deviceSession.subjectId') = ?
+          AND json_extract(metadata, '$.deviceSession.status') = 'running'
+    `).all(ownerQueryId) as Array<{asset_id:string}>;
+    for (const device of runningDeviceRows) {
+        if (device.asset_id === 'lab_sex_machine') activeCueTags.push('machine', 'sexual', 'penetration');
+    }
     const visibleContexts = activeContextRow.flatMap(r => {
         let role = 'other';
         let config:Record<string,any> = {};
@@ -133,7 +145,7 @@ export async function buildPromptPayloadWithDB(
         activeContextNames,
         latestResult,
         eventId,
-        { ...options, worldPlayerId: options?.worldPlayerId || 'PL-1', addresseeContextFacts }
+        { ...options, worldPlayerId: options?.worldPlayerId || 'PL-1', addresseeContextFacts, compulsionCueTags:activeCueTags }
     );
 
     if (extraLog) {

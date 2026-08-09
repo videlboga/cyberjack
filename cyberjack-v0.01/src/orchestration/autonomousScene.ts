@@ -10,7 +10,7 @@ import {
 import { getLaboratoryPresence, getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { runGameTick } from './runGameTick';
 import { ActionScorer, ActionScoreResult } from './actionScorer';
-import { conditioningTags } from '../domain/conditioning';
+import { conditioningTags, deriveCompulsionSignals } from '../domain/conditioning';
 import { createSocialTurnPlan, enqueueSocialTurn, processPendingSocialTurns, resolvePhysicalInitiativeBasis } from '../services/socialTransactions';
 
 const AUTONOMOUS_INTERVAL_MINUTES = 5;
@@ -67,7 +67,7 @@ function isDeviceBound(subjectId: string, playerId: string): boolean {
     return String(getLaboratoryPresence(subjectId, playerId)?.status || '').startsWith('device:');
 }
 
-function chooseAction(actorId: string, observed: ObservedEvent | null, sceneId: string, visibleTargets: string[]): { targetId: string; action: ActionScoreResult } | null {
+function chooseAction(actorId: string, preferences: unknown, observed: ObservedEvent | null, sceneId: string, visibleTargets: string[]): { targetId: string; action: ActionScoreResult } | null {
     const preferredTarget = observed.targetId && visibleTargets.includes(observed.targetId)
         ? observed.targetId
         : undefined;
@@ -77,6 +77,12 @@ function chooseAction(actorId: string, observed: ObservedEvent | null, sceneId: 
         const points = pointStateRepo.getAllForSubject(targetId).map(point => point.pointId);
         const relation = characterRelationRepo.get(actorId, targetId);
         const scored = ActionScorer.scoreAvailableActions(sceneId, actorId, targetId, points.length ? points : ['systemic'])
+            .map(action => {
+                const compulsion = deriveCompulsionSignals(preferences, conditioningTags(action.actionId))[0];
+                return compulsion?.level === 3
+                    ? { ...action, score:action.score + compulsion.pressure * 18 }
+                    : action;
+            })
             .filter(action => isAutonomousActionAllowed(action, relation?.openness));
         const action = scored.find(item => item.score > -20);
         if (!action) continue;
@@ -146,7 +152,7 @@ export async function runAutonomousSceneMinute() {
             executed.push({ actorId: next.actorId, targetId: social.recipientId, actionId: `social:${social.act}` });
             continue;
         }
-        const selected = chooseAction(next.actorId, next.observed, sceneId, next.visibleTargets);
+        const selected = chooseAction(next.actorId, subjectPreferencesRepo.get(next.actorId), next.observed, sceneId, next.visibleTargets);
         acted.add(next.actorId);
         if (!selected) continue;
         const basis = resolvePhysicalInitiativeBasis(next.actorId, selected.targetId);

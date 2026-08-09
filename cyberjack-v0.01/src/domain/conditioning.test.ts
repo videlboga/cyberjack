@@ -6,6 +6,7 @@ import {
     clothingConditioningTags,
     contextConditioningTags,
     deriveAcquiredTraits,
+    deriveCompulsionSignals,
     isLearnablePreferenceContext,
     parsePreferences,
     preferenceValenceModifier,
@@ -38,6 +39,16 @@ describe('persistent conditioning', () => {
         expect(acquiredTraitValue(preferences, 'trait_masochist')).toBe(3);
         expect(acquiredTraitValue(preferences, 'trait_restraint_fetish')).toBe(2);
         expect(deriveAcquiredTraits(preferences).find(trait => trait.id === 'trait_exhibitionist')?.level).toBe(0);
+    });
+
+    it('turns a level-three relevant trait into a strong cue-bound compulsion', () => {
+        const signals = deriveCompulsionSignals({ tags: { sexual: 5, electronic: 5 } }, ['sexual', 'penetration']);
+        expect(signals).toContainEqual(expect.objectContaining({
+            traitId: 'trait_sexual_dependency',
+            level: 3,
+            pressure: .92,
+        }));
+        expect(signals.some(signal => signal.traitId === 'trait_electrophile')).toBe(false);
     });
 
     it('learns accepted controlled pain at a visible pace', () => {

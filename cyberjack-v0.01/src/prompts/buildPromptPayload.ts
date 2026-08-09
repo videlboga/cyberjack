@@ -11,7 +11,7 @@ import {
 } from '../infrastructure/repositories';
 import { buildInteractionObservation, buildCurrentStateObservationText, describeObservationSignal } from '../narrative/interactionObservation';
 import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/reactionFrame';
-import { deriveAcquiredTraits } from '../domain/conditioning';
+import { deriveAcquiredTraits, deriveCompulsionSignals } from '../domain/conditioning';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { renderSocialMemories } from '../services/socialMemory';
 import { renderTemporalDialogue, TemporalDialogueEntry } from '../narrative/temporalDialogue';
@@ -262,7 +262,7 @@ export async function buildPromptPayload(
     activeContextNames: string[],
     latestResult?: TickOutput,
     eventId = 'scene_lab_calibrator',
-    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string; addresseeContextFacts?: string[] }
+    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string; addresseeContextFacts?: string[]; compulsionCueTags?: string[] }
 ): Promise<PromptPayload & { systemPrompt: string }> {
     const suppressed = new Set(options?.suppressTickIds || []);
     const recentEvents = recentEventsIn.filter(event => {
@@ -340,9 +340,23 @@ export async function buildPromptPayload(
         .filter(trait => trait.level > 0)
         .map(trait => {
             const strength = trait.level >= 3 ? 'сильно выраженная' : trait.level === 2 ? 'выраженная' : 'заметная';
-            return `У тебя есть ${strength} телесно-психологическая склонность «${trait.label}». Это окрашивает непосредственные ощущения и импульсы, но само по себе не задаёт согласие, доверие или решение.`;
+            return `У тебя есть ${strength} телесно-психологическая склонность «${trait.label}»; она меняет оценку релевантных ощущений и может влиять на твои решения.`;
         });
     roleContext.push(...embodiedTraits);
+    const compulsionSignals = deriveCompulsionSignals(actorDetails.core.preferences, [
+        ...(options?.compulsionCueTags || []),
+        ...((latestResult?.tickMeta?.inputs?.action?.tags || []) as string[]),
+    ]);
+    const compulsionLines = compulsionSignals.map(signal => signal.level >= 3
+        ? `Сейчас релевантный стимул запускает навязчивую компульсию «${signal.label}»: мысли снова возвращаются к импульсу ${signal.impulse}. Этот импульс конкурирует с твоими прежними намерениями и должен заметно влиять на то, что ты пытаешься сказать или сделать.`
+        : signal.level === 2
+            ? `Релевантный стимул заметно усиливает склонность «${signal.label}»: тебе трудно не думать об импульсе ${signal.impulse}.`
+            : `Релевантный стимул слегка окрашен склонностью «${signal.label}».`
+    );
+    // Role context is intentionally capped in the reaction frame. Compulsions
+    // must appear before addressee and posture boilerplate rather than being
+    // silently cut off at the end of a dense laboratory scene.
+    roleContext.splice(Math.min(6, roleContext.length), 0, ...compulsionLines);
     const presentCharacters = (spatial ? spatial.characterNames : sceneCharacterRepo.list(eventId)
         .filter(entry => entry.presenceState === 'present')
         .map(entry => entry.character.name));
@@ -427,7 +441,8 @@ export async function buildPromptPayload(
         openThreads: [
             ...socialMemory.openThreads,
             ...deriveOpenDialogueThreads(recentChatEntries, ownerName, initiatorName)
-        ]
+        ],
+        compulsions: compulsionSignals,
     });
     const averageLocalAttitude = pointStatesRow.length
         ? pointStatesRow.reduce((sum, row) => sum + Number(row.localAttitude ?? row.local_attitude ?? 50), 0) / pointStatesRow.length

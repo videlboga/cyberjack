@@ -14,6 +14,16 @@ export type AcquiredTrait = {
     strength: number;
 };
 
+export type CompulsionSignal = {
+    traitId: string;
+    label: string;
+    level: number;
+    pressure: number;
+    cueTags: string[];
+    impulse: string;
+    actionTags: string[];
+};
+
 export type ConditioningSignalInput = {
     pleasure?: number;
     discomfort?: number;
@@ -317,6 +327,51 @@ export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
         ...definition,
         level: acquiredTraitLevel(definition.strength),
     }));
+}
+
+const COMPULSION_DEFINITIONS: Array<{
+    traitId: string;
+    cueTags: string[];
+    impulse: string;
+    actionTags: string[];
+}> = [
+    { traitId:'trait_masochist', cueTags:['pain'], impulse:'искать или не прерывать болезненное воздействие', actionTags:['pain'] },
+    { traitId:'trait_knismolagnia', cueTags:['tickling'], impulse:'искать щекочущее ощущение и возвращаться к нему мыслями', actionTags:['tickling'] },
+    { traitId:'trait_restraint_fetish', cueTags:['restraint'], impulse:'сохранять или искать фиксацию', actionTags:['restraint'] },
+    { traitId:'trait_conditioned_submission', cueTags:['control','command','submission'], impulse:'подчиниться направляющему импульсу', actionTags:['control','command','submission'] },
+    { traitId:'trait_exhibitionist', cueTags:['exposure','humiliation','vulnerable'], impulse:'оставаться открытой чужому вниманию', actionTags:['exposure','humiliation','vulnerable'] },
+    { traitId:'trait_clinical_fetish', cueTags:['clinical','medical'], impulse:'искать медицински оформленное воздействие', actionTags:['clinical','medical'] },
+    { traitId:'trait_electrophile', cueTags:['electronic'], impulse:'искать электрическую стимуляцию', actionTags:['electronic'] },
+    { traitId:'trait_technophile', cueTags:['machine'], impulse:'не прерывать машинное воздействие', actionTags:['machine'] },
+    { traitId:'trait_sexual_dependency', cueTags:['sexual','penetration','oral'], impulse:'сохранить или получить сексуальную стимуляцию', actionTags:['sexual','penetration','oral'] },
+    { traitId:'trait_sensory_deprivation', cueTags:['deprivation'], impulse:'искать отстранение от внешних раздражителей', actionTags:['deprivation'] },
+];
+
+/**
+ * Deterministic motivational pressure from acquired traits. It is produced
+ * only by a matching present cue; a trait is not a permanent instruction to
+ * behave the same way in every scene.
+ */
+export function deriveCompulsionSignals(preferences: unknown, cueTags: string[] = []): CompulsionSignal[] {
+    const cues = new Set(cueTags);
+    if (!cues.size) return [];
+    const traits = new Map(deriveAcquiredTraits(preferences).map(trait => [trait.id, trait]));
+    const pressureForLevel = [0, .28, .58, .92];
+    return COMPULSION_DEFINITIONS.flatMap(definition => {
+        const trait = traits.get(definition.traitId);
+        if (!trait || trait.level <= 0) return [];
+        const matched = definition.cueTags.filter(tag => cues.has(tag));
+        if (!matched.length) return [];
+        return [{
+            traitId:trait.id,
+            label:trait.label,
+            level:trait.level,
+            pressure:pressureForLevel[trait.level] || 0,
+            cueTags:matched,
+            impulse:definition.impulse,
+            actionTags:definition.actionTags,
+        }];
+    }).sort((left, right) => right.pressure - left.pressure);
 }
 
 export function acquiredTraitValue(preferences: unknown, traitId: string): number {
