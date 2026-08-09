@@ -20,4 +20,12 @@ describe('canonicalCharacterPortrait', () => {
 
     expect(portrait).toContain('dress_stockings');
   });
+
+  it('maps the personal costume context to the costume image variant', () => {
+    const portrait = canonicalCharacterPortrait('NPC-CAND-01', 'Ника', [], {
+      contexts: [{ actionId: 'eq_clothe_costume' }],
+    });
+
+    expect(portrait).toContain('costume');
+  });
 });

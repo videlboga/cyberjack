@@ -1580,6 +1580,33 @@
     "removeContexts": ["eq_clothe_calibration_set"]
   },
   {
+    "id": "eq_clothe_costume",
+    "name": "Надеть личный костюм",
+    "description": "Надеть личный костюм персонажа — повседневный наряд, не относящийся к лабораторной экипировке.",
+    "categories": ["clothing"],
+    "tags": ["clothing", "costume", "personal"],
+    "type": "clothing",
+    "contextConfig": {
+      "type": "clothing",
+      "activeLabel": "Личный костюм",
+      "occupiesPoints": ["global_clothing"],
+      "duration": -1,
+      "modifiers": {
+        "intensity": -1,
+        "contact": -2,
+        "sharpness": -1
+      }
+    },
+    "removeNarrative": "{name} снимает личный костюм"
+  },
+  {
+    "id": "eq_clothe_costume_remove",
+    "name": "Снять личный костюм",
+    "categories": ["clothing"],
+    "tags": ["clothing", "costume", "remove"],
+    "removeContexts": ["eq_clothe_costume"]
+  },
+  {
     "id": "act_apply_ankle_cuffs",
     "requiresItem": "eq_ankle_cuffs",
     "name": "Застегнуть ножные манжеты",

@@ -183,6 +183,7 @@ const calibrationClothingFromContexts = (contexts: VisualContext[] = []) => {
     const ids = new Set(contexts.map(context => context.actionId));
     if (ids.has('eq_clothe_jumpsuit')) return 'jumpsuit';
     if (ids.has('eq_clothe_calibration_set')) return 'calibration_set';
+    if (ids.has('eq_clothe_costume')) return 'costume';
     if (ids.has('eq_clothe_lab_gown')) return 'lab_gown';
     // v4 currently has no stockings-only axis. Preserve the visible stockings
     // with the closest authored wardrobe instead of incorrectly falling back

@@ -19,6 +19,7 @@ const wardrobeFor = (contexts: PortraitContext[] = []) => {
   const ids = contextIds(contexts);
   if (ids.has('eq_clothe_dress') && ids.has('eq_clothe_stockings')) return 'dress_stockings';
   if (ids.has('eq_clothe_dress')) return 'dress';
+  if (ids.has('eq_clothe_costume')) return 'costume';
   if (ids.has('eq_clothe_lab_gown')) return 'lab_gown';
   if (ids.has('eq_clothe_jumpsuit')) return 'jumpsuit';
   if (ids.has('eq_clothe_calibration_set')) return 'calibration_set';

@@ -969,6 +969,22 @@ export const calibrationActions: ActionDef[] = [
     requiresContext: "eq_clothe_calibration_set",
   },
   {
+    id: "eq_clothe_costume",
+    label: "Надеть личный костюм",
+    hint: "Вернуть персонажу её обычный наряд",
+    group: "clothing",
+    pointId: "systemic",
+    hideWhenContext: "eq_clothe_costume",
+  },
+  {
+    id: "eq_clothe_costume_remove",
+    label: "Снять личный костюм",
+    hint: "Снять обычный наряд",
+    group: "clothing",
+    pointId: "systemic",
+    requiresContext: "eq_clothe_costume",
+  },
+  {
     id: "eq_clothe_dress",
     label: "Надеть платье",
     hint: "Надеть платье поверх белья или на тело",
@@ -1411,6 +1427,7 @@ const preparationTargetVisual = (
     "eq_clothe_jumpsuit",
     "eq_clothe_lab_gown",
     "eq_clothe_calibration_set",
+    "eq_clothe_costume",
   ]);
   let contexts = [...(state?.contexts || [])];
 

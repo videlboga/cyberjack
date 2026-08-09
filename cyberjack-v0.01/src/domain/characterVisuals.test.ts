@@ -61,6 +61,18 @@ describe('calibration pose resolution', () => {
         );
     });
 
+    it('maps the personal costume context to the costume matrix variant', () => {
+        const descriptor = buildCalibrationVisualDescriptorV4('S-AV-01', {
+            contexts: [context('eq_clothe_costume')],
+            tension: 0,
+            attitude: 50,
+            openness: 50,
+        });
+
+        expect(descriptor.clothing).toBe('costume');
+        expect(resolveCalibrationAvatarV4(descriptor)).toContain('costume__none__neutral.png');
+    });
+
     it.each([
         [['act_hold_exposure'], 'standing_exposed'],
         [['act_hold_exposure', 'pose_standing'], 'standing_exposed'],

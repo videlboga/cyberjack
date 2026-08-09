@@ -330,7 +330,7 @@ export async function parseVerbalInput(
                 type: 'deactivate_contexts',
                 targetContextIds: [
                     'eq_clothe_jumpsuit', 'eq_clothe_calibration_set', 'eq_clothe_lab_gown',
-                    'eq_clothe_dress', 'eq_clothe_stockings', 'eq_clothe_underwear', 'eq_clothe_panties'
+                    'eq_clothe_dress', 'eq_clothe_costume', 'eq_clothe_stockings', 'eq_clothe_underwear', 'eq_clothe_panties'
                 ]
             },
             raw: JSON.stringify({ intent: 'deactivate_context', deterministic: 'remove_all_clothing' }),

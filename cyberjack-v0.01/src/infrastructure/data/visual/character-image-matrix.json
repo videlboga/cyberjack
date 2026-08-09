@@ -224,6 +224,13 @@
       "contextIds": [
         "eq_clothe_calibration_set"
       ]
+    },
+    {
+      "id": "costume",
+      "name": "Личный костюм",
+      "contextIds": [
+        "eq_clothe_costume"
+      ]
     }
   ],
   "restraints": [

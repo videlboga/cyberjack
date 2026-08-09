@@ -316,7 +316,8 @@ db.transaction(() => {
         'eq_clothe_dress', 'eq_clothe_dress_remove',
         'eq_clothe_stockings', 'eq_clothe_stockings_remove',
         'eq_clothe_lab_gown', 'eq_clothe_lab_gown_remove',
-        'eq_clothe_calibration_set', 'eq_clothe_calibration_set_remove'
+        'eq_clothe_calibration_set', 'eq_clothe_calibration_set_remove',
+        'eq_clothe_costume', 'eq_clothe_costume_remove'
     ];
     const availableActions = Array.from(new Set([...actions.map(a => a.id), ...prototypeExpansionActions]));
     const availableActionsStr = JSON.stringify(availableActions);
