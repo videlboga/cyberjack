@@ -9,6 +9,7 @@ import { ensureCharacterStorySeeds } from './characterStorySeeds';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
 import { setLaboratoryPresence } from './spatialContext';
+import { describeDeviceProtocolEvent } from '../narrative/deviceExperience';
 
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
@@ -1068,17 +1069,9 @@ export function controlDeviceSession(
     db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
         .run(JSON.stringify({ ...metadata, deviceSession: next }), playerId, assetId);
     if (command === 'stop') interactionStanceRepo.softenAll(next.subjectId,.5);
-    const actionLabel = ({
-        configure: 'Изменить конфигурацию оборудования',
-        settings: 'Изменить автономную программу',
-        start: 'Запустить протокол',
-        adjust: `Изменить интенсивность до ${next.intensity}%`,
-        pause: 'Приостановить протокол',
-        resume: 'Продолжить протокол',
-        stop: 'Остановить протокол',
-    } as Record<string, string>)[command];
-    chatMemoryRepo.append(next.subjectId, 'user', `[Действие] ${actionLabel}`, row.name);
-    recordScenarioEvent('device_protocol', `Устройство: ${command}`, `${row.name}: ${next.configuration}, интенсивность ${next.intensity}%.`, {
+    const sensoryEvent = describeDeviceProtocolEvent(command, next, current);
+    chatMemoryRepo.append(next.subjectId, 'user', `[Действие] ${sensoryEvent}`, row.name);
+    recordScenarioEvent('device_protocol', `Устройство: ${command}`, sensoryEvent, {
         subjectId: next.subjectId, assetId, command, configuration: next.configuration, intensity: next.intensity
     });
     return { assetId, session: next };

@@ -12,6 +12,7 @@ import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamics
 import { passiveArousalAfterMinutes } from '../domain/arousalDynamics';
 import { runAutonomousSceneMinute } from './autonomousScene';
 import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
+import { describeDeviceAction, describeDeviceProtocolEvent, describeDeviceSensation } from '../narrative/deviceExperience';
 
 let running = false;
 let pendingMinutes = 0;
@@ -62,8 +63,8 @@ function sexMachineVector(session:BackgroundDeviceSession, worldMinute:number) {
     sharpness:.06 + power * .18,
     novelty:rhythmNovelty,
     tags:['intimate', 'penetration', 'continuous', 'machine', `rhythm_${session.rhythm || 'steady'}`],
-    label:`Секс-машина · ${session.intensity}%`,
-    description:'Механизм продолжает повторяющееся внутреннее движение в зафиксированной зоне.',
+    label:describeDeviceAction(session),
+    description:describeDeviceSensation(session),
     sensory:{
       stimulus:'Каждый ход создаёт внутреннее давление, движение и трение по одной траектории.',
       texture:'Давление приходит изнутри и не исчезает при попытке изменить положение тела.',
@@ -192,9 +193,15 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
       if (significant) {
         const transitionText = transitions.map((entry:any) => entry.label || entry.kind).filter(Boolean).join(', ');
         const reason = transitionText
-          || (reserveReached ? `Достигнут резерв выносливости ${minCapacity}; протокол продолжает работу`
-            : justStarted ? `Протокол запущен: ${session.targetMode || 'manual'}, мощность ${session.intensity}%`
-            : `Фаза протокола изменилась: ${phase}`);
+          || (reserveReached
+            ? `${describeDeviceSensation(session)} Тело заметно утомлено, но движение не прекращается.`
+            : justStarted
+              ? describeDeviceProtocolEvent('start', session)
+              : phase === 'peak'
+                ? `${describeDeviceSensation(session)} Ощущения подходят к особенно острой грани.`
+                : phase === 'intense'
+                  ? `${describeDeviceSensation(session)} Тело уже не успевает полностью расслабиться между движениями.`
+                  : describeDeviceSensation(session));
         db.prepare(`INSERT INTO scenario_events (world_minute,type,title,description,metadata) VALUES (?,?,?,?,?)`)
           .run(
             worldMinute,
