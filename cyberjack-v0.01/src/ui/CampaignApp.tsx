@@ -3041,6 +3041,18 @@ function DeviceControlScreen({
     const [targetMode] = targetModes[nextIndex];
     return control("settings", { targetMode, ...targetPresets[targetMode] });
   };
+  const rhythm = session.rhythm || "steady";
+  const rhythmWavePaths: Record<string, string> = {
+      steady:
+        "M0 12 C6 5 12 5 18 12 S30 19 36 12 S48 5 54 12 S66 19 72 12 S84 5 90 12 S102 19 108 12 S120 5 126 12",
+      pulse:
+        "M0 12 L14 12 L18 3 L22 21 L26 12 L42 12 L46 3 L50 21 L54 12 L70 12 L74 3 L78 21 L82 12 L98 12 L102 3 L106 21 L110 12 L126 12",
+      wave:
+        "M0 12 C8 3 16 3 24 12 S40 21 48 12 S64 3 72 12 S88 21 96 12 S112 3 120 12 S124 15 128 12",
+      random:
+        "M0 12 L9 6 L17 17 L28 4 L37 14 L48 9 L59 20 L70 5 L81 15 L92 3 L104 18 L115 8 L128 12",
+    };
+  const rhythmWavePath = rhythmWavePaths[rhythm] || "M0 12 H128";
   const machineRunning = session.status === "running";
   const machineEngaged = machineRunning || session.status === "paused";
   const tension = clampMetric(Number(state.tension || 0));
@@ -3162,15 +3174,14 @@ function DeviceControlScreen({
               </span>
             </div>
             <div
-              className={`sex-machine-rhythm rhythm-${session.rhythm || "steady"} ${machineRunning ? "running" : ""}`}
-              aria-label={`Визуализация ритма: ${session.rhythm || "steady"}`}
+              className={`sex-machine-rhythm rhythm-${rhythm} ${machineRunning ? "running" : ""}`}
+              aria-label={`Визуализация ритма: ${rhythm}`}
             >
               <small>СИГНАЛ РИТМА</small>
-              <div aria-hidden="true">
-                {Array.from({ length: 12 }, (_, index) => (
-                  <i key={index} />
-                ))}
-              </div>
+              <svg viewBox="0 0 128 24" preserveAspectRatio="none" aria-hidden="true">
+                <path className="baseline" d="M0 12H128" />
+                <path className="wave" d={rhythmWavePath} pathLength={100} />
+              </svg>
             </div>
             <div className="sex-machine-power">
               <header>
