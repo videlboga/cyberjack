@@ -3174,6 +3174,17 @@ function DeviceControlScreen({
                 <b>{session.minCapacity ?? 15}</b>
               </span>
             </div>
+            <div
+              className={`sex-machine-rhythm rhythm-${session.rhythm || "steady"} ${machineRunning ? "running" : ""}`}
+              aria-label={`Визуализация ритма: ${session.rhythm || "steady"}`}
+            >
+              <small>СИГНАЛ РИТМА</small>
+              <div aria-hidden="true">
+                {Array.from({ length: 12 }, (_, index) => (
+                  <i key={index} />
+                ))}
+              </div>
+            </div>
             <div className="sex-machine-power">
               <header>
                 <span>МОЩНОСТЬ ВОЗДЕЙСТВИЯ</span>
