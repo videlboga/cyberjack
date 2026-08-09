@@ -10036,6 +10036,32 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   text-transform:uppercase;
   white-space:nowrap;
 }
+
+/* With the service controls gone, the console can use readable game-scale type. */
+.campaign-shell .sex-machine-live { gap:8px; padding:11px; }
+.campaign-shell .sex-machine-live>header small,
+.campaign-shell .sex-machine-protocols>header small { font-size:7px; }
+.campaign-shell .sex-machine-live>header strong { font-size:20px; }
+.campaign-shell .sex-machine-live>header>span,
+.campaign-shell .sex-machine-protocols>header span { font-size:7px; }
+.campaign-shell .sex-machine-readout>span { padding:7px; }
+.campaign-shell .sex-machine-readout small { font-size:6px; }
+.campaign-shell .sex-machine-readout b { font-size:9px; }
+.campaign-shell .sex-machine-power>header span { font-size:7px; }
+.campaign-shell .sex-machine-power>header b { font-size:24px; }
+.campaign-shell .sex-machine-live .sex-machine-power>div { height:28px; }
+.campaign-shell .sex-machine-protocols { gap:7px; }
+.campaign-shell .sex-machine-protocol-selector { min-height:64px; }
+.campaign-shell .sex-machine-protocol-selector>button { font-size:30px; }
+.campaign-shell .sex-machine-protocol-selector>div { padding:8px 10px; }
+.campaign-shell .sex-machine-protocol-selector small { font-size:6px; }
+.campaign-shell .sex-machine-protocol-selector strong { font-size:14px; }
+.campaign-shell .sex-machine-protocol-brief { padding:8px 10px; }
+.campaign-shell .sex-machine-protocol-brief strong { font-size:11px; }
+.campaign-shell .sex-machine-protocol-brief span { font-size:6px; }
+.campaign-shell .sex-machine-protocol-brief p { font-size:8px; }
+.campaign-shell .sex-machine-console-actions button { min-height:48px; font-size:12px; }
+.campaign-shell .sex-machine-console-actions button small { font-size:6px; }
 @keyframes sex-machine-contact-wave {
   0% { opacity:0; transform:translate(-50%,-50%) scale(.35); }
   18% { opacity:.8; }
