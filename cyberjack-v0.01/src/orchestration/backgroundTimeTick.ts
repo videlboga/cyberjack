@@ -150,10 +150,10 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
         sceneId:'scene_lab_calibrator',
         presetId:'sustained_sexual_pulse',
         deltaTime:1,
-        // The common sustained preset is authored for occasional pulses.
-        // A machine pulse happens every world minute, so its learning/state
-        // delta must be correspondingly smaller.
-        stateDeltaScale:edgeBrake ? .0025 : .02,
+        // The machine is a continuous, full-strength source of stimulation.
+        // Only the edge controller below reduces its effect near the selected
+        // ceiling; ordinary operation uses the engine's normal tick delta.
+        stateDeltaScale:edgeBrake ? .0025 : 1,
         dynamicModifiers:sexMachineVector(session, worldMinute),
         customPayload:{
           sustainedSource:'lab_sex_machine',
