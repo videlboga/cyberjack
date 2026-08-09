@@ -3138,7 +3138,7 @@ function DeviceControlScreen({
           >
             <header>
               <div>
-                <small>ЗАГРУЖЕННЫЙ ПРОТОКОЛ</small>
+                <small>ТЕКУЩИЙ ПРОТОКОЛ</small>
                 <strong>{activeMode[1]}</strong>
               </div>
               <span>
@@ -3150,19 +3150,22 @@ function DeviceControlScreen({
                     : "ГОТОВ"}
               </span>
             </header>
-            <div className="sex-machine-readout">
-              <span>
-                <small>РИТМ</small>
-                <b>{session.rhythm === "pulse" ? "ИМПУЛЬС" : session.rhythm === "wave" ? "ВОЛНА" : session.rhythm === "random" ? "СЛУЧАЙНЫЙ" : "РОВНЫЙ"}</b>
-              </span>
-              <span>
-                <small>ПРЕДЕЛ</small>
-                <b>{session.maxTension ?? 95}</b>
-              </span>
-              <span>
-                <small>РЕЗЕРВ</small>
-                <b>{session.minCapacity ?? 15}</b>
-              </span>
+            <div
+              className={`sex-machine-oscilloscope rhythm-${session.rhythm || "steady"}`}
+              aria-hidden="true"
+            >
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
             </div>
             <div className="sex-machine-power">
               <header>
@@ -3192,10 +3195,44 @@ function DeviceControlScreen({
             </div>
           </section>
           {!machineEngaged && (
+            <section className="sex-machine-vitals">
+              <header>
+                <small>СОСТОЯНИЕ АКТИВА</small>
+                <span>История последних изменений</span>
+              </header>
+              <div className="sex-machine-vital-charts">
+                <LabMetricChart
+                  resident={resident}
+                  metric="tension"
+                  label="АКТИВАЦИЯ"
+                  tone="amber"
+                />
+                <LabMetricChart
+                  resident={resident}
+                  metric="capacity"
+                  label="РЕСУРС"
+                  tone="mint"
+                />
+                <LabMetricChart
+                  resident={resident}
+                  metric="attitude"
+                  label="ПРИНЯТИЕ"
+                  tone="blue"
+                />
+                <LabMetricChart
+                  resident={resident}
+                  metric="sensitivity"
+                  label="ЧУВСТВИТЕЛЬНОСТЬ"
+                  tone="violet"
+                />
+              </div>
+            </section>
+          )}
+          {!machineEngaged && (
             <section className="sex-machine-protocols">
               <header>
-                <small>ВЫБОР КАРТРИДЖА</small>
-                <span>Автоматические конфигурации</span>
+                <small>ВЫБОР ПРОТОКОЛА</small>
+                <span>Автоматическая стартовая конфигурация</span>
               </header>
               <div className="sex-machine-mode-grid">
                 {targetModes.map(([id, label]) => (
@@ -3213,7 +3250,6 @@ function DeviceControlScreen({
                     }
                   >
                     <strong>{label}</strong>
-                    <small>{targetPresets[id].intensity}%</small>
                   </button>
                 ))}
               </div>
