@@ -9667,6 +9667,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .campaign-shell .sex-machine-session-target small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .campaign-shell .sex-machine-session-target button { width:22px; font-size:13px; }
 .campaign-shell .sex-machine-session-target b { min-width:24px; text-align:center; font-size:9px; white-space:nowrap; }
+.campaign-shell .sex-machine-session-target:first-child b { font-size:11px; }
 .campaign-shell .sex-machine-fine-tuning {
   min-height:0;
   background:var(--ji-surface-soft);
