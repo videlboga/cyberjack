@@ -3031,6 +3031,16 @@ function DeviceControlScreen({
   const activeMode =
     targetModes.find((mode) => mode[0] === (session.targetMode || "manual")) ||
     targetModes[0];
+  const activeModeIndex = Math.max(
+    0,
+    targetModes.findIndex((mode) => mode[0] === activeMode[0]),
+  );
+  const selectAdjacentMode = (offset: number) => {
+    const nextIndex =
+      (activeModeIndex + offset + targetModes.length) % targetModes.length;
+    const [targetMode] = targetModes[nextIndex];
+    return control("settings", { targetMode, ...targetPresets[targetMode] });
+  };
   const machineRunning = session.status === "running";
   const machineEngaged = machineRunning || session.status === "paused";
   const tension = clampMetric(Number(state.tension || 0));
@@ -3150,22 +3160,19 @@ function DeviceControlScreen({
                     : "ГОТОВ"}
               </span>
             </header>
-            <div
-              className={`sex-machine-oscilloscope rhythm-${session.rhythm || "steady"}`}
-              aria-hidden="true"
-            >
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
+            <div className="sex-machine-readout">
+              <span>
+                <small>РИТМ</small>
+                <b>{session.rhythm === "pulse" ? "ИМПУЛЬС" : session.rhythm === "wave" ? "ВОЛНА" : session.rhythm === "random" ? "СЛУЧАЙНЫЙ" : "РОВНЫЙ"}</b>
+              </span>
+              <span>
+                <small>ПРЕДЕЛ</small>
+                <b>{session.maxTension ?? 95}</b>
+              </span>
+              <span>
+                <small>РЕЗЕРВ</small>
+                <b>{session.minCapacity ?? 15}</b>
+              </span>
             </div>
             <div className="sex-machine-power">
               <header>
@@ -3195,63 +3202,30 @@ function DeviceControlScreen({
             </div>
           </section>
           {!machineEngaged && (
-            <section className="sex-machine-vitals">
-              <header>
-                <small>СОСТОЯНИЕ АКТИВА</small>
-                <span>История последних изменений</span>
-              </header>
-              <div className="sex-machine-vital-charts">
-                <LabMetricChart
-                  resident={resident}
-                  metric="tension"
-                  label="АКТИВАЦИЯ"
-                  tone="amber"
-                />
-                <LabMetricChart
-                  resident={resident}
-                  metric="capacity"
-                  label="РЕСУРС"
-                  tone="mint"
-                />
-                <LabMetricChart
-                  resident={resident}
-                  metric="attitude"
-                  label="ПРИНЯТИЕ"
-                  tone="blue"
-                />
-                <LabMetricChart
-                  resident={resident}
-                  metric="sensitivity"
-                  label="ЧУВСТВИТЕЛЬНОСТЬ"
-                  tone="violet"
-                />
-              </div>
-            </section>
-          )}
-          {!machineEngaged && (
             <section className="sex-machine-protocols">
               <header>
                 <small>ВЫБОР ПРОТОКОЛА</small>
-                <span>Автоматическая стартовая конфигурация</span>
+                <span>{activeMode[3]}</span>
               </header>
-              <div className="sex-machine-mode-grid">
-                {targetModes.map(([id, label]) => (
-                  <button
-                    className={
-                      (session.targetMode || "manual") === id ? "active" : ""
-                    }
-                    disabled={working}
-                    key={id}
-                    onClick={() =>
-                      control("settings", {
-                        targetMode: id,
-                        ...targetPresets[id],
-                      })
-                    }
-                  >
-                    <strong>{label}</strong>
-                  </button>
-                ))}
+              <div className="sex-machine-protocol-selector">
+                <button
+                  aria-label="Предыдущий протокол"
+                  disabled={working}
+                  onClick={() => selectAdjacentMode(-1)}
+                >
+                  ‹
+                </button>
+                <div>
+                  <small>КАРТРИДЖ {String(activeModeIndex + 1).padStart(2, "0")} / {String(targetModes.length).padStart(2, "0")}</small>
+                  <strong>{activeMode[1]}</strong>
+                </div>
+                <button
+                  aria-label="Следующий протокол"
+                  disabled={working}
+                  onClick={() => selectAdjacentMode(1)}
+                >
+                  ›
+                </button>
               </div>
               <div className="sex-machine-protocol-brief">
                 <div>

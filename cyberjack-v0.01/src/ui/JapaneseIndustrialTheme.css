@@ -9967,6 +9967,75 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   border-color:color-mix(in srgb,var(--ji-amber) 78%,transparent);
   animation-duration:1.1s;
 }
+
+/* The right-hand console is deliberately narrow: show one protocol clearly
+   instead of compressing a dashboard of unrelated telemetry into it. */
+.campaign-shell .sex-machine-readout {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:3px;
+}
+.campaign-shell .sex-machine-readout>span {
+  min-width:0;
+  display:grid;
+  gap:2px;
+  padding:5px;
+  background:var(--ji-control);
+}
+.campaign-shell .sex-machine-readout small {
+  overflow:hidden;
+  color:var(--ji-muted);
+  font-size:5px;
+  letter-spacing:.08em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.campaign-shell .sex-machine-readout b {
+  overflow:hidden;
+  color:var(--ji-secondary);
+  font-size:7px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.campaign-shell .sex-machine-live.running .sex-machine-readout b { color:var(--ji-lcd); }
+.campaign-shell .sex-machine-protocol-selector {
+  display:grid;
+  grid-template-columns:32px minmax(0,1fr) 32px;
+  min-height:54px;
+  background:var(--ji-control);
+}
+.campaign-shell .sex-machine-protocol-selector>button {
+  border:0;
+  color:var(--ji-secondary);
+  background:var(--ji-surface-soft);
+  font-size:24px;
+  line-height:1;
+}
+.campaign-shell .sex-machine-protocol-selector>button:hover:not(:disabled) {
+  color:var(--ji-lcd);
+  background:var(--ji-selected)!important;
+}
+.campaign-shell .sex-machine-protocol-selector>div {
+  min-width:0;
+  display:grid;
+  align-content:center;
+  gap:3px;
+  padding:6px 8px;
+  border-bottom:2px solid var(--ji-lcd);
+}
+.campaign-shell .sex-machine-protocol-selector small {
+  color:var(--ji-muted);
+  font-size:5px;
+  letter-spacing:.1em;
+}
+.campaign-shell .sex-machine-protocol-selector strong {
+  overflow:hidden;
+  color:var(--ji-text);
+  font-size:11px;
+  text-overflow:ellipsis;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
 @keyframes sex-machine-contact-wave {
   0% { opacity:0; transform:translate(-50%,-50%) scale(.35); }
   18% { opacity:.8; }
