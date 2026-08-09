@@ -3090,19 +3090,6 @@ function DeviceControlScreen({
       : projectedTension >= maxTension
         ? "Следующий цикл выведет активацию к заданному пределу."
         : `Следующий цикл: активация +${Math.max(0, Math.round(projectedTension - tension))}, ресурс ${Math.round(projectedCapacity - capacity)}.`);
-  const intervene = async (label: string, intensity: number) => {
-    const nextIntensity = Math.max(10, Math.min(100, intensity));
-    const adjusted =
-      nextIntensity === session.intensity ||
-      (await control("adjust", { intensity: nextIntensity }));
-    if (!adjusted) return;
-    const advanced = await onPassTime(10);
-    if (advanced !== false)
-      setOperatorNote(
-        `${label} · мощность ${nextIntensity}% · выполнен цикл 10 мин.`,
-      );
-  };
-
   return (
     <main className="device-control-screen sex-machine-screen">
       <header className="device-control-header">
@@ -3310,28 +3297,6 @@ function DeviceControlScreen({
                 </article>
               </div>
               <p className="sex-machine-system-note">{systemNote}</p>
-              {machineRunning && (
-                <div className="sex-machine-interventions">
-                  <button
-                    disabled={working || busy}
-                    onClick={() =>
-                      intervene("Темп снижен", session.intensity - 15)
-                    }
-                  >
-                    <strong>Снизить темп</strong>
-                    <small>−15 мощности · сохранить ресурс</small>
-                  </button>
-                  <button
-                    disabled={working || busy || session.intensity >= 100}
-                    onClick={() =>
-                      intervene("Импульс усилен", session.intensity + 15)
-                    }
-                  >
-                    <strong>Усилить импульс</strong>
-                    <small>+15 мощности · повысить риск</small>
-                  </button>
-                </div>
-              )}
             </section>
           )}
           <div className="sex-machine-console-actions">
