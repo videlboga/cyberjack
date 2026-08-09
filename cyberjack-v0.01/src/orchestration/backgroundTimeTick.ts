@@ -33,7 +33,10 @@ type BackgroundDeviceSession = {
   valencePolicy?:string;
   maxTension?:number;
   minCapacity?:number;
-  durationMinutes?:number;
+  stopAfterMinutes?:number | null;
+  orgasmTargetCount?:number | null;
+  orgasmCount?:number;
+  stopAtReserve?:boolean;
   lastReactionTick?:number;
 };
 
@@ -123,17 +126,17 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
     for (const context of activeContextsRepo.getAllForSubject(session.subjectId)) {
       if (incompatible.has(context.actionId)) activeContextsRepo.remove(context.id);
     }
-    const durationReached = Boolean(
-      session.durationMinutes
+    const timerReached = Boolean(
+      session.stopAfterMinutes
       && session.startedAtTick !== null
-      && worldMinute - session.startedAtTick >= session.durationMinutes
+      && worldMinute - session.startedAtTick >= session.stopAfterMinutes
     );
-    if (durationReached) {
+    if (timerReached) {
       const stopped = { ...session, status:'stopped', phase:'sustain', startedAtTick:null, updatedAtTick:worldMinute };
       db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
         .run(JSON.stringify({ ...metadata, deviceSession:stopped }), row.player_id, row.asset_id);
       db.prepare(`INSERT INTO scenario_events (world_minute,type,title,description,metadata) VALUES (?,?,?,?,?)`)
-        .run(worldMinute, 'device_protocol', 'Протокол секс-машины завершён', `${row.name}: достигнута заданная длительность.`, JSON.stringify({ subjectId:session.subjectId, assetId:row.asset_id, significant:true }));
+        .run(worldMinute, 'device_protocol', 'Сеанс секс-машины завершён', `${row.name}: сработал установленный лимит сеанса.`, JSON.stringify({ subjectId:session.subjectId, assetId:row.asset_id, significant:true }));
       continue;
     }
     const pointId = session.targetPointIds?.find(point => point && point !== 'systemic') || 'vagina';
@@ -176,7 +179,13 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
       const transitions = bundle.diagnostics?.observation?.transitions || [];
       const justStarted = session.startedAtTick !== null && worldMinute - session.startedAtTick <= 1;
       const reserveReached = Number(after?.capacity ?? 100) <= minCapacity;
-      const significant = justStarted || reserveReached || phase !== session.phase || transitions.length > 0;
+      const reserveTargetReached = reserveReached && Boolean(session.stopAtReserve);
+      const orgasmCount = Number(session.orgasmCount || 0) + (bundle.output?.notableEvent === 'positive_discharge' ? 1 : 0);
+      const orgasmTargetReached = Boolean(
+        session.orgasmTargetCount
+        && orgasmCount >= session.orgasmTargetCount
+      );
+      const significant = justStarted || reserveReached || reserveTargetReached || orgasmTargetReached || phase !== session.phase || transitions.length > 0;
       const canReact = justStarted || worldMinute - Number(session.lastReactionTick || -Infinity) >= 10;
       const nextSession = {
         ...session,
@@ -184,7 +193,9 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
         // Low reserve is a risk/response threshold, not an implicit stop.
         // A running machine remains continuous until its configured duration
         // expires or the operator explicitly pauses/stops it.
-        status:session.status,
+        status:orgasmTargetReached || reserveTargetReached ? 'stopped' : session.status,
+        startedAtTick:orgasmTargetReached || reserveTargetReached ? null : session.startedAtTick,
+        orgasmCount,
         updatedAtTick:worldMinute,
         lastReactionTick:significant && canReact ? worldMinute : session.lastReactionTick,
       };
@@ -193,7 +204,11 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
       if (significant) {
         const transitionText = transitions.map((entry:any) => entry.label || entry.kind).filter(Boolean).join(', ');
         const reason = transitionText
-          || (reserveReached
+          || (orgasmTargetReached
+            ? 'Острый пик завершается оргазмом, и механизм останавливается.'
+            : reserveTargetReached
+              ? 'Ресурс тела достигает заданного предела, и механизм останавливается.'
+            : reserveReached
             ? `${describeDeviceSensation(session)} Тело заметно утомлено, но движение не прекращается.`
             : justStarted
               ? describeDeviceProtocolEvent('start', session)
@@ -206,7 +221,7 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
           .run(
             worldMinute,
             'device_effect',
-            phase === 'peak' ? 'Секс-машина: достигнут порог' : phase === 'intense' ? 'Секс-машина: интенсивная фаза' : 'Секс-машина: стабилизация',
+            orgasmTargetReached || reserveTargetReached ? 'Сеанс секс-машины: цель достигнута' : phase === 'peak' ? 'Секс-машина: достигнут порог' : phase === 'intense' ? 'Секс-машина: интенсивная фаза' : 'Секс-машина: стабилизация',
             reason,
             JSON.stringify({ subjectId:session.subjectId, assetId:row.asset_id, phase, transitions, significant:true }),
           );

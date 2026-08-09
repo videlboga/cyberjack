@@ -134,7 +134,6 @@ type DeviceSession = {
   status: "loaded" | "running" | "paused" | "stopped";
   intensity: number;
   phase: "sustain" | "intense" | "peak";
-  protocolId: string;
   targetPointIds: string[];
   startedAtTick: number | null;
   updatedAtTick: number;
@@ -147,11 +146,14 @@ type DeviceSession = {
     | "orgasm"
     | "exhaustion";
   rhythm?: "steady" | "pulse" | "wave" | "random";
-  orgasmPolicy?: "deny" | "allow" | "force" | "repeat";
+  orgasmPolicy?: "deny" | "allow" | "force";
   valencePolicy?: "adaptive" | "neutral" | "positive" | "negative" | "mixed";
   maxTension?: number;
   minCapacity?: number;
-  durationMinutes?: number;
+  stopAfterMinutes?: number | null;
+  orgasmTargetCount?: number | null;
+  orgasmCount?: number;
+  stopAtReserve?: boolean;
 };
 type LabAsset = {
   id: string;
@@ -2908,7 +2910,7 @@ function DeviceControlScreen({
       | "valencePolicy"
       | "maxTension"
       | "minCapacity"
-      | "durationMinutes"
+      | "stopAtReserve"
     >
   > = {
     manual: {
@@ -2918,7 +2920,7 @@ function DeviceControlScreen({
       valencePolicy: "neutral",
       maxTension: 95,
       minCapacity: 15,
-      durationMinutes: 120,
+      stopAtReserve: false,
     },
     edge: {
       intensity: 55,
@@ -2927,7 +2929,7 @@ function DeviceControlScreen({
       valencePolicy: "adaptive",
       maxTension: 88,
       minCapacity: 25,
-      durationMinutes: 0,
+      stopAtReserve: false,
     },
     positive: {
       intensity: 45,
@@ -2936,7 +2938,7 @@ function DeviceControlScreen({
       valencePolicy: "positive",
       maxTension: 90,
       minCapacity: 25,
-      durationMinutes: 120,
+      stopAtReserve: false,
     },
     negative: {
       intensity: 65,
@@ -2945,7 +2947,7 @@ function DeviceControlScreen({
       valencePolicy: "negative",
       maxTension: 95,
       minCapacity: 15,
-      durationMinutes: 120,
+      stopAtReserve: false,
     },
     mixed: {
       intensity: 60,
@@ -2954,7 +2956,7 @@ function DeviceControlScreen({
       valencePolicy: "mixed",
       maxTension: 95,
       minCapacity: 15,
-      durationMinutes: 180,
+      stopAtReserve: false,
     },
     orgasm: {
       intensity: 75,
@@ -2963,16 +2965,16 @@ function DeviceControlScreen({
       valencePolicy: "adaptive",
       maxTension: 100,
       minCapacity: 15,
-      durationMinutes: 90,
+      stopAtReserve: false,
     },
     exhaustion: {
       intensity: 55,
       rhythm: "steady",
-      orgasmPolicy: "repeat",
+      orgasmPolicy: "allow",
       valencePolicy: "adaptive",
       maxTension: 95,
       minCapacity: 5,
-      durationMinutes: 240,
+      stopAtReserve: true,
     },
   };
 
@@ -3039,8 +3041,19 @@ function DeviceControlScreen({
     const nextIndex =
       (activeModeIndex + offset + targetModes.length) % targetModes.length;
     const [targetMode] = targetModes[nextIndex];
-    return control("settings", { targetMode, ...targetPresets[targetMode] });
+    return control("settings", {
+      targetMode,
+      ...targetPresets[targetMode],
+      orgasmTargetCount: targetMode === "orgasm" ? session.orgasmTargetCount || 1 : null,
+    });
   };
+  const timerOptions: Array<{ label: string; value: number | null }> = [
+    { label: "ВРУЧНУЮ", value: null },
+    { label: "30 МИН", value: 30 },
+    { label: "60 МИН", value: 60 },
+    { label: "120 МИН", value: 120 },
+  ];
+  const orgasmTargetCount = Math.max(1, Number(session.orgasmTargetCount || 1));
   const rhythm = session.rhythm || "steady";
   const waveformKey = session.targetMode || rhythm;
   const waveformPaths: Record<string, string> = {
@@ -3258,6 +3271,44 @@ function DeviceControlScreen({
                 </div>
                 <p>{activeMode[2]}</p>
               </div>
+              <section className="sex-machine-session-settings">
+                <header>
+                  <small>ЛИМИТ СЕАНСА</small>
+                  <strong>{session.stopAfterMinutes ? `${session.stopAfterMinutes} МИН` : "ВРУЧНУЮ"}</strong>
+                </header>
+                <div className="sex-machine-session-options">
+                  {timerOptions.map((option) => (
+                    <button
+                      className={session.stopAfterMinutes === option.value ? "active" : ""}
+                      disabled={working}
+                      key={option.label}
+                      onClick={() => control("settings", { stopAfterMinutes: option.value })}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                {activeMode[0] === "orgasm" && (
+                  <div className="sex-machine-orgasm-target">
+                    <small>ЦЕЛЬ: ОРГАЗМОВ</small>
+                    <button
+                      aria-label="Уменьшить число оргазмов"
+                      disabled={working || orgasmTargetCount <= 1}
+                      onClick={() => control("settings", { orgasmTargetCount: orgasmTargetCount - 1 })}
+                    >
+                      −
+                    </button>
+                    <b>{orgasmTargetCount}</b>
+                    <button
+                      aria-label="Увеличить число оргазмов"
+                      disabled={working || orgasmTargetCount >= 10}
+                      onClick={() => control("settings", { orgasmTargetCount: orgasmTargetCount + 1 })}
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+              </section>
             </section>
           )}
           {machineEngaged && (

@@ -9661,6 +9661,52 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   font-size:7px;
   line-height:1.25;
 }
+.campaign-shell .sex-machine-session-settings {
+  display:grid;
+  gap:5px;
+  padding:7px 8px;
+  background:var(--ji-surface-soft);
+}
+.campaign-shell .sex-machine-session-settings>header,
+.campaign-shell .sex-machine-orgasm-target {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+}
+.campaign-shell .sex-machine-session-settings small {
+  color:var(--ji-muted);
+  font-size:6px;
+  letter-spacing:.1em;
+}
+.campaign-shell .sex-machine-session-settings strong,
+.campaign-shell .sex-machine-orgasm-target b {
+  color:var(--ji-lcd);
+  font-size:8px;
+  letter-spacing:.06em;
+}
+.campaign-shell .sex-machine-session-options {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;
+}
+.campaign-shell .sex-machine-session-options button,
+.campaign-shell .sex-machine-orgasm-target button {
+  min-height:24px;
+  border:1px solid var(--ji-border);
+  background:var(--ji-control);
+  color:var(--ji-secondary);
+  font-size:6px;
+}
+.campaign-shell .sex-machine-session-options button.active {
+  border-color:var(--ji-lcd);
+  color:var(--ji-lcd);
+  background:var(--ji-selected);
+}
+.campaign-shell .sex-machine-orgasm-target { justify-content:flex-end; }
+.campaign-shell .sex-machine-orgasm-target small { margin-right:auto; }
+.campaign-shell .sex-machine-orgasm-target button { width:26px; font-size:14px; }
+.campaign-shell .sex-machine-orgasm-target b { min-width:18px; text-align:center; font-size:11px; }
 .campaign-shell .sex-machine-fine-tuning {
   min-height:0;
   background:var(--ji-surface-soft);

@@ -513,17 +513,19 @@ export type DeviceSession = {
     status: 'loaded' | 'running' | 'paused' | 'stopped';
     intensity: number;
     phase: 'sustain' | 'intense' | 'peak';
-    protocolId: string;
     targetPointIds: string[];
     startedAtTick: number | null;
     updatedAtTick: number;
     targetMode?: 'manual' | 'edge' | 'positive' | 'negative' | 'mixed' | 'orgasm' | 'exhaustion';
     rhythm?: 'steady' | 'pulse' | 'wave' | 'random';
-    orgasmPolicy?: 'deny' | 'allow' | 'force' | 'repeat';
+    orgasmPolicy?: 'deny' | 'allow' | 'force';
     valencePolicy?: 'adaptive' | 'neutral' | 'positive' | 'negative' | 'mixed';
     maxTension?: number;
     minCapacity?: number;
-    durationMinutes?: number;
+    stopAfterMinutes?: number | null;
+    orgasmTargetCount?: number | null;
+    orgasmCount?: number;
+    stopAtReserve?: boolean;
 };
 
 const DEVICE_DEFINITIONS = {
@@ -976,7 +978,6 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
             status: 'loaded',
             intensity: 35,
             phase: 'sustain',
-            protocolId: 'standard',
             targetPointIds: ['vagina'],
             startedAtTick: null,
             updatedAtTick: getWorldClock().totalMinutes
@@ -986,7 +987,10 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
             valencePolicy: 'neutral',
             maxTension: 95,
             minCapacity: 15,
-            durationMinutes: 120
+            stopAfterMinutes: null,
+            orgasmTargetCount: null,
+            orgasmCount: 0,
+            stopAtReserve: false
         } : undefined;
         db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
             .run(JSON.stringify(nextSubjectId
@@ -1008,7 +1012,7 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
 export function controlDeviceSession(
     assetId: string,
     command: 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop',
-    payload: { configuration?: string; wardrobe?: string; intensity?: number; protocolId?: string; targetPointIds?: string[]; targetMode?: DeviceSession['targetMode']; rhythm?: DeviceSession['rhythm']; orgasmPolicy?: DeviceSession['orgasmPolicy']; valencePolicy?: DeviceSession['valencePolicy']; maxTension?: number; minCapacity?: number; durationMinutes?: number } = {},
+    payload: { configuration?: string; wardrobe?: string; intensity?: number; targetPointIds?: string[]; targetMode?: DeviceSession['targetMode']; rhythm?: DeviceSession['rhythm']; orgasmPolicy?: DeviceSession['orgasmPolicy']; valencePolicy?: DeviceSession['valencePolicy']; maxTension?: number; minCapacity?: number; stopAfterMinutes?: number | null; orgasmTargetCount?: number | null; stopAtReserve?: boolean } = {},
     playerId = PLAYER_ID
 ) {
     if (!isControllableDevice(assetId)) throw new Error('Устройство не поддерживает управляемые протоколы');
@@ -1031,8 +1035,16 @@ export function controlDeviceSession(
         if (!wardrobes) throw new Error('Эта конфигурация недоступна');
         const wardrobe = String(payload.wardrobe || current.wardrobe);
         if (!wardrobes.includes(wardrobe)) throw new Error('Одежда несовместима с выбранной конфигурацией');
-        next = { ...next, configuration, wardrobe: wardrobe as DeviceSession['wardrobe'], protocolId: String(payload.protocolId || current.protocolId) };
+        next = { ...next, configuration, wardrobe: wardrobe as DeviceSession['wardrobe'] };
     } else if (command === 'settings') {
+        const hasStopAfter = Object.prototype.hasOwnProperty.call(payload, 'stopAfterMinutes');
+        const hasOrgasmTarget = Object.prototype.hasOwnProperty.call(payload, 'orgasmTargetCount');
+        const stopAfterMinutes = hasStopAfter
+            ? (Number(payload.stopAfterMinutes) > 0 ? Math.max(10, Math.min(1440, Number(payload.stopAfterMinutes))) : null)
+            : current.stopAfterMinutes ?? null;
+        const orgasmTargetCount = hasOrgasmTarget
+            ? (Number(payload.orgasmTargetCount) > 0 ? Math.max(1, Math.min(10, Math.floor(Number(payload.orgasmTargetCount)))) : null)
+            : current.orgasmTargetCount ?? null;
         const intensity = Math.max(10, Math.min(100, Number(payload.intensity ?? current.intensity)));
         next = {
             ...next,
@@ -1045,9 +1057,10 @@ export function controlDeviceSession(
             valencePolicy: payload.valencePolicy || current.valencePolicy || 'adaptive',
             maxTension: Math.max(20, Math.min(100, Number(payload.maxTension ?? current.maxTension ?? 95))),
             minCapacity: Math.max(0, Math.min(80, Number(payload.minCapacity ?? current.minCapacity ?? 15))),
-            durationMinutes: Number(payload.durationMinutes ?? current.durationMinutes ?? 120) === 0
-                ? 0
-                : Math.max(10, Math.min(1440, Number(payload.durationMinutes ?? current.durationMinutes ?? 120))),
+            stopAfterMinutes,
+            orgasmTargetCount,
+            orgasmCount: hasOrgasmTarget ? 0 : (current.orgasmCount ?? 0),
+            stopAtReserve: typeof payload.stopAtReserve === 'boolean' ? payload.stopAtReserve : Boolean(current.stopAtReserve),
         };
     } else if (command === 'start') {
         if (current.status === 'running') throw new Error('Протокол уже запущен');
