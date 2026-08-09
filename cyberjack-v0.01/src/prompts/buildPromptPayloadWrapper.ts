@@ -9,7 +9,7 @@ export async function buildPromptPayloadWithDB(
     targetId: string,
     latestResult?: any,
     eventId: string = 'scene_lab_calibrator',
-    options?: { suppressTickIds?: string[]; initiatorId?: string }
+    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string }
 ) {
     const ownerQueryId = ownerId;
     const targetQueryId = targetId || ownerQueryId;
@@ -37,7 +37,7 @@ export async function buildPromptPayloadWithDB(
     const recentLogLimit = activeConfig.perception?.recentEventLimit ?? 10;
     const logs = db.prepare(
         'SELECT * FROM event_logs WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
-    ).all(targetQueryId, recentLogLimit) as any[];
+    ).all(ownerQueryId, recentLogLimit) as any[];
 
     const recentEvents = logs.map(log => ({
         id: Number(log.id),
@@ -52,13 +52,11 @@ export async function buildPromptPayloadWithDB(
         FROM active_contexts ac
         JOIN action_presets cp ON ac.action_id = cp.id
         WHERE ac.subject_id = ?
-    `).all(targetQueryId) as {label: string; id: string; context_config_json?: string; point_id?: string}[];
+    `).all(ownerQueryId) as {label: string; id: string; context_config_json?: string; point_id?: string}[];
     const visibleContexts = activeContextRow.flatMap(r => {
         let role = 'other';
         let config:Record<string,any> = {};
         try { config = JSON.parse(r.context_config_json || '{}'); role = config.type || role; } catch { }
-        const externallyVisible = ['pose', 'clothing', 'equipment', 'restraint', 'environment', 'social', 'other'];
-        if (ownerQueryId !== targetQueryId && !externallyVisible.includes(role)) return [];
         return [{ role, id:r.id, label:getActiveContextPromptText({ label:r.label,contextConfig:config },r.id), pointId:r.point_id }];
     });
     const groupedContexts = new Map<string, { role:string; id:string; label:string; points:Set<string> }>();
@@ -77,14 +75,31 @@ export async function buildPromptPayloadWithDB(
             ? ` [зона: ${points[0]}]`
             : '';
         const label = `${context.label}${scope}`;
-        const ownExperience = ownerQueryId === targetQueryId;
-        if (!ownExperience) return `Ты видишь на ${targetRow?.name || targetQueryId}: ${label}.`;
-        if (context.role === 'pose') return `Ты чувствуешь, что положение твоего тела сейчас задано так: ${label}.`;
+        if (context.role === 'pose') return `pose: ${label}`;
         if (context.role === 'clothing') return `На тебе сейчас: ${label}.`;
         if (['equipment', 'restraint'].includes(context.role)) return `Ты чувствуешь на своём теле: ${label}.`;
         if (context.role === 'environment') return `Ты замечаешь вокруг себя: ${label}.`;
         return `Ты замечаешь в собственном состоянии: ${label}.`;
     });
+    const addresseeContextRows = ownerQueryId === targetQueryId ? [] : (db.prepare(`
+        SELECT cp.label, cp.id, cp.context_config_json, ac.point_id
+        FROM active_contexts ac JOIN action_presets cp ON ac.action_id = cp.id
+        WHERE ac.subject_id = ?
+    `).all(targetQueryId) as {label: string; id: string; context_config_json?: string; point_id?: string}[])
+        .map(row => {
+            let config: Record<string, any> = {};
+            try { config = JSON.parse(row.context_config_json || '{}'); } catch { }
+            const role = config.type || 'other';
+            const detail = getActiveContextPromptText({ label:row.label, contextConfig:config }, row.id);
+            return { role, detail };
+        });
+    const addresseeName = targetRow?.name || targetQueryId;
+    const addresseeContextFacts = addresseeContextRows
+        .filter(row => ['pose', 'clothing', 'equipment', 'restraint', 'environment', 'social', 'other'].includes(row.role))
+        .sort((left, right) => Number(right.role === 'pose') - Number(left.role === 'pose'))
+        .map(row => row.role === 'pose' ? `${addresseeName} сейчас находится в таком положении: ${row.detail}.` : `На ${addresseeName} сейчас заметно: ${row.detail}.`)
+        .filter((value, index, values) => values.indexOf(value) === index)
+        .slice(0, 6);
     const worldMinute = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
     const firstKnownMinuteValue = (db.prepare(`
         SELECT MIN(world_minute) AS minute
@@ -102,7 +117,7 @@ export async function buildPromptPayloadWithDB(
                sps.baseline_local_sensitivity
         FROM subject_point_states sps
         WHERE sps.subject_id = ?
-    `).all(targetQueryId) as any[];
+    `).all(ownerQueryId) as any[];
 
     // Removed the broker log generation from here logic, 
     // it belongs in specific character templates or scenario controllers,
@@ -118,7 +133,7 @@ export async function buildPromptPayloadWithDB(
         activeContextNames,
         latestResult,
         eventId,
-        options
+        { ...options, worldPlayerId: options?.worldPlayerId || 'PL-1', addresseeContextFacts }
     );
 
     if (extraLog) {

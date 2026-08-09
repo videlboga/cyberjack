@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { resolveCurrentPostureFact, selectAuthoredFacts } from './buildPromptPayload';
+import { resolveCurrentPostureFact, selectAuthoredFacts, selectGeneralPromptEpisodes } from './buildPromptPayload';
+import { contextPromptEffect } from '../domain/contextNarration';
 
 const profile = {
   identity: { archetype: 'asset' },
@@ -42,5 +43,22 @@ describe('resolveCurrentPostureFact', () => {
   it('uses equipment posture when no free pose exists', () => {
     expect(resolveCurrentPostureFact([], 'ты лежишь в фиксаторах'))
       .toContain('ты лежишь в фиксаторах');
+  });
+});
+
+describe('general prompt memories', () => {
+  it('keeps direct player experience ahead of newly written social chatter', () => {
+    const selected = selectGeneralPromptEpisodes([
+      { text: 'Новая реплика Суми', type: 'episode_v2', metadata: { socialTransaction: true }, relatedSubjects: ['NPC-CAND-SUMI'] },
+      { text: 'Недавний разговор с игроком', type: 'episode_v2', metadata: {}, relatedSubjects: ['PL-1'] },
+      { text: 'Наблюдение за игроком', type: 'episode_v2', metadata: { observed: true }, relatedSubjects: ['PL-1', 'NPC-CAND-SUMI'] },
+    ], 'NPC-CAND-SUMI');
+    expect(selected.map(record => record.text)).toEqual(['Недавний разговор с игроком', 'Наблюдение за игроком', 'Новая реплика Суми']);
+  });
+});
+
+describe('context narration', () => {
+  it('gives the feet-presentation pose a concrete non-standing description', () => {
+    expect(contextPromptEffect('act_present_feet')).toBe('Ты сидишь с вытянутыми вперёд ногами и демонстрируешь ступни.');
   });
 });

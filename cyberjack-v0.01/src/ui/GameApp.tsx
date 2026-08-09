@@ -5,6 +5,7 @@ import {
   interpretPointSensitivity,
   InterpretableCoreMetric,
 } from '../domain/parameterInterpretation';
+import { useI18n } from './i18n';
 import './GameApp.css';
 
 const API_BASE = '';
@@ -175,6 +176,8 @@ const Bar: React.FC<{ value: number; max?: number; color?: string; baseline?: nu
 // ─── Main Component ──────────────────────────────────────
 
 export function GameApp() {
+  const { t, locale } = useI18n();
+
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
       const saved = localStorage.getItem('cyberjack_chat');
@@ -214,6 +217,24 @@ export function GameApp() {
   const [sceneImageUrl, setSceneImageUrl] = useState<string | null>(null);
 
   const logRef = useRef<HTMLDivElement>(null);
+
+  // ─── Localized metrics ───────────────────────────────
+  const coreMetrics = useMemo(() => [
+    { key: 'sensitivity' as const, label: t('game.state.sensitivity'), baselineKey: 'baselineSensitivity' as const, color: '#2196f3' },
+    { key: 'capacity' as const, label: t('game.state.capacity'), baselineKey: 'baselineCapacity' as const, color: '#2196f3' },
+    { key: 'openness' as const, label: t('game.state.openness'), baselineKey: 'baselineOpenness' as const, color: '#2196f3' },
+    { key: 'plasticity' as const, label: t('game.state.plasticity'), baselineKey: 'baselinePlasticity' as const, color: '#2196f3' },
+    { key: 'attitude' as const, label: t('game.state.attitude'), baselineKey: 'baselineAttitude' as const, color: '#4caf50' },
+    { key: 'tension' as const, label: t('game.state.tension'), color: '#ff5722' },
+  ], [locale]);
+
+  const resultMetrics = useMemo(() => [
+    { key: 'pleasure' as const, label: t('game.result.pleasure'), color: '#4caf50' },
+    { key: 'discomfort' as const, label: t('game.result.discomfort'), color: '#f44336' },
+    { key: 'overload' as const, label: t('game.result.overload'), color: '#ff9800' },
+    { key: 'engagement' as const, label: t('game.result.engagement'), color: '#2196f3' },
+    { key: 'learningEffect' as const, label: t('game.result.learning'), color: '#9c27b0' },
+  ], [locale]);
 
   // ─── WebSocket: приём сгенерированных изображений сцены ──
   useEffect(() => {
@@ -530,7 +551,7 @@ export function GameApp() {
         {subjectState && (
           <div className="panel-section">
             <h3>{subjectState.name || focusedCharId}</h3>
-            {CORE_METRICS.map(m => (
+            {coreMetrics.map(m => (
               (() => {
                 const value = Number((subjectState as any)[m.key] || 0);
                 const baseline = m.baselineKey ? Number((subjectState as any)[m.baselineKey] ?? value) : undefined;
@@ -623,7 +644,7 @@ export function GameApp() {
         {lastResult && (
           <div className="panel-section">
             <h3>Последний тик</h3>
-            {RESULT_METRICS.map(m => (
+            {resultMetrics.map(m => (
               <div key={m.key} className="metric-row">
                 <span className="metric-label">{m.label}</span>
                 <Bar value={(lastResult as any)[m.key] || 0} max={120} color={m.color} />

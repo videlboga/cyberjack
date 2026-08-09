@@ -260,6 +260,37 @@ export function buildInteractionObservation(input: {
     };
 }
 
+/**
+ * A compact signal for the dialogue model. `subjectiveText` is intentionally
+ * richer: it is stored for the UI and the episode record, but putting that
+ * prose into a speech prompt makes it look like a line ready to be repeated.
+ */
+export function describeObservationSignal(observation: InteractionObservation): string {
+    const { pleasure = 0, discomfort = 0, overload = 0, mixed = false, sensoryAmplification = 1 } = observation.reaction || {};
+    const state = {
+        responsive: 'ты сохраняешь осмысленный контакт',
+        subspace: 'внимание вязнет в ощущениях',
+        overload: 'ощущений слишком много, чтобы легко их разделить',
+        freeze: 'тело замирает, и выразить реакцию трудно',
+        panic: 'тебе важно вернуть дистанцию и безопасность',
+        defiance: 'ты собрана и сопротивляешься происходящему',
+        unresponsive: 'на осмысленную реакцию почти не остаётся сил',
+    }[observation.behavioralState || 'responsive'];
+    const valence = mixed
+        ? 'ощущение противоречиво'
+        : pleasure > discomfort * 1.25 && pleasure > 0.5
+            ? 'ощущение скорее приятно'
+            : discomfort > pleasure * 1.25 && discomfort > 0.5
+                ? 'ощущение скорее неприятно'
+                : 'у ощущения нет ясной эмоциональной окраски';
+    const intensity = sensoryAmplification >= 3
+        ? 'оно захватывает почти всё внимание'
+        : sensoryAmplification >= 2
+            ? 'оно ощущается необычно ярко'
+            : '';
+    return [state, valence, intensity].filter(Boolean).join('; ') + '.';
+}
+
 export function buildCurrentStateObservationText(subjectId: string, core: SubjectCoreState): string {
     const contexts = activeContextsRepo.getAllForSubject(subjectId);
     const ids = new Set(contexts.map(context => context.actionId));

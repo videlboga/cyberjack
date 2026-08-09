@@ -325,18 +325,14 @@ db.transaction(() => {
 
     insertSceneStmt.run(
         'scene_lab_calibrator', availableActionsStr, 'Каморка Калибратора. Темная, тесная комната, заставленная оборудованием.',
-        JSON.stringify([
-            { id: 'slot_bed', name: 'Койка Калибратора', capacity: 1, tags: ['safe'] },
-            { id: 'slot_terminal', name: 'Терминал Синдиката', capacity: 1, tags: ['control'] },
-            { id: 'slot_table', name: 'Диагностический стол', capacity: 1, tags: ['core'] }
-        ]),
+        JSON.stringify([]),
         JSON.stringify([{ toSceneId: 'scene_global_map', label: 'Выйти на Омнискрипт (Карта)', condition: null }]),
         0
     );
     upsertSceneObjectStmt.run(
         'calibrator_suspension_mount',
         'scene_lab_calibrator',
-        'slot_table',
+        'device:lab_diagnostic_table',
         'eq_suspension',
         'PL-1',
         'active',
@@ -377,8 +373,8 @@ db.transaction(() => {
     );
 
     const placements = [
-        { characterId: 'PL-1', role: 'calibrator', slotId: 'slot_table', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true },
-        { characterId: 'S-AV-01', role: 'asset', slotId: 'slot_table', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true }
+        { characterId: 'PL-1', role: 'calibrator', slotId: 'room:room_calibration', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true },
+        { characterId: 'S-AV-01', role: 'asset', slotId: 'room:room_cell_a', sceneId: 'scene_lab_calibrator', presenceState: 'present', canAct: true }
     ];
 
     for (const placement of placements) {

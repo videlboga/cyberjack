@@ -9,7 +9,7 @@ import {
     sceneCharacterRepo,
     sceneRepo
 } from '../infrastructure/repositories';
-import { buildInteractionObservation, buildCurrentStateObservationText } from '../narrative/interactionObservation';
+import { buildInteractionObservation, buildCurrentStateObservationText, describeObservationSignal } from '../narrative/interactionObservation';
 import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/reactionFrame';
 import { deriveAcquiredTraits } from '../domain/conditioning';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
@@ -175,19 +175,27 @@ export function contextualizeBehavioralCore<T extends {
     };
 }
 
-type EpisodeRecord = { text: string; type: string; metadata: Record<string, any> };
+type EpisodeRecord = { text: string; type: string; metadata: Record<string, any>; relatedSubjects?: string[] };
 
 export function renderEpisodeForCharacter(record: EpisodeRecord): string {
     const metadata = record.metadata || {};
     const parts: string[] = [];
+    if (metadata.observed) {
+        const actor = metadata.actorName || 'кто-то';
+        const target = metadata.targetName || 'другой персонаж';
+        if (metadata.actionLabel) {
+            parts.push(`Ты помнишь наблюдаемое событие: действие «${metadata.actionLabel}» от ${actor} было направлено на ${target}${metadata.pointLabel ? ` в области «${metadata.pointLabel}»` : ''}.`);
+        }
+        return parts.join(' ') || `Ты помнишь наблюдаемое событие: ${record.text}`;
+    }
     if (metadata.actionLabel) {
         parts.push(`Ты помнишь воздействие «${metadata.actionLabel}»${metadata.pointId ? ` в области «${metadata.pointId}»` : ''}.`);
     }
     const facts = metadata.objectiveFacts;
     if (facts?.location) parts.push(`Ты помнишь это место: ${facts.location}.`);
     if (facts?.environment) parts.push(`Тогда вокруг тебя было так: ${facts.environment}`);
-    const subjective = metadata.observation?.subjectiveText;
-    if (subjective) parts.push(`В твоей памяти телесное переживание осталось таким: ${subjective}`);
+    const observation = metadata.observation;
+    if (observation) parts.push(`Ты помнишь общий смысл своей телесной реакции: ${describeObservationSignal(observation)}`);
     if (metadata.playerSpeech) parts.push(`Собеседник сказал тебе: «${metadata.playerSpeech}».`);
     if (metadata.characterSpeech) parts.push(`Твои собственные слова тогда прозвучали так: «${metadata.characterSpeech}».`);
     return parts.join(' ') || `Ты помнишь этот эпизод так: ${record.text}`;
@@ -225,6 +233,22 @@ export function selectReactionEpisodes(
     return result;
 }
 
+/** Keep lived history with the player and scene observations available even
+ * after a fresh NPC-to-NPC exchange has written newer social memories. */
+export function selectGeneralPromptEpisodes(records: EpisodeRecord[], addresseeId?: string): EpisodeRecord[] {
+    const directPlayer = records.filter(record => (record.relatedSubjects || []).includes('PL-1') && !record.metadata?.observed);
+    const observed = records.filter(record => Boolean(record.metadata?.observed));
+    const withAddressee = addresseeId
+        ? records.filter(record => (record.relatedSubjects || []).includes(addresseeId) && !record.metadata?.socialTransaction)
+        : [];
+    const selected: EpisodeRecord[] = [];
+    for (const record of [...directPlayer, ...observed, ...withAddressee, ...records]) {
+        if (!selected.some(existing => existing.text === record.text)) selected.push(record);
+        if (selected.length === 5) break;
+    }
+    return selected;
+}
+
 /**
  * Compiles an actor-specific dramatic perspective. Mechanical truth stays in the
  * engine; the language model receives only facts available to this speaker.
@@ -238,7 +262,7 @@ export async function buildPromptPayload(
     activeContextNames: string[],
     latestResult?: TickOutput,
     eventId = 'scene_lab_calibrator',
-    options?: { suppressTickIds?: string[]; initiatorId?: string }
+    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string; addresseeContextFacts?: string[] }
 ): Promise<PromptPayload & { systemPrompt: string }> {
     const suppressed = new Set(options?.suppressTickIds || []);
     const recentEvents = recentEventsIn.filter(event => {
@@ -252,11 +276,14 @@ export async function buildPromptPayload(
     const initiatorName = initiatorId === 'PL-1'
         ? 'Калибратор'
         : initiatorCharacter?.name || 'Собеседник';
+    const addresseeId = options?.addresseeId || initiatorId;
+    const addresseeCharacter = characterRepo.get(addresseeId);
+    const addresseeName = addresseeId === 'PL-1' ? 'Калибратор' : addresseeCharacter?.name || initiatorName;
     const ownerName = ownerCharacter?.name || actorDetails.name || ownerId;
     const targetName = targetCharacter?.name || actorDetails.name || targetId;
     const profile = ensureGeneratedProfile(ownerCharacter?.subjectId || ownerId);
     const scene = sceneRepo.get(eventId);
-    const spatial = eventId === 'scene_lab_calibrator' ? getLaboratorySpatialContext(ownerId, initiatorId) : null;
+    const spatial = eventId === 'scene_lab_calibrator' ? getLaboratorySpatialContext(ownerId, options?.worldPlayerId || 'PL-1') : null;
     const scenePresence = sceneCharacterRepo.list(eventId).find(entry => entry.character.id === ownerCharacter?.id || entry.character.subjectId === ownerId);
     const effectiveRole = scenePresence?.role || 'participant';
     const locationFact = spatial
@@ -299,6 +326,12 @@ export async function buildPromptPayload(
         ];
         return facts.filter(Boolean);
     })();
+    if (addresseeId !== ownerId) {
+        const addresseeProfile = ensureGeneratedProfile(addresseeCharacter?.subjectId || addresseeId);
+        const gender = addresseeProfile.identity.gender === 'female' ? 'женщина' : addresseeProfile.identity.gender === 'male' ? 'мужчина' : 'персонаж с неуказанным грамматическим родом';
+        roleContext.push(`Твой собеседник — ${addresseeName}; это ${gender}. Это отдельный персонаж со своей волей: не приписывай ему роль Калибратора и не отвечай за него.`);
+        roleContext.push(...(options?.addresseeContextFacts || []));
+    }
     if (initiatorId === 'PL-1') {
         roleContext.push('Ты разговариваешь с Калибратором — человеком, который управляет этой лабораторией и обращается к тебе как её оператор. Он не актив и не кандидат на калибровку.');
     }
@@ -347,7 +380,7 @@ export async function buildPromptPayload(
         .map(entry => String(entry.metadata?.speechAct));
     const recentSpeechAct = recentSpeechActs[0];
     const socialMemory = renderSocialMemories(ownerId, initiatorId);
-    const episodeRecords = selectReactionEpisodes(allEpisodeRecords, currentActionId, currentPointId);
+    const episodeRecords = selectGeneralPromptEpisodes(allEpisodeRecords, addresseeId);
     const relevantEpisodes = episodeRecords.map(renderEpisodeForCharacter);
     const repetitionFromLogs = countRepetitions(recentEvents, currentActionId, currentPointId);
     const exposureBeforeTick = Number(latestResult?.tickMeta?.inputs?.point.exposureCount ?? 0);

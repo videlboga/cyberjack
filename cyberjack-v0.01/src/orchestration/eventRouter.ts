@@ -156,6 +156,16 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
             routedActorId = payload.playerId || 'PL-1';
             pointId = dynamicModifiers.pointId || 'systemic';
         }
+        console.info('[EventRouter][CommandRoute]', JSON.stringify({
+            text: payload.textMessage,
+            addressedCharacterId: payload.addressedCharacterId || null,
+            requestedSubjectId: payload.subjectId || null,
+            parsedRouting: dynamicModifiers.routing || null,
+            commandIntent: dynamicModifiers.commandIntent || null,
+            routedSubjectId,
+            routedActorId,
+            pointId,
+        }));
             const verbalPresentation = {
                 conversation: { label: 'Беседа', tags: ['mental'] },
                 question: { label: 'Вопрос', tags: ['mental'] },

@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "./i18n";
+import { getRoomName, getDeviceName, getRoomDescription } from './roomTranslations';
 import {
   CalibrationPrototype,
   CalibrationZoneMap,
@@ -557,6 +559,7 @@ function LabMetricChart({
   label: string;
   tone: string;
 }) {
+  const { t } = useI18n();
   const state = resident.state || {};
   const current = Number(state[metric] ?? 0);
   const values = residentTrend(
@@ -717,6 +720,7 @@ async function resolveDeferredReply(data: any, timeoutMs = 60_000, onText?: (tex
 }
 
 export function CampaignApp() {
+  const { t, locale } = useI18n();
   const [uiTheme, setUiTheme] = useState<
     "industrial" | "graphite" | "paper" | "mist" | "manga" | "manga2"
   >(() => {
@@ -742,6 +746,10 @@ export function CampaignApp() {
   const [timeFlow, setTimeFlow] = useState<TimeFlowState | null>(null);
   const animationsPausedByTime = useRef<Animation[]>([]);
   const [inbox, setInbox] = useState<DirectorEvent[]>([]);
+  // The periodic refresh and an interaction-triggered refresh can overlap.
+  // Never let an older snapshot erase a context (and therefore its avatar)
+  // that was just applied by the newer tick.
+  const latestLoadRequestRef = useRef(0);
 
   // Network work must never leave the whole game permanently inert. Individual
   // requests already have their own timeout; this is a final UI-state guard for
@@ -754,6 +762,7 @@ export function CampaignApp() {
 
   const load = useCallback(
     async (quiet = false) => {
+      const requestId = ++latestLoadRequestRef.current;
       try {
         const [world, flowData, inboxData] = await Promise.all([
           api("/api/scenario?playerId=PL-1"),
@@ -769,6 +778,7 @@ export function CampaignApp() {
         )
           ? selectedAssetId
           : assets[0]?.id || null;
+        if (requestId !== latestLoadRequestRef.current) return;
         setScenario(world);
         setTimeFlow(flowData.timeFlow);
         setInbox(inboxData.events || []);
@@ -785,6 +795,7 @@ export function CampaignApp() {
                 )
               : Promise.resolve(null),
           ]);
+          if (requestId !== latestLoadRequestRef.current) return;
           setContracts([
             ...(orderData.accepted || []),
             ...(orderData.available || []),
@@ -832,6 +843,23 @@ export function CampaignApp() {
       return false;
     } finally {
       setBusy(false);
+    }
+  };
+  const enterInteraction = async (resident: Resident) => {
+    const device = scenario?.laboratory.find(
+      (asset) => asset.metadata?.subjectId === resident.id,
+    );
+    // A device-bound character is approached at that device. A free
+    // character is approached directly, which creates a near:<character> slot.
+    const targetLocation = device?.name || resident.name;
+    const moved = await mutate(
+      "/api/scenario/characters/PL-1/move",
+      { playerId: "PL-1", roomId: targetLocation },
+      "",
+    );
+    if (moved) {
+      setUtility(null);
+      setInteraction(resident);
     }
   };
 
@@ -908,8 +936,7 @@ export function CampaignApp() {
             item.subjectId === data.result.focusSubjectId,
         );
         if (resident) {
-          setUtility(null);
-          setInteraction(resident);
+          await enterInteraction(resident);
         }
       } else if (data.result?.focusSection === "contracts") {
         setInteraction(null);
@@ -1024,10 +1051,10 @@ export function CampaignApp() {
       <header className="campaign-statusbar">
         <div className="campaign-brand">
           <b>CYBERJACK</b>
-          <span>ТЕРМИНАЛ КАЛИБРАТОРА</span>
+          <span>{t('game.ui.calibratorTerminal')}</span>
         </div>
         <div className="campaign-current">
-          <small>МЕСТО</small>
+          <small>{t('game.ui.location')}</small>
           <strong>
             {interaction
               ? `${scenario.location.shortTitle} / ${interaction.name}`
@@ -1037,12 +1064,12 @@ export function CampaignApp() {
         <div className="campaign-status-spacer" />
         {deadline && (
           <div className="campaign-stat deadline">
-            <small>СРОК</small>
+            <small>{t('game.ui.term')}</small>
             <strong>{deadline}</strong>
           </div>
         )}
         <div className="campaign-stat credits">
-          <small>СЧЁТ</small>
+          <small>{t('game.ui.account')}</small>
           <strong>{Math.round(scenario.credits)} cr</strong>
         </div>
         <button
@@ -1056,7 +1083,7 @@ export function CampaignApp() {
         >
           <i>{timeFlow?.paused ? "▶" : "Ⅱ"}</i>
           <span>
-            <small>ВРЕМЯ · {timeFlow?.paused ? "ПАУЗА" : "ИДЁТ"}</small>
+            <small>{t('game.ui.time')} · {timeFlow?.paused ? t('game.ui.paused') : t('game.ui.running')}</small>
             <strong>
               <SmoothGameClock
                 totalMinutes={scenario.clock.totalMinutes}
@@ -1066,7 +1093,7 @@ export function CampaignApp() {
           </span>
         </button>
         <label className="theme-switcher" style={{ display: "none" }}>
-          <small>ТЕМА</small>
+          <small>{t('game.ui.topic')}</small>
           <select
             aria-label="Тема интерфейса"
             value={uiTheme}
@@ -1084,19 +1111,19 @@ export function CampaignApp() {
       <div className="campaign-frame">
         <nav className="campaign-nav">
           <section>
-            <small>РАЗДЕЛЫ</small>
+            <small>{t('game.ui.sections')}</small>
             <NavButton
               active={
                 !utility && scenario.location.id === "scene_lab_calibrator"
               }
-              label="Лаборатория"
-              meta={`${scenario.residents.length} персонажа`}
+              label={t('game.ui.laboratory')}
+              meta={`${scenario.residents.length} ${t('game.ui.residents')}`}
               onClick={() => navigate("scene_lab_calibrator")}
             />
             <NavButton
               active={utility === "people"}
-              label="Персонажи"
-              meta={`${scenario.residents.length} в комплексе`}
+              label={t('game.ui.characters')}
+              meta={`${scenario.residents.length} ${t('game.ui.inComplex')}`}
               onClick={() => {
                 setInteraction(null);
                 setDirectoryCharacterId(null);
@@ -1105,8 +1132,8 @@ export function CampaignApp() {
             />
             <NavButton
               active={utility === "inbox"}
-              label="Входящие"
-              meta={inbox.length ? `${inbox.length} новых` : "нет новых"}
+              label={t('game.ui.incoming')}
+              meta={inbox.length ? `${inbox.length} ${t('game.ui.new')}` : t('game.ui.noNew')}
               onClick={() => {
                 setInteraction(null);
                 setUtility("inbox");
@@ -1114,8 +1141,8 @@ export function CampaignApp() {
             />
             <NavButton
               active={!utility && scenario.location.id === "scene_liaison"}
-              label="Контракты"
-              meta={`${accepted.length} активных`}
+              label={t('game.ui.contracts')}
+              meta={`${accepted.length} ${t('game.ui.active')}`}
               onClick={() => navigate("scene_liaison")}
             />
             <NavButton
@@ -1123,8 +1150,8 @@ export function CampaignApp() {
                 utility === "supply" ||
                 (!utility && scenario.location.id === "scene_broker")
               }
-              label="Станция"
-              meta={`${scenario.inventory.length} на складе`}
+              label={t('game.ui.station')}
+              meta={`${scenario.inventory.length} ${t('game.ui.inStock')}`}
               onClick={() => {
                 setInteraction(null);
                 setUtility("supply");
@@ -1132,8 +1159,8 @@ export function CampaignApp() {
             />
             <NavButton
               active={utility === "journal"}
-              label="Журнал"
-              meta={`${scenario.events.length} событий`}
+              label={t('game.ui.journal')}
+              meta={`${scenario.events.length} ${t('game.ui.events')}`}
               onClick={() => {
                 setInteraction(null);
                 setUtility("journal");
@@ -1171,7 +1198,7 @@ export function CampaignApp() {
                   (resident) =>
                     resident.id === characterId || resident.subjectId === characterId,
                 );
-                if (next) setInteraction(next);
+                if (next) void enterInteraction(next);
               }}
               onExit={() => setInteraction(null)}
             />
@@ -1348,13 +1375,14 @@ function EventInbox({
   busy: boolean;
   onChoose: (event: DirectorEvent, choice: string) => void;
 }) {
+  const { t } = useI18n();
   return (
     <main className="management-screen director-inbox">
       <header className="screen-heading">
         <div>
-          <p>СОБЫТИЯ ОМНИКРОНА</p>
-          <h1>Входящие</h1>
-          <span>Сообщения, незавершённые разговоры и внешние возможности.</span>
+          <p>{t('game.ui.omnikronEvents')}</p>
+          <h1>{t('game.ui.inbox')}</h1>
+          <span>{t('game.ui.inboxDescription')}</span>
         </div>
         <b>{events.length}</b>
       </header>
@@ -1389,9 +1417,9 @@ function EventInbox({
         ) : (
           <div className="director-inbox-empty">
             <i>○</i>
-            <strong>Нет новых входящих</strong>
+            <strong>{t('game.ui.noNewIncoming')}</strong>
             <span>
-              Станция продолжает работать. Значимые сообщения появятся здесь.
+              {t('game.ui.inboxEmpty')}
             </span>
           </div>
         )}
@@ -1423,6 +1451,7 @@ function LaboratoryOverview({
   onPassTime: (minutes: number) => Promise<boolean>;
   onUse: (asset: LabAsset, resident: Resident) => Promise<boolean> | void;
 }) {
+  const { t } = useI18n();
   const equipmentCovers: Record<string, string> = {
     lab_diagnostic_table: "/backgrounds/laboratory/diagnostic_table.png",
     lab_recovery_capsule:
@@ -1570,22 +1599,21 @@ function LaboratoryOverview({
     <main className="lab-overview">
       <header className="screen-heading lab-heading">
         <div>
-          <p>ЛИЧНЫЙ КОМПЛЕКС</p>
-          <h1>Лаборатория</h1>
+          <p>{t('game.ui.personalComplex')}</p>
+          <h1>{t('game.ui.laboratory')}</h1>
           <span>
-            Выберите помещение, чтобы увидеть находящихся там персонажей и
-            установленное оборудование.
+            {t('game.ui.selectRoom')}
           </span>
         </div>
         <div className="lab-capacity">
-          <small>ПОМЕЩЕНИЯ</small>
+          <small>{t('game.ui.rooms')}</small>
           <strong>{scenario.rooms.length}</strong>
-          <span>доступно</span>
+          <span>{t('game.ui.available')}</span>
         </div>
       </header>
       <section className="lab-spatial">
         <aside className="room-rail">
-          <small>ПЛАН ЛАБОРАТОРИИ</small>
+          <small>{t('game.ui.labPlan')}</small>
           {scenario.rooms.map((room) => {
             const assets = scenario.laboratory.filter(
               (asset) =>
@@ -1603,9 +1631,9 @@ function LaboratoryOverview({
                 key={room.id}
                 onClick={() => setSelectedRoomId(room.id)}
               >
-                <span>{room.name}</span>
+                <span>{getRoomName(room.id, t)}</span>
                 <small>
-                  {people} чел. · {assets.length} оборуд.
+                  {people} {t('game.ui.people')} · {assets.length} {t('game.ui.equipment')}
                 </small>
               </button>
             );
@@ -1617,13 +1645,13 @@ function LaboratoryOverview({
               <div>
                 <small>
                   {selectedRoom.type === "cell"
-                    ? "ЖИЛАЯ КАМЕРА"
+                    ? t('game.ui.livingCell')
                     : selectedRoom.type === "staff"
-                      ? "СЛУЖЕБНОЕ ПОМЕЩЕНИЕ"
-                      : "РАБОЧЕЕ ПОМЕЩЕНИЕ"}
+                      ? t('game.ui.staffRoom')
+                      : t('game.ui.workspace')}
                 </small>
-                <h2>{selectedRoom.name}</h2>
-                <p>{selectedRoom.description}</p>
+                <h2>{getRoomName(selectedRoom.id, t)}</h2>
+                <p>{getRoomDescription(selectedRoom.id, t)}</p>
               </div>
               <b>
                 {visibleOccupants.length +
@@ -1633,7 +1661,7 @@ function LaboratoryOverview({
               </b>
             </header>
             <section className="room-detail-section room-people-section">
-              <h3>Персонажи</h3>
+              <h3>{t('game.ui.charactersSection')}</h3>
               <div className="room-people">
                 {roomPanelResidents.length ? (
                   roomPanelResidents.map((resident) => {
@@ -1653,15 +1681,16 @@ function LaboratoryOverview({
                               name={resident.name}
                               portrait={resident.portrait}
                               contexts={resident.contexts}
+                              state={resident.state}
                             />
                           </div>
                           <div>
                             <strong>{resident.name}</strong>
                             <span>
-                              {device?.name ||
+                              {device ? getDeviceName(device.id, t) :
                                 (resident.role === "assistant"
-                                  ? "Персонал"
-                                  : "Актив · свободна")}
+                                  ? t('game.ui.staff')
+                                  : t('game.ui.activeFree'))}
                             </span>
                           </div>
                         </div>
@@ -1687,11 +1716,11 @@ function LaboratoryOverview({
                             }
                           >
                             {device?.id === "lab_diagnostic_table"
-                              ? "Калибровка"
-                              : "Взаимодействовать"}
+                              ? t('game.ui.calibration')
+                              : t('game.ui.interact')}
                           </button>
                           <button onClick={() => onOpenDossier(resident)}>
-                            Досье
+                            {t('game.ui.dossier')}
                           </button>
                           <button
                             className={moving ? "active" : ""}
@@ -1700,8 +1729,8 @@ function LaboratoryOverview({
                             }
                           >
                             {device
-                              ? "Освободить и переместить ▾"
-                              : "Переместить ▾"}
+                              ? t('game.ui.releaseAndMove')
+                              : t('game.ui.move')}
                           </button>
                         </div>
                         {moving && (
@@ -1729,7 +1758,7 @@ function LaboratoryOverview({
                                     onMove(resident, room.id);
                                   }}
                                 >
-                                  <span>{room.name}</span>
+                                  <span>{getRoomName(room.id, t)}</span>
                                   <i>
                                     {room.occupants.length}/{room.capacity}
                                   </i>
@@ -1741,7 +1770,7 @@ function LaboratoryOverview({
                     );
                   })
                 ) : (
-                  <p>Помещение пусто.</p>
+                  <p>{t('game.ui.roomEmpty')}</p>
                 )}
               </div>
               {selectedRoom.type === "cell" && (
@@ -1761,8 +1790,8 @@ function LaboratoryOverview({
                   <section className="equipment-assignment-panel">
                     <header>
                       <div>
-                        <small>РАЗМЕЩЕНИЕ</small>
-                        <strong>Поместить в «{assignmentAsset.name}»</strong>
+                        <small>{t('game.ui.placement')}</small>
+                        <strong>{t('game.ui.placeIn').replace('{name}', assignmentAsset.name)}</strong>
                       </div>
                       <button onClick={() => setAssignmentAssetId(null)}>
                         ×
@@ -1794,6 +1823,7 @@ function LaboratoryOverview({
                                 name={resident.name}
                                 portrait={resident.portrait}
                                 contexts={resident.contexts}
+                                state={resident.state}
                               />
                             </span>
                             <span>
@@ -1804,7 +1834,7 @@ function LaboratoryOverview({
                                   "Местоположение не определено"}
                               </i>
                             </span>
-                            <em>Поместить →</em>
+                            <em>{t('game.ui.placeArrow')}</em>
                           </button>
                         );
                       })}
@@ -1813,7 +1843,7 @@ function LaboratoryOverview({
                 );
               })()}
             <section className="room-detail-section room-equipment-section">
-              <h3>Оборудование</h3>
+              <h3>{t('game.ui.equipmentSection')}</h3>
               <div className="room-equipment">
                 {roomAssets.length ? (
                   roomAssets.map((asset) => {
@@ -1846,9 +1876,9 @@ function LaboratoryOverview({
                         <div className="laboratory-module-copy">
                           <header>
                             <small>
-                              {occupant ? "СЕАНС АКТИВЕН" : "ГОТОВО К РАБОТЕ"}
+                              {occupant ? t('game.ui.sessionActive') : t('game.ui.readyToWork')}
                             </small>
-                            <strong>{asset.name}</strong>
+                            <strong>{getDeviceName(asset.id, t)}</strong>
                           </header>
                           <p>{asset.description}</p>
                         </div>
@@ -1867,6 +1897,7 @@ function LaboratoryOverview({
                                   name={occupant.name}
                                   portrait={occupant.portrait}
                                   contexts={occupant.contexts}
+                                  state={occupant.state}
                                 />
                               )}
                             </div>
@@ -1900,7 +1931,7 @@ function LaboratoryOverview({
                                   />
                                 </div>
                               ) : (
-                                <span>Данные состояния недоступны</span>
+                                <span>{t('game.ui.stateDataUnavailable')}</span>
                               )}
                             </div>
                           </div>
@@ -1912,7 +1943,7 @@ function LaboratoryOverview({
                               disabled={busy}
                               onClick={() => onInteract(occupant)}
                             >
-                              Калибровка
+                              {t('game.ui.calibration')}
                             </button>
                           ) : (
                             occupant && (
@@ -1928,7 +1959,7 @@ function LaboratoryOverview({
                                   })
                                 }
                               >
-                                Управление
+                                {t('game.ui.control')}
                               </button>
                             )
                           )}
@@ -1937,7 +1968,7 @@ function LaboratoryOverview({
                               disabled={busy}
                               onClick={() => onUse(asset, occupant)}
                             >
-                              Освободить
+                              {t('game.ui.release')}
                             </button>
                           )}
                           {acceptsAsset && !occupant && (
@@ -1945,7 +1976,7 @@ function LaboratoryOverview({
                               disabled={busy || !assets.length}
                               onClick={() => setAssignmentAssetId(asset.id)}
                             >
-                              Поместить персонажа
+                              {t('game.ui.placeCharacter')}
                             </button>
                           )}
                         </footer>
@@ -1953,7 +1984,7 @@ function LaboratoryOverview({
                     );
                   })
                 ) : (
-                  <p>В помещении нет установленного оборудования.</p>
+                  <p>{t('game.ui.noEquipmentInstalled')}</p>
                 )}
               </div>
             </section>
@@ -1979,6 +2010,7 @@ function CharacterDirectory({
   onLocate: (resident: Resident) => void;
   onChangeRole: (resident: Resident, role: "staff" | "asset") => void;
 }) {
+  const { t } = useI18n();
   const [tab, setTab] = useState<
     "overview" | "state" | "zones" | "learning" | "history"
   >("overview");
@@ -2131,9 +2163,9 @@ function CharacterDirectory({
     <main className="character-dossier">
       <header>
         <button onClick={() => onSelect(null)}>← Назад</button>
-        <span>ДОСЬЕ ПЕРСОНАЖА</span>
+        <span>{t('game.ui.characterDossier')}</span>
         <label className="dossier-character-picker">
-          <small>ПЕРСОНАЖ</small>
+          <small>{t('game.ui.character')}</small>
           <select
             value={selected.id}
             onChange={(event) => onSelect(event.target.value)}
@@ -2154,6 +2186,7 @@ function CharacterDirectory({
               name={selected.name}
               portrait={selected.portrait}
               contexts={selected.contexts}
+              state={selected.state}
             />
           </div>
           <small>
@@ -2176,7 +2209,7 @@ function CharacterDirectory({
               className={tab === "overview" ? "active" : ""}
               onClick={() => setTab("overview")}
             >
-              Досье
+              {t('game.ui.dossier')}
             </button>
             <button
               className={tab === "state" ? "active" : ""}
@@ -2206,7 +2239,7 @@ function CharacterDirectory({
           {tab === "overview" && (
             <div className="dossier-information-grid">
               <article className="dossier-biography">
-                <small>БИОГРАФИЯ</small>
+                <small>{t('game.ui.biography')}</small>
                 <p>
                   {selected.biography ||
                     selected.description ||
@@ -2214,14 +2247,14 @@ function CharacterDirectory({
                 </p>
               </article>
               <article>
-                <small>ПАСПОРТ ЗАПИСИ</small>
+                <small>{t('game.ui.recordPassport')}</small>
                 <dl className="dossier-facts">
                   <div>
-                    <dt>Идентификатор</dt>
+                    <dt>{t('game.ui.identifier')}</dt>
                     <dd>{selected.subjectId || selected.id}</dd>
                   </div>
                   <div>
-                    <dt>Категория</dt>
+                    <dt>{t('game.ui.category')}</dt>
                     <dd>
                       {selected.kind === "subject"
                         ? "испытуемая"
@@ -2231,7 +2264,7 @@ function CharacterDirectory({
                     </dd>
                   </div>
                   <div>
-                    <dt>Статус</dt>
+                    <dt>{t('game.ui.status')}</dt>
                     <dd>
                       {selected.role === "asset"
                         ? "актив"
@@ -2241,17 +2274,17 @@ function CharacterDirectory({
                     </dd>
                   </div>
                   <div>
-                    <dt>Присутствие</dt>
+                    <dt>{t('game.ui.presence')}</dt>
                     <dd>{selected.presenceState || "не указано"}</dd>
                   </div>
                   <div>
-                    <dt>Должность / роль</dt>
+                    <dt>{t('game.ui.positionRole')}</dt>
                     <dd>
                       {selected.currentRole || selected.title || "не назначена"}
                     </dd>
                   </div>
                   <div>
-                    <dt>Исследованные зоны</dt>
+                    <dt>{t('game.ui.exploredZones')}</dt>
                     <dd>
                       {observedPoints.length} / {selected.points?.length || 0}
                     </dd>
@@ -2259,7 +2292,7 @@ function CharacterDirectory({
                 </dl>
               </article>
               <article>
-                <small>ТЕКУЩАЯ ОЦЕНКА</small>
+                <small>{t('game.ui.currentAssessment')}</small>
                 <div className="narrative-notes">
                   {assessment.map((note, index) => (
                     <p key={index}>{note}</p>
@@ -2267,7 +2300,7 @@ function CharacterDirectory({
                 </div>
               </article>
               <article>
-                <small>СТАТИСТИКА НАБЛЮДЕНИЙ</small>
+                <small>{t('game.ui.observationStats')}</small>
                 {statistics.length ? (
                   <dl className="dossier-facts dossier-statistics">
                     {statistics.map(([label, value]) => (
@@ -2278,16 +2311,16 @@ function CharacterDirectory({
                     ))}
                   </dl>
                 ) : (
-                  <p>Накопленная статистика пока отсутствует.</p>
+                  <p>{t('game.ui.noStatsYet')}</p>
                 )}
               </article>
               {selected.roleHistory?.length ? (
                 <article className="dossier-wide">
-                  <small>ИСТОРИЯ СТАТУСА</small>
+                  <small>{t('game.ui.statusHistory')}</small>
                   <div className="dossier-role-history">
                     {selected.roleHistory.map((entry, index) => (
                       <div key={`${entry.worldMinute}-${index}`}>
-                        <i>День {Math.floor(entry.worldMinute / 1440) + 1}</i>
+                        <i>{t('game.ui.day')} {Math.floor(entry.worldMinute / 1440) + 1}</i>
                         <b>{entry.title}</b>
                         <span>{entry.description}</span>
                       </div>
@@ -2296,7 +2329,7 @@ function CharacterDirectory({
                 </article>
               ) : null}
               <article className="dossier-wide">
-                <small>ОПЕРАТИВНЫЙ СТАТУС</small>
+                <small>{t('game.ui.operationalStatus')}</small>
                 <p>
                   {selected.role === "asset"
                     ? "Содержится в лаборатории как актив и доступна для подготовки к контрактам."
@@ -2336,7 +2369,7 @@ function CharacterDirectory({
           {tab === "state" && (
             <div className="dossier-information-grid">
               <article className="dossier-wide">
-                <small>СВОДКА СОСТОЯНИЯ</small>
+                <small>{t('game.ui.stateSummary')}</small>
                 {coreMetrics.length ? (
                   <div className="dossier-parameter-table">
                     {coreMetrics.map((metric) => (
@@ -2348,11 +2381,11 @@ function CharacterDirectory({
                     ))}
                   </div>
                 ) : (
-                  <p>Состояние пока не измерено.</p>
+                  <p>{t('game.ui.stateNotMeasured')}</p>
                 )}
               </article>
               <article>
-                <small>НАБЛЮДАЕМЫЕ ОСОБЕННОСТИ</small>
+                <small>{t('game.ui.observedFeatures')}</small>
                 <div className="narrative-notes">
                   {assessment.map((note, index) => (
                     <p key={index}>{note}</p>
@@ -2360,7 +2393,7 @@ function CharacterDirectory({
                 </div>
               </article>
               <article>
-                <small>УСТАНОВЛЕННЫЕ РЕАКЦИИ</small>
+                <small>{t('game.ui.establishedReactions')}</small>
                 <div className="narrative-notes">
                   {favored.length > 0 && (
                     <p>
@@ -2387,12 +2420,12 @@ function CharacterDirectory({
                     </p>
                   )}
                   {!observedPoints.length && (
-                    <p>Устойчивые реакции пока не установлены.</p>
+                    <p>{t('game.ui.noReactionsYet')}</p>
                   )}
                 </div>
               </article>
               <article className="dossier-wide">
-                <small>ТЕКУЩИЕ ОБСТОЯТЕЛЬСТВА</small>
+                <small>{t('game.ui.currentCircumstances')}</small>
                 <div className="dossier-tags">
                   {selected.contexts?.length ? (
                     selected.contexts.map((context) => (
@@ -2401,7 +2434,7 @@ function CharacterDirectory({
                       </span>
                     ))
                   ) : (
-                    <i>Значимых активных состояний не отмечено.</i>
+                    <i>{t('game.ui.noActiveStates')}</i>
                   )}
                 </div>
               </article>
@@ -2410,16 +2443,16 @@ function CharacterDirectory({
           {tab === "zones" && (
             <div className="dossier-information-grid dossier-zones-view">
               <article className="dossier-wide">
-                <small>ЛОКАЛЬНЫЕ ПОКАЗАТЕЛИ</small>
+                <small>{t('game.ui.localIndicators')}</small>
                 {observedPoints.length ? (
                   <div className="dossier-point-table">
                     <header>
-                      <span>Зона</span>
-                      <span>Чувствительность</span>
-                      <span>Принятие</span>
-                      <span>Открытость</span>
-                      <span>Знакомство</span>
-                      <span>Замеры</span>
+                      <span>{t('game.ui.zone')}</span>
+                      <span>{t('game.ui.sensitivity')}</span>
+                      <span>{t('game.ui.acceptance')}</span>
+                      <span>{t('game.ui.openness')}</span>
+                      <span>{t('game.ui.familiarity')}</span>
+                      <span>{t('game.ui.measurements')}</span>
                     </header>
                     {observedPoints.map((point) => {
                       const pointSensitivity = interpretPointSensitivity(
@@ -2451,7 +2484,7 @@ function CharacterDirectory({
                     })}
                   </div>
                 ) : (
-                  <p>Ни одна зона ещё не исследована.</p>
+                  <p>{t('game.ui.noZonesExplored')}</p>
                 )}
               </article>
             </div>
@@ -2459,7 +2492,7 @@ function CharacterDirectory({
           {tab === "learning" && (
             <div className="dossier-information-grid dossier-learning-view">
               <article>
-                <small>ПРИОБРЕТЁННЫЕ ОСОБЕННОСТИ</small>
+                <small>{t('game.ui.acquiredFeatures')}</small>
                 <div className="dossier-tags">
                   {acquiredTraits.length ? (
                     acquiredTraits.map((trait) => (
@@ -2468,12 +2501,12 @@ function CharacterDirectory({
                       </span>
                     ))
                   ) : (
-                    <i>Глубокие устойчивые изменения пока не сформированы.</i>
+                    <i>{t('game.ui.noDeepChanges')}</i>
                   )}
                 </div>
               </article>
               <article>
-                <small>УСВОЕННЫЕ АССОЦИАЦИИ</small>
+                <small>{t('game.ui.learnedAssociations')}</small>
                 {learnedTags.length ? (
                   <div className="dossier-learning-list">
                     {learnedTags.map(([tag, strength]) => (
@@ -2487,7 +2520,7 @@ function CharacterDirectory({
                     ))}
                   </div>
                 ) : (
-                  <p>Устойчивые ассоциации пока не сформированы.</p>
+                  <p>{t('game.ui.noAssociationsYet')}</p>
                 )}
               </article>
             </div>
@@ -2496,10 +2529,10 @@ function CharacterDirectory({
             <article className="dossier-history-panel">
               <header>
                 <div>
-                  <small>ХРОНИКА ПЕРСОНАЖА</small>
+                  <small>{t('game.ui.characterChronicle')}</small>
                   <b>{selected.history?.length || 0} событий</b>
                 </div>
-                <span>Новые записи сверху</span>
+                <span>{t('game.ui.newEntriesFirst')}</span>
               </header>
               <div className="dossier-history">
                 {selected.history?.length ? (
@@ -2524,7 +2557,7 @@ function CharacterDirectory({
                       </div>
                     ))
                 ) : (
-                  <p>Значимых событий пока не записано.</p>
+                  <p>{t('game.ui.noEventsYet')}</p>
                 )}
               </div>
             </article>
@@ -2542,6 +2575,7 @@ function PeopleView({
   residents: Resident[];
   onOpen: (resident: Resident) => void;
 }) {
+  const { t } = useI18n();
   const assets = residents.filter(
     (resident) => resident.role === "asset" || resident.kind === "subject",
   );
@@ -2550,18 +2584,17 @@ function PeopleView({
     <main className="character-directory">
       <header className="screen-heading">
         <div>
-          <p>СОСТАВ КОМПЛЕКСА</p>
-          <h1>Персонажи</h1>
+          <p>{t('game.ui.composition')}</p>
+          <h1>{t('game.ui.characters')}</h1>
           <span>
-            Активы и персонал собраны в одном месте. Выберите персонажа, чтобы
-            открыть его досье.
+            {t('game.ui.charactersDescription')}
           </span>
         </div>
-        <b>{residents.length} всего</b>
+        <b>{residents.length} {t('game.ui.total')}</b>
       </header>
       <section>
         <div className="directory-group">
-          <h2>Активы</h2>
+          <h2>{t('game.ui.assets')}</h2>
           {assets.length ? (
             assets.map((resident) => (
               <DirectoryCard
@@ -2571,11 +2604,11 @@ function PeopleView({
               />
             ))
           ) : (
-            <p className="empty-screen">Активов пока нет.</p>
+            <p className="empty-screen">{t('game.ui.noAssets')}</p>
           )}
         </div>
         <div className="directory-group">
-          <h2>Персонал</h2>
+          <h2>{t('game.ui.staff')}</h2>
           {staff.length ? (
             staff.map((resident) => (
               <DirectoryCard
@@ -2585,7 +2618,7 @@ function PeopleView({
               />
             ))
           ) : (
-            <p className="empty-screen">Персонал отсутствует.</p>
+            <p className="empty-screen">{t('game.ui.staffMissing')}</p>
           )}
         </div>
       </section>
@@ -2609,6 +2642,7 @@ function DirectoryCard({
           name={resident.name}
           portrait={resident.portrait}
           contexts={resident.contexts}
+          state={resident.state}
         />
       </div>
       <div>
@@ -2681,9 +2715,10 @@ function DeviceControlScreen({
   busy: boolean;
   onRefresh: () => Promise<void>;
   onPassTime: (minutes: number) => Promise<boolean>;
-  onRelease: () => Promise<void>;
+  onRelease?: () => Promise<void>;
   onExit: () => void;
 }) {
+  const { t } = useI18n();
   const session = asset.metadata?.deviceSession;
   const [lines, setLines] = useState<CharacterChatLine[]>([]);
   const [text, setText] = useState("");
@@ -2742,10 +2777,10 @@ function DeviceControlScreen({
     return (
       <main className="device-control-screen">
         <header>
-          <button onClick={onExit}>← Лаборатория</button>
-          <h1>{asset.name}</h1>
+          <button onClick={onExit}>← {t('game.ui.laboratory')}</button>
+          <h1>{getDeviceName(asset.id, t)}</h1>
         </header>
-        <p>Сессия устройства не инициализирована.</p>
+        <p>{t('game.ui.deviceSessionNotInitialized')}</p>
       </main>
     );
 
@@ -3061,11 +3096,11 @@ function DeviceControlScreen({
   return (
     <main className="device-control-screen sex-machine-screen">
       <header className="device-control-header">
-        <button onClick={onExit}>← Лаборатория</button>
+        <button onClick={onExit}>← {t('game.ui.laboratory')}</button>
         <div>
-          <small>СЕКС-МАШИНА · ФИКСИРОВАННАЯ ПЛАТФОРМА</small>
+          <small>{t('game.ui.sexMachineFixedPlatform')}</small>
           <h1>{resident.name}</h1>
-          <p>{asset.name}</p>
+          <p>{getDeviceName(asset.id, t)}</p>
         </div>
         <div className={`device-status ${session.status}`}>
           <i>●</i>
@@ -3621,6 +3656,7 @@ function ContainerConversation({
   onRelease?: () => Promise<void>;
   onExit: () => void;
 }) {
+  const { t } = useI18n();
   const [lines, setLines] = useState<CharacterChatLine[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -3833,6 +3869,9 @@ function ContainerConversation({
     const chatParticipants = presentResidents.length
       ? presentResidents
       : [resident];
+    const contextLabels = Array.from(
+      new Set([container, roomName].filter((label): label is string => Boolean(label))),
+    );
     Promise.all([
       Promise.all(
         chatParticipants.map((character) =>
@@ -3844,37 +3883,36 @@ function ContainerConversation({
       api(
         `/api/state?subjectId=${resident.subjectId || resident.id}&sceneId=scene_lab_calibrator&pointId=${selectedZoneId}`,
       ),
+      api(`/api/chat/context?contexts=${encodeURIComponent(contextLabels.join("|"))}&limit=100`),
     ])
-      .then(([chatHistories, stateData]) => {
+      .then(([chatHistories, stateData, contextHistory]) => {
+        const contextMessages = (contextHistory.messages || []).map((message: any) => ({
+          ...message,
+          participantId: message.subjectId,
+          participantName: message.characterName || message.subjectId,
+        }));
+        // Context-less legacy rows have no slot to query by. Keep them for
+        // current occupants, but source all labelled rows from the durable
+        // context journal so departed occupants remain visible in this slot.
+        const legacyMessages = chatHistories.flatMap(({ character, messages }) =>
+          messages
+            .filter((message: any) => !message.contextLabel)
+            .map((message: any) => ({
+              ...message,
+              participantId: character.subjectId || character.id,
+              participantName: character.name,
+            })),
+        );
         const restored = collapseRepeatedChatActions(
-          chatHistories
-            .flatMap(({ character, messages }) =>
-              messages
-                .filter((message: any) => {
-                  // Chat is room-based. Show messages that belong to this room:
-                  // - System events (contextLabel = 'Система')
-                  // - Messages with context matching the room name
-                  // - Messages with no context (legacy)
-                  // Device/calibration contexts belong to the calibration screen.
-                  const ctx = String(message.contextLabel || "");
-                  if (ctx === "Система") return true;
-                  if (roomName && ctx === roomName) return true;
-                  if (ctx === container) return true;
-                  if (!ctx) return true;
-                  return false;
-                })
-                .map((message: any) => ({
-                  ...chatLineFromStoredMessage(
-                    message,
-                    character.name,
-                    character.subjectId || character.id,
-                  ),
-                  actorId:
-                    message.role === "assistant"
-                      ? character.subjectId || character.id
-                      : undefined,
-                })),
-            )
+          [...contextMessages, ...legacyMessages]
+            .map((message: any) => ({
+              ...chatLineFromStoredMessage(
+                message,
+                message.participantName || message.participantId,
+                message.participantId,
+              ),
+              actorId: message.role === "assistant" ? message.participantId : undefined,
+            }))
             .sort((left, right) => Number(left.id) - Number(right.id)),
         ).slice(-100);
         // A state/chat refresh may have started before a deferred reply and
@@ -3950,7 +3988,7 @@ function ContainerConversation({
       });
       deliverDeferredReply(data);
       setSending(false);
-      void onRefresh();
+      await onRefresh();
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -4112,7 +4150,7 @@ function ContainerConversation({
       if (!capsuleDrug) showPeakEffectFromTick(data);
       deliverDeferredReply(data);
       setSending(false);
-      void onRefresh();
+      await onRefresh();
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -4780,7 +4818,7 @@ function ContainerConversation({
           <p>{container}</p>
         </div>
         {kind === "capsule" && onRelease && (
-          <button onClick={onRelease}>Освободить</button>
+          <button onClick={onRelease}>{t('game.ui.release')}</button>
         )}
       </header>
       <section className="residential-workbench-layout">
@@ -5267,6 +5305,8 @@ function ContainerConversation({
                           id={character.subjectId || character.id}
                           name={character.name}
                           portrait={character.portrait}
+                          contexts={character.contexts}
+                          state={character.state}
                         />
                       )}
                       <span>{character.name}</span>
@@ -5297,6 +5337,8 @@ function ContainerConversation({
                     id={resident.subjectId || resident.id}
                     name={resident.name}
                     portrait={resident.portrait}
+                    contexts={resident.contexts}
+                    state={resident.state}
                   />
                 )}
               </button>
@@ -5616,6 +5658,7 @@ function SupplyView({
   onOpenInbox: () => void;
   onOpenContracts: () => void;
 }) {
+  const { t } = useI18n();
   const [tab, setTab] = useState<"overview" | "supply" | "storage">("overview");
   const modules = scenario.shop.filter(
     (offer) => offer.category === "laboratory",
@@ -5635,7 +5678,7 @@ function SupplyView({
       <header className="station-command-header">
         <div>
           <p>ОМНИКРОН · СТАНЦИОННЫЙ ТЕРМИНАЛ</p>
-          <h1>Станция</h1>
+          <h1>{t('game.ui.station')}</h1>
           <span>Внешние связи лаборатории.</span>
         </div>
         <section>
@@ -5673,7 +5716,7 @@ function SupplyView({
             <div className="station-radial-panel">
               <header>
                 <small>ОМНИКРОН</small>
-                <strong>Станция вокруг лаборатории</strong>
+                <strong>{t('game.ui.stationAroundLab')}</strong>
                 <span>
                   Схема мира; активные ситуации приходят через каналы справа
                 </span>
@@ -5758,14 +5801,14 @@ function SupplyView({
           <section className="management-section station-supply">
             <header className="station-section-heading">
               <div>
-                <small>ДОСТУПНЫЕ ЛОТЫ</small>
-                <h2>Снабжение комплекса</h2>
+                <small>{t('game.ui.availableLots')}</small>
+                <h2>{t('game.ui.complexSupply')}</h2>
               </div>
-              <span>Получение оформляется через станционную сеть</span>
+              <span>{t('game.ui.obtainedViaStation')}</span>
             </header>
             {modules.length > 0 && (
               <>
-                <h2>Лабораторные модули</h2>
+                <h2>{t('game.ui.labModules')}</h2>
                 <div className="offer-grid">
                   {modules.map((offer) => (
                     <OfferCard
@@ -5779,7 +5822,7 @@ function SupplyView({
                 </div>
               </>
             )}
-            <h2>Препараты и составы</h2>
+            <h2>{t('game.ui.drugsAndCompounds')}</h2>
             <div className="offer-grid">
               {consumables.map((offer) => (
                 <OfferCard
@@ -5791,7 +5834,7 @@ function SupplyView({
                 />
               ))}
             </div>
-            <h2>Оснащение и одежда</h2>
+            <h2>{t('game.ui.equipmentAndClothing')}</h2>
             <div className="offer-grid">
               {equipment.map((offer) => (
                 <OfferCard
@@ -5826,6 +5869,7 @@ function OfferCard({
   busy: boolean;
   onBuy: (offer: ShopOffer) => void;
 }) {
+  const { t } = useI18n();
   const unavailable = offer.owned || offer.stock === 0;
   return (
     <article
@@ -5834,12 +5878,12 @@ function OfferCard({
       <div>
         <small>
           {offer.limited
-            ? `ОГРАНИЧЕННАЯ ПАРТИЯ · ${offer.batch}`
+            ? `${t('game.ui.limitedBatch')} · ${offer.batch}`
             : offer.category === "laboratory"
-              ? "МОДУЛЬ"
+              ? t('game.ui.module')
               : offer.stock > 0
-                ? `ОСТАЛОСЬ ${offer.stock}`
-                : "ОБОРУДОВАНИЕ"}
+                ? `${t('game.ui.remaining')} ${offer.stock}`
+                : t('game.ui.equipmentSection')}
         </small>
         <strong>{offer.name}</strong>
         <p>{offer.description}</p>
@@ -5888,28 +5932,28 @@ function ContractOffice({
   onDeliver: (contract: Contract) => void;
   now: number;
 }) {
+  const { t } = useI18n();
   const subjectName =
-    assets.find((asset) => asset.id === selectedAssetId)?.name || "Актив";
+    assets.find((asset) => asset.id === selectedAssetId)?.name || t('game.ui.asset');
   return (
     <main className="management-screen">
       <header className="screen-heading">
         <div>
-          <p>ОФИС СВЯЗНОГО</p>
-          <h1>Контракты</h1>
+          <p>{t('game.ui.liaisonOffice')}</p>
+          <h1>{t('game.ui.contracts')}</h1>
           <span>
-            Выберите актив для проверки требований и передачи по выполненному
-            заказу.
+            {t('game.ui.selectAssetForContract')}
           </span>
         </div>
         <label className="contract-asset-picker">
-          <small>ПРОВЕРИТЬ АКТИВ</small>
+          <small>{t('game.ui.checkAsset')}</small>
           <select
             value={selectedAssetId || ""}
             onChange={(event) => onSelectAsset(event.target.value)}
           >
             {assets.map((asset) => (
               <option key={`contract-asset-${asset.id}`} value={asset.id}>
-                {asset.name}
+                {getDeviceName(asset.id, t)}
               </option>
             ))}
           </select>
@@ -5964,7 +6008,7 @@ function ContractOffice({
               </div>
               {contract.state === "available" ? (
                 <button disabled={busy} onClick={() => onAccept(contract)}>
-                  Принять заказ
+                  {t('game.ui.acceptOrder')}
                 </button>
               ) : (
                 <button
@@ -5992,13 +6036,14 @@ function InventoryView({
   items: InventoryItem[];
   embedded?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <section className={embedded ? "embedded-inventory" : "management-screen"}>
       {!embedded && (
         <header className="screen-heading">
           <div>
             <p>УЧЁТ</p>
-            <h1>Имущество</h1>
+            <h1>{t('game.ui.property')}</h1>
             <span>
               Переносное оборудование, одежда и расходники калибратора.
             </span>
@@ -6029,29 +6074,30 @@ function StationStorage({
   inventory: InventoryItem[];
   laboratory: LabAsset[];
 }) {
+  const { t } = useI18n();
   const groups = [
-    { id: "capsule", label: "Препараты капсулы" },
-    { id: "medical", label: "Прочие расходники" },
-    { id: "equipment", label: "Переносное оснащение" },
-    { id: "clothing", label: "Одежда и экипировка" },
+    { id: "capsule", label: t('game.ui.capsuleDrugs') },
+    { id: "medical", label: t('game.ui.medicalSupplies') },
+    { id: "equipment", label: t('game.ui.portableEquipment') },
+    { id: "clothing", label: t('game.ui.clothingAndGear') },
   ] as const;
   return (
     <section className="management-section station-storage">
       <header className="station-section-heading">
         <div>
           <small>СКЛАДСКОЙ УЧЁТ</small>
-          <h2>Имущество комплекса</h2>
+          <h2>{t('game.ui.complexProperty')}</h2>
         </div>
         <span>
           {inventory.length} позиций · {laboratory.length} установленных модулей
         </span>
       </header>
-      <h2>Установлено в лаборатории</h2>
+      <h2>{t('game.ui.installedInLab')}</h2>
       <div className="installed-module-grid">
         {laboratory.map((asset) => (
           <article key={asset.id}>
-            <small>{asset.metadata?.subjectId ? "ЗАНЯТО" : "ГОТОВО"}</small>
-            <strong>{asset.name}</strong>
+            <small>{asset.metadata?.subjectId ? t('game.ui.busy') : t('game.ui.ready')}</small>
+            <strong>{getDeviceName(asset.id, t)}</strong>
             <p>{asset.description}</p>
             <span>
               {asset.metadata?.subjectId
@@ -6091,15 +6137,15 @@ function StationStorage({
 }
 
 function JournalView({ events }: { events: Scenario["events"] }) {
+  const { t } = useI18n();
   return (
     <main className="management-screen">
       <header className="screen-heading">
         <div>
-          <p>ХРОНИКА</p>
-          <h1>Журнал сектора</h1>
+          <p>{t('game.ui.chronicle')}</p>
+          <h1>{t('game.ui.sectorJournal')}</h1>
           <span>
-            Перемещения, приобретения, восстановительные циклы и изменения
-            контрактов.
+            {t('game.ui.journalDescription')}
           </span>
         </div>
       </header>

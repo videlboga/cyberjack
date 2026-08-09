@@ -43,7 +43,7 @@ function effectiveCurrentRole(character: CharacterRow | undefined, canonical: Re
 
 function determineArchetype(character: CharacterRow | undefined, canonical: Record<string, any>): CharacterArchetype {
     const status = canonical.base?.status;
-    if (canonical.recruitment || ['candidate', 'assistant', 'staff', 'person'].includes(status)) return 'person';
+    if (canonical.recruitment || ['candidate', 'assistant', 'staff', 'person', 'calibrator'].includes(status)) return 'person';
     if (['asset', 'broker', 'client', 'observer'].includes(status)) return status;
     if (character && db.prepare('SELECT 1 FROM character_resources WHERE character_id = ? AND resource_key = ?').get(character.id, 'store_catalog')) {
         return 'broker';

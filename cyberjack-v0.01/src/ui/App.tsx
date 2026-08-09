@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { DevApp } from './DevApp';
 import { GameApp } from './GameApp';
+import { I18nProvider } from './i18n';
+import { LanguageSelector } from './LanguageSelector';
 
 export function App() {
   const [isDevMode, setIsDevMode] = useState(false);
 
   return (
-    <>
+    <I18nProvider>
+      <LanguageSelector />
       <button 
         style={{
           position: 'fixed', 
@@ -25,6 +28,6 @@ export function App() {
         DEV: {isDevMode ? 'ON' : 'OFF'}
       </button>
       {isDevMode ? <DevApp /> : <GameApp />}
-    </>
+    </I18nProvider>
   );
 }

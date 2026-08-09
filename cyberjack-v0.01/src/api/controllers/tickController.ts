@@ -20,6 +20,8 @@ import { randomUUID } from 'crypto';
 import { actionTimePolicy } from '../../domain/actionTimePolicy';
 import { advanceSimulationTime } from '../../scenario/simulationTime';
 import { buildPairedDialogueHistory } from '../../narrative/dialogueHistory';
+import { moveCharacterInLaboratory } from '../../scenario/spatialContext';
+import { syncLaboratorySpatialRelations } from '../../services/sceneRelations';
 
 const deferredReplyJobs = new Map<string, {
     done: boolean;
@@ -193,6 +195,15 @@ export const processTick = async (req: Request, res: Response) => {
 
         const baseUserMessage = typeof textMessage === 'string' && textMessage.trim().length ? textMessage.trim() : null;
 
+        // A direct UI action has no semantic route, so it must establish the
+        // active screen's position before the physical-access check.
+        // Spoken input is parsed first: its route may name a different actor
+        // or target, and moving here used to bias that resolution.
+        if (!textMessage && tickSceneId === 'scene_lab_calibrator' && requestedPlayerId && requestedSubjectId !== requestedPlayerId) {
+            const relocation = moveCharacterInLaboratory(requestedPlayerId, requestedSubjectId, requestedPlayerId);
+            if (relocation.handled) syncLaboratorySpatialRelations(requestedPlayerId);
+        }
+
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
         // Note: dispatchEvent now calls runGameTick
         const requestedActionId = String(req.body.presetId || '');
@@ -207,6 +218,13 @@ export const processTick = async (req: Request, res: Response) => {
             skipContextTimeAdvance:true,
         };
         const { bundle, dynamicModifiers, pointIdUsed, subjectIdUsed, actorIdUsed } = await dispatchEvent(dispatchPayload);
+        // A conversational screen still represents where the calibrator is,
+        // but its position must never take part in choosing who the command
+        // refers to.  Apply that screen transition only after parsing/routing.
+        if (textMessage && tickSceneId === 'scene_lab_calibrator' && requestedPlayerId && requestedSubjectId !== requestedPlayerId) {
+            const relocation = moveCharacterInLaboratory(requestedPlayerId, requestedSubjectId, requestedPlayerId);
+            if (relocation.handled) syncLaboratorySpatialRelations(requestedPlayerId);
+        }
         const subjectId = subjectIdUsed || requestedSubjectId;
         const playerId = requestedPlayerId;
         const actingCharacterId = actorIdUsed || requestedPlayerId;
@@ -278,7 +296,7 @@ export const processTick = async (req: Request, res: Response) => {
             })
             : 1;
         const llmSkipped = chanceSpeech && Math.random() >= llmChance;
-        
+
         const generateTurnReply = async () => {
             let generatedMetrics: any = null;
             let generatedError: string | null = null;
@@ -310,6 +328,14 @@ export const processTick = async (req: Request, res: Response) => {
                         `[Текущий контакт]\nКалибратор применяет: ${actionLabel}. Зона: ${pointLabel}.\nТвоё фактическое внутреннее ощущение: ${observation?.subjectiveText || 'реакция неясна'}.`
                         ].filter(Boolean).join('\n\n');
                 }
+                // Add language directive to system prompt
+                const { getCurrentLocale } = await import('../../api/routes/localeRoutes');
+                const currentLocale = getCurrentLocale();
+                const languageDirective = currentLocale === 'ru'
+                    ? 'Отвечай на русском языке.'
+                    : 'Respond in English.';
+                promptPayload.systemPrompt += `\n\n${languageDirective}`;
+
                 const generated = await generateCharacterReply(promptPayload, currentInput, previousHistory, (chunk) => {
                     if (replyJobId) {
                         const job = deferredReplyJobs.get(replyJobId);

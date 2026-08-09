@@ -10,5 +10,7 @@ export function getActiveContextPromptText(
     fallback: string
 ): string {
     const label = getActiveContextLabel(preset, fallback);
-    return preset?.contextConfig?.promptEffect ? `${label}: ${preset.contextConfig.promptEffect}` : label;
+    const effect = contextPromptEffect(fallback, preset?.contextConfig?.promptEffect);
+    return effect ? `${label}: ${effect}` : label;
 }
+import { contextPromptEffect } from './contextNarration';

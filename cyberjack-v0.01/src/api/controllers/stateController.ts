@@ -167,6 +167,22 @@ export const getChatHistory = (req: Request, res: Response) => {
     }
 };
 
+/** Return a durable room/device journal, including former occupants. */
+export const getContextChatHistory = (req: Request, res: Response) => {
+    try {
+        const labels = String(req.query.contexts || '')
+            .split('|')
+            .map(label => label.trim())
+            .filter(Boolean);
+        if (!labels.length) return res.status(400).json({ success: false, error: 'contexts required' });
+        const limit = Math.max(1, Math.min(200, Number(req.query.limit) || 100));
+        const messages = chatMemoryRepo.getRecentForContexts(labels, limit);
+        res.json({ success: true, contexts: labels, messages });
+    } catch (error: any) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 export const updateSubject = (req: Request, res: Response) => {
     try {
         const subjectId = req.body.subjectId || 'S-01';

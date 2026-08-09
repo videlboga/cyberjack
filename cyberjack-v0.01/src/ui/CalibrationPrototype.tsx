@@ -1603,6 +1603,7 @@ const DualAvatarStage = memo(function DualAvatarStage({
   secondaryFallback,
   mainOnError,
   mainOnLoad,
+  activeIsSecondary,
   onSwap,
 }: {
   mainSrc: string;
@@ -1613,40 +1614,27 @@ const DualAvatarStage = memo(function DualAvatarStage({
   secondaryFallback: string;
   mainOnError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
   mainOnLoad?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
-  onSwap?: () => void;
+  activeIsSecondary: boolean;
+  onSwap: () => void;
 }) {
-  const [swapped, setSwapped] = useState(false);
-
-  const handleSwap = () => {
-    const next = !swapped;
-    setSwapped(next);
-    // Update parent AFTER animation completes (500ms)
-    if (onSwap) setTimeout(onSwap, 500);
-  };
-
   return (
     <>
       {secondarySrc && (
-        <motion.div
-          className={`calibration-secondary-avatar ${swapped ? "active" : ""}`}
-          initial={{ opacity: 0.5 }}
-          animate={{ opacity: swapped ? 1 : 0.5 }}
-          transition={{ duration: 0.4 }}
-          onClick={handleSwap}
+        <div
+          className={`calibration-secondary-avatar ${activeIsSecondary ? "active" : "recessed"}`}
+          onClick={onSwap}
         >
           <span className="portrait-fallback">{secondaryFallback}</span>
           <img className="calibration-character-image" src={secondarySrc} alt={secondaryAlt} onError={(e) => { e.currentTarget.hidden = true; }} />
-        </motion.div>
+        </div>
       )}
-      <motion.div
-        className={`calibration-avatar-frame ${swapped ? "dimmed" : ""}`}
-        initial={{ opacity: 1 }}
-        animate={{ opacity: swapped ? 0.4 : 1 }}
-        transition={{ duration: 0.4 }}
+      <div
+        className={`calibration-avatar-frame ${activeIsSecondary ? "dimmed" : "active"}`}
+        onClick={activeIsSecondary ? onSwap : undefined}
       >
         <span className="portrait-fallback">{mainFallback}</span>
         <img className="calibration-character-image" src={mainSrc} alt={mainAlt} onLoad={mainOnLoad} onError={mainOnError} />
-      </motion.div>
+      </div>
     </>
   );
 });
@@ -1698,7 +1686,11 @@ export function CalibrationPrototype({
     [playerInput, setPlayerInput] = useState(""),
     [speechTargetId, setSpeechTargetId] = useState(SUBJECT),
     [activeSubjectId, setActiveSubjectId] = useState(SUBJECT),
-    swapSubjects = (nextId: string) => { setActiveSubjectId(nextId); },
+    swapSubjects = (nextId: string) => {
+      setActiveSubjectId(nextId);
+      setSpeechTargetId(nextId);
+      setSpeechTargetMenuOpen(false);
+    },
     vtUpdate = (fn: () => void) => { fn(); },
     [speechTargetMenuOpen, setSpeechTargetMenuOpen] = useState(false),
     [chatLines, setChatLines] = useState<ChatLine[]>([]),
@@ -1741,6 +1733,10 @@ export function CalibrationPrototype({
     ),
     [diagnosticsOpen, setDiagnosticsOpen] = useState(false),
     [subject, setSubject] = useState<State | null>(null),
+    [focusedMonitorState, setFocusedMonitorState] = useState<State | null>(null),
+    [sceneCharacterStates, setSceneCharacterStates] = useState<
+      Record<string, State>
+    >({}),
     [relationAttitude, setRelationAttitude] = useState<number | null>(null),
     [stateHistory, setStateHistory] = useState<StateSnapshot[]>(() => {
       try {
@@ -1870,6 +1866,106 @@ export function CalibrationPrototype({
       : line;
   };
   useEffect(() => setSpeechTargetId(SUBJECT), [SUBJECT]);
+  const nearbyCharacterStateKey = nearbyCharacters
+    .map((character) =>
+      [
+        character.id,
+        JSON.stringify(character.state || {}),
+        JSON.stringify(character.contexts || []),
+      ].join(":"),
+    )
+    .join("|");
+  useEffect(() => {
+    const controller = new AbortController();
+    const participantIds = nearbyCharacters.map((character) => character.id);
+    if (!participantIds.length) return () => controller.abort();
+
+    // Scene cards carry a convenient snapshot, but the avatar must use the
+    // authoritative state: a nearby character may have changed clothes or
+    // pose without becoming the selected monitor target.
+    Promise.all(
+      participantIds.map(async (participantId) => {
+        const response = await fetch(
+          `/api/state?subjectId=${encodeURIComponent(participantId)}&sceneId=${encodeURIComponent(SCENE)}&pointId=${encodeURIComponent(selectedZoneId || ZONE)}`,
+          { signal: controller.signal },
+        );
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data?.subject ? ([participantId, data.subject] as const) : null;
+      }),
+    )
+      .then((entries) => {
+        if (controller.signal.aborted) return;
+        setSceneCharacterStates((current) => ({
+          ...current,
+          ...Object.fromEntries(
+            entries.filter(
+              (entry): entry is readonly [string, State] => Boolean(entry),
+            ),
+          ),
+        }));
+      })
+      .catch((error) => {
+        if (error?.name !== "AbortError") {
+          console.warn("[Calibration] Could not load scene participant states", error);
+        }
+      });
+    return () => controller.abort();
+  }, [SUBJECT, SCENE, selectedZoneId, nearbyCharacterStateKey]);
+  useEffect(() => {
+    if (activeSubjectId === SUBJECT) {
+      setFocusedMonitorState(null);
+      return;
+    }
+
+    const nearbyState = nearbyCharacters.find(
+      (character) => character.id === activeSubjectId,
+    )?.state as State | undefined;
+    setFocusedMonitorState(nearbyState || null);
+
+    const controller = new AbortController();
+    fetch(
+      `/api/state?subjectId=${encodeURIComponent(activeSubjectId)}&sceneId=${encodeURIComponent(SCENE)}&pointId=${encodeURIComponent(selectedZoneId || ZONE)}`,
+      { signal: controller.signal },
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error(`State request failed: ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        if (data?.subject) {
+          const freshState = data.subject as State;
+          setFocusedMonitorState(freshState);
+          setSceneCharacterStates((current) => ({
+            ...current,
+            [activeSubjectId]: freshState,
+          }));
+        }
+      })
+      .catch((error) => {
+        if (error?.name !== "AbortError") {
+          console.warn("[Calibration] Could not load focused monitor state", error);
+        }
+      });
+
+    return () => controller.abort();
+  }, [activeSubjectId, SUBJECT]);
+  const activeDisplayCharacter = activeSubjectId === SUBJECT
+    ? null
+    : nearbyCharacters.find((character) => character.id === activeSubjectId);
+  const activeDisplayState = activeSubjectId === SUBJECT
+    ? subject
+    : sceneCharacterStates[activeSubjectId] ||
+      focusedMonitorState ||
+      (activeDisplayCharacter?.state as State | undefined) ||
+      null;
+  // The body map already follows the selected participant. Keep the central
+  // visual and its context rack on that same subject instead of rendering
+  // the primary calibration subject's clothing after a switch.
+  const presentationSubjectId = activeSubjectId || SUBJECT;
+  const presentationState = activeDisplayState || subject;
+  const presentationName = activeDisplayCharacter?.name || subjectName;
+  const presentationObservation = activeSubjectId === SUBJECT ? currentObservation : null;
   const load = async () => {
     const q = await fetch(
         `/api/state?subjectId=${SUBJECT}&sceneId=${SCENE}&pointId=${selectedZoneId || ZONE}`,
@@ -1877,6 +1973,35 @@ export function CalibrationPrototype({
       ),
       d = await q.json();
     if (!d.success) throw new Error(d.error);
+    // The primary subject and scene participants used to have separate refresh
+    // paths. A command to a nearby character then reached the database but
+    // left their cached state (and therefore contexts/avatar) unchanged.
+    // Refresh every visible participant as one scene snapshot after each load.
+    const participantResults = await Promise.allSettled(
+      nearbyCharacters.map(async (character) => {
+        const response = await fetch(
+          `/api/state?subjectId=${encodeURIComponent(character.id)}&sceneId=${encodeURIComponent(SCENE)}&pointId=${encodeURIComponent(selectedZoneId || ZONE)}`,
+          { signal: AbortSignal.timeout(15_000) },
+        );
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data?.subject ? ([character.id, data.subject] as const) : null;
+      }),
+    );
+    const freshParticipantStates = Object.fromEntries(
+      participantResults.flatMap((result) =>
+        result.status === "fulfilled" && result.value ? [result.value] : [],
+      ),
+    ) as Record<string, State>;
+    if (Object.keys(freshParticipantStates).length) {
+      setSceneCharacterStates((current) => ({
+        ...current,
+        ...freshParticipantStates,
+      }));
+      if (activeSubjectId !== SUBJECT && freshParticipantStates[activeSubjectId]) {
+        setFocusedMonitorState(freshParticipantStates[activeSubjectId]);
+      }
+    }
     // Apply state updates inside View Transition for smooth visual crossfade
     const applyState = () => {
     subjectRef.current = d.subject;
@@ -2311,6 +2436,10 @@ export function CalibrationPrototype({
     chatEndRef.current?.scrollIntoView({ block: "end" });
   }, [chatLines, generatingSpeech]);
   const request = async (item: Step, callLLM = false) => {
+    // The primary prop is the character that opened the calibration screen.
+    // The body map can subsequently focus another present character, and all
+    // manual actions must follow that live focus rather than the stale prop.
+    const actionSubjectId = activeSubjectId || SUBJECT;
     const wait = item.actionId === "wait",
       q = await fetch(wait ? "/api/wait" : "/api/tick", {
         method: "POST",
@@ -2319,7 +2448,7 @@ export function CalibrationPrototype({
         body: JSON.stringify(
           wait
             ? {
-                subjectId: SUBJECT,
+                subjectId: actionSubjectId,
                 eventId: SCENE,
                 ticks: 1,
                 deltaTime: 10,
@@ -2327,7 +2456,8 @@ export function CalibrationPrototype({
                 interactionContext: "Диагностический стол",
               }
             : {
-                subjectId: SUBJECT,
+                subjectId: actionSubjectId,
+                addressedCharacterId: actionSubjectId,
                 playerId: "PL-1",
                 sceneId: SCENE,
                 pointId: item.pointId || ZONE,
@@ -2775,8 +2905,6 @@ export function CalibrationPrototype({
               });
             else if (!replies.length && replyPayload.llmError)
               pushChat({ speaker: "system", text: "Ответ модели недоступен." });
-            else if (!replyPayload.llmSkipped)
-              pushChat({ speaker: "system", text: `${subjectName} молчит.` });
           } finally {
             setGeneratingSpeech(false);
           }
@@ -3345,7 +3473,7 @@ export function CalibrationPrototype({
     ),
     preparationTarget =
       operationMode === "setup"
-        ? preparationTargetVisual(SUBJECT, subject, selectedAction)
+        ? preparationTargetVisual(activeSubjectId, activeDisplayState, selectedAction)
         : null,
     selectedZone =
       operationMode === "impact"
@@ -3357,7 +3485,7 @@ export function CalibrationPrototype({
       (subject?.contexts || []).flatMap((c) => c.blocksPoints || []),
     ),
     visibleContexts = Array.from(
-      new Map((subject?.contexts || []).map((c) => [c.actionId, c])).values(),
+      new Map((presentationState?.contexts || []).map((c) => [c.actionId, c])).values(),
     ),
     wornContexts = visibleContexts.filter(
       (c) =>
@@ -3610,26 +3738,27 @@ export function CalibrationPrototype({
             ? "Рабочий запас"
             : "Высокий запас",
     baseVisualPath = characterVisualPath(
-      SUBJECT,
-      subject,
-      currentObservation?.behavioralState,
-      currentObservation?.transitions?.some(
+      presentationSubjectId,
+      presentationState,
+      presentationObservation?.behavioralState,
+      presentationObservation?.transitions?.some(
         (transition) => transition.kind === "discharge",
       ) || false,
     ),
     portraitFallbackPath = canonicalCharacterPortrait(
-      SUBJECT,
-      subjectName,
-      (subject?.contexts || []).map((context) => ({ id: context.actionId })),
+      presentationSubjectId,
+      presentationName,
+      (presentationState?.contexts || []).map((context) => ({ id: context.actionId })),
+      presentationState,
     ),
     activeVisualInteraction = activeVisualInteractionFromContexts(
-      subject?.contexts || [],
-      subject?.tension || 0,
+      presentationState?.contexts || [],
+      presentationState?.tension || 0,
     ),
     criticalVisualState =
-      currentObservation?.behavioralState === "unresponsive" ||
-      currentObservation?.behavioralState === "panic" ||
-      (subject?.contexts || []).some((context) =>
+      presentationObservation?.behavioralState === "unresponsive" ||
+      presentationObservation?.behavioralState === "panic" ||
+      (presentationState?.contexts || []).some((context) =>
         [
           "effect_apathy",
           "effect_chronic_apathy",
@@ -3641,20 +3770,20 @@ export function CalibrationPrototype({
       activeVisualInteraction?.family === "foot" ||
       activeVisualInteraction?.family === "exposure",
     interactionVisualPath = activeVisualInteraction
-      ? `/character-images/interactions/${visualCharacterSlugs[SUBJECT] || SUBJECT}/${activeVisualInteraction.family}/${activeVisualInteraction.variant}__${activeVisualInteraction.phase}.png`
+      ? `/character-images/interactions/${visualCharacterSlugs[presentationSubjectId] || presentationSubjectId}/${activeVisualInteraction.family}/${activeVisualInteraction.variant}__${activeVisualInteraction.phase}.png`
       : null,
     intimacyVisualPath =
       activeVisualInteraction && (!criticalVisualState || persistentPoseVisual)
         ? resolveIntimacyInteractionVisual({
-            characterSlug: visualCharacterSlugs[SUBJECT] || SUBJECT,
+            characterSlug: visualCharacterSlugs[presentationSubjectId] || presentationSubjectId,
             interaction: activeVisualInteraction,
-            contexts: subject?.contexts || [],
-            tension: subject?.tension || 0,
-            attitude: subject?.attitude || 0,
-            openness: subject?.openness || 0,
-            behavioralState: currentObservation?.behavioralState,
+            contexts: presentationState?.contexts || [],
+            tension: presentationState?.tension || 0,
+            attitude: presentationState?.attitude || 0,
+            openness: presentationState?.openness || 0,
+            behavioralState: presentationObservation?.behavioralState,
             discharged:
-              currentObservation?.transitions?.some(
+              presentationObservation?.transitions?.some(
                 (transition) => transition.kind === "discharge",
               ) || false,
           })
@@ -3662,15 +3791,15 @@ export function CalibrationPrototype({
     expandedVisualPath =
       activeVisualInteraction && (!criticalVisualState || persistentPoseVisual)
         ? expandedInteractionAssetPath({
-            characterSlug: visualCharacterSlugs[SUBJECT] || SUBJECT,
+            characterSlug: visualCharacterSlugs[presentationSubjectId] || presentationSubjectId,
             interaction: activeVisualInteraction,
-            contexts: subject?.contexts || [],
-            tension: subject?.tension || 0,
-            attitude: subject?.attitude || 0,
-            openness: subject?.openness || 0,
-            behavioralState: currentObservation?.behavioralState,
+            contexts: presentationState?.contexts || [],
+            tension: presentationState?.tension || 0,
+            attitude: presentationState?.attitude || 0,
+            openness: presentationState?.openness || 0,
+            behavioralState: presentationObservation?.behavioralState,
             discharged:
-              currentObservation?.transitions?.some(
+              presentationObservation?.transitions?.some(
                 (transition) => transition.kind === "discharge",
               ) || false,
           })
@@ -3696,29 +3825,149 @@ export function CalibrationPrototype({
           ],
     visualPath =
       resolveFirstAvailableVisual(visualCandidates) || baseVisualPath,
-    // Compute visual path for the nearby (secondary) character, if any.
+    // The stage positions belong to scene participants, not to the currently
+    // selected participant. Selecting the secondary character must only swap
+    // focus/highlighting; it must never put their image into the primary slot.
+    stageMainVisualPath =
+      activeSubjectId === SUBJECT
+        ? visualPath
+        : characterVisualPath(
+            SUBJECT,
+            subject,
+            currentObservation?.behavioralState,
+            currentObservation?.transitions?.some(
+              (transition) => transition.kind === "discharge",
+            ) || false,
+          ),
     nearbyCharacter = nearbyCharacters.find((c) => c.id !== SUBJECT),
-    nearbyVisualPath = nearbyCharacter
-      ? characterVisualPath(
-          nearbyCharacter.id,
-          (nearbyCharacter.state as any) || null,
-          undefined,
-          false,
-        )
-      : null,
-    // The active subject is who's shown large; the other is dimmed.
-    // Both paths stay FIXED — swap only toggles CSS opacity, never changes src.
-    activeVisualPath = visualPath,
+    // `nearbyCharacter.state` is a scenario snapshot. Once that character is
+    // selected, `focusedMonitorState` is the newer state fetched from /api/state
+    // and contains freshly changed contexts such as clothing and pose.
+    secondaryVisualState =
+      nearbyCharacter?.id === activeSubjectId
+        ? activeDisplayState
+        : (sceneCharacterStates[nearbyCharacter?.id || ""] ||
+          (nearbyCharacter?.state as State | undefined) ||
+          null),
     secondaryVisualPath = nearbyCharacter
       ? characterVisualPath(
           nearbyCharacter.id,
-          (nearbyCharacter.state as any) || null,
+          secondaryVisualState,
           undefined,
           false,
         )
       : null,
     secondaryName = nearbyCharacter?.name,
-    activeIsSecondary = activeSubjectId !== SUBJECT && !!nearbyCharacter,
+    activeNearbyCharacter = nearbyCharacters.find(
+      (character) => character.id === activeSubjectId,
+    ),
+    activeIsSecondary = activeSubjectId !== SUBJECT && !!activeNearbyCharacter,
+    monitorSubject = activeIsSecondary
+      ? focusedMonitorState ||
+        ((activeNearbyCharacter?.state as State | undefined) || null)
+      : subject,
+    monitorActivation = clampPercent(monitorSubject?.tension || 0),
+    monitorCapacity = clampPercent(monitorSubject?.capacity || 0),
+    monitorBalance = activeIsSecondary
+      ? Math.round(
+          Math.max(
+            -100,
+            Math.min(
+              100,
+              ((monitorSubject?.attitude || 0) +
+                (monitorSubject?.openness || 0)) /
+                2 -
+                monitorActivation,
+            ),
+          ),
+        )
+      : activationBalance,
+    monitorOverload = activeIsSecondary
+      ? Math.max(0, monitorActivation - monitorCapacity)
+      : currentOverload,
+    monitorValence = activeIsSecondary
+      ? Math.max(-1, Math.min(1, ((monitorSubject?.attitude || 50) - 50) / 50))
+      : currentObservation?.reaction?.appraisal,
+    monitorNature = activeIsSecondary
+      ? monitorBalance > 12
+        ? "положительная"
+        : monitorBalance < -12
+          ? "защитная"
+          : "нейтральная"
+      : activationNature,
+    monitorOverloadActive = activeIsSecondary
+      ? monitorOverload >= 40 ||
+        Boolean(
+          monitorSubject?.contexts?.some(
+            (context) => context.actionId === "effect_sensory_overload",
+          ),
+        )
+      : sensoryOverloadActive,
+    monitorOverloadLabel = monitorOverloadActive
+      ? "перегруз"
+      : monitorOverload >= 40
+        ? "напряжение"
+        : "спокойствие",
+    monitorPulseBpm = activeIsSecondary
+      ? 60 + monitorActivation * 0.72
+      : pulseBpm,
+    monitorBreathingRate = activeIsSecondary
+      ? 10 + monitorActivation * 0.18
+      : breathingRate,
+    monitorPulsePeriod = 60 / monitorPulseBpm,
+    monitorBreathingPeriod = 60 / monitorBreathingRate,
+    monitorVisibleContexts = Array.from(
+      new Map(
+        (monitorSubject?.contexts || []).map((context) => [
+          context.actionId,
+          context,
+        ]),
+      ).values(),
+    ),
+    monitorPoseContext = monitorVisibleContexts.find(
+      (context) =>
+        context.type === "pose" ||
+        context.actionId.startsWith("pose_") ||
+        context.actionId === "act_suspend_wrists",
+    ),
+    monitorWornContexts = monitorVisibleContexts.filter(
+      (context) =>
+        context.type === "clothing" ||
+        context.type === "equipment" ||
+        context.type === "restraint",
+    ),
+    monitorOtherContexts = monitorVisibleContexts.filter(
+      (context) =>
+        context !== monitorPoseContext &&
+        context.type !== "clothing" &&
+        context.type !== "equipment" &&
+        context.type !== "restraint",
+    ),
+    monitorTelemetrySignals = activeIsSecondary
+      ? [
+          {
+            id: "pulse",
+            label: "Пульс",
+            value: monitorPulseBpm.toFixed(0),
+            unit: "уд/мин",
+            trend: monitorActivation >= 55 ? "up" : "stable",
+          },
+          {
+            id: "breathing",
+            label: "Дыхание",
+            value: monitorBreathingRate.toFixed(0),
+            unit: "вдох/мин",
+            trend: monitorActivation >= 55 ? "up" : "stable",
+          },
+          {
+            id: "contact",
+            label: "Контексты",
+            value: String(monitorVisibleContexts.length),
+            unit: "",
+            trend: "stable",
+          },
+        ]
+      : telemetry?.signals || [],
     reviewAssetPath = displayedVisualPath || visualPath,
     significantEvent =
       [...entries]
@@ -4485,7 +4734,7 @@ export function CalibrationPrototype({
             <p>{telemetry?.summary || currentState.description}</p>
           </div>
           <div className="telemetry-readout">
-            {telemetry?.signals
+            {monitorTelemetrySignals
               .filter((signal) =>
                 ["pulse", "breathing", "contact"].includes(signal.id),
               )
@@ -4506,7 +4755,10 @@ export function CalibrationPrototype({
                         : "→"}
                   </i>
                 </div>
-              )) || <p className="muted">Монитор ожидает данные.</p>}
+              ))}
+            {!monitorTelemetrySignals.length && (
+              <p className="muted">Монитор ожидает данные.</p>
+            )}
           </div>
           {telemetry?.behavioral?.length ? (
             <div className="behavioral-readout">
@@ -4639,28 +4891,30 @@ export function CalibrationPrototype({
           >
             <div className="portrait-placeholder">
               <DualAvatarStage
-                mainSrc={activeVisualPath}
+                mainSrc={stageMainVisualPath}
                 mainAlt={subjectName}
                 mainFallback={subjectName.slice(0, 1).toUpperCase()}
                 secondarySrc={secondaryVisualPath}
                 secondaryAlt={secondaryName || ""}
                 secondaryFallback={(secondaryName || "?").slice(0, 1).toUpperCase()}
                 mainOnError={(e) => {
-                    if (expandedVisualPath && e.currentTarget.src.endsWith(expandedVisualPath) && interactionVisualPath) {
+                    if (activeSubjectId === SUBJECT && expandedVisualPath && e.currentTarget.src.endsWith(expandedVisualPath) && interactionVisualPath) {
                       e.currentTarget.src = interactionVisualPath;
-                    } else if (portraitFallbackPath && e.currentTarget.src.endsWith(portraitFallbackPath)) {
+                    } else if (activeSubjectId === SUBJECT && portraitFallbackPath && e.currentTarget.src.endsWith(portraitFallbackPath)) {
                       e.currentTarget.hidden = true;
-                    } else if (e.currentTarget.src.endsWith(baseVisualPath)) {
+                    } else if (activeSubjectId === SUBJECT && e.currentTarget.src.endsWith(baseVisualPath)) {
                       if (portraitFallbackPath && !e.currentTarget.src.endsWith(portraitFallbackPath)) {
                         e.currentTarget.src = portraitFallbackPath;
                       } else {
                         e.currentTarget.hidden = true;
                       }
                     } else {
-                      e.currentTarget.src = baseVisualPath;
+                      e.currentTarget.hidden = true;
                     }
                 }}
                 mainOnLoad={(e) => setDisplayedVisualPath(new URL(e.currentTarget.src).pathname)}
+                activeIsSecondary={activeIsSecondary}
+                onSwap={() => swapSubjects(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
               />
               {activeProcesses[0] && (
                 <GameSustainedEffect
@@ -4687,7 +4941,7 @@ export function CalibrationPrototype({
                   actionImage={visualEffect.actionImage}
                   actionLabel={visualEffect.actionLabel}
                   targetLabel={visualEffect.target}
-                  characterSlug={visualCharacterSlugs[SUBJECT]}
+                  characterSlug={visualCharacterSlugs[presentationSubjectId]}
                   emotion={visualEffect.emotion}
                   showPortrait={visualEffect.showPortrait}
                 />
@@ -4772,9 +5026,7 @@ export function CalibrationPrototype({
                           className={character.id === speechTargetId ? "active" : ""}
                           title={character.name}
                           onClick={() => {
-                            setSpeechTargetMenuOpen(false);
-                            setSpeechTargetId(character.id);
-                            onFocusCharacter?.(character.id);
+                            swapSubjects(character.id);
                           }}
                         >
                           {portrait ? (
@@ -4855,38 +5107,39 @@ export function CalibrationPrototype({
             </form>
           </div>
           <div
-            className={`scene-monitor state-${currentObservation?.behavioralState || "responsive"}`}
+            key={`monitor-${activeSubjectId}`}
+            className={`scene-monitor monitor-character-enter state-${currentObservation?.behavioralState || "responsive"}`}
           >
             <CalibrationBiometrics
-              activation={activation}
-              activationLabel={activationLabel}
-              capacity={subject?.capacity || 0}
-              enduranceLabel={enduranceLabel}
-              capacityDelta={currentObservation?.changes?.capacity}
-              pulseBpm={pulseBpm}
-              pulsePeriod={pulsePeriod}
-              breathingRate={breathingRate}
-              breathingPeriod={breathingPeriod}
-              activationBalance={activationBalance}
-              currentValence={currentObservation?.reaction?.appraisal}
-              activationNature={activationNature}
-              overload={currentOverload}
-              overloadLabel={overloadLabel}
-              overloadActive={sensoryOverloadActive}
+              activation={monitorActivation}
+              activationLabel={activeIsSecondary ? "Текущая" : activationLabel}
+              capacity={monitorCapacity}
+              enduranceLabel={activeIsSecondary ? "Текущий запас" : enduranceLabel}
+              capacityDelta={activeIsSecondary ? undefined : currentObservation?.changes?.capacity}
+              pulseBpm={monitorPulseBpm}
+              pulsePeriod={monitorPulsePeriod}
+              breathingRate={monitorBreathingRate}
+              breathingPeriod={monitorBreathingPeriod}
+              activationBalance={monitorBalance}
+              currentValence={monitorValence}
+              activationNature={monitorNature}
+              overload={monitorOverload}
+              overloadLabel={monitorOverloadLabel}
+              overloadActive={monitorOverloadActive}
             />
             <div className="physiology-panel legacy-physiology-panel">
               <section
-                className={`activation-scale level-${edgeProfile.kind === "negative" || edgeProfile.kind === "exhausted" ? "danger" : edgeProfile.active || activation >= 85 ? "edge" : activation >= 70 ? "high" : "normal"}`}
+                className={`activation-scale level-${monitorActivation >= 85 ? "edge" : monitorActivation >= 70 ? "high" : "normal"}`}
               >
                 <header>
                   <span>ФИЗИОЛОГИЧЕСКАЯ АКТИВАЦИЯ</span>
                   <b>
-                    {activationLabel} · {Math.round(activation)}%
+                    {activeIsSecondary ? "Текущая" : activationLabel} · {Math.round(monitorActivation)}%
                   </b>
                 </header>
                 <div>
-                  <i style={{ width: `${activation}%` }} />
-                  <em style={{ left: `${activation}%` }} />
+                  <i style={{ width: `${monitorActivation}%` }} />
+                  <em style={{ left: `${monitorActivation}%` }} />
                 </div>
                 <footer>
                   <span>Спокойствие</span>
@@ -4898,14 +5151,14 @@ export function CalibrationPrototype({
                     className="pulse-biosignal"
                     style={
                       {
-                        "--signal-period": `${pulsePeriod * 2}s`,
+                        "--signal-period": `${monitorPulsePeriod * 2}s`,
                       } as React.CSSProperties
                     }
                   >
                     <header>
                       <span>ПУЛЬС</span>
                       <b>
-                        {pulseBpm.toFixed(0)} <i>уд/мин</i>
+                        {monitorPulseBpm.toFixed(0)} <i>уд/мин</i>
                       </b>
                     </header>
                     <div className="pulse-cardiogram" aria-hidden="true">
@@ -4921,14 +5174,14 @@ export function CalibrationPrototype({
                     className="breathing-biosignal"
                     style={
                       {
-                        "--signal-period": `${breathingPeriod}s`,
+                        "--signal-period": `${monitorBreathingPeriod}s`,
                       } as React.CSSProperties
                     }
                   >
                     <header>
                       <span>ДЫХАНИЕ</span>
                       <b>
-                        {breathingRate.toFixed(0)} <i>вдох/мин</i>
+                        {monitorBreathingRate.toFixed(0)} <i>вдох/мин</i>
                       </b>
                     </header>
                     <div className="breathing-field" aria-hidden="true">
@@ -4937,7 +5190,7 @@ export function CalibrationPrototype({
                     </div>
                   </section>
                 </div>
-                {edgeProfile.active && (
+                {!activeIsSecondary && edgeProfile.active && (
                   <p
                     className="edge-profile-note"
                     title={edgeProfile.description}
@@ -4952,9 +5205,9 @@ export function CalibrationPrototype({
                 className="endurance-card endurance-stack"
                 style={
                   {
-                    "--endurance-angle": `${clampPercent(subject?.capacity || 0) * 3.6}deg`,
-                    "--balance-position": `${clampPercent(50 + activationBalance / 2)}%`,
-                    "--overload-level": `${clampPercent(currentOverload)}%`,
+                    "--endurance-angle": `${monitorCapacity * 3.6}deg`,
+                    "--balance-position": `${clampPercent(50 + monitorBalance / 2)}%`,
+                    "--overload-level": `${clampPercent(monitorOverload)}%`,
                   } as React.CSSProperties
                 }
               >
@@ -4964,26 +5217,26 @@ export function CalibrationPrototype({
                     <b>{enduranceLabel}</b>
                   </header>
                   <div className="endurance-liquid-container">
-                    <EnduranceLiquid value={subject?.capacity || 0} overload={currentOverload} />
+                    <EnduranceLiquid value={monitorCapacity} overload={monitorOverload} />
                   </div>
                 </div>
                 <div className="endurance-overload-row">
-                  <small>{overloadLabel}</small>
-                  <b>{currentOverload.toFixed(1)}</b>
+                  <small>{monitorOverloadLabel}</small>
+                  <b>{monitorOverload.toFixed(1)}</b>
                 </div>
                 <div className="endurance-pendulum-row">
                   <BalancePendulum
-                    balance={activationBalance}
-                    nature={activationNature}
-                    valence={currentObservation?.reaction?.appraisal}
+                    balance={monitorBalance}
+                    nature={monitorNature}
+                    valence={monitorValence}
                     showLabels={false}
                   />
                 </div>
                 <div className="endurance-balance-labels">
                   <BalanceLabels
-                    balance={activationBalance}
-                    nature={activationNature}
-                    valence={currentObservation?.reaction?.appraisal}
+                    balance={monitorBalance}
+                    nature={monitorNature}
+                    valence={monitorValence}
                   />
                 </div>
               </section>
@@ -4994,45 +5247,53 @@ export function CalibrationPrototype({
                   [
                     "Принятие",
                     "attitude",
-                    subject?.attitude,
-                    stateBaseline(subject, "Attitude"),
+                    monitorSubject?.attitude,
+                    stateBaseline(monitorSubject, "Attitude"),
                     "mint",
                   ],
                   [
                     "Открытость",
                     "openness",
-                    subject?.openness,
-                    stateBaseline(subject, "Openness"),
+                    monitorSubject?.openness,
+                    stateBaseline(monitorSubject, "Openness"),
                     "blue",
                   ],
                   [
                     "Пластичность",
                     "plasticity",
-                    subject?.plasticity,
-                    stateBaseline(subject, "Plasticity"),
+                    monitorSubject?.plasticity,
+                    stateBaseline(monitorSubject, "Plasticity"),
                     "amber",
                   ],
                   [
                     "Чувствительность",
                     "sensitivity",
-                    subject?.sensitivity,
-                    stateBaseline(subject, "Sensitivity"),
+                    monitorSubject?.sensitivity,
+                    stateBaseline(monitorSubject, "Sensitivity"),
                     "violet",
                   ],
                 ] as const
               ).map(([label, key, value, baseline, tone]) => {
-                const delta = currentObservation?.changes?.[key];
+                const delta = activeIsSecondary
+                  ? undefined
+                  : currentObservation?.changes?.[key];
                 const changed =
                   monitorPulse > 0 &&
                   typeof delta === "number" &&
                   Math.abs(delta) >= 0.01;
-                const historyValues = stateHistory
-                  .map((snapshot) => snapshot[key])
-                  .filter(Number.isFinite);
+                const historyValues = activeIsSecondary
+                  ? [baseline, Number(value || 0)].filter(Number.isFinite)
+                  : stateHistory
+                      .map((snapshot) => snapshot[key])
+                      .filter(Number.isFinite);
                 const relative =
                   key === "attitude"
                     ? undefined
-                    : coreInterpretations[key as InterpretableCoreMetric];
+                    : interpretCoreMetric(
+                        key as InterpretableCoreMetric,
+                        Number(value || 0),
+                        baseline,
+                      );
                 return (
                   <article
                     className={`metric-${key}${changed ? " just-changed" : ""}`}
@@ -5066,18 +5327,18 @@ export function CalibrationPrototype({
             <div className="monitor-status-strip">
               <div className="condition-main">
                 <div className="condition-pose">
-                  {poseContext ? (
+                  {monitorPoseContext ? (
                     <>
-                      <span className="condition-label">{poseContext.label || poseContext.actionId}</span>
-                      {(contextLearningBySource.get(poseContext.actionId) || []).length > 0 ? (
+                      <span className="condition-label">{monitorPoseContext.label || monitorPoseContext.actionId}</span>
+                      {(contextLearningBySource.get(monitorPoseContext.actionId) || []).length > 0 ? (
                         <span className="condition-effect active">
-                          {effectiveSelectedAction ? "+" : "±"} {(contextLearningBySource.get(poseContext.actionId) || []).slice(0, 3).map(e => semanticTagLabels[e.tag] || e.tag).join(", ")}
+                          {effectiveSelectedAction ? "+" : "±"} {(contextLearningBySource.get(monitorPoseContext.actionId) || []).slice(0, 3).map(e => semanticTagLabels[e.tag] || e.tag).join(", ")}
                         </span>
                       ) : (
                         <span className="condition-effect muted">не модифицирует</span>
                       )}
-                      {!!poseContext.blocksPoints?.length && (
-                        <span className="condition-effect blocked">закрыто зон: {poseContext.blocksPoints.length}</span>
+                      {!!monitorPoseContext.blocksPoints?.length && (
+                        <span className="condition-effect blocked">закрыто зон: {monitorPoseContext.blocksPoints.length}</span>
                       )}
                     </>
                   ) : (
@@ -5085,11 +5346,11 @@ export function CalibrationPrototype({
                   )}
                 </div>
                 <div className="condition-contexts">
-                  {wornContexts.length > 0 && (
+                  {monitorWornContexts.length > 0 && (
                     <div className="condition-group">
                       <small>надетое</small>
                       <div className="condition-list">
-                        {wornContexts.map(c => {
+                        {monitorWornContexts.map(c => {
                           const tags = contextLearningBySource.get(c.actionId) || [];
                           return (
                             <span key={c.actionId} className={`condition-item ${tags.length > 0 ? "active" : ""}`}>
@@ -5103,11 +5364,11 @@ export function CalibrationPrototype({
                       </div>
                     </div>
                   )}
-                  {otherContexts.length > 0 && (
+                  {monitorOtherContexts.length > 0 && (
                     <div className="condition-group">
                       <small>условия</small>
                       <div className="condition-list">
-                        {otherContexts.map(c => {
+                        {monitorOtherContexts.map(c => {
                           const tags = contextLearningBySource.get(c.actionId) || [];
                           return (
                             <span key={c.actionId} className={`condition-item ${tags.length > 0 ? "active" : ""}`}>
@@ -5624,7 +5885,8 @@ export function CalibrationPrototype({
         <aside className="operations-column">
           {zoneOpen && (
             <CalibrationZoneMap
-              subjectId={SUBJECT}
+              key={`zone-map-${activeSubjectId}`}
+              subjectId={activeSubjectId}
               zones={compatibleZones}
               selectedZoneId={effectiveZoneId}
               blockedPoints={blockedPoints}
@@ -5702,7 +5964,7 @@ export function CalibrationPrototype({
                   className="target-zone-card"
                   style={
                     {
-                      "--zone-image": `url("${bodypartVisualPath(SUBJECT, selectedZone?.id)}")`,
+                      "--zone-image": `url("${bodypartVisualPath(activeSubjectId, selectedZone?.id)}")`,
                     } as React.CSSProperties
                   }
                   onClick={() => setZoneOpen(true)}
@@ -5960,6 +6222,11 @@ export function CalibrationPrototype({
                       <CharacterPortrait
                         id={character.id}
                         name={character.name}
+                        contexts={character.contexts}
+                        state={
+                          sceneCharacterStates[character.id] ||
+                          (character.state as State | undefined)
+                        }
                       />
                     </b>
                     <span>

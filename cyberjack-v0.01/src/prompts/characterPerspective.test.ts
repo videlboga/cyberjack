@@ -20,11 +20,12 @@ describe('character-facing perspective', () => {
             } as any,
         });
         const prompt = `${buildReactionSystemPrompt(frame)}\n${buildReactionTurnMessage(frame)}`;
-        expect(prompt).toContain('Ты прямо сейчас переживаешь');
+        expect(prompt).toContain('Внутренний сигнал текущего момента');
         expect(prompt).toContain('Твой непосредственный внутренний импульс');
         expect(prompt).toContain('В тебе накопилось сильное напряжение');
         expect(prompt).not.toMatch(/\bequipment:|\bpose:|\bP \d|\bD \d|sensoryAmplification|systemic/i);
         expect(prompt).not.toContain('персонаж сильнее закрылся');
+        expect(prompt).not.toContain('Ты чувствуешь, как давление не отпускает запястья и не даёт отстраниться.');
     });
 
     it('turns biography and episodic memory toward the character', () => {
@@ -39,8 +40,25 @@ describe('character-facing perspective', () => {
             },
         });
         expect(memory).toContain('Ты помнишь воздействие');
-        expect(memory).toContain('В твоей памяти');
+        expect(memory).toContain('общий смысл своей телесной реакции');
+        expect(memory).not.toContain('Ты чувствуешь осторожное тепло в ладонях.');
         expect(memory).toContain('Собеседник сказал тебе');
         expect(memory).not.toContain('Объективные факты симуляции');
+    });
+
+    it('keeps witnessed actions distinct from own bodily experience', () => {
+        const memory = renderEpisodeForCharacter({
+            type: 'episode_v2', text: 'technical fallback', metadata: {
+                observed: true,
+                actorName: 'Калибратор',
+                targetName: 'Суми',
+                actionLabel: 'Мягкое поглаживание',
+                pointLabel: 'Шея',
+            },
+        });
+        expect(memory).toContain('наблюдаемое событие');
+        expect(memory).toContain('от Калибратор');
+        expect(memory).toContain('на Суми');
+        expect(memory).not.toContain('В твоей памяти телесное переживание');
     });
 });

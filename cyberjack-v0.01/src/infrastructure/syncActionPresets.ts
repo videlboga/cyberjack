@@ -131,12 +131,16 @@ export function syncActionPresets(): void {
             }
         }
 
+        // The laboratory's topology is now represented by room:/device:/near:
+        // presence slots. The generic table/terminal scene layout was the old
+        // competing location model and must not be reintroduced from saves.
+        db.prepare(`UPDATE scenes SET slots = '[]' WHERE id = 'scene_lab_calibrator'`).run();
         db.prepare(`
             INSERT INTO scene_objects (id, scene_id, node_id, item_id, owner_id, state, metadata)
             VALUES (
                 'calibrator_suspension_mount',
                 'scene_lab_calibrator',
-                'slot_table',
+                'device:lab_diagnostic_table',
                 'eq_suspension',
                 'PL-1',
                 'active',

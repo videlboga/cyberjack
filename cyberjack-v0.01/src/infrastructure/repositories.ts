@@ -942,6 +942,28 @@ export const chatMemoryRepo = {
         const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }>;
         return rows.reverse();
     },
+    /**
+     * A room/device conversation belongs to its context as well as to the
+     * character who spoke. This allows an empty slot to retain its journal
+     * after its former occupant has moved away.
+     */
+    getRecentForContexts(contextLabels: string[], limit = 100): Array<{ id: number; subjectId: string; characterName: string; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }> {
+        const labels = Array.from(new Set(contextLabels.map(label => String(label || '').trim()).filter(Boolean)));
+        if (!labels.length) return [];
+        const placeholders = labels.map(() => '?').join(',');
+        const rows = db.prepare(`
+            SELECT cm.id, cm.subject_id AS subjectId, c.name AS characterName,
+                   cm.role, cm.content, cm.context_label AS contextLabel,
+                   cm.portrait_emotion AS portraitEmotion,
+                   cm.created_at AS createdAt, cm.world_minute AS worldMinute
+            FROM chat_memory cm
+            LEFT JOIN characters c ON c.id = cm.subject_id OR c.subject_id = cm.subject_id
+            WHERE cm.context_label IN (${placeholders})
+            ORDER BY cm.id DESC
+            LIMIT ?
+        `).all(...labels, limit) as Array<{ id: number; subjectId: string; characterName: string; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }>;
+        return rows.reverse();
+    },
     getSince(subjectId: string, afterId: number, limit = 100): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
         const stmt = db.prepare(
             'SELECT id, role, content FROM chat_memory WHERE subject_id = ? AND id > ? ORDER BY id ASC LIMIT ?'
@@ -1148,14 +1170,16 @@ export const memoryRepo = {
             .slice(0, limit)
             .filter(entry => entry.score > 0);
     },
-    listRecent(subjectId: string, limit = 5, type?: string): Array<{ text: string; type: string; metadata: Record<string, any> }> {
+    listRecent(subjectId: string, limit = 5, type?: string): Array<{ text: string; type: string; metadata: Record<string, any>; relatedSubjects: string[] }> {
         const rows = type
-            ? db.prepare('SELECT text, type, metadata FROM memory_embeddings WHERE subject_id = ? AND type = ? ORDER BY id DESC LIMIT ?').all(subjectId, type, limit)
-            : db.prepare('SELECT text, type, metadata FROM memory_embeddings WHERE subject_id = ? ORDER BY id DESC LIMIT ?').all(subjectId, limit);
-        return (rows as Array<{ text: string; type: string; metadata: string }>).map(row => {
+            ? db.prepare('SELECT text, type, metadata, related_subjects FROM memory_embeddings WHERE subject_id = ? AND type = ? ORDER BY id DESC LIMIT ?').all(subjectId, type, limit)
+            : db.prepare('SELECT text, type, metadata, related_subjects FROM memory_embeddings WHERE subject_id = ? ORDER BY id DESC LIMIT ?').all(subjectId, limit);
+        return (rows as Array<{ text: string; type: string; metadata: string; related_subjects: string }>).map(row => {
             let metadata: Record<string, any> = {};
+            let relatedSubjects: string[] = [];
             try { metadata = JSON.parse(row.metadata || '{}'); } catch { }
-            return { text: row.text, type: row.type, metadata };
+            try { relatedSubjects = JSON.parse(row.related_subjects || '[]'); } catch { }
+            return { text: row.text, type: row.type, metadata, relatedSubjects };
         });
     },
     deleteEpisodesForScene(subjectId: string, sceneId: string) {

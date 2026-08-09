@@ -1,10 +1,37 @@
 import { Scene, ResourceState } from '../domain/types';
 import { presetRepo, sceneCharacterRepo, characterItemsRepo, sceneObjectsRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { isActionTargetAllowed } from '../domain/actionTargets';
+import { getLaboratoryPresence } from './spatialContext';
 
 export interface ActionValidationResult {
     allowed: boolean;
     errorReason?: string;
+}
+
+/**
+ * Slot ids describe a local position, not only a map cell.  In particular,
+ * `near:<character id>` means the actor can reach that character even though
+ * the character itself keeps its room/device slot.  The same applies to an
+ * occupied device and `near:<device id>`.
+ */
+export function areSlotsWithinPhysicalReach(
+    actorSlotId: string,
+    targetSlotId: string,
+    actorCharacterId: string,
+    targetCharacterId: string,
+): boolean {
+    if (actorSlotId === targetSlotId) return true;
+
+    if (actorSlotId === `near:${targetCharacterId}` || targetSlotId === `near:${actorCharacterId}`) {
+        return true;
+    }
+
+    const actorNearId = actorSlotId.startsWith('near:') ? actorSlotId.slice('near:'.length) : null;
+    const targetNearId = targetSlotId.startsWith('near:') ? targetSlotId.slice('near:'.length) : null;
+    if (actorNearId && targetSlotId === `device:${actorNearId}`) return true;
+    if (targetNearId && actorSlotId === `device:${targetNearId}`) return true;
+
+    return false;
 }
 
 /**
@@ -43,12 +70,17 @@ export function validateAction(
         const presentChars = sceneCharacterRepo.list(scene.id);
         const subjSceneChar = presentChars.find(sc => sc.character.subjectId === subjectId || sc.character.id === subjectId);
         const playerSceneChar = presentChars.find(sc => sc.character.playerId === playerId || sc.character.id === playerId);
-        
-        if (subjSceneChar && playerSceneChar && subjSceneChar.slotId && playerSceneChar.slotId && subjSceneChar.slotId !== playerSceneChar.slotId) {
-            // Exempt: calibrator (PL-1) at slot_table can reach subjects on lab devices
-            const isCalibratorAtTable = playerSceneChar.slotId === 'slot_table';
-            const isSubjectOnDevice = subjSceneChar.slotId?.startsWith('device:');
-            if (!isCalibratorAtTable || !isSubjectOnDevice) {
+        const targetPresence = getLaboratoryPresence(subjectId, playerId);
+        const actorPresence = getLaboratoryPresence(playerId, playerId);
+
+        if (subjSceneChar && playerSceneChar && targetPresence && actorPresence) {
+            const withinReach = areSlotsWithinPhysicalReach(
+                actorPresence.slotId,
+                targetPresence.slotId,
+                playerSceneChar.character.id,
+                subjSceneChar.character.id,
+            );
+            if (!withinReach) {
                 return { allowed: false, errorReason: 'Слишком далеко для физического воздействия. Сначала подойдите в нужную зону (сектор).' };
             }
         }
@@ -78,7 +110,7 @@ export function validateAction(
             }
             // Optional: check proximity to the node if the object is tied to a node_id
             const theChar = sceneCharacterRepo.list(scene.id).find(c => c.character.playerId === playerId || c.character.id === playerId);
-            if (obj.nodeId && theChar?.slotId && obj.nodeId !== theChar.slotId) {
+            if (obj.nodeId && theChar?.slotId && !areSlotsWithinPhysicalReach(theChar.slotId, obj.nodeId, theChar.character.id, '')) {
                 return { allowed: false, errorReason: `Слишком далеко от объекта "${requiredSceneObject}". Сначала подойдите к нему.` };
             }
         }
@@ -119,7 +151,6 @@ export function validateAction(
     return { allowed: true };
 }
 
-// Legacy wrapper to keep existing checks working until fully refactored
 export function checkActionAccess(actionId: string, scene: Scene, player: ResourceState): boolean {
     return validateAction(actionId, scene, player).allowed;
 }

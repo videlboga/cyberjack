@@ -1,6 +1,7 @@
 import { CharacterRelation, InteractionObservation, SubjectCoreState } from '../domain/types';
 import { deriveEdgeProfile } from '../domain/edgeState';
 import { OVERLOAD_FRAGMENTED_SPEECH, OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
+import { describeObservationSignal } from './interactionObservation';
 
 export type SpeechAct =
     | 'silence'
@@ -139,7 +140,7 @@ function relationText(relation?: CharacterRelation | null): string {
 function experienceText(observation?: InteractionObservation, directlyExperienced = true): string {
     if (!observation) return 'достоверная реакция неизвестна';
     if (!directlyExperienced) return observation.uiText || 'Ты видишь внешнюю реакцию, но не можешь достоверно знать внутреннее переживание.';
-    return observation.subjectiveText;
+    return describeObservationSignal(observation);
 }
 
 function changeLines(observation?: InteractionObservation): string[] {
@@ -676,12 +677,14 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
     return [
         `Ты — ${frame.speaker.name}. Грамматический род: ${genderText}. ${grammaticalIdentity}`,
         frame.scene.roleContext.length ? `[Твоё положение и понимание происходящего]\n${frame.scene.roleContext.map(value => `- ${value}`).join('\n')}` : '',
+        frame.continuity.relevantEpisodes.length ? `[Твоя актуальная память]\n${frame.continuity.relevantEpisodes.map(value => `- ${value}`).join('\n')}` : '',
+        frame.continuity.relationshipBeliefs.length ? `[Твоя память об отношениях]\n${frame.continuity.relationshipBeliefs.map(value => `- ${value}`).join('\n')}` : '',
         `[Твой характер]\n${behavioralLines.length ? behavioralLines.map(v => `- ${owned(v)}`).join('\n') : '- Ты реагируешь как самостоятельный живой человек.'}${core.centralConflict ? `\n- Тебя ведёт желание: ${core.centralConflict.desire}.\n- Тебя пугает: ${core.centralConflict.fear}.` : ''}`,
         `[Твоя манера речи]\n${core.voice.length ? core.voice.map(v => `- ${owned(v, 'Ты слышишь свою привычную манеру в этих словах')}`).join('\n') : '- Ты говоришь естественно и по-человечески.'}${currentEmotionalVoice ? `\n- Именно сейчас твой голос звучит так: ${currentEmotionalVoice}` : ''}`,
         frame.event.requiresSpeech
             ? `Говори только своими словами. Твоя речевая реакция на текущий момент уже выбрана: произнеси хотя бы одно слово или естественный слышимый звук. Ты можешь уклониться, отказаться отвечать, сменить тему, ответить несовершенно или противоречиво, но не возвращай пустой ответ.`
             : `Говори только своими словами. Ты решаешь, что действительно произнесёшь сейчас; можешь промолчать, сменить тему, ответить несовершенно или противоречиво.`,
-        `[Форма ответа]\nВерни одну произнесённую реплику одним абзацем обычного текста. Без JSON, служебных полей, имени говорящего, ремарок и звёздочек. Не предваряй и не завершай реплику словами «сказала», «говорю», «отвечаю» или описанием голоса. Воплоти свою манеру речи в самих словах, но не объясняй её. Неверно: «Голос срывается на шёпот: — Я согласна». Верно: «Я... согласна». Ты переживаешь состояние изнутри, а не объясняешь себя как автор отчёта. Профессиональная лексика появляется только там, где она естественна для твоей живой речи.`
+        `[Форма ответа]\nВерни одну произнесённую реплику одним абзацем обычного текста. Без JSON, служебных полей, имени говорящего, ремарок и звёздочек. Не предваряй и не завершай реплику словами «сказала», «говорю», «отвечаю» или описанием голоса. Воплоти свою манеру речи в самих словах, но не объясняй её. Неверно: «Голос срывается на шёпот: — Я согласна». Верно: «Я... согласна». Ты переживаешь состояние изнутри, а не объясняешь себя как автор отчёта. Сигналы о состоянии ниже — не черновик реплики: не цитируй и не пересказывай их формулировки. Выбери собственные слова, вывод, просьбу, границу или вопрос, которые из них следуют. Профессиональная лексика появляется только там, где она естественна для твоей живой речи.`
     ].filter(Boolean).join('\n\n');
 }
 
@@ -703,7 +706,7 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
             ? `Ты прямо сейчас переживаешь телесное воздействие «${frame.event.action}» в области «${frame.event.target}». Отзовись именно на непосредственное ощущение; прежний разговор лишь остаётся в памяти, и сейчас тебе не нужно отвечать на старый вопрос, обещание или спор.`
             : `Ты прямо сейчас видишь событие, описанное выше. Прежний разговор лишь остаётся в памяти и не звучит как новое обращение к тебе.`;
     const eventPerspective = frame.event.directlyExperienced
-        ? `[То, что ты переживаешь сейчас]\nТы прямо сейчас переживаешь воздействие «${frame.event.action}» в области «${frame.event.target}». ${frame.event.experience}`
+        ? `[Внутренний сигнал текущего момента]\nТы прямо сейчас переживаешь воздействие «${frame.event.action}» в области «${frame.event.target}». ${frame.event.experience} Это ориентир для твоего решения, а не готовый текст реплики.`
         : `[То, что ты видишь сейчас]\nТы видишь, что воздействие «${frame.event.action}» направлено на ${frame.event.affectedCharacter}, в область «${frame.event.target}». ${frame.event.experience}\nТы видишь только внешние признаки и не чувствуешь чужое воздействие своим телом.`;
     const changePerspective = frame.event.changes.length
         ? frame.event.directlyExperienced

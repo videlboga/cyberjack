@@ -320,6 +320,46 @@ db.exec(`
   
   CREATE INDEX IF NOT EXISTS idx_chat_summary_subject ON chat_memory_summary(subject_id, created_at DESC);
 
+  CREATE TABLE IF NOT EXISTS social_pair_states (
+    from_id TEXT NOT NULL,
+    to_id TEXT NOT NULL,
+    trust REAL NOT NULL DEFAULT 50,
+    safety REAL NOT NULL DEFAULT 50,
+    last_ego_state TEXT,
+    last_need TEXT,
+    last_intent TEXT,
+    last_world_minute INTEGER,
+    PRIMARY KEY (from_id, to_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS pending_social_turns (
+    id TEXT PRIMARY KEY,
+    speaker_id TEXT NOT NULL,
+    recipient_id TEXT NOT NULL,
+    plan_json TEXT NOT NULL,
+    speech TEXT,
+    semantics_json TEXT,
+    status TEXT NOT NULL DEFAULT 'planned',
+    error TEXT,
+    created_world_minute INTEGER NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_pending_social_turns_status ON pending_social_turns(status, created_world_minute);
+
+  CREATE TABLE IF NOT EXISTS social_threads (
+    id TEXT PRIMARY KEY,
+    from_id TEXT NOT NULL,
+    to_id TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    salience REAL NOT NULL DEFAULT 0.5,
+    source_json TEXT NOT NULL DEFAULT '{}',
+    last_touched_minute INTEGER NOT NULL,
+    cooldown_until_minute INTEGER,
+    UNIQUE(from_id, to_id, topic)
+  );
+  CREATE INDEX IF NOT EXISTS idx_social_threads_pair ON social_threads(from_id,to_id,status,cooldown_until_minute);
+
   CREATE TABLE IF NOT EXISTS social_memories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id TEXT NOT NULL,

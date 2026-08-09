@@ -137,6 +137,7 @@ html[data-ui-theme="manga2"] .screen-heading {
   border-bottom: 1px solid #111 !important;
   box-shadow: none !important;
 }
+html[data-ui-theme="manga2"] .screen-heading::after { content: none !important; display: none !important; }
 
 html[data-ui-theme="manga2"] .screen-heading p { color: #555 !important; }
 html[data-ui-theme="manga2"] .screen-heading h1 { color: #111 !important; text-shadow: none !important; }
@@ -839,3 +840,220 @@ html[data-ui-theme="manga2"] .capsule-biometry-host .endurance-pendulum-row svg 
   display: none;
 }
 /* dimmed class kept for logic, Framer Motion drives opacity/filter */
+
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-avatar-frame,
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-secondary-avatar {
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 64% !important;
+  height: 100% !important;
+  transform-origin: 50% 88% !important;
+  transition: transform .46s cubic-bezier(.22,1,.36,1), opacity .32s ease, filter .38s ease !important;
+  will-change: transform, opacity, filter;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-avatar-frame.active {
+  z-index: 8 !important;
+  opacity: 1 !important;
+  filter: grayscale(0) brightness(1) !important;
+  transform: translate3d(20%,0,0) scale(1) !important;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-avatar-frame.dimmed {
+  z-index: 2 !important;
+  opacity: .42 !important;
+  filter: grayscale(.72) brightness(.58) !important;
+  transform: translate3d(-24%,18px,0) scale(.82) !important;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-secondary-avatar.active {
+  z-index: 8 !important;
+  opacity: 1 !important;
+  filter: grayscale(0) brightness(1) !important;
+  transform: translate3d(20%,0,0) scale(1) !important;
+}
+html[data-ui-theme="manga2"] .character-stage.has-secondary .calibration-secondary-avatar.recessed {
+  z-index: 2 !important;
+  opacity: .42 !important;
+  filter: grayscale(.72) brightness(.58) !important;
+  transform: translate3d(-24%,18px,0) scale(.82) !important;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter {
+  position: relative;
+  isolation: isolate;
+  animation: manga-monitor-enter .58s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter::after {
+  content: "";
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(108deg,transparent 0 38%,rgba(17,17,17,.12) 46%,rgba(255,255,255,.82) 50%,transparent 58%),
+    repeating-linear-gradient(108deg,transparent 0 12px,rgba(17,17,17,.035) 13px 14px,transparent 15px 25px);
+  animation: manga-monitor-wipe .62s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter>.shared-calibration-biometrics {
+  animation: manga-monitor-detail .48s .06s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article {
+  animation: manga-monitor-detail .5s cubic-bezier(.22,1,.36,1) both;
+}
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(1) { animation-delay:.09s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(2) { animation-delay:.13s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(3) { animation-delay:.17s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.state-trends>article:nth-child(4) { animation-delay:.21s; }
+html[data-ui-theme="manga2"] .monitor-character-enter>.monitor-status-strip {
+  animation: manga-monitor-detail .5s .18s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes manga-monitor-enter {
+  from { opacity: .18; filter:blur(3px); transform:translate3d(0,8px,0) scale(.994); }
+  55% { opacity: 1; filter:blur(.35px); }
+  to { opacity:1; filter:blur(0); transform:translate3d(0,0,0) scale(1); }
+}
+@keyframes manga-monitor-detail {
+  from { opacity:0; transform:translate3d(-7px,0,0); }
+  to { opacity:1; transform:translate3d(0,0,0); }
+}
+@keyframes manga-monitor-wipe {
+  0% { opacity:0; transform:translateX(-48%); }
+  18% { opacity:.72; }
+  72% { opacity:.18; }
+  100% { opacity:0; transform:translateX(48%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui-theme="manga2"] .monitor-character-enter,
+  html[data-ui-theme="manga2"] .monitor-character-enter::after,
+  html[data-ui-theme="manga2"] .monitor-character-enter > * {
+    animation: none !important;
+  }
+}
+
+/* === LAB OVERVIEW — remove decorative dividers, add black card borders === */
+
+/* Remove decorative section separators */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail-section + .room-detail-section { border-top: 0 !important; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail-section h3 { border-bottom: 0 !important; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-section + .lab-section { border-top: 0 !important; }
+
+/* Black borders on all cards — override JI theme border:0 */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people > article,
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment > article {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+/* Equipment cards: occupied get thicker left accent, available stay plain */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment > article.occupied {
+  border-left: 2px solid #111 !important;
+}
+
+/* Resident avatar: thin border */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .resident-avatar {
+  border: 1px solid #ccc !important;
+  background: #f8f8f8 !important;
+}
+
+/* === CHARACTER DIRECTORY — black borders + larger cards === */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card {
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  margin-bottom: 0 !important;
+  grid-template-columns: 72px minmax(0,1fr) !important;
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-photo {
+  width: 72px !important;
+  height: 88px !important;
+  border: 0 !important;
+  background: #f8f8f8 !important;
+  font-size: 32px !important;
+}
+/* Hide "АКТИВ/ПЕРСОНАЛ" small label — duplicates group heading */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card small {
+  display: none !important;
+}
+/* Text block: padding since card padding is 0 */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card > div:not(.directory-photo) {
+  padding: 6px 8px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-photo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card strong {
+  font-size: 14px !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card span {
+  font-size: 9px !important;
+  color: #555 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card p {
+  font-size: 8px !important;
+  color: #555 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card i {
+  font-size: 8px !important;
+  color: #555 !important;
+}
+
+/* No-scroll: 3 columns, tighter section padding */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory > section {
+  display: block !important;
+  gap: 5px !important;
+  padding: 6px 10px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group h2 {
+  margin: 0 0 2px !important;
+}
+/* Hide "Открыть досье →" link — whole card is clickable */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-card > i {
+  display: none !important;
+}
+/* Cards grid: 3 columns within each group */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  gap: 5px !important;
+}
+/* Group heading spans full width */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group h2 {
+  grid-column: 1 / -1 !important;
+  margin: 0 0 2px !important;
+}
+/* Gap between Активы and Персонал groups */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group {
+  margin-bottom: 14px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .directory-group:last-child {
+  margin-bottom: 0 !important;
+}
+/* Compact screen heading on directory screen */
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading {
+  height: auto !important;
+  min-height: 48px !important;
+  padding: 8px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading > div {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading h1 {
+  font-size: 16px !important;
+  margin: 0 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading p {
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading span {
+  font-size: 8px !important;
+}

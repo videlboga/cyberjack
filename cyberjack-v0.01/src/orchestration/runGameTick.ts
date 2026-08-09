@@ -6,7 +6,7 @@ import { saveTickState } from './saveTickState';
 import { compileAction } from '../compiler/compileAction';
 import { runTick } from '../engine/runTick';
 import { eventQueries } from '../infrastructure/eventQueries';
-import { activeContextsRepo, resourceRepo, sceneRepo, presetRepo, eventLogRepo, characterRepo, characterItemsRepo, itemRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, resourceRepo, sceneRepo, presetRepo, eventLogRepo, characterRepo, characterItemsRepo, itemRepo, characterRelationRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
@@ -35,8 +35,12 @@ import { actionConflictsWithStance, actionRespectsStance, boundaryAcknowledgemen
 import { resolvePortraitEmotion } from '../domain/portraitEmotion';
 import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 import { pendingCommandRepo } from '../infrastructure/pendingCommandRepo';
+import { db } from '../infrastructure/db';
 import { buildPhysicalReaction } from '../narrative/physicalReaction';
 import { buildBoundaryExpression } from '../narrative/boundaryExpression';
+import { recordSceneObservation } from '../services/sceneAwareness';
+import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
+import { presentCommand } from '../narrative/commandPresentation';
 
 export interface GameEventPayload {
     subjectId: string;
@@ -441,6 +445,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     const subjectChar = characterRepo.get(payload.subjectId);
                     const subjectName = subjectChar?.name || payload.subjectId;
                     if (laboratoryMove.moved) {
+                        syncLaboratorySpatialRelations(payload.playerId);
                         const moveNarrative = `[Система]: ${subjectName} перемещается ${laboratoryMove.label}.`;
                         eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'move', action: null, actionLabel: moveNarrative, narrative: moveNarrative }, { added: true, slotId: laboratoryMove.slotId });
                         addedContextNotes.push(moveNarrative);
@@ -1170,10 +1175,15 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         }
     }
 
-    // Inject addedContextNotes into systemPrompt so the LLM can react to
-    // system events (refusals, moves, context changes) in its reply.
-    if (addedContextNotes.length > 0 && prompt.systemPrompt) {
-        prompt.systemPrompt += `\n\n[Системные события тика]:\n${addedContextNotes.join('\n')}`;
+    // Command resolution has its own present-tense scene presentation in the
+    // conversation layer. Do not also feed its mechanical audit messages to
+    // the model: words such as "подчинение" and "уже выполнено" turn a live
+    // action into a post-factum, coercive-sounding explanation.
+    const promptSystemNotes = commandIntent?.type && commandIntent.type !== 'none'
+        ? addedContextNotes.filter(note => !/(Актив .*отклоняет|Актив не выполняет|Актив мысленно отклоняет|Команда выполнена|Применено действие|Удалены связанные контексты|выполняет указание)/i.test(note))
+        : addedContextNotes;
+    if (promptSystemNotes.length > 0 && prompt.systemPrompt) {
+        prompt.systemPrompt += `\n\n[Системные события тика]:\n${promptSystemNotes.join('\n')}`;
     }
 
     const event: GameEvent = {
@@ -1191,6 +1201,33 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             ...payload.customPayload
         }
     };
+
+    const observableAction = ['physical', 'context'].includes(String(compiledAction.type || ''))
+        && compiledAction.actionKey !== 'wait'
+        && !(payload.customPayload?.backgroundTime && !(diagnostics.observation?.transitions || []).length);
+    if (observableAction) {
+        try {
+            const actorId = payload.actingCharacterId || payload.playerId || 'PL-1';
+            const pointLabel = presetRepo.getPointPreset(payload.pointId)?.label || payload.pointId;
+            recordSceneObservation({
+                sceneId: activeSceneId,
+                playerId: payload.playerId,
+                actorId,
+                targetId: payload.subjectId,
+                actionId: compiledAction.actionKey || payload.presetId,
+                actionLabel: compiledAction.label || payload.presetId,
+                pointId: payload.pointId,
+                pointLabel,
+                actionTags: compiledAction.tags || [],
+                finalValence: engineOutput.result.finalValence,
+                notable: Boolean(diagnostics.observation?.transitions?.length),
+                background: Boolean(payload.customPayload?.backgroundTime),
+                worldMinute: Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0),
+            });
+        } catch (error) {
+            console.warn('[SceneAwareness] observation recording failed:', error);
+        }
+    }
 
     const actionTrace = [
         { label: 'State before (core)', values: stateBefore.core },
@@ -1225,6 +1262,39 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     
     const finalCommandIntent = payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent;
+    const commandPresentation = finalCommandIntent?.type && finalCommandIntent.type !== 'none'
+        ? (() => {
+            const targetId = finalCommandIntent.targetId && finalCommandIntent.targetId !== payload.subjectId
+                ? String(finalCommandIntent.targetId)
+                : undefined;
+            const targetName = targetId
+                ? characterRepo.get(targetId)?.name || targetId
+                : undefined;
+            const actionLabel = commandActionPreset?.label
+                || (finalCommandIntent.actionId ? presetRepo.getActionPreset(finalCommandIntent.actionId)?.label : undefined)
+                || finalCommandIntent.targetPoseId
+                || finalCommandIntent.targetContextId
+                || finalCommandIntent.targetLocation
+                || 'указанное действие';
+            const presence = sceneCharacterRepo.list(payload.sceneId).find(entry =>
+                entry.character.id === payload.subjectId || entry.character.subjectId === payload.subjectId,
+            );
+            return presentCommand({
+                performed: actionApplied,
+                executorId: payload.subjectId,
+                executorName: characterRepo.get(payload.subjectId)?.name || payload.subjectId,
+                targetId,
+                targetName,
+                actionLabel,
+                requesterName: characterRepo.get(initiatorId)?.name || (initiatorId === 'PL-1' ? 'Калибратор' : initiatorId),
+                relationToRequester: state.relation,
+                relationToTarget: targetId ? characterRelationRepo.get(payload.subjectId, targetId) : null,
+                dynamics: relationalDynamics,
+                core: state.core,
+                role: presence?.role,
+            });
+        })()
+        : undefined;
     if (finalCommandIntent?.type && finalCommandIntent.type !== 'none') {
         const refusalWasAboutWillingness = addedContextNotes.some(note =>
             /отклоняет|недостаточ|не выполняет указание|подчинение .*требуется/i.test(note),
@@ -1262,6 +1332,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent,
             resumedPendingCommand: Boolean(payload.dynamicModifiers && (payload.dynamicModifiers as any).resumedPendingCommand),
             pendingCommandDescription: payload.dynamicModifiers && (payload.dynamicModifiers as any).pendingCommandDescription,
+            commandPresentation,
         },
         actionApplied,
         systemNotes: addedContextNotes,

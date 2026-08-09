@@ -8,6 +8,7 @@ type PortraitState = {
   openness?: number;
   behavioralState?: string;
   transitions?: Array<{ kind?: string; title?: string }>;
+  contexts?: PortraitContext[];
 };
 
 const contextIds = (contexts: PortraitContext[] = []) => new Set(
@@ -48,7 +49,17 @@ export const canonicalCharacterPortrait = (
   contexts: PortraitContext[] = [],
   state?: PortraitState | null,
 ): string | null => {
-  const wardrobe = wardrobeFor(contexts);
+  // Some scene payloads expose contexts on the participant state, while
+  // directory and legacy payloads carry them beside it.  Treat both as one
+  // source of truth so a portrait cannot fall back to an outdated wardrobe.
+  const visualContexts = Array.from(
+    new Map(
+      [...(state?.contexts || []), ...contexts]
+        .map((context) => [context.actionId || context.id, context] as const)
+        .filter(([actionId]) => Boolean(actionId)),
+    ).values(),
+  );
+  const wardrobe = wardrobeFor(visualContexts);
   const slug = id === 'S-AV-01' ? 'mira'
     : id === 'NPC-LAB-01' ? 'iona'
       : id === 'NPC-CAND-01' ? 'nika'
@@ -57,7 +68,7 @@ export const canonicalCharacterPortrait = (
             : id === 'NPC-CAND-GEN-04' ? 'mai'
               : null;
   if (slug && id) {
-    const visualContexts = contexts
+    const descriptorContexts = visualContexts
       .map(context => context.actionId || context.id)
       .filter((actionId): actionId is string => Boolean(actionId))
       .map(actionId => ({ actionId }));
@@ -65,14 +76,14 @@ export const canonicalCharacterPortrait = (
       /discharge|climax|разряд/i.test(`${transition.kind || ''} ${transition.title || ''}`)
     );
     const descriptor = buildCalibrationVisualDescriptorV4(id, {
-      contexts: visualContexts,
+      contexts: descriptorContexts,
       tension: state?.tension,
       attitude: state?.attitude,
       openness: state?.openness,
     }, state?.behavioralState, climax);
     return resolveCalibrationAvatarV4(descriptor)
-      || `/character-images/cutout/rendered/${slug}/${poseFor(contexts)}__${wardrobe}__none__neutral.png`
-      || `/character-images/rendered/${slug}/${poseFor(contexts)}__${wardrobe}__none__neutral.png`;
+      || `/character-images/cutout/rendered/${slug}/${poseFor(visualContexts)}__${wardrobe}__none__neutral.png`
+      || `/character-images/rendered/${slug}/${poseFor(visualContexts)}__${wardrobe}__none__neutral.png`;
   }
   const normalizedName = String(name || '').trim().toLowerCase();
   return legacyPortraits[normalizedName] || null;

@@ -19,10 +19,6 @@ export function hasVerifiedDirectiveEvidence(text: string, command: any) {
     return text.toLocaleLowerCase('ru-RU').includes(evidence.toLocaleLowerCase('ru-RU'));
 }
 
-export function isCollaborativeProposal(text: string) {
-    return /(?:^|\s)давай(?:те)?\s+(?:продолжим|начн(?:ем|ём)|сделаем|попробуем|перейд(?:ем|ём)|верн(?:ем|ём)ся|поговорим|посмотрим|будем)(?=\s|[.!?,]|$)/iu.test(text);
-}
-
 export function resolveRecipientSpeechValence(
     text: string,
     recentCharacterSpeech: string,
@@ -174,9 +170,11 @@ export async function parseSemanticVerbalInput(
 Исполняемой командой считаются только явно сформулированная просьба/приказ, чтобы персонаж:
 1) сделал действие сам;
 2) сделал действие с другим присутствующим персонажем;
-3) переместился;
-4) начал, изменил или прекратил текущий процесс.
+3) сменил позу;
+4) переместился;
+5) начал, изменил или прекратил текущий процесс.
 Обсуждение, вопрос, желание игрока и упоминание действия командой не являются.
+Сообщение может состоять из нескольких предложений и начинаться с пояснения, предложения или оговорки. Если хотя бы один последующий фрагмент прямо предписывает адресату конкретное действие, command.type не должен быть none, speechType должен быть command, а сам фрагмент нужно дословно поместить в directiveEvidence.
 Фразы о намерении или необходимости без глагола, прямо предписывающего адресату действие, не являются командой: «нам нужно повысить чувствительность», «тебе предстоит процедура», «сейчас будет больно» — это разговор.
 Предложение игрока о собственном плане (например, «предлагаю продолжить», «я потом добавлю», «сейчас кое-что сделаю») — не команда. Команда требует прямого обращения к персонажу с просьбой или требованием выполнить действие.
 Не достраивай конкретное действие или точку из неопределённых слов «кое-что», «это», «так», «продолжим». Упоминание записывай только если конкретное действие, процесс или часть тела действительно названы либо однозначно описаны словами сообщения. Сходство с кандидатом само по себе не является упоминанием.
@@ -192,7 +190,8 @@ pendingCommandRelation="continue" ставь только когда без не
 Адресат по умолчанию: ${defaultActorId}. Цель по умолчанию: ${defaultTargetId}.
 
 Верни JSON:
-{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|activate_context|deactivate_context|move|change_current_interaction","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null},"confidence":0..1}
+{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|move|change_current_interaction","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null},"confidence":0..1}
+Для change_pose contextId обязан быть ID позы из «Ближайших состояний/процессов» (например pose_sitting), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.
 tone.valence — только манера говорящего. recipientAppraisal.valence — насколько адресату приятен или неприятен смысл реплики с учётом его последней реплики. Игнорирование страха, отказа или границы оценивай отрицательно, даже если слова звучат мягко.
 Запрет не совершать действие («не раздевайся», «не трогай», «не иди») не превращай в противоположное действие. Если он отменяет ожидающее поручение, используй pendingCommandRelation="abandon" и command.type="none".
 ID выбирай только из кандидатов и присутствующих. Упоминания заполняй независимо от того, является ли сообщение командой.`
@@ -201,15 +200,17 @@ ID выбирай только из кандидатов и присутству
     const { parsed, model } = await parseVerbalInputWithLLM(messages);
     const command = parsed.command || {};
     let commandIntent: CommandIntent = { type: 'none' };
+    const commandActorId = command.actorId || defaultActorId;
+    const commandTargetId = command.targetId || defaultTargetId;
     // Asterisks are ordinary chat punctuation in the current UI. Keeping this
     // invariant outside the model prevents the retired RP-action syntax from
     // silently becoming executable again.
     const isPlayerPhysicalAction = isPlayerPhysicalCommand(command, defaultActorId, playerId);
     const commandCandidate = !text.includes('*')
+        && command.type && command.type !== 'none'
         && parsed.speechType === 'command'
         && command.directedAtCharacter === true
         && hasVerifiedDirectiveEvidence(text, command)
-        && !isCollaborativeProposal(text)
         && clamp(parsed.confidence, 0, 1, 0) >= 0.78
         && !isPlayerPhysicalAction;
     const addressedCharacter = characters.find(character => character.id === defaultActorId)?.name || defaultActorId;
@@ -222,6 +223,12 @@ ID выбирай только из кандидатов и присутству
             const actionId = genericUndress ? 'command_remove_worn_clothing' : command.actionId;
             if (genericUndress || candidates.actions.some(item => item.id === actionId)) {
                 commandIntent = { type: 'perform_action', actionId, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
+            }
+        }
+        else if (command.type === 'change_pose' && command.contextId) {
+            const context = candidates.contexts.find(item => item.id === command.contextId);
+            if (context?.tags?.includes('pose')) {
+                commandIntent = { type: 'change_pose', targetPoseId: command.contextId };
             }
         }
         else if (command.type === 'activate_context' && command.contextId) {
@@ -248,6 +255,20 @@ ID выбирай только из кандидатов и присутству
         ? commandIntent.pointId || mentions.pointIds[0] || 'systemic'
         : mentions.pointIds[0] || 'systemic';
     console.log(`[SemanticParser][Timing] model=${model} totalMs=${Math.round(performance.now() - started)} candidates=${candidates.actions.length + candidates.contexts.length + candidates.points.length}`);
+    console.info('[SemanticParser][Decision]', JSON.stringify({
+        text,
+        speechType: parsed.speechType,
+        confidence: clamp(parsed.confidence, 0, 1, 0),
+        command: {
+            type: command.type || 'none',
+            directedAtCharacter: command.directedAtCharacter === true,
+            explicitDirective: command.explicitDirective === true,
+            directiveEvidence: command.directiveEvidence || '',
+        },
+        commandCandidate,
+        mayExecute,
+        commandIntent: commandIntent.type,
+    }));
     return {
         intensity: clamp(parsed.tone?.intensity, 0, 1, 0.3),
         valence: resolveRecipientSpeechValence(text, recentCharacterSpeech, parsed.recipientAppraisal?.valence, parsed.tone?.valence),
@@ -264,10 +285,10 @@ ID выбирай только из кандидатов и присутству
             ? parsed.pendingCommandRelation
             : 'unrelated',
         mentionedTags,
-        routing: commandIntent.type === 'perform_action' ? {
-            actorId: command.actorId || defaultActorId,
-            targetId: command.targetId || defaultTargetId,
-            actionId: command.actionId,
+        routing: commandIntent.type !== 'none' ? {
+            actorId: commandActorId,
+            targetId: commandTargetId,
+            actionId: 'actionId' in commandIntent ? commandIntent.actionId : undefined,
             confidence: clamp(parsed.confidence, 0, 1, 0),
             source: 'semantic-command-parser-v2'
         } : undefined,

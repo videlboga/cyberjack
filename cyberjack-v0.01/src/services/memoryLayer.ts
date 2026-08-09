@@ -4,6 +4,7 @@ import { buildEmbedding } from './embeddingService';
 import { TickBundle, SubjectCoreState } from '../domain/types';
 import { rememberSocialExchange } from './socialMemory';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
+import { describeObservationSignal } from '../narrative/interactionObservation';
 
 interface RecordMemoryInput {
     subjectId: string;
@@ -37,7 +38,7 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
     if (objectiveFacts) {
         parts.push(`Объективные факты симуляции: место — ${objectiveFacts.location}. ${objectiveFacts.environment}`);
     }
-    if (observation?.subjectiveText) parts.push(`Субъективное переживание: ${observation.subjectiveText}`);
+    if (observation) parts.push(`Смысл телесной реакции: ${describeObservationSignal(observation)}`);
     else if (input.reactionText) parts.push(`Наблюдаемая реакция: ${input.reactionText}`);
     if (input.userText?.trim()) parts.push(`Высказывание собеседника (не объективный факт): «${input.userText.trim()}»`);
     if (input.assistantText?.trim()) parts.push(`Моя реплика в тот момент (не объективный факт): «${input.assistantText.trim()}»`);

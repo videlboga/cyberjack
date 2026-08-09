@@ -309,6 +309,7 @@ import { applyVerbalInputToFrame, buildReactionSystemPrompt, buildReactionTurnMe
 import { deriveTelemetry, formatTelemetryForPrompt, formatVisibleConditionForPrompt } from '../narrative/telemetry';
 import { buildPairedDialogueHistory } from '../narrative/dialogueHistory';
 import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueEntry } from '../narrative/temporalDialogue';
+import type { CommandPresentation } from '../narrative/commandPresentation';
 
 function dialogueContextBeforeCurrent(history: TemporalDialogueEntry[], currentSpeech: string | undefined, speakerName: string, initiatorName = 'Калибратор') {
     const prior = [...history];
@@ -554,6 +555,11 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         ? presetRepo.getActionPreset(commandIntent.actionId)?.label || commandIntent.actionId
         : actionLabel;
     const systemNotes = Array.isArray((bundle as any).systemNotes) ? (bundle as any).systemNotes.filter((note: unknown): note is string => typeof note === 'string' && note.trim().length > 0) : [];
+    const commandPresentation = (bundle.metadata as any)?.commandPresentation as CommandPresentation | undefined;
+    // A commanded NPC→NPC action is resolved by a second tick on its target.
+    // Keep that result so the target's later speech is about the received
+    // action, never about the player's imperative addressed to the executor.
+    const commandedTargetBundles = new Map<string, TickBundle>();
 
     // ── Commanded cross-character action ──
     // When the player orders an NPC to perform a physical action on another
@@ -575,7 +581,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             const cmdPreset = presetRepo.getActionPreset(commandIntent.actionId);
             const cmdActionLabel = cmdPreset?.label || commandIntent.actionId;
             const cmdPointLabel = presetRepo.getPointPreset(commandIntent.pointId)?.label || commandIntent.pointId;
-            await runGameTick({
+            const targetBundle = await runGameTick({
                 subjectId: commandIntent.targetId,
                 pointId: commandIntent.pointId,
                 playerId: bundle.event.playerId || 'PL-1',
@@ -583,6 +589,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 sceneId: eventId,
                 presetId: commandIntent.actionId,
             });
+            commandedTargetBundles.set(commandIntent.targetId, targetBundle);
             const notice = `[Действие] ${executorName} → ${targetCharName}: ${cmdActionLabel} · ${cmdPointLabel}`;
             chatMemoryRepo.append(commandIntent.targetId, 'user', notice, interactionContext);
             chatMemoryRepo.append(subjectId, 'user', notice, interactionContext);
@@ -602,6 +609,9 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
 
     if (orchestration.actorDecisions.length) {
         const actorPromises = orchestration.actorDecisions.map(async decision => {
+            const receivedCommandedAction = decision.kind === 'reactive'
+                ? commandedTargetBundles.get(decision.actorId)
+                : undefined;
             const responseTargetId = directedActorId || subjectId;
             const isResponseTarget = decision.actorId === responseTargetId;
             const isDirectedCommandActor = Boolean(autoUserMessage && hasParsedCommand && isResponseTarget);
@@ -619,7 +629,27 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                 userMsgOverride = userMsgOverride ? `${userMsgOverride}\n\n[Твоё телесное восприятие]: ${sceneForChar}` : `[Твоё телесное восприятие]: ${sceneForChar}`;
             }
 
-            if (decision.actorId !== subjectId) {
+            if (receivedCommandedAction) {
+                // The target did not receive the command. Its authoritative
+                // present is the physical tick performed by the executor.
+                currentPayload = await buildPromptPayload(
+                    decision.actorId,
+                    decision.actorId,
+                    receivedCommandedAction.output,
+                    eventId,
+                    { suppressTickIds, initiatorId: subjectId, addresseeId: subjectId },
+                );
+                currentHistory = buildPairedDialogueHistory(
+                    chatMemoryRepo.getRecent(decision.actorId, 32)
+                        .filter(entry => !/^\[Действие\]|^\[Текущий контакт\]|^\*\(Без слов\)\*/.test(entry.content))
+                        .slice(-16)
+                        .map(entry => ({ role: entry.role, content: entry.content, worldMinute: entry.worldMinute, contextLabel: entry.contextLabel })),
+                );
+                userMsgOverride = `${buildReactionTurnMessage(currentPayload.reactionFrame)}
+
+[Что происходит рядом]
+${commandPresentation?.targetNow || `${subjectRepo.get(subjectId)?.name || subjectId} сейчас выполняет действие «${resolvedCommandActionLabel}».`}`;
+            } else if (decision.actorId !== subjectId) {
                 currentPayload = await buildPromptPayload(decision.actorId, subjectId, bundle.output, eventId, {
                     suppressTickIds,
                     initiatorId: bundle.event.playerId || 'PL-1'
@@ -686,16 +716,8 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
                             : '';
                     const commandOutcome = isDirectedCommandActor
                         ? `
-[Результат твоего действия в этом ходе]
-Попытка исполнить поручение Калибратора уже позади. ${
-                              bundle.actionApplied
-                                  ? commandIntent?.type === 'perform_action' && commandIntent?.targetId && commandIntent.targetId !== subjectId
-                                      ? `Ты выполнила действие на ${subjectRepo.get(commandIntent.targetId)?.name || commandIntent.targetId}.`
-                                      : `Ты выполнила поручение.`
-                                  : `Ты видишь, что твоё действие ничего нового не изменило.`
-                          }
-${systemNotes.length ? systemNotes.filter((note: string) => !note.includes('Переход уже показан визуально')).map((note: string) => note.replace(/^\[Система\]:\s*/, '')).join('\n') : 'Ты не замечаешь никакого дополнительного изменения.'}
-Ты находишься уже после этой попытки, а не перед решением. Можешь коротко подтвердить сделанное, назвать непосредственно видимый результат или высказать возникшее после него сомнение.
+[Текущее действие]
+${commandPresentation?.executorNow || `Ты сейчас выполняешь поручение Калибратора.`}
 `
                         : `
 [То, что происходит в этом ходе]
@@ -739,8 +761,8 @@ ${isResponseTarget ? `[Прямое обращение к тебе от Кали
                         },
                         dramaticPosition: bundle.actionApplied
                             ? {
-                                  primaryIntent: 'отреагировать из момента после уже выполненного поручения',
-                                  secondaryConflict: 'личное отношение может окрасить ответ, но выполненное действие нельзя отрицать или описывать как будущее',
+                                  primaryIntent: 'говорить и реагировать во время начавшегося действия',
+                                  secondaryConflict: 'личное отношение окрашивает манеру исполнения и слова в этот момент',
                                   preferredSpeechAct: 'acknowledge',
                                   allowedSpeechActs: ['acknowledge', 'report', 'set_boundary', 'warn', 'silence']
                               }
@@ -756,12 +778,8 @@ ${isResponseTarget ? `[Прямое обращение к тебе от Кали
                 }
                 userMsgOverride = `${userMsgOverride || ''}
 
-[Результат команды — авторитетный факт]
-Команда «${autoUserMessage.trim()}» уже разрешилась. ${
-                    bundle.actionApplied ? `Ты уже выполнила действие «${resolvedCommandActionLabel}»; текущее состояние сцены показано после выполнения.` : 'Нового выполненного действия не произошло.'
-                }
-Отвечай из момента после этого результата. Не говори, что ещё только будешь выполнять команду, и не отрицай уже зафиксированное действие. Несогласие или границу можно выразить как реакцию после произошедшего.
-${systemNotes.length ? systemNotes.join('\n') : ''}`;
+[Текущее действие]
+${commandPresentation?.executorNow || (bundle.actionApplied ? `Ты сейчас выполняешь действие «${resolvedCommandActionLabel}».` : 'Новое действие не начинается.')}`;
             }
 
             if (autoUserMessage && currentPayload.reactionFrame) {
@@ -819,6 +837,15 @@ ${systemNotes.length ? systemNotes.join('\n') : ''}`;
                 userMsgOverride = userMsgOverride
                     ? `${userMsgOverride}\n\n[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`
                     : `[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`;
+            }
+
+            if (commandPresentation && decision.actorId !== subjectId && !receivedCommandedAction) {
+                const visibleMoment = decision.actorId === commandPresentation.targetId
+                    ? commandPresentation.targetNow
+                    : commandPresentation.observerNow;
+                userMsgOverride = userMsgOverride
+                    ? `${userMsgOverride}\n\n[Текущее действие рядом]\n${visibleMoment}`
+                    : `[Текущее действие рядом]\n${visibleMoment}`;
             }
 
             // Silence is a valid orchestration decision, but once the

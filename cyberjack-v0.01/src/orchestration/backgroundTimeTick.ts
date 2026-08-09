@@ -10,6 +10,8 @@ import { buildPromptPayloadWithDB } from '../prompts/buildPromptPayloadWrapper';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 import { passiveArousalAfterMinutes } from '../domain/arousalDynamics';
+import { runAutonomousSceneMinute } from './autonomousScene';
+import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
 
 let running = false;
 let pendingMinutes = 0;
@@ -322,6 +324,8 @@ export async function runBackgroundSustainedTicks(deltaTime = 1) {
         if (!advancedContextTime) ContextManager.processTick(subjectId, 1);
       }
       settleUnstimulatedArousalMinute(stimulatedSubjects);
+      syncLaboratorySpatialRelations();
+      await runAutonomousSceneMinute();
     }
   } catch (error) {
     console.error('[TimeFlow] sustained background tick failed:', error);

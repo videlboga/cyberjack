@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, recruitCandidate, changeLaboratoryRole, controlDeviceSession } from '../../scenario/worldService';
 import { moveCharacterInLaboratory } from '../../scenario/spatialContext';
+import { syncLaboratorySpatialRelations } from '../../services/sceneRelations';
 import { getTimeFlowState, setTimeFlowPaused } from '../../scenario/timeFlow';
 import { advanceSimulationTime } from '../../scenario/simulationTime';
 import { db } from '../../infrastructure/db';
@@ -117,7 +118,14 @@ export const moveLaboratoryCharacter = (req: Request, res: Response) => {
             'SELECT a.room_id, r.name AS room_name FROM laboratory_room_assignments a JOIN laboratory_rooms r ON r.player_id = a.player_id AND r.room_id = a.room_id WHERE a.player_id = ? AND a.character_id = ?'
         ).get(playerId, characterId) as any;
         const result = moveCharacterInLaboratory(characterId, target, playerId);
-        if (!result.handled || !result.moved) throw new Error(result.reason || 'Перемещение не выполнено');
+        if (!result.handled) throw new Error(result.reason || 'Перемещение не выполнено');
+        syncLaboratorySpatialRelations(playerId);
+        // Opening the same screen twice is valid: the player is already in
+        // its matching slot, so there is no move event to announce.
+        if (!result.moved) {
+            res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
+            return;
+        }
         // Record move event in chat memory of all characters in old and new room
         const character = (db as any).prepare('SELECT name FROM characters WHERE id = ? OR subject_id = ? LIMIT 1').get(characterId, characterId) as any;
         const charName = character?.name || characterId;

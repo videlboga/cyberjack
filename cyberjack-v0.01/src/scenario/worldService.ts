@@ -7,6 +7,8 @@ import { emitSupplyPurchased } from './eventDirector';
 import { ensureGeneratedCandidates } from './generatedCandidates';
 import { ensureCharacterStorySeeds } from './characterStorySeeds';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
+import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
+import { setLaboratoryPresence } from './spatialContext';
 
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
@@ -84,6 +86,47 @@ const BASE_LAB_ROOMS = [
     { id: 'room_cell_b', name: 'Жилая камера B', type: 'cell', capacity: 1, description: 'Резервная жилая камера для второго актива.' },
     { id: 'room_control', name: 'Пост наблюдения', type: 'staff', capacity: 2, description: 'Рабочее место ассистента, терминал телеметрии и управление оборудованием.' }
 ];
+
+/**
+ * The player is a physical observer in the laboratory, but not an occupant
+ * that consumes a bed/workstation slot.  That keeps the UI capacity and NPC
+ * placement rules about actual assignable characters.
+ */
+const PLAYER_ROOM_STATUS = 'operator';
+
+function normalizePlayerProfile() {
+    const row = db.prepare(`SELECT profile_json FROM characters WHERE id = ?`).get(PLAYER_ID) as { profile_json?: string | null } | undefined;
+    if (!row) return;
+    let profile: Record<string, any>;
+    try { profile = JSON.parse(row.profile_json || '{}'); } catch { profile = {}; }
+    const base = profile.base || {};
+    const generated = profile.generatedProfile;
+    const isLegacyGeneratedAsset = generated?.identity?.archetype === 'asset'
+        && (generated?.identity?.name === 'Player' || base.name === 'Player');
+    const needsNormalization = base.name === 'Player' || isLegacyGeneratedAsset;
+    if (!needsNormalization) return;
+
+    profile.base = {
+        ...base,
+        name: 'Калибратор',
+        age: Number(base.age) || 30,
+        gender: base.gender || 'male',
+        // `none` is the anatomy modification value for an unmodified human,
+        // not an absence of a body. Point states contain the actual anatomy.
+        anatomy: base.anatomy || 'none',
+        status: 'calibrator',
+    };
+    profile.origin = {
+        ...(profile.origin || {}),
+        biography: 'Калибратор лаборатории: принимает решения и вручную управляет ходом процедур.',
+    };
+    profile.personality = profile.personality || { traits: [], quirks: [], speechStyle: '', coreBelief: '' };
+    // The old randomly generated asset biography must never describe the
+    // player if a future path asks for the player's profile.
+    delete profile.generatedProfile;
+    db.prepare(`UPDATE characters SET name = ?, profile_json = ? WHERE id = ?`)
+        .run('Калибратор', JSON.stringify(profile), PLAYER_ID);
+}
 
 export function ensureWorldSeed() {
     db.prepare(`INSERT OR IGNORE INTO world_state (id, total_minutes, day) VALUES ('main', 480, 1)`).run();
@@ -170,10 +213,7 @@ export function ensureWorldSeed() {
                 db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
                     .run(JSON.stringify(metadata), PLAYER_ID, row.asset_id);
             }
-            db.prepare(`UPDATE laboratory_room_assignments SET room_id = ?, status = ? WHERE player_id = ? AND character_id = ?`)
-                .run(metadata.roomId, `device:${row.asset_id}`, PLAYER_ID, metadata.subjectId);
-            db.prepare(`UPDATE scene_characters SET slot_id = ? WHERE scene_id = ? AND character_id = ?`)
-                .run(`device:${row.asset_id}`, LAB_SCENE_ID, metadata.subjectId);
+            setLaboratoryPresence({ characterId: metadata.subjectId, slotId: `device:${row.asset_id}`, roomId: metadata.roomId, status: `device:${row.asset_id}`, playerId: PLAYER_ID });
         }
     }
     const insertRoom = db.prepare(`
@@ -183,7 +223,19 @@ export function ensureWorldSeed() {
     for (const room of BASE_LAB_ROOMS) insertRoom.run(PLAYER_ID, room.id, room.name, room.type, room.description, room.capacity);
 
     const player = characterRepo.get(PLAYER_ID) || characterRepo.ensureCharacter(PLAYER_ID, 'Калибратор');
-    if (!player.currentSceneId) sceneCharacterRepo.set(LAB_SCENE_ID, PLAYER_ID, { role: 'calibrator', slotId: 'slot_terminal' });
+    normalizePlayerProfile();
+    if (!player.currentSceneId) sceneCharacterRepo.set(LAB_SCENE_ID, PLAYER_ID, { role: 'calibrator', slotId: 'room:room_calibration' });
+    db.prepare(`
+        INSERT OR IGNORE INTO laboratory_room_assignments (player_id, room_id, character_id, status)
+        VALUES (?, 'room_calibration', ?, ?)
+    `).run(PLAYER_ID, PLAYER_ID, PLAYER_ROOM_STATUS);
+    // A missing location is initialized once; all subsequent moves go through
+    // setLaboratoryPresence and use canonical room/device/near slots.
+    db.prepare(`
+        UPDATE scene_characters
+        SET slot_id = 'room:room_calibration', presence_state = 'present', can_act = 1
+        WHERE scene_id = ? AND character_id = ? AND (slot_id IS NULL OR slot_id = '')
+    `).run(LAB_SCENE_ID, PLAYER_ID);
     const ionaPersonaText = `[Личность]
 Иона, 29 лет; лабораторный ассистент.
 
@@ -366,10 +418,13 @@ export function ensureWorldSeed() {
                 role: 'asset',
                 presenceState: 'present',
             });
-            db.prepare(`DELETE FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`)
-                .run(PLAYER_ID, 'NPC-CAND-GEN-04');
-            db.prepare(`INSERT INTO laboratory_room_assignments (player_id, room_id, character_id, status) VALUES (?, 'room_cell_b', ?, 'resident')`)
-                .run(PLAYER_ID, 'NPC-CAND-GEN-04');
+            setLaboratoryPresence({
+                characterId: 'NPC-CAND-GEN-04',
+                slotId: 'room:room_cell_b',
+                roomId: 'room_cell_b',
+                status: 'resident',
+                playerId: PLAYER_ID,
+            });
             const stored = db.prepare(`SELECT profile_json FROM characters WHERE id = ?`).get('NPC-CAND-GEN-04') as any;
             const profile = JSON.parse(stored?.profile_json || '{}');
             profile.base = { ...(profile.base || {}), status: 'asset' };
@@ -398,6 +453,9 @@ export function ensureWorldSeed() {
             }
         });
     }
+    // A newly restored player position must be observable immediately, not
+    // only after the next background minute.
+    syncLaboratorySpatialRelations(PLAYER_ID);
 }
 
 export function getWorldClock() {
@@ -670,8 +728,8 @@ export function listLabRooms(playerId = PLAYER_ID) {
         FROM laboratory_room_assignments a
         JOIN characters c ON c.id = a.character_id
         LEFT JOIN subjects s ON s.id = a.character_id
-        WHERE a.player_id = ?
-    `).all(playerId) as any[];
+        WHERE a.player_id = ? AND a.status != ?
+    `).all(playerId, PLAYER_ROOM_STATUS) as any[];
     return rooms.map(room => ({
         id: room.room_id,
         name: room.name,
@@ -761,9 +819,7 @@ export function recruitCandidate(characterId: string, role: 'staff' | 'asset', p
     db.transaction(() => {
         db.prepare(`UPDATE character_resources SET amount = amount - ? WHERE character_id = ? AND resource_key = 'credits'`).run(cost, playerId);
         sceneCharacterRepo.moveCharacter(characterId, LAB_SCENE_ID, { role: role === 'asset' ? 'asset' : 'staff', presenceState: 'present' });
-        db.prepare(`DELETE FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`).run(playerId, characterId);
-        db.prepare(`INSERT INTO laboratory_room_assignments (player_id, room_id, character_id, status) VALUES (?, ?, ?, 'resident')`)
-            .run(playerId, roomId, characterId);
+        setLaboratoryPresence({ characterId, slotId: `room:${roomId}`, roomId, status: 'resident', playerId });
     })();
     ensureCharacterStorySeeds();
     const clock = advanceWorldTime(30);
@@ -799,9 +855,7 @@ export function changeLaboratoryRole(characterId: string, role: 'staff' | 'asset
 
     db.transaction(() => {
         sceneCharacterRepo.set(LAB_SCENE_ID, characterId, { role, presenceState: 'present' });
-        db.prepare(`DELETE FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`).run(playerId, characterId);
-        db.prepare(`INSERT INTO laboratory_room_assignments (player_id, room_id, character_id, status) VALUES (?, ?, ?, 'resident')`)
-            .run(playerId, roomId, characterId);
+        setLaboratoryPresence({ characterId, slotId: `room:${roomId}`, roomId, status: 'resident', playerId });
     })();
     const clock = advanceWorldTime(20);
     const title = role === 'asset' ? 'Перевод в активы' : 'Назначение в штат';
@@ -937,10 +991,13 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
             .run(JSON.stringify(nextSubjectId
                 ? { ...asset.metadata, subjectId: nextSubjectId, startedAt: getWorldClock().totalMinutes, previousRoomId, ...(deviceSession ? { deviceSession } : {}) }
                 : { roomId: (asset.metadata as any)?.roomId }), playerId, assetId);
-        db.prepare(`UPDATE laboratory_room_assignments SET room_id = ?, status = ? WHERE player_id = ? AND character_id = ?`)
-            .run(nextSubjectId ? assetRoomId : returnRoomId, nextSubjectId ? `device:${assetId}` : 'resident', playerId, subjectId);
-        db.prepare(`UPDATE scene_characters SET slot_id = ? WHERE scene_id = ? AND character_id = ?`)
-            .run(nextSubjectId ? `device:${assetId}` : `room:${returnRoomId}`, LAB_SCENE_ID, subjectId);
+        setLaboratoryPresence({
+            characterId: subjectId,
+            slotId: nextSubjectId ? `device:${assetId}` : `room:${returnRoomId}`,
+            roomId: nextSubjectId ? assetRoomId : returnRoomId,
+            status: nextSubjectId ? `device:${assetId}` : 'resident',
+            playerId,
+        });
     })();
     if (!nextSubjectId) interactionStanceRepo.softenAll(subjectId,.45);
     recordScenarioEvent('equipment', nextSubjectId ? 'Актив помещён в устройство' : 'Актив извлечён из устройства', `${core.name || subjectId}: ${asset.name}.`, { subjectId, assetId });
