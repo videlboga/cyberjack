@@ -1,6 +1,6 @@
 import { characterRepo, presetRepo, characterRelationRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { presentCommand } from '../narrative/commandPresentation';
-import type { CompiledAction, GameEvent, TickBundle, TickOutput } from '../domain/types';
+import type { CompiledAction, GameEvent, TickBundle, TickOutput, DynamicModifiers } from '../domain/types';
 import type { TickEffect } from './tickEffectPlan';
 
 export interface BuildTickResponseInput {
@@ -15,7 +15,7 @@ export interface BuildTickResponseInput {
         playerIntensity?: number;
         eventType?: string;
         textMessage?: string;
-        dynamicModifiers?: unknown;
+        dynamicModifiers?: DynamicModifiers;
         customPayload?: Record<string, unknown> | null;
     };
     activeSceneId: string;
@@ -68,7 +68,7 @@ export interface BuildPendingCommandEffectInput {
         playerId: string;
         sceneId: string;
         textMessage?: string;
-        dynamicModifiers?: unknown;
+        dynamicModifiers?: DynamicModifiers;
     };
     actionApplied: boolean;
     addedContextNotes: string[];
@@ -82,7 +82,7 @@ export interface BuildPendingCommandEffectInput {
  */
 export function buildPendingCommandEffect(input: BuildPendingCommandEffectInput): TickEffect | undefined {
     const { payload, actionApplied, addedContextNotes } = input;
-    const dynamicModifiers = payload.dynamicModifiers as any;
+    const dynamicModifiers = payload.dynamicModifiers;
     const finalCommandIntent = dynamicModifiers?.commandIntent;
     if (!finalCommandIntent?.type || finalCommandIntent.type === 'none') return undefined;
     const refusalWasAboutWillingness = addedContextNotes.some(note =>
@@ -97,10 +97,10 @@ export function buildPendingCommandEffect(input: BuildPendingCommandEffectInput)
             subjectId: payload.subjectId,
             playerId: payload.playerId,
             sceneId: payload.sceneId,
-            sourceText: dynamicModifiers.pendingCommandSourceText || dynamicModifiers.commandSourceText || payload.textMessage || '',
-            description: dynamicModifiers.pendingCommandDescription || dynamicModifiers.commandDescription || payload.textMessage || 'невыполненное поручение',
+            sourceText: dynamicModifiers?.pendingCommandSourceText || dynamicModifiers?.commandSourceText || payload.textMessage || '',
+            description: dynamicModifiers?.pendingCommandDescription || dynamicModifiers?.commandDescription || payload.textMessage || 'невыполненное поручение',
             intent: finalCommandIntent,
-            routing: dynamicModifiers.routing,
+            routing: dynamicModifiers?.routing,
         },
     };
 }
@@ -138,20 +138,21 @@ export function buildTickResponse(input: BuildTickResponseInput): BuildTickRespo
         { label: 'State after (point)', values: output.nextPoint }
     ];
 
-    const finalCommandIntent = payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent;
+    const finalCommandIntent = payload.dynamicModifiers?.commandIntent;
     const commandPresentation = finalCommandIntent?.type && finalCommandIntent.type !== 'none'
         ? (() => {
-            const targetId = finalCommandIntent.targetId && finalCommandIntent.targetId !== payload.subjectId
-                ? String(finalCommandIntent.targetId)
+            const intent = finalCommandIntent as { type: string; targetId?: string; actionId?: string; targetPoseId?: string; targetContextId?: string; targetLocation?: string };
+            const targetId = intent.targetId && intent.targetId !== payload.subjectId
+                ? String(intent.targetId)
                 : undefined;
             const targetName = targetId
                 ? characterRepo.get(targetId)?.name || targetId
                 : undefined;
             const actionLabel = commandActionPreset?.label
-                || (finalCommandIntent.actionId ? presetRepo.getActionPreset(finalCommandIntent.actionId)?.label : undefined)
-                || finalCommandIntent.targetPoseId
-                || finalCommandIntent.targetContextId
-                || finalCommandIntent.targetLocation
+                || (intent.actionId ? presetRepo.getActionPreset(intent.actionId)?.label : undefined)
+                || intent.targetPoseId
+                || intent.targetContextId
+                || intent.targetLocation
                 || 'указанное действие';
             const presence = sceneCharacterRepo.list(payload.sceneId).find(entry =>
                 entry.character.id === payload.subjectId || entry.character.subjectId === payload.subjectId,
@@ -190,9 +191,9 @@ export function buildTickResponse(input: BuildTickResponseInput): BuildTickRespo
         scenario: scenarioResult,
         metadata: {
             requestId: input.requestId,
-            commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent,
-            resumedPendingCommand: Boolean(payload.dynamicModifiers && (payload.dynamicModifiers as any).resumedPendingCommand),
-            pendingCommandDescription: payload.dynamicModifiers && (payload.dynamicModifiers as any).pendingCommandDescription,
+            commandIntent: payload.dynamicModifiers?.commandIntent,
+            resumedPendingCommand: Boolean(payload.dynamicModifiers?.resumedPendingCommand),
+            pendingCommandDescription: payload.dynamicModifiers?.pendingCommandDescription,
             commandPresentation,
         },
         actionApplied,

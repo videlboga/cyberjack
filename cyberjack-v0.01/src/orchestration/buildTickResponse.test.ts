@@ -72,9 +72,9 @@ describe('buildTickResponse', () => {
             ...baseInput,
             payload: {
                 ...baseInput.payload,
-                dynamicModifiers: { commandIntent: { type: 'perform_action', actionId: 'stimulate' } },
+                dynamicModifiers: { commandIntent: { type: 'perform_action' as const, actionId: 'stimulate' } },
             },
-            commandIntent: { type: 'perform_action', actionId: 'stimulate' },
+            commandIntent: { type: 'perform_action' as const, actionId: 'stimulate' },
         };
         const result = buildTickResponse(input);
         expect(result.pendingCommandEffect).toBeDefined();
@@ -86,9 +86,9 @@ describe('buildTickResponse', () => {
             ...baseInput,
             payload: {
                 ...baseInput.payload,
-                dynamicModifiers: { commandIntent: { type: 'perform_action', actionId: 'stimulate' } },
+                dynamicModifiers: { commandIntent: { type: 'perform_action' as const, actionId: 'stimulate' } },
             },
-            commandIntent: { type: 'perform_action', actionId: 'stimulate' },
+            commandIntent: { type: 'perform_action' as const, actionId: 'stimulate' },
             actionApplied: false,
             addedContextNotes: ['[Система]: Актив мысленно отклоняет действие.'],
         };
