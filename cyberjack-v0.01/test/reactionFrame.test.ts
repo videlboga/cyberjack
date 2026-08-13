@@ -102,6 +102,21 @@ describe('reaction frame compiler', () => {
         ]);
     });
 
+    it('includes messages that arrived after the previous impulse', () => {
+        // A proactive reply must see the player's newest lines, not only the
+        // dialogue that existed when the impulse was first scheduled.
+        const dialogue = selectRecentDialogue([
+            { role: 'assistant', content: 'Я подожду здесь.' },
+            { role: 'user', content: 'Вернусь через минуту.' },
+            { role: 'user', content: 'Я уже здесь. Продолжим?' },
+        ], 'Ника', 'Калибратор');
+        expect(dialogue).toEqual([
+            'Ника: «Я подожду здесь.»',
+            'Калибратор: «Вернусь через минуту.»',
+            'Калибратор: «Я уже здесь. Продолжим?»'
+        ]);
+    });
+
     it('makes approaching the peak an explicit focus of the reply', () => {
         const frame = compileReactionFrame({
             ...base,
