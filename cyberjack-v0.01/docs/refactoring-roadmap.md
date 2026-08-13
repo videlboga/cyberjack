@@ -504,13 +504,13 @@ Baseline после третьего ревью: 21 failed / 529 passed / 6 skip
 
 Приоритетные проблемные контракты:
 
-- семантические поля `dynamicModifiers`;
-- `DiagnosticsOutput.observation`;
-- типы команд и их целей;
-- payload игровых событий;
-- device/mental session metadata;
-- world-time options;
-- scene and context effects.
+- ~~семантические поля `dynamicModifiers`~~ ✅ — типизированы (см. §2.21);
+- ~~`DiagnosticsOutput.observation`~~ ✅ — уже `InteractionObservation`;
+- ~~типы команд и их целей~~ ✅ — `CommandIntent` — дискриминированный union; `buildTickResponse` сужает через intent-каст;
+- ~~payload игровых событий~~ ✅ — `GameEventPayload` типизирован; `dispatchEvent` принимает `DispatchEventInput`;
+- ~~device/mental session metadata~~ ✅ — `sessionMetadata.ts`: `DeviceSessionMetadata`/`MentalSessionMetadata` вместо `Record<string, any>` (spatialContext, runGameTick);
+- ~~world-time options~~ ✅ — `TimeAdvanceOptions` типизирован;
+- scene and context effects — в коде отсутствуют (не найдены).
 
 После миграции каждого среза:
 
