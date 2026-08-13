@@ -8,6 +8,7 @@ import type { TickEffect } from './tickEffectPlan';
 import { eventQueries } from '../infrastructure/eventQueries';
 import { activeContextsRepo, sceneRepo, presetRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent, DynamicModifiers } from '../domain/types';
+import type { DeviceSessionMetadata } from '../domain/sessionMetadata';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { appendJsonLog } from '../utils/fileLogs';
@@ -334,7 +335,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // === Edging & Tension Discharge Mechanic ===
     const worldMinute = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
-    const deviceOrgasmPolicy = String((payload.customPayload as any)?.deviceSession?.orgasmPolicy || '');
+    const deviceOrgasmPolicy = String((payload.customPayload?.deviceSession as DeviceSessionMetadata | undefined)?.orgasmPolicy || '');
     const consequence = resolveTickConsequences({
         subjectId: payload.subjectId,
         pointId: payload.pointId,
@@ -555,7 +556,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         actionApplied,
         compiledAction,
         output: engineOutput,
-        commandIntent: (payload.dynamicModifiers as any)?.commandIntent,
+        commandIntent: payload.dynamicModifiers?.commandIntent,
         customPayload: payload.customPayload,
         textMessage: payload.textMessage,
         worldMinute,
