@@ -117,4 +117,27 @@ describe('spoken clothing commands', () => {
         expect(activeIds).toContain('eq_clothe_underwear');
         expect(activeIds).not.toContain('test_refused_command');
     });
+
+    it('removes all worn clothing via structured remove_worn_clothing intent', async () => {
+        activeContextsRepo.add('test-underwear', 'TEST-CMD-01', 'eq_clothe_underwear', -1, 'systemic');
+        activeContextsRepo.add('test-panties', 'TEST-CMD-01', 'eq_clothe_panties', -1, 'systemic');
+        activeContextsRepo.add('test-jumpsuit', 'TEST-CMD-01', 'eq_clothe_jumpsuit', -1, 'systemic');
+
+        const result = await runGameTick({
+            subjectId: 'TEST-CMD-01',
+            playerId: 'PL-1',
+            sceneId: 'scene_lab_calibrator',
+            pointId: 'systemic',
+            presetId: 'verbal_pressure',
+            textMessage: 'Разденься',
+            dynamicModifiers: {
+                intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0,
+                commandIntent: { type: 'remove_worn_clothing' },
+            } as any,
+            skipPrompt: true,
+        });
+
+        expect(result.actionApplied).toBe(true);
+        expect(activeContextsRepo.getAllForSubject('TEST-CMD-01')).toEqual([]);
+    });
 });

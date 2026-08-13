@@ -3,6 +3,7 @@ export type CommandIntent =
   | { type: "activate_context"; targetContextId: string }
   | { type: "deactivate_context"; targetContextId: string }
   | { type: "deactivate_contexts"; targetContextIds: string[] }
+  | { type: "remove_worn_clothing" }
   | { type: "move"; targetLocation: string }
   | { type: "change_current_interaction"; goal: "stop" | "start" | "adjust"; suggestedActionId?: string; targetId?: string; pointId?: string }
   | { type: "perform_action"; actionId: string; targetId?: string; pointId?: string }

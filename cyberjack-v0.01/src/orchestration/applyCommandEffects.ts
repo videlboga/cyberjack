@@ -243,6 +243,44 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
             } else if (!activeClothing) {
                 addedContextNotes.push(`[Система]: Команда не выполнена: действие «${commandIntent.actionId}» отсутствует в каталоге.`);
             }
+        } else if (commandIntent.type === 'remove_worn_clothing') {
+            // Structured "undress all" command. Collect the active clothing
+            // contexts and build a removal preset — no text re-interpretation.
+            const activeClothing = activeContextsRepo.getAllForSubject(payload.subjectId)
+                .map(context => context.actionId)
+                .filter(actionId => (presetRepo.getActionPreset(actionId)?.tags || []).includes('clothing'));
+            if (activeClothing.length) {
+                const removalBase = presetRepo.getActionPreset('eq_clothe_calibration_set_remove')
+                    || presetRepo.getActionPreset('eq_clothe_jumpsuit_remove');
+                commandActionPreset = {
+                    ...(removalBase || {}),
+                    id: 'command_remove_worn_clothing',
+                    label: 'Снять одежду',
+                    type: 'physical',
+                    tags: ['clothing', 'remove'],
+                    priority: (removalBase as any)?.priority || 1,
+                    removeContexts: [...new Set(activeClothing)],
+                } as any;
+            } else {
+                addedContextNotes.push('[Система]: Команда снять одежду не привела к действию: на персонаже нет одежды.');
+                commandActionPreset = undefined;
+            }
+            if (commandActionPreset) {
+                forcedAttempted = true;
+                const requiredCompliance = (commandActionPreset.priority || 1) * 20;
+                const currentCompliance = complianceFor({ id: commandActionPreset.id, label: commandActionPreset.label, type: commandActionPreset.type, pointId: payload.pointId }).total;
+                const targetName = payload.subjectId;
+                if (currentCompliance >= requiredCompliance) {
+                    commandEffectsAuthorized = true;
+                    let reason = (state.relation?.attitude ?? 0) > 70 ? "с готовностью выполняя указание" : "выполняя указание без подтверждённого добровольного согласия";
+                    if ((state.core.attitude ?? 0) < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
+                    forcedNarrativeToLog = `[Система]: Актив выполняет указание "${commandActionPreset.label}" (цель: ${targetName}), ${reason}.`;
+                    actionApplied = true;
+                } else {
+                    const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${commandActionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
+                    addedContextNotes.push(refusedNarrative);
+                }
+            }
         } else if (commandIntent.type === 'perform_described_action') {
             if (commandIntent.refusal) {
                 const refusalNarrative = `[Система]: ${commandIntent.refusal}`;

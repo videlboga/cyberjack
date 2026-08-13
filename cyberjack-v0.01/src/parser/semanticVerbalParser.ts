@@ -219,7 +219,8 @@ pendingCommandRelation="continue" ставь только когда без не
 Адресат по умолчанию: ${defaultActorId}. Цель по умолчанию: ${defaultTargetId}.
 
 Верни JSON:
-{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|move|change_current_interaction","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null},"confidence":0..1}
+{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|remove_worn_clothing|move|change_current_interaction","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null},"confidence":0..1}
+Для remove_worn_clothing используй type="remove_worn_clothing" (без actionId/contextId), когда команда требует снять всю одежду целиком («разденься», «сними всё», «сними одежду»). Для снятия одного конкретного предмета используй deactivate_context с contextId этого предмета.
 Для change_pose contextId обязан быть ID позы из «Ближайших состояний/процессов» (например pose_sitting), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.
 tone.valence — только манера говорящего. recipientAppraisal.valence — насколько адресату приятен или неприятен смысл реплики с учётом его последней реплики. Игнорирование страха, отказа или границы оценивай отрицательно, даже если слова звучат мягко.
 Запрет не совершать действие («не раздевайся», «не трогай», «не иди») не превращай в противоположное действие. Если он отменяет ожидающее поручение, используй pendingCommandRelation="abandon" и command.type="none".
@@ -267,6 +268,9 @@ ID выбирай только из кандидатов и присутству
             commandIntent = command.contextId === 'act_end_exposure'
                 ? { type: 'change_current_interaction', goal: 'stop', targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' }
                 : { type: 'deactivate_context', targetContextId: command.contextId };
+        }
+        else if (command.type === 'remove_worn_clothing') {
+            commandIntent = { type: 'remove_worn_clothing' };
         }
         else if (command.type === 'move' && command.location) commandIntent = { type: 'move', targetLocation: command.location };
         else if (command.type === 'change_current_interaction') commandIntent = { type: 'change_current_interaction', goal: ['start', 'adjust', 'stop'].includes(command.goal) ? command.goal : 'stop', suggestedActionId: command.actionId || undefined, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
