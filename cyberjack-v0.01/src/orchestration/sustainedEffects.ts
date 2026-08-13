@@ -46,17 +46,21 @@ export function planSustainedPulses(contexts: SustainedContextLike[], elapsedTim
     }
 
     const sexual = contexts.find(context => context.actionId === 'act_start_penetration') ||
-        contexts.find(context => context.actionId === 'finger_insertion');
+        contexts.find(context => context.actionId === 'finger_insertion') ||
+        contexts.find(context => context.actionId === 'act_start_oral_giving');
     if (sexual) {
-        const boosted = ids.has('act_increase_friction');
+        const oral = sexual.actionId === 'act_start_oral_giving';
+        const boosted = oral ? ids.has('act_deepen_oral') : ids.has('act_increase_friction');
         const manual = sexual.actionId === 'finger_insertion';
         const sexualPulses = boosted ? Math.min(6, pulses * 2) : pulses;
         plans.push({
             sourceActionId: sexual.actionId,
             presetId: 'sustained_sexual_pulse',
-            pointId: physicalPulsePoint(sexual.pointId, 'vagina'),
+            pointId: physicalPulsePoint(sexual.pointId, oral ? 'lips' : 'vagina'),
             pulses: sexualPulses,
-            label: boosted
+            label: oral
+                ? (boosted ? 'Глубокий оральный контакт' : 'Продолжительный оральный контакт')
+                : boosted
                 ? (manual ? 'Быстрая стимуляция пальцами' : 'Быстрые фрикции')
                 : (manual ? 'Продолжительная стимуляция пальцами' : 'Продолжительное проникновение')
         });

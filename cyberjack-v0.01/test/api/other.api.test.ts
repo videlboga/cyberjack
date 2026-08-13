@@ -75,6 +75,22 @@ describe('API - other endpoints', () => {
     expect(res.body).toHaveProperty('availableActions');
   });
 
+  it('GET /api/state scene view omits heavyweight screen data', async () => {
+    subjectRepo.save('S-SCENE-STATE', 'Scene State Subject', { sensitivity: 1, capacity: 1, openness: 50, plasticity: 0, attitude: 50, tension: 0 });
+
+    const res = await request(app)
+      .get('/api/state')
+      .query({ subjectId: 'S-SCENE-STATE', sceneId: 'scene_lab_calibrator', view: 'scene' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBeTruthy();
+    expect(res.body.subject).toBeTruthy();
+    expect(res.body.availableActions).toEqual([]);
+    expect(res.body.availablePoints).toEqual([]);
+    expect(res.body.recommendationObservations).toEqual([]);
+    expect(res.body.characters).toEqual([]);
+  });
+
   itIfLive('POST /api/subject/update and /api/subject/point', async () => {
     subjectRepo.save('SUB-UP', 'Sub Up', { sensitivity: 10, capacity: 10, openness: 50, plasticity: 0, attitude: 50, tension: 0 });
 

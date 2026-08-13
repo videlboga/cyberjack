@@ -3,13 +3,16 @@ import { db } from '../infrastructure/db';
 import { activeConfig } from './config';
 import { getActiveContextPromptText } from '../domain/contextPresentation';
 import { formatWorldTimeContext } from '../narrative/temporalDialogue';
+import { subjectEdgeStateRepo } from '../infrastructure/repositories';
+import { describeEdgeHold } from '../domain/edgeState';
+import { sexMachineStimulation } from '../domain/sexMachineStimulation';
 
 export async function buildPromptPayloadWithDB(
     ownerId: string,
     targetId: string,
     latestResult?: any,
     eventId: string = 'scene_lab_calibrator',
-    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string }
+    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string }
 ) {
     const ownerQueryId = ownerId;
     const targetQueryId = targetId || ownerQueryId;
@@ -58,12 +61,22 @@ export async function buildPromptPayloadWithDB(
         try { return JSON.parse(row.tags || '[]'); } catch { return []; }
     }).filter((tag: unknown): tag is string => typeof tag === 'string');
     const runningDeviceRows = db.prepare(`
-        SELECT asset_id FROM laboratory_assets
+        SELECT asset_id, metadata FROM laboratory_assets
         WHERE json_extract(metadata, '$.deviceSession.subjectId') = ?
           AND json_extract(metadata, '$.deviceSession.status') = 'running'
-    `).all(ownerQueryId) as Array<{asset_id:string}>;
+    `).all(ownerQueryId) as Array<{asset_id:string; metadata?:string}>;
+    const activeCuePointIds = activeContextRow
+        .map(row => row.point_id)
+        .filter((pointId): pointId is string => Boolean(pointId && pointId !== 'systemic'));
     for (const device of runningDeviceRows) {
-        if (device.asset_id === 'lab_sex_machine') activeCueTags.push('machine', 'sexual', 'penetration');
+        if (device.asset_id === 'lab_sex_machine') {
+            try {
+                const session = JSON.parse(device.metadata || '{}')?.deviceSession;
+                const stimulation = sexMachineStimulation(session?.stimulationMode);
+                activeCueTags.push(...stimulation.tags);
+                activeCuePointIds.push(stimulation.pointId);
+            } catch { /* malformed asset metadata must not break dialogue */ }
+        }
     }
     const visibleContexts = activeContextRow.flatMap(r => {
         let role = 'other';
@@ -113,6 +126,8 @@ export async function buildPromptPayloadWithDB(
         .filter((value, index, values) => values.indexOf(value) === index)
         .slice(0, 6);
     const worldMinute = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
+    const edgeHold = subjectEdgeStateRepo.get(ownerQueryId);
+    const edgeDescription = describeEdgeHold(edgeHold, worldMinute);
     const firstKnownMinuteValue = (db.prepare(`
         SELECT MIN(world_minute) AS minute
         FROM chat_memory
@@ -123,6 +138,7 @@ export async function buildPromptPayloadWithDB(
         worldMinute,
         firstKnownMinute != null && Number.isFinite(firstKnownMinute) ? firstKnownMinute : null,
     ));
+    if (edgeDescription) activeContextNames.unshift(edgeDescription);
 
     const pointStatesRow = db.prepare(`
         SELECT sps.point_id, sps.point_id as label, sps.local_sensitivity, sps.local_attitude,
@@ -145,7 +161,7 @@ export async function buildPromptPayloadWithDB(
         activeContextNames,
         latestResult,
         eventId,
-        { ...options, worldPlayerId: options?.worldPlayerId || 'PL-1', addresseeContextFacts, compulsionCueTags:activeCueTags }
+        { ...options, worldPlayerId: options?.worldPlayerId || 'PL-1', addresseeContextFacts, compulsionCueTags:activeCueTags, compulsionCuePointIds:activeCuePointIds, edgeHoldMinutes: edgeHold ? Math.max(0, worldMinute - edgeHold.enteredAtMinute) : 0 }
     );
 
     if (extraLog) {

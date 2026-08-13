@@ -4,6 +4,7 @@ import {
     calibrationAvatarCandidatesV4,
     resolveCalibrationAvatarV4,
     activeVisualInteractionFromContexts,
+    expandedInteractionAssetPath,
     resolveIntimacyInteractionVisual,
 } from './characterVisuals';
 
@@ -161,5 +162,18 @@ describe('calibration pose resolution', () => {
         // The unrestrained nude matrix has no authored mixed frame, so the
         // resolver deliberately falls back to the nearest receptive frame.
         })).toBe('/character-images/intimacy/nika/manual/vaginal_fingering/nude__sustain__receptive.png');
+    });
+
+    it('uses the oral/giving_deep matrix composition after the oral modifier', () => {
+        const contexts = [
+            { ...context('act_start_oral_giving'), pointId: 'lips' },
+            context('act_deepen_oral'),
+        ];
+        const interaction = activeVisualInteractionFromContexts(contexts, 30)!;
+        expect(interaction).toMatchObject({ family: 'oral', variant: 'deep', targetPointId: 'lips' });
+        expect(expandedInteractionAssetPath({
+            characterSlug: 'mira', interaction, contexts, tension: 30, attitude: 70,
+            behavioralState: 'responsive',
+        })).toBe('/character-images/interactions-expanded/mira/oral/deep/nude__free__high_positive__intense.png');
     });
 });

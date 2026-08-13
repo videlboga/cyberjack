@@ -8,6 +8,7 @@ import { DEFAULT_CONFIG } from './config';
 import { advanceBaseline, dampTowardsBaseline } from './baselineUtils';
 import { OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
 import { arousalDirection } from '../domain/arousalDynamics';
+import { estimateCapacityLoss } from './capacityPacing';
 
 export function applyLearning(
     core: Partial<SubjectCoreState>,
@@ -114,19 +115,15 @@ export function applyLearning(
         f.localSensitivityFromIntensity + (result.overload || 0) * (f.localSensitivityFromOverload ?? 0.03);
 
     const isRest = safeAction.actionKey === 'wait';
-    let baseCapacityDrop = isRest ? 0 :
-        result.experiencedIntensity * (f.capacityLoadFromIntensity ?? 0.015) +
-        result.discomfort * (f.capacityLoadFromDiscomfort ?? 0.02) +
-        result.overload * (f.capacityDropMultiplier ?? 0.25);
-    // A well-received pleasant action is still tiring, but much less so than
-    // distress or overload at the same raw intensity.
-    const pleasantShare = (result.pleasure || 0) / Math.max(1, (result.pleasure || 0) + (result.discomfort || 0) + (result.overload || 0));
-    baseCapacityDrop *= 1 - clamp(pleasantShare, 0, 1) * 0.45;
-    if (isEdging) {
-        const edgeDistressFactor = result.pleasure > (result.discomfort || 0) * 1.35 ? 0.25
-            : result.discomfort > (result.pleasure || 0) * 1.35 ? 1 : 0.65;
-        baseCapacityDrop += (tension - 85) * (f.edgingCapacityDropRate ?? 0.08) * edgeDistressFactor * deltaTime;
-    }
+    const baseCapacityDrop = estimateCapacityLoss({
+        experiencedIntensity: result.experiencedIntensity,
+        pleasure: result.pleasure,
+        discomfort: result.discomfort,
+        overload: result.overload,
+        tension,
+        isRest,
+        deltaTime,
+    }, f);
     const capacityBaseline = safeCore.baselineCapacity ?? safeCore.capacity;
     const capacityRecovery = isRest ? Math.min(
         Math.max(0, capacityBaseline - safeCore.capacity),
@@ -135,7 +132,7 @@ export function applyLearning(
 
     const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
     const routineCapacityLossLimit = (result.overload || 0) >= OVERLOAD_NOTICEABLE ? 15 : 6;
-    const capacityLoss = Math.min(baseCapacityDrop * tensionModifier, routineCapacityLossLimit);
+    const capacityLoss = Math.min(baseCapacityDrop, routineCapacityLossLimit);
 
     const timeScale = safeAction.actionKey === 'wait' ? deltaTime : 1.0;
     const bodilyBalance = (result.pleasure || 0) - (result.discomfort || 0);
@@ -165,7 +162,11 @@ export function applyLearning(
     // High activation strengthens the *meaningful* (novel/engaging) part of
     // learning. It must not amplify the tiny familiarity floor, otherwise one
     // repeated pleasant action becomes an acceptance exploit near the edge.
-    const positiveLearningFactor = 0.03 + learnedQuality * 0.555 * emotionalEncoding;
+    // Persistent dispositions are a session-scale outcome. Immediate state
+    // remains vivid, but positive experiences now need sustained, varied
+    // exposure instead of pushing openness/attitude to their ceiling in a few
+    // high-intensity ticks.
+    const positiveLearningFactor = 0.01 + learnedQuality * 0.06 * emotionalEncoding;
     const negativeResponsiveness = 0.5 + responsiveness * 0.5;
     const opennessAffect = affect > 0
         ? affect * positiveLearningFactor * responsiveness
@@ -392,7 +393,7 @@ export function applyLearning(
     });
     nextPoint.baselineLocalOpenness = advanceBaseline(
         pointBaselineState.localOpenness,
-        nextPoint.localOpenness,
+        nextPoint.localOpenness ?? pointBaselineState.localOpenness,
         pointDriver,
         { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
     );

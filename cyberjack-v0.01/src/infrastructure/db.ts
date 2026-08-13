@@ -308,6 +308,35 @@ db.exec(`
   
   CREATE INDEX IF NOT EXISTS idx_memory_subject ON memory_embeddings(subject_id, created_at DESC);
 
+  CREATE TABLE IF NOT EXISTS subjective_memory_episodes (
+    subject_id TEXT NOT NULL,
+    source_key TEXT NOT NULL,
+    source_atom_ids TEXT NOT NULL,
+    summary_json TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'ready',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(subject_id, source_key)
+  );
+  CREATE INDEX IF NOT EXISTS idx_subjective_episode_subject ON subjective_memory_episodes(subject_id, updated_at DESC);
+  CREATE TABLE IF NOT EXISTS memory_association_effects (
+    subject_id TEXT NOT NULL, source_key TEXT NOT NULL, tag TEXT NOT NULL,
+    weight REAL NOT NULL, expectation TEXT NOT NULL, PRIMARY KEY(subject_id, source_key, tag)
+  );
+  CREATE INDEX IF NOT EXISTS idx_memory_association_subject_tag ON memory_association_effects(subject_id, tag);
+  CREATE TABLE IF NOT EXISTS subjective_associations (
+    subject_id TEXT NOT NULL, source_key TEXT NOT NULL, target_type TEXT NOT NULL,
+    target_key TEXT NOT NULL, target_label TEXT NOT NULL, tag_links TEXT NOT NULL DEFAULT '[]',
+    valence REAL NOT NULL, strength REAL NOT NULL, expectation TEXT NOT NULL,
+    PRIMARY KEY(subject_id, source_key, target_type, target_key)
+  );
+  CREATE INDEX IF NOT EXISTS idx_subjective_association_target ON subjective_associations(subject_id, target_type, target_key);
+  CREATE TABLE IF NOT EXISTS subjective_memory_revisions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, subject_id TEXT NOT NULL, source_key TEXT NOT NULL,
+    target_label TEXT NOT NULL, intervention TEXT NOT NULL, operation TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE TABLE IF NOT EXISTS chat_memory_summary (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id TEXT NOT NULL,
@@ -546,6 +575,11 @@ db.prepare(`UPDATE point_presets SET label = 'Грудь' WHERE id = 'chest'`).r
 db.prepare(`DELETE FROM active_contexts WHERE point_id = 'groin'`).run();
 db.prepare(`DELETE FROM subject_point_states WHERE point_id = 'groin'`).run();
 db.prepare(`DELETE FROM point_presets WHERE id = 'groin'`).run();
+// Knees are not a selectable anatomy target.  Poses can still describe
+// kneeling through their scene-level global_pose context.
+db.prepare(`DELETE FROM active_contexts WHERE point_id = 'knees'`).run();
+db.prepare(`DELETE FROM subject_point_states WHERE point_id = 'knees'`).run();
+db.prepare(`DELETE FROM point_presets WHERE id = 'knees'`).run();
 
 // Older builds treated naturally sensitive anatomy (85+) as hyperesthesia.
 // Preserve only contexts whose sensitivity is genuinely elevated above baseline.
@@ -594,8 +628,100 @@ safeAddColumn('chat_memory', 'portrait_emotion', 'TEXT');
 safeAddColumn('chat_memory', 'portrait_emotion_source', 'TEXT');
 safeAddColumn('chat_memory', 'portrait_emotion_confidence', 'REAL');
 safeAddColumn('chat_memory', 'world_minute', 'INTEGER');
+// A chat line can be delivered into more than one participant's transcript.
+// Keep its actual author and a shared identity with the line itself.
+safeAddColumn('chat_memory', 'speaker_id', 'TEXT');
+safeAddColumn('chat_memory', 'message_id', 'TEXT');
+safeAddColumn('chat_memory', 'origin_chat_id', 'INTEGER');
+
+// Repair social turns created before chat delivery was participant-owned.
+// The source of truth remains pending_social_turns; this only fills the
+// recipient's ordinary chat transcript with the same authored message.
+db.exec(`
+  UPDATE chat_memory
+  SET speaker_id = (
+        SELECT speaker_id FROM pending_social_turns turn
+        WHERE turn.status = 'applied'
+          AND turn.speaker_id = chat_memory.subject_id
+          AND turn.speech = chat_memory.content
+        ORDER BY turn.created_world_minute DESC
+        LIMIT 1
+      ),
+      message_id = (
+        SELECT id FROM pending_social_turns turn
+        WHERE turn.status = 'applied'
+          AND turn.speaker_id = chat_memory.subject_id
+          AND turn.speech = chat_memory.content
+        ORDER BY turn.created_world_minute DESC
+        LIMIT 1
+      )
+  WHERE context_label = 'Социальная транзакция'
+    AND message_id IS NULL
+    AND EXISTS (
+      SELECT 1 FROM pending_social_turns turn
+      WHERE turn.status = 'applied'
+        AND turn.speaker_id = chat_memory.subject_id
+        AND turn.speech = chat_memory.content
+    );
+
+  UPDATE chat_memory
+  SET origin_chat_id = id
+  WHERE context_label = 'Социальная транзакция'
+    AND origin_chat_id IS NULL
+    AND subject_id = speaker_id;
+
+  INSERT INTO chat_memory (
+    subject_id, role, content, context_label, portrait_emotion, created_at,
+    world_minute, speaker_id, message_id, origin_chat_id
+  )
+  SELECT
+    turn.recipient_id, 'assistant', turn.speech, 'Социальная транзакция',
+    source.portrait_emotion, source.created_at, source.world_minute,
+    turn.speaker_id, turn.id, source.origin_chat_id
+  FROM pending_social_turns turn
+  JOIN chat_memory source ON source.message_id = turn.id
+    AND source.subject_id = turn.speaker_id
+  WHERE turn.status = 'applied'
+    AND turn.speech IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM chat_memory delivered
+      WHERE delivered.subject_id = turn.recipient_id
+        AND delivered.message_id = turn.id
+    );
+
+  UPDATE chat_memory
+  SET origin_chat_id = (
+    SELECT source.origin_chat_id
+    FROM chat_memory source
+    WHERE source.context_label = 'Социальная транзакция'
+      AND source.message_id = chat_memory.message_id
+      AND source.subject_id = source.speaker_id
+      AND source.origin_chat_id IS NOT NULL
+    LIMIT 1
+  )
+  WHERE context_label = 'Социальная транзакция'
+    AND origin_chat_id IS NULL
+    AND EXISTS (
+      SELECT 1
+      FROM chat_memory source
+      WHERE source.context_label = 'Социальная транзакция'
+        AND source.message_id = chat_memory.message_id
+        AND source.subject_id = source.speaker_id
+        AND source.origin_chat_id IS NOT NULL
+    );
+`);
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS subject_edge_states (
+    subject_id TEXT PRIMARY KEY,
+    entered_at_minute INTEGER NOT NULL,
+    cycles INTEGER NOT NULL DEFAULT 0,
+    valence TEXT NOT NULL DEFAULT 'mixed',
+    source_action_id TEXT,
+    source_point_id TEXT,
+    last_expression_minute INTEGER,
+    updated_at_minute INTEGER NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS interaction_stances (
     subject_id TEXT NOT NULL,
     actor_id TEXT NOT NULL,
@@ -714,4 +840,10 @@ try {
   db.exec(`ALTER TABLE active_contexts ADD COLUMN initiator_id TEXT`);
 } catch (e) {
   // Ignore if column already exists
+}
+
+try {
+  db.exec(`ALTER TABLE subject_edge_states ADD COLUMN last_expression_minute INTEGER`);
+} catch (e) {
+  // New installations receive it from CREATE TABLE; existing saves migrate here.
 }

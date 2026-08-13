@@ -328,6 +328,13 @@ export const characterRelationRepo = {
 };
 
 export const subjectRepo = {
+    updatePreferences(id: string, updater: (preferences: any) => any) {
+        const row = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(id) as { preferences?: string } | undefined;
+        if (!row) return;
+        let preferences: any = {};
+        try { preferences = JSON.parse(row.preferences || '{}'); } catch { /* use empty */ }
+        db.prepare('UPDATE subjects SET preferences = ? WHERE id = ?').run(JSON.stringify(updater(preferences)), id);
+    },
     save(id: string, name: string, state: SubjectCoreState) {
         const baselineSensitivity = state.baselineSensitivity ?? state.sensitivity;
         const baselineCapacity = state.baselineCapacity ?? state.capacity;
@@ -442,6 +449,32 @@ export const subjectRepo = {
             availablePoints: points
         };
     }
+};
+
+export const subjectEdgeStateRepo = {
+    get(subjectId: string) {
+        const row = db.prepare('SELECT * FROM subject_edge_states WHERE subject_id = ?').get(subjectId) as any;
+        return row ? {
+            enteredAtMinute: Number(row.entered_at_minute), cycles: Number(row.cycles || 0),
+            valence: row.valence as 'positive' | 'negative' | 'mixed',
+            sourceActionId: row.source_action_id || undefined, sourcePointId: row.source_point_id || undefined,
+            lastExpressionMinute: row.last_expression_minute == null ? undefined : Number(row.last_expression_minute),
+        } : null;
+    },
+    update(subjectId: string, state: { enteredAtMinute:number; cycles:number; valence:'positive'|'negative'|'mixed'; sourceActionId?:string; sourcePointId?:string }, worldMinute: number) {
+        db.prepare(`INSERT INTO subject_edge_states (subject_id, entered_at_minute, cycles, valence, source_action_id, source_point_id, updated_at_minute)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(subject_id) DO UPDATE SET entered_at_minute=excluded.entered_at_minute, cycles=excluded.cycles, valence=excluded.valence, source_action_id=excluded.source_action_id, source_point_id=excluded.source_point_id, updated_at_minute=excluded.updated_at_minute`)
+            .run(subjectId, state.enteredAtMinute, state.cycles, state.valence, state.sourceActionId || null, state.sourcePointId || null, worldMinute);
+    },
+    listActive() {
+        return (db.prepare('SELECT subject_id FROM subject_edge_states').all() as Array<{subject_id:string}>)
+            .map(row => ({ subjectId: row.subject_id, state: subjectEdgeStateRepo.get(row.subject_id)! }));
+    },
+    markExpression(subjectId: string, worldMinute: number) {
+        db.prepare('UPDATE subject_edge_states SET last_expression_minute = ? WHERE subject_id = ?').run(worldMinute, subjectId);
+    },
+    clear(subjectId: string) { db.prepare('DELETE FROM subject_edge_states WHERE subject_id = ?').run(subjectId); },
 };
 
 export const subjectPreferencesRepo = {
@@ -928,18 +961,31 @@ export const sceneCharacterRepo = {
 };
 
 export const chatMemoryRepo = {
-    append(subjectId: string, role: 'user' | 'assistant', content: string, contextLabel?: string, portraitEmotion?: string): number | null {
+    append(subjectId: string, role: 'user' | 'assistant', content: string, contextLabel?: string, portraitEmotion?: string, speakerId?: string, messageId?: string, originChatId?: number): number | null {
         if (!content || !subjectId) return null;
         const worldMinute = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes);
-        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content, context_label, portrait_emotion, world_minute) VALUES (?, ?, ?, ?, ?, ?)');
-        const info = stmt.run(subjectId, role, content, contextLabel || null, portraitEmotion || null, Number.isFinite(worldMinute) ? worldMinute : null);
+        const stmt = db.prepare('INSERT INTO chat_memory (subject_id, role, content, context_label, portrait_emotion, world_minute, speaker_id, message_id, origin_chat_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const info = stmt.run(subjectId, role, content, contextLabel || null, portraitEmotion || null, Number.isFinite(worldMinute) ? worldMinute : null, speakerId || null, messageId || null, originChatId || null);
         return Number(info.lastInsertRowid) || null;
     },
-    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }> {
+    getRecent(subjectId: string, limit = 10): Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null; speakerId?: string; speakerName?: string; messageId?: string; originChatId?: number }> {
         const stmt = db.prepare(
-            'SELECT id, role, content, context_label AS contextLabel, portrait_emotion AS portraitEmotion, portrait_emotion_source AS portraitEmotionSource, portrait_emotion_confidence AS portraitEmotionConfidence, created_at AS createdAt, world_minute AS worldMinute FROM chat_memory WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
+            `SELECT cm.id, cm.role, cm.content, cm.context_label AS contextLabel,
+                    cm.portrait_emotion AS portraitEmotion,
+                    cm.portrait_emotion_source AS portraitEmotionSource,
+                    cm.portrait_emotion_confidence AS portraitEmotionConfidence,
+                    cm.created_at AS createdAt, cm.world_minute AS worldMinute,
+                    cm.speaker_id AS speakerId, c.name AS speakerName,
+                    cm.message_id AS messageId, cm.origin_chat_id AS originChatId
+             FROM chat_memory cm
+             LEFT JOIN characters c
+               ON c.id = COALESCE(cm.speaker_id, cm.subject_id)
+               OR c.subject_id = COALESCE(cm.speaker_id, cm.subject_id)
+             WHERE cm.subject_id = ?
+             ORDER BY cm.id DESC
+             LIMIT ?`
         );
-        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }>;
+        const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null; speakerId?: string; speakerName?: string; messageId?: string; originChatId?: number }>;
         return rows.reverse();
     },
     /**
@@ -987,6 +1033,74 @@ export const chatMemoryRepo = {
     },
     clear(subjectId: string) {
         db.prepare('DELETE FROM chat_memory WHERE subject_id = ?').run(subjectId);
+    }
+};
+
+export const subjectiveEpisodeRepo = {
+    get(subjectId: string, sourceKey: string): Record<string, any> | null {
+        const row = db.prepare('SELECT summary_json FROM subjective_memory_episodes WHERE subject_id = ? AND source_key = ?').get(subjectId, sourceKey) as any;
+        if (!row) return null;
+        try { return JSON.parse(row.summary_json); } catch { return null; }
+    },
+    save(subjectId: string, sourceKey: string, sourceAtomIds: number[], summary: Record<string, any>) {
+        db.prepare(`INSERT INTO subjective_memory_episodes (subject_id, source_key, source_atom_ids, summary_json, status, updated_at)
+            VALUES (?, ?, ?, ?, 'ready', CURRENT_TIMESTAMP)
+            ON CONFLICT(subject_id, source_key) DO UPDATE SET source_atom_ids=excluded.source_atom_ids, summary_json=excluded.summary_json, status='ready', updated_at=CURRENT_TIMESTAMP`)
+            .run(subjectId, sourceKey, JSON.stringify(sourceAtomIds), JSON.stringify(summary));
+    },
+    clearAll() {
+        db.prepare('DELETE FROM subjective_memory_episodes').run();
+        db.prepare('DELETE FROM subjective_associations').run();
+        db.prepare('DELETE FROM memory_association_effects').run();
+    }
+};
+
+export const memoryAssociationRepo = {
+    replaceSource(subjectId: string, sourceKey: string, effects: Array<{ tag: string; weight: number; expectation: string }>) {
+        const remove = db.prepare('DELETE FROM memory_association_effects WHERE subject_id = ? AND source_key = ?');
+        const insert = db.prepare('INSERT INTO memory_association_effects (subject_id, source_key, tag, weight, expectation) VALUES (?, ?, ?, ?, ?)');
+        const transaction = db.transaction(() => {
+            remove.run(subjectId, sourceKey);
+            for (const effect of effects) insert.run(subjectId, sourceKey, effect.tag, effect.weight, effect.expectation);
+        });
+        transaction();
+    },
+    scoreTags(subjectId: string, tags: string[]) {
+        if (!tags.length) return 0;
+        const rows = db.prepare(`SELECT weight FROM memory_association_effects WHERE subject_id = ? AND tag IN (${tags.map(() => '?').join(',')})`).all(subjectId, ...tags) as Array<{weight:number}>;
+        return Math.max(-1.5, Math.min(1.5, rows.reduce((sum, row) => sum + Number(row.weight || 0), 0)));
+    }
+};
+
+export const subjectiveAssociationRepo = {
+    replaceSource(subjectId: string, sourceKey: string, associations: Array<{ type:string; key:string; label:string; tagLinks:string[]; valence:number; strength:number; expectation:string }>) {
+        const remove = db.prepare('DELETE FROM subjective_associations WHERE subject_id=? AND source_key=?');
+        const insert = db.prepare('INSERT INTO subjective_associations (subject_id,source_key,target_type,target_key,target_label,tag_links,valence,strength,expectation) VALUES (?,?,?,?,?,?,?,?,?)');
+        db.transaction(() => { remove.run(subjectId, sourceKey); for (const item of associations) insert.run(subjectId, sourceKey, item.type, item.key, item.label, JSON.stringify(item.tagLinks), item.valence, item.strength, item.expectation); })();
+    },
+    scoreAction(subjectId: string, targetId: string, tags: string[]) {
+        const rows = db.prepare('SELECT target_type,target_key,tag_links,valence,strength,expectation FROM subjective_associations WHERE subject_id=?').all(subjectId) as any[];
+        return Math.max(-1.8, Math.min(1.8, rows.reduce((sum, row) => {
+            let links:string[]=[]; try { links=JSON.parse(row.tag_links || '[]'); } catch { }
+            const active = (row.target_type === 'person' && row.target_key === targetId) || links.some(tag => tags.includes(tag));
+            if (!active) return sum;
+            const direction = row.expectation === 'avoid' || row.expectation === 'freeze' ? -1 : 1;
+            return sum + direction * Number(row.valence) * Number(row.strength);
+        }, 0)));
+    },
+    activeForPrompt(subjectId: string, targetId: string, tags: string[]) {
+        const rows = db.prepare('SELECT target_type,target_key,target_label,tag_links,valence,strength,expectation FROM subjective_associations WHERE subject_id=? ORDER BY strength DESC LIMIT 80').all(subjectId) as any[];
+        return rows.filter(row => { let links:string[]=[]; try { links=JSON.parse(row.tag_links || '[]'); } catch { } return (row.target_type === 'person' && row.target_key === targetId) || links.some(tag => tags.includes(tag)); }).slice(0,3);
+    },
+    intervene(subjectId:string, sourceKey:string, targetLabel:string, operation:string, intensity:number) {
+        const rows = db.prepare('SELECT target_type,target_key,valence,strength FROM subjective_associations WHERE subject_id=? AND source_key=? AND lower(target_label)=lower(?)').all(subjectId, sourceKey, targetLabel) as any[];
+        for (const row of rows) {
+            const delta = Math.max(.02, Math.min(.22, intensity * .22));
+            const valence = operation === 'anxiety' ? Math.max(-1, Number(row.valence) - delta) : operation === 'reframe' ? Number(row.valence) * (1 - delta) : Math.max(-1, Math.min(1, Number(row.valence) + Math.sign(Number(row.valence) || 1) * delta));
+            const strength = operation === 'reframe' ? Math.max(0, Number(row.strength) - delta) : Math.min(1, Number(row.strength) + delta);
+            db.prepare('UPDATE subjective_associations SET valence=?, strength=? WHERE subject_id=? AND source_key=? AND target_type=? AND target_key=?').run(valence, strength, subjectId, sourceKey, row.target_type, row.target_key);
+        }
+        return rows.length;
     }
 };
 
@@ -1170,16 +1284,18 @@ export const memoryRepo = {
             .slice(0, limit)
             .filter(entry => entry.score > 0);
     },
-    listRecent(subjectId: string, limit = 5, type?: string): Array<{ text: string; type: string; metadata: Record<string, any>; relatedSubjects: string[] }> {
+    listRecent(subjectId: string, limit = 5, type?: string): Array<{ id: number; text: string; type: string; tags: string[]; metadata: Record<string, any>; relatedSubjects: string[] }> {
         const rows = type
-            ? db.prepare('SELECT text, type, metadata, related_subjects FROM memory_embeddings WHERE subject_id = ? AND type = ? ORDER BY id DESC LIMIT ?').all(subjectId, type, limit)
-            : db.prepare('SELECT text, type, metadata, related_subjects FROM memory_embeddings WHERE subject_id = ? ORDER BY id DESC LIMIT ?').all(subjectId, limit);
-        return (rows as Array<{ text: string; type: string; metadata: string; related_subjects: string }>).map(row => {
+            ? db.prepare('SELECT id, text, type, tags, metadata, related_subjects FROM memory_embeddings WHERE subject_id = ? AND type = ? ORDER BY id DESC LIMIT ?').all(subjectId, type, limit)
+            : db.prepare('SELECT id, text, type, tags, metadata, related_subjects FROM memory_embeddings WHERE subject_id = ? ORDER BY id DESC LIMIT ?').all(subjectId, limit);
+        return (rows as Array<{ id: number; text: string; type: string; tags: string; metadata: string; related_subjects: string }>).map(row => {
             let metadata: Record<string, any> = {};
             let relatedSubjects: string[] = [];
+            let tags: string[] = [];
             try { metadata = JSON.parse(row.metadata || '{}'); } catch { }
             try { relatedSubjects = JSON.parse(row.related_subjects || '[]'); } catch { }
-            return { text: row.text, type: row.type, metadata, relatedSubjects };
+            try { tags = JSON.parse(row.tags || '[]'); } catch { }
+            return { id: row.id, text: row.text, type: row.type, tags, metadata, relatedSubjects };
         });
     },
     deleteEpisodesForScene(subjectId: string, sceneId: string) {

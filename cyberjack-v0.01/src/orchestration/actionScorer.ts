@@ -3,9 +3,12 @@ import {
     pointStateRepo, 
     characterRelationRepo, 
     sceneRepo, 
-    presetRepo 
+    presetRepo,
+    memoryAssociationRepo,
+    subjectiveAssociationRepo
 } from '../infrastructure/repositories';
 import { isActionTargetAllowed } from '../domain/actionTargets';
+import { canPerformPartnerPointAction, partnerPointAffinity } from '../domain/intimatePartnerMechanics';
 
 interface PreferenceData {
     points?: Record<string, number>;
@@ -57,12 +60,14 @@ export class ActionScorer {
             const state = pointStateRepo.get(targetId, pid);
             if (state) pointStates[pid] = state;
         }
+        const actorPointIds = pointStateRepo.getAllForSubject(actorId).map(point => point.pointId);
 
         for (const actionId of scene.availableActions) {
             const preset = presetRepo.getActionPreset(actionId);
             if (!preset) continue;
+            if (!canPerformPartnerPointAction(actorPointIds, actionId, preset.tags || [])) continue;
 
-            const actionPrefBonus = (preferences.actions?.[actionId] || 0) * 10;
+            const actionPrefBonus = (preferences.actions?.[actionId] || 0) * 4;
             
             // Если действие имеет определенные тэги, мы можем их проверить
             let contextBonus = 0;
@@ -71,12 +76,17 @@ export class ActionScorer {
                     // Older saves accidentally looked for semantic tags in the
                     // context-id bucket. Keep that fallback while using the
                     // dedicated learned tag bucket going forward.
-                    contextBonus += ((preferences.tags?.[tag] ?? preferences.contexts?.[tag]) || 0) * 5;
+                    contextBonus += ((preferences.tags?.[tag] ?? preferences.contexts?.[tag]) || 0) * 3;
                 }
+                // Subjective episode memories are a separate, bounded signal:
+                // they colour anticipation, but do not overwrite learned traits.
+                contextBonus += memoryAssociationRepo.scoreTags(actorId, preset.tags) * 3;
+                contextBonus += subjectiveAssociationRepo.scoreAction(actorId, targetId, preset.tags) * 3;
             }
 
             for (const pointId of targetPointIds) {
                 if (!isActionTargetAllowed(preset.validTargets, pointId)) continue;
+                if (!canPerformPartnerPointAction(actorPointIds, actionId, preset.tags || [], pointId)) continue;
                 const pState = pointStates[pointId];
                 if (!pState) continue;
 
@@ -85,7 +95,8 @@ export class ActionScorer {
                 const attitudeDiff = relation.attitude - 50;
                 
                 // 2. Предпочтения актора к точке
-                const pointPrefBonus = (preferences.points?.[pointId] || 0) * 15;
+                const pointPrefBonus = (preferences.points?.[pointId] || 0) * 6
+                    + partnerPointAffinity(actor.preferences, targetId, pointId) * 10;
 
                 // 3. Барьер интимности цели
                 const pointOpenness = pState.localOpenness ?? 50;

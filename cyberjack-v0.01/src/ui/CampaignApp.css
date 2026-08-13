@@ -317,9 +317,15 @@
   color:var(--ji-lcd);
   font-size: 34px;
 }
-/* World pause freezes every CSS-driven game effect at its current frame. */
-html.game-time-paused *,
-html.game-time-paused *::before,
-html.game-time-paused *::after {
+
+/* A time pause freezes readings driven by world time, not UI transitions.
+   In particular, the monitor must finish its entrance animation so its
+   contents never get stranded at their transparent initial keyframe. */
+html.game-time-paused .calibration-workbench .scope-trace-live,
+html.game-time-paused .calibration-workbench .breathing-field > i,
+html.game-time-paused .calibration-workbench .breathing-field > em,
+html.game-time-paused .calibration-workbench .monitor-live-header span i,
+html.game-time-paused .calibration-workbench .active-process-visual *,
+html.game-time-paused .campaign-shell .sex-machine-rhythm.running .wave {
   animation-play-state: paused !important;
 }

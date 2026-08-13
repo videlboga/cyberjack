@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveActionButtonImage } from './actionButtonVisual';
+import { hasActionPointImage, resolveActionButtonImage } from './actionButtonVisual';
 import { peakActionImagePath } from '../ui/CalibrationPrototype';
 
 describe('resolveActionButtonImage', () => {
@@ -19,6 +19,13 @@ describe('resolveActionButtonImage', () => {
       .toMatch(/^\/character-images\/actions-by-point\/lips\/deep_kiss_(?:s\d+|alt\d+)\.png$/);
   });
 
+  it('uses the dedicated oral action illustrations for oral controls', () => {
+    expect(resolveActionButtonImage('act_start_oral_giving', 'intimate', 'lips', 'mira'))
+      .toBe('/character-images/actions-by-point/oral/blowjob.png');
+    expect(resolveActionButtonImage('act_deepen_oral', 'intimate', 'lips', 'mira'))
+      .toBe('/character-images/actions-by-point/oral/deep_blowjob.png');
+  });
+
   it('uses the old image for an uncovered point-action pair', () => {
     expect(resolveActionButtonImage('belt_strike', 'contact', 'back'))
       .toBe('/character-images/actions/contact/belt_strike.png');
@@ -32,5 +39,10 @@ describe('resolveActionButtonImage', () => {
   it('uses feather point artwork for breath where available', () => {
     expect(resolveActionButtonImage('breath_blow', 'contact', 'face'))
       .toContain('/character-images/actions-by-point/face/feather_stroke');
+  });
+
+  it('reports whether tickle has an authored image for the selected point', () => {
+    expect(hasActionPointImage('tickle', 'feet')).toBe(true);
+    expect(hasActionPointImage('tickle', 'neck')).toBe(false);
   });
 });

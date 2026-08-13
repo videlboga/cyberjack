@@ -10,6 +10,11 @@ export type CommandPresentation = {
   observerNow: string;
 };
 
+/**
+ * The engine commits a transition before speech is generated so the UI can
+ * update immediately. A model must therefore not turn that current state into
+ * an assertion that it existed before the command.
+ */
 type Input = {
   performed: boolean;
   executorId: string;

@@ -49,7 +49,7 @@ export function saveTickState(
     const experiencedIntensity = Number(output.result.experiencedIntensity || 0);
     const relationalScale = Math.max(.15, Math.min(1.5, experiencedIntensity / 10));
     const boundarySignal = boundary?.ignored ? -2.5 : boundary?.respected ? .5 : 0;
-    const relationalSignal = clamp(output.result.finalValence * relationalScale + boundarySignal, -4, 2) * persistenceScale;
+    const relationalSignal = clamp((output.result.finalValence * relationalScale + boundarySignal) * .25, -1, .5) * persistenceScale;
     const proposedRelationAttitude = clamp(relation.attitude + relationalSignal, 0, 100);
     const dampedRelationAttitude = dampTowardsBaseline(proposedRelationAttitude, relationBaseline, {
         dampingBase: relationCfg.dampingBase,
@@ -163,8 +163,11 @@ export function saveTickState(
         });
         const targetReward = signal.reward;
         const targetPlasticity = Math.max(0, Math.min(1, (output.nextCore?.plasticity ?? 50) / 100));
-        const catalystMultiplier = activeContextsRepo.getAllForSubject(subjectId).some(context => context.actionId === 'capsule_infusion_plasticity') ? 1.75 : 1;
-        const targetDelta = Math.sign(targetReward) * Math.min(1, Math.abs(targetReward)) * 0.5 * targetPlasticity * catalystMultiplier * persistenceScale;
+        const catalystMultiplier = activeContextsRepo.getAllForSubject(subjectId).some(context => context.actionId === 'capsule_infusion_plasticity') ? 1.35 : 1;
+        // Point/action preferences represent accumulated experience. A
+        // high-quality tick leaves a trace, but reaching an established trait
+        // takes a long, varied protocol rather than ten repetitions.
+        const targetDelta = Math.sign(targetReward) * Math.min(1, Math.abs(targetReward)) * 0.035 * targetPlasticity * catalystMultiplier * persistenceScale;
 
         if (presetId) subjectPreferencesRepo.adjust(subjectId, 'actions', presetId, targetDelta);
         if (pointId) subjectPreferencesRepo.adjust(subjectId, 'points', pointId, targetDelta);
@@ -256,7 +259,7 @@ export function saveTickState(
                 const actorReward = (empathyReward * 0.4) + (submissionReward * 0.3) + (dominantReward * 0.3) + 0.05;
                 
                 const actorPlasticity = (actorSubject.plasticity ?? 50) / 100;
-                const actorDelta = Math.sign(actorReward) * Math.min(1, Math.abs(actorReward)) * 0.5 * actorPlasticity;
+                const actorDelta = Math.sign(actorReward) * Math.min(1, Math.abs(actorReward)) * 0.035 * actorPlasticity;
                 
                 if (presetId) subjectPreferencesRepo.adjust(actorSubject.id!, 'actions', presetId, actorDelta);
                 if (pointId) subjectPreferencesRepo.adjust(actorSubject.id!, 'points', pointId, actorDelta);

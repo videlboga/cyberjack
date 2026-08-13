@@ -6,6 +6,8 @@ import {
     characterRepo,
     chatMemoryRepo,
     memoryRepo,
+    presetRepo,
+    subjectiveAssociationRepo,
     sceneCharacterRepo,
     sceneRepo
 } from '../infrastructure/repositories';
@@ -15,6 +17,9 @@ import { deriveAcquiredTraits, deriveCompulsionSignals } from '../domain/conditi
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { renderSocialMemories } from '../services/socialMemory';
 import { renderTemporalDialogue, TemporalDialogueEntry } from '../narrative/temporalDialogue';
+import { compactMemoryReaction } from '../services/memoryLayer';
+import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
+import { getSubjectiveEpisode, queueSubjectiveEpisode } from '../services/subjectiveMemoryEpisodes';
 
 function parseEvent(event: EventRecord) {
     let action: any = {};
@@ -181,24 +186,28 @@ export function renderEpisodeForCharacter(record: EpisodeRecord): string {
     const metadata = record.metadata || {};
     const parts: string[] = [];
     if (metadata.observed) {
-        const actor = metadata.actorName || 'кто-то';
+        const actor = metadata.actorId === 'PL-1' || metadata.actorName === 'PL-1' ? 'Калибратор' : metadata.actorName || 'кто-то';
         const target = metadata.targetName || 'другой персонаж';
         if (metadata.actionLabel) {
-            parts.push(`Ты помнишь наблюдаемое событие: действие «${metadata.actionLabel}» от ${actor} было направлено на ${target}${metadata.pointLabel ? ` в области «${metadata.pointLabel}»` : ''}.`);
+            parts.push(`Наблюдение: ${actor} выполнил «${metadata.actionLabel}» для ${target}${metadata.pointLabel ? ` в области «${metadata.pointLabel}»` : ''}.`);
         }
-        return parts.join(' ') || `Ты помнишь наблюдаемое событие: ${record.text}`;
+        return parts.join(' ') || `Наблюдение: ${record.text.slice(0, 280)}`;
     }
-    if (metadata.actionLabel) {
-        parts.push(`Ты помнишь воздействие «${metadata.actionLabel}»${metadata.pointId ? ` в области «${metadata.pointId}»` : ''}.`);
+    const actionDescription = String(metadata.observation?.action?.description || '').trim();
+    if (actionDescription) {
+        parts.push(actionDescription);
+    } else if (metadata.actionLabel) {
+        parts.push(`Калибратор выполнил действие «${metadata.actionLabel}»${metadata.pointLabel ? ` в области «${metadata.pointLabel}»` : ''}.`);
     }
-    const facts = metadata.objectiveFacts;
-    if (facts?.location) parts.push(`Ты помнишь это место: ${facts.location}.`);
-    if (facts?.environment) parts.push(`Тогда вокруг тебя было так: ${facts.environment}`);
-    const observation = metadata.observation;
-    if (observation) parts.push(`Ты помнишь общий смысл своей телесной реакции: ${describeObservationSignal(observation)}`);
-    if (metadata.playerSpeech) parts.push(`Собеседник сказал тебе: «${metadata.playerSpeech}».`);
-    if (metadata.characterSpeech) parts.push(`Твои собственные слова тогда прозвучали так: «${metadata.characterSpeech}».`);
-    return parts.join(' ') || `Ты помнишь этот эпизод так: ${record.text}`;
+    const reaction = String(metadata.memoryReaction || compactMemoryReaction(metadata.observation));
+    if (reaction) parts.push(reaction);
+    const quote = (value: unknown) => {
+        const text = String(value || '').replace(/\s+/g, ' ').trim();
+        return text.length > 180 ? `${text.slice(0, 179).trimEnd()}…` : text;
+    };
+    if (metadata.playerSpeech) parts.push(`Калибратор сказал: «${quote(metadata.playerSpeech)}».`);
+    if (metadata.characterSpeech) parts.push(`Ты ответила: «${quote(metadata.characterSpeech)}».`);
+    return parts.join(' ') || record.text.slice(0, 360);
 }
 
 export function ownCharacterFact(value: string): string {
@@ -242,9 +251,13 @@ export function selectGeneralPromptEpisodes(records: EpisodeRecord[], addresseeI
         ? records.filter(record => (record.relatedSubjects || []).includes(addresseeId) && !record.metadata?.socialTransaction)
         : [];
     const selected: EpisodeRecord[] = [];
+    const observedActionIds = new Set<string>();
     for (const record of [...directPlayer, ...observed, ...withAddressee, ...records]) {
+        const observedActionId = record.metadata?.observed ? String(record.metadata?.actionId || record.metadata?.actionLabel || '') : '';
+        if (observedActionId && observedActionIds.has(observedActionId)) continue;
         if (!selected.some(existing => existing.text === record.text)) selected.push(record);
-        if (selected.length === 5) break;
+        if (observedActionId) observedActionIds.add(observedActionId);
+        if (selected.length === 3) break;
     }
     return selected;
 }
@@ -262,7 +275,7 @@ export async function buildPromptPayload(
     activeContextNames: string[],
     latestResult?: TickOutput,
     eventId = 'scene_lab_calibrator',
-    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string; addresseeContextFacts?: string[]; compulsionCueTags?: string[] }
+    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string; addresseeContextFacts?: string[]; compulsionCueTags?: string[]; compulsionCuePointIds?: string[]; edgeHoldMinutes?: number }
 ): Promise<PromptPayload & { systemPrompt: string }> {
     const suppressed = new Set(options?.suppressTickIds || []);
     const recentEvents = recentEventsIn.filter(event => {
@@ -287,8 +300,8 @@ export async function buildPromptPayload(
     const scenePresence = sceneCharacterRepo.list(eventId).find(entry => entry.character.id === ownerCharacter?.id || entry.character.subjectId === ownerId);
     const effectiveRole = scenePresence?.role || 'participant';
     const locationFact = spatial
-        ? `Прямо сейчас ты находишься здесь: ${spatial.locationTitle}. ${spatial.description}`
-        : `Прямо сейчас ты находишься здесь: ${scene?.title || eventId}. ${scene?.description || ''}`.trim();
+        ? `Прямо сейчас ты находишься здесь: ${spatial.locationTitle}.`
+        : `Прямо сейчас ты находишься здесь: ${scene?.title || eventId}.`;
     const roleContext = (() => {
         let facts: string[];
         if (effectiveRole === 'asset') facts = [
@@ -346,6 +359,9 @@ export async function buildPromptPayload(
     const compulsionSignals = deriveCompulsionSignals(actorDetails.core.preferences, [
         ...(options?.compulsionCueTags || []),
         ...((latestResult?.tickMeta?.inputs?.action?.tags || []) as string[]),
+    ], [
+        ...(options?.compulsionCuePointIds || []),
+        ...(latestResult?.tickMeta?.inputs?.point?.pointId ? [latestResult.tickMeta.inputs.point.pointId] : []),
     ]);
     const compulsionLines = compulsionSignals.map(signal => signal.level >= 3
         ? `Сейчас релевантный стимул запускает навязчивую компульсию «${signal.label}»: мысли снова возвращаются к импульсу ${signal.impulse}. Этот импульс конкурирует с твоими прежними намерениями и должен заметно влиять на то, что ты пытаешься сказать или сделать.`
@@ -364,8 +380,11 @@ export async function buildPromptPayload(
     if (!presentCharacters.includes(initiatorName)) presentCharacters.push(initiatorName);
 
     let observation;
-    if (latestResult?.observation) {
-        observation = latestResult.observation;
+    // runGameTick attaches the finalized observation onto engineOutput at
+    // runtime (it is not part of the TickOutput type), so access it via any.
+    const latestObservation = (latestResult as any)?.observation;
+    if (latestObservation) {
+        observation = latestObservation;
     } else if (latestResult?.tickMeta?.inputs?.action) {
         observation = buildInteractionObservation({
             subjectId: targetId,
@@ -378,6 +397,7 @@ export async function buildPromptPayload(
     }
     const currentActionId = latestResult?.tickMeta?.inputs?.action.actionKey;
     const currentPointId = latestResult?.tickMeta?.inputs?.point.pointId;
+    const currentActionTags = currentActionId ? presetRepo.getActionPreset(currentActionId)?.tags || [] : [];
     const relation = characterRelationRepo.get(ownerId, initiatorId);
     const recentDialogue = selectRecentDialogue(
         chatMemoryRepo.getRecent(ownerId, 20),
@@ -395,7 +415,15 @@ export async function buildPromptPayload(
     const recentSpeechAct = recentSpeechActs[0];
     const socialMemory = renderSocialMemories(ownerId, initiatorId);
     const episodeRecords = selectGeneralPromptEpisodes(allEpisodeRecords, addresseeId);
-    const relevantEpisodes = episodeRecords.map(renderEpisodeForCharacter);
+    const subjectiveEpisodes = aggregateMemoryEpisodes(memoryRepo.listRecent(ownerId, 160, 'episode_v2'), 8)
+        .flatMap(episode => {
+            queueSubjectiveEpisode(ownerId, ownerName, episode);
+            const memory = getSubjectiveEpisode(ownerId, episode);
+            return memory ? [`Личное воспоминание: ${memory.summary}${memory.appraisal ? ` Оценка: ${memory.appraisal}` : ''}`] : [];
+        });
+    const activeAssociations = subjectiveAssociationRepo.activeForPrompt(ownerId, addresseeId, currentActionTags)
+        .map((association: any) => `У тебя откликается связь «${association.target_label}»: ожидание ${association.expectation}, сила ${Math.round(Number(association.strength) * 100)}%.`);
+    const relevantEpisodes = [...activeAssociations, ...subjectiveEpisodes.slice(0, 2), ...episodeRecords.map(renderEpisodeForCharacter)].slice(0, 3);
     const repetitionFromLogs = countRepetitions(recentEvents, currentActionId, currentPointId);
     const exposureBeforeTick = Number(latestResult?.tickMeta?.inputs?.point.exposureCount ?? 0);
     const frame = compileReactionFrame({
@@ -412,6 +440,7 @@ export async function buildPromptPayload(
         roleContext,
         core: actorDetails.core,
         relation,
+        edgeHoldMinutes: options?.edgeHoldMinutes,
         observation,
         actionLabel: latestResult?.tickMeta?.inputs?.action.label,
         pointLabel: currentPointId,

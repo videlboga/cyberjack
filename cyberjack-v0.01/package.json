@@ -17,6 +17,10 @@
     "audio:integrate-emotions": "node scripts/integrate-selected-emotion-audio.mjs",
     "benchmark:chat-models": "node scripts/benchmark-chat-models.mjs",
     "test:semantic-parser": "tsx scripts/test-semantic-parser.ts",
+    "typecheck": "npm run typecheck:runtime",
+    "typecheck:runtime": "tsc --noEmit -p tsconfig.runtime.json",
+    "typecheck:speech": "tsc --noEmit -p tsconfig.speech.json",
+    "typecheck:all": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -33,9 +37,16 @@
     "ws": "^8.20.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.2.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.0.0",
     "supertest": "^6.3.3",
+    "typescript": "^5.9.3",
     "vite": "^4.0.0",
     "vitest": "^1.0.0"
   }

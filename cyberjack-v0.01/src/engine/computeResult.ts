@@ -1,6 +1,6 @@
 // src/engine/computeResult.ts
 
-import { CompiledAction, SubjectCoreState, SubjectPointState, EngineConfig, TickResult, TickMeta } from '../domain/types';
+import { CompiledAction, SubjectCoreState, SubjectPointState, EngineConfig, TickResult, TickMeta, CharacterRelation } from '../domain/types';
 import { validateConfig } from './validate';
 import { normalizeAction, normalizeCore, normalizePoint } from './normalize';
 import { clamp, softMechanicalScale } from './utils';
@@ -11,7 +11,8 @@ export function computeResult(
     action: Partial<CompiledAction>,
     core: Partial<SubjectCoreState>,
     point: Partial<SubjectPointState>,
-    config: EngineConfig = DEFAULT_CONFIG
+    config: EngineConfig = DEFAULT_CONFIG,
+    relationship?: Pick<CharacterRelation, 'attitude' | 'openness' | 'plasticity' | 'familiarityLevel'>,
 ): { result: TickResult; tickMeta: TickMeta } {
     validateConfig(config);
     const safeAction = normalizeAction(action, config);
@@ -26,6 +27,10 @@ export function computeResult(
         safeCore.sensitivity / HUMAN_CORE_NORMS.sensitivity * f.effectiveSensitivity.globalWeight +
         safePoint.localSensitivity / humanPointSensitivityNorm(safePoint.pointId) * f.effectiveSensitivity.localWeight;
     const isVerbalAction = safeAction.actionKey === 'verbal_pressure' || safeAction.tags.includes('mental');
+    const isIntimateAction = !isVerbalAction && (
+        safeAction.tags.some(tag => ['sexual', 'intimate', 'penetration', 'oral'].includes(tag)) ||
+        ['vulva', 'vagina', 'clitoris', 'penis', 'testicles', 'prostate', 'anus'].includes(safePoint.pointId)
+    );
     const sensoryAmplification = isVerbalAction ? 1 : physicalSensoryAmplification;
 
     const effectiveAttitude = clamp(
@@ -36,6 +41,15 @@ export function computeResult(
 
     const attitudeShift = (effectiveAttitude - 50) / 50;
     const attitudePower = Math.sign(attitudeShift) * Math.pow(Math.abs(attitudeShift), f.attitude.shiftPow);
+    // A character can be generally open yet feel differently about intimate
+    // contact with a particular person. Keep this influence scoped to intimate
+    // actions and modest enough that bodily state and the selected point remain
+    // decisive.
+    const relationAttitude = Number(relationship?.attitude ?? safeCore.attitude);
+    const relationOpenness = Number(relationship?.openness ?? safeCore.openness);
+    const relationAttitudeShift = isIntimateAction ? clamp((relationAttitude - 50) / 50, -1, 1) : 0;
+    const relationOpennessShift = isIntimateAction ? clamp((relationOpenness - 50) / 50, -1, 1) : 0;
+    const intimateRelationBias = relationAttitudeShift * 0.28 + relationOpennessShift * 0.12;
 
     // Speech has psychological force, but it is not amplified by skin/body
     // sensitivity and must never become a fictitious physical overload. A
@@ -50,7 +64,7 @@ export function computeResult(
         0, 100);
 
     const finalValence = clamp(
-        safeAction.valence + attitudePower * f.attitude.shiftMultiplier,
+        safeAction.valence + attitudePower * f.attitude.shiftMultiplier + intimateRelationBias,
         -1,
         1
     );
@@ -85,7 +99,8 @@ export function computeResult(
     const comfortThreshold = clamp(
         (physicalCfg.comfortBase ?? 15) +
         safeCore.capacity * (physicalCfg.capacityComfortFactor ?? 0.25) +
-        effectiveAttitude * (physicalCfg.attitudeComfortFactor ?? 0.05),
+        effectiveAttitude * (physicalCfg.attitudeComfortFactor ?? 0.05) +
+        relationAttitudeShift * (isIntimateAction ? 3 : 0),
         0,
         100
     );
@@ -104,7 +119,8 @@ export function computeResult(
         discomfort * f.engagement.discomfortFactor -
         overload * f.engagement.overloadFactor +
         safeCore.openness * f.engagement.opennessFactor +
-        attitudeShift * f.engagement.attitudeFactor,
+        attitudeShift * f.engagement.attitudeFactor +
+        relationAttitudeShift * 6 + relationOpennessShift * 4,
         0,
         100
     );

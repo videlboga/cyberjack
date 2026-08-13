@@ -146,7 +146,7 @@ function buildProfile(
         identity: identityFrom(character, canonical)
     });
     const narrative = context.narrative || { identityParagraphs: [], historyParagraphs: [], activationParagraphs: [] };
-    const archConfig = activeConfig.character.archetypes?.[archetype] || {};
+    const archConfig = (activeConfig.character.archetypes as Record<string, { identity?: string; history?: string; formatInstructions?: string }> | undefined)?.[archetype] || {};
     const archetypeBlock = [archConfig.identity, archConfig.history].filter(Boolean).join(' ');
     const sections = composePromptSections(context, {
         identity: activeConfig.character.identity,

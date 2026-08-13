@@ -31,7 +31,6 @@ export const HUMAN_POINT_SENSITIVITY_NORMS: Record<string, number> = {
     hands: 70,
     inner_thighs: 85,
     legs: 25,
-    knees: 20,
     feet: 75,
     buttocks: 50,
     anus: 100,

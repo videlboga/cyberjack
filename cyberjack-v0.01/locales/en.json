@@ -89,6 +89,7 @@
       "diagnosticTable": "Diagnostic Table",
       "recoveryCapsule": "Recovery Capsule",
       "sexMachine": "Sex Machine Module",
+      "mentalCorrectionChair": "Mental Correction Chair",
       "roomDescriptions": {
         "room_calibration": "Isolated room for manual interventions and protocol execution.",
         "room_cell_a": "Closed cell with a bed, sanitary module, and sleep control.",

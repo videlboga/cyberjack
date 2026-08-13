@@ -891,7 +891,6 @@
       "occupiesPoints": [
         "systemic",
         "global_pose",
-        "knees",
         "hands"
       ]
     },
@@ -1266,7 +1265,6 @@
         "inner_thighs",
         "left_leg",
         "right_leg",
-        "knees",
         "buttocks",
         "anus",
         "vulva",
@@ -1479,7 +1477,8 @@
     ],
     "type": "physical",
     "removeContexts": [
-      "eq_clothe_panties"
+      "eq_clothe_panties",
+      "eq_clothe_underwear"
     ]
   },
   {
@@ -1667,7 +1666,7 @@
   {
     "id": "finger_insertion",
     "name": "Начать стимуляцию пальцами",
-    "description": "Начать продолжительный внутренний контакт пальцами.",
+    "description": "Пальцы входят во влагалище или анус и начинают двигаться внутри.",
     "categories": ["physical", "intimate", "context"],
     "tags": ["intimate", "penetration", "continuous", "manual"],
     "removeContexts": ["act_start_penetration", "act_increase_friction"],
@@ -1683,7 +1682,7 @@
   {
     "id": "act_start_penetration",
     "name": "Начать проникновение",
-    "description": "Начать продолжительный проникающий сексуальный контакт.",
+    "description": "Пенис входит во влагалище или анус; начинается проникающий секс.",
     "categories": ["physical", "intimate", "context"],
     "tags": ["intimate", "penetration", "continuous", "sexual"],
     "removeContexts": ["finger_insertion", "act_increase_friction"],
@@ -1699,7 +1698,7 @@
   {
     "id": "act_increase_friction",
     "name": "Ускорить фрикции",
-    "description": "Перевести продолжающийся сексуальный контакт в быстрый темп.",
+    "description": "Ускорить толчки во время вагинального или анального секса.",
     "categories": ["physical", "intimate", "context"],
     "tags": ["intimate", "continuous", "intense", "pace"],
     "validTargets": ["vagina", "anus"],
@@ -1712,9 +1711,40 @@
     }
   },
   {
+    "id": "act_start_oral_giving",
+    "name": "Вставить в рот",
+    "description": "Пенис входит в рот; начинается минет.",
+    "categories": ["physical", "intimate", "context"],
+    "tags": ["intimate", "sexual", "oral", "continuous", "giving"],
+    "removeContexts": ["finger_insertion", "act_start_penetration", "act_increase_friction", "act_deepen_oral"],
+    "validTargets": ["lips"],
+    "vector": { "intensity": 4.5, "valence": 3.5, "sharpness": 0.8, "contact": 9, "novelty": 6.5, "powerBase": 30 },
+    "contextConfig": {
+      "type": "sexual_interaction",
+      "activeLabel": "Продолжительный оральный контакт",
+      "duration": -1,
+      "modifiers": { "intensity": 3.5, "valence": 3.5, "sharpness": 0.8, "contact": 9, "novelty": -1 }
+    }
+  },
+  {
+    "id": "act_deepen_oral",
+    "name": "Засунуть в горло",
+    "description": "Ввести пенис глубже в рот и усилить минет.",
+    "categories": ["physical", "intimate", "context"],
+    "tags": ["intimate", "sexual", "oral", "continuous", "giving", "intense"],
+    "validTargets": ["lips"],
+    "vector": { "intensity": 6.5, "valence": 4, "sharpness": 1.4, "contact": 10, "novelty": 2.5, "powerBase": 42 },
+    "contextConfig": {
+      "type": "interaction_level",
+      "activeLabel": "Глубокий оральный контакт",
+      "duration": -1,
+      "modifiers": { "intensity": 2, "valence": 0.5, "sharpness": 0.6, "contact": 0.5, "novelty": -0.8 }
+    }
+  },
+  {
     "id": "act_decrease_friction",
     "name": "Замедлить фрикции",
-    "description": "Вернуть продолжающийся сексуальный контакт к ровному темпу.",
+    "description": "Замедлить толчки во время вагинального или анального секса.",
     "categories": ["physical", "intimate"],
     "tags": ["intimate", "continuous", "pace"],
     "removeContexts": ["act_increase_friction"],
@@ -1724,7 +1754,7 @@
   {
     "id": "act_sexual_climax",
     "name": "Резко усилить",
-    "description": "Коротко усилить продолжающийся контакт, подталкивая актива к оргазму.",
+    "description": "Резко усилить толчки внутри, подталкивая тело к оргазму.",
     "categories": ["physical", "intimate"],
     "tags": ["intimate", "sexual", "climax", "intense"],
     "validTargets": ["vagina", "anus", "clitoris"],
@@ -1733,11 +1763,11 @@
   {
     "id": "act_end_sexual_contact",
     "name": "Завершить сексуальный контакт",
-    "description": "Прекратить фрикции и выйти из внутреннего контакта.",
+    "description": "Прекратить минет или секс: вывести пенис изо рта, влагалища либо ануса.",
     "categories": ["physical", "intimate"],
     "tags": ["intimate", "sexual", "stop"],
-    "removeContexts": ["finger_insertion", "act_start_penetration", "act_increase_friction"],
-    "validTargets": ["vagina", "anus"],
+    "removeContexts": ["finger_insertion", "act_start_penetration", "act_start_oral_giving", "act_increase_friction", "act_deepen_oral"],
+    "validTargets": ["vagina", "anus", "lips"],
     "vector": { "intensity": 2, "valence": 3, "sharpness": 0, "contact": 5, "novelty": 1, "powerBase": 10 }
   },
   {
@@ -1853,6 +1883,22 @@
       "promptEffect": "в груди, животе и паху держится фоновый жар; пульс и телесное возбуждение нарастают легче, даже если сознательное отношение к происходящему иное",
       "exclusiveWithinPoint": true, "occupiesPoints": ["capsule_medication"],
       "modifiers": { "contact": 1, "intensity": 1 }
+    }
+  },
+  {
+    "id": "context_mental_correction_chair",
+    "name": "Кресло ментальной коррекции",
+    "description": "Изолированная посадка в нейрокресло с визором и направленной сенсорной обратной связью.",
+    "categories": ["equipment", "mental", "context"],
+    "tags": ["equipment", "mental", "conditioning", "neural", "isolation"],
+    "validTargets": ["mind_state"],
+    "vector": { "intensity": 0, "valence": 0, "sharpness": 0, "contact": 0, "novelty": 0, "powerBase": 0 },
+    "contextConfig": {
+      "type": "environment",
+      "activeLabel": "Кресло ментальной коррекции",
+      "duration": -1,
+      "occupiesPoints": ["mental_correction_chair"],
+      "promptEffect": "ты сидишь глубоко в фиксирующем кресле; плотный визор закрывает глаза, в наушниках держится направленный звук, а подголовник и подлокотники дают ровную тактильную обратную связь"
     }
   },
   {

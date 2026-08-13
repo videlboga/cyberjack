@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import type { PortraitEmotion } from "../domain/portraitEmotion";
+import { resolveActionButtonImage } from "../domain/actionButtonVisual";
 import "./concepts/VisualEffectsCinematic.css";
 import "./concepts/VisualEffectsMontage.css";
 import "./concepts/VisualEffectsVibration.css";
@@ -49,7 +50,6 @@ const topCropActions = new Set([
 ]);
 const bottomCropActions = new Set([
   "back/hard_slap",
-  "knees/light_kiss",
   "feet/needle_prick",
 ]);
 const effectPortal = (effect: React.ReactNode) =>
@@ -71,7 +71,9 @@ export function GameActionEffect(props: {
   emotion?: PortraitEmotion;
   showPortrait?: boolean;
 }) {
-  const cropClass = topCropActions.has(props.actionKey)
+  const cropClass = /(?:^|\/)act_(?:start_oral_giving|deepen_oral)$/.test(props.actionKey)
+    ? "fx-action-cut--full-height"
+    : topCropActions.has(props.actionKey)
     ? "fx-action-cut--top-crop"
     : bottomCropActions.has(props.actionKey)
       ? "fx-action-cut--bottom-crop"
@@ -221,6 +223,8 @@ const sustainedKind = (actionId: string) =>
     ? "electric"
     : /vibrat|plug/.test(actionId)
       ? "vibration"
+      : /oral/.test(actionId)
+        ? "oral"
       : /pulse/.test(actionId)
         ? "pulse"
         : "friction";
@@ -238,14 +242,26 @@ export function GameSustainedEffect({
   minutes = 0,
   contained = false,
   compact = false,
+  characterSlug,
+  deepened = false,
 }: {
   actionId: string;
   label: string;
   minutes?: number;
   contained?: boolean;
   compact?: boolean;
+  characterSlug?: string;
+  deepened?: boolean;
 }) {
   const kind = sustainedKind(actionId);
+  const image = kind === "oral"
+    ? resolveActionButtonImage(
+        deepened ? "act_deepen_oral" : "act_start_oral_giving",
+        "intimate",
+        "lips",
+        characterSlug,
+      )
+    : sustainedImage[kind];
   const effect = (
     <div
       className={`game-effect-overlay fx-sustained fx-sustained--${kind} fx-sustained--steady${contained ? " fx-contained" : ""}${compact ? " fx-sustained--compact" : ""}`}
@@ -254,14 +270,14 @@ export function GameSustainedEffect({
       <div className="fx-process-window">
         <img
           className="fx-process-window__base"
-          src={sustainedImage[kind]}
+          src={image}
           alt=""
         />
         <div className="fx-process-window__motion">
-          <img src={sustainedImage[kind]} alt="" />
+          <img src={image} alt="" />
         </div>
         <div className="fx-process-window__motion fx-process-window__motion--echo">
-          <img src={sustainedImage[kind]} alt="" />
+          <img src={image} alt="" />
         </div>
         {kind === "electric" && (
           <svg

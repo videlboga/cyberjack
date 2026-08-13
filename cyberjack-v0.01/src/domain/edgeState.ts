@@ -14,6 +14,34 @@ export interface EdgeProfile {
     expectedOutcome: 'stable' | 'positive_discharge' | 'overload' | 'breakdown';
 }
 
+export type EdgeHoldState = {
+    enteredAtMinute: number;
+    cycles: number;
+    valence: 'positive' | 'negative' | 'mixed';
+    sourceActionId?: string;
+    sourcePointId?: string;
+};
+
+export function edgeHoldMinutes(state: EdgeHoldState | null | undefined, worldMinute: number): number {
+    return state ? Math.max(0, worldMinute - state.enteredAtMinute) : 0;
+}
+
+/** A subjective fact, intentionally independent from whatever caused it. */
+export function describeEdgeHold(state: EdgeHoldState | null | undefined, worldMinute: number): string | null {
+    const minutes = edgeHoldMinutes(state, worldMinute);
+    if (!state) return null;
+    const tone = state.valence === 'positive'
+        ? ['тянет к следующему подъёму', 'каждая новая волна кажется почти необходимой', 'тело заранее откликается на знакомое приближение']
+        : state.valence === 'negative'
+            ? ['ощущение не отпускает и раздражает', 'очередной подъём задевает уже накопившееся напряжение', 'тело устало от повторяющегося почти-достижения']
+            : ['тяга к следующей волне смешивается с усталостью', 'каждый подъём оставляет после себя неразрешённый след', 'тело одновременно ждёт и сопротивляется следующему приближению'];
+    if (minutes < 5) return `Ты только что оказалась у самой грани: тело ещё не успело привыкнуть к этой острой, почти разрешающейся волне.`;
+    if (minutes < 30) return `Ты уже ${minutes} мин. удерживаешься у самой грани: напряжение не рассеивается между подъёмами, и ${tone[0]}.`;
+    if (minutes < 120) return `Ты давно удерживаешься у самой грани: волны снова подводят тело к почти-разрядке и отступают, оставляя его чувствительным; ${tone[1]}.`;
+    if (minutes < 300) return `Долгое чередование подъёмов и отступлений изменило само ощущение времени: тело заранее отзывается на знакомое приближение, а ${tone[2]}.`;
+    return `Ты слишком долго живёшь в повторяющемся приближении к пику: тело устало, но остаётся обострённо чувствительным; новая волна касается уже накопившегося, неразрешённого напряжения.`;
+}
+
 const observationFrom = (entry: any): InteractionObservation | null | undefined =>
     entry?.resultPayload?.observation || entry?.observation || entry;
 

@@ -77,6 +77,7 @@ export interface GeneratedCharacterContext {
         actions?: Record<string, number>;
         points?: Record<string, number>;
         contexts?: Record<string, number>;
+        tags?: Record<string, number>;
     };
 }
 
@@ -117,6 +118,7 @@ export interface GeneratedProfileV2 {
         conditionalReactions?: Array<{ facts: string[]; response: string }>;
         attentionFocus?: Array<'technique' | 'person' | 'body' | 'risk' | 'rules' | 'change'>;
         speechDisposition?: 'quiet' | 'normal' | 'expressive';
+        emotionalVoice?: Record<string, unknown>;
     };
     knowledgeRefs: string[];
     mechanicalSeed: {

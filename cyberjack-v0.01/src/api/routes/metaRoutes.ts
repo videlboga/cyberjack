@@ -6,8 +6,6 @@ const router = Router();
 
 router.get('/actions', getActions);
 router.get('/config', getConfig);
-router.get('/actions', getActions);
-router.get('/diagnostics', getDiagnostics);
 router.get('/diagnostics', getDiagnostics);
 router.get('/logs/prompts', getPrompts);
 router.get('/logs/engine', getEngineLog);

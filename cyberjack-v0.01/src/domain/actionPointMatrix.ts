@@ -17,7 +17,6 @@ export const BODY_POINT_ORDER = [
     'hands',
     'inner_thighs',
     'legs',
-    'knees',
     'feet',
     'buttocks',
     'vulva',

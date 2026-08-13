@@ -23,8 +23,9 @@ import localeRoutes from './routes/localeRoutes';
 import { ensureActionSpecialization } from '../infrastructure/actionSpecialization';
 import { syncActionPresets } from '../infrastructure/syncActionPresets';
 import { migrateCharacterLifecycles } from '../scenario/characterLifecycle';
-import { setTimeFlowPaused, startTimeFlow } from '../scenario/timeFlow';
+import { startTimeFlow } from '../scenario/timeFlow';
 import { warmSemanticParser } from '../parser/semanticVerbalParser';
+import { startSubjectiveMemoryWorker } from '../workers/subjectiveMemoryWorker';
 
 // Seed contracts on startup
 try {
@@ -47,15 +48,6 @@ app.use((err: any, req: any, res: any, next: any) => {
         return res.status(400).json({ success: false, error: 'Invalid JSON in request body' });
     }
     next(err);
-});
-
-// Any state-changing game interaction resumes world time. The dedicated time
-// control is excluded because it must remain able to put the world on pause.
-app.use('/api', (req: any, _res: any, next: any) => {
-    if (req.method !== 'GET' && req.path !== '/scenario/time/flow') {
-        setTimeFlowPaused(false);
-    }
-    next();
 });
 
 app.use('/api', tickRoutes);
@@ -103,8 +95,11 @@ if (process.env.NODE_ENV !== 'test') {
     initWebSocket(server);
     server.listen(PORT, () => {
         console.log(`[Engine API + WS] Running on http://localhost:${PORT}`);
-        // Make HTTP available before background simulation and model warmup.
+        // Game time has one owner: the background clock. Starting its scheduler
+        // never resumes a paused world; `startTimeFlow` reads the persisted
+        // pause flag before every minute.
         startTimeFlow();
+        startSubjectiveMemoryWorker();
         void warmSemanticParser().catch(error => console.warn('[SemanticParser] warmup failed:', error?.message || error));
     });
 }

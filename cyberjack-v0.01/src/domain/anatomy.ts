@@ -34,7 +34,6 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
         
         { id: 'inner_thighs', label: 'Внутренняя сторона бедер', sens: 85, att: 10 },
         { id: 'legs', label: 'Ноги', sens: 25, att: 75, providesFunctions: ['walk'] },
-        { id: 'knees', label: 'Колени', sens: 20, att: 70, providesFunctions: ['kneel', 'stand', 'shift_posture'] },
         { id: 'feet', label: 'Ступни', sens: 75, att: 50, providesFunctions: ['stand'] },
         
         { id: 'buttocks', label: 'Ягодицы', sens: 50, att: 15 },

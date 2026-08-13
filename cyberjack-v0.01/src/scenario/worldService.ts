@@ -1416,12 +1416,15 @@ export function controlDeviceSession(
     // A stopped or paused machine does not create a bodily event.  Its
     // configuration is operator state, not something the occupant perceives.
     const machineWasOrIsRunning = current.status === 'running' || next.status === 'running';
-    if (machineWasOrIsRunning && hasPerceptibleDeviceChange(command, current, next)) {
-        const sensoryEvent = describeDeviceProtocolEvent(command, next, current);
+    // Only non-chair devices reach here (the mental chair returns above), and
+    // 'intervene' never reaches this block. Narrow for the protocol reporters.
+    const protocolCommand = command as 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop';
+    if (machineWasOrIsRunning && hasPerceptibleDeviceChange(protocolCommand, current, next)) {
+        const sensoryEvent = describeDeviceProtocolEvent(protocolCommand, next, current);
         // Technical sensory context remains available to the character but is
         // deliberately hidden from the dialogue feed by its marker.
         chatMemoryRepo.append(next.subjectId, 'user', `[Воздействие] ${sensoryEvent}`, row.name);
-        recordScenarioEvent('device_protocol', `Устройство: ${command}`, describeDeviceProtocolSummary(command), {
+        recordScenarioEvent('device_protocol', `Устройство: ${protocolCommand}`, describeDeviceProtocolSummary(protocolCommand), {
             subjectId: next.subjectId, assetId, command, configuration: next.configuration, intensity: next.intensity
         });
     }

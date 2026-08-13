@@ -24,6 +24,8 @@ type ObservableSceneAction = {
     notable?: boolean;
     background?: boolean;
     worldMinute?: number;
+    spokenText?: string;
+    outcomeText?: string;
 };
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
@@ -57,7 +59,7 @@ export function recordSceneObservation(action: ObservableSceneAction) {
     const actorName = actorCharacter?.name || subjectRepo.get(action.actorId)?.name || 'Калибратор';
     const targetName = subjectRepo.get(action.targetId)?.name || action.targetId;
     const actionTags = conditioningTags(action.actionId, action.actionTags || []);
-    const text = `Действие «${action.actionLabel}» от ${actorName} было направлено на ${targetName}${action.pointLabel ? ` в области «${action.pointLabel}»` : ''}.`;
+    const text = `Действие «${action.actionLabel}» от ${actorName} было направлено на ${targetName}${action.pointLabel ? ` в области «${action.pointLabel}»` : ''}${action.spokenText ? `: «${action.spokenText}»` : ''}.`;
 
     for (const observerId of new Set(spatial.subjectIds)) {
         if (!observerId || observerId === action.targetId || observerId === action.actorId) continue;
@@ -88,6 +90,8 @@ export function recordSceneObservation(action: ObservableSceneAction) {
                 actionLabel: action.actionLabel,
                 pointId: action.pointId || null,
                 pointLabel: action.pointLabel || null,
+                playerSpeech: action.spokenText || '',
+                observedOutcome: action.outcomeText || '',
             },
         });
 

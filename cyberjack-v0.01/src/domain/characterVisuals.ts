@@ -209,6 +209,13 @@ const calibrationAffect = (
     return 'neutral';
 };
 
+/** The mental-correction chair has a complete, separate avatar matrix. */
+export const resolveMentalChairAvatar = (descriptor: Pick<CharacterVisualDescriptorV4, 'characterSlug' | 'affect'>): string | null =>
+    resolveFirstAvailableVisual([
+        `/character-images/vr-chair/${descriptor.characterSlug}__vr_chair_ni__${descriptor.affect}.png`,
+        `/character-images/vr-chair/${descriptor.characterSlug}__vr_chair_ni__neutral.png`,
+    ]);
+
 const representedEquipmentContexts = (contexts: VisualContext[]) => contexts
     .map(context => context.actionId)
     .filter(actionId => [
@@ -376,6 +383,19 @@ export const INTERACTION_VISUAL_RULES: readonly InteractionVisualRule[] = [
             : ids.has('pose_standing') ? 'standing' : 'missionary',
         defaultIntensity: 0.65,
         modifiedIntensity: 0.9,
+    },
+    {
+        // The oral matrix is a full-scene asset family rather than a palette
+        // icon. Its target remains the character's lips; deepen switches to
+        // the dedicated `oral/deep` composition.
+        id: 'oral-giving',
+        startActionId: 'act_start_oral_giving',
+        modifierActionIds: ['act_deepen_oral'],
+        family: 'oral',
+        variant: ({ ids }) => ids.has('act_deepen_oral') ? 'deep' : 'kneeling',
+        defaultIntensity: 0.6,
+        modifiedIntensity: 0.9,
+        targetPoint: () => 'lips',
     },
     {
         id: 'held-exposure',

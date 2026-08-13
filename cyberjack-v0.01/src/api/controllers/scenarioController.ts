@@ -22,7 +22,7 @@ export const travel = (req: Request, res: Response) => {
 export const buy = (req: Request, res: Response) => {
     try {
         const playerId = String(req.body.playerId || 'PL-1');
-        const purchase = buyOffer(req.params.offerId, playerId);
+        const purchase = buyOffer(String(req.params.offerId), playerId);
         res.json({ success: true, purchase, scenario: getScenarioSnapshot(playerId) });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });
@@ -34,7 +34,7 @@ export const useEquipment = (req: Request, res: Response) => {
         const playerId = String(req.body.playerId || 'PL-1');
         const subjectId = String(req.body.subjectId || '');
         if (!subjectId) throw new Error('Не выбран персонаж');
-        const result = useLabAsset(req.params.assetId, subjectId, playerId);
+        const result = useLabAsset(String(req.params.assetId), subjectId, playerId);
         res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });
@@ -46,7 +46,7 @@ export const controlEquipment = async (req: Request, res: Response) => {
         const playerId = String(req.body.playerId || 'PL-1');
         const command = String(req.body.command || '') as 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop' | 'intervene';
         if (!['configure', 'settings', 'start', 'adjust', 'pause', 'resume', 'stop', 'intervene'].includes(command)) throw new Error('Неизвестная команда устройства');
-        const result = await controlDeviceSession(req.params.assetId, command, req.body, playerId);
+        const result = await controlDeviceSession(String(req.params.assetId), command, req.body, playerId);
         // The client refreshes its scenario state immediately after a device
         // command. Building another full snapshot here duplicates expensive
         // work and makes simple settings changes feel delayed.
@@ -88,7 +88,7 @@ export const recruit = (req: Request, res: Response) => {
     try {
         const playerId = String(req.body.playerId || 'PL-1');
         const role = req.body.role === 'asset' ? 'asset' : 'staff';
-        const result = recruitCandidate(req.params.characterId, role, playerId);
+        const result = recruitCandidate(String(req.params.characterId), role, playerId);
         res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });
@@ -99,7 +99,7 @@ export const changeRole = (req: Request, res: Response) => {
     try {
         const playerId = String(req.body.playerId || 'PL-1');
         const role = req.body.role === 'asset' ? 'asset' : 'staff';
-        const result = changeLaboratoryRole(req.params.characterId, role, playerId);
+        const result = changeLaboratoryRole(String(req.params.characterId), role, playerId);
         res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });

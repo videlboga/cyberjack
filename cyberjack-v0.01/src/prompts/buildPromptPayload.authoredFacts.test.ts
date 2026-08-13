@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveCurrentPostureFact, selectAuthoredFacts, selectGeneralPromptEpisodes } from './buildPromptPayload';
+import { renderEpisodeForCharacter, resolveCurrentPostureFact, selectAuthoredFacts, selectGeneralPromptEpisodes } from './buildPromptPayload';
 import { contextPromptEffect } from '../domain/contextNarration';
 
 const profile = {
@@ -54,6 +54,33 @@ describe('general prompt memories', () => {
       { text: 'Наблюдение за игроком', type: 'episode_v2', metadata: { observed: true }, relatedSubjects: ['PL-1', 'NPC-CAND-SUMI'] },
     ], 'NPC-CAND-SUMI');
     expect(selected.map(record => record.text)).toEqual(['Недавний разговор с игроком', 'Наблюдение за игроком', 'Новая реплика Суми']);
+  });
+
+  it('renders an episode as a concise lived fact without replaying its old environment', () => {
+    const rendered = renderEpisodeForCharacter({
+      text: 'Long legacy text with stale environment.',
+      type: 'episode_v2',
+      metadata: {
+        actionLabel: 'Щекотка пальцами',
+        pointLabel: 'Ступни',
+        memoryReaction: 'Мне это было неприятно.',
+        objectiveFacts: { environment: 'A very long obsolete description.' },
+      },
+    });
+    expect(rendered).toBe('Калибратор выполнил действие «Щекотка пальцами» в области «Ступни». Мне это было неприятно.');
+    expect(rendered).not.toContain('obsolete');
+  });
+
+  it('recovers the concrete authored action from a legacy episode record', () => {
+    const rendered = renderEpisodeForCharacter({
+      text: 'Действие: Подать биоматериал; зона: Губы. Объективные факты симуляции: …',
+      type: 'episode_v2',
+      metadata: {
+        actionLabel: 'Подать биоматериал',
+        observation: { action: { description: 'Интимный контур капсулы подаёт в рот персонажа порцию семенной жидкости калибратора.' } },
+      },
+    });
+    expect(rendered).toBe('Интимный контур капсулы подаёт в рот персонажа порцию семенной жидкости калибратора.');
   });
 });
 

@@ -63,6 +63,10 @@ export interface ReactionFrame {
         directlyExperienced: boolean;
         affectedCharacter: string;
         playerSpeech?: string;
+        commandOutcome?: {
+            status: 'performed' | 'not_performed';
+            actionLabel: string;
+        };
         sharedPastUnsupported?: boolean;
     };
     continuity: {
@@ -80,6 +84,30 @@ export interface ReactionFrame {
     };
     expressionMode: ExpressionMode;
     compulsions?: CompulsionSignal[];
+    edgeHoldMinutes?: number;
+}
+
+export type InternalImpulse = {
+    id: string;
+    primaryIntent: string;
+    secondaryConflict: string;
+    allowedSpeechActs: SpeechAct[];
+};
+
+/** An initiative changes motive, not the dialogue pipeline. */
+export function applyInternalImpulseToFrame(frame: ReactionFrame, impulse: InternalImpulse): ReactionFrame {
+    const allowed = impulse.allowedSpeechActs.length ? impulse.allowedSpeechActs : frame.dramaticPosition.allowedSpeechActs;
+    return {
+        ...frame,
+        event: { ...frame.event, requiresSpeech: true },
+        dramaticPosition: {
+            ...frame.dramaticPosition,
+            primaryIntent: impulse.primaryIntent,
+            secondaryConflict: impulse.secondaryConflict,
+            preferredSpeechAct: allowed[0] || frame.dramaticPosition.preferredSpeechAct,
+            allowedSpeechActs: allowed,
+        },
+    };
 }
 
 interface CompileFrameInput {
@@ -100,6 +128,7 @@ interface CompileFrameInput {
     actionLabel?: string;
     pointLabel?: string;
     repetition?: number;
+    edgeHoldMinutes?: number;
     profileText?: string;
     behavioralCore?: BehavioralCore;
     recentDialogue?: string[];
@@ -172,7 +201,7 @@ function hasContext(contexts: string[], pattern: RegExp): boolean {
     return contexts.some(context => pattern.test(context));
 }
 
-function physiologicalPosition(core: SubjectCoreState, observation?: InteractionObservation, contexts: string[] = []) {
+function physiologicalPosition(core: SubjectCoreState, observation?: InteractionObservation, contexts: string[] = [], edgeHoldMinutes = 0) {
     const transitionKinds = new Set((observation?.transitions || []).map(transition => transition.kind));
     if (transitionKinds.has('discharge')) return {
         state: 'Ты прямо сейчас проходишь через оргазм: пик уже прорвался через тело, и на сложную связную речь почти не остаётся контроля.',
@@ -204,9 +233,18 @@ function physiologicalPosition(core: SubjectCoreState, observation?: Interaction
     const reactionMagnitude = (observation?.reaction.pleasure ?? 0)
         + (observation?.reaction.discomfort ?? 0)
         + (observation?.reaction.overload ?? 0);
-    const edgeDescription = reactionMagnitude >= 2
+    const freshEdgeDescription = reactionMagnitude >= 2
         ? deriveEdgeProfile(core, observation ? [observation] : []).description
         : 'Ты чувствуешь, что накопленное напряжение близко к пределу, но пока не можешь ясно назвать его приятным или защитным.';
+    const edgeDescription = edgeHoldMinutes >= 300
+        ? 'Ты слишком долго удерживаешься у самой грани: усталость не гасит обострённую чувствительность, и очередной подъём касается уже накопившегося, неразрешённого напряжения.'
+        : edgeHoldMinutes >= 120
+            ? 'Долгое чередование подъёмов и отступлений изменило само ощущение времени: тело заранее отзывается на знакомое приближение к пику.'
+            : edgeHoldMinutes >= 30
+                ? 'Ты давно удерживаешься у самой грани: напряжение не успевает рассеяться между волнами, оставляя тело чувствительным и настороженным к следующему подъёму.'
+                : edgeHoldMinutes >= 5
+                    ? 'Напряжение уже удерживается у самой грани: оно остаётся в теле между подъёмами и не даёт полностью расслабиться.'
+                    : freshEdgeDescription;
     if (core.tension >= 95) return {
         state: `${edgeDescription} Ты почти не можешь выдержать ещё один подъём.`,
         mandatory: true,
@@ -232,7 +270,8 @@ function compileExpressionMode(
     core: SubjectCoreState,
     observation: InteractionObservation | undefined,
     physiology: ReturnType<typeof physiologicalPosition>,
-    contexts: string[] = []
+    contexts: string[] = [],
+    edgeHoldMinutes = 0,
 ): ExpressionMode {
     const pleasure = observation?.reaction.pleasure ?? 0;
     const discomfort = observation?.reaction.discomfort ?? 0;
@@ -265,7 +304,8 @@ function compileExpressionMode(
         : physiology.kind === 'discharge' || arousal === 'peak' || core.capacity <= 20 || overload >= OVERLOAD_FRAGMENTED_SPEECH || sensoryAmplification >= 5 ? 'fragmented'
         : arousal === 'edge' || arousal === 'high' || core.capacity <= 35 || overload >= OVERLOAD_NOTICEABLE || sensoryAmplification >= 3 ? 'strained' : 'intact';
 
-    const maxWords = control === 'minimal' ? 3 : control === 'fragmented' ? 7 : control === 'strained' ? 12 : 20;
+    const edgeSpeechLoad = arousal === 'edge' && edgeHoldMinutes >= 300 ? 5 : arousal === 'edge' && edgeHoldMinutes >= 120 ? 3 : arousal === 'edge' && edgeHoldMinutes >= 30 ? 2 : 0;
+    const maxWords = Math.max(3, (control === 'minimal' ? 3 : control === 'fragmented' ? 7 : control === 'strained' ? 12 : 20) - edgeSpeechLoad);
     const requiresDisruption = (['peak', 'aftershock'].includes(arousal) || sensoryAmplification >= 3) && control !== 'intact';
     const instructions: string[] = [];
 
@@ -305,6 +345,11 @@ function compileExpressionMode(
 
     if (requiresDisruption) {
         instructions.push('Ты не можешь произнести это как спокойное законченное высказывание: голос естественно срывается на паузу, обрыв или междометие.');
+    }
+    if (arousal === 'edge' && edgeHoldMinutes >= 30) {
+        instructions.push(edgeHoldMinutes >= 300
+            ? 'Длительное удержание делает невозможной полностью нейтральную речь: мысль снова цепляется за телесное напряжение, даже когда ты говоришь о другом.'
+            : 'Долгое удержание заметно окрашивает речь: незавершённое напряжение возвращается в паузах, выборе слов и попытках сменить тему.');
     }
 
     return { arousal, affect, control, maxWords, requiresDisruption, instructions };
@@ -532,7 +577,7 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
     // Observers may see another character's reaction, but must not inherit its
     // pleasure, distress or loss of speech control as their own expression.
     const ownObservation = directlyExperienced ? input.observation : undefined;
-    const physiology = physiologicalPosition(input.core, ownObservation, input.contexts);
+    const physiology = physiologicalPosition(input.core, ownObservation, input.contexts, input.edgeHoldMinutes);
     const allowedSpeechActs = behavioral.speechDisposition === 'quiet' && !physiology.mandatory
         ? ['silence', ...basePosition.allowedSpeechActs.filter(act => act !== 'silence')] as SpeechAct[]
         : basePosition.allowedSpeechActs;
@@ -557,7 +602,7 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
         ], 8) as SpeechAct[];
         if (!previousWasQuestion) position.preferredSpeechAct = 'request';
     }
-    const expressionMode = compileExpressionMode(input.core, ownObservation, physiology, input.contexts);
+    const expressionMode = compileExpressionMode(input.core, ownObservation, physiology, input.contexts, input.edgeHoldMinutes);
     const addresseeId = input.initiatorId || input.targetId;
     const addresseeName = input.initiatorName || input.targetName;
     return {
@@ -663,11 +708,14 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
     // This prompt produces the audible speech channel only. Physical
     // mannerisms belong to the visual reaction layer; listing them here makes
     // models imitate them as stage directions in otherwise spoken replies.
+    // Voice needs a few stable anchors, not the complete dossier on every
+    // turn.  A long profile delayed first-token time while duplicating facts
+    // already represented by the current reaction frame.
     const behavioralLines = [
-        ...core.values,
-        ...(core.needs || []),
-        ...core.vulnerabilities,
-        ...core.defenses,
+        ...core.values.slice(0, 1),
+        ...(core.needs || []).slice(0, 1),
+        ...core.vulnerabilities.slice(0, 1),
+        ...core.defenses.slice(0, 1),
     ];
     const grammaticalIdentity = frame.speaker.gender === 'female'
         ? `Ты женщина. Говоря о себе в прошедшем времени, используй только женские формы: «сказала», «поняла», «почувствовала», «сделала». Никогда не используй о себе мужские формы.`
@@ -686,6 +734,7 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
                         ? 'angry'
                         : frame.expressionMode.affect === 'positive' ? 'open' : 'guarded';
     const currentEmotionalVoice = core.emotionalVoice?.[emotionalVoiceKey];
+    const commandOutcome = frame.event.commandOutcome;
     const owned = (value: string, lead = 'Ты узнаёшь себя в этих словах') => /^(?:ты|тебе|тебя|твой|твоя|твоё|твои)\b/iu.test(value.trim())
         ? value.trim()
         : `${lead}: «${value.trim().replace(/[.!?]+$/u, '')}».`;
@@ -697,8 +746,11 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
         `[Твой характер]\n${behavioralLines.length ? behavioralLines.map(v => `- ${owned(v)}`).join('\n') : '- Ты реагируешь как самостоятельный живой человек.'}${core.centralConflict ? `\n- Тебя ведёт желание: ${core.centralConflict.desire}.\n- Тебя пугает: ${core.centralConflict.fear}.` : ''}`,
         `[Твоя манера речи]\n${core.voice.length ? core.voice.map(v => `- ${owned(v, 'Ты слышишь свою привычную манеру в этих словах')}`).join('\n') : '- Ты говоришь естественно и по-человечески.'}${currentEmotionalVoice ? `\n- Именно сейчас твой голос звучит так: ${currentEmotionalVoice}` : ''}`,
         frame.event.requiresSpeech
-            ? `Говори только своими словами. Твоя речевая реакция на текущий момент уже выбрана: произнеси хотя бы одно слово или естественный слышимый звук. Ты можешь уклониться, отказаться отвечать, сменить тему, ответить несовершенно или противоречиво, но не возвращай пустой ответ.`
-            : `Говори только своими словами. Ты решаешь, что действительно произнесёшь сейчас; можешь промолчать, сменить тему, ответить несовершенно или противоречиво.`,
+            ? `Говори только своими словами. Твоя речевая реакция на текущий момент уже выбрана: произнеси хотя бы одно слово или естественный слышимый звук. Ты можешь уклониться, отказаться отвечать, сменить тему или выражать смешанные чувства, но не возвращай пустой ответ и не отрицай факты текущего хода, зафиксированные в контексте.`
+            : `Говори только своими словами. Ты решаешь, что действительно произнесёшь сейчас; можешь промолчать, сменить тему или выражать смешанные чувства, но не отрицай факты текущего хода, зафиксированные в контексте.`,
+        commandOutcome
+            ? `[Авторитетный исход команды]\nКоманда «${commandOutcome.actionLabel}» ${commandOutcome.status === 'performed' ? 'уже выполняется в этом ходе' : 'не привела к новому действию'}. Это установленный фактический исход, а не версия собеседника. Твои слова могут выражать отношение, границу или напряжение, но не могут утверждать противоположный исход.`
+            : '',
         `[Форма ответа]\nВерни одну произнесённую реплику одним абзацем обычного текста. Без JSON, служебных полей, имени говорящего, ремарок и звёздочек. Не предваряй и не завершай реплику словами «сказала», «говорю», «отвечаю» или описанием голоса. Воплоти свою манеру речи в самих словах, но не объясняй её. Неверно: «Голос срывается на шёпот: — Я согласна». Верно: «Я... согласна». Ты переживаешь состояние изнутри, а не объясняешь себя как автор отчёта. Сигналы о состоянии ниже — не черновик реплики: не цитируй и не пересказывай их формулировки. Выбери собственные слова, вывод, просьбу, границу или вопрос, которые из них следуют. Профессиональная лексика появляется только там, где она естественна для твоей живой речи.`
     ].filter(Boolean).join('\n\n');
 }
@@ -728,10 +780,16 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
             ? `Ты замечаешь в себе: ${frame.event.changes.join('; ')}.`
             : `Ты видишь изменения у ${frame.event.affectedCharacter}, но не чувствуешь их своим телом: ${frame.event.changes.join('; ')}.`
         : '';
+    const sceneContexts = frame.scene.contexts.slice(0, 4);
+    const canonicalFacts = frame.continuity.canonicalFacts.slice(0, 3);
+    const relationshipBeliefs = frame.continuity.relationshipBeliefs.slice(0, 2);
+    const relevantEpisodes = frame.continuity.relevantEpisodes.slice(0, 2);
     return [
         `[То, что окружает тебя]\nТы находишься здесь: ${frame.scene.title || 'место тебе не вполне ясно'}. Рядом ты видишь: ${frame.scene.presentCharacters.join(', ') || 'никого'}.`,
-        frame.scene.contexts.length ? `[То, что ты ощущаешь или видишь в сцене]\n${frame.scene.contexts.map(value => `- ${value}`).join('\n')}` : '',
-        frame.scene.roleContext.length ? `[Что ты знаешь о своём положении]\n${frame.scene.roleContext.join('\n')}` : '',
+        sceneContexts.length ? `[То, что ты ощущаешь или видишь в сцене]\n${sceneContexts.map(value => `- ${value}`).join('\n')}` : '',
+        frame.event.commandOutcome
+            ? `[Исход команды в этом ходе]\n«${frame.event.commandOutcome.actionLabel}»: ${frame.event.commandOutcome.status === 'performed' ? 'выполняется' : 'не выполнено'}. Это уже определено системой; не описывай противоположный результат.`
+            : '',
         frame.addressee ? `[Твой собеседник]\nПеред тобой ${frame.addressee.name}. ${frame.addressee.relationship}` : '',
         currentSpeech ? `[Слова, обращённые к тебе]\n${frame.addressee?.name || 'Собеседник'} говорит тебе: «${currentSpeech}»` : '',
         eventPerspective,
@@ -742,14 +800,14 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
             ? `[Твой непосредственный внутренний импульс]\n${frame.dramaticPosition.primaryIntent}.${frame.dramaticPosition.secondaryConflict ? ` Одновременно: ${frame.dramaticPosition.secondaryConflict}.` : ''}`
             : '',
         changePerspective,
-        frame.continuity.canonicalFacts.length ? `[Факты о себе]\n${frame.continuity.canonicalFacts.map(v => `- ${v}`).join('\n')}` : '',
-        frame.continuity.relationshipBeliefs.length ? `[Память об отношениях]\n${frame.continuity.relationshipBeliefs.map(v => `- ${v}`).join('\n')}` : '',
+        canonicalFacts.length ? `[Факты о себе]\n${canonicalFacts.map(v => `- ${v}`).join('\n')}` : '',
+        relationshipBeliefs.length ? `[Память об отношениях]\n${relationshipBeliefs.map(v => `- ${v}`).join('\n')}` : '',
         frame.continuity.openThreads.length ? `[Незавершённое]\n${frame.continuity.openThreads.map(v => `- ${v}`).join('\n')}` : '',
-        visibleRecentDialogue.length || frame.continuity.relevantEpisodes.length
+        visibleRecentDialogue.length || relevantEpisodes.length
             ? `[Границы твоей памяти]\nТы помнишь недавние реплики только как произнесённые слова. Из них ты не узнаёшь новых фактов своей биографии или мира. Не считай случившимися прошлые события, действия третьих лиц или существование организаций, если об этом нет среди твоих собственных воспоминаний и знаний.`
             : '',
         visibleRecentDialogue.length ? `[Недавний разговор]\n${visibleRecentDialogue.join('\n')}` : '',
-        frame.continuity.relevantEpisodes.length ? `[Недавний опыт]\n${frame.continuity.relevantEpisodes.map(v => `- ${v}`).join('\n')}` : '',
+        relevantEpisodes.length ? `[Недавний опыт]\n${relevantEpisodes.map(v => `- ${v}`).join('\n')}` : '',
         `Что ты действительно произносишь сейчас? ${frame.event.requiresSpeech ? 'Пустой ответ здесь не означает твоё молчание: речевая реакция уже выбрана, поэтому дай ей слышимое содержание. ' : ''}Запиши только собственные слышимые слова. Не выдавай цитату собеседника за свои слова и не повторяй дословно собственную недавнюю реплику. Твои движения уже отображаются игрой и в ответе не описываются.`
     ].filter(Boolean).join('\n\n');
 }

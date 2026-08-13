@@ -27,6 +27,20 @@
   object-fit: cover !important;
 }
 
+/* Keep the normal effect window, but do not crop a portrait oral frame. */
+.game-effect-overlay .fx-action-cut--full-height > img {
+  object-fit: contain !important;
+  object-position: center bottom;
+}
+
+.game-effect-overlay.fx-sustained--oral .fx-process-window img {
+  object-fit: contain !important;
+  object-position: center bottom;
+}
+.game-effect-overlay.fx-sustained--oral .fx-process-window__motion {
+  display: none;
+}
+
 .fx-portrait-reaction-only .fx-face-cut {
   right: 4%;
   top: 12%;

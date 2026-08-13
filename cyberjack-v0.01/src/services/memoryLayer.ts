@@ -4,7 +4,7 @@ import { buildEmbedding } from './embeddingService';
 import { TickBundle, SubjectCoreState } from '../domain/types';
 import { rememberSocialExchange } from './socialMemory';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
-import { describeObservationSignal } from '../narrative/interactionObservation';
+import { InteractionObservation } from '../domain/types';
 
 interface RecordMemoryInput {
     subjectId: string;
@@ -17,13 +17,57 @@ interface RecordMemoryInput {
     addressedTo?: string;
 }
 
+const memoryQuote = (text: string, limit = 220) => {
+    const normalized = text.replace(/\s+/g, ' ').trim();
+    return normalized.length > limit ? `${normalized.slice(0, limit - 1).trimEnd()}…` : normalized;
+};
+
+/** A memory stores the lived fact, not a prose version of engine telemetry. */
+export function compactMemoryReaction(observation?: InteractionObservation | null): string {
+    if (!observation) return '';
+    const { pleasure = 0, discomfort = 0, overload = 0, mixed = false } = observation.reaction || {};
+    const state = {
+        responsive: '',
+        subspace: 'Мне было трудно удерживать внимание.',
+        overload: 'Ощущений оказалось слишком много.',
+        freeze: 'Я застыла и не смогла сразу ответить.',
+        panic: 'Я испугалась и попыталась отстраниться.',
+        defiance: 'Я сопротивлялась происходящему.',
+        unresponsive: 'У меня почти не осталось сил на осмысленную реакцию.',
+    }[observation.behavioralState || 'responsive'];
+    const feeling = mixed
+        ? 'Ощущение было одновременно приятным и неприятным.'
+        : pleasure > discomfort * 1.25 && pleasure > .5
+            ? 'Мне это было приятно.'
+            : discomfort > pleasure * 1.25 && discomfort > .5
+                ? 'Мне это было неприятно.'
+                : overload > 5 ? 'Это меня перегрузило.' : '';
+    return [feeling, state].filter(Boolean).join(' ');
+}
+
+export function buildCompactEpisodeText(input: {
+    actionLabel: string;
+    pointLabel?: string;
+    observation?: InteractionObservation | null;
+    userText?: string;
+    assistantText?: string;
+    isWait?: boolean;
+}): string {
+    const actionDescription = String((input.observation as any)?.action?.description || '').trim();
+    const parts = input.isWait
+        ? ['Прошло немного времени без нового действия.']
+        : [actionDescription || `Калибратор выполнил действие «${input.actionLabel}»${input.pointLabel ? ` в области «${input.pointLabel}»` : ''}.`];
+    const reaction = compactMemoryReaction(input.observation);
+    if (reaction) parts.push(reaction);
+    if (input.userText?.trim()) parts.push(`Калибратор сказал: «${memoryQuote(input.userText)}».`);
+    if (input.assistantText?.trim()) parts.push(`Я ответила: «${memoryQuote(input.assistantText)}».`);
+    return parts.join(' ');
+}
+
 export function recordMemoryEvent(input: RecordMemoryInput) {
     const actionLabel = input.bundle.compiledAction.label || 'Неизвестное действие';
     const observation = input.bundle.diagnostics?.observation;
     const pointLabel = observation?.action.pointLabel || observation?.action.pointId || input.bundle.event.pointId || 'не указана';
-    const parts = input.bundle.compiledAction.actionKey === 'wait'
-        ? ['Событие: прошла пауза без нового воздействия']
-        : [`Действие: ${actionLabel}; зона: ${pointLabel}`];
     const spatialContext = getLaboratorySpatialContext(
         input.subjectId,
         input.bundle.event.playerId || 'PL-1',
@@ -35,14 +79,14 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
         isolated: spatialContext.isolated,
         environment: spatialContext.description,
     } : null;
-    if (objectiveFacts) {
-        parts.push(`Объективные факты симуляции: место — ${objectiveFacts.location}. ${objectiveFacts.environment}`);
-    }
-    if (observation) parts.push(`Смысл телесной реакции: ${describeObservationSignal(observation)}`);
-    else if (input.reactionText) parts.push(`Наблюдаемая реакция: ${input.reactionText}`);
-    if (input.userText?.trim()) parts.push(`Высказывание собеседника (не объективный факт): «${input.userText.trim()}»`);
-    if (input.assistantText?.trim()) parts.push(`Моя реплика в тот момент (не объективный факт): «${input.assistantText.trim()}»`);
-    const text = parts.join('. ');
+    const text = buildCompactEpisodeText({
+        actionLabel,
+        pointLabel,
+        observation,
+        userText: input.userText,
+        assistantText: input.assistantText,
+        isWait: input.bundle.compiledAction.actionKey === 'wait',
+    });
     if (!text.trim()) return;
 
     memoryRepo.save({
@@ -57,11 +101,13 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
             sceneId: input.bundle.event.sceneId,
             actionLabel,
             pointId: observation?.action.pointId || input.bundle.event.pointId || null,
+            pointLabel,
             playerSpeech: input.userText || '',
             characterSpeech: input.assistantText || '',
             speechAct: input.speechAct || null,
             addressedTo: input.addressedTo || null,
             observation: observation || null,
+            memoryReaction: compactMemoryReaction(observation),
             objectiveFacts,
             infoTag: input.infoTag || null,
             timestamp: input.bundle.event.timestamp

@@ -21,7 +21,8 @@ const roots = [
   'character-images/intimacy',
   'character-images/calibration-v4',
   'character-images/calibration-interactions-v4',
-  'character-images/devices-v4'
+  'character-images/devices-v4',
+  'character-images/vr-chair'
 ];
 
 const excludedSegments = new Set(['rmbg_v1']);
@@ -61,7 +62,8 @@ const generated = {
     intimacy: countBelow('/character-images/intimacy/'),
     calibrationV4: countBelow('/character-images/calibration-v4/'),
     calibrationInteractionsV4: countBelow('/character-images/calibration-interactions-v4/'),
-    devicesV4: countBelow('/character-images/devices-v4/')
+    devicesV4: countBelow('/character-images/devices-v4/'),
+    vrChair: countBelow('/character-images/vr-chair/')
   },
   assets
 };

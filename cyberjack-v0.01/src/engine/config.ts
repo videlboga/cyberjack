@@ -147,20 +147,26 @@ export const DEFAULT_CONFIG: any =
       sensitivityTarget: 5, // legacy alias
       sensitivityRegenRate: 0.4,
       sensitivityRegenThreshold: 8,
-      capacityDropMultiplier: 0.2,
-      capacityLoadFromIntensity: 0.027,
-      capacityLoadFromDiscomfort: 0.025,
-      edgingCapacityDropRate: 0.08,
+      // Capacity is a session resource on a 0–100 scale. A sustained intense
+      // contact must visibly deplete it (roughly 2–3 points per turn), while
+      // a light contact still remains inexpensive. Discomfort and overload
+      // represent additional physiological strain rather than just flavour.
+      capacityDropMultiplier: 0.35,
+      capacityLoadFromIntensity: 0.03,
+      capacityLoadFromDiscomfort: 0.045,
+      // Enjoyment can ease the strain, but cannot erase the physical cost.
+      capacityPleasureReliefMax: 0.25,
+      edgingCapacityDropRate: 0.10,
       capacityRecoveryRate: 1.0,    // Regen per silent tick
       // Recovery uses sqrt(elapsed time), so both a short pause and a standard
       // 20-unit wait matter without making the latter an implicit discharge.
       tensionRecoveryBase: 10,
       tensionRecoveryOpennessDivisor: 8,
       tensionRecoveryMaxPerAction: 18,
-      opennessFromPleasureDiscomfort: 0.14,
-      plasticityFromLearning: 0.04,
-      plasticityFromOverload: 0.1,
-      attitudeFromPleasureDiscomfort: 0.12,
+      opennessFromPleasureDiscomfort: 0.05,
+      plasticityFromLearning: 0.008,
+      plasticityFromOverload: 0.06,
+      attitudeFromPleasureDiscomfort: 0.05,
       attitudeFromOverload: 0.08,
       localSensitivityFromIntensity: 0.08,
       localSensitivityFromLearning: 42,

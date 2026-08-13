@@ -20,6 +20,7 @@ export type CompulsionSignal = {
     level: number;
     pressure: number;
     cueTags: string[];
+    cuePointIds: string[];
     impulse: string;
     actionTags: string[];
 };
@@ -164,7 +165,10 @@ export function conditioningSignal(input: ConditioningSignalInput): Conditioning
     const learningQuality = 0.25 + 0.75 * Math.sqrt(learning * engagement);
     const rewardSignal = Math.tanh(reward / 15);
     const overloadConsequence = reward < 0 ? 1 + clamp01(overload / 50) * 0.35 : 1;
-    const generalizedDelta = rewardSignal * 0.35 * plasticity * learningQuality * overloadConsequence;
+    // Semantic traits are consolidated dispositions, not a per-pulse meter.
+    // Concrete experience may still be remembered immediately, while tags
+    // require a sustained pattern across a session.
+    const generalizedDelta = rewardSignal * 0.10 * plasticity * learningQuality * overloadConsequence;
 
     return {
         reward,
@@ -268,9 +272,9 @@ export function clothingConditioningTags(input: {
         // focus of an action, with foot tickling as the strongest pairing.
         add('sexual', 'eq_clothe_stockings', .3);
         if (input.pointId === 'feet') add('feet', 'eq_clothe_stockings', .7);
-        else if (['legs', 'knees', 'inner_thighs'].includes(input.pointId)) add('feet', 'eq_clothe_stockings', .4);
+        else if (['legs', 'inner_thighs'].includes(input.pointId)) add('feet', 'eq_clothe_stockings', .4);
         if (tags.has('tickling') && input.pointId === 'feet') add('tickling', 'eq_clothe_stockings', .9);
-        else if (tags.has('tickling') && ['legs', 'knees', 'inner_thighs'].includes(input.pointId)) {
+        else if (tags.has('tickling') && ['legs', 'inner_thighs'].includes(input.pointId)) {
             add('tickling', 'eq_clothe_stockings', .55);
         }
     }
@@ -303,6 +307,19 @@ const positiveMean = (tags: Record<string, number>, keys: string[]) => {
     return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 };
 
+const POINT_TRAIT_DEFINITIONS = [
+    { pointId: 'hands', label: 'Фиксация на прикосновениях к рукам', actionTags: [] },
+    { pointId: 'feet', label: 'Фетиш ступней', actionTags: ['feet'] },
+    { pointId: 'lips', label: 'Оральная фиксация', actionTags: ['oral'] },
+    { pointId: 'vulva', label: 'Фиксация на ощущениях вульвы', actionTags: ['sexual'] },
+    { pointId: 'vagina', label: 'Фиксация на вагинальной стимуляции', actionTags: ['sexual', 'penetration'] },
+    { pointId: 'clitoris', label: 'Фиксация на стимуляции клитора', actionTags: ['sexual'] },
+    { pointId: 'penis', label: 'Фиксация на стимуляции пениса', actionTags: ['sexual'] },
+    { pointId: 'testicles', label: 'Фиксация на ощущениях в области яичек', actionTags: ['sexual'] },
+    { pointId: 'prostate', label: 'Фиксация на стимуляции простаты', actionTags: ['sexual', 'penetration'] },
+    { pointId: 'anus', label: 'Анальная фиксация', actionTags: ['penetration'] },
+] as const;
+
 export function acquiredTraitLevel(strength: number): number {
     // Leave a little stability around authored starting values: a level-two
     // trait seeded at 3.5 should not disappear after one mildly bad episode.
@@ -310,7 +327,7 @@ export function acquiredTraitLevel(strength: number): number {
 }
 
 export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
-    const tags = parsePreferences(preferences).tags;
+    const { tags, points } = parsePreferences(preferences);
     const definitions = [
         { id: 'trait_masochist', label: 'Мазохизм', strength: tags.pain || 0 },
         { id: 'trait_knismolagnia', label: 'Книсмолагния', strength: tags.tickling || 0 },
@@ -322,6 +339,14 @@ export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
         { id: 'trait_technophile', label: 'Машинный фетиш', strength: tags.machine || 0 },
         { id: 'trait_sexual_dependency', label: 'Сексуальная зависимость', strength: tags.sexual || 0 },
         { id: 'trait_sensory_deprivation', label: 'Тяга к сенсорной изоляции', strength: tags.deprivation || 0 },
+        // Point preferences are learned independently from semantic tags. A
+        // trait remains tied to its exact zone, so a high value on one point
+        // cannot be diluted by unrelated anatomy or leak into every scene.
+        ...POINT_TRAIT_DEFINITIONS.map(definition => ({
+            id: `trait_point_${definition.pointId}`,
+            label: definition.label,
+            strength: points[definition.pointId] || 0,
+        })),
     ];
     return definitions.map(definition => ({
         ...definition,
@@ -334,6 +359,7 @@ const COMPULSION_DEFINITIONS: Array<{
     cueTags: string[];
     impulse: string;
     actionTags: string[];
+    cuePointIds?: string[];
 }> = [
     { traitId:'trait_masochist', cueTags:['pain'], impulse:'искать или не прерывать болезненное воздействие', actionTags:['pain'] },
     { traitId:'trait_knismolagnia', cueTags:['tickling'], impulse:'искать щекочущее ощущение и возвращаться к нему мыслями', actionTags:['tickling'] },
@@ -345,6 +371,13 @@ const COMPULSION_DEFINITIONS: Array<{
     { traitId:'trait_technophile', cueTags:['machine'], impulse:'не прерывать машинное воздействие', actionTags:['machine'] },
     { traitId:'trait_sexual_dependency', cueTags:['sexual','penetration','oral'], impulse:'сохранить или получить сексуальную стимуляцию', actionTags:['sexual','penetration','oral'] },
     { traitId:'trait_sensory_deprivation', cueTags:['deprivation'], impulse:'искать отстранение от внешних раздражителей', actionTags:['deprivation'] },
+    ...POINT_TRAIT_DEFINITIONS.map(definition => ({
+        traitId: `trait_point_${definition.pointId}`,
+        cueTags: [],
+        cuePointIds: [definition.pointId],
+        impulse: `вернуться к ощущениям в зоне «${definition.label.replace(/^Фиксация на |^Фетиш |^Анальная /, '').toLowerCase()}»`,
+        actionTags: [...definition.actionTags],
+    })),
 ];
 
 /**
@@ -352,22 +385,29 @@ const COMPULSION_DEFINITIONS: Array<{
  * only by a matching present cue; a trait is not a permanent instruction to
  * behave the same way in every scene.
  */
-export function deriveCompulsionSignals(preferences: unknown, cueTags: string[] = []): CompulsionSignal[] {
+export function deriveCompulsionSignals(
+    preferences: unknown,
+    cueTags: string[] = [],
+    cuePointIds: string[] = [],
+): CompulsionSignal[] {
     const cues = new Set(cueTags);
-    if (!cues.size) return [];
+    const points = new Set(cuePointIds.filter(pointId => pointId && pointId !== 'systemic'));
+    if (!cues.size && !points.size) return [];
     const traits = new Map(deriveAcquiredTraits(preferences).map(trait => [trait.id, trait]));
     const pressureForLevel = [0, .28, .58, .92];
     return COMPULSION_DEFINITIONS.flatMap(definition => {
         const trait = traits.get(definition.traitId);
         if (!trait || trait.level <= 0) return [];
         const matched = definition.cueTags.filter(tag => cues.has(tag));
-        if (!matched.length) return [];
+        const matchedPoints = (definition.cuePointIds || []).filter(pointId => points.has(pointId));
+        if (!matched.length && !matchedPoints.length) return [];
         return [{
             traitId:trait.id,
             label:trait.label,
             level:trait.level,
             pressure:pressureForLevel[trait.level] || 0,
             cueTags:matched,
+            cuePointIds:matchedPoints,
             impulse:definition.impulse,
             actionTags:definition.actionTags,
         }];

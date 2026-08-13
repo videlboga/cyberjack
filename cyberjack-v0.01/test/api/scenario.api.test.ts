@@ -35,7 +35,7 @@ describe('scenario campaign API', () => {
     const travel = await request(app).post('/api/scenario/travel').send({ locationId: 'scene_broker' });
     expect(travel.status).toBe(200);
     expect(travel.body.scenario.location.id).toBe('scene_broker');
-    expect(travel.body.scenario.clock.totalMinutes).toBeGreaterThan(initial.body.clock.totalMinutes);
+    expect(travel.body.scenario.clock.totalMinutes).toBe(initial.body.clock.totalMinutes);
   });
 
   it('orders portable items and laboratory modules through station supply', async () => {
@@ -72,40 +72,14 @@ describe('scenario campaign API', () => {
     expect(accepted.body.contract.deadlineTick).toBeGreaterThan(0);
   });
 
-  it('recovers a cell resident passively as world time advances', async () => {
+  it('does not permit a route to fast-forward the background game clock', async () => {
     subjectRepo.save('S-AV-01', 'Мира', {
       sensitivity: 80, capacity: 10, openness: 50, plasticity: 50, attitude: 50, tension: 90,
       baselineSensitivity: 50, baselineCapacity: 70, baselineOpenness: 50, baselinePlasticity: 50, baselineAttitude: 50
     });
     await request(app).get('/api/scenario');
     const result = await request(app).post('/api/scenario/time/pass').send({ minutes: 480 });
-    expect(result.status).toBe(200);
-    const recovered = subjectRepo.get('S-AV-01')!;
-    expect(recovered.capacity).toBe(34);
-    expect(recovered.baselineCapacity).toBe(70);
-    expect(recovered.tension).toBe(58);
-    expect(result.body.clock.totalMinutes).toBe(960);
-  });
-
-  it('keeps an asset in a recovery capsule and applies its effect with world time', async () => {
-    subjectRepo.save('S-AV-01', 'Мира', {
-      sensitivity: 50, capacity: 60, openness: 50, plasticity: 50, attitude: 50, tension: 60,
-      baselineSensitivity: 50, baselineCapacity: 60, baselineOpenness: 50, baselinePlasticity: 50, baselineAttitude: 50
-    });
-    await request(app).get('/api/scenario');
-    db.prepare(`INSERT INTO laboratory_assets (player_id, asset_id, name, description, state, metadata) VALUES ('PL-1', 'lab_recovery_capsule', 'Капсула', '', 'installed', '{}')`).run();
-
-    const placed = await request(app).post('/api/scenario/laboratory/lab_recovery_capsule/use').send({ subjectId: 'S-AV-01' });
-    expect(placed.status).toBe(200);
-    expect(placed.body.result.occupied).toBe(true);
-
-    await request(app).post('/api/scenario/time/pass').send({ minutes: 180 });
-    const recovered = subjectRepo.get('S-AV-01')!;
-    expect(recovered.capacity).toBe(84);
-    expect(recovered.baselineCapacity).toBeCloseTo(62.25);
-    expect(recovered.tension).toBe(24);
-
-    const extracted = await request(app).post('/api/scenario/laboratory/lab_recovery_capsule/use').send({ subjectId: 'S-AV-01' });
-    expect(extracted.body.result.occupied).toBe(false);
+    expect(result.status).toBe(409);
+    expect(subjectRepo.get('S-AV-01')!.capacity).toBe(10);
   });
 });

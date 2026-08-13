@@ -39,8 +39,9 @@ export function CalibrationBiometrics({
   overloadLabel,
   overloadActive,
 }: CalibrationBiometricsProps) {
+  const deltaPrecision = Math.abs(capacityDelta || 0) < .1 ? 2 : 1;
   const signedDelta = typeof capacityDelta === 'number'
-    ? `${capacityDelta > 0 ? '+' : ''}${capacityDelta.toFixed(1)} за действие`
+    ? `${capacityDelta > 0 ? '+' : ''}${capacityDelta.toFixed(deltaPrecision)} за действие`
     : 'без нового замера';
   return <div className="physiology-panel shared-calibration-biometrics">
     <section className={`activation-scale level-${activation >= 85 ? 'edge' : activation >= 70 ? 'high' : 'normal'}`}>

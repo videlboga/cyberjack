@@ -2,6 +2,7 @@ export type DeviceExperienceSession = {
   intensity?: number;
   rhythm?: string;
   targetMode?: string;
+  stimulationMode?: string;
 };
 
 function intensityBand(intensity: number) {
@@ -12,8 +13,30 @@ function intensityBand(intensity: number) {
   return 'предельной интенсивностью, почти не оставляющей передышки';
 }
 
+const directPressure = (intensity: number) => intensity <= 30 ? 'лёгким, но настойчивым давлением'
+  : intensity <= 50 ? 'ощутимым давлением, которое не даёт мышцам расслабиться'
+  : intensity <= 70 ? 'глубоким и требовательным давлением'
+  : intensity <= 85 ? 'сильным давлением, от которого тело невольно напрягается'
+  : 'предельным давлением почти без передышки';
+
 export function describeDeviceMotion(session: DeviceExperienceSession): string {
   const rhythm = session.rhythm || 'steady';
+  if (session.stimulationMode === 'tickling') {
+    const pattern = rhythm === 'pulse'
+      ? 'серии быстрых щекочущих касаний с различимыми паузами'
+      : rhythm === 'wave'
+        ? 'щекочущие касания, которые плавно учащаются и редеют'
+        : rhythm === 'random'
+          ? 'сбивчивые щекочущие касания с непредсказуемой сменой точек'
+          : 'ровные повторяющиеся щекочущие касания';
+    const intensity = Number(session.intensity || 0);
+    const pressure = intensity <= 30 ? 'едва касаясь кожи'
+      : intensity <= 50 ? 'настойчиво проходя по чувствительным местам'
+      : intensity <= 70 ? 'жёстко врезаясь щетинками в подошвы'
+      : intensity <= 85 ? 'безжалостно прочёсывая подошвы и пальцы'
+      : 'на пределе, не оставляя ногам ни секунды покоя';
+    return `${pattern}, ${pressure}`;
+  }
   const pattern = rhythm === 'pulse'
     ? 'серии коротких толчков с различимыми паузами'
     : rhythm === 'wave'
@@ -25,11 +48,14 @@ export function describeDeviceMotion(session: DeviceExperienceSession): string {
 }
 
 export function describeDeviceSensation(session: DeviceExperienceSession): string {
-  return `Механизм продолжает ${describeDeviceMotion(session)}. Давление, движение и трение идут по одной траектории, а след предыдущего движения остаётся до следующего.`;
+  if (session.stimulationMode === 'tickling') return `Ступни зажаты в держателях. Щётки работают по подошвам, под пальцами и вдоль сводов: ${describeDeviceMotion(session)}. Ноги дёргаются и пытаются уйти от щекотки, но фиксаторы не дают их отдёрнуть.`;
+  if (session.stimulationMode === 'anal') return `Поршень в анусе продолжает ${describeDeviceMotion(session)}. Он растягивает мышцы изнутри ${directPressure(Number(session.intensity || 0))}; после каждого движения остаются давление и трение до следующего хода.`;
+  return `Поршень во влагалище продолжает ${describeDeviceMotion(session)}. Он давит на стенки изнутри ${directPressure(Number(session.intensity || 0))}; после каждого движения остаются давление и трение до следующего хода.`;
 }
 
 export function describeDeviceAction(session: DeviceExperienceSession): string {
-  return `Секс-машина: внутреннее воздействие — ${describeDeviceMotion(session)}`;
+  if (session.stimulationMode === 'tickling') return `Секс-машина: щекочущий протокол — ${describeDeviceMotion(session)}`;
+  return `Секс-машина: ${session.stimulationMode === 'anal' ? 'анальное' : 'вагинальное'} воздействие — ${describeDeviceMotion(session)}`;
 }
 
 export function describeDeviceProtocolEvent(

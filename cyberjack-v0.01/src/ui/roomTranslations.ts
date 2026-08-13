@@ -10,7 +10,8 @@ export const roomNameMap: Record<string, string> = {
 export const deviceNameMap: Record<string, string> = {
   'lab_diagnostic_table': 'diagnosticTable',
   'lab_recovery_capsule': 'recoveryCapsule',
-  'lab_sex_machine': 'sexMachine'
+  'lab_sex_machine': 'sexMachine',
+  'lab_mental_correction_chair': 'mentalCorrectionChair'
 };
 
 export function getRoomName(roomId: string, t: (key: string) => string): string {

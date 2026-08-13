@@ -49,7 +49,6 @@ const pointShortNames: Record<string, string> = {
     groin: 'паху',
     buttocks: 'ягодицам',
     inner_thighs: 'внутренним бёдрам',
-    knees: 'коленям',
     calves: 'икрам',
     feet: 'ступням',
     general: 'телу'

@@ -28,4 +28,13 @@ describe('canonicalCharacterPortrait', () => {
 
     expect(portrait).toContain('costume');
   });
+
+  it('uses the mental-correction chair avatar when its environment context is active', () => {
+    const portrait = canonicalCharacterPortrait('NPC-CAND-01', 'Ника', [], {
+      contexts: [{ actionId: 'context_mental_correction_chair' }],
+      attitude: 20,
+    });
+
+    expect(portrait).toBe('/character-images/vr-chair/nika__vr_chair_ni__guarded.png');
+  });
 });

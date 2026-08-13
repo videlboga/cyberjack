@@ -112,6 +112,20 @@ describe('capacity pacing', () => {
         expect(pleasant.capacity).toBeGreaterThan(distress.capacity);
     });
 
+    it('makes sustained high intensity consume a meaningful session reserve even when it is pleasant', () => {
+        const light = applyLearning(core, point, action, {
+            experiencedIntensity: 12, effectiveSensitivity: 50, pleasure: 12, discomfort: 0, overload: 0, learningEffect: 0, engagement: 0,
+        }, DEFAULT_CONFIG).nextCore;
+        const intense = applyLearning({ ...core, tension: 45 }, point, action, {
+            experiencedIntensity: 85, effectiveSensitivity: 50, pleasure: 80, discomfort: 4, overload: 0, learningEffect: 0, engagement: 0,
+        }, DEFAULT_CONFIG).nextCore;
+        const lightLoss = core.capacity - light.capacity;
+        const intenseLoss = core.capacity - intense.capacity;
+        expect(lightLoss).toBeGreaterThan(.05);
+        expect(intenseLoss).toBeGreaterThan(2);
+        expect(intenseLoss).toBeLessThan(4);
+    });
+
     it('caps routine loss while retaining a larger overload path', () => {
         const routine = applyLearning(core, point, action, { experiencedIntensity: 100, effectiveSensitivity: 100, pleasure: 0, discomfort: 100, overload: 0, learningEffect: 0, engagement: 0 }, DEFAULT_CONFIG).nextCore;
         expect(core.capacity - routine.capacity).toBeLessThanOrEqual(6);

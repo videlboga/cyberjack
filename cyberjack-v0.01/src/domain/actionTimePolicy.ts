@@ -19,10 +19,10 @@ const PROCESS_CONTROLS = new Set([
 
 export function actionTimePolicy(actionId: string) {
   if (PROCESS_STARTS.has(actionId)) {
-    return { worldMinutes:0, stateDeltaScale:.35, kind:'process_start' as const };
+    return { stateDeltaScale:.35, kind:'process_start' as const };
   }
   if (PROCESS_CONTROLS.has(actionId)) {
-    return { worldMinutes:0, stateDeltaScale:0, kind:'process_control' as const };
+    return { stateDeltaScale:0, kind:'process_control' as const };
   }
-  return { worldMinutes:1, stateDeltaScale:1, kind:'discrete' as const };
+  return { stateDeltaScale:1, kind:'discrete' as const };
 }

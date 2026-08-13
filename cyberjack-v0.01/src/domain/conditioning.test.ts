@@ -51,6 +51,17 @@ describe('persistent conditioning', () => {
         expect(signals.some(signal => signal.traitId === 'trait_electrophile')).toBe(false);
     });
 
+    it('derives point-based traits and only activates them for the matching anatomy', () => {
+        const pointPreferences = { points: { feet: 5, vagina: 4.6 } };
+        expect(acquiredTraitValue(pointPreferences, 'trait_point_feet')).toBe(3);
+        expect(acquiredTraitValue(pointPreferences, 'trait_point_vagina')).toBe(3);
+        expect(deriveCompulsionSignals(pointPreferences, ['sexual'], ['feet'])).toContainEqual(expect.objectContaining({
+            traitId: 'trait_point_feet', level: 3, pressure: .92, cuePointIds: ['feet'],
+        }));
+        expect(deriveCompulsionSignals(pointPreferences, ['sexual'], ['hands'])
+            .some(signal => signal.traitId === 'trait_point_feet' || signal.traitId === 'trait_point_vagina')).toBe(false);
+    });
+
     it('learns accepted controlled pain at a visible pace', () => {
         const signal = conditioningSignal({
             pleasure: 4.7,
@@ -65,7 +76,10 @@ describe('persistent conditioning', () => {
             relationPlasticity: 99,
         });
         expect(signal.modifiers.acceptedDiscomfort).toBeGreaterThan(0);
-        expect(signal.generalizedDelta).toBeGreaterThan(0.025);
+        // A coherent experience leaves a real semantic trace, but a single
+        // tick must not create a durable disposition by itself.
+        expect(signal.generalizedDelta).toBeGreaterThan(0.007);
+        expect(signal.generalizedDelta).toBeLessThan(0.02);
     });
 
     it('does not unlearn pain when discomfort is positively appraised', () => {
@@ -259,7 +273,7 @@ describe('persistent conditioning', () => {
         expect(neutral).toEqual([{ tag: 'sexual', sourceId: 'eq_clothe_stockings', weight: .3 }]);
 
         const legTickling = clothingConditioningTags({
-            contextIds: ['eq_clothe_stockings'], directTags: ['tickling'], pointId: 'knees', contact: .4,
+            contextIds: ['eq_clothe_stockings'], directTags: ['tickling'], pointId: 'legs', contact: .4,
         });
         const footTickling = clothingConditioningTags({
             contextIds: ['eq_clothe_stockings'], directTags: ['tickling'], pointId: 'feet', contact: .4,
