@@ -62,6 +62,23 @@
 - Синхронизация социальных связей и наблюдателей перенесена в post-commit publication (`publishTickOutcome` → `syncLabSpatialRelations`).
 - Boundary-тест запрещает `runGameTick` импортировать `spatialContext` и вызывать `moveCharacterInLaboratory`.
 
+### 2.5. Остальные мутации `runGameTick` в `TickEffectPlan`
+
+Все прямые обязательные записи игрового состояния вынесены из оркестратора в доменные эффекты плана тика:
+
+- замена конфликтующих сексуальных взаимодействий → `context.remove-id`;
+- применение `contextConfig` и `removeContexts` → `context.apply` / `context.remove-action`;
+- контексты разрядки, паники, перегрузки и рефрактерного периода → `context.apply`;
+- восстановление остальных body points во время ожидания → `point.save`;
+- `subjectEdgeStateRepo` → `edge.clear` / `edge.update`;
+- `interactionStanceRepo` (soften, recordIgnored, save, softenAll) → `stance.*`;
+- `pendingCommandRepo` → `pending-command.clear` / `pending-command.save`;
+- результаты `ConditionWatcher` → `ConditionWatcher.plan()` возвращает эффекты (`state-trigger.set`, `context.apply/remove-id`, `event.append`);
+- автономный collapse → read-only `ContextManager.planAutonomousCollapse`;
+- старение контекстов → `context.age`.
+
+`runGameTick` больше не выполняет ни одной прямой записи до `commitTickOutcome` — все мутации собираются в `tickEffects` и применяются в одной транзакции. Boundary-тест запрещает прямые вызовы репозиториев и `ContextManager`-мутаторов в оркестраторе.
+
 ## 3. Обязательные архитектурные правила
 
 Эти правила действуют для всех следующих этапов.
@@ -119,29 +136,9 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 **Выполнен** (см. §2.4). Лабораторное перемещение идёт через read-only `resolveLaboratoryMove`, эффекты применяются в общем commit тика, социальная синхронизация перенесена в publication. Boundary-тест запрещает прямой вызов `moveCharacterInLaboratory` из оркестратора.
 
-### Этап 2. Перевести остальные мутации `runGameTick` в `TickEffectPlan`
+### Этап 2. Перевести остальные мутации `runGameTick` в `TickEffectPlan` ✅
 
-Оставшиеся группы прямых записей:
-
-- применение `compiledAction.contextConfig` и `removeContexts`;
-- замена конфликтующих сексуальных взаимодействий;
-- контексты разрядки, паники, перегрузки и рефрактерного периода;
-- старение и удаление временных контекстов;
-- восстановление остальных body points во время ожидания;
-- `subjectEdgeStateRepo`;
-- `interactionStanceRepo`;
-- `pendingCommandRepo`;
-- результаты `ConditionWatcher`.
-
-Нужно:
-
-1. Расширить типы эффектов только доменными операциями, а не универсальным SQL/closure-эффектом.
-2. Для каждой группы отделить read-only решение от применения.
-3. Передавать финальный план в `commitTickOutcome`.
-4. Удалить прямые записи из `runGameTick`.
-5. Запретить их возврат архитектурным тестом.
-
-Критерий готовности: до вызова `commitTickOutcome` оркестратор не выполняет ни одной обязательной записи игрового состояния.
+**Выполнен** (см. §2.5). Все прямые обязательные записи вынесены в доменные эффекты плана тика; `runGameTick` не выполняет записей до `commitTickOutcome`. Boundary-тест запрещает прямые вызовы репозиториев и `ContextManager`-мутаторов в оркестраторе.
 
 ### Этап 3. Разрезать `runGameTick` на явные стадии
 
@@ -338,7 +335,7 @@ type CharacterStimulus =
 Приоритет определяется зависимостями:
 
 1. ✅ лабораторное перемещение: resolution/commit — **выполнено**;
-2. остальные обязательные мутации в `TickEffectPlan`;
+2. ✅ остальные обязательные мутации в `TickEffectPlan` — **выполнено**;
 3. декомпозиция `runGameTick`;
 4. единое игровое время и очередь фоновых задач;
 5. единый `CharacterTurnContext` и prompt builder;
@@ -378,6 +375,14 @@ type CharacterStimulus =
 
 - 102 test files;
 - 484 теста проходят (+6: resolver + boundary);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (состав прежний, новых падений нет);
+- runtime typecheck проходит.
+
+После завершения Этапа 2 (мутации в `TickEffectPlan`):
+
+- 102 test files;
+- 487 тестов проходят (+3: эффекты плана + boundary);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (состав прежний, новых падений нет);
 - runtime typecheck проходит.

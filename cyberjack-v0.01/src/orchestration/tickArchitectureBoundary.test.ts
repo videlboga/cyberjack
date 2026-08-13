@@ -38,4 +38,19 @@ describe('tick architecture boundary', () => {
         expect(source).not.toMatch(/\bmoveCharacterInLaboratory\s*\(/);
         expect(source).toMatch(/\bresolveLaboratoryMove\s*\(/);
     });
+
+    it('does not perform direct mandatory state writes before the commit phase', () => {
+        const source = fs.readFileSync(runGameTickPath, 'utf8');
+        // Direct repo mutations must be gone; all mandatory writes flow through
+        // the TickEffect plan executed inside commitTickOutcome.
+        expect(source).not.toMatch(/\bactiveContextsRepo\.(remove|add|removeByActionId)\s*\(/);
+        expect(source).not.toMatch(/\bpointStateRepo\.save\s*\(/);
+        expect(source).not.toMatch(/\bsubjectEdgeStateRepo\.(clear|update)\s*\(/);
+        expect(source).not.toMatch(/\binteractionStanceRepo\.(save|soften|recordIgnored|softenAll)\s*\(/);
+        expect(source).not.toMatch(/\bpendingCommandRepo\.(save|clear)\s*\(/);
+        expect(source).not.toMatch(/\bContextManager\.(applyContext|processTick|applyAutonomousCollapse)\s*\(/);
+        expect(source).not.toMatch(/\bstateTriggersRepo\.(increment|reset|set)\s*\(/);
+        expect(source).not.toMatch(/\bsceneCharacterRepo\.set\s*\(/);
+        expect(source).not.toMatch(/\beventLogRepo\.append\s*\(/);
+    });
 });

@@ -8,7 +8,7 @@ import { publishTickOutcome } from './publishTickOutcome';
 import type { TickEffect } from './tickEffectPlan';
 import { compileAction } from '../compiler/compileAction';
 import { eventQueries } from '../infrastructure/eventQueries';
-import { activeContextsRepo, sceneRepo, presetRepo, eventLogRepo, characterRepo, characterRelationRepo, subjectEdgeStateRepo, subjectiveAssociationRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, sceneRepo, presetRepo, characterRepo, characterRelationRepo, subjectEdgeStateRepo, subjectiveAssociationRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
@@ -36,7 +36,6 @@ import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { actionConflictsWithStance, actionRespectsStance, boundaryAcknowledgementStrength, boundaryValencePenalty, requestedStanceFromReaction } from '../domain/interactionStance';
 import { resolvePortraitEmotion } from '../domain/portraitEmotion';
 import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
-import { pendingCommandRepo } from '../infrastructure/pendingCommandRepo';
 import { db } from '../infrastructure/db';
 import { buildPhysicalReaction } from '../narrative/physicalReaction';
 import { buildBoundaryExpression } from '../narrative/boundaryExpression';
@@ -107,6 +106,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const relationalDynamics = relationshipDynamicsRepo.get(payload.subjectId, initiatorId);
     const elapsedTime = payload.deltaTime ?? (payload.presetId === 'wait' ? 20 : 1);
     const preTickContextNotes: string[] = [];
+    const tickEffects: TickEffect[] = [];
+    let labRelocationApplied = false;
     
     // 2. Scenario layer: доступность действия, ресурсы, локация
     const validation = checkActionAccess.validateAction(
@@ -170,9 +171,17 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     let allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
     if (allContexts.some(context => context.actionId === 'effect_apathy') &&
         !allContexts.some(context => context.actionId === 'pose_lying_down')) {
-        const collapse = ContextManager.applyAutonomousCollapse(payload.subjectId);
-        if (collapse.applied && collapse.narrative) preTickContextNotes.push(collapse.narrative);
-        allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
+        const collapse = ContextManager.planAutonomousCollapse(payload.subjectId);
+        if (collapse.effect) {
+            tickEffects.push(collapse.effect);
+            // Model the collapse locally so compileAction sees the lying pose
+            // without re-reading the DB before commit.
+            allContexts = [...allContexts, {
+                id: 'planned_lying_down', actionId: 'pose_lying_down', pointId: 'global_pose',
+                subjectId: payload.subjectId, actorId: payload.subjectId,
+            } as any];
+        }
+        if (collapse.narrative) preTickContextNotes.push(collapse.narrative);
     }
     const applicableContexts = allContexts.filter(c => !c.pointId || c.pointId === payload.pointId);
 
@@ -287,13 +296,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         // The immediate command to stop is not the same thing as forgiveness.
         // Once contact has actually ceased, let the live stance close quickly;
         // relationship memory still retains whether it had been ignored.
-        interactionStanceRepo.soften(
-            payload.subjectId,
-            initiatorId,
-            acknowledgementStrength > 0 ? acknowledgementStrength : .2,
-        );
+        const softenAmount = acknowledgementStrength > 0 ? acknowledgementStrength : .2;
+        tickEffects.push({ kind: 'stance.soften', subjectId: payload.subjectId, actorId: initiatorId, amount: softenAmount });
+        // Model the soften locally so the boundary decision below sees the
+        // softened intensity without re-reading the DB before commit.
+        activeStance = { ...activeStance, intensity: Math.max(0, activeStance.intensity - softenAmount) };
         stanceSoftenedBeforeTick = true;
-        activeStance = interactionStanceRepo.get(payload.subjectId, initiatorId);
     }
     const ignoredBoundary = actionConflictsWithStance(activeStance, compiledAction, payload.pointId);
     const respectedBoundary = Boolean(activeStance && actionRespectsStance(compiledAction));
@@ -302,10 +310,10 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         compiledAction.valence = clamp(compiledAction.valence - penalty, -1, 1);
         compiledAction.tags = [...new Set([...(compiledAction.tags || []), 'boundary_ignored'])];
         (compiledAction as any).interactionStance = { request: activeStance.request, ignored: true, penalty };
-        interactionStanceRepo.recordIgnored(payload.subjectId, initiatorId);
+        tickEffects.push({ kind: 'stance.record-ignored', subjectId: payload.subjectId, actorId: initiatorId });
         preTickContextNotes.push(`Активная граница персонажа проигнорирована: действие продолжает нежелательный контакт.`);
     } else if (respectedBoundary && !stanceSoftenedBeforeTick) {
-        interactionStanceRepo.soften(payload.subjectId, initiatorId);
+        tickEffects.push({ kind: 'stance.soften', subjectId: payload.subjectId, actorId: initiatorId });
         (compiledAction as any).interactionStance = { request: activeStance!.request, respected: true };
     }
 
@@ -350,11 +358,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // A long pause is one gameplay step for finite condition durations; its
     // elapsed time still drives physiological recovery inside the engine.
     if (!payload.skipContextTimeAdvance) {
-        ContextManager.processTick(
-            payload.subjectId,
-            payload.presetId === 'wait' ? 1 : elapsedTime,
-            elapsedTime
-        );
+        tickEffects.push({
+            kind: 'context.age',
+            subjectId: payload.subjectId,
+            deltaTime: payload.presetId === 'wait' ? 1 : elapsedTime,
+            elapsedMinutes: elapsedTime,
+        });
     }
 
     if (engineOutput.tickMeta?.inputs) {
@@ -377,8 +386,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // AFTER the primary commit (ensuring correct id ordering: interaction < system_trigger)
     let forcedNarrativeToLog: string | undefined = undefined;
     let forcedAttempted = false;
-    const tickEffects: TickEffect[] = [];
-    let labRelocationApplied = false;
     if (commandIntent && commandIntent.type !== 'none') {
         
         const activeContextsRepo2 = activeContextsRepo;
@@ -502,10 +509,19 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                     const subjCharPresence = sceneChars.find(c => c.character.subjectId === payload.subjectId || c.character.id === payload.subjectId);
                     if (subjCharPresence) {
                         if (subjCharPresence.slotId !== finalSlotId) {
-                            sceneCharacterRepo.set(payload.sceneId, subjCharPresence.character.id, { slotId: finalSlotId });
+                            tickEffects.push({ kind: 'scene.set-slot', sceneId: payload.sceneId, characterId: subjCharPresence.character.id, slotId: finalSlotId });
                             let reason = (state.relation?.attitude > 70) ? "с готовностью" : "с неохотой, подчиняясь приказу";
                             const moveNarrative = `[Система]: Актив перемещается в зону "${targetLabel}", ${reason}.`;
-                            eventLogRepo.append(payload.subjectId, 'context_change', { presetId: 'move', action: null, actionLabel: moveNarrative, narrative: moveNarrative }, { added: true });
+                            tickEffects.push({
+                                kind: 'event.append',
+                                event: {
+                                    subjectId: payload.subjectId,
+                                    type: 'context_change',
+                                    presetId: 'move',
+                                    narrative: moveNarrative,
+                                    metadata: { added: true },
+                                },
+                            });
                             addedContextNotes.push(moveNarrative);
                         } else {
                             addedContextNotes.push(`Ты уже в зоне "${targetLabel}", перемещение не нужно.`);
@@ -780,17 +796,24 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
                 const preset = presetRepo.getActionPreset(context.actionId);
                 if (preset?.contextConfig?.type === 'sexual_interaction' &&
                     (context.actionId !== payload.presetId || context.pointId !== payload.pointId)) {
-                    activeContextsRepo.remove(context.id);
+                    tickEffects.push({ kind: 'context.remove-id', contextId: context.id });
                 }
             }
         }
         const initiator = initiatorId;
-        ContextManager.applyContext(payload.subjectId, payload.presetId, compiledAction, payload.pointId, initiator);
+        tickEffects.push({
+            kind: 'context.apply',
+            subjectId: payload.subjectId,
+            actionId: payload.presetId,
+            action: compiledAction,
+            pointId: payload.pointId,
+            initiatorId: initiator,
+        });
         actionApplied = true;
     }
     if (compiledAction.removeContexts && compiledContextAllowed) {
         for (const remCtx of compiledAction.removeContexts) {
-            activeContextsRepo.removeByActionId(payload.subjectId, remCtx);
+            tickEffects.push({ kind: 'context.remove-action', subjectId: payload.subjectId, actionId: remCtx });
             actionApplied = true;
         }
     }
@@ -809,7 +832,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             passivePoint.localAttitude = dampTowardsBaseline(passivePoint.localAttitude, baselineAttitude, { ...pointCfg, timeScale: elapsedTime });
             passivePoint.baselineLocalSensitivity = advanceBaseline(baselineSensitivity, passivePoint.localSensitivity, { plasticity: engineOutput.nextCore.plasticity, openness: engineOutput.nextCore.openness, novelty: 0 }, { baseRate: pointCfg.adaptBase, ...pointCfg, timeScale: elapsedTime });
             passivePoint.baselineLocalAttitude = advanceBaseline(baselineAttitude, passivePoint.localAttitude, { plasticity: engineOutput.nextCore.plasticity, openness: engineOutput.nextCore.openness, novelty: 0 }, { baseRate: pointCfg.adaptBase, ...pointCfg, timeScale: elapsedTime });
-            pointStateRepo.save(payload.subjectId, passivePoint.pointId, passivePoint);
+            tickEffects.push({ kind: 'point.save', subjectId: payload.subjectId, point: passivePoint });
         }
     }
 
@@ -878,7 +901,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             }
             const refractoryPreset = presetRepo.getActionPreset('effect_refractory');
             if (refractoryPreset) {
-                ContextManager.applyContext(payload.subjectId, 'effect_refractory', refractoryPreset);
+                tickEffects.push({
+                    kind: 'context.apply',
+                    subjectId: payload.subjectId,
+                    actionId: 'effect_refractory',
+                    action: refractoryPreset,
+                });
             }
             engineOutput.nextCore.plasticity = applySoftPositiveGain(engineOutput.nextCore.plasticity || 0, 15);
             engineOutput.nextCore.tension = 10;
@@ -894,7 +922,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             engineOutput.nextCore.tension = 45;
             const panicPreset = presetRepo.getActionPreset('effect_panic');
             if (panicPreset) {
-                ContextManager.applyContext(payload.subjectId, 'effect_panic', panicPreset);
+                tickEffects.push({
+                    kind: 'context.apply',
+                    subjectId: payload.subjectId,
+                    actionId: 'effect_panic',
+                    action: panicPreset,
+                });
             }
         } else {
             notableObservationEvent = 'peak_overload';
@@ -904,7 +937,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             engineOutput.nextCore.tension = 88;
             const overloadPreset = presetRepo.getActionPreset('effect_sensory_overload');
             if (overloadPreset) {
-                ContextManager.applyContext(payload.subjectId, 'effect_sensory_overload', overloadPreset);
+                tickEffects.push({
+                    kind: 'context.apply',
+                    subjectId: payload.subjectId,
+                    actionId: 'effect_sensory_overload',
+                    action: overloadPreset,
+                });
             }
         }
 
@@ -933,17 +971,22 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const tensionAfter = Number(engineOutput.nextCore.tension || 0);
     const resolvedEdge = Boolean(notableObservationEvent && notableObservationEvent !== 'exhaustion') || tensionAfter < 80;
     if (resolvedEdge) {
-        subjectEdgeStateRepo.clear(payload.subjectId);
+        tickEffects.push({ kind: 'edge.clear', subjectId: payload.subjectId });
     } else if (tensionAfter >= 85) {
         const valence: 'positive' | 'negative' | 'mixed' = engineOutput.result.finalValence > .2 ? 'positive'
             : engineOutput.result.finalValence < -.2 ? 'negative' : 'mixed';
-        subjectEdgeStateRepo.update(payload.subjectId, {
-            enteredAtMinute: previousEdge?.enteredAtMinute ?? worldMinute,
-            cycles: previousEdge?.cycles ?? 0,
-            valence,
-            sourceActionId: payload.presetId,
-            sourcePointId: payload.pointId,
-        }, worldMinute);
+        tickEffects.push({
+            kind: 'edge.update',
+            subjectId: payload.subjectId,
+            state: {
+                enteredAtMinute: previousEdge?.enteredAtMinute ?? worldMinute,
+                cycles: previousEdge?.cycles ?? 0,
+                valence,
+                sourceActionId: payload.presetId,
+                sourcePointId: payload.pointId,
+            },
+            worldMinute,
+        });
     }
 
     // Save player and scene state at the final atomicity boundary
@@ -996,12 +1039,14 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     }
 
     // 6.6 Evaluate conditions for state triggers (Trauma, Panic, Subspace) over ticks
-    addedContextNotes.push(...ConditionWatcher.evaluate(
+    const conditionPlan = ConditionWatcher.plan(
         payload.subjectId,
         payload.pointId,
         engineOutput.nextCore,
         engineOutput.nextPoint
-    ));
+    );
+    addedContextNotes.push(...conditionPlan.narratives);
+    tickEffects.push(...conditionPlan.effects);
 
     // Orchestration may have changed nextCore after numerical computation (discharge,
     // breakdown, scenario consequences). Keep public delta consistent with the
@@ -1036,7 +1081,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         discomfort: engineOutput.result.discomfort,
         overload: engineOutput.result.overload,
     });
-    if (requestedStance) interactionStanceRepo.save(requestedStance);
+    if (requestedStance) tickEffects.push({ kind: 'stance.save', stance: requestedStance });
     // A scoped boundary remains stored for its point, but it must not colour
     // an unrelated point or an ordinary conversation as if the character were
     // still rejecting every possible contact.
@@ -1328,17 +1373,20 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             /отклоняет|недостаточ|не выполняет указание|подчинение .*требуется/i.test(note),
         );
         if (actionApplied || !refusalWasAboutWillingness) {
-            pendingCommandRepo.clear(payload.subjectId, payload.playerId);
+            tickEffects.push({ kind: 'pending-command.clear', subjectId: payload.subjectId, playerId: payload.playerId });
         } else {
             const modifiers = payload.dynamicModifiers as any;
-            pendingCommandRepo.save({
-                subjectId: payload.subjectId,
-                playerId: payload.playerId,
-                sceneId: payload.sceneId,
-                sourceText: modifiers.pendingCommandSourceText || modifiers.commandSourceText || payload.textMessage || '',
-                description: modifiers.pendingCommandDescription || modifiers.commandDescription || payload.textMessage || 'невыполненное поручение',
-                intent: finalCommandIntent,
-                routing: modifiers.routing,
+            tickEffects.push({
+                kind: 'pending-command.save',
+                focus: {
+                    subjectId: payload.subjectId,
+                    playerId: payload.playerId,
+                    sceneId: payload.sceneId,
+                    sourceText: modifiers.pendingCommandSourceText || modifiers.commandSourceText || payload.textMessage || '',
+                    description: modifiers.pendingCommandDescription || modifiers.commandDescription || payload.textMessage || 'невыполненное поручение',
+                    intent: finalCommandIntent,
+                    routing: modifiers.routing,
+                },
             });
         }
     }

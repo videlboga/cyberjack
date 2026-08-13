@@ -22,6 +22,41 @@ export class ContextManager {
         };
     }
 
+    /**
+     * Read-only planning of the autonomous collapse. Returns the effect to
+     * apply inside the tick commit plus the narrative, without writing to the
+     * database. Mirrors applyAutonomousCollapse's conflict decision.
+     */
+    static planAutonomousCollapse(subjectId: string): { effect: import('./tickEffectPlan').TickEffect | null; narrative: string } {
+        const lyingPose = presetRepo.getActionPreset('pose_lying_down');
+        if (!lyingPose) return { effect: null, narrative: '' };
+        const currentContexts = activeContextsRepo.getAllForSubject(subjectId);
+        const blocker = currentContexts.find(ctx => {
+            const preset = presetRepo.getActionPreset(ctx.actionId);
+            const config = preset?.contextConfig;
+            if (!config) return false;
+            const holdsGlobalPose = ctx.pointId === 'global_pose' || config.occupiesPoints?.includes('global_pose');
+            return holdsGlobalPose && preset?.tags?.includes('restraint');
+        });
+        if (blocker) {
+            const blockerPreset = presetRepo.getActionPreset(blocker.actionId);
+            return {
+                effect: null,
+                narrative: `Актив обмякает, но фиксация «${getActiveContextLabel(blockerPreset, blocker.actionId)}» удерживает тело в прежнем положении.`,
+            };
+        }
+        return {
+            effect: {
+                kind: 'context.apply',
+                subjectId,
+                actionId: 'pose_lying_down',
+                action: lyingPose,
+                initiatorId: subjectId,
+            },
+            narrative: 'Актив обмякает и оседает, оказываясь в положении лёжа.',
+        };
+    }
+
     static isPointBlocked(subjectId: string, pointId: string): { blocked: boolean; reason?: string } {
         const currentContexts = activeContextsRepo.getAllForSubject(subjectId);
         for (const ctx of currentContexts) {

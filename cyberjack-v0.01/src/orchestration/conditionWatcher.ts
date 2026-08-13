@@ -1,6 +1,7 @@
 import { SubjectCoreState, SubjectPointState, CompiledAction } from '../domain/types';
 import { stateTriggersRepo, presetRepo, eventLogRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { ContextManager } from './contextManager';
+import type { TickEffect } from './tickEffectPlan';
 
 export interface TriggerRule {
     code: string;
@@ -141,28 +142,41 @@ export const STATE_RULES: TriggerRule[] = [
     }
 ];
 
+export interface ConditionPlan {
+    narratives: string[];
+    effects: TickEffect[];
+}
+
+/**
+ * Read-only evaluation of state-trigger conditions. Returns a plan of effects
+ * (context apply/remove, state-trigger counters, event logs) that the caller
+ * applies inside the tick commit. No writes are performed here.
+ */
 export class ConditionWatcher {
-    static evaluate(subjectId: string, pointId: string | null, core: SubjectCoreState, point: SubjectPointState) {
+    static plan(subjectId: string, pointId: string | null, core: SubjectCoreState, point: SubjectPointState): ConditionPlan {
         const activeContexts = activeContextsRepo.getAllForSubject(subjectId);
         const narratives: string[] = [];
+        const effects: TickEffect[] = [];
+        // Model the trigger counters locally so the plan is deterministic and
+        // the DB is only touched once, inside the commit.
+        const counters = new Map<string, number>();
+        const counter = (code: string) => counters.get(code) ?? stateTriggersRepo.get(subjectId, code);
 
         for (const rule of STATE_RULES) {
-            // If the rule is point-specific, ensure we match the pointId as well
-            const hasContext = activeContexts.some(c => 
-                c.actionId === rule.actionPresetId && 
+            const hasContext = activeContexts.some(c =>
+                c.actionId === rule.actionPresetId &&
                 (!rule.pointSpecific || c.pointId === pointId)
             );
-            // Some states use hysteresis: entering collapse and recovering from it
-            // must not share the same threshold or the state flickers off immediately.
             const isConditionMet = hasContext && rule.releaseCheck
                 ? !rule.releaseCheck(core, point)
                 : rule.check(core, point);
-            
-            // To separate triggers by point, compound the trigger code
+
             const triggerCode = rule.pointSpecific && pointId ? `${rule.code}_${pointId}` : rule.code;
 
             if (isConditionMet) {
-                const currentTicks = stateTriggersRepo.increment(subjectId, triggerCode, 1);
+                const currentTicks = counter(triggerCode) + 1;
+                counters.set(triggerCode, currentTicks);
+                effects.push({ kind: 'state-trigger.set', subjectId, triggerCode, ticks: currentTicks });
 
                 if (currentTicks >= rule.requiredTicks) {
                     if (!hasContext || (rule.requiredTicks > 0 && currentTicks === rule.requiredTicks)) {
@@ -181,18 +195,32 @@ export class ConditionWatcher {
                                 }
 
                                 const applyPointId = rule.pointSpecific ? pointId : undefined;
-                                ContextManager.applyContext(subjectId, rule.actionPresetId, preset, applyPointId || undefined);
+                                effects.push({
+                                    kind: 'context.apply',
+                                    subjectId,
+                                    actionId: rule.actionPresetId,
+                                    action: preset,
+                                    pointId: applyPointId || undefined,
+                                });
 
                                 let physicalConsequence = '';
                                 if (rule.code === 'apathy_instant') {
-                                    const collapse = ContextManager.applyAutonomousCollapse(subjectId);
+                                    const collapse = ContextManager.planAutonomousCollapse(subjectId);
+                                    if (collapse.effect) effects.push(collapse.effect);
                                     physicalConsequence = collapse.narrative ? ` ${collapse.narrative}` : '';
                                 }
 
                                 const narrative = `[Состояние] Активация: ${rule.description}${rule.pointSpecific ? ` (${pointId})` : ''}.${physicalConsequence}`.trim();
-                                eventLogRepo.append(subjectId, 'system_trigger', {
-                                    presetId: 'system_trigger', action: null, actionLabel: narrative, narrative
-                                }, { triggeredRule: triggerCode });
+                                effects.push({
+                                    kind: 'event.append',
+                                    event: {
+                                        subjectId,
+                                        type: 'system_trigger',
+                                        presetId: 'system_trigger',
+                                        narrative,
+                                        metadata: { triggeredRule: triggerCode },
+                                    },
+                                });
                                 narratives.push(narrative);
 
                                 if (preset.contextConfig && originalDuration !== undefined) {
@@ -203,29 +231,58 @@ export class ConditionWatcher {
                     }
                 }
             } else {
-                const currentTicks = stateTriggersRepo.get(subjectId, triggerCode);
+                const currentTicks = counter(triggerCode);
                 if (currentTicks > 0) {
-                    stateTriggersRepo.reset(subjectId, triggerCode);
+                    counters.set(triggerCode, 0);
+                    effects.push({ kind: 'state-trigger.set', subjectId, triggerCode, ticks: 0 });
                 }
 
                 if (rule.removeOnFail && hasContext) {
-                    // Need to potentially filter by pointId when removing.
-                    const contextToRemove = activeContexts.find(c => 
-                        c.actionId === rule.actionPresetId && 
+                    const contextToRemove = activeContexts.find(c =>
+                        c.actionId === rule.actionPresetId &&
                         (!rule.pointSpecific || c.pointId === pointId)
                     );
-                    
+
                     if (contextToRemove) {
-                        activeContextsRepo.remove(contextToRemove.id);
+                        effects.push({ kind: 'context.remove-id', contextId: contextToRemove.id });
                         const narrative = `[Состояние] Снятие: ${rule.description}${rule.pointSpecific ? ` (${pointId})` : ''}`;
-                        eventLogRepo.append(subjectId, 'system_trigger', {
-                            presetId: 'system_trigger', action: null, actionLabel: narrative, narrative
-                        }, { clearedRule: triggerCode });
+                        effects.push({
+                            kind: 'event.append',
+                            event: {
+                                subjectId,
+                                type: 'system_trigger',
+                                presetId: 'system_trigger',
+                                narrative,
+                                metadata: { clearedRule: triggerCode },
+                            },
+                        });
                         narratives.push(narrative);
                     }
                 }
             }
         }
-        return narratives;
+        return { narratives, effects };
+    }
+
+    /** Applies the condition plan immediately. Kept for tests and legacy callers. */
+    static evaluate(subjectId: string, pointId: string | null, core: SubjectCoreState, point: SubjectPointState): string[] {
+        const plan = ConditionWatcher.plan(subjectId, pointId, core, point);
+        // Apply effects in order. Context applies/removes and event logs are
+        // executed directly here (outside a tick transaction) for test parity.
+        for (const effect of plan.effects) {
+            if (effect.kind === 'context.apply') {
+                ContextManager.applyContext(effect.subjectId, effect.actionId, effect.action, effect.pointId, effect.initiatorId);
+            } else if (effect.kind === 'context.remove-id') {
+                activeContextsRepo.remove(effect.contextId);
+            } else if (effect.kind === 'state-trigger.set') {
+                stateTriggersRepo.set(effect.subjectId, effect.triggerCode, effect.ticks);
+            } else if (effect.kind === 'event.append') {
+                eventLogRepo.append(effect.event.subjectId, effect.event.type, {
+                    presetId: effect.event.presetId, action: null,
+                    actionLabel: effect.event.narrative, narrative: effect.event.narrative,
+                }, effect.event.metadata || {});
+            }
+        }
+        return plan.narratives;
     }
 }
