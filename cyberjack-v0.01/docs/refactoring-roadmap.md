@@ -270,6 +270,16 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 Единственный оставшийся игровой таймер — `timeFlow` heartbeat (5 реальных секунд), который является самим драйвером продвижения времени через единый path `advanceSimulationTime` → `advanceWorldTime` + `runBackgroundSustainedTicks` + очередь. Это соответствует целевой модели «единственный worldMinute cursor».
 
+### 2.14. Автономные сцены через очередь
+
+`runAutonomousSceneMinute` переведён с прямого вызова из `runBackgroundSustainedTicks` на задание очереди:
+
+- `advanceSimulationTime` планирует `scene.autonomous` на следующую 5-минутную границу с идемпотентным ключом `scene.autonomous:<minute>` — повторный worker-run не дублирует автономное действие.
+- Обработчик `scene.autonomous` исполняет `runAutonomousSceneMinute` в `runDueBackgroundJobs`; сбои видны в статусе/`lastError` задания.
+- Прямой вызов из `runBackgroundSustainedTicks` убран (импорт удалён).
+
+Это приближает к критериям «повторный worker-run безопасен» и «фоновые LLM-сбои видны в статусе задания и могут быть повторены».
+
 ### Этап 5. Свести prompt/context builders к одному контракту
 
 Нужно инвентаризировать:

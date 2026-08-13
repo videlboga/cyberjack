@@ -2,6 +2,7 @@ import { runBackgroundSustainedTicks } from '../orchestration/backgroundTimeTick
 import { advanceWorldTime, getWorldClock } from './worldService';
 import { enqueueBackgroundJob, listDueBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed, markBackgroundJobRunning } from '../orchestration/backgroundJobs';
 import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
+import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 
 /**
  * Advances active simulation time.
@@ -25,10 +26,20 @@ export async function advanceSimulationTime(
     // Schedule the next low-priority memory materialization pass ~45 game
     // minutes out. Idempotent on the queue key, so only one is pending.
     scheduleMemoryMaterialization(clock.totalMinutes + MEMORY_MATERIALIZE_INTERVAL_MINUTES);
+    // Schedule the next autonomous scene pulse at the next 5-minute boundary.
+    // Idempotent per world minute, so a repeated worker run never duplicates
+    // an autonomous action.
+    const nextAutonomousMinute = Math.ceil(clock.totalMinutes / AUTONOMOUS_INTERVAL_MINUTES) * AUTONOMOUS_INTERVAL_MINUTES;
+    enqueueBackgroundJob({
+        type: 'scene.autonomous',
+        key: `scene.autonomous:${nextAutonomousMinute}`,
+        dueMinute: nextAutonomousMinute,
+    });
     return clock;
 }
 
 const MEMORY_MATERIALIZE_INTERVAL_MINUTES = 45;
+const AUTONOMOUS_INTERVAL_MINUTES = 5;
 
 /** Runs background jobs whose dueMinute has been reached. */
 export async function runDueBackgroundJobs(worldMinute: number) {
@@ -50,6 +61,9 @@ async function executeBackgroundJob(job: { type: string; payload: string | null 
     switch (job.type) {
         case 'memory.materialize':
             await materializeNextSubjectiveMemory();
+            return;
+        case 'scene.autonomous':
+            await runAutonomousSceneMinute();
             return;
         default:
             throw new Error(`Unknown background job type: ${job.type}`);
