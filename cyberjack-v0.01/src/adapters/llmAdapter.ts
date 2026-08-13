@@ -1,6 +1,7 @@
 import { activeConfig } from '../prompts/config.js';
 import { randomUUID } from 'crypto';
 import { emitTrace } from '../orchestration/trace';
+import { getModelAssignment } from './modelAssignments';
 
 export interface ChatMessage {
     role: 'user' | 'system' | 'assistant';
@@ -12,28 +13,9 @@ const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/cha
 // provider-pinned dialogue benchmark. Reasoning is disabled below: audible
 // dialogue does not benefit from spending the short output budget on thought.
 const LLM_MODEL = process.env.LLM_MODEL || 'deepseek/deepseek-v4-flash-0731';
-const LLM_MAX_TOKENS = Number(process.env.LLM_MAX_TOKENS ?? 180);
-const LLM_TEMPERATURE = Number(process.env.LLM_TEMPERATURE ?? 0.85);
 const LLM_TOP_P = Number(process.env.LLM_TOP_P ?? 0.9);
 const LLM_FREQUENCY_PENALTY = Number(process.env.LLM_FREQUENCY_PENALTY ?? 0.5);
 const LLM_PRESENCE_PENALTY = Number(process.env.LLM_PRESENCE_PENALTY ?? 0.3);
-const LLM_TTFT_TIMEOUT = Number(process.env.LLM_TTFT_TIMEOUT ?? 4000);
-const LLM_REQUEST_TIMEOUT = Number(process.env.LLM_REQUEST_TIMEOUT ?? 8000);
-const PARSER_MODEL = process.env.PARSER_MODEL || 'google/gemini-3.1-flash-lite-preview';
-const PARSER_FALLBACK_MODELS = (process.env.PARSER_FALLBACK_MODELS || 'google/gemini-2.5-flash-lite,deepseek/deepseek-chat-v3-0324')
-    .split(',')
-    .map(value => value.trim())
-    .filter(Boolean)
-    .filter(value => value !== PARSER_MODEL);
-const LLM_PROVIDER_ORDER = (process.env.LLM_PROVIDER_ORDER || 'novita,siliconflow,deepinfra')
-    .split(',')
-    .map(value => value.trim())
-    .filter(Boolean);
-const LLM_FALLBACK_MODELS = (process.env.LLM_FALLBACK_MODELS || 'deepseek/deepseek-v4-flash,google/gemini-2.5-flash-lite')
-    .split(',')
-    .map(value => value.trim())
-    .filter(Boolean)
-    .filter(value => value !== LLM_MODEL);
 
 const getApiKey = () => process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
 
@@ -82,7 +64,8 @@ export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, 
 export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any): Promise<any> {
     const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
     const LLM_API_KEY = getApiKey();
-    const models = [PARSER_MODEL, ...PARSER_FALLBACK_MODELS];
+    const assignment = getModelAssignment('parser');
+    const models = assignment.models;
     let lastError: unknown;
     // One trace/request ID shared across every parser fallback attempt for
     // this logical request (Этап 6: «все попытки имеют общий trace/request ID»).
@@ -96,7 +79,7 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
                     'X-Request-Id': traceId,
                     ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}),
                 },
-                body: JSON.stringify({ model, messages, temperature: 0.1, response_format: { type: 'json_object' } })
+                body: JSON.stringify({ model, messages, temperature: assignment.temperature, response_format: { type: 'json_object' } })
             });
             if (!response.ok) throw new Error(`Parser network error ${response.status}: ${await response.text()}`);
             const data = await response.json() as any;
@@ -324,6 +307,7 @@ function validateNarratorReply(candidate: any): candidate is { reaction: string 
 
 async function requestCompletion(messages: ChatMessage[], options: { json?: boolean; purpose?: string; onToken?: (chunk: string) => void } = {}): Promise<string> {
     const LLM_API_KEY = getApiKey();
+    const assignment = getModelAssignment(options.purpose === 'memory' ? 'memory' : 'reply');
     // One trace/request ID shared across every provider fallback attempt for
     // this logical request (Этап 6: «все попытки имеют общий trace/request ID»).
     const traceId = randomUUID();
@@ -339,15 +323,15 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
     }
 
     const attempts = [
-        ...LLM_PROVIDER_ORDER.map(provider => ({ model: LLM_MODEL, provider })),
-        ...LLM_FALLBACK_MODELS.map(model => ({ model, provider: '' })),
+        ...assignment.providers.map(provider => ({ model: assignment.models[0], provider })),
+        ...assignment.models.slice(1).map(model => ({ model, provider: '' })),
     ];
     let lastError: unknown;
     for (const [index, attempt] of attempts.entries()) {
         const { model, provider } = attempt;
         const body: Record<string, any> = {
-            model, messages, max_tokens: LLM_MAX_TOKENS,
-            temperature: LLM_TEMPERATURE,
+            model, messages, max_tokens: assignment.maxTokens,
+            temperature: assignment.temperature,
             frequency_penalty: LLM_FREQUENCY_PENALTY,
             presence_penalty: LLM_PRESENCE_PENALTY,
             reasoning: { enabled: false },
@@ -358,7 +342,7 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
         if (Number.isFinite(LLM_TOP_P)) body.top_p = LLM_TOP_P;
         const t0 = performance.now();
         const controller = new AbortController();
-        let timer = setTimeout(() => controller.abort(), LLM_TTFT_TIMEOUT);
+        let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
         let result = '';
         try {
             const response = await fetch(LLM_API_URL, {
@@ -366,7 +350,7 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
             });
             const headersMs = Math.round(performance.now() - t0);
             clearTimeout(timer);
-            timer = setTimeout(() => controller.abort(), LLM_REQUEST_TIMEOUT);
+            timer = setTimeout(() => controller.abort(), assignment.requestTimeoutMs);
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
             if (options.onToken && response.body) {
                 const reader = response.body.getReader();
