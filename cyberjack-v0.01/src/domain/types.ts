@@ -1,3 +1,5 @@
+import type { CommandIntent } from './resolver';
+
 export interface SubjectCoreState {
     sensitivity: number; // Чувствительность (реакция на физическое воздействие, интенсивность ощущений)
     capacity: number;    // Выносливость / Ресурс (способность выдерживать стресс, сопротивляемость перегрузке)
@@ -135,6 +137,38 @@ export interface SceneLayout {
     edges: SceneLayoutEdge[];
 }
 
+/**
+ * Semantic modifiers attached to a tick request by the verbal parser / event
+ * router. These are the typed shape of `GameEventPayload.dynamicModifiers`
+ * (Этап 9: типизация семантических полей dynamicModifiers).
+ */
+export interface DynamicModifiers {
+    intensity?: number;
+    valence?: number;
+    contact?: number;
+    sharpness?: number;
+    novelty?: number;
+    pointId?: string;
+    tags?: string[];
+    mentionedTags?: string[];
+    semanticMentions?: { actionIds: string[]; pointIds: string[] };
+    commandIntent?: CommandIntent;
+    routing?: { actorId?: string; targetId?: string; actionId?: string; confidence?: number; source?: string };
+    verbalIntent?: 'conversation' | 'question' | 'praise' | 'insult' | 'command';
+    commandSourceText?: string;
+    commandDescription?: string;
+    pendingCommandRelation?: 'continue' | 'abandon' | 'unrelated';
+    pendingCommandSourceText?: string;
+    pendingCommandDescription?: string;
+    resumedPendingCommand?: boolean;
+    model?: string;
+    raw?: string;
+    contextConfig?: ContextConfig;
+    description?: string;
+    label?: string;
+    sensory?: CompiledAction['sensory'];
+}
+
 export interface CompiledAction {
     actionKey: string;
     label: string;
@@ -184,6 +218,9 @@ export interface TickInput {
     action: CompiledAction;
     core: SubjectCoreState;
     point: SubjectPointState;
+    // The relationship is deliberately separate from the subject's general
+    // disposition: intimate contact is appraised in relation to its initiator.
+    relationship?: Pick<CharacterRelation, 'attitude' | 'openness' | 'plasticity' | 'familiarityLevel'>;
     config?: EngineConfig;
     deltaTime?: number;
 }
@@ -415,6 +452,12 @@ export interface ActorDecision {
     actorId: string;
     kind: 'reactive' | 'proactive';
     reason?: string;
+    impulse?: {
+        id: string;
+        primaryIntent: string;
+        secondaryConflict: string;
+        allowedSpeechActs: string[];
+    };
     mechanicalAction?: {
         actionId: string;
         pointId: string;

@@ -443,7 +443,18 @@ Fallback не меняет семантику контракта: `executeCharac
 
 ### Этап 9. Типизация и удаление legacy
 
-Типизацию следует расширять вертикальными срезами, не скрывая ошибки глобальным `any`.
+**В работе.** Начат вертикальный срез типизации семантических полей `dynamicModifiers`.
+
+### 2.21. Типизация `dynamicModifiers`
+
+`GameEventPayload.dynamicModifiers` был `Partial<CompiledAction>` и использовался с полями, которых там нет (`commandIntent`, `routing`, `verbalIntent`, `mentionedTags`, `pendingCommand*`, `model`, `raw`). Введён типизированный контракт:
+
+- `DynamicModifiers` в `domain/types.ts` — все семантические поля: `intensity/valence/contact/sharpness/novelty`, `pointId`, `tags`, `mentionedTags`, `semanticMentions`, `commandIntent` (типизированный `CommandIntent`), `routing` (с `actionId/confidence/source`), `verbalIntent`, `commandSourceText/Description`, `pendingCommandRelation` (`continue|abandon|unrelated`), `pendingCommandSourceText/Description`, `resumedPendingCommand`, `model`, `raw`, `contextConfig`, `description`, `label`, `sensory`.
+- `GameEventPayload.dynamicModifiers` → `DynamicModifiers`.
+- `eventRouter` — `RouteResponse.dynamicModifiers` → `DynamicModifiers`; исправлены `possibly undefined` (guard после парсинга, `parsedCommand` сужение).
+- `semanticVerbalParser` — `mentionedTags`/`mentions` приведены к `string[]`.
+
+Полный `tsconfig.json` typecheck проходит без ошибок в этом срезе. Осталось: `DiagnosticsOutput.observation`, типы команд, payload, device/mental metadata, world-time options, scene/context effects.
 
 Приоритетные проблемные контракты:
 
@@ -624,6 +635,14 @@ Fallback не меняет семантику контракта: `executeCharac
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.
+
+После типизации `dynamicModifiers` (Этап 9, первый срез):
+
+- 112 test files;
+- 521 тест проходит;
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- полный `tsconfig.json` typecheck проходит в этом срезе.
 
 Известные группы существующих падений:
 

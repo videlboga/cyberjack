@@ -8,7 +8,7 @@ import { publishTickOutcome } from './publishTickOutcome';
 import type { TickEffect } from './tickEffectPlan';
 import { eventQueries } from '../infrastructure/eventQueries';
 import { activeContextsRepo, sceneRepo, presetRepo } from '../infrastructure/repositories';
-import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
+import { CompiledAction, TickBundle, GameEvent, DynamicModifiers } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { appendJsonLog } from '../utils/fileLogs';
@@ -46,7 +46,7 @@ export interface GameEventPayload {
     sceneId: string;
     presetId: string; // The base action id
     playerIntensity?: number;
-    dynamicModifiers?: Partial<CompiledAction>;
+    dynamicModifiers?: DynamicModifiers;
     eventType?: GameEvent['type'];
     textMessage?: string;
     parserVersion?: string;

@@ -4,10 +4,11 @@ import { parseSemanticVerbalInput } from '../parser/semanticVerbalParser';
 import { presetRepo, sceneRepo, sceneCharacterRepo, chatMemoryRepo } from '../infrastructure/repositories';
 import { getLaboratorySpatialContext, listLaboratoryDestinations } from '../scenario/spatialContext';
 import { pendingCommandRepo } from '../infrastructure/pendingCommandRepo';
+import type { DynamicModifiers } from '../domain/types';
 
 export interface RouteResponse {
     bundle: Awaited<ReturnType<typeof runGameTick>>;
-    dynamicModifiers?: any;
+    dynamicModifiers?: DynamicModifiers;
     pointIdUsed: string;
     subjectIdUsed: string;
     actorIdUsed: string;
@@ -43,7 +44,7 @@ export function resolveCommandRoute(
  */
 export async function dispatchEvent(payload: any): Promise<RouteResponse> {
     let pointId = payload.pointId || 'systemic';
-    let dynamicModifiers = undefined;
+    let dynamicModifiers: DynamicModifiers | undefined = undefined;
     const sceneId = payload.sceneId || 'scene_lab_calibrator';
     let routedSubjectId = payload.subjectId || 'S-01';
     let routedActorId = payload.playerId || 'PL-1';
@@ -53,6 +54,9 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
     if (payload.textMessage) {
         const pendingSubjectId = payload.addressedCharacterId || payload.subjectId || 'S-01';
         const pendingPlayerId = payload.playerId || 'PL-1';
+        // The parser (or its fallback) always assigns dynamicModifiers below;
+        // this guard narrows the type for the rest of the block.
+        if (!dynamicModifiers) dynamicModifiers = {};
         let pendingCommand = pendingCommandRepo.get(pendingSubjectId, pendingPlayerId);
         if (pendingCommand && pendingCommand.sceneId !== sceneId) {
             pendingCommandRepo.clear(pendingSubjectId, pendingPlayerId);
@@ -104,7 +108,7 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
         // Cancelling the conversational focus takes priority over a spurious
         // action mapping extracted from a negative prohibition such as
         // "забудь, не раздевайся".
-        if (pendingCommand && dynamicModifiers.pendingCommandRelation === 'abandon') {
+        if (pendingCommand && dynamicModifiers?.pendingCommandRelation === 'abandon') {
             pendingCommandRepo.clear(pendingSubjectId, pendingPlayerId);
             dynamicModifiers = { ...dynamicModifiers, commandIntent: { type: 'none' }, routing: undefined };
             pendingCommand = null;
@@ -112,7 +116,7 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
         const parsedCommand = dynamicModifiers?.commandIntent;
         const hasNewCommand = Boolean(parsedCommand?.type && parsedCommand.type !== 'none');
         if (!hasNewCommand && pendingCommand) {
-            if (dynamicModifiers.pendingCommandRelation === 'continue') {
+            if (dynamicModifiers?.pendingCommandRelation === 'continue') {
                 dynamicModifiers = {
                     ...dynamicModifiers,
                     commandIntent: pendingCommand.intent,
@@ -124,7 +128,7 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
             } else {
                 pendingCommandRepo.clear(pendingSubjectId, pendingPlayerId);
             }
-        } else if (hasNewCommand) {
+        } else if (hasNewCommand && parsedCommand) {
             // A new explicit instruction supersedes the previous conversational focus.
             pendingCommandRepo.clear(pendingSubjectId, pendingPlayerId);
             const commandDescription = (() => {
@@ -138,8 +142,7 @@ export async function dispatchEvent(payload: any): Promise<RouteResponse> {
                 if (parsedCommand.type === 'change_current_interaction') return `${parsedCommand.goal} текущее взаимодействие`;
                 return payload.textMessage;
             })();
-            dynamicModifiers.commandSourceText = payload.textMessage;
-            dynamicModifiers.commandDescription = commandDescription;
+            dynamicModifiers = { ...dynamicModifiers, commandSourceText: payload.textMessage, commandDescription };
         }
         if (dynamicModifiers.routing) {
             const route = resolveCommandRoute(

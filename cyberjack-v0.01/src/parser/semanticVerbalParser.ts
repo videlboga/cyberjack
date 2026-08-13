@@ -65,18 +65,41 @@ async function verifyExecutableCommand(
 }
 
 const EMBEDDING_MODEL = process.env.PARSER_EMBEDDING_MODEL || 'perplexity/pplx-embed-v1-0.6b';
+const EMBEDDING_FALLBACK_MODELS = (process.env.PARSER_EMBEDDING_FALLBACK_MODELS || 'qwen/qwen3-embedding-8b')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean)
+    .filter(value => value !== EMBEDDING_MODEL);
 let indexedCatalog: Promise<Candidate[]> | null = null;
+let activeEmbeddingModel: string | null = null;
 
 async function embed(input: string[]): Promise<number[][]> {
     const key = process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
-    const response = await fetch('https://openrouter.ai/api/v1/embeddings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
-        body: JSON.stringify({ model: EMBEDDING_MODEL, input })
-    });
-    if (!response.ok) throw new Error(`Embedding HTTP ${response.status}: ${await response.text()}`);
-    const body = await response.json() as any;
-    return (body.data || []).sort((a: any, b: any) => a.index - b.index).map((item: any) => item.embedding);
+    const models = activeEmbeddingModel
+        ? [activeEmbeddingModel, ...[EMBEDDING_MODEL, ...EMBEDDING_FALLBACK_MODELS].filter(model => model !== activeEmbeddingModel)]
+        : [EMBEDDING_MODEL, ...EMBEDDING_FALLBACK_MODELS];
+    let lastError: unknown;
+    for (const model of models) {
+        try {
+            const response = await fetch('https://openrouter.ai/api/v1/embeddings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
+                body: JSON.stringify({ model, input })
+            });
+            if (!response.ok) throw new Error(`Embedding HTTP ${response.status}: ${await response.text()}`);
+            const body = await response.json() as any;
+            const vectors = (body.data || []).sort((a: any, b: any) => a.index - b.index).map((item: any) => item.embedding);
+            if (vectors.length !== input.length || vectors.some((vector: unknown) => !Array.isArray(vector) || vector.length === 0)) {
+                throw new Error('Embedding response has no usable vectors');
+            }
+            activeEmbeddingModel = model;
+            return vectors;
+        } catch (error: any) {
+            lastError = error;
+            if (model !== models.at(-1)) console.warn(`[SemanticParser] embedding model ${model} failed; trying next model:`, error?.message || error);
+        }
+    }
+    throw lastError instanceof Error ? lastError : new Error(String(lastError || 'All embedding models failed'));
 }
 
 function catalogEntries(): Candidate[] {
@@ -243,13 +266,13 @@ ID выбирай только из кандидатов и присутству
         else if (command.type === 'move' && command.location) commandIntent = { type: 'move', targetLocation: command.location };
         else if (command.type === 'change_current_interaction') commandIntent = { type: 'change_current_interaction', goal: ['start', 'adjust', 'stop'].includes(command.goal) ? command.goal : 'stop', suggestedActionId: command.actionId || undefined, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
     }
-    const mentions = {
-        actionIds: Array.isArray(parsed.mentions?.actionIds) ? parsed.mentions.actionIds.filter((id: string) => candidates.actions.some(item => item.id === id)) : [],
-        pointIds: Array.isArray(parsed.mentions?.pointIds) ? parsed.mentions.pointIds.filter((id: string) => candidates.points.some(item => item.id === id)) : []
+    const mentions: { actionIds: string[]; pointIds: string[] } = {
+        actionIds: (Array.isArray(parsed.mentions?.actionIds) ? parsed.mentions.actionIds : []).filter((id: unknown) => candidates.actions.some(item => item.id === id)).map(String),
+        pointIds: (Array.isArray(parsed.mentions?.pointIds) ? parsed.mentions.pointIds : []).filter((id: unknown) => candidates.points.some(item => item.id === id)).map(String)
     };
-    const mentionedTags = [...new Set(mentions.actionIds.flatMap((id: string) => {
+    const mentionedTags: string[] = [...new Set(mentions.actionIds.flatMap((id: string) => {
         const candidate = candidates.actions.find(item => item.id === id);
-        return conditioningTags(id, candidate?.tags || []);
+        return conditioningTags(id, (candidate?.tags || []).map(String));
     }))];
     const pointId = commandIntent.type !== 'none' && 'pointId' in commandIntent
         ? commandIntent.pointId || mentions.pointIds[0] || 'systemic'
@@ -293,6 +316,6 @@ ID выбирай только из кандидатов и присутству
             source: 'semantic-command-parser-v2'
         } : undefined,
         raw: JSON.stringify(parsed),
-        model: `${model}+${EMBEDDING_MODEL}`
+        model: `${model}+${activeEmbeddingModel || EMBEDDING_MODEL}`
     };
 }
