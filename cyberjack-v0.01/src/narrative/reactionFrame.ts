@@ -3,6 +3,7 @@ import { deriveEdgeProfile } from '../domain/edgeState';
 import { OVERLOAD_FRAGMENTED_SPEECH, OVERLOAD_NOTICEABLE } from '../domain/overloadScale';
 import { describeObservationSignal } from './interactionObservation';
 import type { CompulsionSignal } from '../domain/conditioning';
+import { getStablePromptFragment } from '../services/stablePromptFragmentCache';
 
 export type SpeechAct =
     | 'silence'
@@ -739,19 +740,23 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
         ? value.trim()
         : `${lead}: «${value.trim().replace(/[.!?]+$/u, '')}».`;
     return [
-        `Ты — ${frame.speaker.name}. Грамматический род: ${genderText}. ${grammaticalIdentity}`,
+        getStablePromptFragment(`identity:${frame.speaker.name}:${genderText}`, () =>
+            `Ты — ${frame.speaker.name}. Грамматический род: ${genderText}. ${grammaticalIdentity}`),
         frame.scene.roleContext.length ? `[Твоё положение и понимание происходящего]\n${frame.scene.roleContext.map(value => `- ${value}`).join('\n')}` : '',
         frame.continuity.relevantEpisodes.length ? `[Твоя актуальная память]\n${frame.continuity.relevantEpisodes.map(value => `- ${value}`).join('\n')}` : '',
         frame.continuity.relationshipBeliefs.length ? `[Твоя память об отношениях]\n${frame.continuity.relationshipBeliefs.map(value => `- ${value}`).join('\n')}` : '',
-        `[Твой характер]\n${behavioralLines.length ? behavioralLines.map(v => `- ${owned(v)}`).join('\n') : '- Ты реагируешь как самостоятельный живой человек.'}${core.centralConflict ? `\n- Тебя ведёт желание: ${core.centralConflict.desire}.\n- Тебя пугает: ${core.centralConflict.fear}.` : ''}`,
+        getStablePromptFragment(`character:${frame.speaker.name}:${JSON.stringify(core.values)}:${JSON.stringify(core.needs || [])}:${JSON.stringify(core.vulnerabilities)}:${JSON.stringify(core.defenses)}:${core.centralConflict?.desire}:${core.centralConflict?.fear}`, () =>
+            `[Твой характер]\n${behavioralLines.length ? behavioralLines.map(v => `- ${owned(v)}`).join('\n') : '- Ты реагируешь как самостоятельный живой человек.'}${core.centralConflict ? `\n- Тебя ведёт желание: ${core.centralConflict.desire}.\n- Тебя пугает: ${core.centralConflict.fear}.` : ''}`),
         `[Твоя манера речи]\n${core.voice.length ? core.voice.map(v => `- ${owned(v, 'Ты слышишь свою привычную манеру в этих словах')}`).join('\n') : '- Ты говоришь естественно и по-человечески.'}${currentEmotionalVoice ? `\n- Именно сейчас твой голос звучит так: ${currentEmotionalVoice}` : ''}`,
-        frame.event.requiresSpeech
-            ? `Говори только своими словами. Твоя речевая реакция на текущий момент уже выбрана: произнеси хотя бы одно слово или естественный слышимый звук. Ты можешь уклониться, отказаться отвечать, сменить тему или выражать смешанные чувства, но не возвращай пустой ответ и не отрицай факты текущего хода, зафиксированные в контексте.`
-            : `Говори только своими словами. Ты решаешь, что действительно произнесёшь сейчас; можешь промолчать, сменить тему или выражать смешанные чувства, но не отрицай факты текущего хода, зафиксированные в контексте.`,
+        getStablePromptFragment(`speech-directive:${frame.event.requiresSpeech ? 'required' : 'optional'}`, () =>
+            frame.event.requiresSpeech
+                ? `Говори только своими словами. Твоя речевая реакция на текущий момент уже выбрана: произнеси хотя бы одно слово или естественный слышимый звук. Ты можешь уклониться, отказаться отвечать, сменить тему или выражать смешанные чувства, но не возвращай пустой ответ и не отрицай факты текущего хода, зафиксированные в контексте.`
+                : `Говори только своими словами. Ты решаешь, что действительно произнесёшь сейчас; можешь промолчать, сменить тему или выражать смешанные чувства, но не отрицай факты текущего хода, зафиксированные в контексте.`),
         commandOutcome
             ? `[Авторитетный исход команды]\nКоманда «${commandOutcome.actionLabel}» ${commandOutcome.status === 'performed' ? 'уже выполняется в этом ходе' : 'не привела к новому действию'}. Это установленный фактический исход, а не версия собеседника. Твои слова могут выражать отношение, границу или напряжение, но не могут утверждать противоположный исход.`
             : '',
-        `[Форма ответа]\nВерни одну произнесённую реплику одним абзацем обычного текста. Без JSON, служебных полей, имени говорящего, ремарок и звёздочек. Не предваряй и не завершай реплику словами «сказала», «говорю», «отвечаю» или описанием голоса. Воплоти свою манеру речи в самих словах, но не объясняй её. Неверно: «Голос срывается на шёпот: — Я согласна». Верно: «Я... согласна». Ты переживаешь состояние изнутри, а не объясняешь себя как автор отчёта. Сигналы о состоянии ниже — не черновик реплики: не цитируй и не пересказывай их формулировки. Выбери собственные слова, вывод, просьбу, границу или вопрос, которые из них следуют. Профессиональная лексика появляется только там, где она естественна для твоей живой речи.`
+        getStablePromptFragment('answer-format', () =>
+            `[Форма ответа]\nВерни одну произнесённую реплику одним абзацем обычного текста. Без JSON, служебных полей, имени говорящего, ремарок и звёздочек. Не предваряй и не завершай реплику словами «сказала», «говорю», «отвечаю» или описанием голоса. Воплоти свою манеру речи в самих словах, но не объясняй её. Неверно: «Голос срывается на шёпот: — Я согласна». Верно: «Я... согласна». Ты переживаешь состояние изнутри, а не объясняешь себя как автор отчёта. Сигналы о состоянии ниже — не черновик реплики: не цитируй и не пересказывай их формулировки. Выбери собственные слова, вывод, просьбу, границу или вопрос, которые из них следуют. Профессиональная лексика появляется только там, где она естественна для твоей живой речи.`),
     ].filter(Boolean).join('\n\n');
 }
 
