@@ -189,34 +189,6 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
             }
         } else if (commandIntent.type === 'perform_action') {
             commandActionPreset = presetRepo.getActionPreset(commandIntent.actionId);
-            // The parser already resolved a generic "undress" command to
-            // command_remove_worn_clothing. Here we only collect the active
-            // clothing contexts to remove — no text re-interpretation.
-            const isGenericUndress = commandIntent.actionId === 'command_remove_worn_clothing';
-            const activeClothing = isGenericUndress
-                ? activeContextsRepo.getAllForSubject(payload.subjectId)
-                    .map(context => context.actionId)
-                    .filter(actionId => (presetRepo.getActionPreset(actionId)?.tags || []).includes('clothing'))
-                : null;
-            if (activeClothing) {
-                if (activeClothing.length) {
-                    const removalBase = commandActionPreset
-                        || presetRepo.getActionPreset('eq_clothe_calibration_set_remove')
-                        || presetRepo.getActionPreset('eq_clothe_jumpsuit_remove');
-                    commandActionPreset = {
-                        ...(removalBase || {}),
-                        id: 'command_remove_worn_clothing',
-                        label: 'Снять одежду',
-                        type: 'physical',
-                        tags: ['clothing', 'remove'],
-                        priority: (removalBase as any)?.priority || 1,
-                        removeContexts: [...new Set(activeClothing)],
-                    } as any;
-                } else {
-                    addedContextNotes.push('[Система]: Команда снять одежду не привела к действию: на персонаже нет одежды.');
-                    commandActionPreset = undefined;
-                }
-            }
             if (commandActionPreset) {
                 const requiredContexts: string[] = (commandActionPreset as any).requireContexts || [];
                 const activeIds = new Set(activeContextsRepo.getAllForSubject(payload.subjectId).map((context: any) => context.actionId));
@@ -240,7 +212,7 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                         addedContextNotes.push(refusedNarrative);
                     }
                 }
-            } else if (!activeClothing) {
+            } else if (!commandActionPreset) {
                 addedContextNotes.push(`[Система]: Команда не выполнена: действие «${commandIntent.actionId}» отсутствует в каталоге.`);
             }
         } else if (commandIntent.type === 'remove_worn_clothing') {

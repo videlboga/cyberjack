@@ -125,6 +125,12 @@ export async function dispatchEvent(payload: DispatchEventInput): Promise<RouteR
             pendingCommand = null;
         }
         const parsedCommand = dynamicModifiers?.commandIntent;
+        // Normalize the legacy perform_action + command_remove_worn_clothing
+        // form (from old model outputs) to the structured remove_worn_clothing
+        // intent, so only one removal path remains (Этап 4/9 legacy cleanup).
+        if (parsedCommand?.type === 'perform_action' && parsedCommand.actionId === 'command_remove_worn_clothing') {
+            dynamicModifiers = { ...dynamicModifiers, commandIntent: { type: 'remove_worn_clothing' } };
+        }
         const hasNewCommand = Boolean(parsedCommand?.type && parsedCommand.type !== 'none');
         if (!hasNewCommand && pendingCommand) {
             if (dynamicModifiers?.pendingCommandRelation === 'continue') {
@@ -143,9 +149,8 @@ export async function dispatchEvent(payload: DispatchEventInput): Promise<RouteR
             // A new explicit instruction supersedes the previous conversational focus.
             pendingCommandRepo.clear(pendingSubjectId, pendingPlayerId);
             const commandDescription = (() => {
-                if (parsedCommand.type === 'perform_action') return parsedCommand.actionId === 'command_remove_worn_clothing'
-                    ? 'снять надетую одежду'
-                    : presetRepo.getActionPreset(parsedCommand.actionId)?.label || parsedCommand.actionId;
+                if (parsedCommand.type === 'remove_worn_clothing') return 'снять надетую одежду';
+                if (parsedCommand.type === 'perform_action') return presetRepo.getActionPreset(parsedCommand.actionId)?.label || parsedCommand.actionId;
                 if (parsedCommand.type === 'activate_context' || parsedCommand.type === 'deactivate_context') {
                     return presetRepo.getActionPreset(parsedCommand.targetContextId)?.label || parsedCommand.targetContextId;
                 }
