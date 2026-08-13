@@ -79,6 +79,14 @@
 
 `runGameTick` больше не выполняет ни одной прямой записи до `commitTickOutcome` — все мутации собираются в `tickEffects` и применяются в одной транзакции. Boundary-тест запрещает прямые вызовы репозиториев и `ContextManager`-мутаторов в оркестраторе.
 
+### 2.6. Разрезка `runGameTick`: discharge/edge в чистую стадию
+
+Discharge-логика (разрядка, истощение, edge state) вынесена из оркестратора в чистую функцию `resolveTickConsequences`:
+
+- `resolveTickConsequences.ts` — read-only резолвер последствий тика. Возвращает мутированный `output`, `peakEventToLog`, `notableObservationEvent`, заметки и набор `TickEffect` без записи в БД.
+- `runGameTick` вызывает её и передаёт эффекты в общий commit.
+- Последствия разрядки тестируются без prompt stack (4 unit-теста: чистота, positive discharge → refractory + edge.clear, exhaustion, low-tension).
+
 ## 3. Обязательные архитектурные правила
 
 Эти правила действуют для всех следующих этапов.
@@ -383,6 +391,14 @@ type CharacterStimulus =
 
 - 102 test files;
 - 487 тестов проходят (+3: эффекты плана + boundary);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (состав прежний, новых падений нет);
+- runtime typecheck проходит.
+
+После выноса discharge/edge в `resolveTickConsequences` (Этап 3, частично):
+
+- 103 test files;
+- 491 тест проходит (+4: последствия разрядки);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (состав прежний, новых падений нет);
 - runtime typecheck проходит.
