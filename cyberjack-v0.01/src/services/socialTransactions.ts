@@ -8,6 +8,7 @@ import { buildEmbedding } from './embeddingService';
 import { executeCharacterSpeech } from './characterSpeechExecutor';
 import { deliverCharacterSpeech } from './characterSpeechDelivery';
 import { prepareCharacterSpeechStimuli, type CharacterSpeechStimulus } from './characterSpeechStimulus';
+import type { SpeechAct } from '../narrative/reactionFrame';
 
 export type EgoState = 'nurturing_parent' | 'critical_parent' | 'adult' | 'free_child' | 'adapted_child' | 'rebellious_child';
 export type SocialNeed = 'safety' | 'clarity' | 'approval' | 'autonomy' | 'connection';
@@ -95,11 +96,11 @@ function chooseTopic(speakerId:string, recipientId:string, worldMinute:number, s
         return { id:active.id, topic:active.topic, context: typeof saved.topicContext === 'string' ? saved.topicContext : undefined };
     }
     const social = profileSocial(speakerId);
-    const declared = Array.isArray(social.conversationHooks) ? social.conversationHooks.map(String) : [];
+    const declared: string[] = Array.isArray(social.conversationHooks) ? social.conversationHooks.map(String) : [];
     // A topic must come from an observed event or an authored profile hook.
     // The core must not invent a generic conversation merely to avoid silence.
     const shared = stimulus === 'co_presence' ? sharedRoomTopic(coPresence) : null;
-    const candidates = stimulus === 'observed_event'
+    const candidates: Array<{ topic: string; context?: string }> = stimulus === 'observed_event'
         ? [{ topic:'observed_event' }, ...declared.map(topic => ({ topic }))]
         : [
             ...(shared ? [shared] : []),
@@ -263,10 +264,10 @@ export async function processPendingSocialTurns() {
                     id: `social:${plan.act}`,
                     primaryIntent: `Ты сама выбираешь социальный акт «${plan.act}» и обращаешься именно к ${recipientName}.`,
                     secondaryConflict: `Потребность: ${plan.need}. Эго-состояние: ${plan.egoState}. Вы не оператор и не объект процедуры друг для друга; не назначай физических действий и не придумывай фактов.`,
-                    allowedSpeechActs: plan.act === 'answer_question' ? ['answer', 'set_boundary']
+                    allowedSpeechActs: (plan.act === 'answer_question' ? ['answer', 'set_boundary']
                         : plan.act === 'ask_boundary' ? ['probe', 'set_boundary']
                             : plan.act === 'offer_support' ? ['reassure', 'probe']
-                                : ['probe', 'acknowledge', 'admit'],
+                                : ['probe', 'acknowledge', 'admit']) as SpeechAct[],
                 },
             },
         ];

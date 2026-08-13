@@ -437,6 +437,16 @@ Fallback не меняет семантику контракта: `executeCharac
 
 Baseline после исправлений: 21 failed / 527 passed / 6 skipped (прежний baseline, новых падений нет).
 
+### 2.25. Исправления по второму код-ревью (5 обязательных остатков)
+
+1. **Покупка в общий commit** — эффект `market.buy-asset` в `TickEffectPlan` + обработчик в `executeTickEffectPlan`; `runGameTick` добавляет эффект до commit, прямой вызов удалён. Покупка атомарна вместе с тиком.
+2. **Очередь: lease/recovery + off-by-one + лимит** — колонка `lease_until`, `recoverStaleBackgroundJobs()` (просроченные running → failed), автономное задание планируется строго в будущем (`Math.floor + INTERVAL`), `MAX_CONCURRENT_LLM_JOBS = 2`.
+3. **Защита от перекрытия тиков** — возвращён `tickInFlight` guard в `timeFlow.ts` (с `finally`-сбросом).
+4. **typecheck:all в pipeline-файлах** — исправлены `sceneOrchestrator` (pointId, autoUserMessage) и `socialTransactions` (declared, candidates, allowedSpeechActs).
+5. **Эвристика раздевания в parser boundary** — `isGenericUndressCommand` в `semanticVerbalParser`; `applyCommandEffects` только собирает активные clothing-контексты по распознанному `command_remove_worn_clothing`; модуль `resolveGenericUndressContexts` удалён.
+
+Baseline после второго ревью: 21 failed / 527 passed / 6 skipped (прежний baseline, новых падений нет).
+
 ### 2.20. Тонкий контроллер перемещения
 
 `scenarioController.moveLaboratoryCharacter` содержал прямую бизнес-логику (запросы к `db`, `chatMemoryRepo.append`, `syncLaboratorySpatialRelations`). Вынесена в application service:

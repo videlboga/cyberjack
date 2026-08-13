@@ -8,6 +8,16 @@ type SceneCharacter = { id: string; name: string };
 
 const CHARACTER_CONTROLLED_CONTEXT_TAGS = new Set(['pose', 'clothing', 'exposure']);
 
+/**
+ * Parser-boundary heuristic: a generic "undress" command (no specific garment
+ * named) is resolved to the remove-worn-clothing action. This is the single
+ * place that reinterprets command text; command resolution downstream only
+ * collects the active clothing contexts to remove.
+ */
+export function isGenericUndressCommand(text: string): boolean {
+    return /(?:сними(?:те)?\s+(?:всю\s+)?одежду|раздень(?:ся|тесь)|сними(?:те)?\s+вс[её])/iu.test(text);
+}
+
 export function isCharacterControlledContext(candidate: Pick<Candidate, 'tags'> | undefined) {
     return Boolean(candidate?.tags?.some(tag => CHARACTER_CONTROLLED_CONTEXT_TAGS.has(tag)));
 }
@@ -242,7 +252,7 @@ ID выбирай только из кандидатов и присутству
         : false;
     if (mayExecute) {
         if (command.type === 'perform_action' && command.actionId) {
-            const genericUndress = /(?:сними(?:те)?\s+(?:всю\s+)?одежду|раздень(?:ся|тесь)|сними(?:те)?\s+вс[её])/iu.test(text);
+            const genericUndress = isGenericUndressCommand(text);
             const actionId = genericUndress ? 'command_remove_worn_clothing' : command.actionId;
             if (genericUndress || candidates.actions.some(item => item.id === actionId)) {
                 commandIntent = { type: 'perform_action', actionId, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };

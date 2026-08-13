@@ -1,6 +1,6 @@
 import { runBackgroundSustainedTicks } from '../orchestration/backgroundTimeTick';
 import { advanceWorldTime, getWorldClock } from './worldService';
-import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, claimBackgroundJob, markBackgroundJobDone, markBackgroundJobFailed } from '../orchestration/backgroundJobs';
+import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, claimBackgroundJob, recoverStaleBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed } from '../orchestration/backgroundJobs';
 import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
@@ -31,10 +31,10 @@ export async function advanceSimulationTime(
     // Schedule the next low-priority memory materialization pass ~45 game
     // minutes out. Idempotent on the queue key, so only one is pending.
     scheduleMemoryMaterialization(clock.totalMinutes + MEMORY_MATERIALIZE_INTERVAL_MINUTES);
-    // Schedule the next autonomous scene pulse at the next 5-minute boundary.
-    // Idempotent per world minute, so a repeated worker run never duplicates
-    // an autonomous action.
-    const nextAutonomousMinute = Math.ceil(clock.totalMinutes / AUTONOMOUS_INTERVAL_MINUTES) * AUTONOMOUS_INTERVAL_MINUTES;
+    // Schedule the next autonomous scene pulse at the next 5-minute boundary
+    // strictly in the future, so a job is never created already-due and then
+    // deferred to the following tick. Idempotent per world minute.
+    const nextAutonomousMinute = Math.floor(clock.totalMinutes / AUTONOMOUS_INTERVAL_MINUTES) * AUTONOMOUS_INTERVAL_MINUTES + AUTONOMOUS_INTERVAL_MINUTES;
     enqueueBackgroundJob({
         type: 'scene.autonomous',
         key: `scene.autonomous:${nextAutonomousMinute}`,
@@ -53,6 +53,9 @@ const AUTONOMOUS_INTERVAL_MINUTES = 5;
  * awaiting, so a slow model does not block the game clock.
  */
 export function runDueBackgroundJobs(worldMinute: number) {
+    // Recover jobs whose lease expired (a worker crashed or hung) so they can
+    // be retried on the next pass.
+    recoverStaleBackgroundJobs();
     const due = listDueBackgroundJobs(worldMinute);
     const requestId = newRequestId();
     if (due.length) {
@@ -72,12 +75,17 @@ export function runDueBackgroundJobs(worldMinute: number) {
                 : 0,
         });
     }
+    // Cap concurrent LLM-backed jobs so a burst of due jobs cannot spawn an
+    // unbounded number of in-flight model calls.
+    const MAX_CONCURRENT_LLM_JOBS = 2;
+    let inFlight = 0;
     for (const job of due) {
         // Atomically claim; skip if another worker already took it.
         const claimed = claimBackgroundJob(job.id);
         if (!claimed) continue;
         const startedAt = performance.now();
         void (async () => {
+            inFlight++;
             try {
                 await executeBackgroundJob(claimed);
                 markBackgroundJobDone(claimed.id);
@@ -85,8 +93,11 @@ export function runDueBackgroundJobs(worldMinute: number) {
             } catch (error: any) {
                 markBackgroundJobFailed(claimed.id, error?.message || String(error));
                 emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'failed', error: String(error?.message || error) });
+            } finally {
+                inFlight--;
             }
         })();
+        if (inFlight >= MAX_CONCURRENT_LLM_JOBS) break;
     }
 }
 

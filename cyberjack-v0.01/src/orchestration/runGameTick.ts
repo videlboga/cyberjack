@@ -1,4 +1,3 @@
-import { handleBuyAssetAction } from '../scenario/buyAssetHandler';
 // src/orchestration/runGameTick.ts
 import { randomUUID } from 'crypto';
 import { loadTickSnapshot } from './loadTickSnapshot';
@@ -579,6 +578,20 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     });
     if (pendingCommandEffect) tickEffects.push(pendingCommandEffect);
 
+    // A raw-asset purchase is part of the same atomic commit: it debits
+    // credits, updates the broker catalog, creates the character and attaches
+    // it to the scene inside the tick transaction. If any step fails, the
+    // whole tick (including the purchase) rolls back.
+    if (payload.presetId === 'buy_raw_asset' && payload.customPayload?.assetId) {
+        tickEffects.push({
+            kind: 'market.buy-asset',
+            playerId: payload.playerId,
+            brokerId: payload.subjectId,
+            sceneId: activeSceneId,
+            assetId: payload.customPayload.assetId as string,
+        });
+    }
+
     // The primary action becomes durable exactly once. Reactive projections
     // are published only after this transaction succeeds.
     const commitPlan = buildTickCommitPlan({
@@ -647,21 +660,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             tickId,
             promptSizeChars: promptChars,
         });
-    }
-
-    let systemMarketLog = '';
-    if (payload.presetId === 'buy_raw_asset' && payload.customPayload?.assetId) {
-        try {
-            systemMarketLog = handleBuyAssetAction(
-                payload.playerId, 
-                payload.subjectId, 
-                activeSceneId, 
-                payload.customPayload.assetId as string
-            );
-            prompt.systemPrompt += `\n\n${systemMarketLog}`;
-        } catch (e: any) {
-            prompt.systemPrompt += `\n\n[SYSTEM: Транзакция отклонена: ${e.message}]`;
-        }
     }
 
     // Command resolution has its own present-tense scene presentation in the

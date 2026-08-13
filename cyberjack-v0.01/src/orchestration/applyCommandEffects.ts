@@ -2,7 +2,6 @@ import type { CompiledAction, TickBundle } from '../domain/types';
 import type { CommandIntent } from '../domain/resolver';
 import { activeContextsRepo, presetRepo, characterRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { resolveLaboratoryMove } from '../scenario/resolveLaboratoryMove';
-import { resolveGenericUndressContexts } from './resolveGenericUndressContexts';
 import type { TickEffect } from './tickEffectPlan';
 
 export interface CommandEffectsContext {
@@ -190,11 +189,15 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
             }
         } else if (commandIntent.type === 'perform_action') {
             commandActionPreset = presetRepo.getActionPreset(commandIntent.actionId);
-            const activeClothing = resolveGenericUndressContexts(
-                payload.textMessage || '',
-                activeContextsRepo.getAllForSubject(payload.subjectId).map(context => context.actionId),
-                actionId => presetRepo.getActionPreset(actionId)?.tags || [],
-            );
+            // The parser already resolved a generic "undress" command to
+            // command_remove_worn_clothing. Here we only collect the active
+            // clothing contexts to remove — no text re-interpretation.
+            const isGenericUndress = commandIntent.actionId === 'command_remove_worn_clothing';
+            const activeClothing = isGenericUndress
+                ? activeContextsRepo.getAllForSubject(payload.subjectId)
+                    .map(context => context.actionId)
+                    .filter(actionId => (presetRepo.getActionPreset(actionId)?.tags || []).includes('clothing'))
+                : null;
             if (activeClothing) {
                 if (activeClothing.length) {
                     const removalBase = commandActionPreset

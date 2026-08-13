@@ -18,6 +18,7 @@ export interface BackgroundJob {
     status: 'pending' | 'running' | 'done' | 'failed';
     attempts: number;
     lastError: string | null;
+    leaseUntil: number | null;
     createdAt: number;
     updatedAt: number;
 }
@@ -33,18 +34,22 @@ db.exec(`
     status TEXT NOT NULL DEFAULT 'pending',
     attempts INTEGER NOT NULL DEFAULT 0,
     last_error TEXT,
+    lease_until INTEGER,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     UNIQUE(type, key)
   )
 `);
+// Add lease_until to existing tables (migration for pre-lease schemas).
+try { db.exec(`ALTER TABLE background_jobs ADD COLUMN lease_until INTEGER`); } catch { /* already present */ }
 
 const now = () => Date.now();
+const LEASE_MS = 60_000; // a job lease expires after 60s of wall-clock
 
 const JOB_COLUMNS = `
     id, type, key, subject_id AS subjectId, due_minute AS dueMinute,
     payload, status, attempts, last_error AS lastError,
-    created_at AS createdAt, updated_at AS updatedAt
+    lease_until AS leaseUntil, created_at AS createdAt, updated_at AS updatedAt
 `;
 
 /** Enqueue a background job. Idempotent on (type, key): re-enqueueing the same
@@ -92,17 +97,32 @@ export function listDueBackgroundJobs(worldMinute: number, limit = 20): Backgrou
  * Atomically claim a due job: transitions it from pending/failed to running in
  * a single UPDATE ... WHERE status IN ('pending','failed'), so two workers can
  * never pick up the same job. Returns the claimed job or null if it was
- * already taken. A job stuck in 'running' (e.g. a crashed worker) is not
- * re-picked automatically; a supervisor may reset it to 'failed' explicitly.
+ * already taken. A job stuck in 'running' (e.g. a crashed worker) is recovered
+ * once its lease expires (see recoverStaleBackgroundJobs).
  */
 export function claimBackgroundJob(id: number): BackgroundJob | null {
+    const leaseUntil = now() + LEASE_MS;
     const res = db.prepare(`
         UPDATE background_jobs
-        SET status = 'running', attempts = attempts + 1, updated_at = ?
+        SET status = 'running', attempts = attempts + 1, lease_until = ?, updated_at = ?
         WHERE id = ? AND status IN ('pending', 'failed')
-    `).run(now(), id);
+    `).run(leaseUntil, now(), id);
     if (res.changes === 0) return null;
     return db.prepare(`SELECT ${JOB_COLUMNS} FROM background_jobs WHERE id = ?`).get(id) as BackgroundJob;
+}
+
+/**
+ * Recover jobs whose lease has expired (a worker crashed or hung). Resets them
+ * to 'failed' so the next claim pass can retry them. Returns the number of
+ * recovered jobs.
+ */
+export function recoverStaleBackgroundJobs(): number {
+    const res = db.prepare(`
+        UPDATE background_jobs
+        SET status = 'failed', last_error = 'lease expired', updated_at = ?
+        WHERE status = 'running' AND lease_until IS NOT NULL AND lease_until < ?
+    `).run(now(), now());
+    return res.changes;
 }
 
 export function markBackgroundJobRunning(id: number) {

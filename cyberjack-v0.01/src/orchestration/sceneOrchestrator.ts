@@ -100,7 +100,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
         const resourceValue = Math.max(0, Number(playerCredits));
         const resourceScale = cfg.resourceScale || 100;
         const resourceNorm = normalize(resourceValue, 0, resourceScale);
-        const activeCompulsions = deriveCompulsionSignals(core?.preferences, bundle.compiledAction.tags || [], [bundle.compiledAction.pointId]);
+        const activeCompulsions = deriveCompulsionSignals(core?.preferences, bundle.compiledAction.tags || [], bundle.event.pointId ? [bundle.event.pointId] : []);
         const compulsionPressure = activeCompulsions[0]?.pressure || 0;
 
         // Смягчаем штраф за отсутствие новизны: снижение максимум на 20%, чтобы персонажи чаще отвечали.
@@ -803,7 +803,7 @@ ${commandPresentation?.targetNow || `${subjectRepo.get(subjectId)?.name || subje
                         .slice(-16)
                         .map(entry => ({ role: entry.role, content: entry.content, worldMinute: entry.worldMinute, contextLabel: entry.contextLabel }))
                 );
-                currentHistory = historyWithoutDuplicatedCurrentInput(currentHistory, autoUserMessage);
+                currentHistory = historyWithoutDuplicatedCurrentInput(currentHistory, autoUserMessage ?? undefined);
                 userMsgOverride = currentPayload.reactionFrame ? buildReactionTurnMessage(currentPayload.reactionFrame) : actionLabelMessage || undefined;
                 if (autoUserMessage) {
                     const asksForTelemetry = /(состояни|показател|телеметр|оцени|рекоменду|что\s+с\s+(?:ней|ним)|как\s+(?:она|он|они)|пульс|дыхани|перегруз|вынослив)/i.test(autoUserMessage);

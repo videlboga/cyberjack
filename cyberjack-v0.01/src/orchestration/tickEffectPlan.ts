@@ -6,6 +6,7 @@ import { pendingCommandRepo } from '../infrastructure/pendingCommandRepo';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { clearCalibrationSetupContexts } from '../scenario/calibrationContextCleanup';
 import { setLaboratoryPresence } from '../scenario/spatialContext';
+import { handleBuyAssetAction } from '../scenario/buyAssetHandler';
 import { ContextManager } from './contextManager';
 
 export type TickEffect =
@@ -113,6 +114,13 @@ export type TickEffect =
         subjectId: string;
         deltaTime: number;
         elapsedMinutes: number;
+    }
+    | {
+        kind: 'market.buy-asset';
+        playerId: string;
+        brokerId: string;
+        sceneId: string;
+        assetId: string;
     };
 
 export interface TickEffectEvent {
@@ -211,6 +219,9 @@ export function executeTickEffectPlan(
         } else if (effect.kind === 'context.age') {
             ContextManager.processTick(effect.subjectId, effect.deltaTime, effect.elapsedMinutes);
             applied = true;
+        } else if (effect.kind === 'market.buy-asset') {
+            handleBuyAssetAction(effect.playerId, effect.brokerId, effect.sceneId, effect.assetId);
+            applied = true;
         }
 
         if (applied) {
@@ -220,7 +231,8 @@ export function executeTickEffectPlan(
                 && effect.kind !== 'stance.save' && effect.kind !== 'point.save'
                 && effect.kind !== 'edge.clear' && effect.kind !== 'edge.update'
                 && effect.kind !== 'pending-command.clear' && effect.kind !== 'pending-command.save'
-                && effect.kind !== 'state-trigger.set' && effect.kind !== 'context.age') {
+                && effect.kind !== 'state-trigger.set' && effect.kind !== 'context.age'
+                && effect.kind !== 'market.buy-asset') {
                 appendEffectEvent(effect.event);
             }
             result.applied.push(effect);
@@ -236,12 +248,13 @@ const NO_EVENT_KINDS = new Set([
     'lab.set-presence', 'lab.clear-setup-contexts', 'stance.soften-all',
     'stance.soften', 'stance.record-ignored', 'stance.save', 'point.save',
     'edge.clear', 'edge.update', 'pending-command.clear', 'pending-command.save',
-    'state-trigger.set', 'context.age',
+    'state-trigger.set', 'context.age', 'market.buy-asset',
 ]);
 
 export function appendTickEffectEvents(effects: readonly TickEffect[]) {
     for (const effect of effects) {
         if (NO_EVENT_KINDS.has(effect.kind)) continue;
+        if (effect.kind !== 'event.append' && !('event' in effect)) continue;
         if ('event' in effect && effect.event) appendEffectEvent(effect.event);
     }
 }
