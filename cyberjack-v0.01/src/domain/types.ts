@@ -411,6 +411,8 @@ export interface PromptPayload {
     systemPrompt?: string;
     narratorPrompt?: NarratorPromptPayload;
     reactionFrame?: import('../narrative/reactionFrame').ReactionFrame;
+    /** Этап 10: структурированная наблюдаемость выбора памяти. */
+    memorySelection?: { associations: number; subjective: number; episodes: number; total: number };
 }
 
 export interface NarratorPromptPayload {

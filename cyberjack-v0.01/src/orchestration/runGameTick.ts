@@ -661,6 +661,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             tickId,
             promptSizeChars: promptChars,
             selectedMemoryBlocks: prompt.reactionFrame?.continuity?.relevantEpisodes?.length || 0,
+            memorySelection: prompt.memorySelection || { associations: 0, subjective: 0, episodes: 0, total: 0 },
         });
     }
 

@@ -424,6 +424,14 @@ export async function buildPromptPayload(
     const activeAssociations = subjectiveAssociationRepo.activeForPrompt(ownerId, addresseeId, currentActionTags)
         .map((association: any) => `У тебя откликается связь «${association.target_label}»: ожидание ${association.expectation}, сила ${Math.round(Number(association.strength) * 100)}%.`);
     const relevantEpisodes = [...activeAssociations, ...subjectiveEpisodes.slice(0, 2), ...episodeRecords.map(renderEpisodeForCharacter)].slice(0, 3);
+    // Этап 10: структурированная наблюдаемость выбора памяти — типы и
+    // источники выбранных блоков, чтобы диагностировать рассинхрон.
+    const memorySelection = {
+        associations: activeAssociations.length,
+        subjective: Math.min(subjectiveEpisodes.length, 2),
+        episodes: episodeRecords.length,
+        total: relevantEpisodes.length,
+    };
     const repetitionFromLogs = countRepetitions(recentEvents, currentActionId, currentPointId);
     const exposureBeforeTick = Number(latestResult?.tickMeta?.inputs?.point.exposureCount ?? 0);
     const frame = compileReactionFrame({
@@ -492,6 +500,7 @@ export async function buildPromptPayload(
         sceneId: eventId,
         systemPrompt: buildReactionSystemPrompt(frame),
         reactionFrame: frame,
+        memorySelection,
         currentStateSummary: {
             interpretation: `[Субъективное состояние] ${stateText}`,
             attitude: actorDetails.core.attitude,
