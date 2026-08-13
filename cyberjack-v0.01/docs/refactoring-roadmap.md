@@ -477,7 +477,22 @@ Fallback не меняет семантику контракта: `executeCharac
 
 ### Этап 10. Наблюдаемость и производительность
 
-После объединения путей следует оптимизировать уже измеряемую систему.
+**В работе.** Введён единый structured trace для тика, LLM и фоновых заданий.
+
+### 2.22. Единый structured trace
+
+Создан `trace.ts` — единый structured trace:
+
+- `newRequestId()` — коррелируемый корневой id для запроса и дочерних span.
+- `traceSync`/`traceAsync` — измеряют длительность стадии и эмитят span в `logs/trace.jsonl` (fire-and-forget, не блокирует).
+- `emitTrace` — свободный span (например, LLM fallback).
+
+Применение:
+
+- `runGameTick`: стадии `loadTickSnapshot` (traceSync) и `commitTickOutcome` (traceSync) — длительность каждой стадии.
+- `requestCompletion` (`llmAdapter`): при fallback эмитит `llm.fallback` span с `model`, `provider`, `attempt`, `attemptsTotal`, `error` — число попыток и причина fallback.
+
+Критерии: «длительность каждой стадии», «число попыток и причина fallback», «единый structured trace». Осталось: размер prompt и выбранные блоки памяти, cache hit/miss, очередь/возраст фоновых задач.
 
 Нужно:
 
@@ -643,6 +658,14 @@ Fallback не меняет семантику контракта: `executeCharac
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - полный `tsconfig.json` typecheck проходит в этом срезе.
+
+После введения единого structured trace (Этап 10, первый шаг):
+
+- 113 test files;
+- 525 тестов проходят (+4: trace);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
 
 Известные группы существующих падений:
 

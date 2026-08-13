@@ -12,6 +12,7 @@ import { CompiledAction, TickBundle, GameEvent, DynamicModifiers } from '../doma
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { appendJsonLog } from '../utils/fileLogs';
+import { traceSync, newRequestId } from './trace';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
 import { runScenarioStep } from '../scenario/runScenarioStep';
 import { ContextManager } from './contextManager';
@@ -85,6 +86,7 @@ export function constrainCapacityWhileUnresponsive(input: {
 
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
     const initiatorId = payload.actingCharacterId || payload.playerId || payload.subjectId;
+    const requestId = newRequestId();
     // 1. Load state
     const {
         state,
@@ -94,7 +96,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         preTickContextNotes,
         tickEffects,
         labRelocationApplied: _labRelocationApplied,
-    } = loadTickSnapshot({
+    } = traceSync(requestId, requestId, 'loadTickSnapshot', () => loadTickSnapshot({
         subjectId: payload.subjectId,
         pointId: payload.pointId,
         playerId: payload.playerId,
@@ -102,7 +104,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         initiatorId,
         presetId: payload.presetId,
         deltaTime: payload.deltaTime,
-    });
+    }), { subjectId: payload.subjectId, tickId: payload.sceneId });
     let labRelocationApplied = _labRelocationApplied;
 
     // 2. Scenario layer: доступность действия, ресурсы, локация
@@ -589,7 +591,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         },
         effects: tickEffects,
     });
-    commitTickOutcome(commitPlan);
+    traceSync(requestId, requestId, 'commitTickOutcome', () => commitTickOutcome(commitPlan), { subjectId: payload.subjectId, tickId });
     publishTickOutcome({
         tickId,
         subjectId: payload.subjectId,

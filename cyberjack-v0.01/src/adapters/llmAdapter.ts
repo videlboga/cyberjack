@@ -1,5 +1,6 @@
 import { activeConfig } from '../prompts/config.js';
 import { randomUUID } from 'crypto';
+import { emitTrace } from '../orchestration/trace';
 
 export interface ChatMessage {
     role: 'user' | 'system' | 'assistant';
@@ -401,6 +402,19 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
                 return result;
             }
             lastError = error;
+            emitTrace({
+                traceId,
+                requestId: traceId,
+                stage: 'llm.fallback',
+                startedAt: t0,
+                durationMs: Math.round(performance.now() - t0),
+                purpose: options.purpose,
+                model,
+                provider: provider || 'auto',
+                attempt: index + 1,
+                attemptsTotal: attempts.length,
+                error: String((error as any)?.message || error),
+            });
             if (index < attempts.length - 1) {
                 const next = attempts[index + 1];
                 console.warn(`[Adapter] ${model}/${provider || 'auto'} failed, falling back to ${next.model}/${next.provider || 'auto'}:`, (error as any)?.message || error);
