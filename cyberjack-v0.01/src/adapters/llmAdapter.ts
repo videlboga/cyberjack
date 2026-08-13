@@ -1,4 +1,5 @@
 import { activeConfig } from '../prompts/config.js';
+import { randomUUID } from 'crypto';
 
 export interface ChatMessage {
     role: 'user' | 'system' | 'assistant';
@@ -18,6 +19,11 @@ const LLM_PRESENCE_PENALTY = Number(process.env.LLM_PRESENCE_PENALTY ?? 0.3);
 const LLM_TTFT_TIMEOUT = Number(process.env.LLM_TTFT_TIMEOUT ?? 4000);
 const LLM_REQUEST_TIMEOUT = Number(process.env.LLM_REQUEST_TIMEOUT ?? 8000);
 const PARSER_MODEL = process.env.PARSER_MODEL || 'google/gemini-3.1-flash-lite-preview';
+const PARSER_FALLBACK_MODELS = (process.env.PARSER_FALLBACK_MODELS || 'google/gemini-2.5-flash-lite,deepseek/deepseek-chat-v3-0324')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean)
+    .filter(value => value !== PARSER_MODEL);
 const LLM_PROVIDER_ORDER = (process.env.LLM_PROVIDER_ORDER || 'novita,siliconflow,deepinfra')
     .split(',')
     .map(value => value.trim())
@@ -75,37 +81,34 @@ export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, 
 export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any): Promise<any> {
     const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
     const LLM_API_KEY = getApiKey();
-    try {
-        const response = await fetch(LLM_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}),
-            },
-            body: JSON.stringify({
-                model: PARSER_MODEL,
-                messages,
-                temperature: 0.1,
-                response_format: { type: 'json_object' }
-            })
-        });
-
-        if (!response.ok) {
-            const errD = await response.text();
-            console.error(`[LLM Adapter Parser] HTTP Error ${response.status}`, errD);
-            throw new Error(`Parser network error ${response.status}`);
+    const models = [PARSER_MODEL, ...PARSER_FALLBACK_MODELS];
+    let lastError: unknown;
+    // One trace/request ID shared across every parser fallback attempt for
+    // this logical request (Этап 6: «все попытки имеют общий trace/request ID»).
+    const traceId = randomUUID();
+    for (const model of models) {
+        try {
+            const response = await fetch(LLM_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Request-Id': traceId,
+                    ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}),
+                },
+                body: JSON.stringify({ model, messages, temperature: 0.1, response_format: { type: 'json_object' } })
+            });
+            if (!response.ok) throw new Error(`Parser network error ${response.status}: ${await response.text()}`);
+            const data = await response.json() as any;
+            const resultString = data.choices?.[0]?.message?.content;
+            if (!resultString) throw new Error('Parser returned an empty response');
+            return { parsed: JSON.parse(resultString), model: data.model || model };
+        } catch (error: any) {
+            lastError = error;
+            if (model !== models.at(-1)) console.warn(`[LLM Adapter Parser] ${model} failed; trying next parser model:`, error?.message || error);
         }
-
-        const data = await response.json();
-        const resultString = data.choices[0].message.content;
-        return {
-            parsed: JSON.parse(resultString),
-            model: data.model
-        };
-    } catch (e: any) {
-        console.error('[LLM Adapter Parser] Error:', e.message);
-        throw e;
     }
+    console.error('[LLM Adapter Parser] All parser models failed:', (lastError as any)?.message || lastError);
+    throw lastError instanceof Error ? lastError : new Error(String(lastError || 'All parser models failed'));
 }
 
 const socialPortraitEmotions = [
@@ -320,10 +323,14 @@ function validateNarratorReply(candidate: any): candidate is { reaction: string 
 
 async function requestCompletion(messages: ChatMessage[], options: { json?: boolean; purpose?: string; onToken?: (chunk: string) => void } = {}): Promise<string> {
     const LLM_API_KEY = getApiKey();
+    // One trace/request ID shared across every provider fallback attempt for
+    // this logical request (Этап 6: «все попытки имеют общий trace/request ID»).
+    const traceId = randomUUID();
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'HTTP-Referer': 'http://localhost:3000',
-        'X-Title': 'Cyberjack Simulator'
+        'X-Title': 'Cyberjack Simulator',
+        'X-Request-Id': traceId,
     };
 
     if (LLM_API_KEY) {

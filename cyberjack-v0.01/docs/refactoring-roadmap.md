@@ -337,6 +337,23 @@ type CharacterStimulus =
 
 ### Этап 6. Формализовать адаптеры LLM и fallback моделей
 
+**В работе.** Проведена инвентаризация адаптеров. Fallback-логика уже существует; добавлены недостающие критерии.
+
+### 2.18. Адаптеры LLM: fallback и trace ID
+
+Инвентаризация подтвердила существующие fallback-механизмы:
+
+- `requestCompletion` — единый путь для реплик/нарратора: перебирает `LLM_PROVIDER_ORDER` провайдеров, затем `LLM_FALLBACK_MODELS`. Таймауты TTFT/request, потоковая передача с частичным выводом.
+- `parseVerbalInputWithLLM` — командный/парсерный путь: перебирает `PARSER_MODEL` + `PARSER_FALLBACK_MODELS`. Rate limit одной модели не ломает командный путь (переход к следующей).
+- `buildEmbedding` — локальные детерминированные эмбеддинги (HMAC), без LLM.
+
+Добавлены недостающие критерии Этапа 6:
+
+- **Кеш эмбеддингов:** `buildEmbedding` теперь кеширует детерминированный вектор по `(text, dimensions)` — «одинаковый запрос эмбеддинга использует кеш». `clearEmbeddingCache` для тестов.
+- **Общий trace/request ID:** `requestCompletion` и `parseVerbalInputWithLLM` генерируют единый `traceId` (randomUUID) на логический запрос и передают его во все fallback-попытки через заголовок `X-Request-Id` — «все попытки имеют общий trace/request ID».
+
+Fallback не меняет семантику контракта: `executeCharacterSpeech` возвращает `{success, speech, error}` независимо от выбранной модели.
+
 Нужно разделить назначения моделей:
 
 - генерация живой реплики;
@@ -561,6 +578,14 @@ type CharacterStimulus =
 
 - 111 test files;
 - 517 тестов проходят (+2: контекст тика);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
+
+После кеша эмбеддингов и trace ID (Этап 6, первый шаг):
+
+- 112 test files;
+- 521 тест проходит (+4: кеш эмбеддингов);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.
