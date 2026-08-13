@@ -1,11 +1,12 @@
 import { runBackgroundSustainedTicks } from '../orchestration/backgroundTimeTick';
 import { advanceWorldTime, getWorldClock } from './worldService';
-import { enqueueBackgroundJob, listDueBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed, markBackgroundJobRunning } from '../orchestration/backgroundJobs';
+import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed, markBackgroundJobRunning } from '../orchestration/backgroundJobs';
 import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryRepo } from '../infrastructure/repositories';
+import { emitTrace, newRequestId } from '../orchestration/trace';
 
 /**
  * Advances active simulation time.
@@ -47,13 +48,34 @@ const AUTONOMOUS_INTERVAL_MINUTES = 5;
 /** Runs background jobs whose dueMinute has been reached. */
 export async function runDueBackgroundJobs(worldMinute: number) {
     const due = listDueBackgroundJobs(worldMinute);
+    const requestId = newRequestId();
+    if (due.length) {
+        // Queue observability (Этап 10): pending/running ages in world minutes.
+        const pendingJobs = listBackgroundJobs(100).filter(j => j.status === 'pending' || j.status === 'failed');
+        emitTrace({
+            traceId: requestId,
+            requestId,
+            stage: 'background.queue',
+            startedAt: performance.now(),
+            durationMs: 0,
+            worldMinute,
+            dueCount: due.length,
+            pendingCount: pendingJobs.length,
+            oldestPendingAgeMinutes: pendingJobs.length
+                ? worldMinute - Math.min(...pendingJobs.map(j => j.dueMinute))
+                : 0,
+        });
+    }
     for (const job of due) {
         markBackgroundJobRunning(job.id);
+        const startedAt = performance.now();
         try {
             await executeBackgroundJob(job);
             markBackgroundJobDone(job.id);
+            emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: job.type, jobId: job.id, status: 'done' });
         } catch (error: any) {
             markBackgroundJobFailed(job.id, error?.message || String(error));
+            emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: job.type, jobId: job.id, status: 'failed', error: String(error?.message || error) });
         }
     }
 }

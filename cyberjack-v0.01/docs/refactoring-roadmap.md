@@ -494,6 +494,16 @@ Fallback не меняет семантику контракта: `executeCharac
 
 Критерии: «длительность каждой стадии», «число попыток и причина fallback», «единый structured trace». Осталось: размер prompt и выбранные блоки памяти, cache hit/miss, очередь/возраст фоновых задач.
 
+### 2.23. Наблюдаемость: prompt, cache, очередь
+
+Дополнен structured trace:
+
+- **Размер prompt:** `runGameTick` эмитит `prompt.build` span с `promptSizeChars`; `prompt_payloads.jsonl` получает `promptSizeChars`.
+- **Cache hit/miss эмбеддингов:** `buildEmbedding` считает `cacheHits`/`cacheMisses`; `embeddingCacheStats()` — снапшот (`hits`, `misses`, `size`). Критерий «cache hit/miss для эмбеддингов».
+- **Очередь/возраст фоновых задач:** `runDueBackgroundJobs` эмитит `background.queue` span (`dueCount`, `pendingCount`, `oldestPendingAgeMinutes`) и `background.job` span на каждое задание (`jobType`, `jobId`, `status`, `durationMs`). Критерий «очередь и возраст фоновых задач».
+
+Критерий «отсутствие синхронной генерации воспоминаний в пользовательском запросе» уже выполнен (память первична, LLM-материализация асинхронна через очередь). Осталось: выбранные блоки памяти в prompt.
+
 Нужно:
 
 - единый structured trace для тика, LLM и фоновых заданий;
@@ -663,6 +673,14 @@ Fallback не меняет семантику контракта: `executeCharac
 
 - 113 test files;
 - 525 тестов проходят (+4: trace);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
+
+После расширения observability (prompt size, cache hit/miss, очередь фоновых задач) (Этап 10, второй шаг):
+
+- 113 test files;
+- 526 тестов проходят (+1: cache hit/miss);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.

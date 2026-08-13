@@ -8,6 +8,10 @@ let cachedKey: Buffer | null = null;
 const embeddingCache = new Map<string, number[]>();
 const EMBEDDING_CACHE_MAX = 4000;
 
+// Cache hit/miss counters (Этап 10: «cache hit/miss для эмбеддингов»).
+let cacheHits = 0;
+let cacheMisses = 0;
+
 function cacheEmbedding(key: string, vector: number[]): number[] {
     embeddingCache.set(key, vector);
     if (embeddingCache.size > EMBEDDING_CACHE_MAX) {
@@ -32,7 +36,11 @@ export function buildEmbedding(text: string, dimensions = 64): number[] {
     if (!text) return new Array(dimensions).fill(0);
     const cacheKey = `${text}\u0000${dimensions}`;
     const cached = embeddingCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+        cacheHits++;
+        return cached;
+    }
+    cacheMisses++;
     const key = getKey();
     const vector = new Array(dimensions).fill(0);
     for (let i = 0; i < text.length; i++) {
@@ -48,7 +56,14 @@ export function buildEmbedding(text: string, dimensions = 64): number[] {
     return cacheEmbedding(cacheKey, normalized);
 }
 
+/** Snapshot of cache hit/miss counters (Этап 10: observability). */
+export function embeddingCacheStats() {
+    return { hits: cacheHits, misses: cacheMisses, size: embeddingCache.size };
+}
+
 /** Test seam: clears the embedding cache between tests. */
 export function clearEmbeddingCache() {
     embeddingCache.clear();
+    cacheHits = 0;
+    cacheMisses = 0;
 }

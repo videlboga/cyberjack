@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildEmbedding, clearEmbeddingCache } from './embeddingService';
+import { buildEmbedding, clearEmbeddingCache, embeddingCacheStats } from './embeddingService';
 
 describe('embeddingService', () => {
     it('is deterministic: identical text yields an identical vector', () => {
@@ -29,5 +29,16 @@ describe('embeddingService', () => {
         expect(v64).not.toBe(v128);
         expect(v64).toHaveLength(64);
         expect(v128).toHaveLength(128);
+    });
+
+    it('tracks cache hit/miss counters (Этап 10)', () => {
+        clearEmbeddingCache();
+        buildEmbedding('первый');   // miss
+        buildEmbedding('первый');   // hit
+        buildEmbedding('второй');   // miss
+        const stats = embeddingCacheStats();
+        expect(stats.hits).toBe(1);
+        expect(stats.misses).toBe(2);
+        expect(stats.size).toBe(2);
     });
 });

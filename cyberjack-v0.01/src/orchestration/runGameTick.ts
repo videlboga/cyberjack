@@ -12,7 +12,7 @@ import { CompiledAction, TickBundle, GameEvent, DynamicModifiers } from '../doma
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { appendJsonLog } from '../utils/fileLogs';
-import { traceSync, newRequestId } from './trace';
+import { traceSync, newRequestId, emitTrace } from './trace';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
 import { runScenarioStep } from '../scenario/runScenarioStep';
 import { ContextManager } from './contextManager';
@@ -608,15 +608,29 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         : await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId, { initiatorId });
 
     // Log the constructed prompt payload for debugging/inspection
-    if (!payload.skipPrompt) try {
-        appendJsonLog('prompt_payloads.jsonl', {
+    if (!payload.skipPrompt) {
+        const promptChars = prompt.systemPrompt?.length || 0;
+        try {
+            appendJsonLog('prompt_payloads.jsonl', {
+                tickId,
+                forSubject: payload.subjectId,
+                sceneId: activeSceneId,
+                promptSizeChars: promptChars,
+                prompt,
+                explanationRu: explainPromptLog({ tickId, forSubject: payload.subjectId, sceneId: activeSceneId, prompt })
+            });
+        } catch (e) { /* ignore */ }
+        emitTrace({
+            traceId: requestId,
+            requestId,
+            stage: 'prompt.build',
+            startedAt: 0,
+            durationMs: 0,
+            subjectId: payload.subjectId,
             tickId,
-            forSubject: payload.subjectId,
-            sceneId: activeSceneId,
-            prompt: prompt,
-            explanationRu: explainPromptLog({ tickId, forSubject: payload.subjectId, sceneId: activeSceneId, prompt })
+            promptSizeChars: promptChars,
         });
-    } catch (e) { /* ignore */ }
+    }
 
     let systemMarketLog = '';
     if (payload.presetId === 'buy_raw_asset' && payload.customPayload?.assetId) {
