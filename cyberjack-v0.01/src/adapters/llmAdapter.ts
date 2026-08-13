@@ -25,6 +25,8 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     // this logical request (Этап 6: «все попытки имеют общий trace/request ID»).
     const traceId = randomUUID();
     for (const model of models) {
+        const controller = new AbortController();
+        let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
         try {
             const response = await fetch(LLM_API_URL, {
                 method: 'POST',
@@ -33,8 +35,12 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
                     'X-Request-Id': traceId,
                     ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}),
                 },
-                body: JSON.stringify({ model, messages, temperature: assignment.temperature, response_format: { type: 'json_object' } })
+                signal: controller.signal,
+                body: JSON.stringify({ model, messages, temperature: assignment.temperature, max_tokens: assignment.maxTokens, response_format: { type: 'json_object' } })
             });
+            // Headers arrived (TTFT satisfied); switch to the full-request timeout.
+            clearTimeout(timer);
+            timer = setTimeout(() => controller.abort(), assignment.requestTimeoutMs);
             if (!response.ok) throw new Error(`Parser network error ${response.status}: ${await response.text()}`);
             const data = await response.json() as any;
             const resultString = data.choices?.[0]?.message?.content;
@@ -43,6 +49,8 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
         } catch (error: any) {
             lastError = error;
             if (model !== models.at(-1)) console.warn(`[LLM Adapter Parser] ${model} failed; trying next parser model:`, error?.message || error);
+        } finally {
+            clearTimeout(timer);
         }
     }
     console.error('[LLM Adapter Parser] All parser models failed:', (lastError as any)?.message || lastError);

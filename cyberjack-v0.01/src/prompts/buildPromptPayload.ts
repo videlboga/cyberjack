@@ -425,11 +425,15 @@ export async function buildPromptPayload(
         .map((association: any) => `У тебя откликается связь «${association.target_label}»: ожидание ${association.expectation}, сила ${Math.round(Number(association.strength) * 100)}%.`);
     const relevantEpisodes = [...activeAssociations, ...subjectiveEpisodes.slice(0, 2), ...episodeRecords.map(renderEpisodeForCharacter)].slice(0, 3);
     // Этап 10: структурированная наблюдаемость выбора памяти — типы и
-    // источники выбранных блоков, чтобы диагностировать рассинхрон.
+    // источники ВЫБРАННЫХ (после обрезки до 3) блоков, чтобы диагностировать
+    // рассинхрон. Считаем по фактически отрендеренным строкам, а не по
+    // кандидатам до slice, иначе сумма категорий не совпадает с total.
+    const ASSOCIATION_PREFIX = 'У тебя откликается связь';
+    const SUBJECTIVE_PREFIX = 'Личное воспоминание';
     const memorySelection = {
-        associations: activeAssociations.length,
-        subjective: Math.min(subjectiveEpisodes.length, 2),
-        episodes: episodeRecords.length,
+        associations: relevantEpisodes.filter(line => line.startsWith(ASSOCIATION_PREFIX)).length,
+        subjective: relevantEpisodes.filter(line => line.startsWith(SUBJECTIVE_PREFIX)).length,
+        episodes: relevantEpisodes.filter(line => !line.startsWith(ASSOCIATION_PREFIX) && !line.startsWith(SUBJECTIVE_PREFIX)).length,
         total: relevantEpisodes.length,
     };
     const repetitionFromLogs = countRepetitions(recentEvents, currentActionId, currentPointId);
