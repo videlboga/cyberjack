@@ -2,7 +2,6 @@ import { CompiledAction } from '../domain/types';
 import { CommandIntent } from '../domain/resolver';
 import { presetRepo, characterItemsRepo, itemRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
-import { matchAggregateUndressCommand } from './undressHeuristic';
 
 export interface ParsedVerbalAction extends Partial<CompiledAction> {
     pointId?: string;
@@ -319,25 +318,6 @@ export async function parseVerbalInput(
     }
 
     // ── Regular verbal command parsing (existing logic) ──
-
-    // Common aggregate wardrobe commands must not depend on an LLM returning
-    // the singular targetContext shape. The runtime safely ignores items that
-    // are not currently worn.
-    if (!commandDiscussionOnly && matchAggregateUndressCommand(text)) {
-        return {
-            intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0,
-            pointId: 'systemic',
-            commandIntent: {
-                type: 'deactivate_contexts',
-                targetContextIds: [
-                    'eq_clothe_jumpsuit', 'eq_clothe_calibration_set', 'eq_clothe_lab_gown',
-                    'eq_clothe_dress', 'eq_clothe_costume', 'eq_clothe_stockings', 'eq_clothe_underwear', 'eq_clothe_panties'
-                ]
-            },
-            raw: JSON.stringify({ intent: 'deactivate_context', deterministic: 'remove_all_clothing' }),
-            model: 'deterministic-command-v1'
-        };
-    }
 
     const ctxList = presetRepo.getAllActionPresets()
         .filter(act => act.contextConfig)

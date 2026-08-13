@@ -2,7 +2,6 @@ import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { presetRepo } from '../infrastructure/repositories';
 import type { CommandIntent } from '../domain/resolver';
 import { conditioningTags } from '../domain/conditioning';
-import { isGenericUndressCommand } from './undressHeuristic';
 
 type Candidate = { id: string; label: string; kind: 'action' | 'context' | 'point'; text: string; tags?: string[]; vector?: number[] };
 type SceneCharacter = { id: string; name: string };
@@ -15,8 +14,6 @@ const CHARACTER_CONTROLLED_CONTEXT_TAGS = new Set(['pose', 'clothing', 'exposure
  * place that reinterprets command text; command resolution downstream only
  * collects the active clothing contexts to remove.
  */
-export { isGenericUndressCommand };
-
 export function isCharacterControlledContext(candidate: Pick<Candidate, 'tags'> | undefined) {
     return Boolean(candidate?.tags?.some(tag => CHARACTER_CONTROLLED_CONTEXT_TAGS.has(tag)));
 }
@@ -251,9 +248,8 @@ ID выбирай только из кандидатов и присутству
         : false;
     if (mayExecute) {
         if (command.type === 'perform_action' && command.actionId) {
-            const genericUndress = isGenericUndressCommand(text);
-            const actionId = genericUndress ? 'command_remove_worn_clothing' : command.actionId;
-            if (genericUndress || candidates.actions.some(item => item.id === actionId)) {
+            const actionId = command.actionId;
+            if (candidates.actions.some(item => item.id === actionId)) {
                 commandIntent = { type: 'perform_action', actionId, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
             }
         }
