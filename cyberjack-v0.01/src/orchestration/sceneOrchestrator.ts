@@ -313,7 +313,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
 
 import { db } from '../infrastructure/db';
 import { chatMemoryRepo } from '../infrastructure/repositories';
-import { generateNarratorReply, generateSceneForCharacter } from '../adapters/llmAdapter';
+import { executeNarratorReply } from '../services/narratorExecutor';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { buildCharacterTurnContext } from './characterTurnContext';
 import { recordMemoryEvent } from '../services/memoryLayer';
@@ -617,7 +617,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             tickResultText
         };
         try {
-            const sceneRes = await generateSceneForCharacter(scenePrompt);
+            const sceneRes = await executeNarratorReply({ kind: 'scene', prompt: scenePrompt });
             sceneForChar = sceneRes?.reaction || null;
         } catch (e) {
             console.error('[Scene A] failed:', e);
@@ -1139,7 +1139,7 @@ ${commandPresentation?.executorNow || (bundle.actionApplied ? `Ты сейчас
         promptPayload.narratorPrompt.systemEvents = (bundle as any).systemNotes?.length ? (bundle as any).systemNotes : undefined;
 
         try {
-            const narratorRes = await generateNarratorReply(promptPayload.narratorPrompt);
+            const narratorRes = await executeNarratorReply({ kind: 'chronicle', prompt: promptPayload.narratorPrompt });
             narratorReaction = narratorRes?.reaction || null;
         } catch (e) {
             console.error('[Narrator B] failed:', e);
