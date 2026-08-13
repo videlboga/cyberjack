@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { sceneRepo, presetRepo, activeContextsRepo, eventLogRepo, sceneCharacterRepo, sceneLayoutsRepo } from '../../infrastructure/repositories';
-import { ContextManager } from '../../orchestration/contextManager';
+import { sceneRepo, presetRepo, activeContextsRepo, sceneCharacterRepo, sceneLayoutsRepo } from '../../infrastructure/repositories';
+import { toggleContext as toggleContextService } from '../../services/contextService';
 
 
 export const getScenes = (req: Request, res: Response) => {
@@ -52,40 +52,17 @@ export const moveScene = (req: Request, res: Response) => {
     export const toggleContext = (req: Request, res: Response) => {
         try {
             const { subjectId = 'CL-01', contextId, isActive, pointId } = req.body;
-            const targetContext = presetRepo.getActionPreset(contextId);
-            const actorName = 'Брокер';
-            
-            if (!targetContext) throw new Error("Context preset not found.");
-
-            const narratives: string[] = [];
-
-            if (isActive) {
-                // If a pointId is provided, apply the context specifically to that point
-                ContextManager.applyContext(subjectId, contextId, targetContext, pointId || undefined);
-                const forcedNarrative = `Активирован контекст: ${targetContext.label}`;
-                eventLogRepo.append(subjectId, 'context_change',
-                    { presetId: 'context_change', action: null, actionLabel: forcedNarrative, narrative: forcedNarrative },
-                    { added: true }
-                );
-                narratives.push(forcedNarrative);
-            } else {
-                if (pointId !== undefined && pointId !== null) {
-                    activeContextsRepo.removeByActionIdAndPoint(subjectId, contextId, pointId);
-                } else {
-                    activeContextsRepo.removeByActionId(subjectId, contextId);
-                }
-                const removalText = `Контекст удален: ${targetContext.label}`;
-                eventLogRepo.append(subjectId, 'context_change',
-                    { presetId: 'context_change', action: null, actionLabel: removalText, narrative: removalText },
-                    { removed: true }
-                );
-                narratives.push(removalText);
-            }
+            const narratives = toggleContextService({
+                subjectId,
+                contextId,
+                isActive: Boolean(isActive),
+                pointId,
+            });
             res.json({ success: true, narratives });
         } catch (error: any) {
             res.status(500).json({ success: false, error: error.message });
         }
-};
+    };
 
 export const getSceneLayout = (req: Request, res: Response) => {
     try {
