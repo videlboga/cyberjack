@@ -156,3 +156,42 @@ export function getActiveContract(playerId: string, subjectId?: string) {
   }
   return { contract: active, progress };
 }
+
+/**
+ * Этап 4. Просроченные контракты.
+ *
+ * Принятый контракт с истёкшим deadlineTick помечается `expired`, и к игроку
+ * применяются штрафы (penalties). Вызывается из advanceSimulationTime после
+ * продвижения времени, поэтому дедлайн считается по авторитетному worldMinute.
+ */
+export function expireOverdueContracts(worldMinute: number): string[] {
+  const expired: string[] = [];
+  const accepted = db.prepare(
+    `SELECT * FROM asset_contracts WHERE state = 'accepted' AND deadline_tick IS NOT NULL AND deadline_tick <= ?`
+  ).all(worldMinute) as any[];
+  for (const row of accepted) {
+    const contract = contractRepo._mapRow(row);
+    const playerId = contract.acceptedByPlayerId || 'PL-1';
+    const penalties = contract.penalties || {};
+    db.transaction(() => {
+      contract.state = 'expired';
+      contractRepo.save(contract);
+      if (penalties.credits) {
+        db.prepare(`
+          INSERT INTO character_resources (character_id, resource_key, amount, metadata)
+          VALUES (?, 'credits', ?, '{}')
+          ON CONFLICT(character_id, resource_key) DO UPDATE SET amount = amount + excluded.amount
+        `).run(playerId, penalties.credits);
+      }
+      if (penalties.trust) {
+        db.prepare(`
+          INSERT INTO player_faction_states (player_id, faction_id, relation, trust, access_level, flags)
+          VALUES (?, ?, 0, ?, 1, '[]')
+          ON CONFLICT(player_id, faction_id) DO UPDATE SET trust = trust + excluded.trust
+        `).run(playerId, contract.issuerId, penalties.trust);
+      }
+    })();
+    expired.push(contract.id);
+  }
+  return expired;
+}

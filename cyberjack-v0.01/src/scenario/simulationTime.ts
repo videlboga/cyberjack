@@ -4,6 +4,7 @@ import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, claimB
 import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
+import { expireOverdueContracts } from '../services/contractService';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryRepo } from '../infrastructure/repositories';
 import { emitTrace, newRequestId } from '../orchestration/trace';
@@ -23,6 +24,8 @@ export async function advanceSimulationTime(
     if (!amount) return getWorldClock();
     const clock = advanceWorldTime(amount, reason, options);
     await runBackgroundSustainedTicks(amount);
+    // Expire accepted contracts whose deadline has passed (Этап 4).
+    expireOverdueContracts(clock.totalMinutes);
     // After time is fixed, run any background jobs that have come due. Each
     // job is idempotent on (type, key), so a repeated worker run never
     // duplicates replicas or memories. LLM-backed jobs run in the background
