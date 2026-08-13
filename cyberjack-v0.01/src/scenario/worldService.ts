@@ -1,5 +1,5 @@
 import { db } from '../infrastructure/db';
-import { activeContextsRepo, characterItemsRepo, characterRepo, chatMemoryRepo, itemRepo, pointStateRepo, resourceRepo, sceneCharacterRepo, subjectRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, characterItemsRepo, characterRelationRepo, characterRepo, chatMemoryRepo, itemRepo, memoryRepo, pointStateRepo, presetRepo, resourceRepo, sceneCharacterRepo, subjectRepo } from '../infrastructure/repositories';
 import { appendRoleHistory, ensureCharacterLifecycle } from './characterLifecycle';
 import { ensureStarterClothing, STARTER_CLOTHING } from '../infrastructure/starterClothing';
 import { clearCalibrationSetupContexts } from './calibrationContextCleanup';
@@ -7,9 +7,18 @@ import { emitSupplyPurchased } from './eventDirector';
 import { ensureGeneratedCandidates } from './generatedCandidates';
 import { ensureCharacterStorySeeds } from './characterStorySeeds';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
+import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
 import { setLaboratoryPresence } from './spatialContext';
 import { describeDeviceProtocolEvent, describeDeviceProtocolSummary } from '../narrative/deviceExperience';
+import { ContextManager } from '../orchestration/contextManager';
+import { enqueueBackgroundJob } from '../orchestration/backgroundJobs';
+import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
+import { memoryTagLabel } from '../domain/memoryTagLabels';
+import { correctionImpact } from '../domain/memoryCorrection';
+import { SexMachineStimulationMode, sexMachineStimulation } from '../domain/sexMachineStimulation';
+import { buildEmbedding } from '../services/embeddingService';
+import { applySubjectiveIntervention, applySubjectiveTagIntervention, createManualTagLink, getSubjectiveEpisode, listManualTagLinks, queueSubjectiveEpisode, regenerateSubjectiveEpisode, removeManualTagLink } from '../services/subjectiveMemoryEpisodes';
 
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
@@ -73,7 +82,8 @@ const SHOP_OFFERS = [
     { id: 'offer_neurostabilizer', itemId: 'drug_neurostabilizer', name: 'NeuroCalm', description: 'Ампула нейростабилизатора для восстановительной капсулы.', category: 'item', price: 140, stock: 6 },
     { id: 'offer_plasticity_catalyst', itemId: 'drug_plasticity_catalyst', name: 'Mnemosyne-P', description: 'Ампула пластического катализатора для восстановительной капсулы.', category: 'item', price: 210, stock: 4 },
     { id: 'lab_recovery_capsule', itemId: 'lab_recovery_capsule', name: 'Восстановительная капсула', description: 'Вертикальная ёмкость с вязкой тёплой жидкостью, кислородной маской и каналом подачи питательного раствора; постепенно расслабляет и стабилизирует тело.', category: 'laboratory', price: 700, stock: 1 },
-    { id: 'lab_sex_machine', itemId: 'lab_sex_machine', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.', category: 'laboratory', price: 1450, stock: 1 }
+    { id: 'lab_sex_machine', itemId: 'lab_sex_machine', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.', category: 'laboratory', price: 1450, stock: 1 },
+    { id: 'lab_mental_correction_chair', itemId: 'lab_mental_correction_chair', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.', category: 'laboratory', price: 1250, stock: 1 }
 ] as const;
 
 const BASE_LAB_ASSETS = [
@@ -94,6 +104,7 @@ const BASE_LAB_ROOMS = [
  * placement rules about actual assignable characters.
  */
 const PLAYER_ROOM_STATUS = 'operator';
+let worldSeeded = false;
 
 function normalizePlayerProfile() {
     const row = db.prepare(`SELECT profile_json FROM characters WHERE id = ?`).get(PLAYER_ID) as { profile_json?: string | null } | undefined;
@@ -130,6 +141,10 @@ function normalizePlayerProfile() {
 }
 
 export function ensureWorldSeed() {
+    // Seeding contains migrations and relation synchronization that write to
+    // SQLite. Running it for every snapshot turns ordinary GET requests into
+    // expensive disk-bound writes.
+    if (worldSeeded) return;
     db.prepare(`INSERT OR IGNORE INTO world_state (id, total_minutes, day) VALUES ('main', 480, 1)`).run();
     const ensureScene = db.prepare(`
         INSERT OR IGNORE INTO scenes (id, description, available_actions)
@@ -457,6 +472,7 @@ export function ensureWorldSeed() {
     // A newly restored player position must be observable immediately, not
     // only after the next background minute.
     syncLaboratorySpatialRelations(PLAYER_ID);
+    worldSeeded = true;
 }
 
 export function getWorldClock() {
@@ -514,9 +530,11 @@ export type DeviceSession = {
     intensity: number;
     phase: 'sustain' | 'intense' | 'peak';
     targetPointIds: string[];
+    stimulationMode?: SexMachineStimulationMode;
     startedAtTick: number | null;
     updatedAtTick: number;
-    targetMode?: 'manual' | 'edge' | 'positive' | 'negative' | 'mixed' | 'orgasm' | 'exhaustion';
+    memorySourceKey?: string | null;
+    targetMode?: 'manual' | 'edge' | 'positive' | 'negative' | 'mixed' | 'orgasm' | 'exhaustion' | 'tickle_steady' | 'tickle_tease' | 'tickle_disrupt' | 'tickle_endurance';
     rhythm?: 'steady' | 'pulse' | 'wave' | 'random';
     orgasmPolicy?: 'deny' | 'allow' | 'force';
     valencePolicy?: 'adaptive' | 'neutral' | 'positive' | 'negative' | 'mixed';
@@ -526,6 +544,35 @@ export type DeviceSession = {
     orgasmTargetCount?: number | null;
     orgasmCount?: number;
     stopAtReserve?: boolean;
+    lastDischargeEvent?: { id: number; worldMinute: number };
+};
+
+export type MentalChairFrame = 'reinforce' | 'anxiety' | 'contradiction' | 'reframe';
+export type MentalChairPhase = 'recall' | 'immersion' | 'consolidation';
+export type MentalChairSession = {
+    subjectId: string;
+    status: 'loaded' | 'running' | 'paused' | 'stopped';
+    intensity: number;
+    frame: MentalChairFrame;
+    phase: MentalChairPhase;
+    memoryId: number | null;
+    memoryText: string | null;
+    memoryTags: string[];
+    relatedSubjectIds: string[];
+    focusTag: string | null;
+    startedAtTick: number | null;
+    updatedAtTick: number;
+    memorySourceKey?: string | null;
+    lastNarrativePhase?: MentalChairPhase;
+    lastIntervention?: {
+        targetLabel: string;
+        intervention: string;
+        operation: string;
+        affected: number;
+        changes: Array<{ target: string; before: { valence: number; strength: number; expectation: string }; after: { valence: number; strength: number; expectation: string } }>;
+        at: number;
+        pending?: boolean;
+    };
 };
 
 const DEVICE_DEFINITIONS = {
@@ -546,6 +593,206 @@ const phaseForDeviceIntensity = (intensity: number): DeviceSession['phase'] =>
     intensity >= 85 ? 'peak' : intensity >= 60 ? 'intense' : 'sustain';
 
 const isControllableDevice = (assetId: string): assetId is DeviceAssetId => assetId in DEVICE_DEFINITIONS;
+
+const mentalChairPhaseFor = (session: MentalChairSession, worldMinute: number): MentalChairPhase => {
+    const elapsed = Math.max(0, worldMinute - Number(session.startedAtTick ?? worldMinute));
+    return elapsed < 5 ? 'recall' : elapsed < 20 ? 'immersion' : 'consolidation';
+};
+
+function initialMentalChairSession(subjectId: string, worldMinute: number): MentalChairSession {
+    return {
+        subjectId,
+        status: 'loaded',
+        intensity: 40,
+        frame: 'reframe',
+        phase: 'recall',
+        memoryId: null,
+        memoryText: null,
+        memoryTags: [],
+        relatedSubjectIds: [],
+        focusTag: null,
+        startedAtTick: null,
+        updatedAtTick: worldMinute,
+    };
+}
+
+async function controlMentalChairSession(
+    row: { asset_id: string; name: string; metadata: string },
+    command: 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop' | 'intervene',
+    payload: { memoryId?: number; focusTag?: string | null; frame?: MentalChairFrame; intensity?: number; targetLabel?: string; tag?: string; tags?: string[]; unlinkTags?: string[]; intervention?: string },
+    playerId: string,
+) {
+    let metadata: Record<string, any> = {};
+    try { metadata = JSON.parse(row.metadata || '{}'); } catch { metadata = {}; }
+    const current = metadata.mentalSession as MentalChairSession | undefined;
+    if (!metadata.subjectId || !current) throw new Error('В кресло не помещён персонаж');
+    const now = getWorldClock().totalMinutes;
+    let next: MentalChairSession = { ...current, updatedAtTick: now };
+    if (command === 'configure') {
+        if (current.status === 'running') throw new Error('Приостановите сессию перед выбором воспоминания');
+        const memoryId = Number(payload.memoryId);
+        const sourceRecords = memoryRepo.listRecent(current.subjectId, 160, 'episode_v2');
+        const memory = aggregateMemoryEpisodes(sourceRecords, 80).find(entry => entry.id === memoryId);
+        if (!memory) throw new Error('Выбранный эпизод не найден среди воспоминаний персонажа');
+        queueSubjectiveEpisode(current.subjectId, characterRepo.get(current.subjectId)?.name || current.subjectId, memory);
+        const candidateTags = memory.tags.filter(tag => /^[a-z0-9_:-]+$/i.test(tag));
+        const focusTag = payload.focusTag && candidateTags.includes(payload.focusTag)
+            ? payload.focusTag
+            : candidateTags[0] || null;
+        next = {
+            ...next,
+            memoryId: memory.id,
+            memorySourceKey: `${memory.id}:${memory.moments.map(moment => moment.id).join(',')}`,
+            memoryText: memory.text,
+            memoryTags: candidateTags,
+            relatedSubjectIds: memory.relatedSubjectIds,
+            focusTag,
+            frame: payload.frame || current.frame,
+            intensity: Math.max(10, Math.min(100, Number(payload.intensity ?? current.intensity))),
+            phase: 'recall',
+        };
+    } else if (command === 'settings' || command === 'adjust') {
+        next = {
+            ...next,
+            frame: payload.frame || current.frame,
+            focusTag: payload.focusTag === null || current.memoryTags.includes(String(payload.focusTag))
+                ? payload.focusTag ?? null
+                : current.focusTag,
+            intensity: Math.max(10, Math.min(100, Number(payload.intensity ?? current.intensity))),
+        };
+    } else if (command === 'intervene') {
+        if (!current.memorySourceKey || (!payload.targetLabel && !payload.tag && !payload.tags?.length && !payload.unlinkTags?.length) || !payload.intervention?.trim()) throw new Error('Выберите тег, связку тегов или связь и сформулируйте внушение');
+        const text = payload.intervention.trim();
+        const operation = current.frame === 'anxiety' ? 'anxiety' : ['reframe', 'contradiction'].includes(current.frame) ? 'reframe' : 'reinforce';
+        const memory = aggregateMemoryEpisodes(memoryRepo.listRecent(current.subjectId, 160, 'episode_v2'), 80)
+            .find(entry => `${entry.id}:${entry.moments.map(moment => moment.id).join(',')}` === current.memorySourceKey);
+        if (!memory) throw new Error('Эпизод для внушения больше не найден');
+        const intensity = Math.max(.1, Math.min(1, Number(current.intensity || 40) / 100));
+        const unlinkTags = [...new Set((payload.unlinkTags || []).filter(tag => memory.tags.includes(tag)))];
+        const selectedTags = [...new Set((payload.tags || (payload.tag ? [payload.tag] : [])).filter(tag => memory.tags.includes(tag)))];
+        const manualLink = selectedTags.length === 2;
+        const manualUnlink = unlinkTags.length === 2;
+        const tag = selectedTags.length === 1 ? selectedTags[0] : null;
+        const targetLabel = manualUnlink ? `Связка: ${unlinkTags.map(memoryTagLabel).join(' · ')}` : manualLink ? `Связка: ${selectedTags.map(memoryTagLabel).join(' · ')}` : tag ? memoryTagLabel(tag) : payload.targetLabel!;
+        // An intervention is an explicit editing operation: the LLM may
+        // reframe the subjective account, but receives the factual episode as
+        // immutable ground truth. This is deliberately never run on refresh.
+        // The LLM regeneration and its post-effects run as a background job so
+        // the API never blocks on the model (Этап 7: «интерфейс не блокируется
+        // на время LLM-задания»). The session records the intent immediately;
+        // the job updates the revision when it completes.
+        enqueueBackgroundJob({
+            type: 'episode.intervene',
+            key: `episode.intervene:${current.subjectId}:${current.memorySourceKey}`,
+            subjectId: current.subjectId,
+            dueMinute: now,
+            payload: {
+                subjectId: current.subjectId,
+                characterName: characterRepo.get(current.subjectId)?.name || current.subjectId,
+                memorySourceKey: current.memorySourceKey,
+                text,
+                operation,
+                intensity,
+                selectedTags,
+                unlinkTags,
+                targetLabel,
+                playerId,
+                worldMinute: now,
+            },
+        });
+        next = {
+            ...next,
+            updatedAtTick: now,
+            lastIntervention: { targetLabel, intervention: text, operation, affected: 0, changes: [], at: now, pending: true },
+        };
+    } else if (command === 'start') {
+        if (!current.memoryText || !current.memoryId) throw new Error('Сначала выберите воспоминание для сессии');
+        if (current.status === 'running') throw new Error('Сессия уже запущена');
+        next = { ...next, status: 'running', startedAtTick: current.startedAtTick ?? now, phase: mentalChairPhaseFor(current, now) };
+    } else if (command === 'pause') {
+        if (current.status !== 'running') throw new Error('Сессия не запущена');
+        next = { ...next, status: 'paused' };
+    } else if (command === 'resume') {
+        if (current.status !== 'paused') throw new Error('Сессия не находится на паузе');
+        next = { ...next, status: 'running' };
+    } else if (command === 'stop') {
+        if (!['running', 'paused'].includes(current.status)) throw new Error('Сессия уже остановлена');
+        next = { ...next, status: 'stopped', startedAtTick: null, phase: 'recall' };
+    }
+    db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
+        .run(JSON.stringify({ ...metadata, mentalSession: next }), playerId, row.asset_id);
+    recordScenarioEvent('mental_correction', `Кресло: ${command}`, command === 'configure'
+        ? 'Выбран эпизод для ментальной сессии.'
+        : command === 'start' ? 'Ментальная сессия запущена.'
+            : command === 'stop' ? 'Ментальная сессия остановлена.' : 'Параметры ментальной сессии обновлены.', {
+        subjectId: next.subjectId, assetId: row.asset_id, command, frame: next.frame, focusTag: next.focusTag,
+    });
+    return { assetId: row.asset_id, session: next };
+}
+
+export interface EpisodeInterventionInput {
+    subjectId: string;
+    characterName: string;
+    memory: any;
+    memorySourceKey: string;
+    text: string;
+    operation: 'anxiety' | 'reframe' | 'reinforce';
+    intensity: number;
+    selectedTags: string[];
+    unlinkTags: string[];
+    targetLabel: string;
+    playerId: string;
+    worldMinute: number;
+}
+
+/**
+ * Runs a full mental-chair episode intervention: LLM regeneration plus the
+ * post-effects (manual tag link, tag/intervention application, core impact,
+ * memory event, revision record). Runs in a background job so the API never
+ * blocks on the LLM (Этап 7: «интерфейс не блокируется на время LLM-задания»).
+ */
+export async function runEpisodeIntervention(input: EpisodeInterventionInput) {
+    const { subjectId, characterName, memory, memorySourceKey, text, operation, intensity, selectedTags, unlinkTags, targetLabel, playerId, worldMinute } = input;
+    const manualLink = selectedTags.length === 2;
+    const manualUnlink = unlinkTags.length === 2;
+    const tag = selectedTags.length === 1 ? selectedTags[0] : null;
+    // An intervention is an explicit editing operation: the LLM may reframe
+    // the subjective account, but receives the factual episode as immutable
+    // ground truth. This is deliberately never run on refresh.
+    const regeneration = regenerateSubjectiveEpisode(
+        subjectId,
+        characterName,
+        memory,
+        manualUnlink
+            ? `Разорви смысловую связь между тегами ${unlinkTags.join(', ')}. Не помещай эти теги в одну ассоциацию; сохрани объективные факты. ${text}`
+            : manualLink
+            ? `Создай новую отдельную ассоциацию, которая связывает ВСЕ теги: ${selectedTags.join(', ')}. Для неё обязательно выбери конкретный target, добавь точную цитату из summary в evidence и вплети эту связь в личную оценку. ${text}`
+            : `Для ${tag ? `тега «${targetLabel}»` : `связи «${targetLabel}»`}: ${text}`,
+        selectedTags,
+        manualUnlink ? unlinkTags : [],
+    );
+    if (!regeneration) throw new Error('Не удалось запустить пересборку субъективной памяти');
+    await regeneration;
+    const createdManualLink = manualLink ? createManualTagLink(subjectId, memory, selectedTags, targetLabel) : null;
+    if (manualUnlink) removeManualTagLink(subjectId, memory, unlinkTags);
+    const result = manualUnlink
+        ? { affected: 1, operation, changes: [] }
+        : manualLink
+        ? { affected: 1, operation, changes: [{ target: createdManualLink!.target, before: { valence: 0, strength: 0, expectation: 'anticipate' }, after: createdManualLink! }] }
+        : tag
+        ? applySubjectiveTagIntervention(subjectId, memory, tag, memoryTagLabel(tag), operation, intensity)
+        : applySubjectiveIntervention(subjectId, memory, targetLabel, operation, intensity);
+    const core = subjectRepo.get(subjectId);
+    const impact = core ? correctionImpact({ intensity, plasticity: core.plasticity, operation, linkedTags: Math.max(1, selectedTags.length) }) : null;
+    if (core && impact) {
+        subjectRepo.save(subjectId, core.name, { ...core, capacity: Math.max(0, core.capacity - impact.capacityCost), plasticity: Math.max(0, core.plasticity - impact.plasticityCost) });
+        relationshipDynamicsRepo.change(subjectId, playerId, { resistance: impact.resistanceDelta, fear: impact.fearDelta, dissociation: impact.dissociationDelta });
+    }
+    const sessionText = `В кресле коррекции памяти я снова прожила эпизод «${memory.title}». Калибратор вмешался в связь ${targetLabel.toLowerCase()}. ${impact?.dissociationDelta ? 'От этого воспоминание на миг стало противоречивым и зыбким.' : 'Новая связь закрепилась в моей оценке произошедшего.'}`;
+    memoryRepo.save({ subjectId, text: sessionText, embedding: buildEmbedding(sessionText), tags: ['mental', 'conditioning', 'memory_recall', 'correction', ...(selectedTags.length ? selectedTags : [])], relatedSubjects: [playerId], type: 'episode_v2', metadata: { mentalCorrection: true, parentEpisodeSourceKey: memorySourceKey, operation, targetLabel, intensity, correctionImpact: impact, worldMinute } });
+    db.prepare('INSERT INTO subjective_memory_revisions (subject_id,source_key,target_label,intervention,operation) VALUES (?,?,?,?,?)').run(subjectId, memorySourceKey, targetLabel, text, operation);
+    return { affected: result.affected, changes: result.changes, targetLabel, operation, at: worldMinute };
+}
 
 function hasPerceptibleDeviceChange(
     command: 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop',
@@ -595,6 +842,57 @@ function processHistoryLabel(action: Record<string, any>): string {
         || action.actionLabel
         || action.presetId
         || 'Воздействие';
+}
+
+function briefMemoryPhrase(value: unknown, words = 5) {
+    const cleaned = String(value || '')
+        .replace(/\s+/g, ' ')
+        .replace(/[«»]/g, '')
+        .trim();
+    if (!cleaned) return '';
+    const phrase = cleaned.split(' ').slice(0, words).join(' ').replace(/[,:;.]$/, '');
+    return phrase.length < cleaned.length ? `${phrase}…` : phrase;
+}
+
+function mentalMemoryTitle(memory: { text: string; metadata: Record<string, any> }) {
+    const playerSpeech = briefMemoryPhrase(memory.metadata.playerSpeech);
+    if (playerSpeech) return `Вопрос: ${playerSpeech}`;
+    const characterSpeech = briefMemoryPhrase(memory.metadata.characterSpeech);
+    if (characterSpeech) return `Ответ: ${characterSpeech}`;
+    const directSpeech = String(memory.text || '').match(/^([^:]{2,32}):\s*(.+)$/s);
+    if (directSpeech) return `${directSpeech[1].trim()}: ${briefMemoryPhrase(directSpeech[2], 4)}`;
+    const actionLabel = String(memory.metadata.actionLabel || '').trim();
+    if (actionLabel) return `${actionLabel} — пережитый эпизод`;
+    const observed = String(memory.text || '').match(/Действие «([^»]+)» от ([^ ]+)/);
+    if (observed) return `${observed[1]} — наблюдение`;
+    return `Эпизод: ${briefMemoryPhrase(memory.text, 4) || 'сохранённое событие'}`;
+}
+
+function memoryDisplayText(memory: { text: string; metadata: Record<string, any> }) {
+    const metadata = memory.metadata || {};
+    const action = metadata.observation?.action || {};
+    const legacy = /^Действие:\s*/u.test(memory.text || '');
+    if (!legacy || !action.description) return memory.text;
+    const compact = (value: unknown, limit = 1200) => {
+        const text = String(value || '').replace(/\s+/g, ' ').trim();
+        return text.length > limit ? `${text.slice(0, limit - 1).trimEnd()}…` : text;
+    };
+    const firstPerson = (value: unknown) => compact(value)
+        .replace(/в рот персонажа/giu, 'мне в рот')
+        .replace(/персонажу/giu, 'мне')
+        .replace(/персонажа/giu, 'меня');
+    const parts = [firstPerson(action.description)];
+    const texture = compact(action.sensory?.texture, 220);
+    if (texture && texture !== parts[0]) parts.push(texture);
+    const reactionState = String(metadata.observation?.behavioralState || '');
+    const reactionData = metadata.observation?.reaction || {};
+    const reaction = metadata.memoryReaction || (reactionState === 'panic' ? 'Я испугалась и попыталась отстраниться.'
+        : reactionState === 'defiance' ? 'Я сопротивлялась происходящему.'
+            : Number(reactionData.pleasure || 0) > Number(reactionData.discomfort || 0) * 1.25 ? 'Мне это было приятно.'
+                : Number(reactionData.discomfort || 0) > Number(reactionData.pleasure || 0) * 1.25 ? 'Мне это было неприятно.' : 'Я отчётливо запомнила это ощущение.');
+    if (reaction) parts.push(reaction);
+    if (metadata.characterSpeech) parts.push(`Я ответила: «${compact(metadata.characterSpeech, 160)}».`);
+    return parts.join(' ');
 }
 
 function applyPassiveLaboratoryEffects(minutes: number, excluded = new Set<string>()) {
@@ -674,8 +972,8 @@ export function travelTo(targetSceneId: string, playerId = PLAYER_ID) {
     if (current.id === target.id) throw new Error('Вы уже находитесь здесь');
     const minutes = Math.max(current.travelMinutes, target.travelMinutes);
     sceneCharacterRepo.moveCharacter(playerId, target.id, { role: 'calibrator', presenceState: 'present' });
-    const clock = advanceWorldTime(minutes);
-    recordScenarioEvent('travel', `Прибытие: ${target.shortTitle}`, `Дорога заняла ${minutes} мин.`, { from: current.id, to: target.id });
+    const clock = getWorldClock();
+    recordScenarioEvent('travel', `Прибытие: ${target.shortTitle}`, `Перемещение выполнено; игровое время не ускорялось.`, { from: current.id, to: target.id, travelMinutes:minutes });
     return { location: target, clock, minutes };
 }
 
@@ -837,7 +1135,7 @@ export function recruitCandidate(characterId: string, role: 'staff' | 'asset', p
         setLaboratoryPresence({ characterId, slotId: `room:${roomId}`, roomId, status: 'resident', playerId });
     })();
     ensureCharacterStorySeeds();
-    const clock = advanceWorldTime(30);
+    const clock = getWorldClock();
     ensureCharacterLifecycle(characterId, 'candidate');
     const title = role === 'asset' ? 'Новый актив принят' : 'Сотрудник нанят';
     const description = `${candidate.name} включена в состав лаборатории.`;
@@ -872,7 +1170,7 @@ export function changeLaboratoryRole(characterId: string, role: 'staff' | 'asset
         sceneCharacterRepo.set(LAB_SCENE_ID, characterId, { role, presenceState: 'present' });
         setLaboratoryPresence({ characterId, slotId: `room:${roomId}`, roomId, status: 'resident', playerId });
     })();
-    const clock = advanceWorldTime(20);
+    const clock = getWorldClock();
     const title = role === 'asset' ? 'Перевод в активы' : 'Назначение в штат';
     const description = `${character.name}: статус изменён с «${currentRole}» на «${role}».`;
     const event = recordScenarioEvent('role_change', title, description, { subjectId: characterId, from: currentRole, role, roomId });
@@ -912,7 +1210,7 @@ export function buyOffer(offerId: string, playerId = PLAYER_ID) {
             });
         }
     })();
-    const clock = advanceWorldTime(10);
+    const clock = getWorldClock();
     recordScenarioEvent('purchase', 'Приобретено', offer.name, { offerId, price: offer.price, provenance:offerMetadata });
     emitSupplyPurchased({ offerId,itemId:offer.item_id,playerId,metadata:offerMetadata });
     return { offerId, name: offer.name, price: offer.price, clock };
@@ -921,7 +1219,7 @@ export function buyOffer(offerId: string, playerId = PLAYER_ID) {
 export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYER_ID) {
     if (getPlayerLocation(playerId).id !== LAB_SCENE_ID) throw new Error('Лабораторное оборудование доступно только в лаборатории');
     if (!listLabAssets(playerId).some(asset => asset.id === assetId)) throw new Error('Модуль не установлен');
-    if (!['lab_recovery_capsule', 'lab_diagnostic_table', 'lab_sex_machine'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
+    if (!['lab_recovery_capsule', 'lab_diagnostic_table', 'lab_sex_machine', 'lab_mental_correction_chair'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
     const core = subjectRepo.get(subjectId);
     if (!core) throw new Error('Актив не найден');
     const asset = listLabAssets(playerId).find(entry => entry.id === assetId)!;
@@ -943,8 +1241,11 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
     const returnRoomId = String((asset.metadata as any)?.previousRoomId || assignment?.room_id || previousRoomId);
     const leavesCalibrationTable = previouslyOccupiedAsset?.id === 'lab_diagnostic_table' && assetId !== 'lab_diagnostic_table';
     const releasedFromCalibrationTable = assetId === 'lab_diagnostic_table' && !nextSubjectId;
+    const leavesMentalChair = previouslyOccupiedAsset?.id === 'lab_mental_correction_chair' && assetId !== 'lab_mental_correction_chair';
+    const releasedFromMentalChair = assetId === 'lab_mental_correction_chair' && !nextSubjectId;
     db.transaction(() => {
         if (leavesCalibrationTable || releasedFromCalibrationTable) clearCalibrationSetupContexts(subjectId);
+        if (leavesMentalChair || releasedFromMentalChair) activeContextsRepo.removeByActionId(subjectId, 'context_mental_correction_chair');
         if (nextSubjectId) {
             // A character can physically occupy only one laboratory container.
             const rows = db.prepare(`SELECT asset_id, metadata FROM laboratory_assets WHERE player_id = ?`).all(playerId) as any[];
@@ -981,6 +1282,11 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
                 }
             }
         }
+        if (nextSubjectId && assetId === 'lab_mental_correction_chair') {
+            const chairContext = presetRepo.getActionPreset('context_mental_correction_chair');
+            if (!chairContext) throw new Error('Не найден контекст кресла ментальной коррекции');
+            ContextManager.applyContext(subjectId, 'context_mental_correction_chair', chairContext, undefined, playerId);
+        }
         const definition = isControllableDevice(assetId) ? DEVICE_DEFINITIONS[assetId] : null;
         const deviceSession: DeviceSession | undefined = definition && nextSubjectId ? {
             deviceId: definition.deviceId,
@@ -991,6 +1297,7 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
             intensity: 35,
             phase: 'sustain',
             targetPointIds: ['vagina'],
+            stimulationMode: 'vaginal',
             startedAtTick: null,
             updatedAtTick: getWorldClock().totalMinutes
             ,targetMode: 'manual',
@@ -1004,9 +1311,12 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
             orgasmCount: 0,
             stopAtReserve: false
         } : undefined;
+        const mentalSession = assetId === 'lab_mental_correction_chair' && nextSubjectId
+            ? initialMentalChairSession(nextSubjectId, getWorldClock().totalMinutes)
+            : undefined;
         db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
             .run(JSON.stringify(nextSubjectId
-                ? { ...asset.metadata, subjectId: nextSubjectId, startedAt: getWorldClock().totalMinutes, previousRoomId, ...(deviceSession ? { deviceSession } : {}) }
+                ? { ...asset.metadata, subjectId: nextSubjectId, startedAt: getWorldClock().totalMinutes, previousRoomId, ...(deviceSession ? { deviceSession } : {}), ...(mentalSession ? { mentalSession } : {}) }
                 : { roomId: (asset.metadata as any)?.roomId }), playerId, assetId);
         setLaboratoryPresence({
             characterId: subjectId,
@@ -1023,14 +1333,15 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
 
 export function controlDeviceSession(
     assetId: string,
-    command: 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop',
-    payload: { configuration?: string; wardrobe?: string; intensity?: number; targetPointIds?: string[]; targetMode?: DeviceSession['targetMode']; rhythm?: DeviceSession['rhythm']; orgasmPolicy?: DeviceSession['orgasmPolicy']; valencePolicy?: DeviceSession['valencePolicy']; maxTension?: number; minCapacity?: number; stopAfterMinutes?: number | null; orgasmTargetCount?: number | null; stopAtReserve?: boolean } = {},
+    command: 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop' | 'intervene',
+    payload: { configuration?: string; wardrobe?: string; intensity?: number; stimulationMode?: SexMachineStimulationMode; targetMode?: DeviceSession['targetMode']; rhythm?: DeviceSession['rhythm']; orgasmPolicy?: DeviceSession['orgasmPolicy']; valencePolicy?: DeviceSession['valencePolicy']; maxTension?: number; minCapacity?: number; stopAfterMinutes?: number | null; orgasmTargetCount?: number | null; stopAtReserve?: boolean; memoryId?: number; focusTag?: string | null; frame?: MentalChairFrame; targetLabel?: string; intervention?: string } = {},
     playerId = PLAYER_ID
 ) {
-    if (!isControllableDevice(assetId)) throw new Error('Устройство не поддерживает управляемые протоколы');
+    if (!isControllableDevice(assetId) && assetId !== 'lab_mental_correction_chair') throw new Error('Устройство не поддерживает управляемые протоколы');
     const row = db.prepare(`SELECT asset_id, name, description, state, metadata FROM laboratory_assets WHERE player_id = ? AND asset_id = ?`)
         .get(playerId, assetId) as any;
     if (!row) throw new Error('Модуль не установлен');
+    if (assetId === 'lab_mental_correction_chair') return controlMentalChairSession(row, command, payload, playerId);
     let metadata: Record<string, any> = {};
     try { metadata = JSON.parse(row.metadata || '{}'); } catch { metadata = {}; }
     const current = metadata.deviceSession as DeviceSession | undefined;
@@ -1049,6 +1360,8 @@ export function controlDeviceSession(
         if (!wardrobes.includes(wardrobe)) throw new Error('Одежда несовместима с выбранной конфигурацией');
         next = { ...next, configuration, wardrobe: wardrobe as DeviceSession['wardrobe'] };
     } else if (command === 'settings') {
+        const stimulationMode: SexMachineStimulationMode = payload.stimulationMode === 'tickling' ? 'tickling' : payload.stimulationMode === 'anal' ? 'anal' : payload.stimulationMode === 'vaginal' ? 'vaginal' : (current.stimulationMode || 'vaginal');
+        const stimulation = sexMachineStimulation(stimulationMode);
         const hasStopAfter = Object.prototype.hasOwnProperty.call(payload, 'stopAfterMinutes');
         const hasOrgasmTarget = Object.prototype.hasOwnProperty.call(payload, 'orgasmTargetCount');
         const stopAfterMinutes = hasStopAfter
@@ -1064,7 +1377,11 @@ export function controlDeviceSession(
             ...next,
             intensity,
             phase: phaseForDeviceIntensity(intensity),
-            targetPointIds: payload.targetPointIds?.length ? payload.targetPointIds : current.targetPointIds,
+            // A machine mode owns its anatomical route. Keeping an old point
+            // here made already-running sessions retain the previous mode's
+            // target after a mode definition changed.
+            targetPointIds: [stimulation.pointId],
+            stimulationMode,
             targetMode: payload.targetMode || current.targetMode || 'manual',
             rhythm: payload.rhythm || current.rhythm || 'steady',
             orgasmPolicy: payload.orgasmPolicy || current.orgasmPolicy || 'allow',
@@ -1113,6 +1430,12 @@ export function controlDeviceSession(
 
 export function getScenarioSnapshot(playerId = PLAYER_ID) {
     ensureWorldSeed();
+    const characterNames = new Map<string, string>();
+    for (const character of characterRepo.listAll()) {
+        characterNames.set(character.id, character.name);
+        if (character.subjectId) characterNames.set(character.subjectId, character.name);
+    }
+    const subjectName = (id: string) => characterNames.get(id) || id;
     const resources = resourceRepo.get(playerId);
     const events = (db.prepare(`SELECT * FROM scenario_events ORDER BY id DESC LIMIT 8`).all() as any[]).map(row => ({
         id: row.id,
@@ -1206,6 +1529,25 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
             LEFT JOIN json_each(e.result_payload, '$.observation.transitions') t
             WHERE e.subject_id = ?
         `).get(simulationId) as any;
+        const relationships = characterRelationRepo.listFor(simulationId)
+            .filter(relation => relation.toId !== simulationId && relation.target?.name)
+            .map(relation => ({
+                characterId: relation.toId,
+                subjectId: relation.target?.subjectId || relation.toId,
+                name: relation.target!.name,
+                attitude: Number(relation.attitude || 0),
+                openness: Number(relation.openness || 0),
+                familiarity: Number(relation.familiarityLevel || 0),
+                knows: relation.knows,
+                present: relation.present,
+                canInteract: relation.canInteract,
+                opinion: relation.generalOpinion || '',
+                recentMemories: relation.recentMemories || [],
+            }));
+        let dossierNarrative: any;
+        try {
+            dossierNarrative = db.prepare(`SELECT self_description,trait_expression,updated_at FROM dossier_narratives WHERE subject_id=?`).get(simulationId) as any;
+        } catch { dossierNarrative = undefined; }
         return {
             id: row.id,
             name: row.name,
@@ -1224,10 +1566,44 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
             state: subjectRepo.get(simulationId),
             contexts,
             points,
+            mentalMemories: (() => {
+                return aggregateMemoryEpisodes(memoryRepo.listRecent(simulationId, 160, 'episode_v2'), 12, subjectName).map(memory => {
+                const subjective = getSubjectiveEpisode(simulationId, memory);
+                const manualLinks = listManualTagLinks(simulationId, memory);
+                return ({
+                id: memory.id,
+                title: subjective?.title || memory.title,
+                text: subjective ? [subjective.summary, subjective.appraisal].filter(Boolean).join(' ') : memory.text,
+                tags: memory.tags,
+                tagLabels: Object.fromEntries(memory.tags.map(tag => [tag, memoryTagLabel(tag)])),
+                relatedSubjectIds: memory.relatedSubjectIds,
+                worldMinute: memory.worldMinute,
+                atomCount: memory.atomCount,
+                // The client uses moment data only to compose the small
+                // visual collage. Sending each atom's full narrative here
+                // duplicated the memory text many times in every 12-second
+                // world refresh.
+                moments: memory.moments.map(moment => ({
+                    id: moment.id,
+                    sceneId: moment.sceneId,
+                    actionId: moment.actionId,
+                    participantIds: moment.participantIds,
+                    portraitEmotion: moment.portraitEmotion,
+                })),
+                subjective: subjective ? { ...subjective, associations: [...subjective.associations, ...manualLinks] } : undefined,
+            });
+                });
+            })(),
             // State-chart annotations need timestamped engine events. Device
             // placement history has only worldMinute and can otherwise fill
             // the whole limit before a single action reaches the client.
             history: [...engineHistory, ...scenarioHistory].slice(0, 48),
+            relationships,
+            dossierNarrative: dossierNarrative ? {
+                selfDescription: dossierNarrative.self_description,
+                traitExpression: dossierNarrative.trait_expression,
+                updatedAt: dossierNarrative.updated_at,
+            } : undefined,
             statistics: {
                 interactions: Number(totals?.interactions || 0),
                 recordedEvents: Number(totals?.recordedEvents || 0),

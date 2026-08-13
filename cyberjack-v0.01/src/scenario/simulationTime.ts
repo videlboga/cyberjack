@@ -3,6 +3,9 @@ import { advanceWorldTime, getWorldClock } from './worldService';
 import { enqueueBackgroundJob, listDueBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed, markBackgroundJobRunning } from '../orchestration/backgroundJobs';
 import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
+import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
+import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
+import { memoryRepo } from '../infrastructure/repositories';
 
 /**
  * Advances active simulation time.
@@ -65,6 +68,16 @@ async function executeBackgroundJob(job: { type: string; payload: string | null 
         case 'scene.autonomous':
             await runAutonomousSceneMinute();
             return;
+        case 'episode.intervene': {
+            const input = JSON.parse(job.payload || '{}') as EpisodeInterventionInput;
+            // Re-resolve the factual episode from the immutable source key.
+            const memory = aggregateMemoryEpisodes(
+                memoryRepo.listRecent(input.subjectId, 160, 'episode_v2'), 80,
+            ).find(entry => `${entry.id}:${entry.moments.map(moment => moment.id).join(',')}` === input.memorySourceKey);
+            if (!memory) throw new Error('Эпизод для внушения больше не найден');
+            await runEpisodeIntervention({ ...input, memory });
+            return;
+        }
         default:
             throw new Error(`Unknown background job type: ${job.type}`);
     }

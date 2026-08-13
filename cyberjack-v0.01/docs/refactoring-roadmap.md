@@ -383,7 +383,17 @@ Fallback не меняет семантику контракта: `executeCharac
 
 ### Этап 7. Унифицировать память и её фоновые задания
 
-Нужно отделить:
+**В работе.** Инвентаризация модели памяти и перевод коррекции на неблокирующую очередь.
+
+### 2.19. Неблокирующая коррекция памяти
+
+`controlMentalChairSession` (command `intervene`) блокировал API-ответ на LLM-перегенерацию эпизода. Извлечена `runEpisodeIntervention` и переведена на очередь:
+
+- `runEpisodeIntervention` — чистая тестируемая функция: LLM-регенерация + post-эффекты (manual tag link, tag/intervention application, core impact, memory event, revision record).
+- `controlMentalChairSession` больше не `await`-ит LLM: ставит задание `episode.intervene` (идемпотентный ключ по `subjectId:memorySourceKey`) через `enqueueBackgroundJob`, возвращает immediate-ответ с `lastIntervention.pending: true`.
+- Обработчик `episode.intervene` в `simulationTime.executeBackgroundJob` восстанавливает факт эпизода по `memorySourceKey` и исполняет `runEpisodeIntervention`.
+
+Критерий «интерфейс не блокируется на время LLM-задания» выполнен для коррекции памяти.
 
 - первичные факты сессии;
 - субъективные эпизоды;
@@ -586,6 +596,14 @@ Fallback не меняет семантику контракта: `executeCharac
 
 - 112 test files;
 - 521 тест проходит (+4: кеш эмбеддингов);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
+
+После неблокирующей коррекции памяти (Этап 7, первый шаг):
+
+- 112 test files;
+- 521 тест проходит;
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.
