@@ -272,7 +272,7 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 Это первый шаг к критериям: «повторный worker-run безопасен и не дублирует реплики или воспоминания» (идемпотентный ключ) и «продвижение времени сначала фиксируется, затем выбирает готовые задания».
 
-Осталось: перевести sustained/device pulses, автономные сцены, event director и дедлайны контрактов в задания (см. §2.15 — инвентаризация). `timeFlow` heartbeat остаётся единственным драйвером времени (см. правило 3.4).
+Осталось: перевести sustained/device pulses, event director и дедлайны контрактов в задания (см. §2.15 — инвентаризация; автономные сцены уже переведены в §2.14). `timeFlow` heartbeat остаётся единственным драйвером времени (см. правило 3.4).
 
 ### 2.13. Материализация памяти через очередь
 
@@ -320,7 +320,7 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 Удалены мёртвые `.orig`-файлы (`server.ts.orig`, `timeFlow.ts.orig`, `worldService.ts.orig`) — legacy-пути.
 
-Критерий «нет отдельных prompt-конструкторов для проактивных реплик» подтверждён инвентаризацией. Осталось: ввести формальный `CharacterStimulus` → `CharacterTurnContext` контракт и единый executor, убрать разрозненные обёртки вокруг LLM-вызова.
+Критерий «нет отдельных prompt-конструкторов для проактивных реплик» подтверждён инвентаризацией. Контракт `CharacterStimulus` → `CharacterTurnContext` и единый executor `executeCharacterSpeech` введены (см. §2.17). Осталось: убрать разрозненные обёртки вокруг LLM-вызова.
 
 ### 2.17. Контракт `CharacterStimulus` → `CharacterTurnContext`
 
@@ -508,7 +508,7 @@ Baseline после третьего ревью: 21 failed / 529 passed / 6 skip
 - `eventRouter` — `RouteResponse.dynamicModifiers` → `DynamicModifiers`; исправлены `possibly undefined` (guard после парсинга, `parsedCommand` сужение).
 - `semanticVerbalParser` — `mentionedTags`/`mentions` приведены к `string[]`.
 
-Полный `tsconfig.json` typecheck проходит без ошибок в этом срезе. Осталось: `DiagnosticsOutput.observation`, типы команд, payload, device/mental metadata, world-time options, scene/context effects.
+Полный `tsconfig.json` typecheck проходит без ошибок в этом срезе. Остальные контракты (`DiagnosticsOutput.observation`, типы команд, payload, device/mental metadata, world-time options, scene/context effects) типизированы — см. список ниже.
 
 Приоритетные проблемные контракты:
 
@@ -548,7 +548,7 @@ Baseline после третьего ревью: 21 failed / 529 passed / 6 skip
 - `runGameTick`: стадии `loadTickSnapshot` (traceSync) и `commitTickOutcome` (traceSync) — длительность каждой стадии.
 - `requestCompletion` (`llmAdapter`): при fallback эмитит `llm.fallback` span с `model`, `provider`, `attempt`, `attemptsTotal`, `error` — число попыток и причина fallback.
 
-Критерии: «длительность каждой стадии», «число попыток и причина fallback», «единый structured trace». Осталось: размер prompt и выбранные блоки памяти, cache hit/miss, очередь/возраст фоновых задач.
+Критерии: «длительность каждой стадии», «число попыток и причина fallback», «единый structured trace». Размер prompt, cache hit/miss и очередь/возраст фоновых задач реализованы в §2.23. Осталось: выбранные блоки памяти в prompt.
 
 ### 2.23. Наблюдаемость: prompt, cache, очередь
 
@@ -562,13 +562,13 @@ Baseline после третьего ревью: 21 failed / 529 passed / 6 skip
 
 Нужно:
 
-- единый structured trace для тика, LLM и фоновых заданий;
-- длительность каждой стадии;
-- размер prompt и выбранные блоки памяти;
-- cache hit/miss для эмбеддингов и стабильных prompt-фрагментов;
-- число попыток и причина fallback;
-- очередь и возраст фоновых задач;
-- отсутствие синхронной генерации воспоминаний в пользовательском запросе.
+- ~~единый structured trace для тика, LLM и фоновых заданий~~ ✅ — `trace.ts`;
+- ~~длительность каждой стадии~~ ✅ — `traceSync`/`traceAsync`;
+- ~~размер prompt~~ ✅ — `prompt.build` span с `promptSizeChars`; выбранные блоки памяти — открыто;
+- ~~cache hit/miss для эмбеддингов~~ ✅ — `embeddingCacheStats`; стабильные prompt-фрагменты — открыто;
+- ~~число попыток и причина fallback~~ ✅ — `llm.fallback` span;
+- ~~очередь и возраст фоновых задач~~ ✅ — `background.queue`/`background.job` span;
+- ~~отсутствие синхронной генерации воспоминаний в пользовательском запросе~~ ✅ — память асинхронна через очередь.
 
 Оптимизация выполняется после измерения. Кеш не должен скрывать смену игрового состояния или новые сообщения.
 
