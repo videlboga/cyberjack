@@ -529,11 +529,11 @@ Baseline после третьего ревью: 21 failed / 529 passed / 6 skip
 
 Финальный критерий: `npm run typecheck:all` проходит без ошибок и без ослабления `strict`.
 
-### Этап 10. Наблюдаемость и производительность 🔄
+### Этап 10. Наблюдаемость и производительность ✅
 
-**Частично выполнен.** Введён единый structured trace для тика, LLM и фоновых заданий.
+**Завершён.** Введён единый structured trace для тика, LLM и фоновых заданий.
 
-**Критерий закрыт:** выбранные блоки памяти (`memorySelection` в `prompt.build` trace). **Открыто:** кеш стабильных prompt-фрагментов.
+**Критерии закрыты:** выбранные блоки памяти (`memorySelection` в `prompt.build` trace), кеш стабильных prompt-фрагментов (`stablePromptFragmentCache`).
 
 ### 2.22. Единый structured trace
 
@@ -566,7 +566,8 @@ Baseline после третьего ревью: 21 failed / 529 passed / 6 skip
 - ~~длительность каждой стадии~~ ✅ — `traceSync`/`traceAsync`;
 - ~~размер prompt~~ ✅ — `prompt.build` span с `promptSizeChars`;
 - ~~выбранные блоки памяти~~ ✅ — `memorySelection` в `prompt.build` trace;
-- ~~cache hit/miss для эмбеддингов~~ ✅ — `embeddingCacheStats`; стабильные prompt-фрагменты — открыто;
+- ~~cache hit/miss для эмбеддингов~~ ✅ — `embeddingCacheStats`;
+- ~~кеш стабильных prompt-фрагментов~~ ✅ — `stablePromptFragmentStats`;
 - ~~число попыток и причина fallback~~ ✅ — `llm.fallback` span;
 - ~~очередь и возраст фоновых задач~~ ✅ — `background.queue`/`background.job` span;
 - ~~отсутствие синхронной генерации воспоминаний в пользовательском запросе~~ ✅ — память асинхронна через очередь.
