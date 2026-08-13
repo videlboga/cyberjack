@@ -6,13 +6,11 @@ import { computeTickOutcome } from './computeTickOutcome';
 import { commitTickOutcome } from './commitTickOutcome';
 import { publishTickOutcome } from './publishTickOutcome';
 import type { TickEffect } from './tickEffectPlan';
-import { compileAction } from '../compiler/compileAction';
 import { eventQueries } from '../infrastructure/eventQueries';
-import { activeContextsRepo, sceneRepo, presetRepo, characterRepo, characterRelationRepo, subjectiveAssociationRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, sceneRepo, presetRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
-import { intimateNarrationFor } from '../domain/intimateNarration';
 import { appendJsonLog } from '../utils/fileLogs';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
 import { runScenarioStep } from '../scenario/runScenarioStep';
@@ -24,23 +22,21 @@ import { resolveTickConsequences } from './resolveTickConsequences';
 import { applyCommandEffects } from './applyCommandEffects';
 import { buildSceneObservation } from './buildSceneObservation';
 import { validateTickRequest } from './validateTickRequest';
+import { compileTickAction } from './compileTickAction';
 import { pointStateRepo } from '../infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
 import { clamp } from '../engine/utils';
 import { resolveLaboratoryMove } from '../scenario/resolveLaboratoryMove';
-import { calculateSituationalCompliance, deriveEdgeProfile } from '../domain/edgeState';
-import { conditioningTags, preferenceValenceModifier } from '../domain/conditioning';
-import { resolveInteractionActionCandidate } from '../domain/resolver';
+import { deriveEdgeProfile } from '../domain/edgeState';
+import { requestedStanceFromReaction } from '../domain/interactionStance';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
-import { actionConflictsWithStance, actionRespectsStance, boundaryAcknowledgementStrength, boundaryValencePenalty, requestedStanceFromReaction } from '../domain/interactionStance';
 import { resolvePortraitEmotion } from '../domain/portraitEmotion';
 import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 import { db } from '../infrastructure/db';
 import { buildPhysicalReaction } from '../narrative/physicalReaction';
 import { buildBoundaryExpression } from '../narrative/boundaryExpression';
 import { presentCommand } from '../narrative/commandPresentation';
-import { memoryAppraisalModifier } from '../domain/memoryCorrection';
 
 export interface GameEventPayload {
     subjectId: string;
@@ -121,170 +117,44 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // 3. Get history for novelty
     const history = eventQueries.getRecentLogs(payload.subjectId, 5);
     const edgeProfile = deriveEdgeProfile(state.core, history);
-    const complianceFor = (action: { id?: string; label?: string; type?: string; pointId?: string } = {}) => {
-        const compliance = calculateSituationalCompliance({
-            attitude: state.relation?.attitude ?? state.core.attitude ?? 0,
-            plasticity: state.core.plasticity || 0,
-            profile: edgeProfile,
-            action,
-        });
-        const contextIds = new Set(activeContextsRepo.getAllForSubject(payload.subjectId).map(context => context.actionId));
-        const stateModifier = (contextIds.has('effect_suggestibility') ? 15 : 0) +
-            (contextIds.has('effect_subspace') ? 10 : 0) +
-            (contextIds.has('act_inject_truth_serum') ? 25 : 0);
-        const learnedModifier = relationalDynamics.learnedCompliance * .35 - relationalDynamics.resistance * .25 + relationalDynamics.dependency * .1;
-        return { ...compliance, stateModifier, learnedModifier, total: Math.max(0, Math.min(150, compliance.total + stateModifier + learnedModifier)) };
-    };
-    
-    // 4. Compile Action Vector
-    let allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
-    if (allContexts.some(context => context.actionId === 'effect_apathy') &&
-        !allContexts.some(context => context.actionId === 'pose_lying_down')) {
-        const collapse = ContextManager.planAutonomousCollapse(payload.subjectId);
-        if (collapse.effect) {
-            tickEffects.push(collapse.effect);
-            // Model the collapse locally so compileAction sees the lying pose
-            // without re-reading the DB before commit.
-            allContexts = [...allContexts, {
-                id: 'planned_lying_down', actionId: 'pose_lying_down', pointId: 'global_pose',
-                subjectId: payload.subjectId, actorId: payload.subjectId,
-            } as any];
-        }
-        if (collapse.narrative) preTickContextNotes.push(collapse.narrative);
-    }
-    const applicableContexts = allContexts.filter(c => !c.pointId || c.pointId === payload.pointId);
 
-    let compiledAction = compileAction({
-        presetId: payload.presetId,
-        eventId: payload.sceneId, // Treat sceneId as the root event contexts are bound to for now
-        playerIntensity: payload.playerIntensity,
-        history: history,
-        dynamicModifiers: payload.dynamicModifiers,
-        sourceText: payload.textMessage,
-        parserVersion: payload.parserVersion, 
-        activeContexts: applicableContexts,
-        familiarity: state.point.familiarity ?? 0
+    // 4. Compile Action Vector + resolve command
+    const compiled = compileTickAction({
+        payload: {
+            subjectId: payload.subjectId,
+            pointId: payload.pointId,
+            presetId: payload.presetId,
+            sceneId: payload.sceneId,
+            playerIntensity: payload.playerIntensity,
+            dynamicModifiers: payload.dynamicModifiers,
+            textMessage: payload.textMessage,
+            parserVersion: payload.parserVersion,
+            customPayload: payload.customPayload,
+            actingCharacterId: payload.actingCharacterId,
+            playerId: payload.playerId,
+        },
+        state: {
+            core: state.core,
+            point: state.point,
+            relation: state.relation,
+        },
+        history,
+        edgeProfile,
+        relationalDynamics,
+        initiatorId,
+        tickEffects,
+        preTickContextNotes,
     });
-    const intimateNarration = intimateNarrationFor(
-        payload.presetId,
-        payload.pointId,
-        payload.customPayload?.sustainedSource,
-    );
-    if (intimateNarration) {
-        compiledAction = { ...compiledAction, ...intimateNarration };
-    }
-
-    // 4.5 Apply Virtual Contexts (Mental and Body point overloads)
-    const baseAction = (compiledAction as any)._baseAction;
-    (compiledAction as any)._baseAction = baseAction || compiledAction;
-    const classifiedVerbalTags = Array.isArray((payload.dynamicModifiers as any)?.tags)
-        ? (payload.dynamicModifiers as any).tags
-        : null;
-    compiledAction.tags = classifiedVerbalTags || conditioningTags(compiledAction.actionKey, compiledAction.tags || []);
-    (compiledAction as any)._baseAction = {
-        ...(compiledAction as any)._baseAction,
-        tags: compiledAction.tags,
-    };
-    const mentionInfluence = payload.presetId === 'verbal_pressure' ? 0.25 : 1;
-    const conditioningModifier = payload.presetId === 'wait'
-        ? 0
-        : preferenceValenceModifier(compiledAction.tags || [], state.core.preferences) * mentionInfluence;
-    if (conditioningModifier !== 0) {
-        compiledAction.valence = clamp(compiledAction.valence + conditioningModifier, -1, 1);
-        (compiledAction as any).conditioningModifier = conditioningModifier;
-        (compiledAction as any)._baseAction = {
-            ...(compiledAction as any)._baseAction,
-            valence: clamp(((compiledAction as any)._baseAction?.valence || 0) + conditioningModifier, -1, 1),
-            conditioningModifier,
-        };
-    }
-    const memoryAssociationSignal = payload.presetId === 'wait'
-        ? 0
-        : subjectiveAssociationRepo.scoreAction(payload.subjectId, payload.actingCharacterId || payload.playerId, compiledAction.tags || []);
-    const memoryModifier = memoryAppraisalModifier(memoryAssociationSignal, payload.presetId === 'verbal_pressure');
-    if (memoryModifier !== 0) {
-        compiledAction.valence = clamp(compiledAction.valence + memoryModifier, -1, 1);
-        (compiledAction as any).memoryAssociationModifier = memoryModifier;
-        (compiledAction as any)._baseAction = { ...(compiledAction as any)._baseAction, valence: clamp(((compiledAction as any)._baseAction?.valence || 0) + memoryModifier, -1, 1), memoryAssociationModifier: memoryModifier };
-    }
-
-    const parsedCommandIntent = payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent;
-    let commandIntent = parsedCommandIntent ? { ...parsedCommandIntent } : parsedCommandIntent;
-    let commandResolutionError: string | undefined;
-    if (commandIntent?.type === 'change_current_interaction') {
-        const semanticCommand = commandIntent;
-        const activeIds = new Set(activeContextsRepo.getAllForSubject(payload.subjectId).map((context: any) => context.actionId));
-        {
-            const resolved = resolveInteractionActionCandidate({
-                presets: presetRepo.getAllActionPresets(),
-                activeContextIds: Array.from(activeIds) as string[],
-                goal: semanticCommand.goal,
-                suggestedActionId: semanticCommand.suggestedActionId,
-                pointId: semanticCommand.pointId
-            });
-            if (resolved) {
-                commandIntent = {
-                    type: 'perform_action',
-                    actionId: resolved.id,
-                    targetId: semanticCommand.targetId,
-                    pointId: (resolved.validTargets || []).includes(semanticCommand.pointId) ? semanticCommand.pointId : 'systemic'
-                };
-            } else {
-                commandResolutionError = `Нет применимого действия, которое позволяет ${semanticCommand.goal === 'stop' ? 'прекратить' : semanticCommand.goal === 'adjust' ? 'изменить' : 'начать'} текущее взаимодействие.`;
-                commandIntent = { type: 'none' };
-            }
-        }
-        if (payload.dynamicModifiers) {
-            (payload.dynamicModifiers as any).commandIntent = commandIntent;
-        }
-    }
-    // preserve any action preset referenced by the parsed command so we can apply its effects later
-    let commandActionPreset: any = undefined;
-    if (commandIntent && commandIntent.type && commandIntent.type !== 'none') {
-        (compiledAction as any).commandIntent = commandIntent;
-        if ((compiledAction as any)._baseAction) {
-            ((compiledAction as any)._baseAction as any).commandIntent = commandIntent;
-        }
-    }
-
-    // Poses, movement and wardrobe/equipment toggles are scene operations, not
-    // physiological calibration stimuli. Their context effects are applied
-    // below, while this carrier tick remains metabolically neutral.
-    if (commandIntent && ['change_pose', 'activate_context', 'deactivate_context', 'deactivate_contexts', 'move'].includes(commandIntent.type)) {
-        compiledAction = { ...compiledAction, intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
-        (compiledAction as any)._baseAction = { ...(compiledAction as any)._baseAction, intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
-    }
-
-    let activeStance = interactionStanceRepo.get(payload.subjectId, initiatorId);
-    const nonContactTurn = Number(compiledAction.contact || 0) <= 0.05;
-    const acknowledgementStrength = nonContactTurn
-        ? boundaryAcknowledgementStrength(payload.textMessage || compiledAction.source?.rawText)
-        : 0;
-    let stanceSoftenedBeforeTick = false;
-    if (activeStance && nonContactTurn) {
-        // The immediate command to stop is not the same thing as forgiveness.
-        // Once contact has actually ceased, let the live stance close quickly;
-        // relationship memory still retains whether it had been ignored.
-        const softenAmount = acknowledgementStrength > 0 ? acknowledgementStrength : .2;
-        tickEffects.push({ kind: 'stance.soften', subjectId: payload.subjectId, actorId: initiatorId, amount: softenAmount });
-        // Model the soften locally so the boundary decision below sees the
-        // softened intensity without re-reading the DB before commit.
-        activeStance = { ...activeStance, intensity: Math.max(0, activeStance.intensity - softenAmount) };
-        stanceSoftenedBeforeTick = true;
-    }
-    const ignoredBoundary = actionConflictsWithStance(activeStance, compiledAction, payload.pointId);
-    const respectedBoundary = Boolean(activeStance && actionRespectsStance(compiledAction));
-    if (ignoredBoundary && activeStance) {
-        const penalty = boundaryValencePenalty(activeStance);
-        compiledAction.valence = clamp(compiledAction.valence - penalty, -1, 1);
-        compiledAction.tags = [...new Set([...(compiledAction.tags || []), 'boundary_ignored'])];
-        (compiledAction as any).interactionStance = { request: activeStance.request, ignored: true, penalty };
-        tickEffects.push({ kind: 'stance.record-ignored', subjectId: payload.subjectId, actorId: initiatorId });
-        preTickContextNotes.push(`Активная граница персонажа проигнорирована: действие продолжает нежелательный контакт.`);
-    } else if (respectedBoundary && !stanceSoftenedBeforeTick) {
-        tickEffects.push({ kind: 'stance.soften', subjectId: payload.subjectId, actorId: initiatorId });
-        (compiledAction as any).interactionStance = { request: activeStance!.request, respected: true };
-    }
+    let compiledAction = compiled.compiledAction;
+    const commandIntent = compiled.commandIntent;
+    const commandResolutionError = compiled.commandResolutionError;
+    let commandActionPreset = compiled.commandActionPreset;
+    const activeStance = compiled.activeStance;
+    const ignoredBoundary = compiled.ignoredBoundary;
+    const respectedBoundary = compiled.respectedBoundary;
+    const stanceSoftenedBeforeTick = compiled.stanceSoftenedBeforeTick;
+    const complianceFor = compiled.complianceFor;
+    const allContexts = activeContextsRepo.getAllForSubject(payload.subjectId);
 
     // 5. Run Engine Tick
     const stateDeltaScale = clamp(Number(payload.stateDeltaScale ?? 1), 0, 1);

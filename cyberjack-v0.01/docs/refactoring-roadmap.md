@@ -104,6 +104,15 @@ Discharge-логика (разрядка, истощение, edge state) вын
 
 `runGameTick` сокращён с ~1280 до ~900 строк.
 
+### 2.9. Разрезка `runGameTick`: компиляция действия в стадию `compileTickAction`
+
+Блок компиляции action vector и разрешения команды вынесен в отдельную стадию:
+
+- `compileTickAction.ts` — стадия `compileTickAction`. Компилирует action (conditioning/memory модификаторы, intimate narration), разрешает `change_current_interaction` в конкретный `perform_action`, оценивает interaction stance. Мутирует только `tickEffects`/`preTickContextNotes`; ни одной записи в БД.
+- `runGameTick` вызывает стадию и присваивает результат (`compiledAction`, `commandIntent`, `commandResolutionError`, `commandActionPreset`, `activeStance`, `ignoredBoundary`, `respectedBoundary`, `stanceSoftenedBeforeTick`, `complianceFor`).
+
+`runGameTick` сокращён до ~760 строк.
+
 ## 3. Обязательные архитектурные правила
 
 Эти правила действуют для всех следующих этапов.
@@ -434,6 +443,14 @@ type CharacterStimulus =
 - 498 тестов проходят (+8: валидация + scene observation);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline; flaky `logs endpoints` не воспроизвёлся в этом прогоне);
+- runtime typecheck проходит.
+
+После выделения `compileTickAction` (Этап 3, частично):
+
+- 106 test files;
+- 502 теста проходят (+4: компиляция действия);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.
 
 Известные группы существующих падений:
