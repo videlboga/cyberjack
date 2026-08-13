@@ -447,6 +447,13 @@ Baseline после исправлений: 21 failed / 527 passed / 6 skipped (
 
 Baseline после второго ревью: 21 failed / 527 passed / 6 skipped (прежний baseline, новых падений нет).
 
+### 2.26. Исправления по третьему код-ревью (глобальный лимит + lease heartbeat)
+
+1. **Глобальный лимит параллелизма LLM** — `tryAcquireJobSlot`/`releaseJobSlot` — модульный счётчик `inFlightJobs` в `backgroundJobs.ts`, общий для всех тиков. Каждый тик не может запустить больше 2 LLM-задач, даже если предыдущие продолжают работать. Занятые-но-незапущенные задания возвращаются в failed ('concurrency cap reached') и подхватываются следующим тиком.
+2. **Heartbeat lease** — `renewBackgroundJobLease(id)` продлевает `lease_until` на `LEASE_MS`; `runDueBackgroundJobs` запускает `setInterval` (15s) на время выполнения задания, чтобы долгий LLM-ответ не был объявлен зависшим и перезапущен, пока первый вызов ещё работает. Интервал очищается в `finally`.
+
+Baseline после третьего ревью: 21 failed / 529 passed / 6 skipped (прежний baseline, +2 теста).
+
 ### 2.20. Тонкий контроллер перемещения
 
 `scenarioController.moveLaboratoryCharacter` содержал прямую бизнес-логику (запросы к `db`, `chatMemoryRepo.append`, `syncLaboratorySpatialRelations`). Вынесена в application service:

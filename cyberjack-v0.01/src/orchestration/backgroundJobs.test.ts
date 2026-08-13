@@ -3,7 +3,7 @@ import { db } from '../infrastructure/db';
 import {
     clearBackgroundJobs, enqueueBackgroundJob, listBackgroundJobs,
     listDueBackgroundJobs, claimBackgroundJob, markBackgroundJobDone, markBackgroundJobFailed,
-    markBackgroundJobRunning,
+    markBackgroundJobRunning, renewBackgroundJobLease, recoverStaleBackgroundJobs, tryAcquireJobSlot, releaseJobSlot,
 } from './backgroundJobs';
 
 describe('backgroundJobs', () => {
@@ -62,5 +62,33 @@ describe('backgroundJobs', () => {
         const retry = claimBackgroundJob(job.id);
         expect(retry).not.toBeNull();
         expect(retry!.attempts).toBe(2);
+    });
+
+    it('enforces a global concurrency gate across calls (not per run)', () => {
+        // Acquire the maximum slots; a further acquire must fail even though
+        // this is a separate "tick" (no per-call reset).
+        expect(tryAcquireJobSlot()).toBe(true);
+        expect(tryAcquireJobSlot()).toBe(true);
+        expect(tryAcquireJobSlot()).toBe(false);
+        // Releasing frees a slot so a later acquire succeeds.
+        releaseJobSlot();
+        expect(tryAcquireJobSlot()).toBe(true);
+        releaseJobSlot();
+        releaseJobSlot();
+        releaseJobSlot();
+        // All released.
+        expect(tryAcquireJobSlot()).toBe(true);
+        releaseJobSlot();
+    });
+
+    it('renews a running job lease so a slow model is not declared stale', () => {
+        const job = enqueueBackgroundJob({ type: 'x', key: 'x1', dueMinute: 0 })!;
+        claimBackgroundJob(job.id);
+        const before = job.leaseUntil ?? 0;
+        // Renewal must extend the lease past the original expiry.
+        const renewed = renewBackgroundJobLease(job.id);
+        expect(renewed).toBeGreaterThan(before);
+        // After renewal the job is not stale.
+        expect(recoverStaleBackgroundJobs()).toBe(0);
     });
 });

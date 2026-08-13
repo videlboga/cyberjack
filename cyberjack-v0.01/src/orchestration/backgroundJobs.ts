@@ -46,6 +46,26 @@ try { db.exec(`ALTER TABLE background_jobs ADD COLUMN lease_until INTEGER`); } c
 const now = () => Date.now();
 const LEASE_MS = 60_000; // a job lease expires after 60s of wall-clock
 
+// Global concurrency gate for LLM-backed jobs. This is a module-level counter,
+// NOT per-runDueBackgroundJobs, so every game tick sees the same cap: a burst
+// of due jobs across ticks can never exceed MAX_CONCURRENT_JOBS in-flight LLM
+// calls.
+const MAX_CONCURRENT_JOBS = 2;
+let inFlightJobs = 0;
+
+/** Attempt to reserve one of the global LLM-job slots. Returns false when the
+ *  cap is already reached. */
+export function tryAcquireJobSlot(): boolean {
+    if (inFlightJobs >= MAX_CONCURRENT_JOBS) return false;
+    inFlightJobs++;
+    return true;
+}
+
+/** Release a previously acquired LLM-job slot. */
+export function releaseJobSlot() {
+    inFlightJobs = Math.max(0, inFlightJobs - 1);
+}
+
 const JOB_COLUMNS = `
     id, type, key, subject_id AS subjectId, due_minute AS dueMinute,
     payload, status, attempts, last_error AS lastError,
@@ -123,6 +143,18 @@ export function recoverStaleBackgroundJobs(): number {
         WHERE status = 'running' AND lease_until IS NOT NULL AND lease_until < ?
     `).run(now(), now());
     return res.changes;
+}
+
+/**
+ * Renew a running job's lease (heartbeat). Long-running LLM jobs must call this
+ * periodically so a slow model response is not declared stale and re-run while
+ * the first call is still in flight. Returns the new lease_until.
+ */
+export function renewBackgroundJobLease(id: number): number {
+    const leaseUntil = now() + LEASE_MS;
+    db.prepare(`UPDATE background_jobs SET lease_until = ?, updated_at = ? WHERE id = ? AND status = 'running'`)
+        .run(leaseUntil, now(), id);
+    return leaseUntil;
 }
 
 export function markBackgroundJobRunning(id: number) {

@@ -1,6 +1,6 @@
 import { runBackgroundSustainedTicks } from '../orchestration/backgroundTimeTick';
 import { advanceWorldTime, getWorldClock } from './worldService';
-import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, claimBackgroundJob, recoverStaleBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed } from '../orchestration/backgroundJobs';
+import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, claimBackgroundJob, recoverStaleBackgroundJobs, renewBackgroundJobLease, tryAcquireJobSlot, releaseJobSlot, markBackgroundJobDone, markBackgroundJobFailed } from '../orchestration/backgroundJobs';
 import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
@@ -75,17 +75,25 @@ export function runDueBackgroundJobs(worldMinute: number) {
                 : 0,
         });
     }
-    // Cap concurrent LLM-backed jobs so a burst of due jobs cannot spawn an
-    // unbounded number of in-flight model calls.
-    const MAX_CONCURRENT_LLM_JOBS = 2;
-    let inFlight = 0;
+    // Cap concurrent LLM-backed jobs globally. tryAcquireJobSlot uses a
+    // module-level counter, so the cap holds ACROSS game ticks, not just within
+    // a single runDueBackgroundJobs call. Due jobs that cannot get a slot stay
+    // claimed and will be picked up (and retried) on the next pass.
     for (const job of due) {
         // Atomically claim; skip if another worker already took it.
         const claimed = claimBackgroundJob(job.id);
         if (!claimed) continue;
+        // Global concurrency gate: do not start more LLM jobs than the cap.
+        if (!tryAcquireJobSlot()) {
+            // No slot free: put the job back as pending so a later pass retries it.
+            markBackgroundJobFailed(claimed.id, 'concurrency cap reached');
+            continue;
+        }
         const startedAt = performance.now();
         void (async () => {
-            inFlight++;
+            // Heartbeat: renew the lease periodically so a slow model response
+            // is not declared stale and re-run while this call is still running.
+            const heartbeat = setInterval(() => renewBackgroundJobLease(claimed.id), 15_000);
             try {
                 await executeBackgroundJob(claimed);
                 markBackgroundJobDone(claimed.id);
@@ -94,10 +102,10 @@ export function runDueBackgroundJobs(worldMinute: number) {
                 markBackgroundJobFailed(claimed.id, error?.message || String(error));
                 emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'failed', error: String(error?.message || error) });
             } finally {
-                inFlight--;
+                clearInterval(heartbeat);
+                releaseJobSlot();
             }
         })();
-        if (inFlight >= MAX_CONCURRENT_LLM_JOBS) break;
     }
 }
 
