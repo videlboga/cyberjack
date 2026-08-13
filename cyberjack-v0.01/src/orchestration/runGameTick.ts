@@ -15,8 +15,6 @@ import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/build
 import { intimateNarrationFor } from '../domain/intimateNarration';
 import { appendJsonLog } from '../utils/fileLogs';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
-import * as checkActionAccess from '../scenario/checkActionAccess';
-import { applyResourceCosts } from '../scenario/applyResourceCosts';
 import { runScenarioStep } from '../scenario/runScenarioStep';
 import { ContextManager } from './contextManager';
 import { sceneCharacterRepo } from '../infrastructure/repositories';
@@ -24,6 +22,8 @@ import { sceneCharacterRepo } from '../infrastructure/repositories';
 import { ConditionWatcher } from './conditionWatcher';
 import { resolveTickConsequences } from './resolveTickConsequences';
 import { applyCommandEffects } from './applyCommandEffects';
+import { buildSceneObservation } from './buildSceneObservation';
+import { validateTickRequest } from './validateTickRequest';
 import { pointStateRepo } from '../infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
@@ -40,7 +40,6 @@ import { db } from '../infrastructure/db';
 import { buildPhysicalReaction } from '../narrative/physicalReaction';
 import { buildBoundaryExpression } from '../narrative/boundaryExpression';
 import { presentCommand } from '../narrative/commandPresentation';
-import { canPerformPartnerPointAction, isPartnerPointAction } from '../domain/intimatePartnerMechanics';
 import { memoryAppraisalModifier } from '../domain/memoryCorrection';
 
 export interface GameEventPayload {
@@ -92,13 +91,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const initiatorId = payload.actingCharacterId || payload.playerId || payload.subjectId;
     // 1. Load state
     const state = loadTickState(payload.subjectId, payload.pointId, payload.playerId, payload.sceneId, initiatorId);
-    const authoredPreset = presetRepo.getActionPreset(payload.presetId);
-    if (initiatorId !== payload.subjectId && authoredPreset && isPartnerPointAction(payload.presetId, authoredPreset.tags || [], payload.pointId)) {
-        const actorPointIds = pointStateRepo.getAllForSubject(initiatorId).map(point => point.pointId);
-        if (!canPerformPartnerPointAction(actorPointIds, payload.presetId, authoredPreset.tags || [], payload.pointId)) {
-            throw new Error('У исполнителя нет анатомической точки, необходимой для этого интимного действия');
-        }
-    }
     const stateBefore = {
         core: { ...state.core },
         point: { ...state.point }
@@ -108,44 +100,21 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const preTickContextNotes: string[] = [];
     const tickEffects: TickEffect[] = [];
     let labRelocationApplied = false;
-    
+
     // 2. Scenario layer: доступность действия, ресурсы, локация
-    const validation = checkActionAccess.validateAction(
-        payload.presetId, state.scene, state.resources, payload.subjectId, payload.playerId, payload.pointId
-    );
-    const internalSustainedPulse = [
-        'sustained_vibration_pulse',
-        'sustained_electro_pulse',
-        'sustained_sexual_pulse',
-    ].includes(payload.presetId) && Boolean(payload.customPayload?.sustainedSource);
-    if (!validation.allowed && payload.presetId !== 'wait' && !internalSustainedPulse) {
-        throw new Error(validation.errorReason || `Action "${payload.presetId}" blocked by scenario.`);
-    }
-
-    // 2.5 Verify node unblocked
-    const blockCheck = ContextManager.isPointBlocked(payload.subjectId, payload.pointId);
-    // Semantic parsing also extracts body-part mentions from ordinary speech.
-    // That point is useful for appraisal and preference context, but a spoken
-    // sentence does not physically contact it and must not be rejected by
-    // clothing. A command that resolves to a physical perform_action remains
-    // subject to the same body-point block.
-    const parsedCommandType = (payload.dynamicModifiers as any)?.commandIntent?.type;
-    const nonContactSpeech = payload.presetId === 'verbal_pressure'
-        && Number((payload.dynamicModifiers as any)?.contact || 0) <= 0
-        && parsedCommandType !== 'perform_action';
-    if (blockCheck.blocked && payload.presetId !== 'wait' && !nonContactSpeech) {
-        throw new Error(blockCheck.reason || `Точка "${payload.pointId}" заблокирована.`);
-    }
-
-    const actionCosts = state.scene.actionCosts?.[payload.presetId] || null;
-    if (actionCosts && Object.keys(actionCosts).length) {
-        try {
-            const nextResources = applyResourceCosts(state.resources, actionCosts);
-            state.resources = nextResources;
-        } catch (error: any) {
-            throw new Error(error.message || 'Failed to apply resource costs');
-        }
-    }
+    const validationResult = validateTickRequest({
+        subjectId: payload.subjectId,
+        pointId: payload.pointId,
+        presetId: payload.presetId,
+        playerId: payload.playerId,
+        initiatorId,
+        sceneId: payload.sceneId,
+        resources: state.resources,
+        scene: state.scene,
+        dynamicModifiers: payload.dynamicModifiers,
+        customPayload: payload.customPayload,
+    });
+    state.resources = validationResult.resources;
 
     let activeSceneId = payload.sceneId;
     
@@ -701,38 +670,23 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const observableAction = ['physical', 'context'].includes(String(compiledAction.type || ''))
         && compiledAction.actionKey !== 'wait'
         && !(payload.customPayload?.backgroundTime && !(diagnostics.observation.transitions || []).length);
-    const sceneObservation = observableAction
-        ? (() => {
-            const actorId = payload.actingCharacterId || payload.playerId || 'PL-1';
-            const pointLabel = presetRepo.getPointPreset(payload.pointId)?.label || payload.pointId;
-            const observedIntent = (payload.dynamicModifiers as any)?.commandIntent;
-            const observedOutcome = observedIntent?.type && observedIntent.type !== 'none' && actionApplied
-                ? (() => {
-                    const executor = characterRepo.get(payload.subjectId)?.name || payload.subjectId;
-                    const target = observedIntent.targetId ? characterRepo.get(String(observedIntent.targetId))?.name || observedIntent.targetId : '';
-                    const label = observedIntent.actionId ? presetRepo.getActionPreset(String(observedIntent.actionId))?.label || observedIntent.actionId : 'указание';
-                    return `${executor} выполнила указание «${label}»${target ? ` для ${target}` : ''}`;
-                })()
-                : '';
-            return {
-                sceneId: activeSceneId,
-                playerId: payload.playerId,
-                actorId,
-                targetId: payload.subjectId,
-                actionId: compiledAction.actionKey || payload.presetId,
-                actionLabel: compiledAction.label || payload.presetId,
-                pointId: payload.pointId,
-                pointLabel,
-                actionTags: compiledAction.tags || [],
-                finalValence: engineOutput.result.finalValence,
-                notable: Boolean(diagnostics.observation.transitions?.length),
-                background: Boolean(payload.customPayload?.backgroundTime),
-                spokenText: String((compiledAction as any).source?.rawText || payload.textMessage || '').trim(),
-                outcomeText: observedOutcome,
-                worldMinute,
-            };
-        })()
-        : undefined;
+    const sceneObservation = buildSceneObservation({
+        observableAction,
+        activeSceneId,
+        playerId: payload.playerId,
+        actingCharacterId: payload.actingCharacterId,
+        subjectId: payload.subjectId,
+        pointId: payload.pointId,
+        presetId: payload.presetId,
+        actionApplied,
+        compiledAction,
+        output: engineOutput,
+        commandIntent: (payload.dynamicModifiers as any)?.commandIntent,
+        customPayload: payload.customPayload,
+        textMessage: payload.textMessage,
+        worldMinute,
+        hasTransitions: Boolean(diagnostics.observation.transitions?.length),
+    });
 
     // The primary action becomes durable exactly once. Reactive projections
     // are published only after this transaction succeeds.

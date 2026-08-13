@@ -95,6 +95,15 @@ Discharge-логика (разрядка, истощение, edge state) вын
 - `runGameTick` вызывает стадию и присваивает результат локальным переменным.
 - Boundary-тест проверяет и `runGameTick`, и `applyCommandEffects` на отсутствие прямых записей.
 
+### 2.8. Разрезка `runGameTick`: валидация и scene observation в стадии
+
+Выделены ещё две read-only стадии:
+
+- `validateTickRequest.ts` — стадия `validateTickRequest`. Проверяет scenario-доступ, блок точки и стоимость ресурсов; применяет resource costs и возвращает обновлённые ресурсы. Никаких записей в БД.
+- `buildSceneObservation.ts` — стадия построения проекции сцены. Принимает action/output и возвращает объект наблюдения (или undefined для не-наблюдаемых действий). Никаких записей в БД.
+
+`runGameTick` сокращён с ~1280 до ~900 строк.
+
 ## 3. Обязательные архитектурные правила
 
 Эти правила действуют для всех следующих этапов.
@@ -417,6 +426,14 @@ type CharacterStimulus =
 - 490 тестов проходят;
 - 6 пропущены;
 - 22 теста падают в 8 файлах. Новое падение — `test/api/other.api.test.ts > logs endpoints` (таймаут 5s под нагрузкой полного прогона из-за чтения больших лог-файлов `prompt_payloads.jsonl` ~225MB / `engine_state.jsonl` ~90MB через `fs.readFileSync`). Изолированно тест проходит; не связано с рефакторингом (файлы `fileLogs`/`logsController` не менялись). Требует отдельной задачи по оптимизации чтения логов.
+- runtime typecheck проходит.
+
+После выделения `validateTickRequest` и `buildSceneObservation` (Этап 3, частично):
+
+- 105 test files;
+- 498 тестов проходят (+8: валидация + scene observation);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline; flaky `logs endpoints` не воспроизвёлся в этом прогоне);
 - runtime typecheck проходит.
 
 Известные группы существующих падений:
