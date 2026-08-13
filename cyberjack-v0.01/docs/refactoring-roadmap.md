@@ -113,6 +113,15 @@ Discharge-логика (разрядка, истощение, edge state) вын
 
 `runGameTick` сокращён до ~760 строк.
 
+### 2.10. Разрезка `runGameTick`: построение ответа в стадию `buildTickResponse`
+
+Блок построения ответа и его побочных проекций вынесен в отдельную стадию:
+
+- `buildTickResponse.ts` — стадия `buildTickResponse`. Строит `event`, `actionTrace`, `commandPresentation` и `pendingCommandEffect` (clear/save). Чистая — ни одной записи в БД; `pendingCommandEffect` возвращается и пушится вызывающим в план эффектов.
+- `runGameTick` вызывает стадию и возвращает `built.response`.
+
+`runGameTick` сокращён до ~670 строк.
+
 ## 3. Обязательные архитектурные правила
 
 Эти правила действуют для всех следующих этапов.
@@ -449,6 +458,14 @@ type CharacterStimulus =
 
 - 106 test files;
 - 502 теста проходят (+4: компиляция действия);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
+
+После выделения `buildTickResponse` (Этап 3, частично):
+
+- 107 test files;
+- 506 тестов проходят (+4: построение ответа);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.

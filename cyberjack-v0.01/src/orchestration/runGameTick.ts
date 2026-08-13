@@ -7,7 +7,7 @@ import { commitTickOutcome } from './commitTickOutcome';
 import { publishTickOutcome } from './publishTickOutcome';
 import type { TickEffect } from './tickEffectPlan';
 import { eventQueries } from '../infrastructure/eventQueries';
-import { activeContextsRepo, sceneRepo, presetRepo, characterRepo, characterRelationRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, sceneRepo, presetRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent } from '../domain/types';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
@@ -15,7 +15,6 @@ import { appendJsonLog } from '../utils/fileLogs';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
 import { runScenarioStep } from '../scenario/runScenarioStep';
 import { ContextManager } from './contextManager';
-import { sceneCharacterRepo } from '../infrastructure/repositories';
 
 import { ConditionWatcher } from './conditionWatcher';
 import { resolveTickConsequences } from './resolveTickConsequences';
@@ -23,6 +22,7 @@ import { applyCommandEffects } from './applyCommandEffects';
 import { buildSceneObservation } from './buildSceneObservation';
 import { validateTickRequest } from './validateTickRequest';
 import { compileTickAction } from './compileTickAction';
+import { buildTickResponse } from './buildTickResponse';
 import { pointStateRepo } from '../infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
@@ -36,7 +36,6 @@ import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamics
 import { db } from '../infrastructure/db';
 import { buildPhysicalReaction } from '../narrative/physicalReaction';
 import { buildBoundaryExpression } from '../narrative/boundaryExpression';
-import { presentCommand } from '../narrative/commandPresentation';
 
 export interface GameEventPayload {
     subjectId: string;
@@ -633,131 +632,40 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         prompt.systemPrompt += `\n\n[Системные события тика]:\n${promptSystemNotes.join('\n')}`;
     }
 
-    const event: GameEvent = {
-        id: tickId,
-        type: payload.eventType || (payload.textMessage ? 'verbal_input' : 'ui_action'),
-        subjectId: payload.subjectId,
-        playerId: payload.playerId,
-        sceneId: activeSceneId,
-        pointId: payload.pointId,
-        timestamp: new Date().toISOString(),
+    const built = buildTickResponse({
+        tickId,
         payload: {
+            subjectId: payload.subjectId,
+            playerId: payload.playerId,
+            sceneId: payload.sceneId,
+            pointId: payload.pointId,
             presetId: payload.presetId,
             playerIntensity: payload.playerIntensity,
+            eventType: payload.eventType,
+            textMessage: payload.textMessage,
             dynamicModifiers: payload.dynamicModifiers,
-            ...payload.customPayload
-        }
-    };
-
-    const actionTrace = [
-        { label: 'State before (core)', values: stateBefore.core },
-        { label: 'State before (point)', values: stateBefore.point },
-        { label: 'Compiled action', values: compiledAction },
-        {
-            label: 'Engine result',
-            values: {
-                delta: engineOutput.delta?.core,
-                result: engineOutput.result
-            }
+            customPayload: payload.customPayload,
         },
-        { label: 'State after (core)', values: engineOutput.nextCore },
-        { label: 'State after (point)', values: engineOutput.nextPoint }
-    ];
-
-    // Log engine state changes: before vs after
-    try {
-        const diffs: any = { core: {}, point: {} };
-        for (const k of Object.keys(stateBefore.core || {})) {
-            const beforeV = (stateBefore.core as any)[k];
-            const afterV = (engineOutput.nextCore as any)[k];
-            if (JSON.stringify(beforeV) !== JSON.stringify(afterV)) diffs.core[k] = { before: beforeV, after: afterV };
-        }
-        for (const k of Object.keys(stateBefore.point || {})) {
-            const beforeV = (stateBefore.point as any)[k];
-            const afterV = (engineOutput.nextPoint as any)[k];
-            if (JSON.stringify(beforeV) !== JSON.stringify(afterV)) diffs.point[k] = { before: beforeV, after: afterV };
-        }
-    appendJsonLog('engine_state.jsonl', { tickId, subjectId: payload.subjectId, diffs, diagnostics, explanationRu: explainEngineState({ tickId, subjectId: payload.subjectId, diffs, diagnostics }) });
-    } catch (e) { /* ignore */ }
-
-    
-    const finalCommandIntent = payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent;
-    const commandPresentation = finalCommandIntent?.type && finalCommandIntent.type !== 'none'
-        ? (() => {
-            const targetId = finalCommandIntent.targetId && finalCommandIntent.targetId !== payload.subjectId
-                ? String(finalCommandIntent.targetId)
-                : undefined;
-            const targetName = targetId
-                ? characterRepo.get(targetId)?.name || targetId
-                : undefined;
-            const actionLabel = commandActionPreset?.label
-                || (finalCommandIntent.actionId ? presetRepo.getActionPreset(finalCommandIntent.actionId)?.label : undefined)
-                || finalCommandIntent.targetPoseId
-                || finalCommandIntent.targetContextId
-                || finalCommandIntent.targetLocation
-                || 'указанное действие';
-            const presence = sceneCharacterRepo.list(payload.sceneId).find(entry =>
-                entry.character.id === payload.subjectId || entry.character.subjectId === payload.subjectId,
-            );
-            return presentCommand({
-                performed: actionApplied,
-                executorId: payload.subjectId,
-                executorName: characterRepo.get(payload.subjectId)?.name || payload.subjectId,
-                targetId,
-                targetName,
-                actionLabel,
-                requesterName: characterRepo.get(initiatorId)?.name || (initiatorId === 'PL-1' ? 'Калибратор' : initiatorId),
-                relationToRequester: state.relation,
-                relationToTarget: targetId ? characterRelationRepo.get(payload.subjectId, targetId) : null,
-                dynamics: relationalDynamics,
-                core: state.core,
-                role: presence?.role,
-            });
-        })()
-        : undefined;
-    if (finalCommandIntent?.type && finalCommandIntent.type !== 'none') {
-        const refusalWasAboutWillingness = addedContextNotes.some(note =>
-            /отклоняет|недостаточ|не выполняет указание|подчинение .*требуется/i.test(note),
-        );
-        if (actionApplied || !refusalWasAboutWillingness) {
-            tickEffects.push({ kind: 'pending-command.clear', subjectId: payload.subjectId, playerId: payload.playerId });
-        } else {
-            const modifiers = payload.dynamicModifiers as any;
-            tickEffects.push({
-                kind: 'pending-command.save',
-                focus: {
-                    subjectId: payload.subjectId,
-                    playerId: payload.playerId,
-                    sceneId: payload.sceneId,
-                    sourceText: modifiers.pendingCommandSourceText || modifiers.commandSourceText || payload.textMessage || '',
-                    description: modifiers.pendingCommandDescription || modifiers.commandDescription || payload.textMessage || 'невыполненное поручение',
-                    intent: finalCommandIntent,
-                    routing: modifiers.routing,
-                },
-            });
-        }
-    }
-
-    return {
-        tickId,
-        event,
+        activeSceneId,
         compiledAction,
         output: engineOutput,
         stateBefore,
-        stateAfter: {
-            core: engineOutput.nextCore,
-            point: engineOutput.nextPoint
-        },
         diagnostics,
         prompt,
-        scenario: scenarioResult,
-        metadata: {
-            commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent,
-            resumedPendingCommand: Boolean(payload.dynamicModifiers && (payload.dynamicModifiers as any).resumedPendingCommand),
-            pendingCommandDescription: payload.dynamicModifiers && (payload.dynamicModifiers as any).pendingCommandDescription,
-            commandPresentation,
-        },
+        scenarioResult,
+        initiatorId,
+        state,
+        relationalDynamics,
         actionApplied,
-        systemNotes: addedContextNotes,
-    };
+        addedContextNotes,
+        commandActionPreset,
+        commandIntent,
+        tickEffects,
+    });
+    const event = built.event;
+    const actionTrace = built.actionTrace;
+    const commandPresentation = built.commandPresentation;
+    if (built.pendingCommandEffect) tickEffects.push(built.pendingCommandEffect);
+
+    return built.response;
 }
