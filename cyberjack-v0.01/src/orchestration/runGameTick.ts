@@ -675,6 +675,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     const built = buildTickResponse({
         tickId,
+        requestId,
         payload: {
             subjectId: payload.subjectId,
             playerId: payload.playerId,

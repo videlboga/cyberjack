@@ -5,6 +5,7 @@ import type { TickEffect } from './tickEffectPlan';
 
 export interface BuildTickResponseInput {
     tickId: string;
+    requestId?: string;
     payload: {
         subjectId: string;
         playerId: string;
@@ -106,7 +107,6 @@ export function buildPendingCommandEffect(input: BuildPendingCommandEffectInput)
 
 export function buildTickResponse(input: BuildTickResponseInput): BuildTickResponseResult {
     const { payload, activeSceneId, compiledAction, output, stateBefore, diagnostics, prompt, scenarioResult, initiatorId, state, relationalDynamics, actionApplied, addedContextNotes, commandActionPreset, commandIntent, tickEffects } = input;
-
     const event: GameEvent = {
         id: input.tickId,
         type: (payload.eventType || (payload.textMessage ? 'verbal_input' : 'ui_action')) as GameEvent['type'],
@@ -189,6 +189,7 @@ export function buildTickResponse(input: BuildTickResponseInput): BuildTickRespo
         prompt,
         scenario: scenarioResult,
         metadata: {
+            requestId: input.requestId,
             commandIntent: payload.dynamicModifiers && (payload.dynamicModifiers as any).commandIntent,
             resumedPendingCommand: Boolean(payload.dynamicModifiers && (payload.dynamicModifiers as any).resumedPendingCommand),
             pendingCommandDescription: payload.dynamicModifiers && (payload.dynamicModifiers as any).pendingCommandDescription,
