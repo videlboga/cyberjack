@@ -84,7 +84,7 @@ export async function getCharacterPrompt(req: Request, res: Response) {
 
         res.json({
             success: true,
-            ...profile
+            profile
         });
     } catch (err: any) {
         res.status(500).json({ success: false, error: err.message });
