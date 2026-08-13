@@ -122,6 +122,15 @@ Discharge-логика (разрядка, истощение, edge state) вын
 
 `runGameTick` сокращён до ~670 строк.
 
+### 2.11. Разрезка `runGameTick`: загрузка снапшота и сборка commit-плана
+
+Выделены ещё две стадии:
+
+- `loadTickSnapshot.ts` — стадия загрузки состояния и инициализации контекста тика (state-before, relational dynamics, elapsed-time, коллекции эффектов). Read-only.
+- `buildTickCommitPlan.ts` — стадия сборки объекта, передаваемого в `commitTickOutcome`. Чистая — ни одной записи в БД.
+
+`runGameTick` теперь — короткая последовательность стадий: `loadTickSnapshot` → `validateTickRequest` → `compileTickAction` → `computeTickOutcome` → `resolveTickConsequences` → `applyCommandEffects` → `buildSceneObservation` → `buildTickCommitPlan` → `commitTickOutcome` → `publishTickOutcome` → `buildTickResponse`. Критерий Этапа 3 выполнен.
+
 ## 3. Обязательные архитектурные правила
 
 Эти правила действуют для всех следующих этапов.
@@ -183,9 +192,9 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 **Выполнен** (см. §2.5). Все прямые обязательные записи вынесены в доменные эффекты плана тика; `runGameTick` не выполняет записей до `commitTickOutcome`. Boundary-тест запрещает прямые вызовы репозиториев и `ContextManager`-мутаторов в оркестраторе.
 
-### Этап 3. Разрезать `runGameTick` на явные стадии
+### Этап 3. Разрезать `runGameTick` на явные стадии ✅
 
-После выноса мутаций большой оркестратор следует разложить на типизированные стадии:
+**Выполнен** (см. §2.6–2.11). После выноса мутаций большой оркестратор разложен на типизированные стадии:
 
 1. `loadTickSnapshot` — неизменяемый снимок входного состояния;
 2. `validateTickRequest` — доступность действия и ресурсов;
@@ -379,7 +388,7 @@ type CharacterStimulus =
 
 1. ✅ лабораторное перемещение: resolution/commit — **выполнено**;
 2. ✅ остальные обязательные мутации в `TickEffectPlan` — **выполнено**;
-3. декомпозиция `runGameTick`;
+3. ✅ декомпозиция `runGameTick` — **выполнено**;
 4. единое игровое время и очередь фоновых задач;
 5. единый `CharacterTurnContext` и prompt builder;
 6. формальные LLM adapters/fallbacks;
@@ -466,6 +475,14 @@ type CharacterStimulus =
 
 - 107 test files;
 - 506 тестов проходят (+4: построение ответа);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
+
+После выделения `loadTickSnapshot` и `buildTickCommitPlan` (Этап 3 завершён):
+
+- 109 test files;
+- 511 тестов проходят (+5: снапшот + commit-план);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.

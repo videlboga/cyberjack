@@ -13,7 +13,7 @@ export interface ValidateTickRequestInput {
     initiatorId: string;
     sceneId: string;
     resources: ResourceState;
-    scene: { actionCosts?: unknown; [key: string]: unknown };
+    scene: { actionCosts?: unknown } & Record<string, unknown>;
     dynamicModifiers?: unknown;
     customPayload?: { sustainedSource?: string } | null;
 }

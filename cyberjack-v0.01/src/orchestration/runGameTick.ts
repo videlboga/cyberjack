@@ -1,7 +1,7 @@
 import { handleBuyAssetAction } from '../scenario/buyAssetHandler';
 // src/orchestration/runGameTick.ts
 import { randomUUID } from 'crypto';
-import { loadTickState } from './loadTickState';
+import { loadTickSnapshot } from './loadTickSnapshot';
 import { computeTickOutcome } from './computeTickOutcome';
 import { commitTickOutcome } from './commitTickOutcome';
 import { publishTickOutcome } from './publishTickOutcome';
@@ -23,6 +23,7 @@ import { buildSceneObservation } from './buildSceneObservation';
 import { validateTickRequest } from './validateTickRequest';
 import { compileTickAction } from './compileTickAction';
 import { buildTickResponse } from './buildTickResponse';
+import { buildTickCommitPlan } from './buildTickCommitPlan';
 import { pointStateRepo } from '../infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
@@ -85,16 +86,24 @@ export function constrainCapacityWhileUnresponsive(input: {
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
     const initiatorId = payload.actingCharacterId || payload.playerId || payload.subjectId;
     // 1. Load state
-    const state = loadTickState(payload.subjectId, payload.pointId, payload.playerId, payload.sceneId, initiatorId);
-    const stateBefore = {
-        core: { ...state.core },
-        point: { ...state.point }
-    };
-    const relationalDynamics = relationshipDynamicsRepo.get(payload.subjectId, initiatorId);
-    const elapsedTime = payload.deltaTime ?? (payload.presetId === 'wait' ? 20 : 1);
-    const preTickContextNotes: string[] = [];
-    const tickEffects: TickEffect[] = [];
-    let labRelocationApplied = false;
+    const {
+        state,
+        stateBefore,
+        relationalDynamics,
+        elapsedTime,
+        preTickContextNotes,
+        tickEffects,
+        labRelocationApplied: _labRelocationApplied,
+    } = loadTickSnapshot({
+        subjectId: payload.subjectId,
+        pointId: payload.pointId,
+        playerId: payload.playerId,
+        sceneId: payload.sceneId,
+        initiatorId,
+        presetId: payload.presetId,
+        deltaTime: payload.deltaTime,
+    });
+    let labRelocationApplied = _labRelocationApplied;
 
     // 2. Scenario layer: доступность действия, ресурсы, локация
     const validationResult = validateTickRequest({
@@ -559,7 +568,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // The primary action becomes durable exactly once. Reactive projections
     // are published only after this transaction succeeds.
-    commitTickOutcome({
+    const commitPlan = buildTickCommitPlan({
         tickId,
         subjectId: payload.subjectId,
         pointId: payload.pointId,
@@ -580,6 +589,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         },
         effects: tickEffects,
     });
+    commitTickOutcome(commitPlan);
     publishTickOutcome({
         tickId,
         subjectId: payload.subjectId,
