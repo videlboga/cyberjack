@@ -7,117 +7,83 @@ import { getActiveContextLabel } from '../../domain/contextPresentation';
 import { deriveTelemetry } from '../../narrative/telemetry';
 import { resolvePortraitEmotion } from '../../domain/portraitEmotion';
 import { db } from '../../infrastructure/db';
+import { relationshipDynamicsRepo } from '../../infrastructure/relationshipDynamicsRepo';
+import { compileAction } from '../../compiler/compileAction';
+import { runTick } from '../../engine/runTick';
+import { conditioningTags, preferenceValenceModifier } from '../../domain/conditioning';
+import { deriveIntimacyReadiness } from '../../domain/intimacyReadiness';
+import * as checkActionAccess from '../../scenario/checkActionAccess';
+import { ContextManager } from '../../orchestration/contextManager';
+import { getStateSnapshot } from '../../services/stateService';
 
 export const getState = (req: Request, res: Response) => {
     const subjectId = (req.query.subjectId as string) || 'S-01';
     let pointId = (req.query.pointId as string) || 'hands';
     pointId = pointId.toLowerCase();
     const requestedSceneId = req.query.sceneId as string | undefined;
+    // Scene cards only need the current character state.  Returning the full
+    // action catalogue and a 160-event recommendation history for every
+    // visible neighbour made a single calibration refresh several megabytes.
+    const sceneSnapshot = req.query.view === 'scene';
     
     try {
-        const uiState = subjectRepo.getUIState(subjectId, pointId);
-        const subjectCharacter = characterRepo.ensureSubject(subjectId, uiState.subject?.name || subjectId);
-        const targetSceneId = requestedSceneId || subjectCharacter.currentSceneId || 'scene_lab_calibrator';
-        const scene = sceneRepo.get(targetSceneId);
-        const player = normalizePlayer(resourceRepo.get('PL-1'));
-        const relations = characterRelationRepo.listFor(subjectCharacter.id);
-        const characters = characterRepo.listAll().map((ch) => ({
-            id: ch.id,
-            name: ch.name,
-            kind: ch.kind,
-            currentSceneId: ch.currentSceneId
-        }));
-
-        let availableActions = uiState.availableActions || [];
-        if (scene) {
-            availableActions = (scene.availableActions || []).map(actionId => {
-                const preset = presetRepo.getActionPreset(actionId);
-                const costs = scene.actionCosts?.[actionId];
-                return {
-                    id: actionId,
-                    label: preset?.label || actionId,
-                    costs: costs && Object.keys(costs).length ? costs : null,
-                    occupiesPoints: preset?.contextConfig?.occupiesPoints || [],
-                    categories: preset?.categories || ['physical'],
-                    tags: preset?.tags || [],
-                    type: preset?.type || 'physical',
-                    // expose requirements so frontend can pre-filter actions
-                    requiresItem: preset?.requiresItem || null,
-                    requiresSceneObject: preset?.contextConfig?.requiresSceneObject || null,
-                    requireContexts: (preset?.vector && preset.vector.requireContexts) || preset?.requireContexts || null,
-                    removeContexts: (preset?.vector && preset.vector.removeContexts) || preset?.removeContexts || null,
-                    validTargets: preset?.validTargets || (preset?.vector && preset.vector.validTargets) || null,
-                    intensity: Number(preset?.vector?.intensity ?? 0),
-                    sharpness: Number(preset?.vector?.sharpness ?? 0)
-                };
-            });
-            scene.characters = sceneCharacterRepo.list(scene.id);
-        }
-
-        const anatomyDict: any = {};
-        const subjectPoints = pointStateRepo.getAllForSubject(subjectId) || [];
-        for (const pt of subjectPoints) {
-            anatomyDict[pt.pointId] = pt; // get mapped pointId
-        }
-
-        let subject = uiState.subject;
-        if (subject) {
-            subject.anatomy = anatomyDict;
-            const rawContexts = activeContextsRepo.getAllForSubject(subjectId) || [];
-            subject.contexts = rawContexts.map(c => {
-                const preset = presetRepo.getActionPreset(c.actionId);
-                return { ...c, label: getActiveContextLabel(preset, c.actionId), type: preset?.contextConfig?.type || preset?.type || c.actionId, occupiesPoints: preset?.contextConfig?.occupiesPoints || [], blocksPoints: preset?.contextConfig?.blocksPoints || [] };
-            });
-        }
-
-        const recentInteractions = db.prepare(`SELECT id, result_payload FROM event_logs WHERE subject_id = ? AND action_type = 'interaction' ORDER BY id DESC LIMIT 5`).all(subjectId) as any[];
-        const recentObservations = recentInteractions.flatMap(row => {
-            try {
-                const observation = JSON.parse(row.result_payload || '{}').observation;
-                return observation ? [{ ...observation, eventLogId: Number(row.id) }] : [];
-            } catch { return []; }
+        const snapshot = getStateSnapshot({
+            subjectId,
+            pointId,
+            sceneId: requestedSceneId,
+            sceneSnapshot,
         });
-        const recommendationInteractions = db.prepare(`
-            SELECT result_payload
-            FROM event_logs
-            WHERE subject_id = ? AND action_type = 'interaction'
-            ORDER BY id DESC
-            LIMIT 160
-        `).all(subjectId) as any[];
-        const recommendationObservations = recommendationInteractions.flatMap(row => {
-            try {
-                const observation = JSON.parse(row.result_payload || '{}').observation;
-                return observation ? [observation] : [];
-            } catch { return []; }
-        });
-        const latestInteraction = recentInteractions[0];
-        let latestObservation: any = null;
-        try { latestObservation = JSON.parse(latestInteraction?.result_payload || '{}').observation || null; } catch { }
-        const telemetry = subject ? deriveTelemetry({
-            core: subject,
-            point: anatomyDict[pointId],
-            observation: latestObservation,
-            contexts: subject.contexts
-        }) : null;
-
-        res.json({ 
-            success: true, 
-            subject: subject,
-            telemetry,
-            recentObservations,
-            recommendationObservations,
-            availablePoints: uiState.availablePoints,
-            availableActions,
-            scene: scene ? { id: scene.id, transitions: scene.transitions || [], characters: scene.characters || [] } : null,
-            // include physical objects present in the scene (furniture, gear, suspension rigs, etc.)
-            sceneObjects: scene ? sceneObjectsRepo.listForScene(scene.id) : [],
-            player,
-            relations,
-            characters
-        });
+        res.json({ success: true, ...snapshot });
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
+};
+
+// A dry run of the same engine used by a real tick. The console uses this to
+// rank its recommendations by the displayed metric, rather than by unrelated
+// historical deltas.
+export const forecastIntimacy = (req: Request, res: Response) => {
+  try {
+    const subjectId = String(req.body.subjectId || '');
+    const actorId = String(req.body.actorId || 'PL-1');
+    const sceneId = String(req.body.sceneId || 'scene_lab_calibrator');
+    const candidates = Array.isArray(req.body.candidates) ? req.body.candidates.slice(0, 80) : [];
+    const subject = subjectRepo.get(subjectId);
+    const character = characterRepo.ensureSubject(subjectId, subject?.name || subjectId);
+    const relation = characterRelationRepo.ensure(character.id, actorId, { attitude: subject?.attitude ?? 50, openness: subject?.openness ?? 50, plasticity: subject?.plasticity ?? 50 });
+    const dynamics = relationshipDynamicsRepo.get(subjectId, actorId);
+    const points = pointStateRepo.getAllForSubject(subjectId);
+    const scene = sceneRepo.get(sceneId);
+    const resources = resourceRepo.get(actorId);
+    const forecasts = candidates.flatMap((candidate: any) => {
+      const pointId = String(candidate.pointId || '');
+      const presetId = String(candidate.actionId || '');
+      const point = points.find(entry => entry.pointId === pointId);
+      if (!subject || !point || !scene || !resources || !presetRepo.getActionPreset(presetId)) return [];
+      if (!checkActionAccess.validateAction(presetId, scene, resources, subjectId, actorId, pointId).allowed) return [];
+      if (ContextManager.isPointBlocked(subjectId, pointId).blocked) return [];
+      let action = compileAction({ presetId, eventId: sceneId, activeContexts: activeContextsRepo.getAllForSubject(subjectId).filter(context => !context.pointId || context.pointId === pointId), familiarity: point.familiarity ?? 0 });
+      action.tags = conditioningTags(action.actionKey, action.tags || []);
+      action.valence += preferenceValenceModifier(action.tags, subject.preferences);
+      const output = runTick({ subjectId, pointId, action, core: subject, point, relationship: relation });
+      const relationalScale = Math.max(.15, Math.min(1.5, Number(output.result.experiencedIntensity || 0) / 10));
+      const relationalSignal = Math.max(-1, Math.min(.5, output.result.finalValence * relationalScale * .25));
+      const after = deriveIntimacyReadiness({
+        relationAttitude: Math.max(0, Math.min(100, Number(relation.attitude) + relationalSignal)),
+        relationOpenness: Math.max(0, Math.min(100, Number(relation.openness || 0) + relationalSignal * .35)),
+        fear: Math.max(0, Number(dynamics.fear || 0) + (output.result.finalValence > .3 ? -.15 : 0)),
+        resistance: dynamics.resistance,
+        capacity: output.nextCore.capacity,
+        tension: output.nextCore.tension,
+        points: points.map(entry => entry.pointId === pointId ? output.nextPoint : entry),
+      });
+      const before = deriveIntimacyReadiness({ relationAttitude: relation.attitude, relationOpenness: relation.openness ?? subject.openness, fear: dynamics.fear, resistance: dynamics.resistance, capacity: subject.capacity, tension: subject.tension, points });
+      return [{ actionId: presetId, pointId, readiness: after.readiness - before.readiness, arousal: after.arousal - before.arousal, trust: after.trust - before.trust }];
+    });
+    res.json({ success: true, forecasts });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
 export const getChatHistory = (req: Request, res: Response) => {
