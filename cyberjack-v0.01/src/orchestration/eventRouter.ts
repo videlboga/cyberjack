@@ -131,7 +131,10 @@ export async function dispatchEvent(payload: DispatchEventInput): Promise<RouteR
         if (parsedCommand?.type === 'perform_action' && parsedCommand.actionId === 'command_remove_worn_clothing') {
             dynamicModifiers = { ...dynamicModifiers, commandIntent: { type: 'remove_worn_clothing' } };
         }
-        const hasNewCommand = Boolean(parsedCommand?.type && parsedCommand.type !== 'none');
+        // Re-read the normalized intent so downstream description uses the
+        // structured form, not the legacy actionId.
+        const normalizedCommand = dynamicModifiers?.commandIntent;
+        const hasNewCommand = Boolean(normalizedCommand?.type && normalizedCommand.type !== 'none');
         if (!hasNewCommand && pendingCommand) {
             if (dynamicModifiers?.pendingCommandRelation === 'continue') {
                 dynamicModifiers = {
@@ -145,17 +148,17 @@ export async function dispatchEvent(payload: DispatchEventInput): Promise<RouteR
             } else {
                 pendingCommandRepo.clear(pendingSubjectId, pendingPlayerId);
             }
-        } else if (hasNewCommand && parsedCommand) {
+        } else if (hasNewCommand && normalizedCommand) {
             // A new explicit instruction supersedes the previous conversational focus.
             pendingCommandRepo.clear(pendingSubjectId, pendingPlayerId);
             const commandDescription = (() => {
-                if (parsedCommand.type === 'remove_worn_clothing') return 'снять надетую одежду';
-                if (parsedCommand.type === 'perform_action') return presetRepo.getActionPreset(parsedCommand.actionId)?.label || parsedCommand.actionId;
-                if (parsedCommand.type === 'activate_context' || parsedCommand.type === 'deactivate_context') {
-                    return presetRepo.getActionPreset(parsedCommand.targetContextId)?.label || parsedCommand.targetContextId;
+                if (normalizedCommand.type === 'remove_worn_clothing') return 'снять надетую одежду';
+                if (normalizedCommand.type === 'perform_action') return presetRepo.getActionPreset(normalizedCommand.actionId)?.label || normalizedCommand.actionId;
+                if (normalizedCommand.type === 'activate_context' || normalizedCommand.type === 'deactivate_context') {
+                    return presetRepo.getActionPreset(normalizedCommand.targetContextId)?.label || normalizedCommand.targetContextId;
                 }
-                if (parsedCommand.type === 'move') return `переместиться: ${parsedCommand.targetLocation}`;
-                if (parsedCommand.type === 'change_current_interaction') return `${parsedCommand.goal} текущее взаимодействие`;
+                if (normalizedCommand.type === 'move') return `переместиться: ${normalizedCommand.targetLocation}`;
+                if (normalizedCommand.type === 'change_current_interaction') return `${normalizedCommand.goal} текущее взаимодействие`;
                 return payload.textMessage;
             })();
             dynamicModifiers = { ...dynamicModifiers, commandSourceText: payload.textMessage, commandDescription };

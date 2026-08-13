@@ -14,6 +14,7 @@ import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/build
 import { appendJsonLog } from '../utils/fileLogs';
 import { traceSync, newRequestId, emitTrace } from './trace';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
+import { stablePromptFragmentStats } from '../services/stablePromptFragmentCache';
 import { runScenarioStep } from '../scenario/runScenarioStep';
 import { ContextManager } from './contextManager';
 
@@ -662,6 +663,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             promptSizeChars: promptChars,
             selectedMemoryBlocks: prompt.reactionFrame?.continuity?.relevantEpisodes?.length || 0,
             memorySelection: prompt.memorySelection || { associations: 0, subjective: 0, episodes: 0, total: 0 },
+            stablePromptFragmentCache: stablePromptFragmentStats(),
         });
     }
 

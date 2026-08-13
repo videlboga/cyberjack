@@ -48,6 +48,19 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
             return { parsed: JSON.parse(resultString), model: data.model || model };
         } catch (error: any) {
             lastError = error;
+            emitTrace({
+                traceId,
+                requestId: traceId,
+                stage: 'llm.fallback',
+                startedAt: performance.now(),
+                durationMs: 0,
+                purpose,
+                model,
+                provider: 'auto',
+                attempt: models.indexOf(model) + 1,
+                attemptsTotal: models.length,
+                error: String(error?.message || error),
+            });
             if (model !== models.at(-1)) console.warn(`[LLM Adapter Parser] ${model} failed; trying next parser model:`, error?.message || error);
         } finally {
             clearTimeout(timer);

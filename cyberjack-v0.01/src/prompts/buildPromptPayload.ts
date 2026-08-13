@@ -423,18 +423,19 @@ export async function buildPromptPayload(
         });
     const activeAssociations = subjectiveAssociationRepo.activeForPrompt(ownerId, addresseeId, currentActionTags)
         .map((association: any) => `У тебя откликается связь «${association.target_label}»: ожидание ${association.expectation}, сила ${Math.round(Number(association.strength) * 100)}%.`);
-    const relevantEpisodes = [...activeAssociations, ...subjectiveEpisodes.slice(0, 2), ...episodeRecords.map(renderEpisodeForCharacter)].slice(0, 3);
-    // Этап 10: структурированная наблюдаемость выбора памяти — типы и
-    // источники ВЫБРАННЫХ (после обрезки до 3) блоков, чтобы диагностировать
-    // рассинхрон. Считаем по фактически отрендеренным строкам, а не по
-    // кандидатам до slice, иначе сумма категорий не совпадает с total.
-    const ASSOCIATION_PREFIX = 'У тебя откликается связь';
-    const SUBJECTIVE_PREFIX = 'Личное воспоминание';
+    // Этап 10: блоки памяти хранятся как { kind, text }, чтобы телеметрия
+    // считала по kind, а не по текстовым префиксам (устойчиво к смене формулировок).
+    const memoryBlocks: Array<{ kind: 'association' | 'subjective' | 'episode'; text: string }> = [
+        ...activeAssociations.map(text => ({ kind: 'association' as const, text })),
+        ...subjectiveEpisodes.slice(0, 2).map(text => ({ kind: 'subjective' as const, text })),
+        ...episodeRecords.map(renderEpisodeForCharacter).map(text => ({ kind: 'episode' as const, text })),
+    ].slice(0, 3);
+    const relevantEpisodes = memoryBlocks.map(block => block.text);
     const memorySelection = {
-        associations: relevantEpisodes.filter(line => line.startsWith(ASSOCIATION_PREFIX)).length,
-        subjective: relevantEpisodes.filter(line => line.startsWith(SUBJECTIVE_PREFIX)).length,
-        episodes: relevantEpisodes.filter(line => !line.startsWith(ASSOCIATION_PREFIX) && !line.startsWith(SUBJECTIVE_PREFIX)).length,
-        total: relevantEpisodes.length,
+        associations: memoryBlocks.filter(block => block.kind === 'association').length,
+        subjective: memoryBlocks.filter(block => block.kind === 'subjective').length,
+        episodes: memoryBlocks.filter(block => block.kind === 'episode').length,
+        total: memoryBlocks.length,
     };
     const repetitionFromLogs = countRepetitions(recentEvents, currentActionId, currentPointId);
     const exposureBeforeTick = Number(latestResult?.tickMeta?.inputs?.point.exposureCount ?? 0);
