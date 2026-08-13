@@ -87,6 +87,14 @@ Discharge-логика (разрядка, истощение, edge state) вын
 - `runGameTick` вызывает её и передаёт эффекты в общий commit.
 - Последствия разрядки тестируются без prompt stack (4 unit-теста: чистота, positive discharge → refractory + edge.clear, exhaustion, low-tension).
 
+### 2.7. Разрезка `runGameTick`: команды в стадию `applyCommandEffects`
+
+Блок разрешения и применения команд (change_pose, activate/deactivate_context, move, perform_action, perform_described_action) вынесен из оркестратора в отдельную стадию:
+
+- `applyCommandEffects.ts` — стадия `resolveCommand`. Принимает контекст (payload, state, compiledAction, commandIntent, complianceFor) и мутирует только переданные `tickEffects`/`addedContextNotes`, возвращая `actionApplied`, `forcedNarrativeToLog`, `forcedAttempted`, `commandActionPreset`, `labRelocationApplied`. Ни одной прямой записи в БД.
+- `runGameTick` вызывает стадию и присваивает результат локальным переменным.
+- Boundary-тест проверяет и `runGameTick`, и `applyCommandEffects` на отсутствие прямых записей.
+
 ## 3. Обязательные архитектурные правила
 
 Эти правила действуют для всех следующих этапов.
@@ -401,6 +409,14 @@ type CharacterStimulus =
 - 491 тест проходит (+4: последствия разрядки);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (состав прежний, новых падений нет);
+- runtime typecheck проходит.
+
+После выноса команд в `applyCommandEffects` (Этап 3, частично):
+
+- 103 test files;
+- 490 тестов проходят;
+- 6 пропущены;
+- 22 теста падают в 8 файлах. Новое падение — `test/api/other.api.test.ts > logs endpoints` (таймаут 5s под нагрузкой полного прогона из-за чтения больших лог-файлов `prompt_payloads.jsonl` ~225MB / `engine_state.jsonl` ~90MB через `fs.readFileSync`). Изолированно тест проходит; не связано с рефакторингом (файлы `fileLogs`/`logsController` не менялись). Требует отдельной задачи по оптимизации чтения логов.
 - runtime typecheck проходит.
 
 Известные группы существующих падений:

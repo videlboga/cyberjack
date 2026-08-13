@@ -23,6 +23,7 @@ import { sceneCharacterRepo } from '../infrastructure/repositories';
 
 import { ConditionWatcher } from './conditionWatcher';
 import { resolveTickConsequences } from './resolveTickConsequences';
+import { applyCommandEffects } from './applyCommandEffects';
 import { pointStateRepo } from '../infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
@@ -385,376 +386,33 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // AFTER the primary commit (ensuring correct id ordering: interaction < system_trigger)
     let forcedNarrativeToLog: string | undefined = undefined;
     let forcedAttempted = false;
-    if (commandIntent && commandIntent.type !== 'none') {
-        
-        const activeContextsRepo2 = activeContextsRepo;
-        
-
-        // Track forced-action narrative/effects so we only log a "performed"
-        // system_trigger after the effects actually changed state.
-        let forcedApplied = false;
-        let commandEffectsAuthorized = false;
-
-        let targetCtxId: string | undefined;
-        if (commandIntent.type === 'change_pose') targetCtxId = commandIntent.targetPoseId;
-    else if (commandIntent.type === 'activate_context') targetCtxId = commandIntent.targetContextId;
-        else if (commandIntent.type === 'deactivate_context' || commandIntent.type === 'deactivate_contexts') {
-            const deactivateIds = commandIntent.type === 'deactivate_context'
-                ? [commandIntent.targetContextId]
-                : commandIntent.targetContextIds;
-            for (const deactivateId of [...new Set(deactivateIds)]) {
-                const actionPreset = presetRepo.getActionPreset(deactivateId);
-                const currentStatuses = activeContextsRepo2.getAllForSubject(payload.subjectId)
-                    .filter((c: any) => c.actionId === deactivateId);
-                if (!currentStatuses.length) continue;
-                const requiredCompliance = actionPreset?.type === 'clothing' ? 40 : 25;
-                const compliance = complianceFor({ id: deactivateId, label: actionPreset?.label, type: actionPreset?.type, pointId: payload.pointId });
-                if (compliance.total < requiredCompliance) {
-                    const refusalNarrative = `[Система]: Актив отклоняет требование «${actionPreset?.label || deactivateId}». Податливость ${Math.round(compliance.total)} (база ${Math.round(compliance.base)}, состояние ${compliance.edgeModifier >= 0 ? '+' : ''}${compliance.edgeModifier}); требуется ${requiredCompliance}.`;
-                    addedContextNotes.push(refusalNarrative);
-                } else {
-                // One wearable context can occupy several body points. A verbal
-                // command removes the item as a whole, not just its first row.
-                const removeNarr = (actionPreset as any)?.vector?.removeNarrative || (actionPreset as any)?._baseAction?.vector?.removeNarrative;
-                const subjectChar = characterRepo.get(payload.subjectId);
-                const subjectName = subjectChar?.name || payload.subjectId;
-                const removalNarrative = removeNarr ? removeNarr.replace(/\{name\}/g, subjectName) : `${subjectName} снимает: ${actionPreset?.label || deactivateId}`;
-                tickEffects.push({
-                    kind: 'context.remove-action',
-                    subjectId: payload.subjectId,
-                    actionId: deactivateId,
-                    event: {
-                        subjectId: payload.subjectId,
-                        type: 'context_change',
-                        presetId: 'context_change',
-                        narrative: removalNarrative,
-                        metadata: { removed: true },
-                    },
-                });
-                addedContextNotes.push(removalNarrative);
-                actionApplied = true;
-                }
-            }
-        } else if (commandIntent.type === 'move') {
-            const tgtLoc = commandIntent.targetLocation;
-            const currentCompliance = complianceFor({ id: 'move', label: tgtLoc, type: 'move' }).total;
-            const moveCompliance = 30;
-            if (currentCompliance < moveCompliance) {
-                const subjectName = characterRepo.get(payload.subjectId)?.name || payload.subjectId;
-                const refusedNarrative = `[Система]: ${subjectName} отклоняет указание на перемещение в «${tgtLoc}».`;
-                addedContextNotes.push(refusedNarrative);
-            } else {
-                const laboratoryMove = payload.sceneId === 'scene_lab_calibrator'
-                    ? resolveLaboratoryMove(payload.subjectId, tgtLoc, payload.playerId)
-                    : { outcome: 'unresolved', handled: false, moved: false, effects: [], label: undefined, slotId: undefined, reason: undefined };
-                if (laboratoryMove.handled) {
-                    const subjectChar = characterRepo.get(payload.subjectId);
-                    const subjectName = subjectChar?.name || payload.subjectId;
-                    if (laboratoryMove.moved) {
-                        const moveNarrative = `[Система]: ${subjectName} перемещается ${laboratoryMove.label}.`;
-                        tickEffects.push(...laboratoryMove.effects);
-                        tickEffects.push({
-                            kind: 'event.append',
-                            event: {
-                                subjectId: payload.subjectId,
-                                type: 'context_change',
-                                presetId: 'move',
-                                narrative: moveNarrative,
-                                metadata: { added: true, slotId: laboratoryMove.slotId },
-                            },
-                        });
-                        labRelocationApplied = true;
-                        addedContextNotes.push(moveNarrative);
-                        actionApplied = true;
-                    } else if (laboratoryMove.reason) {
-                        addedContextNotes.push(`[Система]: ${laboratoryMove.reason}`);
-                    }
-                } else {
-            let finalSlotId: string | null = null;
-            let targetLabel = tgtLoc;
-            
-            const sceneChars = sceneCharacterRepo.list(payload.sceneId);
-            const sceneSlots = state.scene.slots || []; 
-            
-            if (tgtLoc.trim().toLowerCase() === 'initiator') {
-                const initiator = sceneChars.find(c => c.character.id === payload.playerId || c.character.playerId === payload.playerId);
-                if (initiator && initiator.slotId) {
-                    finalSlotId = initiator.slotId;
-                    targetLabel = initiator.character.name || initiator.character.id;
-                }
-            } else {
-                const tgtChar = sceneChars.find(c => {
-                    const cname = (c.character.name || '').toLowerCase();
-                    return cname.includes(tgtLoc.toLowerCase()) || tgtLoc.toLowerCase().includes(cname);
-                });
-                if (tgtChar && tgtChar.slotId) {
-                    finalSlotId = tgtChar.slotId;
-                    targetLabel = tgtChar.character.name || tgtLoc;
-                } else {
-                    const slotObj = sceneSlots.find((s: any) => {
-                        const sname = (typeof s === 'string' ? s : s.id || '').toLowerCase();
-                        return sname === tgtLoc.toLowerCase() || sname.includes(tgtLoc.toLowerCase()) || tgtLoc.toLowerCase().includes(sname);
-                    });
-                    if (slotObj) {
-                        finalSlotId = typeof slotObj === 'string' ? slotObj : (slotObj as any).id;
-                        targetLabel = finalSlotId;
-                    } else {
-                        finalSlotId = tgtLoc;
-                    }
-                }
-            }
-
-            if (finalSlotId) {
-                    const subjCharPresence = sceneChars.find(c => c.character.subjectId === payload.subjectId || c.character.id === payload.subjectId);
-                    if (subjCharPresence) {
-                        if (subjCharPresence.slotId !== finalSlotId) {
-                            tickEffects.push({ kind: 'scene.set-slot', sceneId: payload.sceneId, characterId: subjCharPresence.character.id, slotId: finalSlotId });
-                            let reason = (state.relation?.attitude > 70) ? "с готовностью" : "с неохотой, подчиняясь приказу";
-                            const moveNarrative = `[Система]: Актив перемещается в зону "${targetLabel}", ${reason}.`;
-                            tickEffects.push({
-                                kind: 'event.append',
-                                event: {
-                                    subjectId: payload.subjectId,
-                                    type: 'context_change',
-                                    presetId: 'move',
-                                    narrative: moveNarrative,
-                                    metadata: { added: true },
-                                },
-                            });
-                            addedContextNotes.push(moveNarrative);
-                        } else {
-                            addedContextNotes.push(`Ты уже в зоне "${targetLabel}", перемещение не нужно.`);
-                        }
-                    }
-                }
-            }
-            }
-        } else if (commandIntent.type === 'perform_action') {
-            commandActionPreset = presetRepo.getActionPreset(commandIntent.actionId);
-            const activeClothing = resolveGenericUndressContexts(
-                payload.textMessage || '',
-                activeContextsRepo.getAllForSubject(payload.subjectId).map(context => context.actionId),
-                actionId => presetRepo.getActionPreset(actionId)?.tags || [],
-            );
-            if (activeClothing) {
-                if (activeClothing.length) {
-                    const removalBase = commandActionPreset
-                        || presetRepo.getActionPreset('eq_clothe_calibration_set_remove')
-                        || presetRepo.getActionPreset('eq_clothe_jumpsuit_remove');
-                    commandActionPreset = {
-                        ...(removalBase || {}),
-                        id: 'command_remove_worn_clothing',
-                        label: 'Снять одежду',
-                        type: 'physical',
-                        tags: ['clothing', 'remove'],
-                        priority: (removalBase as any)?.priority || 1,
-                        removeContexts: [...new Set(activeClothing)],
-                    } as any;
-                } else {
-                    addedContextNotes.push('[Система]: Команда снять одежду не привела к действию: на персонаже нет одежды.');
-                    commandActionPreset = undefined;
-                }
-            }
-            if (commandActionPreset) {
-                const requiredContexts: string[] = (commandActionPreset as any).requireContexts || [];
-                const activeIds = new Set(activeContextsRepo.getAllForSubject(payload.subjectId).map((context: any) => context.actionId));
-                const missingContexts = requiredContexts.filter(contextId => !activeIds.has(contextId));
-                if (missingContexts.length) {
-                    addedContextNotes.push(`[Система]: Действие "${commandActionPreset.label}" не выполнено: отсутствует необходимое текущее состояние.`);
-                    commandActionPreset = undefined;
-                } else {
-                    forcedAttempted = true;
-                    const requiredCompliance = (commandActionPreset.priority || 1) * 20;
-                    const currentCompliance = complianceFor({ id: commandActionPreset.id || commandIntent.actionId, label: commandActionPreset.label, type: commandActionPreset.type, pointId: commandIntent.pointId }).total;
-                    const targetName = commandIntent.targetId || 'не указана';
-
-                    if (currentCompliance >= requiredCompliance) {
-                        commandEffectsAuthorized = true;
-                        let reason = state.relation?.attitude > 70 ? "с готовностью выполняя указание" : "выполняя указание без подтверждённого добровольного согласия";
-                        if (state.core.attitude < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
-                        forcedNarrativeToLog = `[Система]: Актив выполняет указание "${commandActionPreset.label}" (цель: ${targetName}), ${reason}.`;
-                        actionApplied = true;
-                        // keep a short local note for immediate UI feedback; don't
-                        // persist the formal system_trigger until effects are applied
-                        // (see later in the effects block).
-                    } else {
-                        const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${commandActionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
-                        addedContextNotes.push(refusedNarrative);
-                    }
-                }
-            } else if (!activeClothing) {
-                addedContextNotes.push(`[Система]: Команда не выполнена: действие «${commandIntent.actionId}» отсутствует в каталоге.`);
-            }
-        } else if (commandIntent.type === 'perform_described_action') {
-            // RP-style described action: *Глажу по щеке*, *бью хлыстом* etc.
-            // The parser already resolved a matching preset (or null) and checked inventory.
-            if (commandIntent.refusal) {
-                // Refused — missing item, no match, or other reason
-                const refusalNarrative = `[Система]: ${commandIntent.refusal}`;
-                addedContextNotes.push(refusalNarrative);
-                tickEffects.push({
-                    kind: 'event.append',
-                    event: {
-                        subjectId: payload.subjectId,
-                        type: 'system_trigger',
-                        presetId: 'system_trigger',
-                        narrative: refusalNarrative,
-                        metadata: { added: true },
-                    },
-                });
-                actionApplied = false;
-            } else if (commandIntent.matchedActionId) {
-                // Matched a preset — apply its effects similar to perform_action
-                commandActionPreset = presetRepo.getActionPreset(commandIntent.matchedActionId);
-                if (commandActionPreset) {
-                    forcedAttempted = true;
-                    const requiredCompliance = (commandActionPreset.priority || 1) * 20;
-                    const currentCompliance = complianceFor({ id: commandActionPreset.id || commandIntent.matchedActionId, label: commandActionPreset.label, type: commandActionPreset.type, pointId: commandIntent.pointId }).total;
-                    // Default target is the subject being acted upon
-                    const targetChar = characterRepo.get(commandIntent.targetId || payload.subjectId);
-                    const targetName = targetChar?.name || commandIntent.targetId || payload.subjectId;
-                    const descText = commandIntent.description || '';
-
-                    if (currentCompliance >= requiredCompliance) {
-                        commandEffectsAuthorized = true;
-                        // For described actions, the PLAYER is doing something TO the subject.
-                        // The subject's compliance determines whether they accept or resist,
-                        // but the narrative should describe the player's action, not the subject "following orders".
-                        let reason: string;
-                        if (state.core.attitude < 30) {
-                            reason = "напрягаясь и пытаясь отдёрнуться";
-                        } else if (state.relation?.attitude > 70) {
-                            reason = "с готовностью принимая ласку";
-                        } else {
-                            reason = "не сумев предотвратить контакт; это само по себе не означает согласия или покорности";
-                        }
-                        forcedNarrativeToLog = `[Система]: *${descText}* → ${commandActionPreset.label}, ${reason}.`;
-                    } else {
-                        const refusedNarrative = `[Система]: Актив мысленно отклоняет действие "${commandActionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен для выполнения (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
-                        addedContextNotes.push(refusedNarrative);
-                    }
-                }
-            }
-        }
-
-        if (targetCtxId) {
-            const actionPreset = presetRepo.getActionPreset(targetCtxId);
-            if (actionPreset && actionPreset.contextConfig) {
-                const wasAlreadyActive = activeContextsRepo2.getAllForSubject(payload.subjectId)
-                    .some((context: any) => context.actionId === targetCtxId);
-                const requiredCompliance = (actionPreset.contextConfig.priority || 1) * 20;
-                const currentCompliance = complianceFor({ id: targetCtxId, label: actionPreset.label, type: actionPreset.type, pointId: payload.pointId }).total;
-                
-                if (currentCompliance >= requiredCompliance) {
-                    if (wasAlreadyActive) {
-                        addedContextNotes.push(`[Система]: Состояние "${actionPreset.label}" уже было активно до текущей команды; нового перехода не произошло.`);
-                    } else {
-                        let reason = (state.relation?.attitude > 70) ? "без явного сопротивления переходу" : "переходя в новое состояние без подтверждённого добровольного принятия";
-                        if (state.core.attitude < 30) reason = "вынужденно и унизительно для себя";
-                        // If there is a playerId (actor), mark them as initiator; otherwise default to subject
-                        const initiator = initiatorId;
-                        // Only record a forced narrative state when the action preset explicitly
-                        // defines a non-verbal, non-wait type. If the preset has no type, we
-                        // avoid creating a forced narrative to prevent polluting memory with
-                        // spurious "Выполнено действие: Разговор" entries.
-                        if (actionPreset.type && actionPreset.type !== 'verbal' && actionPreset.type !== 'wait') {
-                            const forcedNarrative = `[Система]: Команда выполнена. Текущее состояние актива теперь: "${actionPreset.label}"; ${reason}. Переход уже показан визуально: в чат нужны только слова персонажа, без описания движения или позы. До команды состояние было другим.`;
-                            tickEffects.push({
-                                kind: 'context.apply',
-                                subjectId: payload.subjectId,
-                                actionId: targetCtxId,
-                                action: actionPreset,
-                                initiatorId: initiator,
-                                event: {
-                                    subjectId: payload.subjectId,
-                                    type: 'context_change',
-                                    presetId: 'context_change',
-                                    narrative: forcedNarrative,
-                                    metadata: { added: true },
-                                },
-                            });
-                            addedContextNotes.push(forcedNarrative);
-                            actionApplied = true;
-                        }
-                    }
-                } else {
-                    const refusedNarrative = `[Система]: Актив мысленно отклоняет требование перейти в состояние "${actionPreset.label}". Уровень подчинения (~${Math.round(currentCompliance)}) недостаточен (требуется ${requiredCompliance}). Отреагируй отказом словами или жестами.`;
-                    addedContextNotes.push(refusedNarrative);
-                }
-            }
-        }
-
-                    // Execute effects of the commanded actionPreset (apply/remove contexts)
-                    try {
-                        const initiator = initiatorId;
-                        // If the commanded actionPreset itself defines contextConfig, apply it to the subject
-                        if (commandEffectsAuthorized && commandActionPreset && (commandActionPreset as any).contextConfig) {
-                            const applyNarrative = `[Система]: Применено действие "${commandActionPreset.label}" к активу.`;
-                            tickEffects.push({
-                                kind: 'context.apply',
-                                subjectId: payload.subjectId,
-                                actionId: commandIntent.actionId,
-                                action: commandActionPreset as any,
-                                initiatorId: initiator,
-                                event: {
-                                    subjectId: payload.subjectId,
-                                    type: 'context_change',
-                                    presetId: commandIntent.actionId,
-                                    narrative: applyNarrative,
-                                    metadata: { added: true },
-                                },
-                            });
-                            addedContextNotes.push(applyNarrative);
-                            // mark that the forced action produced an actual state change
-                            forcedApplied = true;
-                            actionApplied = true;
-                        }
-
-                        // If the commanded actionPreset declares removeContexts, remove them from the subject
-                        if (commandEffectsAuthorized && commandActionPreset && (commandActionPreset as any).removeContexts && Array.isArray((commandActionPreset as any).removeContexts)) {
-                            let removedAny = false;
-                            for (const remCtx of (commandActionPreset as any).removeContexts) {
-                                const wasActive = activeContextsRepo.getAllForSubject(payload.subjectId)
-                                    .some((context: any) => context.actionId === remCtx);
-                                if (!wasActive) continue;
-                                tickEffects.push({
-                                    kind: 'context.remove-action',
-                                    subjectId: payload.subjectId,
-                                    actionId: remCtx,
-                                });
-                                // mark that the forced action produced an actual state change
-                                removedAny = true;
-                                forcedApplied = true;
-                                actionApplied = true;
-                            }
-                            if (removedAny) {
-                                const removedNarrative = `[Система]: Удалены связанные контексты в результате действия "${commandActionPreset.label}".`;
-                                const lastRemoval = [...tickEffects].reverse().find(effect =>
-                                    effect.kind === 'context.remove-action' && effect.subjectId === payload.subjectId,
-                                );
-                                if (lastRemoval) lastRemoval.event = {
-                                    subjectId: payload.subjectId,
-                                    type: 'context_change',
-                                    presetId: commandIntent.actionId,
-                                    narrative: removedNarrative,
-                                    metadata: { removed: true },
-                                };
-                                addedContextNotes.push(removedNarrative);
-                            }
-                        }
-                    } catch (err) {
-                        console.error('[runGameTick] failed to apply commanded action preset effects', err);
-                    }
-                    // After attempting effects, if the forced action was attempted and
-                    // the narrative says it was performed (compliance was sufficient),
-                    // we log the system-trigger narrative AFTER primary state persistence so its id
-                    // is higher than the interaction log — ensuring correct chronological
-                    // order in recentEvents (interaction first, then system_trigger).
-                    // The actual eventLogRepo.append belongs to the commit phase below.
-                    if (forcedApplied && forcedNarrativeToLog) {
-                        addedContextNotes.push(forcedNarrativeToLog);
-                    }
-    }
+    const commandResult = applyCommandEffects({
+        payload: {
+            subjectId: payload.subjectId,
+            playerId: payload.playerId,
+            sceneId: payload.sceneId,
+            pointId: payload.pointId,
+            presetId: payload.presetId,
+            textMessage: payload.textMessage,
+            dynamicModifiers: payload.dynamicModifiers,
+        },
+        state: {
+            core: state.core,
+            relation: state.relation,
+            scene: state.scene,
+        },
+        compiledAction,
+        commandIntent,
+        initiatorId,
+        complianceFor,
+        tickEffects,
+        addedContextNotes,
+    });
+    actionApplied = commandResult.actionApplied;
+    forcedNarrativeToLog = commandResult.forcedNarrativeToLog;
+    forcedAttempted = commandResult.forcedAttempted;
+    commandActionPreset = commandResult.commandActionPreset;
+    labRelocationApplied = commandResult.labRelocationApplied;
 
     let compiledContextAllowed = true;
     const isDirectedPoseRequest =
