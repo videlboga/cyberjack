@@ -2,6 +2,7 @@ import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { characterRepo, memoryAssociationRepo, subjectiveAssociationRepo, subjectiveEpisodeRepo } from '../infrastructure/repositories';
 import { db } from '../infrastructure/db';
 import { MemoryEpisode } from './memoryEpisodes';
+import { memoryTagLabel } from '../domain/memoryTagLabels';
 
 const pending = new Set<string>();
 const clean = (value: unknown, limit = 600) => String(value || '').replace(/\s+/g, ' ').trim().slice(0, limit);
@@ -101,6 +102,37 @@ export function hasCompleteAssociationCoverage(summary: SubjectiveEpisode | null
 
 export function hasAssociationLink(summary: SubjectiveEpisode | null, tags: string[]) {
     return Boolean(tags.length >= 1 && summary?.associations.some(association => tags.every(tag => association.tagLinks.includes(tag))));
+}
+
+/**
+ * Этап 7. Происхождение тега и связанные фрагменты.
+ *
+ * Возвращает для тега его источник (ассоциация) и буквальные фрагменты
+ * текста (evidence), которые его подтверждают. Это даёт UI возможность
+ * показать, откуда тег взялся, и подсветить связанные фрагменты.
+ */
+export function fragmentsForTag(summary: SubjectiveEpisode | null, tag: string): { source: string; evidence: string[] }[] {
+    if (!summary) return [];
+    return summary.associations
+        .filter(association => association.tagLinks.includes(tag))
+        .map(association => ({
+            source: association.target,
+            evidence: association.evidence,
+        }));
+}
+
+/** Все теги эпизода с их происхождением и связанными фрагментами. */
+export function tagOrigins(summary: SubjectiveEpisode | null, episode: MemoryEpisode): Array<{ tag: string; label: string; sources: string[]; evidence: string[] }> {
+    if (!summary) return [];
+    return episode.tags.map(tag => {
+        const fragments = fragmentsForTag(summary, tag);
+        return {
+            tag,
+            label: memoryTagLabel(tag),
+            sources: Array.from(new Set(fragments.map(fragment => fragment.source))),
+            evidence: Array.from(new Set(fragments.flatMap(fragment => fragment.evidence))),
+        };
+    });
 }
 
 export type ManualTagLink = { target: string; tagLinks: string[]; evidence: string[]; valence: number; strength: number; expectation: SubjectiveEpisode['associations'][number]['expectation']; manual: true };

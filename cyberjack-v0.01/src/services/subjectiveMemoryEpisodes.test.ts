@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applySubjectiveTagIntervention, hasAssociationLink, hasCompleteAssociationCoverage, SubjectiveEpisode } from './subjectiveMemoryEpisodes';
+import { applySubjectiveTagIntervention, fragmentsForTag, hasAssociationLink, hasCompleteAssociationCoverage, SubjectiveEpisode, tagOrigins } from './subjectiveMemoryEpisodes';
 import { MemoryEpisode } from './memoryEpisodes';
 import { db } from '../infrastructure/db';
 
@@ -47,5 +47,41 @@ describe('tag-level intervention', () => {
         expect(effect.weight).toBeLessThan(0);
         db.prepare('DELETE FROM subjective_associations WHERE subject_id = ?').run(subjectId);
         db.prepare('DELETE FROM memory_association_effects WHERE subject_id = ?').run(subjectId);
+    });
+});
+
+describe('tag origin and linked fragments (Этап 7)', () => {
+    const withEvidence = (tagLinks: string[][], evidence: string[][]): SubjectiveEpisode => ({
+        title: 'Личная память', summary: 'Текст', appraisal: '', agency: 'mixed', emotionalArc: [], openLoops: [],
+        associations: tagLinks.map((links, index) => ({
+            target: `Связь ${index}`, tagLinks: links, evidence: evidence[index] || [], valence: 0, strength: .5, expectation: 'anticipate',
+        })),
+    });
+
+    it('returns the source and literal evidence for a tag', () => {
+        const summary = withEvidence([['oral', 'continuous'], ['intense']], [['Он коснулся губ'], ['Он усилил нажим']]);
+        const fragments = fragmentsForTag(summary, 'oral');
+        expect(fragments).toHaveLength(1);
+        expect(fragments[0].source).toBe('Связь 0');
+        expect(fragments[0].evidence).toEqual(['Он коснулся губ']);
+    });
+
+    it('returns empty when the tag has no association', () => {
+        const summary = withEvidence([['oral']], [['Текст']]);
+        expect(fragmentsForTag(summary, 'intense')).toEqual([]);
+    });
+
+    it('aggregates tag origins with labels, sources and evidence', () => {
+        const summary = withEvidence([['oral', 'continuous'], ['oral']], [['Он коснулся губ'], ['Он усилил нажим']]);
+        const origins = tagOrigins(summary, { ...episode, tags: ['oral', 'continuous'] });
+        const oral = origins.find(origin => origin.tag === 'oral')!;
+        expect(oral.label).toBe('оральное');
+        expect(oral.sources).toEqual(['Связь 0', 'Связь 1']);
+        expect(oral.evidence).toEqual(['Он коснулся губ', 'Он усилил нажим']);
+    });
+
+    it('returns empty origins for a null summary', () => {
+        expect(tagOrigins(null, episode)).toEqual([]);
+        expect(fragmentsForTag(null, 'oral')).toEqual([]);
     });
 });
