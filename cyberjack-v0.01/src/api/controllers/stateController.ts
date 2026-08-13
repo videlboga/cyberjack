@@ -15,6 +15,7 @@ import { deriveIntimacyReadiness } from '../../domain/intimacyReadiness';
 import * as checkActionAccess from '../../scenario/checkActionAccess';
 import { ContextManager } from '../../orchestration/contextManager';
 import { getStateSnapshot } from '../../services/stateService';
+import type { ChatHistoryResponse, ContextJournalResponse } from '../dto/memoryDto';
 
 export const getState = (req: Request, res: Response) => {
     const subjectId = (req.query.subjectId as string) || 'S-01';
@@ -127,7 +128,8 @@ export const getChatHistory = (req: Request, res: Response) => {
                     })
                 };
             });
-        res.json({ success: true, subjectId, messages });
+        const response: ChatHistoryResponse = { success: true, subjectId, messages };
+        res.json(response);
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -143,7 +145,8 @@ export const getContextChatHistory = (req: Request, res: Response) => {
         if (!labels.length) return res.status(400).json({ success: false, error: 'contexts required' });
         const limit = Math.max(1, Math.min(200, Number(req.query.limit) || 100));
         const messages = chatMemoryRepo.getRecentForContexts(labels, limit);
-        res.json({ success: true, contexts: labels, messages });
+        const response: ContextJournalResponse = { success: true, contexts: labels, messages };
+        res.json(response);
     } catch (error: any) {
         res.status(500).json({ success: false, error: error.message });
     }

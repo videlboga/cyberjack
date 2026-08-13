@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import { sceneRepo, presetRepo, activeContextsRepo, sceneCharacterRepo, sceneLayoutsRepo } from '../../infrastructure/repositories';
 import { toggleContext as toggleContextService } from '../../services/contextService';
+import { toSceneListItem } from '../dto/sceneDto';
 
 
 export const getScenes = (req: Request, res: Response) => {
     try {
-        const scenes = sceneRepo.list().map((scene) => ({
+        const scenes = sceneRepo.list().map((scene) => toSceneListItem({
             ...scene,
-            characters: sceneCharacterRepo.list(scene.id)
+            characters: sceneCharacterRepo.list(scene.id),
         }));
         res.json({ success: true, scenes });
     } catch (error: any) {
