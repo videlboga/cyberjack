@@ -660,6 +660,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             subjectId: payload.subjectId,
             tickId,
             promptSizeChars: promptChars,
+            selectedMemoryBlocks: prompt.reactionFrame?.continuity?.relevantEpisodes?.length || 0,
         });
     }
 
