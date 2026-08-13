@@ -61,10 +61,10 @@ export async function sendToLLM(systemPrompt: string): Promise<{ reply: string, 
     }
 }
 
-export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any): Promise<any> {
+export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any, purpose: string = 'parser'): Promise<any> {
     const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
     const LLM_API_KEY = getApiKey();
-    const assignment = getModelAssignment('parser');
+    const assignment = getModelAssignment(purpose);
     const models = assignment.models;
     let lastError: unknown;
     // One trace/request ID shared across every parser fallback attempt for
