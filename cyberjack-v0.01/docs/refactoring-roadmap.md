@@ -292,12 +292,28 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 ### Этап 5. Свести prompt/context builders к одному контракту
 
-Нужно инвентаризировать:
+**В работе.** Проведена инвентаризация prompt/context builders и проактивных путей.
 
-- `buildPromptPayload` и wrapper-слои;
-- `ReactionFrame` и его сборщики;
-- специальные пути команд, проактивных реакций и автономных сцен;
-- получение недавней истории, памяти, сцены и отношений.
+### 2.16. Инвентаризация prompt builders
+
+Инвентаризация подтвердила, что **проактивные пути уже используют общий builder**:
+
+- `executeInternalImpulseConversation` (проактивные реплики), `executeTurnConversations` (тикальные) и `runGameTick` — все импортируют `buildPromptPayloadWithDB as buildPromptPayload` из `buildPromptPayloadWrapper.ts`.
+- Единый wrapper (`buildPromptPayloadWithDB`) собирает state-снимок (core, event logs, active contexts, device tags, addressee context, edge hold, world time) и вызывает ядро `buildPromptPayload.ts`, которое строит `systemPrompt`/`turnMessage` через `compileReactionFrame` + `buildReactionSystemPrompt`.
+- `characterSpeechStimulus.ts` применяет `InternalImpulse` к `ReactionFrame` для проактивных путей; `tickController` переиспользует `buildReactionSystemPrompt` для tick-пути.
+
+Удалены мёртвые `.orig`-файлы (`server.ts.orig`, `timeFlow.ts.orig`, `worldService.ts.orig`) — legacy-пути.
+
+Критерий «нет отдельных prompt-конструкторов для проактивных реплик» подтверждён инвентаризацией. Осталось: ввести формальный `CharacterStimulus` → `CharacterTurnContext` контракт и единый executor, убрать разрозненные обёртки вокруг LLM-вызова.
+
+### 2.17. Контракт `CharacterStimulus` → `CharacterTurnContext`
+
+Введён формальный контракт и единый сборщик:
+
+- `characterTurnContext.ts` — тип `CharacterStimulus` (`external_speech` | `external_action` | `internal_impulse` | `observed_event`) и `buildCharacterTurnContext` — единственный сборщик контекста тика из стимула и авторитетного снимка состояния. Оборачивает общий builder `buildPromptPayloadWithDB`.
+- `executeInternalImpulseConversation` (проактивный путь) переведён на `buildCharacterTurnContext` со stimulus `internal_impulse` вместо прямого вызова builder.
+
+Единый executor уже существует: `executeCharacterSpeech` («The single boundary between game orchestration and character-speech LLMs»). Проактивные пути используют его.
 
 Целевой контракт:
 
@@ -537,6 +553,14 @@ type CharacterStimulus =
 
 - 110 test files;
 - 515 тестов проходят (+4: очередь заданий);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
+
+После введения контракта `CharacterStimulus` → `CharacterTurnContext` (Этап 5, первый шаг):
+
+- 111 test files;
+- 517 тестов проходят (+2: контекст тика);
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.

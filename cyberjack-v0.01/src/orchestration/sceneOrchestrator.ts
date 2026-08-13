@@ -100,7 +100,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
         const resourceValue = Math.max(0, Number(playerCredits));
         const resourceScale = cfg.resourceScale || 100;
         const resourceNorm = normalize(resourceValue, 0, resourceScale);
-        const activeCompulsions = deriveCompulsionSignals(core?.preferences, bundle.compiledAction.tags || []);
+        const activeCompulsions = deriveCompulsionSignals(core?.preferences, bundle.compiledAction.tags || [], [bundle.compiledAction.pointId]);
         const compulsionPressure = activeCompulsions[0]?.pressure || 0;
 
         // Смягчаем штраф за отсутствие новизны: снижение максимум на 20%, чтобы персонажи чаще отвечали.
@@ -171,6 +171,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
             : describeTone(relationToCalibrator?.attitude);
         let decidedAction: any = undefined;
         let proactiveKind: 'physical' | 'verbal' | null = null;
+        let proactiveImpulse: ActorDecision['impulse'];
 
         // Significance: how notable was this tick? Higher = more likely NPC acts.
         const hasMajorTransition = Boolean(bundle.diagnostics?.observation?.transitions?.length);
@@ -204,7 +205,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
 
                     const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints)
                         .map(action => {
-                            const actionCompulsion = deriveCompulsionSignals(core?.preferences, conditioningTags(action.actionId))[0];
+                            const actionCompulsion = deriveCompulsionSignals(core?.preferences, conditioningTags(action.actionId), [action.pointId])[0];
                             return actionCompulsion?.level === 3
                                 ? { ...action, score:action.score + actionCompulsion.pressure * 18 }
                                 : action;
@@ -238,6 +239,12 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
                     decidedAction = { ...bestScored.action, targetId: bestScored.targetId };
                     becameProactive = true;
                     proactiveKind = 'physical';
+                    proactiveImpulse = {
+                        id: `initiative:${bestScored.action.actionId}`,
+                        primaryIntent: `Ты решила самой начать «${preset?.label || bestScored.action.actionId}» в отношении ${targetName}.`,
+                        secondaryConflict: 'Это твой собственный выбор действия; говори из текущего состояния и не выдавай его за чужую команду.',
+                        allowedSpeechActs: ['acknowledge', 'report', 'silence'],
+                    };
                 }
             }
 
@@ -247,6 +254,12 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
                 // This is a speech-only proactive decision (no mechanical action).
                 becameProactive = true;
                 proactiveKind = 'verbal';
+                proactiveImpulse = {
+                    id: 'scene_initiative',
+                    primaryIntent: 'Ты хочешь первой начать уместный разговор, а не только отвечать на чужие слова.',
+                    secondaryConflict: 'Выбери тему из того, что ты действительно переживаешь и помнишь в этой сцене.',
+                    allowedSpeechActs: ['acknowledge', 'probe', 'request', 'admit'],
+                };
                 proactiveReason = `${describeTone(relationToCalibrator?.attitude)}; инициативная реплика`;
             }
         }
@@ -256,6 +269,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
                 actorId,
                 kind: 'proactive',
                 reason: proactiveReason,
+                impulse: proactiveImpulse,
                 mechanicalAction: proactiveKind === 'physical' ? decidedAction : undefined
             });
         }
@@ -299,10 +313,14 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
 
 import { db } from '../infrastructure/db';
 import { chatMemoryRepo } from '../infrastructure/repositories';
-import { generateCharacterReply, generateNarratorReply, generateSceneForCharacter } from '../adapters/llmAdapter';
+import { generateNarratorReply, generateSceneForCharacter } from '../adapters/llmAdapter';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
+import { buildCharacterTurnContext } from './characterTurnContext';
 import { recordMemoryEvent } from '../services/memoryLayer';
-import { applyVerbalInputToFrame, buildReactionSystemPrompt, buildReactionTurnMessage } from '../narrative/reactionFrame';
+import { executeCharacterSpeech } from '../services/characterSpeechExecutor';
+import { deliverCharacterSpeech } from '../services/characterSpeechDelivery';
+import { prepareCharacterSpeechStimuli } from '../services/characterSpeechStimulus';
+import { applyInternalImpulseToFrame, applyVerbalInputToFrame, buildReactionSystemPrompt, buildReactionTurnMessage, type InternalImpulse } from '../narrative/reactionFrame';
 import { deriveTelemetry, formatTelemetryForPrompt, formatVisibleConditionForPrompt } from '../narrative/telemetry';
 import { buildPairedDialogueHistory } from '../narrative/dialogueHistory';
 import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueEntry } from '../narrative/temporalDialogue';
@@ -314,6 +332,25 @@ function dialogueContextBeforeCurrent(history: TemporalDialogueEntry[], currentS
         prior.pop();
     }
     return renderTemporalDialogue(selectCurrentDialogueSegment(prior, 8), speakerName, initiatorName);
+}
+
+function frameAtCommandTransition(frame: NonNullable<TickBundle['prompt']['reactionFrame']>, actionLabel: string) {
+    // The simulation state is committed for the UI before dialogue is made.
+    // For this one reply, however, the character must experience the change as
+    // a transition rather than receive the resulting pose as old knowledge.
+    const isFinalPostureFact = (context: string) => /(?:текущее положение тела|^поза\s*:)/iu.test(context);
+    const contexts = frame.scene.contexts.filter(context => !isFinalPostureFact(context));
+    const roleContext = frame.scene.roleContext.filter(context => !isFinalPostureFact(context));
+    return {
+        ...frame,
+        scene: { ...frame.scene, contexts: [...contexts, 'Положение тела меняется в ответ на обращение Калибратора.'], roleContext },
+        event: {
+            ...frame.event,
+            action: actionLabel,
+            experience: 'Ты слышишь прямое обращение Калибратора и начинаешь выполнять его в этот момент.',
+            changes: [],
+        },
+    };
 }
 
 function historyWithoutDuplicatedCurrentInput(history: Array<{ role: 'user' | 'assistant'; content: string }>, currentSpeech?: string) {
@@ -339,6 +376,69 @@ export interface TurnExecutionParams {
     interactionContext?: string;
     directedActorId?: string;
     onToken?: (chunk: string, actorId: string) => void;
+}
+
+/**
+ * The only background entrypoint for character speech. Background systems may
+ * describe an internal impulse, but they never construct chat history, call a
+ * model or write a reply themselves. This keeps autonomous speech in the same
+ * prompt, persistence and portrait-emotion pipeline as an ordinary turn.
+ */
+export async function executeInternalImpulseConversation(input: {
+    subjectId: string;
+    latestResult?: any;
+    eventId?: string;
+    initiatorId?: string;
+    impulse: InternalImpulse;
+    event: Pick<NonNullable<TickBundle['prompt']['reactionFrame']>['event'], 'action' | 'target' | 'experience' | 'mandatoryPhysiologicalFocus'>;
+    interactionContext: string;
+}) {
+    const eventId = input.eventId || 'scene_lab_calibrator';
+    const turnContext = await buildCharacterTurnContext({
+        subjectId: input.subjectId,
+        stimulus: { kind: 'internal_impulse', impulseId: input.impulse.id },
+        latestResult: input.latestResult,
+        eventId,
+        initiatorId: input.initiatorId || 'PL-1',
+    });
+    const payload = turnContext.payload;
+    const prepared = prepareCharacterSpeechStimuli(payload, [{
+        kind: 'internal_impulse',
+        impulse: input.impulse,
+        event: {
+            ...input.event,
+            directlyExperienced: true,
+            affectedCharacter: payload.reactionFrame?.speaker.name || input.subjectId,
+        },
+    }]);
+    if (!prepared) return null;
+    const generated = await executeCharacterSpeech({
+        source: 'internal_impulse',
+        payload: prepared.payload,
+        userInput: prepared.userInput,
+        history: [],
+    });
+    if (!generated.success) throw new Error(generated.error);
+    const reply = generated.speech;
+    const actorState = subjectRepo.get(input.subjectId);
+    const portraitEmotion = resolvePortraitEmotion({
+        speech: reply,
+        state: {
+            tension: actorState?.tension,
+            capacity: actorState?.capacity,
+            attitude: actorState?.attitude,
+            openness: actorState?.openness,
+            plasticity: actorState?.plasticity,
+            contexts: activeContextsRepo.getAllForSubject(input.subjectId).map(context => ({ actionId: context.actionId })),
+        },
+    });
+    deliverCharacterSpeech({
+        speakerId: input.subjectId,
+        speech: reply,
+        contextLabel: input.interactionContext,
+        portraitEmotion,
+    });
+    return { speech: reply.trim(), portraitEmotion };
 }
 
 export async function executeTurnConversations(bundle: TickBundle, params: TurnExecutionParams) {
@@ -545,6 +645,7 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         actorId?: string;
     } | null = null;
     let promptMessages: any = null;
+    const speechErrors: Array<{ actorId: string; error: string }> = [];
     const commandIntent = (bundle.metadata as any)?.commandIntent;
     const resumedPendingCommand = Boolean((bundle.compiledAction as any)?.resumedPendingCommand || (bundle.metadata as any)?.resumedPendingCommand);
     const hasParsedCommand = Boolean(commandIntent?.type && commandIntent.type !== 'none' && !resumedPendingCommand);
@@ -661,7 +762,11 @@ ${commandPresentation?.targetNow || `${subjectRepo.get(subjectId)?.name || subje
                               ...currentPayload.reactionFrame,
                               event: {
                                   ...currentPayload.reactionFrame.event,
-                                  playerSpeech: autoUserMessage.trim()
+                                  playerSpeech: autoUserMessage.trim(),
+                                  commandOutcome: {
+                                      status: bundle.actionApplied ? 'performed' : 'not_performed',
+                                      actionLabel: resolvedCommandActionLabel,
+                                  },
                               },
                               expressionMode: {
                                   ...currentPayload.reactionFrame.expressionMode,
@@ -750,11 +855,16 @@ ${isResponseTarget ? `[Прямое обращение к тебе от Кали
             // the primary subject as well.
             if (decision.actorId === subjectId && autoUserMessage && isDirectedCommandActor) {
                 if (currentPayload.reactionFrame) {
+                    const transitionFrame = frameAtCommandTransition(currentPayload.reactionFrame, resolvedCommandActionLabel);
                     currentPayload.reactionFrame = {
-                        ...currentPayload.reactionFrame,
+                        ...transitionFrame,
                         event: {
-                            ...currentPayload.reactionFrame.event,
-                            playerSpeech: autoUserMessage.trim()
+                            ...transitionFrame.event,
+                            playerSpeech: autoUserMessage.trim(),
+                            commandOutcome: {
+                                status: bundle.actionApplied ? 'performed' : 'not_performed',
+                                actionLabel: resolvedCommandActionLabel,
+                            },
                         },
                         dramaticPosition: bundle.actionApplied
                             ? {
@@ -830,10 +940,10 @@ ${commandPresentation?.executorNow || (bundle.actionApplied ? `Ты сейчас
                 /* ignore */
             }
 
-            if (decision.kind === 'proactive' && decision.reason) {
-                userMsgOverride = userMsgOverride
-                    ? `${userMsgOverride}\n\n[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`
-                    : `[Твоя инициатива]: ${decision.reason}. Ответь сообразно этому намерению.`;
+            if (decision.impulse && currentPayload.reactionFrame) {
+                currentPayload.reactionFrame = applyInternalImpulseToFrame(currentPayload.reactionFrame, decision.impulse as any);
+                currentPayload.systemPrompt = buildReactionSystemPrompt(currentPayload.reactionFrame);
+                userMsgOverride = buildReactionTurnMessage(currentPayload.reactionFrame);
             }
 
             if (commandPresentation && decision.actorId !== subjectId && !receivedCommandedAction) {
@@ -867,17 +977,18 @@ ${commandPresentation?.executorNow || (bundle.actionApplied ? `Ты сейчас
             // duplicated every turn and encouraged the model to continue or
             // echo an older line instead of following the current event.
             const generationHistory = currentPayload.reactionFrame ? [] : currentHistory;
-            const res = await generateCharacterReply(currentPayload, userMsgOverride, generationHistory, (chunk) => onToken?.(chunk, decision.actorId));
+            const res = await executeCharacterSpeech({
+                source: 'player_turn',
+                payload: currentPayload,
+                userInput: userMsgOverride,
+                history: generationHistory,
+                onToken: (chunk) => onToken?.(chunk, decision.actorId),
+            });
             sentMessages = res.sentMessages;
-            structuredReply =
-                res.reply && typeof res.reply === 'object'
-                    ? (res.reply as {
-                          speech: string;
-                          speechAct?: string;
-                          addressedTo?: string;
-                      })
-                    : { speech: String(res.reply || '') };
-
+            if (!res.success) {
+                return { decision, structuredReply, sentMessages, error: res.error };
+            }
+            structuredReply = { speech: res.speech, speechAct: res.speechAct, addressedTo: res.addressedTo };
             try {
                 appendJsonLog('prompt_payloads.jsonl', {
                     tickId: bundle.event.id || null,
@@ -892,12 +1003,16 @@ ${commandPresentation?.executorNow || (bundle.actionApplied ? `Ты сейчас
                 /* ignore */
             }
 
-            return { decision, structuredReply, sentMessages };
+            return { decision, structuredReply, sentMessages, error: null };
         });
 
         const results = await Promise.all(actorPromises);
 
-        for (const { decision, structuredReply, sentMessages } of results) {
+        for (const { decision, structuredReply, sentMessages, error } of results) {
+            if (error) {
+                speechErrors.push({ actorId: decision.actorId, error });
+                continue;
+            }
             const actorState = subjectRepo.get(decision.actorId)
                 || (decision.actorId === subjectId ? bundle.stateAfter.core : bundle.stateBefore.core);
             const actorContexts = activeContextsRepo.getAllForSubject(decision.actorId);
@@ -967,13 +1082,12 @@ ${commandPresentation?.executorNow || (bundle.actionApplied ? `Ты сейчас
             }
 
             if (structuredReply.speech) {
-                const messageId = chatMemoryRepo.append(
-                    decision.actorId,
-                    'assistant',
-                    structuredReply.speech,
-                    interactionContext,
+                const messageId = deliverCharacterSpeech({
+                    speakerId: decision.actorId,
+                    speech: structuredReply.speech,
+                    contextLabel: interactionContext,
                     portraitEmotion,
-                );
+                }).originChatId;
                 if (messageId) {
                     chatMemoryRepo.updatePortraitEmotion(messageId, portraitEmotion, 'simulation+speech', .72);
                 }
@@ -1057,6 +1171,8 @@ ${commandPresentation?.executorNow || (bundle.actionApplied ? `Ты сейчас
         reply: primaryReply,
         promptMessages,
         actorReplies,
-        narratorReaction
+        narratorReaction,
+        speechErrors,
+        error: speechErrors[0]?.error || null,
     };
 }
