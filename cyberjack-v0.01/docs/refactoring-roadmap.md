@@ -260,6 +260,16 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 Осталось: перевести `subjectiveMemoryWorker`/`timeFlow` с `setInterval` на очередь, перевести sustained/device pulses, автономные сцены, event director и дедлайны контрактов в задания.
 
+### 2.13. Материализация памяти через очередь
+
+`subjectiveMemoryWorker` переведён с `setInterval` на единую очередь:
+
+- `startSubjectiveMemoryWorker`/`stopSubjectiveMemoryWorker` стали no-op-совместимыми заглушками (серверный startup-путь не меняется).
+- `advanceSimulationTime` планирует задание `memory.materialize` каждые 45 игровых минут через `scheduleMemoryMaterialization` (идемпотентный ключ — только одно pending-задание).
+- Убран игровой `setInterval`/`setTimeout` из worker; материализация теперь исполняется в `runDueBackgroundJobs` после фиксации времени.
+
+Единственный оставшийся игровой таймер — `timeFlow` heartbeat (5 реальных секунд), который является самим драйвером продвижения времени через единый path `advanceSimulationTime` → `advanceWorldTime` + `runBackgroundSustainedTicks` + очередь. Это соответствует целевой модели «единственный worldMinute cursor».
+
 ### Этап 5. Свести prompt/context builders к одному контракту
 
 Нужно инвентаризировать:

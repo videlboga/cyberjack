@@ -22,8 +22,13 @@ export async function advanceSimulationTime(
     // job is idempotent on (type, key), so a repeated worker run never
     // duplicates replicas or memories.
     await runDueBackgroundJobs(clock.totalMinutes);
+    // Schedule the next low-priority memory materialization pass ~45 game
+    // minutes out. Idempotent on the queue key, so only one is pending.
+    scheduleMemoryMaterialization(clock.totalMinutes + MEMORY_MATERIALIZE_INTERVAL_MINUTES);
     return clock;
 }
+
+const MEMORY_MATERIALIZE_INTERVAL_MINUTES = 45;
 
 /** Runs background jobs whose dueMinute has been reached. */
 export async function runDueBackgroundJobs(worldMinute: number) {
