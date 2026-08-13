@@ -14,6 +14,17 @@ export interface RouteResponse {
     actorIdUsed: string;
 }
 
+/**
+ * Транспортный ввод dispatchEvent. Расширяет GameEventPayload полями,
+ * которые приходят из HTTP-тела тика и используются для маршрутизации.
+ */
+export interface DispatchEventInput extends Partial<GameEventPayload> {
+    actionId?: string;
+    addressedCharacterId?: string;
+    intensity?: number;
+    payload?: Record<string, unknown>;
+}
+
 export function resolveCommandRoute(
     routing: { actorId?: string; targetId?: string } | undefined,
     playerId: string,
@@ -42,7 +53,7 @@ export function resolveCommandRoute(
  * Handles extracting semantic meaning from text messages, overriding targets,
  * and routing into the engine tick.
  */
-export async function dispatchEvent(payload: any): Promise<RouteResponse> {
+export async function dispatchEvent(payload: DispatchEventInput): Promise<RouteResponse> {
     let pointId = payload.pointId || 'systemic';
     let dynamicModifiers: DynamicModifiers | undefined = undefined;
     const sceneId = payload.sceneId || 'scene_lab_calibrator';
