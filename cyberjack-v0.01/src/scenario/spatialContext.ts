@@ -1,6 +1,8 @@
 import { db } from '../infrastructure/db';
 import { clearCalibrationSetupContexts } from './calibrationContextCleanup';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
+import { sexMachineStimulation } from '../domain/sexMachineStimulation';
+import type { DeviceSessionMetadata, MentalSessionMetadata } from '../domain/sessionMetadata';
 
 export type SpatialContext = {
     locationTitle: string;
@@ -109,9 +111,9 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
     const occupiedAsset = assets.find(asset => String(parseMetadata(asset.metadata).subjectId || '') === character.id);
     const nearAssetId = resolvedPresence.slotId.startsWith('near:') ? resolvedPresence.slotId.slice(5) : '';
     const nearAsset = !occupiedAsset && nearAssetId ? assets.find(asset => asset.asset_id === nearAssetId) : null;
-    const isolated = occupiedAsset?.asset_id === 'lab_recovery_capsule';
+    const isolated = ['lab_recovery_capsule', 'lab_mental_correction_chair'].includes(String(occupiedAsset?.asset_id || ''));
     const isolatedCharacterIds = new Set(assets
-        .filter(asset => ['lab_recovery_capsule', 'lab_sex_machine'].includes(asset.asset_id))
+        .filter(asset => ['lab_recovery_capsule', 'lab_sex_machine', 'lab_mental_correction_chair'].includes(asset.asset_id))
         .map(asset => String(parseMetadata(asset.metadata).subjectId || ''))
         .filter(Boolean));
     const roster = db.prepare(`
@@ -128,15 +130,22 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
     const locationTitle = containerName ? `${room.name} / ${containerName}` : room.name;
     const deviceDescription = String(occupiedAsset?.description || 'Изолированное устройство').replace(/[.\s]+$/, '');
     const occupiedMetadata = occupiedAsset ? parseMetadata(occupiedAsset.metadata) : {};
-    const deviceSession = occupiedMetadata.deviceSession as Record<string, any> | undefined;
+    const deviceSession = occupiedMetadata.deviceSession as DeviceSessionMetadata | undefined;
     const worldMinute = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
     const machineIntensity = Number(deviceSession?.intensity || 0);
+    const stimulation = sexMachineStimulation(deviceSession?.stimulationMode);
+    const tickling = deviceSession?.stimulationMode === 'tickling';
     const feltPower = machineIntensity >= 75 ? 'Воздействие ощущается беспощадно сильным'
         : machineIntensity >= 45 ? 'Воздействие ощущается настойчивым и мощным'
         : 'Воздействие остаётся умеренным, но непрерывным';
-    const feltRhythm = deviceSession?.rhythm === 'pulse' ? 'ритм приходит отчётливыми повторяющимися толчками'
-        : deviceSession?.rhythm === 'wave' ? 'ритм накатывает и отступает волнами'
-        : 'ритм остаётся ровным и повторяющимся';
+    const feltRhythm = tickling
+        ? deviceSession?.rhythm === 'pulse' ? 'серии касаний сменяются короткими паузами'
+            : deviceSession?.rhythm === 'wave' ? 'касания накатывают и отступают волнами'
+                : deviceSession?.rhythm === 'random' ? 'точки контакта меняются непредсказуемо'
+                    : 'касания возвращаются ровными повторяющимися сериями'
+        : deviceSession?.rhythm === 'pulse' ? 'ритм приходит отчётливыми повторяющимися толчками'
+            : deviceSession?.rhythm === 'wave' ? 'ритм накатывает и отступает волнами'
+                : 'ритм остаётся ровным и повторяющимся';
     const feltPolicy = deviceSession?.orgasmPolicy === 'deny'
         ? 'каждый подъём обрывается прежде, чем напряжение успевает разрешиться'
         : deviceSession?.orgasmPolicy === 'force'
@@ -146,7 +155,11 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
         ? [
             `Ты лежишь на металлической поверхности секс-машины`,
             `твои руки и ноги зажаты жёсткими фиксаторами, поэтому ты не можешь самостоятельно изменить положение тела`,
-            `в твоё влагалище введён крупный поршень с рельефной, покрытой пупырышками поверхностью; стенками влагалища ты постоянно ощущаешь его объём и давление`,
+            tickling
+                ? `ступни закреплены в отдельных держателях; механические щётки проходят по подошвам, под пальцами и вдоль сводов, а фиксаторы не дают отдёрнуть ноги`
+                : stimulation.pointId === 'anus'
+                    ? `в твой анус введён крупный поршень с рельефной поверхностью; изнутри ты постоянно ощущаешь его объём, давление и движение`
+                    : `в твоё влагалище введён крупный поршень с рельефной поверхностью; изнутри ты постоянно ощущаешь его объём, давление и движение`,
             deviceSession.status === 'running' ? feltPower : deviceSession.status === 'paused' ? 'механизм замер, но давление и фиксация никуда не исчезли' : 'механизм остановлен, хотя твоё тело всё ещё удерживается на месте',
             feltRhythm,
             feltPolicy,
@@ -157,14 +170,23 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
         ? 'ты лежишь на металлической поверхности и не можешь самостоятельно изменить положение из-за фиксаторов'
         : occupiedAsset?.asset_id === 'lab_recovery_capsule'
             ? 'твоё тело удерживается в вертикальном положении внутри капсулы; ты не стоишь на полу и не лежишь'
+            : occupiedAsset?.asset_id === 'lab_mental_correction_chair'
+                ? 'ты сидишь глубоко в фиксирующем кресле; визор закрывает глаза, руки лежат на подлокотниках'
             : occupiedAsset?.asset_id === 'lab_diagnostic_table'
                 ? 'ты лежишь на диагностическом столе; ты не стоишь на полу'
             : null;
     const capsuleExperience = occupiedAsset?.asset_id === 'lab_recovery_capsule'
         ? 'Это вертикальная ёмкость, наполненная вязкой тёплой жидкостью. Ощущения внутри странные и приглушённые, но чувствуется, как тело понемногу расслабляется. На лице закреплена маска, через которую подаётся кислород; к углу рта подведена трубка, из которой иногда поступает сладковатая жидкость.'
         : '';
+    const mentalChairExperience = occupiedAsset?.asset_id === 'lab_mental_correction_chair'
+        ? 'Мягкие фиксаторы удерживают тебя в кресле, а плотный визор отсекает комнату. В наушниках остаётся тихий направленный звук; под ним можно различить ровное тепло подголовника и едва заметную тактильную отдачу подлокотников.'
+        : '';
+    const mentalSession = occupiedMetadata.mentalSession as MentalSessionMetadata | undefined;
+    const mentalProtocolDescription = occupiedAsset?.asset_id === 'lab_mental_correction_chair' && mentalSession?.status === 'running' && mentalSession.memoryText
+        ? `Система возвращает тебя к одному эпизоду из твоей памяти: «${String(mentalSession.memoryText).slice(0, 650)}». Сейчас идёт этап ${mentalSession.phase === 'recall' ? 'извлечения деталей' : mentalSession.phase === 'immersion' ? 'повторного переживания' : 'закрепления новой ассоциации'}; внимание удерживается на теме «${mentalSession.focusTag || 'не выбрана'}».`
+        : '';
     const description = isolated
-        ? `${capsuleExperience || deviceDescription} Связь с калибратором идёт по интеркому; происходящее в комнате непосредственно не слышно и не видно.`
+        ? `${capsuleExperience || mentalChairExperience || deviceDescription}${mentalProtocolDescription ? ` ${mentalProtocolDescription}` : ''} Связь с калибратором идёт по интеркому; происходящее в комнате непосредственно не слышно и не видно.`
         : `${room.description || 'Помещение лаборатории.'}${deviceProtocolDescription ? ` ${deviceProtocolDescription}` : ''}${nearAsset ? ` ${character.name} находится рядом с оборудованием «${nearAsset.name}», но не занимает его.` : ''}`;
 
     return {
@@ -211,6 +233,7 @@ export function moveCharacterInLaboratory(characterOrSubjectId: string, targetLo
     const targetAsset = assets.find(asset =>
         matches(query, asset.name, asset.asset_id) ||
         (asset.asset_id === 'lab_diagnostic_table' && /(диагност|калибровоч|процедурн).*(стол)|\bстол/u.test(query)) ||
+        (asset.asset_id === 'lab_mental_correction_chair' && /(ментальн|нейро|коррекц).*(кресл)|\bкресл/u.test(query)) ||
         (asset.asset_id === 'lab_terminal' && /(терминал|пульт)/u.test(query)) ||
         (asset.asset_id.includes('capsule') && /(капсул)/u.test(query))
     );
@@ -225,7 +248,10 @@ export function moveCharacterInLaboratory(characterOrSubjectId: string, targetLo
 
     const occupied = db.prepare(`SELECT COUNT(*) AS count FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ? AND character_id != ? AND status != 'operator'`)
         .get(playerId, room.room_id, character.id) as any;
-    if (assignment.room_id !== room.room_id && Number(occupied?.count || 0) >= Number(room.capacity || 1)) {
+    // The calibrator is an operator, not an additional room occupant. The
+    // previous unconditional capacity check left the UI focused on a subject
+    // while the authoritative player slot remained at the prior screen.
+    if (character.id !== playerId && assignment.room_id !== room.room_id && Number(occupied?.count || 0) >= Number(room.capacity || 1)) {
         return { handled: true, moved: false, reason: `В помещении «${room.name}» нет свободного места.` };
     }
 
