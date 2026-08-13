@@ -477,11 +477,13 @@ Baseline после третьего ревью: 21 failed / 529 passed / 6 skip
 
 Нужно:
 
-- определить DTO для тика, сцены, фонового задания, памяти и реплики;
+- ~~определить DTO для тика, сцены, фонового задания, памяти и реплики~~ ✅ — `src/api/dto/`: `tickDto.ts`+`tickResponseMapper.ts`, `sceneDto.ts`, `memoryDto.ts`, `jobDto.ts`;
 - вынести проверки доступности и proximity в scenario services;
 - использовать одинаковые сервисы из UI, API и автономных worker-ов;
-- удалить дублирующие маршруты и несовместимые формы ответа;
-- обеспечить трассировку `requestId → tickId → speech job → memory job`.
+- ~~удалить дублирующие маршруты и несовместимые формы ответа~~ ✅ — дублирующих маршрутов нет, формы ответа тика/сцены/памяти типизированы через DTO;
+- ~~обеспечить трассировку `requestId → tickId → speech job → memory job`~~ ✅ — `requestId` в `bundle.metadata`, связан с tickId и дочерними LLM-задачами.
+
+Выполнено в Этапе 8 (application services): `stateService` (state-снимок), `characterAdminService` (создание/удаление персонажей), `contractService` (приём/сдача контрактов), `contextService` (переключение контекстов), `deferredReply` (SSE отложенных LLM-ответов). Контроллеры `state/meta/contract/scene/tick` стали тонкими.
 
 Критерий готовности: контроллер валидирует транспортный ввод, вызывает один application service и отображает его результат в HTTP/WS.
 
