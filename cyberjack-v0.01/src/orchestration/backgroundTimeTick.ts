@@ -223,7 +223,7 @@ function chooseLongEdgeExpression(input: {
 function queueEdgeHoldReaction(subjectId: string, worldMinute: number, state: ReturnType<typeof subjectEdgeStateRepo.get>) {
   if (!state || pendingEdgeReactions.has(subjectId)) return;
   pendingEdgeReactions.add(subjectId);
-  const reason = describeEdgeHold(state, worldMinute);
+  const reason = describeEdgeHold(state, worldMinute) ?? '';
   const recentEntries = chatMemoryRepo.getRecent(subjectId, 20);
   const expression = chooseLongEdgeExpression({
     minutes: edgeHoldMinutes(state, worldMinute),
@@ -471,7 +471,10 @@ export async function runBackgroundSustainedTicks(deltaTime = 1) {
         FROM active_contexts
       `).all() as Array<{ subjectId: string }>;
       for (const { subjectId } of subjects) {
-        const plans = planSustainedPulses(activeContextsRepo.getAllForSubject(subjectId), 1);
+        const plans = planSustainedPulses(
+          activeContextsRepo.getAllForSubject(subjectId).map((c: any) => ({ actionId: c.actionId, pointId: c.pointId ?? undefined })),
+          1,
+        );
         if (!plans.length) {
           ContextManager.processTick(subjectId, 1);
           continue;

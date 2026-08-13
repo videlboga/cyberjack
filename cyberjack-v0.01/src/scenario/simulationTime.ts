@@ -1,6 +1,6 @@
 import { runBackgroundSustainedTicks } from '../orchestration/backgroundTimeTick';
 import { advanceWorldTime, getWorldClock } from './worldService';
-import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed, markBackgroundJobRunning } from '../orchestration/backgroundJobs';
+import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, claimBackgroundJob, markBackgroundJobDone, markBackgroundJobFailed } from '../orchestration/backgroundJobs';
 import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
@@ -25,8 +25,9 @@ export async function advanceSimulationTime(
     await runBackgroundSustainedTicks(amount);
     // After time is fixed, run any background jobs that have come due. Each
     // job is idempotent on (type, key), so a repeated worker run never
-    // duplicates replicas or memories.
-    await runDueBackgroundJobs(clock.totalMinutes);
+    // duplicates replicas or memories. LLM-backed jobs run in the background
+    // (fire-and-forget) so a slow model never blocks the game clock.
+    runDueBackgroundJobs(clock.totalMinutes);
     // Schedule the next low-priority memory materialization pass ~45 game
     // minutes out. Idempotent on the queue key, so only one is pending.
     scheduleMemoryMaterialization(clock.totalMinutes + MEMORY_MATERIALIZE_INTERVAL_MINUTES);
@@ -45,8 +46,13 @@ export async function advanceSimulationTime(
 const MEMORY_MATERIALIZE_INTERVAL_MINUTES = 45;
 const AUTONOMOUS_INTERVAL_MINUTES = 5;
 
-/** Runs background jobs whose dueMinute has been reached. */
-export async function runDueBackgroundJobs(worldMinute: number) {
+/**
+ * Runs background jobs whose dueMinute has been reached. Each job is claimed
+ * atomically (pending/failed -> running) so two workers can never run the same
+ * job. LLM-backed jobs are awaited here but the caller fires this without
+ * awaiting, so a slow model does not block the game clock.
+ */
+export function runDueBackgroundJobs(worldMinute: number) {
     const due = listDueBackgroundJobs(worldMinute);
     const requestId = newRequestId();
     if (due.length) {
@@ -67,16 +73,20 @@ export async function runDueBackgroundJobs(worldMinute: number) {
         });
     }
     for (const job of due) {
-        markBackgroundJobRunning(job.id);
+        // Atomically claim; skip if another worker already took it.
+        const claimed = claimBackgroundJob(job.id);
+        if (!claimed) continue;
         const startedAt = performance.now();
-        try {
-            await executeBackgroundJob(job);
-            markBackgroundJobDone(job.id);
-            emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: job.type, jobId: job.id, status: 'done' });
-        } catch (error: any) {
-            markBackgroundJobFailed(job.id, error?.message || String(error));
-            emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: job.type, jobId: job.id, status: 'failed', error: String(error?.message || error) });
-        }
+        void (async () => {
+            try {
+                await executeBackgroundJob(claimed);
+                markBackgroundJobDone(claimed.id);
+                emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'done' });
+            } catch (error: any) {
+                markBackgroundJobFailed(claimed.id, error?.message || String(error));
+                emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'failed', error: String(error?.message || error) });
+            }
+        })();
     }
 }
 

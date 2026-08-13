@@ -730,13 +730,15 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
             if (receivedCommandedAction) {
                 // The target did not receive the command. Its authoritative
                 // present is the physical tick performed by the executor.
-                currentPayload = await buildPromptPayload(
-                    decision.actorId,
-                    decision.actorId,
-                    receivedCommandedAction.output,
+                currentPayload = (await buildCharacterTurnContext({
+                    subjectId: decision.actorId,
+                    stimulus: { kind: 'external_action', tickId: receivedCommandedAction.tickId || eventId },
+                    latestResult: receivedCommandedAction.output,
                     eventId,
-                    { suppressTickIds, initiatorId: subjectId, addresseeId: subjectId },
-                );
+                    initiatorId: subjectId,
+                    addresseeId: subjectId,
+                    suppressTickIds,
+                })).payload;
                 currentHistory = buildPairedDialogueHistory(
                     chatMemoryRepo.getRecent(decision.actorId, 32)
                         .filter(entry => !/^\[Действие\]|^\[Текущий контакт\]|^\*\(Без слов\)\*/.test(entry.content))
@@ -748,10 +750,14 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
 [Что происходит рядом]
 ${commandPresentation?.targetNow || `${subjectRepo.get(subjectId)?.name || subjectId} сейчас выполняет действие «${resolvedCommandActionLabel}».`}`;
             } else if (decision.actorId !== subjectId) {
-                currentPayload = await buildPromptPayload(decision.actorId, subjectId, bundle.output, eventId, {
+                currentPayload = (await buildCharacterTurnContext({
+                    subjectId: decision.actorId,
+                    stimulus: { kind: 'external_action', tickId: bundle.tickId || eventId },
+                    latestResult: bundle.output,
+                    eventId,
+                    initiatorId: bundle.event.playerId || 'PL-1',
                     suppressTickIds,
-                    initiatorId: bundle.event.playerId || 'PL-1'
-                });
+                })).payload;
                 if (autoUserMessage?.trim() && currentPayload.reactionFrame) {
                     // A routed command is not merely dialogue: its mechanical
                     // result has already been resolved by runGameTick. Preserve

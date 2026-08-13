@@ -6,8 +6,8 @@ import { db } from '../../infrastructure/db';
 import { executeTurnConversations } from '../../orchestration/sceneOrchestrator';
 import { describeActionNarrative } from '../../narrative/eventTemplates';
 import { buildPromptPayloadWithDB } from '../../prompts/buildPromptPayloadWrapper';
-import { classifySpokenEmotion, generateCharacterReply } from '../../adapters/llmAdapter';
-import { applyVerbalInputToFrame, buildReactionSystemPrompt, buildReactionTurnMessage } from '../../narrative/reactionFrame';
+import { buildCharacterTurnContext } from '../../orchestration/characterTurnContext';
+import { applyVerbalInputToFrame, buildReactionSystemPrompt } from '../../narrative/reactionFrame';
 import { recordMemoryEvent } from '../../services/memoryLayer';
 import { chatMemoryRepo } from '../../infrastructure/repositories';
 import { normalizePlayer } from './playerController';
@@ -15,10 +15,8 @@ import { buildStateDescription, getContractProgress } from '../../services/chipG
 import { generateSceneImage, shouldGenerateImage } from '../../services/portraitGenerator';
 import { getWorldClock } from '../../scenario/worldService';
 import { deriveTelemetry } from '../../narrative/telemetry';
-import { resolvePortraitEmotion } from '../../domain/portraitEmotion';
 import { randomUUID } from 'crypto';
 import { actionTimePolicy } from '../../domain/actionTimePolicy';
-import { advanceSimulationTime } from '../../scenario/simulationTime';
 import { buildPairedDialogueHistory } from '../../narrative/dialogueHistory';
 import { moveCharacterInLaboratory } from '../../scenario/spatialContext';
 import { syncLaboratorySpatialRelations } from '../../services/sceneRelations';
@@ -31,19 +29,6 @@ const deferredReplyJobs = new Map<string, {
     chunks?: string[];
     subscribers?: Set<Response>;
 }>();
-
-const physiologyLockedPortraits = new Set([
-    'unconscious', 'climax', 'afterglow', 'subspace', 'pain',
-    'mixed_overload', 'high_negative', 'exhausted', 'sleepy'
-]);
-
-const settleClassifiedEmotion = (previous: string | null, proposed: string, confidence: number) => {
-    if (confidence < 0.58) return previous || proposed;
-    if (!previous || previous === proposed) return proposed;
-    // A very confident observation may cross the full emotional space. With
-    // weaker evidence, retain the previous expression instead of flickering.
-    return confidence >= 0.78 ? proposed : previous;
-};
 
 function publicDeferredJob(job: any) {
     const { completion: _completion, subscribers: _subscribers, ...publicJob } = job;
@@ -153,34 +138,11 @@ export function resolveDirectedActorId(
 
 
 
-export const processWait = async (req: Request, res: Response) => {
-    try {
-        const { subjectId = 'S-AV-01', ticks = 1 } = req.body;
-        const deltaTime = Math.max(1, Math.round(
-            req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : Number(ticks) || 1
-        ));
-        const worldClock = await advanceSimulationTime(deltaTime);
-        const fullState = subjectRepo.getWithPoint(subjectId, 'systemic');
-        const resources = normalizePlayer(resourceRepo.get('PL-1'));
-
-        res.json({
-            success: true,
-            state: fullState,
-            telemetry: null,
-            reply: null,
-            promptMessages: null,
-            actionTrace: null,
-            sustainedEffects: [],
-            tickResult: null,
-            diagnostics: null,
-            bundle: null,
-            resources,
-            worldClock
-        });
-    } catch (error: any) {
-        console.error(error);
-        res.status(500).json({ success: false, error: error.message });
-    }
+export const processWait = (_req: Request, res: Response) => {
+    res.status(409).json({
+        success: false,
+        error: 'Ручное ожидание отключено: игровое время идёт только через фоновый clock.',
+    });
 };
 
 export const processTick = async (req: Request, res: Response) => {
@@ -207,12 +169,12 @@ export const processTick = async (req: Request, res: Response) => {
         // 1. Dispatch through Orchestrator (handles Parsing + Engine Tick)
         // Note: dispatchEvent now calls runGameTick
         const requestedActionId = String(req.body.presetId || '');
-        const timePolicy = actionTimePolicy(requestedActionId);
+        const statePolicy = actionTimePolicy(requestedActionId);
         const dispatchPayload = {
             ...req.body,
             pointId:(req.body.pointId || 'systemic').toLowerCase(),
             deltaTime:req.body.deltaTime !== undefined ? Number(req.body.deltaTime) : 1.0,
-            stateDeltaScale:timePolicy.stateDeltaScale,
+            stateDeltaScale:statePolicy.stateDeltaScale,
             // Context duration belongs to the world-minute service. The action
             // tick computes the action itself but must not age processes again.
             skipContextTimeAdvance:true,
@@ -239,11 +201,17 @@ export const processTick = async (req: Request, res: Response) => {
         const actorCharacter = characterRepo.ensureCharacter(actingCharacterId, actingCharacterId === 'PL-1' ? 'Калибратор' : actingCharacterId);
 
         const chanceSpeech = req.body.llmMode === 'speech_chance' || req.body.llmMode === 'scene_chance';
-        const speechOnly = req.body.llmMode === 'speech_only' || req.body.llmMode === 'speech_chance';
         let promptPayload = bundle.prompt;
-        const suppressTickIds = (suppressActionNarrative || speechOnly) ? [bundle.tickId] : undefined;
+        const suppressTickIds = suppressActionNarrative ? [bundle.tickId] : undefined;
         if (suppressTickIds) {
-            promptPayload = await buildPromptPayloadWithDB(subjectId, subjectId, bundle.output, eventId, { suppressTickIds, initiatorId: playerId });
+            promptPayload = (await buildCharacterTurnContext({
+                subjectId,
+                stimulus: { kind: 'external_action', tickId: bundle.tickId },
+                latestResult: bundle.output,
+                eventId,
+                initiatorId: playerId,
+                suppressTickIds,
+            })).payload;
             bundle.prompt = promptPayload;
         }
         if (baseUserMessage && promptPayload.reactionFrame) {
@@ -298,119 +266,7 @@ export const processTick = async (req: Request, res: Response) => {
         const llmSkipped = chanceSpeech && Math.random() >= llmChance;
 
         const generateTurnReply = async () => {
-            let generatedMetrics: any = null;
-            let generatedError: string | null = null;
-            if (speechOnly) {
-                const observation = bundle.diagnostics?.observation;
-                // The reaction frame already carries a compact recent-dialogue
-                // section. Keep only a short verbatim tail for conversational
-                // cadence instead of sending the same exchange twice.
-                const previousHistory = buildPairedSpeechHistory(chatMemoryRepo.getRecent(subjectId, 16), 6);
-                let currentInput: string;
-                if (promptPayload.reactionFrame && baseUserMessage) {
-                    const lastSpeechBlock = `[Последняя реплика собеседника]\n${baseUserMessage}`;
-                    const reactionContext = buildReactionTurnMessage(promptPayload.reactionFrame, baseUserMessage)
-                        .replace(lastSpeechBlock, '')
-                        .trim();
-                    // Preserve the ordinary chat contract: the latest thing the
-                    // model sees in the user role is the player's actual line,
-                    // not a long instruction document containing that line.
-                    promptPayload = {
-                        ...promptPayload,
-                        systemPrompt: `${promptPayload.systemPrompt}\n\n[Контекст текущей реакции]\n${reactionContext}`,
-                    };
-                    currentInput = baseUserMessage;
-                } else {
-                    currentInput = promptPayload.reactionFrame
-                        ? buildReactionTurnMessage(promptPayload.reactionFrame, baseUserMessage)
-                        : [
-                        baseUserMessage ? `[Реплика адресата]\n${baseUserMessage}` : '',
-                        `[Текущий контакт]\nКалибратор применяет: ${actionLabel}. Зона: ${pointLabel}.\nТвоё фактическое внутреннее ощущение: ${observation?.subjectiveText || 'реакция неясна'}.`
-                        ].filter(Boolean).join('\n\n');
-                }
-                // Add language directive to system prompt
-                const { getCurrentLocale } = await import('../../api/routes/localeRoutes');
-                const currentLocale = getCurrentLocale();
-                const languageDirective = currentLocale === 'ru'
-                    ? 'Отвечай на русском языке.'
-                    : 'Respond in English.';
-                promptPayload.systemPrompt += `\n\n${languageDirective}`;
-
-                const generated = await generateCharacterReply(promptPayload, currentInput, previousHistory, (chunk) => {
-                    if (replyJobId) {
-                        const job = deferredReplyJobs.get(replyJobId);
-                        if (job) publishDeferredToken(job, chunk);
-                    }
-                });
-                const structured = generated.reply && typeof generated.reply === 'object'
-                    ? generated.reply as { speech: string; speechAct?: string; addressedTo?: string }
-                    : { speech: String(generated.reply || '') };
-                let portraitEmotion = resolvePortraitEmotion({
-                    speech: structured.speech,
-                    behavioralState: observation?.behavioralState,
-                    reaction: observation?.reaction,
-                    transitions: observation?.transitions,
-                    state: {
-                        ...bundle.stateAfter.core,
-                        contexts: (observation?.contexts || []).map((context: any) => ({ actionId: context.id }))
-                    }
-                });
-                generatedError = generated.error || null;
-                if (baseUserMessage) chatMemoryRepo.append(subjectId, 'user', baseUserMessage, interactionContext);
-                let assistantMessageId: number | null = null;
-                if (!generatedError) {
-                    if (structured.speech) {
-                        const previousEmotion = [...chatMemoryRepo.getRecent(subjectId, 12)]
-                            .reverse()
-                            .find(message => message.role === 'assistant' && message.portraitEmotion)
-                            ?.portraitEmotion || null;
-                        assistantMessageId = chatMemoryRepo.append(subjectId, 'assistant', structured.speech, interactionContext, portraitEmotion);
-                        if (assistantMessageId) {
-                            chatMemoryRepo.updatePortraitEmotion(assistantMessageId, portraitEmotion, 'simulation+speech-fallback', 0.55);
-                            if (!physiologyLockedPortraits.has(portraitEmotion)) {
-                                try {
-                                    const classified = await classifySpokenEmotion({
-                                        playerSpeech: baseUserMessage,
-                                        characterSpeech: structured.speech,
-                                        previousEmotion,
-                                        simulationPrior: portraitEmotion,
-                                        tension: bundle.stateAfter.core.tension,
-                                        attitude: bundle.stateAfter.core.attitude,
-                                        openness: bundle.stateAfter.core.openness,
-                                    });
-                                    const settled = settleClassifiedEmotion(previousEmotion, classified.emotion, classified.confidence);
-                                    portraitEmotion = settled;
-                                    chatMemoryRepo.updatePortraitEmotion(
-                                        assistantMessageId!,
-                                        settled,
-                                        'speech-classifier',
-                                        classified.confidence,
-                                    );
-                                } catch (error: any) {
-                                    console.warn('[PortraitEmotion] speech classification failed:', error?.message || error);
-                                }
-                            }
-                        }
-                    }
-                }
-                generatedMetrics = { reply: { speech: structured.speech || '', speechAct: structured.speechAct || null, addressedTo: structured.addressedTo || null, reaction: '', portraitEmotion }, promptMessages: generated.sentMessages, actorReplies: [], narratorReaction: null };
-                queueMicrotask(() => {
-                    try {
-                        recordMemoryEvent({
-                            subjectId,
-                            bundle,
-                            userText: baseUserMessage || undefined,
-                            assistantText: generatedError ? '' : structured.speech || '',
-                            speechAct: generatedError ? undefined : structured.speechAct,
-                            addressedTo: generatedError ? undefined : structured.addressedTo
-                        });
-                    } catch (error) {
-                        console.error('[Memory] deferred speech memory failed:', error);
-                    }
-                });
-            } else {
-                // Full multi-actor orchestration remains available to the main simulator.
-                generatedMetrics = await executeTurnConversations(bundle, {
+            const generatedMetrics = await executeTurnConversations(bundle, {
                     subjectId,
                     eventId,
                     actionId,
@@ -435,9 +291,8 @@ export const processTick = async (req: Request, res: Response) => {
                             if (job) publishDeferredToken(job, chunk);
                         }
                     }
-                });
-            }
-            return { metrics: generatedMetrics, error: generatedError };
+            });
+            return { metrics: generatedMetrics, error: generatedMetrics?.error || null };
         };
         const replyPending = deferLLM && !req.body.skipLLM && !llmSkipped;
         const replyJobId = replyPending ? randomUUID() : null;
@@ -503,13 +358,9 @@ export const processTick = async (req: Request, res: Response) => {
             }
         }
 
-        // Process controls alter what is happening now. They do not fast-forward
-        // the world; their sustained consequences arrive through minute ticks.
-        // A discrete action occupies one game minute.
-        const actionMinutes = timePolicy.worldMinutes;
-        const worldClock = actionMinutes
-            ? await advanceSimulationTime(actionMinutes, undefined, { activeSubjectIds: [subjectId] })
-            : getWorldClock();
+        // An action changes the current state; only the background game clock
+        // advances time and applies sustained processes.
+        const worldClock = getWorldClock();
         const telemetry = deriveTelemetry({
             core: bundle.stateAfter.core,
             point: bundle.stateAfter.point,

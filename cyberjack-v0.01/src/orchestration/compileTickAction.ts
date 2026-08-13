@@ -1,4 +1,4 @@
-import type { CompiledAction } from '../domain/types';
+import type { CompiledAction, DynamicModifiers } from '../domain/types';
 import type { EdgeProfile } from '../domain/edgeState';
 import { calculateSituationalCompliance } from '../domain/edgeState';
 import { activeContextsRepo, presetRepo, subjectiveAssociationRepo } from '../infrastructure/repositories';
@@ -20,7 +20,7 @@ export interface CompileTickActionInput {
         presetId: string;
         sceneId: string;
         playerIntensity?: number;
-        dynamicModifiers?: unknown;
+        dynamicModifiers?: DynamicModifiers;
         textMessage?: string;
         parserVersion?: string;
         customPayload?: { sustainedSource?: string } | null;
@@ -97,7 +97,7 @@ export function compileTickAction(input: CompileTickActionInput): CompileTickAct
         eventId: payload.sceneId,
         playerIntensity: payload.playerIntensity,
         history: history,
-        dynamicModifiers: payload.dynamicModifiers,
+        dynamicModifiers: payload.dynamicModifiers as Partial<CompiledAction>,
         sourceText: payload.textMessage,
         parserVersion: payload.parserVersion,
         activeContexts: applicableContexts,
@@ -138,7 +138,7 @@ export function compileTickAction(input: CompileTickActionInput): CompileTickAct
     }
     const memoryAssociationSignal = payload.presetId === 'wait'
         ? 0
-        : subjectiveAssociationRepo.scoreAction(payload.subjectId, payload.actingCharacterId || payload.playerId, compiledAction.tags || []);
+        : subjectiveAssociationRepo.scoreAction(payload.subjectId, payload.actingCharacterId || payload.playerId || payload.subjectId, compiledAction.tags || []);
     const memoryModifier = memoryAppraisalModifier(memoryAssociationSignal, payload.presetId === 'verbal_pressure');
     if (memoryModifier !== 0) {
         compiledAction.valence = clamp(compiledAction.valence + memoryModifier, -1, 1);

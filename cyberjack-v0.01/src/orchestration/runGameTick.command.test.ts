@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveGenericUndressContexts } from './runGameTick';
+import { resolveGenericUndressContexts } from './resolveGenericUndressContexts';
 
 describe('generic clothing commands', () => {
     const tags: Record<string, string[]> = {

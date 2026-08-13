@@ -31,6 +31,19 @@ type ObservedEvent = {
     worldMinute?: number | null;
 };
 
+function nextCoPresenceContext(actorId: string, targetId: string) {
+    const actorPresence = getLaboratoryPresence(actorId, 'PL-1');
+    const targetPresence = getLaboratoryPresence(targetId, 'PL-1');
+    if (!actorPresence?.roomId || actorPresence.roomId !== targetPresence?.roomId) return undefined;
+    const room = db.prepare(`SELECT room_id, name, room_type FROM laboratory_rooms WHERE player_id = ? AND room_id = ?`)
+        .get('PL-1', actorPresence.roomId) as any;
+    return {
+        roomId: actorPresence.roomId,
+        roomName: String(room?.name || actorPresence.roomId),
+        roomType: String(room?.room_type || ''),
+    };
+}
+
 export function autonomousInitiativeProbability(input: {
     sensitivity: number;
     capacity: number;
@@ -39,13 +52,17 @@ export function autonomousInitiativeProbability(input: {
     learnedAction?: number;
     learnedTags?: number[];
     eventAgeMinutes: number;
+    sharesRoom?: boolean;
 }): number {
     const stateReadiness = clamp01((input.sensitivity + input.openness + (100 - input.capacity)) / 300);
     const relation = clamp01((input.relationToObservedTarget ?? 50) / 100);
     const preference = clamp01(Math.max(0, input.learnedAction || 0) / 5);
     const tagPreference = clamp01(Math.max(0, ...(input.learnedTags || [0])) / 5);
     const freshness = clamp01(1 - input.eventAgeMinutes / 30);
-    return clamp01(0.015 + stateReadiness * 0.035 + relation * 0.025 + preference * 0.11 + tagPreference * 0.08 + freshness * 0.035);
+    // A shared room is a durable social opportunity, not invented dialogue:
+    // residents repeatedly encounter one another even without a new event.
+    const sharedRoomOpportunity = input.sharesRoom ? .12 : 0;
+    return clamp01(0.015 + stateReadiness * 0.035 + relation * 0.025 + preference * 0.11 + tagPreference * 0.08 + freshness * 0.035 + sharedRoomOpportunity);
 }
 
 export function isAutonomousActionAllowed(action: ActionScoreResult, relationOpenness?: number): boolean {
@@ -68,7 +85,7 @@ function isDeviceBound(subjectId: string, playerId: string): boolean {
 }
 
 function chooseAction(actorId: string, preferences: unknown, observed: ObservedEvent | null, sceneId: string, visibleTargets: string[]): { targetId: string; action: ActionScoreResult } | null {
-    const preferredTarget = observed.targetId && visibleTargets.includes(observed.targetId)
+    const preferredTarget = observed?.targetId && visibleTargets.includes(observed.targetId)
         ? observed.targetId
         : undefined;
     let best: { targetId: string; action: ActionScoreResult; score: number } | null = null;
@@ -78,7 +95,7 @@ function chooseAction(actorId: string, preferences: unknown, observed: ObservedE
         const relation = characterRelationRepo.get(actorId, targetId);
         const scored = ActionScorer.scoreAvailableActions(sceneId, actorId, targetId, points.length ? points : ['systemic'])
             .map(action => {
-                const compulsion = deriveCompulsionSignals(preferences, conditioningTags(action.actionId))[0];
+                const compulsion = deriveCompulsionSignals(preferences, conditioningTags(action.actionId), [action.pointId])[0];
                 return compulsion?.level === 3
                     ? { ...action, score:action.score + compulsion.pressure * 18 }
                     : action;
@@ -122,6 +139,7 @@ export async function runAutonomousSceneMinute() {
             const prefs = subjectPreferencesRepo.get(actorId);
             const relation = observed?.targetId ? characterRelationRepo.get(actorId, observed.targetId) : undefined;
             const age = observed ? Math.max(0, worldMinute - Number(observed.worldMinute ?? worldMinute)) : 60;
+            const coPresence = nextCoPresenceContext(actorId, visibleTargets[0]);
             const probability = autonomousInitiativeProbability({
                 sensitivity: Number(actor.sensitivity || 50),
                 capacity: Number(actor.capacity || 50),
@@ -130,6 +148,7 @@ export async function runAutonomousSceneMinute() {
                 learnedAction: observed?.actionId ? prefs.actions[observed.actionId] : 0,
                 learnedTags: observed ? Object.values(prefs.tags) : [],
                 eventAgeMinutes: age,
+                sharesRoom: Boolean(coPresence?.roomId),
             });
             return Math.random() < probability ? [{ actorId, observed, visibleTargets, probability }] : [];
         });
@@ -143,7 +162,8 @@ export async function runAutonomousSceneMinute() {
             socialTarget,
             worldMinute,
             next.observed ? 'observed_event' : 'co_presence',
-            next.observed,
+            next.observed ?? undefined,
+            nextCoPresenceContext(next.actorId, socialTarget),
         );
         if (social) {
             enqueueSocialTurn(social);

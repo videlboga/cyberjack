@@ -13,7 +13,7 @@ export interface ValidateTickRequestInput {
     initiatorId: string;
     sceneId: string;
     resources: ResourceState;
-    scene: { actionCosts?: unknown } & Record<string, unknown>;
+    scene: unknown;
     dynamicModifiers?: unknown;
     customPayload?: { sustainedSource?: string } | null;
 }
@@ -61,7 +61,7 @@ export function validateTickRequest(input: ValidateTickRequestInput): ValidateTi
     }
 
     let resources = input.resources;
-    const actionCosts = (input.scene?.actionCosts as Record<string, Record<string, number>> | null | undefined)?.[presetId] || null;
+    const actionCosts = ((input.scene as any)?.actionCosts as Record<string, Record<string, number>> | null | undefined)?.[presetId] || null;
     if (actionCosts && Object.keys(actionCosts).length) {
         try {
             resources = applyResourceCosts(resources, actionCosts);

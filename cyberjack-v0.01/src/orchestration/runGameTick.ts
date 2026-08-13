@@ -23,7 +23,8 @@ import { applyCommandEffects } from './applyCommandEffects';
 import { buildSceneObservation } from './buildSceneObservation';
 import { validateTickRequest } from './validateTickRequest';
 import { compileTickAction } from './compileTickAction';
-import { buildTickResponse } from './buildTickResponse';
+import { buildTickResponse, buildPendingCommandEffect } from './buildTickResponse';
+import { buildCharacterTurnContext } from './characterTurnContext';
 import { buildTickCommitPlan } from './buildTickCommitPlan';
 import { pointStateRepo } from '../infrastructure/repositories';
 import { DEFAULT_CONFIG } from '../engine/config';
@@ -56,16 +57,6 @@ export interface GameEventPayload {
     stateDeltaScale?: number;
     skipPrompt?: boolean;
     skipContextTimeAdvance?: boolean;
-}
-
-export function resolveGenericUndressContexts(
-    text: string,
-    activeActionIds: string[],
-    tagsForAction: (actionId: string) => string[],
-): string[] | null {
-    const generic = /(?:сними(?:те)?\s+(?:всю\s+)?одежду|раздень(?:ся|тесь)|сними(?:те)?\s+вс[её])/iu.test(text);
-    if (!generic) return null;
-    return [...new Set(activeActionIds.filter(actionId => tagsForAction(actionId).includes('clothing')))];
 }
 
 export function constrainCapacityWhileUnresponsive(input: {
@@ -265,10 +256,10 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     let compiledContextAllowed = true;
     const isDirectedPoseRequest =
-        compiledAction.type === 'pose' &&
+        compiledAction.contextConfig?.type === 'pose' &&
         !(compiledAction.tags || []).includes('comfort');
     if (compiledAction.contextConfig && isDirectedPoseRequest) {
-        const requiredCompliance = (compiledAction.contextConfig.priority || compiledAction.priority || 1) * 20;
+        const requiredCompliance = (compiledAction.contextConfig.priority || 1) * 20;
         const compliance = complianceFor({
             id: payload.presetId,
             label: compiledAction.label,
@@ -444,6 +435,10 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         { previousContextIds: allContexts.map(context => context.actionId), notableEvent: notableObservationEvent }
     );
 
+    // subjectId is always present in a tick, so buildDiagnostics always
+    // produces an observation. Narrow it once for the rest of the stage.
+    const observation = diagnostics.observation!;
+
     const requestedStance = ignoredBoundary ? null : requestedStanceFromReaction({
         subjectId: payload.subjectId,
         actorId: initiatorId,
@@ -472,12 +467,12 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const willingness = clamp(relationAttitude * .35 + relationOpenness * .35 + localOpenness * .3 - stancePenalty, 0, 100);
     const agency = initiatorId === payload.subjectId ? 100 : ignoredBoundary ? 0 : respectedBoundary ? 80 : 30;
     const emotion = resolvePortraitEmotion({
-        behavioralState: diagnostics.observation.behavioralState,
-        reaction: diagnostics.observation.reaction,
-        transitions: diagnostics.observation.transitions,
+        behavioralState: observation.behavioralState,
+        reaction: observation.reaction,
+        transitions: observation.transitions,
         state: engineOutput.nextCore,
     });
-    diagnostics.observation.reactionSnapshot = {
+    observation.reactionSnapshot = {
         sensation: {
             pleasure: engineOutput.result.pleasure,
             discomfort: engineOutput.result.discomfort,
@@ -497,7 +492,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             emotion,
         },
         behavior: {
-            state: diagnostics.observation.behavioralState,
+            state: observation.behavioralState,
             resistance: resultingStance ? Math.max(relationshipDynamics.resistance, resultingStance.intensity * 100) : relationshipDynamics.resistance,
             desiredResponse: negativeUnavoidableExperience && relationshipDynamics.dissociation >= 65
                 ? 'silent_compliance'
@@ -515,24 +510,24 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             intensity: resultingStance.intensity,
         } : null,
     };
-    const physicalReaction = buildPhysicalReaction(diagnostics.observation, compiledAction, engineOutput.nextCore);
+    const physicalReaction = buildPhysicalReaction(observation, compiledAction, engineOutput.nextCore);
     if (physicalReaction) {
-        diagnostics.observation.physicalReaction = physicalReaction;
-        diagnostics.observation.subjectiveText += ` ${physicalReaction.subjectiveText}`;
-        diagnostics.observation.uiText += ` ${physicalReaction.observerText}`;
+        observation.physicalReaction = physicalReaction;
+        observation.subjectiveText += ` ${physicalReaction.subjectiveText}`;
+        observation.uiText += ` ${physicalReaction.observerText}`;
     }
-    const boundaryExpression = buildBoundaryExpression(diagnostics.observation, engineOutput.nextCore);
-    if (boundaryExpression) diagnostics.observation.boundaryExpression = boundaryExpression;
+    const boundaryExpression = buildBoundaryExpression(observation, engineOutput.nextCore);
+    if (boundaryExpression) observation.boundaryExpression = boundaryExpression;
     if (resultingStance?.request === 'stop') {
-        diagnostics.observation.subjectiveText += ignoredBoundary
+        observation.subjectiveText += ignoredBoundary
             ? ' Я хочу прекратить этот контакт; моё требование уже проигнорировано.'
             : ' Я хочу, чтобы этот контакт прекратился.';
-        diagnostics.observation.uiText += ignoredBoundary
+        observation.uiText += ignoredBoundary
             ? ' Активная граница проигнорирована; персонаж требует прекратить контакт.'
             : ' Персонаж хочет прекратить текущий контакт.';
     } else if (resultingStance?.request === 'slow_down') {
-        diagnostics.observation.subjectiveText += ' Я хочу замедлить или ослабить воздействие.';
-        diagnostics.observation.uiText += ' Персонаж просит снизить интенсивность.';
+        observation.subjectiveText += ' Я хочу замедлить или ослабить воздействие.';
+        observation.uiText += ' Персонаж просит снизить интенсивность.';
     }
 
     if (requestedStance) {
@@ -545,11 +540,11 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     // finalized semantic observation on it; otherwise buildPromptPayload would
     // reconstruct an earlier observation from raw numbers and lose the
     // boundary that was derived after the engine tick.
-    (engineOutput as any).observation = diagnostics.observation;
+    (engineOutput as any).observation = observation;
 
     const observableAction = ['physical', 'context'].includes(String(compiledAction.type || ''))
         && compiledAction.actionKey !== 'wait'
-        && !(payload.customPayload?.backgroundTime && !(diagnostics.observation.transitions || []).length);
+        && !(payload.customPayload?.backgroundTime && !(observation.transitions || []).length);
     const sceneObservation = buildSceneObservation({
         observableAction,
         activeSceneId,
@@ -565,8 +560,24 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         customPayload: payload.customPayload,
         textMessage: payload.textMessage,
         worldMinute,
-        hasTransitions: Boolean(diagnostics.observation.transitions?.length),
+        hasTransitions: Boolean(observation.transitions?.length),
     });
+
+    // Compute the pending-command effect BEFORE the commit so it participates
+    // in the same atomic transaction. A performed command clears the pending
+    // focus; a willingness refusal saves it for later continuation.
+    const pendingCommandEffect = buildPendingCommandEffect({
+        payload: {
+            subjectId: payload.subjectId,
+            playerId: payload.playerId,
+            sceneId: payload.sceneId,
+            textMessage: payload.textMessage,
+            dynamicModifiers: payload.dynamicModifiers,
+        },
+        actionApplied,
+        addedContextNotes,
+    });
+    if (pendingCommandEffect) tickEffects.push(pendingCommandEffect);
 
     // The primary action becomes durable exactly once. Reactive projections
     // are published only after this transaction succeeds.
@@ -578,7 +589,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
         presetId: payload.presetId,
         compiledAction,
         output: engineOutput,
-        observation: diagnostics.observation,
+        observation: observation,
         eventMetadata: payload.customPayload,
         learningScale: stateDeltaScale,
         stateBefore,
@@ -605,7 +616,13 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     const prompt = payload.skipPrompt
         ? { systemPrompt: '' } as TickBundle['prompt']
-        : await buildPromptPayload(payload.subjectId, payload.subjectId, engineOutput, activeSceneId, { initiatorId });
+        : (await buildCharacterTurnContext({
+            subjectId: payload.subjectId,
+            stimulus: { kind: 'external_action', tickId },
+            latestResult: engineOutput,
+            eventId: activeSceneId,
+            initiatorId,
+        })).payload;
 
     // Log the constructed prompt payload for debugging/inspection
     if (!payload.skipPrompt) {
@@ -691,7 +708,6 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
     const event = built.event;
     const actionTrace = built.actionTrace;
     const commandPresentation = built.commandPresentation;
-    if (built.pendingCommandEffect) tickEffects.push(built.pendingCommandEffect);
 
     return built.response;
 }

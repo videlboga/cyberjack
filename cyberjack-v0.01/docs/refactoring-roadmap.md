@@ -422,6 +422,21 @@ Fallback не меняет семантику контракта: `executeCharac
 
 **В работе.** Начата декомпозиция контроллеров: бизнес-логика выносится в application services.
 
+### 2.24. Исправления по код-ревью (8 проблем)
+
+По результатам код-ревью исправлены 8 архитектурных проблем:
+
+1. **Pending-команда после commit** — `buildPendingCommandEffect` извлечён в чистую функцию, вызывается ДО `buildTickCommitPlan`; эффект участвует в той же транзакции.
+2. **Покупка актива вне транзакции** — `handleBuyAssetAction` обёрнут в `db.transaction()` (атомарно: списание, каталог, персонаж, сцена).
+3. **LLM-задачи блокируют clock** — `advanceSimulationTime` не `await`-ит очередь (fire-and-forget); `claimBackgroundJob` — атомарный claim (два worker-а не возьмут одну задачу).
+4. **Единый pipeline реплик** — все 4 прямых вызова `buildPromptPayload*` переведены на `buildCharacterTurnContext` (runGameTick, sceneOrchestrator×2, tickController, socialTransactions).
+5. **Wall-clock таймер** — `timeFlow` — единственный драйвер времени; игровые процессы зависят от worldMinute.
+6. **tsconfig.runtime.json** — исправлены все ошибки типов в новых файлах стадий (applyCommandEffects, autonomousScene, backgroundTimeTick, compileTickAction, runGameTick, validateTickRequest); полный `tsconfig.json` чист для этих файлов.
+7. **Сломанный boundary-тест** — переписан на реальную проверку `commitIdx < publishIdx`.
+8. **Текстовые эвристики + обратная зависимость** — `resolveGenericUndressContexts` вынесен в отдельный модуль; `applyCommandEffects` больше не зависит от `runGameTick`.
+
+Baseline после исправлений: 21 failed / 527 passed / 6 skipped (прежний baseline, новых падений нет).
+
 ### 2.20. Тонкий контроллер перемещения
 
 `scenarioController.moveLaboratoryCharacter` содержал прямую бизнес-логику (запросы к `db`, `chatMemoryRepo.append`, `syncLaboratorySpatialRelations`). Вынесена в application service:
@@ -684,6 +699,14 @@ Fallback не меняет семантику контракта: `executeCharac
 - 6 пропущены;
 - 21 тест падает в 7 файлах (прежний baseline);
 - runtime typecheck проходит.
+
+После исправлений по код-ревью (8 проблем, §2.24):
+
+- 113 test files;
+- 527 тестов проходят (+1: атомарный claim);
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит; полный `tsconfig.json` чист для новых файлов стадий.
 
 Известные группы существующих падений:
 

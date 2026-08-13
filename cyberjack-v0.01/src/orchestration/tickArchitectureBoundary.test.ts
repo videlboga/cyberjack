@@ -23,7 +23,15 @@ describe('tick architecture boundary', () => {
         const source = fs.readFileSync(runGameTickPath, 'utf8');
         expect(source).not.toMatch(/\bemitSubjectMetricChanges\s*\(/);
         expect(source).not.toMatch(/\brecordSceneObservation\s*\(/);
-        expect(source.indexOf('commitTickOutcome({')).toBeLessThan(source.indexOf('publishTickOutcome({'));
+        // commitTickOutcome is invoked inside traceSync; publishTickOutcome is
+        // invoked directly. The commit call site must appear before the publish
+        // call site in the source, so the transaction commits before reactive
+        // projections are published.
+        const commitIdx = source.indexOf('commitTickOutcome(');
+        const publishIdx = source.indexOf('publishTickOutcome(');
+        expect(commitIdx).toBeGreaterThanOrEqual(0);
+        expect(publishIdx).toBeGreaterThanOrEqual(0);
+        expect(commitIdx).toBeLessThan(publishIdx);
     });
 
     it('does not reinterpret command words with local regular expressions', () => {

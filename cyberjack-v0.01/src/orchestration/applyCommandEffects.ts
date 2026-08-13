@@ -2,7 +2,7 @@ import type { CompiledAction, TickBundle } from '../domain/types';
 import type { CommandIntent } from '../domain/resolver';
 import { activeContextsRepo, presetRepo, characterRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { resolveLaboratoryMove } from '../scenario/resolveLaboratoryMove';
-import { resolveGenericUndressContexts } from './runGameTick';
+import { resolveGenericUndressContexts } from './resolveGenericUndressContexts';
 import type { TickEffect } from './tickEffectPlan';
 
 export interface CommandEffectsContext {
@@ -156,7 +156,7 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                             });
                             if (slotObj) {
                                 finalSlotId = typeof slotObj === 'string' ? slotObj : (slotObj as any).id;
-                                targetLabel = finalSlotId;
+                                targetLabel = finalSlotId || tgtLoc;
                             } else {
                                 finalSlotId = tgtLoc;
                                 targetLabel = tgtLoc;
@@ -168,7 +168,7 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                         if (subjCharPresence) {
                             if (subjCharPresence.slotId !== finalSlotId) {
                                 tickEffects.push({ kind: 'scene.set-slot', sceneId: payload.sceneId, characterId: subjCharPresence.character.id, slotId: finalSlotId });
-                                let reason = (state.relation?.attitude > 70) ? "с готовностью" : "с неохотой, подчиняясь приказу";
+                                let reason = (state.relation?.attitude ?? 0) > 70 ? "с готовностью" : "с неохотой, подчиняясь приказу";
                                 const moveNarrative = `[Система]: Актив перемещается в зону "${targetLabel}", ${reason}.`;
                                 tickEffects.push({
                                     kind: 'event.append',
@@ -228,8 +228,8 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                     const targetName = commandIntent.targetId || 'не указана';
                     if (currentCompliance >= requiredCompliance) {
                         commandEffectsAuthorized = true;
-                        let reason = state.relation?.attitude > 70 ? "с готовностью выполняя указание" : "выполняя указание без подтверждённого добровольного согласия";
-                        if (state.core.attitude < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
+                        let reason = (state.relation?.attitude ?? 0) > 70 ? "с готовностью выполняя указание" : "выполняя указание без подтверждённого добровольного согласия";
+                        if ((state.core.attitude ?? 0) < 30) reason = "скрипя зубами, но будучи не в силах сопротивляться";
                         forcedNarrativeToLog = `[Система]: Актив выполняет указание "${commandActionPreset.label}" (цель: ${targetName}), ${reason}.`;
                         actionApplied = true;
                     } else {
@@ -267,9 +267,9 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                     if (currentCompliance >= requiredCompliance) {
                         commandEffectsAuthorized = true;
                         let reason: string;
-                        if (state.core.attitude < 30) {
+                        if ((state.core.attitude ?? 0) < 30) {
                             reason = "напрягаясь и пытаясь отдёрнуться";
-                        } else if (state.relation?.attitude > 70) {
+                        } else if ((state.relation?.attitude ?? 0) > 70) {
                             reason = "с готовностью принимая ласку";
                         } else {
                             reason = "не сумев предотвратить контакт; это само по себе не означает согласия или покорности";
@@ -294,8 +294,8 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                     if (wasAlreadyActive) {
                         addedContextNotes.push(`[Система]: Состояние "${actionPreset.label}" уже было активно до текущей команды; нового перехода не произошло.`);
                     } else {
-                        let reason = (state.relation?.attitude > 70) ? "без явного сопротивления переходу" : "переходя в новое состояние без подтверждённого добровольного принятия";
-                        if (state.core.attitude < 30) reason = "вынужденно и унизительно для себя";
+                        let reason = (state.relation?.attitude ?? 0) > 70 ? "без явного сопротивления переходу" : "переходя в новое состояние без подтверждённого добровольного принятия";
+                        if ((state.core.attitude ?? 0) < 30) reason = "вынужденно и унизительно для себя";
                         const initiator = initiatorId;
                         if (actionPreset.type && actionPreset.type !== 'verbal' && actionPreset.type !== 'wait') {
                             const forcedNarrative = `[Система]: Команда выполнена. Текущее состояние актива теперь: "${actionPreset.label}"; ${reason}. Переход уже показан визуально: в чат нужны только слова персонажа, без описания движения или позы. До команды состояние было другим.`;
@@ -328,16 +328,18 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
             const initiator = initiatorId;
             if (commandEffectsAuthorized && commandActionPreset && (commandActionPreset as any).contextConfig) {
                 const applyNarrative = `[Система]: Применено действие "${commandActionPreset.label}" к активу.`;
+                const commandActionId = commandIntent && 'actionId' in commandIntent ? commandIntent.actionId : undefined;
+                const resolvedActionId = commandActionId || commandActionPreset.id || commandActionPreset.actionKey;
                 tickEffects.push({
                     kind: 'context.apply',
                     subjectId: payload.subjectId,
-                    actionId: commandIntent.actionId,
+                    actionId: resolvedActionId,
                     action: commandActionPreset as any,
                     initiatorId: initiator,
                     event: {
                         subjectId: payload.subjectId,
                         type: 'context_change',
-                        presetId: commandIntent.actionId,
+                        presetId: resolvedActionId,
                         narrative: applyNarrative,
                         metadata: { added: true },
                     },
@@ -363,13 +365,13 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                 }
                 if (removedAny) {
                     const removedNarrative = `[Система]: Удалены связанные контексты в результате действия "${commandActionPreset.label}".`;
-                    const lastRemoval = [...tickEffects].reverse().find(effect =>
+                    const lastRemoval = [...tickEffects].reverse().find((effect): effect is Extract<TickEffect, { kind: 'context.remove-action' }> =>
                         effect.kind === 'context.remove-action' && effect.subjectId === payload.subjectId,
                     );
                     if (lastRemoval) lastRemoval.event = {
                         subjectId: payload.subjectId,
                         type: 'context_change',
-                        presetId: commandIntent.actionId,
+                        presetId: commandIntent && 'actionId' in commandIntent ? commandIntent.actionId : commandActionPreset.id || commandActionPreset.actionKey,
                         narrative: removedNarrative,
                         metadata: { removed: true },
                     };

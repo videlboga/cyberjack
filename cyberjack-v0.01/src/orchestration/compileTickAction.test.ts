@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../infrastructure/db';
 import { presetRepo } from '../infrastructure/repositories';
 import { compileTickAction } from './compileTickAction';
+import type { CommandIntent } from '../domain/resolver';
 
 const baseInput = {
     payload: {
@@ -71,7 +72,7 @@ describe('compileTickAction', () => {
             payload: {
                 ...baseInput.payload,
                 dynamicModifiers: {
-                    commandIntent: { type: 'change_current_interaction', goal: 'stop', pointId: 'systemic' },
+                    commandIntent: { type: 'change_current_interaction', goal: 'stop', pointId: 'systemic' } as CommandIntent,
                 },
             },
         };
@@ -86,7 +87,7 @@ describe('compileTickAction', () => {
             payload: {
                 ...baseInput.payload,
                 dynamicModifiers: {
-                    commandIntent: { type: 'change_current_interaction', goal: 'start', pointId: 'systemic' },
+                    commandIntent: { type: 'change_current_interaction', goal: 'start', pointId: 'systemic' } as CommandIntent,
                 },
             },
         };

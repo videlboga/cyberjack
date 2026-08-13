@@ -1,9 +1,13 @@
 import { randomUUID } from 'crypto';
-import { parseVerbalInputWithLLM, generateCharacterReply } from '../adapters/llmAdapter';
+import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { db } from '../infrastructure/db';
-import { characterRelationRepo, chatMemoryRepo, memoryRepo, subjectRepo } from '../infrastructure/repositories';
+import { characterRelationRepo, memoryRepo, subjectRepo } from '../infrastructure/repositories';
 import { buildPromptPayloadWithDB } from '../prompts/buildPromptPayloadWrapper';
+import { buildCharacterTurnContext } from '../orchestration/characterTurnContext';
 import { buildEmbedding } from './embeddingService';
+import { executeCharacterSpeech } from './characterSpeechExecutor';
+import { deliverCharacterSpeech } from './characterSpeechDelivery';
+import { prepareCharacterSpeechStimuli, type CharacterSpeechStimulus } from './characterSpeechStimulus';
 
 export type EgoState = 'nurturing_parent' | 'critical_parent' | 'adult' | 'free_child' | 'adapted_child' | 'rebellious_child';
 export type SocialNeed = 'safety' | 'clarity' | 'approval' | 'autonomy' | 'connection';
@@ -17,7 +21,7 @@ export type SocialObservation = {
     pointId?: string;
     worldMinute?: number | null;
 };
-export type SocialTurnPlan = { id:string; speakerId:string; recipientId:string; stimulus:'co_presence'|'observed_event'; egoState:EgoState; hiddenPosition:LifePosition; need:SocialNeed; act:SocialAct; topic:string; expectedReply:'adult_reply'|'accept_support'|'boundary'|'refusal'; physicalPermission:'none'|'request_only'; worldMinute:number; replyToTurnId?:string; incomingSpeech?:string; threadId?:string; observation?:SocialObservation };
+export type SocialTurnPlan = { id:string; speakerId:string; recipientId:string; stimulus:'co_presence'|'observed_event'; egoState:EgoState; hiddenPosition:LifePosition; need:SocialNeed; act:SocialAct; topic:string; topicContext?:string; expectedReply:'adult_reply'|'accept_support'|'boundary'|'refusal'; physicalPermission:'none'|'request_only'; worldMinute:number; replyToTurnId?:string; incomingSpeech?:string; threadId?:string; observation?:SocialObservation };
 export type SpeechSemantics = { speechAct:'answer'|'question'|'support'|'boundary'|'refusal'|'request'|'provocation'|'self_disclosure'; apparentEgoState:EgoState|'unclear'; transaction:'complementary'|'crossed'|'ulterior'|'unclear'; boundary:'none'|'set'|'accepted'|'violated'; invitation:'none'|'conversation'|'help'|'physical_contact'; openLoop:'none'|'question'|'request'|'offer'|'boundary'; conversationDisposition:'continue'|'close'|'unclear'; confidence:number };
 export type PhysicalInitiativeBasis = 'consensual' | 'care' | 'protocol' | 'coercive' | 'violent' | null;
 export type ConversationState = { turnCount:number; maxTurns:number; hardLimit:number; engagement:number };
@@ -63,27 +67,57 @@ function profileSocial(characterId:string) {
     try { return JSON.parse(row?.profile_json || '{}').social || {}; } catch { return {}; }
 }
 
-function chooseTopic(speakerId:string, recipientId:string, worldMinute:number, stimulus:'co_presence'|'observed_event') {
+export type CoPresenceContext = {
+    roomId?: string;
+    roomName?: string;
+    roomType?: string;
+};
+
+function sharedRoomTopic(context: CoPresenceContext | undefined) {
+    if (!context?.roomId) return null;
+    const roomName = context.roomName || context.roomId;
+    if (context.roomType === 'cell') {
+        return {
+            topic: 'shared_cell',
+            context: `Вы живёте в одной камере «${roomName}». Это ваш общий быт и неизбежное соседство; можно начать знакомство, осторожно спросить о самочувствии или о том, как другая переносит происходящее. Не выдавай это за дружбу или доверие.`,
+        };
+    }
+    return {
+        topic: 'shared_room',
+        context: `Вы находитесь в одном помещении «${roomName}» лаборатории. Общая обстановка — достаточный повод заговорить, но не доказательство близости или согласия.`,
+    };
+}
+
+function chooseTopic(speakerId:string, recipientId:string, worldMinute:number, stimulus:'co_presence'|'observed_event', coPresence?:CoPresenceContext) {
     const active = db.prepare(`SELECT * FROM social_threads WHERE from_id=? AND to_id=? AND status='open' AND COALESCE(cooldown_until_minute,0)<=? ORDER BY salience DESC,last_touched_minute ASC LIMIT 1`).get(speakerId,recipientId,worldMinute) as any;
-    if (active) return { id:active.id, topic:active.topic };
+    if (active) {
+        const saved = (() => { try { return JSON.parse(active.source_json || '{}'); } catch { return {}; } })();
+        return { id:active.id, topic:active.topic, context: typeof saved.topicContext === 'string' ? saved.topicContext : undefined };
+    }
     const social = profileSocial(speakerId);
     const declared = Array.isArray(social.conversationHooks) ? social.conversationHooks.map(String) : [];
     // A topic must come from an observed event or an authored profile hook.
     // The core must not invent a generic conversation merely to avoid silence.
-    const candidates = stimulus === 'observed_event' ? ['observed_event', ...declared] : declared;
-    const topic = candidates.find(candidate => !db.prepare('SELECT 1 FROM social_threads WHERE from_id=? AND to_id=? AND topic=? AND COALESCE(cooldown_until_minute,0)>?').get(speakerId,recipientId,candidate,worldMinute));
-    if (!topic) return null;
-    const source = JSON.stringify({stimulus,profileHook:declared.includes(topic),conversation:{turnCount:0,maxTurns:2,hardLimit:6,engagement:50}});
-    const previous = db.prepare('SELECT id FROM social_threads WHERE from_id=? AND to_id=? AND topic=?').get(speakerId,recipientId,topic) as any;
+    const shared = stimulus === 'co_presence' ? sharedRoomTopic(coPresence) : null;
+    const candidates = stimulus === 'observed_event'
+        ? [{ topic:'observed_event' }, ...declared.map(topic => ({ topic }))]
+        : [
+            ...(shared ? [shared] : []),
+            ...declared.map(topic => ({ topic })),
+        ];
+    const choice = candidates.find(candidate => !db.prepare('SELECT 1 FROM social_threads WHERE from_id=? AND to_id=? AND topic=? AND COALESCE(cooldown_until_minute,0)>?').get(speakerId,recipientId,candidate.topic,worldMinute));
+    if (!choice) return null;
+    const source = JSON.stringify({stimulus,profileHook:declared.includes(choice.topic),topicContext:choice.context,conversation:{turnCount:0,maxTurns:2,hardLimit:6,engagement:50}});
+    const previous = db.prepare('SELECT id FROM social_threads WHERE from_id=? AND to_id=? AND topic=?').get(speakerId,recipientId,choice.topic) as any;
     if (previous) {
         db.prepare('UPDATE social_threads SET status=?, salience=?, source_json=?, last_touched_minute=?, cooldown_until_minute=NULL WHERE id=?')
           .run('open', stimulus === 'observed_event' ? .9 : .6, source, worldMinute, previous.id);
-        return { id:previous.id, topic };
+        return { id:previous.id, topic:choice.topic, context:choice.context };
     }
     const id=randomUUID();
     db.prepare('INSERT INTO social_threads (id,from_id,to_id,topic,status,salience,source_json,last_touched_minute) VALUES (?,?,?,?,?,?,?,?)')
-      .run(id,speakerId,recipientId,topic,'open',stimulus === 'observed_event' ? .9 : .6,source,worldMinute);
-    return { id, topic };
+      .run(id,speakerId,recipientId,choice.topic,'open',stimulus === 'observed_event' ? .9 : .6,source,worldMinute);
+    return { id, topic:choice.topic, context:choice.context };
 }
 
 /** The core chooses a social act, never a line of dialogue. */
@@ -93,18 +127,19 @@ export function createSocialTurnPlan(
     worldMinute:number,
     stimulus:'co_presence'|'observed_event'='co_presence',
     observation?: SocialObservation,
+    coPresence?: CoPresenceContext,
 ): SocialTurnPlan | null {
     const relation = characterRelationRepo.get(speakerId, recipientId);
     if (!relation) return null;
     const familiarity = Number(relation.familiarityLevel || 0);
-    if (familiarity >= .35 && Number(relation.openness ?? 0) >= 35) return null;
-    const thread = chooseTopic(speakerId,recipientId,worldMinute,stimulus);
+    const thread = chooseTopic(speakerId,recipientId,worldMinute,stimulus,coPresence);
     if (!thread) return null;
     const social = profileSocial(speakerId);
     const egoState = social.defaultEgoState || defaults.egoState;
     const need = (social.stressNeeds?.[0] || defaults.need) as SocialNeed;
-    const act:SocialAct = thread.topic === 'orientation' && familiarity < .12 ? 'introduce' : thread.topic === 'boundaries' ? 'ask_boundary' : stimulus === 'observed_event' ? 'check_in' : 'offer_support';
-    return { id:randomUUID(), speakerId, recipientId, stimulus, egoState, hiddenPosition:social.lifePosition || defaults.hiddenPosition, need, act, topic:thread.topic, threadId:thread.id, expectedReply:act === 'ask_boundary' ? 'boundary' : act === 'offer_support' ? 'accept_support' : 'adult_reply', physicalPermission:'none', worldMinute, observation };
+    const firstEncounter = familiarity < .12 && ['orientation', 'shared_cell', 'shared_room'].includes(thread.topic);
+    const act:SocialAct = firstEncounter ? 'introduce' : thread.topic === 'boundaries' ? 'ask_boundary' : stimulus === 'observed_event' || thread.topic === 'shared_cell' || thread.topic === 'shared_room' ? 'check_in' : 'offer_support';
+    return { id:randomUUID(), speakerId, recipientId, stimulus, egoState, hiddenPosition:social.lifePosition || defaults.hiddenPosition, need, act, topic:thread.topic, topicContext:thread.context, threadId:thread.id, expectedReply:act === 'ask_boundary' ? 'boundary' : act === 'offer_support' ? 'accept_support' : 'adult_reply', physicalPermission:'none', worldMinute, observation };
 }
 
 export function describeSocialObservation(observation: SocialObservation | undefined, recipientId: string) {
@@ -204,19 +239,58 @@ export async function processPendingSocialTurns() {
     try {
         const plan = JSON.parse(row.plan_json) as SocialTurnPlan;
         db.prepare("UPDATE pending_social_turns SET status='speaking',updated_at=CURRENT_TIMESTAMP WHERE id=?").run(plan.id);
-        const payload = await buildPromptPayloadWithDB(plan.speakerId, plan.recipientId, undefined, 'scene_lab_calibrator', { initiatorId:plan.recipientId, addresseeId:plan.recipientId });
+        const payload = (await buildCharacterTurnContext({
+            subjectId: plan.speakerId,
+            stimulus: { kind: 'internal_impulse', impulseId: `social:${plan.id}` },
+            eventId: 'scene_lab_calibrator',
+            initiatorId: plan.recipientId,
+            addresseeId: plan.recipientId,
+        })).payload;
         const recipientName = subjectRepo.get(plan.recipientId)?.name || plan.recipientId;
-        const incoming = plan.incomingSpeech ? `\n${recipientName} только что сказал${recipientName === 'Калибратор' ? '' : 'а'} тебе: «${plan.incomingSpeech}»` : '';
         const observation = describeSocialObservation(plan.observation, plan.recipientId);
-        const opener = !plan.incomingSpeech && plan.act !== 'continue_topic'
-            ? 'Это начало самостоятельной реплики: сформулируй её так, чтобы смысл был понятен без предыдущей строки.'
-            : '';
-        const instruction = `[Социальный план ядра — обязателен]\nТы говоришь именно с ${recipientName}; вы не Калибратор и не оператор друг для друга. Тема разговора: ${plan.topic}. Эго-состояние: ${plan.egoState}. Социальный акт: ${plan.act}. Потребность: ${plan.need}. ${observation}${incoming}\n${opener}\nСкажи одну естественную короткую реплику этому персонажу; не описывай действий и не выполняй физические действия. Не используй нераскрытые «она», «он», «это» или «дальше», если их референт не назван в этой же реплике или во входящей реплике.`;
-        const generated = await generateCharacterReply(payload, instruction, []);
-        const speech = typeof generated.reply === 'string' ? generated.reply : generated.reply.speech;
-        if (!speech?.trim()) throw new Error(generated.error || 'empty social speech');
+        const stimuli: CharacterSpeechStimulus[] = [
+            ...(plan.incomingSpeech ? [{ kind: 'external_speech' as const, speech: plan.incomingSpeech }] : []),
+            {
+                kind: 'internal_impulse',
+                event: {
+                    action: plan.incomingSpeech ? 'ответ в самостоятельном разговоре' : 'самостоятельное начало разговора',
+                    target: recipientName,
+                    experience: [`Тема: ${plan.topic}.`, plan.topicContext, observation].filter(Boolean).join(' '),
+                    directlyExperienced: true,
+                    affectedCharacter: subjectRepo.get(plan.speakerId)?.name || plan.speakerId,
+                },
+                impulse: {
+                    id: `social:${plan.act}`,
+                    primaryIntent: `Ты сама выбираешь социальный акт «${plan.act}» и обращаешься именно к ${recipientName}.`,
+                    secondaryConflict: `Потребность: ${plan.need}. Эго-состояние: ${plan.egoState}. Вы не оператор и не объект процедуры друг для друга; не назначай физических действий и не придумывай фактов.`,
+                    allowedSpeechActs: plan.act === 'answer_question' ? ['answer', 'set_boundary']
+                        : plan.act === 'ask_boundary' ? ['probe', 'set_boundary']
+                            : plan.act === 'offer_support' ? ['reassure', 'probe']
+                                : ['probe', 'acknowledge', 'admit'],
+                },
+            },
+        ];
+        const prepared = prepareCharacterSpeechStimuli(payload, stimuli);
+        if (!prepared) throw new Error('social speech reaction frame unavailable');
+        const generated = await executeCharacterSpeech({
+            source: 'social_initiative',
+            payload: prepared.payload,
+            userInput: prepared.userInput,
+            history: [],
+        });
+        if (!generated.success) throw new Error(generated.error);
+        const speech = generated.speech;
         const semantics = await classifySocialSpeech(speech.trim());
-        chatMemoryRepo.append(plan.speakerId,'assistant',speech.trim(),'Социальная транзакция');
+        // Chat history is participant-owned. Deliver one authored message to
+        // both transcripts; the renderer uses speakerId, not the recipient's
+        // local role, so this is still one line from the actual speaker.
+        deliverCharacterSpeech({
+            speakerId: plan.speakerId,
+            speech,
+            contextLabel: 'Социальная транзакция',
+            messageId: plan.id,
+            transcriptOwnerIds: [plan.speakerId, plan.recipientId],
+        });
         applySocialTransition(plan,speech.trim(),semantics);
         db.prepare("UPDATE pending_social_turns SET status='applied',speech=?,semantics_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(speech.trim(),JSON.stringify(semantics),plan.id);
     } catch (error:any) { db.prepare("UPDATE pending_social_turns SET status='failed',error=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(String(error?.message || error),row.id); }

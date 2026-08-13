@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../infrastructure/db';
 import {
     clearBackgroundJobs, enqueueBackgroundJob, listBackgroundJobs,
-    listDueBackgroundJobs, markBackgroundJobDone, markBackgroundJobFailed,
+    listDueBackgroundJobs, claimBackgroundJob, markBackgroundJobDone, markBackgroundJobFailed,
     markBackgroundJobRunning,
 } from './backgroundJobs';
 
@@ -46,5 +46,21 @@ describe('backgroundJobs', () => {
         const retried = enqueueBackgroundJob({ type: 'y', key: 'y1', dueMinute: 0 })!;
         expect(retried.status).toBe('pending'); // failed can be re-enqueued
         expect(retried.attempts).toBe(1);
+    });
+
+    it('claims a job atomically so two workers cannot run the same job', () => {
+        const job = enqueueBackgroundJob({ type: 'z', key: 'z1', dueMinute: 0 })!;
+        const first = claimBackgroundJob(job.id);
+        expect(first).not.toBeNull();
+        expect(first!.status).toBe('running');
+        expect(first!.attempts).toBe(1);
+        // Second worker tries to claim the same job: must be rejected.
+        const second = claimBackgroundJob(job.id);
+        expect(second).toBeNull();
+        // A failed job can be claimed again (retry path).
+        markBackgroundJobFailed(job.id, 'boom');
+        const retry = claimBackgroundJob(job.id);
+        expect(retry).not.toBeNull();
+        expect(retry!.attempts).toBe(2);
     });
 });

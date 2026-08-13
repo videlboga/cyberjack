@@ -61,6 +61,49 @@ export interface BuildTickResponseResult {
  * database writes. The returned `pendingCommandEffect` is pushed by the
  * caller into the effect plan.
  */
+export interface BuildPendingCommandEffectInput {
+    payload: {
+        subjectId: string;
+        playerId: string;
+        sceneId: string;
+        textMessage?: string;
+        dynamicModifiers?: unknown;
+    };
+    actionApplied: boolean;
+    addedContextNotes: string[];
+}
+
+/**
+ * Pure: computes the pending-command effect (clear on success, save on a
+ * willingness refusal). Depends only on the command intent, whether it was
+ * applied, and the refusal notes — all known before the tick commit. This
+ * must run BEFORE the commit so the effect is part of the same transaction.
+ */
+export function buildPendingCommandEffect(input: BuildPendingCommandEffectInput): TickEffect | undefined {
+    const { payload, actionApplied, addedContextNotes } = input;
+    const dynamicModifiers = payload.dynamicModifiers as any;
+    const finalCommandIntent = dynamicModifiers?.commandIntent;
+    if (!finalCommandIntent?.type || finalCommandIntent.type === 'none') return undefined;
+    const refusalWasAboutWillingness = addedContextNotes.some(note =>
+        /отклоняет|недостаточ|не выполняет указание|подчинение .*требуется/i.test(note),
+    );
+    if (actionApplied || !refusalWasAboutWillingness) {
+        return { kind: 'pending-command.clear', subjectId: payload.subjectId, playerId: payload.playerId };
+    }
+    return {
+        kind: 'pending-command.save',
+        focus: {
+            subjectId: payload.subjectId,
+            playerId: payload.playerId,
+            sceneId: payload.sceneId,
+            sourceText: dynamicModifiers.pendingCommandSourceText || dynamicModifiers.commandSourceText || payload.textMessage || '',
+            description: dynamicModifiers.pendingCommandDescription || dynamicModifiers.commandDescription || payload.textMessage || 'невыполненное поручение',
+            intent: finalCommandIntent,
+            routing: dynamicModifiers.routing,
+        },
+    };
+}
+
 export function buildTickResponse(input: BuildTickResponseInput): BuildTickResponseResult {
     const { payload, activeSceneId, compiledAction, output, stateBefore, diagnostics, prompt, scenarioResult, initiatorId, state, relationalDynamics, actionApplied, addedContextNotes, commandActionPreset, commandIntent, tickEffects } = input;
 
@@ -130,29 +173,7 @@ export function buildTickResponse(input: BuildTickResponseInput): BuildTickRespo
         })()
         : undefined;
 
-    let pendingCommandEffect: TickEffect | undefined;
-    if (finalCommandIntent?.type && finalCommandIntent.type !== 'none') {
-        const refusalWasAboutWillingness = addedContextNotes.some(note =>
-            /отклоняет|недостаточ|не выполняет указание|подчинение .*требуется/i.test(note),
-        );
-        if (actionApplied || !refusalWasAboutWillingness) {
-            pendingCommandEffect = { kind: 'pending-command.clear', subjectId: payload.subjectId, playerId: payload.playerId };
-        } else {
-            const modifiers = payload.dynamicModifiers as any;
-            pendingCommandEffect = {
-                kind: 'pending-command.save',
-                focus: {
-                    subjectId: payload.subjectId,
-                    playerId: payload.playerId,
-                    sceneId: payload.sceneId,
-                    sourceText: modifiers.pendingCommandSourceText || modifiers.commandSourceText || payload.textMessage || '',
-                    description: modifiers.pendingCommandDescription || modifiers.commandDescription || payload.textMessage || 'невыполненное поручение',
-                    intent: finalCommandIntent,
-                    routing: modifiers.routing,
-                },
-            };
-        }
-    }
+    let pendingCommandEffect: TickEffect | undefined = buildPendingCommandEffect({ payload, actionApplied, addedContextNotes });
 
     const response = {
         tickId: input.tickId,

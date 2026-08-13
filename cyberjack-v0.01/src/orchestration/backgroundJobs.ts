@@ -88,6 +88,23 @@ export function listDueBackgroundJobs(worldMinute: number, limit = 20): Backgrou
     `).all(worldMinute, limit) as BackgroundJob[];
 }
 
+/**
+ * Atomically claim a due job: transitions it from pending/failed to running in
+ * a single UPDATE ... WHERE status IN ('pending','failed'), so two workers can
+ * never pick up the same job. Returns the claimed job or null if it was
+ * already taken. A job stuck in 'running' (e.g. a crashed worker) is not
+ * re-picked automatically; a supervisor may reset it to 'failed' explicitly.
+ */
+export function claimBackgroundJob(id: number): BackgroundJob | null {
+    const res = db.prepare(`
+        UPDATE background_jobs
+        SET status = 'running', attempts = attempts + 1, updated_at = ?
+        WHERE id = ? AND status IN ('pending', 'failed')
+    `).run(now(), id);
+    if (res.changes === 0) return null;
+    return db.prepare(`SELECT ${JOB_COLUMNS} FROM background_jobs WHERE id = ?`).get(id) as BackgroundJob;
+}
+
 export function markBackgroundJobRunning(id: number) {
     db.prepare(`UPDATE background_jobs SET status = 'running', attempts = attempts + 1, updated_at = ? WHERE id = ?`)
         .run(now(), id);

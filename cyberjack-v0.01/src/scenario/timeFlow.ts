@@ -5,7 +5,6 @@ import { advanceSimulationTime } from './simulationTime';
 const REAL_INTERVAL_MS = 5_000;
 const GAME_MINUTES_PER_INTERVAL = 1;
 let timer: ReturnType<typeof setInterval> | null = null;
-let tickInFlight = false;
 let nextTickAt = Date.now() + REAL_INTERVAL_MS;
 
 db.exec(`
@@ -47,17 +46,18 @@ export function setTimeFlowPaused(paused: boolean) {
 export function startTimeFlow() {
   if (timer) return;
   nextTickAt = Date.now() + REAL_INTERVAL_MS;
+  // This is the single wall-clock driver of game time. It advances the world
+  // clock by a fixed number of game minutes per real interval; every game
+  // process (memory, autonomous scenes, sustained effects) is driven by
+  // worldMinute, not by wall-clock. advanceSimulationTime is non-blocking for
+  // LLM-backed jobs, so a slow model never stalls the clock.
   timer = setInterval(async () => {
     nextTickAt = Date.now() + REAL_INTERVAL_MS;
-    // Never stack full simulation passes when one tick exceeds the interval.
-    if (readPaused() || tickInFlight) return;
-    tickInFlight = true;
+    if (readPaused()) return;
     try {
       await advanceSimulationTime(GAME_MINUTES_PER_INTERVAL);
     } catch (error) {
       console.error('[TimeFlow] background tick failed:', error);
-    } finally {
-      tickInFlight = false;
     }
   }, REAL_INTERVAL_MS);
   (timer as any).unref?.();
@@ -67,5 +67,4 @@ export function stopTimeFlow() {
   if (!timer) return;
   clearInterval(timer);
   timer = null;
-  tickInFlight = false;
 }
