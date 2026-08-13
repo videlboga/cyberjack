@@ -20,6 +20,7 @@ import { actionTimePolicy } from '../../domain/actionTimePolicy';
 import { buildPairedDialogueHistory } from '../../narrative/dialogueHistory';
 import { moveCharacterInLaboratory } from '../../scenario/spatialContext';
 import { syncLaboratorySpatialRelations } from '../../services/sceneRelations';
+import { mapTickResponse } from '../dto/tickResponseMapper';
 
 const deferredReplyJobs = new Map<string, {
     done: boolean;
@@ -368,32 +369,23 @@ export const processTick = async (req: Request, res: Response) => {
             contexts: activeContextsRepo.getAllForSubject(subjectId)
         });
 
-        res.json({
-            success: true,
-            tickResult: bundle.output.result,
+        res.json(mapTickResponse({
+            bundle,
             state: fullState,
             telemetry,
             resources: normalizePlayer(resourceRepo.get(playerId)),
-            diagnostics: bundle.diagnostics,
-            bundle,
-            actionApplied: (bundle as any).actionApplied || false,
-            systemNotes: (bundle as any).systemNotes || [],
-            reply: turnExecutionMetrics?.reply || null,
-            promptMessages: turnExecutionMetrics?.promptMessages || null,
-            actorReplies: turnExecutionMetrics?.actorReplies || [],
-            narratorReaction: turnExecutionMetrics?.narratorReaction || null,
+            dynamicModifiers,
+            turnExecutionMetrics,
             llmError,
             llmChance,
             llmSkipped,
             replyPending,
             replyJobId,
-            classifierLog: dynamicModifiers?.raw ?? null,
-            classifierModel: dynamicModifiers?.model ?? null,
             stateDescription,
             contractProgress,
             suggestedChips,
             worldClock
-        });
+        }));
     } catch (error: any) {
         console.error(error);
         res.status(500).json({ success: false, error: error.message });
