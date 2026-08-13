@@ -21,76 +21,9 @@ import { buildPairedDialogueHistory } from '../../narrative/dialogueHistory';
 import { moveCharacterInLaboratory } from '../../scenario/spatialContext';
 import { syncLaboratorySpatialRelations } from '../../services/sceneRelations';
 import { mapTickResponse } from '../dto/tickResponseMapper';
+import { registerDeferredReply, getDeferredReplyJob, publishDeferredToken, finishDeferredStream, getDeferredReply, waitForDeferredReply, streamDeferredReply } from '../deferredReply';
 
-const deferredReplyJobs = new Map<string, {
-    done: boolean;
-    metrics?: any;
-    error?: string | null;
-    completion?: Promise<void>;
-    chunks?: string[];
-    subscribers?: Set<Response>;
-}>();
-
-function publicDeferredJob(job: any) {
-    const { completion: _completion, subscribers: _subscribers, ...publicJob } = job;
-    return publicJob;
-}
-
-export const getDeferredReply = (req: Request, res: Response) => {
-    const id = String(req.params.jobId || '');
-    const job = deferredReplyJobs.get(id);
-    if (!job) return res.status(404).json({ success: false, error: 'Ожидаемый ответ не найден' });
-    res.json({ success: true, ...publicDeferredJob(job) });
-    if (job.done) deferredReplyJobs.delete(id);
-};
-
-export const waitForDeferredReply = async (req: Request, res: Response) => {
-    const id = String(req.params.jobId || '');
-    const job = deferredReplyJobs.get(id);
-    if (!job) return res.status(404).json({ success: false, error: 'Ожидаемый ответ не найден' });
-    if (!job.done && job.completion) {
-        await Promise.race([
-            job.completion,
-            new Promise(resolve => setTimeout(resolve, 60_000))
-        ]);
-    }
-    const completed = deferredReplyJobs.get(id);
-    if (!completed) return res.status(404).json({ success: false, error: 'Ожидаемый ответ не найден' });
-    res.json({ success: true, ...publicDeferredJob(completed) });
-    if (completed.done) deferredReplyJobs.delete(id);
-};
-
-export const streamDeferredReply = (req: Request, res: Response) => {
-    const id = String(req.params.jobId || '');
-    const job = deferredReplyJobs.get(id);
-    if (!job) return res.status(404).end();
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-    for (const chunk of job.chunks || []) res.write(`event: token\ndata: ${JSON.stringify({ chunk })}\n\n`);
-    if (job.done) {
-        res.write(`event: done\ndata: ${JSON.stringify(publicDeferredJob(job))}\n\n`);
-        return res.end();
-    }
-    if (!job.subscribers) job.subscribers = new Set();
-    job.subscribers.add(res);
-    req.on('close', () => job.subscribers?.delete(res));
-};
-
-function publishDeferredToken(job: any, chunk: string) {
-    if (!chunk) return;
-    (job.chunks ||= []).push(chunk);
-    for (const subscriber of job.subscribers || []) subscriber.write(`event: token\ndata: ${JSON.stringify({ chunk })}\n\n`);
-}
-
-function finishDeferredStream(job: any) {
-    for (const subscriber of job.subscribers || []) {
-        subscriber.write(`event: done\ndata: ${JSON.stringify(publicDeferredJob(job))}\n\n`);
-        subscriber.end();
-    }
-    job.subscribers?.clear();
-}
+export { getDeferredReply, waitForDeferredReply, streamDeferredReply };
 
 function buildAutoUserMessage(opts: { actionLabel: string; pointLabel?: string; actorName: string; targetName: string }): string {
     const pointPart = opts.pointLabel ? ` — точка ${opts.pointLabel}` : '';
@@ -288,7 +221,7 @@ export const processTick = async (req: Request, res: Response) => {
                     ),
                     onToken: (chunk) => {
                         if (replyJobId) {
-                            const job = deferredReplyJobs.get(replyJobId);
+                            const job = getDeferredReplyJob(replyJobId);
                             if (job) publishDeferredToken(job, chunk);
                         }
                     }
@@ -299,8 +232,7 @@ export const processTick = async (req: Request, res: Response) => {
         const replyJobId = replyPending ? randomUUID() : null;
         if (!req.body.skipLLM && !llmSkipped) {
             if (deferLLM) {
-                const job = { done: false, chunks: [], subscribers: new Set<Response>() } as { done: boolean; metrics?: any; error?: string | null; completion?: Promise<void>; chunks?: string[]; subscribers?: Set<Response> };
-                deferredReplyJobs.set(replyJobId!, job);
+                const job = registerDeferredReply(replyJobId!);
                 job.completion = generateTurnReply()
                     .then(generated => {
                         job.done = true;
