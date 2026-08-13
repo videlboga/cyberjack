@@ -1,20 +1,10 @@
 import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
-import { subjectRepo, resourceRepo, presetRepo, sceneRepo, characterRepo, characterRelationRepo, sceneCharacterRepo, activeContextsRepo, pointStateRepo, sceneObjectsRepo, chatMemoryRepo, chatSummaryRepo, memoryRepo } from '../../infrastructure/repositories';
-import { activeConfig, updateConfig } from '../../prompts/config';
-import { normalizePlayer } from './playerController';
-import { getActiveContextLabel } from '../../domain/contextPresentation';
-import { deriveTelemetry } from '../../narrative/telemetry';
+import { subjectRepo, pointStateRepo, chatMemoryRepo, chatSummaryRepo, memoryRepo } from '../../infrastructure/repositories';
 import { resolvePortraitEmotion } from '../../domain/portraitEmotion';
 import { db } from '../../infrastructure/db';
-import { relationshipDynamicsRepo } from '../../infrastructure/relationshipDynamicsRepo';
-import { compileAction } from '../../compiler/compileAction';
-import { runTick } from '../../engine/runTick';
-import { conditioningTags, preferenceValenceModifier } from '../../domain/conditioning';
-import { deriveIntimacyReadiness } from '../../domain/intimacyReadiness';
-import * as checkActionAccess from '../../scenario/checkActionAccess';
-import { ContextManager } from '../../orchestration/contextManager';
 import { getStateSnapshot } from '../../services/stateService';
+import { forecastIntimacy as forecastIntimacyService } from '../../services/intimacyForecastService';
 import type { ChatHistoryResponse, ContextJournalResponse } from '../dto/memoryDto';
 
 export const getState = (req: Request, res: Response) => {
@@ -49,38 +39,7 @@ export const forecastIntimacy = (req: Request, res: Response) => {
     const actorId = String(req.body.actorId || 'PL-1');
     const sceneId = String(req.body.sceneId || 'scene_lab_calibrator');
     const candidates = Array.isArray(req.body.candidates) ? req.body.candidates.slice(0, 80) : [];
-    const subject = subjectRepo.get(subjectId);
-    const character = characterRepo.ensureSubject(subjectId, subject?.name || subjectId);
-    const relation = characterRelationRepo.ensure(character.id, actorId, { attitude: subject?.attitude ?? 50, openness: subject?.openness ?? 50, plasticity: subject?.plasticity ?? 50 });
-    const dynamics = relationshipDynamicsRepo.get(subjectId, actorId);
-    const points = pointStateRepo.getAllForSubject(subjectId);
-    const scene = sceneRepo.get(sceneId);
-    const resources = resourceRepo.get(actorId);
-    const forecasts = candidates.flatMap((candidate: any) => {
-      const pointId = String(candidate.pointId || '');
-      const presetId = String(candidate.actionId || '');
-      const point = points.find(entry => entry.pointId === pointId);
-      if (!subject || !point || !scene || !resources || !presetRepo.getActionPreset(presetId)) return [];
-      if (!checkActionAccess.validateAction(presetId, scene, resources, subjectId, actorId, pointId).allowed) return [];
-      if (ContextManager.isPointBlocked(subjectId, pointId).blocked) return [];
-      let action = compileAction({ presetId, eventId: sceneId, activeContexts: activeContextsRepo.getAllForSubject(subjectId).filter(context => !context.pointId || context.pointId === pointId), familiarity: point.familiarity ?? 0 });
-      action.tags = conditioningTags(action.actionKey, action.tags || []);
-      action.valence += preferenceValenceModifier(action.tags, subject.preferences);
-      const output = runTick({ subjectId, pointId, action, core: subject, point, relationship: relation });
-      const relationalScale = Math.max(.15, Math.min(1.5, Number(output.result.experiencedIntensity || 0) / 10));
-      const relationalSignal = Math.max(-1, Math.min(.5, output.result.finalValence * relationalScale * .25));
-      const after = deriveIntimacyReadiness({
-        relationAttitude: Math.max(0, Math.min(100, Number(relation.attitude) + relationalSignal)),
-        relationOpenness: Math.max(0, Math.min(100, Number(relation.openness || 0) + relationalSignal * .35)),
-        fear: Math.max(0, Number(dynamics.fear || 0) + (output.result.finalValence > .3 ? -.15 : 0)),
-        resistance: dynamics.resistance,
-        capacity: output.nextCore.capacity,
-        tension: output.nextCore.tension,
-        points: points.map(entry => entry.pointId === pointId ? output.nextPoint : entry),
-      });
-      const before = deriveIntimacyReadiness({ relationAttitude: relation.attitude, relationOpenness: relation.openness ?? subject.openness, fear: dynamics.fear, resistance: dynamics.resistance, capacity: subject.capacity, tension: subject.tension, points });
-      return [{ actionId: presetId, pointId, readiness: after.readiness - before.readiness, arousal: after.arousal - before.arousal, trust: after.trust - before.trust }];
-    });
+    const forecasts = forecastIntimacyService({ subjectId, actorId, sceneId, candidates });
     res.json({ success: true, forecasts });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
