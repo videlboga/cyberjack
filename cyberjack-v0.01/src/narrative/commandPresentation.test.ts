@@ -8,8 +8,8 @@ const base = {
   targetName: 'Суми',
   actionLabel: 'Массировать ступни',
   requesterName: 'Калибратор',
-  relationToRequester: { attitude: 50 },
-  relationToTarget: { attitude: 75 },
+  relationToRequester: { fromId: 'a', toId: 'b', knows: true, present: true, canInteract: true, attitude: 50 },
+  relationToTarget: { fromId: 'a', toId: 'b', knows: true, present: true, canInteract: true, attitude: 75 },
   dynamics: {
     subjectId: 'NPC-CAND-01', actorId: 'PL-1', resistance: 0,
     learnedCompliance: 0, dependency: 0, dissociation: 0, fear: 0,

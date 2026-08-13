@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyVerbalInputToFrame,
+  applyInternalImpulseToFrame,
   buildReactionSystemPrompt,
   buildReactionTurnMessage,
   boundaryVariationInstruction,
@@ -32,7 +33,7 @@ const behavioralCore = {
     desire: "быть полноценной участницей",
     fear: "слишком поздно заметить важное",
   },
-  attentionFocus: ["change", "person", "technique"] as const,
+  attentionFocus: ["change", "person", "technique"] as Array<'technique' | 'person' | 'body' | 'risk' | 'rules' | 'change'>,
   speechDisposition: "normal" as const,
 };
 
@@ -504,5 +505,28 @@ describe("reaction perspective and dialogue planning", () => {
     expect(formal.dramaticPosition.preferredSpeechAct).toBe("set_boundary");
     expect(formal.dramaticPosition.secondaryConflict).toContain("процедурная точность");
     expect(formal.dramaticPosition.secondaryConflict).toContain("не придумывай конкретный регламент");
+  });
+
+  it("passes the committed command outcome to the speech prompt", () => {
+    const frame = observerFrame();
+    frame.event.commandOutcome = { status: "performed", actionLabel: "Снять трусики" };
+
+    expect(buildReactionSystemPrompt(frame)).toContain("Авторитетный исход команды");
+    expect(buildReactionTurnMessage(frame)).toContain("Исход команды в этом ходе");
+    expect(buildReactionTurnMessage(frame)).toContain("выполняется");
+  });
+
+  it("uses an internal impulse through the same reaction frame", () => {
+    const frame = observerFrame();
+    const impulsive = applyInternalImpulseToFrame(frame, {
+      id: "seek_orientation",
+      primaryIntent: "Ты хочешь понять, сколько это продлится",
+      secondaryConflict: "Тебе трудно держаться за счёт времени",
+      allowedSpeechActs: ["probe", "request"],
+    });
+
+    expect(impulsive.event.requiresSpeech).toBe(true);
+    expect(impulsive.dramaticPosition.primaryIntent).toContain("сколько это продлится");
+    expect(buildReactionTurnMessage(impulsive)).toContain("сколько это продлится");
   });
 });

@@ -149,7 +149,7 @@ export function applyPromiseOutcome(input: {
           0,
           Math.min(
             100,
-            relation.openness +
+            (relation.openness ?? 50) +
               direction * (signal.outcome === "fulfilled" ? 3 : 5),
           ),
         ),

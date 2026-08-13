@@ -1,4 +1,5 @@
 import { clamp } from '../engine/utils';
+import type { CompiledAction } from '../domain/types';
 
 const scalar = (value: unknown, fallback = 0) => typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 
@@ -18,20 +19,30 @@ export function normalizeAuthoredActionVector(vector: Record<string, any> = {}) 
 }
 
 /** Setup/state changes are not themselves sustained physical stimulation. */
-export function shapeImmediateContextAction(vector: Record<string, any>, contextType?: string, removesContexts = false) {
-    const result = { ...vector };
-    if (contextType === 'pose') {
-        result.intensity = Math.min(result.intensity, .15);
-        result.contact = 0;
-        result.sharpness = 0;
-    } else if (['equipment', 'restraint', 'clothing'].includes(contextType || '')) {
-        result.intensity *= .35;
-        result.contact *= .25;
-        result.sharpness *= .25;
-    } else if (removesContexts) {
-        result.intensity *= .2;
-        result.contact *= .2;
-        result.sharpness *= .2;
-    }
-    return result;
+export function shapeImmediateContextAction(
+  vector: Record<string, any>,
+  contextType?: string,
+  removesContexts = false,
+): Pick<CompiledAction, 'intensity' | 'valence' | 'contact' | 'sharpness' | 'novelty'> {
+  const result: Pick<CompiledAction, 'intensity' | 'valence' | 'contact' | 'sharpness' | 'novelty'> = {
+    intensity: Number(vector.intensity) || 0,
+    valence: Number(vector.valence) || 0,
+    contact: Number(vector.contact) || 0,
+    sharpness: Number(vector.sharpness) || 0,
+    novelty: Number(vector.novelty) || 0,
+  };
+  if (contextType === 'pose') {
+    result.intensity = Math.min(result.intensity, .15);
+    result.contact = 0;
+    result.sharpness = 0;
+  } else if (['equipment', 'restraint', 'clothing'].includes(contextType || '')) {
+    result.intensity *= .35;
+    result.contact *= .25;
+    result.sharpness *= .25;
+  } else if (removesContexts) {
+    result.intensity *= .2;
+    result.contact *= .2;
+    result.sharpness *= .2;
+  }
+  return result;
 }

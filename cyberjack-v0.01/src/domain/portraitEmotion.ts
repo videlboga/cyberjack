@@ -59,7 +59,7 @@ export function resolvePortraitEmotion(input: PortraitEmotionInput): PortraitEmo
     .map(transition => `${transition.kind || ""} ${transition.title || ""}`)
     .join(" ");
   const restrained = [...contexts].some(id =>
-    /cuff|restraint|suspend|collar|machine|penetration|insertion/.test(id)
+    !!id && /cuff|restraint|suspend|collar|machine|penetration|insertion/.test(id)
   );
 
   if (behavioral === "unresponsive" || capacity <= 0) return "unconscious";

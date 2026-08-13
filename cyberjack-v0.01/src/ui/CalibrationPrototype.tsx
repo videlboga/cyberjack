@@ -43,6 +43,7 @@ import {
   appendCharacterChatLines,
   CharacterChatFeed,
   CharacterChatLine,
+  CharacterChatRole,
   collapseRepeatedChatActions,
 } from "./CharacterChat";
 import { scoreGoalCandidate } from "./goalRecommendation";
@@ -53,7 +54,7 @@ import {
   GameSustainedEffect,
   gameEffectDurationMs,
 } from "./GameVisualEffects";
-import { resolveActionButtonImage } from "../domain/actionButtonVisual";
+import { hasActionPointImage, resolveActionButtonImage } from "../domain/actionButtonVisual";
 import "./VisualReview.css";
 import "./CalibrationPrototype.css";
 import "./ProtocolControls.css";
@@ -67,9 +68,28 @@ import "./ZoneSelector.css";
 import "./CharacterSpeech.css";
 import "./NoScrollWorkbench.css";
 import { streamDeferredReply } from "./deferredReplyStream";
+import { deriveIntimacyReadiness } from "../domain/intimacyReadiness";
 const SCENE = "scene_lab_calibrator",
   ZONE = "neck",
   ENABLE_ADAPTIVE_PROTOCOL = false;
+
+// A scene refresh asks for several small character cards at once.  Different
+// UI effects may request the same card in the same render turn; share that
+// work instead of opening another proxy connection for an identical snapshot.
+const sceneStateRequests = new Map<string, Promise<any>>();
+async function loadSceneCharacterState(subjectId: string, pointId: string) {
+  const url = `/api/state?subjectId=${encodeURIComponent(subjectId)}&sceneId=${encodeURIComponent(SCENE)}&pointId=${encodeURIComponent(pointId)}&view=scene`;
+  let request = sceneStateRequests.get(url);
+  if (!request) {
+    request = fetch(url).then(async (response) => {
+      if (!response.ok) throw new Error(`State request failed: ${response.status}`);
+      return response.json();
+    });
+    sceneStateRequests.set(url, request);
+    void request.finally(() => window.setTimeout(() => sceneStateRequests.delete(url), 750));
+  }
+  return request;
+}
 type Phase = "diagnosis" | "preparation";
 type PassiveMode = "gentle" | "contrast";
 type ProtocolMode = "exact" | "adaptive";
@@ -130,6 +150,7 @@ type ActionMeta = {
   id: string;
   validTargets?: string[] | null;
   requiresItem?: string | null;
+  requireContexts?: string[] | null;
   tags?: string[];
   intensity?: number;
   sharpness?: number;
@@ -150,6 +171,26 @@ const hiddenCalibrationActionIds = new Set([
   "act_adjust_electrostimulation",
   "act_stop_electrostimulation",
   "act_disconnect_tens",
+]);
+const highRiskRecommendationActionIds = new Set([
+  "hot_wax",
+  "hard_bite",
+  "pinch",
+  "scratching",
+  "slap",
+  "hard_slap",
+  "firm_grip",
+  "needle_prick",
+  "whip_strike",
+  "taser_shock",
+]);
+const trustBuildingRecommendationActionIds = new Set([
+  "feather_stroke",
+  "gentle_stroke",
+  "light_kiss",
+  "deep_kiss",
+  "licking",
+  "deep_massage",
 ]);
 type OperationMode = "impact" | "setup";
 export const semanticTagLabels: Record<string, string> = {
@@ -192,6 +233,8 @@ export const actionSemanticFallback: Record<string, string[]> = {
   licking: ["sexual", "oral"],
   finger_insertion: ["sexual", "penetration"],
   act_start_penetration: ["sexual", "penetration"],
+  act_start_oral_giving: ["sexual", "oral"],
+  act_deepen_oral: ["sexual", "oral"],
 };
 const actionSection = (action: ActionDef) => {
   const tags = actionSemanticFallback[action.id] || [];
@@ -247,6 +290,7 @@ type ProtocolStepProgress = {
   attitude: number;
   localAttitude: number;
   sensitivity: number;
+  localSensitivity: number;
   openness: number;
   plasticity: number;
   localOpenness: number;
@@ -378,6 +422,7 @@ type Obs = {
     familiarityDelta?: number;
   };
   contexts?: { id: string }[];
+  reactionSnapshot?: { affect?: { emotion?: string } };
   transitions?: {
     kind?: string;
     title: string;
@@ -565,6 +610,19 @@ export const calibrationActions: ActionDef[] = [
     label: "Начать проникновение",
     hint: "Продолжительный проникающий контакт",
     group: "intimate",
+  },
+  {
+    id: "act_start_oral_giving",
+    label: "Вставить в рот",
+    hint: "Продолжительный оральный контакт через губы",
+    group: "intimate",
+  },
+  {
+    id: "act_deepen_oral",
+    label: "Засунуть в горло",
+    hint: "Усилить продолжающийся оральный контакт",
+    group: "intimate",
+    contextual: true,
   },
   {
     id: "act_increase_friction",
@@ -1160,11 +1218,11 @@ const conditionLabels: Record<string, string> = {
   capacity: "Ресурс",
   openness: "Открытость",
   plasticity: "Пластичность",
-  pain: "Отношение к боли",
-  restraint: "Отношение к фиксации",
-  exposure: "Отношение к демонстрации",
-  clinical: "Отношение к медицине",
-  electronic: "Отношение к электронике",
+  pain: "Закреплённая реакция · боль",
+  restraint: "Закреплённая реакция · фиксация",
+  exposure: "Закреплённая реакция · демонстрация",
+  clinical: "Закреплённая реакция · клинические процедуры",
+  electronic: "Закреплённая реакция · электроника",
   trait_masochist: "Мазохизм",
   trait_restraint_fetish: "Фетиш фиксации",
   trait_conditioned_submission: "Обусловленная покорность",
@@ -1369,7 +1427,6 @@ const bodypartImageAliases: Record<string, string> = {
   head: "face",
   chest: "breasts",
   belly: "stomach",
-  knees: "legs",
 };
 const bodypartVisualPath = (subjectId: string, zoneId?: string) => {
   const character = visualCharacterSlugs[subjectId] || "mira";
@@ -1473,7 +1530,7 @@ const zoneGroups = [
   {
     id: "limbs",
     label: "Конечности",
-    points: ["arms", "hands", "inner_thighs", "legs", "knees", "feet"],
+    points: ["arms", "hands", "inner_thighs", "legs", "feet"],
   },
   {
     id: "intimate",
@@ -1755,6 +1812,15 @@ export function CalibrationPrototype({
       Record<string, State>
     >({}),
     [relationAttitude, setRelationAttitude] = useState<number | null>(null),
+    [relationOpenness, setRelationOpenness] = useState<number | null>(null),
+    [relationshipDynamics, setRelationshipDynamics] = useState({
+      resistance: 0,
+      learnedCompliance: 0,
+      dependency: 0,
+      dissociation: 0,
+      fear: 0,
+    }),
+    [intimacyForecasts, setIntimacyForecasts] = useState<Record<string, { readiness: number; arousal: number; trust: number }>>({}),
     [stateHistory, setStateHistory] = useState<StateSnapshot[]>(() => {
       try {
         const saved = JSON.parse(
@@ -1883,52 +1949,6 @@ export function CalibrationPrototype({
       : line;
   };
   useEffect(() => setSpeechTargetId(SUBJECT), [SUBJECT]);
-  const nearbyCharacterStateKey = nearbyCharacters
-    .map((character) =>
-      [
-        character.id,
-        JSON.stringify(character.state || {}),
-        JSON.stringify(character.contexts || []),
-      ].join(":"),
-    )
-    .join("|");
-  useEffect(() => {
-    const controller = new AbortController();
-    const participantIds = nearbyCharacters.map((character) => character.id);
-    if (!participantIds.length) return () => controller.abort();
-
-    // Scene cards carry a convenient snapshot, but the avatar must use the
-    // authoritative state: a nearby character may have changed clothes or
-    // pose without becoming the selected monitor target.
-    Promise.all(
-      participantIds.map(async (participantId) => {
-        const response = await fetch(
-          `/api/state?subjectId=${encodeURIComponent(participantId)}&sceneId=${encodeURIComponent(SCENE)}&pointId=${encodeURIComponent(selectedZoneId || ZONE)}`,
-          { signal: controller.signal },
-        );
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data?.subject ? ([participantId, data.subject] as const) : null;
-      }),
-    )
-      .then((entries) => {
-        if (controller.signal.aborted) return;
-        setSceneCharacterStates((current) => ({
-          ...current,
-          ...Object.fromEntries(
-            entries.filter(
-              (entry): entry is readonly [string, State] => Boolean(entry),
-            ),
-          ),
-        }));
-      })
-      .catch((error) => {
-        if (error?.name !== "AbortError") {
-          console.warn("[Calibration] Could not load scene participant states", error);
-        }
-      });
-    return () => controller.abort();
-  }, [SUBJECT, SCENE, selectedZoneId, nearbyCharacterStateKey]);
   useEffect(() => {
     if (activeSubjectId === SUBJECT) {
       setFocusedMonitorState(null);
@@ -1940,16 +1960,11 @@ export function CalibrationPrototype({
     )?.state as State | undefined;
     setFocusedMonitorState(nearbyState || null);
 
-    const controller = new AbortController();
-    fetch(
-      `/api/state?subjectId=${encodeURIComponent(activeSubjectId)}&sceneId=${encodeURIComponent(SCENE)}&pointId=${encodeURIComponent(selectedZoneId || ZONE)}`,
-      { signal: controller.signal },
-    )
+    let cancelled = false;
+    loadSceneCharacterState(activeSubjectId, selectedZoneId || ZONE)
       .then((response) => {
-        if (!response.ok) throw new Error(`State request failed: ${response.status}`);
-        return response.json();
-      })
-      .then((data) => {
+        if (cancelled) return;
+        const data = response;
         if (data?.subject) {
           const freshState = data.subject as State;
           setFocusedMonitorState(freshState);
@@ -1960,13 +1975,10 @@ export function CalibrationPrototype({
         }
       })
       .catch((error) => {
-        if (error?.name !== "AbortError") {
-          console.warn("[Calibration] Could not load focused monitor state", error);
-        }
+        console.warn("[Calibration] Could not load focused monitor state", error);
       });
-
-    return () => controller.abort();
-  }, [activeSubjectId, SUBJECT]);
+    return () => { cancelled = true; };
+  }, [activeSubjectId, SUBJECT, selectedZoneId]);
   const activeDisplayCharacter = activeSubjectId === SUBJECT
     ? null
     : nearbyCharacters.find((character) => character.id === activeSubjectId);
@@ -1996,12 +2008,7 @@ export function CalibrationPrototype({
     // Refresh every visible participant as one scene snapshot after each load.
     const participantResults = await Promise.allSettled(
       nearbyCharacters.map(async (character) => {
-        const response = await fetch(
-          `/api/state?subjectId=${encodeURIComponent(character.id)}&sceneId=${encodeURIComponent(SCENE)}&pointId=${encodeURIComponent(selectedZoneId || ZONE)}`,
-          { signal: AbortSignal.timeout(15_000) },
-        );
-        if (!response.ok) return null;
-        const data = await response.json();
+        const data = await loadSceneCharacterState(character.id, selectedZoneId || ZONE);
         return data?.subject ? ([character.id, data.subject] as const) : null;
       }),
     );
@@ -2023,12 +2030,19 @@ export function CalibrationPrototype({
     const applyState = () => {
     subjectRef.current = d.subject;
     setSubject(d.subject);
-    setRelationAttitude(
-      d.relations?.find(
+    const operatorRelation = d.relations?.find(
         (relation: any) =>
           relation.toId === "PL-1" || relation.to_id === "PL-1",
-      )?.attitude ?? null,
-    );
+      );
+    setRelationAttitude(operatorRelation?.attitude ?? null);
+    setRelationOpenness(operatorRelation?.openness ?? null);
+    setRelationshipDynamics({
+      resistance: Number(d.relationshipDynamics?.resistance || 0),
+      learnedCompliance: Number(d.relationshipDynamics?.learnedCompliance || 0),
+      dependency: Number(d.relationshipDynamics?.dependency || 0),
+      dissociation: Number(d.relationshipDynamics?.dissociation || 0),
+      fear: Number(d.relationshipDynamics?.fear || 0),
+    });
     setTelemetry(d.telemetry || null);
     const loadedObservations = (d.recentObservations || []) as Obs[];
     const newestObservationId = loadedObservations.reduce(
@@ -2080,7 +2094,16 @@ export function CalibrationPrototype({
     const q = await fetch("/api/contracts?playerId=PL-1"),
       d = await q.json();
     if (!d.success) throw new Error(d.error);
-    setContracts([...(d.accepted || []), ...(d.available || [])]);
+    const nextContracts = [...(d.accepted || []), ...(d.available || [])];
+    setContracts(nextContracts);
+    setTrackedContractId((current) => {
+      if (current && nextContracts.some((contract) => contract.id === current))
+        return current;
+      const fallback = nextContracts[0]?.id || null;
+      if (fallback) localStorage.setItem("cyberjack.trackedContract", fallback);
+      else localStorage.removeItem("cyberjack.trackedContract");
+      return fallback;
+    });
     return d;
   };
   const loadChat = async () => {
@@ -2089,6 +2112,9 @@ export function CalibrationPrototype({
     // every exchange that was addressed to an assistant.
     const participants = Array.from(
       new Set([SUBJECT, ...nearbyCharacters.map((character) => character.id)]),
+    );
+    const participantNames = new Map(
+      nearbyCharacters.map((character) => [character.id, character.name]),
     );
     const histories = await Promise.all(
       participants.map(async (participantId) => {
@@ -2099,16 +2125,28 @@ export function CalibrationPrototype({
         if (!d.success) return [];
         return (d.messages || []).map((message: any) => ({
           ...message,
-          participantId,
+          participantId: message.speakerId || participantId,
+          participantName: message.speakerId
+            ? message.speakerName || participantNames.get(message.speakerId)
+            : undefined,
         }));
       }),
     );
-    const participantNames = new Map(
-      nearbyCharacters.map((character) => [character.id, character.name]),
-    );
     const restored = histories
       .flat()
-      .sort((left: any, right: any) => Number(left.id) - Number(right.id))
+      .filter(
+        (message: any, index: number, all: any[]) =>
+          all.findIndex(
+            (candidate) =>
+              String(candidate.messageId || candidate.id) ===
+              String(message.messageId || message.id),
+          ) === index,
+      )
+      .sort(
+        (left: any, right: any) =>
+          Number(left.originChatId || left.id) -
+          Number(right.originChatId || right.id),
+      )
       .map((message: any) => {
         const action = String(message.content || "").match(
           /^\[Действие\]\s*(.*)$/s,
@@ -2124,17 +2162,18 @@ export function CalibrationPrototype({
             ? "system"
             : message.role === "assistant"
               ? message.participantId === SUBJECT
-                ? "mira"
-                : participantNames.get(message.participantId) ||
+                ? subjectName
+                : message.participantName ||
+                  participantNames.get(message.participantId) ||
                   message.participantId
               : "calibrator",
-          role: action || isSystem
+          role: (action || isSystem
             ? "system"
             : message.role === "assistant"
               ? message.participantId === SUBJECT
                 ? "character"
                 : "observer"
-              : "calibrator",
+              : "calibrator") as CharacterChatRole,
           text: action ? action[1] : message.content,
           context: message.contextLabel,
           action: Boolean(action) || systemAction,
@@ -2150,9 +2189,9 @@ export function CalibrationPrototype({
     return restored;
   };
   const trackContract = (id: string | null) => {
+    if (!id) return;
     setTrackedContractId(id);
-    if (id) localStorage.setItem("cyberjack.trackedContract", id);
-    else localStorage.removeItem("cyberjack.trackedContract");
+    localStorage.setItem("cyberjack.trackedContract", id);
   };
   const acceptContract = async (id: string) => {
     setBusy(true);
@@ -2202,7 +2241,6 @@ export function CalibrationPrototype({
         metrics: "Контракт выполнен.",
         kind: "milestone",
       });
-      trackContract(null);
       await loadContracts();
     } catch (e: any) {
       setError(e.message);
@@ -2300,7 +2338,9 @@ export function CalibrationPrototype({
     const minute = Math.floor(worldMinute);
     if (minute === lastWorldSyncMinuteRef.current) return;
     lastWorldSyncMinuteRef.current = minute;
-    vtUpdate(() => load().catch((error) => setError(error.message)));
+    vtUpdate(() =>
+      Promise.all([load(), loadChat()]).catch((error) => setError(error.message)),
+    );
   }, [worldMinute, SUBJECT]);
   useEffect(() => {
     if (!activePeakObservation) return;
@@ -2353,7 +2393,7 @@ export function CalibrationPrototype({
           (key) =>
             Math.abs(
               ((last[key as keyof StateSnapshot] as number) -
-                snapshot[key as keyof StateSnapshot]) as number,
+                Number(snapshot[key as keyof StateSnapshot])) as number,
             ) < 0.001,
         )
       ) {
@@ -2908,6 +2948,7 @@ export function CalibrationPrototype({
                     emotion: reply.portraitEmotion || "neutral",
                     actionKey: `${pointId}/${actionId}`,
                     actionImage: `/character-images/actions/contact/${actionId}.png`,
+                    actionLabel: reply.mechanicalAction?.label || actionId,
                   });
                 }
               }
@@ -3021,6 +3062,19 @@ export function CalibrationPrototype({
     }
   };
   const manual = async (a: ActionDef) => manualAt(a);
+  // Recommendations are not merely shortcuts for a tick: they declare the
+  // target body point the operator is about to work with. Keep the palette in
+  // sync before dispatching, just as a recommendation selected from the main
+  // panel does.
+  const applyRecommendedAction = (action: ActionDef, pointId?: string) => {
+    if (pointId && pointId !== "systemic") {
+      setOperationMode("impact");
+      setSelectedZoneId(pointId);
+      setZoneOpen(false);
+    }
+    setSelectedActionId(action.id);
+    void manualAt(action, pointId);
+  };
   const speechCharacters = [
     {
       id: SUBJECT,
@@ -3033,7 +3087,7 @@ export function CalibrationPrototype({
   const speechPortraitFor = (character: (typeof speechCharacters)[number]) => {
     const slug = visualCharacterSlugs[character.id];
     if (!slug) return null;
-    const state = character.state || {};
+    const state: any = character.state || {};
     const emotion = resolvePortraitEmotion({
       behavioralState: state.behavioralState,
       reaction: state.reaction || state.lastReaction,
@@ -3082,7 +3136,10 @@ export function CalibrationPrototype({
             textMessage: text,
             intensity: 1,
             skipLLM: false,
-            llmMode: nearbyCharacters.length ? "scene_dialogue" : "speech_only",
+            // All dialogue goes through the scene orchestrator. The screen may
+            // have one participant, but its command, memory and prompt
+            // contract must be identical to a multi-character scene.
+            llmMode: "scene_dialogue",
             skipImageGen: true,
             interactionContext: "Диагностический стол",
           }),
@@ -3455,6 +3512,7 @@ export function CalibrationPrototype({
           )) &&
         (!a.requiresContext || activeContextIds.has(a.requiresContext)) &&
         (!a.hideWhenContext || !activeContextIds.has(a.hideWhenContext)) &&
+        (a.id !== "tickle" || hasActionPointImage(a.id, effectiveZoneId)) &&
         (!["contact", "intimate"].includes(a.group) ||
           zonesForAction(a).some((z) => z.id === effectiveZoneId)),
     ),
@@ -4009,6 +4067,12 @@ export function CalibrationPrototype({
         stop: "act_end_sexual_contact",
       },
       {
+        start: "act_start_oral_giving",
+        slower: undefined,
+        faster: "act_deepen_oral",
+        stop: "act_end_sexual_contact",
+      },
+      {
         start: "act_start_vibrator",
         slower: undefined,
         faster: "act_adjust_vibration",
@@ -4042,20 +4106,28 @@ export function CalibrationPrototype({
       : 0,
     learnedPreferences = parsePreferences(subject?.preferences),
     recommendableActions = actions.filter(
-      (action) =>
+      (action) => {
+        const meta = actionMeta.find((entry) => entry.id === action.id);
+        return (
         !hiddenCalibrationActionIds.has(action.id) &&
         action.id !== "wait" &&
         ["contact", "intimate"].includes(action.group) &&
+        Boolean(meta) &&
         !action.contextual &&
-        (!actionMeta.find((meta) => meta.id === action.id)?.requiresItem ||
+        (!meta?.requiresItem ||
           ownedItemIds.has(
-            actionMeta.find((meta) => meta.id === action.id)?.requiresItem ||
+            meta.requiresItem ||
               "",
           )) &&
+        !(meta?.requireContexts || []).some(
+          (contextId) => !activeContextIds.has(contextId),
+        ) &&
         (!action.requiresContext ||
           activeContextIds.has(action.requiresContext)) &&
         (!action.hideWhenContext ||
-          !activeContextIds.has(action.hideWhenContext)),
+          !activeContextIds.has(action.hideWhenContext))
+        );
+      },
     ),
     recommendationCandidates = recommendableActions.flatMap((action) =>
       zonesForAction(action).map((point) => {
@@ -4102,23 +4174,29 @@ export function CalibrationPrototype({
           right.preferenceScore * 4 -
           (left.acceptance + left.openness * 0.35 + left.preferenceScore * 4),
       ),
-    intimateLocalAcceptance = intimateRecommendationCandidates.length
+    intimatePointStates = Array.from(new Map(intimateRecommendationCandidates.map(candidate => [candidate.point.id, { localAttitude: candidate.acceptance, localOpenness: candidate.openness }])).values()),
+    intimateMetrics = deriveIntimacyReadiness({
+      relationAttitude: Number(relationAttitude ?? subject?.attitude ?? 50),
+      relationOpenness: Number(relationOpenness ?? subject?.openness ?? 50),
+      fear: relationshipDynamics.fear,
+      resistance: relationshipDynamics.resistance,
+      capacity: Number(subject?.capacity ?? 0),
+      tension: Number(subject?.tension ?? 0),
+      points: intimatePointStates,
+    }),
+    intimateLocalAcceptance = intimateMetrics.localAcceptance,
+    intimateArousal = intimateMetrics.arousal,
+    intimateRelationAttitude = Number(relationAttitude ?? subject?.attitude ?? 50),
+    intimateRelationOpenness = Number(relationOpenness ?? subject?.openness ?? 50),
+    intimateLocalOpenness = intimateRecommendationCandidates.length
       ? intimateRecommendationCandidates.reduce(
-          (sum, candidate) => sum + candidate.acceptance,
+          (sum, candidate) => sum + candidate.openness,
           0,
         ) / intimateRecommendationCandidates.length
       : 0,
-    intimateArousal = clampPercent(Number(subject?.tension || 0)),
-    intimateTrust = clampPercent(
-      Number(subject?.attitude || 0) * 0.55 +
-        Number(subject?.openness || 0) * 0.45,
-    ),
-    intimateReadiness = clampPercent(
-      Number(subject?.attitude || 0) * 0.38 +
-        Number(subject?.openness || 0) * 0.24 +
-        intimateLocalAcceptance * 0.28 +
-        intimateArousal * 0.1 * (0.25 + intimateTrust / 135),
-    ),
+    intimateReserve = clampPercent(Number(subject?.capacity ?? 0)),
+    intimateTrust = intimateMetrics.trust,
+    intimateReadiness = intimateMetrics.readiness,
     intimateRecommendationText =
       intimateReadiness < 25
         ? "Готовность низкая: начните с наиболее принимаемого контакта и следите за реакцией."
@@ -4304,11 +4382,22 @@ export function CalibrationPrototype({
       goalQuickAction || fallbackQuickAction,
     ],
     quickActionIds = new Set(quickActions.map((quick) => quick.action.id)),
-    availableIntimateRecommendations = recommendationCandidates.filter(
+    hasIntimacyForecasts = Object.keys(intimacyForecasts).length > 0,
+    baseIntimateRecommendations = recommendationCandidates.filter(
       (candidate) =>
         !quickActionIds.has(candidate.action.id) &&
-        !activeContextIds.has(candidate.action.id),
+        !activeContextIds.has(candidate.action.id) &&
+        (!hasIntimacyForecasts ||
+          Boolean(intimacyForecasts[`${candidate.action.id}:${candidate.point.id}`])),
     ),
+    safeIntimateRecommendations = baseIntimateRecommendations.filter(
+      (candidate) => !highRiskRecommendationActionIds.has(candidate.action.id),
+    ),
+    availableIntimateRecommendations =
+      new Set(safeIntimateRecommendations.map((candidate) => candidate.action.id))
+        .size >= 3
+        ? safeIntimateRecommendations
+        : baseIntimateRecommendations,
     observedIntimateChange = (
       candidate: (typeof recommendationCandidates)[number],
       metric: "readiness" | "arousal" | "trust",
@@ -4354,13 +4443,10 @@ export function CalibrationPrototype({
         label: "Повысить готовность",
         hotkey: "A",
         score: (candidate: (typeof recommendationCandidates)[number]) => {
-          const observed = observedIntimateChange(candidate, "readiness");
-          return observed !== null
-            ? observed * 100 + candidate.preferenceScore * 2
-            : candidate.acceptance * 0.55 +
-                candidate.openness * 0.35 +
-                candidate.preferenceScore * 5 -
-                actionIntensity(candidate.action, candidate.tags) * 8;
+          const forecast = intimacyForecasts[`${candidate.action.id}:${candidate.point.id}`];
+          return forecast
+            ? forecast.readiness * 100 + candidate.preferenceScore * .15
+            : candidate.acceptance * .02 + candidate.openness * .01 - actionIntensity(candidate.action, candidate.tags) * .1;
         },
       },
       {
@@ -4368,13 +4454,10 @@ export function CalibrationPrototype({
         label: "Повысить возбуждение",
         hotkey: "S",
         score: (candidate: (typeof recommendationCandidates)[number]) => {
-          const observed = observedIntimateChange(candidate, "arousal");
-          return observed !== null
-            ? observed * 100 + candidate.preferenceScore * 2
-            : candidate.sensitivity * 0.42 +
-                candidate.acceptance * 0.18 +
-                candidate.preferenceScore * 5 +
-                actionIntensity(candidate.action, candidate.tags) * 3;
+          const forecast = intimacyForecasts[`${candidate.action.id}:${candidate.point.id}`];
+          return forecast
+            ? forecast.arousal * 100 + candidate.preferenceScore * .15
+            : candidate.sensitivity * .02 + candidate.acceptance * .01 + actionIntensity(candidate.action, candidate.tags) * .1;
         },
       },
       {
@@ -4382,13 +4465,15 @@ export function CalibrationPrototype({
         label: "Повысить доверие",
         hotkey: "D",
         score: (candidate: (typeof recommendationCandidates)[number]) => {
-          const observed = observedIntimateChange(candidate, "trust");
-          return observed !== null
-            ? observed * 100 + candidate.preferenceScore * 2
-            : candidate.acceptance * 0.58 +
-                candidate.openness * 0.48 +
-                candidate.preferenceScore * 6 -
-                actionIntensity(candidate.action, candidate.tags) * 12;
+          const forecast = intimacyForecasts[`${candidate.action.id}:${candidate.point.id}`];
+          const trustBuildingBonus = trustBuildingRecommendationActionIds.has(
+            candidate.action.id,
+          )
+            ? 10
+            : 0;
+          return forecast
+            ? forecast.trust * 100 + candidate.preferenceScore * .15 + trustBuildingBonus
+            : candidate.acceptance * .02 + candidate.openness * .02 - actionIntensity(candidate.action, candidate.tags) * .1 + trustBuildingBonus;
         },
       },
     ],
@@ -4405,9 +4490,7 @@ export function CalibrationPrototype({
           (entry) =>
             !selected.some(
               (chosen) =>
-                chosen.candidate.action.id === entry.action.id ||
-                `${chosen.candidate.action.id}:${chosen.candidate.point.id}` ===
-                  `${entry.action.id}:${entry.point.id}`,
+                chosen.candidate.action.id === entry.action.id,
             ),
         )
         .sort((left, right) => goal.score(right) - goal.score(left))[0];
@@ -4421,11 +4504,25 @@ export function CalibrationPrototype({
       return selected;
     }, []);
 
+  useEffect(() => {
+    if (!subject || !intimateRecommendationCandidates.length) return;
+    const controller = new AbortController();
+    void fetch('/api/state/intimacy-forecast', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
+      body: JSON.stringify({ subjectId: SUBJECT, actorId: 'PL-1', sceneId: SCENE, candidates: intimateRecommendationCandidates.map(candidate => ({ actionId: candidate.action.id, pointId: candidate.point.id })) }),
+    }).then(response => response.json()).then(data => {
+      if (!data.success) return;
+      setIntimacyForecasts(Object.fromEntries((data.forecasts || []).map((forecast: any) => [`${forecast.actionId}:${forecast.pointId}`, forecast])));
+    }).catch(() => {});
+    return () => controller.abort();
+  }, [SUBJECT, subject?.capacity, subject?.tension, relationAttitude, relationOpenness, relationshipDynamics.fear, relationshipDynamics.resistance, intimateRecommendationCandidates.map(candidate => `${candidate.action.id}:${candidate.point.id}`).join('|')]);
+
   const boostContextForProcess = (process: (typeof activeProcesses)[number]) =>
     (
       ({
         act_start_vibrator: "act_adjust_vibration",
         act_start_electrostimulation: "act_adjust_electrostimulation",
+        act_start_oral_giving: "act_deepen_oral",
       }) as Record<string, string | undefined>
     )[process.start];
   const isProcessBoosted = (process: (typeof activeProcesses)[number]) =>
@@ -4505,13 +4602,7 @@ export function CalibrationPrototype({
   const runQuickAction = (index: number) => {
     const quick = quickActions[index];
     if (!quick || busy) return;
-    if (quick.pointId && quick.pointId !== "systemic") {
-      setOperationMode("impact");
-      setSelectedZoneId(quick.pointId);
-      setSelectedActionId(quick.action.id);
-      setZoneOpen(false);
-    }
-    manualAt(quick.action, quick.pointId);
+    applyRecommendedAction(quick.action, quick.pointId);
   };
 
   useEffect(() => {
@@ -4553,7 +4644,7 @@ export function CalibrationPrototype({
         const recommendationIndex = { KeyA: 0, KeyS: 1, KeyD: 2 }[key] ?? -1;
         const recommendation = intimateRecommendations[recommendationIndex];
         if (recommendation)
-          manualAt(
+          applyRecommendedAction(
             recommendation.candidate.action,
             recommendation.candidate.point.id,
           );
@@ -4702,7 +4793,6 @@ export function CalibrationPrototype({
           value={trackedContractId || ""}
           onChange={(event) => trackContract(event.target.value || null)}
         >
-          <option value="">Свободная калибровка</option>
           {contracts.map((contract) => (
             <option value={contract.id} key={`objective-${contract.id}`}>
               {contract.title}
@@ -4792,7 +4882,6 @@ export function CalibrationPrototype({
               value={trackedContractId || ""}
               onChange={(e) => trackContract(e.target.value || null)}
             >
-              <option value="">Без ориентира</option>
               {contracts
                 .filter((c) => c.state === "accepted")
                 .map((c) => (
@@ -5299,10 +5388,10 @@ export function CalibrationPrototype({
                   typeof delta === "number" &&
                   Math.abs(delta) >= 0.01;
                 const historyValues = activeIsSecondary
-                  ? [baseline, Number(value || 0)].filter(Number.isFinite)
+                  ? [baseline, Number(value || 0)].filter((v): v is number => typeof v === "number")
                   : stateHistory
                       .map((snapshot) => snapshot[key])
-                      .filter(Number.isFinite);
+                      .filter((v): v is number => typeof v === "number");
                 const relative =
                   key === "attitude"
                     ? undefined
@@ -5591,7 +5680,7 @@ export function CalibrationPrototype({
                           disabled={busy}
                           key={`${candidate.action.id}-${candidate.point.id}`}
                           onClick={() =>
-                            manualAt(candidate.action, candidate.point.id)
+                            applyRecommendedAction(candidate.action, candidate.point.id)
                           }
                           style={
                             {
@@ -5613,7 +5702,7 @@ export function CalibrationPrototype({
               )}
             </section>
             <div className="monitor-outcome-stack">
-              <section className="calibration-footer-goal monitor-goal">
+            <section className="calibration-footer-goal monitor-goal" aria-hidden="true">
                 <div className="footer-goal-picker">
                   <small>ЦЕЛЬ</small>
                   <button
@@ -5744,12 +5833,11 @@ export function CalibrationPrototype({
                       {effectiveSelectedAction
                         ? "ОЖИДАЕТСЯ"
                         : peakEventPresentation?.title ||
-                          (currentObservation.reaction?.overload > 8
+                          ((currentObservation.reaction?.overload || 0) > 8
                             ? "ПЕРЕГРУЗКА"
                             : currentObservation.reaction?.mixed
                               ? "СМЕШАННО"
-                              : (currentObservation.reaction?.appraisal || 0) >=
-                                  0
+                              : (currentObservation.reaction?.appraisal || 0) >= 0
                                 ? "ПРИНЯТО"
                                 : "ОТВЕРГНУТО")}
                     </b>
@@ -5928,6 +6016,62 @@ export function CalibrationPrototype({
               <span>Ⅱ</span>
               Подождать
             </button>
+            <div className={`operation-goal-control ${goalPickerOpen ? "open" : ""}`}>
+              <button
+                className="operation-goal-trigger"
+                aria-expanded={goalPickerOpen}
+                onClick={() => setGoalPickerOpen((open) => !open)}
+              >
+                <small>ЦЕЛЬ</small>
+                <strong>{trackedContract?.title || "Загрузка контракта"}</strong>
+                <i>{goalPickerOpen ? "▾" : "▸"}</i>
+              </button>
+              {goalPickerOpen && trackedContract && (
+                <section className="operation-goal-panel">
+                  <header>
+                    <small>ТЕКУЩИЙ КОНТРАКТ</small>
+                    <button
+                      className="operation-goal-settings"
+                      title="Открыть каталог контрактов"
+                      onClick={() => {
+                        setGoalPickerOpen(false);
+                        setProtocolOpen(false);
+                        setGoalSettingsOpen(true);
+                      }}
+                    >
+                      ↗
+                    </button>
+                  </header>
+                  <strong className="operation-goal-title">{trackedContract.title}</strong>
+                  <p className="operation-goal-description">{trackedContract.description}</p>
+                  <div className="operation-goal-conditions">
+                    {goalRows.map((row, index) => (
+                      <span className={row.met ? "met" : ""} key={`operation-goal-condition-${index}`}>
+                        <i>
+                          {conditionLabels[row.condition.key || row.condition.type] ||
+                            row.condition.key || row.condition.type}
+                        </i>
+                        <b>
+                          {displayConditionValue(row.condition.key || row.condition.type, row.value)}
+                          /{displayConditionValue(row.condition.key || row.condition.type, row.condition.value)}
+                        </b>
+                        <em>{row.met ? "✓" : "·"}</em>
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    className="operation-goal-change"
+                    onClick={() => {
+                      setGoalPickerOpen(false);
+                      setProtocolOpen(false);
+                      setGoalSettingsOpen(true);
+                    }}
+                  >
+                    Сменить контракт
+                  </button>
+                </section>
+              )}
+            </div>
             <div className="action-tabs">
               <button
                 className={operationMode === "impact" ? "active" : ""}
@@ -6372,16 +6516,60 @@ export function CalibrationPrototype({
           >
             <header>
               <div>
-                <small>
-                  {trackedContract ? "ЦЕЛЬ КАЛИБРОВКИ" : "СВОБОДНАЯ КАЛИБРОВКА"}
-                </small>
-                <h2>{trackedContract?.title || "Отслеживаемые параметры"}</h2>
+                <small>ЦЕЛИ КАЛИБРОВКИ</small>
+                <h2>{trackedContract?.title || "Выберите контракт"}</h2>
               </div>
               <button onClick={() => setGoalSettingsOpen(false)}>×</button>
             </header>
-            {trackedContract ? (
+            <div className="goal-contract-picker">
+              {contracts.map((contract) => (
+                <article
+                  className={contract.id === trackedContractId ? "selected" : ""}
+                  key={`goal-picker-${contract.id}`}
+                >
+                  <header>
+                    <small>{contract.issuerId.replace("fac_", "").toUpperCase()}</small>
+                    <strong>{contract.title}</strong>
+                  </header>
+                  <p>{contract.description}</p>
+                  <div>
+                    {contract.conditions.map((condition, index) => {
+                      const selectedRow =
+                        contract.id === trackedContractId ? goalRows[index] : null;
+                      const label =
+                        conditionLabels[condition.key || condition.type] ||
+                        condition.key ||
+                        condition.type;
+                      return (
+                        <span className={selectedRow?.met ? "met" : ""} key={`${contract.id}-condition-${index}`}>
+                          <i>{label}</i>
+                          <b>
+                            {selectedRow
+                              ? displayConditionValue(condition.key || condition.type, selectedRow.value)
+                              : "—"}
+                            /{displayConditionValue(condition.key || condition.type, condition.value)}
+                          </b>
+                          <em>{selectedRow?.met ? "✓" : "·"}</em>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <button
+                    className={contract.id === trackedContractId ? "active" : ""}
+                    disabled={contract.id === trackedContractId}
+                    onClick={() => {
+                      trackContract(contract.id);
+                      setGoalSettingsOpen(false);
+                    }}
+                  >
+                    {contract.id === trackedContractId ? "Выбрано" : "Выбрать цель"}
+                  </button>
+                </article>
+              ))}
+            </div>
+            {trackedContract && (
               <>
-                <p>{trackedContract.description}</p>
+                <small className="goal-selection-note">Выбранный контракт отслеживается в калибровке.</small>
                 <div className="goal-contract-details">
                   {goalRows.map((row, index) => (
                     <span
@@ -6413,55 +6601,6 @@ export function CalibrationPrototype({
                 <footer>
                   <button onClick={() => setGoalSettingsOpen(false)}>
                     Закрыть
-                  </button>
-                </footer>
-              </>
-            ) : (
-              <>
-                <p>
-                  Выбранные показатели появятся в прогнозе, результате действия
-                  и протоколе.
-                </p>
-                <div>
-                  {trackedMetricOptions.map((option) => {
-                    const checked = freeTrackedMetrics.includes(option.id);
-                    const limitReached =
-                      !checked && freeTrackedMetrics.length >= 6;
-                    return (
-                      <label
-                        className={`${checked ? "selected" : ""} ${limitReached ? "disabled" : ""}`}
-                        key={option.id}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={limitReached}
-                          onChange={() =>
-                            setFreeTrackedMetrics((current) =>
-                              checked
-                                ? current.length > 1
-                                  ? current.filter(
-                                      (metric) => metric !== option.id,
-                                    )
-                                  : current
-                                : current.length < 6
-                                  ? [...current, option.id]
-                                  : current,
-                            )
-                          }
-                        />
-                        <span>{option.label}</span>
-                        <b>{checked ? "✓" : "+"}</b>
-                      </label>
-                    );
-                  })}
-                </div>
-                <footer>
-                  <small>
-                    {freeTrackedMetrics.length}/6 показателей выбрано
-                  </small>
-                  <button onClick={() => setGoalSettingsOpen(false)}>
-                    Готово
                   </button>
                 </footer>
               </>

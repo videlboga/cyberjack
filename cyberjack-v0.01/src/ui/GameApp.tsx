@@ -57,7 +57,7 @@ type SubjectState = {
     familiarity?: number;
     exposureCount?: number;
   }>;
-  contexts?: { actionId: string; label: string; type: string }[];
+  contexts?: { actionId: string; label: string; type: string; pointId?: string }[];
 };
 
 type TickResult = {
@@ -580,7 +580,7 @@ export function GameApp() {
             shoulders: 'Плечи', chest: 'Грудь', nipples: 'Соски',
             belly: 'Живот', back: 'Спина', waist: 'Талия',
             arms: 'Руки', hands: 'Кисти', inner_thighs: 'Внутр. бёдра',
-            legs: 'Ноги', knees: 'Колени', feet: 'Ступни',
+            legs: 'Ноги', feet: 'Ступни',
             buttocks: 'Ягодицы', anus: 'Анус',
             vulva: 'Вульва', vagina: 'Влагалище', clitoris: 'Клитор',
             penis: 'Член', testicles: 'Яички', prostate: 'Простата',

@@ -38,6 +38,7 @@ import {
   resolvePortraitEmotion,
 } from "../domain/portraitEmotion";
 import { gameAudio } from "./gameAudio";
+import { SEX_MACHINE_STIMULATION, sexMachineAvatarPath } from "../domain/sexMachineStimulation";
 import {
   GameActionEffect,
   GamePortraitReactionEffect,
@@ -45,7 +46,7 @@ import {
   GameSustainedEffect,
   gameEffectDurationMs,
 } from "./GameVisualEffects";
-import { resolveActionButtonImage } from "../domain/actionButtonVisual";
+import { hasActionPointImage, resolveActionButtonImage } from "../domain/actionButtonVisual";
 import {
   acquiredTraitValue,
   deriveAcquiredTraits,
@@ -57,6 +58,8 @@ import {
   interpretPointAttitude,
   interpretPointSensitivity,
 } from "../domain/parameterInterpretation";
+import { DEFAULT_CONFIG } from "../engine/config";
+import { estimateCapacityLoss } from "../engine/capacityPacing";
 import "./DeviceControl.css";
 import "./JapaneseIndustrialTheme.css";
 
@@ -100,6 +103,32 @@ type Resident = {
     baselineAttitude?: number;
     baselineOpenness?: number;
   }[];
+  relationships?: {
+    characterId: string;
+    subjectId: string;
+    name: string;
+    attitude: number;
+    openness: number;
+    familiarity: number;
+    knows: boolean;
+    present: boolean;
+    canInteract: boolean;
+    opinion?: string;
+    recentMemories?: string[];
+  }[];
+  dossierNarrative?: { selfDescription: string; traitExpression: string; updatedAt?: string };
+  mentalMemories?: {
+    id: number;
+    title: string;
+    text: string;
+    tags: string[];
+    tagLabels?: Record<string, string>;
+    relatedSubjectIds: string[];
+    worldMinute?: number | null;
+    atomCount?: number;
+    moments?: { id: number; title: string; text: string; worldMinute?: number | string | null; sceneId?: string; actionId?: string; participantIds?: string[]; portraitEmotion?: string }[];
+    subjective?: { summary?: string; associations?: { target: string; tagLinks: string[]; evidence: string[]; valence: number; strength: number; expectation: string; manual?: boolean }[] };
+  }[];
   history?: {
     id: string;
     type: string;
@@ -135,6 +164,7 @@ type DeviceSession = {
   intensity: number;
   phase: "sustain" | "intense" | "peak";
   targetPointIds: string[];
+  stimulationMode?: "vaginal" | "anal" | "tickling";
   startedAtTick: number | null;
   updatedAtTick: number;
   targetMode?:
@@ -144,7 +174,11 @@ type DeviceSession = {
     | "negative"
     | "mixed"
     | "orgasm"
-    | "exhaustion";
+    | "exhaustion"
+    | "tickle_steady"
+    | "tickle_tease"
+    | "tickle_disrupt"
+    | "tickle_endurance";
   rhythm?: "steady" | "pulse" | "wave" | "random";
   orgasmPolicy?: "deny" | "allow" | "force";
   valencePolicy?: "adaptive" | "neutral" | "positive" | "negative" | "mixed";
@@ -154,6 +188,29 @@ type DeviceSession = {
   orgasmTargetCount?: number | null;
   orgasmCount?: number;
   stopAtReserve?: boolean;
+  lastDischargeEvent?: { id: number; worldMinute: number };
+};
+type MentalChairSession = {
+  subjectId: string;
+  status: "loaded" | "running" | "paused" | "stopped";
+  intensity: number;
+  frame: "reinforce" | "anxiety" | "contradiction" | "reframe";
+  phase: "recall" | "immersion" | "consolidation";
+  memoryId: number | null;
+  memoryText: string | null;
+  memoryTags: string[];
+  relatedSubjectIds: string[];
+  focusTag: string | null;
+  startedAtTick: number | null;
+  updatedAtTick: number;
+  lastIntervention?: {
+    targetLabel: string;
+    intervention: string;
+    operation: string;
+    affected: number;
+    changes: Array<{ target: string; before: { valence: number; strength: number; expectation: string }; after: { valence: number; strength: number; expectation: string } }>;
+    at: number;
+  };
 };
 type LabAsset = {
   id: string;
@@ -165,6 +222,7 @@ type LabAsset = {
     startedAt?: number;
     roomId?: string;
     deviceSession?: DeviceSession;
+    mentalSession?: MentalChairSession;
   };
 };
 type LabRoom = {
@@ -403,11 +461,11 @@ const conditionLabels: Record<string, string> = {
   capacity: "Ресурс",
   openness: "Открытость",
   plasticity: "Пластичность",
-  pain: "Отношение к боли",
-  restraint: "Отношение к фиксации",
-  exposure: "Отношение к демонстрации",
-  clinical: "Отношение к медицине",
-  electronic: "Отношение к электронике",
+  pain: "Закреплённая реакция · боль",
+  restraint: "Закреплённая реакция · фиксация",
+  exposure: "Закреплённая реакция · демонстрация",
+  clinical: "Закреплённая реакция · клинические процедуры",
+  electronic: "Закреплённая реакция · электроника",
   trait_masochist: "Мазохизм",
   trait_restraint_fetish: "Фетиш фиксации",
   trait_conditioned_submission: "Обусловленная покорность",
@@ -746,7 +804,6 @@ export function CampaignApp() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [timeFlow, setTimeFlow] = useState<TimeFlowState | null>(null);
-  const animationsPausedByTime = useRef<Animation[]>([]);
   const [inbox, setInbox] = useState<DirectorEvent[]>([]);
   // The periodic refresh and an interaction-triggered refresh can overlap.
   // Never let an older snapshot erase a context (and therefore its avatar)
@@ -896,30 +953,11 @@ export function CampaignApp() {
       setError(e.message);
     }
   };
-  const resumeTimeFlow = useCallback(() => {
-    if (!timeFlow?.paused) return;
-    setTimeFlow((current) => current ? { ...current, paused: false, running: true } : current);
-    void api("/api/scenario/time/flow", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paused: false }),
-    }).then((data) => setTimeFlow(data.timeFlow)).catch((e: any) => setError(e.message));
-  }, [timeFlow?.paused]);
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("game-time-paused", Boolean(timeFlow?.paused));
-    if (timeFlow?.paused) {
-      animationsPausedByTime.current = (document.getAnimations?.() || [])
-        .filter((animation) => animation.playState === "running");
-      animationsPausedByTime.current.forEach((animation) => animation.pause());
-    } else {
-      animationsPausedByTime.current.forEach((animation) => {
-        if (animation.playState === "paused") animation.play();
-      });
-      animationsPausedByTime.current = [];
-    }
+    return () => root.classList.remove("game-time-paused");
   }, [timeFlow?.paused]);
-  useEffect(() => () => document.documentElement.classList.remove("game-time-paused"), []);
   const chooseDirectorEvent = async (event: DirectorEvent, choice: string) => {
     if (busy) return;
     setBusy(true);
@@ -1044,11 +1082,6 @@ export function CampaignApp() {
     <div
       className="campaign-shell"
       data-theme={uiTheme}
-      onClickCapture={(event) => {
-        const target = event.target as HTMLElement | null;
-        if (!target?.closest(".campaign-time-control, .calibration-time-control")) resumeTimeFlow();
-      }}
-      onSubmitCapture={() => resumeTimeFlow()}
     >
       <header className="campaign-statusbar">
         <div className="campaign-brand">
@@ -1181,7 +1214,7 @@ export function CampaignApp() {
                 name: resident.name,
                 role: resident.role,
                 title: resident.title,
-                state: resident.state,
+                state: resident.state ?? undefined,
                 contexts: resident.contexts,
               }))}
               uiTheme={uiTheme}
@@ -1257,13 +1290,6 @@ export function CampaignApp() {
               }
               onInteract={setInteraction}
               onRefresh={() => load(true)}
-              onPassTime={(minutes) =>
-                mutate(
-                  "/api/scenario/time/pass",
-                  { playerId: "PL-1", minutes },
-                  `Прошло ${minutes} минут`,
-                )
-              }
               onUse={(asset, resident) =>
                 mutate(
                   `/api/scenario/laboratory/${asset.id}/use`,
@@ -1439,7 +1465,6 @@ function LaboratoryOverview({
   onMove,
   onInteract,
   onRefresh,
-  onPassTime,
   onUse,
 }: {
   scenario: Scenario;
@@ -1450,7 +1475,6 @@ function LaboratoryOverview({
   onMove: (resident: Resident, roomId: string) => void;
   onInteract: (resident: Resident) => void;
   onRefresh: () => Promise<void>;
-  onPassTime: (minutes: number) => Promise<boolean>;
   onUse: (asset: LabAsset, resident: Resident) => Promise<boolean> | void;
 }) {
   const { t } = useI18n();
@@ -1459,6 +1483,7 @@ function LaboratoryOverview({
     lab_recovery_capsule:
       "/backgrounds/laboratory/capsule_outpaint_masked_d1.0.png",
     lab_sex_machine: "/backgrounds/laboratory/sex_machine.png",
+    lab_mental_correction_chair: "/backgrounds/laboratory/mental_correction_chair.png",
   };
   const [selectedRoomId, setSelectedRoomId] = useState(
     scenario.rooms[0]?.id || "",
@@ -1557,7 +1582,22 @@ function LaboratoryOverview({
           clock={scenario.clock}
           busy={busy}
           onRefresh={onRefresh}
-          onPassTime={onPassTime}
+          onRelease={async () => {
+            const released = await onUse(currentDevice, currentResident);
+            if (released !== false) setConversation(null);
+          }}
+          onExit={() => setConversation(null)}
+        />
+      );
+    }
+    if (currentDevice?.id === "lab_mental_correction_chair") {
+      return (
+        <MentalChairControlScreen
+          asset={currentDevice}
+          resident={currentResident}
+          clock={scenario.clock}
+          busy={busy}
+          onRefresh={onRefresh}
           onRelease={async () => {
             const released = await onUse(currentDevice, currentResident);
             if (released !== false) setConversation(null);
@@ -1853,6 +1893,7 @@ function LaboratoryOverview({
                       "lab_recovery_capsule",
                       "lab_diagnostic_table",
                       "lab_sex_machine",
+                      "lab_mental_correction_chair",
                     ].includes(asset.id);
                     const occupant = scenario.residents.find(
                       (resident) => resident.id === asset.metadata?.subjectId,
@@ -2014,7 +2055,7 @@ function CharacterDirectory({
 }) {
   const { t } = useI18n();
   const [tab, setTab] = useState<
-    "overview" | "state" | "zones" | "learning" | "history"
+    "overview" | "state" | "zones" | "learning" | "relations" | "history"
   >("overview");
   const selected = residents.find((resident) => resident.id === dossierId);
   if (!selected) return null;
@@ -2059,6 +2100,7 @@ function CharacterDirectory({
     return notes;
   })();
   const observedPoints = (selected.points || [])
+    .filter((point) => !["posture", "slot_room", "slot_social", "global_pose", "mind_state", "systemic"].includes(point.id))
     .filter((point) => point.exposureCount > 0)
     .sort((a, b) => b.exposureCount - a.exposureCount);
   const favored = [...observedPoints]
@@ -2161,6 +2203,41 @@ function CharacterDirectory({
         ["Выполненные контракты", selected.statistics.completedContracts],
       ]
     : [];
+  const chronicleKind = (type: string) => {
+    if (/interaction|device_protocol|equipment/u.test(type)) return "процедура";
+    if (/mental_correction/u.test(type)) return "коррекция";
+    if (/social|chat|speech/u.test(type)) return "разговор";
+    if (/discharge|breakdown/u.test(type)) return "перелом";
+    if (/role_change|recruitment/u.test(type)) return "статус";
+    return "событие";
+  };
+  const meaningfulChronicle = Object.values((selected.history || []).reduce((groups, event) => {
+    const kind = chronicleKind(event.type);
+    const day = Math.floor(Number(event.worldMinute || 0) / 1440) + 1;
+    const key = `${day}:${kind}:${event.title}`;
+    const group = groups[key] || { ...event, kind, day, count: 0, descriptions: [] as string[] };
+    group.count++;
+    if (event.description && !group.descriptions.includes(event.description)) group.descriptions.push(event.description);
+    groups[key] = group;
+    return groups;
+  }, {} as Record<string, { id: string; title: string; type: string; time?: string; worldMinute?: number; kind: string; day: number; count: number; descriptions: string[] }>))
+    .sort((a, b) => Number(b.worldMinute || 0) - Number(a.worldMinute || 0));
+  const bodypartSlug: Record<string, string> = {
+    "S-AV-01": "mira", "NPC-LAB-01": "iona", "NPC-CAND-01": "nika",
+    "NPC-CAND-SUMI": "sumi", "NPC-CAND-GEN-02": "eli", "NPC-CAND-GEN-04": "mai",
+  };
+  const zoneImage = (pointId: string) => {
+    const slug = bodypartSlug[selected.subjectId || selected.id];
+    if (!slug) return null;
+    const aliases: Record<string, string> = {
+      chest: "breasts", belly: "stomach", mouth: "lips", oral: "lips", thighs: "inner_thighs",
+      ass: "buttocks", butt: "buttocks", arms: "arms", hands: "hands",
+    };
+    const image = aliases[pointId] || pointId;
+    return `/character-images/bodyparts/${slug}/${image}.png`;
+  };
+  const relationTone = (value: number) => value >= 68 ? "тёплое" : value <= 35 ? "напряжённое" : "нейтральное";
+  const operationalSummary = assessment[0] || "Данных для оценки пока недостаточно.";
   return (
     <main className="character-dossier">
       <header>
@@ -2232,6 +2309,12 @@ function CharacterDirectory({
               Обучение
             </button>
             <button
+              className={tab === "relations" ? "active" : ""}
+              onClick={() => setTab("relations")}
+            >
+              Связи
+            </button>
+            <button
               className={tab === "history" ? "active" : ""}
               onClick={() => setTab("history")}
             >
@@ -2240,6 +2323,16 @@ function CharacterDirectory({
           </nav>
           {tab === "overview" && (
             <div className="dossier-information-grid">
+              <article className="dossier-wide dossier-operational-brief">
+                <small>ОПЕРАТИВНАЯ ОЦЕНКА</small>
+                <b>{operationalSummary}</b>
+                <div className="dossier-brief-signals">
+                  <span>Ресурс: {Math.round(Number(state?.capacity || 0))}</span>
+                  <span>Напряжение: {Math.round(Number(state?.tension || 0))}</span>
+                  <span>Контакт: {Math.round(Number(state?.attitude || 0))}</span>
+                  <span>{selected.contexts?.length ? `Активных контекстов: ${selected.contexts.length}` : "Свободна от активных контекстов"}</span>
+                </div>
+              </article>
               <article className="dossier-biography">
                 <small>{t('game.ui.biography')}</small>
                 <p>
@@ -2445,17 +2538,9 @@ function CharacterDirectory({
           {tab === "zones" && (
             <div className="dossier-information-grid dossier-zones-view">
               <article className="dossier-wide">
-                <small>{t('game.ui.localIndicators')}</small>
+                <small>{t('game.ui.localIndicators')} · НАБЛЮДАЕМЫЕ ЗОНЫ</small>
                 {observedPoints.length ? (
-                  <div className="dossier-point-table">
-                    <header>
-                      <span>{t('game.ui.zone')}</span>
-                      <span>{t('game.ui.sensitivity')}</span>
-                      <span>{t('game.ui.acceptance')}</span>
-                      <span>{t('game.ui.openness')}</span>
-                      <span>{t('game.ui.familiarity')}</span>
-                      <span>{t('game.ui.measurements')}</span>
-                    </header>
+                  <div className="dossier-zone-gallery">
                     {observedPoints.map((point) => {
                       const pointSensitivity = interpretPointSensitivity(
                         point.id,
@@ -2463,25 +2548,18 @@ function CharacterDirectory({
                         point.baselineSensitivity,
                       );
                       const pointAttitude = interpretPointAttitude(
-                        point.id,
                         point.attitude,
                         point.baselineAttitude,
                       );
                       return (
-                        <div key={point.id}>
-                          <b>{point.label}</b>
-                          <span>
-                            {pointSensitivity.humanPercent}%{" "}
-                            <i>И {Math.round(point.sensitivity)}</i>
-                          </span>
-                          <span>
-                            {pointAttitude.humanPercent}%{" "}
-                            <i>И {Math.round(point.attitude)}</i>
-                          </span>
-                          <span>И {Math.round(point.openness)}</span>
-                          <span>{Math.round(point.familiarity)}</span>
-                          <span>{point.exposureCount}</span>
-                        </div>
+                        <article className="dossier-zone-card" key={point.id}>
+                          {zoneImage(point.id) && <img src={zoneImage(point.id)!} alt="" onError={event => { event.currentTarget.style.display = "none"; }} />}
+                          <section>
+                            <b>{point.label}</b>
+                            <p>Чувствительность {pointSensitivity.humanPercent}% · принятие {pointAttitude.humanPercent}%</p>
+                            <p>Открытость {Math.round(point.openness)} · знакомство {Math.round(point.familiarity)} · наблюдений {point.exposureCount}</p>
+                          </section>
+                        </article>
                       );
                     })}
                   </div>
@@ -2493,6 +2571,7 @@ function CharacterDirectory({
           )}
           {tab === "learning" && (
             <div className="dossier-information-grid dossier-learning-view">
+              {selected.dossierNarrative && <article className="dossier-wide dossier-voice-note"><small>СОБСТВЕННЫМИ СЛОВАМИ</small><p>«{selected.dossierNarrative.selfDescription}»</p><i>{selected.dossierNarrative.traitExpression}</i></article>}
               <article>
                 <small>{t('game.ui.acquiredFeatures')}</small>
                 <div className="dossier-tags">
@@ -2527,34 +2606,54 @@ function CharacterDirectory({
               </article>
             </div>
           )}
+          {tab === "relations" && (
+            <article className="dossier-relations-panel">
+              <header>
+                <div><small>МАТРИЦА ОТНОШЕНИЙ</small><b>Как {selected.name} воспринимает других</b></div>
+                <span>Направленные связи: взгляд персонажа на собеседника</span>
+              </header>
+              <div className="dossier-relation-list">
+                {(selected.relationships || []).sort((a, b) => b.familiarity - a.familiarity).map(relation => (
+                  <article key={relation.characterId}>
+                    <div className="dossier-relation-avatar"><CharacterPortrait id={relation.subjectId} name={relation.name} /></div>
+                    <section>
+                      <b>{relation.name}</b>
+                      <p>{relation.opinion || `${relationTone(relation.attitude)} отношение; устойчивого вывода ещё нет.`}</p>
+                      {relation.recentMemories?.[0] && <i>{relation.recentMemories[relation.recentMemories.length - 1]}</i>}
+                    </section>
+                    <dl>
+                      <div><dt>Отношение</dt><dd>{Math.round(relation.attitude)}</dd></div>
+                      <div><dt>Открытость</dt><dd>{Math.round(relation.openness)}</dd></div>
+                      <div><dt>Знакомство</dt><dd>{Math.round(relation.familiarity * 100)}%</dd></div>
+                    </dl>
+                    <em>{relation.present ? "рядом" : relation.knows ? "знакомы" : "не знакомы"}</em>
+                  </article>
+                ))}
+                {!(selected.relationships || []).length && <p>Связи ещё не зафиксированы.</p>}
+              </div>
+            </article>
+          )}
           {tab === "history" && (
             <article className="dossier-history-panel">
               <header>
                 <div>
-                  <small>{t('game.ui.characterChronicle')}</small>
-                  <b>{selected.history?.length || 0} событий</b>
+                  <small>ЗНАЧИМЫЕ ИЗМЕНЕНИЯ</small>
+                  <b>{meaningfulChronicle.length} эпизодов</b>
                 </div>
-                <span>{t('game.ui.newEntriesFirst')}</span>
+                <span>Однотипные записи объединены; подробности — внутри эпизода</span>
               </header>
               <div className="dossier-history">
-                {selected.history?.length ? (
-                  [...selected.history]
-                    .sort(
-                      (a, b) =>
-                        Number(b.worldMinute || 0) - Number(a.worldMinute || 0),
-                    )
-                    .map((event) => (
-                      <div className="dossier-history-event" key={event.id}>
+                {meaningfulChronicle.length ? (
+                  meaningfulChronicle.map((event) => (
+                      <div className="dossier-history-event" key={`${event.id}:${event.kind}`}>
                         <time>
                           {event.time ||
-                            (typeof event.worldMinute === "number"
-                              ? `День ${Math.floor(event.worldMinute / 1440) + 1}`
-                              : "Без даты")}
+                            `День ${event.day}`}
                         </time>
-                        <em>{event.type}</em>
+                        <em>{event.kind}{event.count > 1 ? ` · ${event.count}` : ""}</em>
                         <section>
                           <b>{event.title}</b>
-                          {event.description && <p>{event.description}</p>}
+                          {event.descriptions[0] && <p>{event.descriptions[0]}</p>}
                         </section>
                       </div>
                     ))
@@ -2701,13 +2800,56 @@ const deviceStatusLabels: Record<DeviceSession["status"], string> = {
   stopped: "Остановлено",
 };
 
-function DeviceControlScreen({
+const episodeSceneBackgrounds: Record<string, string> = {
+  scene_lab_calibrator: "/backgrounds/laboratory/calibration.png",
+  scene_broker: "/backgrounds/laboratory/observation.png",
+  scene_liaison: "/backgrounds/laboratory/observation.png",
+};
+
+const episodePortraitSlugs: Record<string, string> = {
+  "S-AV-01": "mira", "NPC-LAB-01": "iona", "NPC-CAND-01": "nika",
+  "NPC-CAND-SUMI": "sumi", "NPC-CAND-GEN-02": "eli", "NPC-CAND-GEN-04": "mai",
+};
+
+const episodeActionGroup = (actionId: string): "contact" | "intimate" | "equipment" | "pose" | "clothing" | null => {
+  if (/^(light_kiss|deep_kiss|licking|finger_insertion|act_.*(penetration|friction|climax))/u.test(actionId)) return "intimate";
+  if (/^(act_|eq_|vibrator_)/u.test(actionId)) return "equipment";
+  if (/^(pose_|act_(present|release|hold|suspend))/u.test(actionId)) return "pose";
+  if (/^(gentle_stroke|tickle|slap|hard_slap|deep_massage|feather_stroke|hair_pull|pinch|scratching|firm_grip|light_bite|hard_bite|whip_strike|hot_wax|taser_shock|ice_cube|needle_prick|belt_strike|wait)$/u.test(actionId)) return "contact";
+  return null;
+};
+
+function EpisodeMemoryCollage({ memory, subjectId }: { memory: NonNullable<Resident["mentalMemories"]>[number]; subjectId: string }) {
+  const moments = memory.moments || [];
+  const sceneCounts = new Map<string, number>();
+  const actionCounts = new Map<string, number>();
+  const participants = new Set<string>([subjectId]);
+  const emotions = new Set<string>();
+  for (const moment of moments) {
+    if (moment.sceneId) sceneCounts.set(moment.sceneId, (sceneCounts.get(moment.sceneId) || 0) + 1);
+    if (moment.actionId) actionCounts.set(moment.actionId, (actionCounts.get(moment.actionId) || 0) + 1);
+    moment.participantIds?.forEach(id => participants.add(id));
+    if (moment.portraitEmotion) emotions.add(moment.portraitEmotion);
+  }
+  const sceneId = [...sceneCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "scene_lab_calibrator";
+  const actions = [...actionCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id]) => ({ id, group: episodeActionGroup(id) }));
+  const portraits = [...participants].map(id => episodePortraitSlugs[id]).filter(Boolean).slice(0, 3);
+  const emotionRank = ["climax", "unconscious", "subspace", "mixed_overload", "high_negative", "high_positive", "fear", "pain", "distressed", "aroused", "pleasure", "receptive", "guarded", "neutral"];
+  const emotion = emotionRank.find(value => emotions.has(value)) || "neutral";
+  return <span className="mental-memory-collage" aria-hidden="true" style={{ "--episode-scene": `url(${episodeSceneBackgrounds[sceneId] || episodeSceneBackgrounds.scene_lab_calibrator})` } as React.CSSProperties}>
+    {actions.map((action, index) => action.group
+      ? <img key={action.id} className={`episode-action-layer layer-${index + 1}`} src={resolveActionButtonImage(action.id, action.group)} onError={event => { event.currentTarget.style.display = "none"; }} />
+      : <span key={action.id} className={`episode-action-label layer-${index + 1}`}>{action.id.replace(/^(act_|context_)/, "").replace(/_/g, " ")}</span>)}
+    {portraits.map((slug, index) => <img key={`${slug}:${index}`} className={`episode-portrait-layer portrait-${index + 1}`} src={`/character-images/portraits/${slug}/${emotion}.png`} onError={event => { if (!event.currentTarget.dataset.fallback) { event.currentTarget.dataset.fallback = "true"; event.currentTarget.src = `/character-images/portraits/${slug}/neutral.png`; } else event.currentTarget.style.display = "none"; }} />)}
+  </span>;
+}
+
+function MentalChairControlScreen({
   asset,
   resident,
   clock,
   busy,
   onRefresh,
-  onPassTime,
   onRelease,
   onExit,
 }: {
@@ -2716,7 +2858,229 @@ function DeviceControlScreen({
   clock: Scenario["clock"];
   busy: boolean;
   onRefresh: () => Promise<void>;
-  onPassTime: (minutes: number) => Promise<boolean>;
+  onRelease?: () => Promise<void>;
+  onExit: () => void;
+}) {
+  const { t } = useI18n();
+  const session = asset.metadata?.mentalSession;
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [memoryId, setMemoryId] = useState<number | null>(session?.memoryId || null);
+  const [frame, setFrame] = useState<MentalChairSession["frame"]>(session?.frame || "reframe");
+  const [focusTag, setFocusTag] = useState<string | null>(session?.focusTag || null);
+  const [intensity, setIntensity] = useState(session?.intensity || 40);
+  const [memoryPage, setMemoryPage] = useState(0);
+  const [episodeWorkspace, setEpisodeWorkspace] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedAssociationTarget, setSelectedAssociationTarget] = useState<string | null>(null);
+  const [intervention, setIntervention] = useState("");
+  const memories = resident.mentalMemories || [];
+  const selectedMemory = memories.find((memory) => memory.id === memoryId) || null;
+  const memoryPageSize = 14;
+  const memoryPages = Math.max(1, Math.ceil(memories.length / memoryPageSize));
+  const visibleMemories = memories.slice(memoryPage * memoryPageSize, (memoryPage + 1) * memoryPageSize);
+  const tagLabel = (tag: string) => selectedMemory?.tagLabels?.[tag] || `тема: ${tag.replace(/[_-]+/g, " ")}`;
+  const associationLinks = selectedMemory?.subjective?.associations || [];
+  const memoryTags = selectedMemory?.tags || [];
+  const memoryGraph = useMemo(() => {
+    type GraphNode = { id: string; label: string; kind: 'tag' | 'association'; degree: number; strength: number; valence: number; x: number; y: number; vx: number; vy: number };
+    const tags = [...new Set(memoryTags)];
+    const targets = [...new Set(associationLinks.filter(link => !link.manual).map(link => link.target))];
+    const edges = associationLinks.filter(link => !link.manual).flatMap(link => link.tagLinks
+      .filter(tag => tags.includes(tag))
+      .map(tag => ({ from: `association:${link.target}`, to: `tag:${tag}`, target: link.target, strength: Number(link.strength) || 0, valence: Number(link.valence) || 0 })));
+    for (const link of associationLinks.filter(link => link.manual && link.tagLinks.length === 2)) {
+      edges.push({ from: `tag:${link.tagLinks[0]}`, to: `tag:${link.tagLinks[1]}`, target: link.target, strength: Number(link.strength) || 0, valence: Number(link.valence) || 0 });
+    }
+    const hash = (text: string) => [...text].reduce((value, char) => ((value * 31 + char.charCodeAt(0)) >>> 0), 2166136261);
+    const seeded = (text: string, offset: number) => ((hash(`${selectedMemory?.id || 0}:${text}:${offset}`) % 10000) / 10000);
+    const nodes: GraphNode[] = [
+      ...tags.map(tag => ({ id: `tag:${tag}`, label: tagLabel(tag), kind: 'tag' as const, degree: 0, strength: 0, valence: 0, x: 0, y: 0, vx: 0, vy: 0 })),
+      ...targets.map(target => ({ id: `association:${target}`, label: target, kind: 'association' as const, degree: 0, strength: 0, valence: 0, x: 0, y: 0, vx: 0, vy: 0 })),
+    ];
+    const byId = new Map(nodes.map(node => [node.id, node]));
+    for (const edge of edges) {
+      const from = byId.get(edge.from); const to = byId.get(edge.to);
+      if (!from || !to) continue;
+      from.degree++; to.degree++;
+      from.strength = Math.max(from.strength, edge.strength);
+      from.valence += edge.valence;
+    }
+    for (const node of nodes) {
+      node.x = 8 + seeded(node.id, 1) * 84;
+      node.y = 8 + seeded(node.id, 2) * 84;
+    }
+    // A small deterministic force simulation keeps meaningful clusters close,
+    // but preserves an Obsidian-like irregular topology across rerenders.
+    for (let step = 0; step < 150; step++) {
+      for (let left = 0; left < nodes.length; left++) for (let right = left + 1; right < nodes.length; right++) {
+        const a = nodes[left], b = nodes[right];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        const distance2 = Math.max(20, dx * dx + dy * dy);
+        const force = 42 / distance2;
+        if (Math.abs(dx) + Math.abs(dy) < .01) { dx = seeded(`${a.id}:${b.id}`, 3) - .5; dy = seeded(`${b.id}:${a.id}`, 4) - .5; }
+        const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+        a.vx -= dx / distance * force; a.vy -= dy / distance * force;
+        b.vx += dx / distance * force; b.vy += dy / distance * force;
+      }
+      for (const edge of edges) {
+        const a = byId.get(edge.from), b = byId.get(edge.to); if (!a || !b) continue;
+        const dx = b.x - a.x, dy = b.y - a.y, distance = Math.hypot(dx, dy) || 1;
+        const pull = (distance - (15 - edge.strength * 4)) * .016;
+        a.vx += dx / distance * pull; a.vy += dy / distance * pull;
+        b.vx -= dx / distance * pull; b.vy -= dy / distance * pull;
+      }
+      for (const node of nodes) {
+        // The central card is a solid object in the graph, not a node every
+        // label has to orbit evenly.
+        if (node.x > 29 && node.x < 71 && node.y > 24 && node.y < 76) {
+          const dx = node.x - 50, dy = node.y - 50;
+          if (Math.abs(dx) > Math.abs(dy)) node.vx += Math.sign(dx || .1) * .8;
+          else node.vy += Math.sign(dy || .1) * .8;
+        }
+        node.vx += (50 - node.x) * .0015; node.vy += (50 - node.y) * .0015;
+        node.vx *= .82; node.vy *= .82;
+        node.x = Math.max(5, Math.min(95, node.x + node.vx));
+        node.y = Math.max(6, Math.min(94, node.y + node.vy));
+      }
+    }
+    return { nodes, edges, byId };
+  }, [selectedMemory?.id, memoryTags.join('|'), JSON.stringify(associationLinks)]);
+  const selectedAssociation = selectedAssociationTarget
+    ? associationLinks.find(link => link.target === selectedAssociationTarget)
+    : null;
+  // The workspace must show the same complete memory as the selected-episode
+  // panel. `subjective.summary` is intentionally only a brief; using it here
+  // made the central card look as if its text had been cut off.
+  const episodeCopy = selectedMemory?.text || "";
+  const episodeCopySize = Math.max(11, Math.min(13, 13 - Math.ceil(episodeCopy.length / 520)));
+  const interventionResult = session?.lastIntervention && session.memoryId === selectedMemory?.id ? session.lastIntervention : null;
+  const formatAssociationNumber = (value: number) => `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
+  const selectedTagEvidence = selectedTags.length
+    ? associationLinks.filter(link => link.tagLinks.some(tag => selectedTags.includes(tag))).flatMap(link => link.evidence || [])
+    : [];
+  const highlightTerms = selectedAssociation?.evidence?.length
+    ? selectedAssociation.evidence
+    : selectedTagEvidence.length
+      ? [...new Set(selectedTagEvidence)]
+    : [...new Set([
+      selectedAssociation?.target,
+      selectedTag ? tagLabel(selectedTag) : null,
+    ].filter((term): term is string => Boolean(term && term.trim().length > 2)))];
+  const renderEpisodeCopy = (text: string) => {
+    if (!highlightTerms.length) return text;
+    const expression = new RegExp(`(${highlightTerms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "giu");
+    return text.split(expression).map((part, index) => highlightTerms.some(term => part.localeCompare(term, "ru", { sensitivity: "accent" }) === 0)
+      ? <mark key={index}>{part}</mark>
+      : part);
+  };
+  const control = async (
+    command: "configure" | "settings" | "start" | "pause" | "resume" | "stop" | "intervene",
+    payload: Record<string, unknown> = {},
+  ) => {
+    if (working || busy) return false;
+    setWorking(true);
+    setError(null);
+    try {
+      await api(`/api/scenario/laboratory/${asset.id}/control`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId: "PL-1", command, ...payload }),
+      });
+      await onRefresh();
+      return true;
+    } catch (e: any) {
+      setError(e.message);
+      return false;
+    } finally {
+      setWorking(false);
+    }
+  };
+  const saveSelection = () => control("configure", {
+    memoryId,
+    frame,
+    focusTag,
+    intensity,
+  });
+  if (!session) {
+    return <main className="mental-chair-screen"><header><button onClick={onExit}>← {t('game.ui.laboratory')}</button><h1>{getDeviceName(asset.id, t)}</h1></header><p>Сессия ещё не инициализирована.</p></main>;
+  }
+  return (
+    <main className="mental-chair-screen">
+      <header className="device-control-header">
+        <button onClick={onExit}>← {t('game.ui.laboratory')}</button>
+        <div><small>МЕНТАЛЬНАЯ КОРРЕКЦИЯ</small><h1>{resident.name}</h1><p>{getDeviceName(asset.id, t)}</p></div>
+        <div className={`device-status ${session.status}`}><i>●</i><span>{deviceStatusLabels[session.status]}</span></div>
+      </header>
+      <section className="mental-chair-layout">
+        <aside className="mental-chair-subject">
+          <div className="mental-chair-portrait"><CharacterPortrait id={resident.subjectId || resident.id} name={resident.name} portrait={resident.portrait} contexts={resident.contexts} state={resident.state} /></div>
+          <small>РЕЖИМ КРЕСЛА</small><strong>ВЫБОР ЭПИЗОДА</strong>
+          <p>Выберите пережитый эпизод, затем перейдите к работе с его ассоциациями.</p>
+          <div className="mental-chair-metrics"><span><small>ПЛАСТИЧНОСТЬ</small><b>{Math.round(Number(resident.state?.plasticity || 0))}</b></span><span><small>РЕСУРС</small><b>{Math.round(Number(resident.state?.capacity || 0))}</b></span></div>
+        </aside>
+        <section className={`mental-chair-console${episodeWorkspace && selectedMemory ? " workspace" : ""}`}>
+          {episodeWorkspace && selectedMemory ? <>
+            <header><button className="mental-work-back" onClick={() => { setEpisodeWorkspace(false); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>← К эпизодам</button><b>РАБОТА С ЭПИЗОДОМ</b></header>
+            <div className="mental-work-canvas">
+              <div className="mental-association-map" aria-label="Карта ассоциаций эпизода">
+                <article className="mental-episode-core" style={{ "--episode-copy-size": `${episodeCopySize}px` } as any}><small>ЦЕНТР ВОСПОМИНАНИЯ</small><b>{selectedMemory.title}</b><p>{renderEpisodeCopy(episodeCopy)}</p></article>
+                <svg className="mental-association-edges" viewBox="0 0 100 100" preserveAspectRatio="none">{memoryGraph.edges.map((edge, index) => { const from = memoryGraph.byId.get(edge.from); const to = memoryGraph.byId.get(edge.to); if (!from || !to) return null; const selected = selectedAssociationTarget === edge.target || selectedTags.some(tag => edge.to === `tag:${tag}`); return <g key={`${edge.from}:${edge.to}:${index}`} className={selected ? "selected" : ""}><line className="hitbox" x1={from.x} y1={from.y} x2={to.x} y2={to.y} onClick={() => { setSelectedAssociationTarget(edge.target); setSelectedTag(null); setSelectedTags([]); }} /><line className="visible" x1={from.x} y1={from.y} x2={to.x} y2={to.y} style={{ "--association-strength": edge.strength, "--association-valence": edge.valence } as any} /></g>; })}</svg>
+                {memoryGraph.nodes.map(node => <button key={node.id} className={`mental-association-node ${node.kind}${(node.kind === 'tag' ? selectedTags.includes(node.id.slice(4)) : selectedAssociationTarget === node.label) ? " selected" : ""}`} style={{ left: `${node.x}%`, top: `${node.y}%`, "--node-degree": node.degree, "--node-strength": node.strength, "--association-valence": node.valence / Math.max(node.degree, 1) } as any} onClick={() => { if (node.kind === 'tag') { const tag = node.id.slice(4); const nextTags = selectedTags.includes(tag) ? selectedTags.filter(item => item !== tag) : [...selectedTags, tag]; setSelectedTags(nextTags); setSelectedTag(nextTags.at(-1) || null); setSelectedAssociationTarget(null); } else { setSelectedAssociationTarget(node.label); setSelectedTag(null); setSelectedTags([]); } }}><b>{node.label}</b></button>)}
+              </div>
+              <section className="mental-intervention-panel">
+                <header><small>ВНУШЕНИЕ</small><b>{selectedAssociationTarget ? `Выбрана связь: ${selectedAssociationTarget}` : selectedTags.length > 1 ? `Новая связка: ${selectedTags.map(tagLabel).join(' · ')}` : selectedTag ? `Выбран тег: ${tagLabel(selectedTag)}` : "Выберите тег или связь"}</b></header>
+                <textarea value={intervention} onChange={event => setIntervention(event.target.value)} placeholder={selectedTags.length || selectedAssociationTarget ? "Введите внушение…" : "Сначала выберите тег или связь"} disabled={!selectedTags.length && !selectedAssociationTarget} />
+                <button disabled={(!selectedTags.length && !selectedAssociationTarget) || !intervention.trim() || working} onClick={async () => { if (await control("intervene", { targetLabel: selectedAssociation?.target, tags: selectedTags, unlinkTags: selectedAssociation?.manual ? selectedAssociation.tagLinks : undefined, intervention })) { setIntervention(""); await onRefresh(); } }}>{working ? 'Формируется…' : selectedAssociation?.manual ? 'Разорвать связку' : 'Запустить внушение'}</button>
+              </section>
+              {interventionResult && <section className={`mental-intervention-result ${interventionResult.affected ? "applied" : "missed"}`}>
+                <header><small>РЕЗУЛЬТАТ ПОСЛЕДНЕГО ВНУШЕНИЯ</small><b>{interventionResult.affected ? `Связь «${interventionResult.targetLabel}» изменена` : `Связь «${interventionResult.targetLabel}» не найдена`}</b></header>
+                {interventionResult.changes.map(change => <p key={change.target}><b>{change.target}</b>: оценка {formatAssociationNumber(change.before.valence)} → {formatAssociationNumber(change.after.valence)} · сила {change.before.strength.toFixed(2)} → {change.after.strength.toFixed(2)} · реакция: {change.after.expectation}</p>)}
+                {!interventionResult.affected && <p>Пересборка воспоминания не сохранила эту связь, поэтому оценка не была изменена. Выберите существующую линию на карте и повторите внушение.</p>}
+                {interventionResult.affected > 0 && <p>Текст эпизода сохраняет факты; внушение меняет личную оценку и ожидаемую реакцию, показанные выше.</p>}
+              </section>}
+            </div>
+            {error && <p className="mental-chair-error">{error}</p>}
+          </> : <>
+          <header><small>ЭПИЗОД ИЗ ПАМЯТИ</small><b>{selectedMemory ? "ВЫБРАН" : "НЕ ВЫБРАН"}</b></header>
+          <div className="mental-memory-list">
+            {memories.length ? visibleMemories.map((memory) => (
+              <button key={memory.id} className={memory.id === memoryId ? "selected" : ""} onClick={() => { setMemoryId(memory.id); setFocusTag(memory.tags[0] || null); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>
+                <b>{memory.title}</b><small>{memory.tags.slice(0, 3).map(tag => memory.tagLabels?.[tag] || `тема: ${tag.replace(/[_-]+/g, " ")}`).join(" · ") || "эпизод"}{memory.atomCount && memory.atomCount > 1 ? ` · ${memory.atomCount} моментов` : ""}</small>
+              </button>
+            )) : <p>У персонажа пока нет эпизодов, пригодных для обработки.</p>}
+          </div>
+          {memories.length > memoryPageSize && <nav className="mental-memory-pages" aria-label="Страницы эпизодов"><button disabled={memoryPage === 0} onClick={() => setMemoryPage(page => Math.max(0, page - 1))}>←</button><span>{memoryPage + 1} / {memoryPages}</span><button disabled={memoryPage >= memoryPages - 1} onClick={() => setMemoryPage(page => Math.min(memoryPages - 1, page + 1))}>→</button></nav>}
+          <section className={`mental-memory-detail ${selectedMemory ? "selected" : ""}`}>
+            {selectedMemory ? <><EpisodeMemoryCollage memory={selectedMemory} subjectId={resident.subjectId || resident.id} /><header><small>ВЫБРАННЫЙ ЭПИЗОД</small><b>{selectedMemory.title}</b></header><p>{selectedMemory.text}</p></> : <p>Выберите карточку, чтобы прочитать эпизод полностью.</p>}
+          </section>
+          <footer className="mental-chair-actions mental-selection-actions">
+            <button disabled={!selectedMemory || !focusTag || working || busy} onClick={async () => { if (await saveSelection()) setEpisodeWorkspace(true); }}>Работать с эпизодом</button>
+            <button className="secondary" onClick={onRelease}>Освободить</button>
+          </footer>
+          {error && <p className="mental-chair-error">{error}</p>}
+          </>}
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function DeviceControlScreen({
+  asset,
+  resident,
+  clock,
+  busy,
+  onRefresh,
+  onRelease,
+  onExit,
+}: {
+  asset: LabAsset;
+  resident: Resident;
+  clock: Scenario["clock"];
+  busy: boolean;
+  onRefresh: () => Promise<void>;
   onRelease?: () => Promise<void>;
   onExit: () => void;
 }) {
@@ -2728,6 +3092,8 @@ function DeviceControlScreen({
   const [chatWaiting, setChatWaiting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [operatorNote, setOperatorNote] = useState("");
+  const [peakEffect, setPeakEffect] = useState<{ key: string } | null>(null);
+  const seenDischargeEventRef = useRef<number | null>(null);
   const subjectId = resident.subjectId || resident.id;
   const state = resident.state || {};
   const contextIds = new Set(
@@ -2774,6 +3140,25 @@ function DeviceControlScreen({
     },
     [],
   );
+  useEffect(() => {
+    const eventId = session?.lastDischargeEvent?.id;
+    // Opening a machine must not replay its old result. From this point on,
+    // each new engine event is rendered once, regardless of polling cadence.
+    if (seenDischargeEventRef.current === null) {
+      seenDischargeEventRef.current = eventId || 0;
+      return;
+    }
+    if (!eventId) return;
+    if (seenDischargeEventRef.current === eventId) return;
+    seenDischargeEventRef.current = eventId;
+    setPeakEffect({ key: crypto.randomUUID() });
+    void gameAudio.playReaction(resident.name, "climax", 1);
+  }, [resident.name, session?.lastDischargeEvent?.id]);
+  useEffect(() => {
+    if (!peakEffect) return;
+    const timer = window.setTimeout(() => setPeakEffect(null), 5300);
+    return () => window.clearTimeout(timer);
+  }, [peakEffect?.key]);
 
   if (!session)
     return (
@@ -2821,7 +3206,6 @@ function DeviceControlScreen({
     "fear",
     "pain",
     "sad",
-    "shock",
   ]);
   const positiveEmotions = new Set<PortraitEmotion>([
     "aroused",
@@ -2848,7 +3232,8 @@ function DeviceControlScreen({
                 negativeEmotions.has(portraitEmotion)
               ? "guarded"
               : "receptive";
-  const imagePath = `/character-images/sex-machine/${slug}__restrained__${affect}.png`;
+  const stimulationMode = session.stimulationMode || "vaginal";
+  const imagePath = sexMachineAvatarPath(slug, stimulationMode, affect);
   const control = async (
     command: "settings" | "start" | "adjust" | "pause" | "resume" | "stop",
     payload: Record<string, unknown> = {},
@@ -2871,7 +3256,7 @@ function DeviceControlScreen({
       setWorking(false);
     }
   };
-  const targetModes = [
+  const sexualTargetModes = [
     ["manual", "Контроль", "Постоянная заданная мощность", "Низкий риск"],
     ["edge", "На грани", "Удерживать возле порога", "Точный контроль"],
     [
@@ -2899,6 +3284,12 @@ function DeviceControlScreen({
       "Работать до резерва выносливости",
       "Критический риск",
     ],
+  ] as const;
+  const ticklingTargetModes = [
+    ["tickle_steady", "Ровная щекотка", "Ровно вести щётки по подошвам без резких смен", "Низкий риск"],
+    ["tickle_tease", "Дразнящие серии", "Чередовать короткие серии и передышки, не давая привыкнуть", "Умеренная нагрузка"],
+    ["tickle_disrupt", "Срыв ритма", "Непредсказуемо менять участок и темп щекотки", "Высокая реактивность"],
+    ["tickle_endurance", "Предел выносливости", "Продолжать до заданного резерва, не переходя его", "Критический риск"],
   ] as const;
   const targetPresets: Record<
     NonNullable<DeviceSession["targetMode"]>,
@@ -2976,6 +3367,42 @@ function DeviceControlScreen({
       minCapacity: 5,
       stopAtReserve: true,
     },
+    tickle_steady: {
+      intensity: 35,
+      rhythm: "steady",
+      orgasmPolicy: "deny",
+      valencePolicy: "neutral",
+      maxTension: 60,
+      minCapacity: 30,
+      stopAtReserve: false,
+    },
+    tickle_tease: {
+      intensity: 45,
+      rhythm: "wave",
+      orgasmPolicy: "deny",
+      valencePolicy: "positive",
+      maxTension: 72,
+      minCapacity: 25,
+      stopAtReserve: false,
+    },
+    tickle_disrupt: {
+      intensity: 62,
+      rhythm: "random",
+      orgasmPolicy: "deny",
+      valencePolicy: "negative",
+      maxTension: 82,
+      minCapacity: 20,
+      stopAtReserve: false,
+    },
+    tickle_endurance: {
+      intensity: 52,
+      rhythm: "pulse",
+      orgasmPolicy: "deny",
+      valencePolicy: "negative",
+      maxTension: 90,
+      minCapacity: 5,
+      stopAtReserve: true,
+    },
   };
 
   const send = async () => {
@@ -3030,6 +3457,9 @@ function DeviceControlScreen({
       setWorking(false);
     }
   };
+  const targetModes = stimulationMode === "tickling"
+    ? ticklingTargetModes
+    : sexualTargetModes;
   const activeMode =
     targetModes.find((mode) => mode[0] === (session.targetMode || "manual")) ||
     targetModes[0];
@@ -3047,6 +3477,15 @@ function DeviceControlScreen({
       orgasmTargetCount: targetMode === "orgasm" ? session.orgasmTargetCount || 1 : null,
     });
   };
+  const selectStimulation = (nextMode: "vaginal" | "anal" | "tickling") =>
+    control("settings", {
+      stimulationMode: nextMode,
+      ...(nextMode === "tickling"
+        ? { targetMode: "tickle_steady", ...targetPresets.tickle_steady, orgasmTargetCount: null }
+        : String(session.targetMode || "").startsWith("tickle_")
+          ? { targetMode: "manual", ...targetPresets.manual, orgasmTargetCount: null }
+          : {}),
+    });
   const stopAfterMinutes = Math.max(0, Number(session.stopAfterMinutes || 0));
   const orgasmTargetCount = Math.max(1, Number(session.orgasmTargetCount || 1));
   const rhythm = session.rhythm || "steady";
@@ -3066,6 +3505,14 @@ function DeviceControlScreen({
       "M0 12 C5 10 8 10 12 12 S19 14 24 12 S31 8 36 12 S43 17 48 12 S55 5 60 12 S67 20 72 12 S79 2 84 12 S91 22 96 12 S103 0 108 12 S115 23 120 12 S125 2 128 12",
     exhaustion:
       "M0 12 L7 5 L13 19 L20 3 L27 21 L34 6 L41 18 L48 8 L55 16 L62 9 L69 15 L76 10 L83 14 L90 11 L97 13 L104 11 L111 13 L118 12 L128 12",
+    tickle_steady:
+      "M0 12 C6 8 12 8 18 12 S30 16 36 12 S48 8 54 12 S66 16 72 12 S84 8 90 12 S102 16 108 12 S120 8 128 12",
+    tickle_tease:
+      "M0 12 C7 12 9 7 14 7 C19 7 20 15 26 15 L38 15 C43 15 45 8 51 8 C57 8 58 16 65 16 L78 16 C83 16 85 6 92 6 C99 6 100 15 108 15 L128 15",
+    tickle_disrupt:
+      "M0 12 L7 7 L16 18 L25 4 L35 15 L43 9 L52 20 L62 5 L71 16 L81 3 L91 18 L102 6 L112 15 L121 9 L128 12",
+    tickle_endurance:
+      "M0 12 L11 12 L15 4 L19 20 L24 12 L36 12 L40 5 L44 19 L49 12 L61 12 L65 6 L69 18 L74 12 L86 12 L90 7 L94 17 L99 12 L111 12 L115 8 L119 16 L128 12",
     steady:
       "M0 12 C6 5 12 5 18 12 S30 19 36 12 S48 5 54 12 S66 19 72 12 S84 5 90 12 S102 19 108 12 S120 5 126 12",
     pulse:
@@ -3082,8 +3529,8 @@ function DeviceControlScreen({
   const capacity = clampMetric(Number(state.capacity || 0));
   const maxTension = session.maxTension ?? 95;
   const minCapacity = session.minCapacity ?? 15;
-  const tenMinuteHours = 1 / 6;
   const power = clampMetric(session.intensity) / 100;
+  const tenMinuteHours = 10 / 60;
   const projectedTension = clampMetric(
     Math.min(
       maxTension,
@@ -3093,15 +3540,22 @@ function DeviceControlScreen({
           ((session.targetMode || "manual") === "negative" ? 1.2 : 1),
     ),
   );
-  const projectedCapacity = clampMetric(
-    Math.max(
-      minCapacity,
-      capacity -
-        (2 + 8 * power) *
-          tenMinuteHours *
-          ((session.targetMode || "manual") === "exhaustion" ? 1.65 : 1),
-    ),
-  );
+  const projectedTickIntensity = 14 + 72 * power;
+  const projectedDiscomfort = stimulationMode === "tickling"
+    ? projectedTickIntensity * ((session.targetMode || "") === "tickle_tease" ? .22 : .43)
+    : (session.targetMode || "manual") === "negative"
+    ? projectedTickIntensity * .38
+    : (session.targetMode || "manual") === "exhaustion"
+      ? projectedTickIntensity * .24
+      : projectedTickIntensity * .06;
+  const projectedCapacityLoss = estimateCapacityLoss({
+    experiencedIntensity: projectedTickIntensity,
+    pleasure: Math.max(0, projectedTickIntensity - projectedDiscomfort) * (stimulationMode === "tickling" ? .3 : .72),
+    discomfort: projectedDiscomfort,
+    tension,
+    deltaTime: 1,
+  }, DEFAULT_CONFIG.formulas.applyLearning) * 10;
+  const projectedCapacity = clampMetric(Math.max(minCapacity, capacity - projectedCapacityLoss));
   const tensionRisk = Math.max(0, tension / Math.max(1, maxTension));
   const capacityRisk = Math.max(
     0,
@@ -3160,6 +3614,14 @@ function DeviceControlScreen({
                       (session.startedAtTick || clock.totalMinutes),
                   ),
                 )}
+              />
+            )}
+            {peakEffect && (
+              <GamePeakEffect
+                kind="discharge"
+                effectKey={peakEffect.key}
+                characterSlug={slug}
+                actionImage={imagePath}
               />
             )}
           </div>
@@ -3347,7 +3809,7 @@ function DeviceControlScreen({
               </div>
               <div className="sex-machine-operation-metrics">
                 <article>
-                  <small>АКТИВАЦИЯ</small>
+                  <small>{stimulationMode === "tickling" ? "РЕАКЦИЯ" : "АКТИВАЦИЯ"}</small>
                   <strong>{Math.round(tension)}</strong>
                   <span>→ {Math.round(projectedTension)}</span>
                 </article>
@@ -3452,6 +3914,24 @@ function DeviceControlScreen({
           </form>
         </div>
       </section>
+      {!machineEngaged && (
+        <section className="sex-machine-stimulation-selector" aria-label="Тип стимуляции">
+          <small>ТИП СТИМУЛЯЦИИ</small>
+          <div>
+            {(Object.entries(SEX_MACHINE_STIMULATION) as Array<["vaginal" | "anal" | "tickling", typeof SEX_MACHINE_STIMULATION.anal]>).map(([mode, definition]) => (
+              <button
+                key={mode}
+                className={stimulationMode === mode ? "active" : ""}
+                disabled={working}
+                onClick={() => selectStimulation(mode)}
+                title={definition.description}
+              >
+                {definition.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
@@ -3891,6 +4371,7 @@ function ContainerConversation({
           action.id,
           action.group,
           targetPointId || action.pointId || selectedZoneId,
+          residentPortraitSlug,
         ),
       actionLabel: action.label,
       targetLabel:
@@ -4101,6 +4582,8 @@ function ContainerConversation({
         if (
           [
             "act_start_penetration",
+            "act_start_oral_giving",
+            "act_deepen_oral",
             "sustained_sexual_pulse",
             "finger_insertion",
             "act_increase_friction",
@@ -4308,7 +4791,7 @@ function ContainerConversation({
     torso: ["chest", "belly", "back", "waist"],
     groin: ["vulva", "vagina", "clitoris", "anus"],
     arms: ["arms", "hands"],
-    legs: ["inner_thighs", "legs", "knees", "feet"],
+    legs: ["inner_thighs", "legs", "feet"],
   };
   const playablePointIds = new Set([
     "face",
@@ -4326,7 +4809,6 @@ function ContainerConversation({
     "waist",
     "inner_thighs",
     "legs",
-    "knees",
     "feet",
     "vulva",
     "vagina",
@@ -4353,6 +4835,12 @@ function ContainerConversation({
       start: "act_start_penetration",
       slower: "act_decrease_friction",
       faster: "act_increase_friction",
+      stop: "act_end_sexual_contact",
+    },
+    {
+      start: "act_start_oral_giving",
+      slower: undefined,
+      faster: "act_deepen_oral",
       stop: "act_end_sexual_contact",
     },
     {
@@ -4463,6 +4951,10 @@ function ContainerConversation({
         activeContextIds.has(action.hideWhenContext)
       )
         return false;
+      // Tickle has no generic artwork in this palette: do not offer it for a
+      // body point that would otherwise silently fall back to the generic tile.
+      if (action.id === "tickle" && !hasActionPointImage(action.id, effectiveZoneId))
+        return false;
       return (
         operationMode === "setup" ||
         zonesForAction(action).some((zone) => zone.id === effectiveZoneId)
@@ -4474,6 +4966,7 @@ function ContainerConversation({
       action.id,
       action.group,
       operationMode === "impact" ? effectiveZoneId : action.pointId,
+      residentPortraitSlug,
     );
   };
   const actionDisplayTags = (action: ActionDef) => {
@@ -4542,7 +5035,6 @@ function ContainerConversation({
     head: "face",
     chest: "breasts",
     belly: "stomach",
-    knees: "legs",
     systemic: "face",
   };
   const palettePreview =
@@ -4669,6 +5161,8 @@ function ContainerConversation({
             {!equipmentMode && activeProcesses[0] && (
               <GameSustainedEffect
                 actionId={activeProcesses[0].action.id}
+                characterSlug={residentPortraitSlug || undefined}
+                deepened={activeContextIds.has("act_deepen_oral")}
                 label={
                   activeProcesses[0].context.label ||
                   activeProcesses[0].action.label

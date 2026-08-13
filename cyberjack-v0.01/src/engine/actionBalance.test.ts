@@ -6,7 +6,7 @@ import { LEGACY_ACTION_BALANCE_PATCH } from '../infrastructure/syncActionPresets
 const core = {
     sensitivity: 60, capacity: 70, openness: 60, plasticity: 60, attitude: 55, tension: 40,
     baselineSensitivity: 60, baselineCapacity: 70, baselineOpenness: 60,
-    baselinePlasticity: 60, baselineAttitude: 55, preferences: {},
+    baselinePlasticity: 60, baselineAttitude: 55, preferences: '',
 };
 const point = {
     pointId: 'feet', localSensitivity: 60, localAttitude: 55, localOpenness: 60,
@@ -15,7 +15,7 @@ const point = {
 };
 
 const evaluate = (actionKey: keyof typeof LEGACY_ACTION_BALANCE_PATCH) => {
-    const action = { actionKey, label: actionKey, type: 'physical', tags: [], ...LEGACY_ACTION_BALANCE_PATCH[actionKey] };
+    const action = { actionKey, label: actionKey, type: 'physical' as const, tags: [], ...LEGACY_ACTION_BALANCE_PATCH[actionKey] };
     const { result } = computeResult(action, core, point);
     const learned = applyLearning(core, point, action, result);
     return { result, learned };

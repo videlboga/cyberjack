@@ -9,7 +9,7 @@ const profile = (subjectId: string) => ({
     seed: subjectId,
     identity: { name: subjectId, age: 20, gender: 'female' as const, anatomy: 'human', archetype: 'person' as const },
     biography: { origin: [], formativeEvents: [] },
-    behavioralCore: { values: [], vulnerabilities: [], defenses: [], voice: [] },
+    behavioralCore: { values: [], needs: [], vulnerabilities: [], defenses: [], voice: [], mannerisms: [], centralConflict: { desire: '', fear: '' } },
     knowledgeRefs: [],
     mechanicalSeed: { coreModifiers: {}, initialContexts: [], preferences: { actions: {}, points: {}, contexts: {}, tags: {} } },
     sourceTags: [], personaText: '', personaWithoutTraits: '', traitBlock: '', identityText: '', historyText: '', activationText: '', updatedAt: '',
