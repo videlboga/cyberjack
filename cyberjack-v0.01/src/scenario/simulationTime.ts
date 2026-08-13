@@ -5,6 +5,7 @@ import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWork
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
 import { expireOverdueContracts } from '../services/contractService';
+import { ensureAuthoredSupplyOpportunity } from './eventDirector';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryRepo } from '../infrastructure/repositories';
 import { emitTrace, newRequestId } from '../orchestration/trace';
@@ -43,6 +44,15 @@ export async function advanceSimulationTime(
         key: `scene.autonomous:${nextAutonomousMinute}`,
         dueMinute: nextAutonomousMinute,
     });
+    // Event director: open the authored supply lot once the world passes the
+    // threshold. Idempotent on the queue key (Этап 4).
+    if (clock.totalMinutes >= 540) {
+        enqueueBackgroundJob({
+            type: 'event.director',
+            key: 'event.director:authored-supply',
+            dueMinute: 540,
+        });
+    }
     return clock;
 }
 
@@ -121,6 +131,9 @@ async function executeBackgroundJob(job: { type: string; payload: string | null 
             return;
         case 'scene.autonomous':
             await runAutonomousSceneMinute();
+            return;
+        case 'event.director':
+            ensureAuthoredSupplyOpportunity(getWorldClock().totalMinutes);
             return;
         case 'episode.intervene': {
             const input = JSON.parse(job.payload || '{}') as EpisodeInterventionInput;

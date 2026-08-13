@@ -194,7 +194,7 @@ export function emitSubjectMetricChanges(input:{
     return created;
 }
 
-function ensureAuthoredSupplyOpportunity(now:number) {
+export function ensureAuthoredSupplyOpportunity(now:number) {
     if (now < 540) return;
     const sourceId = 'veil-neurospike-v17';
     if (!directorSignalRepo.claim({
