@@ -2,6 +2,7 @@ import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { presetRepo } from '../infrastructure/repositories';
 import type { CommandIntent } from '../domain/resolver';
 import { conditioningTags } from '../domain/conditioning';
+import { isGenericUndressCommand } from './undressHeuristic';
 
 type Candidate = { id: string; label: string; kind: 'action' | 'context' | 'point'; text: string; tags?: string[]; vector?: number[] };
 type SceneCharacter = { id: string; name: string };
@@ -14,9 +15,7 @@ const CHARACTER_CONTROLLED_CONTEXT_TAGS = new Set(['pose', 'clothing', 'exposure
  * place that reinterprets command text; command resolution downstream only
  * collects the active clothing contexts to remove.
  */
-export function isGenericUndressCommand(text: string): boolean {
-    return /(?:сними(?:те)?\s+(?:всю\s+)?одежду|раздень(?:ся|тесь)|сними(?:те)?\s+вс[её])/iu.test(text);
-}
+export { isGenericUndressCommand };
 
 export function isCharacterControlledContext(candidate: Pick<Candidate, 'tags'> | undefined) {
     return Boolean(candidate?.tags?.some(tag => CHARACTER_CONTROLLED_CONTEXT_TAGS.has(tag)));

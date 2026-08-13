@@ -2,6 +2,7 @@ import { CompiledAction } from '../domain/types';
 import { CommandIntent } from '../domain/resolver';
 import { presetRepo, characterItemsRepo, itemRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
+import { matchAggregateUndressCommand } from './undressHeuristic';
 
 export interface ParsedVerbalAction extends Partial<CompiledAction> {
     pointId?: string;
@@ -132,7 +133,7 @@ ${itemsList}
 4. Определи точку воздействия (pointId) по русскому названию части тела.
 5. Если действие вообще не сопоставимо ни с чем из списка — установи matchedActionId в null и объясни причину в refusalReason.
 
-Синонимы частей тела: голова=head, лицо=face, губы=lips, шея=neck, плечи=shoulders, спина=back, грудь=chest, соски=nipples, живот=belly, талия=waist, бедра=hips, пах=groin, ягодицы=buttocks, икры=calves, колени=knees, ступни=feet, руки=hands, кисти=hands, запястья=wrists
+Синонимы частей тела: голова=head, лицо=face, губы=lips, шея=neck, плечи=shoulders, спина=back, грудь=chest, соски=nipples, живот=belly, талия=waist, бедра=hips, пах=groin, ягодицы=buttocks, икры=calves, ступни=feet, руки=hands, кисти=hands, запястья=wrists
 
 Ответь ТОЛЬКО валидным JSON:
 {
@@ -159,7 +160,7 @@ ${itemsList}
         голова: 'head', лицо: 'face', губы: 'lips', шея: 'neck', плечи: 'shoulders',
         спина: 'back', грудь: 'chest', соски: 'nipples', живот: 'belly',
         талия: 'waist', бедра: 'hips', пах: 'groin', ягодицы: 'buttocks',
-        икры: 'calves', колени: 'knees', ступни: 'feet',
+        икры: 'calves', ступни: 'feet',
         руки: 'hands', кисти: 'hands', запястья: 'wrists'
     };
     const normalizePoint = (candidate?: string, txt?: string) => {
@@ -322,7 +323,7 @@ export async function parseVerbalInput(
     // Common aggregate wardrobe commands must not depend on an LLM returning
     // the singular targetContext shape. The runtime safely ignores items that
     // are not currently worn.
-    if (!commandDiscussionOnly && /(?:^|\s)(разденься|сними\s+(?:с\s+себя\s+)?(?:всю\s+)?одежду|сними\s+вс[её])(?:[.!?\s]|$)/i.test(text)) {
+    if (!commandDiscussionOnly && matchAggregateUndressCommand(text)) {
         return {
             intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0,
             pointId: 'systemic',
@@ -400,7 +401,7 @@ ${moveInstructions}
             голова: 'head', лицо: 'face', губы: 'lips', шея: 'neck', плечи: 'shoulders',
             спина: 'back', грудь: 'chest', соски: 'nipples', живот: 'belly',
             талия: 'waist', бедра: 'hips', пах: 'groin', ягодицы: 'buttocks',
-            икры: 'calves', колени: 'knees', ступни: 'feet',
+            икры: 'calves', ступни: 'feet',
             руки: 'hands', кисти: 'hands', запястья: 'wrists'
         };
 
