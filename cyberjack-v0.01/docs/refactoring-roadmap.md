@@ -304,9 +304,9 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 Единый time-advance path подтверждён: `timeFlow` heartbeat → `advanceSimulationTime` → `advanceWorldTime` (контракты) + `runBackgroundSustainedTicks` (непрерывные процессы) + очередь (`memory.materialize`, `scene.autonomous`). Единственный оставшийся игровой таймер — `timeFlow` heartbeat (сам драйвер времени). `wait`/действия не продвигают мировое время напрямую.
 
-### Этап 5. Свести prompt/context builders к одному контракту 🔄
+### Этап 5. Свести prompt/context builders к одному контракту ✅
 
-**Частично выполнен.** Проведена инвентаризация prompt/context builders и проактивных путей. Введён контракт `CharacterStimulus` → `Cha...
+**Завершён.** Проведена инвентаризация prompt/context builders и проактивных путей. Введён контракт `CharacterStimulus` → `Cha...
 
 **Критерий закрыт:** `selectRecentDialogue` включает сообщения после импульса; тест в `reactionFrame.test.ts`.
 
@@ -320,7 +320,7 @@ LLM, эмбеддинги, генерация памяти, наблюдения
 
 Удалены мёртвые `.orig`-файлы (`server.ts.orig`, `timeFlow.ts.orig`, `worldService.ts.orig`) — legacy-пути.
 
-Критерий «нет отдельных prompt-конструкторов для проактивных реплик» подтверждён инвентаризацией. Контракт `CharacterStimulus` → `CharacterTurnContext` и единый executor `executeCharacterSpeech` введены (см. §2.17). Осталось: убрать разрозненные обёртки вокруг LLM-вызова.
+Критерий «нет отдельных prompt-конструкторов для проактивных реплик» подтверждён инвентаризацией. Контракт `CharacterStimulus` → `CharacterTurnContext` и единые executor'ы введены: `executeCharacterSpeech` (реплики), `executeNarratorReply` (нарратор A/B). Мёртвый `sendToLLM` удалён.
 
 ### 2.17. Контракт `CharacterStimulus` → `CharacterTurnContext`
 
