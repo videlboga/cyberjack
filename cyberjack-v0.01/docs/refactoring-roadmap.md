@@ -420,7 +420,16 @@ Fallback не меняет семантику контракта: `executeCharac
 
 ### Этап 8. Тонкие API-контроллеры и единые DTO
 
-После стабилизации сервисов нужно убрать бизнес-логику из контроллеров.
+**В работе.** Начата декомпозиция контроллеров: бизнес-логика выносится в application services.
+
+### 2.20. Тонкий контроллер перемещения
+
+`scenarioController.moveLaboratoryCharacter` содержал прямую бизнес-логику (запросы к `db`, `chatMemoryRepo.append`, `syncLaboratorySpatialRelations`). Вынесена в application service:
+
+- `worldService.moveLaboratoryCharacter` — application service: перемещает персонажа, синхронизирует пространственные отношения, записывает событие перемещения в chat memory всех персонажей старой/новой комнаты.
+- `scenarioController.moveLaboratoryCharacter` — тонкий: валидирует транспортный ввод, вызывает один application service, отображает результат. Убраны импорты `db`, `chatMemoryRepo`, `moveCharacterInLaboratory`, `syncLaboratorySpatialRelations` из контроллера.
+
+Критерий «контроллер валидирует транспортный ввод, вызывает один application service и отображает результат» выполнен для перемещения.
 
 Нужно:
 
@@ -601,6 +610,14 @@ Fallback не меняет семантику контракта: `executeCharac
 - runtime typecheck проходит.
 
 После неблокирующей коррекции памяти (Этап 7, первый шаг):
+
+- 112 test files;
+- 521 тест проходит;
+- 6 пропущены;
+- 21 тест падает в 7 файлах (прежний baseline);
+- runtime typecheck проходит.
+
+После тонкого контроллера перемещения (Этап 8, первый шаг):
 
 - 112 test files;
 - 521 тест проходит;

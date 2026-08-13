@@ -1,11 +1,6 @@
 import { Request, Response } from 'express';
-import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, recruitCandidate, changeLaboratoryRole, controlDeviceSession } from '../../scenario/worldService';
-import { moveCharacterInLaboratory } from '../../scenario/spatialContext';
-import { syncLaboratorySpatialRelations } from '../../services/sceneRelations';
+import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, recruitCandidate, changeLaboratoryRole, controlDeviceSession, moveLaboratoryCharacter as moveLabCharacter } from '../../scenario/worldService';
 import { getTimeFlowState, setTimeFlowPaused } from '../../scenario/timeFlow';
-import { advanceSimulationTime } from '../../scenario/simulationTime';
-import { db } from '../../infrastructure/db';
-import { chatMemoryRepo } from '../../infrastructure/repositories';
 
 export const getScenario = (req: Request, res: Response) => {
     try {
@@ -46,23 +41,27 @@ export const useEquipment = (req: Request, res: Response) => {
     }
 };
 
-export const controlEquipment = (req: Request, res: Response) => {
+export const controlEquipment = async (req: Request, res: Response) => {
     try {
         const playerId = String(req.body.playerId || 'PL-1');
-        const command = String(req.body.command || '') as 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop';
-        if (!['configure', 'settings', 'start', 'adjust', 'pause', 'resume', 'stop'].includes(command)) throw new Error('Неизвестная команда устройства');
-        const result = controlDeviceSession(req.params.assetId, command, req.body, playerId);
-        res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
+        const command = String(req.body.command || '') as 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop' | 'intervene';
+        if (!['configure', 'settings', 'start', 'adjust', 'pause', 'resume', 'stop', 'intervene'].includes(command)) throw new Error('Неизвестная команда устройства');
+        const result = await controlDeviceSession(req.params.assetId, command, req.body, playerId);
+        // The client refreshes its scenario state immediately after a device
+        // command. Building another full snapshot here duplicates expensive
+        // work and makes simple settings changes feel delayed.
+        res.json({ success: true, result });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });
     }
 };
 
-export const passTime = async (req: Request, res: Response) => {
+export const passTime = (_req: Request, res: Response) => {
     try {
-        const minutes = Math.max(10, Math.min(480, Number(req.body.minutes) || 60));
-        const clock = await advanceSimulationTime(minutes, 'Ожидание');
-        res.json({ success: true, clock, scenario: getScenarioSnapshot(String(req.body.playerId || 'PL-1')) });
+        res.status(409).json({
+            success: false,
+            error: 'Ручное продвижение времени отключено: временем управляет фоновый игровой clock.',
+        });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });
     }
@@ -112,37 +111,10 @@ export const moveLaboratoryCharacter = (req: Request, res: Response) => {
         const playerId = String(req.body.playerId || 'PL-1');
         const target = String(req.body.roomId || '');
         if (!target) throw new Error('Не выбрано помещение');
-        const characterId = req.params.characterId;
-        // Get old room before move
-        const oldAssignment = (db as any).prepare(
-            'SELECT a.room_id, r.name AS room_name FROM laboratory_room_assignments a JOIN laboratory_rooms r ON r.player_id = a.player_id AND r.room_id = a.room_id WHERE a.player_id = ? AND a.character_id = ?'
-        ).get(playerId, characterId) as any;
-        const result = moveCharacterInLaboratory(characterId, target, playerId);
-        if (!result.handled) throw new Error(result.reason || 'Перемещение не выполнено');
-        syncLaboratorySpatialRelations(playerId);
-        // Opening the same screen twice is valid: the player is already in
-        // its matching slot, so there is no move event to announce.
-        if (!result.moved) {
-            res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
-            return;
-        }
-        // Record move event in chat memory of all characters in old and new room
-        const character = (db as any).prepare('SELECT name FROM characters WHERE id = ? OR subject_id = ? LIMIT 1').get(characterId, characterId) as any;
-        const charName = character?.name || characterId;
-        const notice = `→ ${charName} переместилась ${result.label || ''}`;
-        // Get characters in old and new room
-        const oldRoomChars = oldAssignment
-            ? ((db as any).prepare('SELECT character_id FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ?').all(playerId, oldAssignment.room_id) as any[])
-            : [];
-        const newRoomChars = (db as any).prepare('SELECT character_id FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ?')
-            .all(playerId, (db as any).prepare('SELECT room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?').get(playerId, characterId)?.room_id) as any[];
-        const allChars = new Map<string, boolean>();
-        for (const c of oldRoomChars) allChars.set(c.character_id, true);
-        for (const c of newRoomChars) allChars.set(c.character_id, true);
-        for (const charId of allChars.keys()) {
-            chatMemoryRepo.append(charId, 'user', notice, 'Система');
-        }
-        res.json({ success: true, result, scenario: getScenarioSnapshot(playerId) });
+        const characterId = String(req.params.characterId);
+        const outcome = moveLabCharacter(characterId, target, playerId);
+        if (!outcome.handled) throw new Error(outcome.reason || 'Перемещение не выполнено');
+        res.json({ success: true, result: outcome.result, scenario: getScenarioSnapshot(playerId) });
     } catch (error: any) {
         res.status(400).json({ success: false, error: error.message });
     }

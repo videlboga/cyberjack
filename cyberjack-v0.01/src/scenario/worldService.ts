@@ -9,7 +9,7 @@ import { ensureCharacterStorySeeds } from './characterStorySeeds';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
-import { setLaboratoryPresence } from './spatialContext';
+import { setLaboratoryPresence, moveCharacterInLaboratory } from './spatialContext';
 import { describeDeviceProtocolEvent, describeDeviceProtocolSummary } from '../narrative/deviceExperience';
 import { ContextManager } from '../orchestration/contextManager';
 import { enqueueBackgroundJob } from '../orchestration/backgroundJobs';
@@ -1628,4 +1628,39 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
         shop: listShopOffers(playerId),
         events
     };
+}
+
+/**
+ * Application service: moves a laboratory character and records the move in
+ * the chat memory of every character present in the old and new rooms.
+ * Extracted from the controller so the HTTP layer stays thin (Этап 8).
+ */
+export function moveLaboratoryCharacter(characterId: string, targetLocation: string, playerId = PLAYER_ID) {
+    const oldAssignment = db.prepare(
+        'SELECT a.room_id, r.name AS room_name FROM laboratory_room_assignments a JOIN laboratory_rooms r ON r.player_id = a.player_id AND r.room_id = a.room_id WHERE a.player_id = ? AND a.character_id = ?'
+    ).get(playerId, characterId) as any;
+    const result = moveCharacterInLaboratory(characterId, targetLocation, playerId);
+    if (!result.handled) return { result, handled: false, reason: result.reason || 'Перемещение не выполнено' };
+    syncLaboratorySpatialRelations(playerId);
+    // Opening the same screen twice is valid: the player is already in its
+    // matching slot, so there is no move event to announce.
+    if (!result.moved) return { result, handled: true, moved: false };
+    // Record move event in chat memory of all characters in old and new room
+    const character = db.prepare('SELECT name FROM characters WHERE id = ? OR subject_id = ? LIMIT 1').get(characterId, characterId) as any;
+    const charName = character?.name || characterId;
+    const notice = `→ ${charName} переместилась ${result.label || ''}`;
+    const oldRoomChars = oldAssignment
+        ? (db.prepare('SELECT character_id FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ?').all(playerId, oldAssignment.room_id) as any[])
+        : [];
+    const newRoomId = (db.prepare('SELECT room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?').get(playerId, characterId) as any)?.room_id;
+    const newRoomChars = newRoomId
+        ? (db.prepare('SELECT character_id FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ?').all(playerId, newRoomId) as any[])
+        : [];
+    const allChars = new Map<string, boolean>();
+    for (const c of oldRoomChars) allChars.set(c.character_id, true);
+    for (const c of newRoomChars) allChars.set(c.character_id, true);
+    for (const charId of allChars.keys()) {
+        chatMemoryRepo.append(charId, 'user', notice, 'Система');
+    }
+    return { result, handled: true, moved: true };
 }
