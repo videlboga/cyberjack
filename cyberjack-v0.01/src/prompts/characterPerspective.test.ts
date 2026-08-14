@@ -39,10 +39,10 @@ describe('character-facing perspective', () => {
                 playerSpeech: 'Я скоро вернусь', characterSpeech: 'Я подожду.',
             },
         });
-        expect(memory).toContain('Ты помнишь воздействие');
-        expect(memory).toContain('общий смысл своей телесной реакции');
+        expect(memory).toContain('Калибратор выполнил действие «Мягкое поглаживание»');
+        expect(memory).toContain('Ты ответила: «Я подожду.»');
         expect(memory).not.toContain('Ты чувствуешь осторожное тепло в ладонях.');
-        expect(memory).toContain('Собеседник сказал тебе');
+        expect(memory).toContain('Калибратор сказал: «Я скоро вернусь»');
         expect(memory).not.toContain('Объективные факты симуляции');
     });
 
@@ -56,9 +56,9 @@ describe('character-facing perspective', () => {
                 pointLabel: 'Шея',
             },
         });
-        expect(memory).toContain('наблюдаемое событие');
-        expect(memory).toContain('от Калибратор');
-        expect(memory).toContain('на Суми');
+        expect(memory).toContain('Наблюдение: Калибратор выполнил «Мягкое поглаживание»');
+        expect(memory).toContain('для Суми');
+        expect(memory).toContain('в области «Шея»');
         expect(memory).not.toContain('В твоей памяти телесное переживание');
     });
 });

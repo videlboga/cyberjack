@@ -40,7 +40,7 @@ describe('reaction frame compiler', () => {
         expect(system).toContain('Ты женщина');
         expect(system).toContain('Никогда не используй о себе мужские формы');
         expect(system).toContain('как актив для подготовки к экспериментам');
-        expect(turn).toContain('Что ты знаешь о своём положении');
+        expect(system).toContain('Твоё положение и понимание происходящего');
     });
     it('keeps an explicitly selected addressee above parser inference', () => {
         expect(resolveDirectedActorId('NPC-LAB-01', 'NPC-CAND-01')).toBe('NPC-LAB-01');
@@ -143,7 +143,7 @@ describe('reaction frame compiler', () => {
         expect(frame.dramaticPosition.primaryIntent.toLowerCase()).toContain('непропорционально мощное ощущение');
         expect(frame.expressionMode.control).toBe('strained');
         expect(frame.expressionMode.requiresDisruption).toBe(true);
-        expect(buildReactionTurnMessage(frame)).toContain('Сенсорное усиление запредельное');
+        expect(buildReactionTurnMessage(frame)).toContain('Даже малейшая деталь воздействия разрастается и захватывает внимание целиком');
     });
 
     it('gives the same high tension a different delivery for negative affect', () => {
@@ -428,7 +428,9 @@ describe('reaction frame compiler', () => {
         );
         expect(frame.event.playerSpeech).toBe('Тебе неприятно?');
         expect(frame.event.experience).toContain('физического воздействия');
-        expect(frame.dramaticPosition.allowedSpeechActs).toEqual([]);
+        // A direct question now assigns concrete answer strategies rather than
+        // leaving the set empty.
+        expect(frame.dramaticPosition.allowedSpeechActs).toEqual(['answer', 'set_boundary', 'deflect']);
     });
 
     it('keeps the authored voice instruction intact', () => {
@@ -442,7 +444,7 @@ describe('reaction frame compiler', () => {
         const prompt = buildReactionSystemPrompt(frame);
         expect(prompt).toContain('Резонанс');
         expect(prompt).toContain('Пустоту');
-        expect(prompt).toContain('Самостоятельно реши');
+        expect(prompt).toContain('[Форма ответа]');
     });
 
     it('normalizes model-owned metadata instead of discarding valid speech', async () => {
