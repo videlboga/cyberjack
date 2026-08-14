@@ -1,7 +1,8 @@
 import { randomUUID } from 'crypto';
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { db } from '../infrastructure/db';
-import { characterRelationRepo, memoryRepo, subjectRepo } from '../infrastructure/repositories';
+import { characterRelationRepo, memoryRepo, subjectRepo, activeContextsRepo } from '../infrastructure/repositories';
+import { resolvePortraitEmotion } from '../domain/portraitEmotion';
 import { buildPromptPayloadWithDB } from '../prompts/buildPromptPayloadWrapper';
 import { buildCharacterTurnContext } from '../orchestration/characterTurnContext';
 import { buildEmbedding } from './embeddingService';
@@ -282,6 +283,20 @@ export async function processPendingSocialTurns() {
         if (!generated.success) throw new Error(generated.error);
         const speech = generated.speech;
         const semantics = await classifySocialSpeech(speech.trim());
+        // Эмоция говорящего (speakerId), а не получателя: реплика в социальной
+        // транзакции должна отражать состояние того, кто говорит.
+        const speakerState = subjectRepo.get(plan.speakerId);
+        const portraitEmotion = resolvePortraitEmotion({
+            speech,
+            state: {
+                tension: speakerState?.tension,
+                capacity: speakerState?.capacity,
+                attitude: speakerState?.attitude,
+                openness: speakerState?.openness,
+                plasticity: speakerState?.plasticity,
+                contexts: activeContextsRepo.getAllForSubject(plan.speakerId).map(context => ({ actionId: context.actionId })),
+            },
+        });
         // Chat history is participant-owned. Deliver one authored message to
         // both transcripts; the renderer uses speakerId, not the recipient's
         // local role, so this is still one line from the actual speaker.
@@ -289,6 +304,7 @@ export async function processPendingSocialTurns() {
             speakerId: plan.speakerId,
             speech,
             contextLabel: 'Социальная транзакция',
+            portraitEmotion,
             messageId: plan.id,
             transcriptOwnerIds: [plan.speakerId, plan.recipientId],
         });
