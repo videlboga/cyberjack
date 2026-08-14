@@ -35,15 +35,6 @@ export function withTraceContext<T>(requestId: string, fn: () => T): T {
     return traceContext.run({ requestId }, fn);
 }
 
-/**
- * Sets the requestId as the active trace context for the current async
- * execution chain (and its awaits). Used at the top of a tick/background job
- * so every LLM call made downstream inherits the same requestId.
- */
-export function setTraceContext(requestId: string): void {
-    traceContext.enterWith({ requestId });
-}
-
 /** Returns the current requestId from the async context, or null if none. */
 export function currentTraceRequestId(): string | null {
     return traceContext.getStore()?.requestId ?? null;

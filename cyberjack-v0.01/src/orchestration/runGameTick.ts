@@ -12,7 +12,7 @@ import type { DeviceSessionMetadata } from '../domain/sessionMetadata';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { appendJsonLog } from '../utils/fileLogs';
-import { traceSync, newRequestId, emitTrace, setTraceContext } from './trace';
+import { traceSync, newRequestId, emitTrace, withTraceContext } from './trace';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
 import { stablePromptFragmentStats } from '../services/stablePromptFragmentCache';
 import { runScenarioStep } from '../scenario/runScenarioStep';
@@ -77,12 +77,17 @@ export function constrainCapacityWhileUnresponsive(input: {
 }
 
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
-    const initiatorId = payload.actingCharacterId || payload.playerId || payload.subjectId;
     const requestId = newRequestId();
-    // Make this tick's requestId the active trace context so every LLM call
-    // made downstream (parser, character speech, narrator) inherits it and can
-    // be correlated with the tick that produced it (Этап 10 сквозной trace).
-    setTraceContext(requestId);
+    // The whole tick lifecycle runs inside the trace context so every LLM call
+    // made downstream (parser, character speech, narrator) inherits this
+    // requestId and can be correlated with the tick that produced it. Using
+    // AsyncLocalStorage.run() (not enterWith) guarantees the parent context is
+    // restored after the tick, even for nested ticks (Этап 10 сквозной trace).
+    return withTraceContext(requestId, () => runGameTickInner(payload, requestId));
+}
+
+async function runGameTickInner(payload: GameEventPayload, requestId: string): Promise<TickBundle> {
+    const initiatorId = payload.actingCharacterId || payload.playerId || payload.subjectId;
     // 1. Load state
     const {
         state,
