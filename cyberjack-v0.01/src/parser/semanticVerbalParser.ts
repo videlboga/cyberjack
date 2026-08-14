@@ -178,6 +178,67 @@ export function isPlayerPhysicalCommand(command: { type?: string; actorId?: stri
     return playerAliases.has(actorId);
 }
 
+/**
+ * Strict JSON Schema для семантического парсера. Structured output заставляет
+ * модель вернуть ВСЕ поля (включая command.contextId для change_pose), поэтому
+ * эвристики (лексика/эмбеддинг) не нужны: правильную позу выбирает сам LLM
+ * из явного списка доступных поз.
+ */
+export const PARSER_SCHEMA = {
+    name: 'cyberjack_semantic_parser',
+    strict: true,
+    value: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+            speechType: { type: 'string', enum: ['conversation', 'question', 'praise', 'insult', 'command'] },
+            tone: {
+                type: 'object', additionalProperties: false,
+                properties: {
+                    valence: { type: 'number' },
+                    intensity: { type: 'number' },
+                    sharpness: { type: 'number' },
+                },
+                required: ['valence', 'intensity', 'sharpness'],
+            },
+            recipientAppraisal: {
+                type: 'object', additionalProperties: false,
+                properties: { valence: { type: 'number' } },
+                required: ['valence'],
+            },
+            mentions: {
+                type: 'object', additionalProperties: false,
+                properties: {
+                    actionIds: { type: 'array', items: { type: 'string' } },
+                    pointIds: { type: 'array', items: { type: 'string' } },
+                },
+                required: ['actionIds', 'pointIds'],
+            },
+            pendingCommandRelation: { type: 'string', enum: ['continue', 'abandon', 'unrelated'] },
+            command: {
+                type: 'object', additionalProperties: false,
+                properties: {
+                    type: { type: 'string', enum: ['none', 'perform_action', 'change_pose', 'activate_context', 'deactivate_context', 'remove_worn_clothing', 'move', 'change_current_interaction'] },
+                    directedAtCharacter: { type: 'boolean' },
+                    explicitDirective: { type: 'boolean' },
+                    directiveEvidence: { type: 'string' },
+                    actorId: { type: ['string', 'null'] },
+                    targetId: { type: ['string', 'null'] },
+                    actionId: { type: ['string', 'null'] },
+                    contextId: { type: ['string', 'null'] },
+                    location: { type: ['string', 'null'] },
+                    goal: { type: ['string', 'null'] },
+                    pointId: { type: ['string', 'null'] },
+                    misunderstood: { type: ['string', 'null'], enum: ['pose_unknown', 'action_unknown', 'target_unknown', 'action_and_target_unknown', null] },
+                },
+                required: ['type', 'directedAtCharacter', 'explicitDirective', 'directiveEvidence', 'actorId', 'targetId', 'actionId', 'contextId', 'location', 'goal', 'pointId', 'misunderstood'],
+            },
+            confidence: { type: 'number' },
+        },
+        required: ['speechType', 'tone', 'recipientAppraisal', 'mentions', 'pendingCommandRelation', 'command', 'confidence'],
+    },
+};
+
 export async function parseSemanticVerbalInput(
     text: string,
     sceneContext: string,
@@ -187,11 +248,19 @@ export async function parseSemanticVerbalInput(
     recentCharacterSpeech = '',
     playerId = 'PL-1',
     pendingCommand?: { description: string } | null,
+    recentDialogue = '',
 ) {
     const started = performance.now();
     const candidates = await retrieve(text);
     const compact = (items: Array<{ id: string; label: string }>) => items.map(item => `${item.id}=${item.label}`).join('; ');
     const characterList = characters.map(character => `${character.id}=${character.name}`).join('; ');
+    // Буквальный список всех доступных поз — LLM должен выбрать ID из него,
+    // а не додумывать. Позы с тегом exposure/feet — это позы-демонстрации,
+    // которые могут быть целью команды «сядь так, чтобы я видел X».
+    const allPosesArr = presetRepo.getAllActionPresets()
+        .filter(action => (action as any).contextConfig?.type === 'pose');
+    const allPoses = allPosesArr.map(action => `${action.id}=${action.label}`).join('; ');
+    const allPosesById = Object.fromEntries(allPosesArr.map(action => [action.id, action]));
     const messages: any[] = [{
         role: 'system',
         content: `Разбери одно сообщение игрока. Физическое действие самого игрока здесь невозможно: оно приходит только кнопкой. Звёздочки не означают действие.
@@ -211,23 +280,30 @@ export async function parseSemanticVerbalInput(
 Ближайшие действия: ${compact(candidates.actions)}
 Ближайшие состояния/процессы: ${compact(candidates.contexts)}
 Ближайшие точки тела: ${compact(candidates.points)}
+Доступные позы (ID выбирай ТОЛЬКО из этого списка для change_pose): ${allPoses || 'нет'}
 Присутствующие: ${characterList || 'нет'}
 Контекст места: ${sceneContext || 'не указан'}
 Последняя реплика адресата: ${recentCharacterSpeech || 'нет'}
+Контекст диалога (недавние реплики, чтобы понять, о чём речь): ${recentDialogue || 'нет'}
 ${pendingCommand ? `Последнее невыполненное поручение в этом разговоре: ${pendingCommand.description}. Определи, продолжает ли текущая реплика убеждение/обсуждение именно этого поручения, явно отменяет его или уже относится к другой теме.` : 'Невыполненного поручения в фокусе разговора нет.'}
 pendingCommandRelation="continue" ставь только когда без невыполненного поручения смысл текущей реплики неполон: это довод, заверение, давление, уточнение или повторная просьба выполнить именно его. Новый самостоятельный вопрос или новая тема — "unrelated", даже если разговор всё ещё идёт с тем же персонажем. «Не бойся, ты справишься» после отказа — continue; «как тебе спалось?» — unrelated; «забудь, не надо» — abandon.
 Адресат по умолчанию: ${defaultActorId}. Цель по умолчанию: ${defaultTargetId}.
 
 Верни JSON:
-{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|remove_worn_clothing|move|change_current_interaction","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null},"confidence":0..1}
+{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|remove_worn_clothing|move|change_current_interaction","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null,"misunderstood":null},"confidence":0..1}
 Для remove_worn_clothing используй type="remove_worn_clothing" (без actionId/contextId), когда команда требует снять всю одежду целиком («разденься», «сними всё», «сними одежду»). Для снятия одного конкретного предмета используй deactivate_context с contextId этого предмета.
-Для change_pose contextId обязан быть ID позы из «Ближайших состояний/процессов» (например pose_sitting), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.
+Для change_pose contextId обязан быть ID позы из «Доступных поз» (например pose_sitting, act_present_feet), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.
+Если команда распознана, но не хватает деталей, заполни command.misunderstood (иначе null):
+- "pose_unknown" — понял, что нужно сменить позу, но не понял какую (нет contextId);
+- "action_unknown" — понял, что нужно совершить действие с другим персонажем, но не понял какое (нет actionId);
+- "target_unknown" — понял, какое действие совершить, но не понял с кем (нет targetId, а действие направлено на другого).
+При misunderstood command.type оставь соответствующим (change_pose/perform_action), directedAtCharacter=true, explicitDirective=true, а недостающее поле пустым.
 tone.valence — только манера говорящего. recipientAppraisal.valence — насколько адресату приятен или неприятен смысл реплики с учётом его последней реплики. Игнорирование страха, отказа или границы оценивай отрицательно, даже если слова звучат мягко.
 Запрет не совершать действие («не раздевайся», «не трогай», «не иди») не превращай в противоположное действие. Если он отменяет ожидающее поручение, используй pendingCommandRelation="abandon" и command.type="none".
 ID выбирай только из кандидатов и присутствующих. Упоминания заполняй независимо от того, является ли сообщение командой.`
     }, { role: 'user', content: text }];
 
-    const { parsed, model } = await parseVerbalInputWithLLM(messages);
+    const { parsed, model } = await parseVerbalInputWithLLM(messages, PARSER_SCHEMA);
     const command = parsed.command || {};
     let commandIntent: CommandIntent = { type: 'none' };
     const commandActorId = command.actorId || defaultActorId;
@@ -252,12 +328,25 @@ ID выбирай только из кандидатов и присутству
             const actionId = command.actionId;
             if (candidates.actions.some(item => item.id === actionId)) {
                 commandIntent = { type: 'perform_action', actionId, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
+            } else if (command.misunderstood === 'target_unknown' || (command.targetId && !characters.some(c => c.id === command.targetId))) {
+                // Понял действие, но не понял, с кем его совершить.
+                commandIntent = { type: 'misunderstood', partial: 'target_unknown' };
             }
         }
-        else if (command.type === 'change_pose' && command.contextId) {
-            const context = candidates.contexts.find(item => item.id === command.contextId);
-            if (context?.tags?.includes('pose')) {
+        else if (command.type === 'change_pose') {
+            // Structured output гарантирует contextId от LLM. Здесь только
+            // валидируем его по полному списку поз каталога (не по урезанному
+            // top-6 candidates.contexts). Если LLM всё же вернул пустой/неверный
+            // ID — это честное «не понял, какую позу».
+            if (command.contextId && allPosesById[command.contextId]) {
                 commandIntent = { type: 'change_pose', targetPoseId: command.contextId };
+            } else if (command.misunderstood === 'pose_unknown') {
+                commandIntent = { type: 'misunderstood', partial: 'pose_unknown' };
+            } else if (command.contextId) {
+                // Вернул ID, которого нет в каталоге — воспринимаем как непонимание.
+                commandIntent = { type: 'misunderstood', partial: 'pose_unknown' };
+            } else {
+                commandIntent = { type: 'misunderstood', partial: 'pose_unknown' };
             }
         }
         else if (command.type === 'activate_context' && command.contextId) {
@@ -274,6 +363,10 @@ ID выбирай только из кандидатов и присутству
         }
         else if (command.type === 'move' && command.location) commandIntent = { type: 'move', targetLocation: command.location };
         else if (command.type === 'change_current_interaction') commandIntent = { type: 'change_current_interaction', goal: ['start', 'adjust', 'stop'].includes(command.goal) ? command.goal : 'stop', suggestedActionId: command.actionId || undefined, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
+        else if (command.type === 'perform_action' && command.misunderstood === 'action_unknown') {
+            // Понял, что нужно совершить действие с другим персонажем, но не понял какое.
+            commandIntent = { type: 'misunderstood', partial: 'action_unknown' };
+        }
     }
     const mentions: { actionIds: string[]; pointIds: string[] } = {
         actionIds: (Array.isArray(parsed.mentions?.actionIds) ? parsed.mentions.actionIds : []).filter((id: unknown) => candidates.actions.some(item => item.id === id)).map(String),

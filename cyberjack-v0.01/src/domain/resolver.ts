@@ -8,6 +8,7 @@ export type CommandIntent =
   | { type: "change_current_interaction"; goal: "stop" | "start" | "adjust"; suggestedActionId?: string; targetId?: string; pointId?: string }
   | { type: "perform_action"; actionId: string; targetId?: string; pointId?: string }
   | { type: "perform_described_action"; description: string; matchedActionId: string | null; targetId?: string; pointId?: string; requiredItem?: string; refusal?: string; modifiers?: { intensity?: number; valence?: number; contact?: number; sharpness?: number; novelty?: number } }
+  | { type: "misunderstood"; partial: "pose_unknown" | "action_unknown" | "target_unknown" | "action_and_target_unknown" }
   | { type: "none" };
 
 export type ResolvedFunctions = {

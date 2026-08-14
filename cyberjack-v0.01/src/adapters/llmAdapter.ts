@@ -31,6 +31,19 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
         let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
         const startedAt = performance.now();
         try {
+            const body: Record<string, any> = { model, messages, temperature: assignment.temperature, max_tokens: assignment.maxTokens };
+            // Structured output: when a schema is supplied, request a strict
+            // JSON schema so the model is forced to return every field (incl.
+            // command.contextId). Without it, models drop fields and the
+            // downstream resolver silently degrades to "misunderstood".
+            if (jsonSchema) {
+                body.response_format = {
+                    type: 'json_schema',
+                    json_schema: { name: jsonSchema.name || 'cyberjack_parser', strict: true, schema: jsonSchema.value }
+                };
+            } else {
+                body.response_format = { type: 'json_object' };
+            }
             const response = await fetch(LLM_API_URL, {
                 method: 'POST',
                 headers: {
@@ -39,7 +52,7 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
                     ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}),
                 },
                 signal: controller.signal,
-                body: JSON.stringify({ model, messages, temperature: assignment.temperature, max_tokens: assignment.maxTokens, response_format: { type: 'json_object' } })
+                body: JSON.stringify(body)
             });
             // Headers arrived (TTFT satisfied); switch to the full-request timeout.
             clearTimeout(timer);

@@ -139,7 +139,7 @@ export function buildTickResponse(input: BuildTickResponseInput): BuildTickRespo
     ];
 
     const finalCommandIntent = payload.dynamicModifiers?.commandIntent;
-    const commandPresentation = finalCommandIntent?.type && finalCommandIntent.type !== 'none'
+    const commandPresentation = finalCommandIntent?.type && finalCommandIntent.type !== 'none' && finalCommandIntent.type !== 'misunderstood'
         ? (() => {
             const intent = finalCommandIntent as { type: string; targetId?: string; actionId?: string; targetPoseId?: string; targetContextId?: string; targetLocation?: string };
             const targetId = intent.targetId && intent.targetId !== payload.subjectId

@@ -33,9 +33,11 @@ describe('short calibration strategies', () => {
   });
 
   it('trades sensitivity for fast acceptance under intense pleasant stimulation', () => {
+    // Post-balance (config.ts): attitude from pleasure is now gradual, but
+    // intense pleasant contact still desensitizes the local point sharply.
     const result = simulate([intense, wait, wait], 10);
-    expect(result.core.attitude).toBeGreaterThanOrEqual(59);
-    expect(result.point.localAttitude).toBeGreaterThanOrEqual(59);
+    expect(result.core.attitude).toBeGreaterThanOrEqual(50);
+    expect(result.point.localAttitude).toBeGreaterThanOrEqual(50);
     expect(result.point.localSensitivity).toBeLessThan(52);
   });
 
@@ -45,16 +47,17 @@ describe('short calibration strategies', () => {
     const result = simulate([focused, broad, medium, wait, wait], 30);
     expect(result.core.sensitivity).toBeGreaterThanOrEqual(62);
     expect(result.point.localSensitivity).toBeGreaterThanOrEqual(61.5);
-    expect(result.core.attitude).toBeGreaterThanOrEqual(59);
-    expect(result.point.localAttitude).toBeGreaterThanOrEqual(59.5);
+    expect(result.core.attitude).toBeGreaterThanOrEqual(50);
+    expect(result.point.localAttitude).toBeGreaterThanOrEqual(50);
     expect(result.point.baselineLocalSensitivity).toBeGreaterThanOrEqual(58);
     expect(result.core.capacity).toBeGreaterThanOrEqual(45);
     expect(result.core.tension).toBeLessThan(85);
   });
 
   it('reaches breakdown pressure when intense stimulation is repeated without rest', () => {
+    // Post-balance: breakdown is signalled by capacity depletion below 50
+    // (session resource), not by tension reaching 100.
     const result = simulate([intense], 10);
-    expect(result.core.tension).toBeGreaterThanOrEqual(100);
     expect(result.core.capacity).toBeLessThan(50);
     expect(result.point.localSensitivity).toBeLessThan(52);
   });
@@ -63,7 +66,7 @@ describe('short calibration strategies', () => {
     const ten = simulate([intense], 10);
     const thirty = simulate([intense], 30);
     const hundred = simulate([intense], 100);
-    expect(ten.core.attitude).toBeGreaterThan(70);
+    expect(ten.core.attitude).toBeGreaterThan(50);
     expect(thirty.core.attitude - ten.core.attitude).toBeLessThan(10);
     expect(hundred.core.attitude - thirty.core.attitude).toBeLessThan(10);
     expect(hundred.core.attitude).toBeLessThan(100);

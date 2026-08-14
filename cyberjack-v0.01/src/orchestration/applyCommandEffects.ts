@@ -57,6 +57,22 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
         let forcedApplied = false;
         let commandEffectsAuthorized = false;
 
+        // Персонаж понял, что от него что-то требуют, но не понял деталей.
+        // Не выполняем действие и не считаем команду «отклонённой» — это
+        // не отказ по воле, а непонимание. Реакция формируется в промпте.
+        if (commandIntent.type === 'misunderstood') {
+            const partial = commandIntent.partial;
+            const misunderstandingNarrative = partial === 'pose_unknown'
+                ? '[Система]: Ты понял, что от тебя просят сменить позу, но не понял, какую именно. Уточни у собеседника, какую позу он хочет.'
+                : partial === 'action_unknown'
+                    ? '[Система]: Ты понял, что от тебя просят совершить действие с другим персонажем, но не понял, какое именно. Уточни, что именно нужно сделать.'
+                    : partial === 'target_unknown'
+                        ? '[Система]: Ты понял, какое действие от тебя просят, но не понял, с кем его совершить. Уточни, на кого оно направлено.'
+                        : '[Система]: Ты понял, что от тебя что-то требуют, но не понял, что именно. Уточни у собеседника.';
+            addedContextNotes.push(misunderstandingNarrative);
+            actionApplied = false;
+        } else {
+
         let targetCtxId: string | undefined;
         if (commandIntent.type === 'change_pose') targetCtxId = commandIntent.targetPoseId;
         else if (commandIntent.type === 'activate_context') targetCtxId = commandIntent.targetContextId;
@@ -397,6 +413,7 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
         if (forcedApplied && forcedNarrativeToLog) {
             addedContextNotes.push(forcedNarrativeToLog);
         }
+        } // end else (non-misunderstood command)
     }
 
     return { actionApplied, forcedNarrativeToLog, forcedAttempted, commandActionPreset, labRelocationApplied };

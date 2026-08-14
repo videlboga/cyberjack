@@ -104,17 +104,22 @@ async function dispatchEventInner(payload: DispatchEventInput): Promise<RouteRes
         }
 
         try {
+            const recentMessages = chatMemoryRepo.getRecent(payload.subjectId || 'S-01', 8);
+            const recentDialogue = recentMessages
+                .map(message => `${message.role === 'assistant' ? 'персонаж' : 'игрок'}: ${message.content}`)
+                .join('\n');
             dynamicModifiers = await parseSemanticVerbalInput(
                 payload.textMessage,
                 sceneContextStr,
                 sceneCharacters,
                 payload.addressedCharacterId || payload.playerId || 'PL-1',
                 payload.subjectId || 'S-01',
-                [...chatMemoryRepo.getRecent(payload.subjectId || 'S-01', 8)]
+                [...recentMessages]
                     .reverse()
                     .find(message => message.role === 'assistant')?.content || '',
                 payload.playerId || 'PL-1',
                 pendingCommand ? { description: pendingCommand.description } : null,
+                recentDialogue,
             );
         } catch (error: any) {
             // Parsing must never make ordinary dialogue unavailable. On an
