@@ -1789,8 +1789,6 @@ export function CalibrationPrototype({
         }
       },
     ),
-    [historyOpen, setHistoryOpen] = useState(false),
-    [menuOpen, setMenuOpen] = useState(false),
     [visualReviewOpen, setVisualReviewOpen] = useState(false),
     [visualReviewDecision, setVisualReviewDecision] = useState<
       "keep" | "rework" | "reject"
@@ -1805,7 +1803,6 @@ export function CalibrationPrototype({
     [visualEffect, setVisualEffect] = useState<CalibrationVisualEffect | null>(
       null,
     ),
-    [diagnosticsOpen, setDiagnosticsOpen] = useState(false),
     [subject, setSubject] = useState<State | null>(null),
     [focusedMonitorState, setFocusedMonitorState] = useState<State | null>(null),
     [sceneCharacterStates, setSceneCharacterStates] = useState<
@@ -3410,59 +3407,6 @@ export function CalibrationPrototype({
       setRunning(false);
     }
   };
-  const setDevice = async (mode: PassiveMode | null) => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      if (passive) await toggleContext(false);
-      if (mode) await toggleContext(true);
-      setPassive(mode);
-      append({
-        action: mode ? "Настройка фонового контура" : "Отключение контура",
-        text:
-          mode === "gentle"
-            ? "Установлен мягкий ритм: небольшой устойчивый прогресс с ростом familiarity."
-            : mode === "contrast"
-              ? "Установлен контрастный режим: обучение быстрее, но физическая нагрузка и дискомфорт выше."
-              : "Пассивные воздействия прекращены.",
-        metrics: "Контекст оборудования изменён.",
-        kind: "system",
-      });
-      await load();
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-  const saveTemplate = () => {
-    localStorage.setItem(
-      "cyberjack.calibrationProtocol",
-      JSON.stringify(protocol),
-    );
-    append({
-      action: "Шаблон сохранён",
-      text: "Последовательность сохранена в терминале и доступна для следующей попытки.",
-      metrics: `${protocol.length} шагов`,
-      kind: "system",
-    });
-  };
-  const loadTemplate = () => {
-    try {
-      const v = JSON.parse(
-        localStorage.getItem("cyberjack.calibrationProtocol") || "[]",
-      );
-      if (Array.isArray(v))
-        setProtocol(
-          v
-            .filter((s: any) => !hiddenCalibrationActionIds.has(s.actionId))
-            .map((s: any) => ({ ...s, key: crypto.randomUUID() }))
-            .slice(0, 8),
-        );
-    } catch {
-      setError("Сохранённый шаблон повреждён");
-    }
-  };
   const activeContextIds = new Set(
       (subject?.contexts || []).map((c) => c.actionId),
     ),
@@ -4781,9 +4725,6 @@ export function CalibrationPrototype({
               </span>
             </button>
           )}
-          <button onClick={() => setHistoryOpen(true)}>История</button>
-          <button onClick={() => setDiagnosticsOpen(true)}>Диагностика</button>
-          <button onClick={() => setMenuOpen(true)}>Меню</button>
         </nav>
       </header>
       <section className="objective-strip">
@@ -6613,9 +6554,8 @@ export function CalibrationPrototype({
         <div>
           <strong>{significantEvent?.action || "Наблюдение начато"}</strong>
           <p>{significantEvent?.text || "Значимых изменений пока нет."}</p>
-        </div>
-        <button onClick={() => setHistoryOpen(true)}>История ↑</button>
-      </footer>
+          </div>
+          </footer>
       {visualReviewOpen && (
         <div
           className="drawer-backdrop"
@@ -6694,174 +6634,6 @@ export function CalibrationPrototype({
                 : visualReviewSaved
                   ? "Сохранено ✓"
                   : "Записать ревью"}
-            </button>
-          </aside>
-        </div>
-      )}
-      {historyOpen && (
-        <div className="drawer-backdrop" onClick={() => setHistoryOpen(false)}>
-          <section
-            className="bottom-drawer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header>
-              <h2>История взаимодействия</h2>
-              <button onClick={() => setHistoryOpen(false)}>Закрыть</button>
-            </header>
-            <ol>
-              {[...entries]
-                .reverse()
-                .slice(0, 8)
-                .map((e, i) => (
-                  <li
-                    className={e.kind || "normal"}
-                    key={`${e.step}-full-${i}`}
-                  >
-                    <span>{String(e.step).padStart(2, "0")}</span>
-                    <div>
-                      <strong>{e.action}</strong>
-                      <small>{e.metrics}</small>
-                      <p>{e.text}</p>
-                    </div>
-                  </li>
-                ))}
-            </ol>
-          </section>
-        </div>
-      )}
-      {diagnosticsOpen && (
-        <div
-          className="drawer-backdrop"
-          onClick={() => setDiagnosticsOpen(false)}
-        >
-          <aside className="side-drawer" onClick={(e) => e.stopPropagation()}>
-            <header>
-              <h2>Диагностика</h2>
-              <button onClick={() => setDiagnosticsOpen(false)}>×</button>
-            </header>
-            <h3>Скрытая модель · отладка</h3>
-            <p>
-              Чувствительность:{" "}
-              <b>{coreInterpretations.sensitivity.humanPercent}%</b>{" "}
-              <small>
-                индекс {coreInterpretations.sensitivity.value.toFixed(2)}
-              </small>
-            </p>
-            <p>
-              Принятие: <b>{subject?.attitude.toFixed(2) || "—"}</b>
-            </p>
-            <p>
-              Открытость: <b>{coreInterpretations.openness.humanPercent}%</b>{" "}
-              <small>
-                индекс {coreInterpretations.openness.value.toFixed(2)}
-              </small>
-            </p>
-            <p>
-              Пластичность:{" "}
-              <b>{coreInterpretations.plasticity.humanPercent}%</b>{" "}
-              <small>
-                индекс {coreInterpretations.plasticity.value.toFixed(2)}
-              </small>
-            </p>
-            <p>
-              Ресурс: <b>{coreInterpretations.capacity.humanPercent}%</b>{" "}
-              <small>
-                индекс {coreInterpretations.capacity.value.toFixed(2)}
-              </small>
-            </p>
-            <p>
-              Напряжение: <b>{subject?.tension.toFixed(2) || "—"}</b>
-            </p>
-            <h3>Выбранная зона</h3>
-            <p>
-              Чувствительность:{" "}
-              <b>
-                {subject?.anatomy?.[displayZoneId]?.localSensitivity?.toFixed(
-                  2,
-                ) || "—"}
-              </b>
-            </p>
-            <p>
-              Baseline:{" "}
-              <b>
-                {subject?.anatomy?.[
-                  displayZoneId
-                ]?.baselineLocalSensitivity?.toFixed(2) || "—"}
-              </b>
-            </p>
-            <p>
-              Принятие:{" "}
-              <b>
-                {subject?.anatomy?.[displayZoneId]?.localAttitude?.toFixed(2) ||
-                  "—"}
-              </b>
-            </p>
-            <h3>Основания телеметрии</h3>
-            {telemetry?.signals.map((signal) => (
-              <p key={`debug-${signal.id}`}>
-                <b>{signal.label}:</b> {signal.evidence.join(", ")} ·
-                уверенность {signal.confidence}
-              </p>
-            ))}
-            <h3>Рабочие наблюдения</h3>
-            {findings.length ? (
-              <ul>
-                {findings.map((f, i) => (
-                  <li key={i}>{f}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted">Наблюдений пока нет.</p>
-            )}
-            <h3>Последний тик</h3>
-            <p className="technical">
-              {currentObservation?.technicalText || "Нет данных"}
-            </p>
-          </aside>
-        </div>
-      )}
-      {menuOpen && (
-        <div className="drawer-backdrop" onClick={() => setMenuOpen(false)}>
-          <aside
-            className="side-drawer menu-drawer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header>
-              <h2>Меню лаборатории</h2>
-              <button onClick={() => setMenuOpen(false)}>×</button>
-            </header>
-            <button onClick={saveTemplate} disabled={!protocol.length}>
-              Сохранить протокол
-            </button>
-            <button onClick={loadTemplate}>Загрузить протокол</button>
-            <button onClick={() => setProtocol([])} disabled={!protocol.length}>
-              Очистить протокол
-            </button>
-            <hr />
-            <h3>Фоновый контур</h3>
-            <button
-              className={passive === "gentle" ? "active" : ""}
-              onClick={() => setDevice(passive === "gentle" ? null : "gentle")}
-            >
-              Мягкий ритм
-            </button>
-            <button
-              className={passive === "contrast" ? "active" : ""}
-              onClick={() =>
-                setDevice(passive === "contrast" ? null : "contrast")
-              }
-            >
-              Контрастный режим
-            </button>
-            <hr />
-            <button
-              className="danger-action"
-              onClick={() => {
-                setMenuOpen(false);
-                reset();
-              }}
-            >
-              Начать новую попытку
             </button>
           </aside>
         </div>
