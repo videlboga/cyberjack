@@ -112,7 +112,6 @@
       "limitedBatch": "ОГРАНИЧЕННАЯ ПАРТИЯ",
       "module": "МОДУЛЬ",
       "remaining": "ОСТАЛОСЬ",
-      "station": "Станция",
       "stationAroundLab": "Станция вокруг лаборатории",
       "acceptOrder": "Принять заказ",
       "sectorJournal": "Журнал сектора",
@@ -186,6 +185,423 @@
       "noEventsYet": "Значимых событий пока не записано.",
       "term": "СРОК",
       "topic": "ТЕМА"
+    },
+    "content": {
+      "actions": {
+        "act_slap": "Пощечина",
+        "act_kiss": "Поцелуй",
+        "act_punch": "Удар кулаком",
+        "act_caress": "Поглаживание",
+        "act_interrogate": "Жесткий допрос",
+        "act_praise": "Похвала",
+        "act_examine": "Строгий осмотр",
+        "act_apply_handcuffs": "Надеть наручники",
+        "act_remove_handcuffs": "Снять наручники",
+        "act_struggle_cuffs": "Вырываться из наручников",
+        "act_apply_collar": "Застегнуть шоковый ошейник",
+        "act_shock_collar": "Ударить током через ошейник",
+        "act_remove_collar": "Снять ошейник",
+        "act_inject_truth_serum": "Ввести сыворотку (Veritas-9)",
+        "act_inject_painkiller": "Ввести болеутоляющее (Numb-X)",
+        "act_insert_plug": "Ввести телеметрический плаг",
+        "act_activate_plug": "Включить вибрацию плага",
+        "act_remove_plug": "Извлечь плаг",
+        "pose_standing": "Стойка: Смирно",
+        "pose_all_fours": "Поза: На четвереньках",
+        "pose_spread_eagle": "Поза: Широко раскрыто",
+        "eq_blindfold_apply": "Надеть повязку на глаза",
+        "eq_blindfold_remove": "Снять повязку",
+        "eq_gag_apply": "Вставить кляп",
+        "eq_gag_remove": "Вынуть кляп",
+        "pose_sitting": "Поза: Сидя",
+        "pose_lying_down": "Поза: Лежа",
+        "act_suspend_wrists": "Подвешивание за запястья",
+        "act_release_wrists": "Развязать запястья (снять с подвеса)",
+        "eq_clothe_jumpsuit": "Надеть Комбинезон",
+        "eq_strip_jumpsuit": "Снять Комбинезон",
+        "effect_apathy": "Апатия / Отключение",
+        "effect_chronic_apathy": "Глубокий Срыв (Хроническая Апатия)",
+        "effect_subspace": "Сабспейс (Податливость)",
+        "effect_panic": "Паническая Атака",
+        "effect_sensory_overload": "Сенсорная Перегрузка",
+        "effect_freeze": "Тоническое Оцепенение",
+        "effect_suggestibility": "Смещение контроля",
+        "effect_active_defiance": "Активное Отторжение",
+        "effect_hyperesthesia": "Гиперестезия",
+        "effect_local_hyperesthesia": "Локальная Гиперестезия",
+        "effect_local_numbness": "Локальное Онемение",
+        "gentle_stroke": "Мягкое поглаживание",
+        "tickle": "Щекотка пальцами",
+        "light_kiss": "Короткий поцелуй",
+        "deep_kiss": "Глубокий поцелуй",
+        "feather_stroke": "Проведение перышком",
+        "deep_massage": "Массаж",
+        "licking": "Провести языком",
+        "firm_grip": "Крепко сжать",
+        "light_bite": "Игровой прикус",
+        "hard_bite": "Болезненный укус",
+        "pinch": "Ущипнуть",
+        "scratching": "Провести ногтями",
+        "slap": "Шлёпнуть",
+        "hard_slap": "Удар ладонью",
+        "needle_prick": "Укол иглой",
+        "whip_strike": "Удар хлыстом",
+        "taser_shock": "Разряд электрошокера",
+        "ice_cube": "Коснуться льдом",
+        "hot_wax": "Капнуть воском",
+        "vibrator_pulse": "Дать импульс вибратором",
+        "hair_pull": "Потянуть за волосы",
+        "spit": "Плевок",
+        "breath_blow": "Обдать дыханием",
+        "verbal_pressure": "Беседа",
+        "stare": "Пристальный взгляд",
+        "close_inspection": "Относительно близкий осмотр",
+        "feint_strike": "Ложный замах",
+        "pose_kneeling": "Поза: На коленях",
+        "context_defiant": "Агрессивный бунт",
+        "context_fear_of_loss": "Страх утраты",
+        "context_glitch_prone": "Нестабильность имплантов",
+        "context_sensitive_skin": "Гиперестезия",
+        "context_masochism": "Мазохистская инверсия",
+        "context_pleasure_burn": "Ожог удовольствием",
+        "eq_clothe_dress": "Надеть платье",
+        "eq_clothe_stockings": "Надеть чулки",
+        "eq_clothe_underwear": "Надеть бельё",
+        "eq_clothe_panties": "Надеть трусики",
+        "eq_clothe_underwear_remove": "Снять бельё",
+        "eq_clothe_panties_remove": "Снять трусики",
+        "eq_clothe_stockings_remove": "Снять чулки",
+        "eq_clothe_dress_remove": "Снять платье",
+        "eq_clothe_jumpsuit_remove": "Снять комбинезон",
+        "device_sensory_loop": "Установить сенсорный контур",
+        "device_sensory_pulse": "Импульс сенсорного контура",
+        "device_contrast_pulse": "Контрастный импульс сенсорного контура",
+        "effect_refractory": "Рефрактерный период",
+        "finger_insertion": "Начать стимуляцию пальцами",
+        "act_deactivate_plug": "Выключить вибрацию плага",
+        "act_start_vibrator": "Включить продолжительную вибрацию",
+        "act_adjust_vibration": "Усилить вибрацию",
+        "act_stop_vibrator": "Остановить вибрацию",
+        "eq_clothe_lab_gown": "Надеть лабораторную рубашку",
+        "eq_clothe_lab_gown_remove": "Снять лабораторную рубашку",
+        "eq_clothe_calibration_set": "Надеть калибровочный комплект",
+        "eq_clothe_calibration_set_remove": "Снять калибровочный комплект",
+        "act_apply_ankle_cuffs": "Застегнуть ножные манжеты",
+        "act_remove_ankle_cuffs": "Снять ножные манжеты",
+        "act_apply_restraint_belt": "Зафиксировать руки на поясе",
+        "act_remove_restraint_belt": "Освободить руки от пояса",
+        "act_connect_tens": "Закрепить электроды TENS",
+        "act_start_electrostimulation": "Включить продолжительную электростимуляцию",
+        "act_adjust_electrostimulation": "Усилить электростимуляцию",
+        "act_stop_electrostimulation": "Остановить электростимуляцию",
+        "act_disconnect_tens": "Снять электроды TENS",
+        "act_hold_exposure": "Показать тело",
+        "act_end_exposure": "Прекратить показ",
+        "act_present_feet": "Предъявить ступни",
+        "act_end_feet_presentation": "Завершить осмотр ступней",
+        "sustained_vibration_pulse": "Импульс продолжительной вибрации",
+        "sustained_electro_pulse": "Импульс продолжительной электростимуляции",
+        "act_start_penetration": "Начать проникновение",
+        "act_increase_friction": "Ускорить фрикции",
+        "act_decrease_friction": "Замедлить фрикции",
+        "act_sexual_climax": "Резко усилить",
+        "act_end_sexual_contact": "Завершить сексуальный контакт",
+        "sustained_sexual_pulse": "Импульс продолжительного сексуального контакта",
+        "capsule_infusion_regenerative": "Ввести Regen-R",
+        "capsule_infusion_neurostabilizer": "Ввести NeuroCalm",
+        "capsule_infusion_sensitizer": "Ввести NeuroSpike",
+        "capsule_infusion_plasticity": "Ввести Mnemosyne-P",
+        "capsule_infusion_hormonal_primer": "Ввести Eros-V",
+        "capsule_additive_seminal": "Подать биоматериал",
+        "eq_clothe_costume": "Надеть личный костюм",
+        "eq_clothe_costume_remove": "Снять личный костюм",
+        "context_mental_correction_chair": "Кресло ментальной коррекции",
+        "act_start_oral_giving": "Вставить в рот",
+        "act_deepen_oral": "Засунуть в горло"
+      },
+      "points": {
+        "posture": "Поза (Текущее положение тела)",
+        "mind_state": "Психика/Разум",
+        "head": "Голова",
+        "face": "Лицо",
+        "lips": "Губы",
+        "neck": "Шея",
+        "shoulders": "Плечи",
+        "chest": "Грудь",
+        "nipples": "Соски",
+        "belly": "Живот",
+        "back": "Спина",
+        "waist": "Талия",
+        "arms": "Руки",
+        "hands": "Кисти",
+        "inner_thighs": "Внутренняя сторона бедер",
+        "legs": "Ноги",
+        "feet": "Ступни",
+        "buttocks": "Ягодицы",
+        "anus": "Анус",
+        "penis": "Член",
+        "testicles": "Яички",
+        "prostate": "Простата",
+        "slot_room": "Слот: Окружение (Комната)",
+        "slot_social": "Слот: Социальное",
+        "systemic": "Всё тело",
+        "vulva": "Вульва",
+        "vagina": "Влагалище",
+        "clitoris": "Клитор",
+        "hair": "Волосы"
+      },
+      "items": {
+        "eq_handcuffs": {
+          "name": "Жесткие наручники",
+          "description": "Металлические наручники для надежной фиксации запястий."
+        },
+        "eq_collar": {
+          "name": "Управляемый ошейник",
+          "description": "Ошейник с возможностью удаленного шокового воздействия."
+        },
+        "eq_tens_unit": {
+          "name": "Электро-стимулятор (TENS)",
+          "description": "Устройство для нейро-электрической стимуляции. Может доставлять как удовольствие, так и боль."
+        },
+        "eq_plug": {
+          "name": "Сенсорный плаг",
+          "description": "Телеметрический плаг для внутреннего контроля и стимуляции."
+        },
+        "eq_speculum": {
+          "name": "Медицинский расширитель",
+          "description": "Металлический инструмент для полного раскрытия и осмотра."
+        },
+        "eq_vibrator": {
+          "name": "Многорежимный вибратор",
+          "description": "Интенсивное устройство для направленной гиперстимуляции."
+        },
+        "eq_sensory_pod": {
+          "name": "Сенсорная капсула",
+          "description": "Герметичная капсула для полной сенсорной депривации."
+        },
+        "eq_fuck_machine": {
+          "name": "Фак-машина",
+          "description": "Устройство для безжалостного механического воздействия."
+        },
+        "eq_med_analyzer": {
+          "name": "Медицинский сканер",
+          "description": "Фиксирующее кольцо для глубокого структурного сканирования."
+        },
+        "drug_truth_serum": {
+          "name": "Сыворотка правды (Veritas-9)",
+          "description": "Снижает когнитивную защиту, развязывает язык и делает субъекта податливым."
+        },
+        "drug_aphrodisiac": {
+          "name": "Синтетический афродизиак (Eros-V)",
+          "description": "Резко повышает чувствительность и возбудимость нервной системы."
+        },
+        "drug_painkiller": {
+          "name": "Болеутоляющее (Numb-X)",
+          "description": "Подавляет болевые рецепторы, делая субъекта устойчивым к повреждениям."
+        },
+        "drug_sensitizer": {
+          "name": "Гипер-сенсибилизатор (NeuroSpike)",
+          "description": "Многократно усиливает любые тактильные и болевые ощущения."
+        },
+        "eq_jumpsuit": {
+          "name": "Сенсорный Комбинезон",
+          "description": "Плотный изоляционный комбинезон, закрывающий почти всё тело. Значительно снижает тактильную чувствительность."
+        },
+        "eq_dress": {
+          "name": "Простое белое платье",
+          "description": "Лёгкое белое платье лабораторного образца"
+        },
+        "eq_stockings": {
+          "name": "Чулки",
+          "description": "Чёрные чулки выше колена"
+        },
+        "eq_underwear": {
+          "name": "Нижнее бельё",
+          "description": "Белое бельё"
+        },
+        "eq_blindfold": {
+          "name": "Повязка на глаза",
+          "description": "Чёрная повязка для глаз"
+        },
+        "eq_gag": {
+          "name": "Кляп",
+          "description": "Шаровой кляп"
+        },
+        "eq_panties": {
+          "name": "Трусики",
+          "description": "Белые трусики"
+        },
+        "drug_regenerative": {
+          "name": "Регенеративный раствор (Regen-R)",
+          "description": "Капсульная ампула для ускоренного восстановления и снижения физиологической нагрузки."
+        },
+        "drug_neurostabilizer": {
+          "name": "Нейростабилизатор (NeuroCalm)",
+          "description": "Капсульная ампула, сглаживающая реактивность и риск перегрузки."
+        },
+        "drug_plasticity_catalyst": {
+          "name": "Пластический катализатор (Mnemosyne-P)",
+          "description": "Капсульная ампула, усиливающая закрепление последующего опыта."
+        },
+        "eq_lab_gown": {
+          "name": "Лабораторная рубашка",
+          "description": "Свободная лабораторная рубашка до середины бедра, раскрывающаяся сзади."
+        },
+        "eq_calibration_set": {
+          "name": "Калибровочный комплект",
+          "description": "Короткий топ и облегающие шорты с открытыми зонами для датчиков."
+        },
+        "eq_ankle_cuffs": {
+          "name": "Ножные манжеты",
+          "description": "Пара фиксирующих манжет для лодыжек с короткой соединительной цепью."
+        },
+        "eq_restraint_belt": {
+          "name": "Фиксирующий пояс",
+          "description": "Широкий пояс с креплениями, удерживающими запястья у талии."
+        }
+      },
+      "traits": {
+        "trait_masochist": "Мазохист",
+        "trait_submissive": "Покорный",
+        "trait_defiant": "Бунтарь",
+        "trait_chem_addict": "Хим-зависимый",
+        "trait_somatophile": "Соматофил",
+        "trait_narcissist": "Нарцисс (Самофиксация)",
+        "trait_clinical_fetish": "Медицинский фетиш",
+        "trait_technophile": "Технофил",
+        "trait_hypersensitive": "Гиперчувствительный",
+        "trait_stoic": "Стоик"
+      },
+      "assets": {
+        "lab_recovery_capsule": {
+          "name": "Восстановительная капсула",
+          "description": "За три часа стабилизирует актив и возвращает ресурс к базовому уровню."
+        },
+        "lab_sex_machine": {
+          "name": "Модуль секс-машины",
+          "description": "Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции."
+        },
+        "lab_diagnostic_table": {
+          "name": "Диагностический стол",
+          "description": "Базовая телеметрия и ручная калибровка актива."
+        },
+        "lab_mental_correction_chair": {
+          "name": "Кресло ментальной коррекции",
+          "description": "Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур."
+        }
+      },
+      "rooms": {
+        "room_calibration": {
+          "name": "Калибровочная",
+          "description": "Изолированное помещение для ручных воздействий и запуска протоколов."
+        },
+        "room_cell_a": {
+          "name": "Жилая камера A",
+          "description": "Закрытая камера с койкой, санитарным модулем и контролем сна."
+        },
+        "room_control": {
+          "name": "Пост наблюдения",
+          "description": "Рабочее место ассистента, терминал телеметрии и управление оборудованием."
+        },
+        "room_cell_b": {
+          "name": "Жилая камера B",
+          "description": "Резервная жилая камера для второго актива."
+        }
+      },
+      "offers": {
+        "offer_aphrodisiac": {
+          "name": "Eros-V",
+          "description": "Расходник: резко повышает реактивность нервной системы."
+        },
+        "offer_sensitizer": {
+          "name": "NeuroSpike",
+          "description": "Расходник для локальной гиперсенсибилизации."
+        },
+        "lab_recovery_capsule": {
+          "name": "Восстановительная капсула",
+          "description": "Вертикальная ёмкость с вязкой тёплой жидкостью, кислородной маской и каналом подачи питательного раствора; постепенно расслабляет и стабилизирует тело."
+        },
+        "offer_lab_gown": {
+          "name": "Лабораторная рубашка",
+          "description": "Свободная диагностическая одежда с открытой спиной."
+        },
+        "offer_calibration_set": {
+          "name": "Калибровочный комплект",
+          "description": "Топ и шорты с доступом к зонам установки датчиков."
+        },
+        "offer_ankle_cuffs": {
+          "name": "Ножные манжеты",
+          "description": "Фиксаторы лодыжек с короткой соединительной цепью."
+        },
+        "offer_restraint_belt": {
+          "name": "Фиксирующий пояс",
+          "description": "Пояс для удержания запястий у талии."
+        },
+        "lab_sex_machine": {
+          "name": "Модуль секс-машины",
+          "description": "Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции."
+        },
+        "offer_regenerative": {
+          "name": "Regen-R",
+          "description": "Ампула для регенеративного контура восстановительной капсулы."
+        },
+        "offer_neurostabilizer": {
+          "name": "NeuroCalm",
+          "description": "Ампула нейростабилизатора для восстановительной капсулы."
+        },
+        "offer_plasticity_catalyst": {
+          "name": "Mnemosyne-P",
+          "description": "Ампула пластического катализатора для восстановительной капсулы."
+        },
+        "offer_handcuffs": {
+          "name": "Наручники",
+          "description": "Стандартная фиксация запястий с визуальным состоянием калибровки."
+        },
+        "offer_collar": {
+          "name": "Управляемый ошейник",
+          "description": "Фиксация шеи и канал дистанционного импульса."
+        },
+        "offer_plug": {
+          "name": "Стимулирующая пробка",
+          "description": "Внутренний управляемый модуль продолжительной стимуляции."
+        },
+        "offer_vibrator": {
+          "name": "Вибростимулятор",
+          "description": "Ручной модуль локальной продолжительной стимуляции."
+        },
+        "offer_blindfold": {
+          "name": "Сенсорная повязка",
+          "description": "Изоляция зрения с отдельным визуальным состоянием."
+        },
+        "offer_gag": {
+          "name": "Фиксирующий кляп",
+          "description": "Лицевая фиксация с отдельным визуальным состоянием."
+        },
+        "offer_jumpsuit": {
+          "name": "Сенсорный комбинезон",
+          "description": "Закрытая экипировка для изоляции и аппаратных процедур."
+        },
+        "offer_dress": {
+          "name": "Станционное платье",
+          "description": "Повседневная одежда, поддерживаемая визуальной матрицей."
+        },
+        "offer_stockings": {
+          "name": "Чулки",
+          "description": "Дополнительный слой одежды с отдельными визуальными состояниями."
+        },
+        "offer_underwear": {
+          "name": "Комплект белья",
+          "description": "Базовое бельё, поддерживаемое калибровочной матрицей."
+        },
+        "event_offer_neurospike_v17": {
+          "name": "NeuroSpike · V-17",
+          "description": "Ранняя серия гипер-сенсибилизатора. Маркировка происхождения частично стёрта."
+        },
+        "lab_mental_correction_chair": {
+          "name": "Кресло ментальной коррекции",
+          "description": "Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур."
+        }
+      }
     }
   },
   "language": {

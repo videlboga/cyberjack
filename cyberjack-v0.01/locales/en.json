@@ -112,7 +112,6 @@
       "limitedBatch": "LIMITED BATCH",
       "module": "MODULE",
       "remaining": "REMAINING",
-      "station": "Station",
       "stationAroundLab": "Station around the laboratory",
       "acceptOrder": "Accept order",
       "sectorJournal": "Sector Journal",
@@ -186,6 +185,423 @@
       "noEventsYet": "No significant events recorded yet.",
       "term": "TERM",
       "topic": "TOPIC"
+    },
+    "content": {
+      "actions": {
+        "act_slap": "Slap",
+        "act_kiss": "Kiss",
+        "act_punch": "Punch",
+        "act_caress": "Caress",
+        "act_interrogate": "Harsh interrogation",
+        "act_praise": "Praise",
+        "act_examine": "Strict inspection",
+        "act_apply_handcuffs": "Put on handcuffs",
+        "act_remove_handcuffs": "Remove handcuffs",
+        "act_struggle_cuffs": "Struggle against cuffs",
+        "act_apply_collar": "Fasten shock collar",
+        "act_shock_collar": "Shock through collar",
+        "act_remove_collar": "Remove collar",
+        "act_inject_truth_serum": "Inject truth serum (Veritas-9)",
+        "act_inject_painkiller": "Inject painkiller (Numb-X)",
+        "act_insert_plug": "Insert telemetry plug",
+        "act_activate_plug": "Turn on plug vibration",
+        "act_remove_plug": "Remove plug",
+        "pose_standing": "Stance: Attention",
+        "pose_all_fours": "Pose: On all fours",
+        "pose_spread_eagle": "Pose: Spread wide",
+        "eq_blindfold_apply": "Put on blindfold",
+        "eq_blindfold_remove": "Remove blindfold",
+        "eq_gag_apply": "Insert gag",
+        "eq_gag_remove": "Remove gag",
+        "pose_sitting": "Pose: Sitting",
+        "pose_lying_down": "Pose: Lying",
+        "act_suspend_wrists": "Suspend by wrists",
+        "act_release_wrists": "Untie wrists (release from suspension)",
+        "eq_clothe_jumpsuit": "Put on Jumpsuit",
+        "eq_strip_jumpsuit": "Remove Jumpsuit",
+        "effect_apathy": "Apathy / Shutdown",
+        "effect_chronic_apathy": "Deep Breakdown (Chronic Apathy)",
+        "effect_subspace": "Subspace (Compliance)",
+        "effect_panic": "Panic Attack",
+        "effect_sensory_overload": "Sensory Overload",
+        "effect_freeze": "Tonic Immobility",
+        "effect_suggestibility": "Control Shift",
+        "effect_active_defiance": "Active Rejection",
+        "effect_hyperesthesia": "Hyperesthesia",
+        "effect_local_hyperesthesia": "Local Hyperesthesia",
+        "effect_local_numbness": "Local Numbness",
+        "gentle_stroke": "Gentle stroking",
+        "tickle": "Fingertip tickling",
+        "light_kiss": "Brief kiss",
+        "deep_kiss": "Deep kiss",
+        "feather_stroke": "Feather stroke",
+        "deep_massage": "Massage",
+        "licking": "Lick",
+        "firm_grip": "Firm grip",
+        "light_bite": "Playful bite",
+        "hard_bite": "Painful bite",
+        "pinch": "Pinch",
+        "scratching": "Scratch with nails",
+        "slap": "Slap",
+        "hard_slap": "Palm strike",
+        "needle_prick": "Needle prick",
+        "whip_strike": "Whip strike",
+        "taser_shock": "Taser shock",
+        "ice_cube": "Touch with ice",
+        "hot_wax": "Drip wax",
+        "vibrator_pulse": "Vibrator pulse",
+        "hair_pull": "Pull hair",
+        "spit": "Spit",
+        "breath_blow": "Blow breath",
+        "verbal_pressure": "Conversation",
+        "stare": "Intent stare",
+        "close_inspection": "Close inspection",
+        "feint_strike": "Feint swing",
+        "pose_kneeling": "Pose: Kneeling",
+        "context_defiant": "Aggressive rebellion",
+        "context_fear_of_loss": "Fear of loss",
+        "context_glitch_prone": "Implant instability",
+        "context_sensitive_skin": "Hyperesthesia",
+        "context_masochism": "Masochistic inversion",
+        "context_pleasure_burn": "Pleasure burn",
+        "eq_clothe_dress": "Put on dress",
+        "eq_clothe_stockings": "Put on stockings",
+        "eq_clothe_underwear": "Put on underwear",
+        "eq_clothe_panties": "Put on panties",
+        "eq_clothe_underwear_remove": "Remove underwear",
+        "eq_clothe_panties_remove": "Remove panties",
+        "eq_clothe_stockings_remove": "Remove stockings",
+        "eq_clothe_dress_remove": "Remove dress",
+        "eq_clothe_jumpsuit_remove": "Remove jumpsuit",
+        "device_sensory_loop": "Set sensory loop",
+        "device_sensory_pulse": "Sensory loop pulse",
+        "device_contrast_pulse": "Sensory loop contrast pulse",
+        "effect_refractory": "Refractory period",
+        "finger_insertion": "Start finger stimulation",
+        "act_deactivate_plug": "Turn off plug vibration",
+        "act_start_vibrator": "Start sustained vibration",
+        "act_adjust_vibration": "Increase vibration",
+        "act_stop_vibrator": "Stop vibration",
+        "eq_clothe_lab_gown": "Put on lab gown",
+        "eq_clothe_lab_gown_remove": "Remove lab gown",
+        "eq_clothe_calibration_set": "Put on calibration set",
+        "eq_clothe_calibration_set_remove": "Remove calibration set",
+        "act_apply_ankle_cuffs": "Fasten ankle cuffs",
+        "act_remove_ankle_cuffs": "Remove ankle cuffs",
+        "act_apply_restraint_belt": "Secure hands at waist",
+        "act_remove_restraint_belt": "Free hands from belt",
+        "act_connect_tens": "Attach TENS electrodes",
+        "act_start_electrostimulation": "Start sustained electrostimulation",
+        "act_adjust_electrostimulation": "Increase electrostimulation",
+        "act_stop_electrostimulation": "Stop electrostimulation",
+        "act_disconnect_tens": "Remove TENS electrodes",
+        "act_hold_exposure": "Show body",
+        "act_end_exposure": "Stop showing",
+        "act_present_feet": "Present feet",
+        "act_end_feet_presentation": "End foot inspection",
+        "sustained_vibration_pulse": "Sustained vibration pulse",
+        "sustained_electro_pulse": "Sustained electro pulse",
+        "act_start_penetration": "Start penetration",
+        "act_increase_friction": "Speed up friction",
+        "act_decrease_friction": "Slow down friction",
+        "act_sexual_climax": "Intensify sharply",
+        "act_end_sexual_contact": "End sexual contact",
+        "sustained_sexual_pulse": "Sustained sexual contact pulse",
+        "capsule_infusion_regenerative": "Inject Regen-R",
+        "capsule_infusion_neurostabilizer": "Inject NeuroCalm",
+        "capsule_infusion_sensitizer": "Inject NeuroSpike",
+        "capsule_infusion_plasticity": "Inject Mnemosyne-P",
+        "capsule_infusion_hormonal_primer": "Inject Eros-V",
+        "capsule_additive_seminal": "Deliver biomaterial",
+        "eq_clothe_costume": "Put on personal costume",
+        "eq_clothe_costume_remove": "Remove personal costume",
+        "context_mental_correction_chair": "Mental correction chair",
+        "act_start_oral_giving": "Insert into mouth",
+        "act_deepen_oral": "Push into throat"
+      },
+      "points": {
+        "posture": "Posture (Current body position)",
+        "mind_state": "Mind / Psyche",
+        "head": "Head",
+        "face": "Face",
+        "lips": "Lips",
+        "neck": "Neck",
+        "shoulders": "Shoulders",
+        "chest": "Chest",
+        "nipples": "Nipples",
+        "belly": "Belly",
+        "back": "Back",
+        "waist": "Waist",
+        "arms": "Arms",
+        "hands": "Hands",
+        "inner_thighs": "Inner thighs",
+        "legs": "Legs",
+        "feet": "Feet",
+        "buttocks": "Buttocks",
+        "anus": "Anus",
+        "penis": "Penis",
+        "testicles": "Testicles",
+        "prostate": "Prostate",
+        "slot_room": "Slot: Environment (Room)",
+        "slot_social": "Slot: Social",
+        "systemic": "Whole body",
+        "vulva": "Vulva",
+        "vagina": "Vagina",
+        "clitoris": "Clitoris",
+        "hair": "Hair"
+      },
+      "items": {
+        "eq_handcuffs": {
+          "name": "Hard handcuffs",
+          "description": "Metal handcuffs for reliable wrist restraint."
+        },
+        "eq_collar": {
+          "name": "Controlled collar",
+          "description": "Collar with remote shock capability."
+        },
+        "eq_tens_unit": {
+          "name": "Electro-stimulator (TENS)",
+          "description": "Neuro-electric stimulation device. Delivers pleasure and pain."
+        },
+        "eq_plug": {
+          "name": "Sensory plug",
+          "description": "Telemetry plug for internal control and stimulation."
+        },
+        "eq_speculum": {
+          "name": "Medical speculum",
+          "description": "Metal instrument for full opening and examination."
+        },
+        "eq_vibrator": {
+          "name": "Multi-mode vibrator",
+          "description": "Intense device for directed hyperstimulation."
+        },
+        "eq_sensory_pod": {
+          "name": "Sensory pod",
+          "description": "Sealed pod for total sensory deprivation."
+        },
+        "eq_fuck_machine": {
+          "name": "Fuck machine",
+          "description": "Device for relentless mechanical stimulation."
+        },
+        "eq_med_analyzer": {
+          "name": "Medical scanner",
+          "description": "Restraint ring for deep structural scanning."
+        },
+        "drug_truth_serum": {
+          "name": "Truth serum (Veritas-9)",
+          "description": "Lowers cognitive defenses, loosens the tongue, makes the subject pliant."
+        },
+        "drug_aphrodisiac": {
+          "name": "Synthetic aphrodisiac (Eros-V)",
+          "description": "Sharply raises nervous system sensitivity and arousal."
+        },
+        "drug_painkiller": {
+          "name": "Painkiller (Numb-X)",
+          "description": "Suppresses pain receptors, making the subject resistant to damage."
+        },
+        "drug_sensitizer": {
+          "name": "Hyper-sensitizer (NeuroSpike)",
+          "description": "Greatly amplifies all tactile and pain sensations."
+        },
+        "eq_jumpsuit": {
+          "name": "Sensory jumpsuit",
+          "description": "Dense insulating jumpsuit covering nearly the whole body. Greatly lowers tactile sensitivity."
+        },
+        "eq_dress": {
+          "name": "Plain white dress",
+          "description": "Light white laboratory dress."
+        },
+        "eq_stockings": {
+          "name": "Stockings",
+          "description": "Black stockings above the knee."
+        },
+        "eq_underwear": {
+          "name": "Underwear",
+          "description": "White underwear."
+        },
+        "eq_blindfold": {
+          "name": "Blindfold",
+          "description": "Black eye covering."
+        },
+        "eq_gag": {
+          "name": "Gag",
+          "description": "Ball gag."
+        },
+        "eq_panties": {
+          "name": "Panties",
+          "description": "White panties."
+        },
+        "drug_regenerative": {
+          "name": "Regenerative solution (Regen-R)",
+          "description": "Capsule ampule for accelerated recovery and reduced physiological load."
+        },
+        "drug_neurostabilizer": {
+          "name": "Neurostabilizer (NeuroCalm)",
+          "description": "Capsule ampule that smooths reactivity and overload risk."
+        },
+        "drug_plasticity_catalyst": {
+          "name": "Plasticity catalyst (Mnemosyne-P)",
+          "description": "Capsule ampule that strengthens consolidation of subsequent experience."
+        },
+        "eq_lab_gown": {
+          "name": "Lab gown",
+          "description": "Loose lab gown to mid-thigh, opening at the back."
+        },
+        "eq_calibration_set": {
+          "name": "Calibration set",
+          "description": "Short top and fitted shorts with open sensor zones."
+        },
+        "eq_ankle_cuffs": {
+          "name": "Ankle cuffs",
+          "description": "Pair of locking cuffs for ankles with a short connecting chain."
+        },
+        "eq_restraint_belt": {
+          "name": "Restraint belt",
+          "description": "Wide belt with straps holding the wrists at the waist."
+        }
+      },
+      "traits": {
+        "trait_masochist": "Masochist",
+        "trait_submissive": "Submissive",
+        "trait_defiant": "Defiant",
+        "trait_chem_addict": "Chem-dependent",
+        "trait_somatophile": "Somatophile",
+        "trait_narcissist": "Narcissist (Self-fixation)",
+        "trait_clinical_fetish": "Medical fetish",
+        "trait_technophile": "Technophile",
+        "trait_hypersensitive": "Hypersensitive",
+        "trait_stoic": "Stoic"
+      },
+      "assets": {
+        "lab_recovery_capsule": {
+          "name": "Recovery Capsule",
+          "description": "Stabilizes the asset over three hours and restores resources to baseline."
+        },
+        "lab_sex_machine": {
+          "name": "Sex Machine Module",
+          "description": "Stationary programmable complex with several fixation and stimulation configurations."
+        },
+        "lab_diagnostic_table": {
+          "name": "Diagnostic Table",
+          "description": "Basic telemetry and manual calibration of the asset."
+        },
+        "lab_mental_correction_chair": {
+          "name": "Mental Correction Chair",
+          "description": "Isolated neuro-chair with a visor, directed sound, and tactile feedback for managed mental procedures."
+        }
+      },
+      "rooms": {
+        "room_calibration": {
+          "name": "Calibration Room",
+          "description": "Isolated room for manual interventions and protocol execution."
+        },
+        "room_cell_a": {
+          "name": "Living Cell A",
+          "description": "Closed cell with a bed, sanitary module, and sleep control."
+        },
+        "room_control": {
+          "name": "Observation Post",
+          "description": "Assistant workspace, telemetry terminal, and equipment control."
+        },
+        "room_cell_b": {
+          "name": "Living Cell B",
+          "description": "Reserve living cell for a second asset."
+        }
+      },
+      "offers": {
+        "offer_aphrodisiac": {
+          "name": "Eros-V",
+          "description": "Consumable: sharply raises nervous system reactivity."
+        },
+        "offer_sensitizer": {
+          "name": "NeuroSpike",
+          "description": "Consumable for local hypersensitization."
+        },
+        "lab_recovery_capsule": {
+          "name": "Recovery Capsule",
+          "description": "Vertical tank with viscous warm fluid, oxygen mask, and nutrient feed; gradually relaxes and stabilizes the body."
+        },
+        "offer_lab_gown": {
+          "name": "Lab Gown",
+          "description": "Loose diagnostic clothing with an open back."
+        },
+        "offer_calibration_set": {
+          "name": "Calibration Set",
+          "description": "Top and shorts with access to sensor zones."
+        },
+        "offer_ankle_cuffs": {
+          "name": "Ankle Cuffs",
+          "description": "Ankle restraints with a short connecting chain."
+        },
+        "offer_restraint_belt": {
+          "name": "Restraint Belt",
+          "description": "Belt to hold wrists at the waist."
+        },
+        "lab_sex_machine": {
+          "name": "Sex Machine Module",
+          "description": "Stationary programmable complex with several fixation and stimulation configurations."
+        },
+        "offer_regenerative": {
+          "name": "Regen-R",
+          "description": "Ampule for the regenerative circuit of the recovery capsule."
+        },
+        "offer_neurostabilizer": {
+          "name": "NeuroCalm",
+          "description": "Neurostabilizer ampule for the recovery capsule."
+        },
+        "offer_plasticity_catalyst": {
+          "name": "Mnemosyne-P",
+          "description": "Plasticity catalyst ampule for the recovery capsule."
+        },
+        "offer_handcuffs": {
+          "name": "Handcuffs",
+          "description": "Standard wrist restraint with visual calibration state."
+        },
+        "offer_collar": {
+          "name": "Controlled Collar",
+          "description": "Neck restraint and remote pulse channel."
+        },
+        "offer_plug": {
+          "name": "Stimulating Plug",
+          "description": "Internal controlled module for sustained stimulation."
+        },
+        "offer_vibrator": {
+          "name": "Vibrator",
+          "description": "Handheld module for local sustained stimulation."
+        },
+        "offer_blindfold": {
+          "name": "Sensory Blindfold",
+          "description": "Vision isolation with a separate visual state."
+        },
+        "offer_gag": {
+          "name": "Restraint Gag",
+          "description": "Face restraint with a separate visual state."
+        },
+        "offer_jumpsuit": {
+          "name": "Sensory Jumpsuit",
+          "description": "Closed gear for isolation and machine procedures."
+        },
+        "offer_dress": {
+          "name": "Station Dress",
+          "description": "Casual clothing supported by the visual matrix."
+        },
+        "offer_stockings": {
+          "name": "Stockings",
+          "description": "Additional clothing layer with separate visual states."
+        },
+        "offer_underwear": {
+          "name": "Underwear Set",
+          "description": "Base underwear supported by the calibration matrix."
+        },
+        "event_offer_neurospike_v17": {
+          "name": "NeuroSpike · V-17",
+          "description": "Early hyper-sensitizer series. Origin markings partially erased."
+        },
+        "lab_mental_correction_chair": {
+          "name": "Mental Correction Chair",
+          "description": "Isolated neuro-chair with a visor, directed sound, and tactile feedback for managed mental procedures."
+        }
+      }
     }
   },
   "language": {

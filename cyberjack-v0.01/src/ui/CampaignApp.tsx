@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "./i18n";
+import { GameMenu } from "./GameMenu";
 import { getRoomName, getDeviceName, getRoomDescription } from './roomTranslations';
+import { translateItem, translateOffer, translateAsset } from './contentTranslations';
 import {
   CalibrationPrototype,
   CalibrationZoneMap,
@@ -809,6 +811,7 @@ export function CampaignApp() {
   const [notice, setNotice] = useState<string | null>(null);
   const [timeFlow, setTimeFlow] = useState<TimeFlowState | null>(null);
   const [inbox, setInbox] = useState<DirectorEvent[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
   // The periodic refresh and an interaction-triggered refresh can overlap.
   // Never let an older snapshot erase a context (and therefore its avatar)
   // that was just applied by the newer tick.
@@ -1146,6 +1149,14 @@ export function CampaignApp() {
             <option value="manga2">Manga 2</option>
           </select>
         </label>
+        <button
+          className="campaign-menu-button"
+          onClick={() => setMenuOpen(true)}
+          title="Меню"
+        >
+          <i>≡</i>
+          <span>Меню</span>
+        </button>
       </header>
       <div className="campaign-frame">
         <nav className="campaign-nav">
@@ -1375,6 +1386,7 @@ export function CampaignApp() {
           <button>×</button>
         </div>
       )}
+      <GameMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
   );
 }
@@ -6214,6 +6226,9 @@ function OfferCard({
 }) {
   const { t } = useI18n();
   const unavailable = offer.owned || offer.stock === 0;
+  const translatedOffer = translateOffer(offer.id, t) || translateAsset(offer.id, t);
+  const offerName = translatedOffer?.name || offer.name;
+  const offerDescription = translatedOffer?.description || offer.description;
   return (
     <article
       className={`${unavailable ? "owned " : ""}${offer.limited ? "limited-offer" : ""}`}
@@ -6228,8 +6243,8 @@ function OfferCard({
                 ? `${t('game.ui.remaining')} ${offer.stock}`
                 : t('game.ui.equipmentSection')}
         </small>
-        <strong>{offer.name}</strong>
-        <p>{offer.description}</p>
+        <strong>{offerName}</strong>
+        <p>{offerDescription}</p>
         {offer.limited && (
           <p className="offer-provenance">
             <span>{offer.supplier}</span>
@@ -6395,16 +6410,19 @@ function InventoryView({
         </header>
       )}
       <div className="inventory-grid">
-        {items.map((item) => (
+        {items.map((item) => {
+          const translated = translateItem(item.itemId, t);
+          return (
           <article key={item.itemId}>
             <div>
               <small>{item.type}</small>
-              <strong>{item.name}</strong>
-              <p>{item.description}</p>
+              <strong>{translated?.name || item.name}</strong>
+              <p>{translated?.description || item.description}</p>
             </div>
             <b>{item.charges >= 0 ? `×${item.charges}` : "постоянно"}</b>
           </article>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
@@ -6458,16 +6476,19 @@ function StationStorage({
           <div className="storage-group" key={group.id}>
             <h2>{group.label}</h2>
             <div className="inventory-grid">
-              {items.map((item) => (
+              {items.map((item) => {
+                const translated = translateItem(item.itemId, t);
+                return (
                 <article key={item.itemId}>
                   <div>
                     <small>{item.type}</small>
-                    <strong>{item.name}</strong>
-                    <p>{item.description}</p>
+                    <strong>{translated?.name || item.name}</strong>
+                    <p>{translated?.description || item.description}</p>
                   </div>
                   <b>{item.charges >= 0 ? `×${item.charges}` : "постоянно"}</b>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </div>
         ) : null;
