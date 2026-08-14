@@ -8,7 +8,7 @@ import { expireOverdueContracts } from '../services/contractService';
 import { ensureAuthoredSupplyOpportunity } from './eventDirector';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryRepo } from '../infrastructure/repositories';
-import { emitTrace, newRequestId } from '../orchestration/trace';
+import { emitTrace, newRequestId, withTraceContext } from '../orchestration/trace';
 
 /**
  * Advances active simulation time.
@@ -66,6 +66,7 @@ const AUTONOMOUS_INTERVAL_MINUTES = 5;
  * awaiting, so a slow model does not block the game clock.
  */
 export function runDueBackgroundJobs(worldMinute: number) {
+    const startedAt = performance.now();
     // Recover jobs whose lease expired (a worker crashed or hung) so they can
     // be retried on the next pass.
     recoverStaleBackgroundJobs();
@@ -78,8 +79,8 @@ export function runDueBackgroundJobs(worldMinute: number) {
             traceId: requestId,
             requestId,
             stage: 'background.queue',
-            startedAt: performance.now(),
-            durationMs: 0,
+            startedAt,
+            durationMs: Math.round(performance.now() - startedAt),
             worldMinute,
             dueCount: due.length,
             pendingCount: pendingJobs.length,
@@ -104,20 +105,26 @@ export function runDueBackgroundJobs(worldMinute: number) {
         }
         const startedAt = performance.now();
         void (async () => {
-            // Heartbeat: renew the lease periodically so a slow model response
-            // is not declared stale and re-run while this call is still running.
-            const heartbeat = setInterval(() => renewBackgroundJobLease(claimed.id), 15_000);
-            try {
-                await executeBackgroundJob(claimed);
-                markBackgroundJobDone(claimed.id);
-                emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'done' });
-            } catch (error: any) {
-                markBackgroundJobFailed(claimed.id, error?.message || String(error));
-                emitTrace({ traceId: requestId, requestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'failed', error: String(error?.message || error) });
-            } finally {
-                clearInterval(heartbeat);
-                releaseJobSlot();
-            }
+            // Each background job runs in its own trace context so its LLM
+            // calls share one requestId and can be correlated with the job
+            // (Этап 10 сквозной trace).
+            const jobRequestId = newRequestId();
+            await withTraceContext(jobRequestId, async () => {
+                // Heartbeat: renew the lease periodically so a slow model response
+                // is not declared stale and re-run while this call is still running.
+                const heartbeat = setInterval(() => renewBackgroundJobLease(claimed.id), 15_000);
+                try {
+                    await executeBackgroundJob(claimed);
+                    markBackgroundJobDone(claimed.id);
+                    emitTrace({ traceId: jobRequestId, requestId: jobRequestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'done' });
+                } catch (error: any) {
+                    markBackgroundJobFailed(claimed.id, error?.message || String(error));
+                    emitTrace({ traceId: jobRequestId, requestId: jobRequestId, stage: 'background.job', startedAt, durationMs: Math.round(performance.now() - startedAt), jobType: claimed.type, jobId: claimed.id, status: 'failed', error: String(error?.message || error) });
+                } finally {
+                    clearInterval(heartbeat);
+                    releaseJobSlot();
+                }
+            });
         })();
     }
 }

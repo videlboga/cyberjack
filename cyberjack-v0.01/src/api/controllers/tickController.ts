@@ -1,6 +1,7 @@
 
 import { Request, Response } from 'express';
 import { dispatchEvent } from '../../orchestration/eventRouter';
+import { withTraceContext } from '../../orchestration/trace';
 import { subjectRepo, resourceRepo, presetRepo, sceneCharacterRepo, activeContextsRepo, eventLogRepo, characterRepo } from '../../infrastructure/repositories';
 import { db } from '../../infrastructure/db';
 import { executeTurnConversations } from '../../orchestration/sceneOrchestrator';
@@ -113,7 +114,7 @@ export const processTick = async (req: Request, res: Response) => {
             // tick computes the action itself but must not age processes again.
             skipContextTimeAdvance:true,
         };
-        const { bundle, dynamicModifiers, pointIdUsed, subjectIdUsed, actorIdUsed } = await dispatchEvent(dispatchPayload);
+        const { bundle, dynamicModifiers, pointIdUsed, subjectIdUsed, actorIdUsed, requestId } = await dispatchEvent(dispatchPayload);
         // A conversational screen still represents where the calibrator is,
         // but its position must never take part in choosing who the command
         // refers to.  Apply that screen transition only after parsing/routing.
@@ -233,7 +234,7 @@ export const processTick = async (req: Request, res: Response) => {
         if (!req.body.skipLLM && !llmSkipped) {
             if (deferLLM) {
                 const job = registerDeferredReply(replyJobId!);
-                job.completion = generateTurnReply()
+                job.completion = withTraceContext(requestId, () => generateTurnReply())
                     .then(generated => {
                         job.done = true;
                         job.metrics = generated.metrics;
@@ -247,7 +248,7 @@ export const processTick = async (req: Request, res: Response) => {
                         finishDeferredStream(job);
                     });
             } else {
-                const generated = await generateTurnReply();
+                const generated = await withTraceContext(requestId, () => generateTurnReply());
                 turnExecutionMetrics = generated.metrics;
                 llmError = generated.error;
             }

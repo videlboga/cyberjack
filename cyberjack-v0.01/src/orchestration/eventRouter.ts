@@ -4,6 +4,7 @@ import { parseSemanticVerbalInput } from '../parser/semanticVerbalParser';
 import { presetRepo, sceneRepo, sceneCharacterRepo, chatMemoryRepo } from '../infrastructure/repositories';
 import { getLaboratorySpatialContext, listLaboratoryDestinations } from '../scenario/spatialContext';
 import { pendingCommandRepo } from '../infrastructure/pendingCommandRepo';
+import { withTraceContext, newRequestId, currentTraceRequestId } from './trace';
 import type { DynamicModifiers } from '../domain/types';
 
 export interface RouteResponse {
@@ -12,6 +13,8 @@ export interface RouteResponse {
     pointIdUsed: string;
     subjectIdUsed: string;
     actorIdUsed: string;
+    /** The trace requestId for this user turn (Этап 10 сквозной trace). */
+    requestId: string;
 }
 
 /**
@@ -54,6 +57,15 @@ export function resolveCommandRoute(
  * and routing into the engine tick.
  */
 export async function dispatchEvent(payload: DispatchEventInput): Promise<RouteResponse> {
+    // The user-turn boundary: reuse the current trace context when present
+    // (processTick already set it), otherwise mint one. The whole path
+    // (parser → runGameTick → response) runs inside a single trace context so
+    // the parser, the tick and the generated reply share the same trace ID.
+    const requestId = currentTraceRequestId() || newRequestId();
+    return withTraceContext(requestId, () => dispatchEventInner(payload));
+}
+
+async function dispatchEventInner(payload: DispatchEventInput): Promise<RouteResponse> {
     let pointId = payload.pointId || 'systemic';
     let dynamicModifiers: DynamicModifiers | undefined = undefined;
     const sceneId = payload.sceneId || 'scene_lab_calibrator';
@@ -239,5 +251,5 @@ export async function dispatchEvent(payload: DispatchEventInput): Promise<RouteR
         skipContextTimeAdvance:payload.skipContextTimeAdvance,
     });
 
-    return { bundle, dynamicModifiers, pointIdUsed: pointId, subjectIdUsed: routedSubjectId, actorIdUsed: routedActorId };
+    return { bundle, dynamicModifiers, pointIdUsed: pointId, subjectIdUsed: routedSubjectId, actorIdUsed: routedActorId, requestId: currentTraceRequestId() || '' };
 }
