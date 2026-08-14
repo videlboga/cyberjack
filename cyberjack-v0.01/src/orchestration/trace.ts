@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { AsyncLocalStorage } from 'async_hooks';
 import { appendJsonLog } from '../utils/fileLogs';
 
 /**
@@ -19,6 +20,33 @@ export interface TraceSpan {
     tickId?: string;
     error?: string;
     [key: string]: unknown;
+}
+
+/**
+ * Async-local trace context. A tick (or autonomous background job) sets its
+ * requestId here; every LLM call made within that async scope inherits it, so
+ * a fallback span can be correlated with the tick that produced it. A new ID
+ * is minted only when no context is present (autonomous/standalone calls).
+ */
+const traceContext = new AsyncLocalStorage<{ requestId: string }>();
+
+/** Runs `fn` with the given requestId as the active trace context. */
+export function withTraceContext<T>(requestId: string, fn: () => T): T {
+    return traceContext.run({ requestId }, fn);
+}
+
+/**
+ * Sets the requestId as the active trace context for the current async
+ * execution chain (and its awaits). Used at the top of a tick/background job
+ * so every LLM call made downstream inherits the same requestId.
+ */
+export function setTraceContext(requestId: string): void {
+    traceContext.enterWith({ requestId });
+}
+
+/** Returns the current requestId from the async context, or null if none. */
+export function currentTraceRequestId(): string | null {
+    return traceContext.getStore()?.requestId ?? null;
 }
 
 /** A correlated root id shared by a request and its child spans. */

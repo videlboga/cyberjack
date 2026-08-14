@@ -12,7 +12,7 @@ import type { DeviceSessionMetadata } from '../domain/sessionMetadata';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
 import { buildPromptPayloadWithDB as buildPromptPayload } from '../prompts/buildPromptPayloadWrapper';
 import { appendJsonLog } from '../utils/fileLogs';
-import { traceSync, newRequestId, emitTrace } from './trace';
+import { traceSync, newRequestId, emitTrace, setTraceContext } from './trace';
 import { explainPromptLog, explainEngineState } from '../utils/logExplainers';
 import { stablePromptFragmentStats } from '../services/stablePromptFragmentCache';
 import { runScenarioStep } from '../scenario/runScenarioStep';
@@ -79,6 +79,10 @@ export function constrainCapacityWhileUnresponsive(input: {
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
     const initiatorId = payload.actingCharacterId || payload.playerId || payload.subjectId;
     const requestId = newRequestId();
+    // Make this tick's requestId the active trace context so every LLM call
+    // made downstream (parser, character speech, narrator) inherits it and can
+    // be correlated with the tick that produced it (Этап 10 сквозной trace).
+    setTraceContext(requestId);
     // 1. Load state
     const {
         state,
@@ -629,6 +633,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
 
     // 6.5 Update context strain (Escalation / Decay)
 
+    const promptBuildStartedAt = performance.now();
     const prompt = payload.skipPrompt
         ? { systemPrompt: '' } as TickBundle['prompt']
         : (await buildCharacterTurnContext({
@@ -638,6 +643,7 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             eventId: activeSceneId,
             initiatorId,
         })).payload;
+    const promptBuildDurationMs = Math.round(performance.now() - promptBuildStartedAt);
 
     // Log the constructed prompt payload for debugging/inspection
     if (!payload.skipPrompt) {
@@ -656,8 +662,8 @@ export async function runGameTick(payload: GameEventPayload): Promise<TickBundle
             traceId: requestId,
             requestId,
             stage: 'prompt.build',
-            startedAt: 0,
-            durationMs: 0,
+            startedAt: promptBuildStartedAt,
+            durationMs: promptBuildDurationMs,
             subjectId: payload.subjectId,
             tickId,
             promptSizeChars: promptChars,

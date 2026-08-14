@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
     emitTrace: vi.fn(),
 }));
-vi.mock('../orchestration/trace', () => ({ emitTrace: mocks.emitTrace }));
+vi.mock('../orchestration/trace', () => ({ emitTrace: mocks.emitTrace, currentTraceRequestId: () => null }));
 vi.mock('crypto', () => ({ randomUUID: () => 'trace-123' }));
 
 import { parseVerbalInputWithLLM } from './llmAdapter';
@@ -23,6 +23,14 @@ describe('parser fallback trace (Этап 10)', () => {
                 json: async () => ({ choices: [{ message: { content: '{"ok":true}' } }] }),
             }));
 
+        // Mock performance.now() to a deterministic sequence: the first call
+        // (startedAt before fetch) returns 1000, the second (in catch) returns
+        // 1042, so the fallback duration must be exactly 42ms.
+        const nowMock = vi.fn()
+            .mockReturnValueOnce(1000)   // startedAt before fetch
+            .mockReturnValueOnce(1042);  // duration computation in catch
+        vi.stubGlobal('performance', { now: nowMock });
+
         const result = await parseVerbalInputWithLLM([{ role: 'user', content: 'x' }]);
 
         expect(result.parsed).toEqual({ ok: true });
@@ -35,9 +43,10 @@ describe('parser fallback trace (Этап 10)', () => {
         expect(fallback.attempt).toBe(1);
         expect(fallback.attemptsTotal).toBeGreaterThanOrEqual(2);
         expect(fallback.error).toContain('network down');
-        // Real duration: startedAt is before now, durationMs is non-negative.
-        expect(fallback.startedAt).toBeGreaterThan(0);
-        expect(fallback.durationMs).toBeGreaterThanOrEqual(0);
+        // Real duration: startedAt is the mocked 1000, durationMs is the
+        // concrete non-zero difference (1042 - 1000 = 42).
+        expect(fallback.startedAt).toBe(1000);
+        expect(fallback.durationMs).toBe(42);
     });
 
     it('shares one traceId across every fallback attempt', async () => {

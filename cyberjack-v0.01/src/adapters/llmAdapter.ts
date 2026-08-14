@@ -1,6 +1,6 @@
 import { activeConfig } from '../prompts/config.js';
 import { randomUUID } from 'crypto';
-import { emitTrace } from '../orchestration/trace';
+import { emitTrace, currentTraceRequestId } from '../orchestration/trace';
 import { getModelAssignment } from './modelAssignments';
 
 export interface ChatMessage {
@@ -22,8 +22,10 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     const models = assignment.models;
     let lastError: unknown;
     // One trace/request ID shared across every parser fallback attempt for
-    // this logical request (Этап 6: «все попытки имеют общий trace/request ID»).
-    const traceId = randomUUID();
+    // this logical request. Inherit the tick's requestId when present so the
+    // fallback can be correlated with the tick that produced it; mint a new
+    // one only for autonomous/standalone calls (Этап 10 сквозной trace).
+    const traceId = currentTraceRequestId() || randomUUID();
     for (const model of models) {
         const controller = new AbortController();
         let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
@@ -285,8 +287,10 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
     const LLM_API_KEY = getApiKey();
     const assignment = getModelAssignment(options.purpose === 'memory' ? 'memory' : 'reply');
     // One trace/request ID shared across every provider fallback attempt for
-    // this logical request (Этап 6: «все попытки имеют общий trace/request ID»).
-    const traceId = randomUUID();
+    // this logical request. Inherit the tick's requestId when present so the
+    // fallback can be correlated with the tick that produced it; mint a new
+    // one only for autonomous/standalone calls (Этап 10 сквозной trace).
+    const traceId = currentTraceRequestId() || randomUUID();
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'HTTP-Referer': 'http://localhost:3000',
