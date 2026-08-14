@@ -17,7 +17,6 @@ describe('Advanced Scenarios and Multi-Character Proactivity', () => {
         db.prepare('DELETE FROM scene_characters').run();
         db.prepare('DELETE FROM active_contexts').run();
         db.prepare('DELETE FROM chat_memory').run();
-        db.prepare('DELETE FROM chat_memory_summary').run();
         db.prepare('DELETE FROM characters').run();
         db.prepare('DELETE FROM event_logs').run();
         db.prepare('DELETE FROM subjects').run();

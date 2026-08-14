@@ -1,6 +1,6 @@
 import { clamp } from '../../engine/utils';
 import { Request, Response } from 'express';
-import { subjectRepo, pointStateRepo, chatMemoryRepo, chatSummaryRepo, memoryRepo } from '../../infrastructure/repositories';
+import { subjectRepo, pointStateRepo, chatMemoryRepo, memoryRepo } from '../../infrastructure/repositories';
 import { resolvePortraitEmotion } from '../../domain/portraitEmotion';
 import { db } from '../../infrastructure/db';
 import { getStateSnapshot } from '../../services/stateService';
@@ -51,20 +51,34 @@ export const getChatHistory = (req: Request, res: Response) => {
         const subjectId = String(req.params.subjectId || '');
         if (!subjectId || !subjectRepo.get(subjectId)) return res.status(404).json({ success: false, error: 'Персонаж не найден' });
         const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 30));
-        const currentSubject = subjectRepo.get(subjectId);
-        const historicalObservations = db.prepare(`
-            SELECT timestamp, result_payload
-            FROM event_logs
-            WHERE subject_id = ? AND action_type = 'interaction'
-            ORDER BY timestamp ASC, id ASC
-        `).all(subjectId) as Array<{ timestamp: string; result_payload: string }>;
+        // Эмоция резолвится по реальному говорящему (speakerId), а не по просматриваемому
+        // субъекту: реплики других NPC в транскрипте должны отражать их состояние.
+        const speakerCache = new Map<string, { subject: any; observations: Array<{ timestamp: string; result_payload: string }> }>();
+        const speakerStateFor = (speakerId: string) => {
+            const key = speakerId || subjectId;
+            let cached = speakerCache.get(key);
+            if (!cached) {
+                const subject = subjectRepo.get(key);
+                const observations = db.prepare(`
+                    SELECT timestamp, result_payload
+                    FROM event_logs
+                    WHERE subject_id = ? AND action_type = 'interaction'
+                    ORDER BY timestamp ASC, id ASC
+                `).all(key) as Array<{ timestamp: string; result_payload: string }>;
+                cached = { subject, observations };
+                speakerCache.set(key, cached);
+            }
+            return cached;
+        };
         const messages = chatMemoryRepo.getRecent(subjectId, Math.min(100, limit * 4))
             .filter(message => !message.content.startsWith('[Воздействие]'))
             .slice(-limit)
             .map(message => {
                 if (message.role !== 'assistant' || message.portraitEmotion) return message;
+                const speakerId = message.speakerId || subjectId;
+                const { subject, observations } = speakerStateFor(speakerId);
                 const messageTime = String(message.createdAt || '');
-                const historical = [...historicalObservations].reverse().find(event => event.timestamp <= messageTime);
+                const historical = [...observations].reverse().find(event => event.timestamp <= messageTime);
                 let observation:any = null;
                 try {
                     if (historical) observation = JSON.parse(historical.result_payload || '{}').observation;
@@ -77,11 +91,11 @@ export const getChatHistory = (req: Request, res: Response) => {
                         reaction: observation?.reaction,
                         transitions: observation?.transitions,
                         state: {
-                            tension: currentSubject?.tension,
-                            capacity: currentSubject?.capacity,
-                            attitude: currentSubject?.attitude,
-                            openness: currentSubject?.openness,
-                            plasticity: currentSubject?.plasticity,
+                            tension: subject?.tension,
+                            capacity: subject?.capacity,
+                            attitude: subject?.attitude,
+                            openness: subject?.openness,
+                            plasticity: subject?.plasticity,
                             contexts: (observation?.contexts || []).map((context: any) => ({ actionId: context.id }))
                         }
                     })
@@ -186,7 +200,6 @@ export const resetAttemptMemory = (req: Request, res: Response) => {
         if (!subjectId) return res.status(400).json({ success: false, error: 'subjectId required' });
 
         chatMemoryRepo.clear(subjectId);
-        chatSummaryRepo.clear(subjectId);
         memoryRepo.deleteEpisodesForScene(subjectId, sceneId);
         res.json({ success: true });
     } catch (error: any) {

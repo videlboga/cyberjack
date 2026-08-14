@@ -337,18 +337,6 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
-  CREATE TABLE IF NOT EXISTS chat_memory_summary (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    subject_id TEXT NOT NULL,
-    summary_text TEXT NOT NULL,
-    important_events TEXT DEFAULT '[]',
-    start_message_id INTEGER,
-    end_message_id INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-  
-  CREATE INDEX IF NOT EXISTS idx_chat_summary_subject ON chat_memory_summary(subject_id, created_at DESC);
-
   CREATE TABLE IF NOT EXISTS social_pair_states (
     from_id TEXT NOT NULL,
     to_id TEXT NOT NULL,

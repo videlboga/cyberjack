@@ -16,7 +16,7 @@ import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/re
 import { deriveAcquiredTraits, deriveCompulsionSignals } from '../domain/conditioning';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { renderSocialMemories } from '../services/socialMemory';
-import { renderTemporalDialogue, TemporalDialogueEntry } from '../narrative/temporalDialogue';
+import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueEntry } from '../narrative/temporalDialogue';
 import { compactMemoryReaction } from '../services/memoryLayer';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { getSubjectiveEpisode, queueSubjectiveEpisode } from '../services/subjectiveMemoryEpisodes';
@@ -107,10 +107,8 @@ function countRepetitions(events: EventRecord[], currentActionId?: string, curre
 const technicalInteractionMarker = /^\s*\[(?:Воздействие|Действие)\]/i;
 
 export function selectRecentDialogue(entries: TemporalDialogueEntry[], ownerName: string, initiatorName: string) {
-    const recent = entries
-        .filter(entry => !technicalInteractionMarker.test(String(entry.content || '')))
-        .slice(-8);
-    return renderTemporalDialogue(recent, ownerName, initiatorName);
+    const recent = entries.filter(entry => !technicalInteractionMarker.test(String(entry.content || '')));
+    return renderTemporalDialogue(selectCurrentDialogueSegment(recent, 8), ownerName, initiatorName);
 }
 
 export function deriveOpenDialogueThreads(entries: Array<{ role: string; content: string }>, ownerName: string, initiatorName: string) {

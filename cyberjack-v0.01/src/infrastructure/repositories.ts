@@ -982,7 +982,7 @@ export const chatMemoryRepo = {
                ON c.id = COALESCE(cm.speaker_id, cm.subject_id)
                OR c.subject_id = COALESCE(cm.speaker_id, cm.subject_id)
              WHERE cm.subject_id = ?
-             ORDER BY cm.id DESC
+             ORDER BY COALESCE(cm.world_minute, cm.id) DESC, cm.id DESC
              LIMIT ?`
         );
         const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null; speakerId?: string; speakerName?: string; messageId?: string; originChatId?: number }>;
@@ -997,6 +997,9 @@ export const chatMemoryRepo = {
         const labels = Array.from(new Set(contextLabels.map(label => String(label || '').trim()).filter(Boolean)));
         if (!labels.length) return [];
         const placeholders = labels.map(() => '?').join(',');
+        // Include context-less (legacy) rows from any character who has a
+        // message in this context, so a departed occupant's older lines stay
+        // visible in the room journal instead of vanishing with them.
         const rows = db.prepare(`
             SELECT cm.id, cm.subject_id AS subjectId, c.name AS characterName,
                    cm.role, cm.content, cm.context_label AS contextLabel,
@@ -1005,9 +1008,12 @@ export const chatMemoryRepo = {
             FROM chat_memory cm
             LEFT JOIN characters c ON c.id = cm.subject_id OR c.subject_id = cm.subject_id
             WHERE cm.context_label IN (${placeholders})
-            ORDER BY cm.id DESC
+               OR (cm.context_label IS NULL AND cm.subject_id IN (
+                   SELECT DISTINCT subject_id FROM chat_memory WHERE context_label IN (${placeholders})
+               ))
+            ORDER BY COALESCE(cm.world_minute, cm.id) DESC, cm.id DESC
             LIMIT ?
-        `).all(...labels, limit) as Array<{ id: number; subjectId: string; characterName: string; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }>;
+        `).all(...labels, ...labels, limit) as Array<{ id: number; subjectId: string; characterName: string; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null }>;
         return rows.reverse();
     },
     getSince(subjectId: string, afterId: number, limit = 100): Array<{ id: number; role: 'user' | 'assistant'; content: string }> {
@@ -1101,47 +1107,6 @@ export const subjectiveAssociationRepo = {
             db.prepare('UPDATE subjective_associations SET valence=?, strength=? WHERE subject_id=? AND source_key=? AND target_type=? AND target_key=?').run(valence, strength, subjectId, sourceKey, row.target_type, row.target_key);
         }
         return rows.length;
-    }
-};
-
-export const chatSummaryRepo = {
-    save(record: {
-        subjectId: string;
-        summaryText: string;
-        importantEvents?: string[];
-        startMessageId?: number;
-        endMessageId?: number;
-    }) {
-        const stmt = db.prepare(
-            'INSERT INTO chat_memory_summary (subject_id, summary_text, important_events, start_message_id, end_message_id) VALUES (?, ?, ?, ?, ?)'
-        );
-        stmt.run(
-            record.subjectId,
-            record.summaryText,
-            JSON.stringify(record.importantEvents || []),
-            record.startMessageId ?? null,
-            record.endMessageId ?? null
-        );
-    },
-    getLast(subjectId: string): { id: number; lastMessageId: number } | null {
-        const stmt = db.prepare(
-            'SELECT id, end_message_id FROM chat_memory_summary WHERE subject_id = ? ORDER BY id DESC LIMIT 1'
-        );
-        const row = stmt.get(subjectId) as { id: number; end_message_id: number } | undefined;
-        if (!row) return null;
-        return { id: row.id, lastMessageId: row.end_message_id ?? 0 };
-    },
-    getRecent(subjectId: string, limit = 5): Array<{ summary: string; important: string[] }> {
-        const stmt = db.prepare(
-            'SELECT summary_text, important_events FROM chat_memory_summary WHERE subject_id = ? ORDER BY id DESC LIMIT ?'
-        );
-        return stmt.all(subjectId, limit).map((row: any) => ({
-            summary: row.summary_text,
-            important: JSON.parse(row.important_events || '[]')
-        }));
-    },
-    clear(subjectId: string) {
-        db.prepare('DELETE FROM chat_memory_summary WHERE subject_id = ?').run(subjectId);
     }
 };
 

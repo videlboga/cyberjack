@@ -1,5 +1,5 @@
 import { activeConfig } from '../prompts/config';
-import { memoryRepo, chatSummaryRepo } from '../infrastructure/repositories';
+import { memoryRepo } from '../infrastructure/repositories';
 import { buildEmbedding } from './embeddingService';
 import { TickBundle, SubjectCoreState } from '../domain/types';
 import { rememberSocialExchange } from './socialMemory';
@@ -140,10 +140,6 @@ export function selectLongTermMemory(
     if (points.some(p => p.localAttitude < 30)) tags.push('pain');
     const records = memoryRepo.findRelevant(subjectId, queryEmbedding, 5, tags.length ? tags : undefined);
     return records.map(record => record.text);
-}
-
-export function getRecentSummaries(subjectId: string, limit = 3) {
-    return chatSummaryRepo.getRecent(subjectId, limit);
 }
 
 function summarizeCommand(text: string): string {
