@@ -1572,6 +1572,18 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
             roleHistory: Array.isArray((profile as any).roleHistory) ? (profile as any).roleHistory : [],
             portrait: (profile as any).portrait || (profile as any).image || null,
             state: subjectRepo.get(simulationId),
+            // Latest interaction observations (with reaction.appraisal) so
+            // device screens (capsule, etc.) can compute the same emotional
+            // valence balance as the calibration workbench.
+            recentReactions: logRows
+                .filter(log => log.action_type === 'interaction')
+                .slice(0, 5)
+                .flatMap(log => {
+                    try {
+                        const observation = JSON.parse(log.result_payload || '{}').observation;
+                        return observation ? [{ ...observation, eventLogId: Number(log.id) }] : [];
+                    } catch { return []; }
+                }),
             contexts,
             points,
             mentalMemories: (() => {

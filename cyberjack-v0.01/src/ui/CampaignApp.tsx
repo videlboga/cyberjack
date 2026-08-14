@@ -39,6 +39,7 @@ import {
   PortraitEmotion,
   resolvePortraitEmotion,
 } from "../domain/portraitEmotion";
+import { deriveActivationPressure } from "../domain/edgeState";
 import { gameAudio } from "./gameAudio";
 import { SEX_MACHINE_STIMULATION, sexMachineAvatarPath } from "../domain/sexMachineStimulation";
 import {
@@ -92,6 +93,7 @@ type Resident = {
   }[];
   portrait?: string | null;
   state?: SubjectState | null;
+  recentReactions?: any[];
   contexts?: { id: string; label: string; ticksActive: number }[];
   points?: {
     id: string;
@@ -5474,12 +5476,23 @@ function ContainerConversation({
               breathingRate={10 + capsuleActivation * 0.18}
               breathingPeriod={60 / Math.max(1, 10 + capsuleActivation * 0.18)}
               activationBalance={Math.round(
-                capsuleCapacity - capsuleActivation,
+                deriveActivationPressure(resident.recentReactions || [])
+                  .activationBalance,
               )}
+              currentValence={
+                Number(resident.recentReactions?.[0]?.reaction?.appraisal)
+              }
               activationNature={
-                capsuleCapacity >= capsuleActivation
-                  ? "ресурс сохранён"
-                  : "ресурс расходуется"
+                (() => {
+                  const balance = deriveActivationPressure(
+                    resident.recentReactions || [],
+                  ).activationBalance;
+                  return balance > 12
+                    ? "положительная"
+                    : balance < -12
+                      ? "защитная"
+                      : "нейтральная";
+                })()
               }
               overload={Number(resident.state?.overload || 0)}
               overloadLabel={
