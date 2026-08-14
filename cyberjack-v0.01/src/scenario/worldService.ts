@@ -475,6 +475,11 @@ export function ensureWorldSeed() {
     worldSeeded = true;
 }
 
+/** Test seam: resets the module-level seed flag between test cases. */
+export function resetWorldSeed() {
+    worldSeeded = false;
+}
+
 export function getWorldClock() {
     ensureWorldSeed();
     const row = db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as { total_minutes: number };

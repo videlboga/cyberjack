@@ -4,10 +4,11 @@ import app from '../../src/api/server';
 import { db } from '../../src/infrastructure/db';
 import { contractRepo } from '../../src/infrastructure/contractRepo';
 import { subjectRepo } from '../../src/infrastructure/repositories';
-import { VISUALLY_SUPPORTED_PORTABLE_ITEMS } from '../../src/scenario/worldService';
+import { VISUALLY_SUPPORTED_PORTABLE_ITEMS, resetWorldSeed } from '../../src/scenario/worldService';
 
 describe('scenario campaign API', () => {
   beforeEach(() => {
+    resetWorldSeed();
     db.prepare('PRAGMA foreign_keys = OFF').run();
     for (const table of ['scenario_events', 'story_threads', 'laboratory_room_assignments', 'laboratory_rooms', 'laboratory_assets', 'shop_offers', 'world_state', 'character_items', 'character_resources', 'scene_characters', 'characters', 'scenes', 'asset_contracts', 'factions']) {
       db.prepare(`DELETE FROM ${table}`).run();

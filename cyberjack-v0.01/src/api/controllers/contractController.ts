@@ -2,6 +2,13 @@ import { Request, Response } from 'express';
 import { contractRepo } from '../../infrastructure/contractRepo';
 import { acceptContract as acceptContractService, deliverContract as deliverContractService, getContractProgress as getContractProgressService, getActiveContract as getActiveContractService } from '../../services/contractService';
 
+/** Maps known business errors from the contract service to HTTP statuses. */
+function contractBusinessStatus(message?: string): number {
+    if (!message) return 500;
+    if (message.includes('не найден')) return 404;
+    return 400;
+}
+
 // GET /api/contracts — список доступных + принятых контрактов
 export const getContracts = (req: Request, res: Response) => {
     try {
@@ -49,7 +56,8 @@ export const acceptContract = (req: Request, res: Response) => {
         res.json({ success: true, contract });
     } catch (error: any) {
         console.error('[acceptContract]', error);
-        res.status(500).json({ success: false, error: error.message });
+        const status = contractBusinessStatus(error?.message);
+        res.status(status).json({ success: false, error: error.message });
     }
 };
 
@@ -62,7 +70,8 @@ export const deliverContract = (req: Request, res: Response) => {
         res.json({ success: true, ...result });
     } catch (error: any) {
         console.error('[deliverContract]', error);
-        res.status(500).json({ success: false, error: error.message });
+        const status = contractBusinessStatus(error?.message);
+        res.status(status).json({ success: false, error: error.message });
     }
 };
 

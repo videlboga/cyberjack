@@ -4,9 +4,11 @@ import app from '../../src/api/server';
 import { db } from '../../src/infrastructure/db';
 import { contractRepo } from '../../src/infrastructure/contractRepo';
 import { subjectRepo } from '../../src/infrastructure/repositories';
+import { resetWorldSeed } from '../../src/scenario/worldService';
 
 describe('contract and asset matching', () => {
     beforeEach(() => {
+        resetWorldSeed();
         db.prepare('PRAGMA foreign_keys = OFF').run();
         db.prepare('DELETE FROM asset_contracts').run();
         db.prepare('DELETE FROM subjects').run();
