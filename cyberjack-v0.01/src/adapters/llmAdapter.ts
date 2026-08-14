@@ -27,6 +27,7 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     for (const model of models) {
         const controller = new AbortController();
         let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
+        const startedAt = performance.now();
         try {
             const response = await fetch(LLM_API_URL, {
                 method: 'POST',
@@ -52,8 +53,8 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
                 traceId,
                 requestId: traceId,
                 stage: 'llm.fallback',
-                startedAt: performance.now(),
-                durationMs: 0,
+                startedAt,
+                durationMs: Math.round(performance.now() - startedAt),
                 purpose,
                 model,
                 provider: 'auto',
