@@ -3086,6 +3086,7 @@ function DeviceControlScreen({
 }) {
   const { t } = useI18n();
   const session = asset.metadata?.deviceSession;
+  const machineRunning = session?.status === "running";
   const [lines, setLines] = useState<CharacterChatLine[]>([]);
   const [text, setText] = useState("");
   const [working, setWorking] = useState(false);
@@ -3233,7 +3234,7 @@ function DeviceControlScreen({
               ? "guarded"
               : "receptive";
   const stimulationMode = session.stimulationMode || "vaginal";
-  const imagePath = sexMachineAvatarPath(slug, stimulationMode, affect);
+  const imagePath = sexMachineAvatarPath(slug, stimulationMode, affect, machineRunning);
   const control = async (
     command: "settings" | "start" | "adjust" | "pause" | "resume" | "stop",
     payload: Record<string, unknown> = {},
@@ -3523,7 +3524,6 @@ function DeviceControlScreen({
       "M0 12 L9 6 L17 17 L28 4 L37 14 L48 9 L59 20 L70 5 L81 15 L92 3 L104 18 L115 8 L128 12",
   };
   const rhythmWavePath = waveformPaths[waveformKey] || "M0 12 H128";
-  const machineRunning = session.status === "running";
   const machineEngaged = machineRunning || session.status === "paused";
   const tension = clampMetric(Number(state.tension || 0));
   const capacity = clampMetric(Number(state.capacity || 0));

@@ -11,5 +11,15 @@ export const sexMachineStimulation = (mode: unknown) =>
     : mode === 'anal' ? SEX_MACHINE_STIMULATION.anal
       : SEX_MACHINE_STIMULATION.vaginal;
 
-export const sexMachineAvatarPath = (characterSlug:string, mode:unknown, affect:string) =>
-  `/character-images/sex-machine/${characterSlug}__${sexMachineStimulation(mode).visualSet}__${affect}.png`;
+export const sexMachineAvatarPath = (characterSlug: string, mode: unknown, affect: string, running: boolean) => {
+  const stim = sexMachineStimulation(mode);
+  const modeDir = mode === 'tickling' ? 'tickling' : mode === 'anal' ? 'anal' : 'vaginal';
+  if (running) {
+    return `/character-images/sex-machine/${modeDir}/${characterSlug}__${stim.visualSet}__${affect}.png`;
+  }
+  // Stopped state has its own dedicated frames per mode.
+  if (mode === 'tickling') {
+    return `/character-images/sex-machine/tickling/stopped/${characterSlug}__${affect}.png`;
+  }
+  return `/character-images/sex-machine/${modeDir}/stop/${modeDir}__${characterSlug}__stop__${affect}.png`;
+};
