@@ -420,22 +420,26 @@ const capsulePoseForEmotion: Record<
   unconscious: "limp",
 };
 
+const visualSlugFor = (subjectId: string | undefined | null): string | undefined => {
+  if (!subjectId) return undefined;
+  return subjectId === "S-AV-01"
+    ? "mira"
+    : subjectId === "NPC-LAB-01"
+      ? "iona"
+      : subjectId === "NPC-CAND-01"
+        ? "nika"
+        : subjectId === "NPC-CAND-SUMI"
+          ? "sumi"
+          : subjectId === "NPC-CAND-GEN-02"
+            ? "eli"
+            : subjectId === "NPC-CAND-GEN-04"
+              ? "mai"
+              : undefined;
+};
+
 const capsulePortraitFor = (resident: Resident): string | null => {
   const subjectId = resident.subjectId || resident.id;
-  const slug =
-    subjectId === "S-AV-01"
-      ? "mira"
-      : subjectId === "NPC-LAB-01"
-        ? "iona"
-        : subjectId === "NPC-CAND-01"
-          ? "nika"
-          : subjectId === "NPC-CAND-SUMI"
-            ? "sumi"
-            : subjectId === "NPC-CAND-GEN-02"
-              ? "eli"
-              : subjectId === "NPC-CAND-GEN-04"
-                ? "mai"
-            : null;
+  const slug = visualSlugFor(subjectId);
   if (!slug) return null;
   const state = resident.state || {};
   const emotion = resolvePortraitEmotion({
@@ -3102,15 +3106,27 @@ function DeviceControlScreen({
   );
   const loadDeviceChat = useCallback(
     () =>
-      api(`/api/characters/${subjectId}/chat?limit=100`).then((data) =>
-        setLines(
-          collapseRepeatedChatActions(
-            (data.messages || []).map((message: any) =>
-              chatLineFromStoredMessage(message, resident.name, subjectId),
-            ),
+      api(`/api/characters/${subjectId}/chat?limit=100`).then((data) => {
+        const restored = collapseRepeatedChatActions(
+          (data.messages || []).map((message: any) =>
+            chatLineFromStoredMessage(message, resident.name, subjectId),
           ),
-        ),
-      ),
+        );
+        // Merge, never replace. A just-sent player message is appended to the
+        // durable history only inside the deferred LLM job, so a history reload
+        // that races that job would otherwise wipe the optimistic line and make
+        // the player's own message flash out and back in.
+        setLines((current) => {
+          const keyFor = (line: CharacterChatLine) =>
+            `${line.actorId || ""}\u0000${line.speaker}\u0000${line.text}\u0000${line.context || ""}\u0000${line.action ? 1 : 0}`;
+          const restoredKeys = new Set(restored.map(keyFor));
+          const newer = current.filter(
+            (line) =>
+              line.id.startsWith("stream:") || !restoredKeys.has(keyFor(line)),
+          );
+          return collapseRepeatedChatActions([...restored, ...newer]).slice(-100);
+        });
+      }),
     [resident.name, subjectId],
   );
 
@@ -3419,7 +3435,7 @@ function DeviceControlScreen({
           speaker: "Калибратор",
           role: "calibrator",
           text: message,
-          context: asset.name,
+          context: `${asset.name}: фиксированная платформа`,
         },
       ]),
     );
@@ -3881,12 +3897,15 @@ function DeviceControlScreen({
             typingSpeaker={resident.name}
             typingActorId={subjectId}
             typingContext={asset.name}
-            avatarSrc={(line) =>
-              line.avatarPath ||
-              (line.role !== "calibrator" && line.role !== "system"
-                ? `/character-images/portraits/${slug}/${line.portraitEmotion || "neutral"}.png`
-                : undefined)
-            }
+            avatarSrc={(line) => {
+              if (line.avatarPath) return line.avatarPath;
+              if (line.role === "calibrator" || line.role === "system") return undefined;
+              const actorId = line.actorId || subjectId;
+              const lineSlug = visualSlugFor(actorId);
+              return lineSlug
+                ? `/character-images/portraits/${lineSlug}/${line.portraitEmotion || "neutral"}.png`
+                : undefined;
+            }}
           />
           {error && <small className="residential-error">{error}</small>}
           <form
@@ -4220,7 +4239,10 @@ function ContainerConversation({
               ),
               actorId: message.role === "assistant" ? message.participantId : undefined,
             }))
-            .sort((left, right) => Number(left.id) - Number(right.id)),
+            .sort((left, right) =>
+              (Number(left.worldMinute ?? left.id) - Number(right.worldMinute ?? right.id)) ||
+              (Number(left.id) - Number(right.id)),
+            ),
         ).slice(-100);
         // A state/chat refresh may have started before a deferred reply and
         // finished after it. Never let that older snapshot erase streamed or

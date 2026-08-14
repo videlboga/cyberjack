@@ -16,6 +16,8 @@ export type CharacterChatLine = {
   repeat?: number;
   action?: boolean;
   role?: CharacterChatRole;
+  /** Игровое время (минуты с начала мира) для сортировки/отображения. */
+  worldMinute?: number | null;
 };
 
 export const collapseRepeatedChatActions = (lines: CharacterChatLine[]) =>
@@ -52,16 +54,21 @@ export function chatLineFromStoredMessage(
   const action = String(message.content || '').match(/^\[Действие\]\s*(.*)$/s);
   const isSystem = message.contextLabel === 'Система' || String(message.content || '').startsWith('→');
   const systemAction = isSystem && !action;
+  // Реальный говорящий: speakerName/speakerId из API (реплики других NPC в транскрипте),
+  // фолбэк на просматриваемого резидента.
+  const speakerName = message.speakerName || message.participantName || characterName;
+  const speakerId = message.speakerId || message.participantId || characterId;
   return {
     id: String(message.id || crypto.randomUUID()),
-    actorId: message.role === 'assistant' ? String(message.participantId || characterId || '') || undefined : undefined,
-    speaker: action || isSystem ? 'Система' : message.role === 'assistant' ? characterName : 'Калибратор',
+    actorId: message.role === 'assistant' ? String(speakerId || '') || undefined : undefined,
+    speaker: action || isSystem ? 'Система' : message.role === 'assistant' ? speakerName : 'Калибратор',
     role: action || isSystem ? 'system' : message.role === 'assistant' ? 'character' : 'calibrator',
     text: action ? action[1] : String(message.content || ''),
     context: message.contextLabel,
     avatarPath: message.avatarPath,
     portraitEmotion: message.portraitEmotion || message.portrait_emotion || undefined,
     action: Boolean(action) || systemAction,
+    worldMinute: message.worldMinute ?? message.world_minute ?? null,
   };
 }
 
