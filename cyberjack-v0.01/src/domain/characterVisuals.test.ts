@@ -12,9 +12,9 @@ const context = (actionId: string) => ({ actionId, ticksActive: 0 });
 
 describe('calibration pose resolution', () => {
     it.each([
-        ['NPC-CAND-SUMI', '/character-images/rendered/sumi/standing__nude__none__neutral.png'],
-        ['NPC-CAND-GEN-02', '/character-images/rendered/eli/standing__nude__none__neutral.png'],
-        ['NPC-CAND-GEN-04', '/character-images/rendered/mai/standing__nude__none__neutral.png'],
+        ['NPC-CAND-SUMI', '/character-images/cutout/rendered/sumi/standing__underwear__none__neutral.png'],
+        ['NPC-CAND-GEN-02', '/character-images/cutout/rendered/eli/standing__underwear__none__neutral.png'],
+        ['NPC-CAND-GEN-04', '/character-images/cutout/rendered/mai/standing__underwear__none__neutral.png'],
     ])('keeps a visible character-specific fallback for %s without unrestrained core frames', (id, expected) => {
         const descriptor = buildCalibrationVisualDescriptorV4(id, {
             contexts: [context('eq_clothe_underwear')],
@@ -41,7 +41,7 @@ describe('calibration pose resolution', () => {
         expect(descriptor.equipmentPreset).toBe('wrist_cuffs');
         expect(calibrationAvatarCandidatesV4(descriptor)[0]).toContain('/calibration-v4/mira/feet_presented/');
         expect(resolveCalibrationAvatarV4(descriptor)).toBe(
-            '/character-images/calibration-v4/mira/feet_presented/nude__wrist_cuffs__neutral.png'
+            '/character-images/cutout/calibration-v4/mira/feet_presented/nude__wrist_cuffs__neutral.png'
         );
     });
 
@@ -58,7 +58,7 @@ describe('calibration pose resolution', () => {
 
         expect(descriptor.clothing).toBe('dress_stockings');
         expect(resolveCalibrationAvatarV4(descriptor)).toBe(
-            '/character-images/calibration-v4/mira/feet_presented/dress_stockings__none__receptive.png'
+            '/character-images/cutout/calibration-v4/mira/feet_presented/dress_stockings__none__receptive.png'
         );
     });
 
@@ -100,7 +100,7 @@ describe('calibration pose resolution', () => {
         });
 
         expect(resolveCalibrationAvatarV4(descriptor)).toBe(
-            '/character-images/calibration-v4/sumi/sitting_spread/underwear__none__neutral.png',
+            '/character-images/cutout/rendered/sumi/sitting__underwear__none__neutral.png',
         );
     });
 

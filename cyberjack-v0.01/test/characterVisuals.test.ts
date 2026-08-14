@@ -58,7 +58,7 @@ describe('continuous interaction visuals', () => {
             unrepresentedEquipment: [],
         });
         expect(resolveCalibrationAvatarV4(descriptor)).toBe(
-            '/character-images/calibration-core/nika/sitting/underwear__blindfold__receptive.png',
+            '/character-images/cutout/calibration-core/nika/sitting/underwear__blindfold__receptive.png',
         );
     });
 
@@ -69,6 +69,7 @@ describe('continuous interaction visuals', () => {
             'act_activate_plug',
             'act_start_vibrator',
             'act_start_penetration',
+            'act_start_oral_giving',
             'act_hold_exposure',
             'act_present_feet',
         ]);
