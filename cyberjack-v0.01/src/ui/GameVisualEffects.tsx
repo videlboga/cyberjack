@@ -2,6 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import type { PortraitEmotion } from "../domain/portraitEmotion";
 import { resolveActionButtonImage } from "../domain/actionButtonVisual";
+import { useI18n } from "./i18n";
 import "./concepts/VisualEffectsCinematic.css";
 import "./concepts/VisualEffectsMontage.css";
 import "./concepts/VisualEffectsVibration.css";
@@ -71,6 +72,7 @@ export function GameActionEffect(props: {
   emotion?: PortraitEmotion;
   showPortrait?: boolean;
 }) {
+  const { t } = useI18n();
   const cropClass = /(?:^|\/)act_(?:start_oral_giving|deepen_oral)$/.test(props.actionKey)
     ? "fx-action-cut--full-height"
     : topCropActions.has(props.actionKey)
@@ -81,19 +83,19 @@ export function GameActionEffect(props: {
         ? "fx-action-cut--feet-pinch"
         : "";
   const resultLabel = {
-    accepted: "Принято",
-    mixed: "Смешанно",
-    rejected: "Отвергнуто",
-    overload: "Перегрузка",
+    accepted: t('game.ui.reactionAccepted'),
+    mixed: t('game.ui.reactionMixed'),
+    rejected: t('game.ui.reactionRejected'),
+    overload: t('game.ui.reactionOverload'),
   }[props.result];
   const resultValue =
     props.result === "accepted"
-      ? "ПОЛОЖИТЕЛЬНЫЙ ОТКЛИК"
+      ? t('game.ui.resultPositive')
       : props.result === "mixed"
-        ? "СМЕШАННЫЙ ОТКЛИК"
+        ? t('game.ui.resultMixed')
         : props.result === "rejected"
-          ? "НЕГАТИВНЫЙ ОТКЛИК"
-          : "ПРЕДЕЛ НАГРУЗКИ";
+          ? t('game.ui.resultNegative')
+          : t('game.ui.resultLoadLimit');
   return effectPortal(
     <div
       className={`game-effect-overlay fx-cinematic fx-${props.family} fx-result-${props.result} fx-power-${props.intensity < 0.45 ? "low" : props.intensity < 0.75 ? "medium" : "high"}`}
@@ -189,6 +191,13 @@ export function GamePeakEffect({
   characterSlug: string;
   actionImage?: string;
 }) {
+  const { t } = useI18n();
+  const peakCopyDesc: Record<GamePeakKind, string> = {
+    discharge: t('game.ui.peakDischargeDesc'),
+    overload: t('game.ui.peakOverloadDesc'),
+    exhaustion: t('game.ui.peakExhaustionDesc'),
+    breakdown: t('game.ui.peakBreakdownDesc'),
+  };
   return effectPortal(
     <div
       className={`game-effect-overlay fx-peak-montage fx-peak-${kind}`}
@@ -212,7 +221,7 @@ export function GamePeakEffect({
       <div className="fx-peak-copy">
         <small>{peakCopy[kind][0]}</small>
         <b>{peakCopy[kind][1]}</b>
-        <span>{peakCopy[kind][2]}</span>
+        <span>{peakCopyDesc[kind]}</span>
       </div>
     </div>,
   );
@@ -253,6 +262,7 @@ export function GameSustainedEffect({
   characterSlug?: string;
   deepened?: boolean;
 }) {
+  const { t } = useI18n();
   const kind = sustainedKind(actionId);
   const image = kind === "oral"
     ? resolveActionButtonImage(
@@ -309,10 +319,10 @@ export function GameSustainedEffect({
       <div className="active-process-visual">
         <i />
         <span>
-          <small>ПРОЦЕСС ИДЁТ</small>
+          <small>{t('game.ui.processRunning')}</small>
           <strong>{label}</strong>
         </span>
-        <em>{minutes} мин</em>
+        <em>{minutes} {t('game.ui.min')}</em>
       </div>
     </div>
   );

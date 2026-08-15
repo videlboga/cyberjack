@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useI18n } from './i18n';
 
 export type CapsuleHistoryPoint = {
   at: number;
@@ -40,6 +41,7 @@ export function CapsuleHistoryChart({ points, baselineCapacity }: {
   points: CapsuleHistoryPoint[];
   baselineCapacity: number;
 }) {
+  const { t } = useI18n();
   const [hovered, setHovered] = useState<number | null>(null);
   const [range, setRange] = useState<60 | 360 | 1440 | 'all'>(360);
   const shown = useMemo(() => {
@@ -168,15 +170,15 @@ export function CapsuleHistoryChart({ points, baselineCapacity }: {
     });
   return <section className="capsule-history-chart">
     <header>
-      <div><strong>ДОЛГОВРЕМЕННАЯ ДИНАМИКА</strong><small>{source.length} замеров · игровое время</small></div>
-      <nav>{([60, 360, 1440, 'all'] as const).map(value => <button className={range === value ? 'active' : ''} key={value} onClick={() => setRange(value)}>{value === 'all' ? 'всё' : value === 60 ? '1 ч' : value === 360 ? '6 ч' : '24 ч'}</button>)}</nav>
+      <div><strong>{t('game.ui.longTermDynamics')}</strong><small>{t('game.ui.samplesGameTime').replace('{n}', String(source.length))}</small></div>
+      <nav>{([60, 360, 1440, 'all'] as const).map(value => <button className={range === value ? 'active' : ''} key={value} onClick={() => setRange(value)}>{value === 'all' ? t('game.ui.rangeAll') : value === 60 ? '1 ч' : value === 360 ? '6 ч' : '24 ч'}</button>)}</nav>
     </header>
-    <div className="capsule-history-event-legend" aria-label="Обозначения событий">
-      <span><i className="key-process" />Процесс</span>
-      <span><i className="key-action" />Действие</span>
-      <span><i className="key-pose">АБВ</i>Поза</span>
-      <span><i className="key-peak">✦</i>Исход</span>
-      <span><i className="key-risk" />Риск</span>
+    <div className="capsule-history-event-legend" aria-label={t('game.ui.eventLegendAria')}>
+      <span><i className="key-process" />{t('game.ui.legendProcess')}</span>
+      <span><i className="key-action" />{t('game.ui.legendAction')}</span>
+      <span><i className="key-pose">АБВ</i>{t('game.ui.legendPose')}</span>
+      <span><i className="key-peak">✦</i>{t('game.ui.legendOutcome')}</span>
+      <span><i className="key-risk" />{t('game.ui.legendRisk')}</span>
     </div>
     <div className="capsule-history-lanes" onMouseLeave={() => setHovered(null)}>
       <div className="capsule-history-events" aria-hidden="true">
@@ -234,9 +236,9 @@ export function CapsuleHistoryChart({ points, baselineCapacity }: {
       {hoverPoint && <aside className="capsule-history-tooltip" style={{ left: `${Math.min(76, positionFor(Number(hovered)))}%` }}>
         <time>{formatGameMinute(hoverPoint.at)}</time>
         {(['activation', 'endurance', 'balance', 'strain'] as const).map(key => <span key={key}>{labels[key]} <b>{clamp(hoverPoint[key]).toFixed(0)}</b></span>)}
-        {riskReason(hoverPoint) && <strong className="capsule-history-risk-reason">РИСК: {riskReason(hoverPoint)}</strong>}
+        {riskReason(hoverPoint) && <strong className="capsule-history-risk-reason">{t('game.ui.riskPrefix')}: {riskReason(hoverPoint)}</strong>}
         <div className="capsule-history-influences">
-          {(hoverPoint.actions?.length ? hoverPoint.actions : ['Фоновый замер состояния'])
+          {(hoverPoint.actions?.length ? hoverPoint.actions : [t('game.ui.backgroundMeasurement')])
             .map((action, index) => <small key={`${action}-${index}`}>{action}</small>)}
         </div>
       </aside>}

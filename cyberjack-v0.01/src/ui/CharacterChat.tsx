@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useI18n } from './i18n';
 import './CharacterSpeech.css';
 
 export type CharacterChatRole = 'calibrator' | 'character' | 'observer' | 'system';
@@ -104,6 +105,7 @@ export function CharacterChatFeed({
   avatarSrc?: (line: CharacterChatLine) => string | undefined;
   className?: string;
 }) {
+  const { t } = useI18n();
   const internalEndRef = useRef<HTMLDivElement>(null);
   const scrollEndRef = endRef || internalEndRef;
   useEffect(() => {
@@ -112,7 +114,7 @@ export function CharacterChatFeed({
 
   return (
     <div className={`chat-scroll ${className}`.trim()}>
-      {!lines.length && !typing && <p className="chat-empty">{emptyText}</p>}
+      {!lines.length && !typing && <p className="chat-empty">{emptyText || t('game.ui.noRepliesYet')}</p>}
       {lines.map((line, index) => line.action ? (
         <div className="chat-action" key={line.id}>
           <span>{line.text}</span>
@@ -156,7 +158,7 @@ export function CharacterChatFeed({
           )}
           <div className="chat-line-copy">
             <small>{typingSpeaker.toUpperCase()}{typingContext ? ` · ${typingContext.toUpperCase()}` : ''}</small>
-            <p>Формируется реакция…</p>
+            <p>{t('game.ui.formingReaction')}</p>
           </div>
         </div>
       )}
