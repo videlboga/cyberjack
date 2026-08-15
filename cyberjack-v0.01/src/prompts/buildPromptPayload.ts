@@ -19,7 +19,7 @@ import { renderSocialMemories } from '../services/socialMemory';
 import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueEntry } from '../narrative/temporalDialogue';
 import { compactMemoryReaction } from '../services/memoryLayer';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
-import { getSubjectiveEpisode, queueSubjectiveEpisode } from '../services/subjectiveMemoryEpisodes';
+import { getSubjectiveEpisode } from '../services/subjectiveMemoryEpisodes';
 
 function parseEvent(event: EventRecord) {
     let action: any = {};
@@ -122,12 +122,8 @@ export function deriveOpenDialogueThreads(entries: Array<{ role: string; content
         const line = `${speaker}: «${entry.content}»`;
         const hasReply = recent.slice(index + 1).some(later => later.role !== entry.role);
         if (entry.content.includes('?') && !hasReply) threads.push(`Без явного ответа осталось: ${line}`);
-        // A promise mentioned several turns ago is not automatically the
-        // subject of every later reaction. Once the other side has answered,
-        // longer-lived trust consequences belong to relationship memory.
-        if (!hasReply && /(обеща|потом|верн[её]мся|поговорим|напомни|проверим)/i.test(line)) {
-            threads.push(`Отложенная договорённость: ${line}`);
-        }
+        // Отложенные договорённости (обещания/общие планы) выявляет LLM-слой
+        // социальной памяти; регекс по естественному языку здесь недопустим.
     }
     return Array.from(new Set(threads)).slice(-3);
 }
@@ -300,6 +296,11 @@ export async function buildPromptPayload(
     const locationFact = spatial
         ? `Прямо сейчас ты находишься здесь: ${spatial.locationTitle}.`
         : `Прямо сейчас ты находишься здесь: ${scene?.title || eventId}.`;
+    const presentCharacters = (spatial ? spatial.characterNames : sceneCharacterRepo.list(eventId)
+        .filter(entry => entry.presenceState === 'present')
+        .map(entry => entry.character.name));
+    if (!presentCharacters.includes(ownerName)) presentCharacters.push(ownerName);
+    if (!presentCharacters.includes(initiatorName)) presentCharacters.push(initiatorName);
     const roleContext = (() => {
         let facts: string[];
         if (effectiveRole === 'asset') facts = [
@@ -343,6 +344,10 @@ export async function buildPromptPayload(
         roleContext.push(`Твой собеседник — ${addresseeName}; это ${gender}. Это отдельный персонаж со своей волей: не приписывай ему роль Калибратора и не отвечай за него.`);
         roleContext.push(...(options?.addresseeContextFacts || []));
     }
+    const bystanders = presentCharacters.filter(name => name !== ownerName && name !== addresseeName);
+    if (bystanders.length) {
+        roleContext.push(`Рядом с вами также находятся: ${bystanders.join(', ')}. Они присутствуют, но не являются твоим собеседником в этом разговоре.`);
+    }
     if (initiatorId === 'PL-1') {
         roleContext.push('Ты разговариваешь с Калибратором — человеком, который управляет этой лабораторией и обращается к тебе как её оператор. Он не актив и не кандидат на калибровку.');
     }
@@ -371,11 +376,6 @@ export async function buildPromptPayload(
     // must appear before addressee and posture boilerplate rather than being
     // silently cut off at the end of a dense laboratory scene.
     roleContext.splice(Math.min(6, roleContext.length), 0, ...compulsionLines);
-    const presentCharacters = (spatial ? spatial.characterNames : sceneCharacterRepo.list(eventId)
-        .filter(entry => entry.presenceState === 'present')
-        .map(entry => entry.character.name));
-    if (!presentCharacters.includes(ownerName)) presentCharacters.push(ownerName);
-    if (!presentCharacters.includes(initiatorName)) presentCharacters.push(initiatorName);
 
     let observation;
     // runGameTick attaches the finalized observation onto engineOutput at
@@ -413,11 +413,18 @@ export async function buildPromptPayload(
     const recentSpeechAct = recentSpeechActs[0];
     const socialMemory = renderSocialMemories(ownerId, initiatorId);
     const episodeRecords = selectGeneralPromptEpisodes(allEpisodeRecords, addresseeId);
+    // Generation is owned solely by the background worker. Reading must not
+    // trigger an LLM call per prompt build (previously caused a request flood).
     const subjectiveEpisodes = aggregateMemoryEpisodes(memoryRepo.listRecent(ownerId, 160, 'episode_v2'), 8)
         .flatMap(episode => {
-            queueSubjectiveEpisode(ownerId, ownerName, episode);
             const memory = getSubjectiveEpisode(ownerId, episode);
-            return memory ? [`Личное воспоминание: ${memory.summary}${memory.appraisal ? ` Оценка: ${memory.appraisal}` : ''}`] : [];
+            if (!memory) return [];
+            const expansions = (memory.tagExpansions || [])
+                .filter(item => item.tag && item.text)
+                .map(item => `- ${item.tag}: ${item.text}`)
+                .join('\n');
+            const tagBlock = expansions ? `\nРазвёртка по тегам:\n${expansions}` : '';
+            return [`Личное воспоминание: ${memory.summary}${memory.appraisal ? ` Оценка: ${memory.appraisal}` : ''}${tagBlock}`];
         });
     const activeAssociations = subjectiveAssociationRepo.activeForPrompt(ownerId, addresseeId, currentActionTags)
         .map((association: any) => `У тебя откликается связь «${association.target_label}»: ожидание ${association.expectation}, сила ${Math.round(Number(association.strength) * 100)}%.`);

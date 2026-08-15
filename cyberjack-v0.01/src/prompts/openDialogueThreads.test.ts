@@ -11,10 +11,12 @@ describe('deriveOpenDialogueThreads', () => {
     expect(threads.join(' ')).not.toContain('обещаю объяснять');
   });
 
-  it('keeps a genuinely unanswered future agreement', () => {
+  it('tracks only unanswered questions (deferred plans come from social LLM memory)', () => {
     const threads = deriveOpenDialogueThreads([
       { role: 'assistant', content: 'Потом вернёмся к этому разговору.' },
     ], 'Суми', 'Калибратор');
-    expect(threads.join(' ')).toContain('Отложенная договорённость');
+    // Регекс-детекция отложенных договорённостей удалена: обещания/общие планы
+    // выявляет LLM-слой социальной памяти, а не эвристика по языку.
+    expect(threads.join(' ')).not.toContain('Отложенная договорённость');
   });
 });

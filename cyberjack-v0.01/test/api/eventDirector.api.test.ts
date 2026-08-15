@@ -1,11 +1,21 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import app from '../../src/api/server';
 import { db } from '../../src/infrastructure/db';
-import { rememberSocialExchange } from '../../src/services/socialMemory';
+import { rememberSocialExchange, __resetSocialThrottle } from '../../src/services/socialMemory';
+
+const llmMock = vi.hoisted(() => ({ parse: vi.fn() }));
+vi.mock('../../src/adapters/llmAdapter', () => ({ parseVerbalInputWithLLM: llmMock.parse }));
+
+function mockPromise(text: string) {
+    llmMock.parse.mockResolvedValue({
+        parsed: { memories: [{ kind: 'promise', content: text, importance: 0.9, confidence: 0.9 }], promiseOutcome: null },
+    });
+}
 
 describe('Event Director API', () => {
     beforeEach(() => {
+        __resetSocialThrottle();
         db.prepare(`PRAGMA foreign_keys = OFF`).run();
         for (const table of [
             'event_instances','event_opportunities','story_threads',
@@ -22,7 +32,9 @@ describe('Event Director API', () => {
     });
 
     it('lists and resolves a due opportunity', async () => {
-        rememberSocialExchange({
+        __resetSocialThrottle();
+        mockPromise('Я вернусь и покажу исходный журнал.');
+        await rememberSocialExchange({
             subjectId:'API-DIRECTOR-SUBJECT',
             relatedSubjectId:'API-DIRECTOR-PLAYER',
             userText:'Я вернусь и покажу исходный журнал.'

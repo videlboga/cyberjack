@@ -31,7 +31,7 @@ const envNum = (key: string, fallback: number) => {
 };
 const splitList = (value: string) => value.split(',').map(item => item.trim()).filter(Boolean);
 
-const LLM_MODEL = env('LLM_MODEL', 'deepseek/deepseek-v4-flash-0731');
+const LLM_MODEL = env('LLM_MODEL', 'deepseek/deepseek-chat-v3-0324');
 const PARSER_MODEL = env('PARSER_MODEL', 'google/gemini-3.1-flash-lite-preview');
 
 /**
@@ -66,7 +66,10 @@ export const modelAssignments: Record<string, ModelAssignment> = {
    *  отдаёт текст вместо JSON. gemini-2.5-flash-lite стабильно отдаёт JSON
    *  при достаточном max_tokens — его и берём основным. */
   memory: {
-    models: ['google/gemini-2.5-flash-lite', ...splitList(env('LLM_FALLBACK_MODELS', 'deepseek/deepseek-v4-flash,deepseek/deepseek-v4-flash-0731')).filter(m => m !== 'google/gemini-2.5-flash-lite')],
+    models: [
+      env('MEMORY_MODEL', 'deepseek/deepseek-chat-v3-0324'),
+      ...splitList(env('MEMORY_FALLBACK_MODELS', 'deepseek/deepseek-v3.2')).filter(m => m !== env('MEMORY_MODEL', 'deepseek/deepseek-chat-v3-0324')),
+    ],
     providers: [],
     ttftTimeoutMs: envNum('MEMORY_TTFT_TIMEOUT', 8000),
     requestTimeoutMs: envNum('MEMORY_REQUEST_TIMEOUT', 30000),

@@ -2,6 +2,21 @@ import { activeConfig } from '../prompts/config.js';
 import { randomUUID } from 'crypto';
 import { emitTrace, currentTraceRequestId } from '../orchestration/trace';
 import { getModelAssignment } from './modelAssignments';
+import { Agent, setGlobalDispatcher } from 'undici';
+
+// Tailscale-прокси (openrouter.ai -> 100.104.97.70) иногда «залипает» на
+// keep-alive соединении в долгоживущем процессе: undici переиспользует
+// мёртвый сокет, все новые fetch встают на него и падают по таймауту.
+// Короткий keepAliveTimeout + таймаут незанятого сокета вынуждают пул
+// открывать свежее соединение, не цепляясь за залипший.
+setGlobalDispatcher(new Agent({
+    keepAliveTimeout: 1000,
+    keepAliveMaxTimeout: 2000,
+    keepAliveTimeoutThreshold: 1000,
+    connections: 12,
+    headersTimeout: 20000,
+    bodyTimeout: 60000,
+}));
 
 export interface ChatMessage {
     role: 'user' | 'system' | 'assistant';

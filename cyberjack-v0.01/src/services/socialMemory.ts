@@ -5,6 +5,7 @@ import {
   socialMemoryRepo,
 } from "../infrastructure/repositories";
 import { emitPromiseCreated } from "../scenario/eventDirector";
+import { parseVerbalInputWithLLM } from "../adapters/llmAdapter";
 
 export interface SocialMemoryCandidate {
   kind: SocialMemoryKind;
@@ -28,99 +29,84 @@ const clean = (text: string) =>
     .trim()
     .replace(/[.!?…]+$/, "");
 
-export function extractSocialMemories(
+/**
+ * Единый LLM-классификатор социального смысла реплики. Заменяет регекс:
+ * извлекает долгосрочные социальные воспоминания (обещания, границы,
+ * предпочтения, общие планы) и исход обещания (сдержано/нарушено).
+ * Языконезависимо — естественный язык обрабатывается только LLM-слоем.
+ */
+export async function classifySocialMemoriesLLM(
   role: "user" | "assistant",
   text: string,
-): SocialMemoryCandidate[] {
-  const content = clean(text);
-  if (!content || /^\s*\[(?:Действие|Воздействие)\]/i.test(content)) return [];
+): Promise<{ memories: SocialMemoryCandidate[]; outcome: PromiseOutcomeSignal | null }> {
   const owner: SocialMemoryOwner = role === "assistant" ? "character" : "other";
-  const candidates: SocialMemoryCandidate[] = [];
-  const add = (
-    kind: SocialMemoryKind,
-    importance: number,
-    confidence: number,
-  ) => {
-    if (
-      !candidates.some(
-        (candidate) =>
-          candidate.kind === kind &&
-          candidate.content.toLowerCase() === content.toLowerCase(),
-      )
-    ) {
-      candidates.push({ kind, owner, content, importance, confidence });
+  const empty = { memories: [], outcome: null };
+  const content = (text || "").trim();
+  if (!content || /^\s*\[(?:Действие|Воздействие)\]/i.test(content)) return empty;
+
+  const prompt = `Ты анализируешь реплику в диалоге и извлекаешь из неё только долгосрочные социальные смыслы. Не придумывай того, чего нет в тексте. Верни JSON:
+{
+  "memories": [
+    {
+      "kind": "promise|shared_plan|preference|boundary|subjective_report|personal_fact",
+      "content": "короткая формулировка смысла (1 предложение)",
+      "importance": 0..1,
+      "confidence": 0..1
     }
-  };
-
-  if (
-    /(?:^|[\s,;:—-])(?:обещаю|клянусь|я\s+(?:не\s+)?буду|я\s+(?:сделаю|расскажу|покажу|объясню|вернусь|помогу|проверю)|мы\s+(?:сделаем|поговорим|верн[её]мся|проверим))(?:\s|$|[,.!?;:—-])/i.test(
-      content,
-    )
-  ) {
-    add("promise", 0.9, 0.9);
-  } else if (
-    /(?:^|[\s,;:—-])(?:потом|позже|в следующий раз|напомни)(?:\s|$|[,.!?;:—-])/i.test(content)
-  ) {
-    add("shared_plan", 0.7, 0.72);
-  }
-  if (
-    /(?:^|[\s,;:—-])(?:мне нравится|я люблю|мне не нравится|я не люблю|предпочитаю|терпеть не могу)/i.test(
-      content,
-    )
-  ) {
-    add("preference", 0.72, 0.88);
-  }
-  if (
-    /(?:^|[\s,;:—-])(?:я боюсь|я работал[а]?|я был[а]?|я вырос(?:ла)?|у меня есть|для меня важно|я никогда|я всегда)/i.test(
-      content,
-    )
-  ) {
-    // Generated character speech proves what was expressed, not that every
-    // implied event in the character's past actually happened. Character
-    // canon comes from authored profiles and the story layer instead.
-    add(role === "assistant" ? "subjective_report" : "personal_fact", 0.66, 0.78);
-  }
-  if (
-    /(?:^|[\s,;:—-])(?:не делай|не надо|не смей|останов(?:ись|итесь)|хватит|не хочу|моя граница|больше так не)/i.test(
-      content,
-    )
-  ) {
-    add("boundary", 0.95, 0.92);
-  }
-  return candidates.slice(0, 2);
+  ],
+  "promiseOutcome": null | { "outcome": "fulfilled|broken", "evidence": "цитата из реплики" }
 }
 
-export function detectPromiseOutcome(
-  role: "user" | "assistant",
-  text: string,
-): PromiseOutcomeSignal | null {
-  const content = clean(text);
-  if (!content) return null;
-  const owner: SocialMemoryOwner = role === "assistant" ? "character" : "other";
-  if (
-    /(?:как|всё)\s+(?:и\s+)?обещал[аи]?|сдержал[аи]?\s+(?:сво[её]|данное)\s+слово|выполнил[аи]?\s+обещание/i.test(
-      content,
-    )
-  ) {
-    return { outcome: "fulfilled", owner, evidence: content };
+Правила:
+- promise — явное обещание что-то сделать/не делать.
+- shared_plan — отложенная совместная договорённость («потом», «в следующий раз»).
+- preference — устойчивое предпочтение или вкус («мне нравится», «не люблю»).
+- boundary — граница/ограничение на поведение («не делай», «остановись», «моя граница»).
+- subjective_report — рассказ о собственном переживании/состоянии (когда говорит персонаж).
+- personal_fact — сообщённый факт о себе (когда говорит собеседник).
+- promiseOutcome — если реплика подтверждает выполнение («сдержал слово») или нарушение («нарушил обещание») ранее данного обещания.
+Верни memories максимум 2, promiseOutcome null если исхода нет. Реплика: ${JSON.stringify(content)}`;
+
+  try {
+    const result = await parseVerbalInputWithLLM(
+      [{ role: "system", content: prompt }, { role: "user", content: content }],
+      { type: "json_object" },
+      "memory",
+    );
+    const parsed = (result as any)?.parsed;
+    if (!parsed || typeof parsed !== "object") return empty;
+    const memories: SocialMemoryCandidate[] = Array.isArray(parsed.memories)
+      ? parsed.memories
+          .map((item: any) => ({
+            kind: item?.kind as SocialMemoryKind,
+            owner,
+            content: String(item?.content || "").trim().slice(0, 200),
+            importance: Math.max(0, Math.min(1, Number(item?.importance) || 0.5)),
+            confidence: Math.max(0, Math.min(1, Number(item?.confidence) || 0.7)),
+          }))
+          .filter((item: SocialMemoryCandidate) =>
+            item.content && ["promise", "shared_plan", "preference", "boundary", "subjective_report", "personal_fact"].includes(item.kind),
+          )
+          .slice(0, 2)
+      : [];
+    const out = parsed.promiseOutcome;
+    const outcome = out && ["fulfilled", "broken"].includes(out.outcome)
+      ? { outcome: out.outcome as PromiseOutcome, owner, evidence: String(out.evidence || content).slice(0, 200) }
+      : null;
+    return { memories, outcome };
+  } catch (error: any) {
+    console.warn("[SocialMemory] classification failed:", error?.message || error);
+    return empty;
   }
-  if (
-    /(?:не\s+сдержал[аи]?\s+(?:слово|обещание)|нарушил[аи]?\s+обещание|обещание\s+нарушено|не\s+(?:смогу|собираюсь)\s+выполнить)/i.test(
-      content,
-    )
-  ) {
-    return { outcome: "broken", owner, evidence: content };
-  }
-  return null;
 }
 
-export function applyPromiseOutcome(input: {
+export async function applyPromiseOutcome(input: {
   subjectId: string;
   relatedSubjectId: string;
   role: "user" | "assistant";
   text: string;
-}): PromiseOutcome | null {
-  const signal = detectPromiseOutcome(input.role, input.text);
+}): Promise<PromiseOutcome | null> {
+  const { outcome: signal } = await classifySocialMemoriesLLM(input.role, input.text);
   if (!signal) return null;
   const promise = socialMemoryRepo.listActive(
     input.subjectId,
@@ -174,25 +160,46 @@ export function applyPromiseOutcome(input: {
   return signal.outcome;
 }
 
-export function rememberSocialExchange(input: {
+// Социальная LLM-классификация запускается не чаще этого интервала на пару,
+// иначе каждый игровой ход создавал бы LLM-запрос (лавина). Один вызов
+// обрабатывает обе стороны обмена.
+const SOCIAL_CLASSIFY_THROTTLE_MS = 60_000;
+const socialClassifyLastRun = new Map<string, number>();
+
+/** Test hook: сбрасывает throttle-карту, чтобы тесты могли вызывать подряд. */
+export function __resetSocialThrottle() {
+    socialClassifyLastRun.clear();
+}
+
+export async function rememberSocialExchange(input: {
   subjectId: string;
   relatedSubjectId: string;
   userText?: string;
   assistantText?: string;
 }) {
-  const messages: Array<{ role: "user" | "assistant"; text?: string }> = [
-    { role: "user", text: input.userText },
-    { role: "assistant", text: input.assistantText },
-  ];
+  const pairKey = `${input.subjectId}:${input.relatedSubjectId}`;
+  const now = Date.now();
+  const lastRun = socialClassifyLastRun.get(pairKey) || 0;
+  if (now - lastRun < SOCIAL_CLASSIFY_THROTTLE_MS) return;
+  socialClassifyLastRun.set(pairKey, now);
+
+  const userText = (input.userText || "").trim();
+  const assistantText = (input.assistantText || "").trim();
+  const messages: Array<{ role: "user" | "assistant"; text: string }> = [];
+  if (userText) messages.push({ role: "user", text: userText });
+  if (assistantText) messages.push({ role: "assistant", text: assistantText });
+
   for (const message of messages) {
-    if (!message.text) continue;
-    applyPromiseOutcome({
-      subjectId: input.subjectId,
-      relatedSubjectId: input.relatedSubjectId,
-      role: message.role,
-      text: message.text,
-    });
-    for (const memory of extractSocialMemories(message.role, message.text)) {
+    const { memories, outcome } = await classifySocialMemoriesLLM(message.role, message.text);
+    if (outcome) {
+      await applyPromiseOutcome({
+        subjectId: input.subjectId,
+        relatedSubjectId: input.relatedSubjectId,
+        role: message.role,
+        text: message.text,
+      });
+    }
+    for (const memory of memories) {
       const memoryId = socialMemoryRepo.save({
         subjectId: input.subjectId,
         relatedSubjectId: input.relatedSubjectId,

@@ -1,5 +1,6 @@
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
-import { characterRepo, memoryAssociationRepo, subjectiveAssociationRepo, subjectiveEpisodeRepo } from '../infrastructure/repositories';
+import { characterRepo, memoryAssociationRepo, subjectPreferencesRepo, subjectiveAssociationRepo, subjectiveEpisodeRepo } from '../infrastructure/repositories';
+import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 import { db } from '../infrastructure/db';
 import { MemoryEpisode } from './memoryEpisodes';
 import { memoryTagLabel } from '../domain/memoryTagLabels';
@@ -17,6 +18,8 @@ export type SubjectiveEpisode = {
     emotionalArc: string[];
     associations: Array<{ target: string; tagLinks: string[]; evidence: string[]; valence: number; strength: number; expectation: 'seek' | 'avoid' | 'freeze' | 'endure' | 'anticipate' }>;
     openLoops: string[];
+    /** Развёрнутый от первого лица текст по каждому тегу эпизода. */
+    tagExpansions?: Array<{ tag: string; text: string }>;
 };
 
 export type SubjectiveInterventionResult = {
@@ -29,6 +32,17 @@ export type SubjectiveInterventionResult = {
     }>;
 };
 
+const MEMORY_PREFERENCE_GAIN = 0.5;
+const MEMORY_RELATIONSHIP_GAIN = 0.6;
+
+/**
+ * Память является первоклассным драйвером поведения (Слой 3), а не косметикой.
+ * Из каждой ассоциации детерминированно выводим:
+ *   - effects (существующий механизм склонности к выбору действий),
+ *   - preferences.tags — бонус к системе обучения по тегам (до +1 за ассоциацию),
+ *   - отношения к персонажам — безусловный дельта по valence/strength.
+ * Кресло пересчитывает этот слой после интервенции; факты (Слой 1) не трогаются.
+ */
 function syncAssociationEffects(subjectId: string, episode: MemoryEpisode, summary: SubjectiveEpisode) {
     // A tag affects future choices only through associations that actually
     // name it. An episode-wide average made unrelated facets of one memory
@@ -41,12 +55,68 @@ function syncAssociationEffects(subjectId: string, episode: MemoryEpisode, summa
         return [{ tag, weight: Math.max(-.45, Math.min(.45, signal * .35)), expectation }];
     });
     memoryAssociationRepo.replaceSource(subjectId, keyFor(episode), effects);
+
     const characters = characterRepo.listAll();
-    subjectiveAssociationRepo.replaceSource(subjectId, keyFor(episode), summary.associations.map(item => {
-        const person = characters.find(character => character.name.toLowerCase() === item.target.toLowerCase());
+    const normalizedAssociations = summary.associations.map(item => {
+        // Person-детекция по вхождению имени: «голос Калибратора» → Калибратор.
+        // Точное совпадение имеет приоритет; иначе — первый персонаж, чьё имя
+        // встречается в target как подстрока. Избегаем ложных срабатываний на
+        // коротких именах, требуя длину имени >= 2.
+        const targetLower = item.target.toLowerCase();
+        const exact = characters.find(character => character.name.toLowerCase() === targetLower);
+        const person = exact || characters.find(character => {
+            const name = character.name.toLowerCase();
+            // Не детектируем самого субъекта (имя не должно ссылаться на себя)
+            // и избегаем слишком коротких имён.
+            return (character.subjectId || character.id) !== subjectId
+                && name.length >= 2
+                && targetLower.includes(name);
+        });
         const links = Array.isArray(item.tagLinks) && item.tagLinks.length ? item.tagLinks : episode.tags;
         return { type: person ? 'person' : 'concept', key: person ? person.subjectId || person.id : item.target.toLowerCase(), label: item.target, tagLinks: links.filter(tag => episode.tags.includes(tag)), valence: item.valence, strength: item.strength, expectation: item.expectation };
-    }));
+    });
+    // Дедупликация по (type, key): substring-детекция может свести несколько
+    // ассоциаций («Калибратор», «голос Калибратора») к одному ключу. Оставляем
+    // самую сильную (по |valence|*strength), объединяя её теги.
+    const dedupMap = new Map<string, typeof normalizedAssociations[number]>();
+    for (const item of normalizedAssociations) {
+        const dedupKey = `${item.type}:${item.key}`;
+        const existing = dedupMap.get(dedupKey);
+        if (!existing || item.valence * item.strength > existing.valence * existing.strength) {
+            dedupMap.set(dedupKey, { ...item, tagLinks: existing ? [...new Set([...existing.tagLinks, ...item.tagLinks])] : item.tagLinks });
+        } else if (existing) {
+            dedupMap.set(dedupKey, { ...existing, tagLinks: [...new Set([...existing.tagLinks, ...item.tagLinks])] });
+        }
+    }
+    const uniqueAssociations = Array.from(dedupMap.values());
+    subjectiveAssociationRepo.replaceSource(subjectId, keyFor(episode), uniqueAssociations);
+
+    // Слой 3: обучение по тегам. Позитивное/негативное воспоминание с тегом
+    // сдвигает preferences.tags (до ±1 за ассоциацию), что усиливает или
+    // подавляет выбор действий с этим тегом в системе обучения.
+    for (const item of uniqueAssociations) {
+        for (const tag of item.tagLinks) {
+            if (!/^[a-z0-9_:-]+$/i.test(tag)) continue;
+            const delta = item.valence * item.strength * MEMORY_PREFERENCE_GAIN;
+            subjectPreferencesRepo.adjust(subjectId, 'tags', tag, delta);
+        }
+    }
+
+    // Слой 3: отношения. Person-ассоциация двигает отношения субъект↔персонаж
+    // безусловным дельта по valence/strength.
+    for (const item of uniqueAssociations) {
+        if (item.type !== 'person') continue;
+        const actorId = item.key;
+        if (!actorId || actorId === subjectId) continue;
+        const delta = item.valence * item.strength * MEMORY_RELATIONSHIP_GAIN;
+        // Положительный опыт укрепляет близость/податливость, негативный —
+        // сопротивление и страх. expectation задаёт направление.
+        if (item.expectation === 'avoid' || item.expectation === 'freeze') {
+            relationshipDynamicsRepo.change(subjectId, actorId, { resistance: -delta * 0.5, fear: -delta * 0.5, dependency: delta * 0.3 });
+        } else {
+            relationshipDynamicsRepo.change(subjectId, actorId, { dependency: delta * 0.6, learnedCompliance: delta * 0.4, fear: -delta * 0.3 });
+        }
+    }
 }
 
 function usesSeminalFact(episode: MemoryEpisode) {
@@ -81,7 +151,10 @@ function normalize(value: any, corpus = ''): SubjectiveEpisode | null {
         return [{ target, tagLinks: Array.isArray(item.tagLinks) ? item.tagLinks.map(String) : [], evidence, valence: Math.max(-1, Math.min(1, Number(item.valence) || 0)), strength: Math.max(0, Math.min(1, Number(item.strength) || 0)), expectation: item.expectation }];
     }) : [];
     const generatedTitle = clean(value.title, 80) || summary.replace(/[.!?].*$/u, '').split(' ').slice(0, 6).join(' ');
-    return { title: generatedTitle || 'Личное воспоминание', summary, appraisal: clean(value.appraisal, 450), agency, emotionalArc: Array.isArray(value.emotionalArc) ? value.emotionalArc.map((x: unknown) => clean(x, 70)).filter(Boolean).slice(0, 5) : [], associations, openLoops: Array.isArray(value.openLoops) ? value.openLoops.map((x: unknown) => clean(x, 160)).filter(Boolean).slice(0, 4) : [] };
+    const tagExpansions = Array.isArray(value.tagExpansions)
+        ? value.tagExpansions.map((item: any) => ({ tag: clean(item?.tag, 60), text: clean(item?.text, 300) })).filter((item: any) => item.tag && item.text).slice(0, 12)
+        : [];
+    return { title: generatedTitle || 'Личное воспоминание', summary, appraisal: clean(value.appraisal, 450), agency, emotionalArc: Array.isArray(value.emotionalArc) ? value.emotionalArc.map((x: unknown) => clean(x, 70)).filter(Boolean).slice(0, 5) : [], associations, openLoops: Array.isArray(value.openLoops) ? value.openLoops.map((x: unknown) => clean(x, 160)).filter(Boolean).slice(0, 4) : [], tagExpansions };
 }
 
 function bindAssociationsToEpisode(summary: SubjectiveEpisode, episode: MemoryEpisode): SubjectiveEpisode {
@@ -91,6 +164,9 @@ function bindAssociationsToEpisode(summary: SubjectiveEpisode, episode: MemoryEp
             ...item,
             tagLinks: [...new Set(item.tagLinks.filter(tag => episode.tags.includes(tag)))].slice(0, 8),
         })).filter(item => item.tagLinks.length >= 1),
+        tagExpansions: (summary.tagExpansions || [])
+            .filter(item => episode.tags.includes(item.tag))
+            .slice(0, 12),
     };
 }
 
@@ -183,6 +259,25 @@ export function getSubjectiveEpisode(subjectId: string, episode: MemoryEpisode):
     return summary;
 }
 
+/**
+ * Deterministically gathers the source facts (moments) that carry a given tag,
+ * so the expansion step is grounded in real memory rather than model invention.
+ */
+function factsForTag(episode: MemoryEpisode, tag: string): string[] {
+    return episode.moments
+        .filter(moment => moment.tags?.includes(tag))
+        .map(moment => clean(moment.text, 300))
+        .filter(Boolean);
+}
+
+function chunkTags<T>(items: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
+    return chunks;
+}
+
+const MEMORY_EXPANSION_BATCH = 6;
+
 export function queueSubjectiveEpisode(subjectId: string, characterName: string, episode: MemoryEpisode, force = false, correction = '', requiredAssociationTags: string[] = [], rejectOnFailure = false, forbiddenAssociationTags: string[] = []): Promise<void> | null {
     if (!process.env.OPENROUTER_API_KEY && !process.env.LLM_API_KEY) return null;
     const sourceKey = keyFor(episode);
@@ -192,31 +287,54 @@ export function queueSubjectiveEpisode(subjectId: string, characterName: string,
     const facts = episode.moments.map(moment => `- ${moment.title}: ${clean(moment.text, 300)}`).join('\n').slice(0, 7500);
     const correctionBlock = correction ? `\nКОРРЕКЦИЯ ВОСПРИЯТИЯ: «${clean(correction, 500)}». Это не новый факт и не приказ персонажу. Вплети её только в личную оценку, эмоциональную дугу и связи памяти; не меняй объективные события.\n` : '';
     const concreteFactRule = usesSeminalFact(episode) ? 'В этом эпизоде обязательно прямо скажи в summary: через трубку капсулы мне в рот подали сперму Калибратора. Не заменяй это «биоматериалом», «составом» или безымянной жидкостью.\n' : '';
-    const job = parseVerbalInputWithLLM([{ role: 'system', content: `Ты создаёшь эпизодическую память персонажа ${characterName}. Только JSON. Факты ниже — исчерпывающая истина. Не добавляй действий, мотивов, диагнозов, зависимости, согласия, намерений или отношений, которых в них прямо нет. Сохраняй имена точно, не меняй род и не сокращай их; внутренние id вроде PL-1 не упоминай — используй отображаемое имя из фактов. Если атом помечен как «Наблюдение», персонаж только видел и слышал чужой разговор: кратко передай его тему, важные реплики, ответ и видимый итог; никогда не пиши, что наблюдатель сделал, спросил или приказал. Если имя ${characterName} встречается как цель, это сам персонаж: используй «я/мне/меня», а не третье лицо. Пиши по-русски от первого лица, живо и связно, без канцелярита и перечня атомов. Называй секс, фиксацию, насилие, сперму, оргазм, страх и боль своими именами, если они есть в фактах. Удовольствие или оргазм не равны согласию. ${concreteFactRule}Верни {title,summary,appraisal,agency,emotionalArc,associations,openLoops}. associations: создай 2–8 конкретных ассоциаций. У каждой обязательно есть target (место, человек, действие, часть тела или голос), tagLinks — массив из 1–8 ТОЧНЫХ тегов из списка ниже, связывающих эту ассоциацию, evidence — 1–3 точных фрагмента (по 3–18 слов) из summary ИЛИ из ФАКТОВ ниже, дословно, без перефразирования. valence от -1 до 1, strength от 0 до 1, expectation: seek|avoid|freeze|endure|anticipate. Покрой КАЖДЫЙ допустимый тег хотя бы одной связью: если тег описывает отдельный момент, у него должна быть своя связь с конкретным target и evidence. Не используй в tagLinks слова вне списка и не оставляй массив пустым.\n\nДОПУСТИМЫЕ ТЕГИ: ${episode.tags.join(', ')}\nАРКА: ${episode.title}\nДЕТЕРМИНИРОВАННЫЙ ИТОГ: ${episode.text}${correctionBlock}\nФАКТЫ:\n${facts}` }], { type: 'json_object' }, 'memory')
-        .then(result => normalize(result.parsed, facts))
-        .then(summary => summary ? bindAssociationsToEpisode(summary, episode) : null)
+    const validTags = episode.tags.filter(tag => /^[a-z0-9_:-]+$/i.test(tag));
+    const tagSources = Object.fromEntries(validTags.map(tag => [tag, factsForTag(episode, tag)]));
+    const tagForExpansion = validTags.filter(tag => (tagSources[tag] || []).length > 0);
+
+    // Шаг 1 — смысловой слой: пересказ + ассоциации (двигают поведение).
+    const job = parseVerbalInputWithLLM([{ role: 'system', content: `Ты создаёшь эпизодическую память персонажа ${characterName}. Только JSON. Факты ниже — исчерпывающая истина. Не добавляй действий, мотивов, диагнозов, зависимости, согласия, намерений или отношений, которых в них прямо нет. Сохраняй имена точно, не меняй род и не сокращай их; внутренние id вроде PL-1 не упоминай — используй отображаемое имя из фактов. Если атом помечен как «Наблюдение», персонаж только видел и слышал чужой разговор: кратко передай его тему, важные реплики, ответ и видимый итог; никогда не пиши, что наблюдатель сделал, спросил или приказал. Если имя ${characterName} встречается как цель, это сам персонаж: используй «я/мне/меня», а не третье лицо. Пиши по-русски от первого лица, живо и связно, без канцелярита и перечня атомов. Называй секс, фиксацию, насилие, сперму, оргазм, страх и боль своими именами, если они есть в фактах. Удовольствие или оргазм не равны согласию. ${concreteFactRule}Верни {title,summary,appraisal,agency,emotionalArc,associations,openLoops}. associations: создай 1–6 конкретных ассоциаций. У каждой есть target (место, человек, действие, часть тела или голос), tagLinks — массив ТОЧНЫХ тегов из списка ниже (1–4), evidence — 1–2 точных фрагмента (по 3–18 слов) дословно выписанные ИЗ ФАКТОВ ниже (прямая цитата реплики или ощущения, без перефразирования). evidence обязателен: если ассоциация опирается на факт, процитируй его дословно. valence от -1 до 1, strength от 0 до 1, expectation: seek|avoid|freeze|endure|anticipate. Каждая ассоциация должна быть подтверждена фактами; если тег встречается в фактах, отметь его в tagLinks хотя бы одной ассоциации. Не придумывай ассоциации без опоры на факты. Не используй в tagLinks слова вне списка.\n\nДОПУСТИМЫЕ ТЕГИ: ${validTags.join(', ') || '(нет)'}\nАРКА: ${episode.title}\nДЕТЕРМИНИРОВАННЫЙ ИТОГ: ${episode.text}${correctionBlock}\nФАКТЫ:\n${facts}` }], { type: 'json_object' }, 'memory')
+        .then(async (result) => {
+            const summary = normalize(result.parsed, facts);
+            if (!summary) return null;
+            const bound = bindAssociationsToEpisode(summary, episode);
+            // Шаг 2 — размотка тегов: каждый тег получает первый-лицо текст,
+            // опираясь на детерминированно собранные факты по этому тегу.
+            // Бьём на батчи, чтобы короткий запрос не обрезался.
+            const expansions: Array<{ tag: string; text: string }> = [];
+            for (const chunk of chunkTags(tagForExpansion, MEMORY_EXPANSION_BATCH)) {
+                const tagPrompt = `Ты — ${characterName}. Ниже — теги из твоего воспоминания и исходные факты, которые их подтверждают. Для КАЖДОГО тега напиши 1–2 предложения от первого лица («я/мне/меня»), которые раскрывают именно этот аспект события на основе фактов. Не добавляй событий, которых нет в фактах; не пиши от третьего лица; не пересказывай другие теги. Называй секс, страх, боль, сперму своими именами, если они есть. Верни только JSON-объект, где ключ — тег, значение — строка текста.\n\n${chunk.map(tag => `Тег «${tag}»:\n${(tagSources[tag] || []).join('\n')}`).join('\n\n')}`;
+                try {
+                    const res = await parseVerbalInputWithLLM([{ role: 'system', content: tagPrompt }], { type: 'json_object' }, 'memory');
+                    const parsedMap = (res as any)?.parsed;
+                    if (parsedMap && typeof parsedMap === 'object') {
+                        for (const tag of chunk) {
+                            const text = clean(parsedMap[tag], 300);
+                            if (text) expansions.push({ tag, text });
+                        }
+                    }
+                } catch (error: any) {
+                    console.warn('[SubjectiveMemory] tag expansion failed:', error?.message || error);
+                }
+            }
+            return { ...bound, tagExpansions: expansions };
+        })
         .then(summary => {
-            // Background generation may wait for a complete map of an episode.
-            // A deliberate chair intervention has a narrower contract: it must
-            // preserve a valid subjective account and, when tags were selected,
-            // include those exact anchors. Requiring full coverage here made a
-            // large episode impossible to edit (the prompt caps associations).
-            const isValid = summary && (requiredAssociationTags.length
+            if (!summary) return;
+            const isValid = requiredAssociationTags.length
                 ? hasAssociationLink(summary, requiredAssociationTags)
                 : forbiddenAssociationTags.length
                     ? !hasAssociationLink(summary, forbiddenAssociationTags)
-                    : correction
-                        ? true
-                        : hasCompleteAssociationCoverage(summary, episode));
-            if (isValid && summary) {
-            useConcreteTerms(summary, episode);
-            subjectiveEpisodeRepo.save(subjectId, sourceKey, episode.moments.map(moment => moment.id), summary);
-            syncAssociationEffects(subjectId, episode, summary);
-        } else if (summary) {
-            throw new Error(requiredAssociationTags.length
-                ? 'модель не создала требуемую ручную связь между выбранными тегами'
-                : 'модель не связала каждый тег эпизода с точной цитатой');
-        } })
+                    : true;
+            if (isValid) {
+                useConcreteTerms(summary, episode);
+                subjectiveEpisodeRepo.save(subjectId, sourceKey, episode.moments.map(moment => moment.id), summary);
+                syncAssociationEffects(subjectId, episode, summary);
+            } else {
+                throw new Error(requiredAssociationTags.length
+                    ? 'модель не создала требуемую ручную связь между выбранными тегами'
+                    : 'модель не связала теги эпизода');
+            }
+        })
         .catch(error => {
             console.warn('[SubjectiveMemory] generation failed:', error.message);
             if (rejectOnFailure) throw error;

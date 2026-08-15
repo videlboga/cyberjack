@@ -20,6 +20,8 @@ export interface MemoryEpisodeMoment {
     actionId?: string;
     participantIds?: string[];
     portraitEmotion?: string;
+    /** Tags this atom carries; used to ground per-tag memory expansion. */
+    tags?: string[];
 }
 
 export interface MemoryEpisode {
@@ -234,6 +236,7 @@ function makeEpisode(scenes: MemoryScene[], resolveSubjectName: (id: string) => 
             actionId: clean(atom.metadata?.actionId || observationFor(atom)?.action?.id),
             participantIds: participantsFor(atom),
             portraitEmotion: portraitEmotionFor(atom),
+            tags: atom.tags,
         })),
     };
 }

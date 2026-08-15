@@ -114,12 +114,14 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
         }
     });
 
-    rememberSocialExchange({
+    // Социальная память теперь строится LLM-слоем. Запускаем в фоне, чтобы
+    // не блокировать игровой тик; регекс-эвристика удалена.
+    void rememberSocialExchange({
         subjectId: input.subjectId,
         relatedSubjectId: input.bundle.event.playerId || 'PL-1',
         userText: input.userText,
         assistantText: input.assistantText
-    });
+    }).catch((error: any) => console.warn('[SocialMemory] background extraction failed:', error?.message || error));
 }
 
 export function selectLongTermMemory(

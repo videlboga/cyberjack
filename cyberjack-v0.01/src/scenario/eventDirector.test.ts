@@ -1,11 +1,21 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '../infrastructure/db';
-import { rememberSocialExchange } from '../services/socialMemory';
+import { rememberSocialExchange, __resetSocialThrottle } from '../services/socialMemory';
+
+const llmMock = vi.hoisted(() => ({ parse: vi.fn() }));
+vi.mock('../adapters/llmAdapter', () => ({ parseVerbalInputWithLLM: llmMock.parse }));
+
+function mockPromise(text: string) {
+    llmMock.parse.mockResolvedValue({
+        parsed: { memories: [{ kind: 'promise', content: text, importance: 0.9, confidence: 0.9 }], promiseOutcome: null },
+    });
+}
 import { emitSubjectMetricChanges, emitSupplyPurchased, listInbox, resolveOpportunity } from './eventDirector';
 import { contractRepo } from '../infrastructure/contractRepo';
 
 describe('Event Director promise flow', () => {
     beforeEach(() => {
+        __resetSocialThrottle();
         db.prepare(`PRAGMA foreign_keys = OFF`).run();
         for (const table of [
             'event_instances','event_opportunities','story_threads','world_facts',
@@ -21,13 +31,9 @@ describe('Event Director promise flow', () => {
         db.prepare(`PRAGMA foreign_keys = ON`).run();
     });
 
-    it('turns a spoken promise into one delayed inbox opportunity', () => {
-        rememberSocialExchange({
-            subjectId:'DIRECTOR-SUBJECT',
-            relatedSubjectId:'PL-DIRECTOR',
-            userText:'Я проверю, кто изменил твоё досье.'
-        });
-        rememberSocialExchange({
+    it('turns a spoken promise into one delayed inbox opportunity', async () => {
+        mockPromise('Я проверю, кто изменил твоё досье.');
+        await rememberSocialExchange({
             subjectId:'DIRECTOR-SUBJECT',
             relatedSubjectId:'PL-DIRECTOR',
             userText:'Я проверю, кто изменил твоё досье.'
@@ -46,8 +52,9 @@ describe('Event Director promise flow', () => {
         expect((db.prepare(`SELECT COUNT(*) AS count FROM story_threads`).get() as any).count).toBe(1);
     });
 
-    it('can defer and later return to the promised conversation', () => {
-        rememberSocialExchange({
+    it('can defer and later return to the promised conversation', async () => {
+        mockPromise('Я помогу найти исходную запись.');
+        await rememberSocialExchange({
             subjectId:'DIRECTOR-SUBJECT',
             relatedSubjectId:'PL-DIRECTOR',
             userText:'Я помогу найти исходную запись.'

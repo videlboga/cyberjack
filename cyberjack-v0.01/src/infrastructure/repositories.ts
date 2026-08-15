@@ -212,6 +212,15 @@ export const characterRepo = {
         const row = db.prepare('SELECT * FROM characters WHERE id = ?').get(id);
         return row ? mapCharacter(row) : null;
     },
+    /** Отображаемое имя персонажа для промптов. PL-1 — это Калибратор, а не
+     *  сырой id и не «Player» из subjects. Все места, где имя попадает в текст
+     *  промпта/наблюдения, должны идти через этот хелпер. */
+    displayNameFor(id: string): string {
+        if (id === 'PL-1') return 'Калибратор';
+        const character = this.get(id);
+        if (character?.name) return character.name;
+        return subjectRepo.get(id)?.name || id;
+    },
     listByIds(ids: string[]): Character[] {
         if (!ids.length) return [];
         const placeholders = ids.map(() => '?').join(',');
