@@ -29,6 +29,7 @@ import {
 } from "./CalibrationBiometrics";
 import { EnduranceLiquid } from "./EnduranceLiquid";
 import { BalancePendulum, BalanceLabels } from "./BalancePendulum";
+import { useI18n } from "./i18n";
 import {
   acquiredTraitValue,
   conditioningTags,
@@ -1565,15 +1566,16 @@ export function CalibrationZoneMap({
   onSelect: (zoneId: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <section className="zone-map-panel shared-calibration-zone-map">
       <header>
         <div>
-          <small>ЦЕЛЬ ВОЗДЕЙСТВИЯ</small>
-          <h2>Карта тела</h2>
-          <p>Выберите область по её текущему отклику.</p>
+          <small>{t('game.ui.impactTarget')}</small>
+          <h2>{t('game.ui.bodyMap')}</h2>
+          <p>{t('game.ui.bodyMapHint')}</p>
         </div>
-        <button onClick={onClose}>← К операциям</button>
+        <button onClick={onClose}>{t('game.ui.backToOperations')}</button>
       </header>
       <div className="zone-map-body">
         {zoneGroups.map((group) => {
@@ -1641,13 +1643,13 @@ export function CalibrationZoneMap({
       </div>
       <footer>
         <span>
-          <i>Ч</i> чувствительность, % нормы
+          <i>Ч</i> {t('game.ui.legendSensitivity')}
         </span>
         <span>
-          <i>П</i> принятие, % нормы
+          <i>П</i> {t('game.ui.legendAcceptance')}
         </span>
         <span>
-          <i>И</i> абсолютный индекс
+          <i>И</i> {t('game.ui.legendAbsolute')}
         </span>
       </footer>
     </section>
@@ -1745,6 +1747,7 @@ export function CalibrationPrototype({
   onFocusCharacter?: (characterId: string) => void;
   onExit?: () => void;
 } = {}) {
+  const { t } = useI18n();
   const SUBJECT = subjectId;
   const [phase, setPhase] = useState<Phase>("preparation"),
     [operationMode, setOperationMode] = useState<OperationMode>("impact"),
@@ -4718,9 +4721,9 @@ export function CalibrationPrototype({
             >
               <i>{timePaused ? "▶" : "Ⅱ"}</i>
               <span>
-                <small>ВРЕМЯ · {timePaused ? "ПАУЗА" : "ИДЁТ"}</small>
+                <small>{timePaused ? t('game.ui.timePausedHeader') : t('game.ui.timeRunningHeader')}</small>
                 <strong>
-                  {timeLabel || `МИНУТА ${Math.floor(worldMinute)}`}
+                  {timeLabel || t('game.ui.minuteLabel').replace('{n}', String(Math.floor(worldMinute)))}
                 </strong>
               </span>
             </button>
@@ -4728,9 +4731,9 @@ export function CalibrationPrototype({
         </nav>
       </header>
       <section className="objective-strip">
-        <small>ОРИЕНТИР</small>
+        <small>{t('game.ui.reference')}</small>
         <select
-          aria-label="Контракт-ориентир"
+          aria-label={t('game.ui.contractReferenceAria')}
           value={trackedContractId || ""}
           onChange={(event) => trackContract(event.target.value || null)}
         >
@@ -4766,7 +4769,7 @@ export function CalibrationPrototype({
             })}
           </div>
         ) : (
-          <p>Работа без заданных критериев</p>
+          <p>{t('game.ui.noCriterionSet')}</p>
         )}
         <strong>
           {trackedContract ? `${readyCount}/${goalRows.length}` : "—"}
@@ -4777,7 +4780,7 @@ export function CalibrationPrototype({
           <div
             className={`current-state state-${currentObservation?.behavioralState || "responsive"}`}
           >
-            <small>СЕЙЧАС</small>
+            <small>{t('game.ui.nowHeader')}</small>
             <strong>{currentState.title}</strong>
             <p>{telemetry?.summary || currentState.description}</p>
           </div>
@@ -4805,21 +4808,21 @@ export function CalibrationPrototype({
                 </div>
               ))}
             {!monitorTelemetrySignals.length && (
-              <p className="muted">Монитор ожидает данные.</p>
+              <p className="muted">{t('game.ui.monitorAwaitsData')}</p>
             )}
           </div>
           {telemetry?.behavioral?.length ? (
             <div className="behavioral-readout">
-              <small>НАБЛЮДАЕМОЕ ПОВЕДЕНИЕ</small>
+              <small>{t('game.ui.observedBehavior')}</small>
               {telemetry.behavioral.slice(0, 1).map((item) => (
                 <p key={item}>{item}</p>
               ))}
             </div>
           ) : null}
-          <h3>Ориентир</h3>
+          <h3>{t('game.ui.referenceTitle')}</h3>
           <div className="contract-target">
             <select
-              aria-label="Контракт-ориентир"
+              aria-label={t('game.ui.contractReferenceAria')}
               value={trackedContractId || ""}
               onChange={(e) => trackContract(e.target.value || null)}
             >
@@ -4827,14 +4830,14 @@ export function CalibrationPrototype({
                 .filter((c) => c.state === "accepted")
                 .map((c) => (
                   <option value={c.id} key={c.id}>
-                    Принят · {c.title}
+                    {t('game.ui.acceptedPrefix').replace('{title}', c.title)}
                   </option>
                 ))}
               {contracts
                 .filter((c) => c.state === "available")
                 .map((c) => (
                   <option value={c.id} key={c.id}>
-                    Доступен · {c.title}
+                    {t('game.ui.availablePrefix').replace('{title}', c.title)}
                   </option>
                 ))}
             </select>
@@ -4848,7 +4851,7 @@ export function CalibrationPrototype({
                     const movement = row.movement,
                       moveText =
                         movement && Math.abs(movement.delta) >= 0.05
-                          ? `${movement.delta > 0 ? "+" : ""}${movement.delta.toFixed(2)} · ${movement.closer > 0 ? "ближе" : movement.closer < 0 ? "дальше" : "без сдвига"}`
+                          ? `${movement.delta > 0 ? "+" : ""}${movement.delta.toFixed(2)} · ${movement.closer > 0 ? t('game.ui.closer') : movement.closer < 0 ? t('game.ui.farther') : t('game.ui.noShift')}`
                           : null;
                     return (
                       <div
@@ -4881,23 +4884,23 @@ export function CalibrationPrototype({
                 </div>
                 <small className="contract-status">
                   {trackedContract.state === "available"
-                    ? "Контракт можно принять у Связного."
+                    ? t('game.ui.contractCanAccept')
                     : readyCount === goalRows.length && goalRows.length
-                      ? "Актив готов к передаче у Связного."
-                      : "Контракт принят · актив не закреплён"}
+                      ? t('game.ui.activeReadyToTransfer')
+                      : t('game.ui.contractAcceptedNotAttached')}
                 </small>
               </>
             ) : (
               <p>
-                Работайте свободно или выберите заказ для сравнения состояния.
+                {t('game.ui.freeOrChooseOrder')}
               </p>
             )}
           </div>
-          <h3>Активные контексты · {visibleContexts.length}</h3>
+          <h3>{t('game.ui.activeContextsTitle').replace('{n}', String(visibleContexts.length))}</h3>
           {!visibleContexts.length && (
-            <p className="muted">Активных контекстов нет</p>
+            <p className="muted">{t('game.ui.noActiveContextsShort')}</p>
           )}
-          <h3>Одежда и оборудование</h3>
+          <h3>{t('game.ui.clothingAndEquipment')}</h3>
           {wornContexts.length ? (
             <div className="context-list">
               {wornContexts.map((c, i) => (
@@ -4907,28 +4910,28 @@ export function CalibrationPrototype({
               ))}
             </div>
           ) : (
-            <p className="muted">Ничего</p>
+            <p className="muted">{t('game.ui.nothing')}</p>
           )}
-          <h3>Поза, эффекты и состояния</h3>
+          <h3>{t('game.ui.poseEffectsStates')}</h3>
           {otherContexts.length ? (
             <div className="context-list">
               {otherContexts.map((c, i) => (
                 <div key={`${c.actionId}-${i}`}>
                   <span>
                     {c.type === "pose" || c.actionId.startsWith("pose_")
-                      ? "Поза"
+                      ? t('game.ui.pose')
                       : c.actionId.startsWith("effect_")
-                        ? "Эффект"
+                        ? t('game.ui.effect')
                         : c.pointId
-                          ? `Контекст · ${c.pointId}`
-                          : "Состояние"}
+                          ? t('game.ui.contextPrefix').replace('{point}', c.pointId)
+                          : t('game.ui.state')}
                   </span>
                   <b>{c.label || c.actionId}</b>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="muted">Без дополнительных состояний</p>
+            <p className="muted">{t('game.ui.noAdditionalStates')}</p>
           )}
           {error && <div className="outcome failure">{error}</div>}
         </aside>
@@ -4993,7 +4996,7 @@ export function CalibrationPrototype({
                   showPortrait={visualEffect.showPortrait}
                 />
               )}
-              <small>ДИАГНОСТИЧЕСКИЙ СТОЛ</small>
+              <small>{t('game.ui.diagnosticTableTitle')}</small>
             </div>
             {isPeakEvent &&
               peakEventKind &&
@@ -5009,8 +5012,8 @@ export function CalibrationPrototype({
           </div>
           <div className="character-chat">
             <header>
-              <strong>КАНАЛ КАЛИБРОВКИ</strong>
-              <span className="chat-channel-state">КАНАЛ ОТКРЫТ</span>
+              <strong>{t('game.ui.calibrationChannel')}</strong>
+              <span className="chat-channel-state">{t('game.ui.channelOpen')}</span>
             </header>
             <CharacterChatFeed
               lines={chatLines}
@@ -5179,9 +5182,9 @@ export function CalibrationPrototype({
                 className={`activation-scale level-${monitorActivation >= 85 ? "edge" : monitorActivation >= 70 ? "high" : "normal"}`}
               >
                 <header>
-                  <span>ФИЗИОЛОГИЧЕСКАЯ АКТИВАЦИЯ</span>
+                  <span>{t('game.ui.physiologicalActivation')}</span>
                   <b>
-                    {activeIsSecondary ? "Текущая" : activationLabel} · {Math.round(monitorActivation)}%
+                    {activeIsSecondary ? t('game.ui.currentNow') : activationLabel} · {Math.round(monitorActivation)}%
                   </b>
                 </header>
                 <div>
@@ -5189,9 +5192,9 @@ export function CalibrationPrototype({
                   <em style={{ left: `${monitorActivation}%` }} />
                 </div>
                 <footer>
-                  <span>Спокойствие</span>
-                  <span>Рабочая</span>
-                  <span>Предел</span>
+                  <span>{t('game.ui.calmState')}</span>
+                  <span>{t('game.ui.workingState')}</span>
+                  <span>{t('game.ui.limitState')}</span>
                 </footer>
                 <div className="live-biosignals">
                   <section
@@ -5203,9 +5206,9 @@ export function CalibrationPrototype({
                     }
                   >
                     <header>
-                      <span>ПУЛЬС</span>
+                      <span>{t('game.ui.pulse')}</span>
                       <b>
-                        {monitorPulseBpm.toFixed(0)} <i>уд/мин</i>
+                        {monitorPulseBpm.toFixed(0)} <i>{t('game.ui.beatsPerMin')}</i>
                       </b>
                     </header>
                     <div className="pulse-cardiogram" aria-hidden="true">
@@ -5226,9 +5229,9 @@ export function CalibrationPrototype({
                     }
                   >
                     <header>
-                      <span>ДЫХАНИЕ</span>
+                      <span>{t('game.ui.breathing')}</span>
                       <b>
-                        {monitorBreathingRate.toFixed(0)} <i>вдох/мин</i>
+                        {monitorBreathingRate.toFixed(0)} <i>{t('game.ui.breathsPerMin')}</i>
                       </b>
                     </header>
                     <div className="breathing-field" aria-hidden="true">
@@ -5241,9 +5244,9 @@ export function CalibrationPrototype({
                   <p
                     className="edge-profile-note"
                     title={edgeProfile.description}
-                    aria-label={`Вероятный исход: ${expectedPeakOutcome}. ${edgeProfile.description}`}
+                    aria-label={t('game.ui.likelyOutcomeAria').replace('{outcome}', expectedPeakOutcome).replace('{desc}', edgeProfile.description)}
                   >
-                    <span>ВЕРОЯТНЫЙ ИСХОД</span>
+                    <span>{t('game.ui.likelyOutcome')}</span>
                     <b>{expectedPeakOutcome}</b>
                   </p>
                 )}
@@ -5260,7 +5263,7 @@ export function CalibrationPrototype({
               >
                 <div className="endurance-scale">
                   <header>
-                    <span>ВЫНОСЛИВОСТЬ</span>
+                    <span>{t('game.ui.endurance')}</span>
                     <b>{enduranceLabel}</b>
                   </header>
                   <div className="endurance-liquid-container">
@@ -5382,20 +5385,20 @@ export function CalibrationPrototype({
                           {effectiveSelectedAction ? "+" : "±"} {(contextLearningBySource.get(monitorPoseContext.actionId) || []).slice(0, 3).map(e => semanticTagLabels[e.tag] || e.tag).join(", ")}
                         </span>
                       ) : (
-                        <span className="condition-effect muted">не модифицирует</span>
+                        <span className="condition-effect muted">{t('game.ui.doesNotModify')}</span>
                       )}
                       {!!monitorPoseContext.blocksPoints?.length && (
-                        <span className="condition-effect blocked">закрыто зон: {monitorPoseContext.blocksPoints.length}</span>
+                        <span className="condition-effect blocked">{t('game.ui.zonesClosed').replace('{n}', String(monitorPoseContext.blocksPoints.length))}</span>
                       )}
                     </>
                   ) : (
-                    <span className="condition-label muted">без ограничений</span>
+                    <span className="condition-label muted">{t('game.ui.noRestrictions')}</span>
                   )}
                 </div>
                 <div className="condition-contexts">
                   {monitorWornContexts.length > 0 && (
                     <div className="condition-group">
-                      <small>надетое</small>
+                      <small>{t('game.ui.worn')}</small>
                       <div className="condition-list">
                         {monitorWornContexts.map(c => {
                           const tags = contextLearningBySource.get(c.actionId) || [];
@@ -5413,7 +5416,7 @@ export function CalibrationPrototype({
                   )}
                   {monitorOtherContexts.length > 0 && (
                     <div className="condition-group">
-                      <small>условия</small>
+                      <small>{t('game.ui.conditions')}</small>
                       <div className="condition-list">
                         {monitorOtherContexts.map(c => {
                           const tags = contextLearningBySource.get(c.actionId) || [];
@@ -5433,7 +5436,7 @@ export function CalibrationPrototype({
               </div>
               {lastConditioningChanges.length > 0 && (
                 <div className="condition-changes">
-                  <small>получено</small>
+                  <small>{t('game.ui.received')}</small>
                   {lastConditioningChanges.slice(0, 3).map(({ tag, delta, source }, i) => (
                     <span key={i} className="change-entry">
                       <b>{semanticTagLabels[tag] || tag}</b>
@@ -5446,7 +5449,7 @@ export function CalibrationPrototype({
             </div>
             <aside
               className="monitor-control-layout__recommendations"
-              aria-label="Область палитры рекомендаций"
+              aria-label={t('game.ui.recommendationPaletteAria')}
             >
               {Array.from({ length: 3 }, (_, index) => {
                 const quick = quickActions[index];
@@ -5559,7 +5562,7 @@ export function CalibrationPrototype({
                           processCommand("slower", index);
                         }}
                       >
-                        <kbd>A</kbd> слабее
+                        <kbd>A</kbd> {t('game.ui.weaker')}
                       </button>
                       <button
                         disabled={!process.faster || busy}
@@ -5569,7 +5572,7 @@ export function CalibrationPrototype({
                           processCommand("faster", index);
                         }}
                       >
-                        <kbd>D</kbd> сильнее
+                        <kbd>D</kbd> {t('game.ui.stronger')}
                       </button>
                       <button
                         disabled={!process.stop || busy}
@@ -5579,7 +5582,7 @@ export function CalibrationPrototype({
                           processCommand("stop", index);
                         }}
                       >
-                        <kbd>E</kbd> завершить
+                        <kbd>E</kbd> {t('game.ui.finish')}
                       </button>
                     </footer>
                   </article>
@@ -5587,22 +5590,22 @@ export function CalibrationPrototype({
               ) : (
                 <div className="intimacy-readiness-panel">
                   <header>
-                    <small>ИНТИМНАЯ ГОТОВНОСТЬ</small>
+                    <small>{t('game.ui.intimateReadiness')}</small>
                     <strong>
                       {intimateReadiness < 25
-                        ? "НЕ ПРИНИМАЕТ"
+                        ? t('game.ui.intimacyReject')
                         : intimateReadiness < 55
-                          ? "ДОПУСКАЕТ"
+                          ? t('game.ui.intimacyAllow')
                           : intimateReadiness < 80
-                            ? "ГОТОВА"
-                            : "ЖЕЛАЕТ"}
+                            ? t('game.ui.intimacyReady')
+                            : t('game.ui.intimacyWants')}
                     </strong>
                   </header>
                   <div className="intimacy-readiness-metrics">
                     {[
-                      ["Готовность", intimateReadiness],
-                      ["Возбуждение", intimateArousal],
-                      ["Доверие", intimateTrust],
+                      [t('game.ui.intimacyReadinessShort'), intimateReadiness],
+                      [t('game.ui.intimacyArousal'), intimateArousal],
+                      [t('game.ui.intimacyTrust'), intimateTrust],
                     ].map(([label, value]) => (
                       <span key={String(label)}>
                         <small>{label}</small>
@@ -5645,7 +5648,7 @@ export function CalibrationPrototype({
             <div className="monitor-outcome-stack">
             <section className="calibration-footer-goal monitor-goal" aria-hidden="true">
                 <div className="footer-goal-picker">
-                  <small>ЦЕЛЬ</small>
+                  <small>{t('game.ui.goal')}</small>
                   <button
                     className="footer-goal-current"
                     onClick={() => setGoalPickerOpen((open) => !open)}
@@ -5719,15 +5722,15 @@ export function CalibrationPrototype({
                         </span>
                       ))
                     : trackedMetrics.slice(0, 4).map((metric) => (
-                        <span key={`monitor-metric-${metric}`}>
-                          <i>{trackedMetricLabel(metric)}</i>
-                          <b>наблюдение</b>
-                        </span>
-                      ))}
-                </div>
-                {trackedContract && specialGoalRows.length > 0 && (
-                  <div className="goal-extra-conditions">
-                    <small>ДОП. УСЛОВИЯ</small>
+                      <span key={`monitor-metric-${metric}`}>
+                        <i>{trackedMetricLabel(metric)}</i>
+                        <b>{t('game.ui.observation')}</b>
+                      </span>
+                    ))}
+                    </div>
+                    {trackedContract && specialGoalRows.length > 0 && (
+                    <div className="goal-extra-conditions">
+                    <small>{t('game.ui.extraConditions')}</small>
                     {specialGoalRows.slice(0, 3).map((row, index) => (
                       <span
                         className={row.met ? "met" : ""}
@@ -5888,13 +5891,13 @@ export function CalibrationPrototype({
                           typeof value === "number" && Math.abs(value) >= 0.01,
                       ) && (
                         <span className="no-state-change">
-                          <i>Состояние не изменилось</i>
+                          <i>{t('game.ui.stateUnchanged')}</i>
                         </span>
                       )}
                   </div>
                   {lastConditioningChanges.length > 0 && (
                     <section className="monitor-experience-readout">
-                      <small>ОПЫТ</small>
+                      <small>{t('game.ui.experience')}</small>
                       {lastConditioningChanges.map(({ tag, delta, source }) => (
                         <span
                           key={`conditioning-main-${tag}`}
@@ -5909,16 +5912,16 @@ export function CalibrationPrototype({
                             {delta > 0 ? "+" : ""}
                             {delta.toFixed(3)}
                           </b>
-                          {source && <em>через «{source}»</em>}
+                          {source && <em>{t('game.ui.viaSource').replace('{source}', source)}</em>}
                         </span>
                       ))}
                     </section>
                   )}
                   {isDischarge && (
                     <footer className="discharge-aftereffect">
-                      <small>ПОСЛЕ ПИКА</small>
+                      <small>{t('game.ui.afterPeak')}</small>
                       <span>
-                        Рефрактерный период · чувствительность{" "}
+                        {t('game.ui.refractoryPeriod')}{" "}
                         {signed(currentObservation.changes?.sensitivity)}
                       </span>
                     </footer>
@@ -5946,7 +5949,7 @@ export function CalibrationPrototype({
           <div className="operation-mode-bar">
             <button
               className="session-pause-action"
-              title="Дать персонажу восстановиться и приблизить состояние к базовому"
+              title={t('game.ui.pauseActionTitle')}
               disabled={busy}
               onClick={() => {
                 setSelectedActionId("");
@@ -5955,7 +5958,7 @@ export function CalibrationPrototype({
               }}
             >
               <span>Ⅱ</span>
-              Подождать
+              {t('game.ui.wait')}
             </button>
             <div className={`operation-goal-control ${goalPickerOpen ? "open" : ""}`}>
               <button
@@ -5963,14 +5966,14 @@ export function CalibrationPrototype({
                 aria-expanded={goalPickerOpen}
                 onClick={() => setGoalPickerOpen((open) => !open)}
               >
-                <small>ЦЕЛЬ</small>
-                <strong>{trackedContract?.title || "Загрузка контракта"}</strong>
+                <small>{t('game.ui.goal')}</small>
+                <strong>{trackedContract?.title || t('game.ui.loadingContract')}</strong>
                 <i>{goalPickerOpen ? "▾" : "▸"}</i>
               </button>
               {goalPickerOpen && trackedContract && (
                 <section className="operation-goal-panel">
                   <header>
-                    <small>ТЕКУЩИЙ КОНТРАКТ</small>
+                    <small>{t('game.ui.currentContract')}</small>
                     <button
                       className="operation-goal-settings"
                       title="Открыть каталог контрактов"
@@ -6043,13 +6046,13 @@ export function CalibrationPrototype({
                   setGoalSettingsOpen(true);
                 }}
               >
-                Цели
+                {t('game.ui.goals')}
               </button>
             )}
           </div>
           <div className="operation-toolbar">
             <div className="target-selector">
-              <small>ЗОНА</small>
+              <small>{t('game.ui.zoneHeader')}</small>
               {selectedAction?.pointId ? (
                 <div
                   className={`fixed-target visual-fixed-target ${preparationTarget?.fullBody ? "full-body" : "body-point"}`}
@@ -6072,8 +6075,8 @@ export function CalibrationPrototype({
                   onClick={() => setZoneOpen(true)}
                 >
                   <span className="target-zone-card__caption">
-                    <strong>{selectedZone?.label || "Выберите"}</strong>
-                    <small>Карта тела →</small>
+                    <strong>{selectedZone?.label || t('game.ui.select')}</strong>
+                    <small>{t('game.ui.bodyMapArrow')}</small>
                   </span>
                 </button>
               ) : selectedAction?.group === "clothing" ? (
@@ -6089,24 +6092,24 @@ export function CalibrationPrototype({
                 />
               ) : (
                 <div className="fixed-target">
-                  <strong>Выберите предмет</strong>
-                  <span>чтобы увидеть зону</span>
+                  <strong>{t('game.ui.selectItem')}</strong>
+                  <span>{t('game.ui.toSeeZone')}</span>
                 </div>
               )}
             </div>
           </div>
           <div className="zone-dynamic-row operation-zone-readout">
             <small>
-              ПАРАМЕТРЫ ЗОНЫ · {selectedZone?.label || "НЕ ВЫБРАНА"}
+              {t('game.ui.zoneParameters').replace('{zone}', selectedZone?.label || t('game.ui.notSelected'))}
             </small>
             <span
               title={
                 activePointSensitivity
                   ? formatRelativeValue(activePointSensitivity)
-                  : "Локальная чувствительность"
+                  : t('game.ui.localSensitivity')
               }
             >
-              Чувствит.{" "}
+              {t('game.ui.sensitivityShort')}{" "}
               <b>
                 {activePointSensitivity
                   ? `${activePointSensitivity.humanPercent}%`
@@ -6114,18 +6117,18 @@ export function CalibrationPrototype({
               </b>
               <i>
                 {activePointSensitivity
-                  ? `индекс ${Math.round(activePointSensitivity.value)}`
-                  : "нет данных"}
+                  ? `${t('game.ui.index')} ${Math.round(activePointSensitivity.value)}`
+                  : t('game.ui.noData')}
               </i>
             </span>
             <span
               title={
                 activePointAttitude
                   ? formatRelativeValue(activePointAttitude)
-                  : "Локальное принятие"
+                  : t('game.ui.localAcceptance')
               }
             >
-              Принятие{" "}
+              {t('game.ui.acceptance')}{" "}
               <b>
                 {activePointAttitude
                   ? `${activePointAttitude.humanPercent}%`
@@ -6133,17 +6136,17 @@ export function CalibrationPrototype({
               </b>
               <i>
                 {activePointAttitude
-                  ? `индекс ${Math.round(activePointAttitude.value)}`
-                  : "нет данных"}
+                  ? `${t('game.ui.index')} ${Math.round(activePointAttitude.value)}`
+                  : t('game.ui.noData')}
               </i>
             </span>
             <span>
-              Знакомство <b>{activePoint?.familiarity?.toFixed(0) || "0"}</b>
-              <i>локальный опыт</i>
+              {t('game.ui.familiarity')} <b>{activePoint?.familiarity?.toFixed(0) || "0"}</b>
+              <i>{t('game.ui.localExperience')}</i>
             </span>
             <span>
-              Действия <b>{activePoint?.exposureCount || 0}</b>
-              <i>на эту зону</i>
+              {t('game.ui.actions')} <b>{activePoint?.exposureCount || 0}</b>
+              <i>{t('game.ui.forThisZone')}</i>
             </span>
           </div>
           <div
@@ -6268,11 +6271,11 @@ export function CalibrationPrototype({
           className={`auxiliary-column ${protocolOpen || goalSettingsOpen ? "expanded" : ""}`}
         >
           <div className="auxiliary-summary">
-            <small>СЛУЖЕБНЫЙ КАНАЛ</small>
-            <strong>{trackedContract?.title || "Свободная калибровка"}</strong>
+            <small>{t('game.ui.serviceChannel')}</small>
+            <strong>{trackedContract?.title || t('game.ui.freeCalibration')}</strong>
             <span>
-              {protocol.reduce((n, step) => n + step.repeat, 0)} шагов ·{" "}
-              {trackedMetrics.length} показателей
+              {t('game.ui.stepsCount').replace('{n}', String(protocol.reduce((n, step) => n + step.repeat, 0)))} ·{" "}
+              {t('game.ui.metricsCount').replace('{n}', String(trackedMetrics.length))}
             </span>
             <div>
               <button
@@ -6282,7 +6285,7 @@ export function CalibrationPrototype({
                   setProtocolOpen(true);
                 }}
               >
-                Протокол
+                {t('game.ui.protocol')}
               </button>
               {!trackedContract && (
                 <button
@@ -6292,12 +6295,12 @@ export function CalibrationPrototype({
                     setGoalSettingsOpen(true);
                   }}
                 >
-                  Цели
+                  {t('game.ui.goals')}
                 </button>
               )}
             </div>
             <section>
-              <small>ОЧЕРЕДЬ</small>
+              <small>{t('game.ui.queue')}</small>
               {protocol.length ? (
                 protocol.slice(0, 5).map((step, index) => (
                   <span key={`aux-step-${step.key}`}>
@@ -6307,17 +6310,17 @@ export function CalibrationPrototype({
                   </span>
                 ))
               ) : (
-                <i>Добавляйте действия кнопкой ＋</i>
+                <i>{t('game.ui.addActionsWithPlus')}</i>
               )}
-              {protocol.length > 5 && <i>Ещё {protocol.length - 5}</i>}
+              {protocol.length > 5 && <i>{t('game.ui.moreLeft').replace('{n}', String(protocol.length - 5))}</i>}
             </section>
             <section>
-              <small>ОТСЛЕЖИВАЕТСЯ</small>
+              <small>{t('game.ui.tracked')}</small>
               <p>{trackedMetrics.map(trackedMetricLabel).join(" · ")}</p>
             </section>
             {nearbyCharacters.length > 0 && (
               <div className="calibration-presence auxiliary-presence">
-                <small>ПРИСУТСТВУЮТ</small>
+                <small>{t('game.ui.presentHeader')}</small>
                 {nearbyCharacters.map((character) => (
                   <div key={character.id}>
                     <b>
@@ -6346,10 +6349,9 @@ export function CalibrationPrototype({
           >
             <header>
               <div>
-                <small>АВТОМАТИЗАЦИЯ КАЛИБРОВКИ</small>
+                <small>{t('game.ui.calibrationAutomation')}</small>
                 <h2>
-                  Протокол · {protocol.reduce((n, step) => n + step.repeat, 0)}{" "}
-                  шагов
+                  {t('game.ui.protocolSteps').replace('{n}', String(protocol.reduce((n, step) => n + step.repeat, 0)))}
                 </h2>
               </div>
               <button onClick={() => setProtocolOpen(false)}>×</button>
@@ -6378,15 +6380,15 @@ export function CalibrationPrototype({
                           {step.repeat > 1 ? ` ×${step.repeat}` : ""}
                         </strong>
                         <small>
-                          {step.pointLabel || step.pointId || "системно"}
+                          {step.pointLabel || step.pointId || t('game.ui.systemic')}
                           {progress
-                            ? ` · выполнено ${progress.completedRepeats}/${step.repeat}`
+                            ? ` · ${t('game.ui.completedRepeats').replace('{n}', String(progress.completedRepeats)).replace('{m}', String(step.repeat))}`
                             : ""}
                         </small>
                       </div>
                       {progress?.completedRepeats ? (
                         <div className="protocol-step-effect">
-                          <small>ЭФФЕКТ</small>
+                          <small>{t('game.ui.effect')}</small>
                           {trackedMetrics.map((metric) => (
                             <span key={`${step.key}-${metric}`}>
                               {trackedMetricLabel(metric).toLowerCase()}{" "}
@@ -6396,7 +6398,7 @@ export function CalibrationPrototype({
                         </div>
                       ) : (
                         <div className="protocol-step-effect empty">
-                          Ожидает выполнения
+                          {t('game.ui.awaitingExecution')}
                         </div>
                       )}
                       <div className="protocol-step-tools">
@@ -6413,7 +6415,7 @@ export function CalibrationPrototype({
                           ↓
                         </button>
                         <button
-                          title="Добавить один повтор"
+                          title={t('game.ui.addOneRepeat')}
                           disabled={running}
                           onClick={() => repeat(step.key)}
                         >
@@ -6436,8 +6438,7 @@ export function CalibrationPrototype({
                 })
               ) : (
                 <p className="protocol-drawer-empty">
-                  Протокол пуст. Добавляйте действия кнопкой ＋ в панели
-                  операций.
+                  {t('game.ui.protocolEmpty')}
                 </p>
               )}
             </div>
@@ -6447,7 +6448,7 @@ export function CalibrationPrototype({
                 disabled={!running && (busy || !protocol.length)}
                 onClick={() => (running ? (stopRef.current = true) : run())}
               >
-                {running ? "■ Остановить" : "▶ Запустить протокол"}
+                {running ? `■ ${t('game.ui.stop')}` : `▶ ${t('game.ui.runProtocol')}`}
               </button>
             </footer>
           </aside>
@@ -6457,8 +6458,8 @@ export function CalibrationPrototype({
           >
             <header>
               <div>
-                <small>ЦЕЛИ КАЛИБРОВКИ</small>
-                <h2>{trackedContract?.title || "Выберите контракт"}</h2>
+                <small>{t('game.ui.calibrationGoals')}</small>
+                <h2>{trackedContract?.title || t('game.ui.selectContract')}</h2>
               </div>
               <button onClick={() => setGoalSettingsOpen(false)}>×</button>
             </header>
@@ -6503,14 +6504,14 @@ export function CalibrationPrototype({
                       setGoalSettingsOpen(false);
                     }}
                   >
-                    {contract.id === trackedContractId ? "Выбрано" : "Выбрать цель"}
+                    {contract.id === trackedContractId ? t('game.ui.selectedGoal') : t('game.ui.selectGoal')}
                   </button>
                 </article>
               ))}
             </div>
             {trackedContract && (
               <>
-                <small className="goal-selection-note">Выбранный контракт отслеживается в калибровке.</small>
+                <small className="goal-selection-note">{t('game.ui.contractTrackedNote')}</small>
                 <div className="goal-contract-details">
                   {goalRows.map((row, index) => (
                     <span
@@ -6550,10 +6551,10 @@ export function CalibrationPrototype({
         </aside>
       </div>
       <footer className={`event-strip ${significantEvent?.kind || ""}`}>
-        <span>СОБЫТИЕ</span>
+        <span>{t('game.ui.event')}</span>
         <div>
-          <strong>{significantEvent?.action || "Наблюдение начато"}</strong>
-          <p>{significantEvent?.text || "Значимых изменений пока нет."}</p>
+          <strong>{significantEvent?.action || t('game.ui.observationStarted')}</strong>
+          <p>{significantEvent?.text || t('game.ui.noSignificantChanges')}</p>
           </div>
           </footer>
       {visualReviewOpen && (
@@ -6566,18 +6567,18 @@ export function CalibrationPrototype({
             onClick={(event) => event.stopPropagation()}
           >
             <header>
-              <h2>Ревью аватара</h2>
+              <h2>{t('game.ui.avatarReview')}</h2>
               <button onClick={() => setVisualReviewOpen(false)}>×</button>
             </header>
             <img src={reviewAssetPath} alt={subjectName} />
             <code>{reviewAssetPath}</code>
-            <h3>Решение</h3>
+            <h3>{t('game.ui.decision')}</h3>
             <div className="visual-review-decisions">
               {(
                 [
-                  ["keep", "Оставить"],
-                  ["rework", "Переделать"],
-                  ["reject", "Исключить"],
+                  ["keep", t('game.ui.reviewKeep')],
+                  ["rework", t('game.ui.reviewRework')],
+                  ["reject", t('game.ui.reviewReject')],
                 ] as const
               ).map(([value, label]) => (
                 <button
@@ -6589,19 +6590,19 @@ export function CalibrationPrototype({
                 </button>
               ))}
             </div>
-            <h3>Что не так</h3>
+            <h3>{t('game.ui.whatsWrong')}</h3>
             <div className="visual-review-issues">
               {[
-                ["identity", "Другой персонаж"],
-                ["wardrobe", "Неверная одежда"],
-                ["restraint", "Неверная фиксация"],
-                ["interaction", "Не читается действие"],
-                ["phase", "Неверная эмоция/фаза"],
-                ["composition", "Прыгает композиция"],
-                ["anatomy", "Анатомия"],
-                ["artifacts", "Артефакты/текст"],
-                ["duplicate", "Дубликат"],
-                ["style", "Не подходит стиль"],
+                ["identity", t('game.ui.issueIdentity')],
+                ["wardrobe", t('game.ui.issueWardrobe')],
+                ["restraint", t('game.ui.issueRestraint')],
+                ["interaction", t('game.ui.issueInteraction')],
+                ["phase", t('game.ui.issuePhase')],
+                ["composition", t('game.ui.issueComposition')],
+                ["anatomy", t('game.ui.issueAnatomy')],
+                ["artifacts", t('game.ui.issueArtifacts')],
+                ["duplicate", t('game.ui.issueDuplicate')],
+                ["style", t('game.ui.issueStyle')],
               ].map(([value, label]) => (
                 <button
                   className={visualReviewIssues.includes(value) ? "active" : ""}
@@ -6618,7 +6619,7 @@ export function CalibrationPrototype({
                 </button>
               ))}
             </div>
-            <h3>Комментарий</h3>
+            <h3>{t('game.ui.comment')}</h3>
             <textarea
               value={visualReviewNote}
               onChange={(event) => setVisualReviewNote(event.target.value)}
