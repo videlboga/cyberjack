@@ -178,7 +178,7 @@ export const characterRepo = {
             INSERT INTO characters (id, name, kind, subject_id)
             VALUES (?, ?, 'subject', ?)
             ON CONFLICT(id) DO UPDATE SET
-                name = excluded.name,
+                name = CASE WHEN characters.name IS NULL OR characters.name = '' OR characters.name = characters.id THEN excluded.name ELSE characters.name END,
                 subject_id = excluded.subject_id
         `);
         stmt.run(subjectId, name, subjectId);
@@ -189,7 +189,7 @@ export const characterRepo = {
             INSERT INTO characters (id, name, kind, player_id)
             VALUES (?, ?, 'player', ?)
             ON CONFLICT(id) DO UPDATE SET
-                name = excluded.name,
+                name = CASE WHEN characters.name IS NULL OR characters.name = '' OR characters.name = characters.id THEN excluded.name ELSE characters.name END,
                 kind = excluded.kind,
                 player_id = excluded.player_id
         `);
@@ -201,7 +201,7 @@ export const characterRepo = {
             INSERT INTO characters (id, name, kind, player_id)
             VALUES (?, ?, 'player', ?)
             ON CONFLICT(id) DO UPDATE SET
-                name = excluded.name,
+                name = CASE WHEN characters.name IS NULL OR characters.name = '' OR characters.name = characters.id THEN excluded.name ELSE characters.name END,
                 kind = excluded.kind,
                 player_id = excluded.player_id
         `);

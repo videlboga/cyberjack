@@ -2254,12 +2254,12 @@ function CharacterDirectory({
     const image = aliases[pointId] || pointId;
     return `/character-images/bodyparts/${slug}/${image}.png`;
   };
-  const relationTone = (value: number) => value >= 68 ? "тёплое" : value <= 35 ? "напряжённое" : "нейтральное";
-  const operationalSummary = assessment[0] || "Данных для оценки пока недостаточно.";
+  const relationTone = (value: number) => value >= 68 ? t('game.ui.relationToneWarm') : value <= 35 ? t('game.ui.relationToneStrained') : t('game.ui.relationToneNeutral');
+  const operationalSummary = assessment[0] || t('game.ui.noAssessmentDataYet');
   return (
     <main className="character-dossier">
       <header>
-        <button onClick={() => onSelect(null)}>← Назад</button>
+        <button onClick={() => onSelect(null)}>{t('game.ui.back')}</button>
         <span>{t('game.ui.characterDossier')}</span>
         <label className="dossier-character-picker">
           <small>{t('game.ui.character')}</small>
@@ -2288,16 +2288,16 @@ function CharacterDirectory({
           </div>
           <small>
             {selected.role === "assistant"
-              ? "ПЕРСОНАЛ"
+              ? t('game.ui.staffShort')
               : selected.role === "asset"
-                ? "АКТИВ"
-                : "ПЕРСОНАЖ"}
+                ? t('game.ui.assetShort')
+                : t('game.ui.character')}
           </small>
           <h1>{selected.name}</h1>
           <p>{selected.title}</p>
           <ContextSummary contexts={selected.contexts} />
           <button className="primary" onClick={() => onLocate(selected)}>
-            Перейти к персонажу
+            {t('game.ui.goToCharacter')}
           </button>
         </aside>
         <section>
@@ -2312,43 +2312,43 @@ function CharacterDirectory({
               className={tab === "state" ? "active" : ""}
               onClick={() => setTab("state")}
             >
-              Состояние
+              {t('game.ui.tabState')}
             </button>
             <button
               className={tab === "zones" ? "active" : ""}
               onClick={() => setTab("zones")}
             >
-              Зоны
+              {t('game.ui.tabZones')}
             </button>
             <button
               className={tab === "learning" ? "active" : ""}
               onClick={() => setTab("learning")}
             >
-              Обучение
+              {t('game.ui.tabLearning')}
             </button>
             <button
               className={tab === "relations" ? "active" : ""}
               onClick={() => setTab("relations")}
             >
-              Связи
+              {t('game.ui.tabRelations')}
             </button>
             <button
               className={tab === "history" ? "active" : ""}
               onClick={() => setTab("history")}
             >
-              Хроника
+              {t('game.ui.tabHistory')}
             </button>
           </nav>
           {tab === "overview" && (
             <div className="dossier-information-grid">
               <article className="dossier-wide dossier-operational-brief">
-                <small>ОПЕРАТИВНАЯ ОЦЕНКА</small>
+                <small>{t('game.ui.operationalBrief')}</small>
                 <b>{operationalSummary}</b>
                 <div className="dossier-brief-signals">
-                  <span>Ресурс: {Math.round(Number(state?.capacity || 0))}</span>
-                  <span>Напряжение: {Math.round(Number(state?.tension || 0))}</span>
-                  <span>Контакт: {Math.round(Number(state?.attitude || 0))}</span>
-                  <span>{selected.contexts?.length ? `Активных контекстов: ${selected.contexts.length}` : "Свободна от активных контекстов"}</span>
+                  <span>{t('game.ui.resource')} {Math.round(Number(state?.capacity || 0))}</span>
+                  <span>{t('game.ui.tension')} {Math.round(Number(state?.tension || 0))}</span>
+                  <span>{t('game.ui.contact')} {Math.round(Number(state?.attitude || 0))}</span>
+                  <span>{selected.contexts?.length ? t('game.ui.activeContextsCount').replace('{n}', String(selected.contexts.length)) : t('game.ui.freeOfContexts')}</span>
                 </div>
               </article>
               <article className="dossier-biography">
@@ -2356,7 +2356,7 @@ function CharacterDirectory({
                 <p>
                   {selected.biography ||
                     selected.description ||
-                    "Описание пока отсутствует."}
+                    t('game.ui.noDescription')}
                 </p>
               </article>
               <article>
@@ -2370,30 +2370,30 @@ function CharacterDirectory({
                     <dt>{t('game.ui.category')}</dt>
                     <dd>
                       {selected.kind === "subject"
-                        ? "испытуемая"
+                        ? t('game.ui.kindSubject')
                         : selected.kind === "npc"
-                          ? "персонаж"
-                          : "оператор"}
+                          ? t('game.ui.kindNpc')
+                          : t('game.ui.kindOperator')}
                     </dd>
                   </div>
                   <div>
                     <dt>{t('game.ui.status')}</dt>
                     <dd>
                       {selected.role === "asset"
-                        ? "актив"
+                        ? t('game.ui.roleAsset')
                         : selected.role === "assistant"
-                          ? "персонал"
+                          ? t('game.ui.roleStaff')
                           : selected.role}
                     </dd>
                   </div>
                   <div>
                     <dt>{t('game.ui.presence')}</dt>
-                    <dd>{selected.presenceState || "не указано"}</dd>
+                    <dd>{selected.presenceState || t('game.ui.notSpecified')}</dd>
                   </div>
                   <div>
                     <dt>{t('game.ui.positionRole')}</dt>
                     <dd>
-                      {selected.currentRole || selected.title || "не назначена"}
+                      {selected.currentRole || selected.title || t('game.ui.notAssigned')}
                     </dd>
                   </div>
                   <div>
@@ -2445,35 +2445,34 @@ function CharacterDirectory({
                 <small>{t('game.ui.operationalStatus')}</small>
                 <p>
                   {selected.role === "asset"
-                    ? "Содержится в лаборатории как актив и доступна для подготовки к контрактам."
-                    : "Состоит в штате лаборатории и имеет рабочее назначение."}
+                    ? t('game.ui.assetBrief')
+                    : t('game.ui.staffBrief')}
                 </p>
                 <div className="role-management">
                   {selected.role === "asset" ? (
                     <button
                       disabled={busy}
                       onClick={() =>
-                        window.confirm(`Назначить ${selected.name} в штат?`) &&
+                        window.confirm(t('game.ui.confirmAssignStaff').replace('{name}', selected.name)) &&
                         onChangeRole(selected, "staff")
                       }
                     >
-                      Назначить в штат
+                      {t('game.ui.assignToStaff')}
                     </button>
                   ) : (
                     <button
                       disabled={busy}
                       onClick={() =>
                         window.confirm(
-                          `Оформить ${selected.name} как актив? Рабочее назначение будет снято.`,
+                          t('game.ui.confirmRegisterAsset').replace('{name}', selected.name),
                         ) && onChangeRole(selected, "asset")
                       }
                     >
-                      Оформить как актив
+                      {t('game.ui.registerAsAsset')}
                     </button>
                   )}
                   <small>
-                    Изменение статуса занимает 20 минут и требует свободного
-                    места.
+                    {t('game.ui.roleChangeNote')}
                   </small>
                 </div>
               </article>
@@ -2510,19 +2509,19 @@ function CharacterDirectory({
                 <div className="narrative-notes">
                   {favored.length > 0 && (
                     <p>
-                      Благоприятное принятие:{" "}
+                      {t('game.ui.favoredAcceptance')}{" "}
                       {favored.map((point) => point.label).join(", ")}.
                     </p>
                   )}
                   {avoided.length > 0 && (
                     <p>
-                      Сопротивление:{" "}
+                      {t('game.ui.resistance')}{" "}
                       {avoided.map((point) => point.label).join(", ")}.
                     </p>
                   )}
                   {sensitive.length > 0 && (
                     <p>
-                      Повышенная чувствительность:{" "}
+                      {t('game.ui.increasedSensitivity')}{" "}
                       {sensitive
                         .map(
                           (entry) =>
@@ -2556,7 +2555,7 @@ function CharacterDirectory({
           {tab === "zones" && (
             <div className="dossier-information-grid dossier-zones-view">
               <article className="dossier-wide">
-                <small>{t('game.ui.localIndicators')} · НАБЛЮДАЕМЫЕ ЗОНЫ</small>
+                <small>{t('game.ui.localIndicators')} · {t('game.ui.observedZones')}</small>
                 {observedPoints.length ? (
                   <div className="dossier-zone-gallery">
                     {observedPoints.map((point) => {
@@ -2574,8 +2573,8 @@ function CharacterDirectory({
                           {zoneImage(point.id) && <img src={zoneImage(point.id)!} alt="" onError={event => { event.currentTarget.style.display = "none"; }} />}
                           <section>
                             <b>{point.label}</b>
-                            <p>Чувствительность {pointSensitivity.humanPercent}% · принятие {pointAttitude.humanPercent}%</p>
-                            <p>Открытость {Math.round(point.openness)} · знакомство {Math.round(point.familiarity)} · наблюдений {point.exposureCount}</p>
+                            <p>{t('game.ui.zoneSensitivity').replace('{sens}', String(pointSensitivity.humanPercent)).replace('{att}', String(pointAttitude.humanPercent))}</p>
+                            <p>{t('game.ui.zoneStats').replace('{open}', String(Math.round(point.openness))).replace('{fam}', String(Math.round(point.familiarity))).replace('{n}', String(point.exposureCount))}</p>
                           </section>
                         </article>
                       );
@@ -2589,7 +2588,7 @@ function CharacterDirectory({
           )}
           {tab === "learning" && (
             <div className="dossier-information-grid dossier-learning-view">
-              {selected.dossierNarrative && <article className="dossier-wide dossier-voice-note"><small>СОБСТВЕННЫМИ СЛОВАМИ</small><p>«{selected.dossierNarrative.selfDescription}»</p><i>{selected.dossierNarrative.traitExpression}</i></article>}
+              {selected.dossierNarrative && <article className="dossier-wide dossier-voice-note"><small>{t('game.ui.ownWords')}</small><p>«{selected.dossierNarrative.selfDescription}»</p><i>{selected.dossierNarrative.traitExpression}</i></article>}
               <article>
                 <small>{t('game.ui.acquiredFeatures')}</small>
                 <div className="dossier-tags">
@@ -2627,8 +2626,8 @@ function CharacterDirectory({
           {tab === "relations" && (
             <article className="dossier-relations-panel">
               <header>
-                <div><small>МАТРИЦА ОТНОШЕНИЙ</small><b>Как {selected.name} воспринимает других</b></div>
-                <span>Направленные связи: взгляд персонажа на собеседника</span>
+                <div><small>{t('game.ui.relationsMatrix')}</small><b>{t('game.ui.howPerceivesOthers').replace('{name}', selected.name)}</b></div>
+                <span>{t('game.ui.directedRelationsNote')}</span>
               </header>
               <div className="dossier-relation-list">
                 {(selected.relationships || []).sort((a, b) => b.familiarity - a.familiarity).map(relation => (
@@ -2636,18 +2635,18 @@ function CharacterDirectory({
                     <div className="dossier-relation-avatar"><CharacterPortrait id={relation.subjectId} name={relation.name} /></div>
                     <section>
                       <b>{relation.name}</b>
-                      <p>{relation.opinion || `${relationTone(relation.attitude)} отношение; устойчивого вывода ещё нет.`}</p>
+                      <p>{relation.opinion || `${relationTone(relation.attitude)} ${t('game.ui.relationNoStable')}`}</p>
                       {relation.recentMemories?.[0] && <i>{relation.recentMemories[relation.recentMemories.length - 1]}</i>}
                     </section>
                     <dl>
-                      <div><dt>Отношение</dt><dd>{Math.round(relation.attitude)}</dd></div>
-                      <div><dt>Открытость</dt><dd>{Math.round(relation.openness)}</dd></div>
-                      <div><dt>Знакомство</dt><dd>{Math.round(relation.familiarity * 100)}%</dd></div>
+                      <div><dt>{t('game.ui.relationAttitude')}</dt><dd>{Math.round(relation.attitude)}</dd></div>
+                      <div><dt>{t('game.ui.relationOpenness')}</dt><dd>{Math.round(relation.openness)}</dd></div>
+                      <div><dt>{t('game.ui.relationFamiliarity')}</dt><dd>{Math.round(relation.familiarity * 100)}%</dd></div>
                     </dl>
-                    <em>{relation.present ? "рядом" : relation.knows ? "знакомы" : "не знакомы"}</em>
+                    <em>{relation.present ? t('game.ui.nearby') : relation.knows ? t('game.ui.known') : t('game.ui.notKnown')}</em>
                   </article>
                 ))}
-                {!(selected.relationships || []).length && <p>Связи ещё не зафиксированы.</p>}
+                {!(selected.relationships || []).length && <p>{t('game.ui.noRelationsYet')}</p>}
               </div>
             </article>
           )}
@@ -2655,10 +2654,10 @@ function CharacterDirectory({
             <article className="dossier-history-panel">
               <header>
                 <div>
-                  <small>ЗНАЧИМЫЕ ИЗМЕНЕНИЯ</small>
-                  <b>{meaningfulChronicle.length} эпизодов</b>
+                  <small>{t('game.ui.significantChanges')}</small>
+                  <b>{t('game.ui.episodesCount').replace('{n}', String(meaningfulChronicle.length))}</b>
                 </div>
-                <span>Однотипные записи объединены; подробности — внутри эпизода</span>
+                <span>{t('game.ui.historyNote')}</span>
               </header>
               <div className="dossier-history">
                 {meaningfulChronicle.length ? (
@@ -2752,6 +2751,7 @@ function DirectoryCard({
   resident: Resident;
   onOpen: () => void;
 }) {
+  const { t } = useI18n();
   const state = resident.state;
   return (
     <button className="directory-card" onClick={onOpen}>
@@ -2770,12 +2770,12 @@ function DirectoryCard({
         <span>{resident.title}</span>
         {state && (
           <p>
-            Ресурс {Math.round(state.capacity || 0)} · напряжение{" "}
+            {t('game.ui.resource')} {Math.round(state.capacity || 0)} · {t('game.ui.tension').toLowerCase()}{" "}
             {Math.round(state.tension || 0)}
           </p>
         )}
       </div>
-      <i>Открыть досье →</i>
+      <i>{t('game.ui.openDossier')}</i>
     </button>
   );
 }
@@ -2785,6 +2785,7 @@ function ContextSummary({
 }: {
   contexts?: Resident["contexts"];
 }) {
+  const { t } = useI18n();
   const clothing = contexts.filter((context) =>
     context.id.startsWith("eq_clothe_"),
   );
@@ -2793,19 +2794,19 @@ function ContextSummary({
   );
   return (
     <div className="character-context-summary">
-      <small>ОДЕЖДА</small>
+      <small>{t('game.ui.clothing')}</small>
       <p>
         {clothing.length
           ? clothing
               .map((context) => context.label.replace(/^Надеть\s+/i, ""))
               .join(" · ")
-          : "Нет одежды"}
+          : t('game.ui.noClothing')}
       </p>
-      <small>АКТИВНЫЕ КОНТЕКСТЫ</small>
+      <small>{t('game.ui.activeContexts')}</small>
       <p>
         {active.length
           ? active.map((context) => context.label).join(" · ")
-          : "Нет"}
+          : t('game.ui.none')}
       </p>
     </div>
   );
@@ -2898,9 +2899,18 @@ function MentalChairControlScreen({
   const memoryPageSize = 14;
   const memoryPages = Math.max(1, Math.ceil(memories.length / memoryPageSize));
   const visibleMemories = memories.slice(memoryPage * memoryPageSize, (memoryPage + 1) * memoryPageSize);
-  const tagLabel = (tag: string) => selectedMemory?.tagLabels?.[tag] || `тема: ${tag.replace(/[_-]+/g, " ")}`;
+  const tagLabel = (tag: string) => selectedMemory?.tagLabels?.[tag] || `${t('game.ui.themePrefix')} ${tag.replace(/[_-]+/g, " ")}`;
   const associationLinks = selectedMemory?.subjective?.associations || [];
   const memoryTags = selectedMemory?.tags || [];
+  // Central card bounds in graph % space (used only by the force sim below).
+  const CORE = { xmin: 35, xmax: 65, ymin: 30, ymax: 70 };
+  // Edges are NOT clipped to the card: the card is opaque and sits above the
+  // edge SVG, so it naturally masks the middle of any line that crosses it.
+  // The two visible stubs then terminate exactly at the card's ink border —
+  // flush, with no white gap. (Clipping to an inset box produced a visible gap
+  // between the line end and the border.)
+  const clipSegments = (x1: number, y1: number, x2: number, y2: number): { x1: number; y1: number; x2: number; y2: number }[] =>
+    [{ x1, y1, x2, y2 }];
   const memoryGraph = useMemo(() => {
     type GraphNode = { id: string; label: string; kind: 'tag' | 'association'; degree: number; strength: number; valence: number; x: number; y: number; vx: number; vy: number };
     const tags = [...new Set(memoryTags)];
@@ -2925,18 +2935,38 @@ function MentalChairControlScreen({
       from.strength = Math.max(from.strength, edge.strength);
       from.valence += edge.valence;
     }
-    for (const node of nodes) {
-      node.x = 8 + seeded(node.id, 1) * 84;
-      node.y = 8 + seeded(node.id, 2) * 84;
+    // Two-ring hub-and-spoke layout.
+    //   • association nodes (entities) sit on the OUTER ring;
+    //   • tag nodes (concepts) sit on the INNER ring, closer to the card.
+    // Each kind gets its OWN evenly-spaced angle sweep. The home pull is made
+    // deliberately dominant so nodes STAY on their ring; edge pull is kept
+    // weak so it nudges clusters without dragging nodes off their radius
+    // (which is what previously made the graph collapse into a heap).
+    const home = new Map<GraphNode, { x: number; y: number }>();
+    for (const kind of ['association', 'tag'] as const) {
+      const kindNodes = nodes
+        .filter(node => node.kind === kind)
+        .slice()
+        .sort((a, b) => seeded(a.id, 5) - seeded(b.id, 5));
+      const outer = kind === 'association';
+      const rx = outer ? 39 : 36;
+      const ry = outer ? 42 : 39;
+      kindNodes.forEach((node, index) => {
+        const angle = (index / Math.max(1, kindNodes.length)) * Math.PI * 2;
+        node.x = 50 + Math.cos(angle) * rx;
+        node.y = 50 + Math.sin(angle) * ry;
+        home.set(node, { x: node.x, y: node.y });
+      });
     }
     // A small deterministic force simulation keeps meaningful clusters close,
     // but preserves an Obsidian-like irregular topology across rerenders.
-    for (let step = 0; step < 150; step++) {
+    for (let step = 0; step < 140; step++) {
+      // Gentle mutual repulsion prevents node overlap (the core defect).
       for (let left = 0; left < nodes.length; left++) for (let right = left + 1; right < nodes.length; right++) {
         const a = nodes[left], b = nodes[right];
         let dx = b.x - a.x, dy = b.y - a.y;
-        const distance2 = Math.max(20, dx * dx + dy * dy);
-        const force = 42 / distance2;
+        const distance2 = Math.max(9, dx * dx + dy * dy);
+        const force = 34 / distance2;
         if (Math.abs(dx) + Math.abs(dy) < .01) { dx = seeded(`${a.id}:${b.id}`, 3) - .5; dy = seeded(`${b.id}:${a.id}`, 4) - .5; }
         const distance = Math.sqrt(dx * dx + dy * dy) || 1;
         a.vx -= dx / distance * force; a.vy -= dy / distance * force;
@@ -2945,22 +2975,27 @@ function MentalChairControlScreen({
       for (const edge of edges) {
         const a = byId.get(edge.from), b = byId.get(edge.to); if (!a || !b) continue;
         const dx = b.x - a.x, dy = b.y - a.y, distance = Math.hypot(dx, dy) || 1;
-        const pull = (distance - (15 - edge.strength * 4)) * .016;
+        const pull = (distance - (14 - edge.strength * 2)) * .012;
         a.vx += dx / distance * pull; a.vy += dy / distance * pull;
         b.vx -= dx / distance * pull; b.vy -= dy / distance * pull;
       }
       for (const node of nodes) {
-        // The central card is a solid object in the graph, not a node every
-        // label has to orbit evenly.
-        if (node.x > 29 && node.x < 71 && node.y > 24 && node.y < 76) {
+        // The central card is a solid object in the graph. Push nodes out of
+        // the card rectangle.
+        if (node.x > CORE.xmin && node.x < CORE.xmax && node.y > CORE.ymin && node.y < CORE.ymax) {
           const dx = node.x - 50, dy = node.y - 50;
-          if (Math.abs(dx) > Math.abs(dy)) node.vx += Math.sign(dx || .1) * .8;
-          else node.vy += Math.sign(dy || .1) * .8;
+          const ax = Math.abs(dx) / ((CORE.xmax - CORE.xmin) / 2), ay = Math.abs(dy) / ((CORE.ymax - CORE.ymin) / 2);
+          if (ax > ay) node.vx += Math.sign(dx || .1) * 2;
+          else node.vy += Math.sign(dy || .1) * 2;
         }
-        node.vx += (50 - node.x) * .0015; node.vy += (50 - node.y) * .0015;
-        node.vx *= .82; node.vy *= .82;
-        node.x = Math.max(5, Math.min(95, node.x + node.vx));
-        node.y = Math.max(6, Math.min(94, node.y + node.vy));
+        // Dominant home pull keeps each node ON its ring slot. This enforces
+        // the two-ring structure; without it repulsion/edges scatter kinds
+        // into a mixed cloud.
+        const h = home.get(node)!;
+        node.vx += (h.x - node.x) * .22; node.vy += (h.y - node.y) * .22;
+        node.vx *= .6; node.vy *= .6;
+        node.x = Math.max(4, Math.min(96, node.x + node.vx));
+        node.y = Math.max(5, Math.min(95, node.y + node.vy));
       }
     }
     return { nodes, edges, byId };
@@ -3022,60 +3057,60 @@ function MentalChairControlScreen({
     intensity,
   });
   if (!session) {
-    return <main className="mental-chair-screen"><header><button onClick={onExit}>← {t('game.ui.laboratory')}</button><h1>{getDeviceName(asset.id, t)}</h1></header><p>Сессия ещё не инициализирована.</p></main>;
+    return <main className="mental-chair-screen"><header><button onClick={onExit}>← {t('game.ui.laboratory')}</button><h1>{getDeviceName(asset.id, t)}</h1></header><p>{t('game.ui.sessionNotInitialized')}</p></main>;
   }
   return (
     <main className="mental-chair-screen">
       <header className="device-control-header">
         <button onClick={onExit}>← {t('game.ui.laboratory')}</button>
-        <div><small>МЕНТАЛЬНАЯ КОРРЕКЦИЯ</small><h1>{resident.name}</h1><p>{getDeviceName(asset.id, t)}</p></div>
+        <div><small>{t('game.ui.mentalCorrection')}</small><h1>{resident.name}</h1><p>{getDeviceName(asset.id, t)}</p></div>
         <div className={`device-status ${session.status}`}><i>●</i><span>{deviceStatusLabels[session.status]}</span></div>
       </header>
       <section className="mental-chair-layout">
         <aside className="mental-chair-subject">
           <div className="mental-chair-portrait"><CharacterPortrait id={resident.subjectId || resident.id} name={resident.name} portrait={resident.portrait} contexts={resident.contexts} state={resident.state} /></div>
-          <small>РЕЖИМ КРЕСЛА</small><strong>ВЫБОР ЭПИЗОДА</strong>
-          <p>Выберите пережитый эпизод, затем перейдите к работе с его ассоциациями.</p>
-          <div className="mental-chair-metrics"><span><small>ПЛАСТИЧНОСТЬ</small><b>{Math.round(Number(resident.state?.plasticity || 0))}</b></span><span><small>РЕСУРС</small><b>{Math.round(Number(resident.state?.capacity || 0))}</b></span></div>
+          <small>{t('game.ui.chairMode')}</small><strong>{t('game.ui.selectEpisode')}</strong>
+          <p>{t('game.ui.chairIntro')}</p>
+          <div className="mental-chair-metrics"><span><small>{t('game.ui.plasticity')}</small><b>{Math.round(Number(resident.state?.plasticity || 0))}</b></span><span><small>{t('game.ui.resourceMetric')}</small><b>{Math.round(Number(resident.state?.capacity || 0))}</b></span></div>
         </aside>
         <section className={`mental-chair-console${episodeWorkspace && selectedMemory ? " workspace" : ""}`}>
           {episodeWorkspace && selectedMemory ? <>
-            <header><button className="mental-work-back" onClick={() => { setEpisodeWorkspace(false); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>← К эпизодам</button><b>РАБОТА С ЭПИЗОДОМ</b></header>
+            <header><button className="mental-work-back" onClick={() => { setEpisodeWorkspace(false); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>{t('game.ui.backToEpisodes')}</button><b>{t('game.ui.workWithEpisode')}</b></header>
             <div className="mental-work-canvas">
-              <div className="mental-association-map" aria-label="Карта ассоциаций эпизода">
-                <article className="mental-episode-core" style={{ "--episode-copy-size": `${episodeCopySize}px` } as any}><small>ЦЕНТР ВОСПОМИНАНИЯ</small><b>{selectedMemory.title}</b><p>{renderEpisodeCopy(episodeCopy)}</p></article>
-                <svg className="mental-association-edges" viewBox="0 0 100 100" preserveAspectRatio="none">{memoryGraph.edges.map((edge, index) => { const from = memoryGraph.byId.get(edge.from); const to = memoryGraph.byId.get(edge.to); if (!from || !to) return null; const selected = selectedAssociationTarget === edge.target || selectedTags.some(tag => edge.to === `tag:${tag}`); return <g key={`${edge.from}:${edge.to}:${index}`} className={selected ? "selected" : ""}><line className="hitbox" x1={from.x} y1={from.y} x2={to.x} y2={to.y} onClick={() => { setSelectedAssociationTarget(edge.target); setSelectedTag(null); setSelectedTags([]); }} /><line className="visible" x1={from.x} y1={from.y} x2={to.x} y2={to.y} style={{ "--association-strength": edge.strength, "--association-valence": edge.valence } as any} /></g>; })}</svg>
+              <div className="mental-association-map" aria-label={t('game.ui.associationMap')}>
+                <article className="mental-episode-core" style={{ "--episode-copy-size": `${episodeCopySize}px` } as any}><small>{t('game.ui.memoryCenter')}</small><b>{selectedMemory.title}</b><p>{renderEpisodeCopy(episodeCopy)}</p></article>
+                <svg className="mental-association-edges" viewBox="0 0 100 100" preserveAspectRatio="none">{memoryGraph.edges.map((edge, index) => { const from = memoryGraph.byId.get(edge.from); const to = memoryGraph.byId.get(edge.to); if (!from || !to) return null; const selected = selectedAssociationTarget === edge.target || selectedTags.some(tag => edge.to === `tag:${tag}`); const segments = clipSegments(from.x, from.y, to.x, to.y); return segments.map((seg, segIndex) => <g key={`${edge.from}:${edge.to}:${index}:${segIndex}`} className={selected ? "selected" : ""}><line className="hitbox" x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2} onClick={() => { setSelectedAssociationTarget(edge.target); setSelectedTag(null); setSelectedTags([]); }} /><line className="visible" x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2} style={{ "--association-strength": edge.strength, "--association-valence": edge.valence } as any} /></g>); })}</svg>
                 {memoryGraph.nodes.map(node => <button key={node.id} className={`mental-association-node ${node.kind}${(node.kind === 'tag' ? selectedTags.includes(node.id.slice(4)) : selectedAssociationTarget === node.label) ? " selected" : ""}`} style={{ left: `${node.x}%`, top: `${node.y}%`, "--node-degree": node.degree, "--node-strength": node.strength, "--association-valence": node.valence / Math.max(node.degree, 1) } as any} onClick={() => { if (node.kind === 'tag') { const tag = node.id.slice(4); const nextTags = selectedTags.includes(tag) ? selectedTags.filter(item => item !== tag) : [...selectedTags, tag]; setSelectedTags(nextTags); setSelectedTag(nextTags.at(-1) || null); setSelectedAssociationTarget(null); } else { setSelectedAssociationTarget(node.label); setSelectedTag(null); setSelectedTags([]); } }}><b>{node.label}</b></button>)}
               </div>
               <section className="mental-intervention-panel">
-                <header><small>ВНУШЕНИЕ</small><b>{selectedAssociationTarget ? `Выбрана связь: ${selectedAssociationTarget}` : selectedTags.length > 1 ? `Новая связка: ${selectedTags.map(tagLabel).join(' · ')}` : selectedTag ? `Выбран тег: ${tagLabel(selectedTag)}` : "Выберите тег или связь"}</b></header>
-                <textarea value={intervention} onChange={event => setIntervention(event.target.value)} placeholder={selectedTags.length || selectedAssociationTarget ? "Введите внушение…" : "Сначала выберите тег или связь"} disabled={!selectedTags.length && !selectedAssociationTarget} />
-                <button disabled={(!selectedTags.length && !selectedAssociationTarget) || !intervention.trim() || working} onClick={async () => { if (await control("intervene", { targetLabel: selectedAssociation?.target, tags: selectedTags, unlinkTags: selectedAssociation?.manual ? selectedAssociation.tagLinks : undefined, intervention })) { setIntervention(""); await onRefresh(); } }}>{working ? 'Формируется…' : selectedAssociation?.manual ? 'Разорвать связку' : 'Запустить внушение'}</button>
+                <header><small>{t('game.ui.suggestion')}</small><b>{selectedAssociationTarget ? t('game.ui.selectedLink').replace('{target}', selectedAssociationTarget) : selectedTags.length > 1 ? t('game.ui.newBundle').replace('{tags}', selectedTags.map(tagLabel).join(' · ')) : selectedTag ? t('game.ui.selectedTag').replace('{tag}', tagLabel(selectedTag)) : t('game.ui.selectTagOrLink')}</b></header>
+                <textarea value={intervention} onChange={event => setIntervention(event.target.value)} placeholder={selectedTags.length || selectedAssociationTarget ? t('game.ui.enterSuggestion') : t('game.ui.selectTagFirst')} disabled={!selectedTags.length && !selectedAssociationTarget} />
+                <button disabled={(!selectedTags.length && !selectedAssociationTarget) || !intervention.trim() || working} onClick={async () => { if (await control("intervene", { targetLabel: selectedAssociation?.target, tags: selectedTags, unlinkTags: selectedAssociation?.manual ? selectedAssociation.tagLinks : undefined, intervention })) { setIntervention(""); await onRefresh(); } }}>{working ? t('game.ui.forming') : selectedAssociation?.manual ? t('game.ui.breakBundle') : t('game.ui.runSuggestion')}</button>
               </section>
               {interventionResult && <section className={`mental-intervention-result ${interventionResult.affected ? "applied" : "missed"}`}>
-                <header><small>РЕЗУЛЬТАТ ПОСЛЕДНЕГО ВНУШЕНИЯ</small><b>{interventionResult.affected ? `Связь «${interventionResult.targetLabel}» изменена` : `Связь «${interventionResult.targetLabel}» не найдена`}</b></header>
-                {interventionResult.changes.map(change => <p key={change.target}><b>{change.target}</b>: оценка {formatAssociationNumber(change.before.valence)} → {formatAssociationNumber(change.after.valence)} · сила {change.before.strength.toFixed(2)} → {change.after.strength.toFixed(2)} · реакция: {change.after.expectation}</p>)}
-                {!interventionResult.affected && <p>Пересборка воспоминания не сохранила эту связь, поэтому оценка не была изменена. Выберите существующую линию на карте и повторите внушение.</p>}
-                {interventionResult.affected > 0 && <p>Текст эпизода сохраняет факты; внушение меняет личную оценку и ожидаемую реакцию, показанные выше.</p>}
+                <header><small>{t('game.ui.lastSuggestionResult')}</small><b>{interventionResult.affected ? t('game.ui.linkChanged').replace('{target}', interventionResult.targetLabel) : t('game.ui.linkNotFound').replace('{target}', interventionResult.targetLabel)}</b></header>
+                {interventionResult.changes.map(change => <p key={change.target}><b>{change.target}</b>: {t('game.ui.estimate')} {formatAssociationNumber(change.before.valence)} → {formatAssociationNumber(change.after.valence)} · {t('game.ui.strength')} {change.before.strength.toFixed(2)} → {change.after.strength.toFixed(2)} · {t('game.ui.reaction')} {change.after.expectation}</p>)}
+                {!interventionResult.affected && <p>{t('game.ui.resuggestionMiss')}</p>}
+                {interventionResult.affected > 0 && <p>{t('game.ui.suggestionApplied')}</p>}
               </section>}
             </div>
             {error && <p className="mental-chair-error">{error}</p>}
           </> : <>
-          <header><small>ЭПИЗОД ИЗ ПАМЯТИ</small><b>{selectedMemory ? "ВЫБРАН" : "НЕ ВЫБРАН"}</b></header>
+          <header><small>{t('game.ui.episodeFromMemory')}</small><b>{selectedMemory ? t('game.ui.selected') : t('game.ui.notSelected')}</b></header>
           <div className="mental-memory-list">
             {memories.length ? visibleMemories.map((memory) => (
               <button key={memory.id} className={memory.id === memoryId ? "selected" : ""} onClick={() => { setMemoryId(memory.id); setFocusTag(memory.tags[0] || null); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>
-                <b>{memory.title}</b><small>{memory.tags.slice(0, 3).map(tag => memory.tagLabels?.[tag] || `тема: ${tag.replace(/[_-]+/g, " ")}`).join(" · ") || "эпизод"}{memory.atomCount && memory.atomCount > 1 ? ` · ${memory.atomCount} моментов` : ""}</small>
+                <b>{memory.title}</b><small>{memory.tags.slice(0, 3).map(tag => memory.tagLabels?.[tag] || `${t('game.ui.themePrefix')} ${tag.replace(/[_-]+/g, " ")}`).join(" · ") || t('game.ui.episode')}{memory.atomCount && memory.atomCount > 1 ? ` · ${memory.atomCount} ${t('game.ui.moments')}` : ""}</small>
               </button>
-            )) : <p>У персонажа пока нет эпизодов, пригодных для обработки.</p>}
+            )) : <p>{t('game.ui.noEpisodesForProcessing')}</p>}
           </div>
-          {memories.length > memoryPageSize && <nav className="mental-memory-pages" aria-label="Страницы эпизодов"><button disabled={memoryPage === 0} onClick={() => setMemoryPage(page => Math.max(0, page - 1))}>←</button><span>{memoryPage + 1} / {memoryPages}</span><button disabled={memoryPage >= memoryPages - 1} onClick={() => setMemoryPage(page => Math.min(memoryPages - 1, page + 1))}>→</button></nav>}
+          {memories.length > memoryPageSize && <nav className="mental-memory-pages" aria-label={t('game.ui.episodePages')}><button disabled={memoryPage === 0} onClick={() => setMemoryPage(page => Math.max(0, page - 1))}>←</button><span>{memoryPage + 1} / {memoryPages}</span><button disabled={memoryPage >= memoryPages - 1} onClick={() => setMemoryPage(page => Math.min(memoryPages - 1, page + 1))}>→</button></nav>}
           <section className={`mental-memory-detail ${selectedMemory ? "selected" : ""}`}>
-            {selectedMemory ? <><EpisodeMemoryCollage memory={selectedMemory} subjectId={resident.subjectId || resident.id} /><header><small>ВЫБРАННЫЙ ЭПИЗОД</small><b>{selectedMemory.title}</b></header><p>{selectedMemory.text}</p></> : <p>Выберите карточку, чтобы прочитать эпизод полностью.</p>}
+            {selectedMemory ? <><EpisodeMemoryCollage memory={selectedMemory} subjectId={resident.subjectId || resident.id} /><header><small>{t('game.ui.selectedEpisode')}</small><b>{selectedMemory.title}</b></header><p>{selectedMemory.text}</p></> : <p>{t('game.ui.selectCardToRead')}</p>}
           </section>
           <footer className="mental-chair-actions mental-selection-actions">
-            <button disabled={!selectedMemory || !focusTag || working || busy} onClick={async () => { if (await saveSelection()) setEpisodeWorkspace(true); }}>Работать с эпизодом</button>
-            <button className="secondary" onClick={onRelease}>Освободить</button>
+            <button disabled={!selectedMemory || !focusTag || working || busy} onClick={async () => { if (await saveSelection()) setEpisodeWorkspace(true); }}>{t('game.ui.workEpisode')}</button>
+            <button className="secondary" onClick={onRelease}>{t('game.ui.releaseShort')}</button>
           </footer>
           {error && <p className="mental-chair-error">{error}</p>}
           </>}
@@ -3598,17 +3633,19 @@ function DeviceControlScreen({
       : Math.max(0, clock.totalMinutes - session.startedAtTick);
   const phaseLabel =
     session.phase === "peak"
-      ? "ПОРОГ"
+      ? t('game.ui.phaseThreshold')
       : session.phase === "intense"
-        ? "УДЕРЖАНИЕ"
-        : "РАЗГОН";
+        ? t('game.ui.phaseHold')
+        : t('game.ui.phaseRamp');
   const systemNote =
     operatorNote ||
     (risk >= 85
-      ? "Протокол приблизился к установленному пределу. Рекомендуется снизить темп."
+      ? t('game.ui.systemNoteNearLimit')
       : projectedTension >= maxTension
-        ? "Следующий цикл выведет активацию к заданному пределу."
-        : `Следующий цикл: активация +${Math.max(0, Math.round(projectedTension - tension))}, ресурс ${Math.round(projectedCapacity - capacity)}.`);
+        ? t('game.ui.systemNoteNextCycleLimit')
+        : t('game.ui.systemNoteNextCycle')
+            .replace('{tension}', String(Math.max(0, Math.round(projectedTension - tension))))
+            .replace('{capacity}', String(Math.round(projectedCapacity - capacity))));
   return (
     <main className="device-control-screen sex-machine-screen">
       <header className="device-control-header">
@@ -3662,37 +3699,37 @@ function DeviceControlScreen({
           >
             <header>
               <div>
-                <small>ТЕКУЩИЙ ПРОТОКОЛ</small>
+                <small>{t('game.ui.currentProtocol')}</small>
                 <strong>{activeMode[1]}</strong>
               </div>
               <span>
                 <i />
                 {machineRunning
-                  ? "АКТИВЕН"
+                  ? t('game.ui.activeState')
                   : session.status === "paused"
-                    ? "ПАУЗА"
-                    : "ГОТОВ"}
+                    ? t('game.ui.paused')
+                    : t('game.ui.readyState')}
               </span>
             </header>
             <div className="sex-machine-readout">
               <span>
-                <small>РИТМ</small>
-                <b>{session.rhythm === "pulse" ? "ИМПУЛЬС" : session.rhythm === "wave" ? "ВОЛНА" : session.rhythm === "random" ? "СЛУЧАЙНЫЙ" : "РОВНЫЙ"}</b>
+                <small>{t('game.ui.rhythm')}</small>
+                <b>{session.rhythm === "pulse" ? t('game.ui.rhythmPulse') : session.rhythm === "wave" ? t('game.ui.rhythmWave') : session.rhythm === "random" ? t('game.ui.rhythmRandom') : t('game.ui.rhythmSteady')}</b>
               </span>
               <span>
-                <small>ПРЕДЕЛ</small>
+                <small>{t('game.ui.limit')}</small>
                 <b>{session.maxTension ?? 95}</b>
               </span>
               <span>
-                <small>РЕЗЕРВ</small>
+                <small>{t('game.ui.reserve')}</small>
                 <b>{session.minCapacity ?? 15}</b>
               </span>
             </div>
             <div
               className={`sex-machine-rhythm rhythm-${rhythm} protocol-${waveformKey} ${machineRunning ? "running" : ""}`}
-              aria-label={`Визуализация ритма: ${rhythm}`}
+              aria-label={t('game.ui.rhythmVisualization').replace('{rhythm}', rhythm)}
             >
-              <small>СИГНАЛ РИТМА</small>
+              <small>{t('game.ui.rhythmSignal')}</small>
               <svg viewBox="0 0 128 24" preserveAspectRatio="none" aria-hidden="true">
                 <path className="baseline" d="M0 12H128" />
                 <path className="wave" d={rhythmWavePath} pathLength={100} />
@@ -3700,7 +3737,7 @@ function DeviceControlScreen({
             </div>
             <div className="sex-machine-power">
               <header>
-                <span>МОЩНОСТЬ ВОЗДЕЙСТВИЯ</span>
+                <span>{t('game.ui.impactPower')}</span>
                 <b>
                   {session.intensity}
                   <small>%</small>
@@ -3709,7 +3746,7 @@ function DeviceControlScreen({
               <div>
                 {Array.from({ length: 10 }, (_, index) => (
                   <button
-                    aria-label={`Интенсивность ${(index + 1) * 10}%`}
+                    aria-label={t('game.ui.intensityLabel').replace('{n}', String((index + 1) * 10))}
                     className={
                       index < Math.ceil(session.intensity / 10) ? "active" : ""
                     }
@@ -3728,18 +3765,18 @@ function DeviceControlScreen({
           {!machineEngaged && (
             <section className="sex-machine-protocols">
               <header>
-                <small>ВЫБОР ПРОТОКОЛА</small>
+                <small>{t('game.ui.selectProtocol')}</small>
               </header>
               <div className="sex-machine-protocol-selector">
                 <button
-                  aria-label="Предыдущий протокол"
+                  aria-label={t('game.ui.previousProtocol')}
                   disabled={working}
                   onClick={() => selectAdjacentMode(-1)}
                 >
                   ‹
                 </button>
                 <div>
-                  <small>КАРТРИДЖ {String(activeModeIndex + 1).padStart(2, "0")} / {String(targetModes.length).padStart(2, "0")}</small>
+                  <small>{t('game.ui.cartridge').replace('{cur}', String(activeModeIndex + 1).padStart(2, "0")).replace('{total}', String(targetModes.length).padStart(2, "0"))}</small>
                   <div className="sex-machine-protocol-title">
                     <strong>{activeMode[1]}</strong>
                     <span>{activeMode[3]}</span>
@@ -3747,7 +3784,7 @@ function DeviceControlScreen({
                   <p>{activeMode[2]}</p>
                 </div>
                 <button
-                  aria-label="Следующий протокол"
+                  aria-label={t('game.ui.nextProtocol')}
                   disabled={working}
                   onClick={() => selectAdjacentMode(1)}
                 >
@@ -3757,17 +3794,17 @@ function DeviceControlScreen({
               <section className="sex-machine-session-settings">
                 <div className="sex-machine-session-targets">
                   <div className="sex-machine-session-target">
-                    <small title="Лимит сеанса">ЛИМИТ</small>
+                    <small title={t('game.ui.sessionLimit')}>{t('game.ui.limit')}</small>
                     <button
-                      aria-label="Уменьшить лимит сеанса на 30 минут"
+                      aria-label={t('game.ui.decreaseSessionLimit')}
                       disabled={working || stopAfterMinutes <= 0}
                       onClick={() => control("settings", { stopAfterMinutes: Math.max(0, stopAfterMinutes - 30) || null })}
                     >
                       −
                     </button>
-                    <b title={stopAfterMinutes ? `${stopAfterMinutes} минут` : "Вручную"}>{stopAfterMinutes ? `${stopAfterMinutes}′` : "—"}</b>
+                    <b title={stopAfterMinutes ? `${stopAfterMinutes} ${t('game.ui.minutes')}` : t('game.ui.manual')}>{stopAfterMinutes ? `${stopAfterMinutes}′` : "—"}</b>
                     <button
-                      aria-label="Увеличить лимит сеанса на 30 минут"
+                      aria-label={t('game.ui.increaseSessionLimit')}
                       disabled={working || stopAfterMinutes >= 1440}
                       onClick={() => control("settings", { stopAfterMinutes: Math.min(1440, stopAfterMinutes + 30) })}
                     >
@@ -3776,9 +3813,9 @@ function DeviceControlScreen({
                   </div>
                   {activeMode[0] === "orgasm" && (
                     <div className="sex-machine-session-target">
-                    <small title="Цель: оргазмов">ОРГАЗМЫ</small>
+                    <small title={t('game.ui.orgasmTarget')}>{t('game.ui.orgasms')}</small>
                     <button
-                      aria-label="Уменьшить число оргазмов"
+                      aria-label={t('game.ui.decreaseOrgasms')}
                       disabled={working || orgasmTargetCount <= 1}
                       onClick={() => control("settings", { orgasmTargetCount: orgasmTargetCount - 1 })}
                     >
@@ -3786,7 +3823,7 @@ function DeviceControlScreen({
                     </button>
                     <b>{orgasmTargetCount}</b>
                     <button
-                      aria-label="Увеличить число оргазмов"
+                      aria-label={t('game.ui.increaseOrgasms')}
                       disabled={working || orgasmTargetCount >= 10}
                       onClick={() => control("settings", { orgasmTargetCount: orgasmTargetCount + 1 })}
                     >
@@ -3804,12 +3841,11 @@ function DeviceControlScreen({
             >
               <header>
                 <div>
-                  <small>ВЕДЕНИЕ ПРОТОКОЛА</small>
+                  <small>{t('game.ui.protocolRunning')}</small>
                   <strong>{phaseLabel}</strong>
                 </div>
                 <span>
-                  ЦИКЛ {String(Math.floor(elapsed / 10) + 1).padStart(2, "0")} ·{" "}
-                  {elapsed} МИН
+                  {t('game.ui.cycle').replace('{n}', String(Math.floor(elapsed / 10) + 1).padStart(2, "0")).replace('{elapsed}', String(elapsed))}
                 </span>
               </header>
               <div className="sex-machine-trajectory">
@@ -3825,38 +3861,38 @@ function DeviceControlScreen({
                 <footer>
                   <span>
                     <i className="current" />
-                    Сейчас
+                    {t('game.ui.now')}
                   </span>
                   <span>
                     <i className="forecast" />
-                    Через цикл
+                    {t('game.ui.nextCycle')}
                   </span>
                   <span>
                     <i className="limit" />
-                    Предел
+                    {t('game.ui.limitShort')}
                   </span>
                 </footer>
               </div>
               <div className="sex-machine-operation-metrics">
                 <article>
-                  <small>{stimulationMode === "tickling" ? "РЕАКЦИЯ" : "АКТИВАЦИЯ"}</small>
+                  <small>{stimulationMode === "tickling" ? t('game.ui.reactionMetric') : t('game.ui.activation')}</small>
                   <strong>{Math.round(tension)}</strong>
                   <span>→ {Math.round(projectedTension)}</span>
                 </article>
                 <article>
-                  <small>РЕСУРС</small>
+                  <small>{t('game.ui.resourceMetric')}</small>
                   <strong>{Math.round(capacity)}</strong>
                   <span>→ {Math.round(projectedCapacity)}</span>
                 </article>
                 <article>
-                  <small>РИСК</small>
+                  <small>{t('game.ui.risk')}</small>
                   <strong>{Math.round(risk)}</strong>
                   <span>
                     {risk >= 85
-                      ? "Критический"
+                      ? t('game.ui.riskCritical')
                       : risk >= 60
-                        ? "Высокий"
-                        : "Допустимый"}
+                        ? t('game.ui.riskHigh')
+                        : t('game.ui.riskAcceptable')}
                   </span>
                 </article>
               </div>
@@ -3870,12 +3906,12 @@ function DeviceControlScreen({
                 disabled={working}
                 onClick={() => control("start")}
               >
-                <small>ПРОТОКОЛ: {activeMode[1]}</small>Запустить
+                <small>{t('game.ui.protocolStart').replace('{name}', activeMode[1])}</small>{t('game.ui.start')}
               </button>
             )}
             {session.status === "running" && (
               <button onClick={() => control("pause")} disabled={working}>
-                Пауза
+                {t('game.ui.pause')}
               </button>
             )}
             {session.status === "paused" && (
@@ -3884,7 +3920,7 @@ function DeviceControlScreen({
                 onClick={() => control("resume")}
                 disabled={working}
               >
-                Продолжить
+                {t('game.ui.resume')}
               </button>
             )}
             {["running", "paused"].includes(session.status) && (
@@ -3893,7 +3929,7 @@ function DeviceControlScreen({
                 onClick={() => control("stop")}
                 disabled={working}
               >
-                Аварийная остановка
+                {t('game.ui.emergencyStop')}
               </button>
             )}
           </div>
@@ -3901,12 +3937,12 @@ function DeviceControlScreen({
         </section>
         <div className="device-chat-panel character-chat residential-chat">
           <header>
-            <strong>КАНАЛ УСТРОЙСТВА</strong>
-            <span className="chat-channel-state">КАНАЛ ОТКРЫТ</span>
+            <strong>{t('game.ui.deviceChannel')}</strong>
+            <span className="chat-channel-state">{t('game.ui.channelOpen')}</span>
           </header>
           <CharacterChatFeed
             lines={lines}
-            emptyText="Разговор ещё не начат."
+            emptyText={t('game.ui.chatNotStarted')}
             typing={chatWaiting}
             typingSpeaker={resident.name}
             typingActorId={subjectId}
@@ -3939,17 +3975,17 @@ function DeviceControlScreen({
                   send();
                 }
               }}
-              placeholder={`Сказать: ${resident.name}`}
+              placeholder={t('game.ui.say').replace('{name}', resident.name)}
             />
             <button disabled={working || !text.trim()}>
-              {working ? "…" : "Отправить"}
+              {working ? "…" : t('game.ui.send')}
             </button>
           </form>
         </div>
       </section>
       {!machineEngaged && (
-        <section className="sex-machine-stimulation-selector" aria-label="Тип стимуляции">
-          <small>ТИП СТИМУЛЯЦИИ</small>
+        <section className="sex-machine-stimulation-selector" aria-label={t('game.ui.stimulationMode')}>
+          <small>{t('game.ui.stimulationType')}</small>
           <div>
             {(Object.entries(SEX_MACHINE_STIMULATION) as Array<["vaginal" | "anal" | "tickling", typeof SEX_MACHINE_STIMULATION.anal]>).map(([mode, definition]) => (
               <button
@@ -3957,9 +3993,9 @@ function DeviceControlScreen({
                 className={stimulationMode === mode ? "active" : ""}
                 disabled={working}
                 onClick={() => selectStimulation(mode)}
-                title={definition.description}
+                title={mode === "tickling" ? t('game.ui.modeTicklingDesc') : mode === "anal" ? t('game.ui.modeAnalDesc') : t('game.ui.modeVaginalDesc')}
               >
-                {definition.label}
+                {mode === "tickling" ? t('game.ui.modeTickling') : mode === "anal" ? t('game.ui.modeAnal') : t('game.ui.modeVaginal')}
               </button>
             ))}
           </div>
@@ -4557,16 +4593,16 @@ function ContainerConversation({
       : null;
   const capsuleRisks = [
     capsuleCapacity <= 15
-      ? "Критическое истощение"
+      ? t('game.ui.riskCriticalExhaustion')
       : capsuleCapacity <= 30
-        ? "Низкий ресурс"
+        ? t('game.ui.lowResource')
         : null,
     capsuleActivation >= 85
-      ? "Предельная активация"
+      ? t('game.ui.peakActivation')
       : capsuleActivation >= 70
-        ? "Высокая активация"
+        ? t('game.ui.highActivation')
         : null,
-    Number(capsuleState.overload || 0) >= 10 ? "Сенсорная перегрузка" : null,
+    Number(capsuleState.overload || 0) >= 10 ? t('game.ui.sensoryOverload') : null,
   ].filter((risk): risk is string => Boolean(risk));
   const informativeCapsuleContexts = Array.from(
     new Set(
@@ -5259,22 +5295,22 @@ function ContainerConversation({
                         selectedProcess.action.label}
                     </strong>
                     <span>
-                      АВТО ·{" "}
+                      {t('game.ui.auto')} ·{" "}
                       {Math.max(
                         0,
                         Math.floor(selectedProcess.context.ticksActive || 0),
                       )}{" "}
-                      мин
+                      {t('game.ui.min')}
                     </span>
                   </header>
                   <div className="control-process-intensity">
                     <span>
                       <b>
                         {selectedProcessLevel >= 3
-                          ? "УСИЛЕННАЯ"
+                          ? t('game.ui.levelEnhanced')
                           : selectedProcessLevel === 1
-                            ? "НИЗКАЯ"
-                            : "РАБОЧАЯ"}
+                            ? t('game.ui.levelLow')
+                            : t('game.ui.levelWorking')}
                       </b>
                     </span>
                     <div>
@@ -5293,26 +5329,26 @@ function ContainerConversation({
                       disabled={!selectedProcess.slower || busy || sending}
                       onClick={() => processCommand("slower")}
                     >
-                      <kbd>A</kbd> слабее
+                      <kbd>A</kbd> {t('game.ui.weaker')}
                     </button>
                     <button
                       disabled={!selectedProcess.faster || busy || sending}
                       onClick={() => processCommand("faster")}
                     >
-                      <kbd>D</kbd> сильнее
+                      <kbd>D</kbd> {t('game.ui.stronger')}
                     </button>
                     <button
                       disabled={!selectedProcess.stop || busy || sending}
                       onClick={() => processCommand("stop")}
                     >
-                      <kbd>E</kbd> завершить
+                      <kbd>E</kbd> {t('game.ui.finish')}
                     </button>
                   </footer>
                 </article>
               ) : (
                 <div className="control-process-idle">
                   <i>●</i>
-                  <strong>Нет активных процессов</strong>
+                  <strong>{t('game.ui.noActiveProcesses')}</strong>
                 </div>
               )}
             </section>
@@ -5322,9 +5358,9 @@ function ContainerConversation({
           <aside className="equipment-action-palette">
             <div className="capsule-infusion-panel">
               <header>
-                <strong>СИСТЕМА ПОДАЧИ</strong>
+                <strong>{t('game.ui.feedingSystem')}</strong>
                 <small>
-                  Одна медицинская ампула и один дополнительный состав
+                  {t('game.ui.feedingSystemNote')}
                 </small>
               </header>
               <div className="equipment-action-list capsule-infusion-list">
@@ -5350,7 +5386,7 @@ function ContainerConversation({
                         title={
                           available
                             ? infusion.effect
-                            : `${infusion.effect}. Нет ампул в инвентаре.`
+                            : `${infusion.effect}. ${t('game.ui.noAmpoules')}`
                         }
                         aria-label={`${infusion.label}. ${infusion.effect}`}
                         onClick={() => {
@@ -5360,17 +5396,17 @@ function ContainerConversation({
                       >
                         <strong>{infusion.label}</strong>
                         <small className="capsule-infusion-effect">
-                          <b>ОЖИДАЕМЫЙ ЭФФЕКТ</b>
+                          <b>{t('game.ui.expectedEffect')}</b>
                           <span>{infusion.effect}</span>
                         </small>
                         <small className="action-card-tags">
                           <span>
                             {infusion.kind === "medical"
-                              ? `ампул: ${charges}`
-                              : "встроенный контур"}
+                              ? t('game.ui.ampoules').replace('{n}', String(charges))
+                              : t('game.ui.builtinCircuit')}
                           </span>
-                          {active && <span>активно</span>}
-                          {!available && <span>нет в наличии</span>}
+                          {active && <span>{t('game.ui.tagActive')}</span>}
+                          {!available && <span>{t('game.ui.outOfStock')}</span>}
                         </small>
                       </button>
                     </div>
@@ -5397,7 +5433,7 @@ function ContainerConversation({
                     setZoneOpen(false);
                   }}
                 >
-                  Воздействия
+                  {t('game.ui.impacts')}
                 </button>
                 <button
                   className={operationMode === "setup" ? "active" : ""}
@@ -5407,7 +5443,7 @@ function ContainerConversation({
                     setZoneOpen(false);
                   }}
                 >
-                  Подготовка
+                  {t('game.ui.preparation')}
                 </button>
               </div>
             </div>
@@ -5601,16 +5637,16 @@ function ContainerConversation({
         )}
         <div className="character-chat residential-chat">
           <header>
-            <strong>КАНАЛ КАМЕРЫ</strong>
+            <strong>{t('game.ui.cameraChannel')}</strong>
             <span className="chat-channel-state">
               {presentResidents.length > 1
-                ? `ПРИСУТСТВУЮТ: ${presentResidents.map((character) => character.name).join(" · ")}`
-                : "КАНАЛ ОТКРЫТ"}
+                ? t('game.ui.present').replace('{names}', presentResidents.map((character) => character.name).join(" · "))
+                : t('game.ui.channelOpen')}
             </span>
           </header>
           <CharacterChatFeed
             lines={lines}
-            emptyText="Разговор ещё не начат."
+            emptyText={t('game.ui.chatNotStarted')}
             typing={
               sending ||
               (replyPending &&
@@ -6045,12 +6081,12 @@ function SupplyView({
     <main className="management-screen supply-screen station-screen station-command">
       <header className="station-command-header">
         <div>
-          <p>ОМНИКРОН · СТАНЦИОННЫЙ ТЕРМИНАЛ</p>
+          <p>{t('game.ui.omnikronTerminal')}</p>
           <h1>{t('game.ui.station')}</h1>
-          <span>Внешние связи лаборатории.</span>
+          <span>{t('game.ui.stationExternalNote')}</span>
         </div>
         <section>
-          <small>ТЕКУЩИЙ УЗЕЛ</small>
+          <small>{t('game.ui.currentNode')}</small>
           <strong>{scenario.location.shortTitle}</strong>
           <span>{scenario.clock.label}</span>
         </section>
@@ -6063,19 +6099,19 @@ function SupplyView({
           className={tab === "overview" ? "active" : ""}
           onClick={() => setTab("overview")}
         >
-          Обзор
+          {t('game.ui.overview')}
         </button>
         <button
           className={tab === "supply" ? "active" : ""}
           onClick={() => setTab("supply")}
         >
-          Снабжение · {scenario.shop.length}
+          {t('game.ui.supplyTab').replace('{n}', String(scenario.shop.length))}
         </button>
         <button
           className={tab === "storage" ? "active" : ""}
           onClick={() => setTab("storage")}
         >
-          Склад · {scenario.inventory.length}
+          {t('game.ui.storageTab').replace('{n}', String(scenario.inventory.length))}
         </button>
       </nav>
       <div className="station-command-body">
@@ -6083,84 +6119,84 @@ function SupplyView({
           <section className="station-overview">
             <div className="station-radial-panel">
               <header>
-                <small>ОМНИКРОН</small>
+                <small>{t('game.ui.omnikron')}</small>
                 <strong>{t('game.ui.stationAroundLab')}</strong>
                 <span>
-                  Схема мира; активные ситуации приходят через каналы справа
+                  {t('game.ui.omnikronIntro')}
                 </span>
               </header>
               <div
                 className="station-radial-map"
-                aria-label="Схема колец станции"
+                aria-label={t('game.ui.stationRingMap')}
               >
                 <StationSchematic />
                 <div className="station-node-marker">
-                  <small>УЗЕЛ</small>
+                  <small>{t('game.ui.node')}</small>
                   <b>CY-17</b>
-                  <span>КАЛИБРАТОР</span>
+                  <span>{t('game.ui.calibratorNode')}</span>
                 </div>
               </div>
               <footer>
                 <span>
-                  <i className="stable" /> внутренний контур
+                  <i className="stable" /> {t('game.ui.innerLoop')}
                 </span>
                 <span>
-                  <i className="warning" /> внешние кольца
+                  <i className="warning" /> {t('game.ui.outerRings')}
                 </span>
                 <span>
-                  <i className="danger" /> граница Аномалии
+                  <i className="danger" /> {t('game.ui.anomalyBorder')}
                 </span>
               </footer>
             </div>
             <div className="station-operations">
               <article className={inbox.length ? "attention" : ""}>
                 <header>
-                  <small>ВХОДЯЩИЕ</small>
+                  <small>{t('game.ui.incoming')}</small>
                   <b>{inbox.length}</b>
                 </header>
-                <strong>{inbox.length ? inbox[0].title : "Канал чист"}</strong>
+                <strong>{inbox.length ? inbox[0].title : t('game.ui.channelClean')}</strong>
                 <p>
                   {inbox.length
                     ? inbox[0].body
-                    : "Новых разговоров и внешних возможностей пока нет."}
+                    : t('game.ui.noNewIncomingDetailed')}
                 </p>
                 <button onClick={onOpenInbox}>
-                  {inbox.length ? "Открыть входящие" : "Проверить канал"}
+                  {inbox.length ? t('game.ui.openInbox') : t('game.ui.checkChannel')}
                 </button>
               </article>
               <article className={activeContracts.length ? "active" : ""}>
                 <header>
-                  <small>КОНТРАКТЫ</small>
+                  <small>{t('game.ui.contracts')}</small>
                   <b>{activeContracts.length}</b>
                 </header>
                 <strong>
                   {activeContracts.length
-                    ? `${activeContracts.length} в работе`
-                    : "Нет принятых заказов"}
+                    ? t('game.ui.inWork').replace('{n}', String(activeContracts.length))
+                    : t('game.ui.noAcceptedOrders')}
                 </strong>
                 <p>
                   {activeContracts[0]?.title ||
-                    `${contracts.filter((contract) => contract.state === "available").length} предложений доступны у Связного.`}
+                    t('game.ui.offersAtLiaison').replace('{n}', String(contracts.filter((contract) => contract.state === "available").length))}
                 </p>
-                <button onClick={onOpenContracts}>К офису Связного</button>
+                <button onClick={onOpenContracts}>{t('game.ui.goToLiaisonOffice')}</button>
               </article>
               <article className={limitedOffers.length ? "limited" : ""}>
                 <header>
-                  <small>СНАБЖЕНИЕ</small>
+                  <small>{t('game.ui.supplyHeader')}</small>
                   <b>{limitedOffers.length || scenario.shop.length}</b>
                 </header>
                 <strong>
                   {limitedOffers.length
-                    ? "Ограниченная партия"
-                    : "Каталог доступен"}
+                    ? t('game.ui.limitedBatchShort')
+                    : t('game.ui.catalogAvailable')}
                 </strong>
                 <p>
                   {limitedOffers[0]
-                    ? `${limitedOffers[0].name} · ${limitedOffers[0].supplier || "неизвестный поставщик"}`
-                    : `${consumables.length} препаратов и ${equipment.length} позиций оснащения.`}
+                    ? `${limitedOffers[0].name} · ${limitedOffers[0].supplier || t('game.ui.unknownSupplier')}`
+                    : t('game.ui.consumablesCount').replace('{n}', String(consumables.length)).replace('{m}', String(equipment.length))}
                 </p>
                 <button onClick={() => setTab("supply")}>
-                  Открыть снабжение
+                  {t('game.ui.openSupply')}
                 </button>
               </article>
             </div>
@@ -6413,13 +6449,13 @@ function InventoryView({
       {!embedded && (
         <header className="screen-heading">
           <div>
-            <p>УЧЁТ</p>
+            <p>{t('game.ui.accounting')}</p>
             <h1>{t('game.ui.property')}</h1>
             <span>
-              Переносное оборудование, одежда и расходники калибратора.
+              {t('game.ui.accountingIntro')}
             </span>
           </div>
-          <b>{items.length} позиций</b>
+          <b>{items.length} {t('game.ui.positions')}</b>
         </header>
       )}
       <div className="inventory-grid">
@@ -6432,7 +6468,7 @@ function InventoryView({
               <strong>{translated?.name || item.name}</strong>
               <p>{translated?.description || item.description}</p>
             </div>
-            <b>{item.charges >= 0 ? `×${item.charges}` : "постоянно"}</b>
+            <b>{item.charges >= 0 ? `×${item.charges}` : t('game.ui.permanent')}</b>
           </article>
           );
         })}
@@ -6459,11 +6495,11 @@ function StationStorage({
     <section className="management-section station-storage">
       <header className="station-section-heading">
         <div>
-          <small>СКЛАДСКОЙ УЧЁТ</small>
+          <small>{t('game.ui.storageAccounting')}</small>
           <h2>{t('game.ui.complexProperty')}</h2>
         </div>
         <span>
-          {inventory.length} позиций · {laboratory.length} установленных модулей
+          {t('game.ui.storageCount').replace('{n}', String(inventory.length)).replace('{m}', String(laboratory.length))}
         </span>
       </header>
       <h2>{t('game.ui.installedInLab')}</h2>
@@ -6475,8 +6511,8 @@ function StationStorage({
             <p>{asset.description}</p>
             <span>
               {asset.metadata?.subjectId
-                ? "актив размещён"
-                : "система доступна"}
+                ? t('game.ui.assetPlaced')
+                : t('game.ui.systemAvailable')}
             </span>
           </article>
         ))}
@@ -6498,7 +6534,7 @@ function StationStorage({
                     <strong>{translated?.name || item.name}</strong>
                     <p>{translated?.description || item.description}</p>
                   </div>
-                  <b>{item.charges >= 0 ? `×${item.charges}` : "постоянно"}</b>
+                  <b>{item.charges >= 0 ? `×${item.charges}` : t('game.ui.permanent')}</b>
                 </article>
                 );
               })}
@@ -6507,7 +6543,7 @@ function StationStorage({
         ) : null;
       })}
       {!inventory.length && (
-        <p className="empty-screen">Склад переносимого имущества пуст.</p>
+        <p className="empty-screen">{t('game.ui.emptyInventory')}</p>
       )}
     </section>
   );
@@ -6536,7 +6572,7 @@ function JournalView({ events }: { events: Scenario["events"] }) {
             </article>
           ))
         ) : (
-          <p className="empty-screen">Событий пока нет.</p>
+          <p className="empty-screen">{t('game.ui.noEventsYetShort')}</p>
         )}
       </section>
     </main>

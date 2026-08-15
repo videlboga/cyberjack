@@ -59,15 +59,20 @@ export const modelAssignments: Record<string, ModelAssignment> = {
     maxTokens: envNum('PARSER_MAX_TOKENS', 400),
     temperature: 0.1,
   },
-  /** Генерация/переписывание эпизода памяти. */
+  /** Генерация/переписывание эпизода памяти. Длинный структурированный
+   *  JSON (title/summary/associations) над фактами до ~7500 символов.
+   *  Модель должна стабильно отдавать полный JSON (не текст) с большим
+   *  окном: flash-lite обрезает на 600 токенов, deepseek-v4-flash местами
+   *  отдаёт текст вместо JSON. gemini-2.5-flash-lite стабильно отдаёт JSON
+   *  при достаточном max_tokens — его и берём основным. */
   memory: {
-    models: [PARSER_MODEL, ...splitList(env('PARSER_FALLBACK_MODELS', 'google/gemini-2.5-flash-lite,deepseek/deepseek-chat-v3-0324')).filter(m => m !== PARSER_MODEL)],
+    models: ['google/gemini-2.5-flash-lite', ...splitList(env('LLM_FALLBACK_MODELS', 'deepseek/deepseek-v4-flash,deepseek/deepseek-v4-flash-0731')).filter(m => m !== 'google/gemini-2.5-flash-lite')],
     providers: [],
-    ttftTimeoutMs: envNum('MEMORY_TTFT_TIMEOUT', 6000),
-    requestTimeoutMs: envNum('MEMORY_REQUEST_TIMEOUT', 12000),
+    ttftTimeoutMs: envNum('MEMORY_TTFT_TIMEOUT', 8000),
+    requestTimeoutMs: envNum('MEMORY_REQUEST_TIMEOUT', 30000),
     format: 'json',
-    maxTokens: envNum('MEMORY_MAX_TOKENS', 600),
-    temperature: 0.1,
+    maxTokens: envNum('MEMORY_MAX_TOKENS', 2000),
+    temperature: 0.3,
   },
 };
 

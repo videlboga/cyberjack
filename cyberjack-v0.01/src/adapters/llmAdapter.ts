@@ -21,6 +21,10 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     const assignment = getModelAssignment(purpose);
     const models = assignment.models;
     let lastError: unknown;
+    // Legacy callers pass { type: 'json_object' } as the second argument to
+    // request plain-JSON output. A real structured schema carries `.value`
+    // (see PARSER_SCHEMA). Treat the legacy marker as "no schema".
+    const schema = jsonSchema && jsonSchema.value ? jsonSchema : undefined;
     // One trace/request ID shared across every parser fallback attempt for
     // this logical request. Inherit the tick's requestId when present so the
     // fallback can be correlated with the tick that produced it; mint a new
@@ -32,14 +36,15 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
         const startedAt = performance.now();
         try {
             const body: Record<string, any> = { model, messages, temperature: assignment.temperature, max_tokens: assignment.maxTokens };
-            // Structured output: when a schema is supplied, request a strict
-            // JSON schema so the model is forced to return every field (incl.
-            // command.contextId). Without it, models drop fields and the
-            // downstream resolver silently degrades to "misunderstood".
-            if (jsonSchema) {
+            // Structured output: when a real schema is supplied, request a
+            // strict JSON schema so the model is forced to return every field
+            // (incl. command.contextId). Without it, models drop fields and
+            // the downstream resolver silently degrades to "misunderstood".
+            // Plain-JSON callers (memory, dossier, social) stay on json_object.
+            if (schema) {
                 body.response_format = {
                     type: 'json_schema',
-                    json_schema: { name: jsonSchema.name || 'cyberjack_parser', strict: true, schema: jsonSchema.value }
+                    json_schema: { name: schema.name || 'cyberjack_parser', strict: true, schema: schema.value }
                 };
             } else {
                 body.response_format = { type: 'json_object' };

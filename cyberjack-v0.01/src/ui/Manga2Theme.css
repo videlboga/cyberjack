@@ -1057,3 +1057,176 @@ html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-headin
 html[data-ui-theme="manga2"] .campaign-shell .character-directory .screen-heading span {
   font-size: 8px !important;
 }
+
+/* === MENTAL CHAIR — association-map intervention panel ===
+   Compact the panel so it sits lower and reads as a clean three-part row:
+   hint (small) | input (prominent) | run button (prominent). */
+html[data-ui-theme="manga2"] .campaign-shell .mental-work-canvas {
+  grid-template-rows: minmax(0,1fr) auto auto !important;
+  gap: 6px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel {
+  grid-template-columns: minmax(120px,.38fr) minmax(0,1fr) auto !important;
+  grid-template-rows: auto !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  align-items: center !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel header {
+  gap: 3px !important;
+  align-content: center !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel header small {
+  font-size: 7px !important;
+  letter-spacing: .12em !important;
+  color: #555 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel header b {
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel textarea {
+  min-height: 46px !important;
+  max-height: 72px !important;
+  height: auto !important;
+  padding: 8px 10px !important;
+  border: 1px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel textarea::placeholder {
+  color: #888 !important;
+  /* Single-line placeholder centred vertically in the field */
+  line-height: 30px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel textarea:focus {
+  outline: 1px solid #111 !important;
+  outline-offset: -1px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel button {
+  min-width: 104px !important;
+  min-height: 46px !important;
+  padding: 9px 13px !important;
+  border: 1px solid #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel button:hover:not(:disabled) {
+  background: #fff !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-intervention-panel button:disabled {
+  opacity: .35 !important;
+  cursor: default !important;
+}
+
+/* === MENTAL CHAIR — association graph nodes & edges === */
+/* Hierarchy: tag nodes are small pills (concepts), association nodes are
+   larger cards (entities). Selected nodes get a hard ink highlight. */
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core {
+  width: 30% !important;
+  height: 40% !important;
+  max-width: 230px !important;
+  padding: 12px 14px !important;
+  border: 1.5px solid #111 !important;
+  box-shadow: 0 2px 0 #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core small {
+  font-size: 8px !important;
+  letter-spacing: .14em !important;
+  color: #666 !important;
+  border-bottom: 1px solid #ddd !important;
+  padding-bottom: 5px !important;
+  margin-bottom: 6px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core > b {
+  font-size: 13px !important;
+  color: #111 !important;
+  line-height: 1.25 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-episode-core p {
+  color: #555 !important;
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-map {
+  background: #fbfbfb !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-edges .visible {
+  stroke: #333 !important;
+  stroke-width: 1px !important;
+  opacity: .9 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-edges g:hover .visible {
+  opacity: 1 !important;
+  stroke: #111 !important;
+  stroke-width: 1.3px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-edges g.selected .visible {
+  opacity: 1 !important;
+  stroke: #111 !important;
+  stroke-width: 1.8px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node {
+  font-family: inherit !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.tag {
+  border-radius: 999px !important;
+  border: 1px solid #aaa !important;
+  background: #fafafa !important;
+  color: #333 !important;
+  font-size: 7px !important;
+  width: auto !important;
+  min-height: 18px !important;
+  padding: 1px 7px !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.association {
+  border-radius: 3px !important;
+  border: 1.5px solid #111 !important;
+  background: #fff !important;
+  color: #111 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  width: auto !important;
+  min-height: 26px !important;
+  height: auto !important;
+  max-width: 104px !important;
+  padding: 3px 7px !important;
+  box-shadow: 0 2px 0 #111 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node b {
+  display: block !important;
+  font-size: inherit !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.25 !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  overflow: visible !important;
+  max-height: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node:hover {
+  z-index: 5 !important;
+  transform: translate(-50%,-50%) scale(1.06) !important;
+  box-shadow: 0 2px 0 #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.selected {
+  z-index: 6 !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 4px #111 !important;
+  transform: translate(-50%,-50%) scale(1.06) !important;
+  background: #111 !important;
+  color: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mental-association-node.selected b {
+  color: #fff !important;
+}
