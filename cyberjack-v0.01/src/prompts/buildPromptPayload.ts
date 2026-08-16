@@ -135,16 +135,25 @@ export function deriveOpenDialogueThreads(entries: Array<{ role: string; content
         .filter(entry => !technicalInteractionMarker.test(String(entry.content || '')))
         .slice(-8);
     const threads: string[] = [];
+    const seenQuestions = new Set<string>();
     for (let index = 0; index < recent.length; index++) {
         const entry = recent[index];
         const speaker = entry.role === 'assistant' ? ownerName : initiatorName;
         const line = `${speaker}: «${entry.content}»`;
         const hasReply = recent.slice(index + 1).some(later => later.role !== entry.role);
-        if (entry.content.includes('?') && !hasReply) threads.push(`Без явного ответа осталось: ${line}`);
+        if (entry.content.includes('?') && !hasReply) {
+            // Dedup by the question text itself (normalized), not the formatted
+            // line: the same unanswered question can be stored with slightly
+            // different trailing punctuation and must not repeat in the prompt.
+            const questionKey = String(entry.content).replace(/\s+/g, ' ').trim();
+            if (seenQuestions.has(questionKey)) continue;
+            seenQuestions.add(questionKey);
+            threads.push(`Без явного ответа осталось: ${line}`);
+        }
         // Отложенные договорённости (обещания/общие планы) выявляет LLM-слой
         // социальной памяти; регекс по естественному языку здесь недопустим.
     }
-    return Array.from(new Set(threads)).slice(-3);
+    return threads.slice(-3);
 }
 
 export function deriveRelationshipBeliefs(

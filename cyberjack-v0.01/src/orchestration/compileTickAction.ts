@@ -103,9 +103,9 @@ export function compileTickAction(input: CompileTickActionInput): CompileTickAct
         activeContexts: applicableContexts,
         familiarity: state.point.familiarity ?? 0
     });
-    // NOTE: intimateNarrationFor currently OVERRIDES matrix sensory for intimate
-    // actions. During matrix integration (next phase), the matrix selector takes
-    // priority and intimateNarrationFor becomes a fallback for uncovered pairs.
+    // intimateNarrationFor feeds the subjectiveText/memory path (compiledAction.sensory),
+    // while the sensory matrix feeds the turn-message block (sensoryVariant, resolved
+    // independently in buildPromptPayload). They are separate channels and do not conflict.
     const intimateNarration = intimateNarrationFor(
         payload.presetId,
         payload.pointId,

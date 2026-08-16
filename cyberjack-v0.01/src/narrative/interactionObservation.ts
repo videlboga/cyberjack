@@ -268,13 +268,13 @@ export function buildInteractionObservation(input: {
 export function describeObservationSignal(observation: InteractionObservation): string {
     const { pleasure = 0, discomfort = 0, overload = 0, mixed = false, sensoryAmplification = 1 } = observation.reaction || {};
     const state = {
-        responsive: 'ты сохраняешь осмысленный контакт',
-        subspace: 'внимание вязнет в ощущениях',
-        overload: 'ощущений слишком много, чтобы легко их разделить',
-        freeze: 'тело замирает, и выразить реакцию трудно',
-        panic: 'тебе важно вернуть дистанцию и безопасность',
-        defiance: 'ты собрана и сопротивляешься происходящему',
-        unresponsive: 'на осмысленную реакцию почти не остаётся сил',
+        responsive: 'Ты сохраняешь осмысленный контакт',
+        subspace: 'Внимание вязнет в ощущениях',
+        overload: 'Ощущений слишком много, чтобы легко их разделить',
+        freeze: 'Тело замирает, и выразить реакцию трудно',
+        panic: 'Тебе важно вернуть дистанцию и безопасность',
+        defiance: 'Ты собрана и сопротивляешься происходящему',
+        unresponsive: 'На осмысленную реакцию почти не остаётся сил',
     }[observation.behavioralState || 'responsive'];
     const valence = mixed
         ? 'ощущение противоречиво'
