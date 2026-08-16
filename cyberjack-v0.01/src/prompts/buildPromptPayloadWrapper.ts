@@ -68,6 +68,7 @@ export async function buildPromptPayloadWithDB(
     const activeCuePointIds = activeContextRow
         .map(row => row.point_id)
         .filter((pointId): pointId is string => Boolean(pointId && pointId !== 'systemic'));
+    let deviceMode: string | undefined;
     for (const device of runningDeviceRows) {
         if (device.asset_id === 'lab_sex_machine') {
             try {
@@ -75,6 +76,7 @@ export async function buildPromptPayloadWithDB(
                 const stimulation = sexMachineStimulation(session?.stimulationMode);
                 activeCueTags.push(...stimulation.tags);
                 activeCuePointIds.push(stimulation.pointId);
+                deviceMode = session?.stimulationMode || 'vaginal';
             } catch { /* malformed asset metadata must not break dialogue */ }
         }
     }
@@ -161,7 +163,7 @@ export async function buildPromptPayloadWithDB(
         activeContextNames,
         latestResult,
         eventId,
-        { ...options, worldPlayerId: options?.worldPlayerId || 'PL-1', addresseeContextFacts, compulsionCueTags:activeCueTags, compulsionCuePointIds:activeCuePointIds, edgeHoldMinutes: edgeHold ? Math.max(0, worldMinute - edgeHold.enteredAtMinute) : 0 }
+        { ...options, worldPlayerId: options?.worldPlayerId || 'PL-1', addresseeContextFacts, compulsionCueTags:activeCueTags, compulsionCuePointIds:activeCuePointIds, edgeHoldMinutes: edgeHold ? Math.max(0, worldMinute - edgeHold.enteredAtMinute) : 0, deviceMode }
     );
 
     if (extraLog) {

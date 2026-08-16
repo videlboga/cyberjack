@@ -19,7 +19,7 @@ import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueE
 import { compactMemoryReaction } from '../services/memoryLayer';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { getSubjectiveEpisode } from '../services/subjectiveMemoryEpisodes';
-import { resolveSensoryVariant } from '../domain/sensoryMatrix';
+import { resolveSensoryVariant, resolveDeviceVariant } from '../domain/sensoryMatrix';
 
 export interface EventRecord {
     id: number;
@@ -288,7 +288,7 @@ export async function buildPromptPayload(
     activeContextNames: string[],
     latestResult?: TickOutput,
     eventId = 'scene_lab_calibrator',
-    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string; addresseeContextFacts?: string[]; compulsionCueTags?: string[]; compulsionCuePointIds?: string[]; edgeHoldMinutes?: number }
+    options?: { suppressTickIds?: string[]; initiatorId?: string; addresseeId?: string; worldPlayerId?: string; addresseeContextFacts?: string[]; compulsionCueTags?: string[]; compulsionCuePointIds?: string[]; edgeHoldMinutes?: number; deviceMode?: string }
 ): Promise<PromptPayload & { systemPrompt: string }> {
     const suppressed = new Set(options?.suppressTickIds || []);
     const recentEvents = recentEventsIn.filter(event => {
@@ -466,9 +466,11 @@ export async function buildPromptPayload(
     const currentPointLabel = currentPointId
         ? presetRepo.getPointPreset(currentPointId)?.label || currentPointId
         : undefined;
-    const sensoryVariant = currentActionId && currentPointId
-        ? resolveSensoryVariant(currentActionId, currentPointId, exposureBeforeTick)
-        : null;
+    const sensoryVariant = options?.deviceMode
+        ? resolveDeviceVariant('lab_sex_machine', options.deviceMode, exposureBeforeTick)
+        : currentActionId && currentPointId
+            ? resolveSensoryVariant(currentActionId, currentPointId, exposureBeforeTick)
+            : null;
     const frame = compileReactionFrame({
         speakerId: ownerId,
         speakerName: ownerName,
