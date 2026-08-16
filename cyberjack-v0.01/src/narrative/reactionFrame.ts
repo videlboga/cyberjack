@@ -69,6 +69,13 @@ export interface ReactionFrame {
             actionLabel: string;
         };
         sharedPastUnsupported?: boolean;
+        sensoryVariant?: {
+            stimulus: string;
+            texture: string;
+            rhythm: string;
+            bodilyResponse: string;
+            aftereffect: string;
+        };
     };
     continuity: {
         recentDialogue: string[];
@@ -140,6 +147,7 @@ interface CompileFrameInput {
     relationshipBeliefs?: string[];
     openThreads?: string[];
     compulsions?: CompulsionSignal[];
+    sensoryVariant?: ReactionFrame['event']['sensoryVariant'];
 }
 
 const unique = (values: string[], limit: number) => Array.from(new Set(values.filter(Boolean))).slice(0, limit);
@@ -622,6 +630,7 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
             repetition: input.repetition ?? 1,
             directlyExperienced,
             affectedCharacter: input.targetName,
+            sensoryVariant: input.sensoryVariant,
         },
         continuity: {
             recentDialogue: unique(input.recentDialogue || [], 4),
@@ -756,6 +765,8 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
                 : `Говори только своими словами. Ты решаешь, что действительно произнесёшь сейчас; можешь промолчать, сменить тему или выражать смешанные чувства, но не отрицай факты текущего хода, зафиксированные в контексте.`),
         getStablePromptFragment('answer-format', () =>
             `[Форма ответа]\nВерни одну произнесённую реплику одним абзацем обычного текста. Без JSON, служебных полей, имени говорящего, ремарок и звёздочек. Не предваряй и не завершай реплику словами «сказала», «говорю», «отвечаю» или описанием голоса. Воплоти свою манеру речи в самих словах, но не объясняй её. Неверно: «Голос срывается на шёпот: — Я согласна». Верно: «Я... согласна». Ты переживаешь состояние изнутри, а не объясняешь себя как автор отчёта. Сигналы о состоянии ниже — не черновик реплики: не цитируй и не пересказывай их формулировки. Выбери собственные слова, вывод, просьбу, границу или вопрос, которые из них следуют. Профессиональная лексика появляется только там, где она естественна для твоей живой речи.`),
+        getStablePromptFragment('anti-repeat', () =>
+            `[Не повторяйся]\nЕсли в недавнем диалоге уже есть твоя фраза, не произноси её дословно снова. Каждая новая реплика должна продвигать разговор: перефразируй, добавь новую мысль, вопрос или реакцию. Повторение одной и той же формулировки подряд — признак зацикливания, которого нужно избегать.`),
     ].filter(Boolean).join('\n\n');
 }
 
@@ -776,8 +787,17 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
         : frame.event.directlyExperienced
             ? `Ты прямо сейчас переживаешь телесное воздействие «${frame.event.action}» в области «${frame.event.target}». Отзовись именно на непосредственное ощущение; прежний разговор лишь остаётся в памяти, и сейчас тебе не нужно отвечать на старый вопрос, обещание или спор.`
             : `Ты прямо сейчас видишь событие, описанное выше. Прежний разговор лишь остаётся в памяти и не звучит как новое обращение к тебе.`;
+    const sensoryBlock = frame.event.sensoryVariant
+        ? [
+            frame.event.sensoryVariant.stimulus,
+            frame.event.sensoryVariant.texture,
+            frame.event.sensoryVariant.rhythm,
+            frame.event.sensoryVariant.bodilyResponse,
+            frame.event.sensoryVariant.aftereffect,
+        ].filter(Boolean).join('\n')
+        : frame.event.experience;
     const eventPerspective = frame.event.directlyExperienced
-        ? `[Внутренний сигнал текущего момента]\nТы прямо сейчас переживаешь воздействие «${frame.event.action}» в области «${frame.event.target}». ${frame.event.experience} Это ориентир для твоего решения, а не готовый текст реплики.`
+        ? `[Внутренний сигнал текущего момента]\nТы прямо сейчас переживаешь воздействие «${frame.event.action}» в области «${frame.event.target}».\n\n${sensoryBlock}\n\nЭто ориентир для твоего решения, а не готовый текст реплики.`
         : `[То, что ты видишь сейчас]\nТы видишь, что воздействие «${frame.event.action}» направлено на ${frame.event.affectedCharacter}, в область «${frame.event.target}». ${frame.event.experience}\nТы видишь только внешние признаки и не чувствуешь чужое воздействие своим телом.`;
     const changePerspective = frame.event.changes.length
         ? frame.event.directlyExperienced

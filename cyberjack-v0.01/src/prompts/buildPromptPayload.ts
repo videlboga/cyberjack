@@ -19,6 +19,7 @@ import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueE
 import { compactMemoryReaction } from '../services/memoryLayer';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { getSubjectiveEpisode } from '../services/subjectiveMemoryEpisodes';
+import { resolveSensoryVariant } from '../domain/sensoryMatrix';
 
 export interface EventRecord {
     id: number;
@@ -115,7 +116,18 @@ const technicalInteractionMarker = /^\s*\[(?:Воздействие|Действ
 
 export function selectRecentDialogue(entries: TemporalDialogueEntry[], ownerName: string, initiatorName: string) {
     const recent = entries.filter(entry => !technicalInteractionMarker.test(String(entry.content || '')));
-    return renderTemporalDialogue(selectCurrentDialogueSegment(recent, 8), ownerName, initiatorName);
+    // Collapse verbatim repeats of the same line (LLM loop artefact): keep the
+    // first occurrence so the model does not see its own phrase echoed back and
+    // copy it again. Preserve chronological order.
+    const deduped: TemporalDialogueEntry[] = [];
+    const seen = new Set<string>();
+    for (const entry of recent) {
+        const key = String(entry.content || '').trim();
+        if (key && seen.has(key)) continue;
+        if (key) seen.add(key);
+        deduped.push(entry);
+    }
+    return renderTemporalDialogue(selectCurrentDialogueSegment(deduped, 8), ownerName, initiatorName);
 }
 
 export function deriveOpenDialogueThreads(entries: Array<{ role: string; content: string }>, ownerName: string, initiatorName: string) {
@@ -451,6 +463,12 @@ export async function buildPromptPayload(
     };
     const repetitionFromLogs = countRepetitions(recentEvents, currentActionId, currentPointId);
     const exposureBeforeTick = Number(latestResult?.tickMeta?.inputs?.point.exposureCount ?? 0);
+    const currentPointLabel = currentPointId
+        ? presetRepo.getPointPreset(currentPointId)?.label || currentPointId
+        : undefined;
+    const sensoryVariant = currentActionId && currentPointId
+        ? resolveSensoryVariant(currentActionId, currentPointId, exposureBeforeTick)
+        : null;
     const frame = compileReactionFrame({
         speakerId: ownerId,
         speakerName: ownerName,
@@ -468,7 +486,8 @@ export async function buildPromptPayload(
         edgeHoldMinutes: options?.edgeHoldMinutes,
         observation,
         actionLabel: latestResult?.tickMeta?.inputs?.action.label,
-        pointLabel: currentPointId,
+        pointLabel: currentPointLabel,
+        sensoryVariant: sensoryVariant || undefined,
         repetition: Math.min(repetitionFromLogs, exposureBeforeTick + 1),
         profileText: profile.personaText,
         behavioralCore: contextualizeBehavioralCore(profile.behavioralCore, [
