@@ -46,7 +46,7 @@ export function resolveSensoryVariant(
     const matrix = loadSensoryMatrix();
     const cell = matrix.cells.find(c => c.actionId === actionId && c.pointId === pointId);
     if (!cell || !cell.variants.length) return null;
-    const index = Math.abs(seed) % cell.variants.length;
+    const index = Math.floor(Math.abs(seed)) % cell.variants.length;
     return cell.variants[index];
 }
 
@@ -60,6 +60,6 @@ export function resolveDeviceVariant(
     const device = (matrix.devices as any)[deviceId];
     const mode = device?.modes?.[modeId];
     if (!mode || !mode.cells.length) return null;
-    const index = Math.abs(seed) % mode.cells.length;
+    const index = Math.floor(Math.abs(seed)) % mode.cells.length;
     return mode.cells[index];
 }
