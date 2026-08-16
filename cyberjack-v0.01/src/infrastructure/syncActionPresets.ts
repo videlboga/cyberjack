@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { db } from './db';
 import { ensureAllStarterClothing } from './starterClothing';
-import { AUTHORED_SENSORY_PROFILES, completeActionSensoryProfile, SensoryProfile } from './actionSensoryProfile';
+import { completeActionSensoryProfile, SensoryProfile } from './actionSensoryProfile';
 
 type RawActionPreset = {
     id: string;
@@ -97,10 +97,6 @@ export function syncActionPresets(): void {
             updateLegacyVector.run(JSON.stringify(vector), id);
         }
         db.prepare("UPDATE action_presets SET label = 'Массаж' WHERE id = 'deep_massage'").run();
-        const updateLegacySensory = db.prepare('UPDATE action_presets SET values_json = json_patch(values_json, ?) WHERE id = ?');
-        for (const [id, sensory] of Object.entries(AUTHORED_SENSORY_PROFILES)) {
-            updateLegacySensory.run(JSON.stringify({ description: sensory.stimulus, sensory }), id);
-        }
 
         // Legacy databases seeded panic as permanent. Keep this lifecycle
         // migration beside content sync because the API does not run the full

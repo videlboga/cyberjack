@@ -1,5 +1,4 @@
 import { PromptPayload, SubjectCoreState, TickOutput } from '../domain/types';
-import { EventRecord } from './buildRecentEventsSummary';
 import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 import {
     characterRelationRepo,
@@ -20,6 +19,14 @@ import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueE
 import { compactMemoryReaction } from '../services/memoryLayer';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { getSubjectiveEpisode } from '../services/subjectiveMemoryEpisodes';
+
+export interface EventRecord {
+    id: number;
+    timestamp: string;
+    action_type: string;
+    action_payload: string; // JSON
+    result_payload: string; // JSON
+}
 
 function parseEvent(event: EventRecord) {
     let action: any = {};
