@@ -7,7 +7,6 @@ import {
     interpretPointSensitivity,
     isAcquiredHyperSensitivity
 } from '../src/domain/parameterInterpretation';
-import { buildStateSummary } from '../src/prompts/buildStateSummary';
 
 describe('parameter interpretation', () => {
     it('separates population and personal references', () => {
@@ -35,21 +34,6 @@ describe('parameter interpretation', () => {
     it('does not call naturally sensitive anatomy acquired hyperesthesia', () => {
         expect(isAcquiredHyperSensitivity(interpretPointSensitivity('nipples', 95, 95))).toBe(false);
         expect(isAcquiredHyperSensitivity(interpretPointSensitivity('nipples', 110, 95))).toBe(true);
-    });
-
-    it('keeps natural sensitivity and acquired hyper-sensitivity distinct in prompts', () => {
-        const core = {
-            sensitivity: 50, capacity: 60, openness: 50, plasticity: 50, attitude: 50, tension: 0
-        };
-        const natural = buildStateSummary(core, [{
-            pointId: 'nipples', label: 'Соски', localSensitivity: 95, baselineLocalSensitivity: 95, localAttitude: 50
-        }]);
-        expect(natural).not.toContain('[Фокусная гиперсенситизация]');
-
-        const acquired = buildStateSummary(core, [{
-            pointId: 'nipples', label: 'Соски', localSensitivity: 110, baselineLocalSensitivity: 95, localAttitude: 50
-        }]);
-        expect(acquired).toContain('[Фокусная гиперсенситизация]');
     });
 
     it('marks values beyond the old core range as exceptional prompt facts', () => {

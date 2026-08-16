@@ -103,6 +103,9 @@ export function compileTickAction(input: CompileTickActionInput): CompileTickAct
         activeContexts: applicableContexts,
         familiarity: state.point.familiarity ?? 0
     });
+    // NOTE: intimateNarrationFor currently OVERRIDES matrix sensory for intimate
+    // actions. During matrix integration (next phase), the matrix selector takes
+    // priority and intimateNarrationFor becomes a fallback for uncovered pairs.
     const intimateNarration = intimateNarrationFor(
         payload.presetId,
         payload.pointId,

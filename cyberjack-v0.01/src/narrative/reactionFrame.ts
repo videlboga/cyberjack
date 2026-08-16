@@ -609,7 +609,7 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
     return {
         speaker: { id: input.speakerId, name: input.speakerName, gender: input.speakerGender, role: directlyExperienced ? 'цель воздействия' : 'участник сцены', core: behavioral },
         addressee: addresseeId === input.speakerId ? undefined : { id: addresseeId, name: addresseeName, relationship: relationText(input.relation) },
-        scene: { title: input.sceneTitle, presentCharacters: unique(input.presentCharacters, 8), contexts: unique(input.contexts, 8), roleContext: unique(input.roleContext || [], 10) },
+        scene: { title: input.sceneTitle, presentCharacters: unique(input.presentCharacters, 8), contexts: unique(input.contexts, 8), roleContext: unique(input.roleContext || [], 14) },
         event: {
             action: input.actionLabel || input.observation?.action.label || 'событие без ясного действия',
             target: input.pointLabel || input.observation?.action.pointLabel || input.observation?.action.pointId || 'не указана',
@@ -735,16 +735,18 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
                         ? 'angry'
                         : frame.expressionMode.affect === 'positive' ? 'open' : 'guarded';
     const currentEmotionalVoice = core.emotionalVoice?.[emotionalVoiceKey];
-    const commandOutcome = frame.event.commandOutcome;
     const owned = (value: string, lead = 'Ты узнаёшь себя в этих словах') => /^(?:ты|тебе|тебя|твой|твоя|твоё|твои)\b/iu.test(value.trim())
         ? value.trim()
         : `${lead}: «${value.trim().replace(/[.!?]+$/u, '')}».`;
     return [
-        getStablePromptFragment(`identity:${frame.speaker.name}:${genderText}`, () =>
-            `Ты — ${frame.speaker.name}. Грамматический род: ${genderText}. ${grammaticalIdentity}`),
+        getStablePromptFragment(`identity:2:${frame.speaker.name}:${genderText}`, () => {
+            const self = frame.speaker.gender === 'female' ? 'Ты сама' : frame.speaker.gender === 'male' ? 'Ты сам' : 'Ты';
+            return `Ты — ${frame.speaker.name}. ${self} по себе: твоё имя — ${frame.speaker.name}, и когда ты говоришь о себе, ты всегда говоришь от первого лица — «я», «мне», «меня», «моя». Ты именно ${frame.speaker.name}, а не наблюдатель и не рассказчик; даже если кто-то обратился к тебе по имени или назвал тебя в третьем лице, ты остаёшься собой и продолжаешь говорить о себе как «я». Грамматический род: ${genderText}. ${grammaticalIdentity}`;
+        }),
         frame.scene.roleContext.length ? `[Твоё положение и понимание происходящего]\n${frame.scene.roleContext.map(value => `- ${value}`).join('\n')}` : '',
         frame.continuity.relevantEpisodes.length ? `[Твоя актуальная память]\n${frame.continuity.relevantEpisodes.map(value => `- ${value}`).join('\n')}` : '',
         frame.continuity.relationshipBeliefs.length ? `[Твоя память об отношениях]\n${frame.continuity.relationshipBeliefs.map(value => `- ${value}`).join('\n')}` : '',
+        frame.continuity.canonicalFacts.length ? `[Факты о себе]\n${frame.continuity.canonicalFacts.map(value => `- ${value}`).join('\n')}` : '',
         getStablePromptFragment(`character:${frame.speaker.name}:${JSON.stringify(core.values)}:${JSON.stringify(core.needs || [])}:${JSON.stringify(core.vulnerabilities)}:${JSON.stringify(core.defenses)}:${core.centralConflict?.desire}:${core.centralConflict?.fear}`, () =>
             `[Твой характер]\n${behavioralLines.length ? behavioralLines.map(v => `- ${owned(v)}`).join('\n') : '- Ты реагируешь как самостоятельный живой человек.'}${core.centralConflict ? `\n- Тебя ведёт желание: ${core.centralConflict.desire}.\n- Тебя пугает: ${core.centralConflict.fear}.` : ''}`),
         `[Твоя манера речи]\n${core.voice.length ? core.voice.map(v => `- ${owned(v, 'Ты слышишь свою привычную манеру в этих словах')}`).join('\n') : '- Ты говоришь естественно и по-человечески.'}${currentEmotionalVoice ? `\n- Именно сейчас твой голос звучит так: ${currentEmotionalVoice}` : ''}`,
@@ -752,9 +754,6 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
             frame.event.requiresSpeech
                 ? `Говори только своими словами. Твоя речевая реакция на текущий момент уже выбрана: произнеси хотя бы одно слово или естественный слышимый звук. Ты можешь уклониться, отказаться отвечать, сменить тему или выражать смешанные чувства, но не возвращай пустой ответ и не отрицай факты текущего хода, зафиксированные в контексте.`
                 : `Говори только своими словами. Ты решаешь, что действительно произнесёшь сейчас; можешь промолчать, сменить тему или выражать смешанные чувства, но не отрицай факты текущего хода, зафиксированные в контексте.`),
-        commandOutcome
-            ? `[Авторитетный исход команды]\nКоманда «${commandOutcome.actionLabel}» ${commandOutcome.status === 'performed' ? 'уже выполняется в этом ходе' : 'не привела к новому действию'}. Это установленный фактический исход, а не версия собеседника. Твои слова могут выражать отношение, границу или напряжение, но не могут утверждать противоположный исход.`
-            : '',
         getStablePromptFragment('answer-format', () =>
             `[Форма ответа]\nВерни одну произнесённую реплику одним абзацем обычного текста. Без JSON, служебных полей, имени говорящего, ремарок и звёздочек. Не предваряй и не завершай реплику словами «сказала», «говорю», «отвечаю» или описанием голоса. Воплоти свою манеру речи в самих словах, но не объясняй её. Неверно: «Голос срывается на шёпот: — Я согласна». Верно: «Я... согласна». Ты переживаешь состояние изнутри, а не объясняешь себя как автор отчёта. Сигналы о состоянии ниже — не черновик реплики: не цитируй и не пересказывай их формулировки. Выбери собственные слова, вывод, просьбу, границу или вопрос, которые из них следуют. Профессиональная лексика появляется только там, где она естественна для твоей живой речи.`),
     ].filter(Boolean).join('\n\n');
@@ -786,9 +785,6 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
             : `Ты видишь изменения у ${frame.event.affectedCharacter}, но не чувствуешь их своим телом: ${frame.event.changes.join('; ')}.`
         : '';
     const sceneContexts = frame.scene.contexts.slice(0, 4);
-    const canonicalFacts = frame.continuity.canonicalFacts.slice(0, 3);
-    const relationshipBeliefs = frame.continuity.relationshipBeliefs.slice(0, 2);
-    const relevantEpisodes = frame.continuity.relevantEpisodes.slice(0, 2);
     return [
         `[То, что окружает тебя]\nТы находишься здесь: ${frame.scene.title || 'место тебе не вполне ясно'}. Рядом ты видишь: ${frame.scene.presentCharacters.join(', ') || 'никого'}.`,
         sceneContexts.length ? `[То, что ты ощущаешь или видишь в сцене]\n${sceneContexts.map(value => `- ${value}`).join('\n')}` : '',
@@ -805,14 +801,11 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
             ? `[Твой непосредственный внутренний импульс]\n${frame.dramaticPosition.primaryIntent}.${frame.dramaticPosition.secondaryConflict ? ` Одновременно: ${frame.dramaticPosition.secondaryConflict}.` : ''}`
             : '',
         changePerspective,
-        canonicalFacts.length ? `[Факты о себе]\n${canonicalFacts.map(v => `- ${v}`).join('\n')}` : '',
-        relationshipBeliefs.length ? `[Память об отношениях]\n${relationshipBeliefs.map(v => `- ${v}`).join('\n')}` : '',
         frame.continuity.openThreads.length ? `[Незавершённое]\n${frame.continuity.openThreads.map(v => `- ${v}`).join('\n')}` : '',
-        visibleRecentDialogue.length || relevantEpisodes.length
+        visibleRecentDialogue.length
             ? `[Границы твоей памяти]\nТы помнишь недавние реплики только как произнесённые слова. Из них ты не узнаёшь новых фактов своей биографии или мира. Не считай случившимися прошлые события, действия третьих лиц или существование организаций, если об этом нет среди твоих собственных воспоминаний и знаний.`
             : '',
         visibleRecentDialogue.length ? `[Недавний разговор]\n${visibleRecentDialogue.join('\n')}` : '',
-        relevantEpisodes.length ? `[Недавний опыт]\n${relevantEpisodes.map(v => `- ${v}`).join('\n')}` : '',
-        `Что ты действительно произносишь сейчас? ${frame.event.requiresSpeech ? 'Пустой ответ здесь не означает твоё молчание: речевая реакция уже выбрана, поэтому дай ей слышимое содержание. ' : ''}Запиши только собственные слышимые слова. Не выдавай цитату собеседника за свои слова и не повторяй дословно собственную недавнюю реплику. Твои движения уже отображаются игрой и в ответе не описываются.`
+        `Что ты произносишь сейчас?${frame.event.requiresSpeech ? ' Речевая реакция уже выбрана — дай ей слышимое содержание.' : ''}`
     ].filter(Boolean).join('\n\n');
 }

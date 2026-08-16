@@ -291,15 +291,21 @@ export function describeObservationSignal(observation: InteractionObservation): 
     return [state, valence, intensity].filter(Boolean).join('; ') + '.';
 }
 
-export function buildCurrentStateObservationText(subjectId: string, core: SubjectCoreState): string {
+export function buildCurrentStateObservationText(subjectId: string, core: SubjectCoreState, perspective: 'first' | 'third' = 'third'): string {
     const contexts = activeContextsRepo.getAllForSubject(subjectId);
     const ids = new Set(contexts.map(context => context.actionId));
     const state = resolveBehavioralState(ids);
-    const stateDescriptions: Record<InteractionObservation['behavioralState'], string> = {
+    const firstPerson: Record<InteractionObservation['behavioralState'], string> = {
+        responsive: 'Ты сохраняешь осмысленный контакт с окружением.', subspace: 'Твои реакции замедлены, внимание погружено в ощущения.',
+        overload: 'Ты перегружена ощущениями и реагируешь с задержкой.', freeze: 'Ты неподвижна и скована.', panic: 'Ты в панике и стремишься прекратить воздействие.',
+        defiance: 'Ты собрана и активно отвергаешь воздействие.', unresponsive: 'Ты истощена и почти не отвечаешь на внешние стимулы.',
+    };
+    const thirdPerson: Record<InteractionObservation['behavioralState'], string> = {
         responsive: 'Актив сохраняет осмысленный контакт с окружением.', subspace: 'Реакции замедлены, внимание погружено в ощущения.',
         overload: 'Актив перегружен ощущениями и реагирует с задержкой.', freeze: 'Актив неподвижен и скован.', panic: 'Актив находится в панике и стремится прекратить воздействие.',
         defiance: 'Актив собран и активно отвергает воздействие.', unresponsive: 'Актив истощён и почти не отвечает на внешние стимулы.',
     };
+    const stateDescriptions = perspective === 'first' ? firstPerson : thirdPerson;
     const tension = core.tension >= 80 ? 'Напряжение близко к оргазму.' : core.tension >= 45 ? 'Напряжение заметно накоплено.' : 'Напряжение остаётся управляемым.';
     return `${stateDescriptions[state]} ${tension}`;
 }

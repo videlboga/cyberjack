@@ -145,7 +145,7 @@ describe("reaction perspective and dialogue planning", () => {
     base.continuity.openThreads = ["Без явного ответа осталось: Иона: «Это безопасно?»", "Отложенная договорённость: позже"];
     const frame = applyVerbalInputToFrame(base, "Разумеется");
     expect(frame.continuity.openThreads).toEqual(["Отложенная договорённость: позже"]);
-    expect(buildReactionTurnMessage(frame)).toContain("не повторяй дословно");
+    expect(buildReactionTurnMessage(frame)).toContain("Что ты произносишь сейчас?");
   });
 
   it("does not transfer the target reaction into an observer expression", () => {
@@ -188,7 +188,7 @@ describe("reaction perspective and dialogue planning", () => {
     );
     const frame = applyVerbalInputToFrame(baseFrame, "Сначала попроси");
     expect(frame.dramaticPosition.allowedSpeechActs).toEqual([]);
-    expect(buildReactionTurnMessage(frame)).toContain("Что ты действительно произносишь сейчас?");
+    expect(buildReactionTurnMessage(frame)).toContain("Что ты произносишь сейчас?");
     expect(buildReactionTurnMessage(frame)).not.toContain("Доступные ходы");
   });
 
@@ -341,11 +341,11 @@ describe("reaction perspective and dialogue planning", () => {
     });
     const prompt = buildReactionSystemPrompt(frame);
     const turn = buildReactionTurnMessage(frame);
-    expect(turn).toContain("[Память об отношениях]");
+    expect(prompt).toContain("[Твоя память об отношениях]");
     expect(turn).toContain("[Незавершённое]");
     expect(turn).toContain("[Недавний разговор]");
-    expect(turn).toContain("[Факты о себе]");
-    expect(turn).toContain("Что ты действительно произносишь сейчас?");
+    expect(prompt).toContain("[Факты о себе]");
+    expect(turn).toContain("Что ты произносишь сейчас?");
     expect(turn).not.toContain("[Внутренний план реакции]");
     expect(prompt).toContain("Ты решаешь, что действительно произнесёшь сейчас");
   });
@@ -361,7 +361,7 @@ describe("reaction perspective and dialogue planning", () => {
       "не возвращай пустой ответ",
     );
     expect(buildReactionSystemPrompt(frame)).not.toContain("допустимы молчание");
-    expect(buildReactionTurnMessage(frame)).toContain("речевая реакция уже выбрана");
+    expect(buildReactionTurnMessage(frame)).toContain("Речевая реакция уже выбрана");
   });
 
   it("keeps an active panic condition audible after the triggering tick", () => {
@@ -511,7 +511,7 @@ describe("reaction perspective and dialogue planning", () => {
     const frame = observerFrame();
     frame.event.commandOutcome = { status: "performed", actionLabel: "Снять трусики" };
 
-    expect(buildReactionSystemPrompt(frame)).toContain("Авторитетный исход команды");
+    expect(buildReactionSystemPrompt(frame)).not.toContain("Авторитетный исход команды");
     expect(buildReactionTurnMessage(frame)).toContain("Исход команды в этом ходе");
     expect(buildReactionTurnMessage(frame)).toContain("выполняется");
   });

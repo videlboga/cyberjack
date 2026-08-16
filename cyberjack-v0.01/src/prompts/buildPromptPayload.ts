@@ -509,7 +509,7 @@ export async function buildPromptPayload(
             interpretation: parsed.action.narrative || parsed.action.actionLabel || parsed.action.presetId || event.action_type
         };
     });
-    const stateText = observation?.subjectiveText || buildCurrentStateObservationText(ownerId, actorDetails.core);
+    const stateText = observation?.subjectiveText || buildCurrentStateObservationText(ownerId, actorDetails.core, 'first');
     const relations = characterRelationRepo.listFor(ownerId);
 
     return {
