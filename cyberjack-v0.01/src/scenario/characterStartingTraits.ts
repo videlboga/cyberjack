@@ -11,6 +11,9 @@ export const CHARACTER_STARTING_TRAIT_TAGS: Record<string, Record<string, number
     'S-AV-01': { control: 2.2, command: 2.2, submission: 2.2 },
     // Мара grew up repairing station machinery and finds mechanisms familiar.
     'NPC-CAND-GEN-03': { electronic: 2.0, machine: 2.0 },
+    // Кейт: одержимая нимфоманка, выросшая в цикле разгона интимных реакций.
+    // Высокий sexual → стабильный trait_sexual_dependency (уровень 3).
+    'NPC-CAND-KATE': { sexual: 4.5, penetration: 3.5, oral: 3.5 },
 };
 
 export function applyCharacterStartingTraits(profile: GeneratedProfileV2): GeneratedProfileV2 {

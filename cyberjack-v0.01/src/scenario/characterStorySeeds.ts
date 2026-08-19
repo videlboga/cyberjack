@@ -69,6 +69,14 @@ const CUSTOM_SEEDS:Record<string, StorySeed> = {
         activationTriggers:['recruitment','continuum_contact','outer_ring','conflict','biography_chat'],
         possibleDirections:['найти виновника','снять старое обвинение','использовать обвинение как путь внутрь силовой сети'],
     },
+    'NPC-CAND-KATE': {
+        unresolvedPast:'Кейт росла в лаборатории по разгону интимных реакций, где её мать была постоянной подопытной; лаборатория передала её сюда по межлабораторному контракту.',
+        externalLink:'другая лаборатория по разгону интимных реакций и её старый цикл калибровки',
+        concealedFact:'Настоящая цель передачи — не только уникальная отзывчивость, но и стабильный профиль нимфомании, который старая лаборатория хочет сохранить через контрактный надзор.',
+        pressure:'Любая интимная близость для Кейт — привычная среда, но вопрос о том, что она для неё значит, становится острым: отклик или человек.',
+        activationTriggers:['recruitment','sexual','intimate_contact','biography_chat','trust_60','close_contact'],
+        possibleDirections:['выяснить условия контракта старой лаборатории','показать Кейт близость вне протокола','использовать её связь с прежним циклом'],
+    },
 };
 
 const readJson = (value:string | null) => {
@@ -80,7 +88,7 @@ export function ensureCharacterStorySeeds() {
     const rows = db.prepare(`
         SELECT id,name,current_scene_id,profile_json FROM characters
         WHERE id IN ('S-AV-01','NPC-LAB-01','NPC-CAND-01','NPC-CAND-SUMI',
-                     'NPC-CAND-GEN-02','NPC-CAND-GEN-03','NPC-CAND-GEN-04','NPC-CAND-GEN-05')
+                     'NPC-CAND-GEN-02','NPC-CAND-GEN-03','NPC-CAND-GEN-04','NPC-CAND-GEN-05','NPC-CAND-KATE')
     `).all() as any[];
     for (const row of rows) {
         const profile = readJson(row.profile_json);

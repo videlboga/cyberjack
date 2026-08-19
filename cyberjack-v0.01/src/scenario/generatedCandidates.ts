@@ -1,10 +1,11 @@
 import { db } from '../infrastructure/db';
 import { ensureStarterClothing } from '../infrastructure/starterClothing';
+import { characterRelationRepo } from '../infrastructure/repositories';
 import { getBaseHumanAnatomy } from '../domain/anatomy';
 import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
 import { regenerateGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 
-type CandidateSeed = {
+export type CandidateSeed = {
     id: string;
     seed: string;
     name?: string;
@@ -12,6 +13,8 @@ type CandidateSeed = {
     gender?: 'female' | 'male';
     forced?: string[];
     description?: string;
+    /** Явные параметры (coreModifiers относительно 50) вместо LLM-генерации. */
+    coreModifiers?: Record<string, number>;
 };
 
 const GENERATED_CANDIDATES: CandidateSeed[] = [
@@ -22,9 +25,14 @@ const GENERATED_CANDIDATES: CandidateSeed[] = [
         age: 18,
         gender: 'female',
         forced: ['origin_inner_ring', 'origin_place_clean_sector'],
+        coreModifiers: { sensitivity: 5, capacity: 10, openness: -25, plasticity: -15, attitude: -20 },
         description: 'Восемнадцатилетняя уроженка центральных контуров. Выросла среди чистых переходов и регламентированной жизни внутреннего кольца; впервые оказывается за пределами привычной защищённой среды.',
     },
-    { id: 'NPC-CAND-GEN-02', seed: 'omnicron-candidate-random-02-v1' },
+    {
+        id: 'NPC-CAND-GEN-02',
+        seed: 'omnicron-candidate-random-02-v1',
+        coreModifiers: { sensitivity: 15, capacity: -20, openness: -25, plasticity: -10, attitude: -20 },
+    },
     { id: 'NPC-CAND-GEN-03', seed: 'omnicron-candidate-random-03-v1' },
     {
         id: 'NPC-CAND-GEN-04',
@@ -32,8 +40,18 @@ const GENERATED_CANDIDATES: CandidateSeed[] = [
         name: 'Май',
         age: 19,
         gender: 'female',
+        coreModifiers: { sensitivity: 5, capacity: 10, openness: 10, plasticity: 10, attitude: 5 },
     },
     { id: 'NPC-CAND-GEN-05', seed: 'omnicron-candidate-random-05-v1' },
+    {
+        id: 'NPC-CAND-KATE',
+        seed: 'authored:kate:v1',
+        name: 'Кейт',
+        age: 27,
+        gender: 'female',
+        coreModifiers: { sensitivity: 15, capacity: 15, openness: 40, plasticity: 10, attitude: 10 },
+        description: 'Огненно-рыжая, женственная. Родилась и выросла в другой лаборатории по разгону интимных реакций; мать — постоянная подопытная. Передана сюда по межлабораторному контракту как актив с высокой интимной отзывчивостью.',
+    },
 ];
 
 function clamp(value: number) {
@@ -62,7 +80,7 @@ function describeGeneratedCandidate(profile: any): string {
     return `Происхождение: ${origin}. Опыт: ${role}. Поведенческий профиль: ${disposition}.`;
 }
 
-function seedOneCandidate(spec: CandidateSeed): boolean {
+export function seedOneCandidate(spec: CandidateSeed): boolean {
     if (db.prepare('SELECT 1 FROM characters WHERE id = ?').get(spec.id)) return false;
 
     const draft = generateCharacterContext({
@@ -85,12 +103,18 @@ function seedOneCandidate(spec: CandidateSeed): boolean {
         visual: spec.id === 'NPC-CAND-SUMI' ? { slug: 'sumi' }
             : spec.id === 'NPC-CAND-GEN-02' ? { slug: 'eli' }
                 : spec.id === 'NPC-CAND-GEN-04' ? { slug: 'mai' }
+                    : spec.id === 'NPC-CAND-KATE' ? { slug: 'kate' }
                 : undefined,
         origin: spec.id === 'NPC-CAND-SUMI'
             ? {
                 birthplaceId: 'inner-ring-clean-sector',
                 biography: spec.description,
             }
+            : spec.id === 'NPC-CAND-KATE'
+                ? {
+                    birthplaceId: 'other-lab-intimate-reactions',
+                    biography: spec.description,
+                }
             : undefined,
     };
 
@@ -100,7 +124,9 @@ function seedOneCandidate(spec: CandidateSeed): boolean {
     `).run(spec.id, identity.name, spec.id, JSON.stringify(canonical));
 
     const profile = regenerateGeneratedProfile(spec.id, { seed: spec.seed, forced: spec.forced });
-    const core = profile.mechanicalSeed.coreModifiers || {};
+    // Explicit coreModifiers override the LLM-generated ones so authored
+    // characters keep deterministic, character-consistent parameters.
+    const core = spec.coreModifiers || profile.mechanicalSeed.coreModifiers || {};
     const metric = (key:string) => clamp(50 + Number(core[key] || 0));
     const staffCost = 170 + Math.round((metric('capacity') + metric('openness')) / 10) * 10;
     const assetCost = 220 + Math.round((metric('plasticity') + metric('sensitivity')) / 8) * 10;
@@ -159,6 +185,27 @@ function seedOneCandidate(spec: CandidateSeed): boolean {
     })();
 
     ensureStarterClothing(spec.id, ['eq_clothe_underwear']);
+    // Кейт (внешний актив по межлабораторному контракту) — отношения с лабой
+    // создаются здесь, где персонаж уже существует (FK-ограничение).
+    if (spec.id === 'NPC-CAND-KATE') {
+        const pairs: { from: string; to: string; attitude: number; openness: number }[] = [
+            { from: 'NPC-LAB-01', to: 'NPC-CAND-KATE', attitude: 50, openness: 45 },
+            { from: 'NPC-CAND-KATE', to: 'NPC-LAB-01', attitude: 55, openness: 50 },
+            { from: 'S-AV-01', to: 'NPC-CAND-KATE', attitude: 45, openness: 40 },
+            { from: 'NPC-CAND-KATE', to: 'S-AV-01', attitude: 50, openness: 45 },
+            { from: 'NPC-CAND-SUMI', to: 'NPC-CAND-KATE', attitude: 45, openness: 45 },
+            { from: 'NPC-CAND-KATE', to: 'NPC-CAND-SUMI', attitude: 50, openness: 50 },
+        ];
+        for (const pair of pairs) {
+            characterRelationRepo.ensure(pair.from, pair.to, {
+                // Кейт — кандидат в витрине Брокера: люди лабы знают о ней по
+                // контракту, но физически она пока не в комнатах (present=false).
+                knows: true, present: false, canInteract: true,
+                attitude: pair.attitude, openness: pair.openness, plasticity: 50,
+                baselineAttitude: pair.attitude, baselineOpenness: pair.openness,
+            });
+        }
+    }
     return true;
 }
 
