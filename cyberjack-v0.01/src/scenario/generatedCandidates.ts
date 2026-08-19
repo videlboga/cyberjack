@@ -1,6 +1,7 @@
 import { db } from '../infrastructure/db';
 import { ensureStarterClothing } from '../infrastructure/starterClothing';
 import { characterRelationRepo } from '../infrastructure/repositories';
+import { reconcileCharacterState } from './characterState';
 import { getBaseHumanAnatomy } from '../domain/anatomy';
 import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
 import { regenerateGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
@@ -185,6 +186,13 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
     })();
 
     ensureStarterClothing(spec.id, ['eq_clothe_underwear']);
+    // Единый механизм: стартовые трейты + поза + одежда + обнуление статистики.
+    // Идемпотентно для вновь созданного кандидата.
+    reconcileCharacterState(spec.id, {
+        pose: 'pose_standing',
+        clothing: ['eq_clothe_underwear'],
+        resetPoints: true,
+    });
     // Кейт (внешний актив по межлабораторному контракту) — отношения с лабой
     // создаются здесь, где персонаж уже существует (FK-ограничение).
     if (spec.id === 'NPC-CAND-KATE') {

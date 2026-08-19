@@ -5,6 +5,7 @@ import { CharacterProfile } from '../domain/characterProfile.js';
 import { CANON_LOCATIONS, CANON_PROFESSIONS } from '../domain/canon.js';
 import { ensureAllStarterClothing } from './starterClothing.js';
 import { characterRelationRepo } from './repositories.js';
+import { reconcileAllCharacters } from '../scenario/characterState.js';
 
 console.log("Начинаем безопасное заполнение базы данных (без удаления существующих данных)...");
 
@@ -401,6 +402,21 @@ db.transaction(() => {
             );
         }
     }
+})();
+
+// ── Единый механизм приведения персонажей к каноническому стартовому состоянию ──
+// Применяет стартовые трейты к subjects.preferences, выставляет позу и одежду
+// в active_contexts, обнуляет статистику subject_point_states (familiarity,
+// exposure_count, локальные чувствительности) для всех сидируемых субъектов.
+(() => {
+    const npcRows = db.prepare("SELECT id FROM characters WHERE id != 'PL-1'").all() as { id: string }[];
+    const npcIds = npcRows.map(r => r.id);
+    const done = reconcileAllCharacters(npcIds, {
+        pose: 'pose_standing',
+        clothing: ['eq_clothe_underwear'],
+        resetPoints: true,
+    });
+    console.log(`[Seed] Reconcile: приведено к канону ${done}/${npcIds.length} персонажей.`);
 })();
 
 // ── Seed character relations between NPCs in the same room ──
