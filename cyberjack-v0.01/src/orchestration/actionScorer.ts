@@ -140,9 +140,10 @@ export class ActionScorer {
     }
 
     /**
-     * Оценка self-действия (мастурбация): без relation к цели, только по
-     * закреплённому интересу к собственной генитальной стимуляции (трейт) и
-     * накопленному возбуждению (tension). Если обоих нет — действия нет.
+     * Оценка self-действий (на себя): без relation к цели, только по
+     * закреплённым трейтам (компульсия уровня 2+) и накопленному возбуждению
+     * (tension). Каждый трейт отображается на своё действие/точку; щекотка
+     * на себе нереализуема и пропущена.
      */
     static scoreSelfActions(
         sceneId: string,
@@ -154,45 +155,50 @@ export class ActionScorer {
         const actor = subjectRepo.get(actorId);
         if (!actor) return [];
 
-        // Генитальные трейты, за которыми закреплена способность к self.
-        const SELF_TRAITS = new Set([
-            'trait_point_clitoris',
-            'trait_point_vagina',
-            'trait_point_vulva',
-            'trait_point_penis',
-        ]);
+        // Трейт → список [действие, точка, метка] для self.
+        // Порог компульсии уровня 2 (strength >= 3.25) уже в deriveAcquiredTraits.
+        const SELF_TRAIT_ACTIONS: Array<[string, string, string]> = [
+            // Мастурбация: сексуальная зависимость и генитальные точки.
+            ['trait_sexual_dependency', 'finger_insertion', 'vagina'],
+            ['trait_point_vagina', 'finger_insertion', 'vagina'],
+            ['trait_point_anus', 'finger_insertion', 'anus'],
+            // Нежная самостимуляция: руки/вульва (по validTargets gentle_stroke).
+            ['trait_point_hands', 'gentle_stroke', 'hands'],
+            ['trait_point_vulva', 'gentle_stroke', 'vulva'],
+            // Оральная самостимуляция: губы/клитор (по validTargets licking).
+            ['trait_point_lips', 'licking', 'lips'],
+            ['trait_point_clitoris', 'licking', 'clitoris'],
+            // Ступни: фетиш (нежная, gentle_stroke поддерживает feet).
+            ['trait_point_feet', 'gentle_stroke', 'feet'],
+            // Мазохизм: болезненная самостимуляция на руках.
+            ['trait_masochist', 'pinch', 'arms'],
+            ['trait_masochist', 'scratching', 'arms'],
+        ];
+
         const prefs = actor.preferences ? JSON.parse(actor.preferences) : {};
-        const traits = deriveAcquiredTraits(prefs);
-        const selfTraitLevel = Math.max(0, ...traits
-            .filter(trait => SELF_TRAITS.has(trait.id))
-            .map(trait => trait.level));
+        const traits = new Map(deriveAcquiredTraits(prefs).map(trait => [trait.id, trait]));
 
         // Порог возбуждения: самоудовлетворение берёт верх только при
         // достаточном накопленном драйве.
-        if (selfTraitLevel <= 0 || tension < 55) return [];
+        if (tension < 55) return [];
 
-        // Чем выше трейт и возбуждение, тем сильнее позыв.
-        const pressure = (selfTraitLevel * 18) + (tension - 55);
+        const availableSet = new Set(scene.availableActions);
         const results: ActionScoreResult[] = [];
-        for (const actionId of scene.availableActions) {
+        for (const [traitId, actionId, pointId] of SELF_TRAIT_ACTIONS) {
+            const trait = traits.get(traitId);
+            if (!trait || trait.level < 2) continue;   // компульсия уровня 2+
+            if (!availableSet.has(actionId)) continue;
             const preset = presetRepo.getActionPreset(actionId);
-            if (!preset) continue;
-            if (preset.id !== 'act_self_stimulate') continue;
+            if (!preset || !isActionTargetAllowed(preset.validTargets, pointId)) continue;
 
-            // Выбираем генитальную точку, где у актора есть закреплённый трейт.
-            const actorPoints = pointStateRepo.getAllForSubject(actorId)
-                .map(point => point.pointId)
-                .filter(pointId => ['clitoris', 'vagina', 'vulva', 'penis'].includes(pointId));
-            const points = actorPoints.length ? actorPoints : ['clitoris'];
-            for (const pointId of points) {
-                if (!isActionTargetAllowed(preset.validTargets, pointId)) continue;
-                results.push({
-                    actionId,
-                    pointId,
-                    score: pressure,
-                    details: { baseScore: pressure, preferenceBonus: 0, barrierPenalty: 0 },
-                });
-            }
+            // Чем выше трейт и возбуждение, тем сильнее позыв.
+            const pressure = (trait.level * 18) + (tension - 55);
+            results.push({
+                actionId,
+                pointId,
+                score: pressure,
+                details: { baseScore: pressure, preferenceBonus: 0, barrierPenalty: 0 },
+            });
         }
         return results.sort((a, b) => b.score - a.score);
     }
