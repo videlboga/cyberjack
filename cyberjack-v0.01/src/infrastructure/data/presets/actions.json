@@ -1902,6 +1902,27 @@
     }
   },
   {
+    "id": "act_self_stimulate",
+    "name": "Утешиться сама",
+    "description": "Автономный акт: персонаж ласкает себя, когда накопленное возбуждение и закреплённый интерес к собственной стимуляции берут верх.",
+    "categories": ["physical", "intimate", "self"],
+    "tags": ["sexual", "self", "stimulation", "continuous"],
+    "validTargets": ["clitoris", "vagina", "vulva", "penis"],
+    "sensory": {
+      "stimulus": "Ладонь и пальцы скользят по собственной коже, возвращаясь к одной и той же точке.",
+      "texture": "Собственные прикосновения привычные и точные — ровно той силы и темпа, каких хочется сейчас.",
+      "rhythm": "Движение ускоряется и становится ровным, когда нужная точка найдена.",
+      "bodilyResponse": "Тело отзывается сразу и сильно: тепло и напряжение стягиваются к месту ласки."
+    },
+    "vector": { "intensity": 4, "valence": 3, "sharpness": 1, "contact": 8, "novelty": -1, "powerBase": 26 },
+    "contextConfig": {
+      "type": "sexual_interaction",
+      "activeLabel": "Ласкает сама себя",
+      "duration": -1,
+      "modifiers": { "intensity": 3, "valence": 3, "sharpness": 1, "contact": 8, "novelty": -2 }
+    }
+  },
+  {
     "id": "capsule_additive_seminal",
     "name": "Подать биоматериал",
     "description": "Интимный контур капсулы подаёт в рот персонажа порцию семенной жидкости калибратора.",

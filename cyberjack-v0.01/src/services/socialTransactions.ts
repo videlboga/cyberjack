@@ -25,7 +25,7 @@ export type SocialObservation = {
 };
 export type SocialTurnPlan = { id:string; speakerId:string; recipientId:string; stimulus:'co_presence'|'observed_event'; egoState:EgoState; hiddenPosition:LifePosition; need:SocialNeed; act:SocialAct; topic:string; topicContext?:string; expectedReply:'adult_reply'|'accept_support'|'boundary'|'refusal'; physicalPermission:'none'|'request_only'; worldMinute:number; replyToTurnId?:string; incomingSpeech?:string; threadId?:string; observation?:SocialObservation };
 export type SpeechSemantics = { speechAct:'answer'|'question'|'support'|'boundary'|'refusal'|'request'|'provocation'|'self_disclosure'; apparentEgoState:EgoState|'unclear'; transaction:'complementary'|'crossed'|'ulterior'|'unclear'; boundary:'none'|'set'|'accepted'|'violated'; invitation:'none'|'conversation'|'help'|'physical_contact'; openLoop:'none'|'question'|'request'|'offer'|'boundary'; conversationDisposition:'continue'|'close'|'unclear'; confidence:number };
-export type PhysicalInitiativeBasis = 'consensual' | 'care' | 'protocol' | 'coercive' | 'violent' | null;
+export type PhysicalInitiativeBasis = 'consensual' | 'care' | 'protocol' | 'coercive' | 'violent' | 'self' | null;
 export type ConversationState = { turnCount:number; maxTurns:number; hardLimit:number; engagement:number; staleStreak:number; repeatCount:number };
 
 const clamp = (value:number) => Math.max(0, Math.min(100, value));
@@ -170,6 +170,8 @@ export function describeSocialObservation(observation: SocialObservation | undef
  * decision from durable relation/context state; speech only supplies inputs.
  */
 export function resolvePhysicalInitiativeBasis(actorId:string, targetId:string): PhysicalInitiativeBasis {
+    // Self-target (мастурбация): собственное действие не требует отношения.
+    if (actorId === targetId) return 'self';
     const relation = characterRelationRepo.get(actorId, targetId);
     if (!relation) return null;
     const pair = db.prepare('SELECT trust,safety,last_intent FROM social_pair_states WHERE from_id=? AND to_id=?').get(actorId,targetId) as any;

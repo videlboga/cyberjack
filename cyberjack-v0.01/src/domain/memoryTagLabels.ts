@@ -9,7 +9,7 @@ export const memoryTagLabels: Record<string, string> = {
     isolation: 'изоляция', manual: 'ручное воздействие', medical: 'медицинское', mental: 'ментальное', metal: 'металл', neural: 'нейронное воздействие', neutral: 'нейтральное', oral: 'оральное',
     overload: 'перегрузка', pace: 'темп', pain: 'боль', panties: 'нижнее бельё', penetration: 'проникновение', personal: 'личное', piercing: 'прокол', plasticity: 'пластичность', pleasure: 'удовольствие',
     pose: 'поза', pressure: 'давление', punishment: 'наказание', recovery: 'восстановление', relief: 'облегчение', remove: 'снятие', restraint: 'фиксация', scene_observation: 'наблюдение сцены',
-    sensitivity: 'чувствительность', sensory: 'ощущения', sexual: 'сексуальное', social_transaction: 'социальный обмен', sportswear: 'спортивная одежда', stabilizer: 'стабилизатор', stimulation: 'стимуляция', stockings: 'чулки', stretching: 'растяжение',
+    sensitivity: 'чувствительность', self: 'самостимуляция', sensory: 'ощущения', sexual: 'сексуальное', social_transaction: 'социальный обмен', sportswear: 'спортивная одежда', stabilizer: 'стабилизатор', stimulation: 'стимуляция', stockings: 'чулки', stretching: 'растяжение',
     stop: 'прекращение контакта', struggle: 'сопротивление', submission: 'подчинение', suspension: 'подвешивание', tickling: 'щекотка', underwear: 'нижнее бельё', vulnerable: 'уязвимость', waist: 'талия',
 };
 

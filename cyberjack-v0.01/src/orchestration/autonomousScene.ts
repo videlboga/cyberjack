@@ -86,6 +86,18 @@ function isDeviceBound(subjectId: string, playerId: string): boolean {
 }
 
 function chooseAction(actorId: string, preferences: unknown, observed: ObservedEvent | null, sceneId: string, visibleTargets: string[]): { targetId: string; action: ActionScoreResult } | null {
+    // Self-target путь (мастурбация): без relation, по закреплённому интересу
+    // к собственной генитальной стимуляции (трейт) и накопленному возбуждению
+    // (tension). Совершается на себя, если позыв достаточно силён.
+    const actor = subjectRepo.get(actorId);
+    if (actor) {
+        const tension = Number(actor.tension || 0);
+        const selfScored = ActionScorer.scoreSelfActions(sceneId, actorId, tension);
+        const selfAction = selfScored.find(item => item.score > 0);
+        if (selfAction) {
+            return { targetId: actorId, action: selfAction };
+        }
+    }
     const preferredTarget = observed?.targetId && visibleTargets.includes(observed.targetId)
         ? observed.targetId
         : undefined;

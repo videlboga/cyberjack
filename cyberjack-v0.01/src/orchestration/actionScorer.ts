@@ -9,6 +9,7 @@ import {
 } from '../infrastructure/repositories';
 import { isActionTargetAllowed } from '../domain/actionTargets';
 import { canPerformPartnerPointAction, partnerPointAffinity } from '../domain/intimatePartnerMechanics';
+import { deriveAcquiredTraits } from '../domain/conditioning';
 
 interface PreferenceData {
     points?: Record<string, number>;
@@ -135,6 +136,64 @@ export class ActionScorer {
         }
 
         // Сортируем от наиболее желанных к наименее
+        return results.sort((a, b) => b.score - a.score);
+    }
+
+    /**
+     * Оценка self-действия (мастурбация): без relation к цели, только по
+     * закреплённому интересу к собственной генитальной стимуляции (трейт) и
+     * накопленному возбуждению (tension). Если обоих нет — действия нет.
+     */
+    static scoreSelfActions(
+        sceneId: string,
+        actorId: string,
+        tension: number,
+    ): ActionScoreResult[] {
+        const scene = sceneRepo.get(sceneId);
+        if (!scene) return [];
+        const actor = subjectRepo.get(actorId);
+        if (!actor) return [];
+
+        // Генитальные трейты, за которыми закреплена способность к self.
+        const SELF_TRAITS = new Set([
+            'trait_point_clitoris',
+            'trait_point_vagina',
+            'trait_point_vulva',
+            'trait_point_penis',
+        ]);
+        const prefs = actor.preferences ? JSON.parse(actor.preferences) : {};
+        const traits = deriveAcquiredTraits(prefs);
+        const selfTraitLevel = Math.max(0, ...traits
+            .filter(trait => SELF_TRAITS.has(trait.id))
+            .map(trait => trait.level));
+
+        // Порог возбуждения: самоудовлетворение берёт верх только при
+        // достаточном накопленном драйве.
+        if (selfTraitLevel <= 0 || tension < 55) return [];
+
+        // Чем выше трейт и возбуждение, тем сильнее позыв.
+        const pressure = (selfTraitLevel * 18) + (tension - 55);
+        const results: ActionScoreResult[] = [];
+        for (const actionId of scene.availableActions) {
+            const preset = presetRepo.getActionPreset(actionId);
+            if (!preset) continue;
+            if (preset.id !== 'act_self_stimulate') continue;
+
+            // Выбираем генитальную точку, где у актора есть закреплённый трейт.
+            const actorPoints = pointStateRepo.getAllForSubject(actorId)
+                .map(point => point.pointId)
+                .filter(pointId => ['clitoris', 'vagina', 'vulva', 'penis'].includes(pointId));
+            const points = actorPoints.length ? actorPoints : ['clitoris'];
+            for (const pointId of points) {
+                if (!isActionTargetAllowed(preset.validTargets, pointId)) continue;
+                results.push({
+                    actionId,
+                    pointId,
+                    score: pressure,
+                    details: { baseScore: pressure, preferenceBonus: 0, barrierPenalty: 0 },
+                });
+            }
+        }
         return results.sort((a, b) => b.score - a.score);
     }
 }
