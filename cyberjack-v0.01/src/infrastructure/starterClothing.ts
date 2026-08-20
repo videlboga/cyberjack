@@ -9,7 +9,7 @@ export const STARTER_CLOTHING: Record<string, string[]> = {
     'NPC-CAND-SUMI': ['eq_clothe_underwear'],
     'NPC-CAND-GEN-02': ['eq_clothe_underwear'],
     'NPC-CAND-GEN-04': ['eq_clothe_underwear'],
-    'NPC-CAND-KATE': ['eq_clothe_underwear']
+    'NPC-CAND-KATE': ['eq_clothe_costume']
 };
 
 function normalizeLegacyUnderwear(characterId: string) {

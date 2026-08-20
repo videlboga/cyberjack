@@ -67,7 +67,9 @@ export const canonicalCharacterPortrait = (
         : id === 'NPC-CAND-SUMI' ? 'sumi'
           : id === 'NPC-CAND-GEN-02' ? 'eli'
             : id === 'NPC-CAND-GEN-04' ? 'mai'
-              : null;
+              : id === 'NPC-CAND-KATE' ? 'kate'
+                : id === 'NPC-RIN-01' ? 'rin'
+                  : null;
   if (slug && id) {
     const descriptorContexts = visualContexts
       .map(context => context.actionId || context.id)
