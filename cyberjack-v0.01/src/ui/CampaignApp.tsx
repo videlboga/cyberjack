@@ -1732,65 +1732,6 @@ function LaboratoryOverview({
                 /{selectedRoom.capacity}
               </b>
             </header>
-            <div
-              className="room-scene"
-              style={{
-                backgroundImage: `url("${roomSceneBackground(selectedRoom.id)}")`,
-              }}
-            >
-              <div className="room-scene-shade" />
-              <span className="room-scene-label">
-                {getRoomName(selectedRoom.id, t)}
-              </span>
-              <div className="room-character-layer">
-                {roomPanelResidents.map((resident) => (
-                  <button
-                    key={resident.id}
-                    onClick={() => onInteract(resident)}
-                    title={resident.name}
-                  >
-                    <CharacterPortrait
-                      id={resident.subjectId || resident.id}
-                      name={resident.name}
-                      portrait={resident.portrait}
-                      contexts={resident.contexts}
-                      state={resident.state}
-                    />
-                    <span>{resident.name}</span>
-                  </button>
-                ))}
-              </div>
-              {(selectedRoom.type === "cell" || selectedRoom.type === "staff") && (
-                <div className="room-equipment-compact-overlay">
-                  {roomAssets
-                    .filter(
-                      (asset) =>
-                        asset.id.endsWith("_music_panel") ||
-                        asset.id.endsWith("_light_panel"),
-                    )
-                    .map((asset) => {
-                      const enabled = Boolean(asset.metadata?.enabled);
-                      return (
-                        <button
-                          className={`room-equipment-switch ${enabled ? "on" : "off"}`}
-                          key={asset.id}
-                          disabled={busy}
-                          onClick={() => onTogglePanel(asset)}
-                          aria-pressed={enabled}
-                          title={asset.name}
-                        >
-                          <span className="room-equipment-switch-track">
-                            <span className="room-equipment-switch-thumb" />
-                          </span>
-                          <span className="room-equipment-switch-label">
-                            {asset.name}
-                          </span>
-                        </button>
-                      );
-                    })}
-                </div>
-              )}
-            </div>
             <section className="room-detail-section room-people-section">
               <h3>{t('game.ui.charactersSection')}</h3>
               <div className="room-people">
@@ -2122,6 +2063,65 @@ function LaboratoryOverview({
               </div>
               )}
             </section>
+            {(selectedRoom.type === "cell" || selectedRoom.type === "staff") && (
+              <div
+                className="room-scene"
+                style={{
+                  backgroundImage: `url("${roomSceneBackground(selectedRoom.id)}")`,
+                }}
+              >
+                <div className="room-scene-shade" />
+                <span className="room-scene-label">
+                  {getRoomName(selectedRoom.id, t)}
+                </span>
+                <div className="room-character-layer">
+                  {roomPanelResidents.map((resident) => (
+                    <button
+                      key={resident.id}
+                      onClick={() => onInteract(resident)}
+                      title={resident.name}
+                    >
+                      <CharacterPortrait
+                        id={resident.subjectId || resident.id}
+                        name={resident.name}
+                        portrait={resident.portrait}
+                        contexts={resident.contexts}
+                        state={resident.state}
+                      />
+                      <span>{resident.name}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="room-equipment-compact-overlay">
+                  {roomAssets
+                    .filter(
+                      (asset) =>
+                        asset.id.endsWith("_music_panel") ||
+                        asset.id.endsWith("_light_panel"),
+                    )
+                    .map((asset) => {
+                      const enabled = Boolean(asset.metadata?.enabled);
+                      return (
+                        <button
+                          className={`room-equipment-switch ${enabled ? "on" : "off"}`}
+                          key={asset.id}
+                          disabled={busy}
+                          onClick={() => onTogglePanel(asset)}
+                          aria-pressed={enabled}
+                          title={asset.name}
+                        >
+                          <span className="room-equipment-switch-track">
+                            <span className="room-equipment-switch-thumb" />
+                          </span>
+                          <span className="room-equipment-switch-label">
+                            {asset.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>
