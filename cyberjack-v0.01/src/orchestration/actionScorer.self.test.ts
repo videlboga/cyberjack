@@ -27,16 +27,16 @@ describe('ActionScorer.scoreSelfActions', () => {
         expect(results.some(r => r.actionId === 'gentle_stroke' && r.pointId === 'vulva')).toBe(true);
     });
 
-    it('стимуляция клитора (licking на clitoris) при клиторальном трейте', () => {
+    it('стимуляция клитора (gentle_stroke на clitoris) при клиторальном трейте', () => {
         setupSelfSubject('SELF-2b', 70, { points: { clitoris: 3.5 } });
         const results = ActionScorer.scoreSelfActions('scene_lab_calibrator', 'SELF-2b', 70);
-        expect(results.some(r => r.actionId === 'licking' && r.pointId === 'clitoris')).toBe(true);
+        expect(results.some(r => r.actionId === 'gentle_stroke' && r.pointId === 'clitoris')).toBe(true);
     });
 
-    it('фетиш ступней (gentle_stroke на feet) при point_feet', () => {
+    it('фетиш ступней (licking на feet) при point_feet', () => {
         setupSelfSubject('SELF-3', 70, { points: { feet: 3.5 } });
         const results = ActionScorer.scoreSelfActions('scene_lab_calibrator', 'SELF-3', 70);
-        expect(results.some(r => r.actionId === 'gentle_stroke' && r.pointId === 'feet')).toBe(true);
+        expect(results.some(r => r.actionId === 'licking' && r.pointId === 'feet')).toBe(true);
     });
 
     it('мазохизм (pinch/scratching на arms) при trait_masochist', () => {

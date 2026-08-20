@@ -162,14 +162,14 @@ export class ActionScorer {
             ['trait_sexual_dependency', 'finger_insertion', 'vagina'],
             ['trait_point_vagina', 'finger_insertion', 'vagina'],
             ['trait_point_anus', 'finger_insertion', 'anus'],
-            // Нежная самостимуляция: руки/вульва (по validTargets gentle_stroke).
+            // Нежная самостимуляция: руки/вульва/клитор (по validTargets gentle_stroke).
             ['trait_point_hands', 'gentle_stroke', 'hands'],
             ['trait_point_vulva', 'gentle_stroke', 'vulva'],
-            // Оральная самостимуляция: губы/клитор (по validTargets licking).
+            ['trait_point_clitoris', 'gentle_stroke', 'clitoris'],
+            // Оральная самостимуляция: губы (по validTargets licking).
             ['trait_point_lips', 'licking', 'lips'],
-            ['trait_point_clitoris', 'licking', 'clitoris'],
-            // Ступни: фетиш (нежная, gentle_stroke поддерживает feet).
-            ['trait_point_feet', 'gentle_stroke', 'feet'],
+            // Ступни: фетиш (облизывание, licking поддерживает feet).
+            ['trait_point_feet', 'licking', 'feet'],
             // Мазохизм: болезненная самостимуляция на руках.
             ['trait_masochist', 'pinch', 'arms'],
             ['trait_masochist', 'scratching', 'arms'],

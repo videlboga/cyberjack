@@ -1,7 +1,7 @@
 import { db } from './db';
 
 const targets: Record<string, string[]> = {
-    gentle_stroke: ['hair','face','neck','shoulders','chest','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks','vulva','penis'],
+    gentle_stroke: ['hair','face','neck','shoulders','chest','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks','vulva','clitoris','penis'],
     tickle: ['neck','belly','waist','inner_thighs','feet','buttocks','vulva','clitoris','penis','testicles','anus'], light_kiss: ['face','lips','neck','shoulders','chest','nipples','belly','back','hands','inner_thighs','feet','buttocks','vulva','clitoris','penis'], deep_kiss: ['lips'],
     feather_stroke: ['head','hair','face','lips','neck','shoulders','chest','nipples','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks','vulva','clitoris','penis','testicles','anus','vagina','prostate'],
     deep_massage: ['shoulders','chest','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks'], licking: ['lips','neck','nipples','inner_thighs','feet','vulva','clitoris','penis','testicles','anus'],
