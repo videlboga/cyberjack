@@ -12,6 +12,7 @@ import { runGameTick } from './runGameTick';
 import { ActionScorer, ActionScoreResult } from './actionScorer';
 import { conditioningTags, deriveCompulsionSignals } from '../domain/conditioning';
 import { createSocialTurnPlan, enqueueSocialTurn, processPendingSocialTurns, resolvePhysicalInitiativeBasis } from '../services/socialTransactions';
+import { isSleeping } from '../services/physiology';
 
 const AUTONOMOUS_INTERVAL_MINUTES = 5;
 const MAX_ACTIONS_PER_SCENE_PULSE = 2;
@@ -130,6 +131,8 @@ export async function runAutonomousSceneMinute() {
             // The player shares the physical scene and therefore receives
             // observations, but has no autonomous will in the simulation.
             if (actorId === 'PL-1' || acted.has(actorId) || isDeviceBound(actorId, 'PL-1')) return [];
+            // Спящий не инициирует автономные ходы (режим дня, §3.1).
+            if (isSleeping(actorId)) return [];
             const actor = subjectRepo.get(actorId);
             const observed = latestObservedEvent(actorId, sceneId);
             const spatial = getLaboratorySpatialContext(actorId, 'PL-1');

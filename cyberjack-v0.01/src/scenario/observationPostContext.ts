@@ -24,13 +24,15 @@ interface PresenceRow {
     room_id: string;
 }
 
-/** Текущее состояние активов (из subjects). */
+/** Текущее состояние активов (из subjects, только реальные персонажи). */
 function assetStatusLines(): string[] {
     let rows: AssetRow[] = [];
     try {
         rows = db.prepare(
-            `SELECT id, name, sensitivity, capacity, openness, plasticity, attitude, tension
-             FROM subjects WHERE id != 'PL-1' ORDER BY name`
+            `SELECT s.id, s.name, s.sensitivity, s.capacity, s.openness, s.plasticity, s.attitude, s.tension
+             FROM subjects s
+             JOIN characters c ON c.subject_id = s.id
+             WHERE s.id != 'PL-1' ORDER BY s.name`
         ).all() as AssetRow[];
     } catch { return []; }
     if (!rows.length) return [];

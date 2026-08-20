@@ -14,6 +14,7 @@ import { buildInteractionObservation, buildCurrentStateObservationText, describe
 import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/reactionFrame';
 import { deriveAcquiredTraits, deriveCompulsionSignals } from '../domain/conditioning';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
+import { buildObservationPostContext } from '../scenario/observationPostContext';
 import { formatPhysiologyContext } from '../services/physiology';
 import { getWorldClock } from '../scenario/worldService';
 import { renderSocialMemories } from '../services/socialMemory';
@@ -496,7 +497,12 @@ export async function buildPromptPayload(
         initiatorName,
         sceneTitle: spatial?.locationTitle || scene?.title,
         presentCharacters,
-        contexts: spatial ? [`Местонахождение: ${spatial.locationTitle}`, spatial.description, ...activeContextNames] : activeContextNames,
+        contexts: spatial ? [
+            `Местонахождение: ${spatial.locationTitle}`,
+            spatial.description,
+            ...(spatial.roomId === 'room_control' ? buildObservationPostContext(ownerId) : []),
+            ...activeContextNames,
+        ] : activeContextNames,
         roleContext,
         core: actorDetails.core,
         relation,
