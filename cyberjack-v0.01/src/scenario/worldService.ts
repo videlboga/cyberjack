@@ -21,6 +21,7 @@ import { buildEmbedding } from '../services/embeddingService';
 import { applySubjectiveIntervention, applySubjectiveTagIntervention, createManualTagLink, getSubjectiveEpisode, listManualTagLinks, queueSubjectiveEpisode, regenerateSubjectiveEpisode, removeManualTagLink } from '../services/subjectiveMemoryEpisodes';
 import { returnAssetsFromTransfer, expireOverdueContracts } from '../services/contractService';
 import { advancePhysiology } from '../services/physiology';
+import { applyDailyUpkeep } from './economy';
 
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
@@ -954,7 +955,17 @@ function applyPassiveLaboratoryEffects(minutes: number, excluded = new Set<strin
         if (!deviceOccupants.has(character_id)) recover(character_id, 10, 3, 0.25, 4);
     }
     for (const [subjectId, assetId] of deviceOccupants) {
-        if (assetId === 'lab_recovery_capsule') recover(subjectId, 25, 8, 0.75, 12);
+        if (assetId === 'lab_recovery_capsule') {
+            // Без ампулы капсула восстанавливает как обычный отдых. Активный
+            // контекст Regen-R (ампула, эффект на сутки) ускоряет восстановление.
+            const regenActive = activeContextsRepo.getAllForSubject(subjectId)
+                .some(ctx => ctx.actionId === 'capsule_infusion_regenerative');
+            if (regenActive) {
+                recover(subjectId, 25, 8, 0.75, 12);
+            } else {
+                recover(subjectId, 10, 3, 0.25, 4);
+            }
+        }
     }
 
     // Running programmable devices are advanced through runGameTick by the
@@ -978,6 +989,8 @@ export function advanceWorldTime(minutes: number, reason?: string, options: Time
     expireOverdueContracts(worldMinute);
     returnAssetsFromTransfer(worldMinute);
     applyExpiredContractPenalties(worldMinute);
+    // Экономика: ежедневное содержание за все пересечённые сутки.
+    applyDailyUpkeep(worldMinute);
     if (reason) recordScenarioEvent('time', reason, `Прошло ${amount} мин.`, { minutes: amount });
     return clock;
 }

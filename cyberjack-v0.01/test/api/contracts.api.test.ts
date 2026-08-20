@@ -51,7 +51,8 @@ describe('contract and asset matching', () => {
 
         const delivered = await request(app).post('/api/contracts/test_contract/deliver').send({ subjectId: 'asset_ready' });
         expect(delivered.body.success).toBe(true);
-        expect(contractRepo.get('test_contract')?.state).toBe('completed');
+        // Внешняя передача: актив уходит, контракт in_transfer, награда при передаче.
+        expect(contractRepo.get('test_contract')?.state).toBe('in_transfer');
         const credits = db.prepare("SELECT amount FROM character_resources WHERE character_id = 'PL-1' AND resource_key = 'credits'").get() as any;
         expect(credits.amount).toBe(1100);
     });

@@ -92,8 +92,15 @@ export function deliverContract(contractId: string, subjectId: string): DeliverC
   }
 
   db.transaction(() => {
-    contract.state = 'completed';
+    // Внешняя передача: актив уходит из лаборатории на срок durationMinutes.
+    // Награда выплачивается при передаче; return_profile применяется при возврате.
+    contract.state = 'in_transfer';
+    contract.subject_id = subjectId;
+    contract.attachedSubjectId = subjectId;
+    contract.unavailableUntil = getWorldClock().totalMinutes + (contract.durationMinutes || 1440);
     contractRepo.save(contract);
+    sceneCharacterRepo.set('scene_lab_calibrator', subjectId, { presenceState: 'absent' });
+
     if (contract.rewards.credits) {
       db.prepare(`
         INSERT INTO character_resources (character_id, resource_key, amount, metadata)
@@ -239,11 +246,32 @@ export function completeContract(contractId: string, subjectId: string): Complet
 
   db.transaction(() => {
     if (contract.format === 'external_transfer' || contract.return_profile) {
-      // Внешняя передача: актив уходит, вернётся после срока.
+      // Внешняя передача: актив уходит, вернётся после срока. Награда
+      // выплачивается при передаче; return_profile применяется при возврате.
       contract.state = 'in_transfer';
       contract.subject_id = subjectId;
+      contract.attachedSubjectId = subjectId;
       contract.unavailableUntil = getWorldClock().totalMinutes + (contract.durationMinutes || 1440);
       sceneCharacterRepo.set('scene_lab_calibrator', subjectId, { presenceState: 'absent' });
+      const playerId = contract.acceptedByPlayerId || 'PL-1';
+      if (contract.rewards.credits) {
+        db.prepare(`INSERT INTO character_resources (character_id, resource_key, amount, metadata)
+          VALUES (?, 'credits', ?, '{}')
+          ON CONFLICT(character_id, resource_key) DO UPDATE SET amount = amount + excluded.amount`)
+          .run(playerId, contract.rewards.credits);
+      }
+      if (contract.rewards.trust) {
+        db.prepare(`INSERT INTO player_faction_states (player_id, faction_id, relation, trust, access_level, flags)
+          VALUES (?, ?, 0, ?, 1, '[]')
+          ON CONFLICT(player_id, faction_id) DO UPDATE SET trust = trust + excluded.trust`)
+          .run(playerId, contract.issuerId, contract.rewards.trust);
+      }
+      for (const itemId of contract.rewards.items || []) {
+        db.prepare(`INSERT INTO character_items (character_id, item_id, state, charges, metadata)
+          VALUES (?, ?, 'active', -1, '{}')
+          ON CONFLICT(character_id, item_id) DO UPDATE SET state = 'active'`)
+          .run(playerId, itemId);
+      }
     } else {
       // Локальный контракт: применяем последствия сразу.
       contract.state = 'completed';
