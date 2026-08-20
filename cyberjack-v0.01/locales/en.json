@@ -114,6 +114,7 @@
       "remaining": "REMAINING",
       "stationAroundLab": "Station around the laboratory",
       "acceptOrder": "Accept order",
+      "refuseOrder": "Decline",
       "sectorJournal": "Sector Journal",
       "deviceSessionNotInitialized": "Device session not initialized.",
       "asset": "Asset",

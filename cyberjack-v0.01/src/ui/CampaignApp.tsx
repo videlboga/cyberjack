@@ -322,6 +322,18 @@ type Contract = {
   conditions: Condition[];
   rewards: { credits?: number; trust?: number; items?: string[] };
   deadlineTick?: number;
+  format?: string;
+  durationMinutes?: number;
+  offerDeadlineMinutes?: number;
+  returnProfile?: {
+    acute_state?: { capacity?: number; tension?: number; sensitivity?: number; attitude?: number };
+    recovery?: { durationDays?: number; method?: string; baselineCapacityLimit?: number };
+    traumatic?: { response?: string; trigger?: string }[];
+    temporary?: { impulse?: string; decayAfterMinutes?: number }[];
+  };
+  unavailableUntil?: number;
+  attachedSubjectId?: string;
+  subjectId?: string;
 };
 type SubjectState = Record<string, any> & { attitude?: number };
 type DirectorEvent = {
@@ -866,6 +878,7 @@ export function CampaignApp() {
           ]);
           if (requestId !== latestLoadRequestRef.current) return;
           setContracts([
+            ...(orderData.inTransfer || []),
             ...(orderData.accepted || []),
             ...(orderData.available || []),
           ]);
@@ -1373,6 +1386,13 @@ export function CampaignApp() {
                       `Контракт выполнен: ${contract.title}`,
                     )
                   : Promise.resolve(false)
+              }
+              onRefuse={(contract) =>
+                mutate(
+                  `/api/contracts/${contract.id}/refuse`,
+                  {},
+                  `Контракт отклонён: ${contract.title}`,
+                )
               }
             />
           ) : currentSection === "inbox" ? (
@@ -6420,6 +6440,7 @@ function ContractOffice({
   busy,
   onAccept,
   onDeliver,
+  onRefuse,
   now,
 }: {
   contracts: Contract[];
@@ -6430,6 +6451,7 @@ function ContractOffice({
   busy: boolean;
   onAccept: (contract: Contract) => void;
   onDeliver: (contract: Contract) => void;
+  onRefuse: (contract: Contract) => void;
   now: number;
 }) {
   const { t } = useI18n();
@@ -6474,19 +6496,37 @@ function ContractOffice({
           const hours = contract.deadlineTick
             ? Math.max(0, Math.ceil((contract.deadlineTick - now) / 60))
             : null;
+          const returnHours = contract.unavailableUntil
+            ? Math.max(0, Math.ceil((contract.unavailableUntil - now) / 60))
+            : null;
+          const rp = contract.returnProfile;
           return (
             <article
               key={contract.id}
-              className={contract.state === "accepted" ? "accepted" : ""}
+              className={`${contract.state === "accepted" ? "accepted" : ""} ${
+                contract.state === "in_transfer" ? "in-transfer" : ""
+              }`}
             >
               <header>
                 <div>
                   <small>
                     {contract.state === "accepted"
                       ? `ПРИНЯТ · ${hours} Ч ДО СРОКА`
-                      : contract.issuerId}
+                      : contract.state === "in_transfer"
+                        ? `В ПЕРЕДАЧЕ · ВОЗВРАТ ЧЕРЕЗ ${returnHours} Ч`
+                        : contract.issuerId}
                   </small>
                   <strong>{contract.title}</strong>
+                  {contract.format && (
+                    <em className="contract-format">
+                      {contract.format === "external_transfer"
+                        ? "внешняя передача"
+                        : contract.format}
+                      {contract.durationMinutes
+                        ? ` · ${Math.round(contract.durationMinutes / 60)} ч`
+                        : ""}
+                    </em>
+                  )}
                 </div>
                 <b>{contract.rewards?.credits || 0} cr</b>
               </header>
@@ -6506,20 +6546,79 @@ function ContractOffice({
                   </span>
                 ))}
               </div>
+              {rp && (
+                <div className="contract-return-profile">
+                  <small>ПОСЛЕДСТВИЯ ВОЗВРАТА</small>
+                  {(rp.acute_state?.capacity != null ||
+                    rp.acute_state?.tension != null ||
+                    rp.acute_state?.sensitivity != null ||
+                    rp.acute_state?.attitude != null) && (
+                    <span>
+                      Острый сдвиг:{" "}
+                      {[
+                        rp.acute_state?.capacity != null
+                          ? `выносливость ${rp.acute_state.capacity > 0 ? "+" : ""}${rp.acute_state.capacity}`
+                          : null,
+                        rp.acute_state?.tension != null
+                          ? `напряжение ${rp.acute_state.tension > 0 ? "+" : ""}${rp.acute_state.tension}`
+                          : null,
+                        rp.acute_state?.sensitivity != null
+                          ? `чувствительность ${rp.acute_state.sensitivity > 0 ? "+" : ""}${rp.acute_state.sensitivity}`
+                          : null,
+                        rp.acute_state?.attitude != null
+                          ? `принятие ${rp.acute_state.attitude > 0 ? "+" : ""}${rp.acute_state.attitude}`
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </span>
+                  )}
+                  {rp.recovery?.durationDays && (
+                    <span>
+                      Восстановление {rp.recovery.durationDays} сут.
+                      {rp.recovery.method ? ` (${rp.recovery.method})` : ""}
+                    </span>
+                  )}
+                  {rp.traumatic?.map((t, i) => (
+                    <span key={i} className="traumatic">
+                      {t.trigger && `Триггер: ${t.trigger}. `}
+                      {t.response}
+                    </span>
+                  ))}
+                  {rp.temporary?.map((t, i) => (
+                    <span key={i} className="temporary">
+                      {t.impulse}
+                    </span>
+                  ))}
+                </div>
+              )}
               {contract.state === "available" ? (
                 <button disabled={busy} onClick={() => onAccept(contract)}>
                   {t('game.ui.acceptOrder')}
                 </button>
+              ) : contract.state === "in_transfer" ? (
+                <span className="contract-in-transfer-note">
+                  Актив вернётся автоматически после передачи
+                </span>
               ) : (
-                <button
-                  className="deliver"
-                  disabled={busy || !ready}
-                  onClick={() => onDeliver(contract)}
-                >
-                  {ready
-                    ? `Передать: ${subjectName}`
-                    : `${subjectName} пока не соответствует`}
-                </button>
+                <>
+                  <button
+                    className="deliver"
+                    disabled={busy || !ready}
+                    onClick={() => onDeliver(contract)}
+                  >
+                    {ready
+                      ? `Передать: ${subjectName}`
+                      : `${subjectName} пока не соответствует`}
+                  </button>
+                  <button
+                    className="refuse"
+                    disabled={busy}
+                    onClick={() => onRefuse(contract)}
+                  >
+                    {t('game.ui.refuseOrder') || "Отказаться"}
+                  </button>
+                </>
               )}
             </article>
           );

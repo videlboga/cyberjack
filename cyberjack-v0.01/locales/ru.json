@@ -114,6 +114,7 @@
       "remaining": "ОСТАЛОСЬ",
       "stationAroundLab": "Станция вокруг лаборатории",
       "acceptOrder": "Принять заказ",
+      "refuseOrder": "Отказаться",
       "sectorJournal": "Журнал сектора",
       "deviceSessionNotInitialized": "Сессия устройства не инициализирована.",
       "asset": "Актив",
