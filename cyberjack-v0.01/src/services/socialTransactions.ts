@@ -26,7 +26,7 @@ export type SocialObservation = {
 export type SocialTurnPlan = { id:string; speakerId:string; recipientId:string; stimulus:'co_presence'|'observed_event'; egoState:EgoState; hiddenPosition:LifePosition; need:SocialNeed; act:SocialAct; topic:string; topicContext?:string; expectedReply:'adult_reply'|'accept_support'|'boundary'|'refusal'; physicalPermission:'none'|'request_only'; worldMinute:number; replyToTurnId?:string; incomingSpeech?:string; threadId?:string; observation?:SocialObservation };
 export type SpeechSemantics = { speechAct:'answer'|'question'|'support'|'boundary'|'refusal'|'request'|'provocation'|'self_disclosure'; apparentEgoState:EgoState|'unclear'; transaction:'complementary'|'crossed'|'ulterior'|'unclear'; boundary:'none'|'set'|'accepted'|'violated'; invitation:'none'|'conversation'|'help'|'physical_contact'; openLoop:'none'|'question'|'request'|'offer'|'boundary'; conversationDisposition:'continue'|'close'|'unclear'; confidence:number };
 export type PhysicalInitiativeBasis = 'consensual' | 'care' | 'protocol' | 'coercive' | 'violent' | null;
-export type ConversationState = { turnCount:number; maxTurns:number; hardLimit:number; engagement:number };
+export type ConversationState = { turnCount:number; maxTurns:number; hardLimit:number; engagement:number; staleStreak:number; repeatCount:number };
 
 const clamp = (value:number) => Math.max(0, Math.min(100, value));
 const defaults = { egoState:'adult' as EgoState, hiddenPosition:'ok_ok' as LifePosition, need:'clarity' as SocialNeed };
@@ -39,9 +39,11 @@ function conversationState(sourceJson:string | undefined): ConversationState {
             maxTurns: Math.max(2, Number(saved.maxTurns || 2)),
             hardLimit: Math.max(2, Number(saved.hardLimit || 6)),
             engagement: clamp(Number(saved.engagement ?? 50)),
+            staleStreak: Math.max(0, Number(saved.staleStreak || 0)),
+            repeatCount: Math.max(0, Number(saved.repeatCount || 0)),
         };
     } catch { /* keep the stable default for older threads */ }
-    return { turnCount:0, maxTurns:2, hardLimit:6, engagement:50 };
+    return { turnCount:0, maxTurns:2, hardLimit:6, engagement:50, staleStreak:0, repeatCount:0 };
 }
 
 function threadSource(sourceJson:string | undefined, conversation:ConversationState) {
@@ -59,9 +61,16 @@ export function shouldContinueConversation(semantics:SpeechSemantics, current:Co
     const engagement = clamp(current.engagement + (cooperative ? 8 : -14) + (openLoop ? 5 : 0) + (semantics.speechAct === 'refusal' ? -25 : 0));
     // A new open loop earns one more turn, but never bypasses the hard limit.
     const maxTurns = Math.min(current.hardLimit, Math.max(current.maxTurns, turnCount) + (openLoop && cooperative ? 1 : 0));
-    const state = { ...current, turnCount, maxTurns, engagement };
-    const continueConversation = !explicitlyClosed && turnCount < maxTurns && engagement >= 25 && (openLoop || (cooperative && semantics.conversationDisposition === 'continue'));
-    return { continueConversation, state, status: declined ? 'declined' : interrupted ? 'interrupted' : continueConversation ? 'open' : 'resolved' };
+    // Repeat detection: the same speech act repeated too many times signals the
+    // conversation is treading water (recycling the same open loop). After 3
+    // repeated questions the thread closes so the NPC does not loop forever.
+    const isFirstTurn = current.turnCount === 0;
+    const repeatCount = !isFirstTurn && semantics.speechAct === 'question' ? current.repeatCount + 1 : 0;
+    const staleStreak = repeatCount > 0 ? current.staleStreak + 1 : 0;
+    const treadingWater = repeatCount >= 3;
+    const state = { ...current, turnCount, maxTurns, engagement, staleStreak, repeatCount };
+    const continueConversation = !explicitlyClosed && !treadingWater && turnCount < maxTurns && engagement >= 25 && (openLoop || (cooperative && semantics.conversationDisposition === 'continue'));
+    return { continueConversation, state, status: declined ? 'declined' : interrupted ? 'interrupted' : treadingWater ? 'resolved' : continueConversation ? 'open' : 'resolved' };
 }
 
 function profileSocial(characterId:string) {
@@ -317,4 +326,51 @@ export async function processPendingSocialTurns() {
         // the already queued next turn; shouldContinueConversation bounds it.
         if (db.prepare("SELECT 1 FROM pending_social_turns WHERE status='planned' LIMIT 1").get()) void processPendingSocialTurns();
     }
+}
+
+// ---------------------------------------------------------------------------
+// Memory → themes + intentions (Layer 1/2)
+// ---------------------------------------------------------------------------
+
+export interface PairThemes {
+    themes: Array<{ topic: string; summary: string; worldMinute?: number }>;
+    intentions: string[];
+}
+
+/**
+ * Из накопленной прожитой памяти пары извлекает темы и открытые намерения.
+ * Смотрит на субъективные эпизоды (summary_json.title / openLoops) субъекта,
+ * которые вовлекают обоих участников пары, и агрегирует их.
+ */
+export function memoryThemesForPair(subjectA: string, subjectB: string): PairThemes {
+    // Эпизоды субъекта A, которые ссылаются на атомы, вовлекающие B.
+    const episodes = db.prepare(`
+        SELECT sme.subject_id, sme.source_key, sme.source_atom_ids, sme.summary_json
+        FROM subjective_memory_episodes sme
+        WHERE sme.subject_id = ? AND sme.status = 'ready'
+    `).all(subjectA) as Array<{ subject_id: string; source_key: string; source_atom_ids: string; summary_json: string }>;
+
+    const themes: Array<{ topic: string; summary: string; worldMinute?: number }> = [];
+    const intentions: string[] = [];
+    for (const episode of episodes) {
+        // Атомы, входящие в эпизод.
+        let atomIds: number[] = [];
+        try { atomIds = JSON.parse(episode.source_atom_ids || '[]'); } catch { continue; }
+        if (!atomIds.length) continue;
+        // Хотя бы один атом эпизода должен вовлекать B (related_subjects).
+        const involved = db.prepare(
+            `SELECT 1 FROM memory_embeddings WHERE id = ? AND related_subjects LIKE ? LIMIT 1`
+        ).get(atomIds[0], `%"${subjectB}"%`);
+        if (!involved) continue;
+        // Парсим summary.
+        let summary: any = {};
+        try { summary = JSON.parse(episode.summary_json || '{}'); } catch { summary = {}; }
+        const topic = summary.title || summary.theme || null;
+        if (!topic) continue;
+        themes.push({ topic, summary: summary.summary || '', worldMinute: summary.worldMinute });
+        for (const loop of summary.openLoops || []) {
+            if (typeof loop === 'string' && loop.trim()) intentions.push(loop.trim());
+        }
+    }
+    return { themes, intentions };
 }

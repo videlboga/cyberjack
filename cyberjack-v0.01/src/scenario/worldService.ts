@@ -19,6 +19,8 @@ import { correctionImpact } from '../domain/memoryCorrection';
 import { SexMachineStimulationMode, sexMachineStimulation } from '../domain/sexMachineStimulation';
 import { buildEmbedding } from '../services/embeddingService';
 import { applySubjectiveIntervention, applySubjectiveTagIntervention, createManualTagLink, getSubjectiveEpisode, listManualTagLinks, queueSubjectiveEpisode, regenerateSubjectiveEpisode, removeManualTagLink } from '../services/subjectiveMemoryEpisodes';
+import { returnAssetsFromTransfer, expireOverdueContracts } from '../services/contractService';
+import { advancePhysiology } from '../services/physiology';
 
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
@@ -88,14 +90,23 @@ const SHOP_OFFERS = [
 
 const BASE_LAB_ASSETS = [
     { id: 'lab_diagnostic_table', roomId: 'room_calibration', name: 'Диагностический стол', description: 'Базовая телеметрия и ручная калибровка актива.' },
-    { id: 'lab_sex_machine', roomId: 'room_calibration', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.' }
+    { id: 'lab_sex_machine', roomId: 'room_calibration', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.' },
+    { id: 'lab_recovery_capsule', roomId: 'room_calibration', name: 'Восстановительная капсула', description: 'Вертикальная ёмкость с вязкой тёплой жидкостью, кислородной маской и каналом подачи питательного раствора; постепенно расслабляет и стабилизирует тело.' },
+    { id: 'lab_mental_correction_chair', roomId: 'room_calibration', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.' },
+    // Комфорт-оборудование жилых комнат: полу-декоративные переключатели
+    // контекста (климат/музыка), повышающие комфорт всех, кто в комнате.
+    { id: 'cell_a_music_panel', roomId: 'room_cell_a', name: 'Настенная панель музыки', description: 'Небольшая панель с выбором фоновой музыки и регулировкой громкости. Можно включить.' },
+    { id: 'cell_a_light_panel', roomId: 'room_cell_a', name: 'Панель освещения', description: 'Регулировка яркости и оттенка верхнего света в камере.' },
+    { id: 'cell_b_music_panel', roomId: 'room_cell_b', name: 'Настенная панель музыки', description: 'Небольшая панель с выбором фоновой музыки и регулировкой громкости. Можно включить.' },
+    { id: 'cell_b_light_panel', roomId: 'room_cell_b', name: 'Панель освещения', description: 'Регулировка яркости и оттенка верхнего света в камере.' }
 ];
 
 const BASE_LAB_ROOMS = [
     { id: 'room_calibration', name: 'Калибровочная', type: 'workroom', capacity: 2, description: 'Изолированное помещение для ручных воздействий и запуска протоколов.' },
-    { id: 'room_cell_a', name: 'Жилая камера A', type: 'cell', capacity: 1, description: 'Закрытая камера с койкой, санитарным модулем и контролем сна.' },
+    { id: 'room_cell_a', name: 'Жилая камера A', type: 'cell', capacity: 2, description: 'Закрытая камера с койкой, санитарным модулем и контролем сна.' },
     { id: 'room_cell_b', name: 'Жилая камера B', type: 'cell', capacity: 1, description: 'Резервная жилая камера для второго актива.' },
-    { id: 'room_control', name: 'Пост наблюдения', type: 'staff', capacity: 2, description: 'Рабочее место ассистента, терминал телеметрии и управление оборудованием.' }
+    { id: 'room_control', name: 'Пост наблюдения', type: 'staff', capacity: 2, description: 'Рабочее место ассистента: терминал телеметрии с данными активов, панель управления оборудованием, журнал событий лаборатории и список контрактов. Отсюда видно состояние всех активов и текущие процедуры.' },
+    { id: 'room_staff_living', name: 'Комната персонала', type: 'staff', capacity: 2, description: 'Жилая комната для персонала лаборатории: две койки с тонкими матрасами, санитарный модуль за перегородкой, тусклое верхнее освещение и настенная панель с музыкой и регулировкой света. Воздух сухой, с лёгким запахом дезинфекции. Режим дня: подъём в 07:00, приёмы пищи в 08:00, 13:00 и 19:00, отбой в 23:00.' }
 ];
 
 /**
@@ -955,10 +966,18 @@ export function advanceWorldTime(minutes: number, reason?: string, options: Time
     ensureWorldSeed();
     const amount = Math.max(0, Math.round(Number(minutes) || 0));
     if (!amount) return getWorldClock();
+    const startMinute = getWorldClock().totalMinutes;
     applyPassiveLaboratoryEffects(amount, new Set(options.activeSubjectIds || []));
     db.prepare(`UPDATE world_state SET total_minutes = total_minutes + ?, updated_at = CURRENT_TIMESTAMP WHERE id = 'main'`).run(amount);
     const clock = getWorldClock();
-    applyExpiredContractPenalties(clock.totalMinutes);
+    const worldMinute = clock.totalMinutes;
+    // Физиология (сон/голод/туалет) — пакетный проход. Минута для определения
+    // фазы сна берётся из НАЧАЛА сегмента, чтобы 23:00→07:00 считалось сном.
+    advancePhysiology(amount, startMinute);
+    // Контракты: просрочка штрафов + возврат активов из внешней передачи.
+    expireOverdueContracts(worldMinute);
+    returnAssetsFromTransfer(worldMinute);
+    applyExpiredContractPenalties(worldMinute);
     if (reason) recordScenarioEvent('time', reason, `Прошло ${amount} мин.`, { minutes: amount });
     return clock;
 }
@@ -1434,6 +1453,31 @@ export function controlDeviceSession(
         });
     }
     return { assetId, session: next };
+}
+
+/**
+ * Переключает комфорт-панель жилой комнаты (музыка/свет). Полу-декоративное
+ * оборудование: включает/выключает контекст комфорта для всех, кто в комнате.
+ * Возвращает новое состояние enabled.
+ */
+export function controlComfortPanel(
+    assetId: string,
+    command: 'on' | 'off' | 'toggle',
+    playerId = PLAYER_ID,
+): { assetId: string; enabled: boolean } {
+    const row = db.prepare(`SELECT asset_id, name, metadata FROM laboratory_assets WHERE player_id = ? AND asset_id = ?`)
+        .get(playerId, assetId) as any;
+    if (!row) throw new Error('Модуль не установлен');
+    if (!assetId.endsWith('_music_panel') && !assetId.endsWith('_light_panel')) {
+        throw new Error('Это не комфорт-панель');
+    }
+    let metadata: Record<string, any> = {};
+    try { metadata = JSON.parse(row.metadata || '{}'); } catch { metadata = {}; }
+    const current = Boolean(metadata.enabled);
+    const enabled = command === 'on' ? true : command === 'off' ? false : !current;
+    db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
+        .run(JSON.stringify({ ...metadata, enabled }), playerId, assetId);
+    return { assetId, enabled };
 }
 
 export function getScenarioSnapshot(playerId = PLAYER_ID) {

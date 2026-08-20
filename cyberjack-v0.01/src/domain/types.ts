@@ -362,7 +362,7 @@ export interface AssetContract {
     issuerId: string; // reference to Faction
     title: string;
     description: string;
-    state: 'available' | 'accepted' | 'completed' | 'failed' | 'expired';
+    state: 'available' | 'accepted' | 'completed' | 'failed' | 'expired' | 'in_transfer' | 'refused';
     acceptedByPlayerId?: string;
     attachedSubjectId?: string; // legacy field; assets are selected only on delivery
     deadlineTick?: number; 
@@ -371,11 +371,23 @@ export interface AssetContract {
         credits?: number;
         trust?: number;
         items?: string[];
+        /** Редкая награда: возврат создаёт нового кандидата. */
+        newAsset?: boolean;
     };
     penalties?: {
         credits?: number;
         trust?: number;
     };
+    // Fields for the contract-line system (used by contractPool/contractService).
+    format?: string;                 // 'external_transfer' | 'in_lab' | ...
+    durationMinutes?: number;
+    offerDeadlineMinutes?: number;
+    return_profile?: Record<string, any>;
+    personal?: boolean;
+    unavailable_until?: number;
+    /** Внешняя передача: актив вернётся после этого момента (минуты). */
+    unavailableUntil?: number;
+    subject_id?: string;
 }
 export interface AnatomyPointPreset {
     id: string;

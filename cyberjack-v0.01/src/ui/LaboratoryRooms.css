@@ -61,3 +61,24 @@
 .campaign-shell .sex-machine-screen .device-chat-panel>form.speech-input textarea{width:100%;min-width:0}
 .campaign-shell .sex-machine-screen .device-chat-panel>form.speech-input>button{width:48px;min-width:48px;padding:0!important;overflow:hidden;font-size:0}
 .campaign-shell .sex-machine-screen .device-chat-panel>form.speech-input>button::before{content:"➤";font-size:16px}
+/* Комфорт-панели жилых комнат: компактный оверлей со свитчами вкл/выкл. */
+.room-equipment-compact{display:grid;grid-template-columns:repeat(2,minmax(200px,1fr));gap:8px}
+.room-equipment-compact-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid #2d3d42;background:#0f181b}
+.room-equipment-compact-item.on{border-color:#5c8c7f;background:#13231f}
+.room-equipment-compact-copy{min-width:0}
+.room-equipment-compact-copy strong{display:block;color:#c4cfd2;font-size:10px}
+.room-equipment-compact-copy span{display:block;margin-top:3px;color:#647a80;font-size:7px;line-height:1.4}
+.room-equipment-switch{display:flex;align-items:center;gap:6px;flex:none;padding:0;border:0;background:transparent;cursor:pointer}
+.room-equipment-switch-track{position:relative;width:34px;height:18px;border-radius:9px;background:#2a3a3f;transition:background .15s}
+.room-equipment-switch.on .room-equipment-switch-track{background:#5c8c7f}
+.room-equipment-switch-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#c4cfd2;transition:left .15s}
+.room-equipment-switch.on .room-equipment-switch-thumb{left:18px;background:#eafff7}
+.room-equipment-switch-label{color:#647a80;font-size:8px}
+.room-equipment-switch.on .room-equipment-switch-label{color:#c0e4da}
+.room-equipment-switch:disabled{opacity:.4;cursor:default}
+/* Оверлей комфорт-панелей поверх сцены комнаты (правая часть фона). */
+.room-equipment-compact-overlay{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:6px;padding:8px;background:rgba(7,13,15,.82);border:1px solid #33464c;z-index:2}
+.room-equipment-compact-overlay .room-equipment-switch{justify-content:space-between;width:100%;min-width:150px;padding:5px 6px;border:1px solid #2d3d42;background:#0f181b}
+.room-equipment-compact-overlay .room-equipment-switch.on{border-color:#5c8c7f;background:#13231f}
+.room-equipment-compact-overlay .room-equipment-switch-label{font-size:8px;white-space:nowrap}
+@media(max-width:650px){.room-equipment-compact{grid-template-columns:1fr}}

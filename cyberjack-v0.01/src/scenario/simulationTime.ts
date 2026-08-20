@@ -5,6 +5,8 @@ import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWork
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
 import { expireOverdueContracts } from '../services/contractService';
+import { ensureContractPool, ensurePersonalContractLine } from '../services/contractPool';
+import { applyAllContractTraitDecay } from '../services/contractTraits';
 import { ensureAuthoredSupplyOpportunity } from './eventDirector';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryRepo } from '../infrastructure/repositories';
@@ -27,6 +29,12 @@ export async function advanceSimulationTime(
     await runBackgroundSustainedTicks(amount);
     // Expire accepted contracts whose deadline has passed (Этап 4).
     expireOverdueContracts(clock.totalMinutes);
+    // Контрактный пул: поддерживает ограниченный набор стандартных контрактов
+    // и выставляет следующий этап персональных линий (идемпотентно).
+    ensureContractPool(clock.totalMinutes);
+    ensurePersonalContractLine(clock.totalMinutes);
+    // Контрактные трейты: снимает истёкшие временные по игровому времени.
+    applyAllContractTraitDecay(clock.totalMinutes);
     // After time is fixed, run any background jobs that have come due. Each
     // job is idempotent on (type, key), so a repeated worker run never
     // duplicates replicas or memories. LLM-backed jobs run in the background

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, recruitCandidate, changeLaboratoryRole, controlDeviceSession, moveLaboratoryCharacter as moveLabCharacter } from '../../scenario/worldService';
+import { buyOffer, getScenarioSnapshot, travelTo, useLabAsset, recruitCandidate, changeLaboratoryRole, controlDeviceSession, controlComfortPanel, moveLaboratoryCharacter as moveLabCharacter } from '../../scenario/worldService';
 import { getTimeFlowState, setTimeFlowPaused } from '../../scenario/timeFlow';
 
 export const getScenario = (req: Request, res: Response) => {
@@ -44,9 +44,17 @@ export const useEquipment = (req: Request, res: Response) => {
 export const controlEquipment = async (req: Request, res: Response) => {
     try {
         const playerId = String(req.body.playerId || 'PL-1');
+        const assetId = String(req.params.assetId);
+        // Комфорт-панели жилых комнат (музыка/свет) — переключатель контекста.
+        if (assetId.endsWith('_music_panel') || assetId.endsWith('_light_panel')) {
+            const command = String(req.body.command || 'toggle') as 'on' | 'off' | 'toggle';
+            const result = controlComfortPanel(assetId, command, playerId);
+            res.json({ success: true, result });
+            return;
+        }
         const command = String(req.body.command || '') as 'configure' | 'settings' | 'start' | 'adjust' | 'pause' | 'resume' | 'stop' | 'intervene';
         if (!['configure', 'settings', 'start', 'adjust', 'pause', 'resume', 'stop', 'intervene'].includes(command)) throw new Error('Неизвестная команда устройства');
-        const result = await controlDeviceSession(String(req.params.assetId), command, req.body, playerId);
+        const result = await controlDeviceSession(assetId, command, req.body, playerId);
         // The client refreshes its scenario state immediately after a device
         // command. Building another full snapshot here duplicates expensive
         // work and makes simple settings changes feel delayed.

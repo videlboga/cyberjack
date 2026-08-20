@@ -487,23 +487,31 @@ export const subjectEdgeStateRepo = {
 };
 
 export const subjectPreferencesRepo = {
-    get(subjectId: string): { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number>; tags: Record<string, number> } {
+    get(subjectId: string): { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number>; tags: Record<string, number>; contractTraits?: Record<string, any> } {
         const row = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(subjectId) as any;
         if (!row || !row.preferences) return { actions: {}, points: {}, contexts: {}, tags: {} };
         try {
             const parsed = JSON.parse(row.preferences);
-            return {
+            const out: any = {
                 actions: parsed.actions || {},
                 points: parsed.points || {},
                 contexts: parsed.contexts || {},
                 tags: parsed.tags || {}
             };
+            if (parsed.contractTraits) out.contractTraits = parsed.contractTraits;
+            return out;
         } catch (e) {
             return { actions: {}, points: {}, contexts: {}, tags: {} };
         }
     },
-    set(subjectId: string, prefs: { actions?: Record<string, number>; points?: Record<string, number>; contexts?: Record<string, number>; tags?: Record<string, number> }) {
-        const asJson = JSON.stringify({ actions: prefs.actions || {}, points: prefs.points || {}, contexts: prefs.contexts || {}, tags: prefs.tags || {} });
+    set(subjectId: string, prefs: { actions?: Record<string, number>; points?: Record<string, number>; contexts?: Record<string, number>; tags?: Record<string, number>; contractTraits?: Record<string, any> }) {
+        const asJson = JSON.stringify({
+            actions: prefs.actions || {},
+            points: prefs.points || {},
+            contexts: prefs.contexts || {},
+            tags: prefs.tags || {},
+            ...(prefs.contractTraits ? { contractTraits: prefs.contractTraits } : {}),
+        });
         db.prepare('UPDATE subjects SET preferences = ? WHERE id = ?').run(asJson, subjectId);
     },
     /** Adjust a single preference entry by delta and clamp to [-5,5] */

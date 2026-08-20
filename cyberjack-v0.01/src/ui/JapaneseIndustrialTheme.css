@@ -1876,11 +1876,6 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   grid-template-columns:minmax(0,1fr) minmax(230px,25%);
   grid-template-rows:58px minmax(0,1fr);
 }
-.lab-overview .room-scene {
-  display:none!important;
-  background:none!important;
-  background-image:none!important;
-}
 .lab-overview .room-equipment-section {
   grid-column:1;
   grid-row:2;

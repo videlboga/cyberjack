@@ -1,6 +1,6 @@
 import { db } from '../infrastructure/db';
 import { ensureStarterClothing } from '../infrastructure/starterClothing';
-import { characterRelationRepo } from '../infrastructure/repositories';
+import { characterRelationRepo, characterRepo } from '../infrastructure/repositories';
 import { reconcileCharacterState } from './characterState';
 import { getBaseHumanAnatomy } from '../domain/anatomy';
 import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
@@ -205,6 +205,11 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
             { from: 'NPC-CAND-KATE', to: 'NPC-CAND-SUMI', attitude: 50, openness: 50 },
         ];
         for (const pair of pairs) {
+            // FK-ограничение: отношения создаются только если партнёр уже
+            // существует в characters. В чистой БД партнёры (NPC-LAB-01,
+            // S-AV-01, NPC-CAND-SUMI) создаются позже в ensureGeneratedCandidates,
+            // поэтому пропускаем, пока их нет.
+            if (!characterRepo.get(pair.from) || !characterRepo.get(pair.to)) continue;
             characterRelationRepo.ensure(pair.from, pair.to, {
                 // Кейт — кандидат в витрине Брокера: люди лабы знают о ней по
                 // контракту, но физически она пока не в комнатах (present=false).

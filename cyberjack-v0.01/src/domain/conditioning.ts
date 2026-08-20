@@ -1,4 +1,5 @@
 import { OVERLOAD_CRITICAL, OVERLOAD_NOTICEABLE } from './overloadScale';
+import { resolveContractTraitTarget } from './contractTraitMap';
 
 export type PreferenceData = {
     actions: Record<string, number>;
@@ -328,24 +329,48 @@ export function acquiredTraitLevel(strength: number): number {
 
 export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
     const { tags, points } = parsePreferences(preferences);
+
+    // Контрактные трейты (из return_profile) дают временный/травматический
+    // буст или штраф к тегам/точкам (см. contractTraits.ts). Они не хранятся
+    // в tags/points напрямую, а накладываются поверх них при выводе.
+    let raw: any = preferences;
+    if (typeof preferences === 'string') {
+        try { raw = JSON.parse(preferences || '{}'); } catch { raw = {}; }
+    }
+    const contractTraits: Record<string, any> = raw?.contractTraits || {};
+    const appliedTags = { ...tags };
+    const appliedPoints = { ...points };
+    for (const [traitId, entry] of Object.entries(contractTraits) as any[]) {
+        if (!entry) continue;
+        const target = resolveContractTraitTarget(traitId);
+        if (!target) continue;
+        if (target.bucket === 'tags') {
+            const boost = (entry.tagBoost || 0) - (entry.tagPenalty || 0);
+            appliedTags[target.key] = Math.max(0, (appliedTags[target.key] || 0) + boost);
+        } else {
+            const boost = (entry.pointBoost || 0) - (entry.pointPenalty || 0);
+            appliedPoints[target.key] = Math.max(0, (appliedPoints[target.key] || 0) + boost);
+        }
+    }
+
     const definitions = [
-        { id: 'trait_masochist', label: 'Мазохизм', strength: tags.pain || 0 },
-        { id: 'trait_knismolagnia', label: 'Книсмолагния', strength: tags.tickling || 0 },
-        { id: 'trait_restraint_fetish', label: 'Фетиш фиксации', strength: tags.restraint || 0 },
-        { id: 'trait_conditioned_submission', label: 'Обусловленная покорность', strength: positiveMean(tags, ['control', 'command', 'submission']) },
-        { id: 'trait_exhibitionist', label: 'Эксгибиционизм', strength: positiveMean(tags, ['exposure', 'humiliation']) },
-        { id: 'trait_clinical_fetish', label: 'Медицинский фетиш', strength: positiveMean(tags, ['clinical', 'medical']) },
-        { id: 'trait_electrophile', label: 'Электрофетиш', strength: tags.electronic || 0 },
-        { id: 'trait_technophile', label: 'Машинный фетиш', strength: tags.machine || 0 },
-        { id: 'trait_sexual_dependency', label: 'Сексуальная зависимость', strength: tags.sexual || 0 },
-        { id: 'trait_sensory_deprivation', label: 'Тяга к сенсорной изоляции', strength: tags.deprivation || 0 },
+        { id: 'trait_masochist', label: 'Мазохизм', strength: appliedTags.pain || 0 },
+        { id: 'trait_knismolagnia', label: 'Книсмолагния', strength: appliedTags.tickling || 0 },
+        { id: 'trait_restraint_fetish', label: 'Фетиш фиксации', strength: appliedTags.restraint || 0 },
+        { id: 'trait_conditioned_submission', label: 'Обусловленная покорность', strength: positiveMean(appliedTags, ['control', 'command', 'submission']) },
+        { id: 'trait_exhibitionist', label: 'Эксгибиционизм', strength: positiveMean(appliedTags, ['exposure', 'humiliation']) },
+        { id: 'trait_clinical_fetish', label: 'Медицинский фетиш', strength: positiveMean(appliedTags, ['clinical', 'medical']) },
+        { id: 'trait_electrophile', label: 'Электрофетиш', strength: appliedTags.electronic || 0 },
+        { id: 'trait_technophile', label: 'Машинный фетиш', strength: appliedTags.machine || 0 },
+        { id: 'trait_sexual_dependency', label: 'Сексуальная зависимость', strength: appliedTags.sexual || 0 },
+        { id: 'trait_sensory_deprivation', label: 'Тяга к сенсорной изоляции', strength: appliedTags.deprivation || 0 },
         // Point preferences are learned independently from semantic tags. A
         // trait remains tied to its exact zone, so a high value on one point
         // cannot be diluted by unrelated anatomy or leak into every scene.
         ...POINT_TRAIT_DEFINITIONS.map(definition => ({
             id: `trait_point_${definition.pointId}`,
             label: definition.label,
-            strength: points[definition.pointId] || 0,
+            strength: appliedPoints[definition.pointId] || 0,
         })),
     ];
     return definitions.map(definition => ({

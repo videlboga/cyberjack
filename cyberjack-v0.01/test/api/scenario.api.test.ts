@@ -45,10 +45,14 @@ describe('scenario campaign API', () => {
     expect(item.status).toBe(200);
     expect(item.body.scenario.inventory.some((entry: any) => entry.itemId === 'eq_handcuffs')).toBe(true);
 
+    // Лабораторные модули (капсула, кресло, секс-машина) предустановлены в
+    // Калибровочной для отладки систем, поэтому повторная покупка отклоняется.
     const module = await request(app).post('/api/scenario/shop/lab_recovery_capsule/buy').send({});
-    expect(module.status).toBe(200);
-    expect(module.body.scenario.laboratory.some((entry: any) => entry.id === 'lab_recovery_capsule')).toBe(true);
-    expect(module.body.scenario.credits).toBe(190);
+    expect(module.status).toBe(400);
+    expect(module.body.error).toContain('уже установлен');
+    // Капсула уже присутствует в лаборатории.
+    const scenario = await request(app).get('/api/scenario');
+    expect(scenario.body.laboratory.some((entry: any) => entry.id === 'lab_recovery_capsule')).toBe(true);
   });
 
   it('requires a visit to the liaison and gives accepted contracts a world-time deadline', async () => {

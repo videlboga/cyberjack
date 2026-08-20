@@ -151,6 +151,13 @@ db.exec(`
     conditions TEXT DEFAULT '[]',
     rewards TEXT DEFAULT '{}',
     penalties TEXT DEFAULT '{}',
+    format TEXT,
+    duration_minutes INTEGER,
+    offer_deadline_minutes INTEGER,
+    return_profile TEXT,
+    personal INTEGER DEFAULT 0,
+    unavailable_until INTEGER,
+    subject_id TEXT,
     FOREIGN KEY (issuer_id) REFERENCES factions(id)
   );
 
@@ -158,7 +165,8 @@ db.exec(`
     id TEXT PRIMARY KEY,
     total_minutes INTEGER NOT NULL DEFAULT 480,
     day INTEGER NOT NULL DEFAULT 1,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_upkeep_day INTEGER
   );
 
   CREATE TABLE IF NOT EXISTS shop_offers (
@@ -346,6 +354,7 @@ db.exec(`
     last_need TEXT,
     last_intent TEXT,
     last_world_minute INTEGER,
+    strokes REAL NOT NULL DEFAULT 0,
     PRIMARY KEY (from_id, to_id)
   );
 
@@ -494,6 +503,37 @@ db.exec(`
     processed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(signal_type, source_type, source_id)
   );
+
+  CREATE TABLE IF NOT EXISTS subject_physiology (
+    subject_id TEXT PRIMARY KEY,
+    hunger REAL NOT NULL DEFAULT 0,
+    bladder REAL NOT NULL DEFAULT 0,
+    sleep_debt REAL NOT NULL DEFAULT 0,
+    sleep_state TEXT NOT NULL DEFAULT 'awake',
+    state_changed_minute INTEGER NOT NULL DEFAULT 0,
+    planned_wake_minute INTEGER,
+    wake_reason TEXT,
+    last_meal_minute INTEGER,
+    last_toilet_minute INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS transactional_games (
+    id TEXT PRIMARY KEY,
+    game_type TEXT NOT NULL,
+    phase TEXT NOT NULL DEFAULT 'thesis',
+    player_id TEXT NOT NULL,
+    partner_id TEXT NOT NULL,
+    player_role TEXT NOT NULL,
+    partner_role TEXT NOT NULL,
+    moves_played INTEGER NOT NULL DEFAULT 0,
+    max_moves INTEGER NOT NULL DEFAULT 0,
+    racket TEXT NOT NULL DEFAULT '',
+    thesis_turn_id TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    payload TEXT DEFAULT '{}',
+    created_world_minute INTEGER NOT NULL DEFAULT 0,
+    updated_world_minute INTEGER NOT NULL DEFAULT 0
+  );
 `);
 
 const safeAddColumn = (table: string, column: string, definition: string) => {
@@ -520,6 +560,8 @@ safeAddColumn('shop_offers', 'metadata', "TEXT NOT NULL DEFAULT '{}'");
 safeAddColumn('shop_offers', 'available_from', 'INTEGER');
 safeAddColumn('shop_offers', 'expires_at', 'INTEGER');
 safeAddColumn('shop_offers', 'source_event_id', 'TEXT');
+safeAddColumn('world_state', 'last_upkeep_day', 'INTEGER');
+safeAddColumn('social_pair_states', 'strokes', 'REAL DEFAULT 0');
 
 // Speech generated for a character is a remembered self-report, not authored
 // canon. Reclassify records written by older builds so they cannot silently

@@ -225,6 +225,7 @@ type LabAsset = {
     subjectId?: string;
     startedAt?: number;
     roomId?: string;
+    enabled?: boolean;
     deviceSession?: DeviceSession;
     mentalSession?: MentalChairSession;
   };
@@ -1316,6 +1317,15 @@ export function CampaignApp() {
                     : `${resident.name}: ${asset.name}`,
                 )
               }
+              onTogglePanel={(asset) =>
+                mutate(
+                  `/api/scenario/laboratory/${asset.id}/control`,
+                  { playerId: "PL-1", command: "toggle" },
+                  asset.metadata?.enabled
+                    ? `${asset.name}: выключено`
+                    : `${asset.name}: включено`,
+                )
+              }
             />
           ) : currentSection === "supply" ? (
             <SupplyView
@@ -1484,6 +1494,7 @@ function LaboratoryOverview({
   onInteract,
   onRefresh,
   onUse,
+  onTogglePanel,
 }: {
   scenario: Scenario;
   busy: boolean;
@@ -1494,6 +1505,7 @@ function LaboratoryOverview({
   onInteract: (resident: Resident) => void;
   onRefresh: () => Promise<void>;
   onUse: (asset: LabAsset, resident: Resident) => Promise<boolean> | void;
+  onTogglePanel: (asset: LabAsset) => Promise<boolean> | void;
 }) {
   const { t } = useI18n();
   const equipmentCovers: Record<string, string> = {
@@ -1720,6 +1732,65 @@ function LaboratoryOverview({
                 /{selectedRoom.capacity}
               </b>
             </header>
+            <div
+              className="room-scene"
+              style={{
+                backgroundImage: `url("${roomSceneBackground(selectedRoom.id)}")`,
+              }}
+            >
+              <div className="room-scene-shade" />
+              <span className="room-scene-label">
+                {getRoomName(selectedRoom.id, t)}
+              </span>
+              <div className="room-character-layer">
+                {roomPanelResidents.map((resident) => (
+                  <button
+                    key={resident.id}
+                    onClick={() => onInteract(resident)}
+                    title={resident.name}
+                  >
+                    <CharacterPortrait
+                      id={resident.subjectId || resident.id}
+                      name={resident.name}
+                      portrait={resident.portrait}
+                      contexts={resident.contexts}
+                      state={resident.state}
+                    />
+                    <span>{resident.name}</span>
+                  </button>
+                ))}
+              </div>
+              {(selectedRoom.type === "cell" || selectedRoom.type === "staff") && (
+                <div className="room-equipment-compact-overlay">
+                  {roomAssets
+                    .filter(
+                      (asset) =>
+                        asset.id.endsWith("_music_panel") ||
+                        asset.id.endsWith("_light_panel"),
+                    )
+                    .map((asset) => {
+                      const enabled = Boolean(asset.metadata?.enabled);
+                      return (
+                        <button
+                          className={`room-equipment-switch ${enabled ? "on" : "off"}`}
+                          key={asset.id}
+                          disabled={busy}
+                          onClick={() => onTogglePanel(asset)}
+                          aria-pressed={enabled}
+                          title={asset.name}
+                        >
+                          <span className="room-equipment-switch-track">
+                            <span className="room-equipment-switch-thumb" />
+                          </span>
+                          <span className="room-equipment-switch-label">
+                            {asset.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
             <section className="room-detail-section room-people-section">
               <h3>{t('game.ui.charactersSection')}</h3>
               <div className="room-people">
@@ -1904,6 +1975,7 @@ function LaboratoryOverview({
               })()}
             <section className="room-detail-section room-equipment-section">
               <h3>{t('game.ui.equipmentSection')}</h3>
+              {selectedRoom.type === "cell" || selectedRoom.type === "staff" ? null : (
               <div className="room-equipment">
                 {roomAssets.length ? (
                   roomAssets.map((asset) => {
@@ -2048,12 +2120,26 @@ function LaboratoryOverview({
                   <p>{t('game.ui.noEquipmentInstalled')}</p>
                 )}
               </div>
+              )}
             </section>
           </div>
         )}
       </section>
     </main>
   );
+}
+
+function roomSceneBackground(roomId: string): string {
+  switch (roomId) {
+    case "room_cell_a":
+    case "room_cell_b":
+      return "/backgrounds/laboratory/living-cell-v2.png";
+    case "room_control":
+    case "room_staff_living":
+      return "/backgrounds/laboratory/observation.png";
+    default:
+      return "/backgrounds/laboratory/calibration.png";
+  }
 }
 
 function CharacterDirectory({

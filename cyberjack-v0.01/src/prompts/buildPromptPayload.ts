@@ -14,6 +14,8 @@ import { buildInteractionObservation, buildCurrentStateObservationText, describe
 import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/reactionFrame';
 import { deriveAcquiredTraits, deriveCompulsionSignals } from '../domain/conditioning';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
+import { formatPhysiologyContext } from '../services/physiology';
+import { getWorldClock } from '../scenario/worldService';
 import { renderSocialMemories } from '../services/socialMemory';
 import { renderTemporalDialogue, selectCurrentDialogueSegment, TemporalDialogueEntry } from '../narrative/temporalDialogue';
 import { compactMemoryReaction } from '../services/memoryLayer';
@@ -404,6 +406,10 @@ export async function buildPromptPayload(
     // must appear before addressee and posture boilerplate rather than being
     // silently cut off at the end of a dense laboratory scene.
     roleContext.splice(Math.min(6, roleContext.length), 0, ...compulsionLines);
+
+    // Физиология (сон/голод/туалет/недосып) — только заметные уровни.
+    const physioContext = formatPhysiologyContext(ownerId, getWorldClock().totalMinutes);
+    if (physioContext) roleContext.push(physioContext);
 
     let observation;
     // runGameTick attaches the finalized observation onto engineOutput at
