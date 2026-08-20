@@ -1914,9 +1914,9 @@ function LaboratoryOverview({
                   </section>
                 );
               })()}
+            {selectedRoom.type === "cell" || selectedRoom.type === "staff" ? null : (
             <section className="room-detail-section room-equipment-section">
               <h3>{t('game.ui.equipmentSection')}</h3>
-              {selectedRoom.type === "cell" || selectedRoom.type === "staff" ? null : (
               <div className="room-equipment">
                 {roomAssets.length ? (
                   roomAssets.map((asset) => {
@@ -2061,8 +2061,8 @@ function LaboratoryOverview({
                   <p>{t('game.ui.noEquipmentInstalled')}</p>
                 )}
               </div>
-              )}
             </section>
+            )}
             {(selectedRoom.type === "cell" || selectedRoom.type === "staff") && (
               <div
                 className="room-scene"
