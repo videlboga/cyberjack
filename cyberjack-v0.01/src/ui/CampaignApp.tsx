@@ -2329,6 +2329,7 @@ function CharacterDirectory({
   const bodypartSlug: Record<string, string> = {
     "S-AV-01": "mira", "NPC-LAB-01": "iona", "NPC-CAND-01": "nika",
     "NPC-CAND-SUMI": "sumi", "NPC-CAND-GEN-02": "eli", "NPC-CAND-GEN-04": "mai",
+    "NPC-CAND-KATE": "kate",
   };
   const zoneImage = (pointId: string) => {
     const slug = bodypartSlug[selected.subjectId || selected.id];
@@ -2914,6 +2915,7 @@ const episodeSceneBackgrounds: Record<string, string> = {
 const episodePortraitSlugs: Record<string, string> = {
   "S-AV-01": "mira", "NPC-LAB-01": "iona", "NPC-CAND-01": "nika",
   "NPC-CAND-SUMI": "sumi", "NPC-CAND-GEN-02": "eli", "NPC-CAND-GEN-04": "mai",
+  "NPC-CAND-KATE": "kate",
 };
 
 const episodeActionGroup = (actionId: string): "contact" | "intimate" | "equipment" | "pose" | "clothing" | null => {
@@ -5151,7 +5153,9 @@ function ContainerConversation({
               ? "eli"
               : (resident.subjectId || resident.id) === "NPC-CAND-GEN-04"
                 ? "mai"
-                : null;
+                : (resident.subjectId || resident.id) === "NPC-CAND-KATE"
+                  ? "kate"
+                  : null;
   const emotionalPortraitFor = (character: Resident) => {
     const id = character.subjectId || character.id;
     const slug =
@@ -5167,8 +5171,10 @@ function ContainerConversation({
                 ? "eli"
                 : id === "NPC-CAND-GEN-04"
                   ? "mai"
-                  : null;
-    if (!slug) return null;
+                  : id === "NPC-CAND-KATE"
+                    ? "kate"
+                    : null;
+                if (!slug) return null;
     const state = character.state || {};
     const emotion = resolvePortraitEmotion({
       behavioralState: state.behavioralState,
@@ -5752,6 +5758,7 @@ function ContainerConversation({
                 : actorId === "NPC-CAND-SUMI" ? "sumi"
                 : actorId === "NPC-CAND-GEN-02" ? "eli"
                 : actorId === "NPC-CAND-GEN-04" ? "mai"
+                : actorId === "NPC-CAND-KATE" ? "kate"
                 : undefined;
               return slug
                 ? `/character-images/portraits/${slug}/${line.portraitEmotion || "neutral"}.png`

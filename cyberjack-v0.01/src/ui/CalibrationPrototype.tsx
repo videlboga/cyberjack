@@ -4963,7 +4963,10 @@ export function CalibrationPrototype({
                       e.currentTarget.hidden = true;
                     }
                 }}
-                mainOnLoad={(e) => setDisplayedVisualPath(new URL(e.currentTarget.src).pathname)}
+                mainOnLoad={(e) => {
+                    e.currentTarget.hidden = false;
+                    setDisplayedVisualPath(new URL(e.currentTarget.src).pathname);
+                }}
                 activeIsSecondary={activeIsSecondary}
                 onSwap={() => swapSubjects(activeIsSecondary ? SUBJECT : (nearbyCharacter?.id || SUBJECT))}
               />
