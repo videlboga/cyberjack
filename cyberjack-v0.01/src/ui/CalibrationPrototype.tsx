@@ -1423,6 +1423,7 @@ const visualCharacterSlugs: Record<string, string> = {
   "NPC-CAND-SUMI": "sumi",
   "NPC-CAND-GEN-02": "eli",
   "NPC-CAND-GEN-04": "mai",
+  "NPC-CAND-KATE": "kate",
 };
 const bodypartImageAliases: Record<string, string> = {
   head: "face",
