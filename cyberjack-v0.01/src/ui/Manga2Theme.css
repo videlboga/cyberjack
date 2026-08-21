@@ -1292,87 +1292,75 @@ html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-controls button {
 html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-controls button:hover {
   background: #f0f0f0 !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-edges {
+html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-svg {
   position: absolute !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  pointer-events: none !important;
+  display: block !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-edges line {
-  stroke: #ccc !important;
+html[data-ui-theme="manga2"] .campaign-shell .mind-edge {
+  fill: none !important;
+  stroke: #d5d5d5 !important;
   stroke-width: 1px !important;
+  vector-effect: non-scaling-stroke !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-edges line.hierarchy {
-  stroke: #bbb !important;
+html[data-ui-theme="manga2"] .campaign-shell .mind-edge.hierarchy {
+  stroke: #c9c9c9 !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-edges line.evidence {
-  stroke: #999 !important;
+html[data-ui-theme="manga2"] .campaign-shell .mind-edge.cross {
+  stroke: #b0b0b0 !important;
+  stroke-dasharray: 3 3 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node {
+  cursor: pointer !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node circle {
+  fill: #fff !important;
+  stroke: #111 !important;
+  stroke-width: 1.5px !important;
+  vector-effect: non-scaling-stroke !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.worldview circle {
+  fill: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.relationships circle,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.biography circle,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.station circle,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.self circle {
+  fill: #f0f0f0 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.trait circle,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.episode circle {
+  fill: #fafafa !important;
+  stroke: #aaa !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.dirty circle {
   stroke-dasharray: 3 2 !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-edges line.selected {
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.selected circle {
+  fill: #111 !important;
   stroke: #111 !important;
-  stroke-width: 1.8px !important;
+  stroke-width: 2.5px !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node {
-  position: absolute !important;
-  transform: translate(-50%, -50%) !important;
-  border: 1.5px solid #111 !important;
-  background: #fff !important;
-  color: #111 !important;
-  border-radius: 3px !important;
-  padding: 3px 7px !important;
-  font-size: 9px !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  max-width: 120px !important;
-  box-shadow: 0 2px 0 #111 !important;
-  line-height: 1.2 !important;
-}
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node b {
-  display: block !important;
-  white-space: normal !important;
-  overflow-wrap: break-word !important;
-  line-height: 1.2 !important;
-  overflow: visible !important;
-  max-height: none !important;
-  color: inherit !important;
-}
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.worldview {
-  background: #111 !important;
-  color: #fff !important;
+html[data-ui-theme="manga2"] .campaign-shell .mind-node-label {
   font-size: 11px !important;
-  padding: 6px 10px !important;
-  border-radius: 999px !important;
+  font-weight: 700 !important;
+  fill: #111 !important;
+  pointer-events: none !important;
+  user-select: none !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.relationships,
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.biography,
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.station,
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.self {
-  border-radius: 999px !important;
-  background: #f0f0f0 !important;
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.worldview .mind-node-label {
+  fill: #fff !important;
+  font-size: 13px !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.trait,
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.episode {
-  border-radius: 999px !important;
-  border: 1px solid #aaa !important;
-  background: #fafafa !important;
-  color: #333 !important;
-  font-size: 8px !important;
-  box-shadow: none !important;
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.selected .mind-node-label {
+  fill: #fff !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.dirty {
-  border-style: dashed !important;
-}
-html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-node.selected {
-  z-index: 6 !important;
-  border-width: 2px !important;
-  box-shadow: 0 0 0 3px #fff, 0 0 0 4px #111 !important;
-  background: #111 !important;
-  color: #fff !important;
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.trait .mind-node-label,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.episode .mind-node-label {
+  font-size: 9px !important;
+  fill: #333 !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-detail {
   position: absolute !important;

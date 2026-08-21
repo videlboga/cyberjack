@@ -2987,8 +2987,8 @@ function MentalChairControlScreen({
   const [episodeView, setEpisodeView] = useState<"list" | "map">("map");
   const [selectedMindNode, setSelectedMindNode] = useState<string | null>(null);
   // Панорамирование и зум холста майнд-мэпа.
-  const [mindTransform, setMindTransform] = useState({ x: 0, y: 0, scale: 1 });
-  const mindDragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null);
+  const [mindView, setMindView] = useState({ x: 0, y: 0, scale: 1 });
+  const mindDragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; origScale: number; moved: boolean } | null>(null);
   const memories = resident.mentalMemories || [];
   const selectedMemory = memories.find((memory) => memory.id === memoryId) || null;
   const memoryPageSize = 14;
@@ -3113,41 +3113,48 @@ function MentalChairControlScreen({
     return node.label;
   };
   const mindMap = useMemo(() => {
-    type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number };
+    type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number; children: string[] };
     const raw = interpretationGraph?.nodes || [];
     const links = interpretationGraph?.links || [];
-    if (!raw.length) return { nodes: [] as MindNode[], edges: [] as { from: string; to: string; kind: string }[], byId: new Map<string, MindNode>() };
-    // Глубина: worldview=0, ветви=1, листья=2+.
-    const depthOf = (node: { id: string; parentId: string | null; kind: string }): number => {
-      if (node.kind === 'worldview') return 0;
-      if (node.kind === 'relationships' || node.kind === 'biography' || node.kind === 'station' || node.kind === 'self') return 1;
-      return 2;
+    if (!raw.length) return { nodes: [] as MindNode[], edges: [] as { from: string; to: string; kind: string }[], byId: new Map<string, MindNode>(), parentOf: new Map<string, string | null>() };
+    const byId = new Map<string, MindNode>();
+    const nodes: MindNode[] = raw.map(n => ({ ...n, depth: 0, x: 0, y: 0, children: [] }));
+    nodes.forEach(n => byId.set(n.id, n));
+    const root = nodes.find(n => n.kind === 'worldview') || nodes[0];
+    // Эффективный родитель: episode-ноды (parentId=null) вешаем на цель их
+    // самого сильного evidence-линка; прочие сироты — на корень.
+    const parentOf = new Map<string, string | null>();
+    for (const n of nodes) {
+      if (n.parentId && byId.has(n.parentId)) { parentOf.set(n.id, n.parentId); continue; }
+      if (n.id === root.id) { parentOf.set(n.id, null); continue; }
+      if (n.kind === 'episode') {
+        // evidence-линки идут episode → rel/trait (from=episode, to=цель).
+        const ev = links.filter(l => l.fromId === n.id && l.kind === 'evidence').sort((a, b) => b.weight - a.weight)[0];
+        parentOf.set(n.id, ev && byId.has(ev.toId) ? ev.toId : root.id);
+      } else {
+        parentOf.set(n.id, root.id);
+      }
+    }
+    for (const n of nodes) { const p = parentOf.get(n.id); if (p && byId.has(p)) byId.get(p)!.children.push(n.id); }
+    const depthOf = (id: string): number => { let d = 0; let cur = byId.get(id); while (cur) { const p = parentOf.get(cur.id); if (!p || !byId.has(p)) break; d++; cur = byId.get(p); } return d; };
+    nodes.forEach(n => n.depth = depthOf(n.id));
+    // Радиальная раскладка дерева (координаты 0..1000).
+    const CX = 500, CY = 500, R_STEP = 170;
+    const layout = (node: MindNode, a0: number, a1: number, radius: number) => {
+      const mid = (a0 + a1) / 2;
+      node.x = CX + Math.cos(mid) * radius;
+      node.y = CY + Math.sin(mid) * radius;
+      const kids = node.children.map(id => byId.get(id)!).filter(Boolean);
+      if (!kids.length) return;
+      const span = a1 - a0;
+      kids.forEach((k, i) => layout(k, a0 + (span * i) / kids.length, a0 + (span * (i + 1)) / kids.length, radius + R_STEP));
     };
-    const nodes: MindNode[] = raw.map(node => ({ ...node, depth: depthOf(node), x: 0, y: 0 }));
-    const byId = new Map(nodes.map(node => [node.id, node]));
-    // Радиальная раскладка: кольцо по глубине.
-    const rings: Record<number, MindNode[]> = {};
-    for (const node of nodes) (rings[node.depth] ||= []).push(node);
-    const hash = (text: string) => [...text].reduce((value, char) => ((value * 31 + char.charCodeAt(0)) >>> 0), 2166136261);
-    const seeded = (text: string, offset: number) => ((hash(`${text}:${offset}`) % 10000) / 10000);
-    for (const depth of Object.keys(rings).map(Number).sort((a, b) => a - b)) {
-      const ringNodes = rings[depth].slice().sort((a, b) => seeded(a.id, 5) - seeded(b.id, 5));
-      const radius = depth === 0 ? 0 : depth === 1 ? 30 : 44;
-      ringNodes.forEach((node, index) => {
-        const angle = depth === 0 ? 0 : (index / Math.max(1, ringNodes.length)) * Math.PI * 2 - Math.PI / 2;
-        node.x = 50 + Math.cos(angle) * radius;
-        node.y = 50 + Math.sin(angle) * radius;
-      });
-    }
-    // Рёбра: parent→child + кросс-линки.
+    layout(root, -Math.PI / 2, Math.PI * 1.5, 0);
+    // Рёбра: иерархия + кросс-линки.
     const edges: { from: string; to: string; kind: string }[] = [];
-    for (const node of nodes) {
-      if (node.parentId && byId.has(node.parentId)) edges.push({ from: node.parentId, to: node.id, kind: 'hierarchy' });
-    }
-    for (const link of links) {
-      if (byId.has(link.fromId) && byId.has(link.toId)) edges.push({ from: link.fromId, to: link.toId, kind: link.kind });
-    }
-    return { nodes, edges, byId };
+    for (const n of nodes) { const p = parentOf.get(n.id); if (p && byId.has(p)) edges.push({ from: p, to: n.id, kind: 'hierarchy' }); }
+    for (const l of links) if (byId.has(l.fromId) && byId.has(l.toId)) edges.push({ from: l.fromId, to: l.toId, kind: l.kind });
+    return { nodes, edges, byId, parentOf };
   }, [JSON.stringify(interpretationGraph?.nodes), JSON.stringify(interpretationGraph?.links)]);
   const selectedAssociation = selectedAssociationTarget
     ? associationLinks.find(link => link.target === selectedAssociationTarget)
@@ -3246,18 +3253,31 @@ function MentalChairControlScreen({
             {error && <p className="mental-chair-error">{error}</p>}
           </> : <>
           <header><small>{t('game.ui.episodeFromMemory')}</small><b>{selectedMemory ? t('game.ui.selected') : t('game.ui.notSelected')}</b><nav className="mental-view-toggle"><button className={episodeView === "map" ? "active" : ""} onClick={() => setEpisodeView("map")}>Карта</button><button className={episodeView === "list" ? "active" : ""} onClick={() => setEpisodeView("list")}>Список</button></nav></header>
-          {episodeView === "map" ? (
+          {episodeView === "map" ? (() => {
+            // Семантический зум: глубина раскрытия зависит от scale.
+            // scale=1 (дефолт) → только worldview + ветви; листья раскрываются при приближении.
+            const maxDepth = mindView.scale < 1.4 ? 1 : mindView.scale < 2.2 ? 2 : 99;
+            const visible = mindMap.nodes.filter(n => n.depth <= maxDepth);
+            const visibleIds = new Set(visible.map(n => n.id));
+            const crossEdges = mindMap.edges.filter(e => e.kind !== 'hierarchy' && (e.from === selectedMindNode || e.to === selectedMindNode));
+            const hierEdges = mindMap.edges.filter(e => e.kind === 'hierarchy' && visibleIds.has(e.from) && visibleIds.has(e.to));
+            const zoomAt = (cx: number, cy: number, factor: number) => setMindView(prev => {
+              const scale = Math.max(0.4, Math.min(3, prev.scale * factor));
+              const k = scale / prev.scale;
+              return { scale, x: cx - (cx - prev.x) * k, y: cy - (cy - prev.y) * k };
+            });
+            return (
             <div
               className="mental-mindmap"
               aria-label="Карта интерпретаций"
               onWheel={(event) => {
                 event.preventDefault();
-                const factor = event.deltaY < 0 ? 1.12 : 0.89;
-                setMindTransform((prev) => ({ ...prev, scale: Math.max(0.4, Math.min(2.5, prev.scale * factor)) }));
+                const rect = event.currentTarget.getBoundingClientRect();
+                zoomAt(event.clientX - rect.left, event.clientY - rect.top, event.deltaY < 0 ? 1.15 : 0.87);
               }}
               onMouseDown={(event) => {
                 if (event.button !== 0) return;
-                mindDragRef.current = { startX: event.clientX, startY: event.clientY, origX: mindTransform.x, origY: mindTransform.y, moved: false };
+                mindDragRef.current = { startX: event.clientX, startY: event.clientY, origX: mindView.x, origY: mindView.y, origScale: mindView.scale, moved: false };
               }}
               onMouseMove={(event) => {
                 const drag = mindDragRef.current;
@@ -3265,29 +3285,42 @@ function MentalChairControlScreen({
                 const dx = event.clientX - drag.startX;
                 const dy = event.clientY - drag.startY;
                 if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
-                if (drag.moved) setMindTransform((prev) => ({ ...prev, x: drag.origX + dx, y: drag.origY + dy }));
+                if (drag.moved) setMindView(prev => ({ ...prev, x: drag.origX + dx, y: drag.origY + dy }));
               }}
               onMouseUp={() => { mindDragRef.current = null; }}
               onMouseLeave={() => { mindDragRef.current = null; }}
             >
-              <div className="mental-mindmap-viewport" style={{ transform: `translate(${mindTransform.x}px, ${mindTransform.y}px) scale(${mindTransform.scale})` }}>
-                <svg className="mental-mindmap-edges" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  {mindMap.edges.map((edge, index) => {
+              <svg className="mental-mindmap-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+                <g transform={`translate(${mindView.x} ${mindView.y}) scale(${mindView.scale})`}>
+                  {hierEdges.map((edge, i) => {
                     const from = mindMap.byId.get(edge.from); const to = mindMap.byId.get(edge.to);
                     if (!from || !to) return null;
-                    return <line key={`${edge.from}:${edge.to}:${index}`} className={`${edge.kind}${selectedMindNode === edge.from || selectedMindNode === edge.to ? " selected" : ""}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
+                    return <line key={`h${i}`} className="mind-edge hierarchy" x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
                   })}
-                </svg>
-                {mindMap.nodes.map(node => (
-                  <button key={node.id} className={`mental-mindmap-node ${node.kind}${node.status === "dirty" ? " dirty" : ""}${selectedMindNode === node.id ? " selected" : ""}`} style={{ left: `${node.x}%`, top: `${node.y}%`, "--node-valence": node.valence } as any} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selectedMindNode === node.id ? null : node.id); }} title={node.content || mindNodeLabel(node)}>
-                    <b>{mindNodeLabel(node)}</b>
-                  </button>
-                ))}
-              </div>
+                  {crossEdges.map((edge, i) => {
+                    const from = mindMap.byId.get(edge.from); const to = mindMap.byId.get(edge.to);
+                    if (!from || !to) return null;
+                    const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2;
+                    const dx = to.x - from.x, dy = to.y - from.y, len = Math.hypot(dx, dy) || 1;
+                    const nx = -dy / len * 40, ny = dx / len * 40;
+                    return <path key={`c${i}`} className="mind-edge cross" d={`M ${from.x} ${from.y} Q ${mx + nx} ${my + ny} ${to.x} ${to.y}`} />;
+                  })}
+                  {visible.map(node => {
+                    const r = node.kind === 'worldview' ? 46 : node.depth === 1 ? 34 : 22;
+                    const selected = selectedMindNode === node.id;
+                    return (
+                      <g key={node.id} className={`mind-node ${node.kind}${node.status === 'dirty' ? ' dirty' : ''}${selected ? ' selected' : ''}`} transform={`translate(${node.x} ${node.y})`} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selected ? null : node.id); }}>
+                        <circle r={r} />
+                        <text className="mind-node-label" textAnchor="middle" dy="0.35em">{mindNodeLabel(node)}</text>
+                      </g>
+                    );
+                  })}
+                </g>
+              </svg>
               <div className="mental-mindmap-controls">
-                <button onClick={() => setMindTransform((prev) => ({ ...prev, scale: Math.max(0.4, prev.scale * 1.2) }))}>+</button>
-                <button onClick={() => setMindTransform((prev) => ({ ...prev, scale: Math.min(2.5, prev.scale * 0.83) }))}>−</button>
-                <button onClick={() => setMindTransform({ x: 0, y: 0, scale: 1 })}>⟲</button>
+                <button onClick={() => zoomAt(500, 500, 1.25)}>+</button>
+                <button onClick={() => zoomAt(500, 500, 0.8)}>−</button>
+                <button onClick={() => setMindView({ x: 0, y: 0, scale: 1 })}>⟲</button>
               </div>
               {selectedMindNode && (() => {
                 const node = mindMap.byId.get(selectedMindNode);
@@ -3295,7 +3328,8 @@ function MentalChairControlScreen({
                 return <section className="mental-mindmap-detail"><header><small>{node.kind}</small><b>{mindNodeLabel(node)}</b></header><p>{node.content || "Интерпретация ещё не сформирована."}</p></section>;
               })()}
             </div>
-          ) : (
+            );
+          })() : (
           <div className="mental-memory-list">
             {memories.length ? visibleMemories.map((memory) => (
               <button key={memory.id} className={memory.id === memoryId ? "selected" : ""} onClick={() => { setMemoryId(memory.id); setFocusTag(memory.tags[0] || null); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>
