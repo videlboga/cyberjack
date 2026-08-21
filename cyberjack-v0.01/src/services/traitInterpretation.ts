@@ -63,7 +63,6 @@ export function currentDay(): number {
  * note — осмысленное событие из текста эпизода (без чисел), а не дельта.
  */
 export function recordLearningDay(subjectId: string, episode: MemoryEpisode, changedTags: string[]) {
-  if (!changedTags.length) return;
   const day = currentDay();
   // Краткая выжимка события: первый атом эпизода (что произошло).
   const firstMoment = episode.moments?.[0]?.text || episode.text || '';
@@ -71,20 +70,30 @@ export function recordLearningDay(subjectId: string, episode: MemoryEpisode, cha
   const prefs = db.prepare('SELECT preferences FROM subjects WHERE id = ?').get(subjectId) as any;
   if (!prefs) return;
   const parsed = parsePreferences(prefs.preferences);
+
+  // Метрики, затронутые эпизодом: теги + точки тела (pointId).
+  const metrics: Array<{ bucket: 'tags' | 'points'; key: string }> = [
+    ...changedTags.filter(tag => /^[a-z0-9_-]+$/i.test(tag)).map(key => ({ bucket: 'tags' as const, key })),
+    ...(episode.moments || []).map(m => m.pointId).filter((p): p is string => !!p && /^[a-z0-9_-]+$/i.test(p)).map(key => ({ bucket: 'points' as const, key })),
+  ];
+  if (!metrics.length) return;
+
   // Трейты субъекта (для проверки «метрика относится к трейту»).
   const traits = deriveAcquiredTraits(prefs.preferences).filter(trait => trait.level > 0);
-  const traitMetrics = new Set(traits.map(trait => {
+  const traitMetrics = new Set<string>();
+  for (const trait of traits) {
     const m = metricForTrait(trait.id);
-    return m ? m.key : trait.id;
-  }));
-  for (const tag of changedTags) {
+    traitMetrics.add(m ? m.key : trait.id);
+  }
+
+  for (const metric of metrics) {
     // Запись создаём, только если: (а) метрика является трейтом с ненулевым
     // обучением, или (б) запись уже была (сохранить историю после обнуления).
-    const isTrait = traitMetrics.has(tag);
-    const hasRecord = !!traitInterpretationRepo.get(subjectId, tag);
+    const isTrait = traitMetrics.has(metric.key);
+    const hasRecord = !!traitInterpretationRepo.get(subjectId, metric.key);
     if (!isTrait && !hasRecord) continue;
-    const value = Number((parsed.tags as Record<string, number>)[tag] || 0);
-    traitInterpretationRepo.recordDay(subjectId, tag, day, value, note || undefined);
+    const value = metricValue(subjectId, metric);
+    traitInterpretationRepo.recordDay(subjectId, metric.key, day, value, note || undefined);
   }
 }
 

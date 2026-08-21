@@ -24,7 +24,6 @@ function episode(note: string): MemoryEpisode {
         tags: ['pain'],
     } as any;
 }
-
 describe('recordLearningDay / traitInterpretationBlock', () => {
     it('записывает день обучения для метрики, относящейся к трейту', () => {
         // pain >= 3.25 → уровень 2 (trait_masochist).
@@ -74,5 +73,23 @@ describe('recordLearningDay / traitInterpretationBlock', () => {
         expect(days[0]).toBe(1);
         expect(days[days.length - 1]).toBe(20);
         expect(days.slice(-6)).toEqual([15, 16, 17, 18, 19, 20]);
+    });
+
+    it('записывает день обучения для point-трейта (точка из момента эпизода)', () => {
+        // clitoris >= 3.25 → уровень 2 (trait_point_clitoris).
+        subjectRepo.save('SUBJ-P', 'Тест', {
+            sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50,
+            tension: 50, baselineCapacity: 50,
+            preferences: JSON.stringify({ points: { clitoris: 3.5 } }),
+        });
+        const pointEpisode = {
+            ...episode('Калибратор коснулся клитора'),
+            moments: [{ id: 'm1', text: 'Калибратор коснулся клитора', tags: ['pleasure'], pointId: 'clitoris' }],
+        } as any;
+        recordLearningDay('SUBJ-P', pointEpisode, []);
+        const row = traitInterpretationRepo.get('SUBJ-P', 'clitoris');
+        expect(row).not.toBeNull();
+        expect(row!.history[0].note).toContain('коснулся');
+        expect(row!.currentValue).toBeGreaterThan(3);
     });
 });
