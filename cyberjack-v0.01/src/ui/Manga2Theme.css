@@ -1322,33 +1322,37 @@ html[data-ui-theme="manga2"] .campaign-shell .mind-node {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-html[data-ui-theme="manga2"] .campaign-shell .mind-node circle {
+html[data-ui-theme="manga2"] .campaign-shell .mind-node-pill {
   fill: #fff !important;
   stroke: #111 !important;
   stroke-width: 1.5px !important;
   vector-effect: non-scaling-stroke !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.worldview circle {
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.worldview .mind-node-pill {
   fill: #111 !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.relationships circle,
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.biography circle,
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.station circle,
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.self circle {
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.relationships .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.biography .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.station .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.self .mind-node-pill {
   fill: #f0f0f0 !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.trait circle,
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.episode circle {
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.trait .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.episode .mind-node-pill {
   fill: #fafafa !important;
   stroke: #aaa !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.dirty circle {
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.dirty .mind-node-pill {
   stroke-dasharray: 3 2 !important;
 }
-html[data-ui-theme="manga2"] .campaign-shell .mind-node.selected circle {
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.selected .mind-node-pill {
   fill: #111 !important;
   stroke: #111 !important;
   stroke-width: 2.5px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.dot .mind-node-pill {
+  fill: #999 !important;
+  stroke: #999 !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .mind-node-float {
   animation: mind-float 6s ease-in-out infinite !important;

@@ -3280,13 +3280,11 @@ function MentalChairControlScreen({
           </> : <>
           <header><small>{t('game.ui.episodeFromMemory')}</small><b>{selectedMemory ? t('game.ui.selected') : t('game.ui.notSelected')}</b><nav className="mental-view-toggle"><button className={episodeView === "map" ? "active" : ""} onClick={() => setEpisodeView("map")}>Карта</button><button className={episodeView === "list" ? "active" : ""} onClick={() => setEpisodeView("list")}>Список</button></nav></header>
           {episodeView === "map" ? (() => {
-            // Семантический зум: глубина раскрытия зависит от scale.
-            // scale=1 (дефолт) → только worldview + ветви; листья раскрываются при приближении.
-            const maxDepth = mindView.scale < 1.4 ? 1 : mindView.scale < 2.2 ? 2 : 99;
-            const visible = mindMap.nodes.filter(n => n.depth <= maxDepth);
-            const visibleIds = new Set(visible.map(n => n.id));
+            // Концепт: все ноды всегда видны; зум масштабирует, а не скрывает.
+            // Детализация = подписи: листья на отдалении — точки, при приближении — пилюли.
             const crossEdges = mindMap.edges.filter(e => e.kind !== 'hierarchy' && (e.from === selectedMindNode || e.to === selectedMindNode));
-            const hierEdges = mindMap.edges.filter(e => e.kind === 'hierarchy' && visibleIds.has(e.from) && visibleIds.has(e.to));
+            const hierEdges = mindMap.edges.filter(e => e.kind === 'hierarchy');
+            const labelScale = 1.3;
             const zoomAt = (cx: number, cy: number, factor: number) => setMindView(prev => {
               const scale = Math.max(0.4, Math.min(3, prev.scale * factor));
               const k = scale / prev.scale;
@@ -3331,14 +3329,22 @@ function MentalChairControlScreen({
                     const nx = -dy / len * 40, ny = dx / len * 40;
                     return <path key={`c${i}`} className="mind-edge cross" d={`M ${from.x} ${from.y} Q ${mx + nx} ${my + ny} ${to.x} ${to.y}`} />;
                   })}
-                  {visible.map(node => {
-                    const r = node.kind === 'worldview' ? 46 : node.depth === 1 ? 34 : 22;
+                  {mindMap.nodes.map(node => {
                     const selected = selectedMindNode === node.id;
+                    const label = mindNodeLabel(node);
+                    // Пилюля: ширина по тексту. Листья (depth>=2) на отдалении — точки.
+                    const isLeaf = node.depth >= 2;
+                    const showLabel = !isLeaf || mindView.scale >= labelScale;
+                    const fontSize = node.kind === 'worldview' ? 13 : node.depth === 1 ? 11 : 9;
+                    const padX = 9, padY = 6;
+                    const textW = label.length * fontSize * 0.6;
+                    const w = showLabel ? textW + padX * 2 : 12;
+                    const h = showLabel ? fontSize + padY * 2 : 12;
                     return (
-                      <g key={node.id} className={`mind-node ${node.kind}${node.status === 'dirty' ? ' dirty' : ''}${selected ? ' selected' : ''}`} transform={`translate(${node.x} ${node.y})`} style={{ "--float-delay": `${node.floatDelay}s`, "--float-amp": `${node.depth === 0 ? 0 : node.depth === 1 ? 2 : 4}px` } as any} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selected ? null : node.id); }} onDoubleClick={(event) => { event.stopPropagation(); zoomAt(node.x, node.y, 1.6); }}>
+                      <g key={node.id} className={`mind-node ${node.kind}${node.status === 'dirty' ? ' dirty' : ''}${selected ? ' selected' : ''}${showLabel ? '' : ' dot'}`} transform={`translate(${node.x} ${node.y})`} style={{ "--float-delay": `${node.floatDelay}s`, "--float-amp": `${node.depth === 0 ? 0 : node.depth === 1 ? 2 : 4}px` } as any} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selected ? null : node.id); }} onDoubleClick={(event) => { event.stopPropagation(); zoomAt(node.x, node.y, 1.6); }}>
                         <g className="mind-node-float">
-                          <circle r={r} />
-                          <text className="mind-node-label" textAnchor="middle" dy="0.35em">{mindNodeLabel(node)}</text>
+                          <rect className="mind-node-pill" x={-w / 2} y={-h / 2} width={w} height={h} rx={h / 2} />
+                          {showLabel && <text className="mind-node-label" textAnchor="middle" dy="0.35em" fontSize={fontSize}>{label}</text>}
                         </g>
                       </g>
                     );
