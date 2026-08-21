@@ -10,6 +10,7 @@ import { applyAllContractTraitDecay } from '../services/contractTraits';
 import { ensureAuthoredSupplyOpportunity } from './eventDirector';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryRepo } from '../infrastructure/repositories';
+import { consolidateNextInterpretation } from '../services/interpretationRegeneration';
 import { emitTrace, newRequestId, withTraceContext } from '../orchestration/trace';
 
 /**
@@ -43,6 +44,8 @@ export async function advanceSimulationTime(
     // Schedule the next low-priority memory materialization pass ~45 game
     // minutes out. Idempotent on the queue key, so only one is pending.
     scheduleMemoryMaterialization(clock.totalMinutes + MEMORY_MATERIALIZE_INTERVAL_MINUTES);
+    // Консолидация графа интерпретаций: регенерация dirty-нод (листья → родители).
+    scheduleInterpretationConsolidation(clock.totalMinutes + INTERPRETATION_CONSOLIDATE_INTERVAL_MINUTES);
     // Schedule the next autonomous scene pulse at the next 5-minute boundary
     // strictly in the future, so a job is never created already-due and then
     // deferred to the following tick. Idempotent per world minute.
@@ -66,6 +69,7 @@ export async function advanceSimulationTime(
 
 const MEMORY_MATERIALIZE_INTERVAL_MINUTES = 45;
 const AUTONOMOUS_INTERVAL_MINUTES = 5;
+const INTERPRETATION_CONSOLIDATE_INTERVAL_MINUTES = 30;
 
 /**
  * Runs background jobs whose dueMinute has been reached. Each job is claimed
@@ -144,6 +148,9 @@ async function executeBackgroundJob(job: { type: string; payload: string | null 
         case 'memory.materialize':
             await materializeNextSubjectiveMemory();
             return;
+        case 'interpretation.consolidate':
+            await consolidateNextInterpretation();
+            return;
         case 'scene.autonomous':
             await runAutonomousSceneMinute();
             return;
@@ -174,6 +181,15 @@ export function scheduleMemoryMaterialization(dueMinute: number) {
     return enqueueBackgroundJob({
         type: 'memory.materialize',
         key: 'memory.materialize',
+        dueMinute,
+    });
+}
+
+/** Планирует консолидацию графа интерпретаций (регенерация dirty-нод). */
+export function scheduleInterpretationConsolidation(dueMinute: number) {
+    return enqueueBackgroundJob({
+        type: 'interpretation.consolidate',
+        key: 'interpretation.consolidate',
         dueMinute,
     });
 }
