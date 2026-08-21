@@ -54,7 +54,8 @@ export function allSubjectIds(): string[] {
     return rows.map(row => row.id);
 }
 
-/** Разбивает биографию субъекта на атомы-факты (неизменяемые, как глоссарий). */
+/** Разбивает биографию субъекта на атомы-факты (неизменяемые, как глоссарий),
+ *  и создаёт под ветвью biography отдельную ноду-интерпретацию на каждый факт. */
 export function seedSubjectFacts(subjectId: string) {
     const profile = ensureGeneratedProfile(subjectId);
     const bio = profile.biography || {} as any;
@@ -72,6 +73,22 @@ export function seedSubjectFacts(subjectId: string) {
             fact: line.fact,
             sortOrder: index,
         });
+        // Нода-интерпретация под ветвью biography: label — краткая выжимка факта.
+        const label = line.fact.length > 48 ? line.fact.slice(0, 48).trimEnd() + '…' : line.fact;
+        const nodeId = `bio:${index}`;
+        if (!interpretationRepo.get(subjectId, nodeId)) {
+            interpretationRepo.upsert({
+                id: nodeId,
+                subjectId,
+                kind: 'biography',
+                parentId: 'biography',
+                label,
+                content: null,
+                valence: 0,
+                strength: 0,
+                fingerprint: null,
+            });
+        }
     });
 }
 

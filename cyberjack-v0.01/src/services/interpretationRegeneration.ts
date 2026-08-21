@@ -36,7 +36,13 @@ function buildRegenerationPrompt(subjectId: string, node: InterpretationNode, ch
     const factLines = facts.map(fact => `- ${fact.term}: ${fact.fact}`).join('\n');
     // Персональные атомы-факты (биография, разбитая на неизменяемые факты).
     const subjectFacts = interpretationRepo.listSubjectFacts(subjectId);
-    const bioLines = subjectFacts.map(f => `- ${f.term}: ${f.fact}`).join('\n');
+    // Для ноды bio:N — её собственный факт (по id), иначе все факты как контекст.
+    const ownFact = node.id.startsWith('bio:')
+        ? subjectFacts.find(f => f.id === `bio_${node.id.slice(4)}`)
+        : null;
+    const bioLines = ownFact
+        ? `- ${ownFact.term}: ${ownFact.fact}`
+        : subjectFacts.map(f => `- ${f.term}: ${f.fact}`).join('\n');
 
     const kindHint: Record<string, string> = {
         worldview: 'общий взгляд на мир и на себя (сценарий жизни)',
