@@ -3159,6 +3159,23 @@ function MentalChairControlScreen({
       kids.forEach((k, i) => layout(k, a0 + (span * i) / kids.length, a0 + (span * (i + 1)) / kids.length, radius + R_STEP));
     };
     layout(root, -Math.PI / 2, Math.PI * 1.5, 0);
+    // Отталкивание: раздвигаем перекрывающиеся ноды (несколько итераций).
+    const MIN_DIST = 58;
+    for (let iter = 0; iter < 6; iter++) {
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < MIN_DIST && dist > 0.001) {
+            const push = (MIN_DIST - dist) / 2;
+            const ux = dx / dist, uy = dy / dist;
+            a.x -= ux * push; a.y -= uy * push;
+            b.x += ux * push; b.y += uy * push;
+          }
+        }
+      }
+    }
     // Рёбра: иерархия + кросс-линки.
     const edges: { from: string; to: string; kind: string }[] = [];
     for (const n of nodes) { const p = parentOf.get(n.id); if (p && byId.has(p)) edges.push({ from: p, to: n.id, kind: 'hierarchy' }); }
@@ -3238,7 +3255,7 @@ function MentalChairControlScreen({
           <p>{t('game.ui.chairIntro')}</p>
           <div className="mental-chair-metrics"><span><small>{t('game.ui.plasticity')}</small><b>{Math.round(Number(resident.state?.plasticity || 0))}</b></span><span><small>{t('game.ui.resourceMetric')}</small><b>{Math.round(Number(resident.state?.capacity || 0))}</b></span></div>
         </aside>
-        <section className={`mental-chair-console${episodeWorkspace && selectedMemory ? " workspace" : ""}`}>
+        <section className={`mental-chair-console${episodeWorkspace && selectedMemory ? " workspace" : ""}${!episodeWorkspace && episodeView === "map" ? " map-mode" : ""}`}>
           {episodeWorkspace && selectedMemory ? <>
             <header><button className="mental-work-back" onClick={() => { setEpisodeWorkspace(false); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>{t('game.ui.backToEpisodes')}</button><b>{t('game.ui.workWithEpisode')}</b></header>
             <div className="mental-work-canvas">

@@ -1316,6 +1316,11 @@ html[data-ui-theme="manga2"] .campaign-shell .mind-edge.cross {
 }
 html[data-ui-theme="manga2"] .campaign-shell .mind-node {
   cursor: pointer !important;
+  animation: mind-appear .35s ease-out both !important;
+}
+@keyframes mind-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 html[data-ui-theme="manga2"] .campaign-shell .mind-node circle {
   fill: #fff !important;
