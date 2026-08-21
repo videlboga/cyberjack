@@ -110,9 +110,17 @@ function chooseTopic(speakerId:string, recipientId:string, worldMinute:number, s
     // A topic must come from an observed event or an authored profile hook.
     // The core must not invent a generic conversation merely to avoid silence.
     const shared = stimulus === 'co_presence' ? sharedRoomTopic(coPresence) : null;
+    // Темы из субъективной памяти, вовлекающей собеседника (текущая интерпретация
+    // совместного прошлого), идут приоритетнее статичных хуков профиля.
+    const memory = memoryThemesForPair(speakerId, recipientId);
+    const memoryCandidates: Array<{ topic: string; context?: string }> = memory.themes.map(theme => ({
+        topic: theme.topic,
+        context: theme.summary ? `Ты вспоминаешь: ${theme.summary}` : undefined,
+    }));
     const candidates: Array<{ topic: string; context?: string }> = stimulus === 'observed_event'
-        ? [{ topic:'observed_event' }, ...declared.map(topic => ({ topic }))]
+        ? [{ topic:'observed_event' }, ...memoryCandidates, ...declared.map(topic => ({ topic }))]
         : [
+            ...memoryCandidates,
             ...(shared ? [shared] : []),
             ...declared.map(topic => ({ topic })),
         ];
