@@ -23,7 +23,6 @@ import {
 } from "./CalibrationBiometrics";
 import "./CampaignApp.css";
 import "./LaboratoryRooms.css";
-import "./MangaTheme.css";
 import "./Manga2Theme.css";
 import { CharacterPortrait } from "./CharacterPortrait";
 import {
@@ -802,13 +801,8 @@ async function resolveDeferredReply(data: any, timeoutMs = 60_000, onText?: (tex
 
 export function CampaignApp() {
   const { t, locale } = useI18n();
-  const [uiTheme, setUiTheme] = useState<
-    "industrial" | "graphite" | "paper" | "mist" | "manga" | "manga2"
-  >(() => {
-    if (window.location.pathname.startsWith("/manga2")) return "manga2";
-    if (window.location.pathname.startsWith("/manga")) return "manga2";
-    return "manga2";
-  });
+  // Единственная активная тема интерфейса — manga2 (см. Manga2Theme.css).
+  const uiTheme = "manga2" as const;
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [subject, setSubject] = useState<SubjectState | null>(null);
@@ -1150,21 +1144,6 @@ export function CampaignApp() {
             </strong>
           </span>
         </button>
-        <label className="theme-switcher" style={{ display: "none" }}>
-          <small>{t('game.ui.topic')}</small>
-          <select
-            aria-label="Тема интерфейса"
-            value={uiTheme}
-            onChange={(event) =>
-              setUiTheme(
-                event.target.value as
-                  "industrial" | "graphite" | "paper" | "mist" | "manga" | "manga2",
-              )
-            }
-          >
-            <option value="manga2">Manga 2</option>
-          </select>
-        </label>
         <button
           className="campaign-menu-button"
           onClick={() => setMenuOpen(true)}
@@ -1248,8 +1227,6 @@ export function CampaignApp() {
                 state: resident.state ?? undefined,
                 contexts: resident.contexts,
               }))}
-              uiTheme={uiTheme}
-              onThemeChange={setUiTheme}
               worldMinute={scenario.clock.totalMinutes}
               timeLabel={
                 <SmoothGameClock

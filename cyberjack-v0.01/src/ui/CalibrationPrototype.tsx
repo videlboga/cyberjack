@@ -1720,8 +1720,6 @@ export function CalibrationPrototype({
   subjectId = "S-AV-01",
   subjectName = "Мира",
   nearbyCharacters = [],
-  uiTheme = "industrial",
-  onThemeChange,
   worldMinute = 0,
   timeLabel,
   timePaused = false,
@@ -1739,8 +1737,6 @@ export function CalibrationPrototype({
     state?: Record<string, any>;
     contexts?: Array<{ id: string }>;
   }>;
-  uiTheme?: "industrial" | "graphite" | "paper" | "mist" | "manga" | "manga2";
-  onThemeChange?: (theme: "industrial" | "graphite" | "paper" | "mist" | "manga" | "manga2") => void;
   worldMinute?: number;
   timeLabel?: React.ReactNode;
   timePaused?: boolean;
