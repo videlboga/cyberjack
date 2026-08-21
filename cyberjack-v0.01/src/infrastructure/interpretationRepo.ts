@@ -105,6 +105,16 @@ export const interpretationRepo = {
             ON CONFLICT(id) DO UPDATE SET term = excluded.term, fact = excluded.fact, sort_order = excluded.sort_order`)
             .run(fact.id, fact.term, fact.fact, fact.sortOrder ?? 0);
     },
+    // --- subject facts (персональные атомы-факты: биография) ---
+    listSubjectFacts(subjectId: string): Array<{ id: string; term: string; fact: string }> {
+        const rows = db.prepare('SELECT * FROM subject_facts WHERE subject_id = ? ORDER BY sort_order').all(subjectId) as any[];
+        return rows.map(row => ({ id: row.id, term: row.term, fact: row.fact }));
+    },
+    upsertSubjectFact(fact: { id: string; subjectId: string; term: string; fact: string; sortOrder?: number }) {
+        db.prepare(`INSERT INTO subject_facts (id, subject_id, term, fact, sort_order) VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(subject_id, id) DO UPDATE SET term = excluded.term, fact = excluded.fact, sort_order = excluded.sort_order`)
+            .run(fact.id, fact.subjectId, fact.term, fact.fact, fact.sortOrder ?? 0);
+    },
 };
 
 function mapNode(row: any): InterpretationNode {

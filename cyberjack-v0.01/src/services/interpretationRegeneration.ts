@@ -34,6 +34,9 @@ function buildRegenerationPrompt(subjectId: string, node: InterpretationNode, ch
     const facts = interpretationRepo.listFacts();
     const childLines = children.map(child => `- ${child.label}: ${child.content || '(нет интерпретации)'}`).join('\n');
     const factLines = facts.map(fact => `- ${fact.term}: ${fact.fact}`).join('\n');
+    // Персональные атомы-факты (биография, разбитая на неизменяемые факты).
+    const subjectFacts = interpretationRepo.listSubjectFacts(subjectId);
+    const bioLines = subjectFacts.map(f => `- ${f.term}: ${f.fact}`).join('\n');
 
     const kindHint: Record<string, string> = {
         worldview: 'общий взгляд на мир и на себя (сценарий жизни)',
@@ -47,7 +50,7 @@ function buildRegenerationPrompt(subjectId: string, node: InterpretationNode, ch
 
     const system = `Ты — ${characterName}, персонаж на изолированной космической станции. Ты пересматриваешь свою интерпретацию: «${node.label}» (${kindHint[node.kind] || 'интерпретация'}). Напиши 1–3 предложения от первого лица («я/мне/меня»), как ты сейчас это понимаешь. Опирайся ТОЛЬКО на факты и дочерние интерпретации ниже; не добавляй событий, которых нет. Факты — неизменяемая истина, но твоё ОТНОШЕНИЕ к ним зависит от твоего характера и опыта. Называй секс, насилие, боль, страх своими именами, если они есть. Верни только JSON: {"content":"..."}.`;
 
-    const user = `ФАКТЫ МИРА:\n${factLines}\n\nДОЧЕРНИЕ ИНТЕРПРЕТАЦИИ:\n${childLines || '(нет)'}\n\nТекущая валентность: ${node.valence.toFixed(2)} (от -1 до 1), сила: ${node.strength.toFixed(2)}.`;
+    const user = `ФАКТЫ МИРА:\n${factLines}\n\nТВОЯ БИОГРАФИЯ:\n${bioLines || '(нет)'}\n\nДОЧЕРНИЕ ИНТЕРПРЕТАЦИИ:\n${childLines || '(нет)'}\n\nТекущая валентность: ${node.valence.toFixed(2)} (от -1 до 1), сила: ${node.strength.toFixed(2)}.`;
 
     return { system, user };
 }

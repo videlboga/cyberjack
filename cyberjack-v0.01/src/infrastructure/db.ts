@@ -536,6 +536,15 @@ db.exec(`
     sort_order INTEGER NOT NULL DEFAULT 0
   );
 
+  CREATE TABLE IF NOT EXISTS subject_facts (
+    id TEXT NOT NULL,
+    subject_id TEXT NOT NULL,
+    term TEXT NOT NULL,
+    fact TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (subject_id, id)
+  );
+
   CREATE TABLE IF NOT EXISTS interpretation_nodes (
     id TEXT NOT NULL,
     subject_id TEXT NOT NULL,

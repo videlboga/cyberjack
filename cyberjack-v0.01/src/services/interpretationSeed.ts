@@ -1,6 +1,7 @@
 import { db } from '../infrastructure/db';
 import { interpretationRepo } from '../infrastructure/interpretationRepo';
 import { WORLD_GLOSSARY } from '../domain/worldGlossary';
+import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 
 /**
  * Сид графа интерпретаций: глоссарий → world_facts (неизменяемые атомы),
@@ -53,9 +54,31 @@ export function allSubjectIds(): string[] {
     return rows.map(row => row.id);
 }
 
+/** Разбивает биографию субъекта на атомы-факты (неизменяемые, как глоссарий). */
+export function seedSubjectFacts(subjectId: string) {
+    const profile = ensureGeneratedProfile(subjectId);
+    const bio = profile.biography || {} as any;
+    const lines: Array<{ term: string; fact: string }> = [];
+    const push = (term: string, fact: string | undefined) => { if (fact && String(fact).trim()) lines.push({ term, fact: String(fact).trim() }); };
+    for (const origin of (Array.isArray(bio.origin) ? bio.origin : [])) push('происхождение', origin);
+    push('прежняя роль', bio.formerRole);
+    push('причина статуса', bio.statusCause);
+    for (const event of (Array.isArray(bio.formativeEvents) ? bio.formativeEvents : [])) push('событие', event);
+    lines.forEach((line, index) => {
+        interpretationRepo.upsertSubjectFact({
+            id: `bio_${index}`,
+            subjectId,
+            term: line.term,
+            fact: line.fact,
+            sortOrder: index,
+        });
+    });
+}
+
 export function seedInterpretationTrees() {
     seedWorldFacts();
     for (const subjectId of allSubjectIds()) {
         ensureInterpretationTree(subjectId);
+        seedSubjectFacts(subjectId);
     }
 }
