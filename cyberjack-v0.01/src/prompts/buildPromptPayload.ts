@@ -13,6 +13,7 @@ import {
 import { buildInteractionObservation, buildCurrentStateObservationText, describeObservationSignal } from '../narrative/interactionObservation';
 import { buildReactionSystemPrompt, compileReactionFrame } from '../narrative/reactionFrame';
 import { deriveAcquiredTraits, deriveCompulsionSignals } from '../domain/conditioning';
+import { traitInterpretationBlock } from '../services/traitInterpretation';
 import { getLaboratorySpatialContext } from '../scenario/spatialContext';
 import { buildObservationPostContext } from '../scenario/observationPostContext';
 import { formatPhysiologyContext } from '../services/physiology';
@@ -390,6 +391,8 @@ export async function buildPromptPayload(
             return `У тебя есть ${strength} телесно-психологическая склонность «${trait.label}»; она меняет оценку релевантных ощущений и может влиять на твои решения.`;
         });
     roleContext.push(...embodiedTraits);
+    const learningBlock = traitInterpretationBlock(ownerId);
+    if (learningBlock) roleContext.push(learningBlock);
     const compulsionSignals = deriveCompulsionSignals(actorDetails.core.preferences, [
         ...(options?.compulsionCueTags || []),
         ...((latestResult?.tickMeta?.inputs?.action?.tags || []) as string[]),

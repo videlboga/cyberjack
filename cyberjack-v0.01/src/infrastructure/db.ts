@@ -517,6 +517,18 @@ db.exec(`
     last_toilet_minute INTEGER
   );
 
+  CREATE TABLE IF NOT EXISTS trait_interpretations (
+    subject_id TEXT NOT NULL,
+    trait_key TEXT NOT NULL,
+    first_day INTEGER NOT NULL,
+    last_day INTEGER NOT NULL,
+    current_value REAL NOT NULL DEFAULT 0,
+    history_json TEXT NOT NULL DEFAULT '[]',
+    summary TEXT,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (subject_id, trait_key)
+  );
+
   CREATE TABLE IF NOT EXISTS transactional_games (
     id TEXT PRIMARY KEY,
     game_type TEXT NOT NULL,

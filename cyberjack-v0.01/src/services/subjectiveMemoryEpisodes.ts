@@ -4,6 +4,7 @@ import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamics
 import { db } from '../infrastructure/db';
 import { MemoryEpisode } from './memoryEpisodes';
 import { memoryTagLabel } from '../domain/memoryTagLabels';
+import { recordLearningDay } from './traitInterpretation';
 
 const pending = new Set<string>();
 const clean = (value: unknown, limit = 600) => String(value || '').replace(/\s+/g, ' ').trim().slice(0, limit);
@@ -117,6 +118,11 @@ function syncAssociationEffects(subjectId: string, episode: MemoryEpisode, summa
             relationshipDynamicsRepo.change(subjectId, actorId, { dependency: delta * 0.6, learnedCompliance: delta * 0.4, fear: -delta * 0.3 });
         }
     }
+
+    // Слой F: интерпретация обучения. Эпизод затронул теги → фиксируем «день
+    // обучения» с осмысленной заметкой (событие из эпизода), без чисел.
+    const affectedTags = Array.from(new Set(uniqueAssociations.flatMap(item => item.tagLinks)));
+    recordLearningDay(subjectId, episode, affectedTags);
 }
 
 function usesSeminalFact(episode: MemoryEpisode) {

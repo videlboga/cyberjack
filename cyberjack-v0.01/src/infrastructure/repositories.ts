@@ -1304,3 +1304,82 @@ function cosineSimilarity(a: number[], b: number[]): number {
     }
     return dot;
 }
+
+export interface TraitInterpretationRow {
+    subjectId: string;
+    traitKey: string;
+    firstDay: number;
+    lastDay: number;
+    currentValue: number;
+    history: Array<{ day: number; value: number; note?: string }>;
+    summary?: string;
+}
+
+export const traitInterpretationRepo = {
+    get(subjectId: string, traitKey: string): TraitInterpretationRow | null {
+        const row = db.prepare('SELECT * FROM trait_interpretations WHERE subject_id = ? AND trait_key = ?').get(subjectId, traitKey) as any;
+        if (!row) return null;
+        let history: Array<{ day: number; value: number }> = [];
+        try { history = JSON.parse(row.history_json || '[]'); } catch { history = []; }
+        return {
+            subjectId: row.subject_id,
+            traitKey: row.trait_key,
+            firstDay: row.first_day,
+            lastDay: row.last_day,
+            currentValue: row.current_value,
+            history,
+            summary: row.summary || undefined,
+        };
+    },
+    listForSubject(subjectId: string): TraitInterpretationRow[] {
+        const rows = db.prepare('SELECT * FROM trait_interpretations WHERE subject_id = ? ORDER BY last_day DESC').all(subjectId) as any[];
+        return rows.map((row) => {
+            let history: Array<{ day: number; value: number; note?: string }> = [];
+            try { history = JSON.parse(row.history_json || '[]'); } catch { history = []; }
+            return {
+                subjectId: row.subject_id,
+                traitKey: row.trait_key,
+                firstDay: row.first_day,
+                lastDay: row.last_day,
+                currentValue: row.current_value,
+                history,
+                summary: row.summary || undefined,
+            };
+        });
+    },
+    /** Сохраняет дневную запись: обновляет историю (один пункт на день),
+     *  first/last day и current_value. note — краткое событие, изменившее обучение. */
+    recordDay(subjectId: string, traitKey: string, day: number, value: number, note?: string) {
+        const existing = this.get(subjectId, traitKey);
+        let history = existing?.history ?? [];
+        history = history.filter(entry => entry.day !== day);
+        history.push({ day, value, note });
+        history.sort((a, b) => a.day - b.day);
+        db.prepare(`INSERT INTO trait_interpretations
+            (subject_id, trait_key, first_day, last_day, current_value, history_json, summary, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(subject_id, trait_key) DO UPDATE SET
+              first_day = excluded.first_day,
+              last_day = excluded.last_day,
+              current_value = excluded.current_value,
+              history_json = excluded.history_json,
+              summary = excluded.summary,
+              updated_at = CURRENT_TIMESTAMP`)
+          .run(
+            subjectId, traitKey,
+            existing?.firstDay ?? day,
+            day,
+            value,
+            JSON.stringify(history),
+            existing?.summary ?? null,
+          );
+    },
+    setSummary(subjectId: string, traitKey: string, summary: string) {
+        db.prepare('UPDATE trait_interpretations SET summary = ? WHERE subject_id = ? AND trait_key = ?').run(summary, subjectId, traitKey);
+    },
+    /** Удаляет запись (когда обучение больше не интерпретируется как трейт). */
+    remove(subjectId: string, traitKey: string) {
+        db.prepare('DELETE FROM trait_interpretations WHERE subject_id = ? AND trait_key = ?').run(subjectId, traitKey);
+    },
+};
+
