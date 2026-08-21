@@ -455,8 +455,12 @@ const visualSlugFor = (subjectId: string | undefined | null): string | undefined
             ? "eli"
             : subjectId === "NPC-CAND-GEN-04"
               ? "mai"
-              : undefined;
-};
+              : subjectId === "NPC-CAND-KATE"
+                ? "kate"
+                : subjectId === "NPC-RIN-01"
+                  ? "rin"
+                  : undefined;
+            };
 
 const capsulePortraitFor = (resident: Resident): string | null => {
   const subjectId = resident.subjectId || resident.id;
@@ -3112,6 +3116,27 @@ function MentalChairControlScreen({
     if (node.kind === 'station' && node.id.startsWith('station:')) return node.label || node.id.slice(8);
     return node.label;
   };
+  // Перенос метки на строки с ограничением ширины (maxChars на строку, ≤2 строки).
+  const wrapLabel = (label: string, maxChars: number): string[] => {
+    if (label.length <= maxChars) return [label];
+    const words = label.split(/\s+/);
+    const lines: string[] = [];
+    let cur = '';
+    for (const word of words) {
+      const next = cur ? `${cur} ${word}` : word;
+      if (next.length <= maxChars) { cur = next; continue; }
+      if (cur) { lines.push(cur); cur = word; }
+      else { lines.push(word.slice(0, maxChars)); cur = ''; }
+      if (lines.length === 2) break;
+    }
+    if (cur && lines.length < 2) lines.push(cur);
+    // Если текст всё ещё длиннее показанного — обрезаем последнюю строку с многоточием.
+    const shown = lines.join(' ');
+    if (label.length > shown.length && lines.length) {
+      lines[lines.length - 1] = lines[lines.length - 1].slice(0, maxChars - 1).trimEnd() + '…';
+    }
+    return lines;
+  };
   const mindMap = useMemo(() => {
     type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number; children: string[]; floatDelay: number; w: number; h: number };
     const raw = interpretationGraph?.nodes || [];
@@ -3153,11 +3178,14 @@ function MentalChairControlScreen({
       node.x = CX + Math.cos(mid) * radius + j.dx;
       node.y = CY + Math.sin(mid) * radius + j.dy;
       node.floatDelay = (hash(node.id) % 1000) / 1000 * 6;
-      // Габариты пилюли (совпадают с рендером): ширина по длине текста.
+      // Габариты пилюли (совпадают с рендером): перенос на ≤2 строки.
       const fontSize = node.kind === 'worldview' ? 13 : node.depth === 1 ? 11 : 9;
+      const maxChars = node.kind === 'worldview' ? 20 : node.depth === 1 ? 16 : 14;
       const padX = 9, padY = 6;
-      node.w = mindNodeLabel(node).length * fontSize * 0.6 + padX * 2;
-      node.h = fontSize + padY * 2;
+      const lines = wrapLabel(mindNodeLabel(node), maxChars);
+      const longest = Math.max(...lines.map(l => l.length));
+      node.w = longest * fontSize * 0.6 + padX * 2;
+      node.h = lines.length * (fontSize + 2) + padY * 2;
       const kids = node.children.map(id => byId.get(id)!).filter(Boolean);
       if (!kids.length) return;
       const span = a1 - a0;
@@ -3351,15 +3379,21 @@ function MentalChairControlScreen({
                     const isLeaf = node.depth >= 2;
                     const showLabel = !isLeaf || mindView.scale >= labelScale;
                     const fontSize = node.kind === 'worldview' ? 13 : node.depth === 1 ? 11 : 9;
+                    const maxChars = node.kind === 'worldview' ? 20 : node.depth === 1 ? 16 : 14;
                     const padX = 9, padY = 6;
-                    const textW = label.length * fontSize * 0.6;
-                    const w = showLabel ? textW + padX * 2 : 12;
-                    const h = showLabel ? fontSize + padY * 2 : 12;
+                    const lines = wrapLabel(label, maxChars);
+                    const longest = Math.max(...lines.map(l => l.length));
+                    const w = showLabel ? longest * fontSize * 0.6 + padX * 2 : 12;
+                    const h = showLabel ? lines.length * (fontSize + 2) + padY * 2 : 12;
+                    const lineHeight = fontSize + 2;
+                    const firstDy = -(lines.length - 1) * lineHeight / 2;
                     return (
                       <g key={node.id} className={`mind-node ${node.kind}${node.status === 'dirty' ? ' dirty' : ''}${selected ? ' selected' : ''}${showLabel ? '' : ' dot'}`} transform={`translate(${node.x} ${node.y})`} style={{ "--float-delay": `${node.floatDelay}s`, "--float-amp": `${node.depth === 0 ? 0 : node.depth === 1 ? 2 : 4}px` } as any} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selected ? null : node.id); }} onDoubleClick={(event) => { event.stopPropagation(); zoomAt(node.x, node.y, 1.6); }}>
                         <g className="mind-node-float">
                           <rect className="mind-node-pill" x={-w / 2} y={-h / 2} width={w} height={h} rx={h / 2} />
-                          {showLabel && <text className="mind-node-label" textAnchor="middle" dy="0.35em" fontSize={fontSize}>{label}</text>}
+                          {showLabel && <text className="mind-node-label" textAnchor="middle" fontSize={fontSize}>
+                            {lines.map((line, i) => <tspan key={i} x={0} dy={i === 0 ? firstDy : lineHeight}>{line}</tspan>)}
+                          </text>}
                         </g>
                       </g>
                     );
@@ -3533,7 +3567,11 @@ function DeviceControlScreen({
               ? "eli"
               : subjectId === "NPC-CAND-GEN-04"
                 ? "mai"
-                : subjectId.toLowerCase();
+                : subjectId === "NPC-CAND-KATE"
+                  ? "kate"
+                  : subjectId === "NPC-RIN-01"
+                    ? "rin"
+                    : subjectId.toLowerCase();
   const portraitEmotion = resolvePortraitEmotion({
     behavioralState: state.behavioralState,
     reaction: state.reaction || state.lastReaction,
