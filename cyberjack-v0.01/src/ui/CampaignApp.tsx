@@ -1081,7 +1081,7 @@ export function CampaignApp() {
     const isolatedIds = new Set(
       scenario.laboratory
         .filter((asset) =>
-          ["lab_recovery_capsule", "lab_sex_machine"].includes(asset.id),
+          ["lab_recovery_capsule", "lab_sex_machine", "lab_mental_correction_chair"].includes(asset.id),
         )
         .map((asset) => asset.metadata?.subjectId)
         .filter(Boolean),
