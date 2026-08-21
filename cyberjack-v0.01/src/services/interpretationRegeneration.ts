@@ -57,12 +57,12 @@ export async function consolidateNextInterpretation(): Promise<boolean> {
     if (running) return false;
     running = true;
     try {
-        const subjects = db.prepare(`SELECT DISTINCT subject_id FROM interpretation_nodes WHERE status = 'dirty'`).all() as Array<{ subject_id: string }>;
+        const subjects = db.prepare(`SELECT DISTINCT subject_id FROM interpretation_nodes WHERE status = 'dirty' OR content IS NULL OR content = ''`).all() as Array<{ subject_id: string }>;
         if (!subjects.length) return false;
 
         // Один субъект за проход (round-robin по порядку).
         const subjectId = subjects[0].subject_id;
-        const dirty = interpretationRepo.listForSubject(subjectId).filter(node => node.status === 'dirty');
+        const dirty = interpretationRepo.listForSubject(subjectId).filter(node => node.status === 'dirty' || !node.content);
 
         // Листья (episode/trait/rel) раньше родителей (self/relationships/worldview).
         const leafFirst = ['episode', 'trait', 'rel', 'station', 'biography', 'self', 'relationships', 'worldview'];

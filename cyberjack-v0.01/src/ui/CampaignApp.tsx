@@ -3113,12 +3113,12 @@ function MentalChairControlScreen({
     return node.label;
   };
   const mindMap = useMemo(() => {
-    type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number; children: string[]; floatDelay: number };
+    type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number; children: string[]; floatDelay: number; w: number; h: number };
     const raw = interpretationGraph?.nodes || [];
     const links = interpretationGraph?.links || [];
     if (!raw.length) return { nodes: [] as MindNode[], edges: [] as { from: string; to: string; kind: string }[], byId: new Map<string, MindNode>(), parentOf: new Map<string, string | null>() };
     const byId = new Map<string, MindNode>();
-    const nodes: MindNode[] = raw.map(n => ({ ...n, depth: 0, x: 0, y: 0, children: [], floatDelay: 0 }));
+    const nodes: MindNode[] = raw.map(n => ({ ...n, depth: 0, x: 0, y: 0, children: [], floatDelay: 0, w: 0, h: 0 }));
     nodes.forEach(n => byId.set(n.id, n));
     const root = nodes.find(n => n.kind === 'worldview') || nodes[0];
     // Эффективный родитель: episode-ноды (parentId=null) вешаем на цель их
@@ -3153,25 +3153,40 @@ function MentalChairControlScreen({
       node.x = CX + Math.cos(mid) * radius + j.dx;
       node.y = CY + Math.sin(mid) * radius + j.dy;
       node.floatDelay = (hash(node.id) % 1000) / 1000 * 6;
+      // Габариты пилюли (совпадают с рендером): ширина по длине текста.
+      const fontSize = node.kind === 'worldview' ? 13 : node.depth === 1 ? 11 : 9;
+      const padX = 9, padY = 6;
+      node.w = mindNodeLabel(node).length * fontSize * 0.6 + padX * 2;
+      node.h = fontSize + padY * 2;
       const kids = node.children.map(id => byId.get(id)!).filter(Boolean);
       if (!kids.length) return;
       const span = a1 - a0;
       kids.forEach((k, i) => layout(k, a0 + (span * i) / kids.length, a0 + (span * (i + 1)) / kids.length, radius + R_STEP));
     };
     layout(root, -Math.PI / 2, Math.PI * 1.5, 0);
-    // Отталкивание: раздвигаем перекрывающиеся ноды (несколько итераций).
-    const MIN_DIST = 58;
-    for (let iter = 0; iter < 6; iter++) {
+    // Отталкивание: раздвигаем перекрывающиеся пилюли по их реальным габаритам.
+    const GAP = 10;
+    for (let iter = 0; iter < 8; iter++) {
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = b.x - a.x, dy = b.y - a.y;
           const dist = Math.hypot(dx, dy);
-          if (dist < MIN_DIST && dist > 0.001) {
-            const push = (MIN_DIST - dist) / 2;
-            const ux = dx / dist, uy = dy / dist;
-            a.x -= ux * push; a.y -= uy * push;
-            b.x += ux * push; b.y += uy * push;
+          const minX = (a.w + b.w) / 2 + GAP;
+          const minY = (a.h + b.h) / 2 + GAP;
+          const overlapX = Math.abs(dx) < minX;
+          const overlapY = Math.abs(dy) < minY;
+          if (overlapX && overlapY) {
+            // Выталкиваем по оси с меньшим перекрытием.
+            const pushX = minX - Math.abs(dx);
+            const pushY = minY - Math.abs(dy);
+            if (pushX < pushY) {
+              const s = dx >= 0 ? 1 : -1;
+              a.x -= s * pushX / 2; b.x += s * pushX / 2;
+            } else {
+              const s = dy >= 0 ? 1 : -1;
+              a.y -= s * pushY / 2; b.y += s * pushY / 2;
+            }
           }
         }
       }
