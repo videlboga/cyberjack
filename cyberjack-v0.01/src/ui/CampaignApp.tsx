@@ -148,6 +148,10 @@ type Resident = {
     breakdowns: number;
     completedContracts: number;
   };
+  interpretationGraph?: {
+    nodes: { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string }[];
+    links: { id: string; fromId: string; toId: string; kind: string; weight: number }[];
+  };
 };
 type InventoryItem = {
   itemId: string;
@@ -2979,6 +2983,8 @@ function MentalChairControlScreen({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedAssociationTarget, setSelectedAssociationTarget] = useState<string | null>(null);
   const [intervention, setIntervention] = useState("");
+  const [episodeView, setEpisodeView] = useState<"list" | "map">("map");
+  const [selectedMindNode, setSelectedMindNode] = useState<string | null>(null);
   const memories = resident.mentalMemories || [];
   const selectedMemory = memories.find((memory) => memory.id === memoryId) || null;
   const memoryPageSize = 14;
@@ -3085,6 +3091,48 @@ function MentalChairControlScreen({
     }
     return { nodes, edges, byId };
   }, [selectedMemory?.id, memoryTags.join('|'), JSON.stringify(associationLinks)]);
+  // Майнд-мэп интерпретаций: радиальная раскладка по глубине дерева.
+  // worldview в центре, ветви (relationships/biography/station/self) на среднем
+  // кольце, листья (rel/trait/episode/station:<key>) на внешнем. Кросс-линки
+  // рисуются как рёбра между нодами.
+  const interpretationGraph = resident.interpretationGraph;
+  const mindMap = useMemo(() => {
+    type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number };
+    const raw = interpretationGraph?.nodes || [];
+    const links = interpretationGraph?.links || [];
+    if (!raw.length) return { nodes: [] as MindNode[], edges: [] as { from: string; to: string; kind: string }[], byId: new Map<string, MindNode>() };
+    // Глубина: worldview=0, ветви=1, листья=2+.
+    const depthOf = (node: { id: string; parentId: string | null; kind: string }): number => {
+      if (node.kind === 'worldview') return 0;
+      if (node.kind === 'relationships' || node.kind === 'biography' || node.kind === 'station' || node.kind === 'self') return 1;
+      return 2;
+    };
+    const nodes: MindNode[] = raw.map(node => ({ ...node, depth: depthOf(node), x: 0, y: 0 }));
+    const byId = new Map(nodes.map(node => [node.id, node]));
+    // Радиальная раскладка: кольцо по глубине.
+    const rings: Record<number, MindNode[]> = {};
+    for (const node of nodes) (rings[node.depth] ||= []).push(node);
+    const hash = (text: string) => [...text].reduce((value, char) => ((value * 31 + char.charCodeAt(0)) >>> 0), 2166136261);
+    const seeded = (text: string, offset: number) => ((hash(`${text}:${offset}`) % 10000) / 10000);
+    for (const depth of Object.keys(rings).map(Number).sort((a, b) => a - b)) {
+      const ringNodes = rings[depth].slice().sort((a, b) => seeded(a.id, 5) - seeded(b.id, 5));
+      const radius = depth === 0 ? 0 : depth === 1 ? 30 : 44;
+      ringNodes.forEach((node, index) => {
+        const angle = depth === 0 ? 0 : (index / Math.max(1, ringNodes.length)) * Math.PI * 2 - Math.PI / 2;
+        node.x = 50 + Math.cos(angle) * radius;
+        node.y = 50 + Math.sin(angle) * radius;
+      });
+    }
+    // Рёбра: parent→child + кросс-линки.
+    const edges: { from: string; to: string; kind: string }[] = [];
+    for (const node of nodes) {
+      if (node.parentId && byId.has(node.parentId)) edges.push({ from: node.parentId, to: node.id, kind: 'hierarchy' });
+    }
+    for (const link of links) {
+      if (byId.has(link.fromId) && byId.has(link.toId)) edges.push({ from: link.fromId, to: link.toId, kind: link.kind });
+    }
+    return { nodes, edges, byId };
+  }, [JSON.stringify(interpretationGraph?.nodes), JSON.stringify(interpretationGraph?.links)]);
   const selectedAssociation = selectedAssociationTarget
     ? associationLinks.find(link => link.target === selectedAssociationTarget)
     : null;
@@ -3181,7 +3229,28 @@ function MentalChairControlScreen({
             </div>
             {error && <p className="mental-chair-error">{error}</p>}
           </> : <>
-          <header><small>{t('game.ui.episodeFromMemory')}</small><b>{selectedMemory ? t('game.ui.selected') : t('game.ui.notSelected')}</b></header>
+          <header><small>{t('game.ui.episodeFromMemory')}</small><b>{selectedMemory ? t('game.ui.selected') : t('game.ui.notSelected')}</b><nav className="mental-view-toggle"><button className={episodeView === "map" ? "active" : ""} onClick={() => setEpisodeView("map")}>Карта</button><button className={episodeView === "list" ? "active" : ""} onClick={() => setEpisodeView("list")}>Список</button></nav></header>
+          {episodeView === "map" ? (
+            <div className="mental-mindmap" aria-label="Карта интерпретаций">
+              <svg className="mental-mindmap-edges" viewBox="0 0 100 100" preserveAspectRatio="none">
+                {mindMap.edges.map((edge, index) => {
+                  const from = mindMap.byId.get(edge.from); const to = mindMap.byId.get(edge.to);
+                  if (!from || !to) return null;
+                  return <line key={`${edge.from}:${edge.to}:${index}`} className={`${edge.kind}${selectedMindNode === edge.from || selectedMindNode === edge.to ? " selected" : ""}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
+                })}
+              </svg>
+              {mindMap.nodes.map(node => (
+                <button key={node.id} className={`mental-mindmap-node ${node.kind}${node.status === "dirty" ? " dirty" : ""}${selectedMindNode === node.id ? " selected" : ""}`} style={{ left: `${node.x}%`, top: `${node.y}%`, "--node-valence": node.valence } as any} onClick={() => setSelectedMindNode(selectedMindNode === node.id ? null : node.id)} title={node.content || node.label}>
+                  <b>{node.label}</b>
+                </button>
+              ))}
+              {selectedMindNode && (() => {
+                const node = mindMap.byId.get(selectedMindNode);
+                if (!node) return null;
+                return <section className="mental-mindmap-detail"><header><small>{node.kind}</small><b>{node.label}</b></header><p>{node.content || "Интерпретация ещё не сформирована."}</p></section>;
+              })()}
+            </div>
+          ) : (
           <div className="mental-memory-list">
             {memories.length ? visibleMemories.map((memory) => (
               <button key={memory.id} className={memory.id === memoryId ? "selected" : ""} onClick={() => { setMemoryId(memory.id); setFocusTag(memory.tags[0] || null); setSelectedTag(null); setSelectedTags([]); setSelectedAssociationTarget(null); }}>
@@ -3189,7 +3258,8 @@ function MentalChairControlScreen({
               </button>
             )) : <p>{t('game.ui.noEpisodesForProcessing')}</p>}
           </div>
-          {memories.length > memoryPageSize && <nav className="mental-memory-pages" aria-label={t('game.ui.episodePages')}><button disabled={memoryPage === 0} onClick={() => setMemoryPage(page => Math.max(0, page - 1))}>←</button><span>{memoryPage + 1} / {memoryPages}</span><button disabled={memoryPage >= memoryPages - 1} onClick={() => setMemoryPage(page => Math.min(memoryPages - 1, page + 1))}>→</button></nav>}
+          )}
+          {episodeView === "list" && memories.length > memoryPageSize && <nav className="mental-memory-pages" aria-label={t('game.ui.episodePages')}><button disabled={memoryPage === 0} onClick={() => setMemoryPage(page => Math.max(0, page - 1))}>←</button><span>{memoryPage + 1} / {memoryPages}</span><button disabled={memoryPage >= memoryPages - 1} onClick={() => setMemoryPage(page => Math.min(memoryPages - 1, page + 1))}>→</button></nav>}
           <section className={`mental-memory-detail ${selectedMemory ? "selected" : ""}`}>
             {selectedMemory ? <><EpisodeMemoryCollage memory={selectedMemory} subjectId={resident.subjectId || resident.id} /><header><small>{t('game.ui.selectedEpisode')}</small><b>{selectedMemory.title}</b></header><p>{selectedMemory.text}</p></> : <p>{t('game.ui.selectCardToRead')}</p>}
           </section>

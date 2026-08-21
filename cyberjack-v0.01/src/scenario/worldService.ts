@@ -1,5 +1,6 @@
 import { db } from '../infrastructure/db';
 import { activeContextsRepo, characterItemsRepo, characterRelationRepo, characterRepo, chatMemoryRepo, itemRepo, memoryRepo, pointStateRepo, presetRepo, resourceRepo, sceneCharacterRepo, subjectRepo } from '../infrastructure/repositories';
+import { interpretationRepo } from '../infrastructure/interpretationRepo';
 import { appendRoleHistory, ensureCharacterLifecycle } from './characterLifecycle';
 import { ensureStarterClothing, STARTER_CLOTHING } from '../infrastructure/starterClothing';
 import { clearCalibrationSetupContexts } from './calibrationContextCleanup';
@@ -1670,6 +1671,34 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
                 subjective: subjective ? { ...subjective, associations: [...subjective.associations, ...manualLinks] } : undefined,
             });
                 });
+            })(),
+            // Граф интерпретаций (майнд-мэп): ноды + кросс-линки для UI кресла.
+            interpretationGraph: (() => {
+                try {
+                    const nodes = interpretationRepo.listForSubject(simulationId);
+                    const links = interpretationRepo.listLinks(simulationId);
+                    return {
+                        nodes: nodes.map(node => ({
+                            id: node.id,
+                            kind: node.kind,
+                            parentId: node.parentId,
+                            label: node.label,
+                            content: node.content,
+                            valence: node.valence,
+                            strength: node.strength,
+                            status: node.status,
+                        })),
+                        links: links.map(link => ({
+                            id: link.id,
+                            fromId: link.fromId,
+                            toId: link.toId,
+                            kind: link.kind,
+                            weight: link.weight,
+                        })),
+                    };
+                } catch {
+                    return { nodes: [], links: [] };
+                }
             })(),
             // State-chart annotations need timestamped engine events. Device
             // placement history has only worldMinute and can otherwise fill
