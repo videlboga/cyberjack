@@ -6,6 +6,7 @@ import { CANON_LOCATIONS, CANON_PROFESSIONS } from '../domain/canon.js';
 import { ensureAllStarterClothing } from './starterClothing.js';
 import { characterRelationRepo } from './repositories.js';
 import { reconcileAllCharacters } from '../scenario/characterState.js';
+import { seedInterpretationTrees } from '../services/interpretationSeed.js';
 
 console.log("Начинаем безопасное заполнение базы данных (без удаления существующих данных)...");
 
@@ -460,5 +461,13 @@ db.transaction(() => {
     }
     console.log(`[Seed] Создано relations между NPC: ${npcPairs.length} пар.`);
 })();
+
+// Граф интерпретаций (майнд-мэп): глоссарий → факты, каркас дерева для субъектов.
+try {
+    seedInterpretationTrees();
+    console.log('[Seed] Граф интерпретаций: факты + каркас дерева созданы.');
+} catch (error: any) {
+    console.warn('[Seed] Граф интерпретаций не создан:', error?.message || error);
+}
 
 console.log("Успешное завершение сидирования.");

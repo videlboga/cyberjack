@@ -5,6 +5,7 @@ import { db } from '../infrastructure/db';
 import { MemoryEpisode } from './memoryEpisodes';
 import { memoryTagLabel } from '../domain/memoryTagLabels';
 import { recordLearningDay } from './traitInterpretation';
+import { propagateEpisode } from './interpretationConsolidation';
 
 const pending = new Set<string>();
 const clean = (value: unknown, limit = 600) => String(value || '').replace(/\s+/g, ' ').trim().slice(0, limit);
@@ -123,6 +124,29 @@ function syncAssociationEffects(subjectId: string, episode: MemoryEpisode, summa
     // обучения» с осмысленной заметкой (событие из эпизода), без чисел.
     const affectedTags = Array.from(new Set(uniqueAssociations.flatMap(item => item.tagLinks)));
     recordLearningDay(subjectId, episode, affectedTags);
+
+    // Граф интерпретаций: детерминированное распространение ассоциаций на
+    // родительские ноды (rel/trait/self) + кросс-линки эпизода.
+    try {
+        propagateEpisode(
+            subjectId,
+            episode.id,
+            episode.title,
+            episode.text,
+            uniqueAssociations.map(item => ({
+                type: item.type as 'person' | 'concept',
+                key: item.key,
+                label: item.label,
+                tagLinks: item.tagLinks,
+                valence: item.valence,
+                strength: item.strength,
+                expectation: item.expectation,
+            })),
+            summary.appraisal,
+        );
+    } catch (error: any) {
+        console.warn('[Interpretation] propagate failed:', error?.message || error);
+    }
 }
 
 function usesSeminalFact(episode: MemoryEpisode) {

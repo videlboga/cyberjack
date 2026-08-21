@@ -529,6 +529,38 @@ db.exec(`
     PRIMARY KEY (subject_id, trait_key)
   );
 
+  CREATE TABLE IF NOT EXISTS world_glossary_facts (
+    id TEXT PRIMARY KEY,
+    term TEXT NOT NULL,
+    fact TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS interpretation_nodes (
+    id TEXT NOT NULL,
+    subject_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    parent_id TEXT,
+    label TEXT NOT NULL,
+    content TEXT,
+    valence REAL NOT NULL DEFAULT 0,
+    strength REAL NOT NULL DEFAULT 0,
+    fingerprint TEXT,
+    status TEXT NOT NULL DEFAULT 'ready',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (subject_id, id)
+  );
+
+  CREATE TABLE IF NOT EXISTS interpretation_links (
+    id TEXT NOT NULL,
+    subject_id TEXT NOT NULL,
+    from_id TEXT NOT NULL,
+    to_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    weight REAL NOT NULL DEFAULT 1,
+    PRIMARY KEY (subject_id, id)
+  );
+
   CREATE TABLE IF NOT EXISTS transactional_games (
     id TEXT PRIMARY KEY,
     game_type TEXT NOT NULL,
