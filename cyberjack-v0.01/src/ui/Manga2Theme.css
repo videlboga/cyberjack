@@ -1252,7 +1252,9 @@ html[data-ui-theme="manga2"] .campaign-shell .mental-view-toggle button.active {
 }
 html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap {
   position: relative !important;
-  height: 420px !important;
+  height: 100% !important;
+  min-height: 420px !important;
+  flex: 1 1 auto !important;
   background: #fbfbfb !important;
   border: 1px solid #e5e5e5 !important;
   border-radius: 6px !important;
@@ -1342,6 +1344,14 @@ html[data-ui-theme="manga2"] .campaign-shell .mind-node.selected circle {
   fill: #111 !important;
   stroke: #111 !important;
   stroke-width: 2.5px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .mind-node-float {
+  animation: mind-float 6s ease-in-out infinite !important;
+  animation-delay: var(--float-delay, 0s) !important;
+}
+@keyframes mind-float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(var(--float-amp, 3px), calc(var(--float-amp, 3px) * -0.6)); }
 }
 html[data-ui-theme="manga2"] .campaign-shell .mind-node-label {
   font-size: 11px !important;

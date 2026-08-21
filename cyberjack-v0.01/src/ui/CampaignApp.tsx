@@ -3113,12 +3113,12 @@ function MentalChairControlScreen({
     return node.label;
   };
   const mindMap = useMemo(() => {
-    type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number; children: string[] };
+    type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number; children: string[]; floatDelay: number };
     const raw = interpretationGraph?.nodes || [];
     const links = interpretationGraph?.links || [];
     if (!raw.length) return { nodes: [] as MindNode[], edges: [] as { from: string; to: string; kind: string }[], byId: new Map<string, MindNode>(), parentOf: new Map<string, string | null>() };
     const byId = new Map<string, MindNode>();
-    const nodes: MindNode[] = raw.map(n => ({ ...n, depth: 0, x: 0, y: 0, children: [] }));
+    const nodes: MindNode[] = raw.map(n => ({ ...n, depth: 0, x: 0, y: 0, children: [], floatDelay: 0 }));
     nodes.forEach(n => byId.set(n.id, n));
     const root = nodes.find(n => n.kind === 'worldview') || nodes[0];
     // Эффективный родитель: episode-ноды (parentId=null) вешаем на цель их
@@ -3138,12 +3138,21 @@ function MentalChairControlScreen({
     for (const n of nodes) { const p = parentOf.get(n.id); if (p && byId.has(p)) byId.get(p)!.children.push(n.id); }
     const depthOf = (id: string): number => { let d = 0; let cur = byId.get(id); while (cur) { const p = parentOf.get(cur.id); if (!p || !byId.has(p)) break; d++; cur = byId.get(p); } return d; };
     nodes.forEach(n => n.depth = depthOf(n.id));
-    // Радиальная раскладка дерева (координаты 0..1000).
+    // Радиальная раскладка дерева (координаты 0..1000) с jitter — меньше симметрии.
     const CX = 500, CY = 500, R_STEP = 170;
+    const hash = (text: string) => [...text].reduce((v, c) => ((v * 31 + c.charCodeAt(0)) >>> 0), 2166136261);
+    const jitter = (id: string, depth: number) => {
+      const amp = depth === 0 ? 0 : depth === 1 ? 26 : 40;
+      const a = (hash(id) % 10000) / 10000 * Math.PI * 2;
+      const b = (hash(id + ':y') % 10000) / 10000;
+      return { dx: Math.cos(a) * amp * b, dy: Math.sin(a) * amp * b };
+    };
     const layout = (node: MindNode, a0: number, a1: number, radius: number) => {
       const mid = (a0 + a1) / 2;
-      node.x = CX + Math.cos(mid) * radius;
-      node.y = CY + Math.sin(mid) * radius;
+      const j = jitter(node.id, node.depth);
+      node.x = CX + Math.cos(mid) * radius + j.dx;
+      node.y = CY + Math.sin(mid) * radius + j.dy;
+      node.floatDelay = (hash(node.id) % 1000) / 1000 * 6;
       const kids = node.children.map(id => byId.get(id)!).filter(Boolean);
       if (!kids.length) return;
       const span = a1 - a0;
@@ -3309,9 +3318,11 @@ function MentalChairControlScreen({
                     const r = node.kind === 'worldview' ? 46 : node.depth === 1 ? 34 : 22;
                     const selected = selectedMindNode === node.id;
                     return (
-                      <g key={node.id} className={`mind-node ${node.kind}${node.status === 'dirty' ? ' dirty' : ''}${selected ? ' selected' : ''}`} transform={`translate(${node.x} ${node.y})`} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selected ? null : node.id); }}>
-                        <circle r={r} />
-                        <text className="mind-node-label" textAnchor="middle" dy="0.35em">{mindNodeLabel(node)}</text>
+                      <g key={node.id} className={`mind-node ${node.kind}${node.status === 'dirty' ? ' dirty' : ''}${selected ? ' selected' : ''}`} transform={`translate(${node.x} ${node.y})`} style={{ "--float-delay": `${node.floatDelay}s`, "--float-amp": `${node.depth === 0 ? 0 : node.depth === 1 ? 2 : 4}px` } as any} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selected ? null : node.id); }} onDoubleClick={(event) => { event.stopPropagation(); zoomAt(node.x, node.y, 1.6); }}>
+                        <g className="mind-node-float">
+                          <circle r={r} />
+                          <text className="mind-node-label" textAnchor="middle" dy="0.35em">{mindNodeLabel(node)}</text>
+                        </g>
                       </g>
                     );
                   })}

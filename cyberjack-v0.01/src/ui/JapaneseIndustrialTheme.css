@@ -10681,7 +10681,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .campaign-shell .mental-chair-metrics small,.campaign-shell .mental-chair-metrics b { display:block; }
 .campaign-shell .mental-chair-metrics small { color:var(--ji-muted); font-size:7px; }
 .campaign-shell .mental-chair-metrics b { margin-top:2px; color:var(--ji-text); font-size:15px; }
-.campaign-shell .mental-chair-console { display:grid; grid-template-rows:auto auto minmax(76px,.75fr) auto auto; gap:8px; padding:10px; overflow:hidden; }
+.campaign-shell .mental-chair-console { display:grid; grid-template-rows:auto auto minmax(76px,1fr) auto auto; gap:8px; padding:10px; overflow:hidden; }
 .campaign-shell .mental-chair-console>header { display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .campaign-shell .mental-chair-console>header b { color:var(--ji-lcd); font-size:9px; letter-spacing:.1em; }
 .campaign-shell .mental-memory-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(7,minmax(40px,1fr)); gap:5px; }
