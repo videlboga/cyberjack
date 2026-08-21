@@ -25,6 +25,7 @@ import "./CampaignApp.css";
 import "./LaboratoryRooms.css";
 import "./Manga2Theme.css";
 import { CharacterPortrait } from "./CharacterPortrait";
+import { memoryTagLabel } from "../domain/memoryTagLabels";
 import {
   appendCharacterChatLines,
   CharacterChatFeed,
@@ -2985,6 +2986,9 @@ function MentalChairControlScreen({
   const [intervention, setIntervention] = useState("");
   const [episodeView, setEpisodeView] = useState<"list" | "map">("map");
   const [selectedMindNode, setSelectedMindNode] = useState<string | null>(null);
+  // Панорамирование и зум холста майнд-мэпа.
+  const [mindTransform, setMindTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const mindDragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null);
   const memories = resident.mentalMemories || [];
   const selectedMemory = memories.find((memory) => memory.id === memoryId) || null;
   const memoryPageSize = 14;
@@ -3096,6 +3100,18 @@ function MentalChairControlScreen({
   // кольце, листья (rel/trait/episode/station:<key>) на внешнем. Кросс-линки
   // рисуются как рёбра между нодами.
   const interpretationGraph = resident.interpretationGraph;
+  // Человекочитаемая метка ноды: trait:<tag> → memoryTagLabel, episode:<id> → title,
+  // rel:<id> → имя, station:<key> → ключ, ветви → label.
+  const mindNodeLabel = (node: { id: string; kind: string; label: string }): string => {
+    if (node.kind === 'trait') {
+      const tag = node.id.startsWith('trait:') ? node.id.slice(6) : node.label;
+      return memoryTagLabel(tag);
+    }
+    if (node.kind === 'episode') return node.label || 'Эпизод';
+    if (node.kind === 'relationships' && node.id.startsWith('rel:')) return node.label || node.id.slice(4);
+    if (node.kind === 'station' && node.id.startsWith('station:')) return node.label || node.id.slice(8);
+    return node.label;
+  };
   const mindMap = useMemo(() => {
     type MindNode = { id: string; kind: string; parentId: string | null; label: string; content: string | null; valence: number; strength: number; status: string; depth: number; x: number; y: number };
     const raw = interpretationGraph?.nodes || [];
@@ -3231,23 +3247,52 @@ function MentalChairControlScreen({
           </> : <>
           <header><small>{t('game.ui.episodeFromMemory')}</small><b>{selectedMemory ? t('game.ui.selected') : t('game.ui.notSelected')}</b><nav className="mental-view-toggle"><button className={episodeView === "map" ? "active" : ""} onClick={() => setEpisodeView("map")}>Карта</button><button className={episodeView === "list" ? "active" : ""} onClick={() => setEpisodeView("list")}>Список</button></nav></header>
           {episodeView === "map" ? (
-            <div className="mental-mindmap" aria-label="Карта интерпретаций">
-              <svg className="mental-mindmap-edges" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {mindMap.edges.map((edge, index) => {
-                  const from = mindMap.byId.get(edge.from); const to = mindMap.byId.get(edge.to);
-                  if (!from || !to) return null;
-                  return <line key={`${edge.from}:${edge.to}:${index}`} className={`${edge.kind}${selectedMindNode === edge.from || selectedMindNode === edge.to ? " selected" : ""}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
-                })}
-              </svg>
-              {mindMap.nodes.map(node => (
-                <button key={node.id} className={`mental-mindmap-node ${node.kind}${node.status === "dirty" ? " dirty" : ""}${selectedMindNode === node.id ? " selected" : ""}`} style={{ left: `${node.x}%`, top: `${node.y}%`, "--node-valence": node.valence } as any} onClick={() => setSelectedMindNode(selectedMindNode === node.id ? null : node.id)} title={node.content || node.label}>
-                  <b>{node.label}</b>
-                </button>
-              ))}
+            <div
+              className="mental-mindmap"
+              aria-label="Карта интерпретаций"
+              onWheel={(event) => {
+                event.preventDefault();
+                const factor = event.deltaY < 0 ? 1.12 : 0.89;
+                setMindTransform((prev) => ({ ...prev, scale: Math.max(0.4, Math.min(2.5, prev.scale * factor)) }));
+              }}
+              onMouseDown={(event) => {
+                if (event.button !== 0) return;
+                mindDragRef.current = { startX: event.clientX, startY: event.clientY, origX: mindTransform.x, origY: mindTransform.y, moved: false };
+              }}
+              onMouseMove={(event) => {
+                const drag = mindDragRef.current;
+                if (!drag) return;
+                const dx = event.clientX - drag.startX;
+                const dy = event.clientY - drag.startY;
+                if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+                if (drag.moved) setMindTransform((prev) => ({ ...prev, x: drag.origX + dx, y: drag.origY + dy }));
+              }}
+              onMouseUp={() => { mindDragRef.current = null; }}
+              onMouseLeave={() => { mindDragRef.current = null; }}
+            >
+              <div className="mental-mindmap-viewport" style={{ transform: `translate(${mindTransform.x}px, ${mindTransform.y}px) scale(${mindTransform.scale})` }}>
+                <svg className="mental-mindmap-edges" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  {mindMap.edges.map((edge, index) => {
+                    const from = mindMap.byId.get(edge.from); const to = mindMap.byId.get(edge.to);
+                    if (!from || !to) return null;
+                    return <line key={`${edge.from}:${edge.to}:${index}`} className={`${edge.kind}${selectedMindNode === edge.from || selectedMindNode === edge.to ? " selected" : ""}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
+                  })}
+                </svg>
+                {mindMap.nodes.map(node => (
+                  <button key={node.id} className={`mental-mindmap-node ${node.kind}${node.status === "dirty" ? " dirty" : ""}${selectedMindNode === node.id ? " selected" : ""}`} style={{ left: `${node.x}%`, top: `${node.y}%`, "--node-valence": node.valence } as any} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selectedMindNode === node.id ? null : node.id); }} title={node.content || mindNodeLabel(node)}>
+                    <b>{mindNodeLabel(node)}</b>
+                  </button>
+                ))}
+              </div>
+              <div className="mental-mindmap-controls">
+                <button onClick={() => setMindTransform((prev) => ({ ...prev, scale: Math.max(0.4, prev.scale * 1.2) }))}>+</button>
+                <button onClick={() => setMindTransform((prev) => ({ ...prev, scale: Math.min(2.5, prev.scale * 0.83) }))}>−</button>
+                <button onClick={() => setMindTransform({ x: 0, y: 0, scale: 1 })}>⟲</button>
+              </div>
               {selectedMindNode && (() => {
                 const node = mindMap.byId.get(selectedMindNode);
                 if (!node) return null;
-                return <section className="mental-mindmap-detail"><header><small>{node.kind}</small><b>{node.label}</b></header><p>{node.content || "Интерпретация ещё не сформирована."}</p></section>;
+                return <section className="mental-mindmap-detail"><header><small>{node.kind}</small><b>{mindNodeLabel(node)}</b></header><p>{node.content || "Интерпретация ещё не сформирована."}</p></section>;
               })()}
             </div>
           ) : (
@@ -3260,9 +3305,9 @@ function MentalChairControlScreen({
           </div>
           )}
           {episodeView === "list" && memories.length > memoryPageSize && <nav className="mental-memory-pages" aria-label={t('game.ui.episodePages')}><button disabled={memoryPage === 0} onClick={() => setMemoryPage(page => Math.max(0, page - 1))}>←</button><span>{memoryPage + 1} / {memoryPages}</span><button disabled={memoryPage >= memoryPages - 1} onClick={() => setMemoryPage(page => Math.min(memoryPages - 1, page + 1))}>→</button></nav>}
-          <section className={`mental-memory-detail ${selectedMemory ? "selected" : ""}`}>
+          {episodeView === "list" && <section className={`mental-memory-detail ${selectedMemory ? "selected" : ""}`}>
             {selectedMemory ? <><EpisodeMemoryCollage memory={selectedMemory} subjectId={resident.subjectId || resident.id} /><header><small>{t('game.ui.selectedEpisode')}</small><b>{selectedMemory.title}</b></header><p>{selectedMemory.text}</p></> : <p>{t('game.ui.selectCardToRead')}</p>}
-          </section>
+          </section>}
           <footer className="mental-chair-actions mental-selection-actions">
             <button disabled={!selectedMemory || !focusTag || working || busy} onClick={async () => { if (await saveSelection()) setEpisodeWorkspace(true); }}>{t('game.ui.workEpisode')}</button>
             <button className="secondary" onClick={onRelease}>{t('game.ui.releaseShort')}</button>
