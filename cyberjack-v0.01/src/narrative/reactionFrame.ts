@@ -4,6 +4,7 @@ import { OVERLOAD_FRAGMENTED_SPEECH, OVERLOAD_NOTICEABLE } from '../domain/overl
 import { describeObservationSignal } from './interactionObservation';
 import type { CompulsionSignal } from '../domain/conditioning';
 import { getStablePromptFragment } from '../services/stablePromptFragmentCache';
+import { worldGlossaryBlock } from '../domain/worldGlossary';
 
 export type SpeechAct =
     | 'silence'
@@ -756,6 +757,7 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
         frame.continuity.relevantEpisodes.length ? `[Твоя актуальная память]\n${frame.continuity.relevantEpisodes.map(value => `- ${value}`).join('\n')}` : '',
         frame.continuity.relationshipBeliefs.length ? `[Твоя память об отношениях]\n${frame.continuity.relationshipBeliefs.map(value => `- ${value}`).join('\n')}` : '',
         frame.continuity.canonicalFacts.length ? `[Факты о себе]\n${frame.continuity.canonicalFacts.map(value => `- ${value}`).join('\n')}` : '',
+        getStablePromptFragment('world-glossary', () => worldGlossaryBlock()),
         getStablePromptFragment(`character:${frame.speaker.name}:${JSON.stringify(core.values)}:${JSON.stringify(core.needs || [])}:${JSON.stringify(core.vulnerabilities)}:${JSON.stringify(core.defenses)}:${core.centralConflict?.desire}:${core.centralConflict?.fear}`, () =>
             `[Твой характер]\n${behavioralLines.length ? behavioralLines.map(v => `- ${owned(v)}`).join('\n') : '- Ты реагируешь как самостоятельный живой человек.'}${core.centralConflict ? `\n- Тебя ведёт желание: ${core.centralConflict.desire}.\n- Тебя пугает: ${core.centralConflict.fear}.` : ''}`),
         `[Твоя манера речи]\n${core.voice.length ? core.voice.map(v => `- ${owned(v, 'Ты слышишь свою привычную манеру в этих словах')}`).join('\n') : '- Ты говоришь естественно и по-человечески.'}${currentEmotionalVoice ? `\n- Именно сейчас твой голос звучит так: ${currentEmotionalVoice}` : ''}`,
