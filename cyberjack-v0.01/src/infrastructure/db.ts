@@ -717,6 +717,7 @@ safeAddColumn('chat_memory', 'world_minute', 'INTEGER');
 safeAddColumn('chat_memory', 'speaker_id', 'TEXT');
 safeAddColumn('chat_memory', 'message_id', 'TEXT');
 safeAddColumn('chat_memory', 'origin_chat_id', 'INTEGER');
+safeAddColumn('laboratory_room_assignments', 'home_room_id', 'TEXT');
 
 // Repair social turns created before chat delivery was participant-owned.
 // The source of truth remains pending_social_turns; this only fills the

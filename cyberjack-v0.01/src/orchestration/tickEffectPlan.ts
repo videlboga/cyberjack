@@ -5,7 +5,7 @@ import { activeContextsRepo, eventLogRepo, pointStateRepo, sceneCharacterRepo, s
 import { pendingCommandRepo } from '../infrastructure/pendingCommandRepo';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { clearCalibrationSetupContexts } from '../scenario/calibrationContextCleanup';
-import { setLaboratoryPresence } from '../scenario/spatialContext';
+import { setLaboratoryPresence, releaseCharacterFromDevice } from '../scenario/spatialContext';
 import { handleBuyAssetAction } from '../scenario/buyAssetHandler';
 import { ContextManager } from './contextManager';
 
@@ -52,6 +52,11 @@ export type TickEffect =
     | {
         kind: 'lab.clear-setup-contexts';
         subjectId: string;
+    }
+    | {
+        kind: 'lab.release-device';
+        subjectId: string;
+        playerId: string;
     }
     | {
         kind: 'stance.soften-all';
@@ -186,6 +191,9 @@ export function executeTickEffectPlan(
         } else if (effect.kind === 'lab.clear-setup-contexts') {
             clearCalibrationSetupContexts(effect.subjectId);
             applied = true;
+        } else if (effect.kind === 'lab.release-device') {
+            releaseCharacterFromDevice(effect.subjectId, effect.playerId);
+            applied = true;
         } else if (effect.kind === 'stance.soften-all') {
             interactionStanceRepo.softenAll(effect.subjectId, effect.amount);
             applied = true;
@@ -226,7 +234,8 @@ export function executeTickEffectPlan(
 
         if (applied) {
             if (options.appendEvents !== false && effect.kind !== 'lab.set-presence'
-                && effect.kind !== 'lab.clear-setup-contexts' && effect.kind !== 'stance.soften-all'
+                && effect.kind !== 'lab.clear-setup-contexts' && effect.kind !== 'lab.release-device'
+                && effect.kind !== 'stance.soften-all'
                 && effect.kind !== 'stance.soften' && effect.kind !== 'stance.record-ignored'
                 && effect.kind !== 'stance.save' && effect.kind !== 'point.save'
                 && effect.kind !== 'edge.clear' && effect.kind !== 'edge.update'
@@ -245,7 +254,7 @@ export function executeTickEffectPlan(
 
 /** Writes events for effects that have already succeeded in the same transaction. */
 const NO_EVENT_KINDS = new Set([
-    'lab.set-presence', 'lab.clear-setup-contexts', 'stance.soften-all',
+    'lab.set-presence', 'lab.clear-setup-contexts', 'lab.release-device', 'stance.soften-all',
     'stance.soften', 'stance.record-ignored', 'stance.save', 'point.save',
     'edge.clear', 'edge.update', 'pending-command.clear', 'pending-command.save',
     'state-trigger.set', 'context.age', 'market.buy-asset',

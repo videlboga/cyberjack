@@ -436,6 +436,16 @@ export function ensureWorldSeed() {
     `);
     if (characterRepo.get('S-AV-01')) assignRoom.run(PLAYER_ID, 'room_cell_a', 'S-AV-01');
     if (assistant) assignRoom.run(PLAYER_ID, 'room_control', 'NPC-LAB-01');
+    // A resident already living in a cell gets that cell as their stable home
+    // so «иди в свою камеру» resolves without an explicit home assignment.
+    db.prepare(`
+        UPDATE laboratory_room_assignments
+        SET home_room_id = room_id
+        WHERE player_id = ?
+          AND status = 'resident'
+          AND room_id LIKE 'room_cell_%'
+          AND (home_room_id IS NULL OR home_room_id = '')
+    `).run(PLAYER_ID);
     // Май уже имеет авторский профиль и полное визуальное покрытие, поэтому
     // входит в стартовый состав лаборатории как актив, а не остаётся в старом
     // списке кандидатов снабжения. Применяется лишь при первом переводе: её

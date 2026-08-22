@@ -88,6 +88,12 @@ export function setLaboratoryPresence(input: {
         VALUES (?, ?, ?, ?)
         ON CONFLICT(player_id, character_id) DO UPDATE SET room_id = excluded.room_id, status = excluded.status`)
         .run(playerId, input.roomId, input.characterId, input.status);
+    // Entering a living cell as a resident makes it the character's home, so
+    // «иди в свою камеру» resolves to the right cell later.
+    if (String(input.status) === 'resident' && String(input.roomId).startsWith('room_cell_')) {
+        db.prepare(`UPDATE laboratory_room_assignments SET home_room_id = ? WHERE player_id = ? AND character_id = ?`)
+            .run(input.roomId, playerId, input.characterId);
+    }
     db.prepare(`UPDATE scene_characters SET slot_id = ?, presence_state = 'present' WHERE scene_id = ? AND character_id = ?`)
         .run(input.slotId, LAB_SCENE_ID, input.characterId);
     db.prepare(`UPDATE characters SET current_scene_id = ? WHERE id = ?`).run(LAB_SCENE_ID, input.characterId);
@@ -240,6 +246,56 @@ const matches = (query: string, ...values: string[]) => values.some(value => {
     return candidate === query || candidate.includes(query) || query.includes(candidate);
 });
 
+/** Devices that physically fix a character in place; they cannot move themselves. */
+export const ENCLOSED_DEVICE_ASSETS = new Set([
+    'lab_recovery_capsule',
+    'lab_sex_machine',
+    'lab_mental_correction_chair',
+]);
+
+/**
+ * The character's assigned living cell. This is the stable "home" resolved
+ * when a command says «иди в свою камеру» without naming a specific cell.
+ */
+export function getCharacterHomeRoom(characterOrSubjectId: string, playerId = 'PL-1'): string | null {
+    const character = db.prepare(`SELECT id FROM characters WHERE id = ? OR subject_id = ? LIMIT 1`)
+        .get(characterOrSubjectId, characterOrSubjectId) as any;
+    if (!character) return null;
+    const assignment = db.prepare(`SELECT room_id, home_room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`)
+        .get(playerId, character.id) as any;
+    if (!assignment) return null;
+    if (assignment.home_room_id) return String(assignment.home_room_id);
+    // Fall back to a cell the character currently occupies or previously left.
+    if (String(assignment.room_id || '').startsWith('room_cell_')) return String(assignment.room_id);
+    const asset = (db.prepare(`SELECT metadata FROM laboratory_assets WHERE player_id = ?`).all(playerId) as any[])
+        .map(row => { try { return JSON.parse(row.metadata || '{}'); } catch { return {}; } })
+        .find(metadata => metadata.subjectId === character.id);
+    const previous = String(asset?.previousRoomId || '');
+    if (previous.startsWith('room_cell_')) return previous;
+    return null;
+}
+
+/**
+ * Clears a non-enclosed device's occupancy (e.g. the diagnostic table) when a
+ * character walks away on their own. Enclosed devices are released through
+ * useLabAsset; this path only handles the freely-leavable surfaces.
+ */
+export function releaseCharacterFromDevice(characterOrSubjectId: string, playerId = 'PL-1'): void {
+    const character = db.prepare(`SELECT id FROM characters WHERE id = ? OR subject_id = ? LIMIT 1`)
+        .get(characterOrSubjectId, characterOrSubjectId) as any;
+    if (!character) return;
+    const rows = db.prepare(`SELECT asset_id, metadata FROM laboratory_assets WHERE player_id = ?`).all(playerId) as any[];
+    for (const row of rows) {
+        let metadata: Record<string, any> = {};
+        try { metadata = JSON.parse(row.metadata || '{}'); } catch { metadata = {}; }
+        if (String(metadata.subjectId || '') !== character.id) continue;
+        if (ENCLOSED_DEVICE_ASSETS.has(row.asset_id)) continue;
+        const { subjectId: _dropped, ...rest } = metadata;
+        db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE player_id = ? AND asset_id = ?`)
+            .run(JSON.stringify(rest), playerId, row.asset_id);
+    }
+}
+
 /** Move a free character to a room/near an object without occupying that object. */
 export function moveCharacterInLaboratory(characterOrSubjectId: string, targetLocation: string, playerId = 'PL-1'): LaboratoryMoveResult {
     const character = db.prepare(`SELECT id, name FROM characters WHERE id = ? OR subject_id = ? LIMIT 1`)
@@ -248,8 +304,14 @@ export function moveCharacterInLaboratory(characterOrSubjectId: string, targetLo
     const assignment = db.prepare(`SELECT room_id, status FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`)
         .get(playerId, character.id) as any;
     if (!assignment) return { handled: false, moved: false };
-    if (String(assignment.status || '').startsWith('device:')) {
-        return { handled: true, moved: false, reason: `${character.name} находится в оборудовании и не может самостоятельно переместиться.` };
+    // Only enclosed devices physically fix a character in place. The diagnostic
+    // table does not restrain the subject, so a free move off it is allowed.
+    const deviceStatus = String(assignment.status || '');
+    if (deviceStatus.startsWith('device:')) {
+        const assetId = deviceStatus.slice('device:'.length);
+        if (ENCLOSED_DEVICE_ASSETS.has(assetId)) {
+            return { handled: true, moved: false, reason: `${character.name} зафиксирована в оборудовании и не может самостоятельно переместиться.` };
+        }
     }
 
     const query = normalized(targetLocation);
@@ -262,20 +324,33 @@ export function moveCharacterInLaboratory(characterOrSubjectId: string, targetLo
         JOIN characters c ON c.id = a.character_id WHERE a.player_id = ?
     `).all(playerId) as any[];
 
-    const targetAsset = assets.find(asset =>
-        matches(query, asset.name, asset.asset_id) ||
-        (asset.asset_id === 'lab_diagnostic_table' && /(диагност|калибровоч|процедурн).*(стол)|\bстол/u.test(query)) ||
-        (asset.asset_id === 'lab_mental_correction_chair' && /(ментальн|нейро|коррекц).*(кресл)|\bкресл/u.test(query)) ||
-        (asset.asset_id === 'lab_terminal' && /(терминал|пульт)/u.test(query)) ||
-        (asset.asset_id.includes('capsule') && /(капсул)/u.test(query))
-    );
-    const targetRoom = targetAsset
-        ? rooms.find(room => room.room_id === targetAsset.parsed.roomId)
-        : rooms.find(room => matches(query, room.name, room.room_id));
-    const targetCharacter = !targetAsset && !targetRoom
-        ? characters.find(entry => entry.id !== character.id && matches(query, entry.name, entry.id))
-        : null;
-    const room = targetRoom || (targetCharacter ? rooms.find(entry => entry.room_id === targetCharacter.room_id) : null);
+    let room: any = null;
+    let slotId: string;
+    let label: string;
+    if (/^(своя камера|свою камеру|в камеру|домой|ко мне домой|к себе)$/.test(query)) {
+        const homeRoomId = getCharacterHomeRoom(character.id, playerId);
+        if (!homeRoomId) return { handled: false, moved: false };
+        room = rooms.find(entry => entry.room_id === homeRoomId) || null;
+        slotId = `room:${homeRoomId}`;
+        label = room ? `в ${room.name}` : 'в свою камеру';
+    } else {
+        const targetAsset = assets.find(asset =>
+            matches(query, asset.name, asset.asset_id) ||
+            (asset.asset_id === 'lab_diagnostic_table' && /(диагност|калибровоч|процедурн).*(стол)|\bстол/u.test(query)) ||
+            (asset.asset_id === 'lab_mental_correction_chair' && /(ментальн|нейро|коррекц).*(кресл)|\bкресл/u.test(query)) ||
+            (asset.asset_id === 'lab_terminal' && /(терминал|пульт)/u.test(query)) ||
+            (asset.asset_id.includes('capsule') && /(капсул)/u.test(query))
+        );
+        const targetRoom = targetAsset
+            ? rooms.find(entry => entry.room_id === targetAsset.parsed.roomId)
+            : rooms.find(entry => matches(query, entry.name, entry.room_id));
+        const targetCharacter = !targetAsset && !targetRoom
+            ? characters.find(entry => entry.id !== character.id && matches(query, entry.name, entry.id))
+            : null;
+        room = targetRoom || (targetCharacter ? rooms.find(entry => entry.room_id === targetCharacter.room_id) : null);
+        slotId = targetAsset ? `near:${targetAsset.asset_id}` : targetCharacter ? `near:${targetCharacter.id}` : `room:${room?.room_id || ''}`;
+        label = targetAsset ? `к оборудованию «${targetAsset.name}»` : targetCharacter ? `к ${targetCharacter.name}` : (room ? `в ${room.name}` : '');
+    }
     if (!room) return { handled: false, moved: false };
 
     const occupied = db.prepare(`SELECT COUNT(*) AS count FROM laboratory_room_assignments WHERE player_id = ? AND room_id = ? AND character_id != ? AND status != 'operator'`)
@@ -287,8 +362,6 @@ export function moveCharacterInLaboratory(characterOrSubjectId: string, targetLo
         return { handled: true, moved: false, reason: `В помещении «${room.name}» нет свободного места.` };
     }
 
-    const slotId = targetAsset ? `near:${targetAsset.asset_id}` : targetCharacter ? `near:${targetCharacter.id}` : `room:${room.room_id}`;
-    const label = targetAsset ? `к оборудованию «${targetAsset.name}»` : targetCharacter ? `к ${targetCharacter.name}` : `в ${room.name}`;
     const unchanged = assignment.room_id === room.room_id && (db.prepare(`SELECT slot_id FROM scene_characters WHERE scene_id = 'scene_lab_calibrator' AND character_id = ?`).get(character.id) as any)?.slot_id === slotId;
     if (unchanged) return { handled: true, moved: false, label, slotId, reason: `${character.name} уже находится ${label}.` };
 
@@ -296,6 +369,10 @@ export function moveCharacterInLaboratory(characterOrSubjectId: string, targetLo
         // A free move starts a new physical scene: table-bound poses and
         // restraints cannot follow the character into another room.
         clearCalibrationSetupContexts(character.id);
+        // Walking off a non-enclosed surface (diagnostic table) frees its slot.
+        if (deviceStatus.startsWith('device:') && !ENCLOSED_DEVICE_ASSETS.has(deviceStatus.slice('device:'.length))) {
+            releaseCharacterFromDevice(character.id, playerId);
+        }
         // The player is an operator rather than a room occupant. Moving them
         // to the screen's physical slot must not make them consume capacity.
         const nextStatus = character.id === playerId ? 'operator' : 'resident';

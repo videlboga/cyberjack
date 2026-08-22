@@ -87,4 +87,34 @@ describe('resolveLaboratoryMove', () => {
         expect(result.moved).toBe(false);
         expect(result.effects).toEqual([]);
     });
+
+    it('resolves «своя камера» to the character home cell', () => {
+        db.prepare(`UPDATE laboratory_room_assignments SET home_room_id = 'r_cell' WHERE player_id = 'PL-1' AND character_id = 'S-01'`).run();
+        db.prepare(`UPDATE laboratory_rooms SET capacity = 3 WHERE player_id = 'PL-1' AND room_id = 'r_cell'`).run();
+        const result = resolveLaboratoryMove('S-01', 'своя камера', 'PL-1');
+        expect(result.outcome).toBe('allowed');
+        expect(result.slotId).toBe('room:r_cell');
+        expect(result.label).toBe('в Изоляционная камера');
+    });
+
+    it('allows a free move off the diagnostic table (non-enclosed device)', () => {
+        // Put S-01 onto the diagnostic table (device:), then free the cell capacity.
+        db.prepare(`UPDATE laboratory_room_assignments SET status = 'device:lab_diagnostic_table' WHERE player_id = 'PL-1' AND character_id = 'S-01'`).run();
+        db.prepare(`UPDATE scene_characters SET slot_id = 'device:lab_diagnostic_table' WHERE scene_id = ? AND character_id = 'S-01'`).run(LAB);
+        db.prepare(`UPDATE laboratory_rooms SET capacity = 3 WHERE player_id = 'PL-1' AND room_id = 'r_cell'`).run();
+        const result = resolveLaboratoryMove('S-01', 'Изоляционная камера', 'PL-1');
+        expect(result.outcome).toBe('allowed');
+        expect(result.slotId).toBe('room:r_cell');
+        // Walking off the table frees its slot (release-device) as part of the move.
+        expect(result.effects.map(e => e.kind)).toContain('lab.release-device');
+    });
+
+    it('blocks a move while fixed in an enclosed device (capsule)', () => {
+        db.prepare(`INSERT OR IGNORE INTO laboratory_assets (player_id, asset_id, name, metadata) VALUES (?, ?, ?, ?)`)
+            .run('PL-1', 'lab_recovery_capsule', 'Капсула восстановления', JSON.stringify({ roomId: 'r_main' }));
+        db.prepare(`UPDATE laboratory_room_assignments SET status = 'device:lab_recovery_capsule' WHERE player_id = 'PL-1' AND character_id = 'S-01'`).run();
+        const result = resolveLaboratoryMove('S-01', 'Изоляционная камера', 'PL-1');
+        expect(result.outcome).toBe('blocked');
+        expect(result.reason).toMatch(/зафиксирована в оборудовании/);
+    });
 });
