@@ -45,7 +45,7 @@
     "description": "Металлический инструмент для полного раскрытия и осмотра.",
     "type": "equipment",
     "tags": [
-      "medical",
+      "clinical",
       "metal"
     ]
   },
@@ -86,7 +86,7 @@
     "type": "equipment",
     "tags": [
       "machine",
-      "medical"
+      "clinical"
     ]
   },
   {
@@ -116,7 +116,7 @@
     "type": "consumable",
     "tags": [
       "chemical",
-      "medical"
+      "clinical"
     ]
   },
   {
@@ -134,21 +134,36 @@
     "name": "Регенеративный раствор (Regen-R)",
     "description": "Капсульная ампула для ускоренного восстановления и снижения физиологической нагрузки.",
     "type": "consumable",
-    "tags": ["chemical", "medical", "capsule", "recovery"]
+    "tags": [
+      "chemical",
+      "clinical",
+      "capsule",
+      "recovery"
+    ]
   },
   {
     "id": "drug_neurostabilizer",
     "name": "Нейростабилизатор (NeuroCalm)",
     "description": "Капсульная ампула, сглаживающая реактивность и риск перегрузки.",
     "type": "consumable",
-    "tags": ["chemical", "medical", "capsule", "stabilizer"]
+    "tags": [
+      "chemical",
+      "clinical",
+      "capsule",
+      "stabilizer"
+    ]
   },
   {
     "id": "drug_plasticity_catalyst",
     "name": "Пластический катализатор (Mnemosyne-P)",
     "description": "Капсульная ампула, усиливающая закрепление последующего опыта.",
     "type": "consumable",
-    "tags": ["chemical", "medical", "capsule", "plasticity"]
+    "tags": [
+      "chemical",
+      "clinical",
+      "capsule",
+      "plasticity"
+    ]
   },
   {
     "id": "eq_jumpsuit",
@@ -226,7 +241,7 @@
     "type": "clothing",
     "tags": [
       "clothing",
-      "medical",
+      "clinical",
       "gown"
     ],
     "description": "Свободная лабораторная рубашка до середины бедра, раскрывающаяся сзади."

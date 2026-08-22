@@ -356,7 +356,6 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
         ],
         tags: [
 "clinical",
-"medical",
 "pressure",
 "submission",
 "veil"

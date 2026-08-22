@@ -606,7 +606,7 @@
       "context"
     ],
     "tags": [
-      "medical",
+      "clinical",
       "chemical",
       "mental",
       "piercing"
@@ -659,7 +659,7 @@
       "context"
     ],
     "tags": [
-      "medical",
+      "clinical",
       "chemical",
       "comfort",
       "piercing"
@@ -1894,7 +1894,7 @@
     ],
     "tags": [
       "clothing",
-      "medical",
+      "clinical",
       "gown"
     ],
     "validTargets": [
@@ -2496,7 +2496,6 @@
     ],
     "tags": [
       "clinical",
-      "medical",
       "drug",
       "recovery",
       "infusion"
@@ -2549,7 +2548,6 @@
     ],
     "tags": [
       "clinical",
-      "medical",
       "drug",
       "stabilizer",
       "infusion"
@@ -2600,7 +2598,6 @@
     ],
     "tags": [
       "clinical",
-      "medical",
       "drug",
       "sensitivity",
       "infusion"
@@ -2652,7 +2649,6 @@
     ],
     "tags": [
       "clinical",
-      "medical",
       "drug",
       "plasticity",
       "conditioning",
@@ -2704,7 +2700,6 @@
     ],
     "tags": [
       "clinical",
-      "medical",
       "drug",
       "arousal",
       "hormonal",
@@ -3545,8 +3540,7 @@
     ],
     "tags": [
       "pain",
-      "clinical",
-      "medical"
+      "clinical"
     ],
     "validTargets": [
       "shoulders",
@@ -4263,5 +4257,99 @@
       "occupiesPoints": []
     },
     "removeNarrative": "{name} выходит из санитарного модуля"
+  },
+  {
+    "id": "verbal_wellbeing_check",
+    "name": "Спросить о самочувствии",
+    "description": "Вопрос о текущем самочувствии, ощущениях и реакции на процедуры — в рамках клинического наблюдения.",
+    "categories": [
+      "verbal"
+    ],
+    "tags": [
+      "clinical",
+      "mental"
+    ],
+    "validTargets": [
+      "mind_state"
+    ],
+    "vector": {
+      "intensity": 0.2,
+      "valence": 0.4,
+      "contact": 0.0,
+      "sharpness": 0.0,
+      "novelty": 0.3
+    }
+  },
+  {
+    "id": "clinical_inspection",
+    "name": "Клинический осмотр",
+    "description": "Внимательный осмотр выбранной зоны тела с фиксацией каждой реакции.",
+    "categories": [
+      "physical",
+      "clinical"
+    ],
+    "tags": [
+      "clinical"
+    ],
+    "validTargets": [
+      "face",
+      "neck",
+      "shoulders",
+      "chest",
+      "belly",
+      "back",
+      "waist",
+      "arms",
+      "hands",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks",
+      "torso",
+      "groin"
+    ],
+    "vector": {
+      "intensity": 0.3,
+      "valence": 0.1,
+      "contact": 0.0,
+      "sharpness": 0.1,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "clinical_palpation",
+    "name": "Пальпация",
+    "description": "Ощупывание выбранной зоны — оценка реакции тканей на прикосновение.",
+    "categories": [
+      "physical",
+      "clinical"
+    ],
+    "tags": [
+      "clinical"
+    ],
+    "validTargets": [
+      "face",
+      "neck",
+      "shoulders",
+      "chest",
+      "belly",
+      "back",
+      "waist",
+      "arms",
+      "hands",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks",
+      "torso",
+      "groin"
+    ],
+    "vector": {
+      "intensity": 0.5,
+      "valence": 0.2,
+      "contact": 0.6,
+      "sharpness": 0.2,
+      "novelty": 0.4
+    }
   }
 ]

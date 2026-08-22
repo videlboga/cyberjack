@@ -259,7 +259,7 @@ describe('persistent conditioning', () => {
         expect(clothingConditioningTags({ contextIds: [], directTags: ['sexual'], pointId: 'vulva', contact: .8 }))
             .toContainEqual({ tag: 'exposure', sourceId: 'nude', weight: .85 });
         expect(clothingConditioningTags({ contextIds: ['eq_clothe_lab_gown'], directTags: ['pain'], pointId: 'arms', contact: .2 }))
-            .toContainEqual({ tag: 'medical', sourceId: 'eq_clothe_lab_gown', weight: .65 });
+            .toContainEqual({ tag: 'clinical', sourceId: 'eq_clothe_lab_gown', weight: .65 });
         expect(clothingConditioningTags({ contextIds: ['eq_clothe_jumpsuit'], directTags: ['pain'], pointId: 'arms', contact: .2 }))
             .toContainEqual({ tag: 'deprivation', sourceId: 'eq_clothe_jumpsuit', weight: .6 });
         expect(clothingConditioningTags({ contextIds: ['eq_clothe_dress'], directTags: ['pain'], pointId: 'chest', contact: .5 }))

@@ -4203,7 +4203,7 @@ export function CalibrationPrototype({
       trait_restraint_fetish: ["restraint"],
       trait_conditioned_submission: ["control", "command", "submission"],
       trait_exhibitionist: ["exposure", "humiliation"],
-      trait_clinical_fetish: ["clinical", "medical"],
+      trait_clinical_fetish: ["clinical"],
       trait_technophile: ["electronic", "machine"],
     },
     goalTags = goalKey ? goalTraitTags[goalKey] || [goalKey] : [],

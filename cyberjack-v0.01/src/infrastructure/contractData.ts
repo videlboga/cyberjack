@@ -421,7 +421,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         ],
         tags: [
 "clinical",
-"medical",
 "penetration",
 "exposure",
 "restraint"

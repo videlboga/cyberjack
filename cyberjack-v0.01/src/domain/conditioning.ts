@@ -77,7 +77,7 @@ export const LEARNABLE_PREFERENCE_TAGS = new Set([
     'pain', 'tickling',
     'restraint', 'control', 'command', 'pressure', 'submission',
     'exposure', 'humiliation', 'demeaning', 'vulnerable',
-    'clinical', 'medical', 'drug', 'chemical',
+    'clinical', 'drug', 'chemical',
     'electronic', 'machine',
     'feet', 'oral', 'penetration', 'sexual',
     'deprivation',
@@ -214,7 +214,7 @@ export function contextConditioningTags(
     };
 
     for (const context of contexts) {
-        if (!['equipment', 'restraint', 'sexual_interaction', 'pose', 'sensory'].includes(context.type || '')) continue;
+        if (!['equipment', 'restraint', 'sexual_interaction', 'pose', 'sensory', 'condition', 'status'].includes(context.type || '')) continue;
         for (const tag of new Set(context.tags || [])) {
             if (direct.has(tag) || !LEARNABLE_PREFERENCE_TAGS.has(tag)) continue;
             const candidate = { tag, sourceId: context.id, weight: weightFor(tag, context.type) };
@@ -236,7 +236,7 @@ export function clothingConditioningTags(input: {
     const tags = new Set(input.directTags);
     const result: WeightedContextTag[] = [];
     const add = (tag: string, sourceId: string, weight: number) => result.push({ tag, sourceId, weight });
-    if (ids.has('eq_clothe_lab_gown')) add('medical', 'eq_clothe_lab_gown', .65);
+    if (ids.has('eq_clothe_lab_gown')) add('clinical', 'eq_clothe_lab_gown', .65);
     if (ids.has('eq_clothe_stockings')) {
         // Stockings carry a weak erotic association by themselves. Their more
         // specific meaning is learned only while the covered legs/feet are the
@@ -329,7 +329,7 @@ export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
         { id: 'trait_restraint_fetish', label: 'Фетиш фиксации', strength: appliedTags.restraint || 0 },
         { id: 'trait_conditioned_submission', label: 'Обусловленная покорность', strength: positiveMean(appliedTags, ['control', 'command', 'submission']) },
         { id: 'trait_exhibitionist', label: 'Эксгибиционизм', strength: positiveMean(appliedTags, ['exposure', 'humiliation']) },
-        { id: 'trait_clinical_fetish', label: 'Медицинский фетиш', strength: positiveMean(appliedTags, ['clinical', 'medical']) },
+        { id: 'trait_clinical_fetish', label: 'Медицинский фетиш', strength: appliedTags.clinical || 0 },
         { id: 'trait_electrophile', label: 'Электрофетиш', strength: appliedTags.electronic || 0 },
         { id: 'trait_technophile', label: 'Машинный фетиш', strength: appliedTags.machine || 0 },
         { id: 'trait_sexual_dependency', label: 'Сексуальная зависимость', strength: appliedTags.sexual || 0 },
@@ -362,7 +362,7 @@ const COMPULSION_DEFINITIONS: Array<{
     { traitId:'trait_restraint_fetish', cueTags:['restraint'], impulse:'сохранять или искать фиксацию', actionTags:['restraint'] },
     { traitId:'trait_conditioned_submission', cueTags:['control','command','submission'], impulse:'подчиниться направляющему импульсу', actionTags:['control','command','submission'] },
     { traitId:'trait_exhibitionist', cueTags:['exposure','humiliation','vulnerable'], impulse:'оставаться открытой чужому вниманию', actionTags:['exposure','humiliation','vulnerable'] },
-    { traitId:'trait_clinical_fetish', cueTags:['clinical','medical'], impulse:'искать медицински оформленное воздействие', actionTags:['clinical','medical'] },
+    { traitId:'trait_clinical_fetish', cueTags:['clinical'], impulse:'искать медицински оформленное воздействие', actionTags:['clinical'] },
     { traitId:'trait_electrophile', cueTags:['electronic'], impulse:'искать электрическую стимуляцию', actionTags:['electronic'] },
     { traitId:'trait_technophile', cueTags:['machine'], impulse:'не прерывать машинное воздействие', actionTags:['machine'] },
     { traitId:'trait_sexual_dependency', cueTags:['sexual','penetration','oral'], impulse:'сохранить или получить сексуальную стимуляцию', actionTags:['sexual','penetration','oral'] },

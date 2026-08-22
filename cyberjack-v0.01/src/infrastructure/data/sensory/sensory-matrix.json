@@ -443,7 +443,7 @@
         "context"
       ],
       "tags": [
-        "medical",
+        "clinical",
         "chemical",
         "mental",
         "piercing"
@@ -461,7 +461,7 @@
         "context"
       ],
       "tags": [
-        "medical",
+        "clinical",
         "chemical",
         "comfort",
         "piercing"
@@ -1315,7 +1315,7 @@
       ],
       "tags": [
         "clothing",
-        "medical",
+        "clinical",
         "gown"
       ],
       "kind": "systemic",
@@ -1405,7 +1405,6 @@
       ],
       "tags": [
         "clinical",
-        "medical",
         "drug",
         "recovery",
         "infusion"
@@ -1424,7 +1423,6 @@
       ],
       "tags": [
         "clinical",
-        "medical",
         "drug",
         "stabilizer",
         "infusion"
@@ -1443,7 +1441,6 @@
       ],
       "tags": [
         "clinical",
-        "medical",
         "drug",
         "sensitivity",
         "infusion"
@@ -1462,7 +1459,6 @@
       ],
       "tags": [
         "clinical",
-        "medical",
         "drug",
         "plasticity",
         "conditioning",
@@ -1482,7 +1478,6 @@
       ],
       "tags": [
         "clinical",
-        "medical",
         "drug",
         "arousal",
         "hormonal",
