@@ -9,7 +9,6 @@ import {
   calibrationActions,
   ActionDef,
   actionIntensity,
-  actionSemanticFallback,
   peakActionImagePath,
   semanticTagLabels,
 } from "./CalibrationPrototype";
@@ -5373,9 +5372,7 @@ function ContainerConversation({
     if (action.group === "clothing") return ["одежда"];
     if (action.group === "pose") return ["поза"];
     const authoredTags = actionMetaFor(action.id)?.tags || [];
-    return Array.from(
-      new Set([...authoredTags, ...(actionSemanticFallback[action.id] || [])]),
-    )
+    return Array.from(new Set(authoredTags))
       .filter((tag) => semanticTagLabels[tag])
       .slice(0, 3)
       .map((tag) => semanticTagLabels[tag]);

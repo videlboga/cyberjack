@@ -214,31 +214,7 @@ export const semanticTagLabels: Record<string, string> = {
   deprivation: "депривация",
   machine: "машина",
 };
-export const actionSemanticFallback: Record<string, string[]> = {
-  feather_stroke: ["tickling"],
-  tickle: ["tickling"],
-  hot_wax: ["pain"],
-  firm_grip: ["pain"],
-  light_bite: ["pain"],
-  hard_bite: ["pain"],
-  pinch: ["pain"],
-  scratching: ["pain"],
-  slap: ["pain", "humiliation"],
-  hard_slap: ["pain", "humiliation"],
-  needle_prick: ["pain", "medical"],
-  whip_strike: ["pain"],
-  taser_shock: ["pain", "electronic"],
-  hair_pull: ["pain", "control"],
-  light_kiss: ["sexual"],
-  deep_kiss: ["sexual", "oral"],
-  licking: ["sexual", "oral"],
-  finger_insertion: ["sexual", "penetration"],
-  act_start_penetration: ["sexual", "penetration"],
-  act_start_oral_giving: ["sexual", "oral"],
-  act_deepen_oral: ["sexual", "oral"],
-};
-const actionSection = (action: ActionDef) => {
-  const tags = actionSemanticFallback[action.id] || [];
+const actionSection = (action: ActionDef, tags: string[] = []) => {
   if (action.group === "clothing") return "Одежда";
   if (action.group === "equipment") return "Оснащение и фиксация";
   if (action.group === "pose") return "Положение тела";
@@ -248,10 +224,7 @@ const actionSection = (action: ActionDef) => {
   return "Мягкий и сенсорный контакт";
 };
 export const actionIntensity = (action: ActionDef, tags: string[]) => {
-  const allTags = new Set([
-    ...tags,
-    ...(actionSemanticFallback[action.id] || []),
-  ]);
+  const allTags = new Set(tags);
   return /hard|whip|belt|taser|shock|needle/.test(action.id)
     ? 3
     : /deep|firm|pinch|slap|bite|scratch|ice|wax/.test(action.id) ||
@@ -2669,10 +2642,9 @@ export function CalibrationPrototype({
       } else {
         const beforeTags = parsePreferences(before?.preferences).tags;
         const afterTags = parsePreferences(after?.preferences).tags;
-        const directTags = new Set([
-          ...(actionMeta.find((meta) => meta.id === item.actionId)?.tags || []),
-          ...(actionSemanticFallback[item.actionId] || []),
-        ]);
+        const directTags = new Set(
+          actionMeta.find((meta) => meta.id === item.actionId)?.tags || [],
+        );
         setLastConditioningChanges(
           Array.from(
             new Set([...Object.keys(beforeTags), ...Object.keys(afterTags)]),
@@ -6146,24 +6118,34 @@ export function CalibrationPrototype({
               setSelectedActionId("");
             }}
           >
-            {Array.from(new Set(visibleActions.map(actionSection))).map(
-              (section) => (
+            {Array.from(
+              new Set(
+                visibleActions.map((action) =>
+                  actionSection(
+                    action,
+                    actionMeta.find((meta) => meta.id === action.id)?.tags || [],
+                  ),
+                ),
+              ),
+            ).map((section) => (
                 <React.Fragment key={`operation-section-${section}`}>
                   <h3 className="operation-section-heading">{section}</h3>
                   {visibleActions
-                    .filter((action) => actionSection(action) === section)
+                    .filter(
+                      (action) =>
+                        actionSection(
+                          action,
+                          actionMeta.find((meta) => meta.id === action.id)
+                            ?.tags || [],
+                        ) === section,
+                    )
                     .map((a) => {
                       const effectiveAction = a;
                       const authoredTags =
                         actionMeta.find(
                           (meta) => meta.id === effectiveAction.id,
                         )?.tags || [];
-                      const tags = Array.from(
-                        new Set([
-                          ...authoredTags,
-                          ...(actionSemanticFallback[effectiveAction.id] || []),
-                        ]),
-                      )
+                      const tags = Array.from(new Set(authoredTags))
                         .filter((tag) => semanticTagLabels[tag])
                         .slice(0, 3);
                       const intensity = actionIntensity(effectiveAction, tags);
