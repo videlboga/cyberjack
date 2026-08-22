@@ -128,6 +128,11 @@ function syncAssociationEffects(subjectId: string, episode: MemoryEpisode, summa
     // Граф интерпретаций: детерминированное распространение ассоциаций на
     // родительские ноды (rel/trait/self) + кросс-линки эпизода.
     try {
+        // Полный текст эпизода: summary + все моменты (реплики, действия).
+        const fullText = [
+            episode.text,
+            ...episode.moments.map(moment => moment.text),
+        ].filter(Boolean).join(' ');
         propagateEpisode(
             subjectId,
             episode.id,
@@ -143,6 +148,7 @@ function syncAssociationEffects(subjectId: string, episode: MemoryEpisode, summa
                 expectation: item.expectation,
             })),
             summary.appraisal,
+            fullText,
         );
     } catch (error: any) {
         console.warn('[Interpretation] propagate failed:', error?.message || error);

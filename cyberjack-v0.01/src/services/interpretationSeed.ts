@@ -36,7 +36,7 @@ export function ensureInterpretationTree(subjectId: string) {
     const upsert = (id: string, kind: string, parentId: string | null, label: string) => {
         const existing = interpretationRepo.get(subjectId, id);
         if (existing) return;
-        interpretationRepo.upsert({ id, subjectId, kind: kind as any, parentId, label, content: null, valence: 0, strength: 0, fingerprint: null });
+        interpretationRepo.upsert({ id, subjectId, kind: kind as any, parentId, label, content: null, sourceText: null, valence: 0, strength: 0, fingerprint: null });
     };
     upsert('worldview', 'worldview', null, 'Сценарий жизни');
     upsert('relationships', 'relationships', 'worldview', 'Отношения');
@@ -84,6 +84,7 @@ export function seedSubjectFacts(subjectId: string) {
                 parentId: 'biography',
                 label,
                 content: null,
+                sourceText: line.fact,
                 valence: 0,
                 strength: 0,
                 fingerprint: null,

@@ -22,6 +22,7 @@ export interface InterpretationNode {
     parentId: string | null;
     label: string;
     content: string | null;
+    sourceText: string | null;
     valence: number;
     strength: number;
     fingerprint: string | null;
@@ -53,19 +54,20 @@ export const interpretationRepo = {
     },
     upsert(node: Omit<InterpretationNode, 'status'> & { status?: InterpretationNode['status'] }) {
         db.prepare(`INSERT INTO interpretation_nodes
-            (id, subject_id, kind, parent_id, label, content, valence, strength, fingerprint, status, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            (id, subject_id, kind, parent_id, label, content, source_text, valence, strength, fingerprint, status, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(subject_id, id) DO UPDATE SET
               kind = excluded.kind,
               parent_id = excluded.parent_id,
               label = excluded.label,
               content = excluded.content,
+              source_text = excluded.source_text,
               valence = excluded.valence,
               strength = excluded.strength,
               fingerprint = excluded.fingerprint,
               status = excluded.status,
               updated_at = CURRENT_TIMESTAMP`)
-            .run(node.id, node.subjectId, node.kind, node.parentId, node.label, node.content, node.valence, node.strength, node.fingerprint, node.status || 'ready');
+            .run(node.id, node.subjectId, node.kind, node.parentId, node.label, node.content, node.sourceText, node.valence, node.strength, node.fingerprint, node.status || 'ready');
     },
     markDirty(subjectId: string, id: string) {
         db.prepare('UPDATE interpretation_nodes SET status = ? WHERE subject_id = ? AND id = ?').run('dirty', subjectId, id);
@@ -125,6 +127,7 @@ function mapNode(row: any): InterpretationNode {
         parentId: row.parent_id ?? null,
         label: row.label,
         content: row.content ?? null,
+        sourceText: row.source_text ?? null,
         valence: Number(row.valence) || 0,
         strength: Number(row.strength) || 0,
         fingerprint: row.fingerprint ?? null,

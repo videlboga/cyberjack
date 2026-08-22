@@ -30,7 +30,7 @@ export interface AssociationSignal {
 }
 
 /** Создаёт/обновляет episode-ноду и возвращает её id. */
-function ensureEpisodeNode(subjectId: string, episodeId: number, title: string, text: string): string {
+function ensureEpisodeNode(subjectId: string, episodeId: number, title: string, text: string, sourceText: string): string {
     const id = `episode:${episodeId}`;
     const existing = interpretationRepo.get(subjectId, id);
     interpretationRepo.upsert({
@@ -40,6 +40,7 @@ function ensureEpisodeNode(subjectId: string, episodeId: number, title: string, 
         parentId: null, // эпизод висит на родителях через кросс-линки
         label: title || `Эпизод ${episodeId}`,
         content: text,
+        sourceText: sourceText || text,
         valence: 0,
         strength: 0,
         fingerprint: text.slice(0, 200),
@@ -55,9 +56,10 @@ export function propagateEpisode(
     text: string,
     associations: AssociationSignal[],
     appraisal?: string,
+    sourceText?: string,
 ): { touched: string[]; deltas: Map<string, number> } {
     ensureInterpretationTree(subjectId);
-    const episodeNodeId = ensureEpisodeNode(subjectId, episodeId, title, text);
+    const episodeNodeId = ensureEpisodeNode(subjectId, episodeId, title, text, sourceText || text);
 
     const deltas = new Map<string, number>();
     const touched: string[] = [];
@@ -119,7 +121,7 @@ export function propagateEpisode(
 
 function ensureNode(subjectId: string, id: string, kind: string, parentId: string, label: string) {
     if (interpretationRepo.get(subjectId, id)) return;
-    interpretationRepo.upsert({ id, subjectId, kind: kind as any, parentId, label, content: null, valence: 0, strength: 0, fingerprint: null });
+    interpretationRepo.upsert({ id, subjectId, kind: kind as any, parentId, label, content: null, sourceText: null, valence: 0, strength: 0, fingerprint: null });
 }
 
 function link(subjectId: string, fromId: string, toId: string, kind: 'cross' | 'evidence', weight: number) {

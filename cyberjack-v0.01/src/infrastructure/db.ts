@@ -552,6 +552,7 @@ db.exec(`
     parent_id TEXT,
     label TEXT NOT NULL,
     content TEXT,
+    source_text TEXT,
     valence REAL NOT NULL DEFAULT 0,
     strength REAL NOT NULL DEFAULT 0,
     fingerprint TEXT,
@@ -927,6 +928,12 @@ try {
 
 try {
   db.exec(`ALTER TABLE subject_edge_states ADD COLUMN last_expression_minute INTEGER`);
+} catch (e) {
+  // New installations receive it from CREATE TABLE; existing saves migrate here.
+}
+
+try {
+  db.exec(`ALTER TABLE interpretation_nodes ADD COLUMN source_text TEXT`);
 } catch (e) {
   // New installations receive it from CREATE TABLE; existing saves migrate here.
 }
