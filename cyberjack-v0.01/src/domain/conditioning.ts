@@ -178,38 +178,8 @@ export function conditioningSignal(input: ConditioningSignalInput): Conditioning
     };
 }
 
-const LEGACY_ACTION_TAGS: Record<string, string[]> = {
-    gentle_stroke: ['affection'],
-    tickle: ['tickling'],
-    feather_stroke: ['tickling'],
-    light_kiss: ['sexual'],
-    deep_kiss: ['sexual', 'oral'],
-    licking: ['sexual', 'oral'],
-    deep_massage: ['stimulation'],
-    ice_cube: ['stimulation', 'sensory'],
-    hot_wax: ['pain'],
-    firm_grip: ['pain', 'blunt'],
-    light_bite: ['pain'],
-    hard_bite: ['pain'],
-    pinch: ['pain'],
-    scratching: ['pain'],
-    slap: ['pain', 'impact', 'humiliation'],
-    hard_slap: ['pain', 'impact', 'humiliation'],
-    needle_prick: ['pain', 'clinical', 'medical'],
-    whip_strike: ['pain', 'impact'],
-    taser_shock: ['pain', 'electronic'],
-    hair_pull: ['pain', 'control'],
-    finger_insertion: ['penetration', 'sexual'],
-    vibrator_pulse: ['electronic', 'stimulation'],
-    pose_kneeling: ['submission'],
-    pose_spread_eagle: ['exposure', 'vulnerable'],
-    act_hold_exposure: ['exposure', 'vulnerable'],
-    act_present_feet: ['feet', 'exposure'],
-    verbal_pressure: ['command', 'pressure'],
-};
-
 export function conditioningTags(actionKey: string | undefined, authoredTags: string[] = []): string[] {
-    return Array.from(new Set([...(authoredTags || []), ...(actionKey ? LEGACY_ACTION_TAGS[actionKey] || [] : [])]));
+    return Array.from(new Set([...(authoredTags || [])]));
 }
 
 export type ContextConditioningSource = {

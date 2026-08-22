@@ -68,7 +68,7 @@ export function autonomousInitiativeProbability(input: {
 
 export function isAutonomousActionAllowed(action: ActionScoreResult, relationOpenness?: number): boolean {
     if ((relationOpenness ?? 0) >= 35) return true;
-    const tags = conditioningTags(action.actionId);
+    const tags = conditioningTags(action.actionId, action.tags);
     return NEUTRAL_CONTACT_POINTS.has(action.pointId)
         && !NEUTRAL_RESTRICTED_ACTION.test(action.actionId)
         && !tags.some(tag => INTIMATE_ACTION_TAGS.has(tag));
@@ -108,7 +108,7 @@ function chooseAction(actorId: string, preferences: unknown, observed: ObservedE
         const relation = characterRelationRepo.get(actorId, targetId);
         const scored = ActionScorer.scoreAvailableActions(sceneId, actorId, targetId, points.length ? points : ['systemic'])
             .map(action => {
-                const compulsion = deriveCompulsionSignals(preferences, conditioningTags(action.actionId), [action.pointId])[0];
+                const compulsion = deriveCompulsionSignals(preferences, conditioningTags(action.actionId, action.tags), [action.pointId])[0];
                 return compulsion?.level === 3
                     ? { ...action, score:action.score + compulsion.pressure * 18 }
                     : action;

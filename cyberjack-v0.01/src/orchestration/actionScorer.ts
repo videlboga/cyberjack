@@ -22,6 +22,7 @@ export interface ActionScoreResult {
     actionId: string;
     pointId: string;
     score: number;
+    tags: string[];
     details: {
         baseScore: number;
         preferenceBonus: number;
@@ -126,6 +127,7 @@ export class ActionScorer {
                     actionId,
                     pointId,
                     score: totalScore,
+                    tags: preset.tags || [],
                     details: {
                         baseScore,
                         preferenceBonus,
@@ -197,6 +199,7 @@ export class ActionScorer {
                 actionId,
                 pointId,
                 score: pressure,
+                tags: preset.tags || [],
                 details: { baseScore: pressure, preferenceBonus: 0, barrierPenalty: 0 },
             });
         }

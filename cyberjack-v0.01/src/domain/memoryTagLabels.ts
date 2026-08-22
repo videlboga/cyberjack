@@ -14,6 +14,11 @@ export const memoryTagLabels: Record<string, string> = {
     // Эго-состояния (Берн) — попадают в теги эпизодов как состояние персонажа.
     adapted_child: 'адаптивный ребёнок', free_child: 'свободный ребёнок', rebellious_child: 'бунтующий ребёнок',
     critical_parent: 'критикующий родитель', nurturing_parent: 'заботливый родитель',
+    // Служебные теги effect/context-пресетов (состояния и оборудование).
+    condition: 'состояние', apathy: 'апатия', subspace: 'сабспейс', panic: 'паника', freeze: 'оцепенение',
+    submissive: 'податливость', defiance: 'сопротивление', hyperesthesia: 'гиперестезия', local: 'локальное',
+    numbness: 'онемение', physiological: 'физиологическое', refractory: 'рефрактерный период',
+    dominance: 'доминирование', passive: 'пассивное', contrast: 'контраст', physical: 'физическое',
 };
 
 export function memoryTagLabel(tag: string) {

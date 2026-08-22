@@ -205,7 +205,7 @@ export function orchestrateSceneActors(bundle: TickBundle, directedActorId?: str
 
                     const actions = ActionScorer.scoreAvailableActions(eventSceneId, actorId, targetId, targetPoints)
                         .map(action => {
-                            const actionCompulsion = deriveCompulsionSignals(core?.preferences, conditioningTags(action.actionId), [action.pointId])[0];
+                            const actionCompulsion = deriveCompulsionSignals(core?.preferences, conditioningTags(action.actionId, action.tags), [action.pointId])[0];
                             return actionCompulsion?.level === 3
                                 ? { ...action, score:action.score + actionCompulsion.pressure * 18 }
                                 : action;

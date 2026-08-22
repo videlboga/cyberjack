@@ -1659,19 +1659,6 @@ export function CalibrationZoneMap({
     </section>
   );
 }
-const calibrationTargetOverrides: Record<string, string[]> = {
-  light_kiss: ["feet"],
-  licking: ["feet"],
-  light_bite: ["feet"],
-  hard_bite: ["feet"],
-  pinch: ["feet"],
-  scratching: ["feet"],
-  firm_grip: ["feet"],
-  needle_prick: ["feet"],
-  hot_wax: ["feet"],
-  whip_strike: ["feet"],
-  taser_shock: ["feet"],
-};
 // DualAvatarStage — isolated component, own swap state.
 // Parent NEVER re-renders on swap. Framer Motion animates smoothly.
 const DualAvatarStage = memo(function DualAvatarStage({
@@ -2994,7 +2981,6 @@ export function CalibrationPrototype({
     const targets = Array.from(
       new Set([
         ...(actionMeta.find((meta) => meta.id === a.id)?.validTargets || []),
-        ...(calibrationTargetOverrides[a.id] || []),
       ]),
     );
     const allowed = new Set(

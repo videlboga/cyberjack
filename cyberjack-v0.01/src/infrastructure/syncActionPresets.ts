@@ -35,27 +35,20 @@ export const LEGACY_ACTION_BALANCE_PATCH = {
     breath_blow: { intensity: 0.16, valence: 0.4, contact: 0.12, sharpness: 0.08, novelty: 0.5 },
 } as const;
 
-/**
- * Refresh authored action content without touching subjects, histories or scene state.
- * This deliberately runs on every API start so JSON preset edits do not require a
- * destructive/full database seed.
- */
-export function syncActionPresets(): void {
-    const actions = JSON.parse(fs.readFileSync(actionsUrl, 'utf8')) as RawActionPreset[];
-    const items = JSON.parse(fs.readFileSync(itemsUrl, 'utf8')) as Array<{
-        id:string; name:string; type:string; tags?:string[]; description?:string;
-    }>;
+/** Read the single source of truth for action presets. */
+export function loadActionPresets(): RawActionPreset[] {
+    return JSON.parse(fs.readFileSync(actionsUrl, 'utf8')) as RawActionPreset[];
+}
 
+/**
+ * Upsert every action preset from `actions.json` into `action_presets`.
+ * This is the ONLY place presets are written to the DB. `seed.ts` (tests) and
+ * `syncActionPresets()` (server start) both call this so the in-memory test DB
+ * and the live DB stay identical.
+ */
+export function upsertActionPresets(actions: RawActionPreset[]): void {
     db.transaction(() => {
         for (const id of retiredActionIds) db.prepare('DELETE FROM action_presets WHERE id = ?').run(id);
-        const upsertItem = db.prepare(`
-            INSERT INTO items (id,name,type,tags,description) VALUES (?,?,?,?,?)
-            ON CONFLICT(id) DO UPDATE SET name=excluded.name,type=excluded.type,
-                tags=excluded.tags,description=excluded.description
-        `);
-        for (const item of items) {
-            upsertItem.run(item.id,item.name,item.type,JSON.stringify(item.tags || []),item.description || '');
-        }
         const upsert = db.prepare(`
             INSERT INTO action_presets
                 (id, label, type, tags, values_json, context_config_json, requires_item, model_url)
@@ -110,6 +103,31 @@ export function syncActionPresets(): void {
             )
             WHERE id = 'effect_panic'
         `).run();
+    })();
+}
+
+/**
+ * Refresh authored action content without touching subjects, histories or scene state.
+ * This deliberately runs on every API start so JSON preset edits do not require a
+ * destructive/full database seed.
+ */
+export function syncActionPresets(): void {
+    const actions = loadActionPresets();
+    const items = JSON.parse(fs.readFileSync(itemsUrl, 'utf8')) as Array<{
+        id:string; name:string; type:string; tags?:string[]; description?:string;
+    }>;
+
+    upsertActionPresets(actions);
+
+    db.transaction(() => {
+        const upsertItem = db.prepare(`
+            INSERT INTO items (id,name,type,tags,description) VALUES (?,?,?,?,?)
+            ON CONFLICT(id) DO UPDATE SET name=excluded.name,type=excluded.type,
+                tags=excluded.tags,description=excluded.description
+        `);
+        for (const item of items) {
+            upsertItem.run(item.id,item.name,item.type,JSON.stringify(item.tags || []),item.description || '');
+        }
 
         const authoredIds = actions.map(action => action.id);
         const sceneRows = db.prepare('SELECT id, available_actions FROM scenes').all() as Array<{

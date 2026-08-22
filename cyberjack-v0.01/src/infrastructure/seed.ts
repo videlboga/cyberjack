@@ -7,6 +7,7 @@ import { ensureAllStarterClothing } from './starterClothing.js';
 import { characterRelationRepo } from './repositories.js';
 import { reconcileAllCharacters } from '../scenario/characterState.js';
 import { seedInterpretationTrees } from '../services/interpretationSeed.js';
+import { loadActionPresets, upsertActionPresets } from './syncActionPresets.js';
 
 console.log("Начинаем безопасное заполнение базы данных (без удаления существующих данных)...");
 
@@ -63,7 +64,6 @@ const insertProfileStmt = db.prepare(`
         END
 `);
 
-const rawActions = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/actions.json', 'utf8'));
 const rawItems = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/items.json', 'utf8'));
 const rawTraits = JSON.parse(fs.readFileSync('src/infrastructure/data/presets/traits.json', 'utf8'));
 
@@ -78,40 +78,6 @@ db.transaction(() => {
         insertItemStmt.run(validItem.id, validItem.name, validItem.type, JSON.stringify(validItem.tags || []), validItem.description || '');
     }
 
-    // Load Actions
-    const insertActionStmt = db.prepare(`
-        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json, requires_item, model_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-            label = excluded.label,
-            type = excluded.type,
-            tags = excluded.tags,
-            values_json = excluded.values_json,
-            context_config_json = excluded.context_config_json,
-            requires_item = excluded.requires_item,
-            model_url = excluded.model_url
-    `);
-    for (const act of rawActions) {
-        const validAct = act as any;
-        const valuesWithReqs = {
-            ...(validAct.vector || {}),
-            requireContexts: validAct.requireContexts || null,
-            removeContexts: validAct.removeContexts || null,
-            validTargets: validAct.validTargets || null,
-            removeNarrative: validAct.removeNarrative || null
-        };
-        insertActionStmt.run(
-            validAct.id,
-            validAct.name,
-            validAct.categories[0], // map first category as type
-            JSON.stringify(validAct.tags),
-            JSON.stringify(valuesWithReqs),
-            validAct.contextConfig ? JSON.stringify(validAct.contextConfig) : null,
-            (validAct as any).requiresItem || null,
-            (validAct as any).model_url || (validAct as any).modelUrl || null
-        );
-    }
-    
     // Load Traits
     const insertTraitStmt = db.prepare('INSERT OR IGNORE INTO traits (id, name, description, rules_json) VALUES (?, ?, ?, ?)');
     for (const trait of rawTraits) {
@@ -221,88 +187,9 @@ const upsertSceneObjectStmt = db.prepare(`
 `);
 
 db.transaction(() => {
-    const actions = [
-        // System and Context Effects
-        { id: 'effect_apathy', label: 'Апатия / Отключение', type: 'condition', tags: ['condition', 'apathy'], values: { intensity_mult: 0.5, sharpness_mult: 0.5 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_chronic_apathy', label: 'Глубокий Срыв (Хроническая Апатия)', type: 'condition', tags: ['condition', 'apathy'], values: { intensity_mult: 0.5, sharpness_mult: 0.5 }, contextConfig: { duration: 10, occupiesPoints: [] } },
-        { id: 'effect_subspace', label: 'Сабспейс (Податливость)', type: 'condition', tags: ['condition', 'subspace'], values: { valence: 0.2, sharpness_mult: 0.6 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_panic', label: 'Паническая Атака', type: 'condition', tags: ['condition', 'panic'], values: { valence: -0.3, sharpness_mult: 1.4 }, contextConfig: { duration: 30, durationUnit: 'minutes', occupiesPoints: [] } },
-        { id: 'effect_sensory_overload', label: 'Сенсорная Перегрузка', type: 'condition', tags: ['condition', 'overload'], values: { intensity_mult: 1.2, sharpness: 0.15 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_freeze', label: 'Тоническое Оцепенение', type: 'condition', tags: ['condition', 'freeze'], values: { contact_mult: 0.8 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_suggestibility', label: 'Смещение контроля', type: 'condition', tags: ['condition', 'submissive'], values: { valence: 0.15, sharpness_mult: 0.8 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_active_defiance', label: 'Активное Отторжение', type: 'condition', tags: ['condition', 'defiance'], values: { intensity_mult: 0.8, valence: -0.1 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_hyperesthesia', label: 'Гиперестезия', type: 'condition', tags: ['condition', 'hyperesthesia'], values: { intensity_mult: 1.3, sharpness_mult: 1.1 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_local_hyperesthesia', label: 'Локальная Гиперестезия', type: 'condition', tags: ['condition', 'hyperesthesia', 'local'], values: { intensity_mult: 1.5, sharpness_mult: 1.2 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_local_numbness', label: 'Локальное Онемение', type: 'condition', tags: ['condition', 'numbness', 'local'], values: { intensity_mult: 0.1, sharpness_mult: 0.1, contact_mult: 0.5 }, contextConfig: { duration: -1, occupiesPoints: [] } },
-        { id: 'effect_refractory', label: 'Рефрактерный период', type: 'condition', tags: ['condition', 'physiological', 'refractory'], values: { intensity_mult: 0.25, contact_mult: 0.8, novelty_mult: 0.25 }, contextConfig: { type: 'condition', duration: 3, occupiesPoints: [] } },
+    const actions = loadActionPresets();
+    upsertActionPresets(actions);
 
-        // Standard actions
-        { id: 'gentle_stroke', label: 'Мягкое поглаживание', validTargets: ['hair','face','neck','shoulders','chest','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks','vulva','clitoris','penis'], values: { intensity: 0.2, valence: 0.6, contact: 0.4, sharpness: 0.1, novelty: 0.2 } },
-        { id: 'tickle', label: 'Щекотка пальцами', validTargets: ['neck','belly','waist','inner_thighs','feet','buttocks','vulva','clitoris','penis','testicles','anus'], values: { intensity: 0.4, valence: 0.2, contact: 0.3, sharpness: 0.4, novelty: 0.5 } },
-        { id: 'light_kiss', label: 'Короткий поцелуй', validTargets: ['face','lips','neck','shoulders','chest','nipples','belly','back','hands','inner_thighs','feet','buttocks','vulva','clitoris','penis'], values: { intensity: 0.2, valence: 0.7, contact: 0.5, sharpness: 0.05, novelty: 0.4 } },
-        { id: 'deep_kiss', label: 'Глубокий поцелуй', validTargets: ['lips'], values: { intensity: 0.6, valence: 0.9, contact: 0.8, sharpness: 0.2, novelty: 0.6 } },
-        { id: 'feather_stroke', label: 'Проведение перышком', validTargets: ['head','hair','face','lips','neck','shoulders','chest','nipples','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks','vulva','clitoris','penis','testicles','anus','vagina','prostate'], values: { intensity: 0.16, valence: 0.5, contact: 0.18, sharpness: 0.02, novelty: 0.7 } },
-        { id: 'deep_massage', label: 'Массаж', validTargets: ['shoulders','chest','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks'], values: { intensity: 0.48, valence: 0.5, contact: 0.82, sharpness: 0.2, novelty: 0.25 } },
-        { id: 'licking', label: 'Провести языком', validTargets: ['lips','neck','nipples','inner_thighs','feet','vulva','clitoris','penis','testicles','anus'], values: { intensity: 0.3, valence: 0.6, contact: 0.5, sharpness: 0.05, novelty: 0.6 } },
-        { id: 'firm_grip', label: 'Крепко сжать', validTargets: ['shoulders','chest','waist','arms','hands','inner_thighs','legs','feet','buttocks','penis','testicles'], values: { intensity: 0.7, valence: -0.2, contact: 0.8, sharpness: 0.3, novelty: 0.4 } },
-        { id: 'light_bite', label: 'Игровой прикус', validTargets: ['lips','neck','shoulders','chest','nipples','inner_thighs','feet','buttocks','vulva','clitoris','penis','testicles'], values: { intensity: 0.4, valence: 0.4, contact: 0.4, sharpness: 0.6, novelty: 0.5 } },
-        { id: 'hard_bite', label: 'Болезненный укус', validTargets: ['lips','neck','shoulders','chest','inner_thighs','feet','buttocks','vulva','clitoris','penis','testicles'], values: { intensity: 0.7, valence: -0.5, contact: 0.6, sharpness: 0.8, novelty: 0.5 } },
-        { id: 'pinch', label: 'Ущипнуть', validTargets: ['chest','nipples','belly','waist','arms','inner_thighs','feet','buttocks','vulva','clitoris','penis','testicles','anus'], values: { intensity: 0.5, valence: -0.4, contact: 0.2, sharpness: 0.8, novelty: 0.3 } },
-        { id: 'scratching', label: 'Провести ногтями', validTargets: ['shoulders','chest','belly','back','arms','inner_thighs','legs','feet','buttocks'], values: { intensity: 0.4, valence: -0.2, contact: 0.3, sharpness: 0.8, novelty: 0.4 } },
-        { id: 'slap', label: 'Шлёпнуть', validTargets: ['face','chest','inner_thighs','buttocks'], values: { intensity: 0.5, valence: -0.3, contact: 0.6, sharpness: 0.7, novelty: 0.4 } },
-        { id: 'hard_slap', label: 'Удар ладонью', validTargets: ['face','chest','inner_thighs','buttocks'], values: { intensity: 0.72, valence: -0.6, contact: 0.65, sharpness: 0.85, novelty: 0.5 } },
-        { id: 'needle_prick', label: 'Укол иглой', validTargets: ['shoulders','arms','inner_thighs','legs','feet','buttocks'], values: { intensity: 0.4, valence: -0.7, contact: 0.1, sharpness: 1.0, novelty: 0.6 } },
-        { id: 'whip_strike', label: 'Удар хлыстом', validTargets: ['shoulders','chest','back','inner_thighs','legs','feet','buttocks'], values: { intensity: 0.9, valence: -0.9, contact: 0.3, sharpness: 1.0, novelty: 0.5 } },
-        { id: 'taser_shock', label: 'Разряд электрошокера', validTargets: ['shoulders','chest','belly','back','arms','inner_thighs','legs','feet','buttocks'], values: { intensity: 0.95, valence: -0.95, contact: 0.4, sharpness: 0.95, novelty: 0.8 } },
-        { id: 'ice_cube', label: 'Коснуться льдом', validTargets: ['head','hair','face','lips','neck','shoulders','chest','nipples','belly','back','waist','arms','hands','inner_thighs','legs','feet','buttocks','vulva','clitoris','penis','testicles','anus','vagina','prostate'], values: { intensity: 0.6, valence: 0.1, contact: 0.4, sharpness: 0.6, novelty: 0.8 } },
-        { id: 'hot_wax', label: 'Капнуть воском', validTargets: ['shoulders','chest','belly','back','waist','arms','inner_thighs','legs','feet','buttocks','vulva','clitoris','penis','testicles','anus'], values: { intensity: 0.7, valence: -0.1, contact: 0.2, sharpness: 0.8, novelty: 0.8 } },
-        { id: 'vibrator_pulse', label: 'Дать импульс вибратором', requiresItem: 'eq_vibrator', validTargets: ['neck','chest','nipples','belly','inner_thighs','vulva','clitoris','penis','testicles','anus'], values: { intensity: 0.6, valence: 0.8, contact: 0.7, sharpness: 0.2, novelty: 0.7 } },
-        { id: 'finger_insertion', label: 'Начать стимуляцию пальцами', type: 'physical', tags: ['intimate','penetration','continuous','manual'], validTargets: ['anus','vagina'], values: { intensity: 0.4, valence: 0.3, contact: 0.9, sharpness: 0.1, novelty: 0.6 }, removeContexts: ['act_start_penetration','act_increase_friction'], contextConfig: { type: 'sexual_interaction', activeLabel: 'Продолжительная стимуляция пальцами', duration: -1, modifiers: { intensity: 0.3, valence: 0.3, sharpness: 0.1, contact: 0.9, novelty: -0.1 } } },
-        { id: 'act_start_oral_giving', label: 'Вставить в рот', type: 'physical', tags: ['intimate','sexual','oral','continuous','giving'], validTargets: ['lips'], values: { intensity: 0.45, valence: 0.35, contact: 0.9, sharpness: 0.08, novelty: 0.65 }, removeContexts: ['finger_insertion','act_start_penetration','act_increase_friction','act_deepen_oral'], contextConfig: { type: 'sexual_interaction', activeLabel: 'Продолжительный оральный контакт', duration: -1, modifiers: { intensity: 0.35, valence: 0.35, sharpness: 0.08, contact: 0.9, novelty: -0.1 } } },
-        { id: 'act_deepen_oral', label: 'Засунуть в горло', type: 'physical', tags: ['intimate','sexual','oral','continuous','giving','intense'], validTargets: ['lips'], values: { intensity: 0.65, valence: 0.4, contact: 1, sharpness: 0.14, novelty: 0.25 }, contextConfig: { type: 'interaction_level', activeLabel: 'Глубокий оральный контакт', duration: -1, modifiers: { intensity: 0.2, valence: 0.05, sharpness: 0.06, contact: 0.05, novelty: -0.08 } } },
-        { id: 'device_sensory_loop', label: 'Установить сенсорный контур', type: 'context', tags: ['equipment', 'passive'], values: { intensity: 0.05, valence: 0.1, contact: 0.2, sharpness: 0, novelty: 0.4 }, contextConfig: { type: 'equipment', activeLabel: 'Сенсорный контур', occupiesPoints: [], exclusiveWithinPoint: true, duration: -1, modifiers: {} } },
-        { id: 'device_sensory_pulse', label: 'Импульс сенсорного контура', type: 'physical', tags: ['equipment', 'passive', 'stimulation'], values: { intensity: 0.25, valence: 0.5, contact: 0.8, sharpness: 0.05, novelty: 0.4 }, requireContexts: ['device_sensory_loop'] },
-        { id: 'device_contrast_pulse', label: 'Контрастный импульс сенсорного контура', type: 'physical', tags: ['equipment', 'passive', 'contrast'], values: { intensity: 0.5, valence: 0.15, contact: 0.7, sharpness: 0.45, novelty: 0.75 }, requireContexts: ['device_sensory_loop'] },
-        { id: 'hair_pull', label: 'Потянуть за волосы', validTargets: ['hair'], values: { intensity: 0.6, valence: -0.4, contact: 0.5, sharpness: 0.7, novelty: 0.4 } },
-        { id: 'spit', label: 'Плевок', values: { intensity: 0.3, valence: -0.8, contact: 0.2, sharpness: 0.8, novelty: 0.7 } },
-        { id: 'breath_blow', label: 'Обдать дыханием', validTargets: ['face','lips','neck','chest','nipples','belly','inner_thighs','vulva','clitoris','penis','anus'], values: { intensity: 0.16, valence: 0.4, contact: 0.12, sharpness: 0.08, novelty: 0.5 } },
-        { id: 'verbal_pressure', label: 'Беседа', values: { intensity: 0.1, valence: 0.0, contact: 0.0, sharpness: 0.0, novelty: 0.1 } },
-        { id: 'stare', label: 'Пристальный взгляд', values: { intensity: 0.3, valence: -0.1, contact: 0.0, sharpness: 0.1, novelty: 0.2 } },
-        { id: 'close_inspection', label: 'Относительно близкий осмотр', values: { intensity: 0.4, valence: -0.3, contact: 0.0, sharpness: 0.2, novelty: 0.4 } },
-        { id: 'feint_strike', label: 'Ложный замах', values: { intensity: 0.7, valence: -0.5, contact: 0.0, sharpness: 0.9, novelty: 0.5 } },
-        { id: 'pose_kneeling', label: 'Поза: На коленях', type: 'pose', tags: ['pose', 'dominance'], values: { intensity: 0.3, valence: -0.2, contact: 0.1, sharpness: 0.0, novelty: 0.2 }, removeContexts: ['act_hold_exposure', 'act_present_feet', 'act_suspend_wrists'], contextConfig: { type: 'pose', activeLabel: 'На коленях', occupiesPoints: ['global_pose'], duration: -1 } },
-        { id: 'context_defiant', label: 'Агрессивный бунт', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: 0.2, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
-        { id: 'context_fear_of_loss', label: 'Страх утраты', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0.1, valence: -0.2, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
-        { id: 'context_glitch_prone', label: 'Нестабильность имплантов', type: 'condition', tags: ['physical', 'condition'], values: { intensity: 0.1, valence: -0.1, contact: 0, sharpness: 0, novelty: 0.2 }, contextConfig: { duration: -1 } },
-        { id: 'context_sensitive_skin', label: 'Гиперестезия', type: 'condition', tags: ['physical', 'condition'], values: { intensity: 0.2, valence: 0, contact: 0.2, sharpness: 0.3, novelty: 0 }, contextConfig: { duration: -1 } },
-        { id: 'context_masochism', label: 'Мазохистская инверсия', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }, contextConfig: { duration: -1 } },
-        { id: 'context_pleasure_burn', label: 'Ожог удовольствием', type: 'condition', tags: ['mental', 'condition'], values: { intensity: 0, valence: -0.1, contact: 0, sharpness: 0.1, novelty: 0 }, contextConfig: { duration: -1 } }
-    ];
-    const upsertActionStmt = db.prepare(`
-        INSERT INTO action_presets (id, label, type, tags, values_json, context_config_json, model_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-            label = excluded.label,
-            type = excluded.type,
-            tags = excluded.tags,
-            values_json = excluded.values_json,
-            context_config_json = excluded.context_config_json,
-            model_url = excluded.model_url
-    `);
-    for (const act of actions) {
-        const valJson = { ...(act as any).values || {}, requireContexts: (act as any).requireContexts || null, removeContexts: (act as any).removeContexts || null, validTargets: (act as any).validTargets || null, requiresItem: (act as any).requiresItem || null };
-        upsertActionStmt.run(
-            act.id,
-            act.label,
-            (act as any).type || 'physical',
-            JSON.stringify((act as any).tags || []),
-            JSON.stringify(valJson),
-            (act as any).contextConfig ? JSON.stringify((act as any).contextConfig) : null,
-            (act as any).model_url || (act as any).modelUrl || null
-        );
-    }
-
-    
     const prototypeExpansionActions = [
         'pose_standing', 'pose_sitting', 'pose_kneeling', 'pose_lying_down', 'pose_all_fours', 'pose_spread_eagle',
         'act_apply_handcuffs', 'act_remove_handcuffs',

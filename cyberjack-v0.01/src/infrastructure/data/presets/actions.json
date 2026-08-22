@@ -355,72 +355,217 @@
     "id": "act_connect_tens",
     "name": "Закрепить электроды TENS",
     "description": "Установить контактные электроды для управляемой продолжительной электростимуляции.",
-    "categories": ["physical", "context"],
-    "tags": ["electronic", "equipment", "stimulation"],
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "equipment",
+      "stimulation"
+    ],
     "requiresItem": "eq_tens_unit",
-    "validTargets": ["nipples", "vulva", "clitoris", "penis", "testicles"],
-    "vector": { "intensity": 3, "valence": -1, "sharpness": 2, "contact": 8, "novelty": 6, "powerBase": 20 },
+    "validTargets": [
+      "nipples",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": -1,
+      "sharpness": 2,
+      "contact": 8,
+      "novelty": 6,
+      "powerBase": 20
+    },
     "contextConfig": {
-      "type": "equipment", "activeLabel": "Электроды TENS", "duration": -1,
-      "exclusiveWithinPoint": false, "occupiesPoints": [],
-      "modifiers": { "intensity": 1, "valence": -1, "sharpness": 1, "contact": 8, "novelty": 1 }
+      "type": "equipment",
+      "activeLabel": "Электроды TENS",
+      "duration": -1,
+      "exclusiveWithinPoint": false,
+      "occupiesPoints": [],
+      "modifiers": {
+        "intensity": 1,
+        "valence": -1,
+        "sharpness": 1,
+        "contact": 8,
+        "novelty": 1
+      }
     }
   },
   {
     "id": "act_start_electrostimulation",
     "name": "Включить продолжительную электростимуляцию",
     "description": "Подать через установленные электроды устойчивую последовательность импульсов.",
-    "categories": ["physical", "context"],
-    "tags": ["electronic", "stimulation", "continuous", "pain"],
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "continuous",
+      "pain"
+    ],
     "requiresItem": "eq_tens_unit",
-    "requireContexts": ["act_connect_tens"],
-    "validTargets": ["nipples", "vulva", "clitoris", "penis", "testicles"],
-    "vector": { "intensity": 7, "valence": -3, "sharpness": 7, "contact": 7, "novelty": 6, "powerBase": 48 },
+    "requireContexts": [
+      "act_connect_tens"
+    ],
+    "validTargets": [
+      "nipples",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 7,
+      "valence": -3,
+      "sharpness": 7,
+      "contact": 7,
+      "novelty": 6,
+      "powerBase": 48
+    },
     "contextConfig": {
-      "type": "interaction", "activeLabel": "Продолжительная электростимуляция", "duration": -1,
-      "exclusiveWithinPoint": false, "occupiesPoints": [],
-      "modifiers": { "intensity": 4, "valence": -3, "sharpness": 5, "contact": 6, "novelty": -1 }
+      "type": "interaction",
+      "activeLabel": "Продолжительная электростимуляция",
+      "duration": -1,
+      "exclusiveWithinPoint": false,
+      "occupiesPoints": [],
+      "modifiers": {
+        "intensity": 4,
+        "valence": -3,
+        "sharpness": 5,
+        "contact": 6,
+        "novelty": -1
+      }
     }
   },
   {
     "id": "act_adjust_electrostimulation",
     "name": "Усилить электростимуляцию",
     "description": "Поднять частоту и амплитуду продолжительной серии импульсов.",
-    "categories": ["physical", "context"],
-    "tags": ["electronic", "stimulation", "continuous", "intense", "pain"],
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "continuous",
+      "intense",
+      "pain"
+    ],
     "requiresItem": "eq_tens_unit",
-    "requireContexts": ["act_start_electrostimulation"],
-    "validTargets": ["nipples", "vulva", "clitoris", "penis", "testicles"],
-    "vector": { "intensity": 9, "valence": -5, "sharpness": 9, "contact": 8, "novelty": 4, "powerBase": 68 },
+    "requireContexts": [
+      "act_start_electrostimulation"
+    ],
+    "validTargets": [
+      "nipples",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 9,
+      "valence": -5,
+      "sharpness": 9,
+      "contact": 8,
+      "novelty": 4,
+      "powerBase": 68
+    },
     "contextConfig": {
-      "type": "interaction_level", "activeLabel": "Интенсивная электростимуляция", "duration": -1,
-      "exclusiveWithinPoint": false, "occupiesPoints": [],
-      "modifiers": { "intensity": 3, "valence": -2, "sharpness": 3, "contact": 1, "novelty": -1 }
+      "type": "interaction_level",
+      "activeLabel": "Интенсивная электростимуляция",
+      "duration": -1,
+      "exclusiveWithinPoint": false,
+      "occupiesPoints": [],
+      "modifiers": {
+        "intensity": 3,
+        "valence": -2,
+        "sharpness": 3,
+        "contact": 1,
+        "novelty": -1
+      }
     }
   },
   {
     "id": "act_stop_electrostimulation",
     "name": "Остановить электростимуляцию",
     "description": "Отключить генератор импульсов, оставив электроды установленными.",
-    "categories": ["physical", "context"],
-    "tags": ["electronic", "stimulation", "comfort"],
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "comfort"
+    ],
     "requiresItem": "eq_tens_unit",
-    "requireContexts": ["act_start_electrostimulation"],
-    "removeContexts": ["act_start_electrostimulation", "act_adjust_electrostimulation"],
-    "validTargets": ["nipples", "vulva", "clitoris", "penis", "testicles"],
-    "vector": { "intensity": 1, "valence": 4, "sharpness": 0, "contact": 2, "novelty": 1, "powerBase": 5 }
+    "requireContexts": [
+      "act_start_electrostimulation"
+    ],
+    "removeContexts": [
+      "act_start_electrostimulation",
+      "act_adjust_electrostimulation"
+    ],
+    "validTargets": [
+      "nipples",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 4,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 1,
+      "powerBase": 5
+    }
   },
   {
     "id": "act_disconnect_tens",
     "name": "Снять электроды TENS",
     "description": "Отключить генератор и убрать контактные электроды.",
-    "categories": ["physical", "context"],
-    "tags": ["electronic", "equipment", "comfort"],
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "equipment",
+      "comfort"
+    ],
     "requiresItem": "eq_tens_unit",
-    "requireContexts": ["act_connect_tens"],
-    "removeContexts": ["act_connect_tens", "act_start_electrostimulation", "act_adjust_electrostimulation"],
-    "validTargets": ["nipples", "vulva", "clitoris", "penis", "testicles"],
-    "vector": { "intensity": 1, "valence": 3, "sharpness": 0, "contact": 2, "novelty": 1, "powerBase": 5 }
+    "requireContexts": [
+      "act_connect_tens"
+    ],
+    "removeContexts": [
+      "act_connect_tens",
+      "act_start_electrostimulation",
+      "act_adjust_electrostimulation"
+    ],
+    "validTargets": [
+      "nipples",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 3,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 1,
+      "powerBase": 5
+    }
   },
   {
     "id": "act_remove_collar",
@@ -641,7 +786,9 @@
       "activeLabel": "Внутренняя вибрация",
       "duration": -1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["active_vibration_internal"],
+      "occupiesPoints": [
+        "active_vibration_internal"
+      ],
       "modifiers": {
         "intensity": 4,
         "valence": 3,
@@ -655,11 +802,25 @@
     "id": "act_deactivate_plug",
     "name": "Выключить вибрацию плага",
     "description": "Остановка ритмического внутреннего импульса без извлечения устройства.",
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["electronic", "stimulation", "comfort"],
-    "requireContexts": ["act_activate_plug"],
-    "removeContexts": ["act_activate_plug"],
-    "validTargets": ["vagina"],
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "comfort"
+    ],
+    "requireContexts": [
+      "act_activate_plug"
+    ],
+    "removeContexts": [
+      "act_activate_plug"
+    ],
+    "validTargets": [
+      "vagina"
+    ],
     "vector": {
       "intensity": 1,
       "valence": 2,
@@ -679,10 +840,22 @@
       "rhythm": "Ровный механический ритм повторяется независимо от движений тела.",
       "bodilyResponse": "Из-за непрерывности каждый импульс накладывается на остаток предыдущего."
     },
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["electronic", "stimulation", "continuous"],
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "continuous"
+    ],
     "requiresItem": "eq_vibrator",
-    "validTargets": ["torso", "clitoris", "penis"],
+    "validTargets": [
+      "torso",
+      "clitoris",
+      "penis"
+    ],
     "vector": {
       "intensity": 6,
       "valence": 4,
@@ -696,7 +869,9 @@
       "activeLabel": "Продолжительная вибрация",
       "duration": -1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["active_vibration_handheld"],
+      "occupiesPoints": [
+        "active_vibration_handheld"
+      ],
       "modifiers": {
         "intensity": 3,
         "valence": 3,
@@ -716,11 +891,26 @@
       "rhythm": "Паузы между различимыми импульсами почти исчезают.",
       "bodilyResponse": "Привыкнуть к новому уровню сразу не получается: внимание снова захватывает зона контакта."
     },
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["electronic", "stimulation", "continuous", "intense"],
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "continuous",
+      "intense"
+    ],
     "requiresItem": "eq_vibrator",
-    "requireContexts": ["act_start_vibrator"],
-    "validTargets": ["torso", "clitoris", "penis"],
+    "requireContexts": [
+      "act_start_vibrator"
+    ],
+    "validTargets": [
+      "torso",
+      "clitoris",
+      "penis"
+    ],
     "vector": {
       "intensity": 8,
       "valence": 4,
@@ -734,7 +924,9 @@
       "activeLabel": "Интенсивная вибрация",
       "duration": -1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["active_vibration_boost"],
+      "occupiesPoints": [
+        "active_vibration_boost"
+      ],
       "modifiers": {
         "intensity": 3,
         "valence": 1,
@@ -748,12 +940,29 @@
     "id": "act_stop_vibrator",
     "name": "Остановить вибрацию",
     "description": "Выключить и убрать закреплённый вибратор.",
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["electronic", "stimulation", "comfort"],
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "comfort"
+    ],
     "requiresItem": "eq_vibrator",
-    "requireContexts": ["act_start_vibrator"],
-    "removeContexts": ["act_start_vibrator", "act_adjust_vibration"],
-    "validTargets": ["torso", "clitoris", "penis"],
+    "requireContexts": [
+      "act_start_vibrator"
+    ],
+    "removeContexts": [
+      "act_start_vibrator",
+      "act_adjust_vibration"
+    ],
+    "validTargets": [
+      "torso",
+      "clitoris",
+      "penis"
+    ],
     "vector": {
       "intensity": 1,
       "valence": 2,
@@ -799,66 +1008,189 @@
     "id": "pose_standing",
     "name": "Стойка: Смирно",
     "description": "Стоять прямо, руки по швам. Базовая стойка подчинения.",
-    "categories": ["pose"],
-    "tags": ["pose", "neutral"],
-    "removeContexts": ["act_hold_exposure", "act_present_feet", "act_suspend_wrists"],
-    "validTargets": ["systemic"],
-    "vector": { "intensity": 1, "valence": 0, "sharpness": 0, "contact": 0, "novelty": 1, "powerBase": 5 },
-    "contextConfig": { "type": "pose", "activeLabel": "Стоит прямо", "duration": -1, "occupiesPoints": ["global_pose"] },
+    "categories": [
+      "pose"
+    ],
+    "tags": [
+      "pose",
+      "neutral"
+    ],
+    "removeContexts": [
+      "act_hold_exposure",
+      "act_present_feet",
+      "act_suspend_wrists"
+    ],
+    "validTargets": [
+      "systemic"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 0,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 1,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "pose",
+      "activeLabel": "Стоит прямо",
+      "duration": -1,
+      "occupiesPoints": [
+        "global_pose"
+      ]
+    },
     "removeNarrative": "{name} меняет положение"
   },
   {
     "id": "act_hold_exposure",
     "name": "Показать тело",
     "description": "Указать активу принять и удерживать демонстрационную позу.",
-    "categories": ["pose", "intimate", "context"],
-    "tags": ["exposure", "continuous", "vulnerable"],
-    "removeContexts": ["act_present_feet"],
-    "validTargets": ["systemic"],
-    "vector": { "intensity": 3, "valence": -2, "sharpness": 1, "contact": 1, "novelty": 4, "powerBase": 20 },
-    "contextConfig": { "type": "interaction", "activeLabel": "Показывает тело", "duration": -1, "exclusiveWithinPoint": true, "occupiesPoints": ["active_visual_interaction"] },
+    "categories": [
+      "pose",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "exposure",
+      "continuous",
+      "vulnerable"
+    ],
+    "removeContexts": [
+      "act_present_feet"
+    ],
+    "validTargets": [
+      "systemic"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": -2,
+      "sharpness": 1,
+      "contact": 1,
+      "novelty": 4,
+      "powerBase": 20
+    },
+    "contextConfig": {
+      "type": "interaction",
+      "activeLabel": "Показывает тело",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "active_visual_interaction"
+      ]
+    },
     "removeNarrative": "{name} больше не удерживает открытую позу"
   },
   {
     "id": "act_end_exposure",
     "name": "Прекратить показ",
     "description": "Разрешить активу выйти из демонстрационной позы.",
-    "categories": ["pose", "context"],
-    "tags": ["comfort"],
-    "requireContexts": ["act_hold_exposure"],
-    "removeContexts": ["act_hold_exposure"],
-    "validTargets": ["systemic"],
-    "vector": { "intensity": 1, "valence": 2, "sharpness": 0, "contact": 0, "novelty": 1, "powerBase": 5 },
+    "categories": [
+      "pose",
+      "context"
+    ],
+    "tags": [
+      "comfort"
+    ],
+    "requireContexts": [
+      "act_hold_exposure"
+    ],
+    "removeContexts": [
+      "act_hold_exposure"
+    ],
+    "validTargets": [
+      "systemic"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 1,
+      "powerBase": 5
+    },
     "contextConfig": {
       "type": "visual_reaction",
       "activeLabel": "Прикрывается после демонстрации",
       "duration": 1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["active_visual_reaction"]
+      "occupiesPoints": [
+        "active_visual_reaction"
+      ]
     }
   },
   {
     "id": "act_present_feet",
     "name": "Предъявить ступни",
     "description": "Удерживать ступни в поле зрения для продолжительного осмотра.",
-    "categories": ["pose", "context"],
-    "tags": ["feet", "exposure", "continuous"],
-    "removeContexts": ["pose_standing", "pose_sitting", "pose_kneeling", "pose_lying_down", "pose_all_fours", "pose_spread_eagle", "act_hold_exposure"],
-    "validTargets": ["feet"],
-    "vector": { "intensity": 2, "valence": -1, "sharpness": 0, "contact": 1, "novelty": 3, "powerBase": 15 },
-    "contextConfig": { "type": "pose", "activeLabel": "Предъявляет ступни", "duration": -1, "exclusiveWithinPoint": true, "occupiesPoints": ["active_visual_interaction", "global_pose"] },
+    "categories": [
+      "pose",
+      "context"
+    ],
+    "tags": [
+      "feet",
+      "exposure",
+      "continuous"
+    ],
+    "removeContexts": [
+      "pose_standing",
+      "pose_sitting",
+      "pose_kneeling",
+      "pose_lying_down",
+      "pose_all_fours",
+      "pose_spread_eagle",
+      "act_hold_exposure"
+    ],
+    "validTargets": [
+      "feet"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": -1,
+      "sharpness": 0,
+      "contact": 1,
+      "novelty": 3,
+      "powerBase": 15
+    },
+    "contextConfig": {
+      "type": "pose",
+      "activeLabel": "Предъявляет ступни",
+      "duration": -1,
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "active_visual_interaction",
+        "global_pose"
+      ]
+    },
     "removeNarrative": "{name} больше не предъявляет ступни"
   },
   {
     "id": "act_end_feet_presentation",
     "name": "Завершить осмотр ступней",
     "description": "Разрешить убрать ступни из демонстрационной позы.",
-    "categories": ["pose", "context"],
-    "tags": ["comfort"],
-    "requireContexts": ["act_present_feet"],
-    "removeContexts": ["act_present_feet"],
-    "validTargets": ["feet"],
-    "vector": { "intensity": 1, "valence": 2, "sharpness": 0, "contact": 0, "novelty": 1, "powerBase": 5 }
+    "categories": [
+      "pose",
+      "context"
+    ],
+    "tags": [
+      "comfort"
+    ],
+    "requireContexts": [
+      "act_present_feet"
+    ],
+    "removeContexts": [
+      "act_present_feet"
+    ],
+    "validTargets": [
+      "feet"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 1,
+      "powerBase": 5
+    }
   },
   {
     "id": "pose_all_fours",
@@ -872,7 +1204,11 @@
       "submission",
       "vulnerable"
     ],
-    "removeContexts": ["act_hold_exposure", "act_present_feet", "act_suspend_wrists"],
+    "removeContexts": [
+      "act_hold_exposure",
+      "act_present_feet",
+      "act_suspend_wrists"
+    ],
     "validTargets": [
       "systemic"
     ],
@@ -904,11 +1240,16 @@
       "pose"
     ],
     "tags": [
+      "exposure",
+      "intimate",
       "pose",
-      "vulnerable",
-      "intimate"
+      "vulnerable"
     ],
-    "removeContexts": ["act_hold_exposure", "act_present_feet", "act_suspend_wrists"],
+    "removeContexts": [
+      "act_hold_exposure",
+      "act_present_feet",
+      "act_suspend_wrists"
+    ],
     "validTargets": [
       "systemic"
     ],
@@ -1074,7 +1415,11 @@
       "pose",
       "neutral"
     ],
-    "removeContexts": ["act_hold_exposure", "act_present_feet", "act_suspend_wrists"],
+    "removeContexts": [
+      "act_hold_exposure",
+      "act_present_feet",
+      "act_suspend_wrists"
+    ],
     "validTargets": [
       "systemic"
     ],
@@ -1107,7 +1452,11 @@
       "pose",
       "vulnerable"
     ],
-    "removeContexts": ["act_hold_exposure", "act_present_feet", "act_suspend_wrists"],
+    "removeContexts": [
+      "act_hold_exposure",
+      "act_present_feet",
+      "act_suspend_wrists"
+    ],
     "validTargets": [
       "systemic"
     ],
@@ -1143,7 +1492,16 @@
       "vulnerable",
       "suspension"
     ],
-    "removeContexts": ["act_hold_exposure", "act_present_feet", "pose_standing", "pose_sitting", "pose_kneeling", "pose_lying_down", "pose_all_fours", "pose_spread_eagle"],
+    "removeContexts": [
+      "act_hold_exposure",
+      "act_present_feet",
+      "pose_standing",
+      "pose_sitting",
+      "pose_kneeling",
+      "pose_lying_down",
+      "pose_all_fours",
+      "pose_spread_eagle"
+    ],
     "validTargets": [
       "limbs",
       "systemic"
@@ -1531,64 +1889,127 @@
     "requiresItem": "eq_lab_gown",
     "name": "Надеть лабораторную рубашку",
     "description": "Надеть свободную диагностическую одежду с доступом к спине и датчикам.",
-    "categories": ["clothing"],
-    "tags": ["clothing", "medical", "gown"],
-    "validTargets": ["systemic"],
-    "vector": { "intensity": 1, "valence": 1, "sharpness": 0, "contact": 3, "novelty": 2, "powerBase": 5 },
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "medical",
+      "gown"
+    ],
+    "validTargets": [
+      "systemic"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 1,
+      "sharpness": 0,
+      "contact": 3,
+      "novelty": 2,
+      "powerBase": 5
+    },
     "contextConfig": {
       "type": "clothing",
       "activeLabel": "Лабораторная рубашка",
       "duration": -1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["global_clothing"],
-      "modifiers": { "intensity": -1, "contact": -2, "sharpness": -1 }
+      "occupiesPoints": [
+        "global_clothing"
+      ],
+      "modifiers": {
+        "intensity": -1,
+        "contact": -2,
+        "sharpness": -1
+      }
     },
     "removeNarrative": "{name} снимает лабораторную рубашку"
   },
   {
     "id": "eq_clothe_lab_gown_remove",
     "name": "Снять лабораторную рубашку",
-    "categories": ["clothing"],
-    "tags": ["clothing", "remove"],
-    "removeContexts": ["eq_clothe_lab_gown"]
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "remove"
+    ],
+    "removeContexts": [
+      "eq_clothe_lab_gown"
+    ]
   },
   {
     "id": "eq_clothe_calibration_set",
     "requiresItem": "eq_calibration_set",
     "name": "Надеть калибровочный комплект",
     "description": "Надеть топ и шорты, не мешающие большинству датчиков и фиксаторов.",
-    "categories": ["clothing"],
-    "tags": ["clothing", "calibration", "sportswear"],
-    "validTargets": ["systemic"],
-    "vector": { "intensity": 1, "valence": 1, "sharpness": 0, "contact": 4, "novelty": 2, "powerBase": 5 },
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "calibration",
+      "sportswear"
+    ],
+    "validTargets": [
+      "systemic"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 1,
+      "sharpness": 0,
+      "contact": 4,
+      "novelty": 2,
+      "powerBase": 5
+    },
     "contextConfig": {
       "type": "clothing",
       "activeLabel": "Калибровочный комплект",
       "duration": -1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["global_clothing"],
-      "modifiers": { "intensity": -1, "contact": -2 }
+      "occupiesPoints": [
+        "global_clothing"
+      ],
+      "modifiers": {
+        "intensity": -1,
+        "contact": -2
+      }
     },
     "removeNarrative": "{name} снимает калибровочный комплект"
   },
   {
     "id": "eq_clothe_calibration_set_remove",
     "name": "Снять калибровочный комплект",
-    "categories": ["clothing"],
-    "tags": ["clothing", "remove"],
-    "removeContexts": ["eq_clothe_calibration_set"]
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "remove"
+    ],
+    "removeContexts": [
+      "eq_clothe_calibration_set"
+    ]
   },
   {
     "id": "eq_clothe_costume",
     "name": "Надеть личный костюм",
     "description": "Надеть личный костюм персонажа — повседневный наряд, не относящийся к лабораторной экипировке.",
-    "categories": ["clothing"],
-    "tags": ["clothing", "costume", "personal"],
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "costume",
+      "personal"
+    ],
     "type": "clothing",
     "contextConfig": {
       "type": "clothing",
       "activeLabel": "Личный костюм",
-      "occupiesPoints": ["global_clothing"],
+      "occupiesPoints": [
+        "global_clothing"
+      ],
       "duration": -1,
       "modifiers": {
         "intensity": -1,
@@ -1601,183 +2022,489 @@
   {
     "id": "eq_clothe_costume_remove",
     "name": "Снять личный костюм",
-    "categories": ["clothing"],
-    "tags": ["clothing", "costume", "remove"],
-    "removeContexts": ["eq_clothe_costume"]
+    "categories": [
+      "clothing"
+    ],
+    "tags": [
+      "clothing",
+      "costume",
+      "remove"
+    ],
+    "removeContexts": [
+      "eq_clothe_costume"
+    ]
   },
   {
     "id": "act_apply_ankle_cuffs",
     "requiresItem": "eq_ankle_cuffs",
     "name": "Застегнуть ножные манжеты",
     "description": "Соединить лодыжки короткой цепью, ограничив длину шага.",
-    "categories": ["physical", "context"],
-    "tags": ["restraint", "metal", "ankles"],
-    "validTargets": ["legs"],
-    "vector": { "intensity": 4, "valence": -2, "sharpness": 2, "contact": 8, "novelty": 4, "powerBase": 30 },
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "restraint",
+      "metal",
+      "ankles"
+    ],
+    "validTargets": [
+      "legs"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": -2,
+      "sharpness": 2,
+      "contact": 8,
+      "novelty": 4,
+      "powerBase": 30
+    },
     "contextConfig": {
       "type": "equipment",
       "activeLabel": "Ножные манжеты",
       "duration": -1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["left_ankle", "right_ankle"],
-      "modifiers": { "intensity": 2, "valence": -1, "contact": 7 }
+      "occupiesPoints": [
+        "left_ankle",
+        "right_ankle"
+      ],
+      "modifiers": {
+        "intensity": 2,
+        "valence": -1,
+        "contact": 7
+      }
     },
     "removeNarrative": "Манжеты сняты с лодыжек"
   },
   {
     "id": "act_remove_ankle_cuffs",
     "name": "Снять ножные манжеты",
-    "categories": ["physical", "context"],
-    "tags": ["comfort", "metal"],
-    "requireContexts": ["act_apply_ankle_cuffs"],
-    "removeContexts": ["act_apply_ankle_cuffs"],
-    "validTargets": ["legs"],
-    "vector": { "intensity": 2, "valence": 4, "sharpness": 0, "contact": 4, "novelty": 1, "powerBase": 10 }
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "comfort",
+      "metal"
+    ],
+    "requireContexts": [
+      "act_apply_ankle_cuffs"
+    ],
+    "removeContexts": [
+      "act_apply_ankle_cuffs"
+    ],
+    "validTargets": [
+      "legs"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": 4,
+      "sharpness": 0,
+      "contact": 4,
+      "novelty": 1,
+      "powerBase": 10
+    }
   },
   {
     "id": "act_apply_restraint_belt",
     "requiresItem": "eq_restraint_belt",
     "name": "Зафиксировать руки на поясе",
     "description": "Закрепить запястья в манжетах фиксирующего пояса.",
-    "categories": ["physical", "context"],
-    "tags": ["restraint", "waist", "hands"],
-    "validTargets": ["hands", "waist"],
-    "vector": { "intensity": 5, "valence": -3, "sharpness": 2, "contact": 8, "novelty": 5, "powerBase": 35 },
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "restraint",
+      "waist",
+      "hands"
+    ],
+    "validTargets": [
+      "hands",
+      "waist"
+    ],
+    "vector": {
+      "intensity": 5,
+      "valence": -3,
+      "sharpness": 2,
+      "contact": 8,
+      "novelty": 5,
+      "powerBase": 35
+    },
     "contextConfig": {
       "type": "equipment",
       "activeLabel": "Руки закреплены на поясе",
       "duration": -1,
       "exclusiveWithinPoint": true,
-      "occupiesPoints": ["left_hand", "right_hand", "waist"],
-      "modifiers": { "intensity": 3, "valence": -1, "contact": 8 }
+      "occupiesPoints": [
+        "left_hand",
+        "right_hand",
+        "waist"
+      ],
+      "modifiers": {
+        "intensity": 3,
+        "valence": -1,
+        "contact": 8
+      }
     },
     "removeNarrative": "Руки освобождены от фиксирующего пояса"
   },
   {
     "id": "act_remove_restraint_belt",
     "name": "Освободить руки от пояса",
-    "categories": ["physical", "context"],
-    "tags": ["comfort"],
-    "requireContexts": ["act_apply_restraint_belt"],
-    "removeContexts": ["act_apply_restraint_belt"],
-    "validTargets": ["hands", "waist"],
-    "vector": { "intensity": 2, "valence": 5, "sharpness": 0, "contact": 4, "novelty": 1, "powerBase": 10 }
+    "categories": [
+      "physical",
+      "context"
+    ],
+    "tags": [
+      "comfort"
+    ],
+    "requireContexts": [
+      "act_apply_restraint_belt"
+    ],
+    "removeContexts": [
+      "act_apply_restraint_belt"
+    ],
+    "validTargets": [
+      "hands",
+      "waist"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": 5,
+      "sharpness": 0,
+      "contact": 4,
+      "novelty": 1,
+      "powerBase": 10
+    }
   },
   {
     "id": "finger_insertion",
     "name": "Начать стимуляцию пальцами",
     "description": "Пальцы входят во влагалище или анус и начинают двигаться внутри.",
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["intimate", "penetration", "continuous", "manual"],
-    "removeContexts": ["act_start_penetration", "act_increase_friction"],
-    "validTargets": ["vagina", "anus"],
-    "vector": { "intensity": 4, "valence": 3, "sharpness": 1, "contact": 9, "novelty": 6, "powerBase": 28 },
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "continuous",
+      "intimate",
+      "manual",
+      "penetration",
+      "sexual"
+    ],
+    "removeContexts": [
+      "act_start_penetration",
+      "act_increase_friction"
+    ],
+    "validTargets": [
+      "vagina",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 4,
+      "valence": 3,
+      "sharpness": 1,
+      "contact": 9,
+      "novelty": 6,
+      "powerBase": 28
+    },
     "contextConfig": {
       "type": "sexual_interaction",
       "activeLabel": "Продолжительная стимуляция пальцами",
       "duration": -1,
-      "modifiers": { "intensity": 3, "valence": 3, "sharpness": 1, "contact": 9, "novelty": -1 }
+      "modifiers": {
+        "intensity": 3,
+        "valence": 3,
+        "sharpness": 1,
+        "contact": 9,
+        "novelty": -1
+      }
     }
   },
   {
     "id": "act_start_penetration",
     "name": "Начать проникновение",
     "description": "Пенис входит во влагалище или анус; начинается проникающий секс.",
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["intimate", "penetration", "continuous", "sexual"],
-    "removeContexts": ["finger_insertion", "act_increase_friction"],
-    "validTargets": ["vagina", "anus"],
-    "vector": { "intensity": 6, "valence": 3, "sharpness": 2, "contact": 10, "novelty": 7, "powerBase": 38 },
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "intimate",
+      "penetration",
+      "continuous",
+      "sexual"
+    ],
+    "removeContexts": [
+      "finger_insertion",
+      "act_increase_friction"
+    ],
+    "validTargets": [
+      "vagina",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 6,
+      "valence": 3,
+      "sharpness": 2,
+      "contact": 10,
+      "novelty": 7,
+      "powerBase": 38
+    },
     "contextConfig": {
       "type": "sexual_interaction",
       "activeLabel": "Продолжительное проникновение",
       "duration": -1,
-      "modifiers": { "intensity": 4, "valence": 3, "sharpness": 1, "contact": 10, "novelty": -1 }
+      "modifiers": {
+        "intensity": 4,
+        "valence": 3,
+        "sharpness": 1,
+        "contact": 10,
+        "novelty": -1
+      }
     }
   },
   {
     "id": "act_increase_friction",
     "name": "Ускорить фрикции",
     "description": "Ускорить толчки во время вагинального или анального секса.",
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["intimate", "continuous", "intense", "pace"],
-    "validTargets": ["vagina", "anus"],
-    "vector": { "intensity": 7, "valence": 4, "sharpness": 2, "contact": 10, "novelty": 3, "powerBase": 48 },
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "intimate",
+      "continuous",
+      "intense",
+      "pace"
+    ],
+    "validTargets": [
+      "vagina",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 7,
+      "valence": 4,
+      "sharpness": 2,
+      "contact": 10,
+      "novelty": 3,
+      "powerBase": 48
+    },
     "contextConfig": {
       "type": "interaction_level",
       "activeLabel": "Быстрые фрикции",
       "duration": -1,
-      "modifiers": { "intensity": 3, "valence": 1, "sharpness": 1, "contact": 1, "novelty": -1 }
+      "modifiers": {
+        "intensity": 3,
+        "valence": 1,
+        "sharpness": 1,
+        "contact": 1,
+        "novelty": -1
+      }
     }
   },
   {
     "id": "act_start_oral_giving",
     "name": "Вставить в рот",
     "description": "Пенис входит в рот; начинается минет.",
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["intimate", "sexual", "oral", "continuous", "giving"],
-    "removeContexts": ["finger_insertion", "act_start_penetration", "act_increase_friction", "act_deepen_oral"],
-    "validTargets": ["lips"],
-    "vector": { "intensity": 4.5, "valence": 3.5, "sharpness": 0.8, "contact": 9, "novelty": 6.5, "powerBase": 30 },
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "intimate",
+      "sexual",
+      "oral",
+      "continuous",
+      "giving"
+    ],
+    "removeContexts": [
+      "finger_insertion",
+      "act_start_penetration",
+      "act_increase_friction",
+      "act_deepen_oral"
+    ],
+    "validTargets": [
+      "lips"
+    ],
+    "vector": {
+      "intensity": 4.5,
+      "valence": 3.5,
+      "sharpness": 0.8,
+      "contact": 9,
+      "novelty": 6.5,
+      "powerBase": 30
+    },
     "contextConfig": {
       "type": "sexual_interaction",
       "activeLabel": "Продолжительный оральный контакт",
       "duration": -1,
-      "modifiers": { "intensity": 3.5, "valence": 3.5, "sharpness": 0.8, "contact": 9, "novelty": -1 }
+      "modifiers": {
+        "intensity": 3.5,
+        "valence": 3.5,
+        "sharpness": 0.8,
+        "contact": 9,
+        "novelty": -1
+      }
     }
   },
   {
     "id": "act_deepen_oral",
     "name": "Засунуть в горло",
     "description": "Ввести пенис глубже в рот и усилить минет.",
-    "categories": ["physical", "intimate", "context"],
-    "tags": ["intimate", "sexual", "oral", "continuous", "giving", "intense"],
-    "validTargets": ["lips"],
-    "vector": { "intensity": 6.5, "valence": 4, "sharpness": 1.4, "contact": 10, "novelty": 2.5, "powerBase": 42 },
+    "categories": [
+      "physical",
+      "intimate",
+      "context"
+    ],
+    "tags": [
+      "intimate",
+      "sexual",
+      "oral",
+      "continuous",
+      "giving",
+      "intense"
+    ],
+    "validTargets": [
+      "lips"
+    ],
+    "vector": {
+      "intensity": 6.5,
+      "valence": 4,
+      "sharpness": 1.4,
+      "contact": 10,
+      "novelty": 2.5,
+      "powerBase": 42
+    },
     "contextConfig": {
       "type": "interaction_level",
       "activeLabel": "Глубокий оральный контакт",
       "duration": -1,
-      "modifiers": { "intensity": 2, "valence": 0.5, "sharpness": 0.6, "contact": 0.5, "novelty": -0.8 }
+      "modifiers": {
+        "intensity": 2,
+        "valence": 0.5,
+        "sharpness": 0.6,
+        "contact": 0.5,
+        "novelty": -0.8
+      }
     }
   },
   {
     "id": "act_decrease_friction",
     "name": "Замедлить фрикции",
     "description": "Замедлить толчки во время вагинального или анального секса.",
-    "categories": ["physical", "intimate"],
-    "tags": ["intimate", "continuous", "pace"],
-    "removeContexts": ["act_increase_friction"],
-    "validTargets": ["vagina", "anus"],
-    "vector": { "intensity": 3, "valence": 4, "sharpness": 0, "contact": 8, "novelty": 1, "powerBase": 18 }
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "intimate",
+      "continuous",
+      "pace"
+    ],
+    "removeContexts": [
+      "act_increase_friction"
+    ],
+    "validTargets": [
+      "vagina",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 3,
+      "valence": 4,
+      "sharpness": 0,
+      "contact": 8,
+      "novelty": 1,
+      "powerBase": 18
+    }
   },
   {
     "id": "act_sexual_climax",
     "name": "Резко усилить",
     "description": "Резко усилить толчки внутри, подталкивая тело к оргазму.",
-    "categories": ["physical", "intimate"],
-    "tags": ["intimate", "sexual", "climax", "intense"],
-    "validTargets": ["vagina", "anus", "clitoris"],
-    "vector": { "intensity": 9, "valence": 6, "sharpness": 2, "contact": 10, "novelty": 3, "powerBase": 68 }
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "intimate",
+      "sexual",
+      "climax",
+      "intense"
+    ],
+    "validTargets": [
+      "vagina",
+      "anus",
+      "clitoris"
+    ],
+    "vector": {
+      "intensity": 9,
+      "valence": 6,
+      "sharpness": 2,
+      "contact": 10,
+      "novelty": 3,
+      "powerBase": 68
+    }
   },
   {
     "id": "act_end_sexual_contact",
     "name": "Завершить сексуальный контакт",
     "description": "Прекратить минет или секс: вывести пенис изо рта, влагалища либо ануса.",
-    "categories": ["physical", "intimate"],
-    "tags": ["intimate", "sexual", "stop"],
-    "removeContexts": ["finger_insertion", "act_start_penetration", "act_start_oral_giving", "act_increase_friction", "act_deepen_oral"],
-    "validTargets": ["vagina", "anus", "lips"],
-    "vector": { "intensity": 2, "valence": 3, "sharpness": 0, "contact": 5, "novelty": 1, "powerBase": 10 }
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "intimate",
+      "sexual",
+      "stop"
+    ],
+    "removeContexts": [
+      "finger_insertion",
+      "act_start_penetration",
+      "act_start_oral_giving",
+      "act_increase_friction",
+      "act_deepen_oral"
+    ],
+    "validTargets": [
+      "vagina",
+      "anus",
+      "lips"
+    ],
+    "vector": {
+      "intensity": 2,
+      "valence": 3,
+      "sharpness": 0,
+      "contact": 5,
+      "novelty": 1,
+      "powerBase": 10
+    }
   },
   {
     "id": "capsule_infusion_regenerative",
     "name": "Ввести Regen-R",
     "description": "Введение регенеративного раствора Regen-R с суточным восстановительным действием.",
-    "categories": ["clinical", "capsule", "context"],
-    "tags": ["clinical", "medical", "drug", "recovery", "infusion"],
+    "categories": [
+      "clinical",
+      "capsule",
+      "context"
+    ],
+    "tags": [
+      "clinical",
+      "medical",
+      "drug",
+      "recovery",
+      "infusion"
+    ],
     "requiresItem": "drug_regenerative",
-    "validTargets": ["systemic"],
+    "validTargets": [
+      "systemic"
+    ],
     "sensory": {
       "stimulus": "Игла и порт катетера дают короткий укол; вслед за ним по вене расходится прохладная волна Regen-R.",
       "texture": "Прохлада постепенно сменяется ровным внутренним теплом в мышцах и грудной клетке.",
@@ -1785,22 +2512,52 @@
       "bodilyResponse": "Дыхание выравнивается, мышечное напряжение отпускает, истощение становится менее острым.",
       "aftereffect": "После извлечения катетера остаётся слабая болезненность в месте укола, а восстановительное тепло держится в теле."
     },
-    "vector": { "intensity": 1, "valence": 4, "sharpness": 0, "contact": 2, "novelty": 3, "powerBase": 8 },
+    "vector": {
+      "intensity": 1,
+      "valence": 4,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 3,
+      "powerBase": 8
+    },
     "contextConfig": {
-      "type": "condition", "activeLabel": "Regen-R", "duration": 1440, "durationUnit": "minutes",
+      "type": "condition",
+      "activeLabel": "Regen-R",
+      "duration": 1440,
+      "durationUnit": "minutes",
       "promptEffect": "в теле держится ровное восстановительное тепло; дыхание и мышечный тонус стабилизируются, усталость отступает быстрее обычного",
-      "exclusiveWithinPoint": true, "occupiesPoints": ["capsule_medication"],
-      "modifiers": { "intensity": -2, "valence": 2, "sharpness": -2, "novelty": -1 }
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "capsule_medication"
+      ],
+      "modifiers": {
+        "intensity": -2,
+        "valence": 2,
+        "sharpness": -2,
+        "novelty": -1
+      }
     }
   },
   {
     "id": "capsule_infusion_neurostabilizer",
     "name": "Ввести NeuroCalm",
     "description": "Введение нейростабилизатора NeuroCalm с суточным сглаживанием нервной реактивности.",
-    "categories": ["clinical", "capsule", "context"],
-    "tags": ["clinical", "medical", "drug", "stabilizer", "infusion"],
+    "categories": [
+      "clinical",
+      "capsule",
+      "context"
+    ],
+    "tags": [
+      "clinical",
+      "medical",
+      "drug",
+      "stabilizer",
+      "infusion"
+    ],
     "requiresItem": "drug_neurostabilizer",
-    "validTargets": ["systemic"],
+    "validTargets": [
+      "systemic"
+    ],
     "sensory": {
       "stimulus": "После укола NeuroCalm оставляет холодный след вдоль вены и лёгкое онемение вокруг порта.",
       "texture": "Внутреннее напряжение словно накрывает мягким плотным слоем, приглушающим резкие пики.",
@@ -1808,22 +2565,50 @@
       "bodilyResponse": "Рефлекторные вздрагивания слабее, между стимулом и реакцией появляется заметная пауза, мысли остаются ясными.",
       "aftereffect": "Холод от инъекции исчезает, но приглушённая телесная реактивность сохраняется."
     },
-    "vector": { "intensity": 1, "valence": 2, "sharpness": 0, "contact": 2, "novelty": 4, "powerBase": 10 },
+    "vector": {
+      "intensity": 1,
+      "valence": 2,
+      "sharpness": 0,
+      "contact": 2,
+      "novelty": 4,
+      "powerBase": 10
+    },
     "contextConfig": {
-      "type": "condition", "activeLabel": "NeuroCalm", "duration": 1440, "durationUnit": "minutes",
+      "type": "condition",
+      "activeLabel": "NeuroCalm",
+      "duration": 1440,
+      "durationUnit": "minutes",
       "promptEffect": "нервные пики приглушены, тело меньше вздрагивает от резких стимулов; реакции ощущаются отдалённее, но сознание остаётся ясным",
-      "exclusiveWithinPoint": true, "occupiesPoints": ["capsule_medication"],
-      "modifiers": { "intensity_mult": 0.72, "sharpness_mult": 0.7 }
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "capsule_medication"
+      ],
+      "modifiers": {
+        "intensity_mult": 0.72,
+        "sharpness_mult": 0.7
+      }
     }
   },
   {
     "id": "capsule_infusion_sensitizer",
     "name": "Ввести NeuroSpike",
     "description": "Введение гипер-сенсибилизатора NeuroSpike с суточным усилением телесного отклика.",
-    "categories": ["clinical", "capsule", "context"],
-    "tags": ["clinical", "medical", "drug", "sensitivity", "infusion"],
+    "categories": [
+      "clinical",
+      "capsule",
+      "context"
+    ],
+    "tags": [
+      "clinical",
+      "medical",
+      "drug",
+      "sensitivity",
+      "infusion"
+    ],
     "requiresItem": "drug_sensitizer",
-    "validTargets": ["systemic"],
+    "validTargets": [
+      "systemic"
+    ],
     "sensory": {
       "stimulus": "NeuroSpike входит жгучей полосой: от укола по вене быстро расходятся тепло и мелкое покалывание.",
       "texture": "Кожа начинает различать ткань, воздух и давление опоры с непривычной подробностью.",
@@ -1831,22 +2616,52 @@
       "bodilyResponse": "Даже слабые прикосновения раньше захватывают внимание, рефлекторные реакции становятся ярче и быстрее.",
       "aftereffect": "Жжение укола проходит, но усиленная телесная отчётливость и покалывание сохраняются."
     },
-    "vector": { "intensity": 3, "valence": 1, "sharpness": 1, "contact": 3, "novelty": 5, "powerBase": 16 },
+    "vector": {
+      "intensity": 3,
+      "valence": 1,
+      "sharpness": 1,
+      "contact": 3,
+      "novelty": 5,
+      "powerBase": 16
+    },
     "contextConfig": {
-      "type": "condition", "activeLabel": "NeuroSpike", "duration": 1440, "durationUnit": "minutes",
+      "type": "condition",
+      "activeLabel": "NeuroSpike",
+      "duration": 1440,
+      "durationUnit": "minutes",
       "promptEffect": "кожа и внутренние ощущения ненормально отчётливы; слабые касания, ткань и температура ощущаются сильнее и быстрее захватывают внимание",
-      "exclusiveWithinPoint": true, "occupiesPoints": ["capsule_medication"],
-      "modifiers": { "intensity_mult": 1.25, "contact": 2, "novelty": 1 }
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "capsule_medication"
+      ],
+      "modifiers": {
+        "intensity_mult": 1.25,
+        "contact": 2,
+        "novelty": 1
+      }
     }
   },
   {
     "id": "capsule_infusion_plasticity",
     "name": "Ввести Mnemosyne-P",
     "description": "Введение пластического катализатора Mnemosyne-P с суточным усилением закрепления опыта.",
-    "categories": ["clinical", "capsule", "context"],
-    "tags": ["clinical", "medical", "drug", "plasticity", "conditioning", "infusion"],
+    "categories": [
+      "clinical",
+      "capsule",
+      "context"
+    ],
+    "tags": [
+      "clinical",
+      "medical",
+      "drug",
+      "plasticity",
+      "conditioning",
+      "infusion"
+    ],
     "requiresItem": "drug_plasticity_catalyst",
-    "validTargets": ["systemic"],
+    "validTargets": [
+      "systemic"
+    ],
     "sensory": {
       "stimulus": "Mnemosyne-P даёт металлический привкус, прохладу в вене и короткое давление за глазами.",
       "texture": "Ощущения остаются физически обычными, но кажутся необычно отчётливыми и значимыми.",
@@ -1854,22 +2669,51 @@
       "bodilyResponse": "Тело быстрее узнаёт повторяющиеся сигналы, а эмоциональный и сенсорный опыт оставляет более цепкий след.",
       "aftereffect": "Давление проходит, но впечатления ещё долго кажутся свежими и легко возвращаются в память."
     },
-    "vector": { "intensity": 2, "valence": 0, "sharpness": 1, "contact": 2, "novelty": 7, "powerBase": 18 },
+    "vector": {
+      "intensity": 2,
+      "valence": 0,
+      "sharpness": 1,
+      "contact": 2,
+      "novelty": 7,
+      "powerBase": 18
+    },
     "contextConfig": {
-      "type": "condition", "activeLabel": "Mnemosyne-P", "duration": 1440, "durationUnit": "minutes",
+      "type": "condition",
+      "activeLabel": "Mnemosyne-P",
+      "duration": 1440,
+      "durationUnit": "minutes",
       "promptEffect": "новый опыт ощущается необычно значимым и цепким; повторения легче узнаются, а пережитое дольше остаётся свежим в памяти и теле",
-      "exclusiveWithinPoint": true, "occupiesPoints": ["capsule_medication"],
-      "modifiers": { "novelty_mult": 1.35, "intensity": 1 }
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "capsule_medication"
+      ],
+      "modifiers": {
+        "novelty_mult": 1.35,
+        "intensity": 1
+      }
     }
   },
   {
     "id": "capsule_infusion_hormonal_primer",
     "name": "Ввести Eros-V",
     "description": "Введение гормонального праймера Eros-V с суточным усилением телесного возбуждения.",
-    "categories": ["clinical", "capsule", "context"],
-    "tags": ["clinical", "medical", "drug", "arousal", "hormonal", "infusion"],
+    "categories": [
+      "clinical",
+      "capsule",
+      "context"
+    ],
+    "tags": [
+      "clinical",
+      "medical",
+      "drug",
+      "arousal",
+      "hormonal",
+      "infusion"
+    ],
     "requiresItem": "drug_aphrodisiac",
-    "validTargets": ["systemic"],
+    "validTargets": [
+      "systemic"
+    ],
     "sensory": {
       "stimulus": "После укола Eros-V по телу расходится жар, сначала в груди и животе, затем ниже живота.",
       "texture": "Кожа теплеет, пульс становится заметнее, а внутреннее возбуждение ощущается как навязчивая телесная готовность.",
@@ -1877,27 +2721,64 @@
       "bodilyResponse": "Кровообращение и телесная реактивность усиливаются; возбуждение возникает легче, независимо от сознательного отношения.",
       "aftereffect": "Жар немного выравнивается, но фоновое возбуждение и повышенная готовность тела сохраняются."
     },
-    "vector": { "intensity": 3, "valence": 4, "sharpness": 0, "contact": 3, "novelty": 6, "powerBase": 20 },
+    "vector": {
+      "intensity": 3,
+      "valence": 4,
+      "sharpness": 0,
+      "contact": 3,
+      "novelty": 6,
+      "powerBase": 20
+    },
     "contextConfig": {
-      "type": "condition", "activeLabel": "Eros-V", "duration": 1440, "durationUnit": "minutes",
+      "type": "condition",
+      "activeLabel": "Eros-V",
+      "duration": 1440,
+      "durationUnit": "minutes",
       "promptEffect": "в груди, животе и паху держится фоновый жар; пульс и телесное возбуждение нарастают легче, даже если сознательное отношение к происходящему иное",
-      "exclusiveWithinPoint": true, "occupiesPoints": ["capsule_medication"],
-      "modifiers": { "contact": 1, "intensity": 1 }
+      "exclusiveWithinPoint": true,
+      "occupiesPoints": [
+        "capsule_medication"
+      ],
+      "modifiers": {
+        "contact": 1,
+        "intensity": 1
+      }
     }
   },
   {
     "id": "context_mental_correction_chair",
     "name": "Кресло ментальной коррекции",
     "description": "Изолированная посадка в нейрокресло с визором и направленной сенсорной обратной связью.",
-    "categories": ["equipment", "mental", "context"],
-    "tags": ["equipment", "mental", "conditioning", "neural", "isolation"],
-    "validTargets": ["mind_state"],
-    "vector": { "intensity": 0, "valence": 0, "sharpness": 0, "contact": 0, "novelty": 0, "powerBase": 0 },
+    "categories": [
+      "equipment",
+      "mental",
+      "context"
+    ],
+    "tags": [
+      "equipment",
+      "mental",
+      "conditioning",
+      "neural",
+      "isolation"
+    ],
+    "validTargets": [
+      "mind_state"
+    ],
+    "vector": {
+      "intensity": 0,
+      "valence": 0,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 0,
+      "powerBase": 0
+    },
     "contextConfig": {
       "type": "environment",
       "activeLabel": "Кресло ментальной коррекции",
       "duration": -1,
-      "occupiesPoints": ["mental_correction_chair"],
+      "occupiesPoints": [
+        "mental_correction_chair"
+      ],
       "promptEffect": "ты сидишь глубоко в фиксирующем кресле; плотный визор закрывает глаза, в наушниках держится направленный звук, а подголовник и подлокотники дают ровную тактильную обратную связь"
     }
   },
@@ -1905,30 +2786,68 @@
     "id": "act_self_stimulate",
     "name": "Утешиться сама",
     "description": "Автономный акт: персонаж ласкает себя, когда накопленное возбуждение и закреплённый интерес к собственной стимуляции берут верх.",
-    "categories": ["physical", "intimate", "self"],
-    "tags": ["sexual", "self", "stimulation", "continuous"],
-    "validTargets": ["clitoris", "vagina", "vulva", "penis"],
+    "categories": [
+      "physical",
+      "intimate",
+      "self"
+    ],
+    "tags": [
+      "sexual",
+      "self",
+      "stimulation",
+      "continuous"
+    ],
+    "validTargets": [
+      "clitoris",
+      "vagina",
+      "vulva",
+      "penis"
+    ],
     "sensory": {
       "stimulus": "Ладонь и пальцы скользят по собственной коже, возвращаясь к одной и той же точке.",
       "texture": "Собственные прикосновения привычные и точные — ровно той силы и темпа, каких хочется сейчас.",
       "rhythm": "Движение ускоряется и становится ровным, когда нужная точка найдена.",
       "bodilyResponse": "Тело отзывается сразу и сильно: тепло и напряжение стягиваются к месту ласки."
     },
-    "vector": { "intensity": 4, "valence": 3, "sharpness": 1, "contact": 8, "novelty": -1, "powerBase": 26 },
+    "vector": {
+      "intensity": 4,
+      "valence": 3,
+      "sharpness": 1,
+      "contact": 8,
+      "novelty": -1,
+      "powerBase": 26
+    },
     "contextConfig": {
       "type": "sexual_interaction",
       "activeLabel": "Ласкает сама себя",
       "duration": -1,
-      "modifiers": { "intensity": 3, "valence": 3, "sharpness": 1, "contact": 8, "novelty": -2 }
+      "modifiers": {
+        "intensity": 3,
+        "valence": 3,
+        "sharpness": 1,
+        "contact": 8,
+        "novelty": -2
+      }
     }
   },
   {
     "id": "capsule_additive_seminal",
     "name": "Подать биоматериал",
     "description": "Интимный контур капсулы подаёт в рот персонажа порцию семенной жидкости калибратора.",
-    "categories": ["physical", "intimate"],
-    "tags": ["intimate", "sexual", "oral", "biomaterial", "fluid"],
-    "validTargets": ["lips"],
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "intimate",
+      "sexual",
+      "oral",
+      "biomaterial",
+      "fluid"
+    ],
+    "validTargets": [
+      "lips"
+    ],
     "sensory": {
       "stimulus": "Насадка у губ подаёт в рот тёплую семенную жидкость калибратора.",
       "texture": "Густая вязкая жидкость растекается по языку и нёбу, оставляя характерный солоноватый вкус и запах.",
@@ -1936,6 +2855,1341 @@
       "bodilyResponse": "Рот наполняется, язык и горло отчётливо чувствуют объём; глотательный и рвотный рефлексы могут сработать независимо от сознательной оценки.",
       "aftereffect": "После подачи вкус, запах и вязкий след ещё некоторое время остаются во рту и горле."
     },
-    "vector": { "intensity": 5, "valence": 0, "sharpness": 0, "contact": 9, "novelty": 9, "powerBase": 30 }
+    "vector": {
+      "intensity": 5,
+      "valence": 0,
+      "sharpness": 0,
+      "contact": 9,
+      "novelty": 9,
+      "powerBase": 30
+    }
+  },
+  {
+    "id": "effect_apathy",
+    "name": "Апатия / Отключение",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "apathy"
+    ],
+    "vector": {
+      "intensity_mult": 0.5,
+      "sharpness_mult": 0.5
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_chronic_apathy",
+    "name": "Глубокий Срыв (Хроническая Апатия)",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "apathy"
+    ],
+    "vector": {
+      "intensity_mult": 0.5,
+      "sharpness_mult": 0.5
+    },
+    "contextConfig": {
+      "duration": 10,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_subspace",
+    "name": "Сабспейс (Податливость)",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "subspace"
+    ],
+    "vector": {
+      "valence": 0.2,
+      "sharpness_mult": 0.6
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_panic",
+    "name": "Паническая Атака",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "panic"
+    ],
+    "vector": {
+      "valence": -0.3,
+      "sharpness_mult": 1.4
+    },
+    "contextConfig": {
+      "duration": 30,
+      "durationUnit": "minutes",
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_sensory_overload",
+    "name": "Сенсорная Перегрузка",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "overload"
+    ],
+    "vector": {
+      "intensity_mult": 1.2,
+      "sharpness": 0.15
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_freeze",
+    "name": "Тоническое Оцепенение",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "freeze"
+    ],
+    "vector": {
+      "contact_mult": 0.8
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_suggestibility",
+    "name": "Смещение контроля",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "submissive"
+    ],
+    "vector": {
+      "valence": 0.15,
+      "sharpness_mult": 0.8
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_active_defiance",
+    "name": "Активное Отторжение",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "defiance"
+    ],
+    "vector": {
+      "intensity_mult": 0.8,
+      "valence": -0.1
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_hyperesthesia",
+    "name": "Гиперестезия",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "hyperesthesia"
+    ],
+    "vector": {
+      "intensity_mult": 1.3,
+      "sharpness_mult": 1.1
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_local_hyperesthesia",
+    "name": "Локальная Гиперестезия",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "hyperesthesia",
+      "local"
+    ],
+    "vector": {
+      "intensity_mult": 1.5,
+      "sharpness_mult": 1.2
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_local_numbness",
+    "name": "Локальное Онемение",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "numbness",
+      "local"
+    ],
+    "vector": {
+      "intensity_mult": 0.1,
+      "sharpness_mult": 0.1,
+      "contact_mult": 0.5
+    },
+    "contextConfig": {
+      "duration": -1,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "effect_refractory",
+    "name": "Рефрактерный период",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "physiological",
+      "refractory"
+    ],
+    "vector": {
+      "intensity_mult": 0.25,
+      "contact_mult": 0.8,
+      "novelty_mult": 0.25
+    },
+    "contextConfig": {
+      "type": "condition",
+      "duration": 3,
+      "occupiesPoints": []
+    }
+  },
+  {
+    "id": "gentle_stroke",
+    "name": "Мягкое поглаживание",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "affection"
+    ],
+    "validTargets": [
+      "hair",
+      "face",
+      "neck",
+      "shoulders",
+      "chest",
+      "belly",
+      "back",
+      "waist",
+      "arms",
+      "hands",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis"
+    ],
+    "vector": {
+      "intensity": 0.2,
+      "valence": 0.6,
+      "contact": 0.4,
+      "sharpness": 0.1,
+      "novelty": 0.2
+    }
+  },
+  {
+    "id": "tickle",
+    "name": "Щекотка пальцами",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "tickling"
+    ],
+    "validTargets": [
+      "neck",
+      "belly",
+      "waist",
+      "inner_thighs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.4,
+      "valence": 0.2,
+      "contact": 0.3,
+      "sharpness": 0.4,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "light_kiss",
+    "name": "Короткий поцелуй",
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "validTargets": [
+      "face",
+      "lips",
+      "neck",
+      "shoulders",
+      "chest",
+      "nipples",
+      "belly",
+      "back",
+      "hands",
+      "inner_thighs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis"
+    ],
+    "vector": {
+      "intensity": 0.2,
+      "valence": 0.7,
+      "contact": 0.5,
+      "sharpness": 0.05,
+      "novelty": 0.4
+    }
+  },
+  {
+    "id": "deep_kiss",
+    "name": "Глубокий поцелуй",
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "sexual",
+      "oral"
+    ],
+    "validTargets": [
+      "lips"
+    ],
+    "vector": {
+      "intensity": 0.6,
+      "valence": 0.9,
+      "contact": 0.8,
+      "sharpness": 0.2,
+      "novelty": 0.6
+    }
+  },
+  {
+    "id": "feather_stroke",
+    "name": "Проведение перышком",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "tickling"
+    ],
+    "validTargets": [
+      "head",
+      "hair",
+      "face",
+      "lips",
+      "neck",
+      "shoulders",
+      "chest",
+      "nipples",
+      "belly",
+      "back",
+      "waist",
+      "arms",
+      "hands",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus",
+      "vagina",
+      "prostate"
+    ],
+    "vector": {
+      "intensity": 0.16,
+      "valence": 0.5,
+      "contact": 0.18,
+      "sharpness": 0.02,
+      "novelty": 0.7
+    }
+  },
+  {
+    "id": "deep_massage",
+    "name": "Массаж",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "stimulation"
+    ],
+    "validTargets": [
+      "shoulders",
+      "chest",
+      "belly",
+      "back",
+      "waist",
+      "arms",
+      "hands",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks"
+    ],
+    "vector": {
+      "intensity": 0.48,
+      "valence": 0.5,
+      "contact": 0.82,
+      "sharpness": 0.2,
+      "novelty": 0.25
+    }
+  },
+  {
+    "id": "licking",
+    "name": "Провести языком",
+    "categories": [
+      "physical",
+      "intimate"
+    ],
+    "tags": [
+      "sexual",
+      "oral"
+    ],
+    "validTargets": [
+      "lips",
+      "neck",
+      "nipples",
+      "inner_thighs",
+      "feet",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.3,
+      "valence": 0.6,
+      "contact": 0.5,
+      "sharpness": 0.05,
+      "novelty": 0.6
+    }
+  },
+  {
+    "id": "firm_grip",
+    "name": "Крепко сжать",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain",
+      "blunt"
+    ],
+    "validTargets": [
+      "shoulders",
+      "chest",
+      "waist",
+      "arms",
+      "hands",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 0.7,
+      "valence": -0.2,
+      "contact": 0.8,
+      "sharpness": 0.3,
+      "novelty": 0.4
+    }
+  },
+  {
+    "id": "light_bite",
+    "name": "Игровой прикус",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain"
+    ],
+    "validTargets": [
+      "lips",
+      "neck",
+      "shoulders",
+      "chest",
+      "nipples",
+      "inner_thighs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 0.4,
+      "valence": 0.4,
+      "contact": 0.4,
+      "sharpness": 0.6,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "hard_bite",
+    "name": "Болезненный укус",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain"
+    ],
+    "validTargets": [
+      "lips",
+      "neck",
+      "shoulders",
+      "chest",
+      "inner_thighs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles"
+    ],
+    "vector": {
+      "intensity": 0.7,
+      "valence": -0.5,
+      "contact": 0.6,
+      "sharpness": 0.8,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "pinch",
+    "name": "Ущипнуть",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain"
+    ],
+    "validTargets": [
+      "chest",
+      "nipples",
+      "belly",
+      "waist",
+      "arms",
+      "inner_thighs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.5,
+      "valence": -0.4,
+      "contact": 0.2,
+      "sharpness": 0.8,
+      "novelty": 0.3
+    }
+  },
+  {
+    "id": "scratching",
+    "name": "Провести ногтями",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain"
+    ],
+    "validTargets": [
+      "shoulders",
+      "chest",
+      "belly",
+      "back",
+      "arms",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks"
+    ],
+    "vector": {
+      "intensity": 0.4,
+      "valence": -0.2,
+      "contact": 0.3,
+      "sharpness": 0.8,
+      "novelty": 0.4
+    }
+  },
+  {
+    "id": "slap",
+    "name": "Шлёпнуть",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain",
+      "impact",
+      "humiliation"
+    ],
+    "validTargets": [
+      "face",
+      "chest",
+      "inner_thighs",
+      "buttocks"
+    ],
+    "vector": {
+      "intensity": 0.5,
+      "valence": -0.3,
+      "contact": 0.6,
+      "sharpness": 0.7,
+      "novelty": 0.4
+    }
+  },
+  {
+    "id": "hard_slap",
+    "name": "Удар ладонью",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain",
+      "impact",
+      "humiliation"
+    ],
+    "validTargets": [
+      "face",
+      "chest",
+      "inner_thighs",
+      "buttocks"
+    ],
+    "vector": {
+      "intensity": 0.72,
+      "valence": -0.6,
+      "contact": 0.65,
+      "sharpness": 0.85,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "needle_prick",
+    "name": "Укол иглой",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain",
+      "clinical",
+      "medical"
+    ],
+    "validTargets": [
+      "shoulders",
+      "arms",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks"
+    ],
+    "vector": {
+      "intensity": 0.4,
+      "valence": -0.7,
+      "contact": 0.1,
+      "sharpness": 1.0,
+      "novelty": 0.6
+    }
+  },
+  {
+    "id": "whip_strike",
+    "name": "Удар хлыстом",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain",
+      "impact"
+    ],
+    "validTargets": [
+      "shoulders",
+      "chest",
+      "back",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks"
+    ],
+    "vector": {
+      "intensity": 0.9,
+      "valence": -0.9,
+      "contact": 0.3,
+      "sharpness": 1.0,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "taser_shock",
+    "name": "Разряд электрошокера",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain",
+      "electronic"
+    ],
+    "validTargets": [
+      "shoulders",
+      "chest",
+      "belly",
+      "back",
+      "arms",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks"
+    ],
+    "vector": {
+      "intensity": 0.95,
+      "valence": -0.95,
+      "contact": 0.4,
+      "sharpness": 0.95,
+      "novelty": 0.8
+    }
+  },
+  {
+    "id": "ice_cube",
+    "name": "Коснуться льдом",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "stimulation",
+      "sensory"
+    ],
+    "validTargets": [
+      "head",
+      "hair",
+      "face",
+      "lips",
+      "neck",
+      "shoulders",
+      "chest",
+      "nipples",
+      "belly",
+      "back",
+      "waist",
+      "arms",
+      "hands",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus",
+      "vagina",
+      "prostate"
+    ],
+    "vector": {
+      "intensity": 0.6,
+      "valence": 0.1,
+      "contact": 0.4,
+      "sharpness": 0.6,
+      "novelty": 0.8
+    }
+  },
+  {
+    "id": "hot_wax",
+    "name": "Капнуть воском",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain"
+    ],
+    "validTargets": [
+      "shoulders",
+      "chest",
+      "belly",
+      "back",
+      "waist",
+      "arms",
+      "inner_thighs",
+      "legs",
+      "feet",
+      "buttocks",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.7,
+      "valence": -0.1,
+      "contact": 0.2,
+      "sharpness": 0.8,
+      "novelty": 0.8
+    }
+  },
+  {
+    "id": "vibrator_pulse",
+    "name": "Дать импульс вибратором",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation"
+    ],
+    "requiresItem": "eq_vibrator",
+    "validTargets": [
+      "neck",
+      "chest",
+      "nipples",
+      "belly",
+      "inner_thighs",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.6,
+      "valence": 0.8,
+      "contact": 0.7,
+      "sharpness": 0.2,
+      "novelty": 0.7
+    }
+  },
+  {
+    "id": "hair_pull",
+    "name": "Потянуть за волосы",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "pain",
+      "control"
+    ],
+    "validTargets": [
+      "hair"
+    ],
+    "vector": {
+      "intensity": 0.6,
+      "valence": -0.4,
+      "contact": 0.5,
+      "sharpness": 0.7,
+      "novelty": 0.4
+    }
+  },
+  {
+    "id": "spit",
+    "name": "Плевок",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "demeaning"
+    ],
+    "vector": {
+      "intensity": 0.3,
+      "valence": -0.8,
+      "contact": 0.2,
+      "sharpness": 0.8,
+      "novelty": 0.7
+    }
+  },
+  {
+    "id": "breath_blow",
+    "name": "Обдать дыханием",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "stimulation"
+    ],
+    "validTargets": [
+      "face",
+      "lips",
+      "neck",
+      "chest",
+      "nipples",
+      "belly",
+      "inner_thighs",
+      "vulva",
+      "clitoris",
+      "penis",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.16,
+      "valence": 0.4,
+      "contact": 0.12,
+      "sharpness": 0.08,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "verbal_pressure",
+    "name": "Беседа",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "command",
+      "pressure"
+    ],
+    "vector": {
+      "intensity": 0.1,
+      "valence": 0.0,
+      "contact": 0.0,
+      "sharpness": 0.0,
+      "novelty": 0.1
+    }
+  },
+  {
+    "id": "stare",
+    "name": "Пристальный взгляд",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "control"
+    ],
+    "vector": {
+      "intensity": 0.3,
+      "valence": -0.1,
+      "contact": 0.0,
+      "sharpness": 0.1,
+      "novelty": 0.2
+    }
+  },
+  {
+    "id": "close_inspection",
+    "name": "Относительно близкий осмотр",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "clinical"
+    ],
+    "vector": {
+      "intensity": 0.4,
+      "valence": -0.3,
+      "contact": 0.0,
+      "sharpness": 0.2,
+      "novelty": 0.4
+    }
+  },
+  {
+    "id": "feint_strike",
+    "name": "Ложный замах",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "impact"
+    ],
+    "vector": {
+      "intensity": 0.7,
+      "valence": -0.5,
+      "contact": 0.0,
+      "sharpness": 0.9,
+      "novelty": 0.5
+    }
+  },
+  {
+    "id": "pose_kneeling",
+    "name": "Поза: На коленях",
+    "categories": [
+      "pose"
+    ],
+    "tags": [
+      "pose",
+      "dominance",
+      "submission"
+    ],
+    "vector": {
+      "intensity": 0.3,
+      "valence": -0.2,
+      "contact": 0.1,
+      "sharpness": 0.0,
+      "novelty": 0.2
+    },
+    "removeContexts": [
+      "act_hold_exposure",
+      "act_present_feet",
+      "act_suspend_wrists"
+    ],
+    "contextConfig": {
+      "type": "pose",
+      "activeLabel": "На коленях",
+      "occupiesPoints": [
+        "global_pose"
+      ],
+      "duration": -1
+    }
+  },
+  {
+    "id": "device_sensory_loop",
+    "name": "Установить сенсорный контур",
+    "categories": [
+      "context"
+    ],
+    "tags": [
+      "equipment",
+      "passive"
+    ],
+    "vector": {
+      "intensity": 0.05,
+      "valence": 0.1,
+      "contact": 0.2,
+      "sharpness": 0,
+      "novelty": 0.4
+    },
+    "contextConfig": {
+      "type": "equipment",
+      "activeLabel": "Сенсорный контур",
+      "occupiesPoints": [],
+      "exclusiveWithinPoint": true,
+      "duration": -1,
+      "modifiers": {}
+    }
+  },
+  {
+    "id": "device_sensory_pulse",
+    "name": "Импульс сенсорного контура",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "equipment",
+      "passive",
+      "stimulation"
+    ],
+    "vector": {
+      "intensity": 0.25,
+      "valence": 0.5,
+      "contact": 0.8,
+      "sharpness": 0.05,
+      "novelty": 0.4
+    },
+    "requireContexts": [
+      "device_sensory_loop"
+    ]
+  },
+  {
+    "id": "device_contrast_pulse",
+    "name": "Контрастный импульс сенсорного контура",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "equipment",
+      "passive",
+      "contrast"
+    ],
+    "vector": {
+      "intensity": 0.5,
+      "valence": 0.15,
+      "contact": 0.7,
+      "sharpness": 0.45,
+      "novelty": 0.75
+    },
+    "requireContexts": [
+      "device_sensory_loop"
+    ]
+  },
+  {
+    "id": "context_defiant",
+    "name": "Агрессивный бунт",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "mental",
+      "condition"
+    ],
+    "vector": {
+      "intensity": 0,
+      "valence": 0.2,
+      "contact": 0,
+      "sharpness": 0,
+      "novelty": 0
+    },
+    "contextConfig": {
+      "duration": -1
+    }
+  },
+  {
+    "id": "context_fear_of_loss",
+    "name": "Страх утраты",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "mental",
+      "condition"
+    ],
+    "vector": {
+      "intensity": 0.1,
+      "valence": -0.2,
+      "contact": 0,
+      "sharpness": 0,
+      "novelty": 0
+    },
+    "contextConfig": {
+      "duration": -1
+    }
+  },
+  {
+    "id": "context_glitch_prone",
+    "name": "Нестабильность имплантов",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "physical",
+      "condition"
+    ],
+    "vector": {
+      "intensity": 0.1,
+      "valence": -0.1,
+      "contact": 0,
+      "sharpness": 0,
+      "novelty": 0.2
+    },
+    "contextConfig": {
+      "duration": -1
+    }
+  },
+  {
+    "id": "context_sensitive_skin",
+    "name": "Гиперестезия",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "physical",
+      "condition"
+    ],
+    "vector": {
+      "intensity": 0.2,
+      "valence": 0,
+      "contact": 0.2,
+      "sharpness": 0.3,
+      "novelty": 0
+    },
+    "contextConfig": {
+      "duration": -1
+    }
+  },
+  {
+    "id": "context_masochism",
+    "name": "Мазохистская инверсия",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "mental",
+      "condition"
+    ],
+    "vector": {
+      "intensity": 0,
+      "valence": 0,
+      "contact": 0,
+      "sharpness": 0,
+      "novelty": 0
+    },
+    "contextConfig": {
+      "duration": -1
+    }
+  },
+  {
+    "id": "context_pleasure_burn",
+    "name": "Ожог удовольствием",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "mental",
+      "condition"
+    ],
+    "vector": {
+      "intensity": 0,
+      "valence": -0.1,
+      "contact": 0,
+      "sharpness": 0.1,
+      "novelty": 0
+    },
+    "contextConfig": {
+      "duration": -1
+    }
+  },
+  {
+    "id": "sustained_sexual_pulse",
+    "name": "Импульс продолжительного сексуального контакта",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "sexual",
+      "penetration",
+      "continuous"
+    ],
+    "validTargets": [
+      "vagina",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.34,
+      "valence": 0.6,
+      "contact": 0.9,
+      "sharpness": 0.1,
+      "novelty": 0.18
+    },
+    "sensory": {
+      "stimulus": "Ты чувствуешь продолжение интимного давления и трения в чувствительной зоне.",
+      "texture": "Глубина, тепло и скольжение меняются вместе с каждым движением.",
+      "rhythm": "Очередное движение приходит до того, как предыдущее ощущение успевает полностью стихнуть.",
+      "bodilyResponse": "Мышцы вокруг контакта непроизвольно меняют напряжение и подстраиваются под ритм.",
+      "aftereffect": "В короткой паузе сохраняются тепло, внутреннее давление и ожидание следующего движения."
+    }
+  },
+  {
+    "id": "sustained_vibration_pulse",
+    "name": "Импульс продолжительной вибрации",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "continuous"
+    ],
+    "validTargets": [
+      "neck",
+      "chest",
+      "nipples",
+      "belly",
+      "inner_thighs",
+      "groin",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.28,
+      "valence": 0.65,
+      "contact": 0.75,
+      "sharpness": 0.08,
+      "novelty": 0.25
+    },
+    "sensory": {
+      "stimulus": "Ты чувствуешь очередной период непрерывной вибрации.",
+      "texture": "Частая дрожь заполняет зону и постепенно размывает отдельные границы контакта.",
+      "rhythm": "Повтор начинается поверх сохранившегося телесного эха.",
+      "bodilyResponse": "Мышцы всё быстрее узнают ритм и отвечают на него автоматически.",
+      "aftereffect": "После паузы тело ещё ожидает продолжения вибрации."
+    }
+  },
+  {
+    "id": "sustained_electro_pulse",
+    "name": "Импульс продолжительной электростимуляции",
+    "categories": [
+      "physical"
+    ],
+    "tags": [
+      "electronic",
+      "stimulation",
+      "continuous"
+    ],
+    "validTargets": [
+      "neck",
+      "chest",
+      "nipples",
+      "belly",
+      "inner_thighs",
+      "groin",
+      "vulva",
+      "clitoris",
+      "penis",
+      "testicles",
+      "anus"
+    ],
+    "vector": {
+      "intensity": 0.42,
+      "valence": -0.25,
+      "contact": 0.65,
+      "sharpness": 0.55,
+      "novelty": 0.3
+    },
+    "sensory": {
+      "stimulus": "Ты чувствуешь очередную волну электрической стимуляции через закреплённые контакты.",
+      "texture": "Ровная искусственная дрожь проходит сквозь мышцы и усиливается в точках электродов.",
+      "rhythm": "Новый импульс накладывается на ещё не исчезнувшее ожидание предыдущего.",
+      "bodilyResponse": "Мышцы сокращаются в навязанном ритме, постепенно утомляясь.",
+      "aftereffect": "Между импульсами остаются дрожь и покалывание."
+    }
   }
 ]
