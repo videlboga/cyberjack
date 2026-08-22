@@ -4304,9 +4304,7 @@
       "inner_thighs",
       "legs",
       "feet",
-      "buttocks",
-      "torso",
-      "groin"
+      "buttocks"
     ],
     "vector": {
       "intensity": 0.3,
@@ -4340,9 +4338,7 @@
       "inner_thighs",
       "legs",
       "feet",
-      "buttocks",
-      "torso",
-      "groin"
+      "buttocks"
     ],
     "vector": {
       "intensity": 0.5,

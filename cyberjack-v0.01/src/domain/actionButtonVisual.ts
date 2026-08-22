@@ -21,6 +21,17 @@ const oralActionImage = (actionId: string): string | null => {
   return null;
 };
 
+/** Clinical actions reuse existing artwork until dedicated art is authored. */
+const clinicalActionImage = (actionId: string): string | null => {
+  if (actionId === 'clinical_inspection') {
+    return '/character-images/actions/contact/needle_prick.png';
+  }
+  if (actionId === 'clinical_palpation') {
+    return '/character-images/actions/contact/deep_massage.png';
+  }
+  return null;
+};
+
 /** True only when this exact body-point/action pair has authored artwork. */
 export function hasActionPointImage(actionId: string, pointId?: string | null): boolean {
   if (!pointId) return false;
@@ -36,6 +47,8 @@ export function resolveActionButtonImage(
 ): string {
   const oralImage = oralActionImage(actionId);
   if (oralImage) return oralImage;
+  const clinicalImage = clinicalActionImage(actionId);
+  if (clinicalImage) return clinicalImage;
   const visualId = actionId === 'breath_blow' ? 'feather_stroke' : actionId;
   const pointAsset = pointId
     ? (actionPointAssets as Record<string, string>)[`${pointId}/${visualId}`]

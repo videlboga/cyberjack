@@ -552,6 +552,18 @@ export const calibrationActions: ActionDef[] = [
     group: "contact",
   },
   {
+    id: "clinical_inspection",
+    label: "Клинический осмотр",
+    hint: "Внимательный осмотр выбранной зоны",
+    group: "contact",
+  },
+  {
+    id: "clinical_palpation",
+    label: "Пальпация",
+    hint: "Ощупывание выбранной зоны",
+    group: "contact",
+  },
+  {
     id: "whip_strike",
     label: "Ударить хлыстом",
     hint: "Крайне интенсивная поверхностная боль",
