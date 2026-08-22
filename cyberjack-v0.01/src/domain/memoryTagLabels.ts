@@ -19,6 +19,8 @@ export const memoryTagLabels: Record<string, string> = {
     submissive: 'податливость', defiance: 'сопротивление', hyperesthesia: 'гиперестезия', local: 'локальное',
     numbness: 'онемение', physiological: 'физиологическое', refractory: 'рефрактерный период',
     dominance: 'доминирование', passive: 'пассивное', contrast: 'контраст', physical: 'физическое',
+    // Рутины (еда/туалет/сон).
+    routine: 'рутина', eat: 'приём пищи', toilet: 'санитарный модуль', sleep: 'сон',
 };
 
 export function memoryTagLabel(tag: string) {

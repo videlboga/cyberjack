@@ -2142,6 +2142,7 @@ function roomSceneBackground(roomId: string): string {
   switch (roomId) {
     case "room_cell_a":
     case "room_cell_b":
+    case "room_cell_c":
       return "/backgrounds/laboratory/living-cell-v2.png";
     case "room_control":
     case "room_staff_living":

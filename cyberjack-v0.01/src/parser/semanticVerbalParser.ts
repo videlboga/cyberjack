@@ -218,7 +218,7 @@ export const PARSER_SCHEMA = {
             command: {
                 type: 'object', additionalProperties: false,
                 properties: {
-                    type: { type: 'string', enum: ['none', 'perform_action', 'change_pose', 'activate_context', 'deactivate_context', 'remove_worn_clothing', 'move', 'change_current_interaction'] },
+                    type: { type: 'string', enum: ['none', 'perform_action', 'change_pose', 'activate_context', 'deactivate_context', 'remove_worn_clothing', 'move', 'routine', 'change_current_interaction'] },
                     directedAtCharacter: { type: 'boolean' },
                     explicitDirective: { type: 'boolean' },
                     directiveEvidence: { type: 'string' },
@@ -294,6 +294,7 @@ pendingCommandRelation="continue" ставь только когда без не
 Для remove_worn_clothing используй type="remove_worn_clothing" (без actionId/contextId), когда команда требует снять всю одежду целиком («разденься», «сними всё», «сними одежду»). Для снятия одного конкретного предмета используй deactivate_context с contextId этого предмета.
 Для change_pose contextId обязан быть ID позы из «Доступных поз» (например pose_sitting, act_present_feet), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.
 Для move, когда игрок называет «свою/твою/мою камеру», «домой», «в камеру» без конкретного имени — верни location="своя камера" (движок сам подставит жилую камеру персонажа). Конкретную комнату или персонажа из «Контекста места» возвращай их именем.
+Для routine (физиологическая потребность персонажа — сходить в туалет, поесть) используй type="routine" и положи в actionId один из ID: routine_toilet (туалет/санитарный модуль/описаться/сходить по-маленькому) или routine_eat (поесть/приём пищи/голод). Это НЕ перемещение и НЕ действие с другим персонажем — это самостоятельная рутина персонажа. «Сходи в туалет», «сходи поешь», «иди в санитарный модуль» — routine, а не move.
 Если команда распознана, но не хватает деталей, заполни command.misunderstood (иначе null):
 - "pose_unknown" — понял, что нужно сменить позу, но не понял какую (нет contextId);
 - "action_unknown" — понял, что нужно совершить действие с другим персонажем, но не понял какое (нет actionId);
@@ -363,6 +364,7 @@ ID выбирай только из кандидатов и присутству
             commandIntent = { type: 'remove_worn_clothing' };
         }
         else if (command.type === 'move' && command.location) commandIntent = { type: 'move', targetLocation: command.location };
+        else if (command.type === 'routine' && command.actionId && ['routine_toilet', 'routine_eat'].includes(command.actionId)) commandIntent = { type: 'routine', routineId: command.actionId as 'routine_toilet' | 'routine_eat' };
         else if (command.type === 'change_current_interaction') commandIntent = { type: 'change_current_interaction', goal: ['start', 'adjust', 'stop'].includes(command.goal) ? command.goal : 'stop', suggestedActionId: command.actionId || undefined, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
         else if (command.type === 'perform_action' && command.misunderstood === 'action_unknown') {
             // Понял, что нужно совершить действие с другим персонажем, но не понял какое.

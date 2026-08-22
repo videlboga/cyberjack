@@ -5,7 +5,7 @@ import { enqueueBackgroundJob } from '../orchestration/backgroundJobs';
 import { memoryRepo } from '../infrastructure/repositories';
 import { buildEmbedding } from './embeddingService';
 import { recordSceneObservation } from './sceneAwareness';
-import { moveCharacterInLaboratory, getLaboratoryPresence } from '../scenario/spatialContext';
+import { moveCharacterInLaboratory, getLaboratoryPresence, ENCLOSED_DEVICE_ASSETS } from '../scenario/spatialContext';
 import { ContextManager } from '../orchestration/contextManager';
 
 /**
@@ -216,17 +216,26 @@ function hasSleepBlockingDevice(subjectId: string): boolean {
 }
 
 /** Тихая обычная рутина: еда и санитарный модуль в обычной камере. */
-/** Оборудование, в котором зафиксирован персонаж (asset_id) или null. */
+/** Оборудование, в котором персонаж физически зафиксирован (asset_id) или null.
+ *  Только закрытые устройства (капсула, секс-машина, кресло ментальной коррекции)
+ *  фиксируют персонажа. Диагностический стол не удерживает — персонаж на нём
+ *  свободен и может самостоятельно сходить в туалет/поесть. */
 function occupiedDeviceId(subjectId: string): string | null {
     const row = db.prepare(
         `SELECT asset_id FROM laboratory_assets WHERE state='installed' AND metadata LIKE ?`
-    ).get(`%\"subjectId\":\"${subjectId}\"%`) as { asset_id: string } | undefined;
-    return row?.asset_id || null;
+    ).get(`%"subjectId":"${subjectId}"%`) as { asset_id: string } | undefined;
+    if (!row?.asset_id) return null;
+    return ENCLOSED_DEVICE_ASSETS.has(row.asset_id) ? row.asset_id : null;
 }
 
 /** Свободен ли персонаж (не в оборудовании). */
 function isFree(subjectId: string): boolean {
     return occupiedDeviceId(subjectId) === null;
+}
+
+/** Зафиксирован ли персонаж в закрытом устройстве (капсула/секс-машина/кресло). */
+export function isSubjectFixedInDevice(subjectId: string): boolean {
+    return occupiedDeviceId(subjectId) !== null;
 }
 
 /** В капсуле восстановления. */
@@ -294,6 +303,32 @@ function applyRoutineContext(id: string, actionId: string, worldMinute: number):
     } catch (e) {
         // Не фатально.
     }
+}
+
+/**
+ * Выполнить рутину по команде («сходи в туалет», «поешь»).
+ * Сбрасывает соответствующую потребность и вешает 10-минутный контекст рутины.
+ * Возвращает false, если персонаж зафиксирован в закрытом устройстве и не может
+ * выполнить рутину самостоятельно (для туалета/еды).
+ */
+export function performRoutine(subjectId: string, routineId: 'routine_toilet' | 'routine_eat'): boolean {
+    const worldMinute = getWorldMinute();
+    const phys = getPhysiology(subjectId);
+
+    // Зафиксирован в закрытом устройстве (капсула/секс-машина/кресло) — не может
+    // самостоятельно сходить в туалет или поесть.
+    if (isSubjectFixedInDevice(subjectId)) return false;
+
+    if (routineId === 'routine_toilet') {
+        phys.bladder = 0;
+        phys.last_toilet_minute = worldMinute;
+    } else if (routineId === 'routine_eat') {
+        phys.hunger = Math.max(0, phys.hunger - 40);
+        phys.last_meal_minute = worldMinute;
+    }
+    savePhysiology(phys);
+    applyRoutineContext(subjectId, routineId, worldMinute);
+    return true;
 }
 
 function applyRoutine(id: string, phys: PhysiologyRow, worldMinute: number): void {

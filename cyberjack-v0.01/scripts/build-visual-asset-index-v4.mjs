@@ -22,7 +22,8 @@ const roots = [
   'character-images/calibration-v4',
   'character-images/calibration-interactions-v4',
   'character-images/devices-v4',
-  'character-images/vr-chair'
+  'character-images/vr-chair',
+  'character-images/cell'
 ];
 
 const excludedSegments = new Set(['rmbg_v1']);
@@ -63,7 +64,8 @@ const generated = {
     calibrationV4: countBelow('/character-images/calibration-v4/'),
     calibrationInteractionsV4: countBelow('/character-images/calibration-interactions-v4/'),
     devicesV4: countBelow('/character-images/devices-v4/'),
-    vrChair: countBelow('/character-images/vr-chair/')
+    vrChair: countBelow('/character-images/vr-chair/'),
+    cell: countBelow('/character-images/cell/')
   },
   assets
 };

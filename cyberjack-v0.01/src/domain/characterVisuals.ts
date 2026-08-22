@@ -220,6 +220,28 @@ export const resolveMentalChairAvatar = (descriptor: Pick<CharacterVisualDescrip
         `/character-images/vr-chair/${descriptor.characterSlug}__vr_chair_ni__neutral.png`,
     ]);
 
+/** Cell-аватар для рутины (еда/туалет/сон): {slug}__{eat|sleep|toilet}__{affect}.png. */
+const ROUTINE_CELL_KINDS: Record<string, string> = {
+    routine_eat: 'eat',
+    routine_toilet: 'toilet',
+    routine_sleep: 'sleep',
+};
+
+export const resolveCellRoutineAvatar = (
+    characterSlug: string,
+    affect: VisualAffect,
+    contexts: VisualContext[] = [],
+): string | null => {
+    const ids = new Set(contexts.map(context => context.actionId));
+    const routineKind = Object.keys(ROUTINE_CELL_KINDS).find(actionId => ids.has(actionId));
+    if (!routineKind) return null;
+    const kind = ROUTINE_CELL_KINDS[routineKind];
+    return resolveFirstAvailableVisual([
+        `/character-images/cell/${characterSlug}__${kind}__${affect}.png`,
+        `/character-images/cell/${characterSlug}__${kind}__neutral.png`,
+    ]);
+};
+
 const representedEquipmentContexts = (contexts: VisualContext[]) => contexts
     .map(context => context.actionId)
     .filter(actionId => [

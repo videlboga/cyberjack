@@ -187,7 +187,7 @@ export function compileTickAction(input: CompileTickActionInput): CompileTickAct
         }
     }
 
-    if (commandIntent && ['change_pose', 'activate_context', 'deactivate_context', 'deactivate_contexts', 'move'].includes(commandIntent.type)) {
+    if (commandIntent && ['change_pose', 'activate_context', 'deactivate_context', 'deactivate_contexts', 'move', 'routine'].includes(commandIntent.type)) {
         compiledAction = { ...compiledAction, intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
         (compiledAction as any)._baseAction = { ...(compiledAction as any)._baseAction, intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
     }

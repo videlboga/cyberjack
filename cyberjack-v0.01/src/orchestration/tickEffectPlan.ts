@@ -7,6 +7,7 @@ import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { clearCalibrationSetupContexts } from '../scenario/calibrationContextCleanup';
 import { setLaboratoryPresence, releaseCharacterFromDevice } from '../scenario/spatialContext';
 import { handleBuyAssetAction } from '../scenario/buyAssetHandler';
+import { performRoutine } from '../services/physiology';
 import { ContextManager } from './contextManager';
 
 export type TickEffect =
@@ -126,6 +127,11 @@ export type TickEffect =
         brokerId: string;
         sceneId: string;
         assetId: string;
+    }
+    | {
+        kind: 'physiology.routine';
+        subjectId: string;
+        routineId: 'routine_toilet' | 'routine_eat';
     };
 
 export interface TickEffectEvent {
@@ -230,6 +236,8 @@ export function executeTickEffectPlan(
         } else if (effect.kind === 'market.buy-asset') {
             handleBuyAssetAction(effect.playerId, effect.brokerId, effect.sceneId, effect.assetId);
             applied = true;
+        } else if (effect.kind === 'physiology.routine') {
+            applied = performRoutine(effect.subjectId, effect.routineId);
         }
 
         if (applied) {
@@ -241,7 +249,7 @@ export function executeTickEffectPlan(
                 && effect.kind !== 'edge.clear' && effect.kind !== 'edge.update'
                 && effect.kind !== 'pending-command.clear' && effect.kind !== 'pending-command.save'
                 && effect.kind !== 'state-trigger.set' && effect.kind !== 'context.age'
-                && effect.kind !== 'market.buy-asset') {
+                && effect.kind !== 'market.buy-asset' && effect.kind !== 'physiology.routine') {
                 appendEffectEvent(effect.event);
             }
             result.applied.push(effect);
@@ -257,7 +265,7 @@ const NO_EVENT_KINDS = new Set([
     'lab.set-presence', 'lab.clear-setup-contexts', 'lab.release-device', 'stance.soften-all',
     'stance.soften', 'stance.record-ignored', 'stance.save', 'point.save',
     'edge.clear', 'edge.update', 'pending-command.clear', 'pending-command.save',
-    'state-trigger.set', 'context.age', 'market.buy-asset',
+    'state-trigger.set', 'context.age', 'market.buy-asset', 'physiology.routine',
 ]);
 
 export function appendTickEffectEvents(effects: readonly TickEffect[]) {

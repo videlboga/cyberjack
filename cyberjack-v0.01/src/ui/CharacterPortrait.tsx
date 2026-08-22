@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { buildCalibrationVisualDescriptorV4, resolveCalibrationAvatarV4, resolveMentalChairAvatar } from '../domain/characterVisuals';
+import { buildCalibrationVisualDescriptorV4, resolveCalibrationAvatarV4, resolveMentalChairAvatar, resolveCellRoutineAvatar } from '../domain/characterVisuals';
 
 type PortraitContext = { id?: string; actionId?: string };
 type PortraitState = {
@@ -87,7 +87,9 @@ export const canonicalCharacterPortrait = (
       openness: state?.openness,
     }, state?.behavioralState, climax);
     const inMentalChair = descriptorContexts.some(context => context.actionId === 'context_mental_correction_chair');
+    const cellRoutineAvatar = resolveCellRoutineAvatar(descriptor.characterSlug, descriptor.affect, descriptorContexts);
     return (inMentalChair ? resolveMentalChairAvatar(descriptor) : null)
+      || cellRoutineAvatar
       || resolveCalibrationAvatarV4(descriptor)
       || `/character-images/cutout/rendered/${slug}/${poseFor(visualContexts)}__${wardrobe}__none__neutral.png`
       || `/character-images/rendered/${slug}/${poseFor(visualContexts)}__${wardrobe}__none__neutral.png`;

@@ -38,7 +38,8 @@ export const SCENES: { id: string; description: string }[] = [
 export const LAB_ROOMS: { id: string; name: string; type: string; capacity: number; description: string }[] = [
     { id: 'room_calibration', name: 'Калибровочная', type: 'workroom', capacity: 2, description: 'Изолированное помещение для ручных воздействий и запуска протоколов. Здесь расположены диагностический стол, кресло ментальной коррекции, восстановительная капсула и модуль секс-машины.' },
     { id: 'room_cell_a', name: 'Жилая камера A', type: 'cell', capacity: 2, description: 'Закрытая жилая камера: узкая койка с тонким матрасом, санитарный модуль за перегородкой, тусклое верхнее освещение и небольшая настенная панель с музыкой и регулировкой света. Воздух сухой, с лёгким запахом дезинфекции. Режим дня: подъём в 07:00, приёмы пищи в 08:00, 13:00 и 19:00, отбой в 23:00.' },
-    { id: 'room_cell_b', name: 'Жилая камера B', type: 'cell', capacity: 1, description: 'Резервная жилая камера: две койки с тонкими матрасами, санитарный модуль за перегородкой, тусклое верхнее освещение и настенная панель с музыкой и регулировкой света. Воздух сухой, с лёгким запахом дезинфекции. Режим дня: подъём в 07:00, приёмы пищи в 08:00, 13:00 и 19:00, отбой в 23:00.' },
+    { id: 'room_cell_b', name: 'Жилая камера B', type: 'cell', capacity: 2, description: 'Закрытая жилая камера: две койки с тонкими матрасами, санитарный модуль за перегородкой, тусклое верхнее освещение и настенная панель с музыкой и регулировкой света. Воздух сухой, с лёгким запахом дезинфекции. Режим дня: подъём в 07:00, приёмы пищи в 08:00, 13:00 и 19:00, отбой в 23:00.' },
+    { id: 'room_cell_c', name: 'Жилая камера C', type: 'cell', capacity: 2, description: 'Закрытая жилая камера: две койки с тонкими матрасами, санитарный модуль за перегородкой, тусклое верхнее освещение и настенная панель с музыкой и регулировкой света. Воздух сухой, с лёгким запахом дезинфекции. Режим дня: подъём в 07:00, приёмы пищи в 08:00, 13:00 и 19:00, отбой в 23:00.' },
     { id: 'room_control', name: 'Пост наблюдения', type: 'staff', capacity: 2, description: 'Рабочее место ассистента: терминал телеметрии с данными активов, панель управления оборудованием, журнал событий лаборатории и список контрактов. Отсюда видно состояние всех активов и текущие процедуры.' },    { id: 'room_staff_living', name: 'Комната персонала', type: 'staff', capacity: 2, description: 'Жилая комната для персонала лаборатории: две койки с тонкими матрасами, санитарный модуль за перегородкой, тусклое верхнее освещение и настенная панель с музыкой и регулировкой света. Воздух сухой, с лёгким запахом дезинфекции. Режим дня: подъём в 07:00, приёмы пищи в 08:00, 13:00 и 19:00, отбой в 23:00.' },
 ];
 
@@ -51,6 +52,8 @@ export const LAB_ASSETS: { id: string; roomId: string; name: string; description
     { id: 'cell_a_light_panel', roomId: 'room_cell_a', name: 'Панель освещения', description: 'Регулировка яркости и оттенка верхнего света в камере.' },
     { id: 'cell_b_music_panel', roomId: 'room_cell_b', name: 'Настенная панель музыки', description: 'Небольшая панель с выбором фоновой музыки и регулировкой громкости. Можно включить.' },
     { id: 'cell_b_light_panel', roomId: 'room_cell_b', name: 'Панель освещения', description: 'Регулировка яркости и оттенка верхнего света в камере.' },
+    { id: 'cell_c_music_panel', roomId: 'room_cell_c', name: 'Настенная панель музыки', description: 'Небольшая панель с выбором фоновой музыки и регулировкой громкости. Можно включить.' },
+    { id: 'cell_c_light_panel', roomId: 'room_cell_c', name: 'Панель освещения', description: 'Регулировка яркости и оттенка верхнего света в камере.' },
 ];
 
 /**
@@ -63,7 +66,7 @@ export const PLACEMENTS: { characterId: string; roomId: string; slotId?: string;
     { characterId: 'PL-1', roomId: 'room_calibration', role: 'calibrator' },
     { characterId: 'S-AV-01', roomId: 'room_cell_a', role: 'asset' },
     { characterId: 'NPC-LAB-01', roomId: 'room_control', role: 'assistant' },
-    { characterId: 'NPC-CAND-01', roomId: 'room_cell_b', role: 'asset' },
+    { characterId: 'NPC-CAND-01', roomId: 'room_cell_c', role: 'asset' },
     { characterId: 'NPC-CAND-SUMI', roomId: 'room_cell_b', role: 'asset' },
     { characterId: 'NPC-CAND-GEN-02', roomId: 'room_control', role: 'asset' },
     { characterId: 'NPC-CAND-GEN-04', roomId: 'room_cell_b', role: 'asset' },

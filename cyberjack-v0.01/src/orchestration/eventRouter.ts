@@ -175,6 +175,7 @@ async function dispatchEventInner(payload: DispatchEventInput): Promise<RouteRes
                     return presetRepo.getActionPreset(normalizedCommand.targetContextId)?.label || normalizedCommand.targetContextId;
                 }
                 if (normalizedCommand.type === 'move') return `переместиться: ${normalizedCommand.targetLocation}`;
+                if (normalizedCommand.type === 'routine') return normalizedCommand.routineId === 'routine_toilet' ? 'сходить в туалет' : 'поесть';
                 if (normalizedCommand.type === 'change_current_interaction') return `${normalizedCommand.goal} текущее взаимодействие`;
                 return payload.textMessage;
             })();

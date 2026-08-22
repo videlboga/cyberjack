@@ -85,6 +85,7 @@
       "calibrationRoom": "Calibration Room",
       "livingCellA": "Living Cell A",
       "livingCellB": "Living Cell B",
+      "livingCellC": "Living Cell C",
       "observationPost": "Observation Post",
       "diagnosticTable": "Diagnostic Table",
       "recoveryCapsule": "Recovery Capsule",
@@ -94,6 +95,7 @@
         "room_calibration": "Isolated room for manual interventions and protocol execution.",
         "room_cell_a": "Closed cell with a bed, sanitary module, and sleep control.",
         "room_cell_b": "Residential cell for a second asset.",
+        "room_cell_c": "Residential cell for a third asset.",
         "room_control": "Assistant workspace, telemetry terminal, and equipment control."
       },
       "staff": "Staff",

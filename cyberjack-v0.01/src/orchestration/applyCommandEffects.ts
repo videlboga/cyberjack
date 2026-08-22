@@ -2,6 +2,7 @@ import type { CompiledAction, TickBundle } from '../domain/types';
 import type { CommandIntent } from '../domain/resolver';
 import { activeContextsRepo, presetRepo, characterRepo, sceneCharacterRepo } from '../infrastructure/repositories';
 import { resolveLaboratoryMove } from '../scenario/resolveLaboratoryMove';
+import { isSubjectFixedInDevice } from '../services/physiology';
 import type { TickEffect } from './tickEffectPlan';
 
 export interface CommandEffectsContext {
@@ -202,6 +203,30 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                         }
                     }
                 }
+            }
+        } else if (commandIntent.type === 'routine') {
+            const routineId = commandIntent.routineId;
+            const subjectChar = characterRepo.get(payload.subjectId);
+            const subjectName = subjectChar?.name || payload.subjectId;
+            if (isSubjectFixedInDevice(payload.subjectId)) {
+                const blockedNarrative = `[Система]: ${subjectName} не может выполнить рутину «${routineId === 'routine_toilet' ? 'сходить в туалет' : 'поесть'}» — зафиксирован(а) в оборудовании.`;
+                addedContextNotes.push(blockedNarrative);
+            } else {
+                const routineLabel = routineId === 'routine_toilet' ? 'в санитарный модуль' : 'есть';
+                const routineNarrative = `[Система]: ${subjectName} выполняет рутину (${routineLabel}).`;
+                tickEffects.push({ kind: 'physiology.routine', subjectId: payload.subjectId, routineId });
+                tickEffects.push({
+                    kind: 'event.append',
+                    event: {
+                        subjectId: payload.subjectId,
+                        type: 'context_change',
+                        presetId: routineId,
+                        narrative: routineNarrative,
+                        metadata: { added: true },
+                    },
+                });
+                addedContextNotes.push(routineNarrative);
+                actionApplied = true;
             }
         } else if (commandIntent.type === 'perform_action') {
             commandActionPreset = presetRepo.getActionPreset(commandIntent.actionId);

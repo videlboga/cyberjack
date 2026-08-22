@@ -4201,5 +4201,67 @@
       "bodilyResponse": "Мышцы сокращаются в навязанном ритме, постепенно утомляясь.",
       "aftereffect": "Между импульсами остаются дрожь и покалывание."
     }
+  },
+  {
+    "id": "routine_eat",
+    "name": "Приём пищи",
+    "categories": [
+      "routine"
+    ],
+    "tags": [
+      "routine",
+      "eat",
+      "neutral"
+    ],
+    "validTargets": [
+      "systemic"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 1,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 0,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "routine",
+      "activeLabel": "Ест",
+      "duration": 10,
+      "durationUnit": "minutes",
+      "occupiesPoints": []
+    },
+    "removeNarrative": "{name} заканчивает есть"
+  },
+  {
+    "id": "routine_toilet",
+    "name": "Санитарный модуль",
+    "categories": [
+      "routine"
+    ],
+    "tags": [
+      "routine",
+      "toilet",
+      "neutral"
+    ],
+    "validTargets": [
+      "systemic"
+    ],
+    "vector": {
+      "intensity": 1,
+      "valence": 0,
+      "sharpness": 0,
+      "contact": 0,
+      "novelty": 0,
+      "powerBase": 5
+    },
+    "contextConfig": {
+      "type": "routine",
+      "activeLabel": "В санитарном модуле",
+      "duration": 10,
+      "durationUnit": "minutes",
+      "occupiesPoints": []
+    },
+    "removeNarrative": "{name} выходит из санитарного модуля"
   }
 ]

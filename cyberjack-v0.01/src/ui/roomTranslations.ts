@@ -4,6 +4,7 @@ export const roomNameMap: Record<string, string> = {
   'room_calibration': 'calibrationRoom',
   'room_cell_a': 'livingCellA',
   'room_cell_b': 'livingCellB',
+  'room_cell_c': 'livingCellC',
   'room_control': 'observationPost'
 };
 
