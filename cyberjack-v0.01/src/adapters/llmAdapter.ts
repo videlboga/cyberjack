@@ -169,30 +169,6 @@ const NARRATOR_SCHEMA = {
 
 type MemoryMessage = { role: 'user' | 'assistant'; content: string };
 
-export function extractAudibleSpeech(text: string) {
-    const trimmed = text.trim();
-    // Some models occasionally render a third-person delivery note followed by
-    // an em-dash despite the audible-speech-only prompt. Keep the spoken part;
-    // do not otherwise rewrite or validate character language.
-    const staged = trimmed.match(/^[^\n:]{3,120}:\s*(?:\n\s*)?[—–-]\s*(.+)$/su);
-    if (staged) return staged[1].trim();
-    // Inline stage directions sandwiched between quoted speech segments:
-    // «A» — я сглатываю, пытаясь унять дрожь. «B» → «A» «B». The prompt
-    // forbids «» and stage directions, but some models still emit them; keep
-    // only the spoken parts and drop the narration between them.
-    const quoted = trimmed.match(/«[^»]+»/g);
-    if (quoted && quoted.length >= 2) {
-        return quoted.map(q => q.replace(/[«»]/g, '').trim()).join(' ');
-    }
-    // Single quoted speech with a trailing stage direction: «A» — я делаю X → A
-    const single = trimmed.match(/^«([^»]+)»\s*[—–-]\s*[^«»]+$/su);
-    if (single) return single[1].trim();
-    // A lone quoted segment with no stage direction: «A» → A
-    const lone = trimmed.match(/^«([^»]+)»$/su);
-    if (lone) return lone[1].trim();
-    return trimmed;
-}
-
 export function generateChatPayload(
     payload: PromptPayload,
     userInput?: string,
@@ -460,7 +436,6 @@ export async function generateCharacterReply(
                 if (typeof legacy?.speechAct === 'string') modelSpeechAct = legacy.speechAct;
             } catch { /* plain speech beginning with a brace remains untouched */ }
         }
-        speech = extractAudibleSpeech(speech);
         const frame = payload.reactionFrame;
         console.log(`[Adapter] Character response received (${speech.length} chars)`);
         return {
