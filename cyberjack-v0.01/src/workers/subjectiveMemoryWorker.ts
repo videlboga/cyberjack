@@ -63,9 +63,16 @@ export async function materializeNextSubjectiveMemory() {
         }
         const characters = characterRepo.listAll()
             .filter(character => character.id !== 'PL-1' && Boolean(character.subjectId));
+        // Резолвер имён: id/subjectId → имя персонажа (для человекочитаемых title).
+        const nameById = new Map<string, string>();
+        for (const character of characters) {
+            nameById.set(character.id, character.name);
+            if (character.subjectId) nameById.set(character.subjectId, character.name);
+        }
+        const resolveName = (id: string) => nameById.get(id) || id;
         const candidates = characters.flatMap(character => {
             const subjectId = character.subjectId || character.id;
-            return aggregateMemoryEpisodes(memoryRepo.listRecent(subjectId, 160, 'episode_v2'), 12)
+            return aggregateMemoryEpisodes(memoryRepo.listRecent(subjectId, 160, 'episode_v2'), 12, resolveName)
                 .filter(episode => !getSubjectiveEpisode(subjectId, episode))
                 .map(episode => ({ subjectId, characterName: character.name, episode }));
         });

@@ -11,6 +11,9 @@ export const memoryTagLabels: Record<string, string> = {
     pose: 'поза', pressure: 'давление', punishment: 'наказание', recovery: 'восстановление', relief: 'облегчение', remove: 'снятие', restraint: 'фиксация', scene_observation: 'наблюдение сцены',
     sensitivity: 'чувствительность', self: 'самостимуляция', sensory: 'ощущения', sexual: 'сексуальное', social_transaction: 'социальный обмен', sportswear: 'спортивная одежда', stabilizer: 'стабилизатор', stimulation: 'стимуляция', stockings: 'чулки', stretching: 'растяжение',
     stop: 'прекращение контакта', struggle: 'сопротивление', submission: 'подчинение', suspension: 'подвешивание', tickling: 'щекотка', underwear: 'нижнее бельё', vulnerable: 'уязвимость', waist: 'талия',
+    // Эго-состояния (Берн) — попадают в теги эпизодов как состояние персонажа.
+    adapted_child: 'адаптивный ребёнок', free_child: 'свободный ребёнок', rebellious_child: 'бунтующий ребёнок',
+    critical_parent: 'критикующий родитель', nurturing_parent: 'заботливый родитель',
 };
 
 export function memoryTagLabel(tag: string) {

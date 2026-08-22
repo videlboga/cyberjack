@@ -133,10 +133,17 @@ function syncAssociationEffects(subjectId: string, episode: MemoryEpisode, summa
             episode.text,
             ...episode.moments.map(moment => moment.text),
         ].filter(Boolean).join(' ');
+        // Резолвим внутренние id персонажей в title («Диалог: NPC-CAND-01» → «Диалог: Ника»).
+        const nameById = new Map<string, string>();
+        for (const character of characterRepo.listAll()) {
+            nameById.set(character.id, character.name);
+            if (character.subjectId) nameById.set(character.subjectId, character.name);
+        }
+        const resolvedTitle = episode.title.replace(/[A-Z][A-Z0-9_-]{2,}/g, token => nameById.get(token) || token);
         propagateEpisode(
             subjectId,
             episode.id,
-            episode.title,
+            resolvedTitle,
             episode.text,
             uniqueAssociations.map(item => ({
                 type: item.type as 'person' | 'concept',
