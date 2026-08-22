@@ -78,4 +78,18 @@ describe('authored character profiles', () => {
     expect(profile?.personaText).toContain('Соблазняй');
     expect(profile?.mechanicalSeed.coreModifiers.openness).toBe(40);
   });
+
+  it('compiles Kai as a male scientist who handed himself over as an asset', () => {
+    const profile = compileAuthoredProfile('NPC-CAND-GEN-05', 'asset');
+    expect(profile?.authored).toBe(true);
+    expect(profile?.identity.name).toBe('Кай');
+    expect(profile?.identity.age).toBe(36);
+    expect(profile?.identity.gender).toBe('male');
+    expect(profile?.identity.archetype).toBe('asset');
+    expect(profile?.biography.origin.join(' ')).toContain('Центральные лаборатории');
+    expect(profile?.biography.formativeEvents.join(' ')).toContain('гормональных изменений');
+    expect(profile?.personaText).toContain('[Сценарий жизни]');
+    expect(profile?.personaText).toContain('Исследуй');
+    expect(profile?.mechanicalSeed.coreModifiers.openness).toBe(35);
+  });
 });

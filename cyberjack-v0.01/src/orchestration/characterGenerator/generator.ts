@@ -21,7 +21,7 @@ const CORE_WORLD_TAGS = [
 ] as const;
 
 const FEMALE_NAMES = ['Эли', 'Никс', 'Лира', 'Джун', 'Мара', 'Иден', 'Нова'];
-const MALE_NAMES = ['Рен', 'Кай', 'Сайлас', 'Сет', 'Нейт', 'Рунис', 'Векс', 'Зейн'];
+const MALE_NAMES = ['Кай', 'Сайлас', 'Сет', 'Нейт', 'Рунис', 'Векс', 'Зейн'];
 
 const CORE_TRAIT_IDS = [
     'trait_profile_observant',

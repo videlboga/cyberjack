@@ -43,7 +43,7 @@ const GENERATED_CANDIDATES: CandidateSeed[] = [
         gender: 'female',
         coreModifiers: { sensitivity: 5, capacity: 10, openness: 10, plasticity: 10, attitude: 5 },
     },
-    { id: 'NPC-CAND-GEN-05', seed: 'omnicron-candidate-random-05-v1' },
+    { id: 'NPC-CAND-GEN-05', seed: 'authored:kai:v1', name: 'Кай', age: 36, gender: 'male', coreModifiers: { sensitivity: 15, capacity: 20, openness: 35, plasticity: 25, attitude: 20 }, description: 'Высокопоставленный учёный из центральных лабораторий станции, передавший себя как актив для получения данных изнутри. Андрогинен, тёмная кожа, светлые волосы, пронзительные голубые глаза; тело несёт следы множества гормональных изменений и генных модификаций.' },
     {
         id: 'NPC-CAND-KATE',
         seed: 'authored:kate:v1',
@@ -105,7 +105,8 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
             : spec.id === 'NPC-CAND-GEN-02' ? { slug: 'eli' }
                 : spec.id === 'NPC-CAND-GEN-03' ? { slug: 'rin' }
                     : spec.id === 'NPC-CAND-GEN-04' ? { slug: 'mai' }
-                        : spec.id === 'NPC-CAND-KATE' ? { slug: 'kate' }
+                        : spec.id === 'NPC-CAND-GEN-05' ? { slug: 'male_test' }
+                            : spec.id === 'NPC-CAND-KATE' ? { slug: 'kate' }
                 : undefined,
         origin: spec.id === 'NPC-CAND-SUMI'
             ? {
@@ -184,6 +185,7 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
         }
         if (spec.id === 'NPC-CAND-GEN-02') profileJson.visual = { slug:'eli' };
         if (spec.id === 'NPC-CAND-GEN-03') profileJson.visual = { slug:'rin' };
+        if (spec.id === 'NPC-CAND-GEN-05') profileJson.visual = { slug:'male_test' };
         db.prepare('UPDATE characters SET profile_json = ? WHERE id = ?').run(JSON.stringify(profileJson), spec.id);
     })();
 

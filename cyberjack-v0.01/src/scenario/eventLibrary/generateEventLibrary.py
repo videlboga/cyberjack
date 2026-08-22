@@ -388,8 +388,8 @@ def build_short_events() -> list[dict[str, Any]]:
 # ─────────────────────────────────────────────────────────────────────────────
 
 CHARACTER_IDS = ["S-AV-01", "NPC-LAB-01", "NPC-CAND-01", "NPC-CAND-SUMI",
-                 "NPC-CAND-GEN-02", "NPC-CAND-GEN-03", "NPC-CAND-GEN-04", "NPC-CAND-GEN-05"]
-CHARACTER_NAMES = ["Мира", "Иона", "Ника", "Суми", "Эли", "Мара", "Май", "Рен"]
+                 "NPC-CAND-GEN-02", "NPC-CAND-GEN-03", "NPC-CAND-GEN-04"]
+CHARACTER_NAMES = ["Мира", "Иона", "Ника", "Суми", "Эли", "Мара", "Май"]
 STAGES = ["hint", "contact", "lead", "pressure", "decision", "echo"]
 
 CHARACTER_SEEDS: dict[str, dict[str, str]] = {
@@ -427,11 +427,6 @@ CHARACTER_SEEDS: dict[str, dict[str, str]] = {
         "unresolvedPast": "Май однажды оставили ждать и не вернулись; с тех пор она старается быть незаменимо полезной.",
         "externalLink": "Lattice и прежний куратор срединного сектора",
         "concealedFact": "Исчезновение было осознанным разрывом связи, а не аварией или забывчивостью.",
-    },
-    "NPC-CAND-GEN-05": {
-        "unresolvedPast": "Рен был наказан за чужой поступок и так и не узнал, кто переложил на него вину.",
-        "externalLink": "Continuum Archive и силовая сеть внешних колец",
-        "concealedFact": "В архивных фрагментах сохранился идентификатор настоящего виновника или заказчика.",
     },
 }
 
