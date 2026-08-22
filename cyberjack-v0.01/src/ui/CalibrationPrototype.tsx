@@ -5,6 +5,7 @@ import {
   buildCalibrationVisualDescriptorV4,
   expandedInteractionAssetPath,
   resolveCalibrationAvatarV4,
+  resolveCellRoutineAvatar,
   resolveFirstAvailableVisual,
   resolveIntimacyInteractionVisual,
 } from "../domain/characterVisuals";
@@ -1424,7 +1425,13 @@ const characterVisualPath = (
     behavioralState,
     climax,
   );
+  const cellRoutineAvatar = resolveCellRoutineAvatar(
+    descriptor.characterSlug,
+    descriptor.affect,
+    state?.contexts || [],
+  );
   return (
+    cellRoutineAvatar ||
     resolveCalibrationAvatarV4(descriptor) ||
     `/character-images/cutout/rendered/${descriptor.characterSlug}/standing__${descriptor.clothing}__none__neutral.png`
     || `/character-images/rendered/${descriptor.characterSlug}/standing__${descriptor.clothing}__none__neutral.png`
