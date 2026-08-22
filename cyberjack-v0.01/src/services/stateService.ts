@@ -74,7 +74,7 @@ export function getStateSnapshot(input: GetStateInput) {
     const rawContexts = activeContextsRepo.getAllForSubject(subjectId) || [];
     subject.contexts = rawContexts.map(c => {
       const preset = presetRepo.getActionPreset(c.actionId);
-      return { ...c, label: getActiveContextLabel(preset, c.actionId), type: preset?.contextConfig?.type || preset?.type || c.actionId, occupiesPoints: preset?.contextConfig?.occupiesPoints || [], blocksPoints: preset?.contextConfig?.blocksPoints || [] };
+      return { ...c, label: getActiveContextLabel(preset, c.actionId), type: preset?.contextConfig?.type || preset?.type || c.actionId, occupiesPoints: preset?.contextConfig?.occupiesPoints || [], blocksPoints: preset?.contextConfig?.blocksPoints || [], description: preset?.description || null };
     });
   }
 

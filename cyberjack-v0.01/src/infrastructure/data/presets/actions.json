@@ -2881,7 +2881,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Полное истощение: выносливость и напряжение упали до минимума, персонаж теряет осмысленный контакт с происходящим. Проходит, когда выносливость восстановится или напряжение снова поднимется."
   },
   {
     "id": "effect_chronic_apathy",
@@ -2900,7 +2901,8 @@
     "contextConfig": {
       "duration": 10,
       "occupiesPoints": []
-    }
+    },
+    "description": "Длительное истощение: персонаж несколько раз подряд оставался на грани отключения. Держится дольше обычной апатии."
   },
   {
     "id": "effect_subspace",
@@ -2919,7 +2921,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Истощение при высоком принятии и открытости: персонаж входит в податливое, отрешённое состояние."
   },
   {
     "id": "effect_panic",
@@ -2939,7 +2942,8 @@
       "duration": 30,
       "durationUnit": "minutes",
       "occupiesPoints": []
-    }
+    },
+    "description": "Истощение, низкое принятие и высокое напряжение сошлись вместе: персонаж теряет контроль над страхом. Держится до 30 минут, пока выносливость не восстановится или напряжение не спадёт."
   },
   {
     "id": "effect_sensory_overload",
@@ -2958,7 +2962,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Истощение при настороженности: ощущения захлёстывают персонажа, он не успевает их обработать."
   },
   {
     "id": "effect_freeze",
@@ -2976,7 +2981,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Истощение при закрытости: персонаж замирает — не сопротивляется, но и не принимает происходящее."
   },
   {
     "id": "effect_suggestibility",
@@ -2995,7 +3001,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Истощение при высокой пластичности: персонаж легче поддаётся внушению и внешнему управлению."
   },
   {
     "id": "effect_active_defiance",
@@ -3014,7 +3021,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Высокая выносливость при крайне низком принятии и закрытости: персонаж активно сопротивляется."
   },
   {
     "id": "effect_hyperesthesia",
@@ -3033,7 +3041,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Чувствительность достигла предела: даже слабые стимулы ощущаются непропорционально ярко."
   },
   {
     "id": "effect_local_hyperesthesia",
@@ -3053,7 +3062,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Локальная чувствительность зоны резко выросла: эта зона ощущается непропорционально ярко."
   },
   {
     "id": "effect_local_numbness",
@@ -3074,7 +3084,8 @@
     "contextConfig": {
       "duration": -1,
       "occupiesPoints": []
-    }
+    },
+    "description": "Локальная чувствительность зоны упала до минимума: зона почти не ощущает воздействие."
   },
   {
     "id": "effect_refractory",
@@ -3096,7 +3107,8 @@
       "type": "condition",
       "duration": 3,
       "occupiesPoints": []
-    }
+    },
+    "description": "После оргазма: чувствительность и восприимчивость временно снижены."
   },
   {
     "id": "gentle_stroke",

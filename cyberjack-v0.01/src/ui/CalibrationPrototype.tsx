@@ -114,6 +114,7 @@ type ActiveContext = {
   type?: string;
   occupiesPoints?: string[];
   blocksPoints?: string[];
+  description?: string | null;
 };
 type State = {
   sensitivity: number;
@@ -4876,7 +4877,7 @@ export function CalibrationPrototype({
           {otherContexts.length ? (
             <div className="context-list">
               {otherContexts.map((c, i) => (
-                <div key={`${c.actionId}-${i}`}>
+                <div key={`${c.actionId}-${i}`} title={c.description || undefined}>
                   <span>
                     {c.type === "pose" || c.actionId.startsWith("pose_")
                       ? t('game.ui.pose')
@@ -4887,6 +4888,9 @@ export function CalibrationPrototype({
                           : t('game.ui.state')}
                   </span>
                   <b>{c.label || c.actionId}</b>
+                  {c.description && (
+                    <small className="context-explanation">{c.description}</small>
+                  )}
                 </div>
               ))}
             </div>
@@ -5384,10 +5388,13 @@ export function CalibrationPrototype({
                         {monitorOtherContexts.map(c => {
                           const tags = contextLearningBySource.get(c.actionId) || [];
                           return (
-                            <span key={c.actionId} className={`condition-item ${tags.length > 0 ? "active" : ""}`}>
+                            <span key={c.actionId} className={`condition-item ${tags.length > 0 ? "active" : ""}`} title={c.description || undefined}>
                               <b>{c.label || c.actionId}</b>
                               {tags.length > 0 && (
                                 <i>{effectiveSelectedAction ? "+" : "±"} {tags.slice(0, 2).map(e => semanticTagLabels[e.tag] || e.tag).join(", ")}</i>
+                              )}
+                              {c.description && (
+                                <em className="condition-explanation">{c.description}</em>
                               )}
                             </span>
                           );
