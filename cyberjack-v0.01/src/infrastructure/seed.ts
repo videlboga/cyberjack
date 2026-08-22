@@ -314,6 +314,7 @@ db.transaction(() => {
         'act_hold_exposure', 'act_end_exposure', 'act_present_feet', 'act_end_feet_presentation',
         'act_suspend_wrists', 'act_release_wrists',
         'act_self_stimulate',
+        'act_start_penetration', 'act_increase_friction', 'act_decrease_friction', 'act_end_sexual_contact', 'act_sexual_climax',
         'act_connect_tens', 'act_start_electrostimulation', 'act_adjust_electrostimulation', 'act_stop_electrostimulation', 'act_disconnect_tens',
         'eq_clothe_jumpsuit', 'eq_clothe_jumpsuit_remove',
         'eq_clothe_underwear', 'eq_clothe_underwear_remove',
