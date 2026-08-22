@@ -4035,7 +4035,9 @@ export function CalibrationPrototype({
       },
     ),
     recommendationCandidates = recommendableActions.flatMap((action) =>
-      zonesForAction(action).map((point) => {
+      zonesForAction(action)
+        .filter((point) => !blockedPoints.has(point.id))
+        .map((point) => {
         const pointState = subject?.anatomy?.[point.id],
           tags = conditioningTags(
             action.id,
