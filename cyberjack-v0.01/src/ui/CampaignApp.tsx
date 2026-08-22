@@ -3181,11 +3181,11 @@ function MentalChairControlScreen({
       // Габариты пилюли (совпадают с рендером): перенос на ≤2 строки.
       const fontSize = node.kind === 'worldview' ? 13 : node.depth === 1 ? 11 : 9;
       const maxChars = node.kind === 'worldview' ? 20 : node.depth === 1 ? 16 : 14;
-      const padX = 9, padY = 6;
+      const padX = 11, padY = 8;
       const lines = wrapLabel(mindNodeLabel(node), maxChars);
       const longest = Math.max(...lines.map(l => l.length));
       node.w = longest * fontSize * 0.6 + padX * 2;
-      node.h = lines.length * (fontSize + 2) + padY * 2;
+      node.h = lines.length * (fontSize + 3) + padY * 2;
       const kids = node.children.map(id => byId.get(id)!).filter(Boolean);
       if (!kids.length) return;
       const span = a1 - a0;
@@ -3380,19 +3380,20 @@ function MentalChairControlScreen({
                     const showLabel = !isLeaf || mindView.scale >= labelScale;
                     const fontSize = node.kind === 'worldview' ? 13 : node.depth === 1 ? 11 : 9;
                     const maxChars = node.kind === 'worldview' ? 20 : node.depth === 1 ? 16 : 14;
-                    const padX = 9, padY = 6;
+                    const padX = 11, padY = 8;
                     const lines = wrapLabel(label, maxChars);
                     const longest = Math.max(...lines.map(l => l.length));
                     const w = showLabel ? longest * fontSize * 0.6 + padX * 2 : 12;
-                    const h = showLabel ? lines.length * (fontSize + 2) + padY * 2 : 12;
-                    const lineHeight = fontSize + 2;
-                    const firstDy = -(lines.length - 1) * lineHeight / 2;
+                    const lineHeight = fontSize + 3;
+                    const h = showLabel ? lines.length * lineHeight + padY * 2 : 12;
+                    // Вертикальное центрирование: явный y для каждой строки.
+                    const firstY = -(lines.length - 1) * lineHeight / 2;
                     return (
                       <g key={node.id} className={`mind-node ${node.kind}${node.status === 'dirty' ? ' dirty' : ''}${selected ? ' selected' : ''}${showLabel ? '' : ' dot'}`} transform={`translate(${node.x} ${node.y})`} style={{ "--float-delay": `${node.floatDelay}s`, "--float-amp": `${node.depth === 0 ? 0 : node.depth === 1 ? 2 : 4}px` } as any} onClick={() => { if (mindDragRef.current?.moved) return; setSelectedMindNode(selected ? null : node.id); }} onDoubleClick={(event) => { event.stopPropagation(); zoomAt(node.x, node.y, 1.6); }}>
                         <g className="mind-node-float">
                           <rect className="mind-node-pill" x={-w / 2} y={-h / 2} width={w} height={h} rx={h / 2} />
-                          {showLabel && <text className="mind-node-label" textAnchor="middle" fontSize={fontSize}>
-                            {lines.map((line, i) => <tspan key={i} x={0} dy={i === 0 ? firstDy : lineHeight}>{line}</tspan>)}
+                          {showLabel && <text className="mind-node-label" textAnchor="middle" dominantBaseline="central" fontSize={fontSize}>
+                            {lines.map((line, i) => <tspan key={i} x={0} y={firstY + i * lineHeight}>{line}</tspan>)}
                           </text>}
                         </g>
                       </g>
