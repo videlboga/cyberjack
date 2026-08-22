@@ -143,12 +143,37 @@ export function reconcileCharacterState(subjectId: string, options: CharacterRec
 
   const openness = Math.max(0, Math.min(100, 50 + Number(profiled.mechanicalSeed?.coreModifiers?.openness || 0)));
 
+  // Персонаж, находящийся в закрытом устройстве (секс-машина, капсула), уже
+  // раздет устройством при помещении (worldService снимает одежду). Стартовое
+  // сидирование не должно надевать бельё поверх — иначе оно снова блокирует
+  // точки (vagina/anus/clitoris) и секс-машина перестаёт поднимать активацию.
+  const inEnclosedDevice = Boolean(db.prepare(
+    `SELECT 1 FROM laboratory_assets
+     WHERE json_extract(metadata, '$.subjectId') IN (?, ?)
+       AND asset_id IN ('lab_sex_machine', 'lab_recovery_capsule')
+     LIMIT 1`
+  ).get(character.id, character.subject_id));
+
   db.transaction(() => {
     writeSubject(character.id, character.name || character.id, profiled);
     if (options.resetPoints !== false) {
       resetPoints(character.id, gender, openness);
     }
-    applyInitialContexts(character.id, options.pose || 'pose_standing', options.clothing || DEFAULT_CLOTHING);
+    if (inEnclosedDevice) {
+      // Снять надетую одежду (бельё блокирует точки устройства), не надевать новую.
+      db.prepare(`
+        DELETE FROM active_contexts
+        WHERE subject_id = ?
+          AND action_id IN (
+            SELECT id FROM action_presets
+            WHERE COALESCE(json_extract(context_config_json, '$.type'), '') = 'clothing'
+               OR type = 'clothing'
+          )
+      `).run(character.id);
+      applyInitialContexts(character.id, options.pose || 'pose_standing', []);
+    } else {
+      applyInitialContexts(character.id, options.pose || 'pose_standing', options.clothing || DEFAULT_CLOTHING);
+    }
   })();
 
   return true;
