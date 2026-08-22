@@ -9,8 +9,9 @@ export const CHARACTER_STARTING_TRAIT_TAGS: Record<string, Record<string, number
     // Мира already seeks safety through compliance; this is only a mild
     // starting tendency, not consent and not irreversible submission.
     'S-AV-01': { control: 2.2, command: 2.2, submission: 2.2 },
-    // Мара grew up repairing station machinery and finds mechanisms familiar.
-    'NPC-CAND-GEN-03': { electronic: 2.0, machine: 2.0 },
+    // Рин: крайне сабмиссивная мазохистка с хим-зависимостью. Боль/подчинение —
+    // её способ чувствовать себя живой; препараты — побег от реальности.
+    'NPC-CAND-GEN-03': { pain: 3.5, impact: 3.5, submission: 3.5, command: 3.0, chemical: 3.5, drug: 3.5 },
     // Кейт: одержимая нимфоманка, выросшая в цикле разгона интимных реакций.
     // Высокий sexual → стабильный trait_sexual_dependency (уровень 3).
     'NPC-CAND-KATE': { sexual: 4.5, penetration: 3.5, oral: 3.5 },

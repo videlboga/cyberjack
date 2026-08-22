@@ -34,7 +34,7 @@ const GENERATED_CANDIDATES: CandidateSeed[] = [
         seed: 'omnicron-candidate-random-02-v1',
         coreModifiers: { sensitivity: 15, capacity: -20, openness: -25, plasticity: -10, attitude: -20 },
     },
-    { id: 'NPC-CAND-GEN-03', seed: 'omnicron-candidate-random-03-v1' },
+    { id: 'NPC-CAND-GEN-03', seed: 'omnicron-candidate-random-03-v1', name: 'Рин', age: 18, gender: 'female', coreModifiers: { sensitivity: 15, capacity: -15, openness: 20, plasticity: 15, attitude: -25 }, description: 'Восемнадцатилетняя дочь нелегального торговца препаратами из внешнего кольца. Крайне сабмиссивная, эскапичная, мазохистка, склонная к самоповреждающему поведению и употреблению препаратов. После смерти отца продана организацией в лабораторию.' },
     {
         id: 'NPC-CAND-GEN-04',
         seed: 'omnicron-candidate-random-04-v1',
@@ -103,8 +103,9 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
         recruitment: { staffCost: 180, assetCost: 260 },
         visual: spec.id === 'NPC-CAND-SUMI' ? { slug: 'sumi' }
             : spec.id === 'NPC-CAND-GEN-02' ? { slug: 'eli' }
-                : spec.id === 'NPC-CAND-GEN-04' ? { slug: 'mai' }
-                    : spec.id === 'NPC-CAND-KATE' ? { slug: 'kate' }
+                : spec.id === 'NPC-CAND-GEN-03' ? { slug: 'rin' }
+                    : spec.id === 'NPC-CAND-GEN-04' ? { slug: 'mai' }
+                        : spec.id === 'NPC-CAND-KATE' ? { slug: 'kate' }
                 : undefined,
         origin: spec.id === 'NPC-CAND-SUMI'
             ? {
@@ -182,6 +183,7 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
             };
         }
         if (spec.id === 'NPC-CAND-GEN-02') profileJson.visual = { slug:'eli' };
+        if (spec.id === 'NPC-CAND-GEN-03') profileJson.visual = { slug:'rin' };
         db.prepare('UPDATE characters SET profile_json = ? WHERE id = ?').run(JSON.stringify(profileJson), spec.id);
     })();
 

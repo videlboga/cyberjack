@@ -27,6 +27,7 @@ export const TRAIT_TO_METRIC: Record<string, { bucket: 'tags' | 'points'; key: s
   trait_electrophile: { bucket: 'tags', key: 'electronic', label: 'электростимуляция' },
   trait_technophile: { bucket: 'tags', key: 'machine', label: 'машины' },
   trait_sexual_dependency: { bucket: 'tags', key: 'sexual', label: 'сексуальное' },
+  trait_chem_addict: { bucket: 'tags', key: 'chemical', label: 'химическое воздействие' },
   trait_sensory_deprivation: { bucket: 'tags', key: 'deprivation', label: 'сенсорная изоляция' },
   // point-трейты: id вида trait_point_<pointId>.
 };

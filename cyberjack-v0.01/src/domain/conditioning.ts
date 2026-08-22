@@ -363,6 +363,7 @@ export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
         { id: 'trait_electrophile', label: 'Электрофетиш', strength: appliedTags.electronic || 0 },
         { id: 'trait_technophile', label: 'Машинный фетиш', strength: appliedTags.machine || 0 },
         { id: 'trait_sexual_dependency', label: 'Сексуальная зависимость', strength: appliedTags.sexual || 0 },
+        { id: 'trait_chem_addict', label: 'Хим-зависимость', strength: positiveMean(appliedTags, ['chemical', 'drug']) },
         { id: 'trait_sensory_deprivation', label: 'Тяга к сенсорной изоляции', strength: appliedTags.deprivation || 0 },
         // Point preferences are learned independently from semantic tags. A
         // trait remains tied to its exact zone, so a high value on one point
@@ -395,6 +396,7 @@ const COMPULSION_DEFINITIONS: Array<{
     { traitId:'trait_electrophile', cueTags:['electronic'], impulse:'искать электрическую стимуляцию', actionTags:['electronic'] },
     { traitId:'trait_technophile', cueTags:['machine'], impulse:'не прерывать машинное воздействие', actionTags:['machine'] },
     { traitId:'trait_sexual_dependency', cueTags:['sexual','penetration','oral'], impulse:'сохранить или получить сексуальную стимуляцию', actionTags:['sexual','penetration','oral'] },
+    { traitId:'trait_chem_addict', cueTags:['chemical','drug'], impulse:'искать или не прерывать химическое воздействие', actionTags:['chemical','drug'] },
     { traitId:'trait_sensory_deprivation', cueTags:['deprivation'], impulse:'искать отстранение от внешних раздражителей', actionTags:['deprivation'] },
     ...POINT_TRAIT_DEFINITIONS.map(definition => ({
         traitId: `trait_point_${definition.pointId}`,

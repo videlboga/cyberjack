@@ -453,13 +453,15 @@ const visualSlugFor = (subjectId: string | undefined | null): string | undefined
           ? "sumi"
           : subjectId === "NPC-CAND-GEN-02"
             ? "eli"
-            : subjectId === "NPC-CAND-GEN-04"
-              ? "mai"
-              : subjectId === "NPC-CAND-KATE"
-                ? "kate"
-                : subjectId === "NPC-RIN-01"
-                  ? "rin"
-                  : undefined;
+            : subjectId === "NPC-CAND-GEN-03"
+              ? "rin"
+              : subjectId === "NPC-CAND-GEN-04"
+                ? "mai"
+                : subjectId === "NPC-CAND-KATE"
+                  ? "kate"
+                  : subjectId === "NPC-RIN-01"
+                    ? "rin"
+                    : undefined;
             };
 
 const capsulePortraitFor = (resident: Resident): string | null => {
@@ -501,6 +503,8 @@ const conditionLabels: Record<string, string> = {
   trait_exhibitionist: "Эксгибиционизм",
   trait_clinical_fetish: "Медицинский фетиш",
   trait_technophile: "Технофилия",
+  trait_chem_addict: "Хим-зависимость",
+  trait_sexual_dependency: "Сексуальная зависимость",
 };
 const sectionForLocation: Record<
   string,
@@ -3566,13 +3570,15 @@ function DeviceControlScreen({
             ? "sumi"
             : subjectId === "NPC-CAND-GEN-02"
               ? "eli"
-              : subjectId === "NPC-CAND-GEN-04"
-                ? "mai"
-                : subjectId === "NPC-CAND-KATE"
-                  ? "kate"
-                  : subjectId === "NPC-RIN-01"
-                    ? "rin"
-                    : subjectId.toLowerCase();
+              : subjectId === "NPC-CAND-GEN-03"
+                ? "rin"
+                : subjectId === "NPC-CAND-GEN-04"
+                  ? "mai"
+                  : subjectId === "NPC-CAND-KATE"
+                    ? "kate"
+                    : subjectId === "NPC-RIN-01"
+                      ? "rin"
+                      : subjectId.toLowerCase();
   const portraitEmotion = resolvePortraitEmotion({
     behavioralState: state.behavioralState,
     reaction: state.reaction || state.lastReaction,

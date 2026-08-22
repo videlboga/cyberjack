@@ -23,6 +23,6 @@ describe('character starting traits', () => {
 
     it('keeps starting tendencies evolvable semantic preferences', () => {
         const result = applyCharacterStartingTraits(profile('NPC-CAND-GEN-03'));
-        expect(result.mechanicalSeed.preferences.tags).toMatchObject({ electronic: 2, machine: 2 });
+        expect(result.mechanicalSeed.preferences.tags).toMatchObject({ pain: 3.5, submission: 3.5, chemical: 3.5 });
     });
 });

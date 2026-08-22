@@ -1230,6 +1230,8 @@ const conditionLabels: Record<string, string> = {
   trait_exhibitionist: "Эксгибиционизм",
   trait_clinical_fetish: "Медицинский фетиш",
   trait_technophile: "Технофилия",
+  trait_chem_addict: "Хим-зависимость",
+  trait_sexual_dependency: "Сексуальная зависимость",
 };
 const relativeCoreMetricKeys = new Set<InterpretableCoreMetric>([
   "sensitivity",
@@ -1422,6 +1424,7 @@ const visualCharacterSlugs: Record<string, string> = {
   "NPC-CAND-01": "nika",
   "NPC-CAND-SUMI": "sumi",
   "NPC-CAND-GEN-02": "eli",
+  "NPC-CAND-GEN-03": "rin",
   "NPC-CAND-GEN-04": "mai",
   "NPC-CAND-KATE": "kate",
 };
