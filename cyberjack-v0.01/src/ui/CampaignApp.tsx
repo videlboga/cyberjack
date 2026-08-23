@@ -2088,23 +2088,29 @@ function LaboratoryOverview({
                   {getRoomName(selectedRoom.id, t)}
                 </span>
                 <div className="room-character-layer">
-                  {roomPanelResidents.map((resident) => (
-                    <button
-                      key={resident.id}
-                      onClick={() => onInteract(resident)}
-                      title={resident.name}
-                    >
-                      <CharacterPortrait
-                        id={resident.subjectId || resident.id}
-                        name={resident.name}
-                        portrait={resident.portrait}
-                        contexts={resident.contexts}
-                        state={resident.state}
-                        sleeping={resident.sleeping}
-                      />
-                      <span>{resident.name}</span>
-                    </button>
-                  ))}
+                  {roomPanelResidents.map((resident, index) => {
+                    const anchor = roomAnchorFor(resident, index);
+                    const pos = ROOM_ANCHORS[anchor];
+                    return (
+                      <button
+                        key={resident.id}
+                        className={`room-character-anchor anchor-${anchor}`}
+                        style={{ left: pos.left, bottom: pos.bottom }}
+                        onClick={() => onInteract(resident)}
+                        title={resident.name}
+                      >
+                        <CharacterPortrait
+                          id={resident.subjectId || resident.id}
+                          name={resident.name}
+                          portrait={resident.portrait}
+                          contexts={resident.contexts}
+                          state={resident.state}
+                          sleeping={resident.sleeping}
+                        />
+                        <span>{resident.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="room-equipment-compact-overlay">
                   {roomAssets
@@ -2155,6 +2161,37 @@ function roomSceneBackground(roomId: string): string {
     default:
       return "/backgrounds/laboratory/calibration.png";
   }
+}
+
+/**
+ * Точки привязки аватаров на фоне жилой камеры (living-cell-v2.png).
+ * Координаты — проценты от ширины/высоты сцены, центр нижней точки аватара.
+ * Фон: кровать слева (24%), табурет (40%), стол (50%), табурет (60%),
+ * кровать справа (76%), санитарный модуль (65%).
+ */
+const ROOM_ANCHORS: Record<string, { left: string; bottom: string }> = {
+  bed_1: { left: "24%", bottom: "18%" },
+  bed_2: { left: "76%", bottom: "18%" },
+  table_1: { left: "40%", bottom: "6%" },
+  table_2: { left: "60%", bottom: "6%" },
+  toilet: { left: "65%", bottom: "10%" },
+  standing: { left: "50%", bottom: "4%" },
+};
+
+/**
+ * Определяет точку привязки персонажа на фоне камеры по его состоянию.
+ * Приоритет: сон → кровать, рутина (еда/туалет) → стол/санитарный модуль,
+ * иначе — стоя в центре. Два персонажа в одном состоянии разводятся по
+ * кроватям/столам по индексу.
+ */
+function roomAnchorFor(resident: Resident, index: number): string {
+  const ids = new Set(
+    (resident.contexts || []).map((c) => c.id || (c as any).actionId).filter(Boolean),
+  );
+  if (resident.sleeping) return index % 2 === 0 ? "bed_1" : "bed_2";
+  if (ids.has("routine_toilet")) return "toilet";
+  if (ids.has("routine_eat")) return index % 2 === 0 ? "table_1" : "table_2";
+  return "standing";
 }
 
 function CharacterDirectory({

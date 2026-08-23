@@ -1414,3 +1414,54 @@ html[data-ui-theme="manga2"] .campaign-shell .mental-mindmap-detail p {
   line-height: 1.45 !important;
   margin: 0 !important;
 }
+
+/* === ROOM SCENE (жилые камеры) — единый дизайн: чёрные рамки, без скруглений === */
+html[data-ui-theme="manga2"] .campaign-shell .room-scene {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-scene-label {
+  border: 1px solid #111 !important;
+  border-left: 2px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-character-layer > button {
+  border-radius: 0 !important;
+  filter: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-character-layer > button > img {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-character-layer > button > span {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-compact-overlay {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-compact-overlay .room-equipment-switch {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-switch-track {
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-switch-thumb {
+  border-radius: 0 !important;
+  background: #111 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .room-equipment-switch.on .room-equipment-switch-thumb {
+  background: #111 !important;
+}
