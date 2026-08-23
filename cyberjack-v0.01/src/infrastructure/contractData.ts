@@ -2047,50 +2047,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     }
 },
 {
-    id: "contract_core_nipples_aversion_01",
-    issuerId: "fac_core",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "hard",
-    cruelty: "severe",
-    title: "Стимуляция сосков при аверсии",
-    description: "Центр запрашивает актив с аверсией на стимуляцию сосков и высокой локальной чувствительностью. Актив будет подвергнут продолжительной стимуляции сосков — зажимами, вибрацией и электростимуляцией — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии и закрепление гиперчувствительности.",
-    conditions: [
-        { type: "point", key: "nipples", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 62 }
-    ],
-    rewards: { credits: 900, trust: 18, items: ["drug_sensitizer"] },
-    penalties: { credits: -130, trust: -7 },
-    return_profile: {
-        memory: {
-            theme: "продолжительная стимуляция сосков при фобии",
-            fragments: [
-"Мои соски стимулировали зажимами и разрядами — острая боль прошивала грудь.",
-"Фобия нарастала с каждой минутой: я дёргалась, стонала, но фиксация держала.",
-"Каждый разряд отдавался в груди, и я чувствовала, как соски горят и пульсируют.",
-"Я умоляла остановиться, но стимуляция продолжалась, не слыша моих просьб.",
-"Грудь стала невыносимо чувствительной — даже воздух, касающийся сосков, причинял боль.",
-"Аверсия перестраивалась в гиперчувствительность, и я не могла понять, что со мной происходит.",
-"Когда всё закончилось, соски ещё долго ныли, и я не могла прикоснуться к груди без содрогания."
-        ],
-            tags: ["nipples", "aversion", "electronic", "restraint", "overload", "phobia"]
-        },
-        acute_state: { capacity: 6, tension: 82, sensitivity: 10, attitude: -12 },
-        recovery: { baselineCapacityLimit: 0.25, method: "капсула + drug_neurostabilizer", durationDays: 3 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "nipples", response: "паника при стимуляции сосков" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции сосков", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["соски→невыносимость"], new: ["аверсия→гиперчувствительность"] },
-        relations: { attitude: -9, openness: 5, plasticity: 7 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию сосков"], threads: ["серия аверсивных протоколов сосков"] }
-    }
-},
-{
     id: "contract_core_anus_aversion_01",
     issuerId: "fac_core",
     format: "external_transfer",
@@ -2098,7 +2054,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     offerDeadlineMinutes: 2880,
     difficulty: "extreme",
     cruelty: "extreme",
-    title: "Анальная стимуляция при аверсии",
+    title: "Анальное проникновение при аверсии",
     description: "Центр запрашивает актив с аверсией на анальное проникновение и высокой чувствительностью. Актив будет подвергнут продолжительному анальному проникновению с нарастающим диаметром и вибрацией, при полной фиксации, чтобы зафиксировать отклик фобии на инвазивное воздействие. Ожидается глубокая перегрузка и перестройка аверсии.",
     conditions: [
         { type: "point", key: "anus", operator: "<=", value: -3 },
@@ -2132,6 +2088,50 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         associations: { traumatic: ["анус→невыносимость"], new: ["аверсия→перестройка"] },
         relations: { attitude: -11, openness: 6, plasticity: 8 },
         world_effects: { facts: ["Центр зафиксировал отклик фобии на анальное проникновение"], threads: ["серия аверсивных анальных протоколов"] }
+    }
+},
+{
+    id: "contract_core_genital_orgasm_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Принудительная разрядка при генитальной аверсии",
+    description: "Центр запрашивает актив с аверсией на генитальную стимуляцию и высокой чувствительностью. Актив будет доведён до оргазма вопреки фобии — вибрацией, проникновением и электростимуляцией при полной фиксации, чтобы зафиксировать конфликт между страхом и принудительным наслаждением. Ожидается глубокая перегрузка и расщепление аверсии.",
+    conditions: [
+        { type: "point", key: "vulva", operator: "<=", value: -3 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 72 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 58 }
+    ],
+    rewards: { credits: 1050, trust: 21, items: ["drug_sensitizer"] },
+    penalties: { credits: -150, trust: -8 },
+    return_profile: {
+        memory: {
+            theme: "принудительный оргазм вопреки фобии, страх и наслаждение слились",
+            fragments: [
+"Мои гениталии стимулировали непрерывно — вибрация, проникновение, разряды.",
+"Фобия кричала во мне, но тело предавало меня, отзываясь на каждое прикосновение.",
+"Я чувствовала, как внутри нарастает жар, и не могла понять, страх это или возбуждение.",
+"Оргазм накатил вопреки всему — тело содрогнулось, и я закричала от ужаса и наслаждения сразу.",
+"Разрядка не принесла облегчения — только стыд, что тело отозвалось на то, чего я боялась.",
+"Меня доводили до оргазма снова и снова, и каждый раз страх и наслаждение сплетались теснее.",
+"Когда всё закончилось, я лежала, дрожа, и не знала, кем я стала — жертвой или соучастницей собственного тела."
+        ],
+            tags: ["vulva", "sexual", "orgasm", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 4, tension: 90, sensitivity: 12, attitude: -15 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_forced_orgasm", trigger: "sexual", response: "паника и стыд при приближении оргазма" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание принудительной разрядки", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["гениталии→невыносимость", "оргазм→стыд"], new: ["страх→наслаждение"] },
+        relations: { attitude: -12, openness: 6, plasticity: 8 },
+        world_effects: { facts: ["Центр зафиксировал конфликт страха и принудительного наслаждения"], threads: ["серия протоколов принудительной разрядки"] }
     }
 },
 {
@@ -2179,147 +2179,15 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     }
 },
 {
-    id: "contract_core_genital_aversion_01",
-    issuerId: "fac_core",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "extreme",
-    cruelty: "extreme",
-    title: "Генитальная стимуляция при аверсии",
-    description: "Центр запрашивает актив с аверсией на генитальную стимуляцию и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции гениталий — вибрацией, проникновением и электростимуляцией — при полной фиксации, чтобы зафиксировать отклик фобии на сексуальное воздействие. Ожидается глубокая перегрузка и перестройка аверсии.",
-    conditions: [
-        { type: "point", key: "vulva", operator: "<=", value: -3 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 72 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 58 }
-    ],
-    rewards: { credits: 1050, trust: 21, items: ["drug_sensitizer"] },
-    penalties: { credits: -150, trust: -8 },
-    return_profile: {
-        memory: {
-            theme: "продолжительная генитальная стимуляция при фобии",
-            fragments: [
-"Мои гениталии стимулировали непрерывно — вибрация, проникновение, разряды.",
-"Фобия кричала во мне: я дёргалась, стонала, но фиксация держала ноги разведёнными.",
-"Каждое воздействие отдавалось внизу живота, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Между ног всё горело и пульсировало, и я чувствовала, как тело предаёт меня, отзываясь.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, внизу ещё долго ныло, и я не могла свести ноги от слабости."
-        ],
-            tags: ["vulva", "sexual", "aversion", "restraint", "overload", "phobia"]
-        },
-        acute_state: { capacity: 4, tension: 90, sensitivity: 12, attitude: -15 },
-        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "vulva", response: "паника и диссоциация при генитальной стимуляции" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание генитальной стимуляции", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["гениталии→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -12, openness: 6, plasticity: 8 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на генитальную стимуляцию"], threads: ["серия аверсивных генитальных протоколов"] }
-    }
-},
-{
-    id: "contract_core_neck_aversion_01",
-    issuerId: "fac_core",
-    format: "external_transfer",
-    durationMinutes: 2160,
-    offerDeadlineMinutes: 2160,
-    difficulty: "hard",
-    cruelty: "severe",
-    title: "Стимуляция шеи при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к шее и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции шеи — давлением, вибрацией и удушающим захватом — при фиксации, чтобы зафиксировать отклик фобии на угрозу. Ожидается перестройка аверсии и закрепление панического отклика.",
-    conditions: [
-        { type: "point", key: "neck", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 62 }
-    ],
-    rewards: { credits: 860, trust: 17 },
-    penalties: { credits: -120, trust: -6 },
-    return_profile: {
-        memory: {
-            theme: "продолжительная стимуляция шеи при фобии",
-            fragments: [
-"Мою шею стимулировали давлением и удушающим захватом — я чувствовала, как сжимается горло.",
-"Фобия нарастала с каждым сжатием: я задыхалась, дёргалась, но фиксация держала.",
-"Каждый захват отдавался в горле, и я не могла вдохнуть, пока давление не ослабевало.",
-"Я чувствовала, как пульс колотится в висках, и паника заполняла меня целиком.",
-"Шея горела, мышцы дрожали, и я не могла отстраниться — фиксация держала голову.",
-"Панический отклик закрепился: теперь любое прикосновение к шее вызывает ужас.",
-"Когда всё закончилось, шея ещё долго ныла, и я не могла повернуть голову без содрогания."
-        ],
-            tags: ["neck", "aversion", "restraint", "overload", "phobia"]
-        },
-        acute_state: { capacity: 7, tension: 80, sensitivity: 9, attitude: -11 },
-        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "neck", response: "паника при прикосновении к шее" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции шеи", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["шея→невыносимость"], new: ["аверсия→паника"] },
-        relations: { attitude: -8, openness: 5, plasticity: 7 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию шеи"], threads: ["серия аверсивных протоколов шеи"] }
-    }
-},
-{
-    id: "contract_core_inner_thighs_aversion_01",
-    issuerId: "fac_core",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "hard",
-    cruelty: "severe",
-    title: "Стимуляция внутренней стороны бёдер при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к внутренней стороне бёдер и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции этой зоны — щекоткой, вибрацией и точечным давлением — при фиксации ног, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
-    conditions: [
-        { type: "point", key: "inner_thighs", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 62 }
-    ],
-    rewards: { credits: 880, trust: 17 },
-    penalties: { credits: -120, trust: -6 },
-    return_profile: {
-        memory: {
-            theme: "продолжительная стимуляция внутренней стороны бёдер при фобии",
-            fragments: [
-"Мои бёдра стимулировали непрерывно — щекотка, вибрация, точечное давление.",
-"Фобия нарастала с каждой минутой: я дёргалась, но ноги фиксировали, не давая свести их.",
-"Каждое прикосновение к внутренней стороне бёдер отдавалось во всём теле.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Бёдра горели, вздрагивали, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, бёдра ещё долго вздрагивали, и я не могла свести ноги без содрогания."
-        ],
-            tags: ["inner_thighs", "tickling", "aversion", "restraint", "overload", "phobia"]
-        },
-        acute_state: { capacity: 6, tension: 82, sensitivity: 10, attitude: -12 },
-        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "inner_thighs", response: "паника при прикосновении к бёдрам" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции бёдер", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["бёдра→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -9, openness: 5, plasticity: 7 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию бёдер"], threads: ["серия аверсивных протоколов бёдер"] }
-    }
-},
-{
-    id: "contract_core_hands_aversion_01",
+    id: "contract_core_hands_active_aversion_01",
     issuerId: "fac_core",
     format: "external_transfer",
     durationMinutes: 2160,
     offerDeadlineMinutes: 2160,
     difficulty: "medium",
     cruelty: "moderate",
-    title: "Стимуляция кистей при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к кистям и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции кистей — щекоткой, вибрацией и точечным давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    title: "Активное преодоление аверсии к прикосновениям",
+    description: "Центр запрашивает актив с аверсией на прикосновения к кистям. В отличие от пассивных протоколов, актив будет вынужден сам прикасаться к объекту страха — удерживать, гладить, сжимать — под контролем оператора, чтобы зафиксировать отклик фобии на добровольное действие. Ожидается перестройка аверсии через вынужденное преодоление.",
     conditions: [
         { type: "point", key: "hands", operator: "<=", value: -2 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
@@ -2330,336 +2198,469 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
-            theme: "продолжительная стимуляция кистей при фобии",
+            theme: "вынужденное прикосновение к объекту страха, преодоление аверсии",
             fragments: [
-"Мои кисти стимулировали непрерывно — щекотка, вибрация, точечное давление.",
-"Фобия нарастала с каждой минутой: я дёргалась, но руки фиксировали.",
-"Каждое прикосновение к кистям отдавалось во всём теле, как удар током.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Кисти горели, вздрагивали, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, кисти ещё долго вздрагивали, и я не могла сжать их без содрогания."
+"Мне приказали прикоснуться к тому, чего я боялась, — и я должна была сделать это сама.",
+"Мои руки дрожали, когда я тянулась к объекту страха, но отступить было нельзя.",
+"Первое прикосновение было как удар — фобия взорвалась во мне, но я держала.",
+"Меня заставляли гладить, сжимать, удерживать, и каждый раз страх накатывал заново.",
+"Я чувствовала, как аверсия борется с вынужденным действием, и не знала, что победит.",
+"Постепенно страх притупился — руки привыкали к тому, что делали, вопреки мне.",
+"Когда всё закончилось, я смотрела на свои руки и не узнавала их — они сделали то, чего я боялась."
         ],
-            tags: ["hands", "tickling", "aversion", "restraint", "overload", "phobia"]
+            tags: ["hands", "aversion", "control", "overload", "phobia"]
         },
         acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
         recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
         traits: {
             kept: [],
             traumatic: [{ id: "trauma_aversion_amplified", trigger: "hands", response: "паника при прикосновении к кистям" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции кистей", decayCondition: "работа с памятью" }]
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание прикосновений", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: ["кисти→невыносимость"], new: ["аверсия→перестройка"] },
+        associations: { traumatic: ["кисти→невыносимость"], new: ["преодоление→перестройка"] },
         relations: { attitude: -6, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию кистей"], threads: ["серия аверсивных протоколов кистей"] }
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на вынужденное преодоление"], threads: ["серия протоколов активного преодоления"] }
     }
 },
 {
-    id: "contract_core_chest_aversion_01",
+    id: "contract_core_pain_aversion_01",
     issuerId: "fac_core",
     format: "external_transfer",
-    durationMinutes: 2160,
-    offerDeadlineMinutes: 2160,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Стимуляция груди при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к груди и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции груди — давлением, вибрацией и щекоткой — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Принудительная боль при аверсии к боли",
+    description: "Центр запрашивает актив с выраженной аверсией к боли и высокой чувствительностью. Актив будет подвергнут продолжительной серии болевых воздействий — от тупых ударов до точечных проколов и электроразрядов — при полной фиксации, чтобы зафиксировать отклик фобии на длительную боль. Ожидается глубокая перегрузка и перестройка болевой аверсии.",
     conditions: [
-        { type: "point", key: "chest", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "acquired_trait", key: "trait_masochist", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 64 }
+        { type: "attitude", operator: "<=", value: 60 }
     ],
-    rewards: { credits: 760, trust: 15 },
-    penalties: { credits: -100, trust: -5 },
+    rewards: { credits: 1000, trust: 20, items: ["drug_sensitizer"] },
+    penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
-            theme: "продолжительная стимуляция груди при фобии",
+            theme: "принудительная боль при фобии, перегрузка болевой аверсии",
             fragments: [
-"Мою грудь стимулировали непрерывно — давление, вибрация, щекотка.",
-"Фобия нарастала с каждой минутой: я дёргалась, но фиксация держала.",
-"Каждое прикосновение к груди отдавалось во всём теле, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Грудь горела, вздрагивала, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, грудь ещё долго ныла, и я не могла прикоснуться к ней без содрогания."
+"Меня закрепили и начали бить — тупые удары растекались по телу горячими волнами.",
+"Фобия кричала во мне: я дёргалась, выла, но фиксация держала, и боль не прекращалась.",
+"Потом точечные проколы — острая, чистая боль, от которой я выгибалась дугой.",
+"Электроразряды сводили мышцы судорогой, и я не могла ни вдохнуть, ни закричать.",
+"Боль нарастала, пока не перестала быть отдельными ударами — она стала сплошной стеной.",
+"Я теряла связь с реальностью, захлёбываясь страхом и болью, которые слились в одно.",
+"Когда всё закончилось, тело ещё долго вздрагивало, и я не могла поверить, что выжила."
         ],
-            tags: ["chest", "aversion", "restraint", "overload", "phobia"]
+            tags: ["pain", "impact", "piercing", "electronic", "aversion", "overload", "phobia"]
         },
-        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        acute_state: { capacity: 3, tension: 92, sensitivity: 12, attitude: -16 },
+        recovery: { baselineCapacityLimit: 0.15, method: "капсула + drug_neurostabilizer", durationDays: 5 },
         traits: {
             kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "chest", response: "паника при прикосновении к груди" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции груди", decayCondition: "работа с памятью" }]
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "pain", response: "паника и диссоциация при болевых стимулах" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание боли", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: ["грудь→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -6, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию груди"], threads: ["серия аверсивных протоколов груди"] }
+        associations: { traumatic: ["боль→невыносимость", "фиксация→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -12, openness: 6, plasticity: 8 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на длительную боль"], threads: ["серия аверсивных болевых протоколов"] }
     }
 },
 {
-    id: "contract_core_back_aversion_01",
+    id: "contract_core_clinical_aversion_01",
     issuerId: "fac_core",
     format: "external_transfer",
-    durationMinutes: 2160,
-    offerDeadlineMinutes: 2160,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Стимуляция спины при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к спине и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции спины — давлением, вибрацией и точечным воздействием — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Инвазивный осмотр при аверсии к медицинскому",
+    description: "Центр запрашивает актив с аверсией к медицинским процедурам и высокой чувствительностью. Актив будет подвергнут полному инвазивному обследованию — гинекологическому и ректальному, с инструментами и забором проб — при фиксации, чтобы зафиксировать отклик фобии на медицинскую рамку. Ожидается перестройка аверсии и закрепление панического отклика на инструменты.",
     conditions: [
-        { type: "point", key: "back", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "acquired_trait", key: "trait_clinical_fetish", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 64 }
+        { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 760, trust: 15 },
-    penalties: { credits: -100, trust: -5 },
+    rewards: { credits: 900, trust: 18 },
+    penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
-            theme: "продолжительная стимуляция спины при фобии",
+            theme: "инвазивный осмотр при фобии на медицинское, паника на инструменты",
             fragments: [
-"Мою спину стимулировали непрерывно — давление, вибрация, точечное воздействие.",
-"Фобия нарастала с каждой минутой: я дёргалась, но фиксация держала.",
-"Каждое прикосновение к спине отдавалось во всём теле, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Спина горела, вздрагивала, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, спина ещё долго ныла, и я не могла лечь на неё без содрогания."
+"Меня уложили на холодный стол и зафиксировали, как образец для исследования.",
+"Фобия нарастала с каждым прикосновением инструментов — холодных, точных, безжалостных.",
+"Меня раскрывали и осматривали, не спрашивая, и я не могла отстраниться.",
+"Забор проб был болезненным — острая боль внутри, от которой я вскрикивала.",
+"Медицинская рамка, которой я боялась, обернулась вокруг меня, и я задыхалась от ужаса.",
+"Каждая процедура была холодной и деловой, и от этого страх становился только глубже.",
+"Когда всё закончилось, я лежала, дрожа, и внутри всё ныло от инструментов, которые там побывали."
         ],
-            tags: ["back", "aversion", "restraint", "overload", "phobia"]
+            tags: ["clinical", "medical", "penetration", "aversion", "restraint", "overload", "phobia"]
         },
-        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        acute_state: { capacity: 6, tension: 82, sensitivity: 10, attitude: -12 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула + drug_neurostabilizer", durationDays: 3 },
         traits: {
             kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "back", response: "паника при прикосновении к спине" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции спины", decayCondition: "работа с памятью" }]
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "clinical", response: "паника при медицинских процедурах" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание осмотра", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: ["спина→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -6, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию спины"], threads: ["серия аверсивных протоколов спины"] }
+        associations: { traumatic: ["инструменты→невыносимость", "осмотр→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -9, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на медицинскую рамку"], threads: ["серия аверсивных клинических протоколов"] }
     }
 },
 {
-    id: "contract_core_belly_aversion_01",
-    issuerId: "fac_core",
-    format: "external_transfer",
-    durationMinutes: 2160,
-    offerDeadlineMinutes: 2160,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Стимуляция живота при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к животу и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции живота — щекоткой, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
-    conditions: [
-        { type: "point", key: "belly", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 64 }
-    ],
-    rewards: { credits: 760, trust: 15 },
-    penalties: { credits: -100, trust: -5 },
-    return_profile: {
-        memory: {
-            theme: "продолжительная стимуляция живота при фобии",
-            fragments: [
-"Мой живот стимулировали непрерывно — щекотка, вибрация, давление.",
-"Фобия нарастала с каждой минутой: я дёргалась, но фиксация держала.",
-"Каждое прикосновение к животу отдавалось во всём теле, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Живот горел, вздрагивал, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, живот ещё долго вздрагивал, и я не могла прикоснуться к нему без содрогания."
-        ],
-            tags: ["belly", "tickling", "aversion", "restraint", "overload", "phobia"]
-        },
-        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "belly", response: "паника при прикосновении к животу" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции живота", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["живот→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -6, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию живота"], threads: ["серия аверсивных протоколов живота"] }
-    }
-},
-{
-    id: "contract_core_buttocks_aversion_01",
-    issuerId: "fac_core",
-    format: "external_transfer",
-    durationMinutes: 2160,
-    offerDeadlineMinutes: 2160,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Стимуляция ягодиц при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к ягодицам и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции ягодиц — ударами, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
-    conditions: [
-        { type: "point", key: "buttocks", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 64 }
-    ],
-    rewards: { credits: 760, trust: 15 },
-    penalties: { credits: -100, trust: -5 },
-    return_profile: {
-        memory: {
-            theme: "продолжительная стимуляция ягодиц при фобии",
-            fragments: [
-"Мои ягодицы стимулировали ударами и вибрацией — каждый удар отдавался во всём теле.",
-"Фобия нарастала с каждым ударом: я дёргалась, но фиксация держала.",
-"Каждый удар оставлял горячее пятно на коже, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Ягодицы горели, вздрагивали, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, ягодицы ещё долго ныли, и я не могла сесть без содрогания."
-        ],
-            tags: ["buttocks", "impact", "aversion", "restraint", "overload", "phobia"]
-        },
-        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "buttocks", response: "паника при прикосновении к ягодицам" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции ягодиц", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["ягодицы→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -6, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию ягодиц"], threads: ["серия аверсивных протоколов ягодиц"] }
-    }
-},
-{
-    id: "contract_core_face_aversion_01",
+    id: "contract_core_electro_aversion_01",
     issuerId: "fac_core",
     format: "external_transfer",
     durationMinutes: 2160,
     offerDeadlineMinutes: 2160,
     difficulty: "hard",
     cruelty: "severe",
-    title: "Стимуляция лица при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к лицу и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции лица — щекоткой, вибрацией и точечным давлением — при фиксации головы, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии и закрепление панического отклика.",
+    title: "Электростимуляция при аверсии к разрядам",
+    description: "Центр запрашивает актив с аверсией к электростимуляции и высокой чувствительностью. Актив будет подключён к электродам на эрогенных зонах, с нарастающей силой разрядов, при полной фиксации, чтобы зафиксировать отклик фобии на электричество. Ожидается перестройка аверсии и закрепление панического отклика на разряды.",
     conditions: [
-        { type: "point", key: "face", operator: "<=", value: -2 },
+        { type: "acquired_trait", key: "trait_electrophile", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 880, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "электроразряды при фобии на электричество, паника на ток",
+            fragments: [
+"Меня подключили к электродам — холодные контакты легли на самые чувствительные точки.",
+"Фобия нарастала ещё до первого разряда: я знала, что будет, и уже дрожала.",
+"Первый разряд прошил меня насквозь — острая боль, от которой я дёрнулась всем телом.",
+"Сила разрядов нарастала, и каждый следующий был страшнее предыдущего.",
+"Мышцы сводило судорогой, зубы стучали, а в местах контакта кожа горела.",
+"Я чувствовала, как ток проходит через меня, и не могла отстраниться — фиксация держала.",
+"Когда разряды прекратились, я лежала, дрожа, и в местах контакта ещё долго покалывало."
+        ],
+            tags: ["electronic", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 7, tension: 85, sensitivity: 12, attitude: -10 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "electronic", response: "паника при электростимуляции" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание разрядов", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["разряды→невыносимость", "электроды→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -8, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на электростимуляцию"], threads: ["серия аверсивных электро-протоколов"] }
+    }
+},
+{
+    id: "contract_core_restraint_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Длительная фиксация при аверсии к обездвиживанию",
+    description: "Центр запрашивает актив с аверсией к фиксации и высокой чувствительностью. Актив будет закреплён в жёсткой фиксации — наручники, ошейник, ремни — и удерживаем в неподвижности длительное время, чтобы зафиксировать отклик фобии на обездвиживание. Ожидается перестройка аверсии и закрепление панического отклика на ремни.",
+    conditions: [
+        { type: "acquired_trait", key: "trait_restraint_fetish", operator: "<=", value: -2 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 860, trust: 17 },
+    rewards: { credits: 880, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
-            theme: "продолжительная стимуляция лица при фобии",
+            theme: "длительная фиксация при фобии на обездвиживание, паника на ремни",
             fragments: [
-"Моё лицо стимулировали непрерывно — щекотка, вибрация, точечное давление.",
-"Фобия нарастала с каждой минутой: я дёргалась, но голову фиксировали, не давая отвернуться.",
-"Каждое прикосновение к лицу отдавалось во всём теле, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Лицо горело, вздрагивало, и я не могла отстраниться — фиксация держала голову.",
-"Панический отклик закрепился: теперь любое прикосновение к лицу вызывает ужас.",
-"Когда всё закончилось, лицо ещё долго вздрагивало, и я не могла прикоснуться к нему без содрогания."
+"На меня надели наручники, ошейник и ремни — металл и кожа обхватили запястья, шею и бёдра.",
+"Фобия взорвалась сразу: я дёргалась, рвалась, но фиксация держала, и я не могла пошевелиться.",
+"Время тянулось бесконечно — мышцы затекали, кожа под ремнями горела, а я не могла вырваться.",
+"Каждая попытка освободиться только сильнее вдавливала ремни в кожу.",
+"Я чувствовала, как паника нарастает, и не могла её остановить — обездвиживание сводило с ума.",
+"Постепенно я перестала бороться — не потому что смирилась, а потому что не осталось сил.",
+"Когда меня освободили, тело ещё долго помнило давление ремней, и я вздрагивала от любого прикосновения."
         ],
-            tags: ["face", "aversion", "restraint", "overload", "phobia"]
+            tags: ["restraint", "aversion", "overload", "phobia"]
+        },
+        acute_state: { capacity: 6, tension: 82, sensitivity: 9, attitude: -12 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "restraint", response: "паника при фиксации" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание фиксации", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["фиксация→невыносимость", "ремни→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -9, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на обездвиживание"], threads: ["серия аверсивных протоколов фиксации"] }
+    }
+},
+{
+    id: "contract_core_tickling_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Непрерывная щекотка при аверсии к щекотке",
+    description: "Центр запрашивает актив с аверсией к щекотке и высокой чувствительностью. Актив будет подвергнут непрерывной щекотке — по всему телу, с фармакологическим усилением чувствительности — при полной фиксации, чтобы зафиксировать отклик фобии на длительное щекочущее воздействие. Ожидается глубокая перегрузка и перестройка аверсии.",
+    conditions: [
+        { type: "acquired_trait", key: "trait_knismolagnia", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 900, trust: 18, items: ["drug_sensitizer"] },
+    penalties: { credits: -130, trust: -7 },
+    return_profile: {
+        memory: {
+            theme: "непрерывная щекотка при фобии, перегрузка от щекочущего воздействия",
+            fragments: [
+"Меня зафиксировали и накачали препаратами — кожа стала невыносимо чувствительной.",
+"Щекотка началась сразу по всему телу — лёгкие, невыносимые прикосновения, от которых я дёргалась.",
+"Фобия кричала во мне: я смеялась, пока не стало больно, потом плакала, потом снова смеялась.",
+"Щекотка не прекращалась ни на минуту — тело не знало, как реагировать, и сходило с ума.",
+"Каждое прикосновение отдавалось во всём теле, как будто нервы оголились.",
+"Я теряла счёт времени — щекотка слилась в один бесконечный, невыносимый поток.",
+"Когда всё закончилось, кожа ещё долго вздрагивала, и я не могла вынести даже прикосновения воздуха."
+        ],
+            tags: ["tickling", "aversion", "restraint", "chemical", "overload", "phobia"]
+        },
+        acute_state: { capacity: 5, tension: 85, sensitivity: 10, attitude: -15 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_regenerative", durationDays: 4 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "tickling", response: "паника и перегрузка при щекотке" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание щекотки", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["щекотка→невыносимость", "фиксация→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -10, openness: 5, plasticity: 5 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на непрерывную щекотку"], threads: ["серия аверсивных протоколов щекотки"] }
+    }
+},
+{
+    id: "contract_core_machine_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Машинная стимуляция при аверсии к механизмам",
+    description: "Центр запрашивает актив с аверсией к механизмам и высокой чувствительностью. Актив будет подключён к автоматизированному комплексу, который непрерывно стимулирует его без участия человека, чтобы зафиксировать отклик фобии на безличное машинное воздействие. Ожидается перестройка аверсии и закрепление панического отклика на механизмы.",
+    conditions: [
+        { type: "acquired_trait", key: "trait_technophile", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 900, trust: 18, items: ["eq_vibrator"] },
+    penalties: { credits: -130, trust: -7 },
+    return_profile: {
+        memory: {
+            theme: "машинная стимуляция при фобии на механизмы, паника на безличное воздействие",
+            fragments: [
+"Меня подключили к комплексу — холодные металлические модули коснулись кожи, и я вздрогнула.",
+"Фобия нарастала: машина не слышала моих просьб, не видела моих слёз, и это пугало сильнее всего.",
+"Комплекс начал работать — проникновение, вибрация, разряды, всё по заданной программе.",
+"Я не могла предугадать, что будет дальше, и не могла остановить машину — только терпеть.",
+"Механические части двигались внутри меня с точностью, которой не было у человека.",
+"Я чувствовала, как машина использует меня, и паника накатывала волнами, захлёбываясь страхом.",
+"Когда комплекс остановился, я лежала, дрожа, и внутри всё ещё ощущала эхо механических движений."
+        ],
+            tags: ["machine", "sexual", "penetration", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 7, tension: 80, sensitivity: 10, attitude: -11 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "machine", response: "паника при машинном воздействии" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание машинной стимуляции", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["машина→невыносимость", "автоматизация→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -8, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на машинное воздействие"], threads: ["серия аверсивных машинных протоколов"] }
+    }
+},
+{
+    id: "contract_core_chemical_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Химическое усиление паники при аверсии к препаратам",
+    description: "Центр запрашивает актив с аверсией к препаратам и высокой чувствительностью. Актив будет накачан стимуляторами, разгоняющими панику и чувствительность до предела, чтобы зафиксировать отклик фобии на химическое усиление страха. Ожидается глубокая перегрузка и перестройка аверсии.",
+    conditions: [
+        { type: "acquired_trait", key: "trait_chem_addict", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 900, trust: 18, items: ["drug_sensitizer"] },
+    penalties: { credits: -130, trust: -7 },
+    return_profile: {
+        memory: {
+            theme: "химическое усиление паники при фобии на препараты",
+            fragments: [
+"Мне ввели препараты, и почти сразу тело начало гореть — кожа стала невыносимо чувствительной.",
+"Фобия нарастала вместе с чувствительностью: я знала, что препараты разгоняют мой страх, и не могла это остановить.",
+"Паника захлёстывала меня волнами — сердце колотилось, дыхание сбивалось, тело дрожало.",
+"Каждое прикосновение, каждый вдох отдавался во всём теле, и страх становился невыносимым.",
+"Я металась, умоляла, но препараты действовали по своему графику, и паника не отпускала.",
+"Я чувствовала, как нервная система работает на пределе, как будто вот-вот перегорит.",
+"Когда препараты выветрились, я лежала обессиленная, и тело ещё долго вздрагивало от малейшего прикосновения."
+        ],
+            tags: ["chemical", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 5, tension: 88, sensitivity: 14, attitude: -14 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "chemical", response: "паника при введении препаратов" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание препаратов", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["препараты→невыносимость", "пик→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -10, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на химическое усиление паники"], threads: ["серия аверсивных химических протоколов"] }
+    }
+},
+{
+    id: "contract_core_deprivation_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Сенсорная изоляция при аверсии к замкнутости",
+    description: "Центр запрашивает актив с аверсией к сенсорной изоляции и высокой чувствительностью. Актив будет помещён в изолирующий кокон с заглушёнными зрением, слухом и осязанием, чтобы зафиксировать отклик фобии на полное лишение сенсорного входа. Ожидается глубокая диссоциация и перестройка аверсии.",
+    conditions: [
+        { type: "acquired_trait", key: "trait_sensory_deprivation", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 880, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "сенсорная изоляция при фобии на замкнутость, паника в пустоте",
+            fragments: [
+"Меня поместили в кокон — сначала исчез свет, потом звук, потом ощущение собственного тела.",
+"Фобия взорвалась: я не видела, не слышала, не чувствовала, и паника захлестнула меня целиком.",
+"Я не знала, сколько прошло времени — в пустоте минуты и часы сливались в одно.",
+"Замкнутость давила со всех сторон, и я металась внутри кокона, не находя выхода.",
+"Я кричала, но не слышала собственного голоса — только пустоту, которая поглощала всё.",
+"Постепенно я перестала ощущать границы собственного тела — я растворялась в пустоте.",
+"Когда меня достали, свет и звук обрушились на меня, и я не сразу поняла, что снова существую."
+        ],
+            tags: ["deprivation", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 7, tension: 85, sensitivity: 12, attitude: -12 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "deprivation", response: "паника в замкнутом пространстве" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание изоляции", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["изоляция→невыносимость", "пустота→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -9, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на сенсорную изоляцию"], threads: ["серия аверсивных протоколов депривации"] }
+    }
+},
+{
+    id: "contract_core_exposure_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Публичная демонстрация при аверсии к наготе",
+    description: "Центр запрашивает актив с аверсией к наготе и демонстрации. Актив будет выставлен обнажённым перед группой наблюдателей и подвергнут длительной демонстрации всех эрогенных зон, чтобы зафиксировать отклик фобии на публичное унижение. Ожидается слом стыда и перестройка аверсии.",
+    conditions: [
+        { type: "acquired_trait", key: "trait_exhibitionist", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 880, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "публичная демонстрация при фобии на наготу, слом стыда",
+            fragments: [
+"Меня раздели и вывели в открытый зал — холодный воздух коснулся обнажённой кожи, и я сжалась.",
+"Фобия взорвалась: я пыталась прикрыться, но меня зафиксировали в раскрытой позе.",
+"Передо мной стояли наблюдатели — я чувствовала их взгляды на каждой части своего тела.",
+"Меня заставляли демонстрировать все эрогенные зоны, и стыд жёг сильнее любого прикосновения.",
+"Я умоляла отвернуться, закрыться, но фиксация держала меня открытой, и взгляды не прекращались.",
+"Постепенно стыд начал ломаться — я перестала различать лица, остались только взгляды, прожигающие кожу.",
+"В конце я уже не чувствовала унижения — только пустоту, как будто нагота перестала быть моей."
+        ],
+            tags: ["exposure", "humiliation", "aversion", "restraint", "overload", "phobia"]
         },
         acute_state: { capacity: 7, tension: 80, sensitivity: 9, attitude: -11 },
         recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
         traits: {
             kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "face", response: "паника при прикосновении к лицу" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции лица", decayCondition: "работа с памятью" }]
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "exposure", response: "паника при публичной наготе" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание демонстрации", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: ["лицо→невыносимость"], new: ["аверсия→паника"] },
+        associations: { traumatic: ["нагота→невыносимость", "взгляды→негатив"], new: ["аверсия→перестройка"] },
         relations: { attitude: -8, openness: 5, plasticity: 7 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию лица"], threads: ["серия аверсивных протоколов лица"] }
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на публичную демонстрацию"], threads: ["серия аверсивных протоколов демонстрации"] }
     }
 },
 {
-    id: "contract_core_waist_aversion_01",
+    id: "contract_core_sexual_aversion_01",
     issuerId: "fac_core",
     format: "external_transfer",
-    durationMinutes: 2160,
-    offerDeadlineMinutes: 2160,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Стимуляция талии при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к талии и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции талии — щекоткой, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Принудительный оргазм при аверсии к сексу",
+    description: "Центр запрашивает актив с аверсией к сексуальной стимуляции и высокой чувствительностью. Актив будет доведён до оргазма вопреки фобии — многократно, без паузы, с фармакологическим усилением чувствительности — чтобы зафиксировать конфликт между страхом и принудительным наслаждением. Ожидается глубокая перегрузка и расщепление аверсии.",
     conditions: [
-        { type: "point", key: "waist", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "acquired_trait", key: "trait_sexual_dependency", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 64 }
+        { type: "attitude", operator: "<=", value: 60 }
     ],
-    rewards: { credits: 760, trust: 15 },
-    penalties: { credits: -100, trust: -5 },
+    rewards: { credits: 1000, trust: 20, items: ["drug_sensitizer"] },
+    penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
-            theme: "продолжительная стимуляция талии при фобии",
+            theme: "принудительный оргазм при фобии на секс, страх и наслаждение слились",
             fragments: [
-"Мою талию стимулировали непрерывно — щекотка, вибрация, давление.",
-"Фобия нарастала с каждой минутой: я дёргалась, но фиксация держала.",
-"Каждое прикосновение к талии отдавалось во всём теле, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Талия горела, вздрагивала, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, талия ещё долго вздрагивала, и я не могла прикоснуться к ней без содрогания."
+"Меня закрепили и начали стимулировать — вибрация, проникновение, всё, чего я боялась.",
+"Фобия кричала во мне, но тело предавало меня, отзываясь на каждое прикосновение.",
+"Первый оргазм накатил вопреки всему — тело содрогнулось, и я закричала от ужаса и наслаждения сразу.",
+"Меня доводили до оргазма снова и снова, без паузы, и каждый раз страх и наслаждение сплетались теснее.",
+"Я чувствовала, как внутри нарастает жар, и не могла понять, страх это или возбуждение.",
+"Разрядка не приносила облегчения — только стыд, что тело отозвалось на то, чего я боялась.",
+"Когда всё закончилось, я лежала, дрожа, и не знала, кем я стала — жертвой или соучастницей собственного тела."
         ],
-            tags: ["waist", "tickling", "aversion", "restraint", "overload", "phobia"]
+            tags: ["sexual", "orgasm", "penetration", "aversion", "restraint", "overload", "phobia"]
         },
-        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        acute_state: { capacity: 4, tension: 90, sensitivity: 12, attitude: -15 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
         traits: {
             kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "waist", response: "паника при прикосновении к талии" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции талии", decayCondition: "работа с памятью" }]
+            traumatic: [{ id: "trauma_forced_orgasm", trigger: "sexual", response: "паника и стыд при приближении оргазма" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание принудительной разрядки", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: ["талия→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -6, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию талии"], threads: ["серия аверсивных протоколов талии"] }
+        associations: { traumatic: ["секс→невыносимость", "оргазм→стыд"], new: ["страх→наслаждение"] },
+        relations: { attitude: -12, openness: 6, plasticity: 8 },
+        world_effects: { facts: ["Центр зафиксировал конфликт страха и принудительного наслаждения"], threads: ["серия протоколов принудительной разрядки"] }
     }
 },
-{
-    id: "contract_core_legs_aversion_01",
-    issuerId: "fac_core",
-    format: "external_transfer",
-    durationMinutes: 2160,
-    offerDeadlineMinutes: 2160,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Стимуляция ног при аверсии",
-    description: "Центр запрашивает актив с аверсией на прикосновения к ногам и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции ног — щекоткой, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
-    conditions: [
-        { type: "point", key: "legs", operator: "<=", value: -2 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: "<=", value: 64 }
-    ],
-    rewards: { credits: 760, trust: 15 },
-    penalties: { credits: -100, trust: -5 },
-    return_profile: {
-        memory: {
-            theme: "продолжительная стимуляция ног при фобии",
-            fragments: [
-"Мои ноги стимулировали непрерывно — щекотка, вибрация, давление.",
-"Фобия нарастала с каждой минутой: я дёргалась, но фиксация держала.",
-"Каждое прикосновение к ногам отдавалось во всём теле, и я не могла от него уйти.",
-"Я умоляла прекратить, но стимуляция продолжалась, не слыша моих просьб.",
-"Ноги горели, вздрагивали, и я не могла отстраниться — фиксация держала крепко.",
-"Паника накатывала волнами, и я теряла связь с реальностью, захлёбываясь страхом.",
-"Когда всё закончилось, ноги ещё долго вздрагивали, и я не могла встать без содрогания."
-        ],
-            tags: ["legs", "tickling", "aversion", "restraint", "overload", "phobia"]
-        },
-        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_aversion_amplified", trigger: "legs", response: "паника при прикосновении к ногам" }],
-            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции ног", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["ноги→невыносимость"], new: ["аверсия→перестройка"] },
-        relations: { attitude: -6, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию ног"], threads: ["серия аверсивных протоколов ног"] }
-    }
-}
+
 ];
