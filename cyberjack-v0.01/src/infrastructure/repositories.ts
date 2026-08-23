@@ -999,7 +999,7 @@ export const chatMemoryRepo = {
                ON c.id = COALESCE(cm.speaker_id, cm.subject_id)
                OR c.subject_id = COALESCE(cm.speaker_id, cm.subject_id)
              WHERE cm.subject_id = ?
-             ORDER BY COALESCE(cm.world_minute, cm.id) DESC, cm.id DESC
+             ORDER BY cm.id DESC
              LIMIT ?`
         );
         const rows = stmt.all(subjectId, limit) as Array<{ id: number; role: 'user' | 'assistant'; content: string; contextLabel?: string; portraitEmotion?: string; createdAt?: string; worldMinute?: number | null; speakerId?: string; speakerName?: string; messageId?: string; originChatId?: number }>;
