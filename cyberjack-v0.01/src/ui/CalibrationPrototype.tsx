@@ -1423,8 +1423,15 @@ const bodypartImageAliases: Record<string, string> = {
 };
 const bodypartVisualPath = (subjectId: string, zoneId?: string) => {
   const character = visualCharacterSlugs[subjectId] || "mira";
-  const bodypart = bodypartImageAliases[zoneId || ""] || zoneId || "face";
-  return `/character-images/bodyparts/${character}/${bodypart}.png`;
+  const alias = bodypartImageAliases[zoneId || ""];
+  // Порядок кандидатов: сначала точное имя зоны (мужские/андрогинные
+  // персонажи хранят chest.png, а не breasts.png), затем alias (женские).
+  const candidates = [
+    zoneId ? `/character-images/bodyparts/${character}/${zoneId}.png` : null,
+    alias ? `/character-images/bodyparts/${character}/${alias}.png` : null,
+    `/character-images/bodyparts/${character}/face.png`,
+  ];
+  return resolveFirstAvailableVisual(candidates) || candidates[0] || "";
 };
 const characterVisualPath = (
   subjectId: string,

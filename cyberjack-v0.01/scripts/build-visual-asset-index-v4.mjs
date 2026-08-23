@@ -23,7 +23,8 @@ const roots = [
   'character-images/calibration-interactions-v4',
   'character-images/devices-v4',
   'character-images/vr-chair',
-  'character-images/cell'
+  'character-images/cell',
+  'character-images/bodyparts'
 ];
 
 const excludedSegments = new Set(['rmbg_v1']);
