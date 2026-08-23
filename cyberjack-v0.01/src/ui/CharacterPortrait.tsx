@@ -69,7 +69,7 @@ export const canonicalCharacterPortrait = (
           : id === 'NPC-CAND-GEN-02' ? 'eli'
             : id === 'NPC-CAND-GEN-03' ? 'rin'
               : id === 'NPC-CAND-GEN-04' ? 'mai'
-                : id === 'NPC-CAND-GEN-05' ? 'male_test'
+                : id === 'NPC-CAND-GEN-05' ? 'kai'
                   : id === 'NPC-CAND-KATE' ? 'kate'
                     : id === 'NPC-RIN-01' ? 'rin'
                       : null;

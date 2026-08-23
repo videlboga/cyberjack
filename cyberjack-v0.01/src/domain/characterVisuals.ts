@@ -158,7 +158,7 @@ const characterSlugFor = (characterId: string) => characterId === 'S-AV-01' ? 'm
                 : characterId === 'NPC-CAND-GEN-02' ? 'eli'
                     : characterId === 'NPC-CAND-GEN-03' ? 'rin'
                         : characterId === 'NPC-CAND-GEN-04' ? 'mai'
-                            : characterId === 'NPC-CAND-GEN-05' ? 'male_test'
+                            : characterId === 'NPC-CAND-GEN-05' ? 'kai'
                                 : characterId === 'NPC-CAND-KATE' ? 'kate'
                                     : characterId === 'NPC-RIN-01' ? 'rin'
                                         : characterId.toLowerCase().replace(/[^a-z0-9]+/g, '-');

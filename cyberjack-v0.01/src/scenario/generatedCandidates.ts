@@ -105,7 +105,7 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
             : spec.id === 'NPC-CAND-GEN-02' ? { slug: 'eli' }
                 : spec.id === 'NPC-CAND-GEN-03' ? { slug: 'rin' }
                     : spec.id === 'NPC-CAND-GEN-04' ? { slug: 'mai' }
-                        : spec.id === 'NPC-CAND-GEN-05' ? { slug: 'male_test' }
+                        : spec.id === 'NPC-CAND-GEN-05' ? { slug: 'kai' }
                             : spec.id === 'NPC-CAND-KATE' ? { slug: 'kate' }
                 : undefined,
         origin: spec.id === 'NPC-CAND-SUMI'
@@ -185,7 +185,7 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
         }
         if (spec.id === 'NPC-CAND-GEN-02') profileJson.visual = { slug:'eli' };
         if (spec.id === 'NPC-CAND-GEN-03') profileJson.visual = { slug:'rin' };
-        if (spec.id === 'NPC-CAND-GEN-05') profileJson.visual = { slug:'male_test' };
+        if (spec.id === 'NPC-CAND-GEN-05') profileJson.visual = { slug:'kai' };
         db.prepare('UPDATE characters SET profile_json = ? WHERE id = ?').run(JSON.stringify(profileJson), spec.id);
     })();
 

@@ -3014,7 +3014,7 @@ const episodeSceneBackgrounds: Record<string, string> = {
 const episodePortraitSlugs: Record<string, string> = {
   "S-AV-01": "mira", "NPC-LAB-01": "iona", "NPC-CAND-01": "nika",
   "NPC-CAND-SUMI": "sumi", "NPC-CAND-GEN-02": "eli", "NPC-CAND-GEN-04": "mai",
-  "NPC-CAND-KATE": "kate",
+  "NPC-CAND-GEN-05": "kai", "NPC-CAND-KATE": "kate",
 };
 
 const episodeActionGroup = (actionId: string): "contact" | "intimate" | "equipment" | "pose" | "clothing" | null => {
