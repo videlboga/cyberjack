@@ -355,7 +355,9 @@ function applyRoutine(id: string, phys: PhysiologyRow, worldMinute: number): voi
     const m = minuteOfDay(worldMinute);
     // Еда в обычные часы — вешаем контекст «Ест» на несколько минут.
     if (DAY_CYCLE.mealMinutes.some(mm => Math.abs(m - mm) < 30)) {
-        if (phys.last_meal_minute === null || worldMinute - phys.last_meal_minute >= 60) {
+        // last_meal_minute в будущем означает откат часов — считаем, что персонаж
+        // ещё не ел в этом цикле, иначе он «застревает» голодным до конца дня.
+        if (phys.last_meal_minute === null || phys.last_meal_minute > worldMinute || worldMinute - phys.last_meal_minute >= 60) {
             phys.hunger = Math.max(0, phys.hunger - 40);
             phys.last_meal_minute = worldMinute;
             applyRoutineContext(id, 'routine_eat', worldMinute);
