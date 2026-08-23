@@ -72,7 +72,7 @@ export function constrainCapacityWhileUnresponsive(input: {
     // Collapse recovery is intentionally slower than ordinary rest. Generic
     // baseline damping may still propose a lower value, but cannot wake the
     // subject in a single long pause by restoring most of the baseline gap.
-    const recoveryCeiling = input.previousCapacity + recoveryRate * input.elapsedTime * 0.5;
+    const recoveryCeiling = input.previousCapacity + recoveryRate * input.elapsedTime;
     return Math.min(input.proposedCapacity, recoveryCeiling);
 }
 

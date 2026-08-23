@@ -167,7 +167,7 @@ export function saveTickState(
         // Point/action preferences represent accumulated experience. A
         // high-quality tick leaves a trace, but reaching an established trait
         // takes a long, varied protocol rather than ten repetitions.
-        const targetDelta = Math.sign(targetReward) * Math.min(1, Math.abs(targetReward)) * 0.035 * targetPlasticity * catalystMultiplier * persistenceScale;
+        const targetDelta = Math.sign(targetReward) * Math.min(1, Math.abs(targetReward)) * 0.10 * targetPlasticity * catalystMultiplier * persistenceScale;
 
         if (presetId) subjectPreferencesRepo.adjust(subjectId, 'actions', presetId, targetDelta);
         if (pointId) subjectPreferencesRepo.adjust(subjectId, 'points', pointId, targetDelta);

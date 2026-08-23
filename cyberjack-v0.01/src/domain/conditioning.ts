@@ -176,7 +176,7 @@ export function conditioningSignal(input: ConditioningSignalInput): Conditioning
     // Semantic traits are consolidated dispositions, not a per-pulse meter.
     // Concrete experience may still be remembered immediately, while tags
     // require a sustained pattern across a session.
-    const generalizedDelta = rewardSignal * 0.10 * plasticity * learningQuality * overloadConsequence;
+    const generalizedDelta = rewardSignal * 0.30 * plasticity * learningQuality * overloadConsequence;
 
     return {
         reward,

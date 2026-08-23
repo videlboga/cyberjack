@@ -89,8 +89,8 @@ describe('persistent conditioning', () => {
         expect(signal.modifiers.acceptedDiscomfort).toBeGreaterThan(0);
         // A coherent experience leaves a real semantic trace, but a single
         // tick must not create a durable disposition by itself.
-        expect(signal.generalizedDelta).toBeGreaterThan(0.007);
-        expect(signal.generalizedDelta).toBeLessThan(0.02);
+        expect(signal.generalizedDelta).toBeGreaterThan(0.02);
+        expect(signal.generalizedDelta).toBeLessThan(0.06);
     });
 
     it('does not unlearn pain when discomfort is positively appraised', () => {

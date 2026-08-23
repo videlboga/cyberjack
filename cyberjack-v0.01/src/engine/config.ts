@@ -157,7 +157,7 @@ export const DEFAULT_CONFIG: any =
       // Enjoyment can ease the strain, but cannot erase the physical cost.
       capacityPleasureReliefMax: 0.25,
       edgingCapacityDropRate: 0.10,
-      capacityRecoveryRate: 1.0,    // Regen per silent tick
+      capacityRecoveryRate: 2.0,    // Regen per silent tick
       // Recovery uses sqrt(elapsed time), so both a short pause and a standard
       // 20-unit wait matter without making the latter an implicit discharge.
       tensionRecoveryBase: 10,
