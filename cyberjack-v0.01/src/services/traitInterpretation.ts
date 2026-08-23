@@ -80,7 +80,7 @@ export function recordLearningDay(subjectId: string, episode: MemoryEpisode, cha
   if (!metrics.length) return;
 
   // Трейты субъекта (для проверки «метрика относится к трейту»).
-  const traits = deriveAcquiredTraits(prefs.preferences).filter(trait => trait.level > 0);
+  const traits = deriveAcquiredTraits(prefs.preferences).filter(trait => trait.level !== 0);
   const traitMetrics = new Set<string>();
   for (const trait of traits) {
     const m = metricForTrait(trait.id);

@@ -23,7 +23,7 @@ async function materializeNextDossierNarrative() {
         const subjectId = character.subjectId || character.id;
         const subject = db.prepare('SELECT sensitivity,capacity,openness,plasticity,attitude,tension,preferences FROM subjects WHERE id=?').get(subjectId) as any;
         if (!subject) continue;
-        const traits = deriveAcquiredTraits(subject.preferences).filter(trait => trait.level > 0);
+        const traits = deriveAcquiredTraits(subject.preferences).filter(trait => trait.level !== 0);
         const tags = Object.entries(parsePreferences(subject.preferences).tags)
             .filter(([, value]) => Math.abs(Number(value)) >= .15)
             .sort(([, a], [, b]) => Math.abs(Number(b)) - Math.abs(Number(a))).slice(0, 6);

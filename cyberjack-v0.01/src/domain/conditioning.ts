@@ -11,8 +11,11 @@ export type PreferenceData = {
 export type AcquiredTrait = {
     id: string;
     label: string;
+    /** Отрицательный уровень = аверсия (неприязнь/отторжение/страх). */
     level: number;
     strength: number;
+    /** Название при отрицательном уровне (аверсия). */
+    aversionLabel?: string;
 };
 
 export type CompulsionSignal = {
@@ -294,7 +297,23 @@ const POINT_TRAIT_DEFINITIONS = [
 export function acquiredTraitLevel(strength: number): number {
     // Leave a little stability around authored starting values: a level-two
     // trait seeded at 3.5 should not disappear after one mildly bad episode.
-    return strength >= 4.5 ? 3 : strength >= 3.25 ? 2 : strength >= 1.75 ? 1 : 0;
+    if (strength >= 4.5) return 3;
+    if (strength >= 3.25) return 2;
+    if (strength >= 1.75) return 1;
+    // Отрицательные уровни — аверсия: неприязнь, отторжение, панический страх.
+    // Симметричны положительным порогам, но в минус.
+    if (strength <= -4.5) return -3;
+    if (strength <= -3.25) return -2;
+    if (strength <= -1.75) return -1;
+    return 0;
+}
+
+/** Название аверсии для отрицательного уровня трейта. */
+export function aversionLabelFor(level: number): string | null {
+    if (level >= 0) return null;
+    if (level <= -3) return 'панический страх';
+    if (level === -2) return 'резкое отторжение';
+    return 'неприязнь';
 }
 
 export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
@@ -316,10 +335,11 @@ export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
         if (!target) continue;
         if (target.bucket === 'tags') {
             const boost = (entry.tagBoost || 0) - (entry.tagPenalty || 0);
-            appliedTags[target.key] = Math.max(0, (appliedTags[target.key] || 0) + boost);
+            // Травматические трейты могут опускать тег в минус (аверсия).
+            appliedTags[target.key] = Math.max(-5, Math.min(5, (appliedTags[target.key] || 0) + boost));
         } else {
             const boost = (entry.pointBoost || 0) - (entry.pointPenalty || 0);
-            appliedPoints[target.key] = Math.max(0, (appliedPoints[target.key] || 0) + boost);
+            appliedPoints[target.key] = Math.max(-5, Math.min(5, (appliedPoints[target.key] || 0) + boost));
         }
     }
 
@@ -344,10 +364,14 @@ export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
             strength: appliedPoints[definition.pointId] || 0,
         })),
     ];
-    return definitions.map(definition => ({
-        ...definition,
-        level: acquiredTraitLevel(definition.strength),
-    }));
+    return definitions.map(definition => {
+        const level = acquiredTraitLevel(definition.strength);
+        return {
+            ...definition,
+            level,
+            aversionLabel: aversionLabelFor(level) ?? undefined,
+        };
+    });
 }
 
 const COMPULSION_DEFINITIONS: Array<{

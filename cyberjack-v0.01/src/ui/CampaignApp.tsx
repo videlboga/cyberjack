@@ -2308,7 +2308,7 @@ function CharacterDirectory({
     .sort((a, b) => b.interpreted.humanRatio - a.interpreted.humanRatio)
     .slice(0, 3);
   const acquiredTraits = deriveAcquiredTraits(state?.preferences).filter(
-    (trait) => trait.level > 0,
+    (trait) => trait.level !== 0,
   );
   const preferenceData = parsePreferences(state?.preferences);
   const learnedTags = Object.entries(preferenceData.tags)
@@ -2762,8 +2762,10 @@ function CharacterDirectory({
                 <div className="dossier-tags">
                   {acquiredTraits.length ? (
                     acquiredTraits.map((trait) => (
-                      <span key={trait.id}>
-                        {trait.label} · {["", "I", "II", "III"][trait.level]}
+                      <span key={trait.id} className={trait.level < 0 ? "aversion" : ""}>
+                        {trait.label} · {trait.level < 0
+                          ? trait.aversionLabel || "неприязнь"
+                          : ["", "I", "II", "III"][trait.level]}
                       </span>
                     ))
                   ) : (

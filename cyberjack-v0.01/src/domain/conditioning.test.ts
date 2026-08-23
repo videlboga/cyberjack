@@ -38,7 +38,18 @@ describe('persistent conditioning', () => {
     it('derives named trait levels from generalized preferences', () => {
         expect(acquiredTraitValue(preferences, 'trait_masochist')).toBe(3);
         expect(acquiredTraitValue(preferences, 'trait_restraint_fetish')).toBe(2);
-        expect(deriveAcquiredTraits(preferences).find(trait => trait.id === 'trait_exhibitionist')?.level).toBe(0);
+        // exposure: -2 → отрицательный уровень (неприязнь), а не 0.
+        const exhibitionist = deriveAcquiredTraits(preferences).find(trait => trait.id === 'trait_exhibitionist');
+        expect(exhibitionist?.level).toBe(-1);
+        expect(exhibitionist?.aversionLabel).toBe('неприязнь');
+    });
+
+    it('derives negative trait levels as aversions', () => {
+        expect(acquiredTraitLevel(-2)).toBe(-1);
+        expect(acquiredTraitLevel(-3.5)).toBe(-2);
+        expect(acquiredTraitLevel(-4.6)).toBe(-3);
+        expect(acquiredTraitLevel(-1)).toBe(0);
+        expect(acquiredTraitValue({ points: { feet: -4.6 } }, 'trait_point_feet')).toBe(-3);
     });
 
     it('turns a level-three relevant trait into a strong cue-bound compulsion', () => {

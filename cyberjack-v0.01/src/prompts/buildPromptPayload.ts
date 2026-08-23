@@ -384,8 +384,12 @@ export async function buildPromptPayload(
     }
     roleContext.push(resolveCurrentPostureFact(activeContextNames, spatial?.postureDescription));
     const embodiedTraits = deriveAcquiredTraits(actorDetails.core.preferences)
-        .filter(trait => trait.level > 0)
+        .filter(trait => trait.level !== 0)
         .map(trait => {
+            if (trait.level < 0) {
+                const aversion = trait.aversionLabel || 'неприязнь';
+                return `У тебя есть ${aversion} к «${trait.label}»; при релевантном стимуле ты испытываешь отторжение и стремишься избежать или прекратить воздействие.`;
+            }
             const strength = trait.level >= 3 ? 'сильно выраженная' : trait.level === 2 ? 'выраженная' : 'заметная';
             return `У тебя есть ${strength} телесно-психологическая склонность «${trait.label}»; она меняет оценку релевантных ощущений и может влиять на твои решения.`;
         });
