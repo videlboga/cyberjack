@@ -33,6 +33,7 @@ export interface BuildTickResponseInput {
     commandActionPreset?: any;
     commandIntent?: any;
     tickEffects: TickEffect[];
+    labRelocationApplied: boolean;
 }
 
 export interface BuildTickResponseResult {
@@ -53,6 +54,7 @@ export interface BuildTickResponseResult {
         metadata: Record<string, any>;
         actionApplied: boolean;
         systemNotes: string[];
+        labRelocationApplied: boolean;
     };
 }
 
@@ -106,7 +108,7 @@ export function buildPendingCommandEffect(input: BuildPendingCommandEffectInput)
 }
 
 export function buildTickResponse(input: BuildTickResponseInput): BuildTickResponseResult {
-    const { payload, activeSceneId, compiledAction, output, stateBefore, diagnostics, prompt, scenarioResult, initiatorId, state, relationalDynamics, actionApplied, addedContextNotes, commandActionPreset, commandIntent, tickEffects } = input;
+    const { payload, activeSceneId, compiledAction, output, stateBefore, diagnostics, prompt, scenarioResult, initiatorId, state, relationalDynamics, actionApplied, addedContextNotes, commandActionPreset, commandIntent, tickEffects, labRelocationApplied } = input;
     const event: GameEvent = {
         id: input.tickId,
         type: (payload.eventType || (payload.textMessage ? 'verbal_input' : 'ui_action')) as GameEvent['type'],
@@ -198,6 +200,7 @@ export function buildTickResponse(input: BuildTickResponseInput): BuildTickRespo
         },
         actionApplied,
         systemNotes: addedContextNotes,
+        labRelocationApplied,
     };
 
     return { event, actionTrace, commandPresentation, pendingCommandEffect, response };

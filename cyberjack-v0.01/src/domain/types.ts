@@ -594,4 +594,8 @@ export interface TickBundle {
     actionApplied?: boolean;
     // System messages generated during the tick (refusals, context changes, etc.)
     systemNotes?: string[];
+    // Whether this tick relocated the subject within the laboratory (e.g. a
+    // spoken move command). The UI uses this to close a device screen whose
+    // subject has walked away.
+    labRelocationApplied?: boolean;
 }

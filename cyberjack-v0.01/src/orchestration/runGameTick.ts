@@ -718,6 +718,7 @@ async function runGameTickInner(payload: GameEventPayload, requestId: string): P
         commandActionPreset,
         commandIntent,
         tickEffects,
+        labRelocationApplied,
     });
     const event = built.event;
     const actionTrace = built.actionTrace;

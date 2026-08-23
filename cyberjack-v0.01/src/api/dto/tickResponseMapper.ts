@@ -44,6 +44,7 @@ export function mapTickResponse(input: TickResponseInput): TickResponse {
     bundle,
     actionApplied: bundle.actionApplied || false,
     systemNotes: bundle.systemNotes || [],
+    labRelocationApplied: bundle.labRelocationApplied || false,
     reply: turnExecutionMetrics?.reply ?? null,
     promptMessages: turnExecutionMetrics?.promptMessages ?? null,
     actorReplies: turnExecutionMetrics?.actorReplies ?? [],

@@ -52,6 +52,7 @@ export interface TickResponse {
   bundle: TickBundle;
   actionApplied: boolean;
   systemNotes: string[];
+  labRelocationApplied: boolean;
   reply: unknown;
   promptMessages: unknown;
   actorReplies: unknown[];

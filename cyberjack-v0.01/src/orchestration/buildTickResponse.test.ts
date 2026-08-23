@@ -37,6 +37,7 @@ const baseInput = {
     commandActionPreset: undefined,
     commandIntent: undefined,
     tickEffects: [] as any[],
+    labRelocationApplied: false,
 };
 
 describe('buildTickResponse', () => {

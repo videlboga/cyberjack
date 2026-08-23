@@ -3124,6 +3124,13 @@ export function CalibrationPrototype({
         }),
         d = await q.json();
       if (!d.success) throw new Error(d.error || "Ошибка реплики");
+      // A spoken move command relocates the subject off the device. The table
+      // screen must not stay open on an empty device, so hand control back to
+      // the laboratory overview once the relocation is confirmed.
+      if (d.labRelocationApplied && speechTargetId === SUBJECT) {
+        onExit?.();
+        return;
+      }
       const shared = (d.diagnostics || d.bundle?.diagnostics)?.observation as
         Obs | undefined;
       if (shared && speechTargetId === SUBJECT) {
