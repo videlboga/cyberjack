@@ -2167,7 +2167,7 @@ function roomSceneBackground(roomId: string): string {
     case "room_cell_special":
       return "/backgrounds/laboratory/special-containment-cell.png";
     case "room_control":
-      return "/backgrounds/laboratory/observation.png";
+      return "/backgrounds/laboratory/observation-station.png";
     default:
       return "/backgrounds/laboratory/calibration.png";
   }
@@ -2202,6 +2202,19 @@ const SPECIAL_ROOM_ANCHORS: Record<string, { left: string; bottom: string }> = {
 };
 
 /**
+ * Якоря станции наблюдения (observation-station.png): кровать-ниша слева,
+ * два кресла за длинным столом (левое/правое), стоя перед видеостеной.
+ */
+const OBSERVATION_ANCHORS: Record<string, { left: string; bottom: string }> = {
+  bed_1: { left: "15%", bottom: "22%" },
+  bed_2: { left: "15%", bottom: "22%" },
+  table_1: { left: "40%", bottom: "12%" },
+  table_2: { left: "68%", bottom: "12%" },
+  toilet: { left: "50%", bottom: "8%" },
+  standing: { left: "50%", bottom: "6%" },
+};
+
+/**
  * Определяет точку привязки персонажа на фоне камеры по его состоянию.
  * Приоритет: сон → кровать, рутина (еда/туалет) → стол/санитарный модуль,
  * иначе — стоя в центре. Два персонажа в одном состоянии разводятся по
@@ -2219,7 +2232,9 @@ function roomAnchorFor(resident: Resident, index: number): string {
 
 /** Набор якорей для выбранной комнаты. */
 function anchorsForRoom(roomId: string): Record<string, { left: string; bottom: string }> {
-  return roomId === "room_cell_special" ? SPECIAL_ROOM_ANCHORS : ROOM_ANCHORS;
+  if (roomId === "room_cell_special") return SPECIAL_ROOM_ANCHORS;
+  if (roomId === "room_control") return OBSERVATION_ANCHORS;
+  return ROOM_ANCHORS;
 }
 
 function CharacterDirectory({
