@@ -27,6 +27,13 @@ const factions = [
         type: 'other',
         description: 'Собирает и интерпретирует данные. Покупает активов для долговременного наблюдения.',
         meta: { approach: 'observational', preferredStates: ['high_plasticity', 'high_openness'] }
+    },
+    {
+        id: 'fac_core',
+        name: 'Центр адаптивной психофизиологии',
+        type: 'research_center',
+        description: 'Центральная лаборатория станции. Изучает предельные психофизиологические состояния и фобические отклики, запрашивая активов с выраженными аверсиями для продолжительной стимуляции.',
+        meta: { approach: 'extreme', preferredStates: ['high_sensitivity', 'low_attitude', 'aversion'] }
     }
 ];
 
@@ -42,9 +49,9 @@ const STARTER_CONTRACT_IDS = [
     'contract_helix_compliance_01',
     'contract_helix_restraint_01',
     'contract_helix_interface_01',
-    'contract_continuum_drift_01',
-    'contract_continuum_crossindex_01',
-    'contract_continuum_archive_01',
+    'contract_continuum_pain_rewrite_01',
+    'contract_continuum_relation_rewrite_01',
+    'contract_continuum_orgasm_rewrite_01',
 ];
 
 // ─── Запись в БД ────────────────────────────────────────────────────────────

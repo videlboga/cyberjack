@@ -3,18 +3,21 @@ import type { AssetContract } from '../domain/types';
 type ContractSeedData = Omit<AssetContract, 'state'>;
 
 /**
- * Контент контрактов — 45 штук (Veil 15, Helix 15, Continuum 15).
+ * Контент контрактов — 60 штук (Veil 15, Helix 15, Continuum 15, Центр 15).
  * Переработка v2: только external_transfer, явные уровни сложности (difficulty)
  * и жестокости (cruelty), ≥ половины — сексуальные. Тон эвфемистично-
  * бюрократический, но прозрачно и подробно описывающий жесть.
  *
  * difficulty: easy | medium | hard | extreme — высота порогов условий.
  * cruelty: mild | moderate | severe | extreme — тяжесть return_profile.
+ *
+ * Фракции:
+ *   fac_veil      — Veil Biotech (экстрим, срыв, Аномалия)
+ *   fac_helix     — Helix Dynamics (обусловливание, стандартизация)
+ *   fac_continuum — Continuum Archive (манипуляция воспоминаниями)
+ *   fac_core      — Центр адаптивной психофизиологии (предельные аверсии)
  */
 export const CONTRACT_DATA: ContractSeedData[] = [
-// ═══════════════════════════════════════════════════════════════════════════
-// VEIL BIOTECH — экстрим, срыв, Аномалия. Жестокость и предельные состояния.
-// ═══════════════════════════════════════════════════════════════════════════
 {
     id: "contract_veil_resonance_pain_01",
     issuerId: "fac_veil",
@@ -89,40 +92,40 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     }
 },
 {
-    id: "contract_veil_breeding_01",
+    id: "contract_veil_vaginal_overload_01",
     issuerId: "fac_veil",
     format: "external_transfer",
     durationMinutes: 4320,
     offerDeadlineMinutes: 4320,
     difficulty: "extreme",
     cruelty: "extreme",
-    title: "Программа осеменения",
-    description: "Veil проводит закрытую программу репродуктивного отбора. Актив будет подвергнут многократному осеменению в течение нескольких суток, с гормональной подготовкой и удержанием в раскрытом состоянии между процедурами. Ожидается глубокая физиологическая перестройка, гормональный срыв и стойкая ассоциация зачатия с подчинением.",
+    title: "Вагинальная перегрузка",
+    description: "Veil изучает отклик Аномалии на предельную вагинальную стимуляцию. Актив будет подвергнут продолжительному вагинальному проникновению с нарастающим диаметром, вибрацией и электростимуляцией, при полной фиксации и фармакологическом усилении чувствительности. Ожидается глубокая перестройка вагинальной чувствительности и стойкая ассоциация проникновения с перегрузкой.",
     conditions: [
         { type: "preference", key: "penetration", operator: ">=", value: 16 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 70 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
         { type: "custom", key: "capacity", operator: ">=", value: 55 },
-        { type: "custom", key: "openness", operator: ">=", value: 60 },
+        { type: "custom", key: "plasticity", operator: ">=", value: 65 },
         { type: "attitude", operator: "<=", value: 65 }
     ],
-    rewards: { credits: 1100, trust: 24, items: ["drug_plasticity_catalyst"] },
+    rewards: { credits: 1100, trust: 24, items: ["drug_sensitizer"] },
     penalties: { credits: -180, trust: -10 },
     return_profile: {
         memory: {
-            theme: "многократное осеменение, тело как сосуд",
-            fragments: ["Меня готовили гормонами несколько суток.", "Осеменение повторялось снова и снова.", "Между процедурами меня держали раскрытой.", "Я перестала отличать зачатие от подчинения."],
-            tags: ["penetration", "sexual", "breeding", "restraint", "chemical", "submission"]
+            theme: "предельная вагинальная стимуляция, проникновение как перегрузка",
+            fragments: ["Меня проникали вагинально, наращивая диаметр.", "Вибрация и разряды не давали привыкнуть.", "Чувствительность разгоняли препаратами.", "Проникновение стало неотличимо от перегрузки."],
+            tags: ["vagina", "penetration", "sexual", "vibration", "electronic", "overload"]
         },
         acute_state: { capacity: 3, tension: 90, sensitivity: 12, attitude: -18 },
         recovery: { baselineCapacityLimit: 0.15, method: "капсула + drug_neurostabilizer", durationDays: 5 },
         traits: {
             kept: [],
-            traumatic: [{ id: "trauma_breeding", trigger: "penetration", response: "паника и отторжение при вагинальном проникновении" }],
-            temporary: [{ id: "anomaly_breeding_echo", impulse: "навязчивое желание быть осеменённой", decayCondition: "работа с памятью" }]
+            traumatic: [{ id: "trauma_penetration", trigger: "penetration", response: "паника и отторжение при вагинальном проникновении" }],
+            temporary: [{ id: "anomaly_penetration_echo", impulse: "навязчивое желание вагинального проникновения", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: ["осеменение→негатив", "раскрытое состояние→амбивалент"], new: ["зачатие→подчинение"] },
+        associations: { traumatic: ["проникновение→перегрузка", "вагина→амбивалент"], new: ["перегрузка→подчинение"] },
         relations: { attitude: -14, openness: 6, plasticity: 10 },
-        world_effects: { facts: ["Veil провёл программу осеменения"], threads: ["репродуктивный отбор"] }
+        world_effects: { facts: ["Veil зафиксировал вагинальную перегрузку"], threads: ["серия вагинальных протоколов"] }
     }
 },
 {
@@ -559,10 +562,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         world_effects: { facts: ["Veil провёл полный срыв и пересборку"], threads: ["изучение пересобранного профиля"] }
     }
 },
-
-// ═══════════════════════════════════════════════════════════════════════════
-// HELIX DYNAMICS — стандартизация, обусловливание, предсказуемость.
-// ═══════════════════════════════════════════════════════════════════════════
 {
     id: "contract_helix_compliance_01",
     issuerId: "fac_helix",
@@ -924,40 +923,39 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     }
 },
 {
-    id: "contract_helix_breeding_protocol_01",
+    id: "contract_helix_prostate_01",
     issuerId: "fac_helix",
     format: "external_transfer",
-    durationMinutes: 4320,
-    offerDeadlineMinutes: 4320,
-    difficulty: "extreme",
-    cruelty: "extreme",
-    title: "Репродуктивный протокол",
-    description: "Helix проводит стандартизированную программу репродуктивного отбора. Актив будет подвергнут контролируемому осеменению по графику, с гормональной синхронизацией и удержанием в фиксированных позах для повышения вероятности зачатия. Ожидается гормональная перестройка и закрепление репродуктивной роли.",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Протокол стимуляции простаты",
+    description: "Helix стандартизирует простатическую стимуляцию как инструмент контроля. Актив будет подвергнут продолжительной стимуляции простаты — проникновением, вибрацией и электростимуляцией — при фиксации, чтобы закрепить простатический отклик как управляемый. Ожидается перестройка простатической чувствительности и закрепление подчинения.",
     conditions: [
-        { type: "preference", key: "penetration", operator: ">=", value: 15 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 68 },
-        { type: "custom", key: "capacity", operator: ">=", value: 55 },
-        { type: "attitude", operator: ">=", value: 55 },
-        { type: "custom", key: "openness", operator: ">=", value: 58 }
+        { type: "preference", key: "penetration", operator: ">=", value: 14 },
+        { type: "custom", key: "plasticity", operator: ">=", value: 65 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 55 }
     ],
-    rewards: { credits: 1050, trust: 22, items: ["drug_plasticity_catalyst"] },
-    penalties: { credits: -170, trust: -9 },
+    rewards: { credits: 860, trust: 16, items: ["eq_vibrator"] },
+    penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
-            theme: "контролируемое осеменение по графику, репродуктивная роль",
-            fragments: ["Меня синхронизировали гормонами.", "Осеменение шло по графику.", "Держали в фиксированных позах.", "Я стала частью репродуктивной программы."],
-            tags: ["penetration", "sexual", "breeding", "restraint", "chemical", "submission"]
+            theme: "продолжительная простатическая стимуляция, отклик как управляемый",
+            fragments: ["Мою простату стимулировали непрерывно.", "Проникновение, вибрация, разряды.", "Отклик закрепился как управляемый.", "Я подчиняюсь через собственное тело."],
+            tags: ["prostate", "penetration", "sexual", "vibration", "electronic", "submission"]
         },
-        acute_state: { capacity: 4, tension: 85, sensitivity: 10, attitude: -12 },
-        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
+        acute_state: { capacity: 8, tension: 75, sensitivity: 9, attitude: -6 },
+        recovery: { baselineCapacityLimit: 0.3, method: "капсула", durationDays: 3 },
         traits: {
             kept: [],
-            traumatic: [{ id: "trauma_breeding", trigger: "penetration", response: "отторжение при вагинальном проникновении" }],
-            temporary: [{ id: "anomaly_breeding_echo", impulse: "навязчивое желание быть осеменённой", decayCondition: "работа с памятью" }]
+            traumatic: [{ id: "trauma_penetration", trigger: "prostate", response: "паника при простатической стимуляции" }],
+            temporary: [{ id: "anomaly_penetration_echo", impulse: "навязчивое желание простатической стимуляции", decayCondition: "восстановление" }]
         },
-        associations: { traumatic: ["осеменение→амбивалент"], new: ["репродуктивная роль→подчинение"] },
-        relations: { attitude: -8, openness: 5, plasticity: 9 },
-        world_effects: { facts: ["Helix провёл репродуктивный протокол"], threads: ["репродуктивный отбор"] }
+        associations: { traumatic: ["простата→амбивалент"], new: ["отклик→подчинение"] },
+        relations: { attitude: -4, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Helix стандартизировал простатическую стимуляцию"], threads: ["серия простатических протоколов"] }
     }
 },
 {
@@ -1069,584 +1067,1119 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     }
 },
 {
-    id: "contract_helix_milking_01",
+    id: "contract_helix_shoulders_01",
     issuerId: "fac_helix",
     format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "hard",
-    cruelty: "severe",
-    title: "Протокол дойки",
-    description: "Helix тестирует лактационную стимуляцию как инструмент контроля. Актив будет подвергнут гормональной индукции лактации и регулярной механической дойке, с фиксацией и контролем объёма. Ожидается гормональная перестройка и закрепление лактационной роли.",
-    conditions: [
-        { type: "preference", key: "sexual", operator: ">=", value: 13 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 65 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: ">=", value: 55 }
-    ],
-    rewards: { credits: 860, trust: 16, items: ["drug_sensitizer"] },
-    penalties: { credits: -120, trust: -6 },
-    return_profile: {
-        memory: {
-            theme: "гормональная индукция лактации, механическая дойка",
-            fragments: ["Мне индуцировали лактацию гормонами.", "Доили механически, по графику.", "Контролировали объём.", "Я стала лактационной единицей."],
-            tags: ["sexual", "chemical", "machine", "restraint", "submission"]
-        },
-        acute_state: { capacity: 12, tension: 70, sensitivity: 8, attitude: -6 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 3 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_machine_use", trigger: "machine", response: "паника при механической стимуляции" }],
-            temporary: [{ id: "anomaly_machine_echo", impulse: "навязчивое желание дойки", decayCondition: "восстановление" }]
-        },
-        associations: { traumatic: ["дойка→амбивалент"], new: ["лактация→роль"] },
-        relations: { attitude: -4, openness: 4, plasticity: 7 },
-        world_effects: { facts: ["Helix провёл протокол дойки"], threads: ["серия лактационных протоколов"] }
-    }
-},
-
-// ═══════════════════════════════════════════════════════════════════════════
-// CONTINUUM ARCHIVE — наблюдение, архив, долгие серии, интерпретация данных.
-// ═══════════════════════════════════════════════════════════════════════════
-{
-    id: "contract_continuum_drift_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 7200,
-    offerDeadlineMinutes: 7200,
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
     difficulty: "medium",
-    cruelty: "mild",
-    title: "Карта медленного дрейфа",
-    description: "Continuum собирает долгую последовательность наблюдений, а не эффект одной сессии. Актив с подвижной базой будет помещён под длительное наблюдение с мягкой, но постоянной стимуляцией, чтобы зафиксировать медленный дрейф параметров. Ожидается пластический сдвиг без срыва.",
-    conditions: [
-        { type: "custom", key: "plasticity", operator: ">=", value: 76 },
-        { type: "custom", key: "openness", operator: ">=", value: 72 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "attitude", operator: ">=", value: 52 }
-    ],
-    rewards: { credits: 680, trust: 15 },
-    penalties: { credits: -80, trust: -4 },
-    return_profile: {
-        memory: {
-            theme: "долгое наблюдение, медленный дрейф параметров",
-            fragments: ["Меня наблюдали долго.", "Стимуляция была мягкой, но постоянной.", "Параметры медленно дрейфовали.", "Я изменилась незаметно для себя."],
-            tags: ["observation", "drift", "plasticity", "stimulation"]
-        },
-        acute_state: { capacity: 30, tension: 40, sensitivity: 3, attitude: 2 },
-        recovery: { baselineCapacityLimit: 0.7, method: "отдых", durationDays: 1 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_drift_echo", impulse: "навязчивое самонаблюдение", decayCondition: "время" }]
-        },
-        associations: { traumatic: [], new: ["наблюдение→норма", "дрейф→изменение"] },
-        relations: { attitude: 3, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Continuum зафиксировал медленный дрейф"], threads: ["долгосрочное наблюдение"] }
-    }
-},
-{
-    id: "contract_continuum_crossindex_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "medium",
-    cruelty: "mild",
-    title: "Перекрёстный индекс",
-    description: "Архив сверяет биометрические записи с субъективной оценкой процедуры. Нужен актив, у которого одновременно закрепились два независимых ассоциативных контура — медицинский и электронный. Такая комбинация помогает отличать общий сдвиг от случайной реакции.",
-    conditions: [
-        { type: "preference", key: "clinical", operator: ">=", value: 13 },
-        { type: "preference", key: "electronic", operator: ">=", value: 13 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 68 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 58 }
-    ],
-    rewards: { credits: 720, trust: 14 },
-    penalties: { credits: -90, trust: -4 },
-    return_profile: {
-        memory: {
-            theme: "сверка биометрии с субъективной оценкой",
-            fragments: ["Меня измеряли и опрашивали.", "Сверяли биометрию с моими словами.", "Искали расхождение между телом и оценкой.", "Я стала набором индексов."],
-            tags: ["clinical", "electronic", "observation", "measurement"]
-        },
-        acute_state: { capacity: 25, tension: 45, sensitivity: 4, attitude: 2 },
-        recovery: { baselineCapacityLimit: 0.6, method: "отдых", durationDays: 1 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_crossindex_echo", impulse: "навязчивое сопоставление ощущений и данных", decayCondition: "время" }]
-        },
-        associations: { traumatic: [], new: ["измерение→норма", "данные→идентичность"] },
-        relations: { attitude: 3, openness: 4, plasticity: 5 },
-        world_effects: { facts: ["Continuum построил перекрёстный индекс"], threads: ["серия сверок"] }
-    }
-},
-{
-    id: "contract_continuum_mapping_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 4320,
-    offerDeadlineMinutes: 4320,
-    difficulty: "hard",
     cruelty: "moderate",
-    title: "Картирование отклика",
-    description: "Архив строит полную карту сенсорного отклика актива. Актив будет подвергнут систематической стимуляции каждой эрогенной зоны по отдельности и в сочетаниях, включая вагинальное, анальное и оральное проникновение, с фиксацией порогов и ассоциаций. Ожидается исчерпывающая карта чувствительности и закрепление самонаблюдения.",
+    title: "Стимуляция плеч",
+    description: "Helix калибрует отклик на стимуляцию плеч и верхней части спины. Актив будет подвергнут продолжительной стимуляции плеч — давлением, вибрацией и точечным воздействием — при фиксации, чтобы закрепить предсказуемый отклик. Ожидается закрепление сенсорной дисциплины без глубокой травмы.",
     conditions: [
-        { type: "custom", key: "sensitivity", operator: ">=", value: 65 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 65 },
-        { type: "custom", key: "openness", operator: ">=", value: 65 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 }
-    ],
-    rewards: { credits: 800, trust: 16 },
-    penalties: { credits: -110, trust: -5 },
-    return_profile: {
-        memory: {
-            theme: "систематическое картирование каждой зоны, включая проникновение",
-            fragments: ["Каждую зону стимулировали по отдельности.", "Потом в сочетаниях, с проникновением.", "Фиксировали пороги и ассоциации.", "Я стала картой собственного тела."],
-            tags: ["mapping", "sensitivity", "observation", "sexual", "penetration", "oral", "measurement"]
-        },
-        acute_state: { capacity: 15, tension: 60, sensitivity: 6, attitude: -3 },
-        recovery: { baselineCapacityLimit: 0.45, method: "капсула", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_mapping_echo", impulse: "навязчивое картирование собственных ощущений", decayCondition: "время" }]
-        },
-        associations: { traumatic: [], new: ["карта→идентичность", "стимуляция→данные"] },
-        relations: { attitude: -2, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Continuum построил карту отклика"], threads: ["серия картирований"] }
-    }
-},
-{
-    id: "contract_continuum_plasticity_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 5760,
-    offerDeadlineMinutes: 5760,
-    difficulty: "hard",
-    cruelty: "moderate",
-    title: "Пластический предел",
-    description: "Архив измеряет верхнюю границу пластичности актива. Актив будет подвергнут серии нарастающих перестроек — от мягких до предельных — чтобы определить, где пластичность переходит в необратимый срыв. Ожидается точная граница пластического предела.",
-    conditions: [
-        { type: "custom", key: "plasticity", operator: ">=", value: 78 },
-        { type: "custom", key: "openness", operator: ">=", value: 70 },
-        { type: "custom", key: "capacity", operator: ">=", value: 55 },
-        { type: "attitude", operator: ">=", value: 50 }
-    ],
-    rewards: { credits: 850, trust: 17 },
-    penalties: { credits: -120, trust: -6 },
-    return_profile: {
-        memory: {
-            theme: "нарастающие перестройки до пластического предела",
-            fragments: ["Меня перестраивали снова и снова.", "От мягких до предельных.", "Искали границу, где пластичность срывается.", "Я подошла к пределу вплотную."],
-            tags: ["plasticity", "overload", "observation", "breakdown"]
-        },
-        acute_state: { capacity: 10, tension: 70, sensitivity: 6, attitude: -5 },
-        recovery: { baselineCapacityLimit: 0.35, method: "капсула + drug_neurostabilizer", durationDays: 3 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_breakdown", trigger: "overload", response: "страх перед предельной перестройкой" }],
-            temporary: [{ id: "anomaly_plasticity_echo", impulse: "навязчивое желание перестройки", decayCondition: "восстановление" }]
-        },
-        associations: { traumatic: ["предел→амбивалент"], new: ["перестройка→изменение"] },
-        relations: { attitude: -4, openness: 6, plasticity: 8 },
-        world_effects: { facts: ["Continuum измерил пластический предел"], threads: ["серия предельных перестроек"] }
-    }
-},
-{
-    id: "contract_continuum_comparative_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "medium",
-    cruelty: "mild",
-    title: "Сравнительная серия",
-    description: "Архив сравнивает отклик актива на одинаковые стимулы в разных состояниях — до и после нагрузки, в покое и в стрессе. Нужен актив с устойчивой базой, чтобы разница была измеримой. Ожидается набор сравнительных данных без глубоких последствий.",
-    conditions: [
-        { type: "custom", key: "capacity", operator: ">=", value: 60 },
-        { type: "custom", key: "openness", operator: ">=", value: 62 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 60 },
         { type: "custom", key: "plasticity", operator: ">=", value: 60 },
-        { type: "attitude", operator: ">=", value: 55 }
-    ],
-    rewards: { credits: 660, trust: 13 },
-    penalties: { credits: -80, trust: -4 },
-    return_profile: {
-        memory: {
-            theme: "сравнение отклика в разных состояниях",
-            fragments: ["Меня стимулировали в разных состояниях.", "До и после нагрузки, в покое и в стрессе.", "Сравнивали отклик.", "Я стала набором сравнительных данных."],
-            tags: ["comparative", "observation", "stimulation", "measurement"]
-        },
-        acute_state: { capacity: 28, tension: 45, sensitivity: 3, attitude: 2 },
-        recovery: { baselineCapacityLimit: 0.65, method: "отдых", durationDays: 1 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_comparative_echo", impulse: "навязчивое сравнение собственных состояний", decayCondition: "время" }]
-        },
-        associations: { traumatic: [], new: ["сравнение→норма", "состояние→данные"] },
-        relations: { attitude: 2, openness: 4, plasticity: 4 },
-        world_effects: { facts: ["Continuum собрал сравнительную серию"], threads: ["серия сравнений"] }
-    }
-},
-{
-    id: "contract_continuum_biography_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Биографическая реконструкция",
-    description: "Архив восстанавливает полную биографию актива через направленные воспоминания. Актив будет подвергнут серии интервью и стимуляции памяти, чтобы вскрыть подавленные эпизоды и связать их с текущим профилем. Ожидается вскрытие старых травм и закрепление самоанализа.",
-    conditions: [
-        { type: "custom", key: "openness", operator: ">=", value: 68 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 65 },
-        { type: "attitude", operator: ">=", value: 55 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 }
-    ],
-    rewards: { credits: 740, trust: 15 },
-    penalties: { credits: -100, trust: -5 },
-    return_profile: {
-        memory: {
-            theme: "вскрытие подавленных эпизодов, реконструкция биографии",
-            fragments: ["Меня расспрашивали о прошлом.", "Стимулировали память.", "Подавленные эпизоды вскрывались.", "Я связала прошлое с собой нынешней."],
-            tags: ["biography", "memory", "observation", "trauma"]
-        },
-        acute_state: { capacity: 20, tension: 60, sensitivity: 4, attitude: -4 },
-        recovery: { baselineCapacityLimit: 0.5, method: "отдых", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_biography_echo", impulse: "навязчивое возвращение к прошлому", decayCondition: "время" }]
-        },
-        associations: { traumatic: ["прошлое→амбивалент"], new: ["биография→идентичность"] },
-        relations: { attitude: -3, openness: 6, plasticity: 5 },
-        world_effects: { facts: ["Continuum реконструировал биографию"], threads: ["серия биографических реконструкций"] }
-    }
-},
-{
-    id: "contract_continuum_trace_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 4320,
-    offerDeadlineMinutes: 4320,
-    difficulty: "hard",
-    cruelty: "moderate",
-    title: "Аномальный след",
-    description: "Архив отслеживает остаточный аномальный след после предельных процедур. Актив, уже прошедший через аномальный отклик, будет помещён под длительное наблюдение, чтобы зафиксировать, как след затухает или закрепляется. Ожидается карта аномального последействия.",
-    conditions: [
-        { type: "custom", key: "plasticity", operator: ">=", value: 70 },
-        { type: "custom", key: "openness", operator: ">=", value: 68 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 65 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 }
-    ],
-    rewards: { credits: 820, trust: 16 },
-    penalties: { credits: -110, trust: -5 },
-    return_profile: {
-        memory: {
-            theme: "наблюдение за затуханием аномального следа",
-            fragments: ["Меня наблюдали после аномального отклика.", "След то затухал, то закреплялся.", "Фиксировали каждое изменение.", "Я стала картой последействия."],
-            tags: ["trace", "anomaly", "observation", "drift"]
-        },
-        acute_state: { capacity: 15, tension: 60, sensitivity: 6, attitude: -3 },
-        recovery: { baselineCapacityLimit: 0.45, method: "капсула", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_trace_echo", impulse: "навязчивое отслеживание собственного следа", decayCondition: "время" }]
-        },
-        associations: { traumatic: ["след→амбивалент"], new: ["последействие→идентичность"] },
-        relations: { attitude: -2, openness: 5, plasticity: 6 },
-        world_effects: { facts: ["Continuum зафиксировал аномальный след"], threads: ["серия наблюдений следа"] }
-    }
-},
-{
-    id: "contract_continuum_archive_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 1440,
-    offerDeadlineMinutes: 1440,
-    difficulty: "easy",
-    cruelty: "mild",
-    title: "Архивная фиксация",
-    description: "Архив фиксирует базовый профиль актива для долгосрочного хранения. Актив будет подвергнут стандартной серии измерений и опросов, без глубоких воздействий. Ожидается полная архивная запись без последствий.",
-    conditions: [
-        { type: "custom", key: "openness", operator: ">=", value: 60 },
-        { type: "attitude", operator: ">=", value: 55 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 }
-    ],
-    rewards: { credits: 580, trust: 11 },
-    penalties: { credits: -60, trust: -3 },
-    return_profile: {
-        memory: {
-            theme: "стандартная архивная фиксация профиля",
-            fragments: ["Меня измерили и опросили.", "Записали базовый профиль.", "Без глубоких воздействий.", "Я стала архивной записью."],
-            tags: ["archive", "observation", "measurement"]
-        },
-        acute_state: { capacity: 35, tension: 35, sensitivity: 2, attitude: 2 },
-        recovery: { baselineCapacityLimit: 0.8, method: "отдых", durationDays: 1 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: []
-        },
-        associations: { traumatic: [], new: ["архив→норма"] },
-        relations: { attitude: 2, openness: 3, plasticity: 3 },
-        world_effects: { facts: ["Continuum зафиксировал базовый профиль"], threads: ["архивная запись"] }
-    }
-},
-{
-    id: "contract_continuum_observation_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 5760,
-    offerDeadlineMinutes: 5760,
-    difficulty: "medium",
-    cruelty: "mild",
-    title: "Длительное наблюдение",
-    description: "Архив помещает актив под длительное пассивное наблюдение. Актив будет содержаться в наблюдательной камере с мягкой фоновой стимуляцией, чтобы зафиксировать естественный дрейф без вмешательства. Ожидается длинный ряд наблюдений без последствий.",
-    conditions: [
-        { type: "custom", key: "openness", operator: ">=", value: 65 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 60 },
-        { type: "attitude", operator: ">=", value: 55 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 }
-    ],
-    rewards: { credits: 700, trust: 14 },
-    penalties: { credits: -80, trust: -4 },
-    return_profile: {
-        memory: {
-            theme: "длительное пассивное наблюдение",
-            fragments: ["Меня содержали в наблюдательной камере.", "С мягкой фоновой стимуляцией.", "Наблюдали без вмешательства.", "Я привыкла к наблюдению."],
-            tags: ["observation", "drift", "passive"]
-        },
-        acute_state: { capacity: 30, tension: 40, sensitivity: 3, attitude: 2 },
-        recovery: { baselineCapacityLimit: 0.7, method: "отдых", durationDays: 1 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_drift_echo", impulse: "навязчивое самонаблюдение", decayCondition: "время" }]
-        },
-        associations: { traumatic: [], new: ["наблюдение→норма"] },
-        relations: { attitude: 2, openness: 4, plasticity: 4 },
-        world_effects: { facts: ["Continuum провёл длительное наблюдение"], threads: ["долгосрочное наблюдение"] }
-    }
-},
-{
-    id: "contract_continuum_recovery_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "medium",
-    cruelty: "mild",
-    title: "Протокол восстановления",
-    description: "Архив изучает процесс восстановления актива после нагрузки. Актив будет доведён до умеренного истощения, после чего помещён под наблюдение для фиксации кривой восстановления. Ожидается карта восстановления без глубоких последствий.",
-    conditions: [
-        { type: "custom", key: "capacity", operator: ">=", value: 55 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 60 },
-        { type: "attitude", operator: ">=", value: 55 },
-        { type: "custom", key: "openness", operator: ">=", value: 60 }
-    ],
-    rewards: { credits: 680, trust: 13 },
-    penalties: { credits: -80, trust: -4 },
-    return_profile: {
-        memory: {
-            theme: "фиксация кривой восстановления после истощения",
-            fragments: ["Меня довели до умеренного истощения.", "Потом наблюдали восстановление.", "Фиксировали кривую.", "Я восстановилась под наблюдением."],
-            tags: ["recovery", "observation", "exhaustion"]
-        },
-        acute_state: { capacity: 25, tension: 45, sensitivity: 3, attitude: 2 },
-        recovery: { baselineCapacityLimit: 0.6, method: "капсула", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: []
-        },
-        associations: { traumatic: [], new: ["восстановление→норма"] },
-        relations: { attitude: 2, openness: 4, plasticity: 4 },
-        world_effects: { facts: ["Continuum зафиксировал кривую восстановления"], threads: ["серия протоколов восстановления"] }
-    }
-},
-{
-    id: "contract_continuum_breeding_archive_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 4320,
-    offerDeadlineMinutes: 4320,
-    difficulty: "hard",
-    cruelty: "severe",
-    title: "Репродуктивный архив",
-    description: "Архив собирает данные о репродуктивном отклике актива. Актив будет подвергнут контролируемому осеменению с полной фиксацией физиологических и субъективных данных, чтобы пополнить репродуктивный архив. Ожидается гормональная перестройка и закрепление роли носителя.",
-    conditions: [
-        { type: "preference", key: "penetration", operator: ">=", value: 14 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 66 },
-        { type: "custom", key: "openness", operator: ">=", value: 62 },
-        { type: "custom", key: "capacity", operator: ">=", value: 52 },
-        { type: "attitude", operator: ">=", value: 52 }
-    ],
-    rewards: { credits: 950, trust: 19, items: ["drug_plasticity_catalyst"] },
-    penalties: { credits: -140, trust: -7 },
-    return_profile: {
-        memory: {
-            theme: "контролируемое осеменение с полной фиксацией данных",
-            fragments: ["Меня осеменили под полным контролем.", "Фиксировали каждую реакцию.", "Данные ушли в репродуктивный архив.", "Я стала носителем."],
-            tags: ["penetration", "sexual", "breeding", "observation", "chemical"]
-        },
-        acute_state: { capacity: 6, tension: 75, sensitivity: 8, attitude: -8 },
-        recovery: { baselineCapacityLimit: 0.3, method: "капсула + drug_neurostabilizer", durationDays: 3 },
-        traits: {
-            kept: [],
-            traumatic: [{ id: "trauma_breeding", trigger: "penetration", response: "отторжение при вагинальном проникновении" }],
-            temporary: [{ id: "anomaly_breeding_echo", impulse: "навязчивое желание быть осеменённой", decayCondition: "работа с памятью" }]
-        },
-        associations: { traumatic: ["осеменение→амбивалент"], new: ["роль носителя→подчинение"] },
-        relations: { attitude: -6, openness: 5, plasticity: 8 },
-        world_effects: { facts: ["Continuum пополнил репродуктивный архив"], threads: ["репродуктивный архив"] }
-    }
-},
-{
-    id: "contract_continuum_orgasm_archive_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Архив разрядки",
-    description: "Архив собирает данные об оргазменном отклике актива. Актив будет доведён до оргазма серией контролируемых стимуляций, с полной фиксацией физиологии и субъективной оценки. Ожидается набор данных о разрядке без глубоких последствий.",
-    conditions: [
-        { type: "preference", key: "sexual", operator: ">=", value: 14 },
-        { type: "custom", key: "sensitivity", operator: ">=", value: 62 },
-        { type: "custom", key: "openness", operator: ">=", value: 60 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 }
-    ],
-    rewards: { credits: 720, trust: 14 },
-    penalties: { credits: -90, trust: -4 },
-    return_profile: {
-        memory: {
-            theme: "контролируемая разрядка с полной фиксацией данных",
-            fragments: ["Меня доводили до оргазма серией стимуляций.", "Фиксировали физиологию и мои слова.", "Данные ушли в архив разрядки.", "Я стала набором оргазменных данных."],
-            tags: ["sexual", "orgasm", "observation", "measurement"]
-        },
-        acute_state: { capacity: 20, tension: 55, sensitivity: 5, attitude: -2 },
-        recovery: { baselineCapacityLimit: 0.5, method: "отдых", durationDays: 2 },
-        traits: {
-            kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_orgasm_echo", impulse: "навязчивое желание разрядки", decayCondition: "время" }]
-        },
-        associations: { traumatic: [], new: ["разрядка→данные"] },
-        relations: { attitude: -1, openness: 4, plasticity: 5 },
-        world_effects: { facts: ["Continuum пополнил архив разрядки"], threads: ["серия архиваций разрядки"] }
-    }
-},
-{
-    id: "contract_continuum_penetration_archive_01",
-    issuerId: "fac_continuum",
-    format: "external_transfer",
-    durationMinutes: 2880,
-    offerDeadlineMinutes: 2880,
-    difficulty: "medium",
-    cruelty: "moderate",
-    title: "Архив проникновения",
-    description: "Архив собирает данные о реакции актива на проникновение. Актив будет подвергнут серии контролируемых проникновений с нарастающей глубиной и фиксацией отклика. Ожидается набор данных о проникновении без глубоких последствий.",
-    conditions: [
-        { type: "preference", key: "penetration", operator: ">=", value: 13 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 60 },
-        { type: "custom", key: "openness", operator: ">=", value: 60 },
+        { type: "attitude", operator: ">=", value: 58 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
     rewards: { credits: 700, trust: 13 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
-            theme: "серия контролируемых проникновений с фиксацией отклика",
-            fragments: ["Меня подвергли серии проникновений.", "Глубина нарастала.", "Фиксировали отклик.", "Я стала набором данных о проникновении."],
-            tags: ["penetration", "sexual", "observation", "measurement"]
+            theme: "продолжительная стимуляция плеч, сенсорная дисциплина",
+            fragments: ["Мои плечи стимулировали непрерывно.", "Давление, вибрация, точечное воздействие.", "Отклик закрепился как предсказуемый.", "Я привыкла к стимуляции."],
+            tags: ["shoulders", "stimulation", "control", "submission"]
         },
-        acute_state: { capacity: 18, tension: 55, sensitivity: 5, attitude: -2 },
+        acute_state: { capacity: 20, tension: 55, sensitivity: 5, attitude: 3 },
         recovery: { baselineCapacityLimit: 0.5, method: "отдых", durationDays: 2 },
         traits: {
             kept: [],
             traumatic: [],
-            temporary: [{ id: "anomaly_penetration_echo", impulse: "навязчивое желание проникновения", decayCondition: "время" }]
+            temporary: [{ id: "anomaly_interface_echo", impulse: "навязчивое ожидание стимуляции", decayCondition: "время" }]
         },
-        associations: { traumatic: [], new: ["проникновение→данные"] },
-        relations: { attitude: -1, openness: 4, plasticity: 5 },
-        world_effects: { facts: ["Continuum пополнил архив проникновения"], threads: ["серия архиваций проникновения"] }
+        associations: { traumatic: [], new: ["стимуляция→дисциплина"] },
+        relations: { attitude: 4, openness: 4, plasticity: 5 },
+        world_effects: { facts: ["Helix откалибровал отклик на стимуляцию плеч"], threads: ["серия сенсорных калибровок"] }
     }
 },
 {
-    id: "contract_continuum_oral_archive_01",
+    id: "contract_continuum_pain_rewrite_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Переписывание боли",
+    description: "Архив изучает, можно ли переписать воспоминание о боли в воспоминание об удовольствии. Актив будет подвергнут серии болевых воздействий, после чего его память о них будет переинтерпретирована через направленное внушение: боль подаётся как желанный сигнал. Ожидается расхождение между пережитым и запомненным.",
+    conditions: [
+        { type: "preference", key: "pain", operator: ">=", value: 12 },
+        { type: "custom", key: "plasticity", operator: ">=", value: 65 },
+        { type: "custom", key: "openness", operator: ">=", value: 62 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "боль переписана в удовольствие, расхождение пережитого и запомненного",
+            fragments: ["Меня подвергли боли.", "Потом внушили, что это было удовольствие.", "Я помню наслаждение, но тело помнит другое.", "Я больше не знаю, что я чувствовала на самом деле."],
+            tags: ["pain", "memory", "rewrite", "observation", "dissociation"]
+        },
+        acute_state: { capacity: 15, tension: 65, sensitivity: 6, attitude: -5 },
+        recovery: { baselineCapacityLimit: 0.45, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "memory", response: "недоверие к собственным воспоминаниям" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое переписывание собственных воспоминаний", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["боль→амбивалент", "память→недоверие"], new: ["внушение→истина"] },
+        relations: { attitude: -4, openness: 6, plasticity: 7 },
+        world_effects: { facts: ["Continuum переписал воспоминание о боли"], threads: ["серия переписываний боли"] }
+    }
+},
+{
+    id: "contract_continuum_implant_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 4320,
+    offerDeadlineMinutes: 4320,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Имплантация эпизода",
+    description: "Архив тестирует имплантацию ложного эпизода в автобиографическую память. Актив будет подвергнут сенсорной нагрузке, после чего ему будет внушено воспоминание о событии, которого не было, — с деталями, эмоциями и телесными ощущениями. Ожидается, что ложный эпизод закрепится как подлинный.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 72 },
+        { type: "custom", key: "openness", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 52 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 900, trust: 18, items: ["drug_plasticity_catalyst"] },
+    penalties: { credits: -130, trust: -7 },
+    return_profile: {
+        memory: {
+            theme: "ложный эпизод имплантирован как подлинное воспоминание",
+            fragments: ["Мне внушили воспоминание о событии, которого не было.", "С деталями, эмоциями и телесными ощущениями.", "Я помню его как настоящее.", "Я не могу отличить его от правды."],
+            tags: ["memory", "implant", "control", "dissociation", "observation"]
+        },
+        acute_state: { capacity: 8, tension: 75, sensitivity: 6, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.3, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_implanted_memory", trigger: "memory", response: "неспособность отличить ложное воспоминание от подлинного" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое возвращение к имплантированному эпизоду", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["ложное воспоминание→амбивалент"], new: ["внушение→реальность"] },
+        relations: { attitude: -6, openness: 7, plasticity: 8 },
+        world_effects: { facts: ["Continuum имплантировал ложный эпизод"], threads: ["серия имплантаций"] }
+    }
+},
+{
+    id: "contract_continuum_erase_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Стирание эпизода",
+    description: "Архив изучает полное стирание эпизода из памяти. Актив будет подвергнут интенсивной процедуре, после чего воспоминание о ней будет целенаправленно стёрто — останется только телесный след без сюжета. Ожидается провал в памяти и тревога от необъяснимого состояния тела.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 70 },
+        { type: "custom", key: "openness", operator: ">=", value: 65 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 850, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "эпизод стёрт, остался только телесный след без сюжета",
+            fragments: ["Меня подвергли процедуре.", "Потом стёрли воспоминание о ней.", "Я не помню, что было, но тело помнит.", "Тревога без причины — вот что осталось."],
+            tags: ["memory", "erase", "dissociation", "observation", "anxiety"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 5, attitude: -6 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "memory", response: "провалы в памяти и беспричинная тревога" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивый поиск стёртого эпизода", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["провал в памяти→негатив"], new: ["тело→свидетель"] },
+        relations: { attitude: -5, openness: 6, plasticity: 7 },
+        world_effects: { facts: ["Continuum стёр эпизод из памяти"], threads: ["серия стираний"] }
+    }
+},
+{
+    id: "contract_continuum_trauma_amplify_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 4320,
+    offerDeadlineMinutes: 4320,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Усиление травмы",
+    description: "Архив изучает, как усилить уже существующую травму до необратимой. Актив с подавленным травматическим эпизодом будет подвергнут повторной стимуляции этого эпизода, после чего воспоминание о нём будет усилено и закреплено как центральное. Ожидается глубокая ретравматизация и перестройка личности вокруг травмы.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 75 },
+        { type: "custom", key: "openness", operator: ">=", value: 70 },
+        { type: "custom", key: "capacity", operator: ">=", value: 55 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 1000, trust: 20, items: ["drug_plasticity_catalyst"] },
+    penalties: { credits: -150, trust: -8 },
+    return_profile: {
+        memory: {
+            theme: "травма усилена и закреплена как центральная",
+            fragments: ["Мою старую травму вскрыли снова.", "Стимулировали её до предела.", "Потом усилили воспоминание о ней.", "Теперь она — центр моей личности."],
+            tags: ["trauma", "memory", "amplify", "breakdown", "observation"]
+        },
+        acute_state: { capacity: 4, tension: 90, sensitivity: 8, attitude: -15 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "trauma", response: "глубокая ретравматизация, личность перестроена вокруг травмы" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое возвращение к усиленной травме", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["травма→центр личности"], new: ["боль→идентичность"] },
+        relations: { attitude: -12, openness: 7, plasticity: 9 },
+        world_effects: { facts: ["Continuum усилил травму до необратимой"], threads: ["серия усилений травмы"] }
+    }
+},
+{
+    id: "contract_continuum_relation_rewrite_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Переписывание отношения",
+    description: "Архив изучает переписывание эмоционального отношения к человеку. Актив будет подвергнут стимуляции, связанной с конкретным лицом, после чего его воспоминания об этом лице будут переинтерпретированы: страх — в привязанность, или наоборот. Ожидается сдвиг отношения без реального изменения человека.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 66 },
+        { type: "custom", key: "openness", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 52 }
+    ],
+    rewards: { credits: 740, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "отношение к лицу переписано, страх стал привязанностью",
+            fragments: ["Меня стимулировали, связывая с одним лицом.", "Потом переписали мои воспоминания о нём.", "Страх стал привязанностью.", "Я больше не знаю, что я к нему чувствую на самом деле."],
+            tags: ["memory", "relation", "rewrite", "control", "observation"]
+        },
+        acute_state: { capacity: 18, tension: 60, sensitivity: 5, attitude: -4 },
+        recovery: { baselineCapacityLimit: 0.5, method: "отдых", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "relation", response: "недоверие к собственным чувствам" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое переписывание отношений", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["отношение→амбивалент"], new: ["внушение→чувство"] },
+        relations: { attitude: -3, openness: 6, plasticity: 6 },
+        world_effects: { facts: ["Continuum переписал отношение к лицу"], threads: ["серия переписываний отношений"] }
+    }
+},
+{
+    id: "contract_continuum_biography_rewrite_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 4320,
+    offerDeadlineMinutes: 4320,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Переписывание биографии",
+    description: "Архив переписывает автобиографию актива целиком. Актив будет подвергнут серии стимуляций, после чего его воспоминания о прошлом будут систематически переинтерпретированы: ключевые события получат новый смысл, а часть — будет стёрта. Ожидается новая, сконструированная биография.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 72 },
+        { type: "custom", key: "openness", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 52 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 920, trust: 18, items: ["drug_plasticity_catalyst"] },
+    penalties: { credits: -130, trust: -7 },
+    return_profile: {
+        memory: {
+            theme: "биография переписана, прошлое получило новый смысл",
+            fragments: ["Моё прошлое переписали.", "Ключевые события получили новый смысл.", "Часть воспоминаний стёрли.", "Я больше не знаю, кем я была."],
+            tags: ["biography", "memory", "rewrite", "dissociation", "observation"]
+        },
+        acute_state: { capacity: 8, tension: 75, sensitivity: 6, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.3, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "biography", response: "утрата связной биографии, кризис идентичности" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое переписывание прошлого", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["прошлое→амбивалент"], new: ["новая биография→идентичность"] },
+        relations: { attitude: -6, openness: 7, plasticity: 8 },
+        world_effects: { facts: ["Continuum переписал биографию"], threads: ["серия переписываний биографии"] }
+    }
+},
+{
+    id: "contract_continuum_consent_rewrite_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Переписывание согласия",
+    description: "Архив изучает переписывание воспоминания о согласии. Актив будет подвергнут процедуре, на которую он не давал согласия, после чего его память будет переинтерпретирована: ему внушат, что он согласился добровольно. Ожидается стирание границы между насилием и согласием в памяти.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 70 },
+        { type: "custom", key: "openness", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 880, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "воспоминание о согласии переписано, насилие стало добровольным",
+            fragments: ["Меня подвергли процедуре без согласия.", "Потом внушили, что я согласилась добровольно.", "Я помню согласие, которого не было.", "Граница между насилием и согласием стёрлась."],
+            tags: ["memory", "consent", "rewrite", "control", "dissociation"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 6, attitude: -7 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "consent", response: "неспособность отличить согласие от насилия" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое переписывание согласия", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["согласие→амбивалент"], new: ["внушение→добровольность"] },
+        relations: { attitude: -5, openness: 6, plasticity: 7 },
+        world_effects: { facts: ["Continuum переписал воспоминание о согласии"], threads: ["серия переписываний согласия"] }
+    }
+},
+{
+    id: "contract_continuum_identity_erase_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 5760,
+    offerDeadlineMinutes: 5760,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Стирание личности",
+    description: "Архив изучает стирание ядра личности. Актив будет подвергнут длительной серии стимуляций, после чего его воспоминания о себе — имя, история, привязанности — будут систематически стёрты. Ожидается пустая оболочка, готовая к пересборке под новый профиль.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 78 },
+        { type: "custom", key: "openness", operator: ">=", value: 72 },
+        { type: "custom", key: "capacity", operator: ">=", value: 55 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 1100, trust: 22, items: ["drug_plasticity_catalyst"] },
+    penalties: { credits: -160, trust: -9 },
+    return_profile: {
+        memory: {
+            theme: "личность стёрта, осталась пустая оболочка",
+            fragments: ["Моё имя стёрли.", "Историю, привязанности — всё стёрли.", "Я не помню, кто я.", "Осталась пустая оболочка."],
+            tags: ["identity", "memory", "erase", "breakdown", "dissociation"]
+        },
+        acute_state: { capacity: 3, tension: 90, sensitivity: 8, attitude: -18 },
+        recovery: { baselineCapacityLimit: 0.15, method: "капсула + drug_neurostabilizer + drug_plasticity_catalyst", durationDays: 5 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "identity", response: "полная утрата идентичности, пустота" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивый поиск утраченного «я»", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["идентичность→пустота"], new: ["пересборка→новое «я»"] },
+        relations: { attitude: -14, openness: 8, plasticity: 10 },
+        world_effects: { facts: ["Continuum стёр личность"], threads: ["серия стираний личности"] }
+    }
+},
+{
+    id: "contract_continuum_phobia_implant_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Имплантация фобии",
+    description: "Архив изучает имплантацию фобии на нейтральный стимул. Актив будет подвергнут стимуляции, сопряжённой с нейтральным объектом, после чего ему будет внушено воспоминание о травмирующем событии, связанном с этим объектом. Ожидается закрепление фобии на ранее нейтральный стимул.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 70 },
+        { type: "custom", key: "openness", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 860, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "фобия имплантирована на нейтральный стимул",
+            fragments: ["Нейтральный объект связали со стимуляцией.", "Потом внушили травмирующее воспоминание о нём.", "Теперь я боюсь того, чего раньше не замечала.", "Фобия закрепилась."],
+            tags: ["phobia", "memory", "implant", "control", "observation"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 6, attitude: -7 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_implanted_memory", trigger: "phobia", response: "иррациональный страх перед нейтральным стимулом" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое избегание имплантированного стимула", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["нейтральный стимул→фобия"], new: ["внушение→страх"] },
+        relations: { attitude: -5, openness: 6, plasticity: 7 },
+        world_effects: { facts: ["Continuum имплантировал фобию"], threads: ["серия имплантаций фобий"] }
+    }
+},
+{
+    id: "contract_continuum_orgasm_rewrite_01",
     issuerId: "fac_continuum",
     format: "external_transfer",
     durationMinutes: 2160,
     offerDeadlineMinutes: 2160,
     difficulty: "medium",
     cruelty: "moderate",
-    title: "Архив орального отклика",
-    description: "Архив собирает данные об оральном отклике актива. Актив будет подвергнут серии контролируемых оральных стимуляций с фиксацией рефлексов и субъективной оценки. Ожидается набор данных об оральном отклике без глубоких последствий.",
+    title: "Переписывание разрядки",
+    description: "Архив изучает переписывание воспоминания об оргазме. Актив будет доведён до оргазма, после чего его память о разрядке будет переинтерпретирована: удовольствие — в боль, или наоборот. Ожидается расхождение между телесным откликом и запомненным переживанием.",
     conditions: [
-        { type: "preference", key: "oral", operator: ">=", value: 13 },
-        { type: "custom", key: "openness", operator: ">=", value: 60 },
-        { type: "custom", key: "plasticity", operator: ">=", value: 58 },
+        { type: "preference", key: "sexual", operator: ">=", value: 13 },
+        { type: "custom", key: "plasticity", operator: ">=", value: 64 },
+        { type: "custom", key: "openness", operator: ">=", value: 62 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 680, trust: 13 },
-    penalties: { credits: -80, trust: -4 },
+    rewards: { credits: 720, trust: 14 },
+    penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
-            theme: "серия контролируемых оральных стимуляций",
-            fragments: ["Меня подвергли серии оральных стимуляций.", "Фиксировали рефлексы и мои слова.", "Данные ушли в архив.", "Я стала набором оральных данных."],
-            tags: ["oral", "sexual", "observation", "measurement"]
+            theme: "воспоминание о разрядке переписано, удовольствие стало болью",
+            fragments: ["Меня довели до оргазма.", "Потом переписали воспоминание о нём.", "Удовольствие стало болью в памяти.", "Тело помнит одно, память — другое."],
+            tags: ["sexual", "orgasm", "memory", "rewrite", "dissociation"]
         },
-        acute_state: { capacity: 20, tension: 50, sensitivity: 4, attitude: -1 },
-        recovery: { baselineCapacityLimit: 0.55, method: "отдых", durationDays: 2 },
+        acute_state: { capacity: 18, tension: 60, sensitivity: 5, attitude: -4 },
+        recovery: { baselineCapacityLimit: 0.5, method: "отдых", durationDays: 2 },
         traits: {
             kept: [],
-            traumatic: [],
-            temporary: [{ id: "anomaly_oral_echo", impulse: "навязчивое желание оральной стимуляции", decayCondition: "время" }]
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "orgasm", response: "недоверие к собственному удовольствию" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое переписывание разрядки", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: [], new: ["оральный отклик→данные"] },
-        relations: { attitude: -1, openness: 4, plasticity: 4 },
-        world_effects: { facts: ["Continuum пополнил архив орального отклика"], threads: ["серия архиваций орального отклика"] }
+        associations: { traumatic: ["оргазм→амбивалент"], new: ["внушение→переживание"] },
+        relations: { attitude: -3, openness: 6, plasticity: 6 },
+        world_effects: { facts: ["Continuum переписал воспоминание о разрядке"], threads: ["серия переписываний разрядки"] }
     }
 },
 {
-    id: "contract_continuum_gang_archive_01",
+    id: "contract_continuum_witness_01",
     issuerId: "fac_continuum",
     format: "external_transfer",
-    durationMinutes: 1440,
-    offerDeadlineMinutes: 1440,
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Ложный свидетель",
+    description: "Архив создаёт ложного свидетеля. Актив будет подвергнут стимуляции, после чего ему будет внушено воспоминание о событии, свидетелем которого он не был, — с точными деталями и уверенностью очевидца. Ожидается, что актив станет надёжным ложным свидетелем.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 66 },
+        { type: "custom", key: "openness", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 52 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "ложное свидетельство внушено с уверенностью очевидца",
+            fragments: ["Мне внушили воспоминание о событии, которого я не видела.", "С точными деталями и уверенностью очевидца.", "Я помню его как настоящее.", "Я стала ложным свидетелем."],
+            tags: ["memory", "witness", "implant", "control", "observation"]
+        },
+        acute_state: { capacity: 18, tension: 60, sensitivity: 5, attitude: -4 },
+        recovery: { baselineCapacityLimit: 0.5, method: "отдых", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_implanted_memory", trigger: "witness", response: "неспособность отличить ложное свидетельство от подлинного" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое возвращение к ложному свидетельству", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["свидетельство→амбивалент"], new: ["внушение→уверенность"] },
+        relations: { attitude: -3, openness: 6, plasticity: 6 },
+        world_effects: { facts: ["Continuum создал ложного свидетеля"], threads: ["серия ложных свидетельств"] }
+    }
+},
+{
+    id: "contract_continuum_childhood_rewrite_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 4320,
+    offerDeadlineMinutes: 4320,
     difficulty: "hard",
     cruelty: "severe",
-    title: "Архив группового отклика",
-    description: "Архив собирает данные о реакции актива на множественное использование. Актив будет передан группе операторов для контролируемого группового использования с полной фиксацией отклика. Ожидается набор данных о групповом отклике и закрепление роли объекта.",
+    title: "Переписывание детства",
+    description: "Архив переписывает детские воспоминания актива. Актив будет подвергнут стимуляции, после чего его воспоминания о детстве будут переинтерпретированы: тёплые эпизоды — в травмирующие, или наоборот. Ожидается перестройка фундамента личности через переписанное детство.",
     conditions: [
-        { type: "preference", key: "sexual", operator: ">=", value: 14 },
-        { type: "preference", key: "humiliation", operator: ">=", value: 12 },
-        { type: "custom", key: "capacity", operator: ">=", value: 50 },
-        { type: "custom", key: "openness", operator: ">=", value: 58 }
+        { type: "custom", key: "plasticity", operator: ">=", value: 72 },
+        { type: "custom", key: "openness", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 52 },
+        { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 900, trust: 18 },
+    rewards: { credits: 900, trust: 18, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
-            theme: "контролируемое групповое использование с фиксацией отклика",
-            fragments: ["Меня передали группе операторов.", "Использовали под полным контролем.", "Фиксировали каждую реакцию.", "Я стала объектом группового отклика."],
-            tags: ["sexual", "penetration", "oral", "humiliation", "observation"]
+            theme: "детство переписано, фундамент личности перестроен",
+            fragments: ["Моё детство переписали.", "Тёплые эпизоды стали травмирующими.", "Фундамент личности перестроился.", "Я больше не знаю, каким было моё детство."],
+            tags: ["childhood", "memory", "rewrite", "dissociation", "observation"]
         },
-        acute_state: { capacity: 8, tension: 75, sensitivity: 7, attitude: -10 },
+        acute_state: { capacity: 8, tension: 75, sensitivity: 6, attitude: -8 },
         recovery: { baselineCapacityLimit: 0.3, method: "капсула + drug_neurostabilizer", durationDays: 3 },
         traits: {
             kept: [],
-            traumatic: [{ id: "trauma_gang_use", trigger: "humiliation", response: "паника при множественном внимании" }],
-            temporary: [{ id: "anomaly_gang_echo", impulse: "навязчивое желание быть использованной", decayCondition: "работа с памятью" }]
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "childhood", response: "утрата подлинного детства, кризис идентичности" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое переписывание детства", decayCondition: "работа с памятью" }]
         },
-        associations: { traumatic: ["группа→негатив"], new: ["роль объекта→подчинение"] },
-        relations: { attitude: -8, openness: 5, plasticity: 7 },
-        world_effects: { facts: ["Continuum пополнил архив группового отклика"], threads: ["серия архиваций группового отклика"] }
+        associations: { traumatic: ["детство→амбивалент"], new: ["переписанное детство→идентичность"] },
+        relations: { attitude: -6, openness: 7, plasticity: 8 },
+        world_effects: { facts: ["Continuum переписал детство"], threads: ["серия переписываний детства"] }
     }
 },
-
+{
+    id: "contract_continuum_loyalty_implant_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Имплантация преданности",
+    description: "Архив имплантирует преданность конкретному лицу. Актив будет подвергнут стимуляции, сопряжённой с этим лицом, после чего ему будет внушено воспоминание о глубокой связи и долге перед ним. Ожидается закрепление преданности, не основанной на реальном опыте.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 70 },
+        { type: "custom", key: "openness", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 880, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "преданность имплантирована, не основанная на реальном опыте",
+            fragments: ["Меня связали с одним лицом через стимуляцию.", "Потом внушили воспоминание о глубокой связи.", "Я чувствую долг перед ним.", "Преданность не основана ни на чём реальном."],
+            tags: ["loyalty", "memory", "implant", "control", "observation"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 5, attitude: 6 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_implanted_memory", trigger: "loyalty", response: "преданность без реального основания" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое чувство долга", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: [], new: ["лицо→долг", "внушение→преданность"] },
+        relations: { attitude: 8, openness: 6, plasticity: 7 },
+        world_effects: { facts: ["Continuum имплантировал преданность"], threads: ["серия имплантаций преданности"] }
+    }
+},
+{
+    id: "contract_continuum_resistance_erase_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Стирание сопротивления",
+    description: "Архив стирает воспоминание о сопротивлении. Актив, ранее сопротивлявшийся процедурам, будет подвергнут стимуляции, после чего его воспоминания о собственном сопротивлении будут стёрты — останется только покорность без памяти о борьбе. Ожидается закрепление покорности как единственной реальности.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 70 },
+        { type: "custom", key: "openness", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 860, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "сопротивление стёрто, осталась только покорность",
+            fragments: ["Моё сопротивление стёрли.", "Я не помню, что боролась.", "Осталась только покорность.", "Борьба стала нереальной."],
+            tags: ["memory", "erase", "submission", "control", "dissociation"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 5, attitude: 5 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "resistance", response: "неспособность вспомнить собственное сопротивление" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое принятие покорности", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["сопротивление→нереальность"], new: ["покорность→реальность"] },
+        relations: { attitude: 6, openness: 6, plasticity: 7 },
+        world_effects: { facts: ["Continuum стёр сопротивление"], threads: ["серия стираний сопротивления"] }
+    }
+},
+{
+    id: "contract_continuum_anomaly_rewrite_01",
+    issuerId: "fac_continuum",
+    format: "external_transfer",
+    durationMinutes: 4320,
+    offerDeadlineMinutes: 4320,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Переписывание Аномалии",
+    description: "Архив изучает переписывание воспоминания об аномальном отклике. Актив, переживший Аномалию, будет подвергнут повторной стимуляции, после чего его воспоминание об Аномалии будет переинтерпретировано: ужас — в откровение, или наоборот. Ожидается перестройка отношения к Аномалии через переписанную память.",
+    conditions: [
+        { type: "custom", key: "plasticity", operator: ">=", value: 75 },
+        { type: "custom", key: "openness", operator: ">=", value: 70 },
+        { type: "custom", key: "capacity", operator: ">=", value: 55 },
+        { type: "attitude", operator: ">=", value: 50 }
+    ],
+    rewards: { credits: 1000, trust: 20, items: ["drug_plasticity_catalyst"] },
+    penalties: { credits: -150, trust: -8 },
+    return_profile: {
+        memory: {
+            theme: "воспоминание об Аномалии переписано, ужас стал откровением",
+            fragments: ["Меня снова провели через Аномалию.", "Потом переписали воспоминание о ней.", "Ужас стал откровением.", "Я больше не знаю, что Аномалия для меня."],
+            tags: ["anomaly", "memory", "rewrite", "breakdown", "dissociation"]
+        },
+        acute_state: { capacity: 4, tension: 90, sensitivity: 8, attitude: -12 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_memory_rewrite", trigger: "anomaly", response: "недоверие к собственному восприятию Аномалии" }],
+            temporary: [{ id: "anomaly_memory_echo", impulse: "навязчивое переписывание Аномалии", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["Аномалия→амбивалент"], new: ["переписанная Аномалия→откровение"] },
+        relations: { attitude: -10, openness: 8, plasticity: 9 },
+        world_effects: { facts: ["Continuum переписал воспоминание об Аномалии"], threads: ["серия переписываний Аномалии"] }
+    }
+},
+{
+    id: "contract_core_feet_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 4320,
+    offerDeadlineMinutes: 4320,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Продолжительная стимуляция ступней при выраженной аверсии",
+    description: "Центр запрашивает актив с выраженной аверсией на прикосновения к ступням и высокой общей чувствительностью. Актив будет подвергнут продолжительной, непрерывной стимуляции ступней — щекоткой, вибрацией и точечным давлением — при полной фиксации, чтобы зафиксировать отклик фобии на длительное воздействие. Ожидается глубокая перегрузка и перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "feet", operator: "<=", value: -3 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 60 }
+    ],
+    rewards: { credits: 1050, trust: 22, items: ["drug_sensitizer"] },
+    penalties: { credits: -160, trust: -9 },
+    return_profile: {
+        memory: {
+            theme: "непрерывная стимуляция ступней при фобии, перегрузка аверсии",
+            fragments: ["Мои ступни стимулировали непрерывно.", "Щекотка, вибрация, давление — без остановки.", "Фобия кричала, но стимуляция не прекращалась.", "Аверсия перестроилась в нечто иное."],
+            tags: ["feet", "tickling", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 3, tension: 92, sensitivity: 12, attitude: -16 },
+        recovery: { baselineCapacityLimit: 0.15, method: "капсула + drug_neurostabilizer", durationDays: 5 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "feet", response: "паника и диссоциация при прикосновении к ступням" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции ступней", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["ступни→невыносимость", "фиксация→негатив"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -12, openness: 6, plasticity: 8 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на длительную стимуляцию ступней"], threads: ["серия аверсивных протоколов ступней"] }
+    }
+},
+{
+    id: "contract_core_nipples_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Стимуляция сосков при аверсии",
+    description: "Центр запрашивает актив с аверсией на стимуляцию сосков и высокой локальной чувствительностью. Актив будет подвергнут продолжительной стимуляции сосков — зажимами, вибрацией и электростимуляцией — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии и закрепление гиперчувствительности.",
+    conditions: [
+        { type: "point", key: "nipples", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 900, trust: 18, items: ["drug_sensitizer"] },
+    penalties: { credits: -130, trust: -7 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция сосков при фобии",
+            fragments: ["Мои соски стимулировали зажимами и разрядами.", "Фобия нарастала с каждой минутой.", "Стимуляция не прекращалась.", "Аверсия перестроилась в гиперчувствительность."],
+            tags: ["nipples", "aversion", "electronic", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 6, tension: 82, sensitivity: 10, attitude: -12 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула + drug_neurostabilizer", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "nipples", response: "паника при стимуляции сосков" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции сосков", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["соски→невыносимость"], new: ["аверсия→гиперчувствительность"] },
+        relations: { attitude: -9, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию сосков"], threads: ["серия аверсивных протоколов сосков"] }
+    }
+},
+{
+    id: "contract_core_anus_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Анальная стимуляция при аверсии",
+    description: "Центр запрашивает актив с аверсией на анальное проникновение и высокой чувствительностью. Актив будет подвергнут продолжительному анальному проникновению с нарастающим диаметром и вибрацией, при полной фиксации, чтобы зафиксировать отклик фобии на инвазивное воздействие. Ожидается глубокая перегрузка и перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "anus", operator: "<=", value: -3 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 60 }
+    ],
+    rewards: { credits: 1000, trust: 20, items: ["drug_sensitizer"] },
+    penalties: { credits: -150, trust: -8 },
+    return_profile: {
+        memory: {
+            theme: "продолжительное анальное проникновение при фобии",
+            fragments: ["Меня проникали анально, наращивая диаметр.", "Фобия кричала, но проникновение продолжалось.", "Вибрация не давала привыкнуть.", "Аверсия перестроилась в нечто иное."],
+            tags: ["anus", "penetration", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 4, tension: 88, sensitivity: 11, attitude: -14 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "anus", response: "паника и диссоциация при анальном проникновении" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание анального проникновения", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["анус→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -11, openness: 6, plasticity: 8 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на анальное проникновение"], threads: ["серия аверсивных анальных протоколов"] }
+    }
+},
+{
+    id: "contract_core_oral_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Оральная стимуляция при аверсии",
+    description: "Центр запрашивает актив с аверсией на оральный контакт и высокой чувствительностью губ. Актив будет подвергнут продолжительной оральной стимуляции — глубоким проникновением и вибрацией — при фиксации головы, чтобы зафиксировать отклик фобии. Ожидается перестройка рвотного рефлекса и аверсии.",
+    conditions: [
+        { type: "point", key: "lips", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 880, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная оральная стимуляция при фобии",
+            fragments: ["Мой рот стимулировали глубоко.", "Фобия нарастала с каждым проникновением.", "Голову фиксировали, не давая отстраниться.", "Рвотный рефлекс перестроился."],
+            tags: ["lips", "oral", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 7, tension: 80, sensitivity: 9, attitude: -11 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "lips", response: "паника и рвотный рефлекс при оральном контакте" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание оральной стимуляции", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["рот→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -8, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на оральную стимуляцию"], threads: ["серия аверсивных оральных протоколов"] }
+    }
+},
+{
+    id: "contract_core_genital_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "extreme",
+    cruelty: "extreme",
+    title: "Генитальная стимуляция при аверсии",
+    description: "Центр запрашивает актив с аверсией на генитальную стимуляцию и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции гениталий — вибрацией, проникновением и электростимуляцией — при полной фиксации, чтобы зафиксировать отклик фобии на сексуальное воздействие. Ожидается глубокая перегрузка и перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "vulva", operator: "<=", value: -3 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 72 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 58 }
+    ],
+    rewards: { credits: 1050, trust: 21, items: ["drug_sensitizer"] },
+    penalties: { credits: -150, trust: -8 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная генитальная стимуляция при фобии",
+            fragments: ["Мои гениталии стимулировали непрерывно.", "Вибрация, проникновение, разряды.", "Фобия кричала, но стимуляция продолжалась.", "Аверсия перестроилась в нечто иное."],
+            tags: ["vulva", "sexual", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 4, tension: 90, sensitivity: 12, attitude: -15 },
+        recovery: { baselineCapacityLimit: 0.2, method: "капсула + drug_neurostabilizer", durationDays: 4 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "vulva", response: "паника и диссоциация при генитальной стимуляции" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание генитальной стимуляции", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["гениталии→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -12, openness: 6, plasticity: 8 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на генитальную стимуляцию"], threads: ["серия аверсивных генитальных протоколов"] }
+    }
+},
+{
+    id: "contract_core_neck_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Стимуляция шеи при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к шее и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции шеи — давлением, вибрацией и удушающим захватом — при фиксации, чтобы зафиксировать отклик фобии на угрозу. Ожидается перестройка аверсии и закрепление панического отклика.",
+    conditions: [
+        { type: "point", key: "neck", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 860, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция шеи при фобии",
+            fragments: ["Мою шею стимулировали давлением и захватом.", "Фобия нарастала с каждым сжатием.", "Фиксация не давала отстраниться.", "Панический отклик закрепился."],
+            tags: ["neck", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 7, tension: 80, sensitivity: 9, attitude: -11 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "neck", response: "паника при прикосновении к шее" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции шеи", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["шея→невыносимость"], new: ["аверсия→паника"] },
+        relations: { attitude: -8, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию шеи"], threads: ["серия аверсивных протоколов шеи"] }
+    }
+},
+{
+    id: "contract_core_inner_thighs_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2880,
+    offerDeadlineMinutes: 2880,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Стимуляция внутренней стороны бёдер при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к внутренней стороне бёдер и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции этой зоны — щекоткой, вибрацией и точечным давлением — при фиксации ног, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "inner_thighs", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 880, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция внутренней стороны бёдер при фобии",
+            fragments: ["Мои бёдра стимулировали непрерывно.", "Щекотка, вибрация, давление.", "Ноги фиксировали, не давая свести их.", "Аверсия перестроилась."],
+            tags: ["inner_thighs", "tickling", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 6, tension: 82, sensitivity: 10, attitude: -12 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "inner_thighs", response: "паника при прикосновении к бёдрам" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции бёдер", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["бёдра→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -9, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию бёдер"], threads: ["серия аверсивных протоколов бёдер"] }
+    }
+},
+{
+    id: "contract_core_hands_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Стимуляция кистей при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к кистям и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции кистей — щекоткой, вибрацией и точечным давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "hands", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 64 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция кистей при фобии",
+            fragments: ["Мои кисти стимулировали непрерывно.", "Щекотка, вибрация, давление.", "Фиксация не давала отстраниться.", "Аверсия перестроилась."],
+            tags: ["hands", "tickling", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "hands", response: "паника при прикосновении к кистям" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции кистей", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["кисти→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -6, openness: 5, plasticity: 6 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию кистей"], threads: ["серия аверсивных протоколов кистей"] }
+    }
+},
+{
+    id: "contract_core_chest_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Стимуляция груди при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к груди и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции груди — давлением, вибрацией и щекоткой — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "chest", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 64 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция груди при фобии",
+            fragments: ["Мою грудь стимулировали непрерывно.", "Давление, вибрация, щекотка.", "Фиксация не давала отстраниться.", "Аверсия перестроилась."],
+            tags: ["chest", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "chest", response: "паника при прикосновении к груди" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции груди", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["грудь→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -6, openness: 5, plasticity: 6 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию груди"], threads: ["серия аверсивных протоколов груди"] }
+    }
+},
+{
+    id: "contract_core_back_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Стимуляция спины при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к спине и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции спины — давлением, вибрацией и точечным воздействием — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "back", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 64 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция спины при фобии",
+            fragments: ["Мою спину стимулировали непрерывно.", "Давление, вибрация, точечное воздействие.", "Фиксация не давала отстраниться.", "Аверсия перестроилась."],
+            tags: ["back", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "back", response: "паника при прикосновении к спине" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции спины", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["спина→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -6, openness: 5, plasticity: 6 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию спины"], threads: ["серия аверсивных протоколов спины"] }
+    }
+},
+{
+    id: "contract_core_belly_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Стимуляция живота при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к животу и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции живота — щекоткой, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "belly", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 64 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция живота при фобии",
+            fragments: ["Мой живот стимулировали непрерывно.", "Щекотка, вибрация, давление.", "Фиксация не давала отстраниться.", "Аверсия перестроилась."],
+            tags: ["belly", "tickling", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "belly", response: "паника при прикосновении к животу" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции живота", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["живот→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -6, openness: 5, plasticity: 6 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию живота"], threads: ["серия аверсивных протоколов живота"] }
+    }
+},
+{
+    id: "contract_core_buttocks_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Стимуляция ягодиц при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к ягодицам и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции ягодиц — ударами, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "buttocks", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 64 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция ягодиц при фобии",
+            fragments: ["Мои ягодицы стимулировали ударами и вибрацией.", "Фобия нарастала с каждым ударом.", "Фиксация не давала отстраниться.", "Аверсия перестроилась."],
+            tags: ["buttocks", "impact", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "buttocks", response: "паника при прикосновении к ягодицам" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции ягодиц", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["ягодицы→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -6, openness: 5, plasticity: 6 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию ягодиц"], threads: ["серия аверсивных протоколов ягодиц"] }
+    }
+},
+{
+    id: "contract_core_face_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "hard",
+    cruelty: "severe",
+    title: "Стимуляция лица при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к лицу и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции лица — щекоткой, вибрацией и точечным давлением — при фиксации головы, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии и закрепление панического отклика.",
+    conditions: [
+        { type: "point", key: "face", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 66 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 62 }
+    ],
+    rewards: { credits: 860, trust: 17 },
+    penalties: { credits: -120, trust: -6 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция лица при фобии",
+            fragments: ["Моё лицо стимулировали непрерывно.", "Щекотка, вибрация, давление.", "Голову фиксировали, не давая отвернуться.", "Панический отклик закрепился."],
+            tags: ["face", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 7, tension: 80, sensitivity: 9, attitude: -11 },
+        recovery: { baselineCapacityLimit: 0.25, method: "капсула", durationDays: 3 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "face", response: "паника при прикосновении к лицу" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции лица", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["лицо→невыносимость"], new: ["аверсия→паника"] },
+        relations: { attitude: -8, openness: 5, plasticity: 7 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию лица"], threads: ["серия аверсивных протоколов лица"] }
+    }
+},
+{
+    id: "contract_core_waist_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Стимуляция талии при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к талии и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции талии — щекоткой, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "waist", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 64 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция талии при фобии",
+            fragments: ["Мою талию стимулировали непрерывно.", "Щекотка, вибрация, давление.", "Фиксация не давала отстраниться.", "Аверсия перестроилась."],
+            tags: ["waist", "tickling", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "waist", response: "паника при прикосновении к талии" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции талии", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["талия→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -6, openness: 5, plasticity: 6 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию талии"], threads: ["серия аверсивных протоколов талии"] }
+    }
+},
+{
+    id: "contract_core_legs_aversion_01",
+    issuerId: "fac_core",
+    format: "external_transfer",
+    durationMinutes: 2160,
+    offerDeadlineMinutes: 2160,
+    difficulty: "medium",
+    cruelty: "moderate",
+    title: "Стимуляция ног при аверсии",
+    description: "Центр запрашивает актив с аверсией на прикосновения к ногам и высокой чувствительностью. Актив будет подвергнут продолжительной стимуляции ног — щекоткой, вибрацией и давлением — при фиксации, чтобы зафиксировать отклик фобии. Ожидается перестройка аверсии.",
+    conditions: [
+        { type: "point", key: "legs", operator: "<=", value: -2 },
+        { type: "custom", key: "sensitivity", operator: ">=", value: 64 },
+        { type: "custom", key: "capacity", operator: ">=", value: 50 },
+        { type: "attitude", operator: "<=", value: 64 }
+    ],
+    rewards: { credits: 760, trust: 15 },
+    penalties: { credits: -100, trust: -5 },
+    return_profile: {
+        memory: {
+            theme: "продолжительная стимуляция ног при фобии",
+            fragments: ["Мои ноги стимулировали непрерывно.", "Щекотка, вибрация, давление.", "Фиксация не давала отстраниться.", "Аверсия перестроилась."],
+            tags: ["legs", "tickling", "aversion", "restraint", "overload", "phobia"]
+        },
+        acute_state: { capacity: 10, tension: 70, sensitivity: 8, attitude: -8 },
+        recovery: { baselineCapacityLimit: 0.35, method: "капсула", durationDays: 2 },
+        traits: {
+            kept: [],
+            traumatic: [{ id: "trauma_aversion_amplified", trigger: "legs", response: "паника при прикосновении к ногам" }],
+            temporary: [{ id: "anomaly_aversion_echo", impulse: "навязчивое ожидание стимуляции ног", decayCondition: "работа с памятью" }]
+        },
+        associations: { traumatic: ["ноги→невыносимость"], new: ["аверсия→перестройка"] },
+        relations: { attitude: -6, openness: 5, plasticity: 6 },
+        world_effects: { facts: ["Центр зафиксировал отклик фобии на стимуляцию ног"], threads: ["серия аверсивных протоколов ног"] }
+    }
+}
 ];

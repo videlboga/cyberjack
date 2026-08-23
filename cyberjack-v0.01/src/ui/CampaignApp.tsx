@@ -709,6 +709,8 @@ const currentFor = (condition: Condition, subject: SubjectState | null) => {
     return parsePreferences(subject.preferences).tags[condition.key] || 0;
   if (condition.type === "acquired_trait" && condition.key)
     return acquiredTraitValue(subject.preferences, condition.key);
+  if (condition.type === "point" && condition.key)
+    return parsePreferences(subject.preferences).points[condition.key] || 0;
   const key =
     condition.type === "attitude"
       ? "attitude"

@@ -97,6 +97,12 @@ export function contractConditionValue(cond: AssetContractCondition, core: Subje
     if (cond.type === 'acquired_trait' && cond.key) {
         return acquiredTraitValue(core.preferences, cond.key);
     }
+    if (cond.type === 'point' && cond.key) {
+        // Прямое чтение точки тела (points[pointId]) — позволяет условиям
+        // вида «фобия на ступни» (trait_point_feet ≤ -3), где значение
+        // отрицательное. Точки клампятся в [-5, 5].
+        return parsePreferences(core.preferences).points[cond.key] || 0;
+    }
     return context[cond.key || cond.type];
 }
 

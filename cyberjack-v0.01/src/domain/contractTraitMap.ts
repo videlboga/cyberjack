@@ -67,6 +67,13 @@ export const CONTRACT_TRAIT_TARGET_MAP: Record<string, ContractTraitTarget> = {
     anomaly_breeding_echo: { bucket: 'tags', key: 'penetration' },
     anomaly_gang_echo: { bucket: 'tags', key: 'sexual' },
     anomaly_machine_echo: { bucket: 'tags', key: 'machine' },
+    // Манипуляция воспоминаниями (Continuum Archive v2).
+    trauma_memory_rewrite: { bucket: 'tags', key: 'deprivation' },
+    trauma_implanted_memory: { bucket: 'tags', key: 'control' },
+    anomaly_memory_echo: { bucket: 'tags', key: 'deprivation' },
+    // Аверсии/фобии (Центр адаптивной психофизиологии).
+    trauma_aversion_amplified: { bucket: 'tags', key: 'pain' },
+    anomaly_aversion_echo: { bucket: 'tags', key: 'pain' },
 };
 
 /** Резолвит контрактный трейт на тег/точку. */

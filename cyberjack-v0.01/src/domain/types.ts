@@ -351,7 +351,7 @@ export interface PlayerFactionState {
 }
 
 export interface AssetContractCondition {
-    type: 'flag' | 'attitude' | 'trait' | 'resource' | 'custom' | 'preference' | 'acquired_trait';
+    type: 'flag' | 'attitude' | 'trait' | 'resource' | 'custom' | 'preference' | 'acquired_trait' | 'point';
     key?: string; // e.g. "masochistic_tendencies"
     operator?: '>' | '<' | '>=' | '<=' | '==' | '!=';
     value?: any; 
