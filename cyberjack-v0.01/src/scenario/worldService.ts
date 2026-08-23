@@ -21,7 +21,7 @@ import { SexMachineStimulationMode, sexMachineStimulation } from '../domain/sexM
 import { buildEmbedding } from '../services/embeddingService';
 import { applySubjectiveIntervention, applySubjectiveTagIntervention, createManualTagLink, getSubjectiveEpisode, listManualTagLinks, queueSubjectiveEpisode, regenerateSubjectiveEpisode, removeManualTagLink } from '../services/subjectiveMemoryEpisodes';
 import { returnAssetsFromTransfer, expireOverdueContracts } from '../services/contractService';
-import { advancePhysiology } from '../services/physiology';
+import { advancePhysiology, isSleeping } from '../services/physiology';
 import { applyDailyUpkeep } from './economy';
 
 export const PLAYER_ID = 'PL-1';
@@ -1642,6 +1642,7 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
             currentRole: (profile as any).currentRole || row.role,
             roleHistory: Array.isArray((profile as any).roleHistory) ? (profile as any).roleHistory : [],
             portrait: (profile as any).portrait || (profile as any).image || null,
+            sleeping: isSleeping(simulationId),
             state: subjectRepo.get(simulationId),
             // Latest interaction observations (with reaction.appraisal) so
             // device screens (capsule, etc.) can compute the same emotional

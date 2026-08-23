@@ -242,6 +242,16 @@ export const resolveCellRoutineAvatar = (
     ]);
 };
 
+/** Спящий аватар: сон хранится в subject_physiology.sleep_state, а не в
+ *  active_contexts, поэтому рутинный контекст routine_sleep здесь не нужен. */
+export const resolveSleepAvatar = (
+    characterSlug: string,
+    affect: VisualAffect,
+): string | null => resolveFirstAvailableVisual([
+    `/character-images/cell/${characterSlug}__sleep__${affect}.png`,
+    `/character-images/cell/${characterSlug}__sleep__neutral.png`,
+]);
+
 const representedEquipmentContexts = (contexts: VisualContext[]) => contexts
     .map(context => context.actionId)
     .filter(actionId => [

@@ -6,6 +6,7 @@ import {
     activeVisualInteractionFromContexts,
     expandedInteractionAssetPath,
     resolveIntimacyInteractionVisual,
+    resolveSleepAvatar,
 } from './characterVisuals';
 
 const context = (actionId: string) => ({ actionId, ticksActive: 0 });
@@ -175,5 +176,11 @@ describe('calibration pose resolution', () => {
             characterSlug: 'mira', interaction, contexts, tension: 30, attitude: 70,
             behavioralState: 'responsive',
         })).toBe('/character-images/interactions-expanded/mira/oral/deep/nude__free__high_positive__intense.png');
+    });
+
+    it('resolves a sleeping cell avatar from the sleep_state flag, not a routine context', () => {
+        expect(resolveSleepAvatar('nika', 'neutral')).toBe(
+            '/character-images/cell/nika__sleep__neutral.png',
+        );
     });
 });

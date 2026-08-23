@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { buildCalibrationVisualDescriptorV4, resolveCalibrationAvatarV4, resolveMentalChairAvatar, resolveCellRoutineAvatar } from '../domain/characterVisuals';
+import { buildCalibrationVisualDescriptorV4, resolveCalibrationAvatarV4, resolveMentalChairAvatar, resolveCellRoutineAvatar, resolveSleepAvatar } from '../domain/characterVisuals';
 
 type PortraitContext = { id?: string; actionId?: string };
 type PortraitState = {
@@ -49,6 +49,7 @@ export const canonicalCharacterPortrait = (
   name?: string | null,
   contexts: PortraitContext[] = [],
   state?: PortraitState | null,
+  sleeping = false,
 ): string | null => {
   // Some scene payloads expose contexts on the participant state, while
   // directory and legacy payloads carry them beside it.  Treat both as one
@@ -88,7 +89,9 @@ export const canonicalCharacterPortrait = (
     }, state?.behavioralState, climax);
     const inMentalChair = descriptorContexts.some(context => context.actionId === 'context_mental_correction_chair');
     const cellRoutineAvatar = resolveCellRoutineAvatar(descriptor.characterSlug, descriptor.affect, descriptorContexts);
+    const sleepAvatar = sleeping ? resolveSleepAvatar(descriptor.characterSlug, descriptor.affect) : null;
     return (inMentalChair ? resolveMentalChairAvatar(descriptor) : null)
+      || sleepAvatar
       || cellRoutineAvatar
       || resolveCalibrationAvatarV4(descriptor)
       || `/character-images/cutout/rendered/${slug}/${poseFor(visualContexts)}__${wardrobe}__none__neutral.png`
@@ -99,16 +102,17 @@ export const canonicalCharacterPortrait = (
 };
 
 export function CharacterPortrait({
-  id, name, portrait, contexts = [], state, className,
+  id, name, portrait, contexts = [], state, sleeping = false, className,
 }: {
   id?: string | null;
   name: string;
   portrait?: string | null;
   contexts?: PortraitContext[];
   state?: PortraitState | null;
+  sleeping?: boolean;
   className?: string;
 }) {
-  const canonical = canonicalCharacterPortrait(id, name, contexts, state);
+  const canonical = canonicalCharacterPortrait(id, name, contexts, state, sleeping);
   // The authored `portrait` is a stable identity fallback. The canonical
   // visual reflects the character's actual pose, clothing, restraints and
   // affect, so it must be attempted first whenever the matrix covers it.

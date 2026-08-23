@@ -91,6 +91,7 @@ type Resident = {
     description: string;
   }[];
   portrait?: string | null;
+  sleeping?: boolean;
   state?: SubjectState | null;
   recentReactions?: any[];
   contexts?: { id: string; label: string; ticksActive: number }[];
@@ -1763,6 +1764,7 @@ function LaboratoryOverview({
                               portrait={resident.portrait}
                               contexts={resident.contexts}
                               state={resident.state}
+                              sleeping={resident.sleeping}
                             />
                           </div>
                           <div>
@@ -1905,6 +1907,7 @@ function LaboratoryOverview({
                                 portrait={resident.portrait}
                                 contexts={resident.contexts}
                                 state={resident.state}
+                                sleeping={resident.sleeping}
                               />
                             </span>
                             <span>
@@ -1981,6 +1984,7 @@ function LaboratoryOverview({
                                   portrait={occupant.portrait}
                                   contexts={occupant.contexts}
                                   state={occupant.state}
+                                  sleeping={occupant.sleeping}
                                 />
                               )}
                             </div>
@@ -2096,6 +2100,7 @@ function LaboratoryOverview({
                         portrait={resident.portrait}
                         contexts={resident.contexts}
                         state={resident.state}
+                        sleeping={resident.sleeping}
                       />
                       <span>{resident.name}</span>
                     </button>
@@ -2381,6 +2386,7 @@ function CharacterDirectory({
               portrait={selected.portrait}
               contexts={selected.contexts}
               state={selected.state}
+              sleeping={selected.sleeping}
             />
           </div>
           <small>
@@ -2859,6 +2865,7 @@ function DirectoryCard({
           portrait={resident.portrait}
           contexts={resident.contexts}
           state={resident.state}
+          sleeping={resident.sleeping}
         />
       </div>
       <div>
@@ -3297,7 +3304,7 @@ function MentalChairControlScreen({
       </header>
       <section className="mental-chair-layout">
         <aside className="mental-chair-subject">
-          <div className="mental-chair-portrait"><CharacterPortrait id={resident.subjectId || resident.id} name={resident.name} portrait={resident.portrait} contexts={resident.contexts} state={resident.state} /></div>
+          <div className="mental-chair-portrait"><CharacterPortrait id={resident.subjectId || resident.id} name={resident.name} portrait={resident.portrait} contexts={resident.contexts} state={resident.state} sleeping={resident.sleeping} /></div>
           <small>{t('game.ui.chairMode')}</small><strong>{t('game.ui.selectEpisode')}</strong>
           <p>{t('game.ui.chairIntro')}</p>
           <div className="mental-chair-metrics"><span><small>{t('game.ui.plasticity')}</small><b>{Math.round(Number(resident.state?.plasticity || 0))}</b></span><span><small>{t('game.ui.resourceMetric')}</small><b>{Math.round(Number(resident.state?.capacity || 0))}</b></span></div>
@@ -5558,6 +5565,7 @@ function ContainerConversation({
                 portrait={resident.portrait}
                 contexts={resident.contexts}
                 state={resident.state}
+                sleeping={resident.sleeping}
               />
             )}
             {!equipmentMode && activeProcesses[0] && (
@@ -6042,6 +6050,7 @@ function ContainerConversation({
                           portrait={character.portrait}
                           contexts={character.contexts}
                           state={character.state}
+                          sleeping={character.sleeping}
                         />
                       )}
                       <span>{character.name}</span>
@@ -6074,6 +6083,7 @@ function ContainerConversation({
                     portrait={resident.portrait}
                     contexts={resident.contexts}
                     state={resident.state}
+                    sleeping={resident.sleeping}
                   />
                 )}
               </button>
