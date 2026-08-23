@@ -2154,6 +2154,7 @@ function roomSceneBackground(roomId: string): string {
     case "room_cell_a":
     case "room_cell_b":
     case "room_cell_c":
+    case "room_cell_special":
       return "/backgrounds/laboratory/living-cell-v2.png";
     case "room_control":
     case "room_staff_living":

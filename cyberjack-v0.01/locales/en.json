@@ -86,6 +86,7 @@
       "livingCellA": "Living Cell A",
       "livingCellB": "Living Cell B",
       "livingCellC": "Living Cell C",
+      "specialCell": "Special Containment Cell",
       "observationPost": "Observation Post",
       "staffLivingRoom": "Staff Living Room",
       "diagnosticTable": "Diagnostic Table",
@@ -97,6 +98,7 @@
         "room_cell_a": "Closed cell with a bed, sanitary module, and sleep control.",
         "room_cell_b": "Residential cell for a second asset.",
         "room_cell_c": "Residential cell for a third asset.",
+        "room_cell_special": "Separate isolated cell for a special-containment asset.",
         "room_control": "Assistant workspace, telemetry terminal, and equipment control.",
         "room_staff_living": "Residential room for laboratory staff: two beds, a sanitary module, and a wall panel."
       },
