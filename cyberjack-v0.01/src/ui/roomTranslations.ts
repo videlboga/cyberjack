@@ -5,7 +5,8 @@ export const roomNameMap: Record<string, string> = {
   'room_cell_a': 'livingCellA',
   'room_cell_b': 'livingCellB',
   'room_cell_c': 'livingCellC',
-  'room_control': 'observationPost'
+  'room_control': 'observationPost',
+  'room_staff_living': 'staffLivingRoom'
 };
 
 export const deviceNameMap: Record<string, string> = {
