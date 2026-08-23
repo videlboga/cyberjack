@@ -774,16 +774,11 @@ export function buildReactionSystemPrompt(frame: ReactionFrame): string {
 
 export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: string | null): string {
     const currentSpeech = playerSpeech?.trim() || frame.event.playerSpeech;
-    // During a direct bodily event the previous spoken exchange is not an
-    // input awaiting an answer. Keeping it verbatim made occasional action
-    // reactions answer the preceding clothing dispute instead of the touch.
-    const isConcreteBodilyEvent = !currentSpeech
-        && frame.event.directlyExperienced
-        && frame.event.action !== 'событие без ясного действия'
-        && frame.event.action !== 'реплика адресата';
-    const visibleRecentDialogue = isConcreteBodilyEvent
-        ? []
-        : frame.continuity.recentDialogue;
+    // Единый таймлайн «фразы-действия-фразы»: недавний диалог показывается и при
+    // телесном действии, чтобы модель видела свои прошлые реплики и не повторяла
+    // их. Приоритет текущего хода (ниже) отделяет «отвечать на старый вопрос» от
+    // «отозваться на текущее ощущение».
+    const visibleRecentDialogue = frame.continuity.recentDialogue;
     const currentTurnPriority = currentSpeech
         ? `К тебе только что обращены новые слова. Ответь именно на них. Предыдущий разговор остаётся твоей памятью о контексте: не продолжай прежнюю тему, если новые слова её не продолжают.`
         : frame.event.directlyExperienced
@@ -825,7 +820,7 @@ export function buildReactionTurnMessage(frame: ReactionFrame, playerSpeech?: st
         changePerspective,
         frame.continuity.openThreads.length ? `[Незавершённое]\n${frame.continuity.openThreads.map(v => `- ${v}`).join('\n')}` : '',
         visibleRecentDialogue.length
-            ? `[Границы твоей памяти]\nТы помнишь недавние реплики только как произнесённые слова. Из них ты не узнаёшь новых фактов своей биографии или мира. Не считай случившимися прошлые события, действия третьих лиц или существование организаций, если об этом нет среди твоих собственных воспоминаний и знаний.`
+            ? `[Границы твоей памяти]\nТы помнишь недавние реплики и действия только как произошедшее. Из них ты не узнаёшь новых фактов своей биографии или мира. Не считай случившимися прошлые события, действия третьих лиц или существование организаций, если об этом нет среди твоих собственных воспоминаний и знаний.`
             : '',
         visibleRecentDialogue.length ? `[Недавний разговор]\n${visibleRecentDialogue.join('\n')}` : '',
         `Что ты произносишь сейчас?${frame.event.requiresSpeech ? ' Речевая реакция уже выбрана — дай ей слышимое содержание.' : ''}`

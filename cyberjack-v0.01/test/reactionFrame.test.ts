@@ -46,7 +46,7 @@ describe('reaction frame compiler', () => {
         expect(resolveDirectedActorId('NPC-LAB-01', 'NPC-CAND-01')).toBe('NPC-LAB-01');
         expect(resolveDirectedActorId(undefined, 'NPC-CAND-01')).toBe('NPC-CAND-01');
     });
-    it('does not keep answered questions or action markers as open dialogue threads', () => {
+    it('does not keep answered questions as open dialogue threads, but keeps action markers in the timeline', () => {
         const entries = [
             { role: 'user', content: '[Действие] Облизывание языком · Ступни' },
             { role: 'user', content: 'Хочешь продолжить?' },
@@ -55,6 +55,7 @@ describe('reaction frame compiler', () => {
             { role: 'assistant', content: 'Продолжи воздействие.' },
         ];
         expect(selectRecentDialogue(entries, 'Ника', 'Калибратор')).toEqual([
+            'Калибратор: [Действие] Облизывание языком · Ступни',
             'Калибратор: «Хочешь продолжить?»',
             'Ника: «Да.»',
             'Калибратор: «Что именно?»',
@@ -90,7 +91,7 @@ describe('reaction frame compiler', () => {
             .toContain('Если на тебя надевают ошейник, ты резко сопротивляешься.');
     });
 
-    it('keeps actual conversation while dropping physical history markers', () => {
+    it('keeps actual conversation and physical history markers in one timeline', () => {
         const dialogue = selectRecentDialogue([
             { role: 'assistant', content: 'Что именно ты проверяешь?' },
             { role: 'user', content: '[Воздействие] Мягкое поглаживание; зона: Спина.' },
@@ -98,6 +99,7 @@ describe('reaction frame compiler', () => {
         ], 'Ника', 'Калибратор');
         expect(dialogue).toEqual([
             'Ника: «Что именно ты проверяешь?»',
+            'Калибратор: [Воздействие] Мягкое поглаживание; зона: Спина.',
             'Калибратор: «Хочу понять твою реакцию.»'
         ]);
     });

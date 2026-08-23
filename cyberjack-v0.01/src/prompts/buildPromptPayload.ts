@@ -119,13 +119,12 @@ function countRepetitions(events: EventRecord[], currentActionId?: string, curre
 const technicalInteractionMarker = /^\s*\[(?:Воздействие|Действие)\]/i;
 
 export function selectRecentDialogue(entries: TemporalDialogueEntry[], ownerName: string, initiatorName: string) {
-    const recent = entries.filter(entry => !technicalInteractionMarker.test(String(entry.content || '')));
-    // Collapse verbatim repeats of the same line (LLM loop artefact): keep the
-    // first occurrence so the model does not see its own phrase echoed back and
-    // copy it again. Preserve chronological order.
+    // Действия и воздействия остаются в едином таймлайне (фразы-действия-фразы),
+    // поэтому технические маркеры больше не отфильтровываются. Убираем только
+    // дословные повторы одной строки (артефакт зацикливания LLM).
     const deduped: TemporalDialogueEntry[] = [];
     const seen = new Set<string>();
-    for (const entry of recent) {
+    for (const entry of entries) {
         const key = String(entry.content || '').trim();
         if (key && seen.has(key)) continue;
         if (key) seen.add(key);

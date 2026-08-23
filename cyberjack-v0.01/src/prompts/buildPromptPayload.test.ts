@@ -37,13 +37,14 @@ describe('selectRecentDialogue', () => {
         expect(lines[2]).toContain('Третья реплика');
     });
 
-    it('filters technical interaction markers', () => {
+    it('keeps action markers in the unified timeline without quoting them', () => {
         const entries: Entry[] = [
             entry('assistant', '[Воздействие] лёгкое касание', 100),
             entry('assistant', 'Обычная реплика', 101),
         ];
         const lines = selectRecentDialogue(entries, 'Ника', 'Суми');
-        expect(lines.join('\n')).not.toContain('[Воздействие]');
-        expect(lines.join('\n')).toContain('Обычная реплика');
+        // Действие остаётся в таймлайне, но без кавычек (это не произнесённые слова).
+        expect(lines.join('\n')).toContain('Ника: [Воздействие] лёгкое касание');
+        expect(lines.join('\n')).toContain('Ника: «Обычная реплика»');
     });
 });

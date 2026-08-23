@@ -5,6 +5,9 @@ export type TemporalDialogueEntry = {
     contextLabel?: string | null;
 };
 
+/** Маркеры действий/воздействий, которые пишутся в общий таймлайн chat_memory. */
+const ACTION_MARKER = /^\[(?:Действие|Воздействие)\]/i;
+
 export function formatElapsedGameTime(minutes: number): string {
     const value = Math.max(0, Math.round(minutes));
     if (value < 2) return '';
@@ -86,7 +89,15 @@ export function renderTemporalDialogue(
             const marker = temporalGapMarker(entries[index - 1], entry);
             if (marker) lines.push(marker);
         }
-        lines.push(`${entry.role === 'assistant' ? ownerName : initiatorName}: «${entry.content}»`);
+        const speaker = entry.role === 'assistant' ? ownerName : initiatorName;
+        // Действия и воздействия — часть единого таймлайна, но не произнесённые
+        // слова: их не нужно брать в кавычки, чтобы модель не приняла их за
+        // реплику, на которую надо ответить.
+        if (ACTION_MARKER.test(entry.content)) {
+            lines.push(`${speaker}: ${entry.content.trim()}`);
+        } else {
+            lines.push(`${speaker}: «${entry.content}»`);
+        }
     }
     return lines;
 }

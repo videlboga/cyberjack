@@ -463,7 +463,9 @@ describe("reaction perspective and dialogue planning", () => {
     const prompt = buildReactionTurnMessage(frame);
     expect(prompt).toContain("Ты прямо сейчас переживаешь телесное воздействие");
     expect(prompt).toContain("не нужно отвечать на старый вопрос, обещание или спор");
-    expect(prompt).not.toContain("Я всё объясню");
+    // Единый таймлайн: прошлый диалог остаётся видимым как память, но приоритет
+    // текущего хода отделяет его от ответа на старый вопрос.
+    expect(prompt).toContain("Я всё объясню");
   });
 
   it("makes a fearful low-agency boundary prefer a plea-shaped request", () => {

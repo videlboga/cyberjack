@@ -50,6 +50,9 @@ function sensoryExperienceText(
         return 'Ты слышишь содержание и тон сказанного; нового физического воздействия в этот момент нет.';
     }
     const authored = action.sensory;
+    // Бесконтактные действия (визуальный осмотр, взгляд) не «ощущаются» телом:
+    // персонаж их замечает/видит, а не чувствует кожей.
+    const contactless = Number(action.contact || 0) <= 0.05;
     const details = [
         authored?.stimulus || action.description,
         authored?.texture,
@@ -57,13 +60,19 @@ function sensoryExperienceText(
         authored?.bodilyResponse,
         authored?.aftereffect,
     ].filter(Boolean);
-    const intensity = experiencedIntensity >= 12
-        ? 'Ощущение подавляет остальные сигналы тела и почти не оставляет места для связной мысли.'
-        : experiencedIntensity >= 7
-            ? 'Ощущение яркое, настойчивое и всё время возвращает внимание к месту контакта.'
+    const intensity = contactless
+        ? (experiencedIntensity >= 7
+            ? 'Внимание к происходящему почти не оставляет места для связной мысли.'
             : experiencedIntensity >= 3
-                ? 'Ощущение отчётливое, но его детали ещё можно разделять.'
-                : 'Ощущение слабое и локальное.';
+                ? 'Внимание отчётливое, но его детали ещё можно разделять.'
+                : 'Внимание слабое и локальное.')
+        : experiencedIntensity >= 12
+            ? 'Ощущение подавляет остальные сигналы тела и почти не оставляет места для связной мысли.'
+            : experiencedIntensity >= 7
+                ? 'Ощущение яркое, настойчивое и всё время возвращает внимание к месту контакта.'
+                : experiencedIntensity >= 3
+                    ? 'Ощущение отчётливое, но его детали ещё можно разделять.'
+                    : 'Ощущение слабое и локальное.';
     const texture = action.sharpness >= 0.7
         ? 'Контакт воспринимается резко, с отчётливой границей каждого импульса.'
         : action.sharpness <= -0.15
@@ -74,8 +83,14 @@ function sensoryExperienceText(
     const overloadText = overload >= 8
         ? 'Отдельные нюансы начинают сливаться в общий сенсорный напор.'
         : '';
-    const zone = pointLabel ? `Ты яснее всего чувствуешь это в области «${pointLabel.toLowerCase()}».` : '';
-    const feltDetails = details.map(detail => /^ты\b/iu.test(String(detail)) ? String(detail) : `Ты ощущаешь: ${detail}`);
+    const zone = pointLabel
+        ? (contactless
+            ? `Ты яснее всего замечаешь это в области «${pointLabel.toLowerCase()}».`
+            : `Ты яснее всего чувствуешь это в области «${pointLabel.toLowerCase()}».`)
+        : '';
+    const feltDetails = details.map(detail => /^ты\b/iu.test(String(detail))
+        ? String(detail)
+        : contactless ? `Ты замечаешь: ${detail}` : `Ты ощущаешь: ${detail}`);
     return [zone, ...feltDetails, intensity, texture, overloadText].filter(Boolean).join(' ');
 }
 
