@@ -116,15 +116,25 @@ export function CharacterPortrait({
   // The authored `portrait` is a stable identity fallback. The canonical
   // visual reflects the character's actual pose, clothing, restraints and
   // affect, so it must be attempted first whenever the matrix covers it.
-  const sources = Array.from(new Set([canonical, portrait].filter(Boolean))) as string[];
+  // A sleeping character must never fall back to a standing portrait: the
+  // sleep avatar is authoritative, and a transient load error must not
+  // permanently swap it for the awake visual.
+  const sources = Array.from(
+    new Set([canonical, ...(sleeping ? [] : [portrait])].filter(Boolean)),
+  ) as string[];
   const [sourceIndex, setSourceIndex] = useState(0);
-  useEffect(() => setSourceIndex(0), [id, name, portrait, canonical]);
+  useEffect(() => setSourceIndex(0), [id, name, portrait, canonical, sleeping]);
   const source = sources[sourceIndex];
   if (!source) return <b className={className}>{name.slice(0, 1).toUpperCase()}</b>;
   return <img
     className={['character-portrait-image', className].filter(Boolean).join(' ')}
     src={source}
     alt={name}
-    onError={() => setSourceIndex(index => index + 1)}
+    onError={() => {
+      // Retry the same authoritative source once before advancing; a sleeping
+      // character has no awake fallback, so a single transient failure must not
+      // strand it on the initial-letter placeholder.
+      setSourceIndex(index => (index + 1 < sources.length ? index + 1 : index));
+    }}
   />;
 }
