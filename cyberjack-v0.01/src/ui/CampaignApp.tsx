@@ -2090,7 +2090,7 @@ function LaboratoryOverview({
                 <div className="room-character-layer">
                   {roomPanelResidents.map((resident, index) => {
                     const anchor = roomAnchorFor(resident, index);
-                    const pos = ROOM_ANCHORS[anchor];
+                    const pos = anchorsForRoom(selectedRoom.id)[anchor];
                     return (
                       <button
                         key={resident.id}
@@ -2154,9 +2154,10 @@ function roomSceneBackground(roomId: string): string {
     case "room_cell_a":
     case "room_cell_b":
     case "room_cell_c":
-    case "room_cell_special":
     case "room_staff_living":
       return "/backgrounds/laboratory/living-cell-v2.png";
+    case "room_cell_special":
+      return "/backgrounds/laboratory/special-containment-cell.png";
     case "room_control":
       return "/backgrounds/laboratory/observation.png";
     default:
@@ -2180,6 +2181,19 @@ const ROOM_ANCHORS: Record<string, { left: string; bottom: string }> = {
 };
 
 /**
+ * Точки привязки для камеры особого содержания (special-containment-cell.png).
+ * Одна кровать (29%), один стол (52%), санитарный модуль (67%).
+ */
+const SPECIAL_ROOM_ANCHORS: Record<string, { left: string; bottom: string }> = {
+  bed_1: { left: "29%", bottom: "30%" },
+  bed_2: { left: "29%", bottom: "30%" },
+  table_1: { left: "52%", bottom: "20%" },
+  table_2: { left: "52%", bottom: "20%" },
+  toilet: { left: "67%", bottom: "35%" },
+  standing: { left: "50%", bottom: "4%" },
+};
+
+/**
  * Определяет точку привязки персонажа на фоне камеры по его состоянию.
  * Приоритет: сон → кровать, рутина (еда/туалет) → стол/санитарный модуль,
  * иначе — стоя в центре. Два персонажа в одном состоянии разводятся по
@@ -2193,6 +2207,11 @@ function roomAnchorFor(resident: Resident, index: number): string {
   if (ids.has("routine_toilet")) return "toilet";
   if (ids.has("routine_eat")) return index % 2 === 0 ? "table_1" : "table_2";
   return "standing";
+}
+
+/** Набор якорей для выбранной комнаты. */
+function anchorsForRoom(roomId: string): Record<string, { left: string; bottom: string }> {
+  return roomId === "room_cell_special" ? SPECIAL_ROOM_ANCHORS : ROOM_ANCHORS;
 }
 
 function CharacterDirectory({
