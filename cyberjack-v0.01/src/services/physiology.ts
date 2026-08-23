@@ -153,6 +153,8 @@ export function advancePhysiology(minutes: number, worldMinute: number): void {
                 phys.state_changed_minute = worldMinute;
                 phys.planned_wake_minute = null;
                 phys.wake_reason = null;
+                // Ассистент после сна возвращается на пост наблюдения.
+                returnAssistantToPost(id, playerIdForSubject(id));
             }
             // Накопление недосыпа при бодрствовании.
             phys.sleep_debt = Math.min(100, phys.sleep_debt + hours * 1.2);
@@ -175,6 +177,21 @@ function playerIdForSubject(_subjectId: string): string {
     return 'PL-1';
 }
 
+/** Ассистент (роль assistant) после сна возвращается на пост наблюдения. */
+function returnAssistantToPost(subjectId: string, playerId: string): void {
+    try {
+        const role = db.prepare(`SELECT role FROM scene_characters WHERE scene_id = ? AND character_id = ?`)
+            .get('scene_lab_calibrator', subjectId) as any;
+        if (role?.role !== 'assistant') return;
+        const presence = getLaboratoryPresence(subjectId, playerId);
+        if (!presence) return;
+        if (presence.roomId === 'room_control') return; // уже на посту
+        moveCharacterInLaboratory(subjectId, 'room_control', playerId);
+    } catch (e) {
+        // Не фатально.
+    }
+}
+
 /** Переместить персонажа спать в его назначенную жилую комнату (не трогает тех, кто в оборудовании). */
 function retireToLivingRoom(subjectId: string, playerId: string, worldMinute: number): void {
     try {
@@ -182,13 +199,16 @@ function retireToLivingRoom(subjectId: string, playerId: string, worldMinute: nu
         const presence = getLaboratoryPresence(subjectId, playerId);
         if (!presence || !presence.roomId) return;
         // Назначенная жилая комната персонажа (cell для активов, room_staff_living для ассистентов).
-        const assignment = db.prepare(`SELECT room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`).get(playerId, subjectId) as any;
+        const assignment = db.prepare(`SELECT room_id, home_room_id FROM laboratory_room_assignments WHERE player_id = ? AND character_id = ?`).get(playerId, subjectId) as any;
         if (!assignment) return;
-        const targetRoom = db.prepare(`SELECT room_type FROM laboratory_rooms WHERE player_id = ? AND room_id = ?`).get(playerId, assignment.room_id) as any;
+        // Спальня — home_room_id, если задан; иначе текущая комната (для активов в камерах).
+        const livingRoomId = String(assignment.home_room_id || assignment.room_id || '');
+        if (!livingRoomId) return;
+        const targetRoom = db.prepare(`SELECT room_type FROM laboratory_rooms WHERE player_id = ? AND room_id = ?`).get(playerId, livingRoomId) as any;
         // Перемещаем только в жилые комнаты (cell/staff) и только если персонаж ещё не в ней.
         if (!targetRoom || !(targetRoom.room_type === 'cell' || targetRoom.room_type === 'staff')) return;
-        if (presence.roomId === assignment.room_id) return; // уже в жилой комнате
-        moveCharacterInLaboratory(subjectId, assignment.room_id, playerId);
+        if (presence.roomId === livingRoomId) return; // уже в жилой комнате
+        moveCharacterInLaboratory(subjectId, livingRoomId, playerId);
     } catch (e) {
         // Не фатально: если переместить не удалось, персонаж просто остаётся на месте.
     }

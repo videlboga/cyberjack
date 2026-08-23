@@ -439,6 +439,11 @@ export function ensureWorldSeed() {
     `);
     if (characterRepo.get('S-AV-01')) assignRoom.run(PLAYER_ID, 'room_cell_a', 'S-AV-01');
     if (assistant) assignRoom.run(PLAYER_ID, 'room_control', 'NPC-LAB-01');
+    // Ассистент работает на посту наблюдения, но спит в комнате персонала.
+    // home_room_id — стабильная «спальня», куда персонаж уходит на ночь.
+    if (assistant) {
+        db.prepare(`UPDATE laboratory_room_assignments SET home_room_id = 'room_staff_living' WHERE player_id = ? AND character_id = 'NPC-LAB-01'`).run(PLAYER_ID);
+    }
     // A resident already living in a cell gets that cell as their stable home
     // so «иди в свою камеру» resolves without an explicit home assignment.
     db.prepare(`
