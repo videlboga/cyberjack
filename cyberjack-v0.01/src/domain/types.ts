@@ -388,6 +388,10 @@ export interface AssetContract {
     /** Внешняя передача: актив вернётся после этого момента (минуты). */
     unavailableUntil?: number;
     subject_id?: string;
+    /** Сложность: насколько высоки пороги условий (easy/medium/hard/extreme). */
+    difficulty?: 'easy' | 'medium' | 'hard' | 'extreme';
+    /** Жестокость: насколько тяжёлые последствия return_profile (mild/moderate/severe/extreme). */
+    cruelty?: 'mild' | 'moderate' | 'severe' | 'extreme';
 }
 export interface AnatomyPointPreset {
     id: string;

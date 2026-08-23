@@ -32,6 +32,8 @@ function mapContract(c: AssetContract) {
         attachedSubjectId: c.attachedSubjectId,
         unavailableUntil: c.unavailable_until ?? c.unavailableUntil ?? undefined,
         subjectId: c.subject_id || undefined,
+        difficulty: c.difficulty,
+        cruelty: c.cruelty,
     };
 }
 

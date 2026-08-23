@@ -15,6 +15,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 2880,
     offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
     title: "Архивный след семьи",
     description: "Continuum Archive предлагает доступ к архивным записям внешнего кольца о ликвидации семьи Миры в обмен на участие в серии наблюдений. Актив будет помещён под длительное наблюдение с мягкой стимуляцией, чтобы зафиксировать эмоциональный отклик на семейные триггеры. Ожидается психологическое давление и вскрытие старой раны.",
     conditions: [
@@ -121,6 +123,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 4320,
     offerDeadlineMinutes: 4320,
+    difficulty: "hard",
+    cruelty: "severe",
     title: "Цена правды",
     description: "Continuum предлагает полный архив о ликвидации семьи Миры, но требует взамен участие в предельном протоколе наблюдения за аномальным откликом на утрату. Актив будет доведён до глубокого эмоционального срыва через семейные триггеры и сенсорную перегрузку. Ожидается тяжёлое истощение и стойкий аномальный след.",
     conditions: [
@@ -232,6 +236,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 1440,
     offerDeadlineMinutes: 1440,
+    difficulty: "easy",
+    cruelty: "mild",
     title: "Разрыв связи",
     description: "Continuum предлагает Мире путь частичного разрыва связи: она может отказаться от дальнейших протоколов, но должна пройти финальную серию наблюдений, чтобы закрыть архивный след. Актив остаётся в лаборатории, но подвергается мягкой стимуляции для фиксации её решения. Ожидается эмоциональное освобождение.",
     conditions: [
@@ -316,6 +322,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 2880,
     offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
     title: "Свидетель клинического канала",
     description: "Veil Biotech знает, что Ника видела то, чего не должна была, в исследовательском секторе. Организация предлагает молчание в обмен на участие в серии клинических протоколов. Актив будет подвергнут инвазивным измерениям, чтобы проверить его пригодность как свидетеля-исполнителя. Ожидается давление и закрепление клинического отклика.",
     conditions: [
@@ -423,6 +431,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 4320,
     offerDeadlineMinutes: 4320,
+    difficulty: "hard",
+    cruelty: "severe",
     title: "Серия стимуляторов",
     description: "Veil предлагает Нике раскрыть происхождение серии стимуляторов, которую она видела, в обмен на участие в фармакологическом протоколе. Актив будет накачан препаратами из той самой серии, чтобы проверить его реакцию и получить данные. Ожидается химическая зависимость и вскрытие тайны.",
     conditions: [
@@ -533,6 +543,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 1440,
     offerDeadlineMinutes: 1440,
+    difficulty: "easy",
+    cruelty: "mild",
     title: "Скрыть участие",
     description: "Veil предлагает Нике путь частичного разрыва: она может скрыть своё участие и уйти из-под давления, но должна пройти финальную проверку лояльности. Актив остаётся в лаборатории, подвергается стандартной серии команд. Ожидается закрепление покорности и закрытие вопроса.",
     conditions: [
@@ -623,6 +635,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 2880,
     offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
     title: "Служебный канал",
     description: "Lattice знает, что Эли видела запрещённую операцию возле медицинского блока. Организация предлагает молчание в обмен на участие в серии стандартизированных протоколов. Актив будет подвергнут обусловливанию, чтобы проверить его управляемость. Ожидается закрепление покорности.",
     conditions: [
@@ -731,6 +745,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 4320,
     offerDeadlineMinutes: 4320,
+    difficulty: "hard",
+    cruelty: "severe",
     title: "Судьба исчезнувшего",
     description: "Lattice предлагает Эли установить судьбу исчезнувшего человека из той операции в обмен на участие в предельном протоколе обусловливания. Актив будет доведён до глубокой перестройки воли, чтобы стать надёжным исполнителем. Ожидается тяжёлое истощение и необратимая перестройка.",
     conditions: [
@@ -842,6 +858,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 1440,
     offerDeadlineMinutes: 1440,
+    difficulty: "easy",
+    cruelty: "mild",
     title: "Подделка следа",
     description: "Lattice предлагает Эли путь частичного разрыва: она может подделать учётный след и уйти из-под давления, но должна пройти финальную проверку. Актив остаётся в лаборатории, подвергается стандартной серии. Ожидается закрытие вопроса.",
     conditions: [
@@ -926,6 +944,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 2880,
     offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
     title: "Чистый сектор",
     description: "Lattice знает, что Суми помогла кому-то в центральных контурах, и эта помощь обернулась проблемой. Организация предлагает очистить имя Суми в обмен на участие в серии стандартизированных протоколов. Актив будет подвергнут обусловливанию, чтобы проверить его лояльность. Ожидается закрепление покорности.",
     conditions: [
@@ -1026,6 +1046,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 4320,
     offerDeadlineMinutes: 4320,
+    difficulty: "hard",
+    cruelty: "severe",
     title: "Оставленный доступ",
     description: "Lattice предлагает Суми использовать оставленный доступ, чтобы найти прежнего знакомого, в обмен на участие в предельном протоколе обусловливания. Актив будет доведён до глубокой перестройки воли, чтобы стать надёжным исполнителем. Ожидается тяжёлое истощение.",
     conditions: [
@@ -1137,6 +1159,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 1440,
     offerDeadlineMinutes: 1440,
+    difficulty: "easy",
+    cruelty: "mild",
     title: "Отказ от прежнего знакомого",
     description: "Lattice предлагает Суми путь частичного разрыва: она может отказаться от прежнего знакомого и очистить имя, но должна пройти финальную проверку лояльности. Актив остаётся в лаборатории, подвергается стандартной серии. Ожидается закрытие вопроса.",
     conditions: [
@@ -1221,6 +1245,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 2880,
     offerDeadlineMinutes: 2880,
+    difficulty: "medium",
+    cruelty: "moderate",
     title: "Прежний куратор",
     description: "Lattice знает, что Май однажды оставили ждать и не вернулись. Организация предлагает узнать причину исчезновения прежнего куратора в обмен на участие в серии стандартизированных протоколов. Актив будет подвергнут обусловливанию, чтобы проверить его лояльность. Ожидается закрепление покорности.",
     conditions: [
@@ -1321,6 +1347,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 4320,
     offerDeadlineMinutes: 4320,
+    difficulty: "hard",
+    cruelty: "severe",
     title: "Сеть зависимых",
     description: "Lattice предлагает Май перехватить сеть зависимых прежнего куратора в обмен на участие в предельном протоколе обусловливания. Актив будет доведён до глубокой перестройки воли, чтобы стать надёжным исполнителем. Ожидается тяжёлое истощение.",
     conditions: [
@@ -1432,6 +1460,8 @@ export const PERSONAL_CONTRACT_DATA: PersonalContractSeed[] = [
     format: "external_transfer",
     durationMinutes: 1440,
     offerDeadlineMinutes: 1440,
+    difficulty: "easy",
+    cruelty: "mild",
     title: "Отказ от старого куратора",
     description: "Lattice предлагает Май путь частичного разрыва: она может отказаться от старого куратора и закрыть вопрос, но должна пройти финальную проверку лояльности. Актив остаётся в лаборатории, подвергается стандартной серии. Ожидается закрытие вопроса.",
     conditions: [

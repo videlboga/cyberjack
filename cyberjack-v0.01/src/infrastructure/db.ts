@@ -158,6 +158,8 @@ db.exec(`
     personal INTEGER DEFAULT 0,
     unavailable_until INTEGER,
     subject_id TEXT,
+    difficulty TEXT,
+    cruelty TEXT,
     FOREIGN KEY (issuer_id) REFERENCES factions(id)
   );
 
@@ -616,6 +618,8 @@ safeAddColumn('shop_offers', 'expires_at', 'INTEGER');
 safeAddColumn('shop_offers', 'source_event_id', 'TEXT');
 safeAddColumn('world_state', 'last_upkeep_day', 'INTEGER');
 safeAddColumn('social_pair_states', 'strokes', 'REAL DEFAULT 0');
+safeAddColumn('asset_contracts', 'difficulty', 'TEXT');
+safeAddColumn('asset_contracts', 'cruelty', 'TEXT');
 
 // Speech generated for a character is a remembered self-report, not authored
 // canon. Reclassify records written by older builds so they cannot silently

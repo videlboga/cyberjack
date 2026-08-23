@@ -338,6 +338,8 @@ type Contract = {
   unavailableUntil?: number;
   attachedSubjectId?: string;
   subjectId?: string;
+  difficulty?: "easy" | "medium" | "hard" | "extreme";
+  cruelty?: "mild" | "moderate" | "severe" | "extreme";
 };
 type SubjectState = Record<string, any> & { attitude?: number };
 type DirectorEvent = {
@@ -506,6 +508,10 @@ const conditionLabels: Record<string, string> = {
   trait_chem_addict: "Хим-зависимость",
   trait_sexual_dependency: "Сексуальная зависимость",
 };
+const difficultyLabel = (d: string) =>
+  ({ easy: "Лёгкий", medium: "Средний", hard: "Тяжёлый", extreme: "Экстремальный" } as Record<string, string>)[d] || d;
+const crueltyLabel = (c: string) =>
+  ({ mild: "Мягкий", moderate: "Умеренный", severe: "Жестокий", extreme: "Предельный" } as Record<string, string>)[c] || c;
 const sectionForLocation: Record<
   string,
   "laboratory" | "contracts" | "supply"
@@ -6811,6 +6817,20 @@ function ContractOffice({
                         ? ` · ${Math.round(contract.durationMinutes / 60)} ч`
                         : ""}
                     </em>
+                  )}
+                  {(contract.difficulty || contract.cruelty) && (
+                    <span className="contract-tier">
+                      {contract.difficulty && (
+                        <em className={`tier-difficulty tier-${contract.difficulty}`}>
+                          {difficultyLabel(contract.difficulty)}
+                        </em>
+                      )}
+                      {contract.cruelty && (
+                        <em className={`tier-cruelty tier-${contract.cruelty}`}>
+                          {crueltyLabel(contract.cruelty)}
+                        </em>
+                      )}
+                    </span>
                   )}
                 </div>
                 <b>{contract.rewards?.credits || 0} cr</b>

@@ -54,6 +54,19 @@ export const CONTRACT_TRAIT_TARGET_MAP: Record<string, ContractTraitTarget> = {
     anomaly_resonance_echo: { bucket: 'tags', key: 'resonance' },
     trauma_anomaly_overload: { bucket: 'tags', key: 'overload' },
     trauma_breakdown: { bucket: 'tags', key: 'breakdown' },
+    // Сексуальные травмы/аномалии (переработка контрактов v2).
+    trauma_forced_orgasm: { bucket: 'tags', key: 'sexual' },
+    trauma_penetration: { bucket: 'tags', key: 'penetration' },
+    trauma_oral_use: { bucket: 'tags', key: 'oral' },
+    trauma_gang_use: { bucket: 'tags', key: 'humiliation' },
+    trauma_breeding: { bucket: 'tags', key: 'penetration' },
+    trauma_machine_use: { bucket: 'tags', key: 'machine' },
+    anomaly_orgasm_echo: { bucket: 'tags', key: 'sexual' },
+    anomaly_penetration_echo: { bucket: 'tags', key: 'penetration' },
+    anomaly_oral_echo: { bucket: 'tags', key: 'oral' },
+    anomaly_breeding_echo: { bucket: 'tags', key: 'penetration' },
+    anomaly_gang_echo: { bucket: 'tags', key: 'sexual' },
+    anomaly_machine_echo: { bucket: 'tags', key: 'machine' },
 };
 
 /** Резолвит контрактный трейт на тег/точку. */

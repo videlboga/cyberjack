@@ -123,6 +123,8 @@ export function ensureContractPool(now: number): void {
             conditions: c.conditions as any,
             rewards: c.rewards as any,
             penalties: c.penalties as any,
+            difficulty: c.difficulty,
+            cruelty: c.cruelty,
         });
         // Отмечаем появление (cooldown).
         db.prepare(
@@ -189,6 +191,8 @@ export function ensurePersonalContractLine(now: number): void {
             conditions: next.conditions as any,
             rewards: next.rewards as any,
             penalties: next.penalties as any,
+            difficulty: next.difficulty,
+            cruelty: next.cruelty,
         });
     }
 }

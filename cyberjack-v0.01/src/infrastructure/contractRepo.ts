@@ -7,8 +7,9 @@ export const contractRepo = {
             INSERT INTO asset_contracts (
                 id, issuer_id, title, description, state, accepted_by_player_id, 
                 attached_subject_id, deadline_tick, conditions, rewards, penalties,
-                format, duration_minutes, offer_deadline_minutes, return_profile, personal, unavailable_until, subject_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                format, duration_minutes, offer_deadline_minutes, return_profile, personal, unavailable_until, subject_id,
+                difficulty, cruelty
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 state = excluded.state,
                 accepted_by_player_id = excluded.accepted_by_player_id,
@@ -23,7 +24,9 @@ export const contractRepo = {
                 return_profile = excluded.return_profile,
                 personal = excluded.personal,
                 unavailable_until = excluded.unavailable_until,
-                subject_id = excluded.subject_id
+                subject_id = excluded.subject_id,
+                difficulty = excluded.difficulty,
+                cruelty = excluded.cruelty
         `).run(
             contract.id, contract.issuerId, contract.title, contract.description,
             contract.state, contract.acceptedByPlayerId || null, 
@@ -35,7 +38,9 @@ export const contractRepo = {
             contract.return_profile ? JSON.stringify(contract.return_profile) : null,
             contract.personal ? 1 : 0,
             contract.unavailableUntil ?? contract.unavailable_until ?? null,
-            contract.subject_id || (contract as any).subjectId || null
+            contract.subject_id || (contract as any).subjectId || null,
+            contract.difficulty || null,
+            contract.cruelty || null
         );
     },
     
@@ -76,6 +81,8 @@ export const contractRepo = {
             unavailable_until: row.unavailable_until ?? undefined,
             unavailableUntil: row.unavailable_until ?? undefined,
             subject_id: row.subject_id || undefined,
+            difficulty: row.difficulty || undefined,
+            cruelty: row.cruelty || undefined,
         };
     }
 };
