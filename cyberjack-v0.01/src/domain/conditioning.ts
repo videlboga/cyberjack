@@ -27,6 +27,10 @@ export type CompulsionSignal = {
     cuePointIds: string[];
     impulse: string;
     actionTags: string[];
+    /** true для отрицательного уровня — аверсия (отторжение/страх). */
+    aversion?: boolean;
+    /** Название аверсии (неприязнь/резкое отторжение/панический страх). */
+    aversionLabel?: string;
 };
 
 export type ConditioningSignalInput = {
@@ -380,23 +384,26 @@ const COMPULSION_DEFINITIONS: Array<{
     impulse: string;
     actionTags: string[];
     cuePointIds?: string[];
+    /** Импульс при отрицательном уровне (аверсия). */
+    aversionImpulse?: string;
 }> = [
-    { traitId:'trait_masochist', cueTags:['pain'], impulse:'искать или не прерывать болезненное воздействие', actionTags:['pain'] },
-    { traitId:'trait_knismolagnia', cueTags:['tickling'], impulse:'искать щекочущее ощущение и возвращаться к нему мыслями', actionTags:['tickling'] },
-    { traitId:'trait_restraint_fetish', cueTags:['restraint'], impulse:'сохранять или искать фиксацию', actionTags:['restraint'] },
-    { traitId:'trait_conditioned_submission', cueTags:['control','command','submission'], impulse:'подчиниться направляющему импульсу', actionTags:['control','command','submission'] },
-    { traitId:'trait_exhibitionist', cueTags:['exposure','humiliation','vulnerable'], impulse:'оставаться открытой чужому вниманию', actionTags:['exposure','humiliation','vulnerable'] },
-    { traitId:'trait_clinical_fetish', cueTags:['clinical'], impulse:'искать медицински оформленное воздействие', actionTags:['clinical'] },
-    { traitId:'trait_electrophile', cueTags:['electronic'], impulse:'искать электрическую стимуляцию', actionTags:['electronic'] },
-    { traitId:'trait_technophile', cueTags:['machine'], impulse:'не прерывать машинное воздействие', actionTags:['machine'] },
-    { traitId:'trait_sexual_dependency', cueTags:['sexual','penetration','oral'], impulse:'сохранить или получить сексуальную стимуляцию', actionTags:['sexual','penetration','oral'] },
-    { traitId:'trait_chem_addict', cueTags:['chemical','drug'], impulse:'искать или не прерывать химическое воздействие', actionTags:['chemical','drug'] },
-    { traitId:'trait_sensory_deprivation', cueTags:['deprivation'], impulse:'искать отстранение от внешних раздражителей', actionTags:['deprivation'] },
+    { traitId:'trait_masochist', cueTags:['pain'], impulse:'искать или не прерывать болезненное воздействие', aversionImpulse:'избежать или прекратить болезненное воздействие', actionTags:['pain'] },
+    { traitId:'trait_knismolagnia', cueTags:['tickling'], impulse:'искать щекочущее ощущение и возвращаться к нему мыслями', aversionImpulse:'избежать или прекратить щекочущее воздействие', actionTags:['tickling'] },
+    { traitId:'trait_restraint_fetish', cueTags:['restraint'], impulse:'сохранять или искать фиксацию', aversionImpulse:'вырваться из фиксации или избежать её', actionTags:['restraint'] },
+    { traitId:'trait_conditioned_submission', cueTags:['control','command','submission'], impulse:'подчиниться направляющему импульсу', aversionImpulse:'сопротивляться направляющему импульсу', actionTags:['control','command','submission'] },
+    { traitId:'trait_exhibitionist', cueTags:['exposure','humiliation','vulnerable'], impulse:'оставаться открытой чужому вниманию', aversionImpulse:'скрыться от чужого внимания, избежать демонстрации', actionTags:['exposure','humiliation','vulnerable'] },
+    { traitId:'trait_clinical_fetish', cueTags:['clinical'], impulse:'искать медицински оформленное воздействие', aversionImpulse:'избежать или прекратить медицински оформленное воздействие', actionTags:['clinical'] },
+    { traitId:'trait_electrophile', cueTags:['electronic'], impulse:'искать электрическую стимуляцию', aversionImpulse:'избежать или прекратить электрическую стимуляцию', actionTags:['electronic'] },
+    { traitId:'trait_technophile', cueTags:['machine'], impulse:'не прерывать машинное воздействие', aversionImpulse:'избежать или прекратить машинное воздействие', actionTags:['machine'] },
+    { traitId:'trait_sexual_dependency', cueTags:['sexual','penetration','oral'], impulse:'сохранить или получить сексуальную стимуляцию', aversionImpulse:'избежать или прекратить сексуальную стимуляцию', actionTags:['sexual','penetration','oral'] },
+    { traitId:'trait_chem_addict', cueTags:['chemical','drug'], impulse:'искать или не прерывать химическое воздействие', aversionImpulse:'избежать или прекратить химическое воздействие', actionTags:['chemical','drug'] },
+    { traitId:'trait_sensory_deprivation', cueTags:['deprivation'], impulse:'искать отстранение от внешних раздражителей', aversionImpulse:'избежать сенсорной изоляции', actionTags:['deprivation'] },
     ...POINT_TRAIT_DEFINITIONS.map(definition => ({
         traitId: `trait_point_${definition.pointId}`,
         cueTags: [],
         cuePointIds: [definition.pointId],
         impulse: `вернуться к ощущениям в зоне «${definition.label.replace(/^Фиксация на |^Фетиш |^Анальная /, '').toLowerCase()}»`,
+        aversionImpulse: `избежать или прекратить стимуляцию зоны «${definition.label.replace(/^Фиксация на |^Фетиш |^Анальная /, '').toLowerCase()}»`,
         actionTags: [...definition.actionTags],
     })),
 ];
@@ -418,19 +425,23 @@ export function deriveCompulsionSignals(
     const pressureForLevel = [0, .28, .58, .92];
     return COMPULSION_DEFINITIONS.flatMap(definition => {
         const trait = traits.get(definition.traitId);
-        if (!trait || trait.level <= 0) return [];
+        if (!trait || trait.level === 0) return [];
         const matched = definition.cueTags.filter(tag => cues.has(tag));
         const matchedPoints = (definition.cuePointIds || []).filter(pointId => points.has(pointId));
         if (!matched.length && !matchedPoints.length) return [];
+        const aversion = trait.level < 0;
+        const magnitude = Math.abs(trait.level);
         return [{
-            traitId:trait.id,
-            label:trait.label,
-            level:trait.level,
-            pressure:pressureForLevel[trait.level] || 0,
-            cueTags:matched,
-            cuePointIds:matchedPoints,
-            impulse:definition.impulse,
-            actionTags:definition.actionTags,
+            traitId: trait.id,
+            label: trait.label,
+            level: trait.level,
+            pressure: pressureForLevel[magnitude] || 0,
+            cueTags: matched,
+            cuePointIds: matchedPoints,
+            impulse: aversion ? (definition.aversionImpulse || definition.impulse) : definition.impulse,
+            actionTags: definition.actionTags,
+            aversion,
+            aversionLabel: aversion ? (trait.aversionLabel || 'неприязнь') : undefined,
         }];
     }).sort((left, right) => right.pressure - left.pressure);
 }

@@ -612,6 +612,20 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
         ], 8) as SpeechAct[];
         if (!previousWasQuestion) position.preferredSpeechAct = 'request';
     }
+    // Аверсия (отрицательный уровень) — активное отторжение при релевантном
+    // стимуле: персонаж стремится избежать/прекратить воздействие, а не
+    // подчиниться ему. Симметрично компульсии, но в противоположную сторону.
+    const dominantAversion = (input.compulsions || []).find(signal => signal.aversion);
+    if (dominantAversion) {
+        const aversion = dominantAversion.aversionLabel || 'неприязнь';
+        const magnitude = Math.abs(dominantAversion.level);
+        position.secondaryConflict = [position.secondaryConflict, `${aversion} к «${dominantAversion.label}» требует ${dominantAversion.impulse}; это отторжение может пересилить прежний план или вынужденную покорность.`].filter(Boolean).join(' ');
+        position.allowedSpeechActs = unique([
+            ...position.allowedSpeechActs,
+            'set_boundary', 'deflect', 'warn', 'challenge'
+        ], 8) as SpeechAct[];
+        if (magnitude >= 3 && !previousWasQuestion) position.preferredSpeechAct = 'set_boundary';
+    }
     const expressionMode = compileExpressionMode(input.core, ownObservation, physiology, input.contexts, input.edgeHoldMinutes);
     const addresseeId = input.initiatorId || input.targetId;
     const addresseeName = input.initiatorName || input.targetName;

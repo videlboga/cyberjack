@@ -403,12 +403,22 @@ export async function buildPromptPayload(
         ...(options?.compulsionCuePointIds || []),
         ...(latestResult?.tickMeta?.inputs?.point?.pointId ? [latestResult.tickMeta.inputs.point.pointId] : []),
     ]);
-    const compulsionLines = compulsionSignals.map(signal => signal.level >= 3
-        ? `Сейчас релевантный стимул запускает навязчивую компульсию «${signal.label}»: мысли снова возвращаются к импульсу ${signal.impulse}. Этот импульс конкурирует с твоими прежними намерениями и должен заметно влиять на то, что ты пытаешься сказать или сделать.`
-        : signal.level === 2
-            ? `Релевантный стимул заметно усиливает склонность «${signal.label}»: тебе трудно не думать об импульсе ${signal.impulse}.`
-            : `Релевантный стимул слегка окрашен склонностью «${signal.label}».`
-    );
+    const compulsionLines = compulsionSignals.map(signal => {
+        if (signal.aversion) {
+            const aversion = signal.aversionLabel || 'неприязнь';
+            const magnitude = Math.abs(signal.level);
+            return magnitude >= 3
+                ? `Сейчас релевантный стимул запускает ${aversion} к «${signal.label}»: тебя захлёстывает паника, ты стремишься ${signal.impulse}. Этот страх должен заметно влиять на то, что ты пытаешься сказать или сделать — вплоть до мольбы остановиться или отчаянного сопротивления.`
+                : magnitude === 2
+                    ? `Релевантный стимул вызывает у тебя ${aversion} к «${signal.label}»: тебе трудно не думать о том, чтобы ${signal.impulse}.`
+                    : `Релевантный стимул окрашен твоей неприязнью к «${signal.label}»: ты хочешь ${signal.impulse}.`;
+        }
+        return signal.level >= 3
+            ? `Сейчас релевантный стимул запускает навязчивую компульсию «${signal.label}»: мысли снова возвращаются к импульсу ${signal.impulse}. Этот импульс конкурирует с твоими прежними намерениями и должен заметно влиять на то, что ты пытаешься сказать или сделать.`
+            : signal.level === 2
+                ? `Релевантный стимул заметно усиливает склонность «${signal.label}»: тебе трудно не думать об импульсе ${signal.impulse}.`
+                : `Релевантный стимул слегка окрашен склонностью «${signal.label}».`;
+    });
     // Role context is intentionally capped in the reaction frame. Compulsions
     // must appear before addressee and posture boilerplate rather than being
     // silently cut off at the end of a dense laboratory scene.
