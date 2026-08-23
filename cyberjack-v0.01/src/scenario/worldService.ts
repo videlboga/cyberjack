@@ -7,6 +7,7 @@ import { clearCalibrationSetupContexts } from './calibrationContextCleanup';
 import { emitSupplyPurchased } from './eventDirector';
 import { ensureGeneratedCandidates } from './generatedCandidates';
 import { ensureCharacterStorySeeds } from './characterStorySeeds';
+import { seedAllBiographies } from '../services/seedBiography';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { relationshipDynamicsRepo } from '../infrastructure/relationshipDynamicsRepo';
 import { syncLaboratorySpatialRelations } from '../services/sceneRelations';
@@ -170,6 +171,7 @@ export function ensureWorldSeed() {
     for (const location of LOCATIONS) ensureScene.run(location.id, location.description);
     ensureGeneratedCandidates();
     ensureCharacterStorySeeds();
+    seedAllBiographies();
     db.prepare(`DELETE FROM laboratory_assets WHERE player_id = ? AND asset_id = 'lab_background_loop'`).run(PLAYER_ID);
     db.prepare(`DELETE FROM laboratory_assets WHERE player_id = ? AND asset_id = 'lab_sensory_pod'`).run(PLAYER_ID);
     db.prepare(`DELETE FROM shop_offers WHERE id = 'lab_sensory_pod'`).run();
