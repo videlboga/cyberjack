@@ -10,6 +10,7 @@ import { applyAllContractTraitDecay } from '../services/contractTraits';
 import { ensureAuthoredSupplyOpportunity } from './eventDirector';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryRepo } from '../infrastructure/repositories';
+import { buildEmbedding } from '../services/embeddingService';
 import { consolidateNextInterpretation } from '../services/interpretationRegeneration';
 import { emitTrace, newRequestId, withTraceContext } from '../orchestration/trace';
 
@@ -141,7 +142,7 @@ export function runDueBackgroundJobs(worldMinute: number) {
     }
 }
 
-async function executeBackgroundJob(job: { type: string; payload: string | null }) {
+async function executeBackgroundJob(job: { type: string; payload: string | null; subjectId?: string | null }) {
     // Job handlers are registered here. Each handler is responsible for its
     // own idempotency (the queue key already prevents duplicate enqueue).
     switch (job.type) {
@@ -165,6 +166,43 @@ async function executeBackgroundJob(job: { type: string; payload: string | null 
             ).find(entry => `${entry.id}:${entry.moments.map(moment => moment.id).join(',')}` === input.memorySourceKey);
             if (!memory) throw new Error('Эпизод для внушения больше не найден');
             await runEpisodeIntervention({ ...input, memory });
+            return;
+        }
+        case 'contract.memory': {
+            // Материализует воспоминание о контракте (return_profile.memory) в
+            // память персонажа как эпизод. Фрагменты — телесные переживания от
+            // первого лица; каждый становится отдельным атомом episode_v2.
+            const input = JSON.parse(job.payload || '{}') as {
+                theme?: string;
+                fragments?: string[];
+                tags?: string[];
+                source?: string;
+            };
+            const subjectId = job.subjectId;
+            if (!subjectId) throw new Error('contract.memory без subjectId');
+            const fragments = (input.fragments || []).filter((fragment: string) => String(fragment || '').trim());
+            if (!fragments.length) return;
+            const tags = (input.tags || []).filter((tag: string) => /^[a-z0-9_:-]+$/i.test(tag));
+            const worldMinute = getWorldClock().totalMinutes;
+            for (const fragment of fragments) {
+                const text = String(fragment).trim();
+                if (!text) continue;
+                memoryRepo.save({
+                    subjectId,
+                    text,
+                    embedding: buildEmbedding(`${subjectId} ${text}`),
+                    tags: ['contract', ...tags],
+                    relatedSubjects: [subjectId],
+                    type: 'episode_v2',
+                    metadata: {
+                        contractMemory: true,
+                        source: input.source,
+                        theme: input.theme,
+                        worldMinute,
+                        actionLabel: 'Контракт',
+                    },
+                });
+            }
             return;
         }
         default:
