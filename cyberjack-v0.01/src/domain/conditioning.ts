@@ -359,6 +359,16 @@ export function deriveAcquiredTraits(preferences: unknown): AcquiredTrait[] {
         { id: 'trait_sexual_dependency', label: 'Сексуальная зависимость', strength: appliedTags.sexual || 0 },
         { id: 'trait_chem_addict', label: 'Хим-зависимость', strength: positiveMean(appliedTags, ['chemical', 'drug']) },
         { id: 'trait_sensory_deprivation', label: 'Тяга к сенсорной изоляции', strength: appliedTags.deprivation || 0 },
+        // Восприимчивость к проникновению — составной трейт. Берёт максимум
+        // из тега penetration и точек, через которые происходит проникновение
+        // в персонажа (вагина, простата, анус). Пол-нейтрален: для женского
+        // актива обычно ведёт вагина, для мужского — простата/анус.
+        { id: 'trait_penetration', label: 'Восприимчивость к проникновению', strength: Math.max(
+            appliedTags.penetration || 0,
+            appliedPoints.vagina || 0,
+            appliedPoints.prostate || 0,
+            appliedPoints.anus || 0,
+        ) },
         // Point preferences are learned independently from semantic tags. A
         // trait remains tied to its exact zone, so a high value on one point
         // cannot be diluted by unrelated anatomy or leak into every scene.

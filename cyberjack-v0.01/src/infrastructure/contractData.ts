@@ -30,7 +30,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Veil ищет актив, у которого боль уже осмыслена как значимый сигнал, но чувствительность не перешла в сенсорный срыв. Актив будет закреплён на столе и подвергнут серии нарастающих болевых воздействий — от тупых ударов до точечных проколов и электроразрядов — до выхода на устойчивый резонансный отклик. Ожидается глубокая перегрузка и перестройка болевого порога.",
     conditions: [
         { type: "acquired_trait", key: "trait_masochist", operator: ">=", value: 2 },
-        { type: "preference", key: "pain", operator: ">=", value: 18 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
         { type: "custom", key: "capacity", operator: ">=", value: 45 },
         { type: "attitude", operator: "<=", value: 72 }
@@ -74,7 +73,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Протокол принудительного оргазма",
     description: "Veil изучает отклик Аномалии на принудительную разрядку. Актив будет закреплён на вибростанке и доведён до оргазма многократно, без паузы между пиками, с фармакологическим усилением чувствительности. Ожидается истощение, перестройка оргазменного порога и стойкая ассоциация разрядки с беспомощностью.",
     conditions: [
-        { type: "preference", key: "sexual", operator: ">=", value: 15 },
+        { type: "acquired_trait", key: "trait_sexual_dependency", operator: ">=", value: 2 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 65 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 70 }
@@ -118,7 +117,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Вагинальная перегрузка",
     description: "Veil изучает отклик Аномалии на предельную вагинальную стимуляцию. Актив будет подвергнут продолжительному вагинальному проникновению с нарастающим диаметром, вибрацией и электростимуляцией, при полной фиксации и фармакологическом усилении чувствительности. Ожидается глубокая перестройка вагинальной чувствительности и стойкая ассоциация проникновения с перегрузкой.",
     conditions: [
-        { type: "preference", key: "penetration", operator: ">=", value: 16 },
+        { type: "acquired_trait", key: "trait_penetration", operator: ">=", value: 2 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
         { type: "custom", key: "capacity", operator: ">=", value: 55 },
         { type: "custom", key: "plasticity", operator: ">=", value: 65 },
@@ -163,8 +162,8 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Групповая эксплуатация",
     description: "Veil тестирует устойчивость актива к множественному одновременному использованию. Актив будет передан группе операторов для непрерывного сексуального использования всеми доступными способами, с фиксацией и ограничением подвижности. Ожидается слом личных границ, глубокая диссоциация и закрепление роли объекта.",
     conditions: [
-        { type: "preference", key: "sexual", operator: ">=", value: 14 },
-        { type: "preference", key: "humiliation", operator: ">=", value: 12 },
+        { type: "acquired_trait", key: "trait_sexual_dependency", operator: ">=", value: 2 },
+        { type: "acquired_trait", key: "trait_exhibitionist", operator: ">=", value: 1 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "custom", key: "openness", operator: ">=", value: 58 },
         { type: "attitude", operator: "<=", value: 68 }
@@ -208,7 +207,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Оральная нагрузка",
     description: "Veil калибрует оральный рефлекс актива. Актив будет приучен к длительному оральному обслуживанию с контролем глубины и ритма, с наказанием за отказ. Ожидается закрепление оральной покорности и перестройка рвотного рефлекса.",
     conditions: [
-        { type: "preference", key: "oral", operator: ">=", value: 13 },
+        { type: "acquired_trait", key: "trait_point_lips", operator: ">=", value: 1 },
         { type: "custom", key: "openness", operator: ">=", value: 60 },
         { type: "custom", key: "plasticity", operator: ">=", value: 55 },
         { type: "attitude", operator: ">=", value: 55 }
@@ -252,8 +251,8 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Машинная эксплуатация",
     description: "Veil тестирует отклик на полностью автоматизированное использование. Актив будет подключён к стационарному комплексу, который непрерывно использует его всеми механическими модулями — проникновение, вибрация, электростимуляция — без участия человека. Ожидается перестройка восприятия машины как оператора и глубокая технофильная зависимость.",
     conditions: [
-        { type: "preference", key: "machine", operator: ">=", value: 14 },
-        { type: "preference", key: "sexual", operator: ">=", value: 13 },
+        { type: "acquired_trait", key: "trait_technophile", operator: ">=", value: 2 },
+        { type: "acquired_trait", key: "trait_sexual_dependency", operator: ">=", value: 1 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 62 },
         { type: "custom", key: "capacity", operator: ">=", value: 48 }
     ],
@@ -341,7 +340,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Veil проверяет переходный профиль: интерес к демонстрации уже закрепился, но общая открытость ещё не растворила осторожность. Актив будет выставлен обнажённым в открытом зале наблюдения и подвергнут длительной демонстрации всех эрогенных зон перед группой наблюдателей, с фиксацией в раскрытых позах. Ожидается слом стыда и закрепление эксгибиционистского отклика.",
     conditions: [
         { type: "acquired_trait", key: "trait_exhibitionist", operator: ">=", value: 1 },
-        { type: "preference", key: "exposure", operator: ">=", value: 16 },
         { type: "custom", key: "openness", operator: ">=", value: 64 },
         { type: "attitude", operator: ">=", value: 55 }
     ],
@@ -385,7 +383,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Veil открывает серию инвазивных измерений. Актив, для которого медицинская рамка уже стала приемлемой, будет подвергнут полному гинекологическому и ректальному обследованию с инструментами, забором проб и длительным удержанием в раскрытом состоянии. Важна не покорность, а сочетание доверия к процедуре, пластичности и рабочего резерва.",
     conditions: [
         { type: "acquired_trait", key: "trait_clinical_fetish", operator: ">=", value: 1 },
-        { type: "preference", key: "clinical", operator: ">=", value: 15 },
         { type: "custom", key: "plasticity", operator: ">=", value: 62 },
         { type: "attitude", operator: ">=", value: 60 },
         { type: "custom", key: "capacity", operator: ">=", value: 52 }
@@ -430,7 +427,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Veil изучает отклик Аномалии на полное лишение сенсорного входа. Актив будет помещён в изолирующий кокон с заглушёнными зрением, слухом и осязанием, при этом удерживаемый на грани оргазма без разрядки. Ожидается глубокая диссоциация и аномальный отклик на пустоту.",
     conditions: [
         { type: "acquired_trait", key: "trait_sensory_deprivation", operator: ">=", value: 1 },
-        { type: "preference", key: "deprivation", operator: ">=", value: 15 },
         { type: "custom", key: "plasticity", operator: ">=", value: 60 },
         { type: "custom", key: "openness", operator: ">=", value: 60 }
     ],
@@ -520,7 +516,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
         { type: "custom", key: "plasticity", operator: ">=", value: 60 },
         { type: "custom", key: "openness", operator: ">=", value: 60 },
-        { type: "preference", key: "chemical", operator: ">=", value: 12 }
+        { type: "acquired_trait", key: "trait_chem_addict", operator: ">=", value: 1 },
     ],
     rewards: { credits: 800, trust: 15, items: ["drug_sensitizer"] },
     penalties: { credits: -120, trust: -6 },
@@ -562,7 +558,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Veil изучает отклик на непрерывную вибрационную стимуляцию гениталий. Актив будет закреплён на вибростанке с постоянной стимуляцией клитора и вагины, с периодическим доведением до оргазма и немедленным продолжением без паузы. Ожидается истощение и перестройка оргазменного порога.",
     conditions: [
         { type: "acquired_trait", key: "trait_point_clitoris", operator: ">=", value: 1 },
-        { type: "preference", key: "sexual", operator: ">=", value: 15 },
+        { type: "acquired_trait", key: "trait_sexual_dependency", operator: ">=", value: 2 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 65 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
@@ -606,7 +602,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Veil калибрует электростимуляционный контур на эрогенных зонах. Актив будет подключён к электродам на клиторе, сосках и анусе, с нарастающей силой разрядов до порога срыва. Ожидается перестройка нервной проводимости и электрофетишистский след.",
     conditions: [
         { type: "acquired_trait", key: "trait_electrophile", operator: ">=", value: 1 },
-        { type: "preference", key: "electronic", operator: ">=", value: 16 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
         { type: "custom", key: "capacity", operator: ">=", value: 48 }
     ],
@@ -738,7 +733,6 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Инженеры Helix калибруют систему контроля позы. Актив будет закреплён в жёсткой фиксации — наручники, ошейник, ремни — и удерживаем в заданных позах длительное время, с периодической стимуляцией для проверки отклика. Ожидается закрепление фетиша фиксации.",
     conditions: [
         { type: "acquired_trait", key: "trait_restraint_fetish", operator: ">=", value: 1 },
-        { type: "preference", key: "restraint", operator: ">=", value: 17 },
         { type: "custom", key: "capacity", operator: ">=", value: 58 },
         { type: "custom", key: "openness", operator: ">=", value: 58 }
     ],
@@ -782,7 +776,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     description: "Helix готовит тестовый пул для сенсорного интерфейса. Актив должен положительно реагировать на электронные средства стимуляции, демонстрируя высокую чувствительность и принятие оператора. Ожидается закрепление технофильного отклика.",
     conditions: [
         { type: "acquired_trait", key: "trait_technophile", operator: ">=", value: 1 },
-        { type: "preference", key: "electronic", operator: ">=", value: 16 },
+        { type: "acquired_trait", key: "trait_electrophile", operator: ">=", value: 2 },
         { type: "custom", key: "sensitivity", operator: ">=", value: 65 },
         { type: "attitude", operator: ">=", value: 65 }
     ],
@@ -1133,7 +1127,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Протокол стимуляции простаты",
     description: "Helix стандартизирует простатическую стимуляцию как инструмент контроля. Актив будет подвергнут продолжительной стимуляции простаты — проникновением, вибрацией и электростимуляцией — при фиксации, чтобы закрепить простатический отклик как управляемый. Ожидается перестройка простатической чувствительности и закрепление подчинения.",
     conditions: [
-        { type: "preference", key: "penetration", operator: ">=", value: 14 },
+        { type: "acquired_trait", key: "trait_penetration", operator: ">=", value: 2 },
         { type: "custom", key: "plasticity", operator: ">=", value: 65 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 55 }
@@ -1177,7 +1171,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Сервисная подготовка",
     description: "Helix готовит актив к сервисной роли. Актив будет обучен базовому сексуальному обслуживанию оператора — оральному и ручному — с поощрением за качество. Ожидается закрепление сервисной покорности без глубокой травмы.",
     conditions: [
-        { type: "preference", key: "oral", operator: ">=", value: 12 },
+        { type: "acquired_trait", key: "trait_point_lips", operator: ">=", value: 1 },
         { type: "attitude", operator: ">=", value: 60 },
         { type: "custom", key: "openness", operator: ">=", value: 60 },
         { type: "custom", key: "plasticity", operator: ">=", value: 55 }
@@ -1221,7 +1215,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Контроль разрядки",
     description: "Helix калибрует контроль оргазма как инструмент обусловливания. Актив будет доведён до грани оргазма и удерживаем на ней, с разрядкой только по команде оператора. Ожидается закрепление оргазма как награды, подчинённой внешнему контролю.",
     conditions: [
-        { type: "preference", key: "sexual", operator: ">=", value: 14 },
+        { type: "acquired_trait", key: "trait_sexual_dependency", operator: ">=", value: 2 },
         { type: "custom", key: "plasticity", operator: ">=", value: 62 },
         { type: "attitude", operator: ">=", value: 58 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
@@ -1265,7 +1259,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Анальная подготовка",
     description: "Helix стандартизирует анальную выносливость актива. Актив будет подвергнут постепенному анальному растяжению с нарастающим диаметром, с фиксацией и контролем глубины. Ожидается закрепление анальной покорности и перестройка сфинктера.",
     conditions: [
-        { type: "preference", key: "penetration", operator: ">=", value: 13 },
+        { type: "acquired_trait", key: "trait_penetration", operator: ">=", value: 1 },
         { type: "custom", key: "plasticity", operator: ">=", value: 60 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 55 }
@@ -1353,7 +1347,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Переписывание боли",
     description: "Архив изучает, можно ли переписать воспоминание о боли в воспоминание об удовольствии. Актив будет подвергнут серии болевых воздействий, после чего его память о них будет переинтерпретирована через направленное внушение: боль подаётся как желанный сигнал. Ожидается расхождение между пережитым и запомненным.",
     conditions: [
-        { type: "preference", key: "pain", operator: ">=", value: 12 },
+        { type: "acquired_trait", key: "trait_masochist", operator: ">=", value: 1 },
         { type: "custom", key: "plasticity", operator: ">=", value: 65 },
         { type: "custom", key: "openness", operator: ">=", value: 62 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
@@ -1749,7 +1743,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
     title: "Переписывание разрядки",
     description: "Архив изучает переписывание воспоминания об оргазме. Актив будет доведён до оргазма, после чего его память о разрядке будет переинтерпретирована: удовольствие — в боль, или наоборот. Ожидается расхождение между телесным откликом и запомненным переживанием.",
     conditions: [
-        { type: "preference", key: "sexual", operator: ">=", value: 13 },
+        { type: "acquired_trait", key: "trait_sexual_dependency", operator: ">=", value: 1 },
         { type: "custom", key: "plasticity", operator: ">=", value: 64 },
         { type: "custom", key: "openness", operator: ">=", value: 62 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
