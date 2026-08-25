@@ -132,6 +132,58 @@ function checkCondition(subjectId: string, metric: string, operator: string, val
     }
 }
 
+/**
+ * Прогресс поручения — детерминированная оценка для UI-карточки.
+ * contract → сколько трейтов достигнуто из требуемых; condition → текущее vs порог;
+ * sequence/category → доля выполненных шагов (не отслеживается пошагово, возвращаем null).
+ */
+export function directiveProgress(
+    subjectId: string,
+    directive: StaffDirective,
+): { label: string; value: number; max: number; current: number; target: number } | null {
+    const spec = directive.spec;
+    if (!spec) return null;
+    switch (spec.kind) {
+        case 'contract': {
+            const contract = db.prepare(`SELECT * FROM asset_contracts WHERE id = ?`).get(spec.contractId) as any;
+            if (!contract) return null;
+            const typed: AssetContract = { ...contract, conditions: JSON.parse(contract.conditions || '[]') };
+            // max = число требуемых трейтов (уникальных), value = достигнутые.
+            const required = new Set<string>();
+            const achieved = new Set<string>();
+            const conditions = typed.conditions || [];
+            for (const cond of conditions) {
+                if (cond.type !== 'acquired_trait' || !cond.key) continue;
+                required.add(cond.key);
+                if (currentTraitValue(subjectId, cond.key) >= Number(cond.value ?? 0)) achieved.add(cond.key);
+            }
+            return {
+                label: 'Готовность к контракту',
+                value: achieved.size,
+                max: required.size,
+                current: achieved.size,
+                target: required.size,
+            };
+        }
+        case 'condition': {
+            const current = metricValue(subjectId, spec.metric);
+            return {
+                label: `Метрика ${spec.metric}`,
+                value: current,
+                max: spec.value * 2,
+                current,
+                target: spec.value,
+            };
+        }
+        case 'sequence':
+            return { label: 'Серия действий', value: 0, max: spec.actions.length, current: 0, target: spec.actions.length };
+        case 'category':
+            return { label: 'Категория', value: 0, max: 1, current: 0, target: 1 };
+        default:
+            return null;
+    }
+}
+
 /** Выбирает действие по спецификации алгоритма. */
 function pickActionForSpec(
     subjectId: string,

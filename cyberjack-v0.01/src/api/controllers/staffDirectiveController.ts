@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { staffDirectiveRepo } from '../../infrastructure/staffDirectiveRepo';
-import { nextExecutorAction } from '../../scenario/staffDirectiveService';
+import { nextExecutorAction, directiveProgress } from '../../scenario/staffDirectiveService';
 
 export function assignStaffDirective(req: Request, res: Response) {
     try {
@@ -24,9 +24,13 @@ export function assignStaffDirective(req: Request, res: Response) {
 export function listStaffDirectives(req: Request, res: Response) {
     try {
         const executorId = String(req.query.executorId || '');
-        const directives = executorId
+        const directives = (executorId
             ? staffDirectiveRepo.listActiveForExecutor(executorId)
-            : staffDirectiveRepo.listAllActive();
+            : staffDirectiveRepo.listAllActive())
+            .map(directive => ({
+                ...directive,
+                progress: directiveProgress(directive.subjectId, directive),
+            }));
         res.json({ success: true, directives });
     } catch (e: any) {
         res.status(500).json({ success: false, error: String(e?.message || e) });
