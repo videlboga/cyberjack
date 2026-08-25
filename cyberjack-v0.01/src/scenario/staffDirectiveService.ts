@@ -166,13 +166,15 @@ export function directiveProgress(
             };
         }
         case 'condition': {
-            const current = metricValue(subjectId, spec.metric);
+            const metric = spec.targetMetric || spec.guardMetric || 'tension';
+            const target = spec.targetValue ?? spec.guardValue ?? 0;
+            const current = metricValue(subjectId, metric);
             return {
-                label: `Метрика ${spec.metric}`,
+                label: `Метрика ${metric}`,
                 value: current,
-                max: spec.value * 2,
+                max: Math.max(target * 2, 100),
                 current,
-                target: spec.value,
+                target,
             };
         }
         case 'sequence':
@@ -212,11 +214,19 @@ function pickActionForSpec(
             return null;
         }
         case 'condition': {
-            // Если условие истинно — выполняем основное действие, иначе else.
-            const met = checkCondition(subjectId, spec.metric, spec.operator, spec.value);
-            const actionId = met ? spec.actionId : spec.elseActionId;
-            if (!actionId) return null;
-            return { actionId, pointId: spec.pointId || 'systemic' };
+            // Протокол: выполняем actionId, пока не нарушен guard и не достигнут target.
+            // Guard нарушен → завершаем (возвращаем null, nextExecutorAction завершит).
+            if (spec.guardMetric && spec.guardOperator && spec.guardValue !== undefined) {
+                const guardOk = checkCondition(subjectId, spec.guardMetric, spec.guardOperator, spec.guardValue);
+                if (!guardOk) return null;
+            }
+            // Target достигнут → завершаем.
+            if (spec.targetMetric && spec.targetOperator && spec.targetValue !== undefined) {
+                const targetMet = checkCondition(subjectId, spec.targetMetric, spec.targetOperator, spec.targetValue);
+                if (targetMet) return null;
+            }
+            if (!spec.actionId) return null;
+            return { actionId: spec.actionId, pointId: spec.pointId || 'systemic' };
         }
         default:
             return null;

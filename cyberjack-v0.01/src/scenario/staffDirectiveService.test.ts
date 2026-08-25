@@ -123,10 +123,10 @@ describe('staffDirectiveService', () => {
         expect(action!.actionId).toBeTruthy();
     });
 
-    it('condition-алгоритм выбирает else-действие, когда условие ложно', () => {
+    it('condition-алгоритм завершается, когда guard нарушен', () => {
         db.prepare(`INSERT INTO characters (id, name, kind, current_scene_id) VALUES ('SUB-COND', 'Тест', 'npc', 'scene_lab_calibrator')
             ON CONFLICT(id) DO NOTHING`).run();
-        // capacity = 10 < 50 → условие «capacity >= 50» ложно → else-действие.
+        // capacity = 10 < 50 → guard «capacity >= 50» нарушен → протокол завершён.
         db.prepare(`INSERT INTO subjects (id, name, sensitivity, capacity, openness, plasticity, attitude, tension, preferences)
             VALUES ('SUB-COND', 'Тест', 50, 10, 50, 50, 50, 0, '{}')
             ON CONFLICT(id) DO NOTHING`).run();
@@ -136,10 +136,10 @@ describe('staffDirectiveService', () => {
             executorId: 'STAFF-COND',
             subjectId: 'SUB-COND',
             goal: 'Условие',
-            spec: { kind: 'condition', actionId: 'act_slap', metric: 'capacity', operator: '>=', value: 50, elseActionId: 'act_punch' },
+            spec: { kind: 'condition', actionId: 'act_slap', guardMetric: 'capacity', guardOperator: '>=', guardValue: 50 },
         });
         const action = nextExecutorAction('STAFF-COND');
-        expect(action).not.toBeNull();
-        expect(action!.actionId).toBe('act_punch');
+        // Guard нарушен → действие не выбирается → протокол завершён.
+        expect(action).toBeNull();
     });
 });

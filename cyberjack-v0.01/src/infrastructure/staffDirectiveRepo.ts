@@ -24,15 +24,17 @@ export type DirectiveSpec =
     | { kind: 'category'; tags: string[]; repeats?: number }
     | {
           kind: 'condition';
-          /** Действие, выполняемое пока условие истинно. */
+          /** Действие, выполняемое пока действует протокол. */
           actionId: string;
           pointId?: string;
-          /** Условие: метрика и порог. */
-          metric: 'sensitivity' | 'capacity' | 'tension' | 'attitude' | 'openness' | 'plasticity';
-          operator: '>=' | '<=' | '>';
-          value: number;
-          /** Действие, выполняемое когда условие ложно (опционально). */
-          elseActionId?: string;
+          /** Целевая метрика: когда достигнута (op value) — протокол завершён. */
+          targetMetric?: string;
+          targetOperator?: '>=' | '<=' | '>';
+          targetValue?: number;
+          /** Защитная метрика: если нарушается op value — протокол приостанавливается. */
+          guardMetric?: string;
+          guardOperator?: '>=' | '<=' | '>';
+          guardValue?: number;
       };
 
 const mapRow = (r: any): StaffDirective => ({

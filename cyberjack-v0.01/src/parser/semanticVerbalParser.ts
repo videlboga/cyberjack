@@ -237,10 +237,12 @@ export const PARSER_SCHEMA = {
                             contractId: { type: ['string', 'null'] },
                             actionId: { type: ['string', 'null'] },
                             pointId: { type: ['string', 'null'] },
-                            metric: { type: ['string', 'null'] },
-                            operator: { type: ['string', 'null'] },
-                            value: { type: ['number', 'null'] },
-                            elseActionId: { type: ['string', 'null'] },
+                            targetMetric: { type: ['string', 'null'] },
+                            targetOperator: { type: ['string', 'null'] },
+                            targetValue: { type: ['number', 'null'] },
+                            guardMetric: { type: ['string', 'null'] },
+                            guardOperator: { type: ['string', 'null'] },
+                            guardValue: { type: ['number', 'null'] },
                             tags: { type: 'array', items: { type: 'string' } },
                             actions: {
                                 type: 'array',
@@ -315,8 +317,12 @@ pendingCommandRelation="continue" ставь только когда без не
 
 Верни JSON:
 {"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|remove_worn_clothing|move|change_current_interaction|run_directive|interrupt_directive","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null,"requesterId":null,"algorithm":null,"misunderstood":null},"confidence":0..1}
-Для run_directive: поручение персонажу выполнять алгоритм (протокол) — например «подготовь к контракту», «натренируй на болевые реакции», «держи на грани оргазма и унижай», «выполни серию». actorId = исполнитель, targetId = над кем, goal = краткая цель, algorithm.kind = contract (contractId) | sequence (actions) | category (tags) | condition (actionId+metric+operator+value+elseActionId). Это НЕ единичное действие, а длящийся протокол.
-Для interrupt_directive: кто-то требует, чтобы исполнитель остановил текущее поручение (например «остановись», «прекрати», «Эли требует прекратить»). actorId = исполнитель, requesterId = кто требует.
+Для run_directive: поручение персонажу выполнять алгоритм (протокол) — например «подготовь к контракту», «натренируй на болевые реакции», «держи на грани оргазма и унижай», «выполни серию». actorId = исполнитель, targetId = над кем, goal = краткая цель. algorithm.kind:
+- contract (contractId) — подготовить к конкретному контракту;
+- sequence (actions: [{actionId, pointId}]) — выполнить ряд действий по порядку;
+- category (tags: [теги]) — действия с тегами категории;
+- condition (actionId + необязательно target* и guard*) — устойчивый протокол: выполняй actionId, пока guard* не нарушен и target* не достигнут. target = цель (когда достигнута — протокол завершён), guard = защитное ограничение (при нарушении — прекратить). Пример «доведи чувствительность до 400%, но чтобы выносливость не падала ниже 50»: actionId=действие, targetMetric=sensitivity targetValue=400 targetOperator=">=", guardMetric=capacity guardOperator=">=" guardValue=50. Это НЕ единичное действие, а длящийся протокол.
+Для interrupt_directive: исполнитель (actorId) напрямую требует остановить поручение («остановись», «перестань», «хватит»). Это только прямое обращение к исполнителю; третье лицо («Эли требует, чтобы Рин остановилась») — не наш кейс, верни none.
 Для remove_worn_clothing используй type="remove_worn_clothing" (без actionId/contextId), когда команда требует снять всю одежду целиком («разденься», «сними всё», «сними одежду»). Для снятия одного конкретного предмета используй deactivate_context с contextId этого предмета.
 Для change_pose contextId обязан быть ID позы из «Доступных поз» (например pose_sitting, act_present_feet), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.
 Для move, когда игрок называет «свою/твою/мою камеру», «домой», «в камеру» без конкретного имени — верни location="своя камера" (движок сам подставит жилую камеру персонажа). Конкретную комнату или персонажа из «Контекста места» возвращай их именем.
@@ -415,10 +421,12 @@ ID выбирай только из кандидатов и присутству
                             kind: 'condition',
                             actionId: algorithm.actionId || '',
                             pointId: algorithm.pointId || undefined,
-                            metric: (algorithm.metric as any) || 'sensitivity',
-                            operator: (algorithm.operator as any) || '>=',
-                            value: Number(algorithm.value ?? 0),
-                            elseActionId: algorithm.elseActionId || undefined,
+                            targetMetric: algorithm.targetMetric || undefined,
+                            targetOperator: (algorithm.targetOperator as any) || undefined,
+                            targetValue: algorithm.targetValue ?? undefined,
+                            guardMetric: algorithm.guardMetric || undefined,
+                            guardOperator: (algorithm.guardOperator as any) || undefined,
+                            guardValue: algorithm.guardValue ?? undefined,
                         };
                         break;
                     default:

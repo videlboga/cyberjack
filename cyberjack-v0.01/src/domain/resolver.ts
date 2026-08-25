@@ -5,12 +5,17 @@ export type DirectiveAlgorithm =
   | { kind: 'category'; tags: string[]; repeats?: number }
   | {
       kind: 'condition';
+      /** Действие, выполняемое пока действует протокол. */
       actionId: string;
       pointId?: string;
-      metric: 'sensitivity' | 'capacity' | 'tension' | 'attitude' | 'openness' | 'plasticity';
-      operator: '>=' | '<=' | '>';
-      value: number;
-      elseActionId?: string;
+      /** Целевая метрика: когда достигнута (op value) — протокол завершён. */
+      targetMetric?: string;
+      targetOperator?: '>=' | '<=' | '>';
+      targetValue?: number;
+      /** Защитная метрика: если нарушается op value — протокол приостанавливается. */
+      guardMetric?: string;
+      guardOperator?: '>=' | '<=' | '>';
+      guardValue?: number;
     };
 
 export type CommandIntent =
