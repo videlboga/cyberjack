@@ -5,7 +5,7 @@ import { appendRoleHistory, ensureCharacterLifecycle } from './characterLifecycl
 import { ensureStarterClothing, STARTER_CLOTHING } from '../infrastructure/starterClothing';
 import { clearCalibrationSetupContexts } from './calibrationContextCleanup';
 import { emitSupplyPurchased } from './eventDirector';
-import { ensureGeneratedCandidates } from './generatedCandidates';
+import { ensureGeneratedCandidates, isCandidateUnlocked, candidateUnlockRequirement } from './generatedCandidates';
 import { ensureCharacterStorySeeds } from './characterStorySeeds';
 import { seedAllBiographies } from '../services/seedBiography';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
@@ -1199,7 +1199,9 @@ export function listCandidates() {
         WHERE sc.scene_id = 'scene_broker' AND sc.role = 'candidate'
         ORDER BY c.name
     `).all() as any[];
-    return rows.map(row => {
+    return rows
+        .filter(row => isCandidateUnlocked(row.id))
+        .map(row => {
         let profile: Record<string, any> = {};
         try { profile = JSON.parse(row.profile_json || '{}'); } catch { profile = {}; }
         return {
@@ -1209,7 +1211,8 @@ export function listCandidates() {
             description: profile.description || profile.origin?.biography || '',
             biography: profile.origin?.biography || '',
             staffCost: Number(profile.recruitment?.staffCost || 0),
-            assetCost: Number(profile.recruitment?.assetCost || 0)
+            assetCost: Number(profile.recruitment?.assetCost || 0),
+            unlock: candidateUnlockRequirement(row.id),
         };
     });
 }

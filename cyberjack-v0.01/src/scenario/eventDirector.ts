@@ -9,11 +9,13 @@ import {
 } from '../infrastructure/eventDirectorRepo';
 import { contractRepo } from '../infrastructure/contractRepo';
 import { SubjectCoreState } from '../domain/types';
+import { isCandidateUnlocked, candidateUnlockRequirement } from './generatedCandidates';
 
 const PROMISE_TEMPLATE = 'promise_follow_up_v1';
 const METRIC_CONTRACT_TEMPLATE = 'metric_contract_offer_v1';
 const SUPPLY_LOT_TEMPLATE = 'supply_lot_offer_v1';
 const SUPPLY_TAIL_TEMPLATE = 'supply_origin_tail_v1';
+const CANDIDATE_OFFER_TEMPLATE = 'candidate_arrival_v1';
 
 const worldMinute = () => Number(
     (db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0
@@ -303,12 +305,61 @@ const presentOpportunity = (event:EventOpportunity) => {
             ],
         };
     }
+    if (event.templateId === CANDIDATE_OFFER_TEMPLATE) {
+        return {
+            ...event,title:'Новый кандидат',senderName:'Брокер',
+            body:`${event.payload.name} появился в витрине. Досье доступно у Брокера.`,
+            choices:[
+                { id:'open_broker',label:'Открыть витрину',kind:'primary' },
+                { id:'defer',label:'Позже',kind:'secondary' },
+            ],
+        };
+    }
     return { ...event, title:'Событие', body:'Поступило новое сообщение.', choices:[] };
 };
+
+/**
+ * При открытии inbox проверяет, не разблокировался ли новый кандидат
+ * (по числу контрактов/покупок). Если да и сигнал ещё не подавался —
+ * создаёт событие прибытия, чтобы игрок узнал о новом кандидате.
+ */
+export function ensureCandidateArrivals(now: number) {
+    const ids = [
+        'NPC-CAND-GEN-02', 'NPC-CAND-GEN-03', 'NPC-CAND-GEN-04',
+        'NPC-CAND-GEN-05', 'NPC-CAND-KATE',
+    ];
+    for (const id of ids) {
+        if (!isCandidateUnlocked(id)) continue;
+        const req = candidateUnlockRequirement(id);
+        const signalId = `candidate:arrived:${id}`;
+        if (!directorSignalRepo.claim({
+            id: signalId, type: 'candidate_unlocked',
+            sourceType: 'candidate', sourceId: id,
+            payload: { candidateId: id, requirement: req },
+            worldMinute: now,
+        })) continue;
+        const name = characterName(id);
+        eventOpportunityRepo.save({
+            id: `opportunity:${randomUUID()}`,
+            templateId: CANDIDATE_OFFER_TEMPLATE,
+            status: 'available',
+            channel: 'inbox',
+            priority: .5,
+            urgency: .2,
+            actorIds: [],
+            threadIds: [],
+            locationId: 'scene_broker',
+            availableFrom: now,
+            expiresAt: now + 4 * 1440,
+            payload: { candidateId: id, name },
+        });
+    }
+}
 
 export function listInbox(limit = 12) {
     const now = worldMinute();
     ensureAuthoredSupplyOpportunity(now);
+    ensureCandidateArrivals(now);
     return eventOpportunityRepo.listAvailable(now, limit).map(event => {
         if (event.status === 'available') {
             event.status = 'presented';
@@ -334,7 +385,9 @@ export function resolveOpportunity(id:string, choice:string) {
                 ? ['open_supply','defer','ignore']
                 : event.templateId === SUPPLY_TAIL_TEMPLATE
                     ? ['inspect','ignore']
-            : [];
+                    : event.templateId === CANDIDATE_OFFER_TEMPLATE
+                        ? ['open_broker','defer']
+                : [];
     if (!allowedChoices.includes(choice)) throw new Error('Недоступный вариант ответа');
 
     if (choice === 'defer') {

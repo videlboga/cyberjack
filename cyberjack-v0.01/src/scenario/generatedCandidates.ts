@@ -16,6 +16,15 @@ export type CandidateSeed = {
     description?: string;
     /** Явные параметры (coreModifiers относительно 50) вместо LLM-генерации. */
     coreModifiers?: Record<string, number>;
+    /** Условие появления кандидата. По умолчанию — доступен сразу. */
+    unlock?: {
+        /** Доступен только после N выполненных контрактов (любых). */
+        contracts?: number;
+        /** Доступен только после N покупок событийных препаратов. */
+        drugDeals?: number;
+        /** Доступен только после N выполненных контрактов фракции fac_core. */
+        coreContracts?: number;
+    };
 };
 
 const GENERATED_CANDIDATES: CandidateSeed[] = [
@@ -33,8 +42,9 @@ const GENERATED_CANDIDATES: CandidateSeed[] = [
         id: 'NPC-CAND-GEN-02',
         seed: 'omnicron-candidate-random-02-v1',
         coreModifiers: { sensitivity: 15, capacity: -20, openness: -25, plasticity: -10, attitude: -20 },
+        unlock: { contracts: 2 },
     },
-    { id: 'NPC-CAND-GEN-03', seed: 'omnicron-candidate-random-03-v1', name: 'Рин', age: 18, gender: 'female', coreModifiers: { sensitivity: 15, capacity: -15, openness: 20, plasticity: 15, attitude: -25 }, description: 'Восемнадцатилетняя дочь нелегального торговца препаратами из внешнего кольца. Крайне сабмиссивная, эскапичная, мазохистка, склонная к самоповреждающему поведению и употреблению препаратов. После смерти отца продана организацией в лабораторию.' },
+    { id: 'NPC-CAND-GEN-03', seed: 'omnicron-candidate-random-03-v1', name: 'Рин', age: 18, gender: 'female', coreModifiers: { sensitivity: 15, capacity: -15, openness: 20, plasticity: 15, attitude: -25 }, description: 'Восемнадцатилетняя дочь нелегального торговца препаратами из внешнего кольца. Крайне сабмиссивная, эскапичная, мазохистка, склонная к самоповреждающему поведению и употреблению препаратов. После смерти отца продана организацией в лабораторию.', unlock: { drugDeals: 2 } },
     {
         id: 'NPC-CAND-GEN-04',
         seed: 'omnicron-candidate-random-04-v1',
@@ -42,8 +52,9 @@ const GENERATED_CANDIDATES: CandidateSeed[] = [
         age: 19,
         gender: 'female',
         coreModifiers: { sensitivity: 5, capacity: 10, openness: 10, plasticity: 10, attitude: 5 },
+        unlock: { contracts: 4 },
     },
-    { id: 'NPC-CAND-GEN-05', seed: 'authored:kai:v1', name: 'Кай', age: 36, gender: 'male', coreModifiers: { sensitivity: 15, capacity: 20, openness: 35, plasticity: 25, attitude: 20 }, description: 'Высокопоставленный учёный из центральных лабораторий станции, передавший себя как актив для получения данных изнутри. Андрогинен, тёмная кожа, светлые волосы, пронзительные голубые глаза; тело несёт следы множества гормональных изменений и генных модификаций.' },
+    { id: 'NPC-CAND-GEN-05', seed: 'authored:kai:v1', name: 'Кай', age: 36, gender: 'male', coreModifiers: { sensitivity: 15, capacity: 20, openness: 35, plasticity: 25, attitude: 20 }, description: 'Высокопоставленный учёный из центральных лабораторий станции, передавший себя как актив для получения данных изнутри. Андрогинен, тёмная кожа, светлые волосы, пронзительные голубые глаза; тело несёт следы множества гормональных изменений и генных модификаций.', unlock: { coreContracts: 3 } },
     {
         id: 'NPC-CAND-KATE',
         seed: 'authored:kate:v1',
@@ -52,6 +63,7 @@ const GENERATED_CANDIDATES: CandidateSeed[] = [
         gender: 'female',
         coreModifiers: { sensitivity: 15, capacity: 15, openness: 40, plasticity: 10, attitude: 10 },
         description: 'Огненно-рыжая, женственная. Родилась и выросла в другой лаборатории по разгону интимных реакций; мать — постоянная подопытная. Передана сюда по межлабораторному контракту как актив с высокой интимной отзывчивостью.',
+        unlock: { contracts: 6 },
     },
 ];
 
@@ -239,6 +251,51 @@ export function ensureGeneratedCandidates(): string[] {
         db.prepare('UPDATE characters SET profile_json = ? WHERE id = ?').run(JSON.stringify(profileJson), spec.id);
     }
     return created;
+}
+
+/** Счётчик выполненных контрактов игрока (state = 'completed'). */
+export function countCompletedContracts(): number {
+    return Number((db.prepare(`SELECT COUNT(*) AS c FROM asset_contracts WHERE state = 'completed'`).get() as any)?.c || 0);
+}
+
+/** Счётчик покупок событийных препаратов (закрытые партии). */
+export function countDrugDeals(): number {
+    return Number((db.prepare(`
+        SELECT COUNT(*) AS c FROM world_facts
+        WHERE predicate = 'acquired_supply_lot'
+    `).get() as any)?.c || 0);
+}
+
+/** Счётчик выполненных контрактов фракции Центра (fac_core). */
+export function countCoreContracts(): number {
+    return Number((db.prepare(`
+        SELECT COUNT(*) AS c FROM asset_contracts
+        WHERE state = 'completed' AND issuer_id = 'fac_core'
+    `).get() as any)?.c || 0);
+}
+
+/**
+ * Доступен ли кандидат игроку сейчас. Без unlock-условия — доступен сразу.
+ */
+export function isCandidateUnlocked(candidateId: string): boolean {
+    const spec = GENERATED_CANDIDATES.find(c => c.id === candidateId);
+    if (!spec?.unlock) return true;
+    const u = spec.unlock;
+    if (u.contracts != null && countCompletedContracts() < u.contracts) return false;
+    if (u.drugDeals != null && countDrugDeals() < u.drugDeals) return false;
+    if (u.coreContracts != null && countCoreContracts() < u.coreContracts) return false;
+    return true;
+}
+
+/** Unlock-условие кандидата (для отображения в UI). */
+export function candidateUnlockRequirement(candidateId: string): { kind: string; current: number; needed: number } | null {
+    const spec = GENERATED_CANDIDATES.find(c => c.id === candidateId);
+    const u = spec?.unlock;
+    if (!u) return null;
+    if (u.contracts != null) return { kind: 'contracts', current: countCompletedContracts(), needed: u.contracts };
+    if (u.drugDeals != null) return { kind: 'drugDeals', current: countDrugDeals(), needed: u.drugDeals };
+    if (u.coreContracts != null) return { kind: 'coreContracts', current: countCoreContracts(), needed: u.coreContracts };
+    return null;
 }
 
 export const GENERATED_CANDIDATE_IDS = GENERATED_CANDIDATES.map(candidate => candidate.id);
