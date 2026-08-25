@@ -878,6 +878,12 @@ export function CampaignApp() {
         setScenario(world);
         setTimeFlow(flowData.timeFlow);
         setInbox(inboxData.events || []);
+        try {
+          const dirData = await api("/api/staff/directives");
+          setDirectives(dirData.directives || []);
+        } catch {
+          setDirectives([]);
+        }
         recordWorldStateHistory(
           world.residents || [],
           world.clock.totalMinutes,
@@ -918,31 +924,7 @@ export function CampaignApp() {
     window.localStorage.setItem("cyberjack-ui-theme", uiTheme);
   }, [uiTheme]);
 
-  const [directiveForm, setDirectiveForm] = useState<{
-    open: boolean;
-    staffId: string;
-    subjectId: string;
-    kind: "contract" | "sequence" | "category" | "condition";
-    contractId: string;
-    actionIds: string;
-    tags: string;
-    metric: string;
-    operator: string;
-    value: string;
-    elseActionId: string;
-  }>({
-    open: false,
-    staffId: "",
-    subjectId: "",
-    kind: "contract",
-    contractId: "",
-    actionIds: "",
-    tags: "",
-    metric: "sensitivity",
-    operator: ">=",
-    value: "50",
-    elseActionId: "",
-  });
+  const [directives, setDirectives] = useState<any[]>([]);
 
   const mutate = async (
     path: string,
@@ -969,64 +951,13 @@ export function CampaignApp() {
     }
   };
 
-  const submitDirective = async () => {
-    if (!directiveForm.staffId || !directiveForm.subjectId) {
-      setError("Выберите сотрудника и актива");
-      return;
-    }
-    let spec: Record<string, unknown> | undefined;
-    if (directiveForm.kind === "contract") {
-      if (!directiveForm.contractId) {
-        setError("Выберите контракт");
-        return;
-      }
-      spec = { kind: "contract", contractId: directiveForm.contractId };
-    } else if (directiveForm.kind === "sequence") {
-      const actions = directiveForm.actionIds
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .map((actionId) => ({ actionId, pointId: "systemic" }));
-      if (!actions.length) {
-        setError("Укажите хотя бы одно действие");
-        return;
-      }
-      spec = { kind: "sequence", actions };
-    } else if (directiveForm.kind === "category") {
-      const tags = directiveForm.tags
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (!tags.length) {
-        setError("Укажите хотя бы один тег");
-        return;
-      }
-      spec = { kind: "category", tags };
-    } else if (directiveForm.kind === "condition") {
-      if (!directiveForm.actionIds.trim()) {
-        setError("Укажите действие");
-        return;
-      }
-      spec = {
-        kind: "condition",
-        actionId: directiveForm.actionIds.trim().split(",")[0],
-        metric: directiveForm.metric,
-        operator: directiveForm.operator,
-        value: Number(directiveForm.value) || 0,
-        elseActionId: directiveForm.elseActionId.trim() || undefined,
-      };
-    }
+  const completeDirective = async (id: number) => {
     const ok = await mutate(
-      "/api/staff/directives",
-      {
-        staffId: directiveForm.staffId,
-        subjectId: directiveForm.subjectId,
-        goal: `Алгоритм: ${directiveForm.kind}`,
-        spec,
-      },
-      "Указание выдано сотруднику",
+      `/api/staff/directives/${id}/complete`,
+      {},
+      "Поручение завершено",
     );
-    if (ok) setDirectiveForm((f) => ({ ...f, open: false }));
+    if (ok) await load(true);
   };
   const enterInteraction = async (resident: Resident) => {
     const device = scenario?.laboratory.find(
@@ -1423,10 +1354,8 @@ export function CampaignApp() {
                     : `${asset.name}: включено`,
                 )
               }
-              directiveForm={directiveForm}
-              setDirectiveForm={setDirectiveForm}
-              submitDirective={submitDirective}
-              contracts={contracts}
+              completeDirective={completeDirective}
+              directives={directives}
             />
           ) : currentSection === "supply" ? (
             <SupplyView
@@ -1603,10 +1532,8 @@ function LaboratoryOverview({
   onRefresh,
   onUse,
   onTogglePanel,
-  directiveForm,
-  setDirectiveForm,
-  submitDirective,
-  contracts,
+  completeDirective,
+  directives,
 }: {
   scenario: Scenario;
   busy: boolean;
@@ -1618,10 +1545,8 @@ function LaboratoryOverview({
   onRefresh: () => Promise<void>;
   onUse: (asset: LabAsset, resident: Resident) => Promise<boolean> | void;
   onTogglePanel: (asset: LabAsset) => Promise<boolean> | void;
-  directiveForm: any;
-  setDirectiveForm: (fn: (f: any) => any) => void;
-  submitDirective: () => Promise<void>;
-  contracts: Contract[];
+  completeDirective: (id: number) => Promise<void>;
+  directives: any[];
 }) {
   const { t } = useI18n();
   const equipmentCovers: Record<string, string> = {
@@ -2188,176 +2113,75 @@ function LaboratoryOverview({
             )}
             {selectedRoom.id === "room_control" && (
               <section className="room-detail-section staff-directive-section">
-                <h3>Указания сотрудникам</h3>
+                <h3>Поручения сотрудникам</h3>
                 <div className="staff-directive-panel">
-                  {!directiveForm.open ? (
-                    <button
-                      className="primary"
-                      disabled={busy}
-                      onClick={() => setDirectiveForm((f) => ({ ...f, open: true }))}
-                    >
-                      Выдать указание
-                    </button>
+                  {!directives.length ? (
+                    <p className="staff-directive-empty">
+                      Нет активных поручений. Поручения выдаются через чат —
+                      напишите сотруднику или активу, например «подготовь
+                      Миру к контракту».
+                    </p>
                   ) : (
-                    <div className="staff-directive-form">
-                      <label>
-                        Сотрудник
-                        <select
-                          value={directiveForm.staffId}
-                          onChange={(e) =>
-                            setDirectiveForm((f) => ({ ...f, staffId: e.target.value }))
-                          }
-                        >
-                          <option value="">— выберите —</option>
-                          {scenario.residents
-                            .filter((r) => r.role === "staff" || r.role === "assistant")
-                            .map((r) => (
-                              <option key={r.id} value={r.id}>
-                                {r.name}
-                              </option>
-                            ))}
-                        </select>
-                      </label>
-                      <label>
-                        Актив
-                        <select
-                          value={directiveForm.subjectId}
-                          onChange={(e) =>
-                            setDirectiveForm((f) => ({ ...f, subjectId: e.target.value }))
-                          }
-                        >
-                          <option value="">— выберите —</option>
-                          {assets.map((a) => (
-                            <option key={a.id} value={a.id}>
-                              {a.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        Тип алгоритма
-                        <select
-                          value={directiveForm.kind}
-                          onChange={(e) =>
-                            setDirectiveForm((f) => ({
-                              ...f,
-                              kind: e.target.value as any,
-                            }))
-                          }
-                        >
-                          <option value="contract">Привести к контракту</option>
-                          <option value="sequence">Серия действий</option>
-                          <option value="category">По категории (теги)</option>
-                          <option value="condition">По условию</option>
-                        </select>
-                      </label>
-                      {directiveForm.kind === "contract" && (
-                        <label>
-                          Контракт
-                          <select
-                            value={directiveForm.contractId}
-                            onChange={(e) =>
-                              setDirectiveForm((f) => ({ ...f, contractId: e.target.value }))
-                            }
+                    <div className="staff-directive-list">
+                      {directives.map((directive) => {
+                        const executor = scenario.residents.find(
+                          (r) => r.id === directive.executorId,
+                        );
+                        const subject = scenario.residents.find(
+                          (r) => r.id === directive.subjectId,
+                        );
+                        const progress = directive.progress;
+                        const pct =
+                          progress && progress.max > 0
+                            ? Math.round((progress.value / progress.max) * 100)
+                            : null;
+                        return (
+                          <article
+                            key={directive.id}
+                            className="staff-directive-card"
                           >
-                            <option value="">— выберите —</option>
-                            {contracts?.map((c: any) => (
-                              <option key={c.id} value={c.id}>
-                                {c.title}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                      )}
-                      {(directiveForm.kind === "sequence" ||
-                        directiveForm.kind === "condition") && (
-                        <label>
-                          Действия (через запятую)
-                          <input
-                            value={directiveForm.actionIds}
-                            onChange={(e) =>
-                              setDirectiveForm((f) => ({ ...f, actionIds: e.target.value }))
-                            }
-                            placeholder="act_slap, act_punch"
-                          />
-                        </label>
-                      )}
-                      {directiveForm.kind === "category" && (
-                        <label>
-                          Теги (через запятую)
-                          <input
-                            value={directiveForm.tags}
-                            onChange={(e) =>
-                              setDirectiveForm((f) => ({ ...f, tags: e.target.value }))
-                            }
-                            placeholder="pain, humiliation"
-                          />
-                        </label>
-                      )}
-                      {directiveForm.kind === "condition" && (
-                        <>
-                          <label>
-                            Метрика
-                            <select
-                              value={directiveForm.metric}
-                              onChange={(e) =>
-                                setDirectiveForm((f) => ({ ...f, metric: e.target.value }))
-                              }
-                            >
-                              <option value="sensitivity">Чувствительность</option>
-                              <option value="capacity">Выносливость</option>
-                              <option value="tension">Напряжение</option>
-                              <option value="attitude">Отношение</option>
-                              <option value="openness">Открытость</option>
-                              <option value="plasticity">Пластичность</option>
-                            </select>
-                          </label>
-                          <label>
-                            Условие
-                            <select
-                              value={directiveForm.operator}
-                              onChange={(e) =>
-                                setDirectiveForm((f) => ({ ...f, operator: e.target.value }))
-                              }
-                            >
-                              <option value=">=">≥</option>
-                              <option value="<=">≤</option>
-                              <option value=">">&gt;</option>
-                            </select>
-                            <input
-                              type="number"
-                              value={directiveForm.value}
-                              onChange={(e) =>
-                                setDirectiveForm((f) => ({ ...f, value: e.target.value }))
-                              }
-                            />
-                          </label>
-                          <label>
-                            Иначе (действие при ложном условии)
-                            <input
-                              value={directiveForm.elseActionId}
-                              onChange={(e) =>
-                                setDirectiveForm((f) => ({ ...f, elseActionId: e.target.value }))
-                              }
-                              placeholder="act_punch"
-                            />
-                          </label>
-                        </>
-                      )}
-                      <div className="staff-directive-actions">
-                        <button
-                          className="primary"
-                          disabled={busy}
-                          onClick={submitDirective}
-                        >
-                          Выдать
-                        </button>
-                        <button
-                          onClick={() => setDirectiveForm((f) => ({ ...f, open: false }))}
-                        >
-                          Отмена
-                        </button>
-                      </div>
+                            <div className="staff-directive-card-head">
+                              <span className="staff-directive-executor">
+                                {executor?.name || directive.executorId}
+                              </span>
+                              <span className="staff-directive-arrow">→</span>
+                              <span className="staff-directive-subject">
+                                {subject?.name || directive.subjectId}
+                              </span>
+                            </div>
+                            <p className="staff-directive-goal">
+                              {directive.goal}
+                            </p>
+                            {progress ? (
+                              <div className="staff-directive-progress">
+                                <div className="staff-directive-progress-label">
+                                  {progress.label}:{" "}
+                                  <strong>
+                                    {progress.value}/{progress.target}
+                                  </strong>
+                                </div>
+                                {pct !== undefined && pct !== null ? (
+                                  <div className="staff-directive-progress-bar">
+                                    <div
+                                      className="staff-directive-progress-fill"
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                  </div>
+                                ) : null}
+                              </div>
+                            ) : null}
+                            <div className="staff-directive-actions">
+                              <button
+                                className="danger"
+                                disabled={busy}
+                                onClick={() => completeDirective(directive.id)}
+                              >
+                                Завершить
+                              </button>
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
