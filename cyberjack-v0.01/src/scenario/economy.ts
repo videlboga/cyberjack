@@ -9,8 +9,9 @@ import { resourceRepo } from '../infrastructure/repositories';
  * от числа активов, физически находящихся в лаборатории (не на контрактах):
  * фиксированная ставка + ставка за каждого актива.
  */
-export const UPKEEP_BASE = 30;        // фикс. содержание за сутки
-export const UPKEEP_PER_ASSET = 10;   // за каждого актива в лаборатории
+export const UPKEEP_BASE = 40;        // фикс. содержание лаборатории за сутки
+export const UPKEEP_PER_ASSET = 25;   // за каждого актива в лаборатории
+export const UPKEEP_PER_EQUIPMENT = 15; // за каждое установленное оборудование
 
 /** Число активов, физически присутствующих в лаборатории (не в in_transfer). */
 export function countLabAssets(playerId = 'PL-1'): number {
@@ -23,9 +24,30 @@ export function countLabAssets(playerId = 'PL-1'): number {
     return Number(row?.n || 0);
 }
 
+/** Покупаемые модули оборудования (не декор, не стартовый стол). */
+const PAID_EQUIPMENT_IDS = new Set([
+    'lab_recovery_capsule',
+    'lab_sex_machine',
+    'lab_mental_correction_chair',
+]);
+
+/** Число установленного платного оборудования (без декора и стартового стола). */
+export function countLabEquipment(playerId = 'PL-1'): number {
+    const ids = [...PAID_EQUIPMENT_IDS];
+    const placeholders = ids.map(() => '?').join(',');
+    const row = db.prepare(`
+        SELECT COUNT(*) AS n
+        FROM laboratory_assets
+        WHERE player_id = ? AND state = 'installed' AND asset_id IN (${placeholders})
+    `).get(playerId, ...ids) as { n: number } | undefined;
+    return Number(row?.n || 0);
+}
+
 /** Стоимость содержания за сутки при текущем составе. */
 export function dailyUpkeepCost(playerId = 'PL-1'): number {
-    return UPKEEP_BASE + UPKEEP_PER_ASSET * countLabAssets(playerId);
+    return UPKEEP_BASE
+        + UPKEEP_PER_ASSET * countLabAssets(playerId)
+        + UPKEEP_PER_EQUIPMENT * countLabEquipment(playerId);
 }
 
 /**

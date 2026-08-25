@@ -26,8 +26,8 @@ describe('Этап 4: экономика', () => {
         resourceRepo.save({ id: 'PL-1', resources: { credits: { characterId: 'PL-1', resourceKey: 'credits', amount: 1000 } } });
         // День 1 (480 мин). Переходим на день 2 (1440 мин) — списание должно сработать.
         advanceWorldTime(1440 - 480, 'test');
-        // Без активов в лаборатории: 1000 - 30 (базовая ставка) = 970
-        expect(credits()).toBe(970);
+        // Без активов и платного оборудования в лаборатории: 1000 - 40 (базовая ставка) = 960
+        expect(credits()).toBe(960);
     });
 
     it('не списывает повторно в тот же день', () => {
@@ -36,6 +36,17 @@ describe('Этап 4: экономика', () => {
         const afterFirst = credits();
         advanceWorldTime(60, 'test'); // ещё час в день 2
         expect(credits()).toBe(afterFirst); // не списано повторно
+    });
+
+    it('учитывает установленное платное оборудование в ежедневном содержании', () => {
+        resourceRepo.save({ id: 'PL-1', resources: { credits: { characterId: 'PL-1', resourceKey: 'credits', amount: 1000 } } });
+        // Устанавливаем капсулу (платное оборудование +15/день) — на старте она НЕ установлена.
+        db.prepare(`INSERT INTO laboratory_assets (player_id, asset_id, name, description, state, metadata)
+            VALUES ('PL-1', 'lab_recovery_capsule', 'Капсула', '', 'installed', ?)
+            ON CONFLICT(player_id, asset_id) DO UPDATE SET metadata = excluded.metadata`).run('{}');
+        advanceWorldTime(1440 - 480, 'test'); // день 2
+        // 1000 - 40 (база) - 15 (оборудование) = 945
+        expect(credits()).toBe(945);
     });
 
     it('капсула без ампулы восстанавливает медленнее, с ампулой — быстрее', () => {
