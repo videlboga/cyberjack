@@ -85,7 +85,7 @@ describe('physiology', () => {
 
     it('описывается при bladder=100, если зафиксирован в оборудовании', () => {
         // Зафиксировать SUB-P в секс-машине.
-        db.prepare(`INSERT INTO laboratory_assets (player_id, asset_id, name, state, metadata) VALUES ('PL-1', 'lab_sex_machine', 'Секс-машина', 'installed', ?)`)
+        db.prepare(`INSERT INTO laboratory_assets (player_id, asset_id, name, state, metadata) VALUES ('PL-1', 'lab_sex_machine_vaginal', 'Секс-машина', 'installed', ?)`)
             .run(JSON.stringify({ subjectId: 'SUB-P' }));
         const phys = getPhysiology('SUB-P');
         phys.bladder = 100;
@@ -96,7 +96,7 @@ describe('physiology', () => {
         // Событие записано в память.
         const mem = db.prepare(`SELECT COUNT(*) AS n FROM memory_embeddings WHERE subject_id='SUB-P' AND metadata LIKE '%incontinence%'`).get() as any;
         expect(mem.n).toBeGreaterThan(0);
-        db.prepare(`DELETE FROM laboratory_assets WHERE asset_id='lab_sex_machine'`).run();
+        db.prepare(`DELETE FROM laboratory_assets WHERE asset_id='lab_sex_machine_vaginal'`).run();
     });
 
     it('свободный персонаж сходит в туалет при bladder>=45', () => {

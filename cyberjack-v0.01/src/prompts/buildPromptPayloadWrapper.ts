@@ -5,7 +5,7 @@ import { getActiveContextPromptText } from '../domain/contextPresentation';
 import { formatWorldTimeContext } from '../narrative/temporalDialogue';
 import { subjectEdgeStateRepo } from '../infrastructure/repositories';
 import { describeEdgeHold } from '../domain/edgeState';
-import { sexMachineStimulation } from '../domain/sexMachineStimulation';
+import { sexMachineStimulation, isSexMachineAsset } from '../domain/sexMachineStimulation';
 
 export async function buildPromptPayloadWithDB(
     ownerId: string,
@@ -70,7 +70,7 @@ export async function buildPromptPayloadWithDB(
         .filter((pointId): pointId is string => Boolean(pointId && pointId !== 'systemic'));
     let deviceMode: string | undefined;
     for (const device of runningDeviceRows) {
-        if (device.asset_id === 'lab_sex_machine') {
+        if (isSexMachineAsset(device.asset_id)) {
             try {
                 const session = JSON.parse(device.metadata || '{}')?.deviceSession;
                 const stimulation = sexMachineStimulation(session?.stimulationMode);

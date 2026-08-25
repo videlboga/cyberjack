@@ -1098,7 +1098,7 @@ export function CampaignApp() {
     const isolatedIds = new Set(
       scenario.laboratory
         .filter((asset) =>
-          ["lab_recovery_capsule", "lab_sex_machine", "lab_mental_correction_chair"].includes(asset.id),
+          ["lab_recovery_capsule", "lab_mental_correction_chair"].includes(asset.id) || asset.id?.startsWith("lab_sex_machine_"),
         )
         .map((asset) => asset.metadata?.subjectId)
         .filter(Boolean),
@@ -1530,7 +1530,9 @@ function LaboratoryOverview({
     lab_diagnostic_table: "/backgrounds/laboratory/diagnostic_table.png",
     lab_recovery_capsule:
       "/backgrounds/laboratory/capsule_outpaint_masked_d1.0.png",
-    lab_sex_machine: "/backgrounds/laboratory/sex_machine.png",
+    lab_sex_machine_vaginal: "/backgrounds/laboratory/sex_machine.png",
+    lab_sex_machine_anal: "/backgrounds/laboratory/sex_machine.png",
+    lab_sex_machine_tickling: "/backgrounds/laboratory/sex_machine.png",
     lab_mental_correction_chair: "/backgrounds/laboratory/mental_correction_chair.png",
   };
   const [selectedRoomId, setSelectedRoomId] = useState(
@@ -1622,7 +1624,7 @@ function LaboratoryOverview({
               occupant.id === resident.id && !occupant.status.startsWith("device:"),
           ),
         );
-    if (currentDevice?.id === "lab_sex_machine") {
+    if (currentDevice?.id?.startsWith("lab_sex_machine_")) {
       return (
         <DeviceControlScreen
           asset={currentDevice}
@@ -1943,7 +1945,9 @@ function LaboratoryOverview({
                     const acceptsAsset = [
                       "lab_recovery_capsule",
                       "lab_diagnostic_table",
-                      "lab_sex_machine",
+                      "lab_sex_machine_vaginal",
+                      "lab_sex_machine_anal",
+                      "lab_sex_machine_tickling",
                       "lab_mental_correction_chair",
                     ].includes(asset.id);
                     const occupant = scenario.residents.find(

@@ -13,7 +13,9 @@ export const roomNameMap: Record<string, string> = {
 export const deviceNameMap: Record<string, string> = {
   'lab_diagnostic_table': 'diagnosticTable',
   'lab_recovery_capsule': 'recoveryCapsule',
-  'lab_sex_machine': 'sexMachine',
+  'lab_sex_machine_vaginal': 'sexMachineVaginal',
+  'lab_sex_machine_anal': 'sexMachineAnal',
+  'lab_sex_machine_tickling': 'sexMachineTickling',
   'lab_mental_correction_chair': 'mentalCorrectionChair'
 };
 

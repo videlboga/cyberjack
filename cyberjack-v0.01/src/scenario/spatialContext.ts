@@ -1,7 +1,7 @@
 import { db } from '../infrastructure/db';
 import { clearCalibrationSetupContexts } from './calibrationContextCleanup';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
-import { sexMachineStimulation } from '../domain/sexMachineStimulation';
+import { sexMachineStimulation, isSexMachineAsset } from '../domain/sexMachineStimulation';
 import type { DeviceSessionMetadata, MentalSessionMetadata } from '../domain/sessionMetadata';
 
 export type SpatialContext = {
@@ -119,7 +119,7 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
     const nearAsset = !occupiedAsset && nearAssetId ? assets.find(asset => asset.asset_id === nearAssetId) : null;
     const isolated = ['lab_recovery_capsule', 'lab_mental_correction_chair'].includes(String(occupiedAsset?.asset_id || ''));
     const isolatedCharacterIds = new Set(assets
-        .filter(asset => ['lab_recovery_capsule', 'lab_sex_machine', 'lab_mental_correction_chair'].includes(asset.asset_id))
+        .filter(asset => ['lab_recovery_capsule', 'lab_sex_machine_vaginal', 'lab_sex_machine_anal', 'lab_sex_machine_tickling', 'lab_mental_correction_chair'].includes(asset.asset_id))
         .map(asset => String(parseMetadata(asset.metadata).subjectId || ''))
         .filter(Boolean));
     const roster = db.prepare(`
@@ -157,7 +157,7 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
         : deviceSession?.orgasmPolicy === 'force'
             ? 'ритм снова и снова подталкивает тебя к неизбежному пику'
             : 'ритм не отступает, когда напряжение приближается к пику';
-    const deviceProtocolDescription = occupiedAsset?.asset_id === 'lab_sex_machine' && deviceSession
+    const deviceProtocolDescription = occupiedAsset?.asset_id && isSexMachineAsset(occupiedAsset.asset_id) && deviceSession
         ? (() => {
             const running = deviceSession.status === 'running';
             const paused = deviceSession.status === 'paused';
@@ -202,7 +202,7 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
             return parts.join('; ') + '.';
         })()
         : '';
-    const postureDescription = occupiedAsset?.asset_id === 'lab_sex_machine'
+    const postureDescription = occupiedAsset?.asset_id && isSexMachineAsset(occupiedAsset.asset_id)
         ? String(deviceSession?.stimulationMode) === 'anal'
             ? 'ты стоишь на четвереньках на металлической поверхности, бёдра разведены, попа приподнята; фиксаторы не дают изменить положение'
             : 'ты лежишь на металлической поверхности и не можешь самостоятельно изменить положение из-за фиксаторов'
@@ -249,7 +249,9 @@ const matches = (query: string, ...values: string[]) => values.some(value => {
 /** Devices that physically fix a character in place; they cannot move themselves. */
 export const ENCLOSED_DEVICE_ASSETS = new Set([
     'lab_recovery_capsule',
-    'lab_sex_machine',
+    'lab_sex_machine_vaginal',
+    'lab_sex_machine_anal',
+    'lab_sex_machine_tickling',
     'lab_mental_correction_chair',
 ]);
 

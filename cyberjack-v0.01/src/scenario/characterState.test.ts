@@ -30,12 +30,12 @@ describe('reconcileCharacterState — единый механизм привед
 
   it('не надевает бельё на персонажа в закрытом устройстве (секс-машина)', () => {
     // Помещаем Май в секс-машину.
-    db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE asset_id = 'lab_sex_machine'`)
+    db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE asset_id = 'lab_sex_machine_vaginal'`)
       .run(JSON.stringify({ roomId: 'room_calibration', subjectId: MAI, deviceSession: { subjectId: MAI, status: 'running', stimulationMode: 'vaginal' } }));
     reconcileCharacterState(MAI, { resetPoints: false });
     const count = db.prepare(`SELECT COUNT(*) AS c FROM active_contexts WHERE subject_id = ? AND action_id = 'eq_clothe_underwear'`).get(MAI) as any;
     expect(count.c).toBe(0);
     // Убираем из устройства, чтобы не влиять на другие тесты.
-    db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE asset_id = 'lab_sex_machine'`).run(JSON.stringify({ roomId: 'room_calibration' }));
+    db.prepare(`UPDATE laboratory_assets SET metadata = ? WHERE asset_id = 'lab_sex_machine_vaginal'`).run(JSON.stringify({ roomId: 'room_calibration' }));
   });
 });

@@ -27,7 +27,9 @@ export function countLabAssets(playerId = 'PL-1'): number {
 /** Покупаемые модули оборудования (не декор, не стартовый стол). */
 const PAID_EQUIPMENT_IDS = new Set([
     'lab_recovery_capsule',
-    'lab_sex_machine',
+    'lab_sex_machine_vaginal',
+    'lab_sex_machine_anal',
+    'lab_sex_machine_tickling',
     'lab_mental_correction_chair',
 ]);
 

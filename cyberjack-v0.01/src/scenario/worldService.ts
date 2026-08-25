@@ -18,7 +18,7 @@ import { enqueueBackgroundJob } from '../orchestration/backgroundJobs';
 import { aggregateMemoryEpisodes } from '../services/memoryEpisodes';
 import { memoryTagLabel } from '../domain/memoryTagLabels';
 import { correctionImpact } from '../domain/memoryCorrection';
-import { SexMachineStimulationMode, sexMachineStimulation } from '../domain/sexMachineStimulation';
+import { SexMachineStimulationMode, sexMachineStimulation, sexMachineModeForAsset, isSexMachineAsset } from '../domain/sexMachineStimulation';
 import { buildEmbedding } from '../services/embeddingService';
 import { applySubjectiveIntervention, applySubjectiveTagIntervention, createManualTagLink, getSubjectiveEpisode, listManualTagLinks, queueSubjectiveEpisode, regenerateSubjectiveEpisode, removeManualTagLink } from '../services/subjectiveMemoryEpisodes';
 import { returnAssetsFromTransfer, expireOverdueContracts } from '../services/contractService';
@@ -87,7 +87,9 @@ const SHOP_OFFERS = [
     { id: 'offer_neurostabilizer', itemId: 'drug_neurostabilizer', name: 'NeuroCalm', description: 'Ампула нейростабилизатора для восстановительной капсулы.', category: 'item', price: 140, stock: 6 },
     { id: 'offer_plasticity_catalyst', itemId: 'drug_plasticity_catalyst', name: 'Mnemosyne-P', description: 'Ампула пластического катализатора для восстановительной капсулы.', category: 'item', price: 210, stock: 4 },
     { id: 'lab_recovery_capsule', itemId: 'lab_recovery_capsule', name: 'Восстановительная капсула', description: 'Вертикальная ёмкость с вязкой тёплой жидкостью, кислородной маской и каналом подачи питательного раствора; постепенно расслабляет и стабилизирует тело.', category: 'laboratory', price: 700, stock: 1 },
-    { id: 'lab_sex_machine', itemId: 'lab_sex_machine', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.', category: 'laboratory', price: 1450, stock: 1 },
+    { id: 'lab_sex_machine_vaginal', itemId: 'lab_sex_machine_vaginal', name: 'Модуль секс-машины · вагинальный', description: 'Стационарный программируемый комплекс с вагинальной траекторией, фиксацией в стременах и управляемой интенсивностью.', category: 'laboratory', price: 700, stock: 1 },
+    { id: 'lab_sex_machine_anal', itemId: 'lab_sex_machine_anal', name: 'Модуль секс-машины · анальный', description: 'Комплекс глубокой анальной траектории с контролем глубины и растяжения, управляемой интенсивностью.', category: 'laboratory', price: 900, stock: 1 },
+    { id: 'lab_sex_machine_tickling', itemId: 'lab_sex_machine_tickling', name: 'Модуль секс-машины · щекотка', description: 'Фиксирующая платформа с щёточными и вибрационными насадками для щекотки ступней с меняющимся ритмом.', category: 'laboratory', price: 750, stock: 1 },
     { id: 'lab_mental_correction_chair', itemId: 'lab_mental_correction_chair', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.', category: 'laboratory', price: 1250, stock: 1 }
 ] as const;
 
@@ -108,7 +110,9 @@ const BASE_LAB_ASSETS = [
 // доверия фракций). При покупке `purchaseOffer` вставляет их как `installed`.
 const PURCHASABLE_LAB_ASSETS = [
     { id: 'lab_recovery_capsule', roomId: 'room_calibration', name: 'Восстановительная капсула', description: 'Вертикальная ёмкость с вязкой тёплой жидкостью, кислородной маской и каналом подачи питательного раствора; постепенно расслабляет и стабилизирует тело.' },
-    { id: 'lab_sex_machine', roomId: 'room_calibration', name: 'Модуль секс-машины', description: 'Стационарный программируемый комплекс с несколькими конфигурациями фиксации и стимуляции.' },
+    { id: 'lab_sex_machine_vaginal', roomId: 'room_calibration', name: 'Модуль секс-машины · вагинальный', description: 'Стационарный программируемый комплекс с вагинальной траекторией, фиксацией в стременах и управляемой интенсивностью.' },
+    { id: 'lab_sex_machine_anal', roomId: 'room_calibration', name: 'Модуль секс-машины · анальный', description: 'Комплекс глубокой анальной траектории с контролем глубины и растяжения, управляемой интенсивностью.' },
+    { id: 'lab_sex_machine_tickling', roomId: 'room_calibration', name: 'Модуль секс-машины · щекотка', description: 'Фиксирующая платформа с щёточными и вибрационными насадками для щекотки ступней с меняющимся ритмом.' },
     { id: 'lab_mental_correction_chair', roomId: 'room_calibration', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.' }
 ];
 
@@ -621,11 +625,27 @@ export type MentalChairSession = {
 };
 
 const DEVICE_DEFINITIONS = {
-    lab_sex_machine: {
+    lab_sex_machine_vaginal: {
         deviceId: 'sex_machine' as const,
         configurations: {
             restrained: ['nude', 'underwear'],
             stirrups: ['nude'],
+        },
+        defaultConfiguration: 'restrained',
+        defaultWardrobe: 'nude' as const
+    },
+    lab_sex_machine_anal: {
+        deviceId: 'sex_machine' as const,
+        configurations: {
+            restrained: ['nude'],
+        },
+        defaultConfiguration: 'restrained',
+        defaultWardrobe: 'nude' as const
+    },
+    lab_sex_machine_tickling: {
+        deviceId: 'sex_machine' as const,
+        configurations: {
+            restrained: ['nude', 'underwear'],
         },
         defaultConfiguration: 'restrained',
         defaultWardrobe: 'nude' as const
@@ -1284,7 +1304,7 @@ export function buyOffer(offerId: string, playerId = PLAYER_ID) {
 export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYER_ID) {
     if (getPlayerLocation(playerId).id !== LAB_SCENE_ID) throw new Error('Лабораторное оборудование доступно только в лаборатории');
     if (!listLabAssets(playerId).some(asset => asset.id === assetId)) throw new Error('Модуль не установлен');
-    if (!['lab_recovery_capsule', 'lab_diagnostic_table', 'lab_sex_machine', 'lab_mental_correction_chair'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
+    if (!['lab_recovery_capsule', 'lab_diagnostic_table', 'lab_sex_machine_vaginal', 'lab_sex_machine_anal', 'lab_sex_machine_tickling', 'lab_mental_correction_chair'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
     const core = subjectRepo.get(subjectId);
     if (!core) throw new Error('Актив не найден');
     const asset = listLabAssets(playerId).find(entry => entry.id === assetId)!;
@@ -1322,7 +1342,7 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
                         .run(JSON.stringify({ roomId: metadata.roomId }), playerId, row.asset_id);
                 }
             }
-            if (assetId === 'lab_recovery_capsule' || assetId === 'lab_sex_machine') {
+            if (assetId === 'lab_recovery_capsule' || isSexMachineAsset(assetId)) {
                 // Both enclosed devices require direct access to the body.
                 // "Nude" is represented by the absence of clothing contexts,
                 // so remove every currently worn garment as part of loading.
@@ -1336,7 +1356,7 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
                       )
                 `).run(subjectId);
             }
-            if (assetId === 'lab_sex_machine') {
+            if (isSexMachineAsset(assetId)) {
                 const incompatible = new Set([
                     'act_start_vibrator', 'act_adjust_vibration', 'act_activate_plug',
                     'act_start_electrostimulation', 'act_adjust_electrostimulation',
@@ -1353,6 +1373,7 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
             ContextManager.applyContext(subjectId, 'context_mental_correction_chair', chairContext, undefined, playerId);
         }
         const definition = isControllableDevice(assetId) ? DEVICE_DEFINITIONS[assetId] : null;
+        const machineMode = sexMachineModeForAsset(assetId);
         const deviceSession: DeviceSession | undefined = definition && nextSubjectId ? {
             deviceId: definition.deviceId,
             subjectId: nextSubjectId,
@@ -1361,8 +1382,8 @@ export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYE
             status: 'loaded',
             intensity: 35,
             phase: 'sustain',
-            targetPointIds: ['vagina'],
-            stimulationMode: 'vaginal',
+            targetPointIds: [machineMode ? sexMachineStimulation(machineMode).pointId : 'vagina'],
+            stimulationMode: machineMode ?? 'vaginal',
             startedAtTick: null,
             updatedAtTick: getWorldClock().totalMinutes
             ,targetMode: 'manual',
@@ -1425,7 +1446,9 @@ export function controlDeviceSession(
         if (!wardrobes.includes(wardrobe)) throw new Error('Одежда несовместима с выбранной конфигурацией');
         next = { ...next, configuration, wardrobe: wardrobe as DeviceSession['wardrobe'] };
     } else if (command === 'settings') {
-        const stimulationMode: SexMachineStimulationMode = payload.stimulationMode === 'tickling' ? 'tickling' : payload.stimulationMode === 'anal' ? 'anal' : payload.stimulationMode === 'vaginal' ? 'vaginal' : (current.stimulationMode || 'vaginal');
+        // Независимый модуль секс-машины фиксирует свой режим — он не
+        // переключается в настройках.
+        const stimulationMode: SexMachineStimulationMode = sexMachineModeForAsset(assetId) ?? (current.stimulationMode || 'vaginal');
         const stimulation = sexMachineStimulation(stimulationMode);
         const hasStopAfter = Object.prototype.hasOwnProperty.call(payload, 'stopAfterMinutes');
         const hasOrgasmTarget = Object.prototype.hasOwnProperty.call(payload, 'orgasmTargetCount');
