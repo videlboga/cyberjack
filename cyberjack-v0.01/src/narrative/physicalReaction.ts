@@ -21,7 +21,7 @@ export function buildPhysicalReaction(
     action: CompiledAction,
     core: SubjectCoreState,
 ): PhysicalReactionFrame | null {
-    if (action.actionKey === 'wait' || action.actionKey === 'verbal_pressure' || action.tags?.includes('mental') || action.contact <= .05) return null;
+    if (action.actionKey === 'verbal_pressure' || action.tags?.includes('mental') || action.contact <= .05) return null;
     const snapshot = observation.reactionSnapshot;
     const intensity = Number(observation.reaction.experiencedIntensity || 0);
     const discomfort = Number(observation.reaction.discomfort || 0);

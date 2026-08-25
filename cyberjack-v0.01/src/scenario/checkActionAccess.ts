@@ -47,7 +47,7 @@ export function validateAction(
     pointId?: string
 ): ActionValidationResult {
     // 1. Scene Availability Constraint
-    const isGlobalAction = actionId === 'wait' || actionId === 'verbal_pressure';
+    const isGlobalAction = actionId === 'verbal_pressure';
     const isListedInScene = scene.availableActions.includes(actionId);
 
     if (!isGlobalAction && !isListedInScene) {

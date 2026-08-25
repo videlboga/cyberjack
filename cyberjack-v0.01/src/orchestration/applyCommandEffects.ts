@@ -351,7 +351,7 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                         let reason = (state.relation?.attitude ?? 0) > 70 ? "без явного сопротивления переходу" : "переходя в новое состояние без подтверждённого добровольного принятия";
                         if ((state.core.attitude ?? 0) < 30) reason = "вынужденно и унизительно для себя";
                         const initiator = initiatorId;
-                        if (actionPreset.type && actionPreset.type !== 'verbal' && actionPreset.type !== 'wait') {
+                        if (actionPreset.type && actionPreset.type !== 'verbal') {
                             const forcedNarrative = `[Система]: Команда выполнена. Текущее состояние актива теперь: "${actionPreset.label}"; ${reason}. Переход уже показан визуально: в чат нужны только слова персонажа, без описания движения или позы. До команды состояние было другим.`;
                             tickEffects.push({
                                 kind: 'context.apply',

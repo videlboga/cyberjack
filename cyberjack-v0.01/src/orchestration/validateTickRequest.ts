@@ -47,7 +47,7 @@ export function validateTickRequest(input: ValidateTickRequestInput): ValidateTi
         'sustained_electro_pulse',
         'sustained_sexual_pulse',
     ].includes(presetId) && Boolean(input.customPayload?.sustainedSource);
-    if (!validation.allowed && presetId !== 'wait' && !internalSustainedPulse) {
+    if (!validation.allowed && !internalSustainedPulse) {
         throw new Error(validation.errorReason || `Action "${presetId}" blocked by scenario.`);
     }
 
@@ -56,7 +56,7 @@ export function validateTickRequest(input: ValidateTickRequestInput): ValidateTi
     const nonContactSpeech = presetId === 'verbal_pressure'
         && Number((input.dynamicModifiers as any)?.contact || 0) <= 0
         && parsedCommandType !== 'perform_action';
-    if (blockCheck.blocked && presetId !== 'wait' && !nonContactSpeech) {
+    if (blockCheck.blocked && !nonContactSpeech) {
         throw new Error(blockCheck.reason || `Точка "${pointId}" заблокирована.`);
     }
 

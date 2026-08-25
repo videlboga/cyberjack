@@ -132,23 +132,11 @@ export const processTick = async (req: Request, res: Response) => {
         const pointLabel = pointPreset?.label || pointIdUsed;
         const fullState = subjectRepo.getWithPoint(subjectId, pointIdUsed);
 
-        let suppressActionNarrative = actionId === 'wait';
         const actorCharacter = characterRepo.ensureCharacter(actingCharacterId, actingCharacterId === 'PL-1' ? 'Калибратор' : actingCharacterId);
 
         const chanceSpeech = req.body.llmMode === 'speech_chance' || req.body.llmMode === 'scene_chance';
         let promptPayload = bundle.prompt;
-        const suppressTickIds = suppressActionNarrative ? [bundle.tickId] : undefined;
-        if (suppressTickIds) {
-            promptPayload = (await buildCharacterTurnContext({
-                subjectId,
-                stimulus: { kind: 'external_action', tickId: bundle.tickId },
-                latestResult: bundle.output,
-                eventId,
-                initiatorId: playerId,
-                suppressTickIds,
-            })).payload;
-            bundle.prompt = promptPayload;
-        }
+        const suppressTickIds = undefined;
         if (baseUserMessage && promptPayload.reactionFrame) {
             // runGameTick appends authoritative command outcomes after the
             // reaction frame is compiled. Rebuilding the reaction prompt for a
@@ -174,14 +162,11 @@ export const processTick = async (req: Request, res: Response) => {
         }
 
         let autoUserMessage: string | null = baseUserMessage;
-        let actionLabelMessage: string | null = null;
-        if (!suppressActionNarrative) {
-            actionLabelMessage = buildAutoUserMessage({ actionLabel, pointLabel, actorName: actorCharacter?.name || 'Калибратор', targetName: fullState?.name || subjectId });
-        }
+        let actionLabelMessage: string | null = buildAutoUserMessage({ actionLabel, pointLabel, actorName: actorCharacter?.name || 'Калибратор', targetName: fullState?.name || subjectId });
         // Keep physical actions in the same durable timeline as dialogue. They
         // remain user-role messages for LLM compatibility; the UI presents the
         // explicit prefix as a system/action row.
-        if (!baseUserMessage && !suppressActionNarrative) {
+        if (!baseUserMessage) {
             chatMemoryRepo.append(subjectId, 'user', `[Действие] ${actionLabel} · ${pointLabel}`, interactionContext);
         }
 

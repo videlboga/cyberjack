@@ -143,9 +143,6 @@ export function buildInteractionObservation(input: {
             ? 'Дыхание становится ровнее; появляются отдельные рефлекторные движения, но осмысленного контакта ещё нет.'
             : 'Актив обмякает и почти перестаёт реагировать на внешнее воздействие.',
     };
-    if (action.actionKey === 'wait') {
-        stateText.responsive = 'Во время паузы актив остаётся доступен наблюдению; текущее состояние постепенно меняется без нового контакта.';
-    }
     const sensation = mixed
         ? 'Одновременно заметны приятный отклик и дискомфорт.'
         : discomfort > Math.max(pleasure * 1.25, 2) ? 'Преобладает дискомфорт.'
@@ -189,9 +186,7 @@ export function buildInteractionObservation(input: {
     const acceptingMore = attitudeDelta > 0.2 || opennessDelta > 0.2;
     const forcedArousal = previousBehavior === 'unresponsive' && behavioralState !== 'unresponsive' &&
         output.nextCore.capacity <= 10 && output.nextCore.tension >= 30;
-    const restText = action.actionKey === 'wait' && tensionDelta < -1
-        ? `Без нового воздействия накопленное напряжение снижается (${signed(tensionDelta)}).`
-        : '';
+    const restText = '';
     const acceptanceText = pleasure > discomfort && acceptingLess
         ? 'Положительный телесный отклик не превращается в принятие: актив после контакта сильнее закрывается или хуже принимает происходящее.'
         : discomfort > pleasure && acceptingMore
@@ -224,12 +219,6 @@ export function buildInteractionObservation(input: {
     if (input.notableEvent === 'peak_overload') transitions.push({ kind: 'overload', title: 'Смешанная перегрузка', text: 'Активация достигает предела, но остаётся смешанной: оргазма или нервного срыва не происходит.', severity: 'major' });
     if (input.notableEvent === 'breakdown') transitions.push({ kind: 'breakdown', title: 'Нервный срыв', text: 'Устойчиво негативная активация срывает контроль, но не означает автоматической потери сознания.', severity: 'danger' });
     if (input.notableEvent === 'exhaustion') transitions.push({ kind: 'breakdown', title: 'Истощение ресурса', text: 'Ресурс исчерпан до достижения оргазма; актив остаётся опустошённым и слабо реагирует.', severity: 'danger' });
-    if (action.actionKey === 'wait' && tensionDelta <= -8 && !input.notableEvent) {
-        transitions.push({ kind: 'recovery', title: 'Напряжение снижается', text: `Пауза позволяет активу расслабиться: напряжение ${signed(tensionDelta)} без оргазма.`, severity: 'major' });
-    }
-    if (action.actionKey === 'wait' && previousBehavior === 'unresponsive' && behavioralState === 'unresponsive' && previousCore.capacity <= 10 && output.nextCore.capacity > 10) {
-        transitions.push({ kind: 'recovery', title: 'Первые реакции', text: 'Дыхание выравнивается и возвращаются отдельные рефлексы, но осмысленный контакт ещё не восстановлен.', severity: 'major' });
-    }
     if (previousBehavior !== behavioralState) {
         if (behavioralState === 'unresponsive') {
             const exhaustedAgain = output.nextCore.capacity <= 10 && output.nextCore.tension <= 15;

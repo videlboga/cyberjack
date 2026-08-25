@@ -140,7 +140,7 @@ export interface SuggestedChip {
     text: string;           // естественная фраза для чипа
     actionId?: string;      // ID действия (если механическое)
     pointId?: string;       // точка воздействия
-    type: 'action' | 'verbal' | 'wait' | 'context';
+    type: 'action' | 'verbal' | 'context';
     speech?: string;        // для verbal — что калибратор говорит (в кавычках)
     description?: string;   // RP-описание для *...* формата (без звёздочек)
 }
@@ -242,7 +242,6 @@ ${actionEffects}
 Примеры правильных чипов:
 {"text": "Погладить по щеке", "actionId": "gentle_stroke", "pointId": "face", "type": "action", "description": "глажу по щеке"}
 {"text": "Сказать: хорошая девочка", "type": "verbal", "speech": "хорошая девочка"}
-{"text": "Подождать", "type": "wait"}
 {"text": "Ударить по щеке", "actionId": "slap", "pointId": "face", "type": "action", "description": "шлёпаю по щеке"}
 
 Ответь ТОЛЬКО валидным JSON массивом.`

@@ -194,7 +194,7 @@ export function saveTickState(
         // semantic tags learn more slowly than the immediate action, allowing
         // pleasant stimulation during painful restraint to condition both
         // restraint and pain without double-counting tags already on the action.
-        const contextTags = presetId === 'wait' ? [] : contextConditioningTags(
+        const contextTags = contextConditioningTags(
                 targetActive.map(ctx => {
                     const preset = presetRepo.getActionPreset(ctx.actionId);
                     return {

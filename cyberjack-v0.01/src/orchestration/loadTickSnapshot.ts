@@ -35,7 +35,7 @@ export function loadTickSnapshot(input: LoadTickSnapshotInput): LoadTickSnapshot
         point: { ...state.point }
     };
     const relationalDynamics = relationshipDynamicsRepo.get(subjectId, initiatorId);
-    const elapsedTime = deltaTime ?? (presetId === 'wait' ? 20 : 1);
+    const elapsedTime = deltaTime ?? 1;
     return {
         state,
         stateBefore,

@@ -63,17 +63,12 @@ export interface GameEventPayload {
 export function constrainCapacityWhileUnresponsive(input: {
     previousCapacity: number;
     proposedCapacity: number;
-    isRest: boolean;
     elapsedTime: number;
     recoveryRate?: number;
 }) {
-    if (!input.isRest) return Math.min(input.proposedCapacity, input.previousCapacity);
-    const recoveryRate = input.recoveryRate ?? DEFAULT_CONFIG.formulas.applyLearning.capacityRecoveryRate ?? 1;
-    // Collapse recovery is intentionally slower than ordinary rest. Generic
-    // baseline damping may still propose a lower value, but cannot wake the
-    // subject in a single long pause by restoring most of the baseline gap.
-    const recoveryCeiling = input.previousCapacity + recoveryRate * input.elapsedTime;
-    return Math.min(input.proposedCapacity, recoveryCeiling);
+    // An unresponsive subject cannot recover; any proposed increase is capped
+    // at the previous value until they become responsive again.
+    return Math.min(input.proposedCapacity, input.previousCapacity);
 }
 
 export async function runGameTick(payload: GameEventPayload): Promise<TickBundle> {
@@ -186,7 +181,6 @@ async function runGameTickInner(payload: GameEventPayload, requestId: string): P
         engineOutput.nextCore.capacity = constrainCapacityWhileUnresponsive({
             previousCapacity: state.core.capacity,
             proposedCapacity: engineOutput.nextCore.capacity,
-            isRest: payload.presetId === 'wait',
             elapsedTime
         });
         const baselineCoreCfg = DEFAULT_CONFIG.formulas.baseline?.core || {};
@@ -210,7 +204,7 @@ async function runGameTickInner(payload: GameEventPayload, requestId: string): P
         tickEffects.push({
             kind: 'context.age',
             subjectId: payload.subjectId,
-            deltaTime: payload.presetId === 'wait' ? 1 : elapsedTime,
+            deltaTime: elapsedTime,
             elapsedMinutes: elapsedTime,
         });
     }
@@ -321,24 +315,6 @@ async function runGameTickInner(payload: GameEventPayload, requestId: string): P
         for (const remCtx of compiledAction.removeContexts) {
             tickEffects.push({ kind: 'context.remove-action', subjectId: payload.subjectId, actionId: remCtx });
             actionApplied = true;
-        }
-    }
-
-    // Passive time affects every local point, not only the synthetic systemic
-    // point used by /wait. Current values recover/damp toward their own
-    // baselines; baselines continue to follow through the normal learning rule.
-    if (payload.presetId === 'wait') {
-        const pointCfg = DEFAULT_CONFIG.formulas.baseline?.point || {};
-        for (const passivePoint of pointStateRepo.getAllForSubject(payload.subjectId)) {
-            if (passivePoint.pointId === payload.pointId) continue;
-            const baselineSensitivity = passivePoint.baselineLocalSensitivity ?? passivePoint.localSensitivity;
-            const baselineAttitude = passivePoint.baselineLocalAttitude ?? passivePoint.localAttitude;
-            const recoveredSensitivity = Math.min(baselineSensitivity, passivePoint.localSensitivity + DEFAULT_CONFIG.formulas.applyLearning.localSensitivityRegenRate * elapsedTime);
-            passivePoint.localSensitivity = dampTowardsBaseline(recoveredSensitivity, baselineSensitivity, { ...pointCfg, timeScale: elapsedTime });
-            passivePoint.localAttitude = dampTowardsBaseline(passivePoint.localAttitude, baselineAttitude, { ...pointCfg, timeScale: elapsedTime });
-            passivePoint.baselineLocalSensitivity = advanceBaseline(baselineSensitivity, passivePoint.localSensitivity, { plasticity: engineOutput.nextCore.plasticity, openness: engineOutput.nextCore.openness, novelty: 0 }, { baseRate: pointCfg.adaptBase, ...pointCfg, timeScale: elapsedTime });
-            passivePoint.baselineLocalAttitude = advanceBaseline(baselineAttitude, passivePoint.localAttitude, { plasticity: engineOutput.nextCore.plasticity, openness: engineOutput.nextCore.openness, novelty: 0 }, { baseRate: pointCfg.adaptBase, ...pointCfg, timeScale: elapsedTime });
-            tickEffects.push({ kind: 'point.save', subjectId: payload.subjectId, point: passivePoint });
         }
     }
 

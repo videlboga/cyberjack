@@ -26,9 +26,7 @@ export interface ActionInput {
 export function compileAction(input: ActionInput): CompiledAction {
     const presetRecord = presetRepo.getActionPreset(input.presetId);
 
-    const authoredVector = input.presetId === 'wait'
-        ? { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 }
-        : (presetRecord?.vector || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 });
+    const authoredVector = presetRecord?.vector || { intensity: 0, valence: 0, contact: 0, sharpness: 0, novelty: 0 };
     const normalizedVector = normalizeAuthoredActionVector(authoredVector as Record<string, any>);
     const baseVector = shapeImmediateContextAction(
         normalizedVector,
@@ -59,7 +57,7 @@ export function compileAction(input: ActionInput): CompiledAction {
 
     // 2. Add player direct overrides
     // Multiply base intensity by slider value.
-    if (input.playerIntensity !== undefined && input.presetId !== 'wait') {
+    if (input.playerIntensity !== undefined) {
         baseAction.intensity *= input.playerIntensity;
     }
 
@@ -103,7 +101,7 @@ export function compileAction(input: ActionInput): CompiledAction {
 
     // Apply the player's slider as a multiplier to the final combined intensity again, 
     // in case dynamicModifiers overwrote it (e.g. from verbalParser).
-    if (input.playerIntensity !== undefined && input.presetId !== 'wait') {
+    if (input.playerIntensity !== undefined) {
         // If it got overridden by dynamic modifiers, multiply it back
         if (input.dynamicModifiers && input.dynamicModifiers.intensity) {
             baseWithDynamic.intensity *= input.playerIntensity;

@@ -47,9 +47,9 @@ describe('loadTickSnapshot', () => {
         expect(result.labRelocationApplied).toBe(false);
     });
 
-    it('uses elapsedTime=20 for a wait preset and deltaTime override otherwise', () => {
-        expect(loadTickSnapshot({ ...baseInput, presetId: 'wait' }).elapsedTime).toBe(20);
+    it('uses deltaTime override, defaulting to 1', () => {
         expect(loadTickSnapshot({ ...baseInput, deltaTime: 7 }).elapsedTime).toBe(7);
+        expect(loadTickSnapshot(baseInput).elapsedTime).toBe(1);
     });
 
     it('is read-only: does not write to the database', () => {

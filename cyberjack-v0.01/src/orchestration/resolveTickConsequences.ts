@@ -45,7 +45,7 @@ export function resolveTickConsequences(input: TickConsequenceInput): TickConseq
         output.nextCore.tension = 99;
     }
 
-    if (presetId !== 'wait' && deviceOrgasmPolicy !== 'deny' && output.nextCore.tension >= dischargeThreshold) {
+    if (deviceOrgasmPolicy !== 'deny' && output.nextCore.tension >= dischargeThreshold) {
         const ids = [...activeContextIds];
         for (const rule of STATE_RULES) {
             if (rule.check(output.nextCore, output.nextPoint)) ids.push(rule.actionPresetId);

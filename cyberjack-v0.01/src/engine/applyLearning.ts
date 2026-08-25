@@ -32,11 +32,10 @@ export function applyLearning(
     // It decays only when time actually passes without stimulation. Result
     // metrics already include sensitivity, so the extra reactivity multiplier
     // is deliberately soft rather than another full sensitivity scaling.
-    const isRestAction = safeAction.actionKey === 'wait';
     const arousal = arousalDirection(safeAction, safePoint.pointId, Number(result.finalValence || 0), tension);
     const mechanicalSensitivity = softMechanicalScale(result.effectiveSensitivity ?? safeCore.sensitivity);
     const reactivityMultiplier = 0.5 + clamp(mechanicalSensitivity / 100, 0, 2);
-    const rawTensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * reactivityMultiplier * (f.tensionGrowthMultiplier ?? 0.3) * (isRestAction ? deltaTime : 1.0) * arousal.excitation;
+    const rawTensionGrowth = (result.pleasure + result.discomfort + (result.overload || 0) * 0.5) * reactivityMultiplier * (f.tensionGrowthMultiplier ?? 0.3) * arousal.excitation;
     // The edge is a playable band rather than one ordinary action away from an
     // automatic outcome. Growth compresses as activation approaches the peak;
     // emotionally meaningful results still enter learning at full strength.
@@ -52,14 +51,8 @@ export function applyLearning(
     // Recovery grows sub-linearly with elapsed time: a one-tick pause remains
     // mechanically meaningful, while a long 20-unit wait cannot erase an
     // entire high-tension state in one click.
-    const passiveTensionDrop = isRestAction
-        ? Math.min(
-            f.tensionRecoveryMaxPerAction ?? 18,
-            tensionRecoveryRate * Math.sqrt(Math.max(deltaTime, 0))
-        )
-        : 0;
-    const regulatedTensionDrop = isRestAction ? 0 : arousal.regulation * (4 + tension * .1);
-    const tensionDrop = passiveTensionDrop + regulatedTensionDrop;
+    const regulatedTensionDrop = arousal.regulation * (4 + tension * .1);
+    const tensionDrop = regulatedTensionDrop;
     const nextTension = clamp(
         tension + tensionGrowth - tensionDrop,
         0,
@@ -114,27 +107,18 @@ export function applyLearning(
     const localDesensitization = Math.max(0, result.experiencedIntensity - localDesensitizationStart) *
         f.localSensitivityFromIntensity + (result.overload || 0) * (f.localSensitivityFromOverload ?? 0.03);
 
-    const isRest = safeAction.actionKey === 'wait';
     const baseCapacityDrop = estimateCapacityLoss({
         experiencedIntensity: result.experiencedIntensity,
         pleasure: result.pleasure,
         discomfort: result.discomfort,
         overload: result.overload,
         tension,
-        isRest,
         deltaTime,
     }, f);
-    const capacityBaseline = safeCore.baselineCapacity ?? safeCore.capacity;
-    const capacityRecovery = isRest ? Math.min(
-        Math.max(0, capacityBaseline - safeCore.capacity),
-        (f.capacityRecoveryRate ?? 1.0) * deltaTime
-    ) * (isEdging ? 0.35 : 1) : 0;
-
     const tensionModifier = 1 + (tension / 100) * 0.5; // Up to 1.5x effect on changes when tension is high
     const routineCapacityLossLimit = (result.overload || 0) >= OVERLOAD_NOTICEABLE ? 15 : 6;
     const capacityLoss = Math.min(baseCapacityDrop, routineCapacityLossLimit);
 
-    const timeScale = safeAction.actionKey === 'wait' ? deltaTime : 1.0;
     const bodilyBalance = (result.pleasure || 0) - (result.discomfort || 0);
     const sensoryMagnitude = (result.pleasure || 0) + (result.discomfort || 0) + (result.overload || 0) * 0.25;
     // finalValence is the character's psychological appraisal after
@@ -190,24 +174,24 @@ export function applyLearning(
             (coreSensitization - coreDesensitization + coreRecovery) * tensionModifier
         ),
         capacity: clamp(
-            safeCore.capacity - capacityLoss + capacityRecovery,
+            safeCore.capacity - capacityLoss,
             config.core.min,
             config.core.max
         ),
         openness: clamp(
-            safeCore.openness + (opennessAffect * f.opennessFromPleasureDiscomfort * timeScale),
+            safeCore.openness + (opennessAffect * f.opennessFromPleasureDiscomfort),
             config.core.min,
             config.core.max
         ),
         plasticity: applySoftPositiveGain(
             safeCore.plasticity,
             ((result.learningEffect * f.plasticityFromLearning * clamp(1 - result.overload / 100, 0, 1) -
-            result.overload * f.plasticityFromOverload) * (isRest ? 0 : 1)) * tensionModifier
+            result.overload * f.plasticityFromOverload)) * tensionModifier
         ),
         attitude: clamp(
             safeCore.attitude +
             (coreAffectForAcceptance * f.attitudeFromPleasureDiscomfort -
-            result.overload * f.attitudeFromOverload) * timeScale,
+            result.overload * f.attitudeFromOverload),
             config.core.min,
             config.core.max
         ),
@@ -311,12 +295,6 @@ export function applyLearning(
         { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
-    if (isRest) nextCore.openness = dampTowardsBaseline(nextCore.openness, coreBaselineState.openness, {
-        dampingBase: coreConfig.dampingBase,
-        dampingDistanceScale: coreConfig.dampingDistanceScale,
-        maxDamping: coreConfig.maxDamping,
-        timeScale: deltaTime
-    });
     nextCore.baselineOpenness = advanceBaseline(
         coreBaselineState.openness,
         nextCore.openness,
@@ -337,12 +315,6 @@ export function applyLearning(
         { baseRate: coreConfig.adaptBase, ...coreConfig, timeScale: deltaTime }
     );
 
-    if (isRest) nextCore.attitude = dampTowardsBaseline(nextCore.attitude, coreBaselineState.attitude, {
-        dampingBase: coreConfig.dampingBase,
-        dampingDistanceScale: coreConfig.dampingDistanceScale,
-        maxDamping: coreConfig.maxDamping,
-        timeScale: deltaTime
-    });
     nextCore.baselineAttitude = advanceBaseline(
         coreBaselineState.attitude,
         nextCore.attitude,
@@ -372,12 +344,6 @@ export function applyLearning(
         { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
     );
 
-    if (isRest) nextPoint.localAttitude = dampTowardsBaseline(nextPoint.localAttitude, pointBaselineState.localAttitude, {
-        dampingBase: pointConfig.dampingBase,
-        dampingDistanceScale: pointConfig.dampingDistanceScale,
-        maxDamping: pointConfig.maxDamping,
-        timeScale: deltaTime
-    });
     nextPoint.baselineLocalAttitude = advanceBaseline(
         pointBaselineState.localAttitude,
         nextPoint.localAttitude,
@@ -385,12 +351,6 @@ export function applyLearning(
         { baseRate: pointConfig.adaptBase, ...pointConfig, timeScale: deltaTime }
     );
 
-    if (isRest) nextPoint.localOpenness = dampTowardsBaseline(nextPoint.localOpenness ?? pointBaselineState.localOpenness, pointBaselineState.localOpenness, {
-        dampingBase: pointConfig.dampingBase,
-        dampingDistanceScale: pointConfig.dampingDistanceScale,
-        maxDamping: pointConfig.maxDamping,
-        timeScale: deltaTime
-    });
     nextPoint.baselineLocalOpenness = advanceBaseline(
         pointBaselineState.localOpenness,
         nextPoint.localOpenness ?? pointBaselineState.localOpenness,

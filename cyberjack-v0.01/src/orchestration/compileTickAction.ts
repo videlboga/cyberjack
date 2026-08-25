@@ -127,9 +127,7 @@ export function compileTickAction(input: CompileTickActionInput): CompileTickAct
         tags: compiledAction.tags,
     };
     const mentionInfluence = payload.presetId === 'verbal_pressure' ? 0.25 : 1;
-    const conditioningModifier = payload.presetId === 'wait'
-        ? 0
-        : preferenceValenceModifier(compiledAction.tags || [], state.core.preferences) * mentionInfluence;
+    const conditioningModifier = preferenceValenceModifier(compiledAction.tags || [], state.core.preferences) * mentionInfluence;
     if (conditioningModifier !== 0) {
         compiledAction.valence = clamp(compiledAction.valence + conditioningModifier, -1, 1);
         (compiledAction as any).conditioningModifier = conditioningModifier;
@@ -139,9 +137,7 @@ export function compileTickAction(input: CompileTickActionInput): CompileTickAct
             conditioningModifier,
         };
     }
-    const memoryAssociationSignal = payload.presetId === 'wait'
-        ? 0
-        : subjectiveAssociationRepo.scoreAction(payload.subjectId, payload.actingCharacterId || payload.playerId || payload.subjectId, compiledAction.tags || []);
+    const memoryAssociationSignal = subjectiveAssociationRepo.scoreAction(payload.subjectId, payload.actingCharacterId || payload.playerId || payload.subjectId, compiledAction.tags || []);
     const memoryModifier = memoryAppraisalModifier(memoryAssociationSignal, payload.presetId === 'verbal_pressure');
     if (memoryModifier !== 0) {
         compiledAction.valence = clamp(compiledAction.valence + memoryModifier, -1, 1);

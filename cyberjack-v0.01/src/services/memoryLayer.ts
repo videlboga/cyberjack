@@ -51,12 +51,9 @@ export function buildCompactEpisodeText(input: {
     observation?: InteractionObservation | null;
     userText?: string;
     assistantText?: string;
-    isWait?: boolean;
 }): string {
     const actionDescription = String((input.observation as any)?.action?.description || '').trim();
-    const parts = input.isWait
-        ? ['Прошло немного времени без нового действия.']
-        : [actionDescription || `Калибратор выполнил действие «${input.actionLabel}»${input.pointLabel ? ` в области «${input.pointLabel}»` : ''}.`];
+    const parts = [actionDescription || `Калибратор выполнил действие «${input.actionLabel}»${input.pointLabel ? ` в области «${input.pointLabel}»` : ''}.`];
     const reaction = compactMemoryReaction(input.observation);
     if (reaction) parts.push(reaction);
     if (input.userText?.trim()) parts.push(`Калибратор сказал: «${memoryQuote(input.userText)}».`);
@@ -85,7 +82,6 @@ export function recordMemoryEvent(input: RecordMemoryInput) {
         observation,
         userText: input.userText,
         assistantText: input.assistantText,
-        isWait: input.bundle.compiledAction.actionKey === 'wait',
     });
     if (!text.trim()) return;
 

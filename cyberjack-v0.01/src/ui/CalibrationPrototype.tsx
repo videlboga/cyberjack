@@ -641,12 +641,6 @@ export const calibrationActions: ActionDef[] = [
     contextual: true,
   },
   {
-    id: "wait",
-    label: "Дать паузу",
-    hint: "Восстановление к baseline",
-    group: "contact",
-  },
-  {
     id: "pose_standing",
     label: "Поставить прямо",
     hint: "Нейтральная стойка",
@@ -1064,7 +1058,6 @@ export const calibrationActions: ActionDef[] = [
   },
 ];
 const actions = calibrationActions;
-const pauseAction = actions.find((action) => action.id === "wait")!;
 const point = (s: State | null) => s?.anatomy?.[ZONE] || null;
 const metricLine = (r: any) =>
   `P ${Number(r?.pleasure || 0).toFixed(1)} · D ${Number(r?.discomfort || 0).toFixed(1)} · O ${Number(r?.overload || 0).toFixed(1)}`;
@@ -3304,9 +3297,10 @@ export function CalibrationPrototype({
                 kind: "system",
               });
               await perform({
-                key: "auto-wait",
-                actionId: "wait",
-                label: "Автоматическая пауза",
+                key: "auto-rest",
+                actionId: "pose_standing",
+                label: "Восстановительная пауза",
+                pointId: "systemic",
                 repeat: 1,
               });
               recoveryPasses++;
@@ -4310,12 +4304,12 @@ export function CalibrationPrototype({
         }
       : null,
     fallbackQuickAction = {
-      action: pauseAction,
+      action: actions.find((a) => a.id === "pose_standing")!,
       observation: undefined,
       repeat: false,
       pointId: "systemic",
       pointLabel: "Всё тело",
-      reason: "Восстановить ресурс",
+      reason: "Нейтральная поза",
     },
     quickActions = [
       preferenceQuickActions[0] || fallbackQuickAction,
@@ -5951,19 +5945,6 @@ export function CalibrationPrototype({
             />
           )}
           <div className="operation-mode-bar">
-            <button
-              className="session-pause-action"
-              title={t('game.ui.pauseActionTitle')}
-              disabled={busy}
-              onClick={() => {
-                setSelectedActionId("");
-                setZoneOpen(false);
-                manual(pauseAction);
-              }}
-            >
-              <span>Ⅱ</span>
-              {t('game.ui.wait')}
-            </button>
             <div className={`operation-goal-control ${goalPickerOpen ? "open" : ""}`}>
               <button
                 className="operation-goal-trigger"

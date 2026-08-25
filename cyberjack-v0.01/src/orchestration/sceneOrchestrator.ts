@@ -579,18 +579,6 @@ export async function executeTurnConversations(bundle: TickBundle, params: TurnE
         /* ignore */
     }
 
-    if (actionId === 'wait') {
-        const hasProactive = orchestration.actorDecisions.some(d => d.kind === 'proactive');
-        if (!hasProactive) {
-            orchestration.actorDecisions = [];
-        } else {
-            orchestration.actorDecisions = orchestration.actorDecisions.filter(d => d.kind === 'proactive');
-        }
-        if (orchestration.narrator) {
-            orchestration.narrator.enabled = false;
-        }
-    }
-
     // ── Narrator A: compressed sensory scene for the character ──
     // Generated BEFORE character speech, injected into character's prompt
     const activeContextIds = activeContextsRepo.getAllForSubject(subjectId);
