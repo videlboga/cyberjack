@@ -93,13 +93,20 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
             );
             actionApplied = true;
         } else if (commandIntent.type === 'interrupt_directive') {
-            // Контр-приказ: кто-то требует остановить текущее поручение.
-            // Решение принимает ядро детерминированно (личность/статус/отношения).
+            // Контр-приказ остановить текущее поручение.
+            // Оператор (игрок) останавливает всегда. Если требует другой персонаж
+            // (подопытный/цель) — ядро решает по личности/статусу/отношениям.
             const intent = commandIntent as { type: 'interrupt_directive'; executorId: string; requesterId: string };
             const active = staffDirectiveRepo.listActiveForExecutor(intent.executorId);
             const executorChar = characterRepo.get(intent.executorId);
             if (!active.length) {
                 addedContextNotes.push(`[Система]: ${executorChar?.name || intent.executorId} не исполняет сейчас никаких поручений.`);
+            } else if (intent.requesterId === payload.playerId || intent.requesterId === 'PL-1') {
+                // Оператор: останавливает безусловно.
+                active.forEach(d => staffDirectiveRepo.cancel(d.id));
+                addedContextNotes.push(
+                    `[Система]: Оператор останавливает поручение; ${executorChar?.name || intent.executorId} прекращает его.`,
+                );
             } else {
                 const verdict = resolveDirectiveCompliance({ executorId: intent.executorId, requesterId: intent.requesterId });
                 if (verdict.comply) {

@@ -437,8 +437,10 @@ ID выбирай только из кандидатов и присутству
         }
         else if (command.type === 'interrupt_directive') {
             // Контр-приказ: кто-то требует, чтобы исполнитель остановил текущее
-            // поручение. Решение (послушается ли) принимает ядро.
-            commandIntent = { type: 'interrupt_directive', executorId: command.actorId || defaultActorId, requesterId: command.requesterId || defaultTargetId };
+            // поручение. Требующий по умолчанию — оператор (игрок): его остановка
+            // всегда исполняется. Если явно назван другой персонаж (requesterId) —
+            // ядро решает, послушается ли исполнитель.
+            commandIntent = { type: 'interrupt_directive', executorId: command.actorId || defaultActorId, requesterId: command.requesterId || playerId };
         }
         else if (command.type === 'perform_action' && command.misunderstood === 'action_unknown') {
             // Понял, что нужно совершить действие с другим персонажем, но не понял какое.
