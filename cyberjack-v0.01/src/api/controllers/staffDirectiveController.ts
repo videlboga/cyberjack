@@ -4,7 +4,7 @@ import { nextStaffAction } from '../../scenario/staffDirectiveService';
 
 export function assignStaffDirective(req: Request, res: Response) {
     try {
-        const { staffId, subjectId, contractId, goal } = req.body || {};
+        const { staffId, subjectId, contractId, goal, spec } = req.body || {};
         if (!staffId || !subjectId || !goal) {
             return res.status(400).json({ success: false, error: 'Требуются staffId, subjectId, goal' });
         }
@@ -13,6 +13,7 @@ export function assignStaffDirective(req: Request, res: Response) {
             subjectId,
             contractId: contractId || undefined,
             goal,
+            spec: spec || undefined,
         });
         res.json({ success: true, directive });
     } catch (e: any) {

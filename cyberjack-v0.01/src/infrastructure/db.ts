@@ -224,6 +224,7 @@ db.exec(`
     subject_id TEXT NOT NULL,
     contract_id TEXT,
     goal TEXT NOT NULL,
+    spec TEXT,
     status TEXT NOT NULL DEFAULT 'active',
     created_minute INTEGER NOT NULL,
     updated_minute INTEGER,
@@ -737,6 +738,7 @@ safeAddColumn('chat_memory', 'speaker_id', 'TEXT');
 safeAddColumn('chat_memory', 'message_id', 'TEXT');
 safeAddColumn('chat_memory', 'origin_chat_id', 'INTEGER');
 safeAddColumn('laboratory_room_assignments', 'home_room_id', 'TEXT');
+safeAddColumn('staff_directives', 'spec', 'TEXT');
 
 // Repair social turns created before chat delivery was participant-owned.
 // The source of truth remains pending_social_turns; this only fills the

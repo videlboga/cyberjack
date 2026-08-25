@@ -7,10 +7,32 @@ export interface StaffDirective {
     subjectId: string;
     contractId?: string;
     goal: string;
+    spec?: DirectiveSpec;
     status: 'active' | 'completed' | 'cancelled';
     createdMinute: number;
     updatedMinute?: number;
 }
+
+/**
+ * Спецификация алгоритма, который сотрудник выполняет автономно.
+ * Поле `kind` определяет тип алгоритма; остальные поля — параметры.
+ */
+export type DirectiveSpec =
+    | { kind: 'contract'; contractId: string }
+    | { kind: 'sequence'; actions: { actionId: string; pointId?: string; repeats?: number }[] }
+    | { kind: 'category'; tags: string[]; repeats?: number }
+    | {
+          kind: 'condition';
+          /** Действие, выполняемое пока условие истинно. */
+          actionId: string;
+          pointId?: string;
+          /** Условие: метрика и порог. */
+          metric: 'sensitivity' | 'capacity' | 'tension' | 'attitude' | 'openness' | 'plasticity';
+          operator: '>=' | '<=' | '>';
+          value: number;
+          /** Действие, выполняемое когда условие ложно (опционально). */
+          elseActionId?: string;
+      };
 
 const mapRow = (r: any): StaffDirective => ({
     id: r.id,
@@ -19,6 +41,7 @@ const mapRow = (r: any): StaffDirective => ({
     subjectId: r.subject_id,
     contractId: r.contract_id || undefined,
     goal: r.goal,
+    spec: r.spec ? JSON.parse(r.spec) : undefined,
     status: r.status,
     createdMinute: r.created_minute,
     updatedMinute: r.updated_minute ?? undefined,
@@ -61,16 +84,18 @@ export const staffDirectiveRepo = {
         subjectId: string;
         contractId?: string;
         goal: string;
+        spec?: DirectiveSpec;
         playerId?: string;
     }): StaffDirective {
         const playerId = input.playerId || 'PL-1';
         const now = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
-        const result = db.prepare(`
-            INSERT INTO staff_directives (player_id, staff_id, subject_id, contract_id, goal, status, created_minute)
-            VALUES (?, ?, ?, ?, ?, 'active', ?)
+        const specJson = input.spec ? JSON.stringify(input.spec) : null;
+        db.prepare(`
+            INSERT INTO staff_directives (player_id, staff_id, subject_id, contract_id, goal, spec, status, created_minute)
+            VALUES (?, ?, ?, ?, ?, ?, 'active', ?)
             ON CONFLICT(player_id, staff_id, subject_id, contract_id) DO UPDATE SET
-                goal = excluded.goal, status = 'active', updated_minute = excluded.created_minute
-        `).run(playerId, input.staffId, input.subjectId, input.contractId || null, input.goal, now);
+                goal = excluded.goal, spec = excluded.spec, status = 'active', updated_minute = excluded.created_minute
+        `).run(playerId, input.staffId, input.subjectId, input.contractId || null, input.goal, specJson, now);
         const row = db.prepare(`
             SELECT * FROM staff_directives
             WHERE player_id = ? AND staff_id = ? AND subject_id = ? AND contract_id IS ?

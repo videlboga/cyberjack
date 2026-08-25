@@ -106,6 +106,71 @@ export function isContractReady(subjectId: string, contract: AssetContract): boo
     return trainingTargetsForContract(subjectId, contract).length === 0;
 }
 
+/** Текущее значение метрики актива (для condition-алгоритма). */
+function metricValue(subjectId: string, metric: string): number {
+    const core = subjectRepo.get(subjectId);
+    if (!core) return 0;
+    switch (metric) {
+        case 'sensitivity': return core.sensitivity ?? 0;
+        case 'capacity': return core.capacity ?? 0;
+        case 'tension': return core.tension ?? 0;
+        case 'attitude': return core.attitude ?? 0;
+        case 'openness': return core.openness ?? 0;
+        case 'plasticity': return core.plasticity ?? 0;
+        default: return 0;
+    }
+}
+
+/** Проверяет условие (metric op value). */
+function checkCondition(subjectId: string, metric: string, operator: string, value: number): boolean {
+    const current = metricValue(subjectId, metric);
+    switch (operator) {
+        case '>=': return current >= value;
+        case '<=': return current <= value;
+        case '>': return current > value;
+        default: return false;
+    }
+}
+
+/** Выбирает действие по спецификации алгоритма. */
+function pickActionForSpec(
+    subjectId: string,
+    spec: NonNullable<StaffDirective['spec']>,
+): { actionId: string; pointId: string } | null {
+    switch (spec.kind) {
+        case 'contract': {
+            const contract = db.prepare(`SELECT * FROM asset_contracts WHERE id = ?`).get(spec.contractId) as any;
+            if (!contract) return null;
+            const typed: AssetContract = { ...contract, conditions: JSON.parse(contract.conditions || '[]') };
+            const action = pickTrainingAction(subjectId, typed);
+            return action ? { actionId: action.actionId, pointId: action.pointId } : null;
+        }
+        case 'sequence': {
+            // Берём первое действие из серии.
+            const first = spec.actions[0];
+            if (!first) return null;
+            return { actionId: first.actionId, pointId: first.pointId || 'systemic' };
+        }
+        case 'category': {
+            // Выбираем действие, тренирующее любой из тегов категории.
+            for (const tag of spec.tags) {
+                const actions = actionsForTag(tag);
+                if (actions.length) return { actionId: actions[0].actionId, pointId: actions[0].pointId };
+            }
+            return null;
+        }
+        case 'condition': {
+            // Если условие истинно — выполняем основное действие, иначе else.
+            const met = checkCondition(subjectId, spec.metric, spec.operator, spec.value);
+            const actionId = met ? spec.actionId : spec.elseActionId;
+            if (!actionId) return null;
+            return { actionId, pointId: spec.pointId || 'systemic' };
+        }
+        default:
+            return null;
+    }
+}
+
 /**
  * Выполняет один шаг подготовки сотрудником: выбирает действие по активному
  * указанию и возвращает его (для runGameTick). Если указаний нет или всё
@@ -117,25 +182,29 @@ export function nextStaffAction(
 ): { subjectId: string; actionId: string; pointId: string; directive: StaffDirective } | null {
     const directives = staffDirectiveRepo.listActiveForStaff(staffId, playerId);
     for (const directive of directives) {
-        // Если указание привязано к контракту — тренируем под него.
+        // Если есть спецификация алгоритма — используем её.
+        if (directive.spec) {
+            const action = pickActionForSpec(directive.subjectId, directive.spec);
+            if (action) {
+                return { subjectId: directive.subjectId, actionId: action.actionId, pointId: action.pointId, directive };
+            }
+            // Алгоритм не дал действия (например, контракт достигнут) — завершаем.
+            staffDirectiveRepo.complete(directive.id);
+            continue;
+        }
+        // Обратная совместимость: указание с contractId без spec.
         if (directive.contractId) {
             const contract = db.prepare(`SELECT * FROM asset_contracts WHERE id = ?`).get(directive.contractId) as any;
             if (contract) {
-                const typed: AssetContract = {
-                    ...contract,
-                    conditions: JSON.parse(contract.conditions || '[]'),
-                };
+                const typed: AssetContract = { ...contract, conditions: JSON.parse(contract.conditions || '[]') };
                 const action = pickTrainingAction(directive.subjectId, typed);
                 if (action) {
                     return { subjectId: directive.subjectId, actionId: action.actionId, pointId: action.pointId, directive };
                 }
-                // Все трейты достигнуты — завершаем указание.
                 staffDirectiveRepo.complete(directive.id);
                 continue;
             }
         }
-        // Указание без контракта — общая цель (например, «поддерживать состояние»).
-        // Пока не реализовано: пропускаем.
         continue;
     }
     return null;
