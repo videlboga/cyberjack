@@ -34,7 +34,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 45 },
         { type: "attitude", operator: "<=", value: 72 }
     ],
-    rewards: { credits: 820, trust: 16, items: ["drug_painkiller"] },
+rewards: { credits: 570, trust: 16, items: ["drug_painkiller"] },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -78,7 +78,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 70 }
     ],
-    rewards: { credits: 760, trust: 14, items: ["drug_sensitizer"] },
+rewards: { credits: 490, trust: 14, items: ["drug_sensitizer"] },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -123,7 +123,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "plasticity", operator: ">=", value: 65 },
         { type: "attitude", operator: "<=", value: 65 }
     ],
-    rewards: { credits: 1100, trust: 24, items: ["drug_sensitizer"] },
+rewards: { credits: 820, trust: 24, items: ["drug_sensitizer"] },
     penalties: { credits: -180, trust: -10 },
     return_profile: {
         memory: {
@@ -168,7 +168,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 58 },
         { type: "attitude", operator: "<=", value: 68 }
     ],
-    rewards: { credits: 950, trust: 20 },
+rewards: { credits: 660, trust: 20 },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
@@ -212,7 +212,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "plasticity", operator: ">=", value: 55 },
         { type: "attitude", operator: ">=", value: 55 }
     ],
-    rewards: { credits: 640, trust: 12 },
+rewards: { credits: 420, trust: 12 },
     penalties: { credits: -80, trust: -4 },
     return_profile: {
         memory: {
@@ -256,7 +256,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "sensitivity", operator: ">=", value: 62 },
         { type: "custom", key: "capacity", operator: ">=", value: 48 }
     ],
-    rewards: { credits: 880, trust: 17, items: ["eq_vibrator"] },
+rewards: { credits: 620, trust: 17, items: ["eq_vibrator"] },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -300,7 +300,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "sensitivity", operator: ">=", value: 70 },
         { type: "custom", key: "openness", operator: ">=", value: 65 }
     ],
-    rewards: { credits: 900, trust: 18, items: ["drug_sensitizer"] },
+rewards: { credits: 630, trust: 18, items: ["drug_sensitizer"] },
     penalties: { credits: -140, trust: -8 },
     return_profile: {
         memory: {
@@ -343,7 +343,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 64 },
         { type: "attitude", operator: ">=", value: 55 }
     ],
-    rewards: { credits: 690, trust: 12 },
+rewards: { credits: 450, trust: 12 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
@@ -387,7 +387,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "attitude", operator: ">=", value: 60 },
         { type: "custom", key: "capacity", operator: ">=", value: 52 }
     ],
-    rewards: { credits: 840, trust: 16 },
+rewards: { credits: 550, trust: 16 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -430,7 +430,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "plasticity", operator: ">=", value: 60 },
         { type: "custom", key: "openness", operator: ">=", value: 60 }
     ],
-    rewards: { credits: 780, trust: 15 },
+rewards: { credits: 550, trust: 15 },
     penalties: { credits: -110, trust: -5 },
     return_profile: {
         memory: {
@@ -474,7 +474,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 70 },
         { type: "acquired_trait", key: "trait_masochist", operator: ">=", value: 1 }
     ],
-    rewards: { credits: 950, trust: 20, items: ["drug_sensitizer"] },
+rewards: { credits: 710, trust: 20, items: ["drug_sensitizer"] },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
@@ -518,7 +518,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 60 },
         { type: "acquired_trait", key: "trait_chem_addict", operator: ">=", value: 1 },
     ],
-    rewards: { credits: 800, trust: 15, items: ["drug_sensitizer"] },
+rewards: { credits: 520, trust: 15, items: ["drug_sensitizer"] },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -562,7 +562,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "sensitivity", operator: ">=", value: 65 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 760, trust: 14 },
+rewards: { credits: 490, trust: 14 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -605,7 +605,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "sensitivity", operator: ">=", value: 68 },
         { type: "custom", key: "capacity", operator: ">=", value: 48 }
     ],
-    rewards: { credits: 790, trust: 15 },
+rewards: { credits: 550, trust: 15 },
     penalties: { credits: -110, trust: -5 },
     return_profile: {
         memory: {
@@ -649,7 +649,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 55 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 1000, trust: 22, items: ["drug_plasticity_catalyst"] },
+rewards: { credits: 750, trust: 22, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -160, trust: -10 },
     return_profile: {
         memory: {
@@ -693,7 +693,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 70 },
         { type: "custom", key: "plasticity", operator: ">=", value: 66 }
     ],
-    rewards: { credits: 820, trust: 15, items: ["eq_handcuffs"] },
+rewards: { credits: 530, trust: 15, items: ["eq_handcuffs"] },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -736,7 +736,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 58 },
         { type: "custom", key: "openness", operator: ">=", value: 58 }
     ],
-    rewards: { credits: 730, trust: 13 },
+rewards: { credits: 470, trust: 13 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
@@ -780,7 +780,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "sensitivity", operator: ">=", value: 65 },
         { type: "attitude", operator: ">=", value: 65 }
     ],
-    rewards: { credits: 760, trust: 14 },
+rewards: { credits: 490, trust: 14 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -824,7 +824,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "attitude", operator: ">=", value: 60 },
         { type: "custom", key: "openness", operator: ">=", value: 60 }
     ],
-    rewards: { credits: 850, trust: 17, items: ["eq_collar"] },
+rewards: { credits: 600, trust: 17, items: ["eq_collar"] },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -868,7 +868,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 60 },
         { type: "custom", key: "plasticity", operator: ">=", value: 60 }
     ],
-    rewards: { credits: 700, trust: 12 },
+rewards: { credits: 460, trust: 12 },
     penalties: { credits: -80, trust: -4 },
     return_profile: {
         memory: {
@@ -912,7 +912,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "plasticity", operator: ">=", value: 65 },
         { type: "custom", key: "openness", operator: ">=", value: 60 }
     ],
-    rewards: { credits: 740, trust: 14 },
+rewards: { credits: 480, trust: 14 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -956,7 +956,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 65 },
         { type: "custom", key: "plasticity", operator: ">=", value: 60 }
     ],
-    rewards: { credits: 680, trust: 12 },
+rewards: { credits: 440, trust: 12 },
     penalties: { credits: -80, trust: -4 },
     return_profile: {
         memory: {
@@ -1000,7 +1000,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 60 },
         { type: "custom", key: "plasticity", operator: ">=", value: 55 }
     ],
-    rewards: { credits: 720, trust: 13 },
+rewards: { credits: 500, trust: 13 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
@@ -1044,7 +1044,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "attitude", operator: ">=", value: 60 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 700, trust: 13 },
+rewards: { credits: 460, trust: 13 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
@@ -1088,7 +1088,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "attitude", operator: ">=", value: 55 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 900, trust: 18, items: ["eq_collar"] },
+rewards: { credits: 630, trust: 18, items: ["eq_collar"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -1132,7 +1132,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 55 }
     ],
-    rewards: { credits: 860, trust: 16, items: ["eq_vibrator"] },
+rewards: { credits: 600, trust: 16, items: ["eq_vibrator"] },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -1176,7 +1176,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 60 },
         { type: "custom", key: "plasticity", operator: ">=", value: 55 }
     ],
-    rewards: { credits: 620, trust: 11 },
+rewards: { credits: 400, trust: 11 },
     penalties: { credits: -70, trust: -3 },
     return_profile: {
         memory: {
@@ -1220,7 +1220,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "attitude", operator: ">=", value: 58 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 750, trust: 14 },
+rewards: { credits: 490, trust: 14 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -1264,7 +1264,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 55 }
     ],
-    rewards: { credits: 710, trust: 13 },
+rewards: { credits: 460, trust: 13 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
@@ -1308,7 +1308,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "attitude", operator: ">=", value: 58 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 700, trust: 13 },
+rewards: { credits: 460, trust: 13 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
@@ -1352,7 +1352,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 62 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 760, trust: 15 },
+rewards: { credits: 490, trust: 15 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -1396,7 +1396,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 52 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 900, trust: 18, items: ["drug_plasticity_catalyst"] },
+rewards: { credits: 630, trust: 18, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -1440,7 +1440,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 850, trust: 17 },
+rewards: { credits: 600, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -1484,7 +1484,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 55 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 1000, trust: 20, items: ["drug_plasticity_catalyst"] },
+rewards: { credits: 750, trust: 20, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
@@ -1528,7 +1528,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 52 }
     ],
-    rewards: { credits: 740, trust: 15 },
+rewards: { credits: 480, trust: 15 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -1572,7 +1572,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 52 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 920, trust: 18, items: ["drug_plasticity_catalyst"] },
+rewards: { credits: 640, trust: 18, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -1616,7 +1616,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 880, trust: 17 },
+rewards: { credits: 620, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -1660,7 +1660,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 55 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 1100, trust: 22, items: ["drug_plasticity_catalyst"] },
+rewards: { credits: 820, trust: 22, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -160, trust: -9 },
     return_profile: {
         memory: {
@@ -1704,7 +1704,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 860, trust: 17 },
+rewards: { credits: 600, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -1748,7 +1748,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "openness", operator: ">=", value: 62 },
         { type: "custom", key: "capacity", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 720, trust: 14 },
+rewards: { credits: 470, trust: 14 },
     penalties: { credits: -90, trust: -4 },
     return_profile: {
         memory: {
@@ -1792,7 +1792,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 52 }
     ],
-    rewards: { credits: 760, trust: 15 },
+rewards: { credits: 490, trust: 15 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -1836,7 +1836,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 52 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 900, trust: 18, items: ["drug_plasticity_catalyst"] },
+rewards: { credits: 630, trust: 18, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -1880,7 +1880,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 880, trust: 17 },
+rewards: { credits: 620, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -1924,7 +1924,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 860, trust: 17 },
+rewards: { credits: 600, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -1968,7 +1968,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 55 },
         { type: "attitude", operator: ">=", value: 50 }
     ],
-    rewards: { credits: 1000, trust: 20, items: ["drug_plasticity_catalyst"] },
+rewards: { credits: 750, trust: 20, items: ["drug_plasticity_catalyst"] },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
@@ -2012,7 +2012,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 60 }
     ],
-    rewards: { credits: 1050, trust: 22, items: ["drug_sensitizer"] },
+rewards: { credits: 790, trust: 22, items: ["drug_sensitizer"] },
     penalties: { credits: -160, trust: -9 },
     return_profile: {
         memory: {
@@ -2056,7 +2056,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 60 }
     ],
-    rewards: { credits: 1000, trust: 20, items: ["drug_sensitizer"] },
+rewards: { credits: 750, trust: 20, items: ["drug_sensitizer"] },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
@@ -2100,7 +2100,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 58 }
     ],
-    rewards: { credits: 1050, trust: 21, items: ["drug_sensitizer"] },
+rewards: { credits: 790, trust: 21, items: ["drug_sensitizer"] },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
@@ -2144,7 +2144,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 880, trust: 17 },
+rewards: { credits: 620, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -2188,7 +2188,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 64 }
     ],
-    rewards: { credits: 760, trust: 15 },
+rewards: { credits: 490, trust: 15 },
     penalties: { credits: -100, trust: -5 },
     return_profile: {
         memory: {
@@ -2232,7 +2232,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 60 }
     ],
-    rewards: { credits: 1000, trust: 20, items: ["drug_sensitizer"] },
+rewards: { credits: 750, trust: 20, items: ["drug_sensitizer"] },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
@@ -2276,7 +2276,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 900, trust: 18 },
+rewards: { credits: 630, trust: 18 },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -2320,7 +2320,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 880, trust: 17 },
+rewards: { credits: 620, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -2364,7 +2364,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 880, trust: 17 },
+rewards: { credits: 620, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -2408,7 +2408,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 900, trust: 18, items: ["drug_sensitizer"] },
+rewards: { credits: 630, trust: 18, items: ["drug_sensitizer"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -2452,7 +2452,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 900, trust: 18, items: ["eq_vibrator"] },
+rewards: { credits: 630, trust: 18, items: ["eq_vibrator"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -2496,7 +2496,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 900, trust: 18, items: ["drug_sensitizer"] },
+rewards: { credits: 630, trust: 18, items: ["drug_sensitizer"] },
     penalties: { credits: -130, trust: -7 },
     return_profile: {
         memory: {
@@ -2540,7 +2540,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 880, trust: 17 },
+rewards: { credits: 620, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -2584,7 +2584,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 62 }
     ],
-    rewards: { credits: 880, trust: 17 },
+rewards: { credits: 620, trust: 17 },
     penalties: { credits: -120, trust: -6 },
     return_profile: {
         memory: {
@@ -2628,7 +2628,7 @@ export const CONTRACT_DATA: ContractSeedData[] = [
         { type: "custom", key: "capacity", operator: ">=", value: 50 },
         { type: "attitude", operator: "<=", value: 60 }
     ],
-    rewards: { credits: 1000, trust: 20, items: ["drug_sensitizer"] },
+rewards: { credits: 750, trust: 20, items: ["drug_sensitizer"] },
     penalties: { credits: -150, trust: -8 },
     return_profile: {
         memory: {
