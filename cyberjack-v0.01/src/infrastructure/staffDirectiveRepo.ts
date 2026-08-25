@@ -1,0 +1,92 @@
+import { db } from './db';
+
+export interface StaffDirective {
+    id: number;
+    playerId: string;
+    staffId: string;
+    subjectId: string;
+    contractId?: string;
+    goal: string;
+    status: 'active' | 'completed' | 'cancelled';
+    createdMinute: number;
+    updatedMinute?: number;
+}
+
+const mapRow = (r: any): StaffDirective => ({
+    id: r.id,
+    playerId: r.player_id,
+    staffId: r.staff_id,
+    subjectId: r.subject_id,
+    contractId: r.contract_id || undefined,
+    goal: r.goal,
+    status: r.status,
+    createdMinute: r.created_minute,
+    updatedMinute: r.updated_minute ?? undefined,
+});
+
+export const staffDirectiveRepo = {
+    /** Активные указания для сотрудника (по цели). */
+    listActiveForStaff(staffId: string, playerId = 'PL-1'): StaffDirective[] {
+        const rows = db.prepare(`
+            SELECT * FROM staff_directives
+            WHERE player_id = ? AND staff_id = ? AND status = 'active'
+            ORDER BY created_minute
+        `).all(playerId, staffId) as any[];
+        return rows.map(mapRow);
+    },
+
+    /** Активные указания на конкретного актива. */
+    listActiveForSubject(subjectId: string, playerId = 'PL-1'): StaffDirective[] {
+        const rows = db.prepare(`
+            SELECT * FROM staff_directives
+            WHERE player_id = ? AND subject_id = ? AND status = 'active'
+            ORDER BY created_minute
+        `).all(playerId, subjectId) as any[];
+        return rows.map(mapRow);
+    },
+
+    /** Все активные указания (для автономного тика). */
+    listAllActive(playerId = 'PL-1'): StaffDirective[] {
+        const rows = db.prepare(`
+            SELECT * FROM staff_directives
+            WHERE player_id = ? AND status = 'active'
+            ORDER BY created_minute
+        `).all(playerId) as any[];
+        return rows.map(mapRow);
+    },
+
+    /** Выдать указание сотруднику. Идемпотентно по (staff, subject, contract). */
+    assign(input: {
+        staffId: string;
+        subjectId: string;
+        contractId?: string;
+        goal: string;
+        playerId?: string;
+    }): StaffDirective {
+        const playerId = input.playerId || 'PL-1';
+        const now = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
+        const result = db.prepare(`
+            INSERT INTO staff_directives (player_id, staff_id, subject_id, contract_id, goal, status, created_minute)
+            VALUES (?, ?, ?, ?, ?, 'active', ?)
+            ON CONFLICT(player_id, staff_id, subject_id, contract_id) DO UPDATE SET
+                goal = excluded.goal, status = 'active', updated_minute = excluded.created_minute
+        `).run(playerId, input.staffId, input.subjectId, input.contractId || null, input.goal, now);
+        const row = db.prepare(`
+            SELECT * FROM staff_directives
+            WHERE player_id = ? AND staff_id = ? AND subject_id = ? AND contract_id IS ?
+        `).get(playerId, input.staffId, input.subjectId, input.contractId || null) as any;
+        return mapRow(row);
+    },
+
+    /** Завершить указание. */
+    complete(id: number): void {
+        const now = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
+        db.prepare(`UPDATE staff_directives SET status = 'completed', updated_minute = ? WHERE id = ?`).run(now, id);
+    },
+
+    /** Отменить указание. */
+    cancel(id: number): void {
+        const now = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
+        db.prepare(`UPDATE staff_directives SET status = 'cancelled', updated_minute = ? WHERE id = ?`).run(now, id);
+    },
+};

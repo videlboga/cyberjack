@@ -217,6 +217,19 @@ db.exec(`
     PRIMARY KEY (player_id, character_id)
   );
 
+  CREATE TABLE IF NOT EXISTS staff_directives (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id TEXT NOT NULL,
+    staff_id TEXT NOT NULL,
+    subject_id TEXT NOT NULL,
+    contract_id TEXT,
+    goal TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_minute INTEGER NOT NULL,
+    updated_minute INTEGER,
+    UNIQUE (player_id, staff_id, subject_id, contract_id)
+  );
+
   CREATE TABLE IF NOT EXISTS scenario_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     world_minute INTEGER NOT NULL,

@@ -19,6 +19,7 @@ import metaRoutes from './routes/metaRoutes';
 import contractRoutes from './routes/contractRoutes';
 import scenarioRoutes from './routes/scenarioRoutes';
 import eventDirectorRoutes from './routes/eventDirectorRoutes';
+import staffDirectiveRoutes from './routes/staffDirectiveRoutes';
 import localeRoutes from './routes/localeRoutes';
 import { ensureActionSpecialization } from '../infrastructure/actionSpecialization';
 import { syncActionPresets } from '../infrastructure/syncActionPresets';
@@ -58,6 +59,7 @@ app.use('/api', metaRoutes);
 app.use('/api', contractRoutes);
 app.use('/api', scenarioRoutes);
 app.use('/api', eventDirectorRoutes);
+app.use('/api', staffDirectiveRoutes);
 app.use('/api', localeRoutes);
 
 // Serve generated scene images

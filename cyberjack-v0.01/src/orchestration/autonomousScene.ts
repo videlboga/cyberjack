@@ -13,6 +13,8 @@ import { ActionScorer, ActionScoreResult } from './actionScorer';
 import { conditioningTags, deriveCompulsionSignals } from '../domain/conditioning';
 import { createSocialTurnPlan, enqueueSocialTurn, processPendingSocialTurns, resolvePhysicalInitiativeBasis } from '../services/socialTransactions';
 import { isSleeping } from '../services/physiology';
+import { nextStaffAction } from '../scenario/staffDirectiveService';
+import { staffDirectiveRepo } from '../infrastructure/staffDirectiveRepo';
 
 const AUTONOMOUS_INTERVAL_MINUTES = 5;
 const MAX_ACTIONS_PER_SCENE_PULSE = 2;
@@ -139,6 +141,35 @@ export async function runAutonomousSceneMinute() {
     const executed: Array<{ actorId: string; targetId: string; actionId: string }> = [];
 
     for (let step = 0; step < MAX_ACTIONS_PER_SCENE_PULSE; step++) {
+        // Сотрудники с активными указаниями действуют в первую очередь:
+        // их подготовка к контракту приоритетнее вероятностной инициативы.
+        const staffWithDirective = present.find(actorId => {
+            if (actorId === 'PL-1' || acted.has(actorId) || isDeviceBound(actorId, 'PL-1')) return false;
+            if (isSleeping(actorId)) return false;
+            return staffDirectiveRepo.listActiveForStaff(actorId, 'PL-1').length > 0;
+        });
+        if (staffWithDirective) {
+            const staffAction = nextStaffAction(staffWithDirective, 'PL-1');
+            if (staffAction) {
+                acted.add(staffWithDirective);
+                try {
+                    await runGameTick({
+                        subjectId: staffAction.subjectId,
+                        pointId: staffAction.pointId,
+                        playerId: 'PL-1',
+                        actingCharacterId: staffWithDirective,
+                        sceneId,
+                        presetId: staffAction.actionId,
+                        customPayload: { autonomousSceneAction: true, staffDirective: true, worldMinute },
+                        skipContextTimeAdvance: true,
+                    });
+                    executed.push({ actorId: staffWithDirective, targetId: staffAction.subjectId, actionId: staffAction.actionId });
+                } catch (error) {
+                    console.warn(`[AutonomousScene] staff ${staffWithDirective} directive action failed:`, error);
+                }
+                continue;
+            }
+        }
         const candidates = present.flatMap(actorId => {
             // The player shares the physical scene and therefore receives
             // observations, but has no autonomous will in the simulation.
