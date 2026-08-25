@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import '../infrastructure/seed';
 import { db } from '../infrastructure/db';
 import { staffDirectiveRepo } from '../infrastructure/staffDirectiveRepo';
-import { trainingTargetsForContract, pickTrainingAction, isContractReady, nextStaffAction } from '../scenario/staffDirectiveService';
+import { trainingTargetsForContract, pickTrainingAction, isContractReady, nextExecutorAction } from '../scenario/staffDirectiveService';
 import { resetWorldSeed } from '../scenario/worldService';
 import { ensureWorldSeed } from '../scenario/worldService';
 
@@ -73,12 +73,12 @@ describe('staffDirectiveService', () => {
         db.prepare(`UPDATE asset_contracts SET conditions = ? WHERE id = 'test-masochist'`)
             .run(JSON.stringify([{ type: 'acquired_trait', key: 'trait_masochist', operator: '>=', value: 2 }]));
         staffDirectiveRepo.assign({
-            staffId: 'STAFF-DIR',
+            executorId: 'STAFF-DIR',
             subjectId: 'SUB-DIR4',
             contractId: 'test-masochist',
             goal: 'Подготовить к контракту',
         });
-        const action = nextStaffAction('STAFF-DIR');
+        const action = nextExecutorAction('STAFF-DIR');
         expect(action).not.toBeNull();
         expect(action!.subjectId).toBe('SUB-DIR4');
         expect(action!.actionId).toBeTruthy();
@@ -93,12 +93,12 @@ describe('staffDirectiveService', () => {
         db.prepare(`INSERT INTO characters (id, name, kind, current_scene_id) VALUES ('STAFF-SEQ', 'Сотрудник', 'npc', 'scene_lab_calibrator')
             ON CONFLICT(id) DO NOTHING`).run();
         staffDirectiveRepo.assign({
-            staffId: 'STAFF-SEQ',
+            executorId: 'STAFF-SEQ',
             subjectId: 'SUB-SEQ',
             goal: 'Серия действий',
             spec: { kind: 'sequence', actions: [{ actionId: 'act_slap', pointId: 'face' }, { actionId: 'act_punch', pointId: 'face' }] },
         });
-        const action = nextStaffAction('STAFF-SEQ');
+        const action = nextExecutorAction('STAFF-SEQ');
         expect(action).not.toBeNull();
         expect(action!.actionId).toBe('act_slap');
         expect(action!.pointId).toBe('face');
@@ -113,12 +113,12 @@ describe('staffDirectiveService', () => {
         db.prepare(`INSERT INTO characters (id, name, kind, current_scene_id) VALUES ('STAFF-CAT', 'Сотрудник', 'npc', 'scene_lab_calibrator')
             ON CONFLICT(id) DO NOTHING`).run();
         staffDirectiveRepo.assign({
-            staffId: 'STAFF-CAT',
+            executorId: 'STAFF-CAT',
             subjectId: 'SUB-CAT',
             goal: 'Категория pain',
             spec: { kind: 'category', tags: ['pain'] },
         });
-        const action = nextStaffAction('STAFF-CAT');
+        const action = nextExecutorAction('STAFF-CAT');
         expect(action).not.toBeNull();
         expect(action!.actionId).toBeTruthy();
     });
@@ -133,12 +133,12 @@ describe('staffDirectiveService', () => {
         db.prepare(`INSERT INTO characters (id, name, kind, current_scene_id) VALUES ('STAFF-COND', 'Сотрудник', 'npc', 'scene_lab_calibrator')
             ON CONFLICT(id) DO NOTHING`).run();
         staffDirectiveRepo.assign({
-            staffId: 'STAFF-COND',
+            executorId: 'STAFF-COND',
             subjectId: 'SUB-COND',
             goal: 'Условие',
             spec: { kind: 'condition', actionId: 'act_slap', metric: 'capacity', operator: '>=', value: 50, elseActionId: 'act_punch' },
         });
-        const action = nextStaffAction('STAFF-COND');
+        const action = nextExecutorAction('STAFF-COND');
         expect(action).not.toBeNull();
         expect(action!.actionId).toBe('act_punch');
     });

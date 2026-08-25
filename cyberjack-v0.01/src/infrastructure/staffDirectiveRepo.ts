@@ -3,7 +3,8 @@ import { db } from './db';
 export interface StaffDirective {
     id: number;
     playerId: string;
-    staffId: string;
+    /** Исполнитель алгоритма: любой персонаж (сотрудник или актив). */
+    executorId: string;
     subjectId: string;
     contractId?: string;
     goal: string;
@@ -37,7 +38,7 @@ export type DirectiveSpec =
 const mapRow = (r: any): StaffDirective => ({
     id: r.id,
     playerId: r.player_id,
-    staffId: r.staff_id,
+    executorId: r.staff_id,
     subjectId: r.subject_id,
     contractId: r.contract_id || undefined,
     goal: r.goal,
@@ -48,13 +49,13 @@ const mapRow = (r: any): StaffDirective => ({
 });
 
 export const staffDirectiveRepo = {
-    /** Активные указания для сотрудника (по цели). */
-    listActiveForStaff(staffId: string, playerId = 'PL-1'): StaffDirective[] {
+    /** Активные указания для исполнителя (сотрудник или актив). */
+    listActiveForExecutor(executorId: string, playerId = 'PL-1'): StaffDirective[] {
         const rows = db.prepare(`
             SELECT * FROM staff_directives
             WHERE player_id = ? AND staff_id = ? AND status = 'active'
             ORDER BY created_minute
-        `).all(playerId, staffId) as any[];
+        `).all(playerId, executorId) as any[];
         return rows.map(mapRow);
     },
 
@@ -78,9 +79,9 @@ export const staffDirectiveRepo = {
         return rows.map(mapRow);
     },
 
-    /** Выдать указание сотруднику. Идемпотентно по (staff, subject, contract). */
+    /** Выдать поручение исполнителю. Идемпотентно по (executor, subject, contract). */
     assign(input: {
-        staffId: string;
+        executorId: string;
         subjectId: string;
         contractId?: string;
         goal: string;
@@ -95,11 +96,11 @@ export const staffDirectiveRepo = {
             VALUES (?, ?, ?, ?, ?, ?, 'active', ?)
             ON CONFLICT(player_id, staff_id, subject_id, contract_id) DO UPDATE SET
                 goal = excluded.goal, spec = excluded.spec, status = 'active', updated_minute = excluded.created_minute
-        `).run(playerId, input.staffId, input.subjectId, input.contractId || null, input.goal, specJson, now);
+        `).run(playerId, input.executorId, input.subjectId, input.contractId || null, input.goal, specJson, now);
         const row = db.prepare(`
             SELECT * FROM staff_directives
             WHERE player_id = ? AND staff_id = ? AND subject_id = ? AND contract_id IS ?
-        `).get(playerId, input.staffId, input.subjectId, input.contractId || null) as any;
+        `).get(playerId, input.executorId, input.subjectId, input.contractId || null) as any;
         return mapRow(row);
     },
 

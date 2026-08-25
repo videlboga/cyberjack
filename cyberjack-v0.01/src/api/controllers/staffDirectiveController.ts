@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
 import { staffDirectiveRepo } from '../../infrastructure/staffDirectiveRepo';
-import { nextStaffAction } from '../../scenario/staffDirectiveService';
+import { nextExecutorAction } from '../../scenario/staffDirectiveService';
 
 export function assignStaffDirective(req: Request, res: Response) {
     try {
-        const { staffId, subjectId, contractId, goal, spec } = req.body || {};
-        if (!staffId || !subjectId || !goal) {
-            return res.status(400).json({ success: false, error: 'Требуются staffId, subjectId, goal' });
+        const { executorId, subjectId, contractId, goal, spec } = req.body || {};
+        if (!executorId || !subjectId || !goal) {
+            return res.status(400).json({ success: false, error: 'Требуются executorId, subjectId, goal' });
         }
         const directive = staffDirectiveRepo.assign({
-            staffId,
+            executorId,
             subjectId,
             contractId: contractId || undefined,
             goal,
@@ -23,9 +23,9 @@ export function assignStaffDirective(req: Request, res: Response) {
 
 export function listStaffDirectives(req: Request, res: Response) {
     try {
-        const staffId = String(req.query.staffId || '');
-        const directives = staffId
-            ? staffDirectiveRepo.listActiveForStaff(staffId)
+        const executorId = String(req.query.executorId || '');
+        const directives = executorId
+            ? staffDirectiveRepo.listActiveForExecutor(executorId)
             : staffDirectiveRepo.listAllActive();
         res.json({ success: true, directives });
     } catch (e: any) {
@@ -45,8 +45,8 @@ export function completeStaffDirective(req: Request, res: Response) {
 
 export function previewStaffAction(req: Request, res: Response) {
     try {
-        const staffId = String(req.query.staffId || '');
-        const action = nextStaffAction(staffId);
+        const executorId = String(req.query.executorId || '');
+        const action = nextExecutorAction(executorId);
         res.json({ success: true, action });
     } catch (e: any) {
         res.status(500).json({ success: false, error: String(e?.message || e) });

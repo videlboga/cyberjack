@@ -172,15 +172,15 @@ function pickActionForSpec(
 }
 
 /**
- * Выполняет один шаг подготовки сотрудником: выбирает действие по активному
- * указанию и возвращает его (для runGameTick). Если указаний нет или всё
- * достигнуто — возвращает null.
+ * Выполняет один шаг подготовки исполнителем (сотрудник или актив): выбирает
+ * действие по активному поручению и возвращает его (для runGameTick).
+ * Если поручений нет или всё достигнуто — возвращает null.
  */
-export function nextStaffAction(
-    staffId: string,
+export function nextExecutorAction(
+    executorId: string,
     playerId = 'PL-1',
 ): { subjectId: string; actionId: string; pointId: string; directive: StaffDirective } | null {
-    const directives = staffDirectiveRepo.listActiveForStaff(staffId, playerId);
+    const directives = staffDirectiveRepo.listActiveForExecutor(executorId, playerId);
     for (const directive of directives) {
         // Если есть спецификация алгоритма — используем её.
         if (directive.spec) {

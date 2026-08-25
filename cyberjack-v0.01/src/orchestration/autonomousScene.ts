@@ -13,7 +13,7 @@ import { ActionScorer, ActionScoreResult } from './actionScorer';
 import { conditioningTags, deriveCompulsionSignals } from '../domain/conditioning';
 import { createSocialTurnPlan, enqueueSocialTurn, processPendingSocialTurns, resolvePhysicalInitiativeBasis } from '../services/socialTransactions';
 import { isSleeping } from '../services/physiology';
-import { nextStaffAction } from '../scenario/staffDirectiveService';
+import { nextExecutorAction } from '../scenario/staffDirectiveService';
 import { staffDirectiveRepo } from '../infrastructure/staffDirectiveRepo';
 
 const AUTONOMOUS_INTERVAL_MINUTES = 5;
@@ -141,31 +141,31 @@ export async function runAutonomousSceneMinute() {
     const executed: Array<{ actorId: string; targetId: string; actionId: string }> = [];
 
     for (let step = 0; step < MAX_ACTIONS_PER_SCENE_PULSE; step++) {
-        // Сотрудники с активными указаниями действуют в первую очередь:
-        // их подготовка к контракту приоритетнее вероятностной инициативы.
-        const staffWithDirective = present.find(actorId => {
+        // Персонажи с активными поручениями действуют в первую очередь:
+        // исполнение алгоритма приоритетнее вероятностной инициативы.
+        const executorWithDirective = present.find(actorId => {
             if (actorId === 'PL-1' || acted.has(actorId) || isDeviceBound(actorId, 'PL-1')) return false;
             if (isSleeping(actorId)) return false;
-            return staffDirectiveRepo.listActiveForStaff(actorId, 'PL-1').length > 0;
+            return staffDirectiveRepo.listActiveForExecutor(actorId, 'PL-1').length > 0;
         });
-        if (staffWithDirective) {
-            const staffAction = nextStaffAction(staffWithDirective, 'PL-1');
-            if (staffAction) {
-                acted.add(staffWithDirective);
+        if (executorWithDirective) {
+            const executorAction = nextExecutorAction(executorWithDirective, 'PL-1');
+            if (executorAction) {
+                acted.add(executorWithDirective);
                 try {
                     await runGameTick({
-                        subjectId: staffAction.subjectId,
-                        pointId: staffAction.pointId,
+                        subjectId: executorAction.subjectId,
+                        pointId: executorAction.pointId,
                         playerId: 'PL-1',
-                        actingCharacterId: staffWithDirective,
+                        actingCharacterId: executorWithDirective,
                         sceneId,
-                        presetId: staffAction.actionId,
+                        presetId: executorAction.actionId,
                         customPayload: { autonomousSceneAction: true, staffDirective: true, worldMinute },
                         skipContextTimeAdvance: true,
                     });
-                    executed.push({ actorId: staffWithDirective, targetId: staffAction.subjectId, actionId: staffAction.actionId });
+                    executed.push({ actorId: executorWithDirective, targetId: executorAction.subjectId, actionId: executorAction.actionId });
                 } catch (error) {
-                    console.warn(`[AutonomousScene] staff ${staffWithDirective} directive action failed:`, error);
+                    console.warn(`[AutonomousScene] executor ${executorWithDirective} directive action failed:`, error);
                 }
                 continue;
             }
