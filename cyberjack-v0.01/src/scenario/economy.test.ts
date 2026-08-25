@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import '../infrastructure/seed';
 import { db } from '../infrastructure/db';
 import { resourceRepo, characterItemsRepo, subjectRepo, activeContextsRepo } from '../infrastructure/repositories';
-import { advanceWorldTime, ensureWorldSeed, getWorldClock } from '../scenario/worldService';
+import { advanceWorldTime, ensureWorldSeed, getWorldClock, listShopOffers, buyOffer } from '../scenario/worldService';
 import { resetWorldSeed } from '../scenario/worldService';
 
 beforeEach(() => {
@@ -70,5 +70,27 @@ describe('Этап 4: экономика', () => {
         advanceWorldTime(60, 'test');
         core = subjectRepo.get('SUB-ECO')!;
         expect(core.capacity).toBe(21); // 13 + 8
+    });
+
+    it('оборудование с required_trust скрыто, пока не достигнут trust фракции', () => {
+        // Начальный trust=0: анальный модуль (Veil 20) и кресло (Continuum 30) скрыты.
+        const offers = listShopOffers('PL-1');
+        const labIds = offers.filter(o => o.category === 'laboratory').map(o => o.id);
+        expect(labIds).not.toContain('lab_sex_machine_anal');
+        expect(labIds).not.toContain('lab_sex_machine_tickling');
+        expect(labIds).not.toContain('lab_mental_correction_chair');
+        expect(labIds).toContain('lab_sex_machine_vaginal');
+        expect(labIds).toContain('lab_recovery_capsule');
+
+        // Покупка анального заблокирована до достижения trust.
+        expect(() => buyOffer('lab_sex_machine_anal', 'PL-1')).toThrow(/довери/);
+
+        // Начисляем trust Veil и убеждаемся, что анальный модуль открылся.
+        db.prepare(`INSERT INTO player_faction_states (player_id, faction_id, relation, trust, access_level, flags)
+            VALUES ('PL-1', 'fac_veil', 0, 25, 1, '[]')
+            ON CONFLICT(player_id, faction_id) DO UPDATE SET trust = excluded.trust`).run();
+        const after = listShopOffers('PL-1').filter(o => o.category === 'laboratory').map(o => o.id);
+        expect(after).toContain('lab_sex_machine_anal');
+        expect(after).not.toContain('lab_sex_machine_tickling'); // требует 30, а у нас 25
     });
 });

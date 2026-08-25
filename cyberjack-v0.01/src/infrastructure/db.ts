@@ -180,6 +180,7 @@ db.exec(`
     price INTEGER NOT NULL,
     stock INTEGER NOT NULL DEFAULT -1,
     required_trust INTEGER NOT NULL DEFAULT 0,
+    required_faction TEXT,
     metadata TEXT NOT NULL DEFAULT '{}',
     available_from INTEGER,
     expires_at INTEGER,
@@ -613,6 +614,7 @@ safeAddColumn('subject_point_states', 'baseline_local_openness', 'REAL');
 safeAddColumn('active_contexts', 'point_id', 'TEXT');
 safeAddColumn('active_contexts', 'initiator_id', 'TEXT');
 safeAddColumn('shop_offers', 'metadata', "TEXT NOT NULL DEFAULT '{}'");
+safeAddColumn('shop_offers', 'required_faction', 'TEXT');
 safeAddColumn('shop_offers', 'available_from', 'INTEGER');
 safeAddColumn('shop_offers', 'expires_at', 'INTEGER');
 safeAddColumn('shop_offers', 'source_event_id', 'TEXT');

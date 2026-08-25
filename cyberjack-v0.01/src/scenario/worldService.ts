@@ -88,9 +88,9 @@ const SHOP_OFFERS = [
     { id: 'offer_plasticity_catalyst', itemId: 'drug_plasticity_catalyst', name: 'Mnemosyne-P', description: 'Ампула пластического катализатора для восстановительной капсулы.', category: 'item', price: 210, stock: 4 },
     { id: 'lab_recovery_capsule', itemId: 'lab_recovery_capsule', name: 'Восстановительная капсула', description: 'Вертикальная ёмкость с вязкой тёплой жидкостью, кислородной маской и каналом подачи питательного раствора; постепенно расслабляет и стабилизирует тело.', category: 'laboratory', price: 700, stock: 1 },
     { id: 'lab_sex_machine_vaginal', itemId: 'lab_sex_machine_vaginal', name: 'Модуль секс-машины · вагинальный', description: 'Стационарный программируемый комплекс с вагинальной траекторией, фиксацией в стременах и управляемой интенсивностью.', category: 'laboratory', price: 700, stock: 1 },
-    { id: 'lab_sex_machine_anal', itemId: 'lab_sex_machine_anal', name: 'Модуль секс-машины · анальный', description: 'Комплекс глубокой анальной траектории с контролем глубины и растяжения, управляемой интенсивностью.', category: 'laboratory', price: 900, stock: 1 },
-    { id: 'lab_sex_machine_tickling', itemId: 'lab_sex_machine_tickling', name: 'Модуль секс-машины · щекотка', description: 'Фиксирующая платформа с щёточными и вибрационными насадками для щекотки ступней с меняющимся ритмом.', category: 'laboratory', price: 750, stock: 1 },
-    { id: 'lab_mental_correction_chair', itemId: 'lab_mental_correction_chair', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.', category: 'laboratory', price: 1250, stock: 1 }
+    { id: 'lab_sex_machine_anal', itemId: 'lab_sex_machine_anal', name: 'Модуль секс-машины · анальный', description: 'Комплекс глубокой анальной траектории с контролем глубины и растяжения, управляемой интенсивностью.', category: 'laboratory', price: 900, stock: 1, requiredFaction: 'fac_veil', requiredTrust: 20 },
+    { id: 'lab_sex_machine_tickling', itemId: 'lab_sex_machine_tickling', name: 'Модуль секс-машины · щекотка', description: 'Фиксирующая платформа с щёточными и вибрационными насадками для щекотки ступней с меняющимся ритмом.', category: 'laboratory', price: 750, stock: 1, requiredFaction: 'fac_veil', requiredTrust: 30 },
+    { id: 'lab_mental_correction_chair', itemId: 'lab_mental_correction_chair', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.', category: 'laboratory', price: 1250, stock: 1, requiredFaction: 'fac_continuum', requiredTrust: 30 }
 ] as const;
 
 const BASE_LAB_ASSETS = [
@@ -215,17 +215,19 @@ export function ensureWorldSeed() {
         WHERE state = 'accepted' AND deadline_tick IS NULL
     `).run();
     const insertOffer = db.prepare(`
-        INSERT INTO shop_offers (id, item_id, name, description, category, price, stock, required_trust)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+        INSERT INTO shop_offers (id, item_id, name, description, category, price, stock, required_trust, required_faction)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             item_id = excluded.item_id,
             name = excluded.name,
             description = excluded.description,
             category = excluded.category,
-            price = excluded.price
+            price = excluded.price,
+            required_trust = excluded.required_trust,
+            required_faction = excluded.required_faction
     `);
     for (const offer of SHOP_OFFERS) {
-        insertOffer.run(offer.id, offer.itemId, offer.name, offer.description, offer.category, offer.price, offer.stock);
+        insertOffer.run(offer.id, offer.itemId, offer.name, offer.description, offer.category, offer.price, offer.stock, (offer as any).requiredTrust ?? 0, (offer as any).requiredFaction ?? null);
     }
     const insertLabAsset = db.prepare(`
         INSERT OR IGNORE INTO laboratory_assets (player_id, asset_id, name, description, state, metadata)
@@ -1145,6 +1147,12 @@ export function listLabRooms(playerId = PLAYER_ID) {
     }));
 }
 
+/** Текущий trust игрока у конкретной фракции (0, если записи нет). */
+export function getFactionTrust(factionId: string, playerId = PLAYER_ID): number {
+    const row = db.prepare(`SELECT trust FROM player_faction_states WHERE player_id = ? AND faction_id = ?`).get(playerId, factionId) as { trust: number } | undefined;
+    return Number(row?.trust || 0);
+}
+
 export function listShopOffers(playerId = PLAYER_ID) {
     ensureWorldSeed();
     const now = getWorldClock().totalMinutes;
@@ -1157,6 +1165,12 @@ export function listShopOffers(playerId = PLAYER_ID) {
         ORDER BY category, price
     `).all(now, now) as any[])
     .filter(row => row.category === 'laboratory' || String(row.item_id).startsWith('drug_') || VISUALLY_SUPPORTED_PORTABLE_ITEMS.has(row.item_id))
+    .filter(row => {
+        // Устройства, требующие доверия фракции, скрыты, пока trust не достигнут.
+        if (!row.required_faction || !row.required_trust) return true;
+        const trust = getFactionTrust(row.required_faction, playerId);
+        return trust >= Number(row.required_trust);
+    })
     .map(row => {
         let metadata:Record<string,any> = {};
         try { metadata = JSON.parse(row.metadata || '{}'); } catch { metadata = {}; }
@@ -1274,6 +1288,10 @@ export function buyOffer(offerId: string, playerId = PLAYER_ID) {
     try { offerMetadata = JSON.parse(offer.metadata || '{}'); } catch { offerMetadata = {}; }
     if (offer.stock === 0) throw new Error('Товар закончился');
     if (offer.category === 'laboratory' && listLabAssets(playerId).some(asset => asset.id === offer.item_id)) throw new Error('Этот модуль уже установлен');
+    if (offer.required_faction && offer.required_trust) {
+        const trust = getFactionTrust(offer.required_faction, playerId);
+        if (trust < Number(offer.required_trust)) throw new Error(`Недостаточно доверия фракции: требуется ${offer.required_trust}`);
+    }
     const credits = resourceRepo.get(playerId)?.resources.credits?.amount || 0;
     if (credits < offer.price) throw new Error(`Недостаточно кредитов: требуется ${offer.price}`);
 
