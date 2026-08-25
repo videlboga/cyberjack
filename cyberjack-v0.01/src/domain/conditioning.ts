@@ -100,6 +100,24 @@ export const NON_LEARNABLE_STATE_CONTEXTS = new Set([
     'effect_refractory',
 ]);
 
+/**
+ * Авторитетный список метрик для condition-алгоритмов поручений
+ * (target/guard). Парсер ссылается на него через импорт, чтобы закрытый
+ * список в схеме не расходился с метриками, которые понимает ядро.
+ */
+export const CONDITION_METRICS = [
+    { key: 'sensitivity', label: 'чувствительность' },
+    { key: 'capacity', label: 'выносливость' },
+    { key: 'tension', label: 'напряжение' },
+    { key: 'attitude', label: 'отношение' },
+    { key: 'openness', label: 'открытость' },
+    { key: 'plasticity', label: 'пластичность' },
+    { key: 'consciousness', label: 'сознание (1=в сознании, 0=отключена)' },
+] as const;
+
+/** Ключи метрик — для валидации/подстановки. */
+export const CONDITION_METRIC_KEYS = CONDITION_METRICS.map(m => m.key) as unknown as string[];
+
 export function isLearnablePreferenceContext(actionId: string): boolean {
     return !NON_LEARNABLE_STATE_CONTEXTS.has(actionId);
 }

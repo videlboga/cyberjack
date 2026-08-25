@@ -1,7 +1,7 @@
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { presetRepo } from '../infrastructure/repositories';
 import type { CommandIntent, DirectiveAlgorithm } from '../domain/resolver';
-import { conditioningTags } from '../domain/conditioning';
+import { conditioningTags, CONDITION_METRICS, LEARNABLE_PREFERENCE_TAGS } from '../domain/conditioning';
 
 type Candidate = { id: string; label: string; kind: 'action' | 'context' | 'point'; text: string; tags?: string[]; vector?: number[] };
 type SceneCharacter = { id: string; name: string };
@@ -287,6 +287,10 @@ export async function parseSemanticVerbalInput(
         .filter(action => (action as any).contextConfig?.type === 'pose');
     const allPoses = allPosesArr.map(action => `${action.id}=${action.label}`).join('; ');
     const allPosesById = Object.fromEntries(allPosesArr.map(action => [action.id, action]));
+    // Закрытые списки для condition/категории берутся из ядра, а не хардкодятся
+    // в парсере — расширение источников автоматически расширяет распознавание.
+    const conditionMetrics = CONDITION_METRICS.map(m => `${m.key} (${m.label})`).join('; ');
+    const learnableTags = Array.from(LEARNABLE_PREFERENCE_TAGS).join(', ');
     const messages: any[] = [{
         role: 'system',
         content: `Разбери одно сообщение игрока. Физическое действие самого игрока здесь невозможно: оно приходит только кнопкой. Звёздочки не означают действие.
@@ -322,6 +326,8 @@ pendingCommandRelation="continue" ставь только когда без не
 - sequence (actions: [{actionId, pointId}]) — выполнить ряд действий по порядку;
 - category (tags: [теги]) — действия с тегами категории;
 - condition (actionId + необязательно target* и guard*) — устойчивый протокол: выполняй actionId, пока guard* не нарушен и target* не достигнут. target = цель (когда достигнута — протокол завершён), guard = защитное ограничение (при нарушении — прекратить). Пример «доведи чувствительность до 400%, но чтобы выносливость не падала ниже 50»: actionId=действие, targetMetric=sensitivity targetValue=400 targetOperator=">=", guardMetric=capacity guardOperator=">=" guardValue=50. Это НЕ единичное действие, а длящийся протокол.
+Допустимые метрики для targetMetric/guardMetric (используй ТОЛЬКО эти ключи, не выдумывай): ${conditionMetrics || 'нет'}
+Для category используй теги ТОЛЬКО из этого списка (переводи русские слова на английские системные теги): ${learnableTags || 'нет'}. Пример: «покорность» → submission, «страх» → fear не входит в список — тогда подбери ближайший, например control.
 Для interrupt_directive: исполнитель (actorId) напрямую требует остановить поручение («остановись», «перестань», «хватит»). Это только прямое обращение к исполнителю; третье лицо («Эли требует, чтобы Рин остановилась») — не наш кейс, верни none.
 Для remove_worn_clothing используй type="remove_worn_clothing" (без actionId/contextId), когда команда требует снять всю одежду целиком («разденься», «сними всё», «сними одежду»). Для снятия одного конкретного предмета используй deactivate_context с contextId этого предмета.
 Для change_pose contextId обязан быть ID позы из «Доступных поз» (например pose_sitting, act_present_feet), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.

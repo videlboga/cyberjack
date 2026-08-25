@@ -1,8 +1,8 @@
 import { db } from '../infrastructure/db';
-import { presetRepo } from '../infrastructure/repositories';
+import { presetRepo, activeContextsRepo } from '../infrastructure/repositories';
 import { staffDirectiveRepo, StaffDirective } from '../infrastructure/staffDirectiveRepo';
 import { subjectRepo } from '../infrastructure/repositories';
-import { acquiredTraitValue, parsePreferences } from '../domain/conditioning';
+import { acquiredTraitValue, parsePreferences, CONDITION_METRIC_KEYS } from '../domain/conditioning';
 import { AssetContract } from '../domain/types';
 
 /**
@@ -117,6 +117,12 @@ function metricValue(subjectId: string, metric: string): number {
         case 'attitude': return core.attitude ?? 0;
         case 'openness': return core.openness ?? 0;
         case 'plasticity': return core.plasticity ?? 0;
+        case 'consciousness': {
+            // 1 = в сознании, 0 = отключена (апатия/фриз/коллапс).
+            const ctxs = activeContextsRepo.getAllForSubject(subjectId).map(c => c.actionId);
+            const out = ctxs.some(id => ['effect_apathy', 'effect_freeze', 'effect_sensory_overload'].includes(id)) ? 0 : 1;
+            return out;
+        }
         default: return 0;
     }
 }
