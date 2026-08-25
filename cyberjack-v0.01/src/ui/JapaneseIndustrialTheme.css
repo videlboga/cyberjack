@@ -10792,3 +10792,13 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .campaign-shell .mental-chair-error { margin:0; color:var(--ji-danger); font-size:9px; }
 @media (max-width:900px) { .campaign-shell .mental-chair-layout { grid-template-columns:1fr; } .campaign-shell .mental-chair-subject { display:grid; grid-template-columns:130px 1fr; gap:8px; } .campaign-shell .mental-chair-portrait { min-height:160px; grid-row:1/4; } }
 @media (max-width:620px) { .campaign-shell .mental-memory-list,.campaign-shell .mental-chair-settings,.campaign-shell .mental-frame-options { grid-template-columns:1fr; } .campaign-shell .mental-chair-subject { display:block; } .campaign-shell .mental-chair-portrait { min-height:220px; } }
+
+/* ── Панель указаний сотрудникам (пункт наблюдения) ── */
+.campaign-shell .staff-directive-section { margin-top:10px; }
+.campaign-shell .staff-directive-panel { display:flex; flex-direction:column; gap:8px; }
+.campaign-shell .staff-directive-form { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.campaign-shell .staff-directive-form label { display:flex; flex-direction:column; gap:3px; font-size:9px; color:var(--ji-muted); }
+.campaign-shell .staff-directive-form label input,
+.campaign-shell .staff-directive-form label select { background:var(--ji-panel); border:1px solid var(--ji-line); color:var(--ji-text); padding:4px 6px; font-size:10px; }
+.campaign-shell .staff-directive-actions { grid-column:1/-1; display:flex; gap:8px; justify-content:flex-end; }
+@media (max-width:620px) { .campaign-shell .staff-directive-form { grid-template-columns:1fr; } }
