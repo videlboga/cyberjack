@@ -13,6 +13,9 @@ beforeEach(() => {
     db.prepare('DELETE FROM subjects WHERE id = ?').run('SUB-ECO');
     db.prepare('DELETE FROM characters WHERE id = ?').run('SUB-ECO');
     db.prepare('DELETE FROM laboratory_room_assignments WHERE player_id = ?').run('PL-1');
+    db.prepare('DELETE FROM laboratory_assets WHERE player_id = ?').run('PL-1');
+    db.prepare('DELETE FROM scene_characters WHERE character_id = ?').run('SUB-STAFF');
+    db.prepare('DELETE FROM characters WHERE id = ?').run('SUB-STAFF');
     db.prepare(`UPDATE world_state SET total_minutes = 480, last_upkeep_day = 1 WHERE id = 'main'`).run();
 });
 
@@ -92,5 +95,21 @@ describe('Этап 4: экономика', () => {
         const after = listShopOffers('PL-1').filter(o => o.category === 'laboratory').map(o => o.id);
         expect(after).toContain('lab_sex_machine_anal');
         expect(after).not.toContain('lab_sex_machine_tickling'); // требует 30, а у нас 25
+    });
+
+    it('учитывает зарплату сотрудников (staff/assistant) в ежедневном содержании', () => {
+        resourceRepo.save({ id: 'PL-1', resources: { credits: { characterId: 'PL-1', resourceKey: 'credits', amount: 1000 } } });
+        // Нанимаем сотрудника: роль staff в scene_lab_calibrator + resident в комнате.
+        db.prepare(`INSERT INTO characters (id, name, kind, current_scene_id) VALUES ('SUB-STAFF', 'Тест-сотрудник', 'npc', 'scene_lab_calibrator')
+            ON CONFLICT(id) DO NOTHING`).run();
+        db.prepare(`INSERT INTO scene_characters (scene_id, character_id, role, can_act, presence_state)
+            VALUES ('scene_lab_calibrator', 'SUB-STAFF', 'staff', 1, 'present')
+            ON CONFLICT(scene_id, character_id) DO UPDATE SET role='staff'`).run();
+        db.prepare(`INSERT INTO laboratory_room_assignments (player_id, room_id, character_id, status)
+            VALUES ('PL-1', 'room_control', 'SUB-STAFF', 'resident')
+            ON CONFLICT(player_id, character_id) DO UPDATE SET status='resident'`).run();
+        advanceWorldTime(1440 - 480, 'test'); // день 2
+        // 1000 - 40 (база) - 30 (зарплата сотрудника) = 930
+        expect(credits()).toBe(930);
     });
 });

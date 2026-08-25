@@ -12,6 +12,7 @@ import { resourceRepo } from '../infrastructure/repositories';
 export const UPKEEP_BASE = 40;        // фикс. содержание лаборатории за сутки
 export const UPKEEP_PER_ASSET = 25;   // за каждого актива в лаборатории
 export const UPKEEP_PER_EQUIPMENT = 15; // за каждое установленное оборудование
+export const UPKEEP_PER_STAFF = 30;   // зарплата за каждого сотрудника (staff/assistant)
 
 /** Число активов, физически присутствующих в лаборатории (не в in_transfer). */
 export function countLabAssets(playerId = 'PL-1'): number {
@@ -19,7 +20,20 @@ export function countLabAssets(playerId = 'PL-1'): number {
         SELECT COUNT(*) AS n
         FROM laboratory_room_assignments a
         JOIN characters c ON c.id = a.character_id
-        WHERE a.player_id = ? AND a.status = 'resident'
+        JOIN scene_characters sc ON sc.character_id = a.character_id AND sc.scene_id = 'scene_lab_calibrator'
+        WHERE a.player_id = ? AND a.status = 'resident' AND sc.role = 'asset'
+    `).get(playerId) as { n: number } | undefined;
+    return Number(row?.n || 0);
+}
+
+/** Число сотрудников (staff/assistant), нанятых в лаборатории. */
+export function countLabStaff(playerId = 'PL-1'): number {
+    const row = db.prepare(`
+        SELECT COUNT(*) AS n
+        FROM laboratory_room_assignments a
+        JOIN characters c ON c.id = a.character_id
+        JOIN scene_characters sc ON sc.character_id = a.character_id AND sc.scene_id = 'scene_lab_calibrator'
+        WHERE a.player_id = ? AND a.status = 'resident' AND sc.role IN ('staff', 'assistant')
     `).get(playerId) as { n: number } | undefined;
     return Number(row?.n || 0);
 }
@@ -49,7 +63,8 @@ export function countLabEquipment(playerId = 'PL-1'): number {
 export function dailyUpkeepCost(playerId = 'PL-1'): number {
     return UPKEEP_BASE
         + UPKEEP_PER_ASSET * countLabAssets(playerId)
-        + UPKEEP_PER_EQUIPMENT * countLabEquipment(playerId);
+        + UPKEEP_PER_EQUIPMENT * countLabEquipment(playerId)
+        + UPKEEP_PER_STAFF * countLabStaff(playerId);
 }
 
 /**
