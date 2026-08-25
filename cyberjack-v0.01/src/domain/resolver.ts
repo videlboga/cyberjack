@@ -1,3 +1,18 @@
+/** Алгоритм действий, который исполняет персонаж (поручение). */
+export type DirectiveAlgorithm =
+  | { kind: 'contract'; contractId: string }
+  | { kind: 'sequence'; actions: { actionId: string; pointId?: string; repeats?: number }[] }
+  | { kind: 'category'; tags: string[]; repeats?: number }
+  | {
+      kind: 'condition';
+      actionId: string;
+      pointId?: string;
+      metric: 'sensitivity' | 'capacity' | 'tension' | 'attitude' | 'openness' | 'plasticity';
+      operator: '>=' | '<=' | '>';
+      value: number;
+      elseActionId?: string;
+    };
+
 export type CommandIntent =
   | { type: "change_pose"; targetPoseId: string }
   | { type: "activate_context"; targetContextId: string }
@@ -9,6 +24,8 @@ export type CommandIntent =
   | { type: "change_current_interaction"; goal: "stop" | "start" | "adjust"; suggestedActionId?: string; targetId?: string; pointId?: string }
   | { type: "perform_action"; actionId: string; targetId?: string; pointId?: string }
   | { type: "perform_described_action"; description: string; matchedActionId: string | null; targetId?: string; pointId?: string; requiredItem?: string; refusal?: string; modifiers?: { intensity?: number; valence?: number; contact?: number; sharpness?: number; novelty?: number } }
+  | { type: "run_directive"; executorId: string; subjectId: string; goal: string; algorithm: DirectiveAlgorithm }
+  | { type: "interrupt_directive"; executorId: string; requesterId: string }
   | { type: "misunderstood"; partial: "pose_unknown" | "action_unknown" | "target_unknown" | "action_and_target_unknown" }
   | { type: "none" };
 

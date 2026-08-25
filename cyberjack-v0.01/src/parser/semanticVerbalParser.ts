@@ -1,6 +1,6 @@
 import { parseVerbalInputWithLLM } from '../adapters/llmAdapter';
 import { presetRepo } from '../infrastructure/repositories';
-import type { CommandIntent } from '../domain/resolver';
+import type { CommandIntent, DirectiveAlgorithm } from '../domain/resolver';
 import { conditioningTags } from '../domain/conditioning';
 
 type Candidate = { id: string; label: string; kind: 'action' | 'context' | 'point'; text: string; tags?: string[]; vector?: number[] };
@@ -218,7 +218,7 @@ export const PARSER_SCHEMA = {
             command: {
                 type: 'object', additionalProperties: false,
                 properties: {
-                    type: { type: 'string', enum: ['none', 'perform_action', 'change_pose', 'activate_context', 'deactivate_context', 'remove_worn_clothing', 'move', 'routine', 'change_current_interaction'] },
+                    type: { type: 'string', enum: ['none', 'perform_action', 'change_pose', 'activate_context', 'deactivate_context', 'remove_worn_clothing', 'move', 'routine', 'change_current_interaction', 'run_directive', 'interrupt_directive'] },
                     directedAtCharacter: { type: 'boolean' },
                     explicitDirective: { type: 'boolean' },
                     directiveEvidence: { type: 'string' },
@@ -229,9 +229,33 @@ export const PARSER_SCHEMA = {
                     location: { type: ['string', 'null'] },
                     goal: { type: ['string', 'null'] },
                     pointId: { type: ['string', 'null'] },
+                    requesterId: { type: ['string', 'null'] },
+                    algorithm: {
+                        type: ['object', 'null'], additionalProperties: false,
+                        properties: {
+                            kind: { type: 'string', enum: ['contract', 'sequence', 'category', 'condition'] },
+                            contractId: { type: ['string', 'null'] },
+                            actionId: { type: ['string', 'null'] },
+                            pointId: { type: ['string', 'null'] },
+                            metric: { type: ['string', 'null'] },
+                            operator: { type: ['string', 'null'] },
+                            value: { type: ['number', 'null'] },
+                            elseActionId: { type: ['string', 'null'] },
+                            tags: { type: 'array', items: { type: 'string' } },
+                            actions: {
+                                type: 'array',
+                                items: {
+                                    type: 'object', additionalProperties: false,
+                                    properties: { actionId: { type: 'string' }, pointId: { type: ['string', 'null'] }, repeats: { type: ['number', 'null'] } },
+                                    required: ['actionId'],
+                                },
+                            },
+                        },
+                        required: ['kind'],
+                    },
                     misunderstood: { type: ['string', 'null'], enum: ['pose_unknown', 'action_unknown', 'target_unknown', 'action_and_target_unknown', null] },
                 },
-                required: ['type', 'directedAtCharacter', 'explicitDirective', 'directiveEvidence', 'actorId', 'targetId', 'actionId', 'contextId', 'location', 'goal', 'pointId', 'misunderstood'],
+                required: ['type', 'directedAtCharacter', 'explicitDirective', 'directiveEvidence', 'actorId', 'targetId', 'actionId', 'contextId', 'location', 'goal', 'pointId', 'requesterId', 'algorithm', 'misunderstood'],
             },
             confidence: { type: 'number' },
         },
@@ -290,7 +314,9 @@ pendingCommandRelation="continue" ставь только когда без не
 Адресат по умолчанию: ${defaultActorId}. Цель по умолчанию: ${defaultTargetId}.
 
 Верни JSON:
-{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|remove_worn_clothing|move|change_current_interaction","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null,"misunderstood":null},"confidence":0..1}
+{"speechType":"conversation|question|praise|insult|command","tone":{"valence":-1..1,"intensity":0..1,"sharpness":0..1},"recipientAppraisal":{"valence":-1..1},"mentions":{"actionIds":[],"pointIds":[]},"pendingCommandRelation":"continue|abandon|unrelated","command":{"type":"none|perform_action|change_pose|activate_context|deactivate_context|remove_worn_clothing|move|change_current_interaction|run_directive|interrupt_directive","directedAtCharacter":false,"explicitDirective":false,"directiveEvidence":"точная цитата директивы из сообщения или пустая строка","actorId":null,"targetId":null,"actionId":null,"contextId":null,"location":null,"goal":null,"pointId":null,"requesterId":null,"algorithm":null,"misunderstood":null},"confidence":0..1}
+Для run_directive: поручение персонажу выполнять алгоритм (протокол) — например «подготовь к контракту», «натренируй на болевые реакции», «держи на грани оргазма и унижай», «выполни серию». actorId = исполнитель, targetId = над кем, goal = краткая цель, algorithm.kind = contract (contractId) | sequence (actions) | category (tags) | condition (actionId+metric+operator+value+elseActionId). Это НЕ единичное действие, а длящийся протокол.
+Для interrupt_directive: кто-то требует, чтобы исполнитель остановил текущее поручение (например «остановись», «прекрати», «Эли требует прекратить»). actorId = исполнитель, requesterId = кто требует.
 Для remove_worn_clothing используй type="remove_worn_clothing" (без actionId/contextId), когда команда требует снять всю одежду целиком («разденься», «сними всё», «сними одежду»). Для снятия одного конкретного предмета используй deactivate_context с contextId этого предмета.
 Для change_pose contextId обязан быть ID позы из «Доступных поз» (например pose_sitting, act_present_feet), а не change_current_interaction. change_current_interaction используй только для начала, изменения или остановки уже идущего процесса.
 Для move, когда игрок называет «свою/твою/мою камеру», «домой», «в камеру» без конкретного имени — верни location="своя камера" (движок сам подставит жилую камеру персонажа). Конкретную комнату или персонажа из «Контекста места» возвращай их именем.
@@ -366,6 +392,46 @@ ID выбирай только из кандидатов и присутству
         else if (command.type === 'move' && command.location) commandIntent = { type: 'move', targetLocation: command.location };
         else if (command.type === 'routine' && command.actionId && ['routine_toilet', 'routine_eat'].includes(command.actionId)) commandIntent = { type: 'routine', routineId: command.actionId as 'routine_toilet' | 'routine_eat' };
         else if (command.type === 'change_current_interaction') commandIntent = { type: 'change_current_interaction', goal: ['start', 'adjust', 'stop'].includes(command.goal) ? command.goal : 'stop', suggestedActionId: command.actionId || undefined, targetId: command.targetId || defaultTargetId, pointId: command.pointId || 'systemic' };
+        else if (command.type === 'run_directive') {
+            // Поручение: персонаж (актив или сотрудник) исполняет алгоритм над
+            // целью. Ядро решает всё детерминированно; LLM только дала интент.
+            const algorithm = command.algorithm && command.algorithm.kind ? command.algorithm : null;
+            if (algorithm) {
+                const executorId = command.actorId || defaultActorId;
+                const subjectId = command.targetId || defaultTargetId;
+                let algo: DirectiveAlgorithm | null = null;
+                switch (algorithm.kind) {
+                    case 'contract':
+                        algo = { kind: 'contract', contractId: algorithm.contractId || '' };
+                        break;
+                    case 'sequence':
+                        algo = { kind: 'sequence', actions: (algorithm.actions || []).map((a: any) => ({ actionId: a.actionId, pointId: a.pointId || undefined, repeats: a.repeats ?? undefined })) };
+                        break;
+                    case 'category':
+                        algo = { kind: 'category', tags: algorithm.tags || [] };
+                        break;
+                    case 'condition':
+                        algo = {
+                            kind: 'condition',
+                            actionId: algorithm.actionId || '',
+                            pointId: algorithm.pointId || undefined,
+                            metric: (algorithm.metric as any) || 'sensitivity',
+                            operator: (algorithm.operator as any) || '>=',
+                            value: Number(algorithm.value ?? 0),
+                            elseActionId: algorithm.elseActionId || undefined,
+                        };
+                        break;
+                    default:
+                        algo = null;
+                }
+                if (algo) commandIntent = { type: 'run_directive', executorId, subjectId, goal: command.goal || 'выполнить протокол', algorithm: algo };
+            }
+        }
+        else if (command.type === 'interrupt_directive') {
+            // Контр-приказ: кто-то требует, чтобы исполнитель остановил текущее
+            // поручение. Решение (послушается ли) принимает ядро.
+            commandIntent = { type: 'interrupt_directive', executorId: command.actorId || defaultActorId, requesterId: command.requesterId || defaultTargetId };
+        }
         else if (command.type === 'perform_action' && command.misunderstood === 'action_unknown') {
             // Понял, что нужно совершить действие с другим персонажем, но не понял какое.
             commandIntent = { type: 'misunderstood', partial: 'action_unknown' };

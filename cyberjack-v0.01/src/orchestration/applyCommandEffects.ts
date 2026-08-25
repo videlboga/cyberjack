@@ -1,6 +1,8 @@
 import type { CompiledAction, TickBundle } from '../domain/types';
 import type { CommandIntent } from '../domain/resolver';
 import { activeContextsRepo, presetRepo, characterRepo, sceneCharacterRepo } from '../infrastructure/repositories';
+import { staffDirectiveRepo } from '../infrastructure/staffDirectiveRepo';
+import { resolveDirectiveCompliance } from '../scenario/directiveCompliance';
 import { resolveLaboratoryMove } from '../scenario/resolveLaboratoryMove';
 import { isSubjectFixedInDevice } from '../services/physiology';
 import type { TickEffect } from './tickEffectPlan';
@@ -72,6 +74,46 @@ export function applyCommandEffects(ctx: CommandEffectsContext): CommandEffectsR
                         : '[Система]: Ты понял, что от тебя что-то требуют, но не понял, что именно. Уточни у собеседника.';
             addedContextNotes.push(misunderstandingNarrative);
             actionApplied = false;
+        } else if (commandIntent.type === 'run_directive') {
+            // Поручение: исполнитель (актив или сотрудник) получает алгоритм
+            // над целью. Ядро сохраняет поручение; исполнение детерминированно
+            // в автономном тике. Создаём поручение, действие не выполняем сразу.
+            const actorChar = characterRepo.get(commandIntent.executorId);
+            const targetChar = characterRepo.get(commandIntent.subjectId);
+            staffDirectiveRepo.assign({
+                executorId: commandIntent.executorId,
+                subjectId: commandIntent.subjectId,
+                goal: commandIntent.goal,
+                spec: commandIntent.algorithm,
+            });
+            addedContextNotes.push(
+                `[Система]: ${actorChar?.name || commandIntent.executorId} получает поручение «${commandIntent.goal}»${
+                    targetChar ? ` в отношении ${targetChar.name}` : ''
+                } и начинает выполнять его как устойчивый протокол.`,
+            );
+            actionApplied = true;
+        } else if (commandIntent.type === 'interrupt_directive') {
+            // Контр-приказ: кто-то требует остановить текущее поручение.
+            // Решение принимает ядро детерминированно (личность/статус/отношения).
+            const intent = commandIntent as { type: 'interrupt_directive'; executorId: string; requesterId: string };
+            const active = staffDirectiveRepo.listActiveForExecutor(intent.executorId);
+            const executorChar = characterRepo.get(intent.executorId);
+            if (!active.length) {
+                addedContextNotes.push(`[Система]: ${executorChar?.name || intent.executorId} не исполняет сейчас никаких поручений.`);
+            } else {
+                const verdict = resolveDirectiveCompliance({ executorId: intent.executorId, requesterId: intent.requesterId });
+                if (verdict.comply) {
+                    active.forEach(d => staffDirectiveRepo.cancel(d.id));
+                    addedContextNotes.push(
+                        `[Система]: ${executorChar?.name || intent.executorId} подчиняется контр-приказу и останавливает текущее поручение (${verdict.reasons.join('; ')}).`,
+                    );
+                } else {
+                    addedContextNotes.push(
+                        `[Система]: ${executorChar?.name || intent.executorId} не прекращает поручение, несмотря на требование (${verdict.reasons.join('; ')}).`,
+                    );
+                }
+            }
+            actionApplied = true;
         } else {
 
         let targetCtxId: string | undefined;
