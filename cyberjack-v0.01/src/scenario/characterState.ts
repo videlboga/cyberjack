@@ -150,7 +150,7 @@ export function reconcileCharacterState(subjectId: string, options: CharacterRec
   const inEnclosedDevice = Boolean(db.prepare(
     `SELECT 1 FROM laboratory_assets
      WHERE json_extract(metadata, '$.subjectId') IN (?, ?)
-       AND asset_id IN ('lab_sex_machine_vaginal','lab_sex_machine_anal','lab_sex_machine_tickling', 'lab_recovery_capsule')
+       AND asset_id IN ('lab_sex_machine_vaginal','lab_sex_machine_anal','lab_sex_machine_tickling','lab_sex_machine_circularsaw', 'lab_recovery_capsule')
      LIMIT 1`
   ).get(character.id, character.subject_id));
 

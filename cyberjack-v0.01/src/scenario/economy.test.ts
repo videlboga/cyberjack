@@ -81,6 +81,7 @@ describe('Этап 4: экономика', () => {
         const labIds = offers.filter(o => o.category === 'laboratory').map(o => o.id);
         expect(labIds).not.toContain('lab_sex_machine_anal');
         expect(labIds).not.toContain('lab_sex_machine_tickling');
+        expect(labIds).not.toContain('lab_sex_machine_circularsaw');
         expect(labIds).not.toContain('lab_mental_correction_chair');
         expect(labIds).toContain('lab_sex_machine_vaginal');
         expect(labIds).toContain('lab_recovery_capsule');
@@ -95,6 +96,14 @@ describe('Этап 4: экономика', () => {
         const after = listShopOffers('PL-1').filter(o => o.category === 'laboratory').map(o => o.id);
         expect(after).toContain('lab_sex_machine_anal');
         expect(after).not.toContain('lab_sex_machine_tickling'); // требует 30, а у нас 25
+        expect(after).not.toContain('lab_sex_machine_circularsaw'); // требует 30
+
+        // Достигаем trust 30: tickling и circularsaw открываются.
+        db.prepare(`INSERT INTO player_faction_states (player_id, faction_id, relation, trust, access_level, flags)
+            VALUES ('PL-1', 'fac_veil', 0, 30, 1, '[]')
+            ON CONFLICT(player_id, faction_id) DO UPDATE SET trust = excluded.trust`).run();
+        const after30 = listShopOffers('PL-1').filter(o => o.category === 'laboratory').map(o => o.id);
+        expect(after30).toContain('lab_sex_machine_circularsaw');
     });
 
     it('учитывает зарплату сотрудников (staff/assistant) в ежедневном содержании', () => {

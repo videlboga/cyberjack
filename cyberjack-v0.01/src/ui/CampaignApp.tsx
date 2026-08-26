@@ -1556,6 +1556,7 @@ function LaboratoryOverview({
     lab_sex_machine_vaginal: "/backgrounds/laboratory/sex_machine.png",
     lab_sex_machine_anal: "/backgrounds/laboratory/sex_machine.png",
     lab_sex_machine_tickling: "/backgrounds/laboratory/sex_machine.png",
+    lab_sex_machine_circularsaw: "/backgrounds/laboratory/sex_machine_circularsaw.png",
     lab_mental_correction_chair: "/backgrounds/laboratory/mental_correction_chair.png",
   };
   const [selectedRoomId, setSelectedRoomId] = useState(
@@ -1971,6 +1972,7 @@ function LaboratoryOverview({
                       "lab_sex_machine_vaginal",
                       "lab_sex_machine_anal",
                       "lab_sex_machine_tickling",
+                      "lab_sex_machine_circularsaw",
                       "lab_mental_correction_chair",
                     ].includes(asset.id);
                     const occupant = scenario.residents.find(

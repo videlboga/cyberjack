@@ -119,7 +119,7 @@ export function getLaboratorySpatialContext(characterOrSubjectId: string, player
     const nearAsset = !occupiedAsset && nearAssetId ? assets.find(asset => asset.asset_id === nearAssetId) : null;
     const isolated = ['lab_recovery_capsule', 'lab_mental_correction_chair'].includes(String(occupiedAsset?.asset_id || ''));
     const isolatedCharacterIds = new Set(assets
-        .filter(asset => ['lab_recovery_capsule', 'lab_sex_machine_vaginal', 'lab_sex_machine_anal', 'lab_sex_machine_tickling', 'lab_mental_correction_chair'].includes(asset.asset_id))
+        .filter(asset => ['lab_recovery_capsule', 'lab_sex_machine_vaginal', 'lab_sex_machine_anal', 'lab_sex_machine_tickling', 'lab_sex_machine_circularsaw', 'lab_mental_correction_chair'].includes(asset.asset_id))
         .map(asset => String(parseMetadata(asset.metadata).subjectId || ''))
         .filter(Boolean));
     const roster = db.prepare(`
@@ -252,6 +252,7 @@ export const ENCLOSED_DEVICE_ASSETS = new Set([
     'lab_sex_machine_vaginal',
     'lab_sex_machine_anal',
     'lab_sex_machine_tickling',
+    'lab_sex_machine_circularsaw',
     'lab_mental_correction_chair',
 ]);
 

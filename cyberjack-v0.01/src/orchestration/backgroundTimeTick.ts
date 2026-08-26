@@ -268,7 +268,7 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
   const rows = db.prepare(`
     SELECT player_id, asset_id, name, metadata
     FROM laboratory_assets
-    WHERE asset_id IN ('lab_sex_machine_vaginal','lab_sex_machine_anal','lab_sex_machine_tickling') AND state = 'installed'
+    WHERE asset_id IN ('lab_sex_machine_vaginal','lab_sex_machine_anal','lab_sex_machine_tickling','lab_sex_machine_circularsaw') AND state = 'installed'
   `).all() as Array<{ player_id:string; asset_id:string; name:string; metadata:string }>;
   for (const row of rows) {
     let metadata:Record<string,any> = {};

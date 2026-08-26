@@ -16,6 +16,7 @@ export const deviceNameMap: Record<string, string> = {
   'lab_sex_machine_vaginal': 'sexMachineVaginal',
   'lab_sex_machine_anal': 'sexMachineAnal',
   'lab_sex_machine_tickling': 'sexMachineTickling',
+    'lab_sex_machine_circularsaw': 'sexMachineCircularsaw',
   'lab_mental_correction_chair': 'mentalCorrectionChair'
 };
 

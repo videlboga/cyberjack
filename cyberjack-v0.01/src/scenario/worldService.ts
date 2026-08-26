@@ -90,6 +90,7 @@ const SHOP_OFFERS = [
     { id: 'lab_sex_machine_vaginal', itemId: 'lab_sex_machine_vaginal', name: 'Модуль секс-машины · вагинальный', description: 'Стационарный программируемый комплекс с вагинальной траекторией, фиксацией в стременах и управляемой интенсивностью.', category: 'laboratory', price: 700, stock: 1 },
     { id: 'lab_sex_machine_anal', itemId: 'lab_sex_machine_anal', name: 'Модуль секс-машины · анальный', description: 'Комплекс глубокой анальной траектории с контролем глубины и растяжения, управляемой интенсивностью.', category: 'laboratory', price: 900, stock: 1, requiredFaction: 'fac_veil', requiredTrust: 20 },
     { id: 'lab_sex_machine_tickling', itemId: 'lab_sex_machine_tickling', name: 'Модуль секс-машины · щекотка', description: 'Фиксирующая платформа с щёточными и вибрационными насадками для щекотки ступней с меняющимся ритмом.', category: 'laboratory', price: 750, stock: 1, requiredFaction: 'fac_veil', requiredTrust: 30 },
+    { id: 'lab_sex_machine_circularsaw', itemId: 'lab_sex_machine_circularsaw', name: 'Модуль секс-машины · ротационный стимулятор', description: 'Вращающийся силиконовый контур по передней точке с непрерывным ротационным контактом и регулируемым радиусом.', category: 'laboratory', price: 800, stock: 1, requiredFaction: 'fac_veil', requiredTrust: 30 },
     { id: 'lab_mental_correction_chair', itemId: 'lab_mental_correction_chair', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.', category: 'laboratory', price: 1250, stock: 1, requiredFaction: 'fac_continuum', requiredTrust: 30 }
 ] as const;
 
@@ -113,6 +114,7 @@ const PURCHASABLE_LAB_ASSETS = [
     { id: 'lab_sex_machine_vaginal', roomId: 'room_calibration', name: 'Модуль секс-машины · вагинальный', description: 'Стационарный программируемый комплекс с вагинальной траекторией, фиксацией в стременах и управляемой интенсивностью.' },
     { id: 'lab_sex_machine_anal', roomId: 'room_calibration', name: 'Модуль секс-машины · анальный', description: 'Комплекс глубокой анальной траектории с контролем глубины и растяжения, управляемой интенсивностью.' },
     { id: 'lab_sex_machine_tickling', roomId: 'room_calibration', name: 'Модуль секс-машины · щекотка', description: 'Фиксирующая платформа с щёточными и вибрационными насадками для щекотки ступней с меняющимся ритмом.' },
+    { id: 'lab_sex_machine_circularsaw', roomId: 'room_calibration', name: 'Модуль секс-машины · ротационный стимулятор', description: 'Вращающийся силиконовый контур по передней точке с непрерывным ротационным контактом.' },
     { id: 'lab_mental_correction_chair', roomId: 'room_calibration', name: 'Кресло ментальной коррекции', description: 'Изолированное нейрокресло с визором, направленным звуком и тактильной обратной связью для управляемых ментальных процедур.' }
 ];
 
@@ -648,6 +650,14 @@ const DEVICE_DEFINITIONS = {
         deviceId: 'sex_machine' as const,
         configurations: {
             restrained: ['nude', 'underwear'],
+        },
+        defaultConfiguration: 'restrained',
+        defaultWardrobe: 'nude' as const
+    },
+    lab_sex_machine_circularsaw: {
+        deviceId: 'sex_machine' as const,
+        configurations: {
+            restrained: ['nude'],
         },
         defaultConfiguration: 'restrained',
         defaultWardrobe: 'nude' as const
@@ -1325,7 +1335,7 @@ export function buyOffer(offerId: string, playerId = PLAYER_ID) {
 export function useLabAsset(assetId: string, subjectId: string, playerId = PLAYER_ID) {
     if (getPlayerLocation(playerId).id !== LAB_SCENE_ID) throw new Error('Лабораторное оборудование доступно только в лаборатории');
     if (!listLabAssets(playerId).some(asset => asset.id === assetId)) throw new Error('Модуль не установлен');
-    if (!['lab_recovery_capsule', 'lab_diagnostic_table', 'lab_sex_machine_vaginal', 'lab_sex_machine_anal', 'lab_sex_machine_tickling', 'lab_mental_correction_chair'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
+    if (!['lab_recovery_capsule', 'lab_diagnostic_table', 'lab_sex_machine_vaginal', 'lab_sex_machine_anal', 'lab_sex_machine_tickling', 'lab_sex_machine_circularsaw', 'lab_mental_correction_chair'].includes(assetId)) throw new Error('Этот модуль пока не принимает активов');
     const core = subjectRepo.get(subjectId);
     if (!core) throw new Error('Актив не найден');
     const asset = listLabAssets(playerId).find(entry => entry.id === assetId)!;

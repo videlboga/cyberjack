@@ -579,7 +579,11 @@
       "peakDischargeDesc": "Discharge passes through the whole body",
       "peakOverloadDesc": "Sensations went beyond the limit of control",
       "peakExhaustionDesc": "The body can no longer hold tension",
-      "peakBreakdownDesc": "Resistance gives way to a breakdown"
+      "peakBreakdownDesc": "Resistance gives way to a breakdown",
+      "sexMachineVaginal": "Vaginal contact",
+      "sexMachineAnal": "Anal contact",
+      "sexMachineTickling": "Foot tickling",
+      "sexMachineCircularsaw": "Rotary stimulator"
     },
     "content": {
       "actions": {

@@ -579,7 +579,11 @@
       "peakDischargeDesc": "Разряд проходит через всё тело",
       "peakOverloadDesc": "Ощущения вышли за предел контроля",
       "peakExhaustionDesc": "Тело больше не держит напряжение",
-      "peakBreakdownDesc": "Сопротивление сменяется срывом"
+      "peakBreakdownDesc": "Сопротивление сменяется срывом",
+      "sexMachineVaginal": "Вагинальный контакт",
+      "sexMachineAnal": "Анальный контакт",
+      "sexMachineTickling": "Щекотка ступней",
+      "sexMachineCircularsaw": "Ротационный стимулятор"
     },
     "content": {
       "actions": {

@@ -44,6 +44,7 @@ const PAID_EQUIPMENT_IDS = new Set([
     'lab_sex_machine_vaginal',
     'lab_sex_machine_anal',
     'lab_sex_machine_tickling',
+    'lab_sex_machine_circularsaw',
     'lab_mental_correction_chair',
 ]);
 
