@@ -28,10 +28,7 @@ import { applyDailyUpkeep } from './economy';
 export const PLAYER_ID = 'PL-1';
 export const LAB_SCENE_ID = 'scene_lab_calibrator';
 export const VISUALLY_SUPPORTED_PORTABLE_ITEMS = new Set([
-    'eq_handcuffs','eq_collar','eq_plug','eq_vibrator',
-    'eq_blindfold','eq_gag','eq_jumpsuit','eq_dress','eq_stockings',
-    'eq_underwear','eq_lab_gown','eq_calibration_set','eq_ankle_cuffs',
-    'eq_restraint_belt',
+    'eq_stockings','eq_lab_gown',
 ]);
 
 export const LOCATIONS = [
@@ -67,20 +64,8 @@ const STATION_SECTOR_CHANNELS = {
 } as const;
 
 const SHOP_OFFERS = [
-    { id: 'offer_handcuffs', itemId: 'eq_handcuffs', name: 'Наручники', description: 'Стандартная фиксация запястий с визуальным состоянием калибровки.', category: 'item', price: 110, stock: -1 },
-    { id: 'offer_collar', itemId: 'eq_collar', name: 'Управляемый ошейник', description: 'Фиксация шеи и канал дистанционного импульса.', category: 'item', price: 190, stock: -1 },
-    { id: 'offer_plug', itemId: 'eq_plug', name: 'Стимулирующая пробка', description: 'Внутренний управляемый модуль продолжительной стимуляции.', category: 'item', price: 150, stock: -1 },
-    { id: 'offer_vibrator', itemId: 'eq_vibrator', name: 'Вибростимулятор', description: 'Ручной модуль локальной продолжительной стимуляции.', category: 'item', price: 145, stock: -1 },
-    { id: 'offer_blindfold', itemId: 'eq_blindfold', name: 'Сенсорная повязка', description: 'Изоляция зрения с отдельным визуальным состоянием.', category: 'item', price: 55, stock: -1 },
-    { id: 'offer_gag', itemId: 'eq_gag', name: 'Фиксирующий кляп', description: 'Лицевая фиксация с отдельным визуальным состоянием.', category: 'item', price: 85, stock: -1 },
-    { id: 'offer_jumpsuit', itemId: 'eq_jumpsuit', name: 'Сенсорный комбинезон', description: 'Закрытая экипировка для изоляции и аппаратных процедур.', category: 'item', price: 120, stock: -1 },
-    { id: 'offer_dress', itemId: 'eq_dress', name: 'Станционное платье', description: 'Повседневная одежда, поддерживаемая визуальной матрицей.', category: 'item', price: 75, stock: -1 },
     { id: 'offer_stockings', itemId: 'eq_stockings', name: 'Чулки', description: 'Дополнительный слой одежды с отдельными визуальными состояниями.', category: 'item', price: 45, stock: -1 },
-    { id: 'offer_underwear', itemId: 'eq_underwear', name: 'Комплект белья', description: 'Базовое бельё, поддерживаемое калибровочной матрицей.', category: 'item', price: 40, stock: -1 },
     { id: 'offer_lab_gown', itemId: 'eq_lab_gown', name: 'Лабораторная рубашка', description: 'Свободная диагностическая одежда с открытой спиной.', category: 'item', price: 45, stock: -1 },
-    { id: 'offer_calibration_set', itemId: 'eq_calibration_set', name: 'Калибровочный комплект', description: 'Топ и шорты с доступом к зонам установки датчиков.', category: 'item', price: 70, stock: -1 },
-    { id: 'offer_ankle_cuffs', itemId: 'eq_ankle_cuffs', name: 'Ножные манжеты', description: 'Фиксаторы лодыжек с короткой соединительной цепью.', category: 'item', price: 130, stock: -1 },
-    { id: 'offer_restraint_belt', itemId: 'eq_restraint_belt', name: 'Фиксирующий пояс', description: 'Пояс для удержания запястий у талии.', category: 'item', price: 170, stock: -1 },
     { id: 'offer_aphrodisiac', itemId: 'drug_aphrodisiac', name: 'Eros-V', description: 'Расходник: резко повышает реактивность нервной системы.', category: 'item', price: 120, stock: 6 },
     { id: 'offer_sensitizer', itemId: 'drug_sensitizer', name: 'NeuroSpike', description: 'Расходник для локальной гиперсенсибилизации.', category: 'item', price: 160, stock: 4 },
     { id: 'offer_regenerative', itemId: 'drug_regenerative', name: 'Regen-R', description: 'Ампула для регенеративного контура восстановительной капсулы.', category: 'item', price: 95, stock: 8 },
