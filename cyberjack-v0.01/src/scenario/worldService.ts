@@ -31,6 +31,11 @@ export const VISUALLY_SUPPORTED_PORTABLE_ITEMS = new Set([
     'eq_stockings','eq_lab_gown',
 ]);
 
+// Расходники, временно скрытые со склада (дорабатываются позже).
+export const HIDDEN_CONSUMABLES = new Set([
+    'drug_truth_serum','drug_painkiller',
+]);
+
 export const LOCATIONS = [
     {
         id: LAB_SCENE_ID,
@@ -1088,6 +1093,7 @@ export function listInventory(playerId = PLAYER_ID) {
     return characterItemsRepo.listFor(playerId)
     .filter(entry => entry.state !== 'consumed' && entry.state !== 'broken' && entry.charges !== 0)
     .filter(entry => itemRepo.get(entry.itemId)?.type === 'consumable' || VISUALLY_SUPPORTED_PORTABLE_ITEMS.has(entry.itemId))
+    .filter(entry => !HIDDEN_CONSUMABLES.has(entry.itemId))
     .map(entry => {
         const item = itemRepo.get(entry.itemId);
         return {
