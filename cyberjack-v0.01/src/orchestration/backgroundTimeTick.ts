@@ -3,6 +3,8 @@ import { activeContextsRepo, chatMemoryRepo, subjectPreferencesRepo, subjectRepo
 import { planSustainedPulses } from './sustainedEffects';
 import { runGameTick } from './runGameTick';
 import { ContextManager } from './contextManager';
+import { ConditionWatcher } from './conditionWatcher';
+import { executeTickEffectPlan } from './tickEffectPlan';
 import { type InternalImpulse } from '../narrative/reactionFrame';
 import { executeInternalImpulseConversation } from './sceneOrchestrator';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
@@ -456,6 +458,21 @@ function recoverIsolatedResidentsMinute() {
  * Routine state evolution is engine work. Device speech is queued only for
  * explicit phase changes, limits and other exceptional events.
  */
+function evaluateGlobalConditions() {
+  const subjects = db.prepare(`SELECT id FROM subjects`).all() as Array<{ id: string }>;
+  for (const { id } of subjects) {
+    const core = subjectRepo.get(id);
+    if (!core) continue;
+    const plan = ConditionWatcher.planGlobal(id, core);
+    if (!plan.effects.length) continue;
+    try {
+      executeTickEffectPlan(plan.effects, { appendEvents: true });
+    } catch (error) {
+      console.warn(`[TimeFlow] global condition evaluation failed for ${id}:`, error);
+    }
+  }
+}
+
 export async function runBackgroundSustainedTicks(deltaTime = 1) {
   pendingMinutes += Math.max(0, deltaTime);
   if (running) return;
@@ -512,6 +529,12 @@ export async function runBackgroundSustainedTicks(deltaTime = 1) {
         if (!advancedContextTime) ContextManager.processTick(subjectId, 1);
       }
       settleUnstimulatedArousalMinute(stimulatedSubjects);
+      // Release global condition contexts (situational acceptance,
+      // suggestibility, subspace, refractory, etc.) once their trigger no
+      // longer holds. These are evaluated here because a subject that is not
+      // being stimulated never passes through runGameTick, so the ordinary
+      // ConditionWatcher.plan inside the tick would never fire for them.
+      evaluateGlobalConditions();
       // A long-held edge can create speech on its own even when no device
       // phase changes. The state belongs to the subject, so this covers every
       // source of edging and only uses the device as one possible tick source.

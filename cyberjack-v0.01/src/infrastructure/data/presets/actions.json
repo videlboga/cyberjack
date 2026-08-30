@@ -1603,7 +1603,6 @@
         "hands",
         "legs",
         "buttocks",
-        "groin",
         "vulva",
         "vagina",
         "anus",
@@ -1630,7 +1629,6 @@
         "clitoris",
         "torso",
         "legs",
-        "groin",
         "breasts"
       ],
       "modifiers": {
@@ -1738,9 +1736,6 @@
       "type": "clothing",
       "activeLabel": "Нижнее бельё",
       "occupiesPoints": [
-        "chest",
-        "nipples",
-        "groin",
         "vulva",
         "vagina",
         "anus",
@@ -1755,7 +1750,6 @@
       },
       "exclusiveWithinPoint": true,
       "blocksPoints": [
-        "groin",
         "vulva",
         "vagina",
         "anus",
@@ -1781,7 +1775,6 @@
       "type": "clothing",
       "activeLabel": "Трусики",
       "occupiesPoints": [
-        "groin",
         "vulva",
         "vagina",
         "anus",
@@ -1791,7 +1784,6 @@
       "duration": -1,
       "exclusiveWithinPoint": true,
       "blocksPoints": [
-        "groin",
         "vulva",
         "vagina",
         "anus",

@@ -1,5 +1,5 @@
 import { SubjectCoreState, SubjectPointState, CompiledAction } from '../domain/types';
-import { stateTriggersRepo, presetRepo, eventLogRepo, activeContextsRepo } from '../infrastructure/repositories';
+import { stateTriggersRepo, presetRepo, eventLogRepo, activeContextsRepo, subjectRepo, pointStateRepo } from '../infrastructure/repositories';
 import { ContextManager } from './contextManager';
 import type { TickEffect } from './tickEffectPlan';
 
@@ -293,5 +293,73 @@ export class ConditionWatcher {
             }
         }
         return plan.narratives;
+    }
+
+    /**
+     * Evaluates only the global (non-point-specific) condition rules for a
+     * subject, using their current core state. This is the background-time
+     * counterpart of `plan`: it releases condition contexts (situational
+     * acceptance, suggestibility, subspace, refractory, etc.) once their
+     * trigger no longer holds, even when the subject is not being stimulated
+     * and therefore never passes through `runGameTick`.
+     *
+     * Point-specific rules (local hyperesthesia / numbness) are skipped here:
+     * they bind to a concrete point and are re-evaluated on the next
+     * interaction with that point.
+     */
+    static planGlobal(subjectId: string, core: SubjectCoreState): ConditionPlan {
+        const activeContexts = activeContextsRepo.getAllForSubject(subjectId);
+        const narratives: string[] = [];
+        const effects: TickEffect[] = [];
+        const counters = new Map<string, number>();
+        const counter = (code: string) => counters.get(code) ?? stateTriggersRepo.get(subjectId, code);
+
+        for (const rule of STATE_RULES) {
+            if (rule.pointSpecific) continue;
+            const hasContext = activeContexts.some(c => c.actionId === rule.actionPresetId);
+            const isConditionMet = hasContext && rule.releaseCheck
+                ? !rule.releaseCheck(core, { pointId: 'systemic' } as SubjectPointState)
+                : rule.check(core, { pointId: 'systemic' } as SubjectPointState);
+
+            if (isConditionMet) {
+                const currentTicks = counter(rule.code) + 1;
+                counters.set(rule.code, currentTicks);
+                effects.push({ kind: 'state-trigger.set', subjectId, triggerCode: rule.code, ticks: currentTicks });
+                if (currentTicks >= rule.requiredTicks && !hasContext) {
+                    const preset = presetRepo.getActionPreset(rule.actionPresetId);
+                    if (preset) {
+                        const originalDuration = preset.contextConfig?.duration;
+                        if (preset.contextConfig && rule.durationOnTrigger !== undefined) {
+                            preset.contextConfig.duration = rule.durationOnTrigger;
+                        } else if (!preset.contextConfig) {
+                            (preset as any).contextConfig = { type: 'condition', occupiesPoints: [], duration: rule.durationOnTrigger ?? -1 };
+                        }
+                        effects.push({ kind: 'context.apply', subjectId, actionId: rule.actionPresetId, action: preset });
+                        const narrative = `[Состояние] Активация: ${rule.description}.`.trim();
+                        effects.push({ kind: 'event.append', event: { subjectId, type: 'system_trigger', presetId: 'system_trigger', narrative, metadata: { triggeredRule: rule.code } } });
+                        narratives.push(narrative);
+                        if (preset.contextConfig && originalDuration !== undefined) {
+                            preset.contextConfig.duration = originalDuration;
+                        }
+                    }
+                }
+            } else {
+                const currentTicks = counter(rule.code);
+                if (currentTicks > 0) {
+                    counters.set(rule.code, 0);
+                    effects.push({ kind: 'state-trigger.set', subjectId, triggerCode: rule.code, ticks: 0 });
+                }
+                if (rule.removeOnFail && hasContext) {
+                    const contextToRemove = activeContexts.find(c => c.actionId === rule.actionPresetId);
+                    if (contextToRemove) {
+                        effects.push({ kind: 'context.remove-id', contextId: contextToRemove.id });
+                        const narrative = `[Состояние] Снятие: ${rule.description}`;
+                        effects.push({ kind: 'event.append', event: { subjectId, type: 'system_trigger', presetId: 'system_trigger', narrative, metadata: { clearedRule: rule.code } } });
+                        narratives.push(narrative);
+                    }
+                }
+            }
+        }
+        return { narratives, effects };
     }
 }

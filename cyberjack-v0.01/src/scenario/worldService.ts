@@ -510,7 +510,77 @@ export function ensureWorldSeed() {
     // A newly restored player position must be observable immediately, not
     // only after the next background minute.
     syncLaboratorySpatialRelations(PLAYER_ID);
+    reconcileOrphanedDeviceContexts(PLAYER_ID);
     worldSeeded = true;
+}
+
+/**
+ * Reconciles device contexts and placements against the actually-installed
+ * laboratory assets. Two classes of drift are repaired:
+ *
+ *   1. A device context (e.g. `context_mental_correction_chair`) whose device
+ *      is no longer present in `laboratory_assets` is removed — the character
+ *      cannot be sitting in a chair that does not exist.
+ *
+ *   2. A character whose `scene_characters.slot_id` / room assignment points
+ *      at a `device:<assetId>` that is not installed is returned to their home
+ *      cell (or the calibration room as a fallback), so they stop appearing
+ *      inside a machine that was never bought.
+ */
+function reconcileOrphanedDeviceContexts(playerId = PLAYER_ID) {
+    const installedAssets = new Set(
+        (db.prepare(`SELECT asset_id FROM laboratory_assets WHERE player_id = ?`).all(playerId) as Array<{ asset_id: string }>)
+            .map(row => row.asset_id),
+    );
+
+    // 1. Remove device contexts whose device is not installed.
+    // The mental chair context is typed `environment` (not `device`), so match
+    // by the explicit actionId → assetId mapping rather than by context type.
+    const DEVICE_CONTEXT_ASSETS: Record<string, string> = {
+        'context_mental_correction_chair': 'lab_mental_correction_chair',
+    };
+    for (const [actionId, assetId] of Object.entries(DEVICE_CONTEXT_ASSETS)) {
+        if (installedAssets.has(assetId)) continue;
+        db.prepare(`DELETE FROM active_contexts WHERE action_id = ?`).run(actionId);
+    }
+
+    // 2. Return characters stuck in a non-installed device to their home cell.
+    const assignments = db.prepare(`
+        SELECT character_id, room_id, status, home_room_id
+        FROM laboratory_room_assignments WHERE player_id = ?
+    `).all(playerId) as Array<{ character_id: string; room_id: string; status: string; home_room_id: string | null }>;
+    for (const assignment of assignments) {
+        if (!assignment.status.startsWith('device:')) continue;
+        const assetId = assignment.status.slice('device:'.length);
+        if (installedAssets.has(assetId)) continue;
+        const homeRoom = assignment.home_room_id || 'room_calibration';
+        setLaboratoryPresence({
+            characterId: assignment.character_id,
+            slotId: `room:${homeRoom}`,
+            roomId: homeRoom,
+            status: 'resident',
+            playerId,
+        });
+    }
+
+    // 3. Drop clothing context rows whose point is no longer part of the
+    //    preset's occupiesPoints (e.g. a legacy `groin`/`chest`/`nipples` row
+    //    left over from an older underwear definition). Idempotent seeding
+    //    never removes these on its own.
+    const clothingRows = db.prepare(`
+        SELECT ac.id, ac.action_id, ac.point_id, ap.context_config_json
+        FROM active_contexts ac
+        JOIN action_presets ap ON ap.id = ac.action_id
+        WHERE COALESCE(json_extract(ap.context_config_json, '$.type'), '') = 'clothing'
+    `).all() as Array<{ id: string; action_id: string; point_id: string | null; context_config_json: string }>;
+    for (const row of clothingRows) {
+        let config: { occupiesPoints?: string[] } = {};
+        try { config = JSON.parse(row.context_config_json || '{}'); } catch { continue; }
+        const valid = config.occupiesPoints || [];
+        if (row.point_id && !valid.includes(row.point_id)) {
+            db.prepare(`DELETE FROM active_contexts WHERE id = ?`).run(row.id);
+        }
+    }
 }
 
 /** Test seam: resets the module-level seed flag between test cases. */
