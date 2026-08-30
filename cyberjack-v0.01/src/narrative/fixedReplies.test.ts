@@ -22,32 +22,54 @@ function frame(overrides: Partial<ReactionFrame> = {}): ReactionFrame {
 describe('fixedReplies gate', () => {
     beforeEach(() => __resetFixedReplyState());
 
+    // ── Физиология фиксируется по умолчанию ───────────────────────────────
+
+    it('uses fixed reply for discharge', () => {
+        const f = frame({ event: { ...frame().event, physiologicalEvent: 'discharge' } });
+        expect(shouldUseFixedReply(f)).toBe(true);
+    });
+
+    it('uses fixed reply for breakdown and overload', () => {
+        expect(shouldUseFixedReply(frame({ event: { ...frame().event, physiologicalEvent: 'breakdown' } }))).toBe(true);
+        expect(shouldUseFixedReply(frame({ event: { ...frame().event, physiologicalEvent: 'overload' } }))).toBe(true);
+    });
+
+    it('uses fixed reply for peak and edge', () => {
+        expect(shouldUseFixedReply(frame({ event: { ...frame().event, physiologicalEvent: 'peak' } }))).toBe(true);
+        expect(shouldUseFixedReply(frame({ event: { ...frame().event, physiologicalEvent: 'edge' } }))).toBe(true);
+    });
+
     it('uses fixed reply for minimal control', () => {
         const f = frame({ expressionMode: { ...frame().expressionMode, control: 'minimal' } });
         expect(shouldUseFixedReply(f)).toBe(true);
     });
 
-    it('does NOT use fixed reply for discharge (fragmented)', () => {
+    // ── Escape-hatch: нужен конкретный смысл → LLM ────────────────────────
+
+    it('does NOT use fixed reply for observer (not directly experienced)', () => {
         const f = frame({
-            event: { ...frame().event, physiologicalEvent: 'discharge' },
-            expressionMode: { ...frame().expressionMode, control: 'fragmented' },
+            event: { ...frame().event, physiologicalEvent: 'discharge', directlyExperienced: false },
         });
         expect(shouldUseFixedReply(f)).toBe(false);
     });
 
-    it('does NOT use fixed reply for breakdown', () => {
-        const f = frame({ event: { ...frame().event, physiologicalEvent: 'breakdown' } });
+    it('does NOT use fixed reply when there are open threads', () => {
+        const f = frame({
+            event: { ...frame().event, physiologicalEvent: 'discharge' },
+            continuity: { ...frame().continuity, openThreads: ['Без явного ответа осталось: вопрос'] },
+        });
         expect(shouldUseFixedReply(f)).toBe(false);
     });
 
-    it('does NOT use fixed reply for overload', () => {
-        const f = frame({ event: { ...frame().event, physiologicalEvent: 'overload' } });
+    it('does NOT use fixed reply when a question was asked', () => {
+        const f = frame({
+            event: { ...frame().event, physiologicalEvent: 'discharge', playerSpeech: 'Что ты чувствуешь?' },
+        });
         expect(shouldUseFixedReply(f)).toBe(false);
     });
 
     it('does NOT use fixed reply for social acts (set_boundary)', () => {
         const f = frame({
-            event: { ...frame().event, repetition: 3 },
             dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
         });
         expect(shouldUseFixedReply(f)).toBe(false);
@@ -57,26 +79,30 @@ describe('fixedReplies gate', () => {
         expect(shouldUseFixedReply(frame())).toBe(false);
     });
 
-    it('returns a non-empty reply for minimal control', () => {
+    // ── Выбор реплики ──────────────────────────────────────────────────────
+
+    it('returns a non-empty reply for discharge', () => {
         const f = frame({
-            expressionMode: { ...frame().expressionMode, control: 'minimal', affect: 'negative' },
+            event: { ...frame().event, physiologicalEvent: 'discharge' },
+            expressionMode: { ...frame().expressionMode, affect: 'positive' },
         });
         const reply = selectFixedReply(f);
         expect(reply).toBeTruthy();
         expect(typeof reply).toBe('string');
     });
 
-    it('returns null for a non-minimal state', () => {
+    it('returns null for a state with no authored variants', () => {
         const f = frame({
             event: { ...frame().event, physiologicalEvent: 'discharge' },
-            expressionMode: { ...frame().expressionMode, control: 'fragmented', affect: 'positive' },
+            expressionMode: { ...frame().expressionMode, affect: 'negative' },
         });
         expect(selectFixedReply(f)).toBeNull();
     });
 
     it('does not repeat the same variation consecutively', () => {
         const f = frame({
-            expressionMode: { ...frame().expressionMode, control: 'minimal', affect: 'negative' },
+            event: { ...frame().event, physiologicalEvent: 'discharge', repetition: 1 },
+            expressionMode: { ...frame().expressionMode, affect: 'positive' },
         });
         const first = selectFixedReply(f);
         const second = selectFixedReply(f);
