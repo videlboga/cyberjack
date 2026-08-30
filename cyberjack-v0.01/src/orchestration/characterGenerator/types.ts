@@ -125,6 +125,7 @@ export interface GeneratedProfileV2 {
         coreModifiers: Record<string, number>;
         initialContexts: string[];
         preferences: { actions: Record<string, number>; points: Record<string, number>; contexts: Record<string, number>; tags: Record<string, number> };
+        pointModifiers?: Record<string, { sens?: number; att?: number }>;
     };
     sourceTags: string[];
     storySeed?: {

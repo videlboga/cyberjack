@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { db } from '../infrastructure/db';
 import { ensureGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 import { applyCharacterStartingTraits } from './characterStartingTraits';
-import { getBaseHumanAnatomy, type Gender } from '../domain/anatomy';
+import { getBaseHumanAnatomy, applyPointModifiers, type Gender } from '../domain/anatomy';
 
 /**
  * Единый механизм приведения персонажа к каноническому стартовому состоянию.
@@ -77,7 +77,7 @@ function writeSubject(
 }
 
 /** Обнуляет subject_point_states к baseline и пересоздаёт, если отсутствуют. */
-function resetPoints(subjectId: string, gender: string, openness: number): void {
+function resetPoints(subjectId: string, gender: string, openness: number, pointModifiers?: Record<string, { sens?: number; att?: number }>): void {
   db.prepare('DELETE FROM subject_point_states WHERE subject_id = ?').run(subjectId);
   const anatomyGender: Gender = gender === 'male' ? 'male' : gender === 'other' ? 'androgynous' : 'female';
   const insertPoint = db.prepare(`
@@ -86,7 +86,8 @@ function resetPoints(subjectId: string, gender: string, openness: number): void 
       baseline_local_sensitivity, baseline_local_attitude, baseline_local_openness
     ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?)
   `);
-  for (const point of getBaseHumanAnatomy(anatomyGender, 'none')) {
+  const points = applyPointModifiers(getBaseHumanAnatomy(anatomyGender, 'none'), pointModifiers);
+  for (const point of points) {
     insertPoint.run(subjectId, point.id, point.sens, point.att, openness, point.sens, point.att, openness);
   }
 }
@@ -157,7 +158,7 @@ export function reconcileCharacterState(subjectId: string, options: CharacterRec
   db.transaction(() => {
     writeSubject(character.id, character.name || character.id, profiled);
     if (options.resetPoints !== false) {
-      resetPoints(character.id, gender, openness);
+      resetPoints(character.id, gender, openness, profiled.mechanicalSeed?.pointModifiers);
     }
     if (inEnclosedDevice) {
       // Снять надетую одежду (бельё блокирует точки устройства), не надевать новую.

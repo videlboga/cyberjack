@@ -11,6 +11,26 @@ export interface AnatomyPointDef {
     parentId?: string;
 }
 
+/** Персональные отклонения точек тела от базы (дельты, не абсолюты). */
+export type PointModifiers = Record<string, { sens?: number; att?: number }>;
+
+/**
+ * Применяет персональные дельты к базовой анатомии. Значения — отклонения
+ * относительно базы: итог = база + дельта. Дельта не задана → база без изменений.
+ */
+export function applyPointModifiers(points: AnatomyPointDef[], modifiers?: PointModifiers): AnatomyPointDef[] {
+    if (!modifiers) return points;
+    return points.map(point => {
+        const mod = modifiers[point.id];
+        if (!mod) return point;
+        return {
+            ...point,
+            sens: mod.sens !== undefined ? point.sens + mod.sens : point.sens,
+            att: mod.att !== undefined ? point.att + mod.att : point.att,
+        };
+    });
+}
+
 export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): AnatomyPointDef[] {
     const points: AnatomyPointDef[] = [
         { id: 'posture', label: 'Поза (Текущее положение тела)', sens: 0, att: 50 },
@@ -19,12 +39,12 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
         { id: 'head', label: 'Голова', sens: 30, att: 70, providesFunctions: ['look', 'hear'] },
         { id: 'hair', label: 'Волосы', sens: 25, att: 65, parentId: 'head', tags: ['hair'] },
         { id: 'face', label: 'Лицо', sens: 60, att: 40, parentId: 'head' },
-        { id: 'lips', label: 'Губы', sens: 85, att: 20, providesFunctions: ['speak', 'kiss', 'eat'], parentId: 'face' },
-        { id: 'neck', label: 'Шея', sens: 80, att: 30 },
+        { id: 'lips', label: 'Губы', sens: 85, att: 35, providesFunctions: ['speak', 'kiss', 'eat'], parentId: 'face' },
+        { id: 'neck', label: 'Шея', sens: 80, att: 25 },
         
         { id: 'shoulders', label: 'Плечи', sens: 30, att: 80 },
-        { id: 'chest', label: 'Грудь', sens: gender === 'female' ? 85 : 60, att: 30 },
-        { id: 'nipples', label: 'Соски', sens: 95, att: 10, parentId: 'chest' },
+        { id: 'chest', label: 'Грудь', sens: gender === 'female' ? 85 : 60, att: 35 },
+        { id: 'nipples', label: 'Соски', sens: 95, att: 15, parentId: 'chest' },
         { id: 'belly', label: 'Живот', sens: 50, att: 40 },
         { id: 'back', label: 'Спина', sens: 40, att: 60, providesFunctions: ['stabilize_posture'] },
         { id: 'waist', label: 'Талия', sens: 65, att: 45 },
@@ -32,23 +52,23 @@ export function getBaseHumanAnatomy(gender: Gender, mod: AnatomyMod = 'none'): A
         { id: 'arms', label: 'Руки', sens: 20, att: 90, providesFunctions: ['reach'] },
         { id: 'hands', label: 'Кисти', sens: 70, att: 85, providesFunctions: ['touch', 'manipulate'], parentId: 'arms' },
         
-        { id: 'inner_thighs', label: 'Внутренняя сторона бедер', sens: 85, att: 10 },
+        { id: 'inner_thighs', label: 'Внутренняя сторона бедер', sens: 85, att: 15 },
         { id: 'legs', label: 'Ноги', sens: 25, att: 75, providesFunctions: ['walk'] },
         { id: 'feet', label: 'Ступни', sens: 75, att: 50, providesFunctions: ['stand'] },
         
-        { id: 'buttocks', label: 'Ягодицы', sens: 50, att: 15 },
-        { id: 'anus', label: 'Анус', sens: 100, att: 5, parentId: 'buttocks' }
+        { id: 'buttocks', label: 'Ягодицы', sens: 50, att: 20 },
+        { id: 'anus', label: 'Анус', sens: 100, att: 10, parentId: 'buttocks' }
     ];
 
     if (gender === 'male' || gender === 'androgynous') {
-        points.push({ id: 'penis', label: 'Член', sens: 100, att: 5 });
-        points.push({ id: 'testicles', label: 'Яички', sens: 100, att: 5 });
-        points.push({ id: 'prostate', label: 'Простата', sens: 100, att: 5, parentId: 'anus' });
+        points.push({ id: 'penis', label: 'Член', sens: 100, att: 10 });
+        points.push({ id: 'testicles', label: 'Яички', sens: 100, att: 10 });
+        points.push({ id: 'prostate', label: 'Простата', sens: 100, att: 10, parentId: 'anus' });
     }
     if (gender === 'female' || gender === 'androgynous') {
-        points.push({ id: 'vulva', label: 'Вульва', sens: 95, att: 5 });
-        points.push({ id: 'vagina', label: 'Влагалище', sens: 100, att: 5, parentId: 'vulva' });
-        points.push({ id: 'clitoris', label: 'Клитор', sens: 100, att: 5, parentId: 'vulva' });
+        points.push({ id: 'vulva', label: 'Вульва', sens: 95, att: 10 });
+        points.push({ id: 'vagina', label: 'Влагалище', sens: 100, att: 10, parentId: 'vulva' });
+        points.push({ id: 'clitoris', label: 'Клитор', sens: 100, att: 10, parentId: 'vulva' });
     }
 
     if (mod === 'amputee_left_arm') {

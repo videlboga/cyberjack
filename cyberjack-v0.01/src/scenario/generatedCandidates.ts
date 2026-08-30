@@ -2,7 +2,7 @@ import { db } from '../infrastructure/db';
 import { ensureStarterClothing } from '../infrastructure/starterClothing';
 import { characterRelationRepo, characterRepo } from '../infrastructure/repositories';
 import { reconcileCharacterState } from './characterState';
-import { getBaseHumanAnatomy } from '../domain/anatomy';
+import { getBaseHumanAnatomy, applyPointModifiers } from '../domain/anatomy';
 import { generateCharacterContext } from '../orchestration/characterGenerator/generator';
 import { regenerateGeneratedProfile } from '../orchestration/characterGenerator/profileManager';
 
@@ -16,6 +16,8 @@ export type CandidateSeed = {
     description?: string;
     /** Явные параметры (coreModifiers относительно 50) вместо LLM-генерации. */
     coreModifiers?: Record<string, number>;
+    /** Персональные отклонения точек тела от базы (дельты sens/att). */
+    pointModifiers?: Record<string, { sens?: number; att?: number }>;
     /** Условие появления кандидата. По умолчанию — доступен сразу. */
     unlock?: {
         /** Доступен только после N выполненных контрактов (любых). */
@@ -170,7 +172,7 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
                 baseline_local_sensitivity,baseline_local_attitude,baseline_local_openness
             ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?)
         `);
-        for (const point of getBaseHumanAnatomy(identity.gender, 'none')) {
+        for (const point of applyPointModifiers(getBaseHumanAnatomy(identity.gender, 'none'), spec.pointModifiers)) {
             insertPoint.run(spec.id, point.id, point.sens, point.att, metric('openness'), point.sens, point.att, metric('openness'));
         }
 

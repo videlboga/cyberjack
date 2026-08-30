@@ -64,6 +64,8 @@ interface AuthoredProfile {
   };
   /** Параметры персонажа: coreModifiers относительно 50. */
   coreModifiers: Record<string, number>;
+  /** Персональные отклонения точек тела от базы (дельты sens/att). */
+  pointModifiers?: Record<string, { sens?: number; att?: number }>;
   /** Знания о мире (uid лор-записей). Разный уровень знания у разных персонажей. */
   loreRefs: string[];
   /** ТА-модель: сценарий жизни + социальные поля. */
@@ -207,6 +209,10 @@ const profiles: Record<string, AuthoredProfile> = {
       openness: 50,      // 100 — адаптивна после культового опыта
       plasticity: 50,    // 100 — выжила в культе, адаптивна
       attitude: 50,      // 100 — внутренняя опора на правду и договорённости
+    },
+    pointModifiers: {
+      nipples: { sens: 10 },
+      back: { att: 10 },
     },
     loreRefs: [
       'world_omnicron', 'world_isolation', 'world_assets', 'world_calibrator', 'world_corporations',
@@ -365,6 +371,11 @@ const profiles: Record<string, AuthoredProfile> = {
       openness: -12,     // 38 — насторожена, недоверчива
       plasticity: 2,     // 52
       attitude: -5,      // 45
+    },
+    pointModifiers: {
+      clitoris: { att: -3 },
+      vulva: { att: -3 },
+      neck: { att: -10 },
     },
     loreRefs: [
       'world_omnicron', 'world_isolation', 'world_assets', 'world_calibrator', 'world_corporations',
@@ -605,6 +616,18 @@ const profiles: Record<string, AuthoredProfile> = {
       plasticity: 10,   // 60 — адаптируется к новой лаборатории
       attitude: 10,     // 60 — уверена в себе, позитивно к своему отклику
     },
+    pointModifiers: {
+      lips: { att: 10 },
+      neck: { att: 10 },
+      chest: { att: 10 },
+      nipples: { sens: 5, att: 15 },
+      inner_thighs: { att: 15 },
+      buttocks: { att: 10 },
+      vulva: { att: 15 },
+      vagina: { att: 15 },
+      clitoris: { att: 20 },
+      anus: { att: 5 },
+    },
     loreRefs: [
       'world_omnicron', 'world_assets', 'world_calibrator', 'world_corporations',
       'faction_veil', 'faction_veil_internal', 'faction_helix', 'loc_research',
@@ -683,6 +706,11 @@ const profiles: Record<string, AuthoredProfile> = {
       openness: 20,      // 70 — доверчива, ищет хозяина
       plasticity: 15,    // 65 — крайне податлива, легко лепится
       attitude: -25,     // 25 — сабмиссивна, не имеет собственной воли
+    },
+    pointModifiers: {
+      nipples: { sens: 10, att: 10 },
+      buttocks: { att: 10 },
+      anus: { att: 5 },
     },
     loreRefs: [
       'world_omnicron', 'world_isolation', 'world_assets', 'world_calibrator', 'world_corporations',
@@ -764,6 +792,10 @@ const profiles: Record<string, AuthoredProfile> = {
       openness: 35,      // 85 — допускает любые манипуляции с собой
       plasticity: 25,    // 75 — тело адаптировано к перестройкам
       attitude: 20,      // 70 — уверен, говорит свысока
+    },
+    pointModifiers: {
+      chest: { sens: 10 },
+      nipples: { sens: 10 },
     },
     loreRefs: [
       'world_omnicron', 'world_isolation', 'world_assets', 'world_calibrator', 'world_corporations',
@@ -870,6 +902,7 @@ export function compileAuthoredProfile(
       coreModifiers: source.coreModifiers || {},
       initialContexts: [],
       preferences: { actions: {}, points: {}, contexts: {}, tags: {} },
+      pointModifiers: source.pointModifiers,
     },
     sourceTags: [],
     loreRefs: source.loreRefs,
