@@ -14,6 +14,7 @@ src/narrative/individualReplies_{category}.ts
 """
 
 import json
+import re
 import sys
 import urllib.request
 import os
@@ -34,18 +35,19 @@ ZONES = {
     "feet": "ступни",
 }
 
-# Конкретные сенсорные детали каждой зоны — материал для живых, уникальных фраз.
+# Характер ощущения каждой зоны — материал для живых фраз БЕЗ анатомических
+# названий. Зона должна угадываться по ощущению, а не называться прямо.
 ZONE_DETAILS = {
-    "face": "губы, щёки, кожа лица, дыхание у самого лица, тепло чужого дыхания",
-    "neck": "кожа шеи, ямка у ключиц, пульс под кожей, чувствительная кожа у основания шеи",
-    "chest": "грудь, соски, рёбра, сердцебиение под ладонью, кожа над ключицами",
-    "belly": "живот, кожа ниже пупка, мышцы живота, тёплая кожа, дрожь внизу живота",
-    "back": "позвоночник, лопатки, поясница, кожа вдоль хребта, мышцы спины",
-    "arms": "запястья, предплечья, плечи, внутренняя сторона локтя, кожа рук",
-    "legs": "бёдра, внутренняя сторона бедра, колени, икры, кожа ног",
-    "genitals": "клитор/головка, вход, складки, самая чувствительная точка, влажность, пульсация",
-    "anus": "кольцо мышц, вход, сжатие, растяжение, глубина, давление изнутри",
-    "feet": "свод стопы, пальцы, пятки, подъём, кожа ступней, щекотка",
+    "face": "тепло у самого лица, чужое дыхание, близость, мягкое касание губ",
+    "neck": "мурашки по коже, тёплое дыхание у кожи, дрожь, чувствительность",
+    "chest": "сердцебиение, тепло, тяжесть, сбитое дыхание",
+    "belly": "дрожь внизу живота, тепло, щекотка, слабость",
+    "back": "мурашки вдоль позвоночника, расслабление, тепло, дрожь",
+    "arms": "лёгкость, щекотка, мурашки, слабость",
+    "legs": "дрожь, слабость в коленях, тепло, мурашки",
+    "genitals": "острота, пульсация, влажность, жар, нарастающая волна",
+    "anus": "давление, растяжение, глубина, сжатие, заполненность",
+    "feet": "щекотка, лёгкость, мурашки, неожиданная чувствительность",
 }
 
 ATTITUDES = {
@@ -107,14 +109,33 @@ def build_prompt(category, cells):
     lines.append("- отражает категорию, зону тела, отношение и усталость/привыкание от повтора;")
     lines.append("- 3 реплики в ячейке не повторяются между собой.")
     lines.append("")
+    lines.append("КРИТИЧЕСКИ ВАЖНО — естественность речи:")
+    lines.append("- НЕ называй части тела анатомически («моя шея», «мой клитор», «моя грудь»,")
+    lines.append("  «мои ступни», «моё лицо»). В живой речи люди так не говорят;")
+    lines.append("- передавай ощущение через реакцию тела: дрожь, жар, мурашки, слабость,")
+    lines.append("  сбитое дыхание, пульс, волну — зона должна УГАДЫВАТЬСЯ, а не называться;")
+    lines.append("- допустимы лишь самые общие слова («там», «здесь», «внутри», «кожа»),")
+    lines.append("  но не конкретные органы или части тела;")
+    lines.append("- фраза должна звучать так, как человек реально говорит в такой момент.")
+    lines.append("")
+    lines.append("Примеры ЕСТЕСТВЕННЫХ фраз (без анатомии, но с живым ощущением):")
+    lines.append("  хорошо: «Опять... по коже мурашки, не могу привыкнуть.»")
+    lines.append("  хорошо: «Снова этот жар... я уже жду его.»")
+    lines.append("  хорошо: «Не надо... я вся дрожу, хватит.»")
+    lines.append("  хорошо: «Ещё... глубже... я уже не выдерживаю.»")
+    lines.append("  плохо: «Ты снова трогаешь мою шею.» (анатомия)")
+    lines.append("  плохо: «Снова... я не знаю, что думать.» (штамп)")
+    lines.append("  плохо: «Опять... мне тревожно.» (штамп)")
+    lines.append("")
     lines.append("КРИТИЧЕСКИ ВАЖНО — уникальность:")
     lines.append("- каждая ячейка (отношение × повтор × пол) должна звучать ПО-СВОЕМУ;")
+    lines.append("- НЕ начинай каждую фразу с «Снова...» или «Опять...» — варьируй зачин;")
     lines.append("- НЕ используй одну и ту же структуру фразы для разных отношений;")
-    lines.append("- «я не знаю, что думать», «мне тревожно», «не надо» — запрещённые штампы,")
-    lines.append("  заменяй их конкретной реакцией на ЭТУ зону и ЭТО отношение;")
+    lines.append("- «я не знаю, что думать», «мне тревожно», «не надо», «мне всё равно» —")
+    lines.append("  запрещённые штампы, заменяй их конкретной реакцией на ЭТУ зону и ЭТО отношение;")
     lines.append("- male и female должны отличаться не только окончанием глагола, но и")
     lines.append("  самим содержанием, интонацией, выбором слов;")
-    lines.append("- упоминай конкретные детали зоны (из списка выше), чтобы фразы были живыми.")
+    lines.append("- упоминай характер ощущения зоны (из списка выше), чтобы фразы были живыми.")
     lines.append("")
     lines.append("Верни ТОЛЬКО валидный JSON-объект. Ключ — строка вида")
     lines.append("`{zone}:{attitude}:{tier}:{gender}`, значение — массив из 3 строк.")
@@ -134,7 +155,7 @@ def call_ollama(prompt):
         "options": {"temperature": 0.9},
     }).encode("utf-8")
     req = urllib.request.Request(OLLAMA_URL, data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=300) as resp:
+    with urllib.request.urlopen(req, timeout=90) as resp:
         data = json.loads(resp.read().decode("utf-8"))
     return data["message"]["content"]
 
@@ -152,6 +173,46 @@ def extract_json(text):
     if start == -1 or end == -1:
         raise ValueError("no JSON object found")
     return json.loads(text[start:end + 1])
+
+
+def load_existing(category):
+    """Читает уже сгенерированные ячейки из существующего TS-файла (для resume)."""
+    out_path = os.path.join(os.path.dirname(__file__), "..", "src", "narrative", f"individualReplies_{category}.ts")
+    out_path = os.path.abspath(out_path)
+    if not os.path.exists(out_path):
+        return {}
+    with open(out_path, encoding="utf-8") as f:
+        text = f.read()
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1:
+        return {}
+    body = text[start:end + 1]
+    body = re.sub(r",\s*([}\]])", r"\1", body)
+    try:
+        return json.loads(body)
+    except Exception:
+        return {}
+
+
+def write_ts(category, result):
+    out_path = os.path.join(os.path.dirname(__file__), "..", "src", "narrative", f"individualReplies_{category}.ts")
+    out_path = os.path.abspath(out_path)
+    lines = []
+    lines.append("// Автогенерировано: индивидуальные реплики для повторяющихся действий.")
+    lines.append(f"// Категория: {category} ({CATEGORIES[category]})")
+    lines.append("")
+    lines.append("export const INDIVIDUAL_REPLIES: Record<string, string[]> = {")
+    for key in sorted(result.keys()):
+        vals = result[key]
+        lines.append(f"  {json.dumps(key)}: [")
+        for v in vals:
+            lines.append(f"    {json.dumps(v, ensure_ascii=False)},")
+        lines.append("  ],")
+    lines.append("};")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    return out_path
 
 
 def main():
@@ -174,52 +235,49 @@ def main():
     cells = build_cells(category, zone)
     print(f"Категория {category}: {len(cells)} ячеек, {len(cells) * 3} реплик")
 
-    result = {}
-    # Генерируем по одной зоне за раз (20 ячеек = 5 отношений × 2 tier × 2 gender).
+    # Resume: подхватываем уже готовые ячейки.
+    result = load_existing(category)
+    if result:
+        print(f"  resume: уже готово {len(result)} ячеек")
+
     zones = [zone] if zone else list(ZONES.keys())
     for z in zones:
         zone_cells = [c for c in cells if c[0] == z]
-        print(f"  зона {z}: {len(zone_cells)} ячеек...", flush=True)
-        prompt = build_prompt(category, zone_cells)
-        for attempt in range(3):
-            try:
-                raw = call_ollama(prompt)
-                parsed = extract_json(raw)
-                for zz, attitude, tier, gender in zone_cells:
-                    key = f"{zz}:{attitude}:{tier}:{gender}"
-                    if key not in parsed:
-                        raise ValueError(f"missing key {key}")
-                    vals = parsed[key]
-                    if not isinstance(vals, list) or len(vals) != 3:
-                        raise ValueError(f"key {key} has {len(vals) if isinstance(vals, list) else 'non-list'} values")
-                    if not all(isinstance(v, str) and v.strip() for v in vals):
-                        raise ValueError(f"key {key} has empty values")
-                result.update(parsed)
-                break
-            except Exception as e:
-                print(f"    попытка {attempt + 1} не удалась: {e}", flush=True)
-                if attempt == 2:
-                    print(f"    ЗОНА {z} ПРОВАЛЕНА после 3 попыток", file=sys.stderr)
-                    sys.exit(1)
+        # Пропускаем уже готовые ключи этой зоны.
+        pending = [c for c in zone_cells if f"{c[0]}:{c[1]}:{c[2]}:{c[3]}" not in result]
+        if not pending:
+            print(f"  зона {z}: уже готова, пропуск", flush=True)
+            continue
+        print(f"  зона {z}: {len(pending)} ячеек...", flush=True)
+        # Батч по 10 ячеек (пол-зоны) — меньше промпт, меньше шанс зависания.
+        for i in range(0, len(pending), 10):
+            batch = pending[i:i + 10]
+            prompt = build_prompt(category, batch)
+            ok = False
+            for attempt in range(3):
+                try:
+                    raw = call_ollama(prompt)
+                    parsed = extract_json(raw)
+                    for zz, attitude, tier, gender in batch:
+                        key = f"{zz}:{attitude}:{tier}:{gender}"
+                        if key not in parsed:
+                            raise ValueError(f"missing key {key}")
+                        vals = parsed[key]
+                        if not isinstance(vals, list) or len(vals) != 3:
+                            raise ValueError(f"key {key} has {len(vals) if isinstance(vals, list) else 'non-list'} values")
+                        if not all(isinstance(v, str) and v.strip() for v in vals):
+                            raise ValueError(f"key {key} has empty values")
+                    result.update(parsed)
+                    ok = True
+                    break
+                except Exception as e:
+                    print(f"    попытка {attempt + 1} не удалась: {e}", flush=True)
+                    if attempt == 2:
+                        print(f"    БАТЧ ПРОВАЛЕН после 3 попыток (пропускаю, продолжу дальше)", file=sys.stderr)
+            # Сохраняем прогресс после каждого батча.
+            write_ts(category, result)
 
-    # Записать TS-файл
-    out_path = os.path.join(os.path.dirname(__file__), "..", "src", "narrative", f"individualReplies_{category}.ts")
-    out_path = os.path.abspath(out_path)
-    lines = []
-    lines.append("// Автогенерировано: индивидуальные реплики для повторяющихся действий.")
-    lines.append(f"// Категория: {category} ({CATEGORIES[category]})")
-    lines.append("")
-    lines.append("export const INDIVIDUAL_REPLIES: Record<string, string[]> = {")
-    for key in sorted(result.keys()):
-        vals = result[key]
-        lines.append(f"  {json.dumps(key)}: [")
-        for v in vals:
-            lines.append(f"    {json.dumps(v, ensure_ascii=False)},")
-        lines.append("  ],")
-    lines.append("};")
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
-
+    out_path = write_ts(category, result)
     print(f"Готово: {len(result)} ячеек → {out_path}")
 
 
