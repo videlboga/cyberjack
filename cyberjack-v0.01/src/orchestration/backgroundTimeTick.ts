@@ -350,8 +350,11 @@ async function runBackgroundDeviceMinute(): Promise<Set<string>> {
         session.orgasmTargetCount
         && orgasmCount >= session.orgasmTargetCount
       );
-      const significant = justStarted || reserveReached || reserveTargetReached || orgasmTargetReached || discharged || phase !== session.phase || transitions.length > 0;
-      const canReact = justStarted || worldMinute - Number(session.lastReactionTick || -Infinity) >= 10;
+      const significant = justStarted || reserveTargetReached || orgasmTargetReached || discharged;
+      // Реплика только по-настоящему значимым событиям (старт, оргазм, достижение
+      // цели), и не чаще раза в 30 минут — иначе машина «болтает» через LLM на
+      // каждой смене фазы, создавая второй голос поверх детерминированной физиологии.
+      const canReact = justStarted || worldMinute - Number(session.lastReactionTick || -Infinity) >= 30;
       let dischargeEventId: number | undefined;
       if (significant) {
         const transitionText = transitions.map((entry:any) => entry.label || entry.kind).filter(Boolean).join(', ');
