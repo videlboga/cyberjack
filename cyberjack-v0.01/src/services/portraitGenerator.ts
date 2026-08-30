@@ -31,8 +31,6 @@ interface VisualContext {
     effects: string[];
     emotion: string | null;
     characterName: string;
-    interactionHint: string | null;
-    narratorReaction: string | null;
 }
 
 /** Маппинг preset ID → визуальное описание для Z-Image (свободный текст) */
@@ -86,33 +84,10 @@ function emotionFromTickResult(pleasure: number, discomfort: number, overload: n
     return null;
 }
 
-/** Извлечение ключевых визуальных деталей из narratorReaction */
-function extractVisualHints(narratorText: string): string | null {
-    const hints: string[] = [];
-    const lower = narratorText.toLowerCase();
-
-    if (lower.includes('поцелуй') || lower.includes('целует')) hints.push('kissing someone');
-    if (lower.includes('объяти') || lower.includes('обнимает')) hints.push('being embraced');
-    if (lower.includes('шлепок') || lower.includes('удар')) hints.push('being struck');
-    if (lower.includes('глаж') || lower.includes('поглажи')) hints.push('being caressed');
-    if (lower.includes('наклон') || lower.includes('склонив')) hints.push('someone leaning over her');
-    if (lower.includes('подняла голову') || lower.includes('поднял голову')) hints.push('looking up');
-    if (lower.includes('закрыла глаза') || lower.includes('глаза закрылись') || lower.includes('жмурится')) hints.push('eyes closed');
-    if (lower.includes('приоткрыла губы') || lower.includes('рот приоткрыт')) hints.push('lips parted');
-    if (lower.includes('дрож') || lower.includes('подрагива')) hints.push('trembling');
-    if (lower.includes('выдох') || lower.includes('дыхание')) hints.push('breathing heavily');
-    if (lower.includes('покорн')) hints.push('submissive expression');
-    if (lower.includes('улыб')) hints.push('smiling');
-    if (lower.includes('касает') || lower.includes('трога') || lower.includes('прикоснов')) hints.push('being touched');
-
-    return hints.length ? hints.join(', ') : null;
-}
-
 export function collectVisualContext(
     subjectId: string,
     playerId: string,
-    tickResult?: { pleasure?: number; discomfort?: number; overload?: number; engagement?: number },
-    narratorReaction?: string
+    tickResult?: { pleasure?: number; discomfort?: number; overload?: number; engagement?: number }
 ): VisualContext {
     const contexts = activeContextsRepo.getAllForSubject(subjectId);
     const subjectChar = characterRepo.get(subjectId);
@@ -150,9 +125,7 @@ export function collectVisualContext(
         )
         : null;
 
-    const interactionHint = narratorReaction ? extractVisualHints(narratorReaction) : null;
-
-    return { pose, equipment, clothing, effects, emotion, characterName, interactionHint, narratorReaction: narratorReaction || null };
+    return { pose, equipment, clothing, effects, emotion, characterName };
 }
 
 /**
@@ -183,15 +156,6 @@ export function buildImagePrompt(ctx: VisualContext): { positive: string; negati
 
     if (ctx.emotion) {
         parts.push(`Her expression is ${ctx.emotion}`);
-    }
-
-    if (ctx.interactionHint) {
-        parts.push(ctx.interactionHint);
-    }
-
-    // Последняя реплика рассказчика — даёт модели контекст происходящего
-    if (ctx.narratorReaction) {
-        parts.push(`Scene: ${ctx.narratorReaction}`);
     }
 
     const positive = parts.join('. ') + '. masterpiece, best quality';
@@ -307,11 +271,10 @@ export async function generateSceneImage(
     subjectId: string,
     playerId: string,
     tickResult?: { pleasure?: number; discomfort?: number; overload?: number; engagement?: number },
-    narratorReaction?: string,
     seed?: number,
 ): Promise<PortraitResult | null> {
     try {
-        const ctx = collectVisualContext(subjectId, playerId, tickResult, narratorReaction);
+        const ctx = collectVisualContext(subjectId, playerId, tickResult);
         const { positive, negative } = buildImagePrompt(ctx);
 
         const actualSeed = seed ?? Math.floor(Math.random() * 1000000);

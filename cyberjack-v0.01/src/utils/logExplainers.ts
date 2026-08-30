@@ -4,7 +4,7 @@ export function explainPromptLog(entry: any): string {
         const subj = entry.forSubject || entry.subjectId || (entry.prompt && entry.prompt.subjectId) || '';
         const scene = entry.sceneId || (entry.prompt && entry.prompt.sceneId) || '';
         const prompt = entry.prompt || entry;
-        const sys = (prompt.systemPrompt && String(prompt.systemPrompt)) || (prompt.narratorPrompt && String(prompt.narratorPrompt?.stateText)) || '';
+        const sys = (prompt.systemPrompt && String(prompt.systemPrompt)) || '';
         const short = sys.replace(/\s+/g, ' ').trim().slice(0, 240);
         const recent = (prompt.recentEvents && Array.isArray(prompt.recentEvents)) ? prompt.recentEvents.slice(-3).map((r:any)=>r.interpretation||r.type||JSON.stringify(r)).join('; ') : '';
         return `Тик для субъекта ${subj} в сцене ${scene}. Краткий системный промпт: "${short}${sys.length>240? '…' : ''}". Последние события: ${recent || 'нет заметных событий'}.`;

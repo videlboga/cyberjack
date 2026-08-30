@@ -271,7 +271,6 @@ export const processTick = async (req: Request, res: Response) => {
                         overload: tickResult.overload,
                         engagement: tickResult.engagement,
                     } : undefined,
-                    turnExecutionMetrics?.narratorReaction || undefined,
                 ).catch(err => console.error('[processTick] image gen error:', err.message));
             }
         }

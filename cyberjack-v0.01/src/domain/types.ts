@@ -425,46 +425,10 @@ export interface PromptPayload {
     sceneContext?: string;
     longTermMemory?: string[];
     systemPrompt?: string;
-    narratorPrompt?: NarratorPromptPayload;
     reactionFrame?: import('../narrative/reactionFrame').ReactionFrame;
     /** Этап 10: структурированная наблюдаемость выбора памяти. */
     memorySelection?: { associations: number; subjective: number; episodes: number; total: number };
 }
-
-export interface NarratorPromptPayload {
-    subjectId: string;
-    recentEventsText: string;
-    stateText: string;
-    instructions?: string;
-    // Narrator B: speech and context for a richer chronicle
-    characterSpeech?: string;
-    characterName?: string;
-    playerSpeech?: string;
-    activeContexts?: string[];
-    tickResultSummary?: string;
-    systemEvents?: string[];
-}
-
-export interface ScenePromptPayload {
-    subjectId: string;
-    actionLabel: string;
-    pointLabel: string;
-    actorName: string;
-    targetName: string;
-    stateText: string;
-    contextsText: string;
-    tickResultText: string;
-}
-
-export interface NarratorReply {
-    reaction: string;
-}
-
-export interface NarratorDecision {
-    enabled: boolean;
-    reason?: string;
-}
-
 
 export interface ActorDecision {
     actorId: string;
@@ -485,7 +449,6 @@ export interface ActorDecision {
 }
 
 export interface OrchestratedTurn {
-    narrator?: NarratorDecision;
     actorDecisions: ActorDecision[];
     diagnostics?: any[];
 }

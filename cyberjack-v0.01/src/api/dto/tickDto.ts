@@ -56,7 +56,6 @@ export interface TickResponse {
   reply: unknown;
   promptMessages: unknown;
   actorReplies: unknown[];
-  narratorReaction: unknown;
   llmError: string | null;
   llmChance: number;
   llmSkipped: boolean;

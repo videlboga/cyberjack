@@ -18,7 +18,6 @@ export interface TickResponseInput {
     reply?: unknown;
     promptMessages?: unknown;
     actorReplies?: unknown[];
-    narratorReaction?: unknown;
     error?: string | null;
   } | null;
   llmError: string | null;
@@ -47,7 +46,6 @@ export function mapTickResponse(input: TickResponseInput): TickResponse {
     reply: turnExecutionMetrics?.reply ?? null,
     promptMessages: turnExecutionMetrics?.promptMessages ?? null,
     actorReplies: turnExecutionMetrics?.actorReplies ?? [],
-    narratorReaction: turnExecutionMetrics?.narratorReaction ?? null,
     llmError: input.llmError,
     llmChance: input.llmChance,
     llmSkipped: input.llmSkipped,

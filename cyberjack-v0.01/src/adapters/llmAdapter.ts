@@ -106,23 +106,9 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     throw lastError instanceof Error ? lastError : new Error(String(lastError || 'All parser models failed'));
 }
 
-import { PromptPayload, NarratorPromptPayload, ScenePromptPayload } from '../domain/types';
+import { PromptPayload } from '../domain/types';
 
 
-
-
-const NARRATOR_SCHEMA = {
-    name: 'cyberjack_narrator',
-    strict: true,
-    value: {
-        type: 'object',
-        properties: {
-            reaction: { type: 'string' }
-        },
-        required: ['reaction'],
-        additionalProperties: false
-    }
-};
 
 type MemoryMessage = { role: 'user' | 'assistant'; content: string };
 
@@ -174,94 +160,8 @@ export function generateChatPayload(
     return messages;
 }
 
-function generateNarratorPayload(prompt: NarratorPromptPayload): ChatMessage[] {
-    const sections: string[] = [];
-    if (activeConfig.adapters.narratorSystemPrefix) {
-        sections.push(activeConfig.adapters.narratorSystemPrefix);
-    }
-    if (prompt.stateText) {
-        sections.push(prompt.stateText);
-    }
-    if (prompt.recentEventsText) {
-        sections.push(prompt.recentEventsText);
-    }
-    // Narrator B: include character speech and contexts if available
-    const extras: string[] = [];
-    if (prompt.activeContexts && prompt.activeContexts.length) {
-        extras.push(`[Активные состояния]: ${prompt.activeContexts.join(', ')}`);
-    }
-    if (prompt.tickResultSummary) {
-        extras.push(`[Результат воздействия]: ${prompt.tickResultSummary}`);
-    }
-    if (prompt.systemEvents && prompt.systemEvents.length) {
-        extras.push(`[Системные события тика]:\n${prompt.systemEvents.join('\n')}`);
-    }
-    if (prompt.playerSpeech) {
-        extras.push(`[Сказал Калибратор]: "${prompt.playerSpeech}"`);
-    }
-    if (prompt.characterSpeech && prompt.characterName) {
-        extras.push(`[Ответила ${prompt.characterName}]: "${prompt.characterSpeech}"`);
-    } else if (prompt.characterSpeech) {
-        extras.push(`[Реплика персонажа]: "${prompt.characterSpeech}"`);
-    }
-    const userContent = extras.length
-        ? `${extras.join('\n\n')}\n\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`
-        : `Ознакомься с последними логами воздействий. Опиши ТОЛЬКО внешние физические реакции на самые последние события в логах. Требования:\n${prompt.instructions || activeConfig.adapters.narratorInputPrompt}`;
-    const messages: ChatMessage[] = [
-        {
-            role: 'system',
-            content: sections.filter(Boolean).join('\n\n')
-        },
-        {
-            role: 'user',
-            content: userContent
-        }
-    ];
-    return messages;
-}
-
-// Narrator A: compressed sensory scene FOR the character (injected into their prompt)
-function generateSceneForCharacterPayload(prompt: ScenePromptPayload): ChatMessage[] {
-    const sections: string[] = [];
-    if (activeConfig.adapters.sceneForCharacterSystem) {
-        sections.push(activeConfig.adapters.sceneForCharacterSystem);
-    }
-    const contextParts: string[] = [];
-    if (prompt.actionLabel) {
-        contextParts.push(`Воздействие: ${prompt.actionLabel} → ${prompt.pointLabel}`);
-    }
-    if (prompt.actorName && prompt.targetName) {
-        contextParts.push(`От: ${prompt.actorName}, на: ${prompt.targetName}`);
-    }
-    if (prompt.stateText) {
-        contextParts.push(prompt.stateText);
-    }
-    if (prompt.contextsText) {
-        contextParts.push(prompt.contextsText);
-    }
-    if (prompt.tickResultText) {
-        contextParts.push(prompt.tickResultText);
-    }
-    const messages: ChatMessage[] = [
-        {
-            role: 'system',
-            content: sections.filter(Boolean).join('\n\n')
-        },
-        {
-            role: 'user',
-            content: `${contextParts.filter(Boolean).join('\n')}\n\n${activeConfig.adapters.sceneForCharacterInput}`
-        }
-    ];
-    return messages;
-}
-
 function sanitizeJson(text: string): string {
     return text.replace(/```json/g, '').replace(/```/g, '').trim();
-}
-
-function validateNarratorReply(candidate: any): candidate is { reaction: string } {
-    if (!candidate || typeof candidate !== 'object') return false;
-    return typeof candidate.reaction === 'string';
 }
 
 async function requestCompletion(messages: ChatMessage[], options: { json?: boolean; purpose?: string; onToken?: (chunk: string) => void } = {}): Promise<string> {
@@ -417,92 +317,4 @@ export async function generateCharacterReply(
         sentMessages: messages,
         error: 'Нет ответа от LLM'
     };
-}
-
-export async function generateNarratorReply(
-    prompt: NarratorPromptPayload
-): Promise<{ reaction: string; sentMessages: ChatMessage[] }> {
-    const messages = generateNarratorPayload(prompt);
-
-    console.log(`[LLM Adapter] Narrator request: ${messages.length} messages`);
-    try {
-        const rawText = await requestCompletion(messages, { json: true, purpose: 'narrator' });
-        try {
-            const parsed = JSON.parse(sanitizeJson(rawText));
-            
-            let reactionText = '';
-            if (Array.isArray(parsed)) {
-                reactionText = parsed.map((r: any) => typeof r === 'string' ? r : (r.reaction || r.description || Object.values(r)[0])).join(' ');
-            } else if (typeof parsed.reaction === 'string') {
-                reactionText = parsed.reaction;
-            } else if (typeof parsed.description === 'string') {
-                reactionText = parsed.description;
-            } else if (Array.isArray(parsed.reactions)) {
-                reactionText = parsed.reactions.map((r: any) => typeof r === 'string' ? r : (r.description || r.reaction || Object.values(r)[0])).join(' ');
-            } else if (Object.keys(parsed).length > 0) {
-                const firstVal = Object.values(parsed)[0];
-                if (typeof firstVal === 'string') {
-                    reactionText = firstVal;
-                } else if (Array.isArray(firstVal)) {
-                    reactionText = firstVal.map((v: any) => typeof v === 'string' ? v : (v.description || v.reaction || Object.values(v)[0])).join(' ');
-                }
-            }
-
-            if (!reactionText || typeof reactionText !== 'string') {
-                throw new Error('invalid narrator structure');
-            }
-            
-            return {
-                reaction: reactionText.trim(),
-                sentMessages: messages
-            };
-        } catch (err) {
-            console.warn('[LLM Adapter] Narrator reply parsing failed, returning raw text');
-            return {
-                reaction: rawText,
-                sentMessages: messages
-            };
-        }
-    } catch (err: any) {
-        console.error(`[LLM Adapter] Narrator request failed: ${err.message}`);
-        return {
-            reaction: `*Ошибка связи с LLM (narrator): ${err.message}*`,
-            sentMessages: messages
-        };
-    }
-}
-
-// Narrator A: compressed sensory scene for the character
-export async function generateSceneForCharacter(
-    prompt: ScenePromptPayload
-): Promise<{ reaction: string; sentMessages: ChatMessage[] }> {
-    const messages = generateSceneForCharacterPayload(prompt);
-
-    console.log(`\n========== СЦЕНА ДЛЯ ПЕРСОНАЖА (Narrator A) ==========`);
-    messages.forEach(m => {
-        console.log(`[Роль: ${m.role.toUpperCase()}]`);
-        console.log(m.content);
-        console.log(`----------------------------------------`);
-    });
-
-    try {
-        const rawText = await requestCompletion(messages, { json: true, purpose: 'scene-for-character' });
-        try {
-            const parsed = JSON.parse(sanitizeJson(rawText));
-            let reactionText = '';
-            if (typeof parsed.reaction === 'string') {
-                reactionText = parsed.reaction;
-            } else if (typeof parsed === 'string') {
-                reactionText = parsed;
-            } else {
-                reactionText = JSON.stringify(parsed);
-            }
-            return { reaction: reactionText.trim(), sentMessages: messages };
-        } catch {
-            return { reaction: rawText.trim(), sentMessages: messages };
-        }
-    } catch (err: any) {
-        console.error(`[LLM Adapter] Scene-for-character failed: ${err.message}`);
-        return { reaction: '', sentMessages: messages };
-    }
 }
