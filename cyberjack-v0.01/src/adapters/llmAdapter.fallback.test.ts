@@ -8,57 +8,62 @@ vi.mock('crypto', () => ({ randomUUID: () => 'trace-123' }));
 
 import { parseVerbalInputWithLLM } from './llmAdapter';
 
-describe('parser fallback trace (Этап 10)', () => {
+describe('parser ollama-only (Этап 10)', () => {
     beforeEach(() => {
         mocks.emitTrace.mockReset();
         vi.unstubAllGlobals();
     });
 
-    it('emits llm.fallback with shared traceId, attempt number and real duration', async () => {
-        // First model fails, second succeeds.
+    it('emits llm.fallback with shared traceId and real duration on network failure', async () => {
+        // Ollama падает по сети — единственная попытка, fallback-моделей больше нет.
         vi.stubGlobal('fetch', vi.fn()
-            .mockRejectedValueOnce(new Error('network down'))
-            .mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({ choices: [{ message: { content: '{"ok":true}' } }] }),
-            }));
+            .mockRejectedValueOnce(new Error('network down')));
 
-        // Mock performance.now() to a deterministic sequence: the first call
-        // (startedAt before fetch) returns 1000, the second (in catch) returns
-        // 1042, so the fallback duration must be exactly 42ms.
         const nowMock = vi.fn()
             .mockReturnValueOnce(1000)   // startedAt before fetch
             .mockReturnValueOnce(1042);  // duration computation in catch
         vi.stubGlobal('performance', { now: nowMock });
 
-        const result = await parseVerbalInputWithLLM([{ role: 'user', content: 'x' }]);
+        await expect(parseVerbalInputWithLLM([{ role: 'user', content: 'x' }])).rejects.toThrow();
 
-        expect(result.parsed).toEqual({ ok: true });
-
-        // Exactly one fallback span for the failed first attempt.
         const fallback = mocks.emitTrace.mock.calls.map(call => call[0]).find(span => span.stage === 'llm.fallback');
         expect(fallback).toBeTruthy();
         expect(fallback.traceId).toBe('trace-123');
         expect(fallback.requestId).toBe('trace-123');
         expect(fallback.attempt).toBe(1);
-        expect(fallback.attemptsTotal).toBeGreaterThanOrEqual(2);
+        expect(fallback.attemptsTotal).toBe(1);
         expect(fallback.error).toContain('network down');
-        // Real duration: startedAt is the mocked 1000, durationMs is the
-        // concrete non-zero difference (1042 - 1000 = 42).
         expect(fallback.startedAt).toBe(1000);
         expect(fallback.durationMs).toBe(42);
     });
 
-    it('shares one traceId across every fallback attempt', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('always fails')));
+    it('retries ollama on empty response instead of falling back to openrouter', async () => {
+        // Первый ответ пустой (reasoning-модель кладёт вывод в thinking),
+        // второй — валидный JSON. Оба идут в ollama (provider='ollama').
+        vi.stubGlobal('fetch', vi.fn()
+            .mockResolvedValueOnce({ ok: true, json: async () => ({ message: { content: '' } }) })
+            .mockResolvedValueOnce({ ok: true, json: async () => ({ message: { content: '{"ok":true}' } }) }));
+
+        const result = await parseVerbalInputWithLLM([{ role: 'user', content: 'x' }]);
+
+        expect(result.parsed).toEqual({ ok: true });
+        // Ни одного fallback-спана: пустой ответ ретраится в ollama, не в openrouter.
+        const spans = mocks.emitTrace.mock.calls.map(call => call[0]).filter(span => span.stage === 'llm.fallback');
+        expect(spans.length).toBe(0);
+        // Оба вызова fetch — в ollama (2 вызова: пустой + ретрай).
+        expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('gives up after retries exhausted on persistent empty response', async () => {
+        vi.stubGlobal('fetch', vi.fn()
+            .mockResolvedValue({ ok: true, json: async () => ({ message: { content: '' } }) }));
+
         await expect(parseVerbalInputWithLLM([{ role: 'user', content: 'x' }])).rejects.toThrow();
 
+        // 1 + OLLAMA_EMPTY_RETRIES(2) = 3 вызова, все в ollama.
+        expect(fetch).toHaveBeenCalledTimes(3);
         const spans = mocks.emitTrace.mock.calls.map(call => call[0]).filter(span => span.stage === 'llm.fallback');
-        expect(spans.length).toBeGreaterThan(1);
-        const ids = new Set(spans.map(span => span.traceId));
-        expect(ids.size).toBe(1);
-        expect(ids.has('trace-123')).toBe(true);
-        // Attempt numbers are sequential.
-        expect(spans.map(span => span.attempt)).toEqual(spans.map((_, i) => i + 1));
+        expect(spans.length).toBe(1);
+        expect(spans[0].attemptsTotal).toBe(1);
     });
 });

@@ -35,6 +35,10 @@ const LLM_PRESENCE_PENALTY = Number(process.env.LLM_PRESENCE_PENALTY ?? 0.3);
 // реплику на полуслове при max_tokens=180.
 const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'http://127.0.0.1:11434/api/chat';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'deepseek-v4-flash:cloud';
+// Сколько раз повторить запрос к ollama при пустом ответе (reasoning-модель
+// под нагрузкой иногда кладёт весь вывод в thinking и отдаёт пустой content).
+// Ретрай идёт в ту же ollama, НЕ в openrouter — все LLM-запросы только ollama.
+const OLLAMA_EMPTY_RETRIES = 2;
 
 const getApiKey = () => process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
 
@@ -89,18 +93,28 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
             const headers: Record<string, string> = isOllama
                 ? { 'Content-Type': 'application/json', 'X-Request-Id': traceId }
                 : { 'Content-Type': 'application/json', 'X-Request-Id': traceId, ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}) };
-            const response = await fetch(url, {
-                method: 'POST',
-                headers,
-                signal: controller.signal,
-                body: JSON.stringify(body)
-            });
-            // Headers arrived (TTFT satisfied); switch to the full-request timeout.
-            clearTimeout(timer);
-            timer = setTimeout(() => controller.abort(), assignment.requestTimeoutMs);
-            if (!response.ok) throw new Error(`Parser network error ${response.status}: ${await response.text()}`);
-            const data = await response.json() as any;
-            const resultString = isOllama ? data.message?.content : data.choices?.[0]?.message?.content;
+            // Ollama под нагрузкой иногда отдаёт пустой content (reasoning-модель
+            // кладёт вывод в thinking). Ретраим в ту же ollama, не уходя в openrouter.
+            const maxAttempts = isOllama ? OLLAMA_EMPTY_RETRIES + 1 : 1;
+            let resultString = '';
+            for (let retry = 0; retry < maxAttempts; retry++) {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers,
+                    signal: controller.signal,
+                    body: JSON.stringify(body)
+                });
+                // Headers arrived (TTFT satisfied); switch to the full-request timeout.
+                clearTimeout(timer);
+                timer = setTimeout(() => controller.abort(), assignment.requestTimeoutMs);
+                if (!response.ok) throw new Error(`Parser network error ${response.status}: ${await response.text()}`);
+                const data = await response.json() as any;
+                resultString = isOllama ? data.message?.content : data.choices?.[0]?.message?.content;
+                if (resultString) break;
+                if (retry < maxAttempts - 1) {
+                    console.warn(`[LLM Adapter Parser] ${effectiveModel}/ollama empty response; retry ${retry + 1}/${maxAttempts - 1}`);
+                }
+            }
             if (!resultString) throw new Error('Parser returned an empty response');
             // Ollama может обернуть JSON в markdown-кодблок (```json ... ```).
             const cleaned = resultString.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -253,7 +267,7 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
             const requestHeaders: Record<string, string> = isOllama
                 ? { 'Content-Type': 'application/json', 'X-Request-Id': traceId }
                 : headers;
-            const response = await fetch(url, {
+            let response = await fetch(url, {
                 method: 'POST', headers: requestHeaders, body: JSON.stringify(body), signal: controller.signal
             });
             const headersMs = Math.round(performance.now() - t0);
@@ -281,8 +295,22 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
                     }
                 }
             } else if (isOllama) {
-                const data = await response.json() as any;
-                result = data.message?.content || '';
+                // Ollama под нагрузкой иногда отдаёт пустой content. Ретраим в ту же
+                // ollama (не уходя в openrouter) — для memory/json и прочих не-стрим.
+                const maxAttempts = OLLAMA_EMPTY_RETRIES + 1;
+                for (let retry = 0; retry < maxAttempts; retry++) {
+                    const data = await response.json() as any;
+                    result = data.message?.content || '';
+                    if (result.trim()) break;
+                    if (retry < maxAttempts - 1) {
+                        console.warn(`[Adapter] ${effectiveModel}/ollama empty response; retry ${retry + 1}/${maxAttempts - 1}`);
+                        const r2 = await fetch(url, {
+                            method: 'POST', headers: requestHeaders, body: JSON.stringify(body), signal: controller.signal
+                        });
+                        if (!r2.ok) throw new Error(`HTTP ${r2.status}: ${await r2.text()}`);
+                        response = r2;
+                    }
+                }
             } else if (options.onToken && response.body) {
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();

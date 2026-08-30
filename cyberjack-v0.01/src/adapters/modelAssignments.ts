@@ -41,10 +41,11 @@ const PARSER_MODEL = env('PARSER_MODEL', 'google/gemini-3.1-flash-lite-preview')
 export const modelAssignments: Record<string, ModelAssignment> = {
   /** Живая реплика персонажа / нарратор. */
   reply: {
-    models: [LLM_MODEL, ...splitList(env('LLM_FALLBACK_MODELS', 'deepseek/deepseek-v4-flash,google/gemini-2.5-flash-lite')).filter(m => m !== LLM_MODEL)],
-    // 'ollama' — локальная Ollama (отдельный транспорт, см. llmAdapter.ts),
-    // идёт первой как основной провайдер; остальные — openrouter-фолбэки.
-    providers: splitList(env('LLM_PROVIDER_ORDER', 'ollama,novita,siliconflow,deepinfra')),
+    models: [LLM_MODEL, ...splitList(env('LLM_FALLBACK_MODELS', '')).filter(m => m !== LLM_MODEL)],
+    // 'ollama' — облачная Ollama (отдельный транспорт, см. llmAdapter.ts),
+    // единственный провайдер. Openrouter-фолбэки убраны: все LLM-запросы
+    // идут только в ollama (кроме эмбеддингов, которые на openrouter).
+    providers: splitList(env('LLM_PROVIDER_ORDER', 'ollama')),
     ttftTimeoutMs: envNum('LLM_TTFT_TIMEOUT', 4000),
     requestTimeoutMs: envNum('LLM_REQUEST_TIMEOUT', 8000),
     format: 'text',
@@ -53,7 +54,7 @@ export const modelAssignments: Record<string, ModelAssignment> = {
   },
   /** Семантический разбор команды / классификация. */
   parser: {
-    models: [PARSER_MODEL, ...splitList(env('PARSER_FALLBACK_MODELS', 'google/gemini-2.5-flash-lite,deepseek/deepseek-chat-v3-0324')).filter(m => m !== PARSER_MODEL)],
+    models: [PARSER_MODEL, ...splitList(env('PARSER_FALLBACK_MODELS', '')).filter(m => m !== PARSER_MODEL)],
     providers: splitList(env('PARSER_PROVIDER_ORDER', 'ollama')),
     ttftTimeoutMs: envNum('PARSER_TTFT_TIMEOUT', 4000),
     requestTimeoutMs: envNum('PARSER_REQUEST_TIMEOUT', 8000),
@@ -71,7 +72,7 @@ export const modelAssignments: Record<string, ModelAssignment> = {
   memory: {
     models: [
       env('MEMORY_MODEL', 'deepseek/deepseek-chat-v3-0324'),
-      ...splitList(env('MEMORY_FALLBACK_MODELS', 'deepseek/deepseek-v3.2')).filter(m => m !== env('MEMORY_MODEL', 'deepseek/deepseek-chat-v3-0324')),
+      ...splitList(env('MEMORY_FALLBACK_MODELS', '')).filter(m => m !== env('MEMORY_MODEL', 'deepseek/deepseek-chat-v3-0324')),
     ],
     providers: splitList(env('MEMORY_PROVIDER_ORDER', 'ollama')),
     ttftTimeoutMs: envNum('MEMORY_TTFT_TIMEOUT', 8000),
