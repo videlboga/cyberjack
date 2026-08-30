@@ -28,10 +28,12 @@ const LLM_TOP_P = Number(process.env.LLM_TOP_P ?? 0.9);
 const LLM_FREQUENCY_PENALTY = Number(process.env.LLM_FREQUENCY_PENALTY ?? 0.5);
 const LLM_PRESENCE_PENALTY = Number(process.env.LLM_PRESENCE_PENALTY ?? 0.3);
 
-// Локальная Ollama (OpenAI-совместимый эндпоинт). Используется как отдельный
-// провайдер 'ollama' в списке providers: свой URL, своё имя модели (с суффиксом
-// :cloud), без openrouter-специфичных полей (provider/reasoning/Authorization).
-const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'http://127.0.0.1:11434/v1/chat/completions';
+// Локальная Ollama. Используется как отдельный провайдер 'ollama' в списке
+// providers. Нативный /api/chat (не OpenAI-совместимый /v1): только он умеет
+// `think:false`, который реально отключает reasoning у deepseek-v4-flash:cloud.
+// Без этого модель тратит ~100 токенов на внутренние рассуждения и обрезает
+// реплику на полуслове при max_tokens=180.
+const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'http://127.0.0.1:11434/api/chat';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'deepseek-v4-flash:cloud';
 
 const getApiKey = () => process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
@@ -196,22 +198,35 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
     let lastError: unknown;
     for (const [index, attempt] of attempts.entries()) {
         const { model, provider } = attempt;
-        // Локальная Ollama — отдельный транспорт: свой URL, своё имя модели
-        // (с суффиксом :cloud), без openrouter-полей (provider/reasoning/auth).
+        // Локальная Ollama — отдельный транспорт: нативный /api/chat, своё имя
+        // модели (с суффиксом :cloud), think:false (отключает reasoning), без
+        // openrouter-полей (provider/reasoning/auth/response_format).
         const isOllama = provider === 'ollama';
         const url = isOllama ? OLLAMA_API_URL : LLM_API_URL;
         const effectiveModel = isOllama ? OLLAMA_MODEL : model;
-        const body: Record<string, any> = {
-            model: effectiveModel, messages, max_tokens: assignment.maxTokens,
-            temperature: assignment.temperature,
-            frequency_penalty: LLM_FREQUENCY_PENALTY,
-            presence_penalty: LLM_PRESENCE_PENALTY,
-        };
-        if (!isOllama) body.reasoning = { enabled: false };
-        if (provider && !isOllama) body.provider = { only: [provider], allow_fallbacks: false };
-        if (options.json) body.response_format = { type: 'json_object' };
-        if (options.onToken && !options.json) body.stream = true;
-        if (Number.isFinite(LLM_TOP_P)) body.top_p = LLM_TOP_P;
+        const body: Record<string, any> = isOllama
+            ? {
+                model: effectiveModel,
+                messages,
+                stream: Boolean(options.onToken && !options.json),
+                think: false,
+                options: {
+                    num_predict: assignment.maxTokens,
+                    temperature: assignment.temperature,
+                    ...(Number.isFinite(LLM_TOP_P) ? { top_p: LLM_TOP_P } : {}),
+                },
+            }
+            : {
+                model: effectiveModel, messages, max_tokens: assignment.maxTokens,
+                temperature: assignment.temperature,
+                frequency_penalty: LLM_FREQUENCY_PENALTY,
+                presence_penalty: LLM_PRESENCE_PENALTY,
+                reasoning: { enabled: false },
+            };
+        if (!isOllama && provider) body.provider = { only: [provider], allow_fallbacks: false };
+        if (!isOllama && options.json) body.response_format = { type: 'json_object' };
+        if (!isOllama && options.onToken && !options.json) body.stream = true;
+        if (!isOllama && Number.isFinite(LLM_TOP_P)) body.top_p = LLM_TOP_P;
         const t0 = performance.now();
         const controller = new AbortController();
         let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
@@ -227,7 +242,30 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
             clearTimeout(timer);
             timer = setTimeout(() => controller.abort(), assignment.requestTimeoutMs);
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-            if (options.onToken && response.body) {
+            if (isOllama && options.onToken && response.body) {
+                // Нативный /api/chat стримит NDJSON: { message: { content }, done }.
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let pending = '';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    pending += decoder.decode(value, { stream: true });
+                    const lines = pending.split('\n');
+                    pending = lines.pop() || '';
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        try {
+                            const event = JSON.parse(line);
+                            const chunk = event.message?.content || '';
+                            if (chunk) { result += chunk; options.onToken(chunk); }
+                        } catch { /* keep-alive */ }
+                    }
+                }
+            } else if (isOllama) {
+                const data = await response.json() as any;
+                result = data.message?.content || '';
+            } else if (options.onToken && response.body) {
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let pending = '';
