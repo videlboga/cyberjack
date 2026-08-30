@@ -1,5 +1,6 @@
 import type { ReactionFrame } from './reactionFrame';
 import { buildCombinatorialReply } from './combinatorialReplies';
+import { INDIVIDUAL_REPLIES } from './individualReplies';
 
 /**
  * Матрица фиксированных реплик для типовых состояний.
@@ -592,6 +593,59 @@ function repeatCategory(frame: ReactionFrame): RepeatKey['category'] {
 const PHYSIOLOGY_EVENTS = new Set(['discharge', 'breakdown', 'overload', 'peak', 'edge']);
 
 /**
+ * Сводит pointId (26 точек тела) к 10 зонам индивидуальной матрицы.
+ * Генитальные точки (vulva/vagina/clitoris/penis/testicles/prostate) → genitals.
+ */
+function zoneOf(frame: ReactionFrame): string | null {
+    const pointId = (frame.event.pointId || '').toLowerCase();
+    if (!pointId) return null;
+    if (['vulva', 'vagina', 'clitoris', 'penis', 'testicles', 'prostate'].includes(pointId)) return 'genitals';
+    if (['face', 'lips', 'head'].includes(pointId)) return 'face';
+    if (['neck'].includes(pointId)) return 'neck';
+    if (['chest', 'nipples'].includes(pointId)) return 'chest';
+    if (['belly', 'waist'].includes(pointId)) return 'belly';
+    if (['back', 'shoulders'].includes(pointId)) return 'back';
+    if (['arms', 'hands'].includes(pointId)) return 'arms';
+    if (['legs', 'inner_thighs', 'feet'].includes(pointId)) return pointId === 'feet' ? 'feet' : 'legs';
+    if (['buttocks', 'anus'].includes(pointId)) return 'anus';
+    if (['hair'].includes(pointId)) return 'face';
+    // posture/mind_state/systemic/slot_* — не телесные зоны.
+    return null;
+}
+
+/**
+ * Сводит отношение говорящего к адресату (relation.attitude) к 5 уровням
+ * индивидуальной матрицы. Пороги совпадают с relationText в reactionFrame.ts.
+ */
+function attitudeOf(frame: ReactionFrame): string | null {
+    const attitude = frame.addressee?.relation?.attitude;
+    if (attitude === undefined) return null;
+    if (attitude >= 70) return 'high';
+    if (attitude >= 55) return 'midhigh';
+    if (attitude >= 40) return 'mid';
+    if (attitude >= 25) return 'midlow';
+    return 'low';
+}
+
+/**
+ * Выбирает индивидуальную реплику по полному ключу
+ * `{category}:{zone}:{attitude}:{tier}:{gender}`, либо null, если ячейки нет.
+ */
+function selectIndividualReply(frame: ReactionFrame): string | null {
+    const category = repeatCategory(frame);
+    const zone = zoneOf(frame);
+    const attitude = attitudeOf(frame);
+    if (!zone || !attitude) return null;
+    const gender = frame.speaker.gender === 'male' ? 'male' : frame.speaker.gender === 'female' ? 'female' : null;
+    if (!gender) return null;
+    const tier = (frame.event.repetition ?? 1) >= 4 ? 't4' : 't2';
+    const key = `${category}:${zone}:${attitude}:${tier}:${gender}`;
+    const variants = INDIVIDUAL_REPLIES[key];
+    if (!variants || variants.length === 0) return null;
+    return pickVariation(variants, frame, key);
+}
+
+/**
  * Детерминированный гейт: когда ответ типовой (фиксированная реплика),
  * а когда требует генерации (LLM).
  *
@@ -679,9 +733,12 @@ export function selectFixedReply(frame: ReactionFrame): string | null {
     const phys = frame.event.physiologicalEvent;
     const repetition = frame.event.repetition ?? 1;
 
-    // Повторяющееся физическое действие — комбинаторная сборка (точка ×
-    // отношение × параметры × повтор), затем плоская матрица как fallback.
+    // Повторяющееся физическое действие — индивидуальные реплики (точка ×
+    // отношение × повтор × пол), затем комбинаторная сборка, затем плоская
+    // матрица как fallback.
     if (!PHYSIOLOGY_EVENTS.has(phys) && repetition >= 2 && frame.event.contact && frame.event.contact !== 'none') {
+        const individual = selectIndividualReply(frame);
+        if (individual) return individual;
         const combinatorial = buildCombinatorialReply(frame);
         if (combinatorial) return combinatorial;
         const key: RepeatKey = {

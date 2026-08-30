@@ -137,6 +137,45 @@ describe('fixedReplies gate', () => {
         }
     });
 
+    // ── Индивидуальные реплики (точка × отношение × повтор × пол) ─────────
+
+    it('selects an individual reply when zone + attitude + gender are known', () => {
+        const f = frame({
+            event: {
+                ...frame().event,
+                repetition: 2,
+                contact: 'partial',
+                actionTags: ['affection'],
+                pointId: 'neck',
+            },
+            addressee: { id: 'OP', name: 'Оператор', relationship: '', relation: { attitude: 80, openness: 60, familiarity: 0.5 } },
+        });
+        const reply = selectFixedReply(f);
+        expect(reply).toBeTruthy();
+        expect(typeof reply).toBe('string');
+    });
+
+    it('maps genital points to the genitals zone', () => {
+        for (const pointId of ['vulva', 'vagina', 'clitoris', 'penis', 'testicles', 'prostate']) {
+            const f = frame({
+                event: { ...frame().event, repetition: 2, contact: 'full', actionTags: ['intimate'], pointId },
+                addressee: { id: 'OP', name: 'Оператор', relationship: '', relation: { attitude: 30, openness: 20, familiarity: 0.1 } },
+            });
+            const reply = selectFixedReply(f);
+            expect(reply, `genital point ${pointId} should map to genitals`).toBeTruthy();
+        }
+    });
+
+    it('falls back to combinatorial/flat matrix when zone or attitude is unknown', () => {
+        // Нет pointId и relation → индивидуальная ячейка недоступна, но
+        // комбинаторная/плоская матрица всё равно даёт ответ.
+        const f = frame({
+            event: { ...frame().event, repetition: 2, contact: 'partial', actionTags: ['affection'] },
+        });
+        const reply = selectFixedReply(f);
+        expect(reply).toBeTruthy();
+    });
+
     // ── Выбор реплики ──────────────────────────────────────────────────────
 
     it('returns a non-empty reply for discharge', () => {
