@@ -1,7 +1,7 @@
 import { runBackgroundSustainedTicks } from '../orchestration/backgroundTimeTick';
 import { advanceWorldTime, getWorldClock } from './worldService';
 import { enqueueBackgroundJob, listDueBackgroundJobs, listBackgroundJobs, claimBackgroundJob, recoverStaleBackgroundJobs, renewBackgroundJobLease, tryAcquireJobSlot, releaseJobSlot, markBackgroundJobDone, markBackgroundJobFailed } from '../orchestration/backgroundJobs';
-import { materializeNextSubjectiveMemory } from '../workers/subjectiveMemoryWorker';
+import { materializeNextSubjectiveMemory, materializeSubjectiveMemoryForSubject } from '../workers/subjectiveMemoryWorker';
 import { runAutonomousSceneMinute } from '../orchestration/autonomousScene';
 import { runEpisodeIntervention, type EpisodeInterventionInput } from './worldService';
 import { expireOverdueContracts } from '../services/contractService';
@@ -149,6 +149,13 @@ async function executeBackgroundJob(job: { type: string; payload: string | null;
         case 'memory.materialize':
             await materializeNextSubjectiveMemory();
             return;
+        case 'memory.consolidate': {
+            // Консолидация во сне: сворачивает накопленные за день атомы
+            // episode_v2 заснувшего субъекта в субъективный эпизод.
+            if (!job.subjectId) throw new Error('memory.consolidate без subjectId');
+            await materializeSubjectiveMemoryForSubject(job.subjectId);
+            return;
+        }
         case 'interpretation.consolidate':
             await consolidateNextInterpretation();
             return;

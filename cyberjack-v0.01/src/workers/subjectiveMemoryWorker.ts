@@ -90,6 +90,40 @@ export async function materializeNextSubjectiveMemory() {
     }
 }
 
+/**
+ * Консолидация во сне: материализует один необработанный эпизод конкретного
+ * субъекта (того, кто заснул). В отличие от глобального round-robin
+ * `materializeNextSubjectiveMemory`, приоритизирует именно этого персонажа —
+ * его накопленные за день атомы episode_v2 сворачиваются в субъективный
+ * эпизод (summary + ассоциации) во время сна.
+ */
+export async function materializeSubjectiveMemoryForSubject(subjectId: string): Promise<boolean> {
+    if (running) return false;
+    running = true;
+    try {
+        const character = characterRepo.listAll()
+            .find(entry => (entry.subjectId || entry.id) === subjectId && entry.id !== 'PL-1');
+        if (!character) return false;
+        const nameById = new Map<string, string>();
+        for (const entry of characterRepo.listAll()) {
+            nameById.set(entry.id, entry.name);
+            if (entry.subjectId) nameById.set(entry.subjectId, entry.name);
+        }
+        const resolveName = (id: string) => nameById.get(id) || id;
+        const episodes = aggregateMemoryEpisodes(
+            memoryRepo.listRecent(subjectId, 160, 'episode_v2'), 12, resolveName,
+        ).filter(episode => !getSubjectiveEpisode(subjectId, episode));
+        if (!episodes.length) return false;
+        await queueSubjectiveEpisode(subjectId, character.name, episodes[0]);
+        return true;
+    } catch (error: any) {
+        console.warn('[SubjectiveMemoryWorker] sleep consolidation failed:', error?.message || error);
+        return false;
+    } finally {
+        running = false;
+    }
+}
+
 export function startSubjectiveMemoryWorker() {
     // The worker is now driven by the unified background job queue
     // (memory.materialize) scheduled from advanceSimulationTime. This

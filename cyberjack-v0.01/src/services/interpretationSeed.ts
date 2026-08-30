@@ -48,9 +48,9 @@ export function ensureInterpretationTree(subjectId: string) {
     }
 }
 
-/** Все субъекты (не PL-1), для которых строится дерево. */
+/** Все субъекты (не PL-1 и не пустые legacy-строки), для которых строится дерево. */
 export function allSubjectIds(): string[] {
-    const rows = db.prepare(`SELECT id FROM subjects WHERE id != 'PL-1'`).all() as Array<{ id: string }>;
+    const rows = db.prepare(`SELECT id FROM subjects WHERE id != 'PL-1' AND id != ''`).all() as Array<{ id: string }>;
     return rows.map(row => row.id);
 }
 
@@ -95,6 +95,9 @@ export function seedSubjectFacts(subjectId: string) {
 
 export function seedInterpretationTrees() {
     seedWorldFacts();
+    // Убираем осиротевшие ноды/линки от legacy-пустого subject_id (id='').
+    db.prepare(`DELETE FROM interpretation_links WHERE subject_id = ''`).run();
+    db.prepare(`DELETE FROM interpretation_nodes WHERE subject_id = ''`).run();
     for (const subjectId of allSubjectIds()) {
         ensureInterpretationTree(subjectId);
         seedSubjectFacts(subjectId);
