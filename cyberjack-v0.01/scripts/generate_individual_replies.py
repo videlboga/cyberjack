@@ -2,13 +2,15 @@
 """
 Генератор индивидуальных реплик для повторяющихся физических действий.
 
-Вызывает ollama deepseek-v4-flash:cloud батчами, собирает реплики в
+Вызывает ollama deepseek-v4-flash:cloud ПО ОДНОЙ ЗОНЕ ЗА РАЗ (20 ячеек на зону),
+чтобы модель не схлопывала вариативность между зонами. Собирает реплики в
 src/narrative/individualReplies_{category}.ts
 
 Использование:
-  python3 scripts/generate_individual_replies.py <category>
+  python3 scripts/generate_individual_replies.py <category> [--zone <zone>]
 
 Категории: affection, pain, stimulation, intimate, restraint, clinical
+Зоны: face, neck, chest, belly, back, arms, legs, genitals, anus, feet
 """
 
 import json
@@ -30,6 +32,20 @@ ZONES = {
     "genitals": "гениталии (вульва/член)",
     "anus": "анус",
     "feet": "ступни",
+}
+
+# Конкретные сенсорные детали каждой зоны — материал для живых, уникальных фраз.
+ZONE_DETAILS = {
+    "face": "губы, щёки, кожа лица, дыхание у самого лица, тепло чужого дыхания",
+    "neck": "кожа шеи, ямка у ключиц, пульс под кожей, чувствительная кожа у основания шеи",
+    "chest": "грудь, соски, рёбра, сердцебиение под ладонью, кожа над ключицами",
+    "belly": "живот, кожа ниже пупка, мышцы живота, тёплая кожа, дрожь внизу живота",
+    "back": "позвоночник, лопатки, поясница, кожа вдоль хребта, мышцы спины",
+    "arms": "запястья, предплечья, плечи, внутренняя сторона локтя, кожа рук",
+    "legs": "бёдра, внутренняя сторона бедра, колени, икры, кожа ног",
+    "genitals": "клитор/головка, вход, складки, самая чувствительная точка, влажность, пульсация",
+    "anus": "кольцо мышц, вход, сжатие, растяжение, глубина, давление изнутри",
+    "feet": "свод стопы, пальцы, пятки, подъём, кожа ступней, щекотка",
 }
 
 ATTITUDES = {
@@ -59,24 +75,27 @@ GENDERS = {
     "male": "мужчина, говорит о себе в мужском роде",
 }
 
-BATCH_CELLS = 70  # ~210 реплик на батч
 
-
-def build_cells(category):
+def build_cells(category, zone=None):
     cells = []
-    for zone in ZONES:
+    zones = [zone] if zone else list(ZONES.keys())
+    for z in zones:
         for attitude in ATTITUDES:
             for tier in TIERS:
                 for gender in GENDERS:
-                    cells.append((zone, attitude, tier, gender))
+                    cells.append((z, attitude, tier, gender))
     return cells
 
 
 def build_prompt(category, cells):
+    # Все ячейки в батче относятся к одной зоне (по построению).
+    zone = cells[0][0]
     lines = []
     lines.append("Ты пишешь реплики персонажа в эротической игре-симуляторе на русском языке.")
     lines.append("")
     lines.append(f"Категория действия: {CATEGORIES[category]}.")
+    lines.append(f"Зона тела: {ZONES[zone]}.")
+    lines.append(f"Конкретные детали этой зоны, которые можно упомянуть: {ZONE_DETAILS[zone]}.")
     lines.append("")
     lines.append("Для каждой комбинации ниже напиши РОВНО 3 реплики — короткие фразы,")
     lines.append("которые персонаж произносит вслух под воздействием повторяющегося действия.")
@@ -88,13 +107,22 @@ def build_prompt(category, cells):
     lines.append("- отражает категорию, зону тела, отношение и усталость/привыкание от повтора;")
     lines.append("- 3 реплики в ячейке не повторяются между собой.")
     lines.append("")
+    lines.append("КРИТИЧЕСКИ ВАЖНО — уникальность:")
+    lines.append("- каждая ячейка (отношение × повтор × пол) должна звучать ПО-СВОЕМУ;")
+    lines.append("- НЕ используй одну и ту же структуру фразы для разных отношений;")
+    lines.append("- «я не знаю, что думать», «мне тревожно», «не надо» — запрещённые штампы,")
+    lines.append("  заменяй их конкретной реакцией на ЭТУ зону и ЭТО отношение;")
+    lines.append("- male и female должны отличаться не только окончанием глагола, но и")
+    lines.append("  самим содержанием, интонацией, выбором слов;")
+    lines.append("- упоминай конкретные детали зоны (из списка выше), чтобы фразы были живыми.")
+    lines.append("")
     lines.append("Верни ТОЛЬКО валидный JSON-объект. Ключ — строка вида")
     lines.append("`{zone}:{attitude}:{tier}:{gender}`, значение — массив из 3 строк.")
     lines.append("")
     lines.append("Комбинации (ключ → зона, отношение, повтор, пол):")
-    for zone, attitude, tier, gender in cells:
-        key = f"{zone}:{attitude}:{tier}:{gender}"
-        lines.append(f"- {key} → зона «{ZONES[zone]}», {ATTITUDES[attitude]}, {TIERS[tier]}, {GENDERS[gender]}")
+    for z, attitude, tier, gender in cells:
+        key = f"{z}:{attitude}:{tier}:{gender}"
+        lines.append(f"- {key} → зона «{ZONES[z]}», {ATTITUDES[attitude]}, {TIERS[tier]}, {GENDERS[gender]}")
     return "\n".join(lines)
 
 
@@ -119,7 +147,6 @@ def extract_json(text):
         if text.startswith("json"):
             text = text[4:]
         text = text.strip()
-    # Найти первый { и последний }
     start = text.find("{")
     end = text.rfind("}")
     if start == -1 or end == -1:
@@ -128,29 +155,38 @@ def extract_json(text):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("usage: generate_individual_replies.py <category>", file=sys.stderr)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    zone = None
+    if "--zone" in sys.argv:
+        zi = sys.argv.index("--zone")
+        zone = sys.argv[zi + 1]
+    if len(args) != 1:
+        print("usage: generate_individual_replies.py <category> [--zone <zone>]", file=sys.stderr)
         sys.exit(1)
-    category = sys.argv[1]
+    category = args[0]
     if category not in CATEGORIES:
         print(f"unknown category: {category}", file=sys.stderr)
         sys.exit(1)
+    if zone and zone not in ZONES:
+        print(f"unknown zone: {zone}", file=sys.stderr)
+        sys.exit(1)
 
-    cells = build_cells(category)
+    cells = build_cells(category, zone)
     print(f"Категория {category}: {len(cells)} ячеек, {len(cells) * 3} реплик")
 
     result = {}
-    for i in range(0, len(cells), BATCH_CELLS):
-        batch = cells[i:i + BATCH_CELLS]
-        print(f"  батч {i // BATCH_CELLS + 1}: {len(batch)} ячеек...", flush=True)
-        prompt = build_prompt(category, batch)
+    # Генерируем по одной зоне за раз (20 ячеек = 5 отношений × 2 tier × 2 gender).
+    zones = [zone] if zone else list(ZONES.keys())
+    for z in zones:
+        zone_cells = [c for c in cells if c[0] == z]
+        print(f"  зона {z}: {len(zone_cells)} ячеек...", flush=True)
+        prompt = build_prompt(category, zone_cells)
         for attempt in range(3):
             try:
                 raw = call_ollama(prompt)
                 parsed = extract_json(raw)
-                # Валидация: каждый ключ из батча должен быть, по 3 строки
-                for zone, attitude, tier, gender in batch:
-                    key = f"{zone}:{attitude}:{tier}:{gender}"
+                for zz, attitude, tier, gender in zone_cells:
+                    key = f"{zz}:{attitude}:{tier}:{gender}"
                     if key not in parsed:
                         raise ValueError(f"missing key {key}")
                     vals = parsed[key]
@@ -163,7 +199,7 @@ def main():
             except Exception as e:
                 print(f"    попытка {attempt + 1} не удалась: {e}", flush=True)
                 if attempt == 2:
-                    print(f"    БАТЧ ПРОВАЛЕН после 3 попыток", file=sys.stderr)
+                    print(f"    ЗОНА {z} ПРОВАЛЕНА после 3 попыток", file=sys.stderr)
                     sys.exit(1)
 
     # Записать TS-файл
