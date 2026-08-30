@@ -27,10 +27,12 @@ export function peakResolutionReady(
     forced = false,
 ): boolean {
     if (forced) return true;
+    // Positive outcome means the character wants it and is on the peak: the
+    // discharge happens. Pleasure shapes the *quality* of the orgasm (trust
+    // gain in resolveTickConsequences), not whether it occurs. A hard pleasure
+    // floor here stranded wary characters (pleasure ~4) on tension 100 forever.
     if (decision.outcome === 'positive') {
-        const releaseImpulse = Math.max(0, result.pleasure || 0);
-        const dynamicThreshold = Math.max(6, Math.min(14, (result.experiencedIntensity || 0) * 0.18));
-        return releaseImpulse >= dynamicThreshold;
+        return true;
     }
     if (decision.outcome === 'breakdown') {
         return capacity <= 10 || (result.discomfort || 0) + (result.overload || 0) * 0.5 >= 10;
@@ -74,9 +76,12 @@ export function evaluateTensionDischarge(input: TensionDischargeInput): TensionD
         overloadPenalty * 0.25;
     // Peak outcome is driven by the legible character of activation. Acceptance
     // can affect the diagnostic score, but cannot secretly turn pleasurable
-    // activation into a nervous breakdown.
-    const positive = !blockedByContext && input.core.capacity > 10 && recentBalance >= 0.2;
-    const breakdown = recentBalance <= -0.2;
+    // activation into a nervous breakdown. The SIGN of the appraisal decides the
+    // outcome; the floor is a small positive threshold (activationBalance >= 5)
+    // that separates a genuinely mixed peak (~2) from a wary-but-willing
+    // character (~13) who would otherwise strand in the overload dead-zone.
+    const positive = !blockedByContext && input.core.capacity > 10 && recentBalance >= 0.05;
+    const breakdown = recentBalance < 0;
     const outcome: TensionDischargeOutcome = positive
         ? 'positive'
         : breakdown

@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { peakResolutionReady } from './triggers';
 
 describe('peak resolution gate', () => {
-  it('lets ordinary pleasant actions reshape balance without accidental discharge', () => {
+  it('discharges a positive outcome even at low pleasure (wary character)', () => {
+    // A wary character on the peak who wants it still discharges; pleasure
+    // shapes quality, not occurrence.
     expect(peakResolutionReady({ outcome: 'positive' }, {
       pleasure: 3, discomfort: 0, overload: 0, experiencedIntensity: 10,
-    }, 60)).toBe(false);
+    }, 60)).toBe(true);
   });
 
   it('allows a strong pleasurable impulse to discharge', () => {
