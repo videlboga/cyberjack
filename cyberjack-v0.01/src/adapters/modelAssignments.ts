@@ -42,7 +42,9 @@ export const modelAssignments: Record<string, ModelAssignment> = {
   /** Живая реплика персонажа / нарратор. */
   reply: {
     models: [LLM_MODEL, ...splitList(env('LLM_FALLBACK_MODELS', 'deepseek/deepseek-v4-flash,google/gemini-2.5-flash-lite')).filter(m => m !== LLM_MODEL)],
-    providers: splitList(env('LLM_PROVIDER_ORDER', 'novita,siliconflow,deepinfra')),
+    // 'ollama' — локальная Ollama (отдельный транспорт, см. llmAdapter.ts),
+    // идёт первой как основной провайдер; остальные — openrouter-фолбэки.
+    providers: splitList(env('LLM_PROVIDER_ORDER', 'ollama,novita,siliconflow,deepinfra')),
     ttftTimeoutMs: envNum('LLM_TTFT_TIMEOUT', 4000),
     requestTimeoutMs: envNum('LLM_REQUEST_TIMEOUT', 8000),
     format: 'text',

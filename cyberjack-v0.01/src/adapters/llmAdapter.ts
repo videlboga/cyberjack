@@ -28,6 +28,12 @@ const LLM_TOP_P = Number(process.env.LLM_TOP_P ?? 0.9);
 const LLM_FREQUENCY_PENALTY = Number(process.env.LLM_FREQUENCY_PENALTY ?? 0.5);
 const LLM_PRESENCE_PENALTY = Number(process.env.LLM_PRESENCE_PENALTY ?? 0.3);
 
+// Локальная Ollama (OpenAI-совместимый эндпоинт). Используется как отдельный
+// провайдер 'ollama' в списке providers: свой URL, своё имя модели (с суффиксом
+// :cloud), без openrouter-специфичных полей (provider/reasoning/Authorization).
+const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'http://127.0.0.1:11434/v1/chat/completions';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'deepseek-v4-flash:cloud';
+
 const getApiKey = () => process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
 
 export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any, purpose: string = 'parser'): Promise<any> {
@@ -190,14 +196,19 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
     let lastError: unknown;
     for (const [index, attempt] of attempts.entries()) {
         const { model, provider } = attempt;
+        // Локальная Ollama — отдельный транспорт: свой URL, своё имя модели
+        // (с суффиксом :cloud), без openrouter-полей (provider/reasoning/auth).
+        const isOllama = provider === 'ollama';
+        const url = isOllama ? OLLAMA_API_URL : LLM_API_URL;
+        const effectiveModel = isOllama ? OLLAMA_MODEL : model;
         const body: Record<string, any> = {
-            model, messages, max_tokens: assignment.maxTokens,
+            model: effectiveModel, messages, max_tokens: assignment.maxTokens,
             temperature: assignment.temperature,
             frequency_penalty: LLM_FREQUENCY_PENALTY,
             presence_penalty: LLM_PRESENCE_PENALTY,
-            reasoning: { enabled: false },
         };
-        if (provider) body.provider = { only: [provider], allow_fallbacks: false };
+        if (!isOllama) body.reasoning = { enabled: false };
+        if (provider && !isOllama) body.provider = { only: [provider], allow_fallbacks: false };
         if (options.json) body.response_format = { type: 'json_object' };
         if (options.onToken && !options.json) body.stream = true;
         if (Number.isFinite(LLM_TOP_P)) body.top_p = LLM_TOP_P;
@@ -206,8 +217,11 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
         let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
         let result = '';
         try {
-            const response = await fetch(LLM_API_URL, {
-                method: 'POST', headers, body: JSON.stringify(body), signal: controller.signal
+            const requestHeaders: Record<string, string> = isOllama
+                ? { 'Content-Type': 'application/json', 'X-Request-Id': traceId }
+                : headers;
+            const response = await fetch(url, {
+                method: 'POST', headers: requestHeaders, body: JSON.stringify(body), signal: controller.signal
             });
             const headersMs = Math.round(performance.now() - t0);
             clearTimeout(timer);
@@ -237,7 +251,7 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
                 result = data.choices?.[0]?.message?.content || data.reply || '';
             }
             if (!result.trim()) throw new Error('Empty completion');
-            console.log(`[Adapter][Timing] purpose=${options.purpose || 'completion'} model=${model} provider=${provider || 'auto'} headersMs=${headersMs} totalMs=${Math.round(performance.now() - t0)}`);
+            console.log(`[Adapter][Timing] purpose=${options.purpose || 'completion'} model=${effectiveModel} provider=${provider || 'auto'} headersMs=${headersMs} totalMs=${Math.round(performance.now() - t0)}`);
             return result;
         } catch (error) {
             // If streaming already reached the player, keep the audible part
@@ -254,7 +268,7 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
                 startedAt: t0,
                 durationMs: Math.round(performance.now() - t0),
                 purpose: options.purpose,
-                model,
+                model: effectiveModel,
                 provider: provider || 'auto',
                 attempt: index + 1,
                 attemptsTotal: attempts.length,
@@ -262,7 +276,7 @@ async function requestCompletion(messages: ChatMessage[], options: { json?: bool
             });
             if (index < attempts.length - 1) {
                 const next = attempts[index + 1];
-                console.warn(`[Adapter] ${model}/${provider || 'auto'} failed, falling back to ${next.model}/${next.provider || 'auto'}:`, (error as any)?.message || error);
+                console.warn(`[Adapter] ${effectiveModel}/${provider || 'auto'} failed, falling back to ${next.model}/${next.provider || 'auto'}:`, (error as any)?.message || error);
             }
         } finally {
             clearTimeout(timer);
