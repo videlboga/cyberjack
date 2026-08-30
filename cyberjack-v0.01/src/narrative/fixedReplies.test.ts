@@ -22,122 +22,64 @@ function frame(overrides: Partial<ReactionFrame> = {}): ReactionFrame {
 describe('fixedReplies gate', () => {
     beforeEach(() => __resetFixedReplyState());
 
-    it('uses fixed reply for discharge', () => {
-        const f = frame({ event: { ...frame().event, physiologicalEvent: 'discharge' } });
-        expect(shouldUseFixedReply(f)).toBe(true);
-    });
-
-    it('uses fixed reply for breakdown and overload', () => {
-        expect(shouldUseFixedReply(frame({ event: { ...frame().event, physiologicalEvent: 'breakdown' } }))).toBe(true);
-        expect(shouldUseFixedReply(frame({ event: { ...frame().event, physiologicalEvent: 'overload' } }))).toBe(true);
-    });
-
     it('uses fixed reply for minimal control', () => {
         const f = frame({ expressionMode: { ...frame().expressionMode, control: 'minimal' } });
         expect(shouldUseFixedReply(f)).toBe(true);
     });
 
-    it('uses fixed reply for fragmented control at peak/edge', () => {
+    it('does NOT use fixed reply for discharge (fragmented)', () => {
         const f = frame({
-            event: { ...frame().event, physiologicalEvent: 'peak' },
+            event: { ...frame().event, physiologicalEvent: 'discharge' },
             expressionMode: { ...frame().expressionMode, control: 'fragmented' },
         });
-        expect(shouldUseFixedReply(f)).toBe(true);
+        expect(shouldUseFixedReply(f)).toBe(false);
+    });
+
+    it('does NOT use fixed reply for breakdown', () => {
+        const f = frame({ event: { ...frame().event, physiologicalEvent: 'breakdown' } });
+        expect(shouldUseFixedReply(f)).toBe(false);
+    });
+
+    it('does NOT use fixed reply for overload', () => {
+        const f = frame({ event: { ...frame().event, physiologicalEvent: 'overload' } });
+        expect(shouldUseFixedReply(f)).toBe(false);
+    });
+
+    it('does NOT use fixed reply for social acts (set_boundary)', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 3 },
+            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
+        });
+        expect(shouldUseFixedReply(f)).toBe(false);
     });
 
     it('does NOT use fixed reply for normal conversation', () => {
         expect(shouldUseFixedReply(frame())).toBe(false);
     });
 
-    it('does NOT use fixed reply for intact control at edge', () => {
+    it('returns a non-empty reply for minimal control', () => {
         const f = frame({
-            event: { ...frame().event, physiologicalEvent: 'edge' },
-            expressionMode: { ...frame().expressionMode, control: 'intact' },
-        });
-        expect(shouldUseFixedReply(f)).toBe(false);
-    });
-
-    it('returns a non-empty reply for discharge', () => {
-        const f = frame({
-            event: { ...frame().event, physiologicalEvent: 'discharge' },
-            expressionMode: { ...frame().expressionMode, affect: 'positive' },
+            expressionMode: { ...frame().expressionMode, control: 'minimal', affect: 'negative' },
         });
         const reply = selectFixedReply(f);
         expect(reply).toBeTruthy();
         expect(typeof reply).toBe('string');
     });
 
-    it('returns null for a state with no authored variants', () => {
-        // male + overload affect has no 'overload:overload:male'? it does. Use a
-        // combination guaranteed absent: discharge + negative affect.
+    it('returns null for a non-minimal state', () => {
         const f = frame({
             event: { ...frame().event, physiologicalEvent: 'discharge' },
-            expressionMode: { ...frame().expressionMode, affect: 'negative' },
+            expressionMode: { ...frame().expressionMode, control: 'fragmented', affect: 'positive' },
         });
         expect(selectFixedReply(f)).toBeNull();
     });
 
     it('does not repeat the same variation consecutively', () => {
         const f = frame({
-            event: { ...frame().event, physiologicalEvent: 'discharge', repetition: 1 },
-            expressionMode: { ...frame().expressionMode, affect: 'positive' },
+            expressionMode: { ...frame().expressionMode, control: 'minimal', affect: 'negative' },
         });
         const first = selectFixedReply(f);
         const second = selectFixedReply(f);
-        // Same repetition seed → same base index, but anti-repeat bumps it.
         expect(first).not.toBe(second);
-    });
-
-    // ── Акты (граница/предупреждение/вызов/торг) ──────────────────────────
-
-    it('uses fixed reply for set_boundary at repetition >= 3', () => {
-        const f = frame({
-            event: { ...frame().event, repetition: 3 },
-            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
-        });
-        expect(shouldUseFixedReply(f)).toBe(true);
-    });
-
-    it('uses fixed reply for set_boundary when control is not intact', () => {
-        const f = frame({
-            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
-            expressionMode: { ...frame().expressionMode, control: 'strained' },
-        });
-        expect(shouldUseFixedReply(f)).toBe(true);
-    });
-
-    it('does NOT use fixed reply for a fresh set_boundary with intact control', () => {
-        const f = frame({
-            event: { ...frame().event, repetition: 1 },
-            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
-        });
-        expect(shouldUseFixedReply(f)).toBe(false);
-    });
-
-    it('returns a non-empty reply for set_boundary', () => {
-        const f = frame({
-            event: { ...frame().event, repetition: 3 },
-            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
-        });
-        const reply = selectFixedReply(f);
-        expect(reply).toBeTruthy();
-        expect(typeof reply).toBe('string');
-    });
-
-    it('returns a non-empty reply for bargain', () => {
-        const f = frame({
-            event: { ...frame().event, repetition: 3 },
-            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'bargain' },
-        });
-        const reply = selectFixedReply(f);
-        expect(reply).toBeTruthy();
-    });
-
-    it('returns null for an act with no authored variants (probe)', () => {
-        const f = frame({
-            event: { ...frame().event, repetition: 3 },
-            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'probe' },
-        });
-        expect(selectFixedReply(f)).toBeNull();
     });
 });
