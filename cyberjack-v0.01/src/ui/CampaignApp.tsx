@@ -350,7 +350,23 @@ type DirectorEvent = {
   title: string;
   body: string;
   senderName?: string;
+  senderId?: string;
   availableFrom: number;
+  expiresAt?: number;
+  priority?: number;
+  urgency?: number;
+  locationId?: string;
+  actorIds?: string[];
+  payload?: {
+    metric?: string;
+    metricLabel?: string;
+    current?: number;
+    target?: number;
+    threshold?: number;
+    factionId?: string;
+    factionName?: string;
+    subjectName?: string;
+  };
   choices: { id: string; label: string; kind: string }[];
 };
 type RoomVisualEffect = {
@@ -512,6 +528,14 @@ const difficultyLabel = (d: string) =>
   ({ easy: "Лёгкий", medium: "Средний", hard: "Тяжёлый", extreme: "Экстремальный" } as Record<string, string>)[d] || d;
 const crueltyLabel = (c: string) =>
   ({ mild: "Мягкий", moderate: "Умеренный", severe: "Жестокий", extreme: "Предельный" } as Record<string, string>)[c] || c;
+const factionName = (id: string) =>
+  ({
+    fac_veil: "Veil Biotech",
+    fac_helix: "Helix Dynamics",
+    fac_continuum: "Continuum Archive",
+    fac_lattice: "Lattice Systems",
+    fac_core: "Центральный директорат",
+  } as Record<string, string>)[id] || id;
 const sectionForLocation: Record<
   string,
   "laboratory" | "contracts" | "supply"
@@ -833,7 +857,7 @@ export function CampaignApp() {
   >(null);
   const [interaction, setInteraction] = useState<Resident | null>(null);
   const [utility, setUtility] = useState<
-    "people" | "supply" | "journal" | "inbox" | null
+    "people" | "supply" | "inbox" | null
   >(null);
   const [focusCharacterId, setFocusCharacterId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -1240,15 +1264,6 @@ export function CampaignApp() {
                 setUtility("supply");
               }}
             />
-            <NavButton
-              active={utility === "journal"}
-              label={t('game.ui.journal')}
-              meta={`${scenario.events.length} ${t('game.ui.events')}`}
-              onClick={() => {
-                setInteraction(null);
-                setUtility("journal");
-              }}
-            />
           </section>
         </nav>
         <div className="campaign-content">
@@ -1419,7 +1434,24 @@ export function CampaignApp() {
               onChoose={chooseDirectorEvent}
             />
           ) : (
-            <JournalView events={scenario.events} />
+            <SupplyView
+              scenario={scenario}
+              contracts={contracts}
+              inbox={inbox}
+              busy={busy}
+              onBuy={(offer) =>
+                mutate(
+                  `/api/scenario/shop/${offer.id}/buy`,
+                  { playerId: "PL-1" },
+                  `${offer.name}: доставлено на склад`,
+                )
+              }
+              onOpenInbox={() => {
+                setInteraction(null);
+                setUtility("inbox");
+              }}
+              onOpenContracts={() => navigate("scene_liaison")}
+            />
           )}
         </div>
       </div>
@@ -1469,6 +1501,16 @@ function EventInbox({
   onChoose: (event: DirectorEvent, choice: string) => void;
 }) {
   const { t } = useI18n();
+  const channelLabel = (channel: string) =>
+    channel === "inbox"
+      ? "ЛИЧНЫЙ КАНАЛ"
+      : channel === "contract"
+        ? "КОНТРАКТНЫЙ КАНАЛ"
+        : channel.toUpperCase();
+  const sorted = [...events].sort(
+    (a, b) => (b.priority || 0) - (a.priority || 0),
+  );
+  const channels = Array.from(new Set(sorted.map((e) => e.channel)));
   return (
     <main className="management-screen director-inbox">
       <header className="screen-heading">
@@ -1479,45 +1521,92 @@ function EventInbox({
         </div>
         <b>{events.length}</b>
       </header>
-      <section className="director-inbox-list">
-        {events.length ? (
-          events.map((event) => (
-            <article key={event.id}>
-              <header>
-                <small>
-                  {event.channel === "inbox"
-                    ? "ЛИЧНЫЙ КАНАЛ"
-                    : event.channel.toUpperCase()}
-                </small>
-                <span>{event.senderName || "Система станции"}</span>
-              </header>
-              <h2>{event.title}</h2>
-              <p>{event.body}</p>
-              <footer>
-                {event.choices.map((choice) => (
-                  <button
-                    className={choice.kind}
-                    disabled={busy}
-                    key={choice.id}
-                    onClick={() => onChoose(event, choice.id)}
-                  >
-                    {choice.label}
-                  </button>
-                ))}
-              </footer>
-            </article>
-          ))
-        ) : (
-          <div className="director-inbox-empty">
-            <i>○</i>
-            <strong>{t('game.ui.noNewIncoming')}</strong>
-            <span>
-              {t('game.ui.inboxEmpty')}
-            </span>
-          </div>
-        )}
-      </section>
+      {channels.map((channel) => {
+        const channelEvents = sorted.filter((e) => e.channel === channel);
+        return (
+          <section key={channel} className="director-inbox-channel">
+            <header className="director-inbox-channel-head">
+              <small>{channelLabel(channel)}</small>
+              <span>{channelEvents.length}</span>
+            </header>
+            <div className="director-inbox-list">
+              {channelEvents.map((event) => (
+                <DirectorEventCard
+                  key={event.id}
+                  event={event}
+                  busy={busy}
+                  onChoose={onChoose}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+      {!events.length && (
+        <div className="director-inbox-empty">
+          <i>○</i>
+          <strong>{t('game.ui.noNewIncoming')}</strong>
+          <span>{t('game.ui.inboxEmpty')}</span>
+        </div>
+      )}
     </main>
+  );
+}
+
+function DirectorEventCard({
+  event,
+  busy,
+  onChoose,
+}: {
+  event: DirectorEvent;
+  busy: boolean;
+  onChoose: (event: DirectorEvent, choice: string) => void;
+}) {
+  const { t } = useI18n();
+  const payload = event.payload;
+  const metricLine = payload?.metricLabel
+    ? `${payload.metricLabel}: ${Math.round(payload.current ?? 0)} → ${payload.target ?? "—"}`
+    : null;
+  const urgency = event.urgency != null && event.urgency > 0.5;
+  const priority = event.priority != null && event.priority > 0.6;
+  return (
+    <article
+      className={`${priority ? "priority" : ""} ${urgency ? "urgent" : ""}`}
+    >
+      <header>
+        <small>{event.senderName || "Система станции"}</small>
+        <span className="director-event-flags">
+          {priority && <em className="flag-priority">ПРИОРИТЕТ</em>}
+          {urgency && <em className="flag-urgency">СРОЧНО</em>}
+        </span>
+      </header>
+      <h2>{event.title}</h2>
+      <p>{event.body}</p>
+      {metricLine && (
+        <div className="director-event-metric">
+          <small>ПРОФИЛЬ</small>
+          <b>{metricLine}</b>
+        </div>
+      )}
+      {event.expiresAt != null && (
+        <div className="director-event-expiry">
+          <small>ДЕЙСТВУЕТ ДО</small>
+          <b>{event.expiresAt}</b>
+        </div>
+      )}
+      <footer>
+        {event.choices.map((choice) => (
+          <button
+            className={choice.kind}
+            disabled={busy}
+            key={choice.id}
+            onClick={() => onChoose(event, choice.id)}
+          >
+            {choice.label}
+          </button>
+        ))}
+      </footer>
+    </article>
   );
 }
 
@@ -6872,15 +6961,19 @@ function ContractOffice({
   const { t } = useI18n();
   const subjectName =
     assets.find((asset) => asset.id === selectedAssetId)?.name || t('game.ui.asset');
+  const byFaction = contracts.reduce<Record<string, Contract[]>>((acc, contract) => {
+    const key = contract.issuerId || "unknown";
+    (acc[key] ||= []).push(contract);
+    return acc;
+  }, {});
+  const factions = Object.keys(byFaction);
   return (
-    <main className="management-screen">
+    <main className="management-screen contract-office">
       <header className="screen-heading">
         <div>
           <p>{t('game.ui.liaisonOffice')}</p>
           <h1>{t('game.ui.contracts')}</h1>
-          <span>
-            {t('game.ui.selectAssetForContract')}
-          </span>
+          <span>{t('game.ui.selectAssetForContract')}</span>
         </div>
         <label className="contract-asset-picker">
           <small>{t('game.ui.checkAsset')}</small>
@@ -6896,164 +6989,231 @@ function ContractOffice({
           </select>
         </label>
       </header>
-      <section className="contract-office-list">
-        {contracts.map((contract) => {
-          const rows = contract.conditions.map((condition) => ({
-            condition,
-            current: currentFor(condition, subject),
-            met: met(
-              currentFor(condition, subject),
-              condition.operator,
-              condition.value,
-            ),
-          }));
-          const ready = rows.length > 0 && rows.every((row) => row.met);
-          const hours = contract.deadlineTick
-            ? Math.max(0, Math.ceil((contract.deadlineTick - now) / 60))
-            : null;
-          const returnHours = contract.unavailableUntil
-            ? Math.max(0, Math.ceil((contract.unavailableUntil - now) / 60))
-            : null;
-          const rp = contract.returnProfile;
-          return (
-            <article
-              key={contract.id}
-              className={`${contract.state === "accepted" ? "accepted" : ""} ${
-                contract.state === "in_transfer" ? "in-transfer" : ""
-              }`}
-            >
-              <header>
-                <div>
-                  <small>
-                    {contract.state === "accepted"
-                      ? `ПРИНЯТ · ${hours} Ч ДО СРОКА`
-                      : contract.state === "in_transfer"
-                        ? `В ПЕРЕДАЧЕ · ВОЗВРАТ ЧЕРЕЗ ${returnHours} Ч`
-                        : contract.issuerId}
-                  </small>
-                  <strong>{contract.title}</strong>
-                  {contract.format && (
-                    <em className="contract-format">
-                      {contract.format === "external_transfer"
-                        ? "внешняя передача"
-                        : contract.format}
-                      {contract.durationMinutes
-                        ? ` · ${Math.round(contract.durationMinutes / 60)} ч`
-                        : ""}
-                    </em>
-                  )}
-                  {(contract.difficulty || contract.cruelty) && (
-                    <span className="contract-tier">
-                      {contract.difficulty && (
-                        <em className={`tier-difficulty tier-${contract.difficulty}`}>
-                          {difficultyLabel(contract.difficulty)}
-                        </em>
-                      )}
-                      {contract.cruelty && (
-                        <em className={`tier-cruelty tier-${contract.cruelty}`}>
-                          {crueltyLabel(contract.cruelty)}
-                        </em>
-                      )}
-                    </span>
-                  )}
-                </div>
-                <b>{contract.rewards?.credits || 0} cr</b>
-              </header>
-              <p>{contract.description}</p>
-              <div className="contract-requirements">
-                {rows.map((row, i) => (
-                  <span className={row.met ? "met" : ""} key={i}>
-                    {row.met ? "✓" : "·"}{" "}
-                    {conditionLabels[row.condition.key || row.condition.type] ||
-                      row.condition.key}{" "}
-                    <b>
-                      {typeof row.current === "number"
-                        ? Math.round(row.current)
-                        : "—"}{" "}
-                      {row.condition.operator} {String(row.condition.value)}
-                    </b>
-                  </span>
-                ))}
-              </div>
-              {rp && (
-                <div className="contract-return-profile">
-                  <small>ПОСЛЕДСТВИЯ ВОЗВРАТА</small>
-                  {(rp.acute_state?.capacity != null ||
-                    rp.acute_state?.tension != null ||
-                    rp.acute_state?.sensitivity != null ||
-                    rp.acute_state?.attitude != null) && (
-                    <span>
-                      Острый сдвиг:{" "}
-                      {[
-                        rp.acute_state?.capacity != null
-                          ? `выносливость ${rp.acute_state.capacity > 0 ? "+" : ""}${rp.acute_state.capacity}`
-                          : null,
-                        rp.acute_state?.tension != null
-                          ? `напряжение ${rp.acute_state.tension > 0 ? "+" : ""}${rp.acute_state.tension}`
-                          : null,
-                        rp.acute_state?.sensitivity != null
-                          ? `чувствительность ${rp.acute_state.sensitivity > 0 ? "+" : ""}${rp.acute_state.sensitivity}`
-                          : null,
-                        rp.acute_state?.attitude != null
-                          ? `принятие ${rp.acute_state.attitude > 0 ? "+" : ""}${rp.acute_state.attitude}`
-                          : null,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")}
-                    </span>
-                  )}
-                  {rp.recovery?.durationDays && (
-                    <span>
-                      Восстановление {rp.recovery.durationDays} сут.
-                      {rp.recovery.method ? ` (${rp.recovery.method})` : ""}
-                    </span>
-                  )}
-                  {rp.traumatic?.map((t, i) => (
-                    <span key={i} className="traumatic">
-                      {t.trigger && `Триггер: ${t.trigger}. `}
-                      {t.response}
-                    </span>
-                  ))}
-                  {rp.temporary?.map((t, i) => (
-                    <span key={i} className="temporary">
-                      {t.impulse}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {contract.state === "available" ? (
-                <button disabled={busy} onClick={() => onAccept(contract)}>
-                  {t('game.ui.acceptOrder')}
-                </button>
-              ) : contract.state === "in_transfer" ? (
-                <span className="contract-in-transfer-note">
-                  Актив вернётся автоматически после передачи
-                </span>
-              ) : (
-                <>
-                  <button
-                    className="deliver"
-                    disabled={busy || !ready}
-                    onClick={() => onDeliver(contract)}
-                  >
-                    {ready
-                      ? `Передать: ${subjectName}`
-                      : `${subjectName} пока не соответствует`}
-                  </button>
-                  <button
-                    className="refuse"
-                    disabled={busy}
-                    onClick={() => onRefuse(contract)}
-                  >
-                    {t('game.ui.refuseOrder') || "Отказаться"}
-                  </button>
-                </>
-              )}
-            </article>
-          );
-        })}
-      </section>
+      {factions.map((factionId) => (
+        <section key={factionId} className="contract-faction">
+          <header className="contract-faction-head">
+            <small>ЗАКАЗЧИК</small>
+            <strong>{factionName(factionId)}</strong>
+            <span>{byFaction[factionId].length}</span>
+          </header>
+          <div className="contract-office-list">
+            {byFaction[factionId].map((contract) => (
+              <ContractCard
+                key={contract.id}
+                contract={contract}
+                subject={subject}
+                subjectName={subjectName}
+                busy={busy}
+                now={now}
+                onAccept={onAccept}
+                onDeliver={onDeliver}
+                onRefuse={onRefuse}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
     </main>
+  );
+}
+
+function ContractCard({
+  contract,
+  subject,
+  subjectName,
+  busy,
+  now,
+  onAccept,
+  onDeliver,
+  onRefuse,
+}: {
+  contract: Contract;
+  subject: SubjectState | null;
+  subjectName: string;
+  busy: boolean;
+  now: number;
+  onAccept: (contract: Contract) => void;
+  onDeliver: (contract: Contract) => void;
+  onRefuse: (contract: Contract) => void;
+}) {
+  const { t } = useI18n();
+  const rows = contract.conditions.map((condition) => ({
+    condition,
+    current: currentFor(condition, subject),
+    met: met(
+      currentFor(condition, subject),
+      condition.operator,
+      condition.value,
+    ),
+  }));
+  const ready = rows.length > 0 && rows.every((row) => row.met);
+  const metCount = rows.filter((row) => row.met).length;
+  const hours = contract.deadlineTick
+    ? Math.max(0, Math.ceil((contract.deadlineTick - now) / 60))
+    : null;
+  const returnHours = contract.unavailableUntil
+    ? Math.max(0, Math.ceil((contract.unavailableUntil - now) / 60))
+    : null;
+  const rp = contract.returnProfile;
+  const rewards = contract.rewards;
+  return (
+    <article
+      className={`${contract.state === "accepted" ? "accepted" : ""} ${
+        contract.state === "in_transfer" ? "in-transfer" : ""
+      }`}
+    >
+      <header>
+        <div>
+          <small>
+            {contract.state === "accepted"
+              ? `ПРИНЯТ · ${hours} Ч ДО СРОКА`
+              : contract.state === "in_transfer"
+                ? `В ПЕРЕДАЧЕ · ВОЗВРАТ ЧЕРЕЗ ${returnHours} Ч`
+                : factionName(contract.issuerId)}
+          </small>
+          <strong>{contract.title}</strong>
+          {contract.format && (
+            <em className="contract-format">
+              {contract.format === "external_transfer"
+                ? "внешняя передача"
+                : contract.format}
+              {contract.durationMinutes
+                ? ` · ${Math.round(contract.durationMinutes / 60)} ч`
+                : ""}
+            </em>
+          )}
+          {(contract.difficulty || contract.cruelty) && (
+            <span className="contract-tier">
+              {contract.difficulty && (
+                <em className={`tier-difficulty tier-${contract.difficulty}`}>
+                  {difficultyLabel(contract.difficulty)}
+                </em>
+              )}
+              {contract.cruelty && (
+                <em className={`tier-cruelty tier-${contract.cruelty}`}>
+                  {crueltyLabel(contract.cruelty)}
+                </em>
+              )}
+            </span>
+          )}
+        </div>
+        <div className="contract-rewards">
+          {rewards?.credits != null && (
+            <b>{rewards.credits} cr</b>
+          )}
+          {rewards?.trust != null && (
+            <span className="reward-trust">+{rewards.trust} доверие</span>
+          )}
+          {rewards?.items?.length ? (
+            <span className="reward-items">
+              {rewards.items.map((item) => item).join(", ")}
+            </span>
+          ) : null}
+        </div>
+      </header>
+      <p>{contract.description}</p>
+      <div className="contract-requirements">
+        <div className="contract-progress">
+          <small>
+            ПРОФИЛЬ · {metCount}/{rows.length}
+          </small>
+          <div className="contract-progress-bar">
+            <i
+              style={{
+                width: `${rows.length ? (metCount / rows.length) * 100 : 0}%`,
+              }}
+            />
+          </div>
+        </div>
+        {rows.map((row, i) => (
+          <span className={row.met ? "met" : ""} key={i}>
+            {row.met ? "✓" : "·"}{" "}
+            {conditionLabels[row.condition.key || row.condition.type] ||
+              row.condition.key}{" "}
+            <b>
+              {typeof row.current === "number"
+                ? Math.round(row.current)
+                : "—"}{" "}
+              {row.condition.operator} {String(row.condition.value)}
+            </b>
+          </span>
+        ))}
+      </div>
+      {rp && (
+        <div className="contract-return-profile">
+          <small>ПОСЛЕДСТВИЯ ВОЗВРАТА</small>
+          {(rp.acute_state?.capacity != null ||
+            rp.acute_state?.tension != null ||
+            rp.acute_state?.sensitivity != null ||
+            rp.acute_state?.attitude != null) && (
+            <span>
+              Острый сдвиг:{" "}
+              {[
+                rp.acute_state?.capacity != null
+                  ? `выносливость ${rp.acute_state.capacity > 0 ? "+" : ""}${rp.acute_state.capacity}`
+                  : null,
+                rp.acute_state?.tension != null
+                  ? `напряжение ${rp.acute_state.tension > 0 ? "+" : ""}${rp.acute_state.tension}`
+                  : null,
+                rp.acute_state?.sensitivity != null
+                  ? `чувствительность ${rp.acute_state.sensitivity > 0 ? "+" : ""}${rp.acute_state.sensitivity}`
+                  : null,
+                rp.acute_state?.attitude != null
+                  ? `принятие ${rp.acute_state.attitude > 0 ? "+" : ""}${rp.acute_state.attitude}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            </span>
+          )}
+          {rp.recovery?.durationDays && (
+            <span>
+              Восстановление {rp.recovery.durationDays} сут.
+              {rp.recovery.method ? ` (${rp.recovery.method})` : ""}
+            </span>
+          )}
+          {rp.traumatic?.map((t, i) => (
+            <span key={i} className="traumatic">
+              {t.trigger && `Триггер: ${t.trigger}. `}
+              {t.response}
+            </span>
+          ))}
+          {rp.temporary?.map((t, i) => (
+            <span key={i} className="temporary">
+              {t.impulse}
+            </span>
+          ))}
+        </div>
+      )}
+      {contract.state === "available" ? (
+        <button disabled={busy} onClick={() => onAccept(contract)}>
+          {t('game.ui.acceptOrder')}
+        </button>
+      ) : contract.state === "in_transfer" ? (
+        <span className="contract-in-transfer-note">
+          Актив вернётся автоматически после передачи
+        </span>
+      ) : (
+        <>
+          <button
+            className="deliver"
+            disabled={busy || !ready}
+            onClick={() => onDeliver(contract)}
+          >
+            {ready
+              ? `Передать: ${subjectName}`
+              : `${subjectName} пока не соответствует`}
+          </button>
+          <button
+            className="refuse"
+            disabled={busy}
+            onClick={() => onRefuse(contract)}
+          >
+            {t('game.ui.refuseOrder') || "Отказаться"}
+          </button>
+        </>
+      )}
+    </article>
   );
 }
 
@@ -7170,32 +7330,4 @@ function StationStorage({
   );
 }
 
-function JournalView({ events }: { events: Scenario["events"] }) {
-  const { t } = useI18n();
-  return (
-    <main className="management-screen">
-      <header className="screen-heading">
-        <div>
-          <p>{t('game.ui.chronicle')}</p>
-          <h1>{t('game.ui.sectorJournal')}</h1>
-          <span>
-            {t('game.ui.journalDescription')}
-          </span>
-        </div>
-      </header>
-      <section className="journal-list">
-        {events.length ? (
-          events.map((event) => (
-            <article key={event.id}>
-              <small>{event.type}</small>
-              <strong>{event.title}</strong>
-              <p>{event.description}</p>
-            </article>
-          ))
-        ) : (
-          <p className="empty-screen">{t('game.ui.noEventsYetShort')}</p>
-        )}
-      </section>
-    </main>
-  );
-}
+

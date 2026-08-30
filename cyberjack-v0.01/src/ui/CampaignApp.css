@@ -318,6 +318,82 @@
   font-size: 34px;
 }
 
+.director-inbox-channel {
+  margin-top: 18px;
+}
+
+.director-inbox-channel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ji-line) 60%, transparent);
+  margin-bottom: 12px;
+}
+
+.director-inbox-channel-head small {
+  color: var(--ji-muted);
+  letter-spacing: .16em;
+  font-weight: 700;
+}
+
+.director-inbox-channel-head span {
+  color: var(--ji-lcd);
+  font-weight: 700;
+}
+
+.director-inbox-list > article.priority {
+  border-color: color-mix(in srgb, var(--ji-amber) 55%, transparent);
+}
+
+.director-inbox-list > article.urgent {
+  border-color: color-mix(in srgb, var(--ji-danger, #c33) 55%, transparent);
+}
+
+.director-event-flags {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.director-event-flags em {
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: .1em;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+}
+
+.director-event-flags .flag-priority {
+  color: var(--ji-amber);
+}
+
+.director-event-flags .flag-urgency {
+  color: var(--ji-danger, #c33);
+}
+
+.director-event-metric,
+.director-event-expiry {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.director-event-metric small,
+.director-event-expiry small {
+  color: var(--ji-muted);
+  letter-spacing: .1em;
+  font-size: 9px;
+}
+
+.director-event-metric b {
+  color: var(--ji-lcd);
+}
+
+.director-event-expiry b {
+  color: var(--ji-secondary);
+}
+
 /* A time pause freezes readings driven by world time, not UI transitions.
    In particular, the monitor must finish its entrance animation so its
    contents never get stranded at their transparent initial keyframe. */
