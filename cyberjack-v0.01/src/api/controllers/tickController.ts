@@ -243,10 +243,9 @@ export const processTick = async (req: Request, res: Response) => {
             recordMemoryEvent({ subjectId, bundle });
         }
 
-        // Generate narrative state description + contract progress + suggested chips
+        // Generate narrative state description + contract progress
         const stateDescription = buildStateDescription(subjectId);
         const contractProgress = getContractProgress(subjectId, playerId);
-        const suggestedChips: any[] = [];
 
         // Async scene image generation — does NOT block the response.
         // Image is pushed to the frontend via WebSocket when ready.
@@ -301,7 +300,6 @@ export const processTick = async (req: Request, res: Response) => {
             replyJobId,
             stateDescription,
             contractProgress,
-            suggestedChips,
             worldClock
         }));
     } catch (error: any) {

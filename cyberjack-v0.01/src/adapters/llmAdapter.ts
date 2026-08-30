@@ -106,49 +106,6 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     throw lastError instanceof Error ? lastError : new Error(String(lastError || 'All parser models failed'));
 }
 
-const socialPortraitEmotions = [
-    'angry', 'crying', 'curious', 'defiant', 'disgust', 'distressed',
-    'excited', 'fear', 'guarded', 'neutral', 'sad', 'shy', 'smile',
-    'smug', 'surprise'
-] as const;
-
-export async function classifySpokenEmotion(input: {
-    playerSpeech?: string | null;
-    characterSpeech: string;
-    previousEmotion?: string | null;
-    simulationPrior?: string | null;
-    tension?: number;
-    attitude?: number;
-    openness?: number;
-}): Promise<{ emotion: string; confidence: number; valence: number; arousal: number; control: number }> {
-    const messages: ChatMessage[] = [{
-        role: 'system',
-        content: `Определи внешне читаемую эмоцию персонажа после короткого диалога. Не оценивай тон слов собеседника вместо реакции персонажа. Учитывай, что персонаж может скрывать страх раздражением. Выбери primary только из: ${socialPortraitEmotions.join(', ')}. Верни JSON {"primary":"...","confidence":0..1,"valence":-1..1,"arousal":0..1,"control":-1..1}.`
-    }, {
-        role: 'user',
-        content: [
-            `Собеседник: ${input.playerSpeech || '(нет новой реплики)'}`,
-            `Персонаж: ${input.characterSpeech}`,
-            `Предыдущая эмоция: ${input.previousEmotion || 'неизвестна'}`,
-            `Приоритет симуляции: ${input.simulationPrior || 'neutral'}`,
-            `Состояние: напряжение ${Number(input.tension || 0).toFixed(1)}, отношение ${Number(input.attitude ?? 50).toFixed(1)}, открытость ${Number(input.openness ?? 50).toFixed(1)}.`
-        ].join('\n')
-    }];
-    const { parsed } = await parseVerbalInputWithLLM(messages);
-    const primary = socialPortraitEmotions.includes(parsed?.primary) ? parsed.primary : 'neutral';
-    const bounded = (value: unknown, min: number, max: number, fallback: number) => {
-        const numeric = Number(value);
-        return Number.isFinite(numeric) ? Math.max(min, Math.min(max, numeric)) : fallback;
-    };
-    return {
-        emotion: primary,
-        confidence: bounded(parsed?.confidence, 0, 1, 0),
-        valence: bounded(parsed?.valence, -1, 1, 0),
-        arousal: bounded(parsed?.arousal, 0, 1, 0),
-        control: bounded(parsed?.control, -1, 1, 0),
-    };
-}
-
 import { PromptPayload, NarratorPromptPayload, ScenePromptPayload } from '../domain/types';
 
 

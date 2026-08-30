@@ -66,7 +66,6 @@ export interface TickResponse {
   classifierModel: unknown;
   stateDescription: string;
   contractProgress: unknown;
-  suggestedChips: unknown[];
   worldClock: unknown;
 }
 

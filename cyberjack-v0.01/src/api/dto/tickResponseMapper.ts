@@ -28,7 +28,6 @@ export interface TickResponseInput {
   replyJobId: string | null;
   stateDescription: string;
   contractProgress: unknown;
-  suggestedChips: unknown[];
   worldClock: unknown;
 }
 
@@ -58,7 +57,6 @@ export function mapTickResponse(input: TickResponseInput): TickResponse {
     classifierModel: dynamicModifiers?.model ?? null,
     stateDescription: input.stateDescription,
     contractProgress: input.contractProgress,
-    suggestedChips: input.suggestedChips,
     worldClock: input.worldClock,
   };
 }
