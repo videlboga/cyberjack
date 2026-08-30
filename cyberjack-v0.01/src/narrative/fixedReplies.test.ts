@@ -106,7 +106,7 @@ describe('fixedReplies gate', () => {
 
     it('returns a non-empty reply for repeated positive action', () => {
         const f = frame({
-            event: { ...frame().event, repetition: 2, contact: 'partial' },
+            event: { ...frame().event, repetition: 2, contact: 'partial', actionTags: ['affection'] },
             expressionMode: { ...frame().expressionMode, affect: 'positive' },
         });
         const reply = selectFixedReply(f);
@@ -114,26 +114,25 @@ describe('fixedReplies gate', () => {
         expect(typeof reply).toBe('string');
     });
 
-    it('returns a non-empty reply for repeated negative action at tier 4', () => {
+    it('returns a non-empty reply for repeated pain action at tier 4', () => {
         const f = frame({
-            event: { ...frame().event, repetition: 5, contact: 'full' },
+            event: { ...frame().event, repetition: 5, contact: 'full', actionTags: ['pain', 'impact'] },
             expressionMode: { ...frame().expressionMode, affect: 'negative' },
         });
         const reply = selectFixedReply(f);
         expect(reply).toBeTruthy();
     });
 
-    it('fills every repeat cell (valence × tier, female)', () => {
-        const valences = ['positive', 'negative', 'mixed'] as const;
+    it('fills every repeat cell (category × tier, female)', () => {
+        const categories = ['affection', 'pain', 'stimulation', 'intimate', 'restraint', 'clinical'] as const;
         const tiers = [2, 4] as const;
-        for (const valence of valences) {
+        for (const category of categories) {
             for (const tier of tiers) {
                 const f = frame({
-                    event: { ...frame().event, repetition: tier, contact: 'partial' },
-                    expressionMode: { ...frame().expressionMode, affect: valence },
+                    event: { ...frame().event, repetition: tier, contact: 'partial', actionTags: [category] },
                 });
                 const reply = selectFixedReply(f);
-                expect(reply, `repeat ${valence} × ${tier} should have a reply`).toBeTruthy();
+                expect(reply, `repeat ${category} × ${tier} should have a reply`).toBeTruthy();
             }
         }
     });

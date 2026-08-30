@@ -65,6 +65,7 @@ export interface ReactionFrame {
         directlyExperienced: boolean;
         affectedCharacter: string;
         contact?: 'none' | 'partial' | 'full' | 'forced';
+        actionTags?: string[];
         playerSpeech?: string;
         commandOutcome?: {
             status: 'performed' | 'not_performed';
@@ -150,6 +151,7 @@ interface CompileFrameInput {
     openThreads?: string[];
     compulsions?: CompulsionSignal[];
     sensoryVariant?: ReactionFrame['event']['sensoryVariant'];
+    actionTags?: string[];
 }
 
 const unique = (values: string[], limit: number) => Array.from(new Set(values.filter(Boolean))).slice(0, limit);
@@ -647,6 +649,7 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
             directlyExperienced,
             affectedCharacter: input.targetName,
             contact: input.observation?.contact,
+            actionTags: input.actionTags,
             sensoryVariant: input.sensoryVariant,
         },
         continuity: {
