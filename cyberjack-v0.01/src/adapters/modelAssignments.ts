@@ -66,14 +66,13 @@ export const modelAssignments: Record<string, ModelAssignment> = {
    *  Модель должна стабильно отдавать полный JSON (не текст) с большим
    *  окном: flash-lite обрезает на 600 токенов, deepseek-v4-flash местами
    *  отдаёт текст вместо JSON. gemini-2.5-flash-lite стабильно отдаёт JSON
-   *  при достаточном max_tokens — его и берём основным.
-   *  'ollama' идёт первым как дешёвый локальный путь (summary эпизодов). */
+   *  при достаточном max_tokens — его и берём основным. */
   memory: {
     models: [
       env('MEMORY_MODEL', 'deepseek/deepseek-chat-v3-0324'),
       ...splitList(env('MEMORY_FALLBACK_MODELS', 'deepseek/deepseek-v3.2')).filter(m => m !== env('MEMORY_MODEL', 'deepseek/deepseek-chat-v3-0324')),
     ],
-    providers: splitList(env('MEMORY_PROVIDER_ORDER', 'ollama')),
+    providers: [],
     ttftTimeoutMs: envNum('MEMORY_TTFT_TIMEOUT', 8000),
     requestTimeoutMs: envNum('MEMORY_REQUEST_TIMEOUT', 30000),
     format: 'json',
