@@ -39,10 +39,8 @@ const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'deepseek-v4-flash:cloud';
 const getApiKey = () => process.env.OPENROUTER_API_KEY || process.env.LLM_API_KEY || '';
 
 export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchema?: any, purpose: string = 'parser'): Promise<any> {
-    const LLM_API_URL = process.env.LLM_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
     const LLM_API_KEY = getApiKey();
     const assignment = getModelAssignment(purpose);
-    const models = assignment.models;
     let lastError: unknown;
     // Legacy callers pass { type: 'json_object' } as the second argument to
     // request plain-JSON output. A real structured schema carries `.value`
@@ -53,32 +51,47 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
     // fallback can be correlated with the tick that produced it; mint a new
     // one only for autonomous/standalone calls (Этап 10 сквозной trace).
     const traceId = currentTraceRequestId() || randomUUID();
-    for (const model of models) {
+    // attempts: providers (для основной модели) + fallback-модели. Провайдер
+    // 'ollama' идёт через нативный /api/chat (format:json, think:false) — это
+    // дешёвый локальный путь для summary/памяти.
+    const attempts = [
+        ...assignment.providers.map(provider => ({ model: assignment.models[0], provider })),
+        ...assignment.models.slice(1).map(model => ({ model, provider: '' })),
+    ];
+    for (const [index, attempt] of attempts.entries()) {
+        const { model, provider } = attempt;
+        const isOllama = provider === 'ollama';
+        const url = isOllama ? OLLAMA_API_URL : LLM_API_URL;
+        const effectiveModel = isOllama ? OLLAMA_MODEL : model;
         const controller = new AbortController();
         let timer = setTimeout(() => controller.abort(), assignment.ttftTimeoutMs);
         const startedAt = performance.now();
         try {
-            const body: Record<string, any> = { model, messages, temperature: assignment.temperature, max_tokens: assignment.maxTokens };
+            const body: Record<string, any> = isOllama
+                ? { model: effectiveModel, messages, stream: false, think: false, format: 'json', options: { num_predict: assignment.maxTokens, temperature: assignment.temperature } }
+                : { model: effectiveModel, messages, temperature: assignment.temperature, max_tokens: assignment.maxTokens };
             // Structured output: when a real schema is supplied, request a
             // strict JSON schema so the model is forced to return every field
             // (incl. command.contextId). Without it, models drop fields and
             // the downstream resolver silently degrades to "misunderstood".
             // Plain-JSON callers (memory, dossier, social) stay on json_object.
-            if (schema) {
-                body.response_format = {
-                    type: 'json_schema',
-                    json_schema: { name: schema.name || 'cyberjack_parser', strict: true, schema: schema.value }
-                };
-            } else {
-                body.response_format = { type: 'json_object' };
+            // Ollama нативный /api/chat поддерживает только format:'json'.
+            if (!isOllama) {
+                if (schema) {
+                    body.response_format = {
+                        type: 'json_schema',
+                        json_schema: { name: schema.name || 'cyberjack_parser', strict: true, schema: schema.value }
+                    };
+                } else {
+                    body.response_format = { type: 'json_object' };
+                }
             }
-            const response = await fetch(LLM_API_URL, {
+            const headers: Record<string, string> = isOllama
+                ? { 'Content-Type': 'application/json', 'X-Request-Id': traceId }
+                : { 'Content-Type': 'application/json', 'X-Request-Id': traceId, ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}) };
+            const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Request-Id': traceId,
-                    ...(LLM_API_KEY ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {}),
-                },
+                headers,
                 signal: controller.signal,
                 body: JSON.stringify(body)
             });
@@ -87,9 +100,9 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
             timer = setTimeout(() => controller.abort(), assignment.requestTimeoutMs);
             if (!response.ok) throw new Error(`Parser network error ${response.status}: ${await response.text()}`);
             const data = await response.json() as any;
-            const resultString = data.choices?.[0]?.message?.content;
+            const resultString = isOllama ? data.message?.content : data.choices?.[0]?.message?.content;
             if (!resultString) throw new Error('Parser returned an empty response');
-            return { parsed: JSON.parse(resultString), model: data.model || model };
+            return { parsed: JSON.parse(resultString), model: effectiveModel };
         } catch (error: any) {
             lastError = error;
             emitTrace({
@@ -99,13 +112,16 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
                 startedAt,
                 durationMs: Math.round(performance.now() - startedAt),
                 purpose,
-                model,
-                provider: 'auto',
-                attempt: models.indexOf(model) + 1,
-                attemptsTotal: models.length,
+                model: effectiveModel,
+                provider: provider || 'auto',
+                attempt: index + 1,
+                attemptsTotal: attempts.length,
                 error: String(error?.message || error),
             });
-            if (model !== models.at(-1)) console.warn(`[LLM Adapter Parser] ${model} failed; trying next parser model:`, error?.message || error);
+            if (index < attempts.length - 1) {
+                const next = attempts[index + 1];
+                console.warn(`[LLM Adapter Parser] ${effectiveModel}/${provider || 'auto'} failed; trying ${next.model}/${next.provider || 'auto'}:`, error?.message || error);
+            }
         } finally {
             clearTimeout(timer);
         }
