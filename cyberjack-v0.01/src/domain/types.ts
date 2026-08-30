@@ -230,6 +230,8 @@ export interface TickResult {
     effectiveAttitude: number;
     attitudeShift: number;
     finalValence: number;
+    /** Валентность без ситуативного буста принятия — по ней идёт обучение. */
+    baseFinalValence?: number;
     experiencedIntensity: number;
     pleasure: number;
     discomfort: number;

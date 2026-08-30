@@ -90,6 +90,13 @@ export const DEFAULT_CONFIG: any =
       globalWeight: 0.4,
       localWeight: 0.6,
     },
+    // Ситуативное принятие: при близости к оргазму тело временно «соглашается»
+    // с интимным контактом, даже если зона изначально не принята. Буст не
+    // сохраняется в localAttitude — обучение идёт по базовому значению.
+    situationalAcceptance: {
+      tensionStart: 85,
+      maxBoost: 30,
+    },
     intensity: {
       baseOffset: 0.3,
       sensitivityPow: 1.2,
@@ -136,13 +143,16 @@ export const DEFAULT_CONFIG: any =
       overloadPenalty: 0.5,
     },
     applyLearning: {
-      sensitivityFromIntensity: 0.06,
+      sensitivityFromIntensity: 0.02,
       sensitivityFromLearning: 22,
       sensitivityLearningEffectScale: 45,
       sensitivityEngagementScale: 65,
       sensitivityFromOverload: 0.02,
       sensitivityRecoveryCeiling: 5,
       sensitivityDesensitizationStart: 30,
+      // Общая чувствительность не должна падать до нуля: даже при длительной
+      // интенсивной стимуляции остаётся минимальный физический отклик.
+      sensitivityFloor: 20,
       adaptationIntensitySetpoint: 5,
       sensitivityTarget: 5, // legacy alias
       sensitivityRegenRate: 0.4,

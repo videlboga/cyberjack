@@ -16,6 +16,7 @@ export const memoryTagLabels: Record<string, string> = {
     critical_parent: 'критикующий родитель', nurturing_parent: 'заботливый родитель',
     // Служебные теги effect/context-пресетов (состояния и оборудование).
     condition: 'состояние', apathy: 'апатия', subspace: 'сабспейс', panic: 'паника', freeze: 'оцепенение',
+    acceptance: 'принятие',
     submissive: 'податливость', defiance: 'сопротивление', hyperesthesia: 'гиперестезия', local: 'локальное',
     numbness: 'онемение', physiological: 'физиологическое', refractory: 'рефрактерный период',
     dominance: 'доминирование', passive: 'пассивное', contrast: 'контраст', physical: 'физическое',

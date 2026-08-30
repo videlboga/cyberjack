@@ -139,6 +139,15 @@ export const STATE_RULES: TriggerRule[] = [
         requiredTicks: 0,
         actionPresetId: 'effect_local_numbness',
         removeOnFail: true
+    },
+    {
+        code: 'situational_acceptance',
+        description: 'Ситуативное принятие (близость к оргазму)',
+        check: (core) => core.tension >= 85,
+        releaseCheck: (core) => core.tension < 85,
+        requiredTicks: 0,
+        actionPresetId: 'effect_situational_acceptance',
+        removeOnFail: true
     }
 ];
 

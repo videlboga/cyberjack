@@ -107,6 +107,13 @@ export function applyLearning(
     const localDesensitization = Math.max(0, result.experiencedIntensity - localDesensitizationStart) *
         f.localSensitivityFromIntensity + (result.overload || 0) * (f.localSensitivityFromOverload ?? 0.03);
 
+    // Общая чувствительность не падает до нуля: экспоненциальное замедление
+    // к полу. Чем ближе к sensitivityFloor, тем медленнее десенситизация —
+    // асимптота к полу, а не пересечение его.
+    const sensitivityFloor = f.sensitivityFloor ?? 20;
+    const coreFloorFactor = clamp((safeCore.sensitivity - sensitivityFloor) / Math.max(100 - sensitivityFloor, 0.001), 0, 1);
+    const effectiveCoreDesensitization = coreDesensitization * coreFloorFactor;
+
     const baseCapacityDrop = estimateCapacityLoss({
         experiencedIntensity: result.experiencedIntensity,
         pleasure: result.pleasure,
@@ -128,6 +135,13 @@ export function applyLearning(
     const affect = Number.isFinite(result.finalValence)
         ? clamp(result.finalValence, -1, 1) * sensoryMagnitude
         : bodilyBalance;
+    // Обучение принятия идёт по базовой валентности (без ситуативного буста
+    // близости к оргазму), чтобы временный буст не «закреплял» принятие зоны
+    // навсегда. Текущая реакция (pleasure/discomfort) остаётся с бустом.
+    const baseValence = Number.isFinite(result.baseFinalValence) ? result.baseFinalValence : result.finalValence;
+    const baseAffect = Number.isFinite(baseValence)
+        ? clamp(baseValence, -1, 1) * sensoryMagnitude
+        : affect;
     // Acceptance follows the experienced balance directly. Novelty and
     // learning amplify a positive experience instead of gating it entirely;
     // familiar pleasure therefore gives a small gain rather than an opaque
@@ -152,26 +166,26 @@ export function applyLearning(
     // high-intensity ticks.
     const positiveLearningFactor = 0.01 + learnedQuality * 0.06 * emotionalEncoding;
     const negativeResponsiveness = 0.5 + responsiveness * 0.5;
-    const opennessAffect = affect > 0
-        ? affect * positiveLearningFactor * responsiveness
-        : affect * negativeResponsiveness;
+    const opennessAffect = baseAffect > 0
+        ? baseAffect * positiveLearningFactor * responsiveness
+        : baseAffect * negativeResponsiveness;
     // Positive conditioning asymptotically loses room near the ceiling. It can
     // reach exceptional values, but no finite repetition receives a hidden
     // minimum gain all the way to 100.
     const positiveCoreRoom = Math.pow(clamp((100 - safeCore.attitude) / 50, 0, 1), 1.5);
     const positiveLocalRoom = Math.pow(clamp((100 - safePoint.localAttitude) / 50, 0, 1), 1.5);
-    const coreAffectForAcceptance = affect > 0
-        ? affect * positiveLearningFactor * responsiveness * positiveCoreRoom
-        : affect * negativeResponsiveness * emotionalEncoding;
-    const localAffectForAcceptance = affect > 0
-        ? affect * positiveLearningFactor * responsiveness * positiveLocalRoom
-        : affect * negativeResponsiveness * emotionalEncoding;
+    const coreAffectForAcceptance = baseAffect > 0
+        ? baseAffect * positiveLearningFactor * responsiveness * positiveCoreRoom
+        : baseAffect * negativeResponsiveness * emotionalEncoding;
+    const localAffectForAcceptance = baseAffect > 0
+        ? baseAffect * positiveLearningFactor * responsiveness * positiveLocalRoom
+        : baseAffect * negativeResponsiveness * emotionalEncoding;
 
     const nextCore: SubjectCoreState = {
         tension: nextTension,
         sensitivity: applySoftPositiveGain(
             safeCore.sensitivity,
-            (coreSensitization - coreDesensitization + coreRecovery) * tensionModifier
+            (coreSensitization - effectiveCoreDesensitization + coreRecovery) * tensionModifier
         ),
         capacity: clamp(
             safeCore.capacity - capacityLoss,

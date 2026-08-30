@@ -3083,6 +3083,24 @@
     "description": "Локальная чувствительность зоны упала до минимума: зона почти не ощущает воздействие."
   },
   {
+    "id": "effect_situational_acceptance",
+    "name": "Ситуативное принятие",
+    "categories": [
+      "condition"
+    ],
+    "tags": [
+      "condition",
+      "acceptance",
+      "arousal"
+    ],
+    "contextConfig": {
+      "type": "condition",
+      "duration": -1,
+      "occupiesPoints": []
+    },
+    "description": "Близость к оргазму временно повышает принятие интимного контакта: тело «соглашается», даже если зона изначально не принята. Не сохраняется в обучении."
+  },
+  {
     "id": "effect_refractory",
     "name": "Рефрактерный период",
     "categories": [

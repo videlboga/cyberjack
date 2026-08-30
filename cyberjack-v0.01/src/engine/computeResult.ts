@@ -39,7 +39,17 @@ export function computeResult(
         100
     );
 
-    const attitudeShift = (effectiveAttitude - 50) / 50;
+    // Ситуативное принятие: при близости к оргазму тело временно «соглашается»
+    // с интимным контактом, даже если зона изначально не принята. Буст влияет
+    // только на текущую реакцию (valence/pleasure/discomfort), но НЕ сохраняется
+    // в localAttitude — обучение идёт по базовому значению (baseFinalValence).
+    const saCfg = f.situationalAcceptance || { tensionStart: 85, maxBoost: 30 };
+    const situationalBoost = isIntimateAction
+        ? clamp((safeCore.tension - saCfg.tensionStart) / Math.max(100 - saCfg.tensionStart, 0.001), 0, 1) * saCfg.maxBoost
+        : 0;
+    const boostedEffectiveAttitude = clamp(effectiveAttitude + situationalBoost, 0, 100);
+
+    const attitudeShift = (boostedEffectiveAttitude - 50) / 50;
     const attitudePower = Math.sign(attitudeShift) * Math.pow(Math.abs(attitudeShift), f.attitude.shiftPow);
     // A character can be generally open yet feel differently about intimate
     // contact with a particular person. Keep this influence scoped to intimate
@@ -65,6 +75,16 @@ export function computeResult(
 
     const finalValence = clamp(
         safeAction.valence + attitudePower * f.attitude.shiftMultiplier + intimateRelationBias,
+        -1,
+        1
+    );
+
+    // Базовая валентность без ситуативного буста — по ней идёт обучение
+    // localAttitude, чтобы временный буст не «закреплял» принятие навсегда.
+    const baseAttitudeShift = (effectiveAttitude - 50) / 50;
+    const baseAttitudePower = Math.sign(baseAttitudeShift) * Math.pow(Math.abs(baseAttitudeShift), f.attitude.shiftPow);
+    const baseFinalValence = clamp(
+        safeAction.valence + baseAttitudePower * f.attitude.shiftMultiplier + intimateRelationBias,
         -1,
         1
     );
@@ -159,6 +179,7 @@ export function computeResult(
         effectiveAttitude,
         attitudeShift,
         finalValence,
+        baseFinalValence,
         experiencedIntensity,
         pleasure,
         discomfort,
