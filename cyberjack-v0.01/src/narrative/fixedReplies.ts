@@ -1,24 +1,28 @@
 import type { ReactionFrame } from './reactionFrame';
 
 /**
- * Матрица фиксированных реплик для физиологических состояний.
+ * Матрица фиксированных реплик для типовых состояний.
  *
- * Ядро сводит каждый тик к малому числу «драматических позиций»
- * (physiologicalEvent × affect). Большинство физиологических реакций
- * (оргазм, срыв, перегрузка, удержание у грани, истощение) формульны и
- * повторяются у модели — их озвучивает матрица заготовок.
+ * Ядро сводит каждый тик к малому числу «драматических позиций». Матрица
+ * озвучивает два класса формульных реакций, где модель зацикливается:
+ *
+ *   1. Физиология (event:) — оргазм, срыв, перегрузка, удержание у грани,
+ *      истощение. Короткие выкрики, где нечего генерировать.
+ *
+ *   2. Повторяющееся обычное действие (repeat:) — то самое «третье поглаживание
+ *      шеи подряд», где модель выдаёт дословный повтор. Здесь нужны живые,
+ *      развивающиеся реплики: персонаж замечает повтор, привыкает, реагирует
+ *      глубже или начинает уставать.
  *
  * LLM остаётся как escape-hatch для случаев, где нужен конкретный смысл:
  *   - наблюдатель (видит чужую реакцию, а не свою);
  *   - незавершённые темы (вопрос/обещание);
  *   - доминирующая компульсия (сложный внутренний конфликт);
- *   - задан вопрос (нужен ответ, а не выкрик).
+ *   - задан вопрос (нужен ответ, а не выкрик);
+ *   - вербальное действие (contact = none) — это разговор, не физика;
+ *   - социальные акты (граница/торг/вызов/предупреждение) — всегда.
  *
- * Социальные акты (граница/торг/вызов/предупреждение) всегда генерируются:
- * они по определению про отношения и конкретный смысл.
- *
- * Ключ матрицы — свёрнутый frame (event × affect × gender), а не сырые
- * action×state. Все 24 ячейки заполнены живыми репликами.
+ * Ключ матрицы — свёрнутый frame, а не сырые action×state.
  */
 
 type Gender = 'female' | 'male' | 'other';
@@ -29,11 +33,22 @@ type EventKey = {
     gender: Gender;
 };
 
+type RepeatKey = {
+    valence: 'positive' | 'negative' | 'mixed';
+    /** 2 = повтор 2–3, 4 = повтор 4+ (усталость/привыкание). */
+    tier: '2' | '4';
+    gender: Gender;
+};
+
 /**
  * Реплики — только произносимые слова, без кавычек, ремарок и описаний.
  * Каждая ячейка — массив вариаций; выбор детерминирован (см. selectFixedReply).
  */
 const MATRIX: Record<string, string[]> = {
+    // ════════════════════════════════════════════════════════════════════
+    // ФИЗИОЛОГИЯ (event:)
+    // ════════════════════════════════════════════════════════════════════
+
     // ── Оргазм (discharge) ────────────────────────────────────────────────
     'discharge:positive:female': [
         'Ах… не могу… не могу больше…',
@@ -354,10 +369,100 @@ const MATRIX: Record<string, string[]> = {
         'Не могу… всё плывёт…',
         'Сил нет… не понимаю…',
     ],
+
+    // ════════════════════════════════════════════════════════════════════
+    // ПОВТОРЯЮЩЕЕСЯ ОБЫЧНОЕ ДЕЙСТВИЕ (repeat:)
+    // ════════════════════════════════════════════════════════════════════
+
+    // ── Повтор 2–3, положительный отклик ──────────────────────────────────
+    'repeat:positive:2:female': [
+        'Снова… мне это нравится.',
+        'Ты опять… и я не против.',
+        'Ещё раз… так хорошо.',
+        'Мне нравится, когда ты так делаешь.',
+        'Продолжай… мне приятно.',
+        'Твои руки… я уже жду этого.',
+    ],
+    'repeat:positive:2:male': [
+        'Снова… мне это нравится.',
+        'Ты опять… и я не против.',
+        'Ещё раз… так хорошо.',
+        'Мне нравится, когда ты так делаешь.',
+    ],
+    'repeat:positive:4:female': [
+        'Ты не устаёшь… а я уже привыкаю.',
+        'Снова и снова… я тону в этом.',
+        'Я уже жду твоего прикосновения.',
+        'Каждый раз… всё глубже.',
+        'Ты знаешь, что мне это нравится…',
+        'Не останавливайся… я привыкла.',
+    ],
+    'repeat:positive:4:male': [
+        'Ты не устаёшь… а я уже привыкаю.',
+        'Снова и снова… я тону в этом.',
+        'Я уже жду твоего прикосновения.',
+        'Каждый раз… всё глубже.',
+    ],
+
+    // ── Повтор 2–3, отрицательный отклик ─────────────────────────────────
+    'repeat:negative:2:female': [
+        'Опять… мне это не нравится.',
+        'Ты снова… хватит.',
+        'Я уже поняла… не надо.',
+        'Перестань повторять одно и то же.',
+        'Мне неприятно… и ты это знаешь.',
+    ],
+    'repeat:negative:2:male': [
+        'Опять… мне это не нравится.',
+        'Ты снова… хватит.',
+        'Я уже понял… не надо.',
+        'Перестань повторять одно и то же.',
+    ],
+    'repeat:negative:4:female': [
+        'Сколько можно… я устала.',
+        'Ты не слышишь меня… хватит.',
+        'Опять и опять… я не выдержу.',
+        'Я уже просила… перестань.',
+        'Это невыносимо… прекрати.',
+    ],
+    'repeat:negative:4:male': [
+        'Сколько можно… я устал.',
+        'Ты не слышишь меня… хватит.',
+        'Опять и опять… я не выдержу.',
+        'Я уже просил… перестань.',
+    ],
+
+    // ── Повтор 2–3, смешанный отклик ─────────────────────────────────────
+    'repeat:mixed:2:female': [
+        'Снова… я не знаю, что чувствую.',
+        'Опять… и приятно, и странно.',
+        'Ты повторяешь… а я теряюсь.',
+        'Не пойму… нравится или нет.',
+    ],
+    'repeat:mixed:2:male': [
+        'Снова… я не знаю, что чувствую.',
+        'Опять… и приятно, и странно.',
+        'Ты повторяешь… а я теряюсь.',
+    ],
+    'repeat:mixed:4:female': [
+        'Снова и снова… я уже не понимаю себя.',
+        'Ты не останавливаешься… а я запуталась.',
+        'Каждый раз… и я всё больше теряюсь.',
+        'Я привыкаю… но не знаю, хорошо ли это.',
+    ],
+    'repeat:mixed:4:male': [
+        'Снова и снова… я уже не понимаю себя.',
+        'Ты не останавливаешься… а я запутался.',
+        'Каждый раз… и я всё больше теряюсь.',
+    ],
 };
 
-function matrixKey(key: EventKey): string {
+function eventMatrixKey(key: EventKey): string {
     return `${key.event}:${key.affect}:${key.gender}`;
+}
+
+function repeatMatrixKey(key: RepeatKey): string {
+    return `repeat:${key.valence}:${key.tier}:${key.gender}`;
 }
 
 /** Сводит affect frame к одному из четырёх ключей матрицы. */
@@ -380,6 +485,14 @@ function eventKey(frame: ReactionFrame): EventKey['event'] {
     return 'minimal';
 }
 
+/** Сводит affect к valence для repeat-среза. */
+function repeatValence(frame: ReactionFrame): RepeatKey['valence'] {
+    const affect = frame.expressionMode.affect;
+    if (affect === 'negative') return 'negative';
+    if (affect === 'mixed' || affect === 'overload') return 'mixed';
+    return 'positive';
+}
+
 const PHYSIOLOGY_EVENTS = new Set(['discharge', 'breakdown', 'overload', 'peak', 'edge']);
 
 /**
@@ -388,14 +501,16 @@ const PHYSIOLOGY_EVENTS = new Set(['discharge', 'breakdown', 'overload', 'peak',
  *
  * Фиксируем:
  *   - истощение (control = minimal) — физически не может говорить сложно;
- *   - физиологию (оргазм/срыв/перегрузка/у грани) — по умолчанию, если нет
- *     сигнала «нужен конкретный смысл».
+ *   - физиологию (оргазм/срыв/перегрузка/у грани) — по умолчанию;
+ *   - повторяющееся физическое действие (contact != none, repetition >= 2) —
+ *     то самое «третье поглаживание», где модель зацикливается.
  *
  * Оставляем LLM (escape-hatch):
- *   - наблюдатель (не directlyExperienced) — видит чужую реакцию;
- *   - незавершённые темы (вопрос/обещание) — нужен конкретный ответ;
- *   - доминирующая компульсия (level 3) — сложный внутренний конфликт;
- *   - задан вопрос — нужен ответ, а не выкрик;
+ *   - наблюдатель (не directlyExperienced);
+ *   - незавершённые темы (вопрос/обещание);
+ *   - доминирующая компульсия (level 3);
+ *   - задан вопрос;
+ *   - вербальное действие (contact = none) — это разговор;
  *   - социальные акты (граница/торг/вызов/предупреждение) — всегда.
  */
 export function shouldUseFixedReply(frame: ReactionFrame): boolean {
@@ -406,21 +521,33 @@ export function shouldUseFixedReply(frame: ReactionFrame): boolean {
     if (control === 'minimal') return true;
 
     // Только физиология (не социальные акты, не разговор).
-    if (!PHYSIOLOGY_EVENTS.has(phys)) return false;
+    if (PHYSIOLOGY_EVENTS.has(phys)) {
+        // Наблюдатель — нужен конкретный смысл.
+        if (!frame.event.directlyExperienced) return false;
+        // Незавершённые темы — нужен конкретный ответ.
+        if (frame.continuity.openThreads?.length) return false;
+        // Доминирующая компульсия — сложный внутренний конфликт.
+        if (frame.compulsions?.some(c => c.level === 3)) return false;
+        // Задан вопрос — нужен ответ.
+        if (frame.event.playerSpeech?.trim().endsWith('?')) return false;
+        return true;
+    }
 
-    // Наблюдатель — нужен конкретный смысл.
-    if (!frame.event.directlyExperienced) return false;
+    // Повторяющееся физическое действие (не вербальное, не социальный акт).
+    const repetition = frame.event.repetition ?? 1;
+    if (repetition >= 2 && frame.event.contact && frame.event.contact !== 'none') {
+        // Наблюдатель — нужен конкретный смысл.
+        if (!frame.event.directlyExperienced) return false;
+        // Незавершённые темы — нужен конкретный ответ.
+        if (frame.continuity.openThreads?.length) return false;
+        // Доминирующая компульсия — сложный внутренний конфликт.
+        if (frame.compulsions?.some(c => c.level === 3)) return false;
+        // Задан вопрос — нужен ответ.
+        if (frame.event.playerSpeech?.trim().endsWith('?')) return false;
+        return true;
+    }
 
-    // Незавершённые темы — нужен конкретный ответ.
-    if (frame.continuity.openThreads?.length) return false;
-
-    // Доминирующая компульсия — сложный внутренний конфликт.
-    if (frame.compulsions?.some(c => c.level === 3)) return false;
-
-    // Задан вопрос — нужен ответ.
-    if (frame.event.playerSpeech?.trim().endsWith('?')) return false;
-
-    return true;
+    return false;
 }
 
 // Последняя выбранная вариация на говорящего — чтобы не повторять подряд.
@@ -434,21 +561,9 @@ function hashString(value: string): number {
     return Math.abs(hash);
 }
 
-/**
- * Выбирает фиксированную реплику по frame, либо null, если для этого состояния
- * заготовки нет (тогда вызывающий идёт в LLM).
- */
-export function selectFixedReply(frame: ReactionFrame): string | null {
-    const key: EventKey = {
-        event: eventKey(frame),
-        affect: affectKey(frame),
-        gender: frame.speaker.gender || 'other',
-    };
-    const variants = MATRIX[matrixKey(key)];
-    if (!variants || variants.length === 0) return null;
-
+function pickVariation(variants: string[], frame: ReactionFrame, seedKey: string): string {
     const speakerId = frame.speaker.id;
-    const seed = hashString(`${speakerId}:${frame.event.repetition ?? 1}:${key.event}`);
+    const seed = hashString(`${speakerId}:${frame.event.repetition ?? 1}:${seedKey}`);
     const previous = lastVariation.get(speakerId);
     let index = seed % variants.length;
     // Не повторять ту же вариацию подряд, если есть альтернатива.
@@ -457,6 +572,39 @@ export function selectFixedReply(frame: ReactionFrame): string | null {
     }
     lastVariation.set(speakerId, index);
     return variants[index];
+}
+
+/**
+ * Выбирает фиксированную реплику по frame, либо null, если для этого состояния
+ * заготовки нет (тогда вызывающий идёт в LLM).
+ */
+export function selectFixedReply(frame: ReactionFrame): string | null {
+    const gender = frame.speaker.gender || 'other';
+    const phys = frame.event.physiologicalEvent;
+    const repetition = frame.event.repetition ?? 1;
+
+    // Повторяющееся физическое действие — отдельный срез.
+    if (!PHYSIOLOGY_EVENTS.has(phys) && repetition >= 2 && frame.event.contact && frame.event.contact !== 'none') {
+        const key: RepeatKey = {
+            valence: repeatValence(frame),
+            tier: repetition >= 4 ? '4' : '2',
+            gender,
+        };
+        const variants = MATRIX[repeatMatrixKey(key)];
+        if (variants && variants.length) return pickVariation(variants, frame, `repeat:${key.valence}:${key.tier}`);
+    }
+
+    const key: EventKey = {
+        event: eventKey(frame),
+        affect: affectKey(frame),
+        gender,
+    };
+    // 'minimal' в матрице означает истощение (control=minimal), а не обычное
+    // состояние. При normal + intact/mixed control заготовки нет — это LLM.
+    if (key.event === 'minimal' && frame.expressionMode.control !== 'minimal') return null;
+    const variants = MATRIX[eventMatrixKey(key)];
+    if (!variants || variants.length === 0) return null;
+    return pickVariation(variants, frame, key.event);
 }
 
 /** Test hook: сбрасывает карту последних вариаций. */

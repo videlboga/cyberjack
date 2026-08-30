@@ -79,6 +79,65 @@ describe('fixedReplies gate', () => {
         expect(shouldUseFixedReply(frame())).toBe(false);
     });
 
+    // ── Повторяющееся физическое действие (repeat:) ────────────────────────
+
+    it('uses fixed reply for repeated physical action (repetition >= 2)', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 2, contact: 'partial' },
+            expressionMode: { ...frame().expressionMode, affect: 'positive' },
+        });
+        expect(shouldUseFixedReply(f)).toBe(true);
+    });
+
+    it('does NOT use fixed reply for a single physical action (repetition 1)', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 1, contact: 'partial' },
+            expressionMode: { ...frame().expressionMode, affect: 'positive' },
+        });
+        expect(shouldUseFixedReply(f)).toBe(false);
+    });
+
+    it('does NOT use fixed reply for verbal action (contact none)', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 3, contact: 'none' },
+        });
+        expect(shouldUseFixedReply(f)).toBe(false);
+    });
+
+    it('returns a non-empty reply for repeated positive action', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 2, contact: 'partial' },
+            expressionMode: { ...frame().expressionMode, affect: 'positive' },
+        });
+        const reply = selectFixedReply(f);
+        expect(reply).toBeTruthy();
+        expect(typeof reply).toBe('string');
+    });
+
+    it('returns a non-empty reply for repeated negative action at tier 4', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 5, contact: 'full' },
+            expressionMode: { ...frame().expressionMode, affect: 'negative' },
+        });
+        const reply = selectFixedReply(f);
+        expect(reply).toBeTruthy();
+    });
+
+    it('fills every repeat cell (valence × tier, female)', () => {
+        const valences = ['positive', 'negative', 'mixed'] as const;
+        const tiers = [2, 4] as const;
+        for (const valence of valences) {
+            for (const tier of tiers) {
+                const f = frame({
+                    event: { ...frame().event, repetition: tier, contact: 'partial' },
+                    expressionMode: { ...frame().expressionMode, affect: valence },
+                });
+                const reply = selectFixedReply(f);
+                expect(reply, `repeat ${valence} × ${tier} should have a reply`).toBeTruthy();
+            }
+        }
+    });
+
     // ── Выбор реплики ──────────────────────────────────────────────────────
 
     it('returns a non-empty reply for discharge', () => {

@@ -64,6 +64,7 @@ export interface ReactionFrame {
         repetition: number;
         directlyExperienced: boolean;
         affectedCharacter: string;
+        contact?: 'none' | 'partial' | 'full' | 'forced';
         playerSpeech?: string;
         commandOutcome?: {
             status: 'performed' | 'not_performed';
@@ -645,6 +646,7 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
             repetition: input.repetition ?? 1,
             directlyExperienced,
             affectedCharacter: input.targetName,
+            contact: input.observation?.contact,
             sensoryVariant: input.sensoryVariant,
         },
         continuity: {
