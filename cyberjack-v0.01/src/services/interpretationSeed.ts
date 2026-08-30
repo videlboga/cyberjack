@@ -65,7 +65,9 @@ export function ensureInterpretationTree(subjectId: string) {
     const upsert = (id: string, kind: string, parentId: string | null, label: string) => {
         const existing = interpretationRepo.get(subjectId, id);
         if (existing) return;
-        interpretationRepo.upsert({ id, subjectId, kind: kind as any, parentId, label, content: null, sourceText: null, valence: 0, strength: 0, fingerprint: null });
+        // Каркас создаётся dirty, чтобы сконсолидировался ОДИН раз при первом
+        // проходе (biography/world_knowledge — изначальные, дальше заморожены).
+        interpretationRepo.upsert({ id, subjectId, kind: kind as any, parentId, label, content: null, sourceText: null, valence: 0, strength: 0, fingerprint: null, status: 'dirty' });
     };
     upsert('worldview', 'worldview', null, 'Сценарий жизни');
     // Изначальное (неизменяемое).
@@ -124,6 +126,7 @@ export function seedSubjectFacts(subjectId: string) {
                 valence: 0,
                 strength: 0,
                 fingerprint: null,
+                status: 'dirty',
             });
         }
     });
