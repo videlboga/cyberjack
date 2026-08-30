@@ -30,14 +30,14 @@ export interface AssociationSignal {
 }
 
 /** Создаёт/обновляет episode-ноду и возвращает её id. */
-function ensureEpisodeNode(subjectId: string, episodeId: number, title: string, text: string, sourceText: string): string {
+function ensureEpisodeNode(subjectId: string, episodeId: number, title: string, text: string, sourceText: string, parentId: string): string {
     const id = `episode:${episodeId}`;
     const existing = interpretationRepo.get(subjectId, id);
     interpretationRepo.upsert({
         id,
         subjectId,
         kind: 'episode',
-        parentId: null, // эпизод висит на родителях через кросс-линки
+        parentId, // эпизод встроен в дерево: под rel:<person> или под world
         label: title || `Эпизод ${episodeId}`,
         content: text,
         sourceText: sourceText || text,
@@ -59,7 +59,13 @@ export function propagateEpisode(
     sourceText?: string,
 ): { touched: string[]; deltas: Map<string, number> } {
     ensureInterpretationTree(subjectId);
-    const episodeNodeId = ensureEpisodeNode(subjectId, episodeId, title, text, sourceText || text);
+    // Эпизод встраивается в дерево: если есть person-ассоциация — под самым
+    // сильным rel:<person>, иначе под ветвью world (событие/одиночный опыт).
+    const strongestPerson = associations
+        .filter(assoc => assoc.type === 'person')
+        .sort((a, b) => Math.abs(b.valence) * b.strength - Math.abs(a.valence) * a.strength)[0];
+    const episodeParent = strongestPerson ? `rel:${strongestPerson.key}` : 'world';
+    const episodeNodeId = ensureEpisodeNode(subjectId, episodeId, title, text, sourceText || text, episodeParent);
 
     const deltas = new Map<string, number>();
     const touched: string[] = [];
@@ -70,14 +76,14 @@ export function propagateEpisode(
 
     for (const assoc of associations) {
         if (assoc.type === 'person') {
-            // rel:<person>
+            // rel:<person> под ветвью others.
             const relId = `rel:${assoc.key}`;
-            ensureNode(subjectId, relId, 'relationships', 'relationships', assoc.label);
+            ensureNode(subjectId, relId, 'relationships', 'others', assoc.label);
             addDelta(relId, assoc.valence * assoc.strength);
             // кросс-линк эпизод → rel
             link(subjectId, episodeNodeId, relId, 'evidence', Math.abs(assoc.valence) * assoc.strength);
         }
-        // tag-ассоциации → trait:<tag>
+        // tag-ассоциации → trait:<tag> под self.
         for (const tag of assoc.tagLinks) {
             if (!/^[a-z0-9_-]+$/i.test(tag)) continue;
             const traitId = `trait:${tag}`;

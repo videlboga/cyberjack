@@ -3402,7 +3402,7 @@ function MentalChairControlScreen({
     }
     if (node.kind === 'episode') return node.label || 'Эпизод';
     if (node.kind === 'relationships' && node.id.startsWith('rel:')) return node.label || node.id.slice(4);
-    if (node.kind === 'station' && node.id.startsWith('station:')) return node.label || node.id.slice(8);
+    if (node.kind === 'world_knowledge' && node.id.startsWith('world_knowledge:')) return node.label || node.id.slice('world_knowledge:'.length);
     return node.label;
   };
   // Перенос метки на строки с ограничением ширины (maxChars на строку, ≤2 строки).

@@ -1420,6 +1420,10 @@ html[data-ui-theme="manga2"] .campaign-shell .mind-node.worldview .mind-node-pil
 html[data-ui-theme="manga2"] .campaign-shell .mind-node.relationships .mind-node-pill,
 html[data-ui-theme="manga2"] .campaign-shell .mind-node.biography .mind-node-pill,
 html[data-ui-theme="manga2"] .campaign-shell .mind-node.station .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.world_knowledge .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.accumulated .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.others .mind-node-pill,
+html[data-ui-theme="manga2"] .campaign-shell .mind-node.world .mind-node-pill,
 html[data-ui-theme="manga2"] .campaign-shell .mind-node.self .mind-node-pill {
   fill: #f0f0f0 !important;
 }

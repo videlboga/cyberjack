@@ -46,10 +46,13 @@ function buildRegenerationPrompt(subjectId: string, node: InterpretationNode, ch
 
     const kindHint: Record<string, string> = {
         worldview: 'общий взгляд на мир и на себя (сценарий жизни)',
-        relationships: 'отношение к конкретному человеку',
         biography: 'интерпретация темы собственной биографии',
-        station: 'понимание аспекта станции',
+        world_knowledge: 'изначальное понимание аспекта мира',
+        accumulated: 'накопленное понимание (сводка)',
         self: 'отношение к себе',
+        others: 'отношение к другим людям',
+        world: 'понимание мира по новым событиям',
+        relationships: 'отношение к конкретному человеку',
         trait: 'понимание собственного обучения/склонности',
         episode: 'интерпретация эпизода',
     };
@@ -82,8 +85,8 @@ export async function consolidateNextInterpretation(): Promise<boolean> {
         const subjectId = subjects[0].subject_id;
         const dirty = interpretationRepo.listForSubject(subjectId).filter(node => node.status === 'dirty' || !node.content);
 
-        // Листья (episode/trait/rel) раньше родителей (self/relationships/worldview).
-        const leafFirst = ['episode', 'trait', 'rel', 'station', 'biography', 'self', 'relationships', 'worldview'];
+        // Листья (episode/trait/rel) раньше родителей (self/others/world/accumulated/worldview).
+        const leafFirst = ['episode', 'trait', 'rel', 'world_knowledge', 'biography', 'self', 'others', 'world', 'accumulated', 'worldview'];
         dirty.sort((a, b) => leafFirst.indexOf(a.kind) - leafFirst.indexOf(b.kind));
         const node = dirty[0];
         if (!node) return false;

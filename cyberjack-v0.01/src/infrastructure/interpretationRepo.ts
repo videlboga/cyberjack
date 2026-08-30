@@ -8,10 +8,14 @@ import { db } from './db';
 
 export type InterpretationKind =
     | 'worldview'
-    | 'relationships'
     | 'biography'
-    | 'station'
+    | 'world_knowledge'
+    | 'accumulated'
     | 'self'
+    | 'others'
+    | 'world'
+    | 'relationships'
+    | 'station'
     | 'trait'
     | 'episode';
 
