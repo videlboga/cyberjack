@@ -13,6 +13,7 @@ export function computeResult(
     point: Partial<SubjectPointState>,
     config: EngineConfig = DEFAULT_CONFIG,
     relationship?: Pick<CharacterRelation, 'attitude' | 'openness' | 'plasticity' | 'familiarityLevel'>,
+    edgeHoldMinutes: number = 0,
 ): { result: TickResult; tickMeta: TickMeta } {
     validateConfig(config);
     const safeAction = normalizeAction(action, config);
@@ -40,13 +41,14 @@ export function computeResult(
     );
 
     // Ситуативное принятие: при близости к оргазму тело временно «соглашается»
-    // с интимным контактом, даже если зона изначально не принята. Буст влияет
-    // только на текущую реакцию (valence/pleasure/discomfort), но НЕ сохраняется
-    // в localAttitude — обучение идёт по базовому значению (baseFinalValence).
-    const saCfg = f.situationalAcceptance || { tensionStart: 85, maxBoost: 30 };
-    const situationalBoost = isIntimateAction
-        ? clamp((safeCore.tension - saCfg.tensionStart) / Math.max(100 - saCfg.tensionStart, 0.001), 0, 1) * saCfg.maxBoost
-        : 0;
+    // с контактом, даже если зона изначально не принята. Буст растёт линейно
+    // с длительностью удержания на грани (эджинг) и применяется ко всем точкам.
+    // Влияет только на текущую реакцию (valence/pleasure/discomfort), но НЕ
+    // сохраняется в localAttitude — обучение идёт по базовому значению.
+    const saCfg = f.situationalAcceptance || { tensionStart: 85, maxBoost: 120, edgeHoldMaxMinutes: 120 };
+    const tensionFactor = clamp((safeCore.tension - saCfg.tensionStart) / Math.max(100 - saCfg.tensionStart, 0.001), 0, 1);
+    const timeFactor = clamp(edgeHoldMinutes / Math.max(saCfg.edgeHoldMaxMinutes, 0.001), 0, 1);
+    const situationalBoost = tensionFactor * timeFactor * saCfg.maxBoost;
     const boostedEffectiveAttitude = clamp(effectiveAttitude + situationalBoost, 0, 100);
 
     const attitudeShift = (boostedEffectiveAttitude - 50) / 50;

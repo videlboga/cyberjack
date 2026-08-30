@@ -6,7 +6,7 @@ import { commitTickOutcome } from './commitTickOutcome';
 import { publishTickOutcome } from './publishTickOutcome';
 import type { TickEffect } from './tickEffectPlan';
 import { eventQueries } from '../infrastructure/eventQueries';
-import { activeContextsRepo, sceneRepo, presetRepo } from '../infrastructure/repositories';
+import { activeContextsRepo, sceneRepo, presetRepo, subjectEdgeStateRepo } from '../infrastructure/repositories';
 import { CompiledAction, TickBundle, GameEvent, DynamicModifiers } from '../domain/types';
 import type { DeviceSessionMetadata } from '../domain/sessionMetadata';
 import { buildDiagnostics } from '../diagnostics/buildDiagnostics';
@@ -32,7 +32,7 @@ import { DEFAULT_CONFIG } from '../engine/config';
 import { dampTowardsBaseline, advanceBaseline } from '../engine/baselineUtils';
 import { clamp } from '../engine/utils';
 import { resolveLaboratoryMove } from '../scenario/resolveLaboratoryMove';
-import { deriveEdgeProfile } from '../domain/edgeState';
+import { deriveEdgeProfile, edgeHoldMinutes } from '../domain/edgeState';
 import { requestedStanceFromReaction } from '../domain/interactionStance';
 import { interactionStanceRepo } from '../infrastructure/interactionStanceRepo';
 import { resolvePortraitEmotion } from '../domain/portraitEmotion';
@@ -163,6 +163,8 @@ async function runGameTickInner(payload: GameEventPayload, requestId: string): P
 
     // 5. Run Engine Tick
     const stateDeltaScale = clamp(Number(payload.stateDeltaScale ?? 1), 0, 1);
+    const edgeWorldMinute = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
+    const edgeHold = edgeHoldMinutes(subjectEdgeStateRepo.get(payload.subjectId), edgeWorldMinute);
     let engineOutput = computeTickOutcome({
         subjectId: payload.subjectId,
         pointId: payload.pointId,
@@ -171,7 +173,8 @@ async function runGameTickInner(payload: GameEventPayload, requestId: string): P
         point: state.point,
         relationship: state.relation,
         config: undefined,
-        deltaTime: elapsedTime
+        deltaTime: elapsedTime,
+        edgeHoldMinutes: edgeHold,
     }, stateDeltaScale);
 
     const wasUnresponsive = allContexts.some(context =>

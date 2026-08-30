@@ -223,6 +223,8 @@ export interface TickInput {
     relationship?: Pick<CharacterRelation, 'attitude' | 'openness' | 'plasticity' | 'familiarityLevel'>;
     config?: EngineConfig;
     deltaTime?: number;
+    /** Минут удержания на грани (эджинг) — для ситуативного буста принятия. */
+    edgeHoldMinutes?: number;
 }
 
 export interface TickResult {
