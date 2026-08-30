@@ -49,12 +49,13 @@ export interface ExpressionMode {
 }
 
 export interface ReactionFrame {
-    speaker: { id: string; name: string; gender?: 'male' | 'female' | 'other'; role: string; core: BehavioralCore };
-    addressee?: { id: string; name: string; relationship: string };
+    speaker: { id: string; name: string; gender?: 'male' | 'female' | 'other'; role: string; core: BehavioralCore; state?: { attitude: number; openness: number; tension: number; capacity: number } };
+    addressee?: { id: string; name: string; relationship: string; relation?: { attitude: number; openness: number; familiarity: number } };
     scene: { title?: string; presentCharacters: string[]; contexts: string[]; roleContext: string[] };
     event: {
         action: string;
         target: string;
+        pointId?: string;
         experience: string;
         changes: string[];
         physiologicalState: string;
@@ -138,6 +139,7 @@ interface CompileFrameInput {
     observation?: InteractionObservation;
     actionLabel?: string;
     pointLabel?: string;
+    pointId?: string;
     repetition?: number;
     edgeHoldMinutes?: number;
     profileText?: string;
@@ -633,12 +635,13 @@ export function compileReactionFrame(input: CompileFrameInput): ReactionFrame {
     const addresseeId = input.initiatorId || input.targetId;
     const addresseeName = input.initiatorName || input.targetName;
     return {
-        speaker: { id: input.speakerId, name: input.speakerName, gender: input.speakerGender, role: directlyExperienced ? 'цель воздействия' : 'участник сцены', core: behavioral },
-        addressee: addresseeId === input.speakerId ? undefined : { id: addresseeId, name: addresseeName, relationship: relationText(input.relation) },
+        speaker: { id: input.speakerId, name: input.speakerName, gender: input.speakerGender, role: directlyExperienced ? 'цель воздействия' : 'участник сцены', core: behavioral, state: { attitude: input.core.attitude, openness: input.core.openness, tension: input.core.tension, capacity: input.core.capacity } },
+        addressee: addresseeId === input.speakerId ? undefined : { id: addresseeId, name: addresseeName, relationship: relationText(input.relation), relation: input.relation ? { attitude: input.relation.attitude, openness: input.relation.openness ?? 0, familiarity: input.relation.familiarityLevel ?? 0 } : undefined },
         scene: { title: input.sceneTitle, presentCharacters: unique(input.presentCharacters, 8), contexts: unique(input.contexts, 8), roleContext: unique(input.roleContext || [], 14) },
         event: {
             action: input.actionLabel || input.observation?.action.label || 'событие без ясного действия',
             target: input.pointLabel || input.observation?.action.pointLabel || input.observation?.action.pointId || 'не указана',
+            pointId: input.pointId || input.observation?.action.pointId,
             experience: experienceText(input.observation, directlyExperienced),
             changes: directlyExperienced ? changeLines(input.observation) : [],
             physiologicalState: physiology.state,

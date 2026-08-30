@@ -526,6 +526,7 @@ export async function buildPromptPayload(
         observation,
         actionLabel: latestResult?.tickMeta?.inputs?.action.label,
         pointLabel: currentPointLabel,
+        pointId: currentPointId,
         sensoryVariant: sensoryVariant || undefined,
         actionTags: currentActionTags,
         repetition: Math.min(repetitionFromLogs, exposureBeforeTick + 1),

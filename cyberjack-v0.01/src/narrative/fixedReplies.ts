@@ -1,4 +1,5 @@
 import type { ReactionFrame } from './reactionFrame';
+import { buildCombinatorialReply } from './combinatorialReplies';
 
 /**
  * Матрица фиксированных реплик для типовых состояний.
@@ -678,8 +679,11 @@ export function selectFixedReply(frame: ReactionFrame): string | null {
     const phys = frame.event.physiologicalEvent;
     const repetition = frame.event.repetition ?? 1;
 
-    // Повторяющееся физическое действие — отдельный срез.
+    // Повторяющееся физическое действие — комбинаторная сборка (точка ×
+    // отношение × параметры × повтор), затем плоская матрица как fallback.
     if (!PHYSIOLOGY_EVENTS.has(phys) && repetition >= 2 && frame.event.contact && frame.event.contact !== 'none') {
+        const combinatorial = buildCombinatorialReply(frame);
+        if (combinatorial) return combinatorial;
         const key: RepeatKey = {
             category: repeatCategory(frame),
             tier: repetition >= 4 ? '4' : '2',
