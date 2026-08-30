@@ -87,4 +87,57 @@ describe('fixedReplies gate', () => {
         // Same repetition seed → same base index, but anti-repeat bumps it.
         expect(first).not.toBe(second);
     });
+
+    // ── Акты (граница/предупреждение/вызов/торг) ──────────────────────────
+
+    it('uses fixed reply for set_boundary at repetition >= 3', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 3 },
+            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
+        });
+        expect(shouldUseFixedReply(f)).toBe(true);
+    });
+
+    it('uses fixed reply for set_boundary when control is not intact', () => {
+        const f = frame({
+            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
+            expressionMode: { ...frame().expressionMode, control: 'strained' },
+        });
+        expect(shouldUseFixedReply(f)).toBe(true);
+    });
+
+    it('does NOT use fixed reply for a fresh set_boundary with intact control', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 1 },
+            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
+        });
+        expect(shouldUseFixedReply(f)).toBe(false);
+    });
+
+    it('returns a non-empty reply for set_boundary', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 3 },
+            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'set_boundary' },
+        });
+        const reply = selectFixedReply(f);
+        expect(reply).toBeTruthy();
+        expect(typeof reply).toBe('string');
+    });
+
+    it('returns a non-empty reply for bargain', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 3 },
+            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'bargain' },
+        });
+        const reply = selectFixedReply(f);
+        expect(reply).toBeTruthy();
+    });
+
+    it('returns null for an act with no authored variants (probe)', () => {
+        const f = frame({
+            event: { ...frame().event, repetition: 3 },
+            dramaticPosition: { ...frame().dramaticPosition, preferredSpeechAct: 'probe' },
+        });
+        expect(selectFixedReply(f)).toBeNull();
+    });
 });
