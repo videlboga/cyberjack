@@ -23,6 +23,8 @@ import {
 import "./CampaignApp.css";
 import "./LaboratoryRooms.css";
 import "./Manga2Theme.css";
+import "./Station3D.css";
+import { Station3D } from "./Station3D";
 import { CharacterPortrait } from "./CharacterPortrait";
 import { memoryTagLabel } from "../domain/memoryTagLabels";
 import {
@@ -6391,275 +6393,108 @@ function ContainerConversation({
   );
 }
 
-const stationSectors = [
-  {
-    id: "eye",
-    index: "00",
-    short: "ОКО",
-    name: "Центр / Око",
-    authority: "Директорат",
-    status: "закрытый контур",
-    tone: "core",
-    description:
-      "Резонансный купол и главные лаборатории. Сюда поступают уже подготовленные активы; доступ к прямому контакту выдаётся только по корпоративным каналам.",
-    function: "Финальная передача, резонанс, высшая научная юрисдикция.",
-  },
-  {
-    id: "scholarium",
-    index: "01",
-    short: "СХОЛАРИУМ",
-    name: "Внутреннее кольцо",
-    authority: "Helix · Veil",
-    status: "контролируемый",
-    tone: "inner",
-    description:
-      "Залы метрик, сады плоти и административные кварталы. Здесь формируются заказы, протоколы и критерии пригодности активов.",
-    function: "Контракты, корпоративные связи, доступ к редким препаратам.",
-  },
-  {
-    id: "archive",
-    index: "02",
-    short: "АРХИВ",
-    name: "Срединное кольцо",
-    authority: "Continuum",
-    status: "доступен",
-    tone: "middle",
-    description:
-      "Логистический хаб и Великий Архив. Потоки снабжения, досье и старые записи сходятся здесь прежде, чем попасть во внутренние сектора.",
-    function: "Снабжение, учёт, архивные события и проверка происхождения.",
-  },
-  {
-    id: "cultivation",
-    index: "03",
-    short: "ИНКУБАЦИЯ",
-    name: "Внешние кольца",
-    authority: "Секторные управы",
-    status: "нестабильный",
-    tone: "outer",
-    description:
-      "Жилые и промышленные массивы большинства населения станции: гидропоника, ремонтные зоны, карго-узлы и серый рынок.",
-    function:
-      "Кандидаты, слухи, неформальные сделки и новые событийные цепочки.",
-  },
-  {
-    id: "perimeter",
-    index: "04",
-    short: "КОНТУР",
-    name: "Обшивка / Периметр",
-    authority: "Lattice",
-    status: "опасный",
-    tone: "danger",
-    description:
-      "Последняя физическая граница перед Аномалией. Гул корпуса, сбои пространства и ремонтные бригады, работающие на пределе.",
-    function:
-      "Редкие происшествия, аномальные сигналы и высокорисковые возможности.",
-  },
-] as const;
-
-function StationSchematic({
-  selectedSectorId,
-  compact = false,
+function buildStationPois({
+  contracts,
+  inbox,
+  shop,
+  onOpenInbox,
+  onOpenContracts,
+  onOpenSupply,
 }: {
-  selectedSectorId?: (typeof stationSectors)[number]["id"];
-  compact?: boolean;
+  contracts: Contract[];
+  inbox: DirectorEvent[];
+  shop: ShopOffer[];
+  onOpenInbox: () => void;
+  onOpenContracts: () => void;
+  onOpenSupply: () => void;
 }) {
-  const selectedIndex = stationSectors.findIndex(
-    (sector) => sector.id === selectedSectorId,
+  const availableContracts = contracts.filter(
+    (contract) => contract.state === "available",
   );
-  const ringClass = (id: string) => (id === selectedSectorId ? "selected" : "");
-  return (
-    <svg
-      className={`station-code-schematic ${compact ? "compact" : ""}`}
-      viewBox="0 0 160 90"
-      role="img"
-      aria-label="Техническая схема станции Омникрон"
-    >
-      <defs>
-        <pattern
-          id={`station-grid-${compact ? "compact" : "full"}`}
-          width="5"
-          height="5"
-          patternUnits="userSpaceOnUse"
-        >
-          <path d="M5 0H0V5" />
-        </pattern>
-        <radialGradient id={`station-core-${compact ? "compact" : "full"}`}>
-          <stop offset="0" stopColor="var(--ji-lcd)" stopOpacity=".55" />
-          <stop offset="1" stopColor="var(--ji-lcd)" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect
-        className="station-grid-plane"
-        width="160"
-        height="90"
-        fill={`url(#station-grid-${compact ? "compact" : "full"})`}
-      />
-      <g className="station-anomaly-field">
-        <path d="M2 13 Q21 2 38 12 T76 9 M3 78 Q25 66 43 79 T91 75 M118 4 Q136 16 157 8 M121 82 Q140 69 158 78" />
-        <circle cx="60" cy="45" r="44" />
-      </g>
-      <g className="station-transit-spokes">
-        {Array.from({ length: 16 }, (_, index) => {
-          const angle = (index / 16) * Math.PI * 2;
-          return (
-            <line
-              key={index}
-              x1={60 + Math.cos(angle) * 8}
-              y1={45 + Math.sin(angle) * 8}
-              x2={60 + Math.cos(angle) * 41}
-              y2={45 + Math.sin(angle) * 41}
-            />
-          );
-        })}
-      </g>
-      <g className={`station-code-ring perimeter ${ringClass("perimeter")}`}>
-        <circle cx="60" cy="45" r="41" />
-        <circle cx="60" cy="45" r="38.5" />
-      </g>
-      <g
-        className={`station-code-ring cultivation ${ringClass("cultivation")}`}
-      >
-        <circle cx="60" cy="45" r="33" />
-        <circle cx="60" cy="45" r="29.5" />
-      </g>
-      <g className={`station-code-ring archive ${ringClass("archive")}`}>
-        <circle cx="60" cy="45" r="25" />
-        <circle cx="60" cy="45" r="22" />
-      </g>
-      <g className={`station-code-ring scholarium ${ringClass("scholarium")}`}>
-        <circle cx="60" cy="45" r="17" />
-        <circle cx="60" cy="45" r="14" />
-      </g>
-      <g className={`station-code-ring eye ${ringClass("eye")}`}>
-        <circle
-          className="core-halo"
-          cx="60"
-          cy="45"
-          r="13"
-          fill={`url(#station-core-${compact ? "compact" : "full"})`}
-        />
-        <circle cx="60" cy="45" r="9" />
-        <circle cx="60" cy="45" r="4" />
-      </g>
-      <g className="station-module-nodes">
-        <rect
-          className={selectedIndex === 4 ? "selected" : ""}
-          x="55"
-          y="2.5"
-          width="10"
-          height="4"
-        />
-        <rect
-          x="84"
-          y="13"
-          width="7"
-          height="4"
-          transform="rotate(35 87.5 15)"
-        />
-        <rect
-          className={selectedIndex === 3 ? "selected" : ""}
-          x="91"
-          y="39"
-          width="8"
-          height="5"
-        />
-        <rect
-          x="80"
-          y="70"
-          width="8"
-          height="4"
-          transform="rotate(-32 84 72)"
-        />
-        <rect
-          className={selectedIndex === 2 ? "selected" : ""}
-          x="55"
-          y="76.5"
-          width="10"
-          height="5"
-        />
-        <rect x="28" y="69" width="8" height="4" transform="rotate(32 32 71)" />
-        <rect
-          className={selectedIndex === 1 ? "selected" : ""}
-          x="21"
-          y="42"
-          width="8"
-          height="5"
-        />
-        <rect
-          x="31"
-          y="15"
-          width="7"
-          height="4"
-          transform="rotate(-35 34.5 17)"
-        />
-      </g>
-      <g className="station-orbit-signals">
-        <circle cx="60" cy="45" r="35">
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            from="0 60 45"
-            to="360 60 45"
-            dur="18s"
-            repeatCount="indefinite"
-          />
-        </circle>
-        <circle cx="60" cy="45" r="27">
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            from="360 60 45"
-            to="0 60 45"
-            dur="13s"
-            repeatCount="indefinite"
-          />
-        </circle>
-      </g>
-      {!compact && (
-        <g className="station-schematic-labels">
-          <path d="M68 45H112" />
-          <text x="115" y="43">
-            00 · ОКО
-          </text>
-          <text className="secondary" x="115" y="48">
-            РЕЗОНАНСНЫЙ ЦЕНТР
-          </text>
-          <path d="M74 29L105 18H112" />
-          <text x="115" y="17">
-            01 · СХОЛАРИУМ
-          </text>
-          <text className="secondary" x="115" y="22">
-            КОРПОРАТИВНЫЙ КОНТУР
-          </text>
-          <path d="M80 57L104 65H112" />
-          <text x="115" y="64">
-            02 · АРХИВ
-          </text>
-          <text className="secondary" x="115" y="69">
-            ДАННЫЕ И ЛОГИСТИКА
-          </text>
-          <path d="M26 45H5" />
-          <text x="5" y="41">
-            03
-          </text>
-          <text className="secondary" x="5" y="47">
-            ИНКУБАЦИЯ
-          </text>
-          <path d="M25 21L7 11" />
-          <text x="5" y="7">
-            04 · КОНТУР
-          </text>
-        </g>
-      )}
-      <g className="station-calibrator-node">
-        <circle cx="66" cy="39" r="1.4" />
-        <path d="M68 38L75 33" />
-        <text x="76" y="32">
-          CY-17
-        </text>
-      </g>
-    </svg>
+  const activeContracts = contracts.filter(
+    (contract) => contract.state === "accepted",
   );
+  const contractFactions = Array.from(
+    new Set(availableContracts.map((c) => c.issuerId)),
+  );
+  const limitedOffers = shop.filter((offer) => offer.limited);
+
+  const pois: {
+    id: string;
+    name: string;
+    ring: string;
+    angle: number;
+    desc: string;
+    kind: "supply" | "faction" | "market" | "inbox";
+    factionId?: string;
+    badge?: number;
+    actions: { label: string; onClick: () => void }[];
+  }[] = [];
+
+  // Снабжение (срединное кольцо / архив).
+  pois.push({
+    id: "supply",
+    name: "Офис снабжения",
+    ring: "archive",
+    angle: 30,
+    desc: "Логистический узел станции: заказы, поставки и учёт расходных материалов.",
+    kind: "supply",
+    badge: shop.length,
+    actions: [
+      { label: "Открыть снабжение", onClick: onOpenSupply },
+    ],
+  });
+
+  // Входящие (личный канал — центр).
+  pois.push({
+    id: "inbox",
+    name: "Канал связи",
+    ring: "eye",
+    angle: 0,
+    desc: "Личный канал калибратора: запросы фракций, события и уведомления станции.",
+    kind: "inbox",
+    badge: inbox.length,
+    actions: [{ label: "Открыть входящие", onClick: onOpenInbox }],
+  });
+
+  // Фракции с доступными контрактами (внутреннее кольцо / схолариум).
+  const factionAngles: Record<string, number> = {
+    fac_veil: 150,
+    fac_helix: 90,
+    fac_continuum: 210,
+    fac_lattice: 270,
+    fac_core: 30,
+  };
+  contractFactions.forEach((factionId, index) => {
+    const factionContracts = availableContracts.filter(
+      (c) => c.issuerId === factionId,
+    );
+    pois.push({
+      id: `faction-${factionId}`,
+      name: factionName(factionId),
+      ring: "scholarium",
+      angle: factionAngles[factionId] ?? 30 + index * 60,
+      desc: `Доступно контрактов: ${factionContracts.length}.`,
+      kind: "faction",
+      factionId,
+      badge: factionContracts.length,
+      actions: [{ label: "К контрактам", onClick: onOpenContracts }],
+    });
+  });
+
+  // Чёрный рынок (внешнее кольцо / инкубация).
+  pois.push({
+    id: "blackmarket",
+    name: "Связной чёрного рынка",
+    ring: "cultivation",
+    angle: 270,
+    desc: "Неформальные сделки, слухи и кандидаты вне корпоративных каналов.",
+    kind: "market",
+    badge: limitedOffers.length || undefined,
+    actions: [{ label: "Открыть снабжение", onClick: onOpenSupply }],
+  });
+
+  return pois;
 }
 
 function SupplyView({
@@ -6734,36 +6569,20 @@ function SupplyView({
       <div className="station-command-body">
         {tab === "overview" ? (
           <section className="station-overview">
-            <div className="station-radial-panel">
-              <header>
-                <small>{t('game.ui.omnikron')}</small>
-                <strong>{t('game.ui.stationAroundLab')}</strong>
-                <span>
-                  {t('game.ui.omnikronIntro')}
-                </span>
-              </header>
-              <div
-                className="station-radial-map"
-                aria-label={t('game.ui.stationRingMap')}
-              >
-                <StationSchematic />
-                <div className="station-node-marker">
-                  <small>{t('game.ui.node')}</small>
-                  <b>CY-17</b>
-                  <span>{t('game.ui.calibratorNode')}</span>
-                </div>
-              </div>
-              <footer>
-                <span>
-                  <i className="stable" /> {t('game.ui.innerLoop')}
-                </span>
-                <span>
-                  <i className="warning" /> {t('game.ui.outerRings')}
-                </span>
-                <span>
-                  <i className="danger" /> {t('game.ui.anomalyBorder')}
-                </span>
-              </footer>
+            <div className="station-radial-panel station-radial-panel-3d">
+              <Station3D
+                pois={buildStationPois({
+                  contracts,
+                  inbox,
+                  shop: scenario.shop,
+                  onOpenInbox,
+                  onOpenContracts,
+                  onOpenSupply: () => setTab("supply"),
+                })}
+                onOpenInbox={onOpenInbox}
+                onOpenContracts={onOpenContracts}
+                onOpenSupply={() => setTab("supply")}
+              />
             </div>
             <div className="station-operations">
               <article className={inbox.length ? "attention" : ""}>
