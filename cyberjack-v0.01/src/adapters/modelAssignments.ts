@@ -54,7 +54,7 @@ export const modelAssignments: Record<string, ModelAssignment> = {
   /** Семантический разбор команды / классификация. */
   parser: {
     models: [PARSER_MODEL, ...splitList(env('PARSER_FALLBACK_MODELS', 'google/gemini-2.5-flash-lite,deepseek/deepseek-chat-v3-0324')).filter(m => m !== PARSER_MODEL)],
-    providers: [],
+    providers: splitList(env('PARSER_PROVIDER_ORDER', 'ollama')),
     ttftTimeoutMs: envNum('PARSER_TTFT_TIMEOUT', 4000),
     requestTimeoutMs: envNum('PARSER_REQUEST_TIMEOUT', 8000),
     format: 'json',

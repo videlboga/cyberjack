@@ -102,7 +102,9 @@ export async function parseVerbalInputWithLLM(messages: ChatMessage[], jsonSchem
             const data = await response.json() as any;
             const resultString = isOllama ? data.message?.content : data.choices?.[0]?.message?.content;
             if (!resultString) throw new Error('Parser returned an empty response');
-            return { parsed: JSON.parse(resultString), model: effectiveModel };
+            // Ollama может обернуть JSON в markdown-кодблок (```json ... ```).
+            const cleaned = resultString.replace(/```json/gi, '').replace(/```/g, '').trim();
+            return { parsed: JSON.parse(cleaned), model: effectiveModel };
         } catch (error: any) {
             lastError = error;
             emitTrace({
