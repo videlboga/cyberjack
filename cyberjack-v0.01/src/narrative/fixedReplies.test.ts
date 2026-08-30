@@ -91,12 +91,14 @@ describe('fixedReplies gate', () => {
         expect(typeof reply).toBe('string');
     });
 
-    it('returns null for a state with no authored variants', () => {
+    it('returns a non-empty reply for every filled cell (discharge × negative)', () => {
         const f = frame({
             event: { ...frame().event, physiologicalEvent: 'discharge' },
             expressionMode: { ...frame().expressionMode, affect: 'negative' },
         });
-        expect(selectFixedReply(f)).toBeNull();
+        const reply = selectFixedReply(f);
+        expect(reply).toBeTruthy();
+        expect(typeof reply).toBe('string');
     });
 
     it('does not repeat the same variation consecutively', () => {
@@ -107,5 +109,30 @@ describe('fixedReplies gate', () => {
         const first = selectFixedReply(f);
         const second = selectFixedReply(f);
         expect(first).not.toBe(second);
+    });
+
+    it('fills every event × affect cell (no null for female)', () => {
+        const events = ['discharge', 'breakdown', 'overload', 'peak', 'edge'] as const;
+        const affects = ['positive', 'negative', 'mixed', 'overload'] as const;
+        for (const ev of events) {
+            for (const af of affects) {
+                const f = frame({
+                    event: { ...frame().event, physiologicalEvent: ev },
+                    expressionMode: { ...frame().expressionMode, affect: af, control: 'fragmented' },
+                });
+                const reply = selectFixedReply(f);
+                expect(reply, `${ev} × ${af} should have a reply`).toBeTruthy();
+            }
+        }
+        // minimal — это control-уровень, а не physiologicalEvent; ключ матрицы
+        // 'minimal' получается из eventKey при normal/high + control=minimal.
+        for (const af of affects) {
+            const f = frame({
+                event: { ...frame().event, physiologicalEvent: 'normal' },
+                expressionMode: { ...frame().expressionMode, affect: af, control: 'minimal' },
+            });
+            const reply = selectFixedReply(f);
+            expect(reply, `minimal × ${af} should have a reply`).toBeTruthy();
+        }
     });
 });
