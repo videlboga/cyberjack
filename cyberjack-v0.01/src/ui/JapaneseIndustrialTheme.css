@@ -2540,17 +2540,22 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .lab-overview .room-detail {
   position:relative;
   grid-template-columns:minmax(0,1fr);
-  grid-template-rows:58px auto minmax(0,1fr);
+  grid-template-rows:58px minmax(120px,30%) minmax(0,1fr) auto;
 }
 .lab-overview .room-people-section {
   grid-column:1;
   grid-row:2;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
   padding:8px 10px;
-  overflow:visible;
+  overflow:hidden;
 }
 .lab-overview .room-people {
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
   align-items:start;
+  align-content:start;
+  overflow-y:auto;
+  scrollbar-width:thin;
 }
 .lab-overview .room-people>article { width:100%; }
 .lab-overview .room-equipment-section {
@@ -2561,8 +2566,9 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   scrollbar-width:thin;
 }
 .lab-overview .room-equipment {
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  grid-template-rows:repeat(2,minmax(112px,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:none;
+  grid-auto-rows:minmax(96px,auto);
   gap:7px;
 }
 .lab-overview .room-equipment>article {
@@ -10794,6 +10800,23 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 @media (max-width:620px) { .campaign-shell .mental-memory-list,.campaign-shell .mental-chair-settings,.campaign-shell .mental-frame-options { grid-template-columns:1fr; } .campaign-shell .mental-chair-subject { display:block; } .campaign-shell .mental-chair-portrait { min-height:220px; } }
 
 /* ── Панель указаний сотрудникам (пункт наблюдения) ── */
+/* Поручения — собственный ряд сетки room-detail (row 4): не распирают
+   оборудование и не обрезаются неявным рядом. Внутри — свой скролл. */
+.campaign-shell .lab-overview .staff-directive-section {
+  grid-column:1;
+  grid-row:4;
+  min-height:0;
+  max-height:180px;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  margin-top:2px;
+  overflow:hidden;
+}
+.campaign-shell .lab-overview .staff-directive-section .staff-directive-panel {
+  min-height:0;
+  overflow-y:auto;
+  scrollbar-width:thin;
+}
 .campaign-shell .staff-directive-section { margin-top:10px; }
 .campaign-shell .staff-directive-panel { display:flex; flex-direction:column; gap:8px; }
 .campaign-shell .staff-directive-form { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
