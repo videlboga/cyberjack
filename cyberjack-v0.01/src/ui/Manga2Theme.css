@@ -1020,9 +1020,10 @@ html[data-ui-theme="manga2"] .monitor-character-enter>.monitor-status-strip {
    скроллом, поручения — отдельный ряд. Перенесено из JI-темы (manga2 активна). */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail {
   grid-template-columns: minmax(0,1fr);
-  /* Полоса персонажей: auto-высота с потолком 38% — при 1 ряде карточек
-     (компактных, ~79px) скролла нет; при 2+ рядах включается внутренний скролл. */
-  grid-template-rows: 58px minmax(108px,38%) minmax(0,1fr) auto;
+  /* Полоса персонажей: auto-высота с потолком 44% — при 1 ряде карточек
+     (средних, ~106px, портрет 72px) скролла нет; при 2+ рядах включается
+     внутренний скролл, оборудование держит минимум. */
+  grid-template-rows: 58px minmax(118px,44%) minmax(0,1fr) auto;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people-section {
   grid-column: 1;
@@ -1038,29 +1039,29 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people {
   overflow-y: auto;
   scrollbar-width: thin;
 }
-/* Компактная карточка персонажа: одна строка ~79px вместо 171px. Без неё полоса
-   не вмещает даже один ряд без скролла (карточка 171 > вся полоса). */
+/* Карточка персонажа среднего размера: одна строка ~106px (портрет 72px),
+   между «мини»-вариантом (79px, лицо не различить) и старой (171px, не лезла). */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people > article {
   min-height: 0 !important;
-  grid-template-columns: 52px minmax(0,1fr) !important;
-  padding: 4px;
+  grid-template-columns: 72px minmax(0,1fr) !important;
+  padding: 6px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar {
-  width: 52px !important;
-  min-height: 48px !important;
+  width: 72px !important;
+  min-height: 84px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar img {
-  min-height: 48px !important;
+  min-height: 84px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity > div:last-child {
-  padding: 2px 4px;
+  padding: 4px 6px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions {
-  gap: 2px;
+  gap: 3px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions button {
-  min-height: 13px;
-  padding: 1px 3px !important;
+  min-height: 17px;
+  padding: 2px 5px !important;
   font-size: 8px;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment-section {
