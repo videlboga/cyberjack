@@ -1020,7 +1020,9 @@ html[data-ui-theme="manga2"] .monitor-character-enter>.monitor-status-strip {
    скроллом, поручения — отдельный ряд. Перенесено из JI-темы (manga2 активна). */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail {
   grid-template-columns: minmax(0,1fr);
-  grid-template-rows: 58px minmax(90px,22%) minmax(0,1fr) auto;
+  /* Полоса персонажей: auto-высота с потолком 38% — при 1 ряде карточек
+     (компактных, ~79px) скролла нет; при 2+ рядах включается внутренний скролл. */
+  grid-template-rows: 58px minmax(108px,38%) minmax(0,1fr) auto;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people-section {
   grid-column: 1;
@@ -1035,6 +1037,31 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people {
   align-content: start;
   overflow-y: auto;
   scrollbar-width: thin;
+}
+/* Компактная карточка персонажа: одна строка ~79px вместо 171px. Без неё полоса
+   не вмещает даже один ряд без скролла (карточка 171 > вся полоса). */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people > article {
+  min-height: 0 !important;
+  grid-template-columns: 52px minmax(0,1fr) !important;
+  padding: 4px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar {
+  width: 52px !important;
+  min-height: 48px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar img {
+  min-height: 48px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity > div:last-child {
+  padding: 2px 4px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions {
+  gap: 2px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions button {
+  min-height: 13px;
+  padding: 1px 3px !important;
+  font-size: 8px;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment-section {
   grid-column: 1;
