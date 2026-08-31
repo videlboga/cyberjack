@@ -673,7 +673,7 @@ function SmoothGameClock({
   ]);
   return <>{formatGameClock(displayed)}</>;
 }
-function LabMetricChart({
+function LabMetricBar({
   resident,
   metric,
   label,
@@ -684,47 +684,28 @@ function LabMetricChart({
   label: string;
   tone: string;
 }) {
-  const { t } = useI18n();
   const state = resident.state || {};
   const current = Number(state[metric] ?? 0);
-  const values = residentTrend(
-    resident.subjectId || resident.id,
-    metric,
-    current,
-  );
-  const points = values
-    .map(
-      (value, index) =>
-        `${(index / Math.max(1, values.length - 1)) * 100},${100 - clampMetric(value)}`,
-    )
-    .join(" ");
   const baselineName = `baseline${metric[0].toUpperCase()}${metric.slice(1)}`;
   const baseline = Number(
     state[baselineName] ?? state[`baseline_${metric}`] ?? current,
   );
+  // Шкала вместо линии-графика: метрики между обновлениями почти статичны,
+  // линия всегда вырождалась в прямую. Бар показывает уровень относительно
+  // 0..100, насечка — базовое (стартовое) значение для сравнения.
   return (
-    <div className={`lab-metric-chart ${tone}`}>
+    <div className={`lab-metric-bar ${tone}`}>
       <header>
         <span>{label}</span>
         <b>{Math.round(current)}</b>
       </header>
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <line className="grid" x1="0" x2="100" y1="50" y2="50" />
-        <line
-          className="baseline"
-          x1="0"
-          x2="100"
-          y1={100 - clampMetric(baseline)}
-          y2={100 - clampMetric(baseline)}
+      <div className="track" aria-hidden="true">
+        <i style={{ width: `${clampMetric(current)}%` }} />
+        <mark
+          style={{ left: `${clampMetric(baseline)}%` }}
+          title={`База: ${Math.round(baseline)}`}
         />
-        <polyline className="history" points={points} />
-        <circle
-          className="latest"
-          cx="100"
-          cy={100 - clampMetric(current)}
-          r="3"
-        />
-      </svg>
+      </div>
     </div>
   );
 }
@@ -2120,25 +2101,25 @@ function LaboratoryOverview({
                               <b>{occupant.name}</b>
                               {occupantState ? (
                                 <div>
-                                  <LabMetricChart
+                                  <LabMetricBar
                                     resident={occupant}
                                     metric="tension"
                                     label="АКТ"
                                     tone="amber"
                                   />
-                                  <LabMetricChart
+                                  <LabMetricBar
                                     resident={occupant}
                                     metric="capacity"
                                     label="РЕС"
                                     tone="mint"
                                   />
-                                  <LabMetricChart
+                                  <LabMetricBar
                                     resident={occupant}
                                     metric="attitude"
                                     label="ПРН"
                                     tone="blue"
                                   />
-                                  <LabMetricChart
+                                  <LabMetricBar
                                     resident={occupant}
                                     metric="sensitivity"
                                     label="ЧУВ"

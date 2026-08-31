@@ -1051,30 +1051,100 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment {
   grid-template-rows: none;
   grid-auto-rows: minmax(88px,auto);
 }
-/* Occupied-строка: аватар-миниатюра вместо портрета 138px — карточка не выше
-   88px ряда. */
+/* Occupied-строка: аватар крупный (64px, на всю высоту блока occupant) слева,
+   телеметрия справа. occ не сжимается flex'ом карточки — иначе аватар усыхает
+   до 28px и лицо не разглядеть. */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-occupant {
   min-height: 0;
-  grid-template-columns: 36px minmax(0,1fr);
-  margin: 3px 6px;
-  border: 1px solid #eee;
+  flex: 0 0 auto;
+  grid-template-columns: 64px minmax(0,1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  overflow: hidden;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-avatar {
-  width: 36px;
+  width: 64px;
   min-height: 0;
+  align-self: stretch;
+  line-height: 0;
 }
-html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar img {
-  height: 44px !important;
-  min-height: 0 !important;
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar img,
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar .character-portrait-image {
+  height: 100% !important;
+  min-height: 64px !important;
+  object-fit: cover !important;
+  object-position: center 20% !important;
+}
+/* Компактная шапка карточки: без статуса-«small», имя устройства 11px. */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy header small {
+  display: none;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy header strong {
+  font-size: 11px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy {
+  padding: 2px 6px 1px;
+  margin: 0 6px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-occupant .device-card-telemetry {
+  padding: 2px 5px;
+  align-self: center;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-telemetry > div {
   display: flex;
   gap: 4px;
 }
-html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-telemetry .lab-metric-chart {
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-telemetry .lab-metric-bar {
   flex: 1;
   min-width: 0;
+  align-self: end;
+  display: grid;
+  grid-template-rows: auto 6px;
+  gap: 3px;
 }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 3px;
+  height: 12px;
+  line-height: 1;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar header span {
+  color: #555 !important;
+  font-size: 8px !important;
+  letter-spacing: .06em;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar header b {
+  color: #111 !important;
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar .track {
+  position: relative;
+  height: 6px;
+  background: #e6e6e6;
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar .track > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #444;
+  transition: width .35s ease;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar .track > mark {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: #b0b0b0;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.amber .track > i { background: #c97870; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.mint .track > i { background: #5c9c85; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.blue .track > i { background: #6d95b8; }
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .lab-metric-bar.violet .track > i { background: #9b86ad; }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .staff-directive-section {
   grid-column: 1;
   grid-row: 4;
