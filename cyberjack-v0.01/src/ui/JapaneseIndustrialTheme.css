@@ -942,12 +942,12 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .lab-overview .room-rail>button span { overflow:hidden; font-size:11px; white-space:nowrap; text-overflow:ellipsis; }
 .lab-overview .room-rail>button small { font-size:8px; }
 
+/* Базовый скелет лаборатории: сетки задаются в Manga2Theme.css (manga2 —
+   единственная активная тема), здесь только display/отступы/переполнение. */
 .lab-overview .room-detail {
   min-width:0;
   min-height:0;
   display:grid;
-  grid-template-columns:minmax(0,2fr) minmax(220px,1fr);
-  grid-template-rows:58px minmax(0,1fr) 230px;
   gap:6px;
   padding:7px 9px 9px;
   overflow:hidden;
@@ -974,6 +974,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .room-active-asset span { color:var(--ji-muted); font-size:7px; letter-spacing:.09em; }
 .room-active-asset select { min-width:0; width:100%; padding:4px 6px; color:var(--ji-text); background:#353b32!important; font-size:9px; }
 
+/* Мёртвый слот старого layout'а (scene в ряду 3) — сетку задаёт manga2. */
 .lab-overview .room-scene {
   grid-column:1/-1;
   grid-row:3;
@@ -987,9 +988,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .lab-overview .room-character-layer { inset:8px; }
 .lab-overview .room-character-layer>button>img { max-width:135px; height:170px; }
 
+/* room-people/room-equipment: колонки и строки задаёт Manga2Theme.css. */
 .lab-overview .room-people-section {
-  grid-column:2;
-  grid-row:2;
   min-width:0;
   min-height:0;
   padding:9px;
@@ -1013,8 +1013,6 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .lab-overview .passive-note { margin-top:5px; font-size:8px; line-height:1.3; }
 
 .lab-overview .room-equipment-section {
-  grid-column:1/-1;
-  grid-row:3;
   min-width:0;
   min-height:0;
   display:grid;
@@ -1025,8 +1023,6 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 }
 .lab-overview .room-equipment {
   min-height:0;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  grid-template-rows:repeat(2,minmax(0,1fr));
   gap:4px;
 }
 .lab-overview .room-equipment>article {
@@ -1794,16 +1790,14 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   opacity:1;
 }
 
-/* Equipment-first laboratory: remove the decorative room scene entirely. */
+/* Старый «equipment-first» слот (ряд 2) не используется: финальная сетка
+   room-detail (4 ряда) задаётся в Manga2Theme.css. Оставлены только размеры. */
 .lab-overview .room-equipment-section {
-  grid-column:1;
-  grid-row:2;
   padding:9px;
   background:var(--ji-panel)!important;
 }
 .lab-overview .room-people-section {
-  grid-column:2;
-  grid-row:2;
+  min-width:0;
 }
 .lab-overview .room-equipment {
   gap:7px;
@@ -2536,41 +2530,10 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
   }
 }
 
-/* Laboratory composition: characters are a full-width strip, not a narrow sidebar. */
-.lab-overview .room-detail {
-  position:relative;
-  grid-template-columns:minmax(0,1fr);
-  grid-template-rows:58px minmax(120px,30%) minmax(0,1fr) auto;
-}
-.lab-overview .room-people-section {
-  grid-column:1;
-  grid-row:2;
-  display:grid;
-  grid-template-rows:auto minmax(0,1fr) auto;
-  padding:8px 10px;
-  overflow:hidden;
-}
-.lab-overview .room-people {
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  align-items:start;
-  align-content:start;
-  overflow-y:auto;
-  scrollbar-width:thin;
-}
+/* Laboratory composition: characters are a full-width strip, not a narrow sidebar.
+   Сетки room-detail/room-people/room-equipment целиком задаются в Manga2Theme.css —
+   здесь остались только не-сеточные размеры карточек. */
 .lab-overview .room-people>article { width:100%; }
-.lab-overview .room-equipment-section {
-  grid-column:1;
-  grid-row:3;
-  min-height:0;
-  overflow-y:auto;
-  scrollbar-width:thin;
-}
-.lab-overview .room-equipment {
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  grid-template-rows:none;
-  grid-auto-rows:minmax(96px,auto);
-  gap:7px;
-}
 .lab-overview .room-equipment>article {
   padding:6px 8px;
 }
@@ -2648,9 +2611,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .lab-overview .equipment-target-current.no-avatar {
   grid-template-columns:minmax(0,1fr) auto;
 }
-@media (max-width:1100px) {
-  .lab-overview .room-people { grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
-}
+/* Медиа-колонки room-people задаёт Manga2Theme.css. */
 
 /* Laboratory character cards: portrait is the visual anchor, controls stay at right. */
 .lab-overview .room-people>article {
