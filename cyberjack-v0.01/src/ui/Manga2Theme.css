@@ -1016,6 +1016,102 @@ html[data-ui-theme="manga2"] .monitor-character-enter>.monitor-status-strip {
 
 /* === LAB OVERVIEW — remove decorative dividers, add black card borders === */
 
+/* Влезание: персонажи — полоса 30% со скроллом, оборудование — 3 колонки со
+   скроллом, поручения — отдельный ряд. Перенесено из JI-темы (manga2 активна). */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail {
+  grid-template-columns: minmax(0,1fr);
+  grid-template-rows: 58px minmax(90px,22%) minmax(0,1fr) auto;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people-section {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto;
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people {
+  grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+  align-items: start;
+  align-content: start;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment-section {
+  grid-column: 1;
+  grid-row: 3;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment {
+  /* 4 колонки: 7 устройств = 2 ряда; при 3 колонках нужно 3 ряда — не влезает
+     в нижнюю зону даже со сжатыми карточками. Ряды 88px: 2 ряда + gap влезают
+     в нижнюю зону при полосе персонажей 22% (проверено живьём: 7/7 видны). */
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  grid-template-rows: none;
+  grid-auto-rows: minmax(88px,auto);
+}
+/* Occupied-строка: аватар-миниатюра вместо портрета 138px — карточка не выше
+   88px ряда. */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-occupant {
+  min-height: 0;
+  grid-template-columns: 36px minmax(0,1fr);
+  margin: 3px 6px;
+  border: 1px solid #eee;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-avatar {
+  width: 36px;
+  min-height: 0;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar img {
+  height: 44px !important;
+  min-height: 0 !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-telemetry > div {
+  display: flex;
+  gap: 4px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-telemetry .lab-metric-chart {
+  flex: 1;
+  min-width: 0;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .staff-directive-section {
+  grid-column: 1;
+  grid-row: 4;
+  min-height: 0;
+  max-height: 180px;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
+  overflow: hidden;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .staff-directive-section .staff-directive-panel {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+/* Сжатие copy/footer карточек оборудования: JI-правила дают copy ~86px и footer
+   ~43px, из-за чего 3 ряда по 112px не влезают в нижнюю зону. Проверено живьём:
+   с этим блоком 7 карточек помещаются (overflow −31px). */
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy header strong {
+  font-size: 11px;
+  line-height: 1.2;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy header small {
+  font-size: 6px;
+  line-height: 1.2;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy {
+  padding: 3px 6px;
+  margin: 0 6px 3px;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module .laboratory-module-copy > p {
+  display: none;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment>article.laboratory-module footer button {
+  min-height: 22px;
+  padding: 3px 6px;
+}
+
 /* Remove decorative section separators */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail-section + .room-detail-section { border-top: 0 !important; }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail-section h3 { border-bottom: 0 !important; }
