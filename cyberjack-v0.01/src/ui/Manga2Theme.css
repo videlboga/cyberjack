@@ -1036,35 +1036,34 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people {
   grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
   align-items: start;
   align-content: start;
-  /* Потолок высоты списка персонажей: 2 ряда карточек (106px). При меньшем
+  /* Потолок высоты списка персонажей: 2 ряда карточек (147px). При меньшем
      числе персонажей секция прижата к контенту (дыры нет), при большем — скролл. */
-  max-height: 236px;
+  max-height: 247px;
   overflow-y: auto;
   scrollbar-width: thin;
 }
-/* Карточка персонажа среднего размера: одна строка ~106px (портрет 72px),
-   между «мини»-вариантом (79px, лицо не различить) и старой (171px, не лезла). */
+/* Карточка персонажа среднего размера: одна строка ~147px (портрет 104px). */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people > article {
   min-height: 0 !important;
-  grid-template-columns: 72px minmax(0,1fr) !important;
+  grid-template-columns: 104px minmax(0,1fr) !important;
   padding: 6px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar {
-  width: 72px !important;
-  min-height: 84px !important;
+  width: 104px !important;
+  min-height: 118px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity .resident-avatar img {
-  min-height: 84px !important;
+  min-height: 118px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-identity > div:last-child {
-  padding: 4px 6px !important;
+  padding: 5px 8px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions {
   gap: 3px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-person-actions button {
-  min-height: 17px;
-  padding: 2px 5px !important;
+  min-height: 19px;
+  padding: 2px 6px !important;
   font-size: 8px;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment-section {
@@ -1076,19 +1075,18 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment-secti
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment {
   /* 4 колонки: 7 устройств = 2 ряда; при 3 колонках нужно 3 ряда — не влезает
-     в нижнюю зону даже со сжатыми карточками. Ряды 88px: 2 ряда + gap влезают
-     в нижнюю зону при полосе персонажей 22% (проверено живьём: 7/7 видны). */
+     в нижнюю зону даже со сжатыми карточками. Ряды 132px под аватар 96px. */
   grid-template-columns: repeat(4,minmax(0,1fr));
   grid-template-rows: none;
-  grid-auto-rows: minmax(88px,auto);
+  grid-auto-rows: minmax(124px,auto);
 }
-/* Occupied-строка: аватар крупный (64px, на всю высоту блока occupant) слева,
+/* Occupied-строка: аватар крупный (96px, на всю высоту блока occupant) слева,
    телеметрия справа. occ не сжимается flex'ом карточки — иначе аватар усыхает
    до 28px и лицо не разглядеть. */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-occupant {
   min-height: 0;
   flex: 0 0 auto;
-  grid-template-columns: 64px minmax(0,1fr);
+  grid-template-columns: 96px minmax(0,1fr);
   gap: 0;
   margin: 0;
   padding: 0;
@@ -1096,7 +1094,7 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .d
   overflow: hidden;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-avatar {
-  width: 64px;
+  width: 96px;
   min-height: 0;
   align-self: stretch;
   line-height: 0;
@@ -1104,20 +1102,28 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .d
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar img,
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .device-card-avatar .character-portrait-image {
   height: 100% !important;
-  min-height: 64px !important;
+  min-height: 112px !important;
   object-fit: cover !important;
   object-position: center 20% !important;
 }
-/* Компактная шапка карточки: без статуса-«small», имя устройства 11px. */
-html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy header small {
-  display: none;
-}
+/* Компактная шапка карточки: без статуса-«small», имя 11px, описание скрыто —
+   карточка не выше 124px ряда. */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy header strong {
-  font-size: 11px;
+  font-size: 11px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy {
-  padding: 2px 6px 1px;
-  margin: 0 6px;
+  padding: 2px 6px 1px !important;
+  margin: 0 6px !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy header small {
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .laboratory-module-copy > p {
+  display: none !important;
+}
+html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-equipment footer button {
+  min-height: 20px !important;
+  padding: 2px 5px !important;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .laboratory-module .device-card-occupant .device-card-telemetry {
   padding: 2px 5px;
