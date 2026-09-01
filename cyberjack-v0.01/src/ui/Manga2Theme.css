@@ -1020,10 +1020,10 @@ html[data-ui-theme="manga2"] .monitor-character-enter>.monitor-status-strip {
    скроллом, поручения — отдельный ряд. Перенесено из JI-темы (manga2 активна). */
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-detail {
   grid-template-columns: minmax(0,1fr);
-  /* Полоса персонажей: auto-высота с потолком 44% — при 1 ряде карточек
-     (средних, ~106px, портрет 72px) скролла нет; при 2+ рядах включается
-     внутренний скролл, оборудование держит минимум. */
-  grid-template-rows: 58px minmax(118px,44%) minmax(0,1fr) auto;
+  /* Полоса персонажей: auto по контенту. Потолок — фиксированные 236px на
+     .room-people (2 ряда): при 1 ряде секция прижата к карточкам без дыры,
+     при 2+ рядах включается внутренний скролл. */
+  grid-template-rows: 58px auto minmax(0,1fr) auto;
 }
 html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people-section {
   grid-column: 1;
@@ -1036,6 +1036,9 @@ html[data-ui-theme="manga2"] .campaign-shell .lab-overview .room-people {
   grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
   align-items: start;
   align-content: start;
+  /* Потолок высоты списка персонажей: 2 ряда карточек (106px). При меньшем
+     числе персонажей секция прижата к контенту (дыры нет), при большем — скролл. */
+  max-height: 236px;
   overflow-y: auto;
   scrollbar-width: thin;
 }
