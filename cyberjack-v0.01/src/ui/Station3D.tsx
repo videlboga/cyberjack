@@ -101,7 +101,6 @@ export function Station3D({
   useEffect(() => {
     setMarkers(pois);
   }, [pois]);
-
   // Init three.js scene once.
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -309,7 +308,8 @@ export function Station3D({
       edgeMat.uniforms.tColor.value = rt.texture;
       renderer.render(quadScene, quadCam);
 
-      // Project markers.
+      // Project markers. Маркер держим внутри холста: метка не должна
+      // вылезать за панель карты при вращении/зуме.
       const w = container.clientWidth;
       const h = container.clientHeight;
       for (const { poi, el } of state.markerEls) {
@@ -318,19 +318,25 @@ export function Station3D({
           el.style.display = "none";
           continue;
         }
+        const mw = el.offsetWidth || 140;
+        const mh = el.offsetHeight || 26;
+        const x = Math.max(4, Math.min(p.x - mw / 2, w - mw - 4));
+        const y = Math.max(4, Math.min(p.y - mh / 2, h - mh - 4));
         el.style.display = "flex";
-        el.style.left = p.x + "px";
-        el.style.top = p.y + "px";
+        el.style.left = x + "px";
+        el.style.top = y + "px";
       }
 
-      // Position card.
+      // Position card. Карточка целиком внутри холста.
       if (state.openPoi && state.cardEl) {
         const p = projectPoi(state.openPoi, state, w, h);
         if (p) {
-          state.cardEl.style.left =
-            Math.min(p.x + 18, container.clientWidth - 270) + "px";
-          state.cardEl.style.top =
-            Math.min(p.y - 20, container.clientHeight - 220) + "px";
+          const cw = state.cardEl.offsetWidth || 250;
+          const ch = state.cardEl.offsetHeight || 200;
+          const cx = Math.max(4, Math.min(p.x + 18, w - cw - 4));
+          const cy = Math.max(4, Math.min(p.y - 20, h - ch - 4));
+          state.cardEl.style.left = cx + "px";
+          state.cardEl.style.top = cy + "px";
         }
       }
     };
@@ -351,13 +357,13 @@ export function Station3D({
 
   // Rebuild marker DOM when markers change.
   useEffect(() => {
-    const state = stateRef.current;
-    if (!state) return;
     const container = containerRef.current;
     if (!container) return;
-    // Clear old markers.
-    for (const { el } of state.markerEls) el.remove();
-    state.markerEls = markers.map((poi) => {
+    // Одиночный источник маркеров: все старые div'ы (включая дубли от
+    // повторного монтажа эффекта) снимаем по классу, затем строим заново.
+    container.querySelectorAll(":scope > .station3d-marker").forEach((el) => el.remove());
+    const state = stateRef.current;
+    const els = markers.map((poi) => {
       const div = document.createElement("div");
       div.className = "station3d-marker";
       div.innerHTML = `<span class="dot"></span><span class="label">${poi.name}${
@@ -366,15 +372,18 @@ export function Station3D({
       div.addEventListener("click", (e) => {
         e.stopPropagation();
         setOpenPoi(poi);
-        state.openPoi = poi;
-        state.autoRotate = false;
-        state.markerEls.forEach((m) =>
-          m.el.classList.toggle("active", m.poi.id === poi.id),
-        );
+        if (state) {
+          state.openPoi = poi;
+          state.autoRotate = false;
+          state.markerEls.forEach((m) =>
+            m.el.classList.toggle("active", m.poi.id === poi.id),
+          );
+        }
       });
       container.appendChild(div);
       return { poi, el: div };
     });
+    if (state) state.markerEls = els;
   }, [markers]);
 
   // Sync openPoi into state ref for the animation loop.
@@ -393,25 +402,6 @@ export function Station3D({
       <div className="station3d-hud">
         <small>ОМНИКРОН · СТАНЦИЯ</small>
         <h1>Интерактивная карта</h1>
-        <div className="station3d-tips">
-          <span>
-            <b>drag</b> вращение
-          </span>
-          <span>
-            <b>wheel</b> зум
-          </span>
-          <span>
-            <b>click</b> карточка
-          </span>
-        </div>
-      </div>
-      <div className="station3d-legend">
-        {RINGS.map((r) => (
-          <div className="row" key={r.id}>
-            <span className="dot" />
-            {r.name}
-          </div>
-        ))}
       </div>
       {openPoi && (
         <div className="station3d-card">
