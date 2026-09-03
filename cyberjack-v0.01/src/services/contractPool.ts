@@ -155,9 +155,9 @@ export function ensurePersonalContractLine(now: number): void {
         const lineSubjectId = (stages[0] as any)?.subject_id ?? (stages[0] as any)?.subjectId;
         if (lineSubjectId) {
             const presence = db.prepare(
-                `SELECT presence_state FROM scene_characters WHERE character_id = ?`
-            ).get(lineSubjectId) as { presence_state?: string } | undefined;
-            if (!presence || presence.presence_state !== 'present') continue;
+                `SELECT scene_id, presence_state FROM scene_characters WHERE character_id = ?`
+            ).get(lineSubjectId) as { scene_id?: string; presence_state?: string } | undefined;
+            if (!presence || presence.scene_id !== 'scene_lab_calibrator' || presence.presence_state !== 'present') continue;
         }
         // Сортируем этапы по номеру.
         const sorted = [...stages].sort((a, b) => {
