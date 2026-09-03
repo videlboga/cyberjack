@@ -313,6 +313,11 @@ db.transaction(() => {
     ];
 
     for (const pair of npcPairs) {
+        // В чистой БД кандидаты и ассистент создаются позже (ensureWorldSeed →
+        // ensureGeneratedCandidates / worldService), поэтому пары с ещё не
+        // существующими персонажами пропускаем — FK-ограничение.
+        if (!db.prepare('SELECT 1 FROM characters WHERE id = ?').get(pair.from)) continue;
+        if (!db.prepare('SELECT 1 FROM characters WHERE id = ?').get(pair.to)) continue;
         characterRelationRepo.ensure(pair.from, pair.to, {
             knows: true,
             present: true,
