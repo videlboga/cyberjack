@@ -477,42 +477,9 @@ export function ensureWorldSeed() {
           AND room_id LIKE 'room_cell_%'
           AND (home_room_id IS NULL OR home_room_id = '')
     `).run(PLAYER_ID);
-    // Май уже имеет авторский профиль и полное визуальное покрытие, поэтому
-    // входит в стартовый состав лаборатории как актив, а не остаётся в старом
-    // списке кандидатов снабжения. Применяется лишь при первом переводе: её
-    // последующие перемещения внутри лаборатории не сбрасываются на старте.
-    const mai = characterRepo.get('NPC-CAND-GEN-04');
-    if (mai?.currentSceneId === 'scene_broker') {
-        db.transaction(() => {
-            sceneCharacterRepo.moveCharacter('NPC-CAND-GEN-04', LAB_SCENE_ID, {
-                role: 'asset',
-                presenceState: 'present',
-            });
-            setLaboratoryPresence({
-                characterId: 'NPC-CAND-GEN-04',
-                slotId: 'room:room_cell_b',
-                roomId: 'room_cell_b',
-                status: 'resident',
-                playerId: PLAYER_ID,
-            });
-            const stored = db.prepare(`SELECT profile_json FROM characters WHERE id = ?`).get('NPC-CAND-GEN-04') as any;
-            const profile = JSON.parse(stored?.profile_json || '{}');
-            profile.base = { ...(profile.base || {}), status: 'asset' };
-            profile.title = 'Актив';
-            profile.visual = { ...(profile.visual || {}), slug: 'mai' };
-            db.prepare(`UPDATE characters SET profile_json = ? WHERE id = ?`)
-                .run(JSON.stringify(profile), 'NPC-CAND-GEN-04');
-        })();
-        ensureCharacterLifecycle('NPC-CAND-GEN-04', 'asset');
-        const assignedAt = Number((db.prepare(`SELECT total_minutes FROM world_state WHERE id = 'main'`).get() as any)?.total_minutes || 0);
-        appendRoleHistory('NPC-CAND-GEN-04', {
-            role: 'asset',
-            previousRole: 'candidate',
-            worldMinute: assignedAt,
-            title: 'Включена в состав лаборатории',
-            description: 'Май переведена в статус актива и размещена в жилой камере B.',
-        });
-    }
+    // Май больше не входит в стартовый состав: планировали только Миру со
+    // старта. Май остаётся кандидатом у Брокера (появляется по unlock-условию
+    // 4 выполненных контрактов через ensureCandidateArrivals).
     const resources = resourceRepo.get(PLAYER_ID);
     if (!resources?.resources.credits) {
         resourceRepo.save({
@@ -1314,9 +1281,16 @@ export function recruitCandidate(characterId: string, role: 'staff' | 'asset', p
 
     let roomId = 'room_control';
     if (role === 'asset') {
+        // Уплотнение: активы селятся в первую неполную камеру, а не каждую
+        // в новую (capacity 2 — два актива делят одну камеру).
         const freeCell = listLabRooms(playerId).find(room => room.type === 'cell' && room.occupants.length < room.capacity);
         if (!freeCell) throw new Error('В лаборатории нет свободной жилой камеры');
         roomId = freeCell.id;
+    } else {
+        // Персонал идёт на пост наблюдения; если он занят — комнату персонала.
+        const staffRoom = listLabRooms(playerId).find(room => room.type === 'staff' && room.occupants.length < room.capacity);
+        if (!staffRoom) throw new Error('Нет свободного места персонала');
+        roomId = staffRoom.id;
     }
     db.transaction(() => {
         db.prepare(`UPDATE character_resources SET amount = amount - ? WHERE character_id = ? AND resource_key = 'credits'`).run(cost, playerId);
@@ -1886,7 +1860,18 @@ export function getScenarioSnapshot(playerId = PLAYER_ID) {
         credits: resources?.resources.credits?.amount || 0,
         inventory: listInventory(playerId),
         laboratory: listLabAssets(playerId),
-        rooms: listLabRooms(playerId),
+        // Пустые комнаты не показываются: жилая камера — только когда в ней
+        // кто-то живёт, пост наблюдения — только когда есть персонал. Калибровочная
+        // всегда видна (рабочая зона Калибратора). listLabRooms остаётся полной —
+        // её используют recruit/changeRole для поиска свободных мест.
+        rooms: listLabRooms(playerId).filter(room => {
+            if (room.type === 'cell') return room.occupants.length > 0;
+            if (room.id === 'room_control') {
+                return room.occupants.some(person => person.kind === 'assistant' || person.id === 'NPC-LAB-01');
+            }
+            if (room.id === 'room_staff_living') return room.occupants.length > 0;
+            return true;
+        }),
         stationSectors: listStationSectorState(),
         residents,
         candidates: listCandidates(),
