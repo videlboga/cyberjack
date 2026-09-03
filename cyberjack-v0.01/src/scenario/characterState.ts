@@ -30,13 +30,15 @@ export interface CharacterReconcileOptions {
   pose?: string;
   /** Стартовая одежда (id action_presets). По умолчанию — нижнее бельё. */
   clothing?: string[];
+  /** Индивидуальный набор одежды по id персонажа (перекрывает clothing). */
+  clothingOverride?: (characterId: string) => string[];
   /** Пересоздать subject_point_states (обнулить статистику). По умолчанию true. */
   resetPoints?: boolean;
 }
 
 const DEFAULT_CLOTHING = ['eq_clothe_underwear'];
 
-function readPreferences(profile: { mechanicalSeed?: { preferences?: any } }): Record<string, any> {
+function readPreferences(profile: { mechanicalSeed?: { preferences?: any; coreModifiers?: Record<string, number> } }): Record<string, any> {
   return profile.mechanicalSeed?.preferences || { actions: {}, points: {}, contexts: {}, tags: {} };
 }
 
@@ -173,7 +175,10 @@ export function reconcileCharacterState(subjectId: string, options: CharacterRec
       `).run(character.id);
       applyInitialContexts(character.id, options.pose || 'pose_standing', []);
     } else {
-      applyInitialContexts(character.id, options.pose || 'pose_standing', options.clothing || DEFAULT_CLOTHING);
+      const clothing = options.clothingOverride
+        ? options.clothingOverride(character.id)
+        : (options.clothing || DEFAULT_CLOTHING);
+      applyInitialContexts(character.id, options.pose || 'pose_standing', clothing);
     }
   })();
 

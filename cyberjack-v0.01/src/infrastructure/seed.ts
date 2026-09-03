@@ -3,7 +3,7 @@ import fs from 'fs';
 import { getBaseHumanAnatomy } from '../domain/anatomy.js';
 import { CharacterProfile } from '../domain/characterProfile.js';
 import { CANON_LOCATIONS, CANON_PROFESSIONS } from '../domain/canon.js';
-import { ensureAllStarterClothing } from './starterClothing.js';
+import { ensureAllStarterClothing, STARTER_CLOTHING } from './starterClothing.js';
 import { characterRelationRepo } from './repositories.js';
 import { reconcileAllCharacters } from '../scenario/characterState.js';
 import { seedInterpretationTrees } from '../services/interpretationSeed.js';
@@ -282,9 +282,11 @@ db.transaction(() => {
 (() => {
     const npcRows = db.prepare("SELECT id FROM characters WHERE id != 'PL-1'").all() as { id: string }[];
     const npcIds = npcRows.map(r => r.id);
+    // Одежда — из STARTER_CLOTHING (костюм + бельё), а не хардкод белья:
+    // reconcileAllCharacters перекрывает контексты, выставленные ensureAllStarterClothing.
     const done = reconcileAllCharacters(npcIds, {
         pose: 'pose_standing',
-        clothing: ['eq_clothe_underwear'],
+        clothingOverride: (id: string) => STARTER_CLOTHING[id] || ['eq_clothe_underwear'],
         resetPoints: true,
     });
     console.log(`[Seed] Reconcile: приведено к канону ${done}/${npcIds.length} персонажей.`);
