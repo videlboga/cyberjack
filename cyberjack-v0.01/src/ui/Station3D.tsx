@@ -3,16 +3,29 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 /**
- * Интерактивная 3D-карта станции Омникрон.
+ * Интерактивная 3D-карта станции Омникрон — рабочий пульт.
  *
  * Рендерит GLB-модель станции в «чертёжном» стиле (Sobel edge detection по
- * ID-буферу: каждый меш получает уникальный цвет, границы между объектами
- * становятся чёрными линиями на белом фоне). Поверх — HTML-маркеры точек
- * интереса (POI), привязанные к кольцам станции. Клик по маркеру открывает
- * карточку с живыми данными: контракты фракции, входящие события, снабжение.
+ * ID-буферу). Поверх — HTML-маркеры POI, привязанные к кольцам станции. Клик
+ * по маркеру открывает живую карточку: контракты фракции с принятием,
+ * события с действиями, ограниченные лоты с покупкой — всё без ухода с карты.
  */
 
-type StationPoi = {
+export type StationPoiAction = {
+  label: string;
+  kind?: "primary" | "quiet";
+  disabled?: boolean;
+  onClick: () => void;
+};
+
+export type StationPoiItem = {
+  title: string;
+  meta?: string;
+  note?: string;
+  action?: StationPoiAction;
+};
+
+export type StationPoi = {
   id: string;
   name: string;
   ring: string;
@@ -20,8 +33,14 @@ type StationPoi = {
   desc: string;
   kind: "supply" | "faction" | "market" | "inbox";
   factionId?: string;
+  /** Число активных дел (контракты/события/лоты). */
   badge?: number;
-  actions: { label: string; onClick: () => void }[];
+  /** Новый/срочный контент — маркер пульсирует. */
+  attention?: boolean;
+  /** Живое содержимое карточки (список дел). */
+  items: StationPoiItem[];
+  /** Резервное действие, когда список пуст. */
+  actions?: StationPoiAction[];
 };
 
 const RINGS = [
@@ -64,19 +83,17 @@ function assignIds(root: THREE.Object3D) {
 
 export function Station3D({
   pois,
-  onOpenInbox,
-  onOpenContracts,
-  onOpenSupply,
 }: {
   pois: StationPoi[];
-  onOpenInbox: () => void;
-  onOpenContracts: () => void;
-  onOpenSupply: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [openPoi, setOpenPoi] = useState<StationPoi | null>(null);
-  const [markers, setMarkers] = useState<StationPoi[]>(pois);
+  const [openPoiId, setOpenPoiId] = useState<string | null>(null);
+  const openPoiIdRef = useRef<string | null>(null);
+  const markersRef = useRef<StationPoi[]>(pois);
+  useEffect(() => {
+    openPoiIdRef.current = openPoiId;
+  }, [openPoiId]);
   const stateRef = useRef<{
     station: THREE.Group;
     camera: THREE.PerspectiveCamera;
@@ -92,15 +109,14 @@ export function Station3D({
     dragging: boolean;
     lastX: number;
     lastY: number;
-    markerEls: { poi: StationPoi; el: HTMLDivElement }[];
-    openPoi: StationPoi | null;
-    cardEl: HTMLDivElement | null;
+    markerEls: { poiId: string; el: HTMLDivElement }[];
   } | null>(null);
 
-  // Keep markers in sync with props.
+  // Keep markers in sync with props (без пересоздания DOM — см. ниже).
   useEffect(() => {
-    setMarkers(pois);
+    markersRef.current = pois;
   }, [pois]);
+
   // Init three.js scene once.
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -207,25 +223,7 @@ export function Station3D({
       (err) => console.error("Station GLB load error", err),
     );
 
-    const state: {
-      station: THREE.Group;
-      camera: THREE.PerspectiveCamera;
-      renderer: THREE.WebGLRenderer;
-      rt: THREE.WebGLRenderTarget;
-      edgeMat: THREE.ShaderMaterial;
-      quadScene: THREE.Scene;
-      quadCam: THREE.OrthographicCamera;
-      rotY: number;
-      rotX: number;
-      zoom: number;
-      autoRotate: boolean;
-      dragging: boolean;
-      lastX: number;
-      lastY: number;
-      markerEls: { poi: StationPoi; el: HTMLDivElement }[];
-      openPoi: StationPoi | null;
-      cardEl: HTMLDivElement | null;
-    } = {
+    const state = {
       station,
       camera,
       renderer,
@@ -240,9 +238,7 @@ export function Station3D({
       dragging: false,
       lastX: 0,
       lastY: 0,
-      markerEls: [],
-      openPoi: null,
-      cardEl: null,
+      markerEls: [] as { poiId: string; el: HTMLDivElement }[],
     };
     stateRef.current = state;
 
@@ -270,24 +266,25 @@ export function Station3D({
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       state.zoom = Math.max(
-        0.4,
+        0.55,
         Math.min(3, state.zoom * (e.deltaY > 0 ? 0.9 : 1.1)),
       );
+      state.autoRotate = false;
+    };
+    const onResize = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      renderer.setSize(w, h);
+      rt.setSize(w, h);
+      edgeMat.uniforms.resolution.value.set(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
     };
     canvas.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("wheel", onWheel, { passive: false });
-
-    const onResize = () => {
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      rt.setSize(w, h);
-      edgeMat.uniforms.resolution.value.set(w, h);
-    };
     window.addEventListener("resize", onResize);
 
     const clock = new THREE.Clock();
@@ -308,36 +305,54 @@ export function Station3D({
       edgeMat.uniforms.tColor.value = rt.texture;
       renderer.render(quadScene, quadCam);
 
-      // Project markers. Маркер держим внутри холста: метка не должна
-      // вылезать за панель карты при вращении/зуме.
+      // Project markers. Позиция — целыми пикселями через transform (без
+      // сабпиксельного дрожания), при уходе за край метка прячется.
       const w = container.clientWidth;
       const h = container.clientHeight;
-      for (const { poi, el } of state.markerEls) {
+      for (const { poiId, el } of state.markerEls) {
+        const poi = markersRef.current.find((m) => m.id === poiId);
+        if (!poi) continue;
         const p = projectPoi(poi, state, w, h);
         if (!p) {
-          el.style.display = "none";
+          el.style.opacity = "0";
+          el.style.pointerEvents = "none";
           continue;
         }
-        const mw = el.offsetWidth || 140;
-        const mh = el.offsetHeight || 26;
-        const x = Math.max(4, Math.min(p.x - mw / 2, w - mw - 4));
-        const y = Math.max(4, Math.min(p.y - mh / 2, h - mh - 4));
-        el.style.display = "flex";
-        el.style.left = x + "px";
-        el.style.top = y + "px";
+        const px = Math.round(p.x);
+        const py = Math.round(p.y);
+        // Точка должна оставаться на модели; если прижимается к краю ближе
+        // 24px — прячем метку, пока не вернётся в зону.
+        const margin = 60;
+        if (px < margin || px > w - margin || py < margin || py > h - margin) {
+          el.style.opacity = "0";
+          el.style.pointerEvents = "none";
+          continue;
+        }
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+        el.style.transform = `translate(${px}px, ${py}px)`;
       }
 
-      // Position card. Карточка целиком внутри холста.
-      if (state.openPoi && state.cardEl) {
-        const p = projectPoi(state.openPoi, state, w, h);
-        if (p) {
-          const cw = state.cardEl.offsetWidth || 250;
-          const ch = state.cardEl.offsetHeight || 200;
-          const cx = Math.max(4, Math.min(p.x + 18, w - cw - 4));
-          const cy = Math.max(4, Math.min(p.y - 20, h - ch - 4));
-          state.cardEl.style.left = cx + "px";
-          state.cardEl.style.top = cy + "px";
+      // Карточка открытого POI: якорится на маркер, но целиком внутри холста.
+      const card = container.querySelector<HTMLDivElement>(":scope > .station3d-card");
+      if (card) {
+        const openPoi = markersRef.current.find((m) => m.id === openPoiIdRef.current);
+        const anchor = openPoi ? projectPoi(openPoi, state, w, h) : null;
+        const cw = card.offsetWidth || 300;
+        const ch = card.offsetHeight || 220;
+        let cx: number;
+        let cy: number;
+        if (anchor) {
+          cx = anchor.x + 16;
+          cy = anchor.y - 20;
+        } else {
+          cx = w - cw - 12;
+          cy = 60;
         }
+        cx = Math.max(8, Math.min(cx, w - cw - 8));
+        cy = Math.max(8, Math.min(cy, h - ch - 8));
+        card.style.left = `${Math.round(cx)}px`;
+        card.style.top = `${Math.round(cy)}px`;
       }
     };
     animate();
@@ -355,85 +370,73 @@ export function Station3D({
     };
   }, []);
 
-  // Rebuild marker DOM when markers change.
+  // Rebuild marker DOM when the POI id set changes (не на каждый апдейт данных).
+  const poiIds = pois.map((p) => p.id).join("|");
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    // Одиночный источник маркеров: все старые div'ы (включая дубли от
-    // повторного монтажа эффекта) снимаем по классу, затем строим заново.
-    container.querySelectorAll(":scope > .station3d-marker").forEach((el) => el.remove());
+    container
+      .querySelectorAll(":scope > .station3d-marker")
+      .forEach((el) => el.remove());
     const state = stateRef.current;
-    const els = markers.map((poi) => {
+    const els = pois.map((poi) => {
       const div = document.createElement("div");
       div.className = "station3d-marker";
-      div.innerHTML = `<span class="dot"></span><span class="label">${poi.name}${
-        poi.badge != null ? ` · ${poi.badge}` : ""
+      div.innerHTML = `<span class="dot${
+        poi.attention ? " attention" : ""
+      }"></span><span class="label">${poi.name}${
+        poi.badge ? ` · ${poi.badge}` : ""
       }</span>`;
       div.addEventListener("click", (e) => {
         e.stopPropagation();
-        setOpenPoi(poi);
-        if (state) {
-          state.openPoi = poi;
-          state.autoRotate = false;
-          state.markerEls.forEach((m) =>
-            m.el.classList.toggle("active", m.poi.id === poi.id),
-          );
-        }
+        setOpenPoiId((cur) => (cur === poi.id ? null : poi.id));
+        if (state) state.autoRotate = false;
       });
       container.appendChild(div);
-      return { poi, el: div };
+      return { poiId: poi.id, el: div };
     });
     if (state) state.markerEls = els;
-  }, [markers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poiIds]);
 
-  // Sync openPoi into state ref for the animation loop.
-  useEffect(() => {
-    const state = stateRef.current;
-    if (!state) return;
-    state.openPoi = openPoi;
-    state.cardEl = containerRef.current?.querySelector(
-      ".station3d-card",
-    ) as HTMLDivElement | null;
-  }, [openPoi]);
+  const openPoi = pois.find((p) => p.id === openPoiId) || null;
 
   return (
     <div className="station3d" ref={containerRef}>
       <canvas ref={canvasRef} className="station3d-canvas" />
       <div className="station3d-hud">
         <small>ОМНИКРОН · СТАНЦИЯ</small>
-        <h1>Интерактивная карта</h1>
+        <h1>Пульт станции</h1>
       </div>
       {openPoi && (
-        <div className="station3d-card">
-          <span
-            className="close"
-            onClick={() => {
-              setOpenPoi(null);
-              const state = stateRef.current;
-              if (state) {
-                state.openPoi = null;
-                state.markerEls.forEach((m) =>
-                  m.el.classList.remove("active"),
-                );
-              }
-            }}
-          >
+        <div className="station3d-card" onClick={(e) => e.stopPropagation()}>
+          <span className="close" onClick={() => setOpenPoiId(null)}>
             ✕
           </span>
           <small>{ringById(openPoi.ring)?.name.toUpperCase()}</small>
           <h3>{openPoi.name}</h3>
-          <p>{openPoi.desc}</p>
-          <div className="station3d-card-actions">
-            {openPoi.actions.map((action) => (
-              <button
-                key={action.label}
-                onClick={() => {
-                  action.onClick();
-                  setOpenPoi(null);
-                }}
-              >
-                {action.label}
-              </button>
+          <p className="station3d-card-desc">{openPoi.desc}</p>
+          <div className="station3d-card-items">
+            {openPoi.items.length === 0 && (
+              <div className="station3d-item-empty">Пусто — всё разобрано</div>
+            )}
+            {openPoi.items.map((item, index) => (
+              <div className="station3d-item" key={`${openPoi.id}-${index}`}>
+                <div className="station3d-item-main">
+                  <strong>{item.title}</strong>
+                  {item.meta && <span>{item.meta}</span>}
+                  {item.note && <em>{item.note}</em>}
+                </div>
+                {item.action && (
+                  <button
+                    className={item.action.kind === "quiet" ? "quiet" : ""}
+                    disabled={item.action.disabled}
+                    onClick={item.action.onClick}
+                  >
+                    {item.action.label}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>

@@ -25,7 +25,7 @@ import "./LaboratoryRooms.css";
 import "./Manga2Theme.css";
 import "./Station3D.css";
 import "./StationManga2.css";
-import { Station3D } from "./Station3D";
+import { Station3D, type StationPoi } from "./Station3D";
 import { CharacterPortrait } from "./CharacterPortrait";
 import { memoryTagLabel } from "../domain/memoryTagLabels";
 import {
@@ -1360,6 +1360,13 @@ export function CampaignApp() {
                   `${offer.name}: доставлено на склад`,
                 )
               }
+              onAcceptContract={(contract) =>
+                mutate(
+                  `/api/contracts/${contract.id}/accept`,
+                  { playerId: "PL-1" },
+                  `Контракт принят: ${contract.title}`,
+                )
+              }
               onChoose={chooseDirectorEvent}
               onOpenContracts={() => navigate("scene_liaison")}
             />
@@ -1416,6 +1423,13 @@ export function CampaignApp() {
                   `/api/scenario/shop/${offer.id}/buy`,
                   { playerId: "PL-1" },
                   `${offer.name}: доставлено на склад`,
+                )
+              }
+              onAcceptContract={(contract) =>
+                mutate(
+                  `/api/contracts/${contract.id}/accept`,
+                  { playerId: "PL-1" },
+                  `Контракт принят: ${contract.title}`,
                 )
               }
               onChoose={chooseDirectorEvent}
@@ -6421,14 +6435,24 @@ function buildStationPois({
   contracts,
   inbox,
   shop,
-  onOpenInbox,
+  credits,
+  now,
+  busy,
+  onAcceptContract,
+  onChooseEvent,
+  onBuyOffer,
   onOpenContracts,
   onOpenSupply,
 }: {
   contracts: Contract[];
   inbox: DirectorEvent[];
   shop: ShopOffer[];
-  onOpenInbox: () => void;
+  credits: number;
+  now: number;
+  busy: boolean;
+  onAcceptContract: (contract: Contract) => void;
+  onChooseEvent: (event: DirectorEvent, choice: string) => void;
+  onBuyOffer: (offer: ShopOffer) => void;
   onOpenContracts: () => void;
   onOpenSupply: () => void;
 }) {
@@ -6441,21 +6465,11 @@ function buildStationPois({
   const contractFactions = Array.from(
     new Set(availableContracts.map((c) => c.issuerId)),
   );
-  const limitedOffers = shop.filter((offer) => offer.limited);
+  const limitedOffers = shop.filter((offer) => offer.limited && !offer.owned);
 
-  const pois: {
-    id: string;
-    name: string;
-    ring: string;
-    angle: number;
-    desc: string;
-    kind: "supply" | "faction" | "market" | "inbox";
-    factionId?: string;
-    badge?: number;
-    actions: { label: string; onClick: () => void }[];
-  }[] = [];
+  const pois: StationPoi[] = [];
 
-  // Снабжение (срединное кольцо / архив).
+  // Снабжение (срединное кольцо / архив): ограниченные лоты с покупкой.
   pois.push({
     id: "supply",
     name: "Офис снабжения",
@@ -6463,13 +6477,25 @@ function buildStationPois({
     angle: 30,
     desc: "Логистический узел станции: заказы, поставки и учёт расходных материалов.",
     kind: "supply",
-    badge: shop.length,
-    actions: [
-      { label: "Открыть снабжение", onClick: onOpenSupply },
-    ],
+    badge: limitedOffers.length || undefined,
+    attention: limitedOffers.length > 0,
+    items: limitedOffers.slice(0, 4).map((offer) => ({
+      title: offer.name,
+      meta: `${offer.price} CR${offer.batch ? ` · партия ${offer.batch}` : ""}`,
+      note: offer.supplier,
+      action: {
+        label: "Купить",
+        disabled: busy || credits < offer.price,
+        onClick: () => onBuyOffer(offer),
+      },
+    })),
+    actions: [{ label: "Полный каталог", onClick: onOpenSupply }],
   });
 
-  // Входящие (личный канал — центр).
+  // Входящие (личный канал — центр): события с кнопками действий.
+  const inboxEvents = [...inbox]
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
+    .slice(0, 5);
   pois.push({
     id: "inbox",
     name: "Канал связи",
@@ -6477,11 +6503,23 @@ function buildStationPois({
     angle: 0,
     desc: "Личный канал калибратора: запросы фракций, события и уведомления станции.",
     kind: "inbox",
-    badge: inbox.length,
-    actions: [{ label: "Открыть входящие", onClick: onOpenInbox }],
+    badge: inbox.length || undefined,
+    attention: inbox.length > 0,
+    items: inboxEvents.map((event) => ({
+      title: event.title,
+      note: event.body,
+      action: event.choices[0]
+        ? {
+            label: event.choices[0].label,
+            disabled: busy,
+            onClick: () => onChooseEvent(event, event.choices[0].id),
+          }
+        : undefined,
+    })),
   });
 
-  // Фракции с доступными контрактами (внутреннее кольцо / схолариум).
+  // Фракции с доступными контрактами (внутреннее кольцо / схолариум):
+  // живой список контрактов с принятием прямо с карты.
   const factionAngles: Record<string, number> = {
     fac_veil: 150,
     fac_helix: 90,
@@ -6502,11 +6540,29 @@ function buildStationPois({
       kind: "faction",
       factionId,
       badge: factionContracts.length,
+      attention: true,
+      items: factionContracts.slice(0, 5).map((contract) => ({
+        title: contract.title,
+        meta: [
+          contract.rewards.credits ? `${contract.rewards.credits} CR` : null,
+          contract.durationMinutes
+            ? `${Math.round(contract.durationMinutes / 1440)} дн.`
+            : null,
+          contract.difficulty ? contract.difficulty : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        action: {
+          label: "Принять",
+          disabled: busy,
+          onClick: () => onAcceptContract(contract),
+        },
+      })),
       actions: [{ label: "К контрактам", onClick: onOpenContracts }],
     });
   });
 
-  // Чёрный рынок (внешнее кольцо / инкубация).
+  // Чёрный рынок (внешнее кольцо / инкубация): кандидаты вне корпоративных каналов.
   pois.push({
     id: "blackmarket",
     name: "Связной чёрного рынка",
@@ -6514,7 +6570,7 @@ function buildStationPois({
     angle: 270,
     desc: "Неформальные сделки, слухи и кандидаты вне корпоративных каналов.",
     kind: "market",
-    badge: limitedOffers.length || undefined,
+    items: [],
     actions: [{ label: "Открыть снабжение", onClick: onOpenSupply }],
   });
 
@@ -6527,6 +6583,7 @@ function SupplyView({
   inbox,
   busy,
   onBuy,
+  onAcceptContract,
   onChoose,
   onOpenContracts,
 }: {
@@ -6535,6 +6592,7 @@ function SupplyView({
   inbox: DirectorEvent[];
   busy: boolean;
   onBuy: (offer: ShopOffer) => void;
+  onAcceptContract: (contract: Contract) => void;
   onChoose: (event: DirectorEvent, choice: string) => void;
   onOpenContracts: () => void;
 }) {
@@ -6606,13 +6664,15 @@ function SupplyView({
                   contracts,
                   inbox,
                   shop: scenario.shop,
-                  onOpenInbox: () => setTab("inbox"),
+                  credits: scenario.credits,
+                  now: scenario.clock.totalMinutes,
+                  busy,
+                  onAcceptContract,
+                  onChooseEvent: onChoose,
+                  onBuyOffer: onBuy,
                   onOpenContracts,
                   onOpenSupply: () => setTab("supply"),
                 })}
-                onOpenInbox={() => setTab("inbox")}
-                onOpenContracts={onOpenContracts}
-                onOpenSupply={() => setTab("supply")}
               />
             </div>
           </section>
