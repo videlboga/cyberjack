@@ -14,10 +14,10 @@ console.log("Начинаем безопасное заполнение базы
 const subjects: { id: string, name: string, state: any, profile: CharacterProfile }[] = [
     {
         id: 'PL-1',
-        name: 'Player',
+        name: 'Калибратор',
         state: { sensitivity: 50, capacity: 50, openness: 50, plasticity: 50, attitude: 50 },
         profile: {
-            base: { name: 'Player', age: 30, gender: 'male', anatomy: 'none', status: 'calibrator' },
+            base: { name: 'Калибратор', age: 30, gender: 'male', anatomy: 'none', status: 'calibrator' },
             origin: { birthplaceId: 'loc-001', professionId: 'prof-001', biography: 'Main character.', coreTrauma: undefined },
             personality: { traits: [], quirks: [], speechStyle: '', coreBelief: '' },
             knowledge: { common: [], personal: [], secrets: [] },

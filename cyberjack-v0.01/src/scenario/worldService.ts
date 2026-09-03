@@ -135,6 +135,8 @@ function normalizePlayerProfile() {
     const generated = profile.generatedProfile;
     const isLegacyGeneratedAsset = generated?.identity?.archetype === 'asset'
         && (generated?.identity?.name === 'Player' || base.name === 'Player');
+    // Отображаемое имя персонажа — единственный источник для промптов памяти;
+    // если оно осталось 'Player', нормализуем независимо от base.name.
     const needsNormalization = base.name === 'Player' || isLegacyGeneratedAsset;
     if (!needsNormalization) return;
 
