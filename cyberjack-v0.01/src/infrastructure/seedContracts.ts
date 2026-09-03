@@ -39,19 +39,15 @@ const factions = [
 
 // ─── Стартовый набор контрактов ─────────────────────────────────────────────
 // Единственный источник контента — CONTRACT_DATA (contractData.ts). Здесь
-// перечислены только id, которые должны быть доступны сразу при старте;
-// остальные выдаются динамическим пулом (contractPool) после 540-й минуты.
+// перечислены только id, которые должны быть доступны сразу при старте.
+// Стартовая выдача минимальна: контракты без acquired_trait-условий, выполнимые
+// стартовым активом (Мира) — остальное приходит пулом (contractPool) после
+// 540-й минуты и персональными линиями по мере найма.
 
 const STARTER_CONTRACT_IDS = [
-    'contract_veil_exposure_01',
-    'contract_veil_clinical_01',
-    'contract_veil_forced_orgasm_01',
-    'contract_helix_compliance_01',
-    'contract_helix_restraint_01',
-    'contract_helix_interface_01',
-    'contract_continuum_pain_rewrite_01',
+    'contract_helix_threshold_01',
     'contract_continuum_relation_rewrite_01',
-    'contract_continuum_orgasm_rewrite_01',
+    'contract_helix_shoulders_01',
 ];
 
 // ─── Запись в БД ────────────────────────────────────────────────────────────

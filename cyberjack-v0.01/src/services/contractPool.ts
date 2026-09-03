@@ -150,6 +150,15 @@ export function ensurePersonalContractLine(now: number): void {
     }
 
     for (const [prefix, stages] of lines) {
+        // Персональная линия активна, только если её актив нанят и присутствует
+        // в лаборатории (кандидаты у Брокера предложений не получают).
+        const lineSubjectId = (stages[0] as any)?.subject_id ?? (stages[0] as any)?.subjectId;
+        if (lineSubjectId) {
+            const presence = db.prepare(
+                `SELECT presence_state FROM scene_characters WHERE character_id = ?`
+            ).get(lineSubjectId) as { presence_state?: string } | undefined;
+            if (!presence || presence.presence_state !== 'present') continue;
+        }
         // Сортируем этапы по номеру.
         const sorted = [...stages].sort((a, b) => {
             const na = Number(/_(\d+)$/.exec(a.id)?.[1] || 0);
@@ -181,7 +190,7 @@ export function ensurePersonalContractLine(now: number): void {
             state: 'available',
             acceptedByPlayerId: undefined,
             attachedSubjectId: undefined,
-            subjectId: next.subjectId,
+            subject_id: (next as any).subjectId,
             personal: true,
             deadlineTick: undefined,
             format: next.format,

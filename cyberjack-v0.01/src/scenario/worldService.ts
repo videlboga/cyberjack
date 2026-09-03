@@ -177,18 +177,31 @@ export function ensureWorldSeed() {
     ensureCharacterStorySeeds();
     seedAllBiographies();
     db.prepare(`DELETE FROM laboratory_assets WHERE player_id = ? AND asset_id = 'lab_background_loop'`).run(PLAYER_ID);
-    db.prepare(`DELETE FROM laboratory_assets WHERE player_id = ? AND asset_id = 'lab_sensory_pod'`).run(PLAYER_ID);
+    db.prepare(`DELETE FROM laboratory_assets WHERE player_id = 'PL-1' AND asset_id = 'lab_sensory_pod'`).run();
     db.prepare(`DELETE FROM shop_offers WHERE id = 'lab_sensory_pod'`).run();
     db.prepare(`DELETE FROM shop_offers WHERE id = 'lab_restraint_frame'`).run();
+    // Выведенные из использования инструменты и одежда (вне текущего дизайна):
+    // TENS, расширитель, сенсорная капсула, фак-машина, мед-сканер, плаг,
+    // повязка, кляп, манжеты, фиксирующий пояс, комбинезон, платье, трусики,
+    // калибровочный комплект. Контекст-действия тоже выводятся из оборота.
+    const retiredItems = [
+        'eq_tens_unit', 'eq_speculum', 'eq_sensory_pod', 'eq_fuck_machine', 'eq_med_analyzer', 'eq_panties',
+        'eq_blindfold', 'eq_gag', 'eq_plug', 'eq_ankle_cuffs', 'eq_restraint_belt',
+        'eq_jumpsuit', 'eq_dress', 'eq_calibration_set',
+    ];
     db.prepare(`
         DELETE FROM shop_offers
         WHERE id IN ('offer_tens','offer_speculum','offer_sensory_pod','offer_fuck_machine','offer_med_analyzer')
-           OR item_id IN ('eq_tens_unit','eq_speculum','eq_sensory_pod','eq_fuck_machine','eq_med_analyzer','eq_panties')
-    `).run();
+           OR item_id IN (${retiredItems.map(() => '?').join(',')})
+    `).run(...retiredItems);
     db.prepare(`
         DELETE FROM character_items
-        WHERE item_id IN ('eq_tens_unit','eq_speculum','eq_sensory_pod','eq_fuck_machine','eq_med_analyzer','eq_panties')
-    `).run();
+        WHERE item_id IN (${retiredItems.map(() => '?').join(',')})
+    `).run(...retiredItems);
+    db.prepare(`
+        DELETE FROM active_contexts
+        WHERE action_id IN (${['eq_clothe_jumpsuit','eq_clothe_dress','eq_clothe_panties','eq_clothe_calibration_set','eq_clothe_costume','eq_blindfold_apply','eq_gag_apply','eq_plug_insert','eq_ankle_cuffs_apply','eq_restraint_belt_apply','eq_tens_unit_apply'].map(() => '?').join(',')})
+    `).run('eq_clothe_jumpsuit', 'eq_clothe_dress', 'eq_clothe_panties', 'eq_clothe_calibration_set', 'eq_clothe_costume', 'eq_blindfold_apply', 'eq_gag_apply', 'eq_plug_apply', 'eq_ankle_cuffs_apply', 'eq_restraint_belt_apply', 'eq_tens_unit_apply');
     for (const obsoleteAssetId of ['lab_terminal','lab_restraint_frame']) {
         const obsolete = db.prepare(`
             SELECT json_extract(metadata,'$.subjectId') AS subject_id

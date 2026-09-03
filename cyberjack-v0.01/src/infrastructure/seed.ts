@@ -115,34 +115,15 @@ db.transaction(() => {
         
         console.log(`Inserting resources for ${subject.id}, isCalibrator: ${isCalibrator}`);
         if (isCalibrator) {
-            insertRes.run(subject.id, 'energy', 100, 100, 1);
+            // Только живой ресурс: credits. Energy/authority выведены из дизайна.
             insertRes.run(subject.id, 'credits', 1000, 1000000, 0);
-            insertRes.run(subject.id, 'authority', 50, 100, 0);
             console.log(`Resources inserted for ${subject.id}`);
         }
     }
 
-    // Стартовые предметы для игрока (Калибратор)
-    const insertCharacterItemStmt = db.prepare(`
-        INSERT OR IGNORE INTO character_items (character_id, item_id, state, charges, metadata)
-        VALUES (?, ?, ?, ?, ?)
-    `);
-    // Базовое оборудование для лаборатории
-    insertCharacterItemStmt.run('PL-1', 'eq_handcuffs', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_collar', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_vibrator', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_tens_unit', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_plug', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_blindfold', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_gag', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_jumpsuit', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_dress', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_stockings', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_underwear', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'eq_panties', 'active', -1, '{}');
-    insertCharacterItemStmt.run('PL-1', 'drug_truth_serum', 'active', 3, '{}');
-    insertCharacterItemStmt.run('PL-1', 'drug_painkiller', 'active', 3, '{}');
-    console.log('Starting items added for PL-1');
+    // Стартовые предметы для игрока (Калибратор) — выведены из дизайна:
+    // инструменты калибратора не раздаются стартом, одежда задаётся STARTER_CLOTHING.
+    console.log('Starting items: none (retired)');
 })();
 
 ensureAllStarterClothing();
