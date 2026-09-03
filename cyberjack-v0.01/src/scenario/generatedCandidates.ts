@@ -1,5 +1,5 @@
 import { db } from '../infrastructure/db';
-import { ensureStarterClothing } from '../infrastructure/starterClothing';
+import { ensureStarterClothing, STARTER_CLOTHING } from '../infrastructure/starterClothing';
 import { characterRelationRepo, characterRepo } from '../infrastructure/repositories';
 import { reconcileCharacterState } from './characterState';
 import { getBaseHumanAnatomy, applyPointModifiers } from '../domain/anatomy';
@@ -203,12 +203,12 @@ export function seedOneCandidate(spec: CandidateSeed): boolean {
         db.prepare('UPDATE characters SET profile_json = ? WHERE id = ?').run(JSON.stringify(profileJson), spec.id);
     })();
 
-    ensureStarterClothing(spec.id, ['eq_clothe_underwear']);
+    ensureStarterClothing(spec.id, STARTER_CLOTHING[spec.id] || ['eq_clothe_underwear']);
     // Единый механизм: стартовые трейты + поза + одежда + обнуление статистики.
     // Идемпотентно для вновь созданного кандидата.
     reconcileCharacterState(spec.id, {
         pose: 'pose_standing',
-        clothing: ['eq_clothe_underwear'],
+        clothing: STARTER_CLOTHING[spec.id] || ['eq_clothe_underwear'],
         resetPoints: true,
     });
     // Кейт (внешний актив по межлабораторному контракту) — отношения с лабой

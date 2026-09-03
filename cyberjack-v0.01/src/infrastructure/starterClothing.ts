@@ -2,17 +2,16 @@ import { randomUUID } from 'crypto';
 import { db } from './db';
 
 export const STARTER_CLOTHING: Record<string, string[]> = {
-    // Текущий гардероб: личная одежда (у кого есть — позже), бельё, халат, чулки,
-    // без одежды. Прочее (комбинезон, платье, трусики, калибровочный комплект,
-    // костюм) выведено из дизайна.
+    // Текущий гардероб: личная одежда (костюм), бельё; халат/чулки — покупные.
+    // Прочее (комбинезон, платье, трусики, калибровочный комплект) выведено.
     'PL-1': ['eq_clothe_underwear'],
-    'S-AV-01': ['eq_clothe_underwear'],
-    'NPC-LAB-01': ['eq_clothe_underwear'],
-    'NPC-CAND-01': ['eq_clothe_underwear'],
-    'NPC-CAND-SUMI': ['eq_clothe_underwear'],
-    'NPC-CAND-GEN-02': ['eq_clothe_underwear'],
-    'NPC-CAND-GEN-04': ['eq_clothe_underwear'],
-    'NPC-CAND-KATE': ['eq_clothe_underwear']
+    'S-AV-01': ['eq_clothe_costume', 'eq_clothe_underwear'],
+    'NPC-LAB-01': ['eq_clothe_costume', 'eq_clothe_underwear'],
+    'NPC-CAND-01': ['eq_clothe_costume', 'eq_clothe_underwear'],
+    'NPC-CAND-SUMI': ['eq_clothe_costume', 'eq_clothe_underwear'],
+    'NPC-CAND-GEN-02': ['eq_clothe_costume', 'eq_clothe_underwear'],
+    'NPC-CAND-GEN-04': ['eq_clothe_costume', 'eq_clothe_underwear'],
+    'NPC-CAND-KATE': ['eq_clothe_costume', 'eq_clothe_underwear']
 };
 
 function normalizeLegacyUnderwear(characterId: string) {

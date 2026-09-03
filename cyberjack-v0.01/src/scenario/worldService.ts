@@ -183,7 +183,8 @@ export function ensureWorldSeed() {
     // Выведенные из использования инструменты и одежда (вне текущего дизайна):
     // TENS, расширитель, сенсорная капсула, фак-машина, мед-сканер, плаг,
     // повязка, кляп, манжеты, фиксирующий пояс, комбинезон, платье, трусики,
-    // калибровочный комплект. Контекст-действия тоже выводятся из оборота.
+    // калибровочный комплект. Костюм остаётся — персонажи стартуют в нём.
+    // Контекст-действия тоже выводятся из оборота.
     const retiredItems = [
         'eq_tens_unit', 'eq_speculum', 'eq_sensory_pod', 'eq_fuck_machine', 'eq_med_analyzer', 'eq_panties',
         'eq_blindfold', 'eq_gag', 'eq_plug', 'eq_ankle_cuffs', 'eq_restraint_belt',
@@ -200,8 +201,8 @@ export function ensureWorldSeed() {
     `).run(...retiredItems);
     db.prepare(`
         DELETE FROM active_contexts
-        WHERE action_id IN (${['eq_clothe_jumpsuit','eq_clothe_dress','eq_clothe_panties','eq_clothe_calibration_set','eq_clothe_costume','eq_blindfold_apply','eq_gag_apply','eq_plug_insert','eq_ankle_cuffs_apply','eq_restraint_belt_apply','eq_tens_unit_apply'].map(() => '?').join(',')})
-    `).run('eq_clothe_jumpsuit', 'eq_clothe_dress', 'eq_clothe_panties', 'eq_clothe_calibration_set', 'eq_clothe_costume', 'eq_blindfold_apply', 'eq_gag_apply', 'eq_plug_apply', 'eq_ankle_cuffs_apply', 'eq_restraint_belt_apply', 'eq_tens_unit_apply');
+        WHERE action_id IN (${['eq_clothe_jumpsuit','eq_clothe_dress','eq_clothe_panties','eq_clothe_calibration_set','eq_blindfold_apply','eq_gag_apply','eq_plug_apply','eq_ankle_cuffs_apply','eq_restraint_belt_apply','eq_tens_unit_apply'].map(() => '?').join(',')})
+    `).run('eq_clothe_jumpsuit', 'eq_clothe_dress', 'eq_clothe_panties', 'eq_clothe_calibration_set', 'eq_blindfold_apply', 'eq_gag_apply', 'eq_plug_apply', 'eq_ankle_cuffs_apply', 'eq_restraint_belt_apply', 'eq_tens_unit_apply');
     for (const obsoleteAssetId of ['lab_terminal','lab_restraint_frame']) {
         const obsolete = db.prepare(`
             SELECT json_extract(metadata,'$.subjectId') AS subject_id
