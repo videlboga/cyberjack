@@ -24,6 +24,7 @@ import "./CampaignApp.css";
 import "./LaboratoryRooms.css";
 import "./Manga2Theme.css";
 import "./Station3D.css";
+import "./StationManga2.css";
 import { Station3D } from "./Station3D";
 import { CharacterPortrait } from "./CharacterPortrait";
 import { memoryTagLabel } from "../domain/memoryTagLabels";
@@ -1221,15 +1222,6 @@ export function CampaignApp() {
               }}
             />
             <NavButton
-              active={utility === "inbox"}
-              label={t('game.ui.incoming')}
-              meta={inbox.length ? `${inbox.length} ${t('game.ui.new')}` : t('game.ui.noNew')}
-              onClick={() => {
-                setInteraction(null);
-                setUtility("inbox");
-              }}
-            />
-            <NavButton
               active={!utility && scenario.location.id === "scene_liaison"}
               label={t('game.ui.contracts')}
               meta={`${accepted.length} ${t('game.ui.active')}`}
@@ -1368,10 +1360,7 @@ export function CampaignApp() {
                   `${offer.name}: доставлено на склад`,
                 )
               }
-              onOpenInbox={() => {
-                setInteraction(null);
-                setUtility("inbox");
-              }}
+              onChoose={chooseDirectorEvent}
               onOpenContracts={() => navigate("scene_liaison")}
             />
           ) : currentSection === "contracts" ? (
@@ -1429,10 +1418,7 @@ export function CampaignApp() {
                   `${offer.name}: доставлено на склад`,
                 )
               }
-              onOpenInbox={() => {
-                setInteraction(null);
-                setUtility("inbox");
-              }}
+              onChoose={chooseDirectorEvent}
               onOpenContracts={() => navigate("scene_liaison")}
             />
           )}
@@ -1471,6 +1457,63 @@ function NavButton({
       <span>{label}</span>
       <small>{meta}</small>
     </button>
+  );
+}
+
+/** Лента событий без шапки экрана — встраивается во вкладку «Входящие» станции. */
+function DirectorEventList({
+  events,
+  busy,
+  onChoose,
+}: {
+  events: DirectorEvent[];
+  busy: boolean;
+  onChoose: (event: DirectorEvent, choice: string) => void;
+}) {
+  const { t } = useI18n();
+  const channelLabel = (channel: string) =>
+    channel === "inbox"
+      ? "ЛИЧНЫЙ КАНАЛ"
+      : channel === "supply"
+        ? "СНАБЖЕНИЕ"
+        : channel === "contract"
+          ? "КОНТРАКТНЫЙ КАНАЛ"
+          : channel.toUpperCase();
+  const sorted = [...events].sort(
+    (a, b) => (b.priority || 0) - (a.priority || 0),
+  );
+  const channels = Array.from(new Set(sorted.map((e) => e.channel)));
+  return (
+    <div className="station-inbox-feed">
+      {channels.map((channel) => {
+        const channelEvents = sorted.filter((e) => e.channel === channel);
+        return (
+          <section key={channel} className="director-inbox-channel">
+            <header className="director-inbox-channel-head">
+              <small>{channelLabel(channel)}</small>
+              <span>{channelEvents.length}</span>
+            </header>
+            <div className="director-inbox-list">
+              {channelEvents.map((event) => (
+                <DirectorEventCard
+                  key={event.id}
+                  event={event}
+                  busy={busy}
+                  onChoose={onChoose}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+      {!events.length && (
+        <div className="director-inbox-empty">
+          <i>○</i>
+          <strong>{t('game.ui.noNewIncoming')}</strong>
+          <span>{t('game.ui.inboxEmpty')}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -6484,7 +6527,7 @@ function SupplyView({
   inbox,
   busy,
   onBuy,
-  onOpenInbox,
+  onChoose,
   onOpenContracts,
 }: {
   scenario: Scenario;
@@ -6492,11 +6535,11 @@ function SupplyView({
   inbox: DirectorEvent[];
   busy: boolean;
   onBuy: (offer: ShopOffer) => void;
-  onOpenInbox: () => void;
+  onChoose: (event: DirectorEvent, choice: string) => void;
   onOpenContracts: () => void;
 }) {
   const { t } = useI18n();
-  const [tab, setTab] = useState<"overview" | "supply" | "storage">("overview");
+  const [tab, setTab] = useState<"overview" | "supply" | "storage" | "inbox">("overview");
   const modules = scenario.shop.filter(
     (offer) => offer.category === "laboratory",
   );
@@ -6535,6 +6578,13 @@ function SupplyView({
           {t('game.ui.overview')}
         </button>
         <button
+          className={tab === "inbox" ? "active" : ""}
+          onClick={() => setTab("inbox")}
+        >
+          {(t('game.ui.incoming') || 'Входящие').replace(/^\w/, (c) => c.toUpperCase())}
+          {inbox.length ? ` · ${inbox.length}` : ""}
+        </button>
+        <button
           className={tab === "supply" ? "active" : ""}
           onClick={() => setTab("supply")}
         >
@@ -6549,38 +6599,26 @@ function SupplyView({
       </nav>
       <div className="station-command-body">
         {tab === "overview" ? (
-          <section className="station-overview">
+          <section className="station-overview station-overview-3d">
             <div className="station-radial-panel station-radial-panel-3d">
               <Station3D
                 pois={buildStationPois({
                   contracts,
                   inbox,
                   shop: scenario.shop,
-                  onOpenInbox,
+                  onOpenInbox: () => setTab("inbox"),
                   onOpenContracts,
                   onOpenSupply: () => setTab("supply"),
                 })}
-                onOpenInbox={onOpenInbox}
+                onOpenInbox={() => setTab("inbox")}
                 onOpenContracts={onOpenContracts}
                 onOpenSupply={() => setTab("supply")}
               />
             </div>
-            <div className="station-operations">
-              <article className={inbox.length ? "attention" : ""}>
-                <header>
-                  <small>{t('game.ui.incoming')}</small>
-                  <b>{inbox.length}</b>
-                </header>
-                <strong>{inbox.length ? inbox[0].title : t('game.ui.channelClean')}</strong>
-                <p>
-                  {inbox.length
-                    ? inbox[0].body
-                    : t('game.ui.noNewIncomingDetailed')}
-                </p>
-                <button onClick={onOpenInbox}>
-                  {inbox.length ? t('game.ui.openInbox') : t('game.ui.checkChannel')}
-                </button>
-              </article>
+          </section>
+        ) : tab === "inbox" ? (
+          <section className="station-inbox">
+            <div className="station-inbox-side">
               <article className={activeContracts.length ? "active" : ""}>
                 <header>
                   <small>{t('game.ui.contracts')}</small>
@@ -6616,6 +6654,13 @@ function SupplyView({
                   {t('game.ui.openSupply')}
                 </button>
               </article>
+            </div>
+            <div className="station-inbox-events">
+              <DirectorEventList
+                events={inbox}
+                busy={busy}
+                onChoose={onChoose}
+              />
             </div>
           </section>
         ) : tab === "supply" ? (
