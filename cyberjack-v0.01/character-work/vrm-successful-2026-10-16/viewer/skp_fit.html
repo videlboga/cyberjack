@@ -1,0 +1,33 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>078 · примерка Rin</title><style>*{box-sizing:border-box}body{margin:0;display:flex;height:100vh;font:14px system-ui;background:#ced3da;color:#e7edf5}aside{width:300px;padding:20px;background:#191d24;overflow:auto}h1{font-size:20px}p{line-height:1.5;color:#bbc8d8}a{color:#a4c9ff}label{display:block;margin:16px 0}input[type=range]{width:100%}button{padding:10px;margin:6px 0;width:100%;background:#303947;color:inherit;border:1px solid #596678;border-radius:6px}main{flex:1;min-width:0}canvas{display:block}output{float:right}#status{white-space:pre-wrap}</style><script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script><aside><a href="./scene_objects.html?kind=skp">← Объекты</a><h1>078 · примерка Rin</h1><p>Одетая Rin, комплект 00. Нейтральная стоячая поза, естественный масштаб. Рамка обозначает габариты удалённой фигуры, а не скелетную позу.</p><label><input id="avatar-visible" type="checkbox" checked> Показать одетую Rin</label><label><input id="wire" type="checkbox"> Контуры механики</label><label><input id="reference" type="checkbox"> Габариты старого меша</label><label>Смещение X, м <output id="ox">0</output><input id="x" type="range" min="-2" max="2" step="0.01" value="0"></label><label>Смещение Y, м <output id="oy">0</output><input id="y" type="range" min="-2" max="2" step="0.01" value="0"></label><label>Смещение Z, м <output id="oz">0</output><input id="z" type="range" min="-2" max="2" step="0.01" value="0"></label><label>Поворот <output id="oa">0°</output><input id="a" type="range" min="-180" max="180" step="1" value="0"></label><button id="reset">Сбросить размещение</button><button id="frame">Показать целиком</button><p id="status" role="status">Загрузка механики и Rin…</p><p>Это проверка масштаба и размещения. Поза исходной STL-фигуры не переносится. Опоры, коллизии и анимация механизма пока не настроены.</p></aside><main></main><script type="module">
+import * as T from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin} from './node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+const $=s=>document.querySelector(s),stage=$('main'),scene=new T.Scene();scene.background=new T.Color(0xced3da);
+const camera=new T.PerspectiveCamera(40,1,.01,100),renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));stage.append(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
+scene.add(new T.HemisphereLight(0xffffff,0x7d8794,2));const light=new T.DirectionalLight(0xffffff,2.5);light.position.set(3,6,4);scene.add(light);
+const content=new T.Group();scene.add(content);const root=new T.Group();content.add(root);let vrm,base=new T.Vector3(),reference;
+new ResizeObserver(()=>{renderer.setSize(stage.clientWidth,stage.clientHeight);camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix()}).observe(stage);
+const clock=new T.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.033);vrm?.update(dt);controls.update();renderer.render(scene,camera)});
+function frame(){content.updateMatrixWorld(true);const b=new T.Box3();content.traverse(n=>{if(n.isMesh)b.union(new T.Box3().setFromObject(n,true))});const c=b.getCenter(new T.Vector3()),s=b.getSize(new T.Vector3()),r=Math.max(...s.toArray());controls.target.copy(c);camera.position.copy(c).add(new T.Vector3(r*1.4,r*.7,r*1.8));controls.update()}
+function place(){root.position.copy(base).add(new T.Vector3(+$ ('#x').value,+$('#y').value,+$('#z').value));root.rotation.y=T.MathUtils.degToRad(+$('#a').value);for(const id of ['x','y','z','a'])$('#o'+id).textContent=$('#'+id).value+(id==='a'?'°':'');root.updateMatrixWorld(true);if(window.fit)window.fit.position=root.position.toArray()}
+for(const id of ['x','y','z','a'])$('#'+id).oninput=place;
+$('#avatar-visible').onchange=()=>{root.visible=$('#avatar-visible').checked};$('#wire').onchange=()=>{content.traverse(n=>{if(n.isMesh&&!root.getObjectById(n.id))for(const m of(Array.isArray(n.material)?n.material:[n.material]))m.wireframe=$('#wire').checked})};
+$('#reset').onclick=()=>{for(const id of ['x','y','z','a'])$('#'+id).value=0;place();frame()};$('#frame').onclick=frame;$('#reference').onchange=()=>{if(reference)reference.visible=$('#reference').checked};
+try{
+ const loader=new GLTFLoader();loader.register(parser=>new VRMLoaderPlugin(parser));
+ const [mechanism,avatar,meta]=await Promise.all([new GLTFLoader().loadAsync('./scene-objects/skp-vol03/models/SexMachineModel-078.glb?v=materials-20261016-3'),loader.loadAsync('./models/x20/outfits/Rin_outfit_00.vrm'),fetch('./scene-objects/skp-vol03/metadata/SexMachineModel-078.json').then(r=>{if(!r.ok)throw Error('metadata '+r.status);return r.json()})]);
+ content.add(mechanism.scene);vrm=avatar.userData.vrm;if(!vrm)throw Error('VRM отсутствует');root.add(vrm.scene);
+ // Relax the arms from the neutral T pose; no pose is inferred from the static mannequin.
+ for(const [side,angle] of [['left',-1.1],['right',1.1]]){const b=vrm.humanoid.getNormalizedBoneNode(side+'UpperArm');if(b)b.rotation.z=angle}
+ vrm.update(0);root.updateMatrixWorld(true);
+ const bounds=meta.figureReferences[0].boundsMeters,oldBox=new T.Box3(new T.Vector3(...bounds.min),new T.Vector3(...bounds.max)),center=oldBox.getCenter(new T.Vector3()),avatarBox=new T.Box3().setFromObject(vrm.scene,true),ac=avatarBox.getCenter(new T.Vector3());
+ base.set(center.x-ac.x,oldBox.min.y-avatarBox.min.y,center.z-ac.z);place();
+ reference=new T.Box3Helper(oldBox,0x2e75be);reference.visible=false;scene.add(reference);
+ content.traverse(n=>{if(n.isMesh)n.frustumCulled=false;if(n.isLine)n.visible=false});
+ const floor=new T.GridHelper(6,30,0x929eac,0xb6c0cc);floor.position.set(center.x,oldBox.min.y-.005,center.z);scene.add(floor);
+ const height=avatarBox.max.y-avatarBox.min.y;window.fit={ready:true,model:'078',avatar:'Rin_outfit_00',scale:root.scale.toArray(),height,position:root.position.toArray(),reference:bounds};
+ $('#status').textContent=`Загружено: 078 + Rin 00.\nРост по геометрии: ${height.toFixed(2)} м.\nСтупни размещены на нижнем уровне старой фигуры. Совпадение опор требует отдельной настройки.`;frame();
+}catch(e){$('#status').textContent='Ошибка: '+e.message;window.fit={ready:false,error:e.message};console.error(e)}
+</script></html>

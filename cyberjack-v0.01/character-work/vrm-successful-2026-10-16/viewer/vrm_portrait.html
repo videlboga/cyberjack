@@ -1,0 +1,20 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>VRM Portrait</title><link rel="stylesheet" href="./vrm_studio.css?v=cast-outfits-8"><script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script><style>
+html,body{margin:0;background:transparent!important;overflow:hidden;width:100%;height:100%}
+.topbar{display:none!important}
+.workspace{display:block!important;width:100%;height:100%}
+.sidebar{display:none!important}
+.view-toolbar{display:none!important}
+.transport{display:none!important}
+#error{display:none!important}
+#toast{display:none!important}
+#loading{opacity:.55}
+#loading .camera-hint,#loading .stage-label{display:none}
+#stage{position:fixed;inset:0;background:transparent!important}
+.camera-hint{display:none!important}
+</style></head>
+<body>
+<div id="stage" class="stage"><div id="loading" class="loading"><strong id="loading-title">Открываю модель</strong><span id="loading-detail">Текстуры, скелет и физика</span></div></div>
+<aside class="sidebar" inert><div class="poses-section"><div id="pose-list"></div><span id="pose-count"></span><button id="tpose"></button><div id="source-info"></div><span id="pose-title"></span><span id="transport-name"></span></div><div class="model-section model-picker"><select id="outfit-select"></select><span id="outfit-info"></span><select id="model-select"></select><span id="model-status"></span><span id="model-format"></span><span id="model-size"></span></div><input id="collider-view" type="checkbox"><input id="skeleton-view" type="checkbox"><div id="physics-info"></div><small id="clip-id"></small><button id="play"></button><input id="timeline" type="range"><span id="timecode"></span><select id="speed"><option value="1">1</option></select><span id="transport-name"></span><button id="restart"></button><button id="screenshot"></button><button id="pick"></button><input id="file" type="file"><button id="physics"></button><button id="collisions"></button><button id="reset-physics"></button><div id="toast"></div><div id="error" hidden></div></aside>
+<script type="module" src="./vrm_studio.js?v=ru-titles-9"></script>
+<script type="module" src="./portrait-director.js?v=1"></script>
+</body></html>

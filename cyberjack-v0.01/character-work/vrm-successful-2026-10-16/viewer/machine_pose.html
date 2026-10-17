@@ -1,0 +1,152 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VRM внутри машин vol-03</title>
+<style>*{box-sizing:border-box}body{margin:0;display:flex;height:100vh;font:14px system-ui;background:#ced3da;color:#e7edf5}aside{width:300px;padding:18px;background:#191d24;overflow:auto}h1{font-size:19px}p{line-height:1.5;color:#bbc8d8;margin:6px 0}a{color:#a4c9ff}label{display:block;margin:12px 0}input[type=range]{width:100%}select,button{padding:7px;margin:4px 0;width:100%;background:#303947;color:inherit;border:1px solid #596678;border-radius:6px}main{flex:1;min-width:0}main canvas{display:block}output{float:right}#status{white-space:pre-wrap;color:#9fb3c8;margin-top:14px}.row{display:flex;gap:8px}.row>*{flex:1}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+<aside>
+<a href="./skp_fit.html">← Примерка 078</a> · <a href="./vrm_view.html">Рин Студио</a>
+<h1>VRM внутри машин</h1>
+<p>Позы по статичным фигурам-примерам машин vol-03. Файлы поз: figure-poses-2026-10-17.</p>
+<label>Машина <select id="machine">
+<option value="065">065 · капсула (лёжа на спине)</option>
+<option value="070">070 · консоль (полулёжа)</option>
+<option value="078">078 · платформа (на предплечьях)</option>
+<option value="087">087 · станок (верхом)</option>
+</select></label>
+<label>Персонаж <select id="char">
+<option value="x20/outfits/Rin_outfit_00.vrm">Rin · комплект 00</option>
+<option value="x20/outfits/Rin_outfit_01.vrm">Rin · платье 01</option>
+<option value="x20/outfits/Rin_outfit_02.vrm">Rin · розовый 02</option>
+<option value="x20/outfits/Rin_outfit_03.vrm">Rin · 03</option>
+<option value="x20/mira/Mira_outfit_00.vrm">Mira · 00</option>
+<option value="x20/kai/Kai_outfit_00.vrm">Kai · 00</option>
+</select></label>
+<label><input id="ghost" type="checkbox" checked> Подложка: машина-оригинал + фигура</label>
+<label><input id="machineVisible" type="checkbox" checked> Чистая механика</label>
+<label><input id="markers" type="checkbox"> Маркеры (якорь, габарит фигуры)</label>
+<label>Сдвиг X, м <output id="oox">0</output><input id="ox" type="range" min="-0.5" max="0.5" step="0.005" value="0"></label>
+<label>Сдвиг Y, м <output id="ooy">0</output><input id="oy" type="range" min="-0.5" max="0.5" step="0.005" value="0"></label>
+<label>Сдвиг Z, м <output id="ooz">0</output><input id="oz" type="range" min="-0.5" max="0.5" step="0.005" value="0"></label>
+<label>Поворот <output id="oyaw">0°</output><input id="yaw" type="range" min="-180" max="180" step="5" value="0"></label>
+<label>Масштаб ×<output id="osm">1.0</output><input id="sm" type="range" min="0.6" max="1.5" step="0.01" value="1"></label>
+<button id="frame">Показать целиком</button>
+<p id="status" role="status">Загрузка…</p>
+</aside><main id="stage"></main>
+<script type="module">
+import * as T from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin} from './node_modules/@pixiv/three-vrm/lib/three-vrm.module.js';
+const $=s=>document.querySelector(s),stage=$('#stage');
+const QS=new URLSearchParams(location.search);
+const scene=new T.Scene();scene.background=new T.Color(0xced3da);
+const camera=new T.PerspectiveCamera(40,1,.01,100),renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));stage.append(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
+scene.add(new T.HemisphereLight(0xffffff,0x7d8794,2));const dl=new T.DirectionalLight(0xffffff,2.4);dl.position.set(3,6,4);scene.add(dl);
+const content=new T.Group();scene.add(content);
+const machineGroup=new T.Group(),refGroup=new T.Group(),root=new T.Group();
+content.add(machineGroup);content.add(refGroup);content.add(root);refGroup.visible=false;
+const RIN_SPAN=0.3303;
+let vrm=null,pose=null,marked=null;
+new ResizeObserver(()=>{renderer.setSize(stage.clientWidth,stage.clientHeight);camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix()}).observe(stage);
+const clock=new T.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.033);vrm&&vrm.update(dt);controls.update();renderer.render(scene,camera)});
+function contentBox(){content.updateMatrixWorld(true);const b=new T.Box3();content.traverse(n=>{if(n.isMesh&&n.visible)b.union(new T.Box3().setFromObject(n,true))});return b}
+function setCam(az,el,distMul){const b=contentBox();const c=b.getCenter(new T.Vector3()),s=b.getSize(new T.Vector3()),r=Math.max(...s.toArray())||1;const a=T.MathUtils.degToRad(az),e=T.MathUtils.degToRad(el??18),d=(distMul??2.2)*r;camera.position.set(c.x+d*Math.cos(e)*Math.sin(a),c.y+d*Math.sin(e),c.z+d*Math.cos(e)*Math.cos(a));controls.target.copy(c);controls.update()}
+window.__mp={ready:false,setCam,frameAll,
+  debugProbe:()=>{
+    const out={rootChildren:root.children.length,vrm:!!vrm,pose:!!pose,machineChildren:machineGroup.children.length,refChildren:refGroup.children.length};
+    if(vrm){
+      vrm.scene.updateMatrixWorld(true);
+      const hips=vrm.humanoid.getNormalizedBoneNode('hips'),head=vrm.humanoid.getNormalizedBoneNode('head');
+      vrm.scene.updateMatrixWorld(true);
+      const p=new T.Vector3();
+      root.children[0].getWorldPosition(p);
+      out.vrmSceneW=p.toArray().map(v=>+v.toFixed(3));
+      let meshVisible=0,matCount=0;root.traverse(n=>{if(n.isMesh){meshVisible++;matCount++}});
+      const b=new T.Box3().setFromObject(root,true);
+      out.hipsW=hips?hips.getWorldPosition(new T.Vector3()).toArray().map(v=>+v.toFixed(3)):null;
+      const bp={};
+      for(const bn of ['head','leftLowerArm','leftHand','leftFoot','rightFoot','leftKnee']){}
+      const mk=(nm)=>{const n=vrm.humanoid.getNormalizedBoneNode(nm);return n?n.getWorldPosition(new T.Vector3()).toArray().map(v=>+v.toFixed(3)):null};
+      bp.head=mk('head');bp.handL=mk('leftHand');bp.handR=mk('rightHand');bp.footL=mk('leftFoot');bp.footR=mk('rightFoot');
+      out.bones=bp;
+      out.headW=head?head.getWorldPosition(new T.Vector3()).toArray().map(v=>+v.toFixed(3)):null;
+      out.rootWPos=root.getWorldPosition(new T.Vector3()).toArray().map(v=>+v.toFixed(3));
+      out.rootScale=root.scale.x;
+      out.rootBox={min:b.min.toArray().map(v=>+v.toFixed(2)),max:b.max.toArray().map(v=>+v.toFixed(2))};
+      out.meshesInRoot=meshVisible;
+    }
+    return out;
+  }};
+if(QS.get('cam'))(()=>{const az=QS.get('camaz')||'35',el=QS.get('camel')||'18';setTimeout(()=>setCam(+az,+el,+((QS.get('camdist')||'2.2'))),2600)})();
+// URL-управление контролами для QA-харнесса
+for(const [key,id] of [['ox','ox'],['oy','oy'],['oz','oz'],['yaw','yaw'],['sm','sm']]){
+  const v=QS.get(key);if(v!=null){const el2=$('#'+id);if(el2){el2.value=v;el2.dispatchEvent(new Event('input'))}}
+}
+if(QS.get('ghost')==='0'){$('#ghost').checked=false}
+if(QS.get('machineVisible')==='0'){$('#machineVisible').checked=false}
+if(QS.get('markers')==='1'){$('#markers').checked=true}
+// машина/персонаж из URL
+{const qM=QS.get('machine');if(qM){const sel=$('#machine');if([...sel.options].some(o=>o.value===qM))sel.value=qM}
+ const qC=QS.get('char');if(qC){const sel=$('#char');if([...sel.options].some(o=>o.value===qC))sel.value=qC}}
+function frameAll(){content.updateMatrixWorld(true);const b=new T.Box3();content.traverse(n=>{if(n.isMesh&&n.visible)b.union(new T.Box3().setFromObject(n,true))});const c=b.getCenter(new T.Vector3()),s=b.getSize(new T.Vector3()),r=Math.max(...s.toArray())||1;controls.target.copy(c);camera.position.copy(c).add(new T.Vector3(r*1.2,r*.55,r*(QS.get('cam')==='side'?2.2:1.8)));controls.update()}
+function clearGroup(g){g.traverse(n=>{if(n.isMesh)n.geometry&&n.geometry.dispose&&0});g.clear()}
+async function reload(){
+  $('#status').textContent='Загрузка…';vrm=null;pose=null;clearGroup(machineGroup);clearGroup(refGroup);root.clear();
+  const mid=$('#machine').value,char='./models/'+$('#char').value;
+  const lib='./scene-objects/skp-vol03/';
+  const loader=new GLTFLoader();loader.register(parser=>new VRMLoaderPlugin(parser));
+  const [machine, ref, vj, avatar] = await Promise.all([
+    new GLTFLoader().loadAsync(`${lib}models/SexMachineModel-${mid}.glb`),
+    new GLTFLoader().loadAsync(`${lib}reference-full/SexMachineModel-${mid}.glb`),
+    fetch(`${lib}figure-poses/pose-SexMachineModel-${mid}.json`).then(r=>{if(!r.ok)throw Error('pose '+r.status);return r.json()}),
+    loader.loadAsync(char)
+  ]);
+  // машина: непрозрачная копия (режим чистой механики)
+  machineGroup.add(machine.scene);
+  machine.scene.traverse(n=>{n.frustumCulled=false});
+  // подложка reference-full: машина полупрозрачна, фигура ясная
+  const stl=[];
+  ref.scene.traverse(n=>{if(n.isMesh){n.material=Array.isArray(n.material)?n.material.map(m=>{const c=m.clone();c.transparent=true;return c}):n.material;const mats=Array.isArray(n.material)?n.material:[n.material];if((n.name||'').toLowerCase().includes('stl'))stl.push(n);for(const m of mats){m.transparent=true;m.opacity=(n.name||'').toLowerCase().includes('stl')?.95:.10;m.depthWrite=(n.name||'').toLowerCase().includes('stl')}}});
+  refGroup.add(ref.scene);
+  vrm=avatar.userData.vrm;
+  if(!vrm)throw Error('VRM отсутствует');
+  root.add(vrm.scene);
+  pose=vj;
+  applyPose(true);
+  const vis=$('#machineVisible').checked;machineGroup.visible=vis;refGroup.visible=$('#ghost').checked;
+  frameAll();
+  $('#status').textContent=`Машина ${mid} · ${pose.notes}\nЯкорь-hips: ${pose.hipsPoint.map(v=>v.toFixed(3)).join(', ')}  масштаб ${pose.scale}, рост-костей RIN span ${RIN_SPAN.toFixed(3)}`;
+}
+function applyPose(recenter){
+  if(!vrm||!pose)return;
+  // измеряем raw (scale=1): hips/head в модельном пространстве
+  const keepScale=root.scale.x;
+  root.scale.setScalar(1);root.updateMatrixWorld(true);
+  const hips=vrm.humanoid.getNormalizedBoneNode('hips'),head=vrm.humanoid.getNormalizedBoneNode('head');
+  const hy=hips.getWorldPosition(new T.Vector3()).y;
+  const span=(head.getWorldPosition(new T.Vector3()).y-hy)||RIN_SPAN;
+  const scale=pose.scale*RIN_SPAN/span*(+$('#sm').value);
+  root.scale.setScalar(scale||keepScale);
+  root.position.set(pose.hipsPoint[0]+ +$('#ox').value, pose.hipsPoint[1]-hy*scale+ +$('#oy').value, pose.hipsPoint[2]+ +$('#oz').value);
+  for(const [bone,q] of Object.entries(pose.quats)){if(QS.get('pose')==='0')break;const b=vrm.humanoid.getNormalizedBoneNode(bone);if(b)b.quaternion.set(q[0],q[1],q[2],q[3])}
+  root.rotation.y=T.MathUtils.degToRad((+$('#yaw').value)+(pose.yawFix||0));
+  root.updateMatrixWorld(true);vrm.update(0);
+  for(const id of ['ox','oy','oz','yaw','sm']){const o=$('#o'+(id==='yaw'?'yaw':id==='sm'?'sm':'o'+id));if(o)o.textContent=$('#'+id).value+(id==='yaw'?'°':id==='sm'?'':'')}
+  // маркеры
+  if(marked){scene.remove(marked);marked=null}
+  if($('#markers').checked){
+    marked=new T.Group();
+    const sph=new T.Mesh(new T.SphereGeometry(.03,12,12),new T.MeshBasicMaterial({color:0xff2020}));
+    sph.position.set(pose.hipsPoint[0]+ +$('#ox').value,pose.hipsPoint[1]+ +$('#oy').value,pose.hipsPoint[2]+ +$('#oz').value);marked.add(sph);
+    const fb=pose.figBounds,bb=new T.Box3(new T.Vector3(...fb.min),new T.Vector3(...fb.max));
+    marked.add(new T.Box3Helper(bb,0x2e75be));
+    scene.add(marked);
+  }
+}
+['ox','oy','oz','yaw','sm'].forEach(id=>{ $('#'+id).oninput=applyPose });
+$('#ghost').onchange=()=>{refGroup.visible=$('#ghost').checked};
+$('#machineVisible').onchange=()=>{machineGroup.visible=$('#machineVisible').checked};
+$('#markers').onchange=applyPose;
+$('#machine').onchange=reload;$('#char').onchange=reload;
+$('#frame').onclick=frameAll;
+reload().then(()=>{window.__mp.ready=true}).catch(e=>{$('#status').textContent='Ошибка: '+e.message;window.__mp={ready:false,error:e.message};console.error(e)});
+</script></html>

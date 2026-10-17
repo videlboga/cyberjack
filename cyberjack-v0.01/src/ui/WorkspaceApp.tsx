@@ -7,6 +7,7 @@ import { SexMachineEffectsLab } from "./concepts/SexMachineEffectsLab";
 import { VocalizationAudit } from "./concepts/VocalizationAudit";
 import { MangaWorkbenchConcept } from "./concepts/MangaWorkbenchConcept";
 import { EnduranceLiquidDemo } from "./concepts/EnduranceLiquidDemo";
+import { FootTickleDemo } from "./concepts/FootTickleDemo";
 
 export function WorkspaceApp() {
   if (window.location.pathname.startsWith("/manga"))
@@ -19,6 +20,8 @@ export function WorkspaceApp() {
     );
   if (window.location.pathname === "/concept/endurance")
     return <EnduranceLiquidDemo />;
+  if (window.location.pathname === "/concept/foot-tickle")
+    return <FootTickleDemo />;
   if (window.location.pathname.startsWith("/concept/manga-workbench"))
     return <MangaWorkbenchConcept />;
   if (window.location.pathname === "/concept/vocalizations")
