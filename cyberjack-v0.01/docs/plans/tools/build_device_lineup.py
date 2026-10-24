@@ -42,6 +42,7 @@ def color_for(name, idx):
 
 
 def append_objects(path, names):
+    before = set(bpy.data.objects)
     with bpy.data.libraries.load(path, link=False) as (src, dst):
         dst.objects = [n for n in src.objects if n in names]
     added = [o for o in dst.objects if o]
@@ -58,6 +59,9 @@ def append_objects(path, names):
             o.parent = None
             o.matrix_world = mw
     bpy.context.view_layer.update()
+    # append тянет служебные меши (smd_bone_vis 4x4) — они висят в центре сцены
+    for o in [x for x in bpy.data.objects if x not in before and x not in added]:
+        bpy.data.objects.remove(o, do_unlink=True)
     return added
 
 
@@ -282,6 +286,13 @@ print('=== LINEUP ===')
 for r in report:
     print('DEV', r)
 
+# ряд по центру сцены, а не от нуля
+for o in bpy.data.objects:
+    if o.type == 'MESH':
+        o.data.transform(Matrix.Translation((-x / 2, 0, 0)))
+    else:
+        o.location = (o.location.x - x / 2, o.location.y, o.location.z)
+
 w = x
 bpy.ops.mesh.primitive_plane_add(size=w + 8, location=(w / 2, 0.8, -0.005))
 bpy.context.object.color = (0.33, 0.34, 0.35, 1)
@@ -307,7 +318,7 @@ cd.ortho_scale = w + 2.0
 cam = bpy.data.objects.new('C', cd)
 sc.collection.objects.link(cam)
 sc.camera = cam
-target_pt = Vector((w / 2, 0, 0.85))
+target_pt = Vector((0.0, 0, 0.85))
 cam.location = target_pt + Vector((-1.6, -11.0, 5.6))
 cam.rotation_euler = (target_pt - cam.location).to_track_quat('-Z', 'Y').to_euler()
 

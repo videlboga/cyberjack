@@ -44,6 +44,7 @@ def color_for(name, idx):
 
 
 def append_objects(path, names):
+    before = set(bpy.data.objects)
     with bpy.data.libraries.load(path, link=False) as (src, dst):
         dst.objects = [n for n in src.objects if n in names]
     added = [o for o in dst.objects if o]
@@ -60,6 +61,10 @@ def append_objects(path, names):
             o.parent = None
             o.matrix_world = mw
     bpy.context.view_layer.update()
+    # append тянет за собой родителей и служебные меши (smd_bone_vis и пр.) —
+    # они остаются висеть в центре сцены, поэтому удаляем всё лишнее
+    for o in [x for x in bpy.data.objects if x not in before and x not in added]:
+        bpy.data.objects.remove(o, do_unlink=True)
     return added
 
 
