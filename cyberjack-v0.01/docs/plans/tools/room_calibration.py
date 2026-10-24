@@ -70,6 +70,52 @@ def box(name, x0, x1, y0, y1, z0, z1, material):
     return o
 
 
+def bevel(obj, width, segments=2, angle=0.62):
+    """Фаска/скругление: без неё любая коробка читается как примитив."""
+    m = obj.modifiers.new('bevel', 'BEVEL')
+    m.width = width
+    m.segments = segments
+    m.limit_method = 'ANGLE'
+    m.angle_limit = angle
+    m.miter_outer = 'MITER_ARC'
+
+
+def smooth(obj):
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    try:
+        bpy.ops.object.shade_smooth_by_angle(angle=math.radians(35))
+    except Exception:
+        pass
+    obj.select_set(False)
+
+
+def finish_shapes():
+    """Один проход по всей сцене: скругления по размеру детали + сглаживание."""
+    for o in bpy.data.objects:
+        if o.type != 'MESH':
+            continue
+        n = o.name
+        if n.startswith('tile_'):
+            w, s = 0.004, 1
+        elif 'pillow' in n:
+            w, s = 0.050, 6
+        elif any(k in n for k in ('mattress', 'headrest')):
+            w, s = 0.030, 4
+        elif n.startswith(('panel_', 'stripe_', 'plinth_')):
+            w, s = 0.004, 1
+        elif any(k in n for k in ('couch_frame', 'cabinet_body', 'cart_', 'sink_body',
+                                 'slot_', 'monitor_', 'jamb', 'door_', 'corr_', 'wall_',
+                                 'light_', 'ceiling', 'floor_base')):
+            w, s = 0.012, 2
+        elif any(k in n for k in ('strap', 'handle', 'bag', 'bin', 'dispenser', 'basin')):
+            w, s = 0.005, 2
+        else:
+            w, s = 0.008, 2
+        bevel(o, w, s)
+        smooth(o)
+
+
 def cyl(name, x, y, z0, z1, r, material):
     bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=abs(z1 - z0),
                                         location=(x, y, (z0 + z1) / 2), vertices=20)
@@ -93,8 +139,9 @@ def build_shell():
             y += 0.61
         x += 0.61
     box('ceiling', X0, X1, Y0, Y1, H, H + 0.06, M_CEIL)
-    box('light_1', -2.2, -1.0, -0.8, 0.4, H - 0.03, H, M_LIGHT)
-    box('light_2', 0.8, 2.0, -0.8, 0.4, H - 0.03, H, M_LIGHT)
+    for i, (lx0, lx1) in enumerate(((-2.2, -1.0), (0.8, 2.0))):
+        box(f'light_frame_{i}', lx0 - 0.04, lx1 + 0.04, -0.84, 0.44, H - 0.05, H, M_STEEL)
+        box(f'light_{i}', lx0, lx1, -0.8, 0.4, H - 0.045, H - 0.005, M_LIGHT)
 
     walls = {'south': (Y0, -1, True), 'north': (Y1, 1, True),
              'west': (X0, -1, False), 'east': (X1, 1, False)}
@@ -174,14 +221,30 @@ def build_couch():
                                   (x0 + 0.12, y1 - 0.12), (x1 - 0.12, y1 - 0.12))):
         cyl(f'couch_leg_{i}', lx, ly, 0.06, COUCH_H - 0.16, 0.025, M_STEEL)
         cyl(f'couch_wheel_{i}', lx, ly, 0.0, 0.06, 0.045, M_PAINT)
-    box('couch_mattress', x0, x1, y0, y1, COUCH_H - 0.06, COUCH_H + 0.06, M_SOFT)
-    box('couch_headrest', x0, x0 + 0.42, y0 + 0.02, y1 - 0.02,
-        COUCH_H + 0.06, COUCH_H + 0.13, M_SOFT)
-    box('couch_pillow', x0 + 0.06, x0 + 0.36, y0 + 0.12, y1 - 0.12,
-        COUCH_H + 0.13, COUCH_H + 0.20, M_WHITE)
+    # мягкая юбка под матрасом: убирает эффект «плита на ножках»
+    box('couch_skirt', x0 - 0.02, x1 + 0.02, y0 - 0.02, y1 + 0.02,
+        COUCH_H - 0.10, COUCH_H + 0.02, M_SOFT)
+    box('couch_mattress', x0, x1, y0, y1, COUCH_H + 0.02, COUCH_H + 0.13, M_SOFT)
+    hx0, hx1 = x0, x0 + 0.42
+    box('couch_headrest', hx0, hx1, y0 + 0.02, y1 - 0.02,
+        COUCH_H + 0.13, COUCH_H + 0.20, M_SOFT)
+    box('couch_pillow', hx0 + 0.05, hx0 + 0.39, COUCH_Y - 0.29, COUCH_Y + 0.29,
+        COUCH_H + 0.20, COUCH_H + 0.30, M_WHITE)
+    # подголовник поднят на 12° вокруг внутренней кромки
+    pivot = Vector((hx1, COUCH_Y, COUCH_H + 0.13))
+    rot = (Matrix.Translation(pivot) @ Matrix.Rotation(math.radians(12), 4, 'Y')
+           @ Matrix.Translation(-pivot))
+    for n in ('couch_headrest', 'couch_pillow'):
+        o = bpy.data.objects[n]
+        o.data.transform(rot)
     for i, xc in enumerate((COUCH_X + 0.10, COUCH_X + 0.62)):
         box(f'couch_strap_{i}', xc - 0.035, xc + 0.035, y0 - 0.01, y1 + 0.01,
-            COUCH_H + 0.05, COUCH_H + 0.075, M_STRAP)
+            COUCH_H + 0.12, COUCH_H + 0.145, M_STRAP)
+    # поперечные связи и пульт на боковой штанге
+    for i, xx in enumerate((x0 + 0.10, x1 - 0.10)):
+        cyl(f'couch_rail_{i}', xx, COUCH_Y, COUCH_H - 0.30, COUCH_H - 0.26, 0.018, M_STEEL)
+    box('couch_pad', x1 - 0.26, x1 - 0.02, COUCH_Y + 0.30, COUCH_Y + 0.40,
+        COUCH_H - 0.02, COUCH_H + 0.06, M_PAINT)
 
 
 def build_monitor():
@@ -197,10 +260,15 @@ def build_monitor():
 def build_cabinet():
     x0, x1 = X0 + 0.02, X0 + 0.46
     y0, y1 = -1.15, -0.25
-    box('cabinet_body', x0, x1, y0, y1, 0.0, 2.0, M_PAINT)
-    box('cabinet_seam', x0 + 0.21, x0 + 0.23, y0 + 0.02, y1 - 0.02, 0.05, 1.95, M_SEAM)
-    for i, yy in enumerate((y0 + 0.20, y0 + 0.28)):
-        box(f'cabinet_handle_{i}', x1 - 0.02, x1 + 0.02, yy - 0.015, yy + 0.015, 1.05, 1.25, M_STEEL)
+    box('cabinet_body', x0, x1, y0, y1, 0.06, 1.98, M_PAINT)
+    box('cabinet_cap', x0 - 0.02, x1 + 0.02, y0 - 0.02, y1 + 0.02, 1.98, 2.04, M_PAINT)
+    box('cabinet_toe', x0, x1 - 0.02, y0, y1, 0.0, 0.06, M_PLINTH)
+    # створки впотай: полотно чуть меньше корпуса, по центру шов
+    ym = (y0 + y1) / 2
+    for i, (ya, yb) in enumerate(((y0 + 0.015, ym - 0.006), (ym + 0.006, y1 - 0.015))):
+        box(f'cabinet_door_{i}', x1 - 0.018, x1 - 0.002, ya, yb, 0.10, 1.94, M_PAINT)
+        box(f'cabinet_handle_{i}', x1 - 0.004, x1 + 0.024, ya + 0.04, ya + 0.06, 1.10, 1.34, M_STEEL)
+    box('cabinet_vent', x1 - 0.004, x1 + 0.002, y0 + 0.10, y1 - 0.10, 1.70, 1.86, M_SEAM)
 
 
 def build_sink():
@@ -213,16 +281,25 @@ def build_sink():
 
 
 def build_slots():
+    """Ниша под модуль: рамка с крепежом и питанием, а не глухая створка."""
     for i, yc in enumerate((-1.35, 0.55)):
-        box(f'slot_plate_{i}', X1 - 0.06, X1 - 0.02, yc - 0.55, yc + 0.55, 0.30, 1.85, M_SEAM)
-        box(f'slot_frame_{i}', X1 - 0.12, X1 - 0.06, yc - 0.60, yc + 0.60, 0.25, 1.90, M_STEEL)
-        box(f'slot_power_{i}', X1 - 0.16, X1 - 0.12, yc - 0.16, yc - 0.02, 1.00, 1.14, M_PAINT)
-        for k, dy in enumerate((-0.40, 0.40)):
-            cyl(f'slot_bolt_{i}_{k}', X1 - 0.10, yc + dy, 0.35, 0.39, 0.02, M_STEEL)
+        # рамка
+        box(f'slot_frame_{i}', X1 - 0.14, X1 - 0.04, yc - 0.62, yc + 0.62, 0.26, 1.72, M_STEEL)
+        # ниша (утоплена в стену)
+        box(f'slot_niche_{i}', X1 - 0.04, X1 - 0.01, yc - 0.54, yc + 0.54, 0.34, 1.64, M_SEAM)
+        # площадка под крепление
+        box(f'slot_pad_{i}', X1 - 0.17, X1 - 0.14, yc - 0.36, yc + 0.36, 0.40, 0.46, M_PAINT)
+        # питание и шина данных
+        box(f'slot_power_{i}', X1 - 0.19, X1 - 0.15, yc - 0.30, yc - 0.14, 1.02, 1.16, M_PAINT)
+        box(f'slot_data_{i}', X1 - 0.18, X1 - 0.15, yc + 0.10, yc + 0.24, 1.04, 1.14, M_ACCENT)
+        # бирка
+        box(f'slot_label_{i}', X1 - 0.16, X1 - 0.15, yc - 0.10, yc + 0.10, 1.34, 1.40, M_ACCENT)
+        for k, dy in enumerate((-0.48, 0.48)):
+            cyl(f'slot_bolt_{i}_{k}', X1 - 0.13, yc + dy, 0.32, 0.36, 0.018, M_STEEL)
 
 
 def build_misc():
-    box('stool_seat', -1.95, -1.60, -1.95, -1.60, 0.44, 0.48, M_SOFT)
+    cyl('stool_seat', -1.775, -1.775, 0.44, 0.48, 0.175, M_SOFT)
     for i, (sx, sy) in enumerate(((-1.92, -1.92), (-1.63, -1.92), (-1.92, -1.63), (-1.63, -1.63))):
         cyl(f'stool_leg_{i}', sx, sy, 0.0, 0.44, 0.012, M_STEEL)
     box('cart_body', 1.55, 2.15, -2.10, -1.65, 0.55, 0.60, M_STEEL)
@@ -244,6 +321,8 @@ build_cabinet()
 build_sink()
 build_slots()
 build_misc()
+
+finish_shapes()
 
 print('=== ROOM ===', f'{W} x {D} x {H} m', 'area', round(W * D, 1))
 print('COUCH', COUCH_L, COUCH_Wd, COUCH_H,
