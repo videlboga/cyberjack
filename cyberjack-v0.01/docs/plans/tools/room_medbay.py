@@ -45,18 +45,102 @@ def build_capsule():
     R.cyl('capsule_console_pole', 2.87, -0.85, 0.0, 1.05, 0.024, 'steel')
     R.cyl('capsule_console_base', 2.87, -0.85, 0.0, 0.05, 0.18, 'paint')
     R.box('capsule_console_screen', 2.69, 2.72, -0.92, -0.78, 1.08, 1.32, 'accent')
-    # наполнение капсулы: ложе, спинка, подголовник, жидкость
-    R.box('capsule_pad', 1.62, 2.38, -1.18, -0.52, 0.50, 0.60, 'soft')
-    R.box('capsule_back', 1.62, 2.38, -0.60, -0.50, 0.60, 1.24, 'soft')
-    R.box('capsule_head', 1.70, 2.30, -0.58, -0.46, 1.24, 1.42, 'white')
-    for i, dx in enumerate((1.68, 2.26)):
-        R.box(f'capsule_arm_{i}', dx, dx + 0.06, -1.16, -0.60, 0.60, 0.64, 'steel')
-    liquid = R.mat('med_liquid', (0.32, 0.62, 0.58), 0.06)
-    b = liquid.node_tree.nodes['Principled BSDF']
-    b.inputs['Alpha'].default_value = 0.20
-    liquid.surface_render_method = 'BLENDED'
-    R.cyl('capsule_liquid', 2.00, -0.85, 0.18, 1.50, 0.44, liquid, verts=32)
+    # внутри капсулы только персонаж: ложе и жидкость убраны
     print('CAPSULE', [round(v, 2) for v in info['size']], info['tris'])
+
+
+def build_patient():
+    """Персонаж внутри капсулы: VRM-модель, руки опущены, рост 1.72."""
+    candidates = [
+        os.path.abspath(os.path.join(HERE, '..', '..', '..', '..', 'assets', '3d',
+                                     'converted', 'anna_nude.glb')),
+        '/home/cyberkitty/Projects/cyberjack/assets/3d/converted/anna_nude.glb',
+    ]
+    path = next((p for p in candidates if os.path.exists(p)), None)
+    if not path:
+        print('PATIENT MISS: anna_nude.glb не найден')
+        return
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [o for o in bpy.data.objects if o not in before]
+    all_meshes = [o for o in new if o.type == 'MESH']
+    # в VRM приезжает служебная плоскость 2x2 без скина — она ломает габарит
+    meshes = [o for o in all_meshes if any(m.type == 'ARMATURE' for m in o.modifiers)]
+    for o in [x for x in all_meshes if x not in meshes]:
+        bpy.data.objects.remove(o, do_unlink=True)
+    new = [o for o in bpy.data.objects if o not in before]
+    arm = next((o for o in new if o.type == 'ARMATURE'), None)
+    for o in new:
+        o.name = 'med_patient_' + o.name
+
+    def measure():
+        """Габарит по деформированной сетке: армтура меняет позу, а не вершины."""
+        bpy.context.view_layer.update()
+        dg = bpy.context.evaluated_depsgraph_get()
+        pts = []
+        for o in meshes:
+            ev = o.evaluated_get(dg)
+            me = ev.to_mesh()
+            pts += [ev.matrix_world @ v.co for v in me.vertices]
+            ev.to_mesh_clear()
+        if not pts:
+            return (0, 0, 0, 0)
+        return (max(p.x for p in pts) - min(p.x for p in pts),
+                max(p.y for p in pts) - min(p.y for p in pts),
+                min(p.z for p in pts), max(p.z for p in pts))
+
+    # руки вниз: подбираем ось и знак поворота плеч по минимальной ширине модели
+    best = None
+    if arm:
+        bpy.context.view_layer.objects.active = arm
+        bpy.ops.object.mode_set(mode='POSE')
+        for pb in arm.pose.bones:
+            pb.rotation_mode = 'XYZ'
+        for axis in (0, 1, 2):
+            for sgn in (1, -1):
+                for ang in (55, 70, 85):
+                    for pb in arm.pose.bones:
+                        pb.rotation_euler = (0, 0, 0)
+                        pb.matrix_basis.identity()
+                    for side, ssgn in (('L', sgn), ('R', -sgn)):
+                        pb = arm.pose.bones.get(f'J_Bip_{side}_UpperArm')
+                        if not pb:
+                            continue
+                        e = [0.0, 0.0, 0.0]
+                        e[axis] = math.radians(ang * ssgn)
+                        pb.rotation_euler = e
+                    w, d, z0, z1 = measure()
+                    if best is None or w < best[0]:
+                        best = (w, d, axis, sgn, ang)
+        # ставим лучшую комбинацию
+        for pb in arm.pose.bones:
+            pb.rotation_euler = (0, 0, 0)
+            pb.matrix_basis.identity()
+        w, d, axis, sgn, ang = best
+        for side, ssgn in (('L', sgn), ('R', -sgn)):
+            pb = arm.pose.bones.get(f'J_Bip_{side}_UpperArm')
+            if not pb:
+                continue
+            e = [0.0, 0.0, 0.0]
+            e[axis] = math.radians(ang * ssgn)
+            pb.rotation_euler = e
+        bpy.ops.object.mode_set(mode='OBJECT')
+        print('POSE best axis', axis, 'sign', sgn, 'angle', ang, 'width', round(w, 2))
+
+    w, d, z0, z1 = measure()
+    k = 1.66 / (z1 - z0)      # рост под внутреннюю высоту капсулы
+    pts = [o.matrix_world @ v.co for o in meshes for v in o.data.vertices]
+    cx = (min(p.x for p in pts) + max(p.x for p in pts)) / 2
+    cy = (min(p.y for p in pts) + max(p.y for p in pts)) / 2
+    for o in new:
+        o.matrix_world = (Matrix.Translation((2.00, -0.85, 0.16))
+                          @ Matrix.Scale(k, 4)
+                          @ Matrix.Translation((-cx, -cy, -z0))
+                          @ o.matrix_world)
+    bpy.context.view_layer.update()
+    w, d, z0, z1 = measure()
+    print('PATIENT', 'h', round(z1 - z0, 2), 'w', round(w, 2),
+          'tris', sum(len(o.data.polygons) for o in meshes))
 
 
 def disc(name, x, y, z, r, depth, axis, mat):
@@ -150,6 +234,7 @@ R.shell()
 R.doorway()
 R.ceiling_lights([(-2.30, -1.10, -0.90, 0.30), (0.70, 1.90, -0.90, 0.30)])
 build_capsule()
+build_patient()
 build_capsule_station()
 build_couch()
 build_storage()
