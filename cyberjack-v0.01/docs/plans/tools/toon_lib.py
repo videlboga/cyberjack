@@ -16,14 +16,15 @@ from mathutils import Vector
 
 # --- палитра: аниме-станция (Genshin/HSR-подобная) ---------------------------
 P = {
-    'wall':    (0.96, 0.90, 0.79),   # тёплый кремовый пластик
+    'wall':    (0.92, 0.88, 0.80),   # тёплый кремовый пластик
     'wall_hi': (0.99, 0.97, 0.92),   # верхняя подсвеченная панель
-    'wall_c':  (0.78, 0.82, 0.90),   # холодная вставка
+    'wall_c':  (0.78, 0.81, 0.87),   # холодная вставка
     'floor':   (0.90, 0.88, 0.84),
+    'floor_d': (0.56, 0.58, 0.62),   # тёмный пол для контраста с белыми стенами
     'metal':   (0.70, 0.76, 0.86),   # шпангоуты, рамки, трубы
     'metal_d': (0.44, 0.48, 0.60),
     'dark':    (0.15, 0.17, 0.24),   # пазы, ручки, тени-детали
-    'teal':    (0.10, 0.82, 0.74),   # основной акцент, светится
+    'teal':    (0.14, 0.78, 0.70),   # основной акцент, светится
     'cyan':    (0.45, 0.93, 1.00),   # иллюминатор, голограммы
     'amber':   (1.00, 0.62, 0.20),   # предупреждающие метки
     'rose':    (1.00, 0.55, 0.62),   # редкий второй акцент (аниме-контраст)
@@ -32,7 +33,7 @@ P = {
     'space':   (0.04, 0.06, 0.14),
 }
 # тень уходит в сине-фиолетовый — главный признак аниме-подачи
-SHADOW_TINT = (0.62, 0.62, 0.92)
+SHADOW_TINT = (0.70, 0.68, 0.86)
 RIM_COLOR = (0.80, 0.95, 1.00)
 
 # роль -> (цвет, тона, свечение, контровой)
@@ -40,6 +41,7 @@ ROLES = {
     'wall':    ('wall', 2, 0.0, 0.10),
     'wall_c':  ('wall_c', 2, 0.0, 0.10),
     'floor':   ('floor', 2, 0.0, 0.06),
+    'floor_d': ('floor_d', 2, 0.0, 0.08),
     'metal':   ('metal', 3, 0.0, 0.35),
     'metal_d': ('metal_d', 2, 0.0, 0.30),
     'dark':    ('dark', 2, 0.0, 0.25),
@@ -54,7 +56,7 @@ ROLES = {
 
 
 class Toon:
-    def __init__(self, shadow=0.58, ink=(0.055, 0.06, 0.12)):
+    def __init__(self, shadow=0.50, ink=(0.09, 0.09, 0.16)):
         self.shadow = shadow
         self.ink = ink
         self.M = {}
@@ -81,17 +83,26 @@ class Toon:
         nt.links.new(diff.outputs['BSDF'], s2.inputs['Shader'])
 
         ramp = nt.nodes.new('ShaderNodeValToRGB')
-        ramp.color_ramp.interpolation = 'CONSTANT'
+        ramp.color_ramp.interpolation = 'EASE'      # мягкая граница тонов, не «вырубка»
         e = ramp.color_ramp.elements
         dark = tuple(min(1.0, color[i] * SHADOW_TINT[i] * self.shadow) for i in range(3))
+        mid = tuple(min(1.0, color[i] * (SHADOW_TINT[i] ** 0.45) * 0.74) for i in range(3))
         e[0].position, e[0].color = 0.0, (*dark, 1)
-        e[1].position, e[1].color = 0.30, (*color, 1)
-        if tones >= 3:
-            el = e.new(0.34)
-            el.color = (*(min(1.0, color[i] * 0.80 * SHADOW_TINT[i] ** 0.5)
-                          for i in range(3)), 1)
+        e[1].position, e[1].color = 0.46, (*color, 1)
+        em_ = e.new(0.34)
+        em_.color = (*mid, 1)
         nt.links.new(s2.outputs['Color'], ramp.inputs['Fac'])
         col_out = ramp.outputs['Color']
+        # AO: тёмные стыки и углы — то, что отличает аниме-рендер от мультика
+        ao = nt.nodes.new('ShaderNodeAmbientOcclusion')
+        ao.inputs['Distance'].default_value = 0.55
+        ao.samples = 8
+        ao_mix = nt.nodes.new('ShaderNodeMixRGB')
+        ao_mix.blend_type = 'MULTIPLY'
+        ao_mix.inputs['Fac'].default_value = 0.8
+        nt.links.new(col_out, ao_mix.inputs['Color1'])
+        nt.links.new(ao.outputs['Color'], ao_mix.inputs['Color2'])
+        col_out = ao_mix.outputs['Color']
 
         if rim > 0:
             lw = nt.nodes.new('ShaderNodeLayerWeight')
@@ -143,7 +154,7 @@ class Toon:
 
     # --- свет ---------------------------------------------------------------
     @staticmethod
-    def lights(sc, key=2.6, fill=0.55, ambient=0.22,
+    def lights(sc, key=1.05, fill=0.30, ambient=0.26,
                key_vec=(0.35, 0.85, -0.55), fill_vec=(-0.45, -0.75, -0.30)):
         """Свет задаётся НАПРАВЛЕНИЕМ луча (куда светит), а не углами Эйлера."""
         def sun(name, energy, vec, color):
@@ -180,11 +191,11 @@ class Toon:
         ls = fs.linesets[0] if fs.linesets else fs.linesets.new('ink')
         ls.select_silhouette = True
         ls.select_border = True
-        ls.select_crease = True
+        ls.select_crease = False
         ls.select_edge_mark = False
         ls.select_contour = True
         style = bpy.data.linestyles.get('toon_ink_style') or bpy.data.linestyles.new('toon_ink_style')
-        style.color = (0.04, 0.045, 0.10)
+        style.color = (0.13, 0.13, 0.20)
         style.thickness = max(1.0, thickness)
         ls.linestyle = style
 
@@ -210,7 +221,7 @@ class Toon:
         sc.render.engine = 'BLENDER_EEVEE_NEXT'
         sc.render.resolution_x, sc.render.resolution_y = res
         sc.eevee.taa_render_samples = samples
-        sc.eevee.use_raytracing = False
+        sc.eevee.use_raytracing = True
         sc.view_settings.view_transform = 'Standard'
         sc.view_settings.look = 'None'
         sc.view_settings.exposure = exposure

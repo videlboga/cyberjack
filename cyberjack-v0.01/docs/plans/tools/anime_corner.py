@@ -163,6 +163,49 @@ box('bench_leg_l', -1.80, -1.68, 0.62, 0.98, 0.0, 0.42, 'metal_d', 0.02)
 box('bench_leg_r', -0.47, -0.35, 0.62, 0.98, 0.0, 0.42, 'metal_d', 0.02)
 box('hazard', -3.05, -2.60, 4.52, 4.56, 0.0, 0.06, 'amber', 0.004)
 
+
+# --- детализация: швы, вентиляция, горбыли, кабели, разметка -----------------
+# горизонтальный шов панелей и линия стыка
+box('seam_h', -3.4, 3.4, 4.52, 4.56, 1.34, 1.38, 'metal_d', 0.004)
+box('seam_h2', -3.4, 3.4, 4.52, 4.56, 2.28, 2.32, 'metal_d', 0.004)
+# швы пола
+for i in range(1, 5):
+    box(f'floor_seam_{i}', -3.4, 3.4, -0.4 + i * 0.95, -0.4 + i * 0.95 + 0.012,
+        0.0, 0.002, 'metal_d')
+# вентиляционные решётки в панелях
+for i, x in enumerate((-2.9, 1.55)):
+    for j in range(5):
+        box(f'vent_{i}_{j}', x, x + 0.42, 4.52, 4.55,
+            0.55 + j * 0.06, 0.55 + j * 0.06 + 0.028, 'dark')
+# горбыли у пола: узлы, коробки, патрубки
+grebles = [(-3.30, 0.10, 0.55, 0.34), (-2.10, 0.08, 0.30, 0.22), (1.95, 0.12, 0.62, 0.30),
+           (2.70, 0.10, 0.36, 0.26), (-1.30, 0.09, 0.24, 0.42)]
+for i, (x, d, w, h) in enumerate(grebles):
+    box(f'greeble_{i}', x, x + w, 4.60 - d, 4.60, 0.16, 0.16 + h, 'metal_d', 0.01)
+    box(f'greeble_led_{i}', x + 0.04, x + 0.10, 4.60 - d - 0.01, 4.60 - d, 0.16 + h - 0.10,
+        0.16 + h - 0.05, 'teal', 0.002)
+# кабельный канал по стене с хомутами
+box('cable_duct', -3.15, 3.15, 4.50, 4.56, 2.42, 2.52, 'metal_d', 0.008)
+for i, x in enumerate((-2.6, -1.4, -0.2, 1.0, 2.2)):
+    box(f'duct_clip_{i}', x - 0.03, x + 0.03, 4.49, 4.56, 2.40, 2.54, 'metal', 0.005)
+# разметка: жёлтая полоса у проёма и предупреждающий треугольник
+box('hazard_strip', -3.05, -2.60, 4.52, 4.56, 0.16, 0.22, 'amber', 0.004)
+# малый терминал на стене справа
+box('term_body', 2.55, 3.05, 4.42, 4.52, 1.05, 1.55, 'wall', 0.02)
+box('term_scr', 2.60, 3.00, 4.41, 4.42, 1.15, 1.45, 'teal', 0.004)
+for j in range(3):
+    box(f'term_btn_{j}', 2.62 + j * 0.12, 2.70 + j * 0.12, 4.40, 4.41, 0.96, 1.02,
+        'metal', 0.004)
+# ящик и инструментальный кейс на полу
+box('crate', -2.95, -2.35, 0.15, 0.75, 0.0, 0.52, 'metal_d', 0.02)
+box('crate_lid', -2.97, -2.33, 0.13, 0.77, 0.52, 0.58, 'metal', 0.012)
+box('crate_latch', -2.72, -2.58, 0.73, 0.77, 0.30, 0.40, 'teal', 0.006)
+box('case', 1.95, 2.45, 1.10, 1.45, 0.0, 0.30, 'dark', 0.02)
+box('case_handle', 2.10, 2.30, 1.06, 1.10, 0.22, 0.28, 'metal', 0.006)
+# потолочные мелочи: датчики, спринклеры
+for i, x in enumerate((-2.2, 0.2, 2.2)):
+    cyl(f'sensor_{i}', x, 1.4, 2.90, 2.95, 0.05, 'metal_d', verts=16)
+
 # --- свет, камера, рендер ----------------------------------------------------
 T.lights(sc, key=1.10, fill=0.36, ambient=0.40)
 cd = bpy.data.cameras.new('cam')
@@ -173,17 +216,19 @@ cam.location = (-0.85, -3.55, 1.48)
 cam.rotation_euler = (math.radians(88), 0, math.radians(3))
 sc.camera = cam
 
-T.render_setup(sc, res=(1680, 940), samples=32, exposure=-0.05, bloom=(1.15, 4))
-T.freestyle(sc, thickness=1.9)
+T.render_setup(sc, res=(1680, 940), samples=32, exposure=-0.02, bloom=(1.2, 4))
+T.freestyle(sc, thickness=1.2)
 sc.render.filepath = os.path.join(OUT, 'anime_corner_fs.png')
 bpy.ops.render.render(write_still=True)
 print('RENDERED anime_corner_fs.png')
 
-# тот же кадр на hull-контуре — сравнить, что надёжнее
-sc.render.use_freestyle = False
-T.outline_hull(sc, thickness=0.006, skip_prefix=('floor_inlay', 'win_mark', 'hazard',
-                                                 'light_', 'cap_inner'))
-sc.render.filepath = os.path.join(OUT, 'anime_corner_hull.png')
+# вариант «cel-lite»: инк тоньше, тёмный пол, контраст по крупным плоскостям
+for o in list(sc.objects):
+    if o.type == 'MESH' and o.name in ('floor', 'floor_band'):
+        T.apply(o, 'floor_d')
+sc.view_settings.exposure = -0.10
+T.freestyle(sc, thickness=0.8)
+sc.render.filepath = os.path.join(OUT, 'anime_corner_lite.png')
 bpy.ops.render.render(write_still=True)
-print('RENDERED anime_corner_hull.png')
+print('RENDERED anime_corner_lite.png')
 print('DONE')
