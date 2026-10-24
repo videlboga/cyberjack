@@ -211,13 +211,36 @@ class Kit:
         self.tag(f'{name}_tag', x0 + 0.09, x0 + 0.19, y0 - 0.004, y0, z1 - 0.075, z1 - 0.045,
                  'orange')
 
-    def blob(self, name, x0, x1, y0, y1, layers=3, pad=0.10, z=0.004):
-        """Контактная тень: вложенные скруглённые плашки, мягкий ореол."""
-        roles = ('shade1', 'shade2', 'shade3')
-        for i in range(min(layers, 3)):
-            p = pad * (layers - i) * 0.55
-            self.rbox(f'{name}_sh{i}', x0 - p, x1 + p, y0 - p, y1 + p,
-                      z + i * 0.0008, z + i * 0.0008 + 0.0012, roles[i], r=0.16, segs=5)
+    def blob(self, name, x0, x1, y0, y1, layers=6, pad=0.30, z=0.004,
+             shift=(-0.040, 0.030)):
+        """Контактная тень: до 6 скруглённых плашек, длинная мягкая растяжка."""
+        roles = ('shade1', 'shade2', 'shade3', 'shade4', 'shade5', 'shade6')
+        n = max(1, min(layers, 6))
+        for i in range(n):
+            p = pad * (n - i) * 0.5
+            k = i / max(1, n - 1)
+            self.rbox(f'{name}_sh{i}', x0 - p + shift[0] * k, x1 + p + shift[0] * k,
+                      y0 - p + shift[1] * k, y1 + p + shift[1] * k,
+                      z + i * 0.0006, z + i * 0.0006 + 0.0010, roles[i], r=0.18, segs=5)
+
+    def drop(self, name, x0, x1, y_wall, z0, h=0.22, layers=3, pad=0.05):
+        """Мягкая тень на стене ПОД настенным прибором (3 полосы вниз)."""
+        roles = ('shade2', 'shade3', 'shade4')
+        for i in range(layers):
+            hh = h * (layers - i) / layers
+            p = pad * (layers - i) / layers
+            self.box(f'{name}_dz{i}', x0 - p, x1 + p, y_wall - 0.006, y_wall - 0.0015,
+                     z0 - hh, z0 + 0.004, roles[i], 0.0)
+
+    def corner(self, name, axis, fixed, a0, a1, z0=0.0, h=0.06, w=0.16, layers=2):
+        """Тень в стыке пол-стена: узкая полоса вдоль плинтуса."""
+        roles = ('shade3', 'shade4')
+        for i in range(layers):
+            d = w * (layers - i) / layers
+            if axis == 'X':
+                self.box(f'{name}_cz{i}', a0, a1, fixed, fixed + d, z0, z0 + 0.002, roles[i], 0.0)
+            else:
+                self.box(f'{name}_cz{i}', fixed, fixed + d, a0, a1, z0, z0 + 0.002, roles[i], 0.0)
 
     def grille(self, prefix, x0, x1, y0, y1, z0, z1, n=6, role='mid'):
         for k in range(n):

@@ -315,16 +315,31 @@ K.cyl('arm_j2', 1.20, Y1 - 1.10, 1.82, 1.94, 0.06, 'metal_d', verts=18, axis='Y'
 K.box('arm_seg2', 1.16, 1.24, Y1 - 1.10, Y1 - 1.55, 1.60, 1.86, 'metal', 0.012)
 K.screen('arm_hmi', 0.95, 1.45, Y1 - 1.62, Y1 - 1.55, 1.42, 1.62, face='-Y')
 
+# --- тени: стыки пол-стена и падающие от настенных приборов -----------------
+K.corner('cor_n', 'X', Y1 - 0.03, X0, X1, w=0.22)
+K.corner('cor_e', 'Y', X1 - 0.03, Y0, Y1, w=0.22)
+K.corner('cor_w', 'Y', X0 + 0.006, Y0, Y1, w=0.22)
+
+# под каждым настенным прибором/кластером/экраном
+for i, x in enumerate((-3.05, -1.65, -0.25, 1.15, 2.55)):
+    K.drop(f'dp_wd{i}', x, x + 0.30, Y1 - 0.04, 2.10, h=0.20)
+for i, (x, z, w) in enumerate(((-2.35, 1.28, 0.46), (-0.35, 1.36, 0.40), (2.45, 1.24, 0.44))):
+    K.drop(f'dp_cl{i}', x, x + w, Y1 - 0.03, z, h=0.28, pad=0.07)
+for i, (x0, x1, z0) in enumerate(((-3.55, -2.35, 1.35), (1.55, 1.95, 1.60))):
+    K.drop(f'dp_ws{i}', x0, x1, Y1 - 0.04, z0, h=0.24, pad=0.06)
+for i, (x, z) in enumerate(((-3.45, 2.32), (-2.15, 2.32), (0.85, 2.32), (2.35, 2.32))):
+    K.drop(f'dp_wt{i}', x, x + 0.22, Y1 - 0.04, z, h=0.16)
+
 # --- контактные тени --------------------------------------------------------
-K.blob('bl_couch', CX - L / 2, CX + L / 2, CY - Wd / 2, CY + Wd / 2, layers=3, pad=0.16)
-K.blob('bl_cart', -3.15, -2.55, -1.98, -1.37, layers=2, pad=0.10)
-K.blob('bl_stool', 1.75, 2.15, -0.90, -0.50, layers=2, pad=0.09)
-K.blob('bl_ward', 2.85, 3.70, 1.55, 2.05, layers=2, pad=0.08)
-K.blob('bl_sink', 2.95, 3.55, -1.10, -0.50, layers=2, pad=0.09)
-K.blob('bl_mon', -2.95, -2.35, 1.60, 2.20, layers=2, pad=0.10)
-K.blob('bl_iv', -1.52, -1.08, 1.33, 1.77, layers=3, pad=0.12)
-K.blob('bl_icart', 1.45, 2.00, 1.35, 1.95, layers=2, pad=0.09)
-K.blob('bl_under', -1.20, 1.55, 3.30, 3.90, layers=2, pad=0.10)
+K.blob('bl_couch', CX - L / 2, CX + L / 2, CY - Wd / 2, CY + Wd / 2, layers=6, pad=0.26)
+K.blob('bl_cart', -3.15, -2.55, -1.98, -1.37, layers=6, pad=0.18)
+K.blob('bl_stool', 1.75, 2.15, -0.90, -0.50, layers=6, pad=0.16)
+K.blob('bl_ward', 2.85, 3.70, 1.55, 2.05, layers=6, pad=0.14)
+K.blob('bl_sink', 2.95, 3.55, -1.10, -0.50, layers=6, pad=0.16)
+K.blob('bl_mon', -2.95, -2.35, 1.60, 2.20, layers=6, pad=0.18)
+K.blob('bl_iv', -1.52, -1.08, 1.33, 1.77, layers=6, pad=0.18)
+K.blob('bl_icart', 1.45, 2.00, 1.35, 1.95, layers=6, pad=0.16)
+K.blob('bl_under', -1.20, 1.55, 3.30, 3.90, layers=6, pad=0.16)
 
 # --- камера и рендер --------------------------------------------------------
 I.lights(sc)
@@ -344,7 +359,7 @@ sc.collection.children.link(_near)
 sc.collection.children.link(_far)
 _cam = Vector(cam.location)
 for _o in list(sc.objects):
-    if _o.type not in {'MESH', 'CURVE'} or '_sh' in _o.name:
+    if _o.type not in {'MESH', 'CURVE'} or any(t in _o.name for t in ('_sh', '_dz', '_cz')):
         continue
     _d = (_o.matrix_world.translation - _cam).length
     (_near if _d < 2.9 else _far).objects.link(_o)
