@@ -18,6 +18,9 @@ from room_kit import RoomKit     # noqa: E402
 bpy.ops.wm.read_factory_settings(use_empty=True)
 R = RoomKit(W=6.4, D=5.2, door_at=0.0, prefix='med_')
 
+CAP_X, CAP_Y = 1.85, -0.85     # центр капсулы
+CAP_R, CAP_H = 0.63, 2.42      # радиус и высота: 0.13 + 2.42 = 2.55 при потолке 2.70
+
 # --- оборудование -----------------------------------------------------------
 def assign_materials(prefix):
     for o in bpy.data.objects:
@@ -35,11 +38,15 @@ def assign_materials(prefix):
 
 
 def build_capsule():
-    objs, info = K.build_device(K.DEVICES['capsule'], (2.00, -0.85), yaw=0, prefix='med_capsule_')
+    spec = dict(K.DEVICES['capsule'])
+    spec['target'] = (CAP_R * 2, CAP_R * 2, CAP_H)
+    objs, info = K.build_device(spec, (CAP_X, CAP_Y), yaw=0, prefix='med_capsule_')
     assign_materials('med_capsule_')
-    # площадка и подиум под капсулу
-    R.box('capsule_plinth', 1.35, 2.65, -1.50, -0.20, 0.0, 0.10, 'paint')
-    R.box('capsule_plinth_lip', 1.31, 2.69, -1.54, -0.16, 0.10, 0.13, 'steel')
+    # подиум под капсулу
+    R.box('capsule_plinth', CAP_X - CAP_R - 0.10, CAP_X + CAP_R + 0.10,
+          CAP_Y - CAP_R - 0.10, CAP_Y + CAP_R + 0.10, 0.0, 0.10, 'paint')
+    R.box('capsule_plinth_lip', CAP_X - CAP_R - 0.14, CAP_X + CAP_R + 0.14,
+          CAP_Y - CAP_R - 0.14, CAP_Y + CAP_R + 0.14, 0.10, 0.13, 'steel')
     # пульт капсулы на стойке рядом
     R.box('capsule_console', 2.72, 3.02, -0.95, -0.75, 1.05, 1.35, 'paint')
     R.cyl('capsule_console_pole', 2.87, -0.85, 0.0, 1.05, 0.024, 'steel')
@@ -128,12 +135,12 @@ def build_patient():
         print('POSE best axis', axis, 'sign', sgn, 'angle', ang, 'width', round(w, 2))
 
     w, d, z0, z1 = measure()
-    k = 1.66 / (z1 - z0)      # рост под внутреннюю высоту капсулы
+    k = 1.66 / (z1 - z0)      # рост с запасом под крышку капсулы
     pts = [o.matrix_world @ v.co for o in meshes for v in o.data.vertices]
     cx = (min(p.x for p in pts) + max(p.x for p in pts)) / 2
     cy = (min(p.y for p in pts) + max(p.y for p in pts)) / 2
     for o in new:
-        o.matrix_world = (Matrix.Translation((2.00, -0.85, 0.16))
+        o.matrix_world = (Matrix.Translation((CAP_X, CAP_Y, 0.16))
                           @ Matrix.Scale(k, 4)
                           @ Matrix.Translation((-cx, -cy, -z0))
                           @ o.matrix_world)
@@ -184,15 +191,16 @@ def build_capsule_station():
     # порты на восточной стороне капсулы
     for i, (py, pz, m) in enumerate(((-1.20, 1.28, 'accent'), (-1.05, 1.02, 'steel'),
                                      (-0.90, 0.74, 'white'))):
-        disc(f'port_{i}', 2.50, py, pz, 0.040, 0.09, 'x', 'steel')
-        disc(f'port_collar_{i}', 2.545, py, pz, 0.048, 0.02, 'x', m)
+        disc(f'port_{i}', CAP_X + CAP_R - 0.01, py, pz, 0.040, 0.09, 'x', 'steel')
+        disc(f'port_collar_{i}', CAP_X + CAP_R + 0.035, py, pz, 0.048, 0.02, 'x', m)
     # шланги: подача, возврат, газ
-    R.hose('hose_supply', [(2.68, -2.10, 1.30), (2.66, -1.70, 1.46), (2.58, -1.40, 1.40),
-                           (2.50, -1.20, 1.28)], radius=0.028, mat='accent')
-    R.hose('hose_return', [(2.78, -2.10, 1.10), (2.72, -1.72, 1.24), (2.60, -1.35, 1.14),
-                           (2.50, -1.05, 1.02)], radius=0.024, mat='steel')
-    R.hose('hose_gas', [(2.72, -2.08, 0.82), (2.68, -1.62, 0.70), (2.58, -1.22, 0.66),
-                        (2.50, -0.90, 0.74)], radius=0.020, mat='white')
+    px = CAP_X + CAP_R
+    R.hose('hose_supply', [(2.68, -2.10, 1.30), (2.70, -1.70, 1.52), (2.66, -1.40, 1.44),
+                           (px, -1.20, 1.28)], radius=0.028, mat='accent')
+    R.hose('hose_return', [(2.78, -2.10, 1.10), (2.76, -1.72, 1.26), (2.68, -1.35, 1.14),
+                           (px, -1.05, 1.02)], radius=0.024, mat='steel')
+    R.hose('hose_gas', [(2.72, -2.08, 0.82), (2.70, -1.62, 0.70), (2.66, -1.22, 0.66),
+                        (px, -0.90, 0.74)], radius=0.020, mat='white')
     # кабель питания стойки в стену
     R.hose('lsu_cable', [(3.14, -2.30, 0.55), (3.18, -2.45, 0.32), (3.10, R.Y0 + 0.06, 0.22)],
            radius=0.014, mat='paint')
