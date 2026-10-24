@@ -121,30 +121,43 @@ class RoomKit:
         o['rounded'] = True
         return o
 
-    def octa_frame(self, name, cx, w, h, z0, mat='steel', corner=0.22, thick=0.09, depth=0.10):
-        """Проём со срезанными углами — октогональная рама как на рефе."""
+    def octa_frame(self, name, cx, w, h, z0, mat='steel', corner=0.20, thick=0.08, depth=0.12):
+        """Проём со срезанными углами: сплошное кольцо-октагон через bmesh."""
         cy = self.Y1 - depth / 2
         x0, x1 = cx - w / 2, cx + w / 2
-        zt = z0 + h
-        parts = [
-            (x0 + corner, x1 - corner, z0, z0 + thick),            # низ
-            (x0 + corner, x1 - corner, zt - thick, zt),            # верх
-            (x0, x0 + thick, z0 + corner, zt - corner),            # левая
-            (x1 - thick, x1, z0 + corner, zt - corner),            # правая
-        ]
-        for i, (a, b, c, d) in enumerate(parts):
-            self.box(f'{name}_{i}', a, b, cy - depth / 2, cy + depth / 2, c, d, mat)
-        # диагональные углы: коробка повёрнута на 45° вокруг своего центра
-        hw, hh = thick * 0.72, corner * 0.72
-        for i, (ax, az, sx, sz) in enumerate((
-                (x0, z0, 1, 1), (x1, z0, -1, 1), (x0, zt, 1, -1), (x1, zt, -1, -1))):
-            ccx, ccz = ax + sx * corner * 0.5, az + sz * corner * 0.5
-            o = self.box(f'{name}_c{i}', ccx - hw, ccx + hw, cy - depth / 2, cy + depth / 2,
-                         ccz - hh, ccz + hh, mat)
-            M = (Matrix.Translation((ccx, 0, ccz))
-                 @ Matrix.Rotation(math.radians(45 if sx * sz > 0 else -45), 4, 'Y')
-                 @ Matrix.Translation((-ccx, 0, -ccz)))
-            o.data.transform(M)
+        z0, z1 = z0, z0 + h
+        c, t = corner, thick
+
+        def ring(dx, dz):
+            # 8 точек: прямые + срезанные углы
+            return [
+                (x0 + dx, z0 - dz), (x1 - dx, z0 - dz),
+                (x1 + dx, z0 + c), (x1 + dx, z1 - c),
+                (x1 - dx, z1 + dz), (x0 + dx, z1 + dz),
+                (x0 - dx, z1 - c), (x0 - dx, z0 + c),
+            ]
+
+        outer = ring(0.0, 0.0)
+        inner = ring(-t, -t)
+        me = bpy.data.meshes.new(name)
+        bm = bmesh.new()
+        yo, yi = cy - depth / 2, cy + depth / 2
+        vo_f = [bm.verts.new((x, yo, z)) for x, z in outer]
+        vo_b = [bm.verts.new((x, yi, z)) for x, z in outer]
+        vi_f = [bm.verts.new((x, yo, z)) for x, z in inner]
+        vi_b = [bm.verts.new((x, yi, z)) for x, z in inner]
+        for i in range(8):
+            j = (i + 1) % 8
+            bm.faces.new((vo_f[i], vo_f[j], vi_f[j], vi_f[i]))
+            bm.faces.new((vo_b[j], vo_b[i], vi_b[i], vi_b[j]))
+            bm.faces.new((vo_f[j], vo_f[i], vo_b[i], vo_b[j]))
+            bm.faces.new((vi_f[i], vi_f[j], vi_b[j], vi_b[i]))
+        bm.to_mesh(me)
+        bm.free()
+        o = bpy.data.objects.new(self.prefix + name, me)
+        self.sc.collection.objects.link(o)
+        o.data.materials.append(self.M[mat])
+        return o
 
     def arc_wall(self, name, cx, cy, radius, a0, a1, z0, z1, mat='panel', thick=0.06, seg=24):
         """Гнутая перегородка: сегменты по дуге, читается как радиусная стенка."""
