@@ -166,14 +166,11 @@ class GameAudio {
     window.setTimeout(() => {
       this.reaction?.pause();
       if (this.action && !this.action.paused) this.action.volume = .38;
-      const reactionPath = this.path(manifest.basePath, relative, manifest.version);
       this.reaction = this.playElement(
-        reactionPath,
+        this.path(manifest.basePath, relative, manifest.version),
         calm ? Math.min(.64, .46 + intensity * .18) : Math.min(.88, .62 + intensity * .2),
       );
       applyVoiceTimbre(this.reaction, characterVoiceTimbre(character), (Math.random() - .5) * .012);
-      // VRM-портрет: синхронный немой дубль реплики — рот движется от её громкости
-      window.dispatchEvent(new CustomEvent("vrm-portrait-speech", { detail: { path: reactionPath, character, emotion: state } }));
       this.reaction.addEventListener("ended", () => {
         if (this.action && !this.action.paused) this.action.volume = .7;
       }, { once: true });

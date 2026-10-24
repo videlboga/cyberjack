@@ -71,3 +71,6 @@ coverage/
 # Test results
 __tests__/results/
 test-results/
+
+# 3D-артефакты блок-аута (blend/png/mp4/glb) — локально
+cyberjack-v0.01/docs/plans/blockout/
