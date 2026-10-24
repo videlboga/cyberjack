@@ -211,6 +211,14 @@ class Kit:
         self.tag(f'{name}_tag', x0 + 0.09, x0 + 0.19, y0 - 0.004, y0, z1 - 0.075, z1 - 0.045,
                  'orange')
 
+    def blob(self, name, x0, x1, y0, y1, layers=3, pad=0.10, z=0.004):
+        """Контактная тень: вложенные скруглённые плашки, мягкий ореол."""
+        roles = ('shade1', 'shade2', 'shade3')
+        for i in range(min(layers, 3)):
+            p = pad * (layers - i) * 0.55
+            self.rbox(f'{name}_sh{i}', x0 - p, x1 + p, y0 - p, y1 + p,
+                      z + i * 0.0008, z + i * 0.0008 + 0.0012, roles[i], r=0.16, segs=5)
+
     def grille(self, prefix, x0, x1, y0, y1, z0, z1, n=6, role='mid'):
         for k in range(n):
             zz = z0 + k * (z1 - z0) / n

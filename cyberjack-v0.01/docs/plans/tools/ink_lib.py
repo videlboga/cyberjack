@@ -28,6 +28,9 @@ INK_P = {
     'pink':   (0.945, 0.560, 0.640),   # акцент: образцы, кнопки
     'orange': (0.975, 0.630, 0.310),   # акцент: колбы, метки
     'space':  (0.120, 0.150, 0.200),
+    'shade1': (0.905, 0.914, 0.925),   # контактная тень: внешний ореол
+    'shade2': (0.858, 0.868, 0.882),
+    'shade3': (0.800, 0.812, 0.830),   # ядро под предметом
 }
 SHADOW_TINT = (0.80, 0.82, 0.88)      # тень почти нейтральная, чуть холодная
 RIM_COLOR = (1.0, 1.0, 1.0)
@@ -46,6 +49,9 @@ INK_ROLES = {
     'pink':   ('pink', 0.55, 0.0),
     'orange': ('orange', 0.65, 0.0),
     'space':  ('space', 0.30, 0.0),
+    'shade1': ('shade1', 0.0, 0.0),
+    'shade2': ('shade2', 0.0, 0.0),
+    'shade3': ('shade3', 0.0, 0.0),
 }
 
 
@@ -87,12 +93,13 @@ class Ink:
         col = ramp.outputs['Color']
 
         # серые «размывки» в стыках — главный признак рефа
+        is_floor = 'floor' in name
         ao = nt.nodes.new('ShaderNodeAmbientOcclusion')
-        ao.inputs['Distance'].default_value = 0.35
-        ao.samples = 8
+        ao.inputs['Distance'].default_value = 0.62 if is_floor else 0.35
+        ao.samples = 12
         aom = nt.nodes.new('ShaderNodeMixRGB')
         aom.blend_type = 'MULTIPLY'
-        aom.inputs['Fac'].default_value = 0.75
+        aom.inputs['Fac'].default_value = 0.95 if is_floor else 0.75
         nt.links.new(col, aom.inputs['Color1'])
         nt.links.new(ao.outputs['Color'], aom.inputs['Color2'])
         col = aom.outputs['Color']
@@ -183,7 +190,9 @@ class Ink:
 
     # --- линии ---------------------------------------------------------------
     @staticmethod
-    def ink(sc, thickness=1.35, crease=True, angle=152):
+    def ink(sc, thickness=1.5, crease=True, angle=152, collections=None):
+        """Линии по кромкам. collections=(near, far) — разные толщины по планам,
+        как в рефе: передний план жирнее, дальний — тоньше."""
         r = sc.render
         r.use_freestyle = True
         r.line_thickness_mode = 'ABSOLUTE'
@@ -192,18 +201,37 @@ class Ink:
         vl.use_freestyle = True
         fs = vl.freestyle_settings
         fs.crease_angle = math.radians(angle)
-        ls = fs.linesets[0] if fs.linesets else fs.linesets.new('ink')
-        ls.select_silhouette = True
-        ls.select_border = True
-        ls.select_crease = crease
-        ls.select_contour = True
-        ls.select_external_contour = False
-        ls.select_edge_mark = False
-        style = bpy.data.linestyles.get('ink_style') or bpy.data.linestyles.new('ink_style')
-        style.color = (0.24, 0.26, 0.31)
-        style.thickness = max(1.0, thickness)
-        style.caps = 'ROUND'
-        ls.linestyle = style
+
+        thin = bpy.data.linestyles.get('ink_thin') or bpy.data.linestyles.new('ink_thin')
+        thin.color = (0.27, 0.29, 0.34)
+        thin.thickness = max(1.0, thickness)
+        thin.caps = 'ROUND'
+        thick = bpy.data.linestyles.get('ink_thick') or bpy.data.linestyles.new('ink_thick')
+        thick.color = (0.19, 0.21, 0.26)
+        thick.thickness = max(1.4, thickness * 1.7)
+        thick.caps = 'ROUND'
+
+        pairs = []
+        if collections:
+            near_name, far_name = collections
+            pairs = [(far_name, thin), (near_name, thick)]
+        else:
+            pairs = [(None, thin)]
+
+        for i, (coll_name, style) in enumerate(pairs):
+            ls = fs.linesets[i] if len(fs.linesets) > i else fs.linesets.new(f'ink_{i}')
+            ls.select_silhouette = True
+            ls.select_border = True
+            ls.select_crease = crease
+            ls.select_contour = True
+            ls.select_external_contour = False
+            ls.select_edge_mark = False
+            if coll_name:
+                coll = bpy.data.collections.get(coll_name)
+                if coll:
+                    ls.select_by_collection = True
+                    ls.collection = coll
+            ls.linestyle = style
 
     @staticmethod
     def render_setup(sc, res=(1680, 940), samples=32, exposure=0.0, bloom=(1.6, 3)):

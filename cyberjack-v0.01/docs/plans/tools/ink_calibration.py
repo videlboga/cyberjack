@@ -277,19 +277,80 @@ K.box('floor_mark_1', 1.25, 2.85, -2.45, -2.38, 0.0, 0.004, 'orange', 0.0)
 K.box('floor_mark_2', 1.25, 1.32, -2.45, -1.35, 0.0, 0.004, 'orange', 0.0)
 K.rbox('floor_plate', 2.55, 3.15, -0.35, 0.25, 0.0, 0.010, 'metal', r=0.008)
 
+
+# --- средний пояс: приборы и обвязка на уровне глаз -------------------------
+def cluster(name, x, z, w=0.46, h=0.34):
+    K.rbox(f'{name}_body', x, x + w, Y1 - 0.16, Y1 - 0.03, z, z + h, 'wall', r=0.02)
+    K.screen(f'{name}_scr', x + 0.03, x + w * 0.62, Y1 - 0.18, Y1 - 0.16, z + 0.10,
+             z + h - 0.04, face='-Y')
+    for k in range(3):
+        K.cyl(f'{name}_kn{k}', x + w * 0.70 + k * 0.06, Y1 - 0.19, z + 0.12 + k * 0.03,
+              z + 0.15 + k * 0.03, 0.018, 'metal_d', verts=12, axis='Y')
+    K.led(f'{name}_led', x + w * 0.72, Y1 - 0.20, z + 0.06, r=0.010, role='cyan')
+    K.cable(f'{name}_cb', [(x + w * 0.5, Y1 - 0.18, z), (x + w * 0.5, Y1 - 0.30, z - 0.10),
+                           (x + w * 0.55, Y1 - 0.42, 0.02)], r=0.008)
+
+
+cluster('cl_a', -2.35, 1.28)
+cluster('cl_b', -0.35, 1.36, w=0.40, h=0.30)
+cluster('cl_c', 2.45, 1.24, w=0.44, h=0.32)
+
+# петли шлангов на стене и свисающие с потолка
+for i, (x, z) in enumerate(((-1.55, 1.72), (1.35, 1.68))):
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.16, minor_radius=0.022,
+                                     major_segments=32, minor_segments=10,
+                                     location=(x, Y1 - 0.18, z),
+                                     rotation=(math.pi / 2, 0, 0))
+    o = bpy.context.object
+    o.name = f'coil_{i}'
+    I.apply(o, 'dark')
+K.cable('drop_hose', [(1.55, Y1 - 0.30, 2.60), (1.45, Y1 - 0.55, 2.10),
+                      (1.30, Y1 - 0.75, 1.55), (1.05, Y1 - 0.95, 1.15)], r=0.014, role='mid')
+
+# шарнирная консоль-манипулятор на стене (как в рефе)
+K.rbox('arm_base', 1.05, 1.35, Y1 - 0.22, Y1 - 0.03, 1.92, 2.12, 'wall', r=0.02)
+K.cyl('arm_j1', 1.20, Y1 - 0.26, 1.86, 1.98, 0.075, 'metal', verts=20, axis='Y')
+K.box('arm_seg1', 1.16, 1.24, Y1 - 1.05, Y1 - 0.26, 1.88, 1.96, 'metal', 0.012)
+K.cyl('arm_j2', 1.20, Y1 - 1.10, 1.82, 1.94, 0.06, 'metal_d', verts=18, axis='Y')
+K.box('arm_seg2', 1.16, 1.24, Y1 - 1.10, Y1 - 1.55, 1.60, 1.86, 'metal', 0.012)
+K.screen('arm_hmi', 0.95, 1.45, Y1 - 1.62, Y1 - 1.55, 1.42, 1.62, face='-Y')
+
+# --- контактные тени --------------------------------------------------------
+K.blob('bl_couch', CX - L / 2, CX + L / 2, CY - Wd / 2, CY + Wd / 2, layers=3, pad=0.16)
+K.blob('bl_cart', -3.15, -2.55, -1.98, -1.37, layers=2, pad=0.10)
+K.blob('bl_stool', 1.75, 2.15, -0.90, -0.50, layers=2, pad=0.09)
+K.blob('bl_ward', 2.85, 3.70, 1.55, 2.05, layers=2, pad=0.08)
+K.blob('bl_sink', 2.95, 3.55, -1.10, -0.50, layers=2, pad=0.09)
+K.blob('bl_mon', -2.95, -2.35, 1.60, 2.20, layers=2, pad=0.10)
+K.blob('bl_iv', -1.52, -1.08, 1.33, 1.77, layers=3, pad=0.12)
+K.blob('bl_icart', 1.45, 2.00, 1.35, 1.95, layers=2, pad=0.09)
+K.blob('bl_under', -1.20, 1.55, 3.30, 3.90, layers=2, pad=0.10)
+
 # --- камера и рендер --------------------------------------------------------
 I.lights(sc)
 cd = bpy.data.cameras.new('cam')
-cd.lens = 22
+cd.lens = 24
 cam = bpy.data.objects.new('cam', cd)
 sc.collection.objects.link(cam)
-cam.location = (-2.55, -2.15, 1.44)
-aim = Vector((0.55, 1.10, 1.02)) - Vector(cam.location)
+cam.location = (-2.30, -1.80, 1.38)
+aim = Vector((0.45, 1.35, 1.12)) - Vector(cam.location)
 cam.rotation_euler = aim.to_track_quat('-Z', 'Y').to_euler()
 sc.camera = cam
 
+# два плана для линий: близкое жирнее, дальнее тоньше; плашки тени без линий
+_near = bpy.data.collections.new('near')
+_far = bpy.data.collections.new('far')
+sc.collection.children.link(_near)
+sc.collection.children.link(_far)
+_cam = Vector(cam.location)
+for _o in list(sc.objects):
+    if _o.type not in {'MESH', 'CURVE'} or '_sh' in _o.name:
+        continue
+    _d = (_o.matrix_world.translation - _cam).length
+    (_near if _d < 2.9 else _far).objects.link(_o)
+
 I.render_setup(sc, res=(1680, 945), samples=32, exposure=-0.04, bloom=(1.9, 3))
-I.ink(sc, thickness=2.1, crease=True, angle=150)
+I.ink(sc, thickness=1.5, crease=True, angle=150, collections=('near', 'far'))
 sc.render.filepath = os.path.join(OUT, 'ink_calibration.png')
 bpy.ops.render.render(write_still=True)
 print('RENDERED ink_calibration.png')
