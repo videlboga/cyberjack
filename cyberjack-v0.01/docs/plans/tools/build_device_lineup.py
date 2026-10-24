@@ -121,7 +121,56 @@ def normalize(objs, target, at):
         o.data.transform(Matrix.Translation((-cx * k + at[0], -cy * k + at[1], -bb[4] * k)))
     bpy.context.view_layer.update()
     bb = bbox(objs)
-    return dict(size=(bb[1] - bb[0], bb[3] - bb[2], bb[5] - bb[4]), k=k, h=bb[5])
+    return dict(size=(bb[1] - bb[0], bb[3] - bb[2], bb[5] - bb[4]), k=k, h=bb[5], bb=bb)
+
+
+def add_box(bb, size, color, name, mode='top', z=0.0, dx=0.0, dy=0.0):
+    """Примитив-довесок: ложемент, сиденье, корпус панели, ремни."""
+    cx = (bb[0] + bb[1]) / 2 + dx
+    cy = (bb[2] + bb[3]) / 2 + dy
+    if mode == 'top':
+        cz = bb[5] - size[2] / 2
+    elif mode == 'center':
+        cz = (bb[4] + bb[5]) / 2
+    else:
+        cz = z
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(cx, cy, cz))
+    o = bpy.context.object
+    o.name = name
+    o.scale = size
+    o.color = color
+    return o
+
+
+def stretch_x(objs, bb, target_w):
+    """Растягивает по X до целевой ширины относительно центра (стол длиннее рамы)."""
+    s = target_w / (bb[1] - bb[0])
+    cx = (bb[0] + bb[1]) / 2
+    M = Matrix.Translation((cx, 0, 0)) @ Matrix.Diagonal((s, 1, 1, 1)) @ Matrix.Translation((-cx, 0, 0))
+    for o in objs:
+        if o.type == 'MESH':
+            o.data.transform(M)
+    return bbox(objs)
+
+
+def decimate(objs, limit):
+    """Срезает полигонаж до limit суммарно (модуль D — 110k на колесо)."""
+    tris = sum(len(o.data.polygons) for o in objs)
+    if tris <= limit:
+        return tris
+    for _ in range(4):                      # модификатор не всегда берёт заявленное ratio
+        tris = sum(len(o.data.polygons) for o in objs)
+        if tris <= limit:
+            break
+        ratio = max(0.05, limit / tris)
+        for o in objs:
+            if o.type != 'MESH':
+                continue
+            m = o.modifiers.new('dec', 'DECIMATE')
+            m.ratio = ratio
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.modifier_apply(modifier=m.name)
+    return sum(len(o.data.polygons) for o in objs)
 
 
 def label(text, x, y, h):
@@ -135,67 +184,98 @@ def label(text, x, y, h):
     return o
 
 
-def build_device(title, sources, target, at, rot_x=0.0):
+def build_device(spec, at):
     objs = []
-    for kind, fname, names in sources:
+    for kind, fname, names in spec['sources']:
         path = os.path.join(ROOT, fname)
         if not os.path.exists(path):
             print('MISS', fname)
             continue
         objs += import_glb(path) if kind == 'glb' else append_objects(path, names)
     if not objs:
-        print('EMPTY', title)
+        print('EMPTY', spec['title'])
         return None
-    if rot_x:
+    if spec.get('rot_x'):
         bake_world(objs)
         for o in objs:
             if o.type == 'MESH':
-                o.data.transform(Matrix.Rotation(math.radians(rot_x), 4, 'X'))
-    info = normalize(objs, target, at)
+                o.data.transform(Matrix.Rotation(math.radians(spec['rot_x']), 4, 'X'))
+    info = normalize(objs, spec['target'], at)
+    bb = info['bb']
+    if spec.get('stretch_x'):
+        bb = stretch_x(objs, bb, spec['stretch_x'])
+        info['size'] = (bb[1] - bb[0], bb[3] - bb[2], bb[5] - bb[4])
+        info['h'] = bb[5]
     for i, o in enumerate(objs):
         o.color = color_for(o.name, i)
-    if info:
-        report.append((title, [round(v, 2) for v in info['size']], round(info['k'], 3),
-                       len(objs), sum(len(o.data.polygons) for o in objs)))
-        label(title, at[0], at[1], info['h'])
+    for part in spec.get('parts', []):
+        add_box(bb, part['size'], part.get('color', C_DARK), part.get('name', 'part'),
+                part.get('mode', 'top'), part.get('z', 0.0), part.get('dx', 0.0), part.get('dy', 0.0))
+    tris = decimate(objs, spec['decimate_to']) if spec.get('decimate_to') else \
+        sum(len(o.data.polygons) for o in objs)
+    report.append((spec['title'], [round(v, 2) for v in info['size']], round(info['k'], 3),
+                   len(objs), tris))
+    label(spec['title'], at[0], at[1], info['h'])
     return objs
 
 
-# (подпись, источники, целевые габариты Ш×Г×В)
+# набор: источники + целевые габариты + довески-примитивы
 DEVICES = [
-    ('Стол диагностический', [('blend', 'sex_toys.blend', ['Table'])], (2.00, 0.80, 0.90), 0),
-    ('Стойка телеметрии', [
-        ('blend', 'Prop_Pack_4/Enema IV Drip.blend', ['enema_iv_drip']),
-    ], (0.40, 0.40, 1.90), 0),
-    ('Панель музыки/света', [
-        ('blend', 'fukonaMachine.blend', ['controlPanelScreen']),
-    ], (0.30, 0.06, 0.20), 90),
-    ('Капсула восстановления', [
-        ('blend', 'Prop_Pack_1/Creature Tank.blend', ['Tank_Base', 'Tank_Top', 'Glass']),
-    ], (1.10, 1.10, 2.10), 0),
-    ('Кресло коррекции', [
-        ('blend', 'Prop_Pack_4/Bondage Chair Slim.blend', ['Bondage_Chair_Slim']),
-    ], (1.10, 1.00, 1.75), 0),
-    ('Модуль A · вагинальный', [('blend', 'Sex_Machine.blend', ['BarbellSybian_V2'])],
-     (1.60, 1.30, 1.15), 0),
-    ('Модуль B · анальный', [
-        ('blend', 'dildo_chair_all_joined.blend', ['engine1', 'here goes the dildo']),
-    ], (1.60, 1.30, 1.15), 0),
-    ('Модуль C · щекотка', [
-        ('glb', 'converted/tickle_chair_v1.glb', []),
-    ], (1.60, 1.30, 1.40), 0),
-    ('Модуль D · ротационный', [
-        ('blend', 'GordProps.blend', ['Wheel', 'Legs', 'Support']),
-    ], (1.60, 1.30, 1.55), 0),
+    dict(title='Стол диагностический', sources=[('blend', 'sex_toys.blend', ['Table'])],
+         target=(2.00, 0.80, 0.90), stretch_x=2.00, parts=[
+             dict(name='ложемент', size=(1.82, 0.66, 0.10), color=C_SOFT),
+             dict(name='ремень_грудь', size=(0.10, 0.72, 0.03), color=C_DARK, mode='abs', z=0.93, dx=-0.45),
+             dict(name='ремень_таз', size=(0.10, 0.72, 0.03), color=C_DARK, mode='abs', z=0.93, dx=0.45),
+         ]),
+    dict(title='Стойка телеметрии', sources=[
+        ('blend', 'Prop_Pack_4/Enema IV Drip.blend', ['enema_iv_drip'])],
+        target=(0.40, 0.40, 1.90), parts=[
+            dict(name='экран_стойки', size=(0.26, 0.04, 0.18), color=C_ACCENT, mode='abs', z=1.45),
+        ]),
+    dict(title='Панель музыки/света', sources=[
+        ('blend', 'fukonaMachine.blend', ['controlPanelScreen'])],
+        target=(0.30, 0.06, 0.20), rot_x=90, parts=[
+            dict(name='корпус_панели', size=(0.34, 0.08, 0.26), color=C_PAINT, mode='center'),
+            dict(name='рамка_панели', size=(0.30, 0.02, 0.22), color=C_ACCENT, mode='center', dy=-0.05),
+        ]),
+    dict(title='Капсула восстановления', sources=[
+        ('blend', 'Prop_Pack_1/Creature Tank.blend', ['Tank_Base', 'Tank_Top', 'Glass'])],
+        target=(1.10, 1.10, 2.10), parts=[
+            dict(name='пульт_капсулы', size=(0.20, 0.10, 0.14), color=C_ACCENT, mode='abs', z=1.05, dx=0.52),
+        ]),
+    dict(title='Кресло коррекции', sources=[
+        ('blend', 'Prop_Pack_4/Bondage Chair Slim.blend', ['Bondage_Chair_Slim'])],
+        target=(1.10, 1.00, 1.75), parts=[
+            dict(name='база_кресла', size=(0.72, 0.62, 0.14), color=C_PAINT, mode='abs', z=0.07),
+            dict(name='сиденье', size=(0.52, 0.48, 0.10), color=C_SOFT, mode='abs', z=0.46),
+            dict(name='спинка', size=(0.50, 0.09, 0.44), color=C_SOFT, mode='abs', z=0.84, dy=0.20),
+            dict(name='подлокотник_Л', size=(0.09, 0.40, 0.06), color=C_METAL, mode='abs', z=0.68, dx=-0.28),
+            dict(name='подлокотник_П', size=(0.09, 0.40, 0.06), color=C_METAL, mode='abs', z=0.68, dx=0.28),
+            dict(name='стойка_визора', size=(0.08, 0.08, 1.45), color=C_METAL, mode='abs', z=0.73, dy=0.26),
+            dict(name='визор', size=(0.30, 0.07, 0.13), color=C_ACCENT, mode='abs', z=1.16, dy=0.10),
+            dict(name='пульт_кресла', size=(0.10, 0.16, 0.05), color=C_DARK, mode='abs', z=0.72, dx=0.30),
+        ]),
+    dict(title='Модуль A · вагинальный', sources=[
+        ('blend', 'Sex_Machine.blend', ['BarbellSybian_V2'])], target=(1.60, 1.30, 1.15)),
+    dict(title='Модуль B · анальный', sources=[
+        ('blend', 'dildo_chair_all_joined.blend', ['engine1', 'here goes the dildo'])],
+        target=(1.60, 1.30, 1.15), parts=[
+            dict(name='ложе_модуля_B', size=(0.70, 0.55, 0.08), color=C_SOFT, mode='top'),
+        ]),
+    dict(title='Модуль C · щекотка', sources=[
+        ('glb', 'converted/tickle_chair_v1.glb', [])], target=(1.60, 1.30, 1.40)),
+    dict(title='Модуль D · ротационный', sources=[
+        ('blend', 'GordProps.blend', ['Wheel', 'Legs', 'Support'])],
+        target=(1.60, 1.30, 1.55), decimate_to=20000),
 ]
 
 report = []
 # один ряд: подписи не наезжают, габариты сравнимы в одном масштабе
 x = 0.0
-for title, sources, target, rot in DEVICES:
+for spec in DEVICES:
     before = len(report)
-    build_device(title, sources, target, (x, 0.0), rot)
-    width = report[-1][1][0] if len(report) > before else target[0]
+    build_device(spec, (x, 0.0))
+    width = report[-1][1][0] if len(report) > before else spec['target'][0]
     x += width + 0.75
 
 print('=== LINEUP ===')
