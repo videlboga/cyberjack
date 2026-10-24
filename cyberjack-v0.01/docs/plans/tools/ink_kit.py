@@ -136,8 +136,9 @@ class Kit:
                              'cyan', 0.0)
 
     # --- стены -------------------------------------------------------------
-    def panel_wall(self, prefix, axis, fixed, a0, a1, z0, z1, pw=0.95, ph=1.35, depth=0.028):
-        """Панели со швами: axis='X' — стена вдоль X (фикс. Y), иначе наоборот."""
+    def panel_wall(self, prefix, axis, fixed, a0, a1, z0, z1, pw=0.95, ph=1.35, depth=0.028,
+                   bolts=True):
+        """Панели со швами и крепежом по углам: density — главное отличие рефа."""
         a = a0
         i = 0
         while a < a1 - 0.01:
@@ -149,13 +150,66 @@ class Kit:
                 if axis == 'X':
                     self.box(f'{prefix}_{i}_{j}', a + 0.007, a + w - 0.007,
                              fixed, fixed + depth, z + 0.007, z + hh - 0.007, 'wall', 0.004)
+                    if bolts:
+                        for bi, (ba, bz) in enumerate(((a + 0.035, z + 0.035),
+                                                       (a + w - 0.035, z + 0.035),
+                                                       (a + 0.035, z + hh - 0.035),
+                                                       (a + w - 0.035, z + hh - 0.035))):
+                            self.bolt(f'{prefix}_b{i}_{j}_{bi}', ba, fixed + depth, bz, 'Y')
                 else:
                     self.box(f'{prefix}_{i}_{j}', fixed, fixed + depth,
                              a + 0.007, a + w - 0.007, z + 0.007, z + hh - 0.007, 'wall', 0.004)
+                    if bolts:
+                        for bi, (ba, bz) in enumerate(((a + 0.035, z + 0.035),
+                                                       (a + w - 0.035, z + 0.035),
+                                                       (a + 0.035, z + hh - 0.035),
+                                                       (a + w - 0.035, z + hh - 0.035))):
+                            self.bolt(f'{prefix}_b{i}_{j}_{bi}', fixed + depth, ba, bz, 'X')
                 z += hh
                 j += 1
             a += pw
             i += 1
+
+    # --- мелкая фурнитура ---------------------------------------------------
+    def bolt(self, name, x, y, z, axis='Y', r=0.012):
+        if axis == 'Y':
+            return self.cyl(name, x, y, z - 0.006, z + 0.006, r, 'metal_d', verts=10, axis='Y')
+        return self.cyl(name, x, y, z - 0.006, z + 0.006, r, 'metal_d', verts=10, axis='X')
+
+    def tag(self, name, x0, x1, y0, y1, z0, z1, role='orange'):
+        return self.box(name, x0, x1, y0, y1, z0, z1, role, 0.0015)
+
+    def conduit(self, prefix, pts, r=0.018, clamp_every=0.65, role='metal'):
+        """Кабельный канал: тонкая труба + хомуты с шагом."""
+        self.pipe(prefix, pts, r=r, role=role)
+        for i in range(len(pts) - 1):
+            a, b = pts[i], pts[i + 1]
+            length = math.dist(a, b)
+            n = max(1, int(length / clamp_every))
+            for k in range(n):
+                t = (k + 0.5) / n
+                cx = a[0] + (b[0] - a[0]) * t
+                cy = a[1] + (b[1] - a[1]) * t
+                cz = a[2] + (b[2] - a[2]) * t
+                self.box(f'{prefix}_cl{i}_{k}', cx - 0.03, cx + 0.03, cy - 0.03, cy + 0.03,
+                         cz - 0.035, cz + 0.035, 'metal_d', 0.003)
+
+    def bundle(self, prefix, pts, n=4, spread=0.026, r=0.008, role='dark'):
+        """Пучок кабелей: n параллельных линий со сдвигом по нормали."""
+        for j in range(n):
+            off = (j - (n - 1) / 2) * spread
+            shifted = [(p[0] + off * 0.4, p[1] + off, p[2] + abs(off) * 0.2) for p in pts]
+            self.cable(f'{prefix}_{j}', shifted, r=r, role=role)
+
+    def wall_device(self, name, x0, x1, y0, y1, z0, z1, led_role='cyan', grille=True):
+        """Настенный приборчик: корпус, решётка, светодиод, бирка."""
+        self.box(f'{name}_body', x0, x1, y0, y1, z0, z1, 'wall', 0.008)
+        if grille:
+            self.grille(f'{name}_gr', x0 + 0.03, x1 - 0.03, y0 - 0.006, y0, z0 + 0.05,
+                        z0 + 0.16, n=4, role='mid')
+        self.led(f'{name}_led', x0 + 0.04, y0 - 0.008, z1 - 0.06, r=0.011, role=led_role)
+        self.tag(f'{name}_tag', x0 + 0.09, x0 + 0.19, y0 - 0.004, y0, z1 - 0.075, z1 - 0.045,
+                 'orange')
 
     def grille(self, prefix, x0, x1, y0, y1, z0, z1, n=6, role='mid'):
         for k in range(n):
