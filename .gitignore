@@ -74,3 +74,8 @@ test-results/
 
 # 3D-артефакты блок-аута (blend/png/mp4/glb) — локально
 cyberjack-v0.01/docs/plans/blockout/
+
+# CC0-ассеты (скачиваются скриптами, не хранятся в репозитории)
+assets/cc0/textures/
+assets/cc0/hdr/
+assets/cc0/models/
