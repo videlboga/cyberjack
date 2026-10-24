@@ -249,3 +249,80 @@ class Kit:
 
     def led(self, name, x, y, z, r=0.014, role='cyan'):
         return self.cyl(name, x, y, z, z + 0.006, r, role, verts=12, axis='Y')
+
+
+class Frame:
+    """Локальная система координат предмета: ставим модуль в любую точку и поворот.
+
+    yaw кратен 90°: модули описываются в локальных (u, v) и одинаково работают
+    в любой комнате. Все примитивы кита проксируются в мировые координаты.
+    """
+
+    def __init__(self, kit, ox, oy, yaw=0, prefix=''):
+        self.K = kit
+        self.ox, self.oy = ox, oy
+        self.yaw = yaw % 360
+        self.prefix = prefix
+
+    def _w(self, u, v):
+        a = self.yaw
+        if a == 0:
+            return self.ox + u, self.oy + v
+        if a == 90:
+            return self.ox - v, self.oy + u
+        if a == 180:
+            return self.ox - u, self.oy - v
+        return self.ox + v, self.oy - u
+
+    def _rect(self, u0, u1, v0, v1):
+        pts = [self._w(u0, v0), self._w(u1, v0), self._w(u0, v1), self._w(u1, v1)]
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        return min(xs), max(xs), min(ys), max(ys)
+
+    def _n(self, name):
+        return f'{self.prefix}{name}' if self.prefix else name
+
+    # --- примитивы в локальных координатах ---------------------------------
+    def box(self, name, u0, u1, v0, v1, z0, z1, role='wall', bevel=0.008, segs=2):
+        x0, x1, y0, y1 = self._rect(u0, u1, v0, v1)
+        return self.K.box(self._n(name), x0, x1, y0, y1, z0, z1, role, bevel, segs)
+
+    def rbox(self, name, u0, u1, v0, v1, z0, z1, role='wall', r=0.04, segs=4):
+        return self.box(name, u0, u1, v0, v1, z0, z1, role, bevel=r, segs=segs)
+
+    def cyl(self, name, u, v, z0, z1, r, role='metal', verts=24, axis='Z'):
+        x, y = self._w(u, v)
+        ax = axis
+        if axis in 'XY' and self.yaw in (90, 270):
+            ax = 'Y' if axis == 'X' else 'X'
+        return self.K.cyl(self._n(name), x, y, z0, z1, r, role, verts, ax)
+
+    def sphere(self, name, u, v, z, r, role='metal', segs=20):
+        x, y = self._w(u, v)
+        return self.K.sphere(self._n(name), x, y, z, r, role, segs)
+
+    def screen(self, name, u0, u1, v0, v1, z0, z1, face='-Y', ui=True):
+        x0, x1, y0, y1 = self._rect(u0, u1, v0, v1)
+        f = face
+        if self.yaw == 90:
+            f = {'-Y': '+X', '+Y': '-X', '-X': '-Y', '+X': '+Y'}[face]
+        elif self.yaw == 180:
+            f = {'-Y': '+Y', '+Y': '-Y', '-X': '+X', '+X': '-X'}[face]
+        elif self.yaw == 270:
+            f = {'-Y': '-X', '+Y': '+X', '-X': '+Y', '+X': '-Y'}[face]
+        return self.K.screen(self._n(name), x0, x1, y0, y1, z0, z1, face=f, ui=ui)
+
+    def pipe(self, name, pts, r=0.05, role='metal'):
+        return self.K.pipe(self._n(name), [self._w(u, v) + (z,) for (u, v, z) in pts], r, role)
+
+    def cable(self, name, pts, r=0.011, role='dark'):
+        return self.K.cable(self._n(name), [self._w(u, v) + (z,) for (u, v, z) in pts], r, role)
+
+    def blob(self, name, u0, u1, v0, v1, layers=6, pad=0.16):
+        x0, x1, y0, y1 = self._rect(u0, u1, v0, v1)
+        return self.K.blob(self._n(name), x0, x1, y0, y1, layers=layers, pad=pad)
+
+    def grille(self, name, u0, u1, v0, v1, z0, z1, n=5, role='mid'):
+        x0, x1, y0, y1 = self._rect(u0, u1, v0, v1)
+        return self.K.grille(self._n(name), x0, x1, y0, y1, z0, z1, n, role)
