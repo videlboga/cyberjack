@@ -42,12 +42,12 @@ T = R.T                    # 0.20
 X0, X1, Y0, Y1, H = R.X0, R.X1, R.Y0, R.Y1, R.H
 NICHE_D = 1.00             # глубина ниш в толще стены
 BED_H = 0.44
-BED_W, BED_L = 0.98, 2.50
+BED_W, BED_L = 0.94, 2.02      # ширина поперёк, длина вдоль стены
 
 # ниши: (u0, u1, z0, z1) в координатах развёртки стены
 DOOR = (R.door_at - R.door_w / 2, R.door_at + R.door_w / 2, 0.0, R.door_h)
 SAN = (0.60, 1.80, 0.0, 2.05)
-BED_NICHE = (-0.55, 1.55, 0.0, 2.05)
+BED_NICHE = (-0.62, 1.40, 0.0, 2.05)   # проём ниши вдоль стены, симметрично
 
 
 def panel_face(side, cuts, with_plinth=True):
@@ -180,8 +180,8 @@ panel_face('east', [BED_NICHE])
 pocket('north', SAN, depth=1.10)
 R.rbox('san_arch', SAN[0] - 0.05, SAN[1] + 0.05, Y1 - 0.02, Y1 + 0.06, 1.98, 2.10,
        'panel_dim', r=0.09, seg=5)
-pocket('west', BED_NICHE, depth=0.95)
-pocket('east', BED_NICHE, depth=0.95)
+pocket('west', BED_NICHE, depth=0.58)
+pocket('east', BED_NICHE, depth=0.58)
 
 # угловые стойки
 for i, (px, py) in enumerate(((X0, Y0), (X1, Y0), (X0, Y1), (X1, Y1))):
@@ -210,29 +210,34 @@ R.box('corr_end', R.door_at - 1.30, R.door_at + 1.30, ty1, ty1 + 0.10, 0.0, 2.46
 
 # --- койки в нишах ----------------------------------------------------------
 def bed(side):
-    a0, a1, z0, z1 = BED_NICHE
+    """Койка ВДОЛЬ стены: утоплена в нишу, изголовье к дальней стене (+Y)."""
+    a0, a1 = BED_NICHE[0] + 0.02, BED_NICHE[1] - 0.02
     if side == 'west':
-        x0, x1 = X0 - 0.90, X0 + BED_L - 0.90
-        hx0, hx1 = X0 - 0.92, X0 - 0.80
+        x0, x1 = X0 - 0.50, X0 + 0.44
+        head0, head1 = X0 - 0.52, X0 + 0.02
     else:
-        x0, x1 = X1 + 0.90 - BED_L, X1 + 0.90
-        hx0, hx1 = X1 + 0.80, X1 + 0.92
-    y0, y1 = (a0 + a1) / 2 - BED_W / 2, (a0 + a1) / 2 + BED_W / 2
-    R.rbox(f'{side}_bed_base', x0, x1, y0, y1, 0.10, BED_H - 0.10, 'paint', r=0.05, seg=4)
-    R.rbox(f'{side}_bed_kick', x0 + 0.08, x1 - 0.04, y0 + 0.12, y1 - 0.12, 0.0, 0.10,
+        x0, x1 = X1 - 0.44, X1 + 0.50
+        head0, head1 = X1 - 0.02, X1 + 0.52
+
+    R.rbox(f'{side}_bed_base', x0, x1, a0, a1, 0.10, BED_H - 0.10, 'paint', r=0.05, seg=4)
+    R.rbox(f'{side}_bed_kick', x0 + 0.06, x1 - 0.06, a0 + 0.06, a1 - 0.06, 0.0, 0.10,
            'panel_dim', r=0.02)
-    R.rbox(f'{side}_bed_mattress', x0 + 0.02, x1 - 0.02, y0 + 0.02, y1 - 0.02,
+    R.rbox(f'{side}_bed_mattress', x0 + 0.02, x1 - 0.02, a0 + 0.02, a1 - 0.02,
            BED_H - 0.10, BED_H + 0.05, 'soft', r=0.07, seg=6)
-    R.rbox(f'{side}_bed_pillow', hx0 + (0.12 if side == 'west' else -0.44),
-           hx1 + (0.12 if side == 'west' else -0.44), y0 + 0.20, y1 - 0.20,
+    # изголовье-панель у торца, подушка перед ним
+    R.rbox(f'{side}_bed_head', head0, head1, a1 - 0.10, a1 + 0.02,
+           BED_H + 0.02, BED_H + 0.52, 'paint', r=0.05, seg=4)
+    R.rbox(f'{side}_bed_pillow', x0 + 0.06, x1 - 0.06, a1 - 0.50, a1 - 0.12,
            BED_H + 0.05, BED_H + 0.15, 'white', r=0.06, seg=6)
-    # полка с ящиками над изголовьем и подсветка
-    sx0, sx1 = (X0 - 0.95, X0 - 0.35) if side == 'west' else (X1 + 0.35, X1 + 0.95)
-    R.rbox(f'{side}_shelf', sx0, sx1, y0 + 0.04, y1 - 0.04, 1.55, 1.62, 'panel', r=0.02)
-    R.box(f'{side}_light', sx0 + 0.04, sx1 - 0.04, y0 + 0.08, y1 - 0.08, 2.02, 2.06, 'light')
-    for k, dy in enumerate((-0.18, 0.18)):
-        R.rbox(f'{side}_box_{k}', sx0 + 0.06, sx1 - 0.06, (a0 + a1) / 2 + dy - 0.14,
-               (a0 + a1) / 2 + dy + 0.14, 1.62, 1.80, 'panel_dim', r=0.02)
+    # полка с ящиками над изголовьем и световая полоса под ней
+    sx0, sx1 = (X0 - 0.34, X0 + 0.06) if side == 'west' else (X1 - 0.06, X1 + 0.34)
+    R.rbox(f'{side}_shelf', sx0, sx1, a0 + 0.04, a1 - 0.04, 1.55, 1.62, 'panel', r=0.02)
+    R.box(f'{side}_shelf_light', sx0 + 0.04, sx1 - 0.04, a0 + 0.08, a1 - 0.08, 1.51, 1.54,
+          'accent')
+    for k, dy in enumerate((-0.20, 0.20)):
+        cy = (a0 + a1) / 2 + dy
+        R.rbox(f'{side}_box_{k}', sx0 + 0.04, sx1 - 0.04, cy - 0.16, cy + 0.16, 1.62, 1.80,
+               'panel_dim', r=0.02)
 
 
 bed('west')
