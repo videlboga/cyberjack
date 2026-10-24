@@ -56,7 +56,8 @@ M_SOFT = mat('upholstery', (0.30, 0.31, 0.32), 0.7)
 M_STRAP = mat('strap', (0.07, 0.07, 0.08), 0.6)
 M_ACCENT = mat('accent', (0.13, 0.38, 0.35), 0.35, emit=(0.20, 0.55, 0.50), emit_strength=1.5)
 M_WHITE = mat('ceramics', (0.90, 0.90, 0.88), 0.2)
-M_CORR_LIGHT = mat('corr_light', (0.55, 0.55, 0.53), 0.6, emit=(1.0, 0.96, 0.88), emit_strength=1.2)
+M_CORR_LIGHT = mat('corr_light', (0.45, 0.45, 0.43), 0.6, emit=(1.0, 0.95, 0.85), emit_strength=0.55)
+M_PANEL_DIM = mat('wall_panel_dim', (0.62, 0.62, 0.61), 0.65)
 
 
 def box(name, x0, x1, y0, y1, z0, z1, material):
@@ -66,6 +67,29 @@ def box(name, x0, x1, y0, y1, z0, z1, material):
     o.data.transform(Matrix.Diagonal((max(abs(x1 - x0), 0.001), max(abs(y1 - y0), 0.001),
                                       max(abs(z1 - z0), 0.001), 1)))
     o.data.transform(Matrix.Translation(((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)))
+    o.data.materials.append(material)
+    return o
+
+
+def taper_box(name, x0, x1, y0, y1, z0, z1, material, shrink=0.10):
+    """Корпус с сужением книзу: убирает эффект «кирпич на ножках»."""
+    import bmesh
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    dx = (x1 - x0) * shrink
+    dy = (y1 - y0) * shrink
+    top = [bm.verts.new(v) for v in ((x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1))]
+    bot = [bm.verts.new(v) for v in ((x0 + dx, y0 + dy, z0), (x1 - dx, y0 + dy, z0),
+                                     (x1 - dx, y1 - dy, z0), (x0 + dx, y1 - dy, z0))]
+    bm.faces.new(top[::-1])
+    bm.faces.new(bot)
+    for i in range(4):
+        j = (i + 1) % 4
+        bm.faces.new((top[i], top[j], bot[j], bot[i]))
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    sc.collection.objects.link(o)
     o.data.materials.append(material)
     return o
 
@@ -140,8 +164,20 @@ def build_shell():
         x += 0.61
     box('ceiling', X0, X1, Y0, Y1, H, H + 0.06, M_CEIL)
     for i, (lx0, lx1) in enumerate(((-2.2, -1.0), (0.8, 2.0))):
-        box(f'light_frame_{i}', lx0 - 0.04, lx1 + 0.04, -0.84, 0.44, H - 0.05, H, M_STEEL)
-        box(f'light_{i}', lx0, lx1, -0.8, 0.4, H - 0.045, H - 0.005, M_LIGHT)
+        # рамка-кольцо, а не сплошная плита: иначе закрывает светильник
+        box(f'light_lip_l_{i}', lx0 - 0.04, lx0, -0.84, 0.44, H - 0.05, H - 0.005, M_STEEL)
+        box(f'light_lip_r_{i}', lx1, lx1 + 0.04, -0.84, 0.44, H - 0.05, H - 0.005, M_STEEL)
+        box(f'light_lip_s_{i}', lx0, lx1, -0.84, -0.8, H - 0.05, H - 0.005, M_STEEL)
+        box(f'light_lip_n_{i}', lx0, lx1, 0.4, 0.44, H - 0.05, H - 0.005, M_STEEL)
+        box(f'light_{i}', lx0, lx1, -0.8, 0.4, H - 0.02, H - 0.005, M_LIGHT)
+
+    # декоративный профиль в углах: закрывает стык панелей двух стен
+    s = 0.05
+    for i, (px, py) in enumerate(((X0, Y0), (X1, Y0), (X0, Y1), (X1, Y1))):
+        cx = px + s if px < 0 else px - s          # столб заходит внутрь комнаты
+        cy = py + s if py < 0 else py - s
+        box(f'corner_post_{i}', min(px, cx), max(px, cx), min(py, cy), max(py, cy),
+            0.0, H, M_STEEL)
 
     walls = {'south': (Y0, -1, True), 'north': (Y1, 1, True),
              'west': (X0, -1, False), 'east': (X1, 1, False)}
@@ -200,9 +236,9 @@ def build_doorway():
     x0, x1 = DOOR_AT - 1.20, DOOR_AT + 1.20
     box('corr_floor', x0, x1, y0, y1, -0.06, 0.0, M_FLOOR)
     box('corr_ceil', x0, x1, y0, y1, 2.55, 2.60, M_CEIL)
-    box('corr_wall_l', x0 - T, x0, y0, y1, 0.0, 2.55, M_PANEL)
-    box('corr_wall_r', x1, x1 + T, y0, y1, 0.0, 2.55, M_PANEL)
-    box('corr_wall_end', x0 - T, x1 + T, y1, y1 + T, 0.0, 2.55, M_PANEL)
+    box('corr_wall_l', x0 - T, x0, y0, y1, 0.0, 2.55, M_PANEL_DIM)
+    box('corr_wall_r', x1, x1 + T, y0, y1, 0.0, 2.55, M_PANEL_DIM)
+    box('corr_wall_end', x0 - T, x1 + T, y1, y1 + T, 0.0, 2.55, M_PANEL_DIM)
     box('corr_plinth', x0 - T, x1 + T, y1 - 0.02, y1, 0.0, 0.10, M_PLINTH)
     box('corr_light', x0 + 0.3, x1 - 0.3, y0 + 0.4, y1 - 0.4, 2.52, 2.55, M_CORR_LIGHT)
 
@@ -215,8 +251,8 @@ COUCH_L, COUCH_Wd, COUCH_H = 2.00, 0.80, 0.78
 def build_couch():
     x0, x1 = COUCH_X - COUCH_L / 2, COUCH_X + COUCH_L / 2
     y0, y1 = COUCH_Y - COUCH_Wd / 2, COUCH_Y + COUCH_Wd / 2
-    box('couch_frame', x0 + 0.04, x1 - 0.04, y0 + 0.04, y1 - 0.04,
-        COUCH_H - 0.16, COUCH_H - 0.06, M_PAINT)
+    taper_box('couch_frame', x0 + 0.04, x1 - 0.04, y0 + 0.04, y1 - 0.04,
+              COUCH_H - 0.20, COUCH_H - 0.04, M_PAINT, shrink=0.14)
     for i, (lx, ly) in enumerate(((x0 + 0.12, y0 + 0.12), (x1 - 0.12, y0 + 0.12),
                                   (x0 + 0.12, y1 - 0.12), (x1 - 0.12, y1 - 0.12))):
         cyl(f'couch_leg_{i}', lx, ly, 0.06, COUCH_H - 0.16, 0.025, M_STEEL)
@@ -278,6 +314,13 @@ def build_sink():
     box('sink_basin', x0 + 0.08, x1 - 0.08, y0 + 0.10, y1 - 0.10, 0.85, 0.88, M_STEEL)
     cyl('sink_tap', x0 + 0.30, y1 - 0.06, 0.88, 1.12, 0.018, M_STEEL)
     box('sink_dispenser', x0 + 0.10, x0 + 0.26, y0 + 0.04, y0 + 0.14, 0.88, 1.14, M_WHITE)
+    # фронт: два ящика со швами и ручкой
+    for i, (za, zb) in enumerate(((0.10, 0.42), (0.46, 0.80))):
+        box(f'sink_drawer_{i}', x1 - 0.008, x1 + 0.004, y0 + 0.04, y1 - 0.04, za, zb, M_WHITE)
+        box(f'sink_drawer_gap_{i}', x1 + 0.002, x1 + 0.006, y0 + 0.05, y1 - 0.05,
+            za - 0.01, za, M_SEAM)
+        cyl(f'sink_drawer_handle_{i}', x1 + 0.02, (y0 + y1) / 2, zb - 0.06, zb - 0.03,
+            0.010, M_STEEL)
 
 
 def build_slots():
@@ -306,8 +349,13 @@ def build_misc():
     box('cart_shelf', 1.55, 2.15, -2.10, -1.65, 0.20, 0.24, M_STEEL)
     for i, (cx, cy) in enumerate(((1.62, -2.02), (2.08, -2.02), (1.62, -1.72), (2.08, -1.72))):
         cyl(f'cart_leg_{i}', cx, cy, 0.0, 0.20, 0.012, M_STEEL)
-    box('cart_bin_1', 1.62, 1.86, -2.02, -1.75, 0.60, 0.78, M_WHITE)
-    box('cart_bin_2', 1.90, 2.10, -2.02, -1.75, 0.60, 0.74, M_ACCENT)
+    box('cart_lip', 1.53, 2.17, -2.12, -1.63, 0.60, 0.63, M_STEEL)
+    for i, (za, zb) in enumerate(((0.26, 0.40), (0.42, 0.56))):
+        box(f'cart_drawer_{i}', 1.55, 2.15, -2.10, -2.075, za, zb, M_STEEL)
+        cyl(f'cart_handle_{i}', 1.62, -2.06, zb - 0.06, zb - 0.03, 0.010, M_STEEL)
+    cyl('cart_push_handle', 2.10, -1.88, 0.62, 1.02, 0.014, M_STEEL)
+    box('cart_bin_1', 1.62, 1.86, -2.02, -1.75, 0.63, 0.78, M_WHITE)
+    box('cart_bin_2', 1.90, 2.10, -2.02, -1.75, 0.63, 0.74, M_ACCENT)
     cyl('iv_pole', -1.85, 0.35, 0.0, 1.85, 0.018, M_STEEL)
     cyl('iv_base', -1.85, 0.35, 0.0, 0.05, 0.20, M_PAINT)
     box('iv_bag', -1.92, -1.78, 0.31, 0.39, 1.45, 1.68, M_WHITE)
