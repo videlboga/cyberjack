@@ -20,6 +20,7 @@ R = RoomKit(W=6.4, D=5.2, door_at=0.0, prefix='med_')
 
 CAP_X, CAP_Y = 1.85, -0.85     # центр капсулы
 CAP_R, CAP_H = 0.63, 2.42      # радиус и высота: 0.13 + 2.42 = 2.55 при потолке 2.70
+CAP_GLASS_R = 0.45             # радиус стекла, уточняется после сборки капсулы
 
 # --- оборудование -----------------------------------------------------------
 def assign_materials(prefix):
@@ -40,6 +41,11 @@ def assign_materials(prefix):
 def zspan(o):
     zs = [(o.matrix_world @ v.co).z for v in o.data.vertices]
     return min(zs), max(zs)
+
+
+def zspan_x(o):
+    xs = [(o.matrix_world @ v.co).x for v in o.data.vertices]
+    return max(xs) - min(xs)
 
 
 def scale_z(o, k, anchor):
@@ -78,6 +84,9 @@ def build_capsule():
         move_z(glass, (0.13 + 0.16) - g0)
         print('CAPSULE_TUNE base 0.16, glass', round((top - 0.26) - (0.13 + 0.16), 2),
               ', cap 0.26')
+        # реальный радиус стекла: у ассета пояс капсулы шире самого цилиндра
+        globals()['CAP_GLASS_R'] = (zspan_x(glass)) / 2
+        print('CAPSULE_GLASS_R', round(CAP_GLASS_R, 3))
     # подиум под капсулу
     R.box('capsule_plinth', CAP_X - CAP_R - 0.10, CAP_X + CAP_R + 0.10,
           CAP_Y - CAP_R - 0.10, CAP_Y + CAP_R + 0.10, 0.0, 0.10, 'paint')
@@ -90,6 +99,53 @@ def build_capsule():
     R.box('capsule_console_screen', 2.69, 2.72, -0.92, -0.78, 1.08, 1.32, 'accent')
     # внутри капсулы только персонаж: ложе и жидкость убраны
     print('CAPSULE', [round(v, 2) for v in info['size']], info['tris'])
+
+
+def build_band():
+    """Металлический поясок на капсуле: к нему крепятся порты и шланги."""
+    z0, z1 = 1.12, 1.34          # узкий поясок под порты, тело не закрывает
+    rb = CAP_GLASS_R + 0.012
+    bpy.ops.mesh.primitive_cylinder_add(radius=rb, depth=z1 - z0,
+                                        location=(CAP_X, CAP_Y, (z0 + z1) / 2),
+                                        vertices=64, end_fill_type='NOTHING')
+    band = bpy.context.object
+    band.name = 'med_capsule_band'
+    band.data.materials.append(R.M['steel'])
+    sol = band.modifiers.new('sol', 'SOLIDIFY')
+    sol.thickness = 0.020
+    sol.offset = 1.0
+    # второй узкий хомут под газовую линию
+    bpy.ops.mesh.primitive_cylinder_add(radius=rb, depth=0.08,
+                                        location=(CAP_X, CAP_Y, 0.74),
+                                        vertices=64, end_fill_type='NOTHING')
+    clamp = bpy.context.object
+    clamp.name = 'med_capsule_clamp_low'
+    clamp.data.materials.append(R.M['steel'])
+    cs = clamp.modifiers.new('sol', 'SOLIDIFY')
+    cs.thickness = 0.018
+    cs.offset = 1.0
+    # верхняя и нижняя окантовки пояса
+    for i, zz in enumerate((z0, z1)):
+        bpy.ops.mesh.primitive_torus_add(major_radius=rb + 0.004, minor_radius=0.012,
+                                         location=(CAP_X, CAP_Y, zz),
+                                         major_segments=64, minor_segments=8)
+        rim = bpy.context.object
+        rim.name = f'med_capsule_band_rim_{i}'
+        rim.data.materials.append(R.M['steel'])
+    # заклёпки по кругу
+    for i in range(10):
+        a = math.radians(i * 36)
+        bpy.ops.mesh.primitive_cylinder_add(
+            radius=0.012, depth=0.012, vertices=10,
+            location=(CAP_X + (rb + 0.014) * math.cos(a),
+                      CAP_Y + (rb + 0.014) * math.sin(a), 1.23),
+            rotation=(0, math.radians(90), a))
+        rv = bpy.context.object
+        rv.name = f'med_capsule_rivet_{i}'
+        rv.data.materials.append(R.M['steel'])
+    # бирка на поясе
+    R.box('capsule_plate', CAP_X - 0.09, CAP_X + 0.09,
+          CAP_Y + rb + 0.010, CAP_Y + rb + 0.026, 1.16, 1.28, 'accent')
 
 
 def build_patient():
@@ -238,16 +294,16 @@ def build_capsule_station():
               1.06, 1.14, 'steel')
     R.box('wall_label', 1.88, 2.20, wy + 0.072, wy + 0.078, 1.04, 1.12, 'accent')
     # порты на восточной стороне капсулы
-    for i, (py, pz, m) in enumerate(((-1.20, 1.28, 'accent'), (-1.05, 1.02, 'steel'),
+    for i, (py, pz, m) in enumerate(((-1.20, 1.28, 'accent'), (-1.05, 1.20, 'steel'),
                                      (-0.90, 0.74, 'white'))):
-        disc(f'port_{i}', CAP_X + CAP_R - 0.01, py, pz, 0.040, 0.09, 'x', 'steel')
-        disc(f'port_collar_{i}', CAP_X + CAP_R + 0.035, py, pz, 0.048, 0.02, 'x', m)
+        disc(f'port_{i}', CAP_X + CAP_GLASS_R + 0.004, py, pz, 0.040, 0.09, 'x', 'steel')
+        disc(f'port_collar_{i}', CAP_X + CAP_GLASS_R + 0.050, py, pz, 0.048, 0.02, 'x', m)
     # шланги: подача, возврат, газ
-    px = CAP_X + CAP_R
+    px = CAP_X + CAP_GLASS_R + 0.02
     R.hose('hose_supply', [(2.68, -2.10, 1.30), (2.70, -1.70, 1.52), (2.66, -1.40, 1.44),
                            (px, -1.20, 1.28)], radius=0.028, mat='accent')
-    R.hose('hose_return', [(2.78, -2.10, 1.10), (2.76, -1.72, 1.26), (2.68, -1.35, 1.14),
-                           (px, -1.05, 1.02)], radius=0.024, mat='steel')
+    R.hose('hose_return', [(2.78, -2.10, 1.10), (2.76, -1.72, 1.26), (2.68, -1.35, 1.24),
+                           (px, -1.05, 1.20)], radius=0.024, mat='steel')
     R.hose('hose_gas', [(2.72, -2.08, 0.82), (2.70, -1.62, 0.70), (2.66, -1.22, 0.66),
                         (px, -0.90, 0.74)], radius=0.020, mat='white')
     # кабель питания стойки в стену
@@ -291,6 +347,7 @@ R.shell()
 R.doorway()
 R.ceiling_lights([(-2.30, -1.10, -0.90, 0.30), (0.70, 1.90, -0.90, 0.30)])
 build_capsule()
+build_band()
 build_patient()
 build_capsule_station()
 build_couch()
