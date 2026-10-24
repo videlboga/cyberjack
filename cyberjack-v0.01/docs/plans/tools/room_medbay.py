@@ -45,7 +45,73 @@ def build_capsule():
     R.cyl('capsule_console_pole', 2.87, -0.85, 0.0, 1.05, 0.024, 'steel')
     R.cyl('capsule_console_base', 2.87, -0.85, 0.0, 0.05, 0.18, 'paint')
     R.box('capsule_console_screen', 2.69, 2.72, -0.92, -0.78, 1.08, 1.32, 'accent')
+    # наполнение капсулы: ложе, спинка, подголовник, жидкость
+    R.box('capsule_pad', 1.62, 2.38, -1.18, -0.52, 0.50, 0.60, 'soft')
+    R.box('capsule_back', 1.62, 2.38, -0.60, -0.50, 0.60, 1.24, 'soft')
+    R.box('capsule_head', 1.70, 2.30, -0.58, -0.46, 1.24, 1.42, 'white')
+    for i, dx in enumerate((1.68, 2.26)):
+        R.box(f'capsule_arm_{i}', dx, dx + 0.06, -1.16, -0.60, 0.60, 0.64, 'steel')
+    liquid = R.mat('med_liquid', (0.32, 0.62, 0.58), 0.06)
+    b = liquid.node_tree.nodes['Principled BSDF']
+    b.inputs['Alpha'].default_value = 0.20
+    liquid.surface_render_method = 'BLENDED'
+    R.cyl('capsule_liquid', 2.00, -0.85, 0.18, 1.50, 0.44, liquid, verts=32)
     print('CAPSULE', [round(v, 2) for v in info['size']], info['tris'])
+
+
+def disc(name, x, y, z, r, depth, axis, mat):
+    """Диск/патрубок вдоль оси X или Y (манометр, порт, разъём)."""
+    rot = (0, math.radians(90), 0) if axis == 'x' else (math.radians(90), 0, 0)
+    bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=depth, location=(x, y, z),
+                                        rotation=rot, vertices=24)
+    o = bpy.context.object
+    o.name = 'med_' + name
+    o.data.materials.append(R.M[mat])
+    return o
+
+
+def build_capsule_station():
+    """Стойка в юго-восточном углу (манометры в комнату), пульт на южной стене,
+    порты на восточной стороне капсулы и три шланга между ними."""
+    # стойка в углу, фронт смотрит на запад (-x), в комнату
+    x0, x1, y0, y1 = 2.62, 3.16, -2.54, -2.06
+    R.box('lsu_body', x0, x1, y0, y1, 0.10, 1.38, 'paint')
+    R.box('lsu_cap', x0 - 0.02, x1 + 0.02, y0 - 0.02, y1 + 0.02, 1.38, 1.44, 'paint')
+    R.box('lsu_toe', x0, x1, y0, y1, 0.0, 0.10, 'plinth')
+    R.box('lsu_face', x0 - 0.002, x0 + 0.010, y0 + 0.04, y1 - 0.04, 0.88, 1.32, 'accent')
+    for i, dy in enumerate((0.10, 0.28, 0.44)):
+        disc(f'lsu_gauge_ring_{i}', x0 - 0.008, y0 + dy, 1.18, 0.062, 0.014, 'x', 'steel')
+        disc(f'lsu_gauge_{i}', x0 - 0.016, y0 + dy, 1.18, 0.052, 0.012, 'x', 'white')
+    for i, dy in enumerate((0.10, 0.20, 0.30, 0.40)):
+        R.box(f'lsu_led_{i}', x0 - 0.012, x0 - 0.004, y0 + dy - 0.018, y0 + dy + 0.018,
+              1.00, 1.03, 'accent' if i % 2 == 0 else 'white')
+    R.box('lsu_vent', x0 - 0.008, x0 - 0.002, y0 + 0.06, y1 - 0.06, 0.26, 0.52, 'seam')
+    for i, dy in enumerate((0.10, 0.40)):
+        disc(f'lsu_knob_{i}', x0 - 0.012, y0 + dy, 0.68, 0.026, 0.016, 'x', 'steel')
+    # пульт на южной стене, экраны смотрят в комнату (+y)
+    wy = R.Y0 + 0.03
+    R.box('wall_panel', 1.10, 2.30, wy, wy + 0.07, 1.26, 1.98, 'paint')
+    R.box('wall_screen_1', 1.18, 1.80, wy + 0.072, wy + 0.080, 1.38, 1.90, 'accent')
+    R.box('wall_screen_2', 1.86, 2.22, wy + 0.072, wy + 0.080, 1.38, 1.90, 'white')
+    for i in range(5):
+        R.box(f'wall_button_{i}', 1.20 + i * 0.10, 1.26 + i * 0.10, wy + 0.072, wy + 0.082,
+              1.06, 1.14, 'steel')
+    R.box('wall_label', 1.88, 2.20, wy + 0.072, wy + 0.078, 1.04, 1.12, 'accent')
+    # порты на восточной стороне капсулы
+    for i, (py, pz, m) in enumerate(((-1.20, 1.28, 'accent'), (-1.05, 1.02, 'steel'),
+                                     (-0.90, 0.74, 'white'))):
+        disc(f'port_{i}', 2.50, py, pz, 0.040, 0.09, 'x', 'steel')
+        disc(f'port_collar_{i}', 2.545, py, pz, 0.048, 0.02, 'x', m)
+    # шланги: подача, возврат, газ
+    R.hose('hose_supply', [(2.68, -2.10, 1.30), (2.66, -1.70, 1.46), (2.58, -1.40, 1.40),
+                           (2.50, -1.20, 1.28)], radius=0.028, mat='accent')
+    R.hose('hose_return', [(2.78, -2.10, 1.10), (2.72, -1.72, 1.24), (2.60, -1.35, 1.14),
+                           (2.50, -1.05, 1.02)], radius=0.024, mat='steel')
+    R.hose('hose_gas', [(2.72, -2.08, 0.82), (2.68, -1.62, 0.70), (2.58, -1.22, 0.66),
+                        (2.50, -0.90, 0.74)], radius=0.020, mat='white')
+    # кабель питания стойки в стену
+    R.hose('lsu_cable', [(3.14, -2.30, 0.55), (3.18, -2.45, 0.32), (3.10, R.Y0 + 0.06, 0.22)],
+           radius=0.014, mat='paint')
 
 
 def build_couch():
@@ -66,8 +132,8 @@ def build_storage():
     R.box('tray_bin_1', -1.10, -0.92, -0.28, -0.05, 0.82, 0.98, 'white')
     R.box('tray_bin_2', -0.88, -0.64, -0.28, -0.05, 0.82, 0.94, 'accent')
     # ведро биоотходов
-    R.cyl('bio_bin', 2.60, -2.10, 0.0, 0.55, 0.19, 'accent')
-    R.cyl('bio_bin_lid', 2.60, -2.10, 0.55, 0.58, 0.20, 'paint')
+    R.cyl('bio_bin', -0.35, -2.30, 0.0, 0.55, 0.19, 'accent')
+    R.cyl('bio_bin_lid', -0.35, -2.30, 0.55, 0.58, 0.20, 'paint')
 
 
 def build_gas_panel():
@@ -84,9 +150,13 @@ R.shell()
 R.doorway()
 R.ceiling_lights([(-2.30, -1.10, -0.90, 0.30), (0.70, 1.90, -0.90, 0.30)])
 build_capsule()
+build_capsule_station()
 build_couch()
 build_storage()
 build_gas_panel()
+for o in bpy.data.objects:
+    if o.name in ('med_capsule_liquid',):
+        o.hide_render = False
 R.bevel_all()
 
 print('=== ROOM ===', f'{R.W} x {R.D} x {R.H} m', 'area', round(R.W * R.D, 1))

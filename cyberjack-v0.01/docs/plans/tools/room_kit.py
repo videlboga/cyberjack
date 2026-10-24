@@ -109,6 +109,22 @@ class RoomKit:
         self.sc.collection.objects.link(o)
         return self._add(o, mat)
 
+    def hose(self, name, points, radius=0.025, mat='steel', res=4):
+        """Шланг по точкам: без него оборудование не связано с аппаратом."""
+        cu = bpy.data.curves.new(name, 'CURVE')
+        cu.dimensions = '3D'
+        cu.bevel_depth = radius
+        cu.bevel_resolution = res
+        sp = cu.splines.new('BEZIER')
+        sp.bezier_points.add(len(points) - 1)
+        for bp, p in zip(sp.bezier_points, points):
+            bp.co = p
+            bp.handle_left_type = bp.handle_right_type = 'AUTO'
+        o = bpy.data.objects.new(self.prefix + name, cu)
+        self.sc.collection.objects.link(o)
+        o.data.materials.append(self.M[mat])
+        return o
+
     # --- форма ------------------------------------------------------------
     def bevel_all(self):
         for o in bpy.data.objects:
