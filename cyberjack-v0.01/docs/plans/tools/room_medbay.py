@@ -37,11 +37,47 @@ def assign_materials(prefix):
         o.data.materials.append(m)
 
 
+def zspan(o):
+    zs = [(o.matrix_world @ v.co).z for v in o.data.vertices]
+    return min(zs), max(zs)
+
+
+def scale_z(o, k, anchor):
+    o.data.transform(Matrix.Translation((0, 0, anchor))
+                     @ Matrix.Diagonal((1, 1, k, 1))
+                     @ Matrix.Translation((0, 0, -anchor)))
+
+
+def move_z(o, dz):
+    o.data.transform(Matrix.Translation((0, 0, dz)))
+
+
 def build_capsule():
     spec = dict(K.DEVICES['capsule'])
     spec['target'] = (CAP_R * 2, CAP_R * 2, CAP_H)
     objs, info = K.build_device(spec, (CAP_X, CAP_Y), yaw=0, prefix='med_capsule_')
     assign_materials('med_capsule_')
+
+    # у ассета толстая станина (0.47) и высокая крышка: внутри остаётся 1.46 м.
+    # Осаживаем станину и крышку по Z, стекло растягиваем — внутри 2.1 м.
+    def find(part):
+        got = [o for o in bpy.data.objects if part in o.name and o.type == 'MESH']
+        return got[0] if got else None
+
+    base, glass, cap = find('Tank_Base'), find('Glass'), find('Tank_Top')
+    if base and glass and cap:
+        top = 0.13 + CAP_H                     # верх капсулы над полом комнаты
+        b0, b1 = zspan(base)
+        scale_z(base, 0.16 / (b1 - b0), b0)     # станина 0.16
+        c0, c1 = zspan(cap)
+        scale_z(cap, 0.26 / (c1 - c0), c0)      # крышка 0.26
+        c0, c1 = zspan(cap)
+        move_z(cap, (top - 0.26) - c0)
+        g0, g1 = zspan(glass)
+        scale_z(glass, ((top - 0.26) - 0.16) / (g1 - g0), g0)
+        move_z(glass, (0.13 + 0.16) - g0)
+        print('CAPSULE_TUNE base 0.16, glass', round((top - 0.26) - (0.13 + 0.16), 2),
+              ', cap 0.26')
     # подиум под капсулу
     R.box('capsule_plinth', CAP_X - CAP_R - 0.10, CAP_X + CAP_R + 0.10,
           CAP_Y - CAP_R - 0.10, CAP_Y + CAP_R + 0.10, 0.0, 0.10, 'paint')
@@ -134,13 +170,26 @@ def build_patient():
         bpy.ops.object.mode_set(mode='OBJECT')
         print('POSE best axis', axis, 'sign', sgn, 'angle', ang, 'width', round(w, 2))
 
+    # пол капсулы — верх станины ассета; крышка — низ Tank_Top
+    def zrange(part):
+        objs = [o for o in bpy.data.objects if part in o.name and o.type == 'MESH']
+        zs = [(o.matrix_world @ v.co).z for o in objs for v in o.data.vertices]
+        return (min(zs), max(zs)) if zs else (0.0, 0.0)
+
+    floor_z = zrange('Tank_Base')[1]
+    cap_z = zrange('Tank_Top')[0]
+    avail = cap_z - floor_z
+    target_h = min(1.70, avail - 0.06)     # рост не выше свободной высоты капсулы
+    print('CAPSULE_INSIDE floor', round(floor_z, 2), 'cap', round(cap_z, 2),
+          'avail', round(avail, 2), 'h', round(target_h, 2))
+
     w, d, z0, z1 = measure()
-    k = 1.66 / (z1 - z0)      # рост с запасом под крышку капсулы
+    k = target_h / (z1 - z0)
     pts = [o.matrix_world @ v.co for o in meshes for v in o.data.vertices]
     cx = (min(p.x for p in pts) + max(p.x for p in pts)) / 2
     cy = (min(p.y for p in pts) + max(p.y for p in pts)) / 2
     for o in new:
-        o.matrix_world = (Matrix.Translation((CAP_X, CAP_Y, 0.16))
+        o.matrix_world = (Matrix.Translation((CAP_X, CAP_Y, floor_z + 0.004))
                           @ Matrix.Scale(k, 4)
                           @ Matrix.Translation((-cx, -cy, -z0))
                           @ o.matrix_world)
