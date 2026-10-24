@@ -262,6 +262,85 @@ class RoomKit:
                      self.H - 0.05, self.H - 0.005, 'steel')
             self.box(f'light_{i}', lx0, lx1, ly0, ly1, self.H - 0.02, self.H - 0.005, 'light')
 
+    def patient(self, at, height=1.70, lying=False, yaw=0.0, src=None):
+        """Персонаж из VRM: руки опущены, при lying — лежит на спине."""
+        path = src or '/home/cyberkitty/Projects/cyberjack/assets/3d/converted/anna_nude.glb'
+        before = set(bpy.data.objects)
+        if not os.path.exists(path):
+            print('PATIENT MISS', path)
+            return None
+        bpy.ops.import_scene.gltf(filepath=path)
+        new = [o for o in bpy.data.objects if o not in before]
+        all_meshes = [o for o in new if o.type == 'MESH']
+        meshes = [o for o in all_meshes if any(m.type == 'ARMATURE' for m in o.modifiers)]
+        for o in [x for x in all_meshes if x not in meshes]:
+            bpy.data.objects.remove(o, do_unlink=True)
+        new = [o for o in bpy.data.objects if o not in before]
+        arm = next((o for o in new if o.type == 'ARMATURE'), None)
+        for o in new:
+            o.name = self.prefix + 'patient_' + o.name
+
+        def measure():
+            bpy.context.view_layer.update()
+            dg = bpy.context.evaluated_depsgraph_get()
+            pts = []
+            for o in meshes:
+                ev = o.evaluated_get(dg)
+                me = ev.to_mesh()
+                pts += [ev.matrix_world @ v.co for v in me.vertices]
+                ev.to_mesh_clear()
+            return (max(p.x for p in pts) - min(p.x for p in pts),
+                    max(p.z for p in pts) - min(p.z for p in pts),
+                    min(p.z for p in pts), max(p.z for p in pts))
+
+        # руки вниз: подбор оси и знака по минимальной ширине
+        if arm:
+            bpy.context.view_layer.objects.active = arm
+            bpy.ops.object.mode_set(mode='POSE')
+            best = None
+            for axis in (0, 1, 2):
+                for sgn in (1, -1):
+                    for ang in (70, 85):
+                        for pb in arm.pose.bones:
+                            pb.rotation_mode = 'XYZ'
+                            pb.rotation_euler = (0, 0, 0)
+                            pb.matrix_basis.identity()
+                        for side, ssgn in (('L', sgn), ('R', -sgn)):
+                            pb = arm.pose.bones.get(f'J_Bip_{side}_UpperArm')
+                            if pb:
+                                e = [0.0, 0.0, 0.0]
+                                e[axis] = math.radians(ang * ssgn)
+                                pb.rotation_euler = e
+                        w = measure()[0]
+                        if best is None or w < best[0]:
+                            best = (w, axis, sgn, ang)
+            w, axis, sgn, ang = best
+            for pb in arm.pose.bones:
+                pb.rotation_euler = (0, 0, 0)
+                pb.matrix_basis.identity()
+            for side, ssgn in (('L', sgn), ('R', -ssgn)):
+                pb = arm.pose.bones.get(f'J_Bip_{side}_UpperArm')
+                if pb:
+                    e = [0.0, 0.0, 0.0]
+                    e[axis] = math.radians(ang * ssgn)
+                    pb.rotation_euler = e
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        w, hgt, z0, z1 = measure()
+        k = height / max(hgt, 1e-3)
+        pts = [o.matrix_world @ v.co for o in meshes for v in o.data.vertices]
+        cx = (min(p.x for p in pts) + max(p.x for p in pts)) / 2
+        cy = (min(p.y for p in pts) + max(p.y for p in pts)) / 2
+
+        M = Matrix.Translation((at[0], at[1], at[2])) @ Matrix.Rotation(math.radians(yaw), 4, 'Z')
+        if lying:
+            M = M @ Matrix.Translation((0, 0, 0)) @ Matrix.Rotation(math.radians(-90), 4, 'X')
+        M = M @ Matrix.Scale(k, 4) @ Matrix.Translation((-cx, -cy, -z0))
+        for o in new:
+            o.matrix_world = M @ o.matrix_world
+        bpy.context.view_layer.update()
+        return new
+
     # --- типовые предметы -------------------------------------------------
     def couch(self, name, cx, cy, L=2.00, Wd=0.80, h=0.78, headrest=True, straps=2):
         x0, x1 = cx - L / 2, cx + L / 2
