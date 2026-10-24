@@ -50,7 +50,7 @@ class RoomKit:
                 # в EEVEE Next проще и надёжнее полупрозрачность через alpha-blend,
                 # transmission без экранных рефракций даёт непрозрачный цилиндр
                 b = m.node_tree.nodes['Principled BSDF']
-                b.inputs['Alpha'].default_value = 0.30
+                b.inputs['Alpha'].default_value = 0.42
                 b.inputs['Roughness'].default_value = 0.10
                 m.surface_render_method = 'BLENDED'
                 m.use_backface_culling = False
