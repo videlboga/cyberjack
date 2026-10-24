@@ -109,6 +109,57 @@ class RoomKit:
         self.sc.collection.objects.link(o)
         return self._add(o, mat)
 
+    def rbox(self, name, x0, x1, y0, y1, z0, z1, mat, r=0.04, seg=4):
+        """Коробка с крупным скруглением — «обтекаемая» мебель по рефу."""
+        o = self.box(name, x0, x1, y0, y1, z0, z1, mat)
+        m = o.modifiers.new('round', 'BEVEL')
+        m.width = r
+        m.segments = seg
+        m.limit_method = 'ANGLE'
+        m.angle_limit = 0.6
+        m.miter_outer = 'MITER_ARC'
+        o['rounded'] = True
+        return o
+
+    def octa_frame(self, name, cx, w, h, z0, mat='steel', corner=0.22, thick=0.09, depth=0.10):
+        """Проём со срезанными углами — октогональная рама как на рефе."""
+        cy = self.Y1 - depth / 2
+        x0, x1 = cx - w / 2, cx + w / 2
+        zt = z0 + h
+        parts = [
+            (x0 + corner, x1 - corner, z0, z0 + thick),            # низ
+            (x0 + corner, x1 - corner, zt - thick, zt),            # верх
+            (x0, x0 + thick, z0 + corner, zt - corner),            # левая
+            (x1 - thick, x1, z0 + corner, zt - corner),            # правая
+        ]
+        for i, (a, b, c, d) in enumerate(parts):
+            self.box(f'{name}_{i}', a, b, cy - depth / 2, cy + depth / 2, c, d, mat)
+        # диагональные углы: коробка повёрнута на 45° вокруг своего центра
+        hw, hh = thick * 0.72, corner * 0.72
+        for i, (ax, az, sx, sz) in enumerate((
+                (x0, z0, 1, 1), (x1, z0, -1, 1), (x0, zt, 1, -1), (x1, zt, -1, -1))):
+            ccx, ccz = ax + sx * corner * 0.5, az + sz * corner * 0.5
+            o = self.box(f'{name}_c{i}', ccx - hw, ccx + hw, cy - depth / 2, cy + depth / 2,
+                         ccz - hh, ccz + hh, mat)
+            M = (Matrix.Translation((ccx, 0, ccz))
+                 @ Matrix.Rotation(math.radians(45 if sx * sz > 0 else -45), 4, 'Y')
+                 @ Matrix.Translation((-ccx, 0, -ccz)))
+            o.data.transform(M)
+
+    def arc_wall(self, name, cx, cy, radius, a0, a1, z0, z1, mat='panel', thick=0.06, seg=24):
+        """Гнутая перегородка: сегменты по дуге, читается как радиусная стенка."""
+        for i in range(seg):
+            t0 = math.radians(a0 + (a1 - a0) * i / seg)
+            t1 = math.radians(a0 + (a1 - a0) * (i + 1) / seg)
+            tm = (t0 + t1) / 2
+            w = max(radius * (t1 - t0) * 1.15, 0.02)
+            x = cx + radius * math.cos(tm)
+            y = cy + radius * math.sin(tm)
+            o = self.box(f'{name}_{i}', -w / 2, w / 2, -thick / 2, thick / 2, 0, z1 - z0, mat)
+            o.data.transform(Matrix.Identity(4))
+            o.location = (x, y, (z0 + z1) / 2)
+            o.rotation_euler = (0, 0, tm + math.pi / 2)
+
     def hose(self, name, points, radius=0.025, mat='steel', res=4):
         """Шланг по точкам: без него оборудование не связано с аппаратом."""
         cu = bpy.data.curves.new(name, 'CURVE')
