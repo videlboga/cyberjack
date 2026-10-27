@@ -77,16 +77,7 @@ for i, path in enumerate(files):
     y = 0.0 if i < PER_ROW else ROW_GAP
     obj.matrix_world = Matrix.Translation((x - cx, y - cy, -lo.z)) @ obj.matrix_world
 
-    # белый инк-материал на все слоты
-    mat = bpy.data.materials.get('lineup_white')
-    if mat is None:
-        mat = bpy.data.materials.new('lineup_white')
-        mat.use_nodes = True
-        bsdf = mat.node_tree.nodes['Principled BSDF']
-        bsdf.inputs['Base Color'].default_value = (0.93, 0.94, 0.95, 1)
-        bsdf.inputs['Roughness'].default_value = 0.75
-    obj.data.materials.clear()
-    obj.data.materials.append(mat)
+    # родные материалы сохраняем: ink-перекраску убрали
     obj.data.polygons.foreach_set('use_smooth', [False] * len(obj.data.polygons))
     obj.data.update()
 
@@ -112,10 +103,11 @@ fm.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.88
 floor.data.materials.append(fm)
 
 # свет
-for name, vec, energy in (('key', (0.35, 0.8, -0.55), 1.5), ('fill', (-0.5, -0.7, -0.3), 0.6)):
+for name, vec, energy in (('key', (0.35, 0.8, -0.55), 3.0), ('fill', (-0.5, -0.7, -0.3), 1.2)):
     d = bpy.data.lights.new(name, 'SUN')
     d.energy = energy
-    d.use_shadow = False
+    d.use_shadow = (name == 'key')
+    d.angle = math.radians(6)
     o = bpy.data.objects.new(name, d)
     o.rotation_euler = Vector(vec).normalized().to_track_quat('-Z', 'Y').to_euler()
     sc.collection.objects.link(o)
@@ -127,46 +119,27 @@ w.node_tree.nodes['Background'].inputs['Strength'].default_value = 0.7
 
 # камера-орто
 cd = bpy.data.cameras.new('cam')
-cd.type = 'ORTHO'
-cd.ortho_scale = (PER_ROW - 1) * STEP + 3.0
+cd.type = 'PERSP'
+cd.lens = 50
 cam = bpy.data.objects.new('cam', cd)
 sc.collection.objects.link(cam)
-cam.location = (0, -16.0, 0.92)
-cam.rotation_euler = (math.radians(90), 0, 0)
+cam.location = (0.0, -26.0, 7.0)
+aim = Vector((0, 0, 0.85))
+cam.rotation_euler = (aim - Vector(cam.location)).to_track_quat('-Z', 'Y').to_euler()
 sc.camera = cam
 
 sc.render.engine = 'BLENDER_EEVEE_NEXT'
-sc.render.resolution_x, sc.render.resolution_y = 4200, 980
+sc.render.resolution_x, sc.render.resolution_y = 2600, 1400
 sc.eevee.taa_render_samples = 6
-sc.view_settings.view_transform = 'Standard'
+sc.view_settings.view_transform = 'AgX'
+sc.view_settings.look = 'AgX - Base Contrast'
+sc.render.use_freestyle = False
+sc.eevee.use_raytracing = True
 
-# контур только по силуэту: без рёбер, чтобы Freestyle не тонул в геометрии
-r = sc.render
-r.use_freestyle = True
-r.line_thickness_mode = 'ABSOLUTE'
-r.line_thickness = 1.3
-vl = sc.view_layers[0]
-vl.use_freestyle = True
-fs = vl.freestyle_settings
-# в дефолтной сцене уже есть набор линий без стиля — он и валит рендер
-for old in list(fs.linesets):
-    fs.linesets.remove(old)
-ls = fs.linesets.new('silhouette')
-ls.select_silhouette = True
-ls.select_border = True
-ls.select_crease = False
-ls.select_contour = False
-sty = bpy.data.linestyles.new('ink_line')
-sty.color = (0.22, 0.24, 0.29)
-sty.thickness = 1.3
-sty.use_chaining = False
-ls.linestyle = sty
-print('LINESET_STYLE', ls.linestyle.name if ls.linestyle else 'NONE')
-
-blend = os.path.join(OUT, 'assets_lineup.blend')
+blend = os.path.join(OUT, 'assets_lineup_plain.blend')
 bpy.ops.wm.save_as_mainfile(filepath=blend)
 print('SAVED', blend)
 
-sc.render.filepath = os.path.join(OUT, 'assets_lineup.png')
+sc.render.filepath = os.path.join(OUT, 'assets_lineup_plain.png')
 bpy.ops.render.render(write_still=True)
 print('RENDERED assets_lineup.png')
