@@ -58,10 +58,8 @@ for i, path in enumerate(files):
         bpy.context.view_layer.objects.active = obj
         bpy.ops.object.modifier_apply(modifier='dec')
 
-    # GLB приходит Y-up: разворачиваем так, чтобы высота была по Z
-    lo, hi = bbox(obj)
-    if (hi.y - lo.y) > (hi.z - lo.z):
-        obj.matrix_world = Matrix.Rotation(math.radians(90), 4, 'X') @ obj.matrix_world
+    # поворот не нужен: импортёр glTF сам переводит Y-up в Z-up.
+    # любая дополнительная ротация валит модели на бок
 
     # масштаб: доверяем ассету, правим только при заметном расхождении
     lo, hi = bbox(obj)

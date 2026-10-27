@@ -72,8 +72,12 @@ def fix_unpainted(scene):
         pbr = m.setdefault('pbrMetallicRoughness', {})
         c = pbr.get('baseColorFactor')
         if c and len(c) >= 3 and np.allclose(np.array(c[:3]), DEFAULT_PINK, atol=0.02):
-            pbr['baseColorFactor'] = [0.86, 0.87, 0.88, c[3] if len(c) > 3 else 1.0]
+            pbr['baseColorFactor'] = [0.86, 0.87, 0.88, 1.0]
             fixed += 1
+        # полупрозрачность из SketchUp (alpha 0.7/0.44) превращала меши в «сетку»
+        if c and len(c) > 3 and c[3] < 0.99:
+            c[3] = 1.0
+            pbr['baseColorFactor'] = c
     return fixed
 
 
