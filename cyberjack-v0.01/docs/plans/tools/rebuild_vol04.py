@@ -22,6 +22,8 @@ import openskp
 import openskp._core as core_module
 import openskp.instanced_scene as scene_module
 
+TARGET_H = 1.72      # м: высота машины в сцене
+MAX_SPAN = 2.0       # м: ограничение размаха по X/Z
 P = Path('/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/models/'
          'sex-machines-models-vol-04/sex-machines-models-vol-04')
 OUT = Path('/home/cyberkitty/Projects/cyberjack/assets/3d/converted/vol04')
@@ -247,6 +249,53 @@ def export_glb(scene, res, textures, keep, path):
 
     root = emit(scene.scene_hierarchy, np.eye(4), '0')
     doc['scenes'][0]['nodes'] = [root] if root is not None else []
+    # SketchUp — Z-up, glTF — Y-up: поворачиваем корень на -90° по X,
+    # иначе импортёр кладёт машину на бок и нормализация берёт не ту ось
+    def glb_bbox():
+        lo = np.full(3, np.inf)
+        hi = -lo.copy()
+
+        def walk(i, M):
+            n = doc['nodes'][i]
+            m = np.array(n.get('matrix', [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+                         dtype=float).reshape(4, 4).T
+            W = M @ m
+            if 'mesh' in n:
+                for pr in doc['meshes'][n['mesh']]['primitives']:
+                    a = doc['accessors'][pr['attributes']['POSITION']]
+                    for cx in (a['min'][0], a['max'][0]):
+                        for cy in (a['min'][1], a['max'][1]):
+                            for cz in (a['min'][2], a['max'][2]):
+                                w = W @ np.array([cx, cy, cz, 1.0])
+                                nonlocal lo, hi
+                                lo = np.minimum(lo, w[:3])
+                                hi = np.maximum(hi, w[:3])
+            for ch in n.get('children', []):
+                walk(ch, W)
+
+        for r in doc['scenes'][0]['nodes']:
+            walk(r, np.eye(4))
+        return lo, hi
+
+    if root is not None:
+        # openskp уже отдаёт Y-up (высота по Y) — доп. поворот не нужен
+        Mroot = np.array(doc['nodes'][root]['matrix'], dtype=float).reshape(4, 4).T
+        # нормализация на экспорте: высота TARGET_H, низ на полу, центр в нуле.
+        # тогда импорт в любой движок не требует пересчёта габаритов
+        lo0, hi0 = 0, 0
+        doc['nodes'][root]['matrix'] = [float(v) for v in Mroot.T.reshape(-1)]
+        lo0, hi0 = glb_bbox()
+        sz = hi0 - lo0
+        k = TARGET_H / max(float(sz[1]), 1e-9)
+        if max(float(sz[0]), float(sz[2])) * k > MAX_SPAN:
+            k *= MAX_SPAN / (max(float(sz[0]), float(sz[2])) * k)
+        S = np.array([[k, 0, 0, 0], [0, k, 0, 0], [0, 0, k, 0], [0, 0, 0, 1]], dtype=float)
+        T = np.array([[1, 0, 0, -(lo0[0] + hi0[0]) / 2],
+                      [0, 1, 0, -lo0[1]],
+                      [0, 0, 1, -(lo0[2] + hi0[2]) / 2],
+                      [0, 0, 0, 1]], dtype=float)
+        Mroot = S @ T @ Mroot
+        doc['nodes'][root]['matrix'] = [float(v) for v in Mroot.T.reshape(-1)]
 
     lo = np.full(3, np.inf)
     hi = -lo.copy()

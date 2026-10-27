@@ -337,7 +337,7 @@ def _luma_role(mat):
 
 
 def imported_machine(F, model_id, target_h=1.75, yaw=0, max_span=2.2, keep_aspect=True,
-                     target_tris=45000):
+                     target_tris=12000):
     """Машина из vol-04 как модуль кита: импорт GLB, нормализация, инк-материалы.
 
     GLB пишется в мм (units='mm'), поэтому сначала x0.001; затем масштаб под
@@ -351,13 +351,74 @@ def imported_machine(F, model_id, target_h=1.75, yaw=0, max_span=2.2, keep_aspec
     if not os.path.exists(path):
         raise FileNotFoundError(path)
 
+    import bmesh
+    from mathutils import Matrix
+
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
-    new = [o for o in set(bpy.data.objects) - before if o.type == 'MESH']
+    new = [o for o in bpy.data.objects if o not in before and o.type == 'MESH']
     if not new:
         raise RuntimeError(f'no meshes in {path}')
 
-    # применить трансформации и слить в один меш
+    # --- децимация и чистка каждого меша (без операторов контекста) ----------
+    for o in new:
+        tris = sum(len(pp.vertices) - 2 for pp in o.data.polygons)
+        if target_tris and tris > target_tris:
+            mod = o.modifiers.new('dec', 'DECIMATE')
+            mod.ratio = max(0.02, target_tris / tris)
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.modifier_apply(modifier='dec')
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(1.5),
+                                 verts=list(bm.verts), edges=list(bm.edges))
+        loose = [v for v in bm.verts if not v.link_faces]
+        if loose:
+            bmesh.ops.delete(bm, geom=loose, context='VERTS')
+        bm.to_mesh(o.data)
+        bm.free()
+        o.data.update()
+
+    # --- габарит в мире по вершинам полигонов --------------------------------
+    def world_bb(objs):
+        lo = Vector((1e18, 1e18, 1e18))
+        hi = -lo.copy()
+        for o in objs:
+            used = {i for poly in o.data.polygons for i in poly.vertices}
+            for i in used:
+                w = o.matrix_world @ o.data.vertices[i].co
+                lo = Vector((min(lo.x, w.x), min(lo.y, w.y), min(lo.z, w.z)))
+                hi = Vector((max(hi.x, w.x), max(hi.y, w.y), max(hi.z, w.z)))
+        return lo, hi
+
+    def xform(M):
+        for o in new:
+            o.matrix_world = M @ o.matrix_world
+
+    # 1) Y-up -> Z-up, если «высота» пришла по Y
+    lo, hi = world_bb(new)
+    sz = hi - lo
+    if sz.y > sz.z:
+        xform(Matrix.Rotation(math.radians(90), 4, 'X'))
+
+    # 2) поворот кита + пользователя
+    xform(Matrix.Rotation(math.radians(F.yaw + yaw), 4, 'Z'))
+
+    # 3) масштаб под target_h с ограничением размаха
+    lo, hi = world_bb(new)
+    sz = hi - lo
+    k = target_h / max(sz.z, 1e-6)
+    span = max(sz.x, sz.y) * k
+    if keep_aspect and span > max_span:
+        k *= max_span / span
+    xform(Matrix.Scale(k, 4))
+
+    # 4) центр по X/Y, низ на пол
+    lo, hi = world_bb(new)
+    x, y = F._w(0.0, 0.0)
+    xform(Matrix.Translation((x - (lo.x + hi.x) / 2, y - (lo.y + hi.y) / 2, -lo.z)))
+
+    # --- слияние в один объект ----------------------------------------------
     bpy.ops.object.select_all(action='DESELECT')
     for o in new:
         o.select_set(True)
@@ -366,43 +427,11 @@ def imported_machine(F, model_id, target_h=1.75, yaw=0, max_span=2.2, keep_aspec
         bpy.ops.object.join()
     obj = bpy.context.view_layer.objects.active
     obj.name = F._n(f'mach_{model_id}')
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-
-    # децимация: SKP-машины приходят по 1+ млн трис
-    tris = sum(len(p.vertices) - 2 for p in obj.data.polygons)
-    if target_tris and tris > target_tris:
-        mod = obj.modifiers.new('dec', 'DECIMATE')
-        mod.ratio = max(0.02, target_tris / tris)
-        bpy.context.view_layer.objects.active = obj
-        bpy.ops.object.modifier_apply(modifier=mod.name)
 
     # материал → роль, затем единый инк-материал на слот
     roles = []
     for slot in obj.material_slots:
         roles.append(_luma_role(slot.material) if slot.material else 'wall')
-
-    # нормализация габаритов
-    obj.scale = (0.001, 0.001, 0.001)          # мм -> м
-    bpy.ops.object.transform_apply(scale=True)
-    bb = [Vector(c) for c in obj.bound_box]
-    size = Vector((max(v.x for v in bb) - min(v.x for v in bb),
-                   max(v.y for v in bb) - min(v.y for v in bb),
-                   max(v.z for v in bb) - min(v.z for v in bb)))
-    k = target_h / max(size.z, 1e-6)
-    span = max(size.x, size.y) * k
-    if keep_aspect and span > max_span:
-        k *= max_span / span
-    obj.scale = (k, k, k)
-    bpy.ops.object.transform_apply(scale=True)
-
-    bb = [Vector(c) for c in obj.bound_box]
-    cx = (max(v.x for v in bb) + min(v.x for v in bb)) / 2
-    cy = (max(v.y for v in bb) + min(v.y for v in bb)) / 2
-    z0 = min(v.z for v in bb)
-    x, y = F._w(0.0, 0.0)
-    obj.rotation_euler = (0, 0, math.radians(F.yaw + yaw))
-    obj.location = (x - cx, y - cy, -z0)
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
     # перекраска в палитру
     for i, slot in enumerate(obj.material_slots):
@@ -412,9 +441,14 @@ def imported_machine(F, model_id, target_h=1.75, yaw=0, max_span=2.2, keep_aspec
     obj.data.polygons.foreach_set('use_smooth', [False] * len(obj.data.polygons))
     obj.data.update()
 
+    # машина должна попасть в ближний план линий, иначе Freestyle её не обводит
+    ncoll = bpy.data.collections.get('near')
+    if ncoll is not None and ncoll not in obj.users_collection:
+        ncoll.objects.link(obj)
+
     # контактная тень под машиной
-    bb = [Vector(c) for c in obj.bound_box]
-    x0, x1 = min(v.x for v in bb), max(v.x for v in bb)
-    y0, y1 = min(v.y for v in bb), max(v.y for v in bb)
+    lo2, hi2 = world_bb([obj])
+    x0, x1 = lo2.x, hi2.x
+    y0, y1 = lo2.y, hi2.y
     F.K.blob(F._n(f'blm_{model_id}'), x0, x1, y0, y1, layers=6, pad=0.18)
     return obj
