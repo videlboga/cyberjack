@@ -86,6 +86,10 @@ def pick_machine(entries, res):
             continue
         lo, hi, dim = bb
         big, small = float(dim.max()), float(dim.min())
+        c0 = (lo + hi) / 2
+        # заглушка-куб 2x2x2 в origin (дефолтный компонент SketchUp) — мусор
+        if np.all(np.abs(dim - 2.0) < 0.06) and np.linalg.norm(c0) < 0.2:
+            continue
         if big > 0.6 and small < 0.03:      # плоский лист
             continue
         if big > 2.2:                        # крупнее машины
@@ -105,6 +109,15 @@ def pick_machine(entries, res):
     for e, lo, hi, dim in cand:
         if np.linalg.norm(e['world'][:3, 3] - centre) <= 1.20:
             keep.add(e['path'])
+
+    # фигура нужна для сверки поз: если рядом с машиной её нет,
+    # подтягиваем ближайший антропоморфный меш (обычно *.stl)
+    if not any('.stl' in (e['name'] or '').lower() and e['path'] in keep for e, _, _, _ in cand):
+        figs = [(np.linalg.norm(e['world'][:3, 3] - centre), e['path'])
+                for e, _, _, _ in cand if '.stl' in (e['name'] or '').lower()]
+        if figs:
+            figs.sort()
+            keep.add(figs[0][1])
     return keep
 
 
@@ -211,7 +224,8 @@ def export_glb(scene, res, textures, keep, path):
         doc['nodes'].append({'name': node.name or node.definition_name or path,
                              'matrix': [float(v) for v in node.matrix]})
         rid = getattr(node, 'mesh_resource_id', None)
-        if rid in res:
+        # геометрию отдаём только отобранным узлам; предки нужны лишь как контейнеры
+        if rid in res and path in keep:
             if rid not in mesh_cache:
                 prs = primitives(rid)
                 if prs:

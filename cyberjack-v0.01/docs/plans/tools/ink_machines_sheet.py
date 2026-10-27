@@ -69,10 +69,23 @@ for key in keys:
     lo = Vector((1e9, 1e9, 1e9))
     hi = Vector((-1e9, -1e9, -1e9))
     tris = 0
+    boxes = []
     for o in meshes:
         tris += sum(len(p.vertices) - 2 for p in o.data.polygons)
-        for c in o.bound_box:
-            w = o.matrix_world @ Vector(c)
+        bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
+        lo_o = Vector((min(v.x for v in bb), min(v.y for v in bb), min(v.z for v in bb)))
+        hi_o = Vector((max(v.x for v in bb), max(v.y for v in bb), max(v.z for v in bb)))
+        boxes.append((lo_o, hi_o, (lo_o + hi_o) / 2, max(hi_o - lo_o)))
+
+    # кадрируем по основной массе деталей: медианный центр, отсев дальних
+    cx = sorted(b[2].x for b in boxes)[len(boxes) // 2]
+    cy = sorted(b[2].y for b in boxes)[len(boxes) // 2]
+    cz = sorted(b[2].z for b in boxes)[len(boxes) // 2]
+    mid = Vector((cx, cy, cz))
+    for lo_o, hi_o, c_o, span in boxes:
+        if span > 2.5 or (c_o - mid).length > 1.5:
+            continue
+        for w in (lo_o, hi_o):
             lo = Vector((min(lo.x, w.x), min(lo.y, w.y), min(lo.z, w.z)))
             hi = Vector((max(hi.x, w.x), max(hi.y, w.y), max(hi.z, w.z)))
     size = hi - lo
