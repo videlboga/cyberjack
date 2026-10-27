@@ -362,6 +362,8 @@ def imported_machine(F, model_id, target_h=1.75, yaw=0, max_span=2.2, keep_aspec
 
     # --- децимация и чистка каждого меша (без операторов контекста) ----------
     for o in new:
+        if o.data.users > 1:          # инстансы из GLB делят один меш
+            o.data = o.data.copy()
         tris = sum(len(pp.vertices) - 2 for pp in o.data.polygons)
         if target_tris and tris > target_tris:
             mod = o.modifiers.new('dec', 'DECIMATE')

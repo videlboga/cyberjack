@@ -27,26 +27,39 @@ def boot():
 
 # --- линейка моделей ---------------------------------------------------------
 def lineup():
+    """Все машины vol-04 в один ряд с подписями, сцена сохраняется в .blend."""
     I, K = boot()
     models = P.vol04_models()
     if not models:
         print('NO_MODELS')
         return
-    x = 0.0
+
+    step = 3.6
+    per_row = 6
+    rows = (len(models) + per_row - 1) // per_row
+    x0 = -(per_row - 1) * step / 2
     for i, m in enumerate(models):
-        row = 0 if i < 6 else 1
-        y = 0.0 if row == 0 else 3.2
-        if i in (0, 6):
-            x = 0.0
+        x = x0 + (i % per_row) * step
+        y = 0.0 if i < per_row else 4.6
         try:
             P.imported_machine(Frame(K, x, y, 0, prefix=f'm{i}_'), m['id'],
-                               target_h=1.75, max_span=2.0)
+                               target_h=1.72, max_span=2.0, target_tris=5000)
+            print('PLACED', m['id'])
         except Exception as e:
             print('SKIP_IMPORT', m['id'], type(e).__name__, str(e)[:120])
-        x += 2.5
-        print('PLACED', m['id'])
 
-    bpy.ops.mesh.primitive_plane_add(size=40, location=(9.0, 1.6, -0.001))
+        # подпись под машиной
+        cu = bpy.data.curves.new(f'lbl{i}', 'FONT')
+        cu.body = m['id'].split('-')[-1]
+        cu.size = 0.20
+        cu.align_x = 'CENTER'
+        tob = bpy.data.objects.new(f'lbl{i}', cu)
+        bpy.context.scene.collection.objects.link(tob)
+        tob.location = (x, y - 0.95, 0.02)
+        tob.rotation_euler = (math.radians(90), 0, 0)
+        tob.data.materials.append(I.M['dark'])
+
+    bpy.ops.mesh.primitive_plane_add(size=40, location=(0.0, 1.6, -0.002))
     floor = bpy.context.object
     floor.name = 'lineup_floor'
     I.apply(floor, 'floor')
@@ -54,19 +67,24 @@ def lineup():
     I.lights(bpy.context.scene)
     sc = bpy.context.scene
     cd = bpy.data.cameras.new('cam')
-    cd.lens = 42
+    cd.type = 'ORTHO'
+    cd.ortho_scale = (per_row - 1) * step + 4.6
     cam = bpy.data.objects.new('cam', cd)
     sc.collection.objects.link(cam)
-    cam.location = (7.5, -13.5, 5.4)
-    d = Vector((7.5, 1.6, 0.9)) - Vector(cam.location)
-    cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
+    cam.location = (0.0, -12.0, 4.2)
+    cam.rotation_euler = (math.radians(74), 0, 0)
     sc.camera = cam
 
-    I.render_setup(sc, res=(2600, 1100), samples=24, exposure=-0.05, bloom=(2.2, 2))
-    I.ink(sc, thickness=1.3, crease=True, angle=150)
-    sc.render.filepath = os.path.join(OUT, 'machines_lineup.png')
+    I.render_setup(sc, res=(2400, 1150), samples=8, exposure=-0.02, bloom=(1.6, 2))
+    I.ink(sc, thickness=1.4, crease=False, angle=150)
+    # сначала сохраняем сцену, рендер — отдельно: Freestyle на 11 машинах идёт долго
+    blend = os.path.join(OUT, 'machines_lineup.blend')
+    bpy.ops.wm.save_as_mainfile(filepath=blend)
+    print('SAVED', blend)
+
+    sc.render.filepath = os.path.join(OUT, 'machines_lineup_all.png')
     bpy.ops.render.render(write_still=True)
-    print('RENDERED machines_lineup.png')
+    print('RENDERED machines_lineup_all.png')
 
 
 # --- комната с машинами ------------------------------------------------------
@@ -80,7 +98,7 @@ def room():
 
     # отобранные вручную: чистые модели, у которых читается рабочая сторона
     picks = [f'SexMachineModel-{n}' for n in ('089', '092', '099')]
-    spots = [(-2.25, 1.45, 180), (0.15, 1.60, 180), (2.45, 1.25, 180)]
+    spots = [(-1.75, 1.35, 150), (0.25, 1.55, 180), (1.95, 1.30, 200)]
     for (x, y, yaw), mid in zip(spots, picks):
         try:
             P.imported_machine(r.frame(x, y, yaw), mid, target_h=1.72, max_span=2.0)
@@ -95,7 +113,11 @@ def room():
     P.cable_run(r.frame(-3.0, -2.6), [(-0.3, 0.0, 0.02), (1.2, 0.5, 0.03), (2.6, 0.2, 0.02)],
                 n=3)
 
-    r.render(cam=(-2.45, -2.60, 1.60), aim=(0.30, 1.55, 0.95), lens=18, out='machines_room.png')
+    # сохраняем сцену: машины уже влиты в меши, внешние ассеты не нужны
+    r.render(cam=(-3.05, -2.50, 1.62), aim=(0.15, 1.50, 0.92), lens=17, out='machines_room.png')
+    blend = os.path.join(OUT, 'machines_room.blend')
+    bpy.ops.wm.save_as_mainfile(filepath=blend)
+    print('SAVED', blend)
 
 
 if __name__ == '__main__':

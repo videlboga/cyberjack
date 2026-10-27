@@ -94,7 +94,7 @@ def pick_machine(entries, res):
             continue
         if big > 0.6 and small < 0.03:      # плоский лист
             continue
-        if big > 2.2:                        # крупнее машины
+        if big > 1.8:                        # крупнее машины (рельсы, рамы стенда)
             continue
         cand.append((e, lo, hi, dim))
     if not cand:
@@ -111,6 +111,24 @@ def pick_machine(entries, res):
     for e, lo, hi, dim in cand:
         if np.linalg.norm(e['world'][:3, 3] - centre) <= 1.20:
             keep.add(e['path'])
+
+    # подрезка размаха: длинные рельсы/рамы стенда тянутся на метры,
+    # из-за них машина нормализуется в крошку — убираем самые дальние детали
+    for _ in range(40):
+        pts = [(e, lo, hi) for e, lo, hi, _ in cand if e['path'] in keep]
+        if not pts:
+            break
+        mn = np.min([lo for _, lo, _ in pts], axis=0)
+        mx = np.max([hi for _, _, hi in pts], axis=0)
+        if max(mx[0] - mn[0], mx[2] - mn[2]) <= 2.2:
+            break
+        c = (mn + mx) / 2
+        far = max(((np.linalg.norm((lo + hi) / 2 - c), e['path'])
+                   for e, lo, hi in pts if '.stl' not in (e['name'] or '').lower()),
+                  default=None)
+        if far is None:
+            break
+        keep.discard(far[1])
 
     # фигура нужна для сверки поз: если рядом с машиной её нет,
     # подтягиваем ближайший антропоморфный меш (обычно *.stl)
