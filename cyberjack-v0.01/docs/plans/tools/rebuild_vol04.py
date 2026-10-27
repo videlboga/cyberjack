@@ -23,7 +23,7 @@ import openskp._core as core_module
 import openskp.instanced_scene as scene_module
 
 TARGET_H = 1.72      # м: высота машины в сцене
-MAX_SPAN = 2.0       # м: ограничение размаха по X/Z
+MAX_SPAN = 3.4       # м: ограничение размаха по X/Z (091 — витрина из трёх секций)
 P = Path('/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/models/'
          'sex-machines-models-vol-04/sex-machines-models-vol-04')
 OUT = Path('/home/cyberkitty/Projects/cyberjack/assets/3d/converted/vol04')
@@ -77,8 +77,14 @@ def fix_unpainted(scene):
     return fixed
 
 
-def pick_machine(entries, res):
-    """Оставляем плотнейшее скопление деталей; стенд/шторы/подиум — мимо."""
+def pick_machine(entries, res, span=2.6, drop_above=3.2):
+    """Оставляем машину целиком, отбрасываем только стенд.
+
+    Опора — фигура внутри машины: всё, что стоит вокруг неё в радиусе span,
+    это машина. Отдельно выкидываются фон/шторы/подиум (крупные листы) и
+    заглушка-куб 2x2x2 в origin. Прежний отбор «по плотнейшему скоплению»
+    резал нужные детали, поэтому он больше не используется.
+    """
     cand = []
     for e in entries:
         if not e['rid'] or e['rid'] not in res:
@@ -89,55 +95,33 @@ def pick_machine(entries, res):
         lo, hi, dim = bb
         big, small = float(dim.max()), float(dim.min())
         c0 = (lo + hi) / 2
-        # заглушка-куб 2x2x2 в origin (дефолтный компонент SketchUp) — мусор
         if np.all(np.abs(dim - 2.0) < 0.06) and np.linalg.norm(c0) < 0.2:
-            continue
-        if big > 0.6 and small < 0.03:      # плоский лист
-            continue
-        if big > 1.8:                        # крупнее машины (рельсы, рамы стенда)
-            continue
+            continue                      # заглушка-куб в origin
+        if big > drop_above:
+            continue                      # фон, шторы, подиум
+        if big > 0.6 and small < 0.02:
+            continue                      # плоские листы стенда
         cand.append((e, lo, hi, dim))
     if not cand:
         return set()
-    cell = 0.40
-    cells = {}
-    for e, lo, hi, dim in cand:
-        c = e['world'][:3, 3]
-        key = (round(c[0] / cell), round(c[1] / cell), round(c[2] / cell))
-        cells[key] = cells.get(key, 0) + 1
-    best = max(cells.items(), key=lambda kv: kv[1])[0]
-    centre = np.array([best[0] * cell, best[1] * cell, best[2] * cell])
+
+    # центр машины: центр фигуры, если она есть, иначе медиана деталей
+    figs = [(e, lo, hi) for e, lo, hi, _ in cand if '.stl' in (e['name'] or '').lower()]
+    if figs:
+        e0, lo0, hi0 = figs[0]
+        centre = (lo0 + hi0) / 2
+    else:
+        centre = np.median(np.array([((lo + hi) / 2) for _, lo, hi, _ in cand]), axis=0)
+
     keep = set()
     for e, lo, hi, dim in cand:
-        if np.linalg.norm(e['world'][:3, 3] - centre) <= 1.20:
+        c = (lo + hi) / 2
+        if np.linalg.norm(c - centre) <= span:
             keep.add(e['path'])
 
-    # подрезка размаха: длинные рельсы/рамы стенда тянутся на метры,
-    # из-за них машина нормализуется в крошку — убираем самые дальние детали
-    for _ in range(40):
-        pts = [(e, lo, hi) for e, lo, hi, _ in cand if e['path'] in keep]
-        if not pts:
-            break
-        mn = np.min([lo for _, lo, _ in pts], axis=0)
-        mx = np.max([hi for _, _, hi in pts], axis=0)
-        if max(mx[0] - mn[0], mx[2] - mn[2]) <= 2.2:
-            break
-        c = (mn + mx) / 2
-        far = max(((np.linalg.norm((lo + hi) / 2 - c), e['path'])
-                   for e, lo, hi in pts if '.stl' not in (e['name'] or '').lower()),
-                  default=None)
-        if far is None:
-            break
-        keep.discard(far[1])
-
-    # фигура нужна для сверки поз: если рядом с машиной её нет,
-    # подтягиваем ближайший антропоморфный меш (обычно *.stl)
-    if not any('.stl' in (e['name'] or '').lower() and e['path'] in keep for e, _, _, _ in cand):
-        figs = [(np.linalg.norm(e['world'][:3, 3] - centre), e['path'])
-                for e, _, _, _ in cand if '.stl' in (e['name'] or '').lower()]
-        if figs:
-            figs.sort()
-            keep.add(figs[0][1])
+    # фигура обязана попасть в набор — она нужна для сверки поз
+    for e, _, _ in figs:
+        keep.add(e['path'])
     return keep
 
 
