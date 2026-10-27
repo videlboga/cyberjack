@@ -78,9 +78,9 @@ def room():
     r.wall_band('W', z=1.25, step=1.30, kinds=['cluster', 'terminal'])
     r.wall_band('E', z=1.25, step=1.30, kinds=['terminal', 'cluster'])
 
-    models = P.vol04_models()
-    picks = [m['id'] for m in models][:3]
-    spots = [(-1.9, 1.0, 0), (0.5, 1.2, 0), (2.4, 0.7, 0)]
+    # отобранные вручную: чистые модели, у которых читается рабочая сторона
+    picks = [f'SexMachineModel-{n}' for n in ('089', '092', '099')]
+    spots = [(-2.25, 1.45, 180), (0.15, 1.60, 180), (2.45, 1.25, 180)]
     for (x, y, yaw), mid in zip(spots, picks):
         try:
             P.imported_machine(r.frame(x, y, yaw), mid, target_h=1.72, max_span=2.0)
@@ -95,7 +95,7 @@ def room():
     P.cable_run(r.frame(-3.0, -2.6), [(-0.3, 0.0, 0.02), (1.2, 0.5, 0.03), (2.6, 0.2, 0.02)],
                 n=3)
 
-    r.render(cam=(-2.9, -2.5, 1.55), aim=(0.6, 1.2, 1.05), lens=24, out='machines_room.png')
+    r.render(cam=(-2.45, -2.60, 1.60), aim=(0.30, 1.55, 0.95), lens=18, out='machines_room.png')
 
 
 if __name__ == '__main__':
