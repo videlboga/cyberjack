@@ -54,12 +54,11 @@ def lineup():
     I.lights(bpy.context.scene)
     sc = bpy.context.scene
     cd = bpy.data.cameras.new('cam')
-    cd.type = 'ORTHO'
-    cd.ortho_scale = 34
+    cd.lens = 42
     cam = bpy.data.objects.new('cam', cd)
     sc.collection.objects.link(cam)
-    cam.location = (14.0, -22.0, 14.0)
-    d = Vector((14.0, 1.6, 0.9)) - Vector(cam.location)
+    cam.location = (7.5, -13.5, 5.4)
+    d = Vector((7.5, 1.6, 0.9)) - Vector(cam.location)
     cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
     sc.camera = cam
 
@@ -100,6 +99,9 @@ def room():
 
 
 if __name__ == '__main__':
-    lineup()
-    room()
-    print('DONE')
+    mode = sys.argv[sys.argv.index('--') + 1] if '--' in sys.argv else 'all'
+    if mode in ('all', 'lineup'):
+        lineup()
+    if mode in ('all', 'room'):
+        room()
+    print('DONE', mode)

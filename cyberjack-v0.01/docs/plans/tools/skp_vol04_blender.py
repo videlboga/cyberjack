@@ -10,7 +10,7 @@
 
 Запуск: blender -b --factory-startup -noaudio --python tools/skp_vol04_blender.py
 """
-import bpy, os, json, time, statistics
+import bpy, os, json, time, statistics, sys
 from mathutils import Vector
 
 BASE = ('/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/models/'
@@ -41,22 +41,44 @@ def placements():
     return out
 
 
-def keep_machine(pls, max_part=2.6, radius=1.6):
-    """Отбор: машина = плотное скопление мелких деталей рядом с центром."""
-    small = [p for p in pls if max(p['dim']) <= max_part and 'lines' not in p['name']]
-    if not small:
+def keep_machine(pls, max_part=2.2, cell=0.40, radius=1.20, keep_figures=False):
+    """Отбор машины: плотнейшее скопление деталей, без плоских листов-стен."""
+    cand = []
+    for p in pls:
+        if 'lines' in p['name']:
+            continue
+        if keep_figures and '.stl' in p['name'].lower():
+            cand.append(p)
+            continue
+        d = p['dim']
+        big = max(d)
+        small_dim = min(d)
+        # плоские крупные листы (стены/шторы/подиум) — мимо
+        if big > 0.6 and small_dim < 0.03:
+            continue
+        if big > max_part:
+            continue
+        cand.append(p)
+    if not cand:
         return [], pls
-    cx = statistics.median([p['mat'].translation.x for p in small])
-    cy = statistics.median([p['mat'].translation.y for p in small])
-    cz = statistics.median([p['mat'].translation.z for p in small])
-    c = Vector((cx, cy, cz))
-    keep, drop = [], []
-    for p in small:
+
+    # плотнейшая ячейка сетки по числу деталей (вес — трисы)
+    cells = {}
+    for p in cand:
         pos = p['mat'].translation
-        if (pos - c).length <= radius:
+        key = (round(pos.x / cell), round(pos.y / cell), round(pos.z / cell))
+        w = cells.setdefault(key, [0, 0])
+        w[0] += 1
+        w[1] += p['tris']
+    best = max(cells.items(), key=lambda kv: (kv[1][0], kv[1][1]))[0]
+    centre = Vector((best[0] * cell, best[1] * cell, best[2] * cell))
+
+    keep = []
+    for p in cand:
+        if (p['mat'].translation - centre).length <= radius:
             keep.append(p)
-        else:
-            drop.append(p)
+    if not keep:
+        keep = cand
     dropped = [p for p in pls if p not in keep]
     return keep, dropped
 
@@ -70,7 +92,10 @@ def union(pls):
     return lo, hi
 
 
+only = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 files = sorted(f for f in os.listdir(BASE) if f.endswith('.skp'))
+if only:
+    files = [f for f in files if any(o in f for o in only)]
 for fn in files:
     key = os.path.splitext(fn)[0]
     out_path = os.path.join(OUT, key + '.glb')
@@ -86,13 +111,12 @@ for fn in files:
         print('IMPORT_ERROR', fn, type(e).__name__, str(e)[:150], flush=True)
         continue
 
-    # фигура (STL) — убираем сразу
-    for o in [o for o in list(bpy.data.objects)
-              if o.type == 'MESH' and '.stl' in (o.name.lower() + o.data.name.lower())]:
-        bpy.data.objects.remove(o, do_unlink=True)
+    # антропоморфные меши ОСТАВЛЯЕМ: они нужны для сверки поз
 
     pls = placements()
-    keep, drop = keep_machine(pls)
+    # фигуры (а также их группы) не должны выкидываться отбором: держим всё,
+    # что рядом с машиной, включая антропоморфные меши
+    keep, drop = keep_machine(pls, keep_figures=True)
     if not keep:
         print('NO_KEEP', fn, flush=True)
         continue
