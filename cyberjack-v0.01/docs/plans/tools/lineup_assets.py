@@ -2,7 +2,7 @@
 
 GLB уже нормализованы на экспорте (высота 1.72 м, низ на полу, центр в нуле),
 поэтому здесь только импорт, децимация и расстановка. Сцена сохраняется в
-blockout/assets_lineup.blend, затем рендер assets_lineup.png.
+blockout/assets_lineup_plain.blend, затем рендер assets_lineup_plain.png.
 
 Запуск: blender -b --factory-startup -noaudio --python tools/lineup_assets.py
 """
@@ -142,4 +142,4 @@ print('SAVED', blend)
 
 sc.render.filepath = os.path.join(OUT, 'assets_lineup_plain.png')
 bpy.ops.render.render(write_still=True)
-print('RENDERED assets_lineup.png')
+print('RENDERED assets_lineup_plain.png')
