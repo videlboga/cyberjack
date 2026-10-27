@@ -79,3 +79,7 @@ cyberjack-v0.01/docs/plans/blockout/
 assets/cc0/textures/
 assets/cc0/hdr/
 assets/cc0/models/
+
+# SKP vol-04 (конвертируется скриптом, не хранится в репозитории)
+assets/3d/converted/vol04/
+assets/3d/converted/vol04_meta.json

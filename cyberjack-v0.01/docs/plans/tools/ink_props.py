@@ -299,3 +299,122 @@ def cable_run(F, pts, n=3, spread=0.03, r=0.009):
     for j in range(n):
         off = (j - (n - 1) / 2) * spread
         F.cable(f'cb{j}', [(u + off, v + off * 0.6, z) for (u, v, z) in pts], r=r)
+
+
+# --- импортированные машины (SKP vol-04 -> GLB) ------------------------------
+VOL04 = '/home/cyberkitty/Projects/cyberjack/assets/3d/converted/vol04'
+VOL04_META = '/home/cyberkitty/Projects/cyberjack/assets/3d/converted/vol04_meta.json'
+
+
+def vol04_models():
+    """Список подготовленных машин vol-04: [{id, glb, size_mm, figure_cut}]."""
+    import json, os
+    if not os.path.exists(VOL04_META):
+        return []
+    meta = json.load(open(VOL04_META))
+    out = []
+    for key, info in sorted(meta.items()):
+        glb = os.path.join(VOL04, key + '.glb')
+        if os.path.exists(glb):
+            out.append({'id': key, 'glb': glb, 'bounds': info.get('bounds'),
+                        'figure_cut': info.get('figure_cut') or []})
+    return out
+
+
+def _luma_role(mat):
+    """Оригинальный материал -> роль инк-палитры по яркости."""
+    try:
+        bsdf = mat.node_tree.nodes.get('Principled BSDF')
+        c = bsdf.inputs['Base Color'].default_value
+        lum = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    except Exception:
+        lum = 0.8
+    if lum > 0.62:
+        return 'wall'
+    if lum > 0.30:
+        return 'metal'
+    return 'dark'
+
+
+def imported_machine(F, model_id, target_h=1.75, yaw=0, max_span=2.2, keep_aspect=True,
+                     target_tris=45000):
+    """Машина из vol-04 как модуль кита: импорт GLB, нормализация, инк-материалы.
+
+    GLB пишется в мм (units='mm'), поэтому сначала x0.001; затем масштаб под
+    target_h, центр по X/Y, низ на пол, поворот yaw, окраска по яркости
+    оригинальных материалов в роли палитры.
+    """
+    import bpy, os, math
+    from mathutils import Vector
+
+    path = os.path.join(VOL04, model_id + '.glb')
+    if not os.path.exists(path):
+        raise FileNotFoundError(path)
+
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [o for o in set(bpy.data.objects) - before if o.type == 'MESH']
+    if not new:
+        raise RuntimeError(f'no meshes in {path}')
+
+    # применить трансформации и слить в один меш
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in new:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = new[0]
+    if len(new) > 1:
+        bpy.ops.object.join()
+    obj = bpy.context.view_layer.objects.active
+    obj.name = F._n(f'mach_{model_id}')
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    # децимация: SKP-машины приходят по 1+ млн трис
+    tris = sum(len(p.vertices) - 2 for p in obj.data.polygons)
+    if target_tris and tris > target_tris:
+        mod = obj.modifiers.new('dec', 'DECIMATE')
+        mod.ratio = max(0.02, target_tris / tris)
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+
+    # материал → роль, затем единый инк-материал на слот
+    roles = []
+    for slot in obj.material_slots:
+        roles.append(_luma_role(slot.material) if slot.material else 'wall')
+
+    # нормализация габаритов
+    obj.scale = (0.001, 0.001, 0.001)          # мм -> м
+    bpy.ops.object.transform_apply(scale=True)
+    bb = [Vector(c) for c in obj.bound_box]
+    size = Vector((max(v.x for v in bb) - min(v.x for v in bb),
+                   max(v.y for v in bb) - min(v.y for v in bb),
+                   max(v.z for v in bb) - min(v.z for v in bb)))
+    k = target_h / max(size.z, 1e-6)
+    span = max(size.x, size.y) * k
+    if keep_aspect and span > max_span:
+        k *= max_span / span
+    obj.scale = (k, k, k)
+    bpy.ops.object.transform_apply(scale=True)
+
+    bb = [Vector(c) for c in obj.bound_box]
+    cx = (max(v.x for v in bb) + min(v.x for v in bb)) / 2
+    cy = (max(v.y for v in bb) + min(v.y for v in bb)) / 2
+    z0 = min(v.z for v in bb)
+    x, y = F._w(0.0, 0.0)
+    obj.rotation_euler = (0, 0, math.radians(F.yaw + yaw))
+    obj.location = (x - cx, y - cy, -z0)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    # перекраска в палитру
+    for i, slot in enumerate(obj.material_slots):
+        role = roles[i] if i < len(roles) else 'wall'
+        slot.material = F.K.I.M[role]
+
+    obj.data.polygons.foreach_set('use_smooth', [False] * len(obj.data.polygons))
+    obj.data.update()
+
+    # контактная тень под машиной
+    bb = [Vector(c) for c in obj.bound_box]
+    x0, x1 = min(v.x for v in bb), max(v.x for v in bb)
+    y0, y1 = min(v.y for v in bb), max(v.y for v in bb)
+    F.K.blob(F._n(f'blm_{model_id}'), x0, x1, y0, y1, layers=6, pad=0.18)
+    return obj
