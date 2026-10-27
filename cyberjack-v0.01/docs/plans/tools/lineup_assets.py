@@ -148,14 +148,20 @@ r.line_thickness = 1.3
 vl = sc.view_layers[0]
 vl.use_freestyle = True
 fs = vl.freestyle_settings
+# в дефолтной сцене уже есть набор линий без стиля — он и валит рендер
+for old in list(fs.linesets):
+    fs.linesets.remove(old)
 ls = fs.linesets.new('silhouette')
 ls.select_silhouette = True
 ls.select_border = True
 ls.select_crease = False
 ls.select_contour = False
-ls.linestyle = bpy.data.linestyles.new('ln')
-ls.linestyle.color = (0.22, 0.24, 0.29)
-ls.linestyle.thickness = 1.3
+sty = bpy.data.linestyles.new('ink_line')
+sty.color = (0.22, 0.24, 0.29)
+sty.thickness = 1.3
+sty.use_chaining = False
+ls.linestyle = sty
+print('LINESET_STYLE', ls.linestyle.name if ls.linestyle else 'NONE')
 
 blend = os.path.join(OUT, 'assets_lineup.blend')
 bpy.ops.wm.save_as_mainfile(filepath=blend)
