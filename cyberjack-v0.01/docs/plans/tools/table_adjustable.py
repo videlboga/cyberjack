@@ -92,8 +92,8 @@ z_yoke = z_fix + YOKE_H + 0.10       # 0.685 — низ вилки (верх в�
 z_frame = z_yoke + 0.02              # 0.705 низ рамы стола
 z_mat = z_frame + FRAME_T + MAT_T    # 0.865 верх матраса
 
-L_T, W_T = 1.44, 0.54
-L_M, W_M = 1.38, 0.50
+L_T, W_T = 1.98, 0.62
+L_M, W_M = 1.92, 0.58
 
 # --- основание ---------------------------------------------------------------
 box('base_plate', (0.86, 0.56, BASE_T), (0, 0, z_base / 2), M_BODY, 'base')
@@ -136,9 +136,9 @@ box('head_pad', (0.26, 0.36, 0.05), (-(L_M / 2 + 0.11), 0, z_mat + 0.05), M_PAD,
 RAIL_Y = W_M / 2 + 0.075
 RAIL_Z = z_mat - 0.075
 for sy in (-1, 1):
-    bar(f'arm_rail_{sy}', (-0.66, sy * RAIL_Y, RAIL_Z), (0.40, sy * RAIL_Y, RAIL_Z),
+    bar(f'arm_rail_{sy}', (-0.90, sy * RAIL_Y, RAIL_Z), (0.40, sy * RAIL_Y, RAIL_Z),
         0.018, M_METAL, 'table')
-    for x in (-0.60, 0.34):
+    for x in (-0.84, -0.10, 0.34):
         bar(f'arm_rail_strut_{sy}_{x}', (x, sy * RAIL_Y, RAIL_Z),
             (x, sy * (W_M / 2), z_mat - 0.03), 0.014, M_METAL, 'table')
 
@@ -158,26 +158,27 @@ for side, sy in (('L', -1), ('R', 1)):
         (cx, y - sy * 0.115, RAIL_Z + 0.288), M_DARK, f'arm_{side}_pitch')
     cyl(f'arm_knob_{side}', 0.016, 0.04, (cx - 0.06, y, RAIL_Z + 0.20), M_ACC, f'arm_{side}_yaw', seg=10)
 
-# --- нижние рельсы и каретки ног ---------------------------------------------
-LEG_Z = z_frame - 0.10
+# --- ножные упоры: пазы на столе, стойки с манжетами над плоскостью ----------
 for sy in (-1, 1):
-    bar(f'leg_rail_{sy}', (0.34, sy * 0.22, LEG_Z), (0.88, sy * 0.22, LEG_Z), 0.017, M_METAL, 'table')
-    bar(f'leg_rail_strut_{sy}', (0.36, sy * 0.22, LEG_Z), (0.36, sy * (W_T / 2), z_frame + 0.02),
-        0.013, M_METAL, 'table')
-box('leg_cross', (0.045, 0.52, 0.035), (0.86, 0, LEG_Z), M_METAL, 'table')
+    box(f'leg_slot_{sy}', (0.44, 0.075, 0.012), (0.58, sy * 0.155, z_mat + 0.006),
+        M_METAL, 'table')
 
 for side, sy in (('L', -1), ('R', 1)):
-    x = 0.62
-    y = sy * 0.22
-    box(f'leg_car_{side}', (0.11, 0.085, 0.085), (x, y, LEG_Z), M_DARK, f'leg_{side}_slide')
-    cyl(f'leg_post_{side}', 0.018, 0.16, (x, y, LEG_Z - 0.12), M_METAL, f'leg_{side}_lift', seg=12)
-    box(f'leg_cuff_{side}', (0.12, 0.12, 0.075), (x, y, LEG_Z - 0.235), M_DARK, f'leg_{side}_cuff')
-    box(f'leg_pad_{side}', (0.10, 0.15, 0.03), (x, y, LEG_Z - 0.287), M_PAD, f'leg_{side}_cuff')
-    cyl(f'leg_knob_{side}', 0.016, 0.035, (x - 0.065, y, LEG_Z), M_ACC, f'leg_{side}_slide', seg=10)
+    x = 0.58
+    y = sy * 0.155
+    box(f'leg_car_{side}', (0.10, 0.085, 0.055), (x, y, z_mat + 0.032), M_DARK, f'leg_{side}_slide')
+    cyl(f'leg_post_{side}', 0.017, 0.16, (x, y, z_mat + 0.14), M_METAL, f'leg_{side}_lift', seg=12)
+    # манжета: П-образная скоба из трёх пластин
+    box(f'cuff_base_{side}', (0.11, 0.13, 0.022), (x, y, z_mat + 0.225), M_DARK, f'leg_{side}_cuff')
+    for sx2 in (-1, 1):
+        box(f'cuff_side_{side}_{sx2}', (0.018, 0.13, 0.065),
+            (x + sx2 * 0.055, y, z_mat + 0.265), M_DARK, f'leg_{side}_cuff')
+    box(f'cuff_strap_{side}', (0.11, 0.11, 0.018), (x, y, z_mat + 0.295), M_PAD, f'leg_{side}_cuff')
+    cyl(f'leg_knob_{side}', 0.015, 0.035, (x - 0.062, y, z_mat + 0.032), M_ACC, f'leg_{side}_slide', seg=10)
 
 # --- упор для стоп -----------------------------------------------------------
-box('foot_rest', (0.22, 0.30, 0.035), (0.86, 0, z_mat - 0.12), M_BODY, 'foot_rest',
-    rot=(0, math.radians(-18), 0))
+box('foot_rest', (0.20, 0.34, 0.035), (1.02, 0, z_mat - 0.06), M_BODY, 'foot_rest',
+    rot=(0, math.radians(-16), 0))
 
 # --- проверка стыков ---------------------------------------------------------
 print('Z', dict(base=round(z_base, 3), fix=round(z_fix, 3), yoke=round(z_yoke, 3),
@@ -207,7 +208,7 @@ bone('column_move', (0, 0, z_fix), (0, 0, z_yoke), 'column_fixed')
 bone('tilt', (0, 0, z_yoke), (0, 0, z_frame), 'column_move')
 bone('table', (0, 0, z_frame), (0, 0, z_mat), 'tilt')
 bone('back_pad', (-(L_M / 2 + 0.03), 0, z_mat), (-(L_M / 2 + 0.20), 0, z_mat + 0.20), 'table')
-bone('foot_rest', (0.86, 0, z_mat - 0.14), (1.02, 0, z_mat - 0.20), 'table')
+bone('foot_rest', (0.94, 0, z_mat - 0.04), (1.10, 0, z_mat - 0.10), 'table')
 for side, sy in (('L', -1), ('R', 1)):
     cx = -0.34 if side == 'L' else 0.02
     bone(f'arm_{side}_rail', (cx, sy * RAIL_Y, RAIL_Z), (cx + 0.1, sy * RAIL_Y, RAIL_Z), 'table')
@@ -215,10 +216,10 @@ for side, sy in (('L', -1), ('R', 1)):
          f'arm_{side}_rail')
     bone(f'arm_{side}_pitch', (cx, sy * RAIL_Y, RAIL_Z + 0.27), (cx, sy * RAIL_Y, RAIL_Z + 0.36),
          f'arm_{side}_yaw')
-    bone(f'leg_{side}_slide', (0.62, sy * 0.26, LEG_Z), (0.72, sy * 0.26, LEG_Z), 'table')
-    bone(f'leg_{side}_lift', (0.62, sy * 0.26, LEG_Z), (0.62, sy * 0.26, LEG_Z - 0.14),
+    bone(f'leg_{side}_slide', (0.58, sy * 0.155, z_mat + 0.032), (0.68, sy * 0.155, z_mat + 0.032), 'table')
+    bone(f'leg_{side}_lift', (0.58, sy * 0.155, z_mat + 0.06), (0.58, sy * 0.155, z_mat + 0.22),
          f'leg_{side}_slide')
-    bone(f'leg_{side}_cuff', (0.62, sy * 0.26, LEG_Z - 0.14), (0.62, sy * 0.26, LEG_Z - 0.30),
+    bone(f'leg_{side}_cuff', (0.58, sy * 0.155, z_mat + 0.22), (0.58, sy * 0.155, z_mat + 0.30),
          f'leg_{side}_lift')
 bone('anchor', (0, 0, z_mat), (0, 0, z_mat + 0.18), 'table')
 bpy.ops.object.mode_set(mode='OBJECT')
