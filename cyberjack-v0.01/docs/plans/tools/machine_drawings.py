@@ -23,7 +23,12 @@ CROSS_X_HEAD = -700     # поперечные пазы у изголовья
 CROSS_LEN_HEAD = 370
 RING_WRIST, RING_ANKLE = 90, 120
 ROD_D1, ROD_D2 = 32, 22
-BOOM_STROKE = 700       # выносная горизонтальная штанга (шпагат, руки в стороны)
+BOOM_STROKE = 950       # поворотная штанга от периметрального рельса
+RAIL_INSET = 70         # рельс под платформой, отступ от кромки
+SLOT_ARM_Y = 200        # прорезь под кисти (руки вдоль тела)
+SLOT_ARM_X0, SLOT_ARM_X1 = -850, 100
+SLOT_LEG_Y = 85         # прорезь под стопы (ноги вместе)
+SLOT_LEG_X0, SLOT_LEG_X1 = 100, 800
 Y_SPLIT = 900           # полураствор полного шпагата при ноге 900 мм
 Y_ARMS_OUT = 780        # кисти в стороны
 CROSS_Y0, CROSS_Y1 = 60, 320   # поперечный паз открыт до кромки платформы
@@ -145,60 +150,65 @@ class Sheet:
         print('DRAW', svg_path, '->', png_path)
 
 
-# --- 1. ПЛАН -----------------------------------------------------------------
+# --- 1. ПЛАН (v2: периметральный рельс, поворотные штанги) -------------------
 def plan():
-    s = Sheet('m1_plan', 3000, 2200, scale=0.5, center=(0, 0), tb='bl',
-              title='ОМНИ-1 · ПЛАН ПЛАТФОРМЫ|М 1:10 · размеры в мм|лист 1 из 5')
-    # платформа
+    s = Sheet('m1_plan', 3000, 2300, scale=0.5, center=(0, 0), tb='bl',
+              title='ОМНИ-1 · ПЛАН ПЛАТФОРМЫ|М 1:10 · рельс по периметру, штанги 950|лист 1 из 6')
     s.rect(-PLAT_L / 2, -PLAT_W / 2, PLAT_L, PLAT_W, fill='#f2f3f5', sw=1.6)
-    s.rect(-MAT_L / 2, -MAT_W / 2, MAT_L, MAT_W, fill='#e9ebee', sw=1.0)
-    # продольные пазы
-    for sy in (-1, 1):
-        s.rect(-SLOT_LEN / 2, sy * SLOT_L_Y - SLOT_W / 2, SLOT_LEN, SLOT_W, fill='#ffffff', sw=1.2)
-    # поперечные пазы (ножной конец — шпагат, изголовье — руки вверх)
-    for sy in (-1, 1):
-        # поперечные пазы открыты до кромки: штанга выходит за габарит
-        s.rect(CROSS_X - SLOT_W / 2, sy * CROSS_Y0, SLOT_W, CROSS_Y1 - CROSS_Y0,
-               fill='#ffffff', sw=1.2)
-        s.rect(CROSS_X_HEAD - SLOT_W / 2, sy * CROSS_Y0, SLOT_W, CROSS_Y1 - CROSS_Y0,
-               fill='#ffffff', sw=1.2)
-    # кардан под платформой
-    s.circle(0, 0, 150, dash='12 8', color='#666')
-    s.circle(0, 0, 60, dash='6 6', color='#666')
-    # крепления: кольца в двух положениях
-    def ring(x, y, r, label, dashed=False):
-        s.circle(x, y, r, stroke='#0b6f66' if not dashed else '#7fb3ad',
-                 sw=1.6 if not dashed else 1.0, dash=None if not dashed else '8 6')
-        if label:
-            s.text(x, y - r - 14, label, size=11, anchor='middle',
-                   color='#0b6f66' if not dashed else '#7fb3ad')
+    s.rect(-MAT_L / 2, -MAT_W / 2, MAT_L, MAT_W, fill='#e9ebee', sw=0.8)
 
-    for sy, name in ((-1, 'Л'), (1, 'П')):
-        # руки: вдоль тела / вверх / в стороны (выносной штангой)
-        ring(-40, sy * SLOT_L_Y, RING_WRIST / 2, f'кисть {name}', dashed=True)
-        ring(-690, sy * SLOT_L_Y, RING_WRIST / 2, f'кисть {name} вверх')
-        s.line(-300, sy * SLOT_L_Y, -300, sy * Y_ARMS_OUT, w=1.2, color='#0b6f66')
-        ring(-300, sy * Y_ARMS_OUT, RING_WRIST / 2, f'кисть {name} в стороны')
-        # стопы: вместе / полный шпагат на выносной штанге
-        ring(CROSS_X, sy * 120, RING_ANKLE / 2, f'стопа {name}', dashed=True)
-        s.line(CROSS_X, sy * 120, CROSS_X, sy * Y_SPLIT, w=1.4, color='#b3541e')
-        s.rect(CROSS_X - 18, sy * 300 if sy > 0 else -sy * 300 - 0, 36, 0,
-               fill='none', sw=0)
-        ring(CROSS_X, sy * Y_SPLIT, RING_ANKLE / 2, '', dashed=False)
-        s.text(CROSS_X, sy * Y_SPLIT + (95 if sy > 0 else -95),
-               f'стопа {name} — шпагат {Y_SPLIT * 2}', size=11, anchor='middle', color='#b3541e')
-        s.text(CROSS_X + 130, sy * 640, 'выносная штанга, ход 700', size=10, color='#b3541e')
-    # размеры
-    s.dim(-PLAT_L / 2, -PLAT_W / 2 - 90, PLAT_L / 2, -PLAT_W / 2 - 90, '1900', off=-14)
+    # периметральный рельс под платформой
+    rx = PLAT_L / 2 - RAIL_INSET
+    ry = PLAT_W / 2 - RAIL_INSET
+    s.rect(-rx, -ry, 2 * rx, 2 * ry, fill='none', stroke='#0b6f66', sw=1.6, dash='10 6')
+    s.text(-rx, -ry - 120, 'периметральный рельс (под платформой)', size=11, color='#0b6f66')
+
+    # прорези: кисти вдоль тела и стопы вместе
+    for sy in (-1, 1):
+        s.rect(SLOT_ARM_X0, sy * SLOT_ARM_Y - 45, SLOT_ARM_X1 - SLOT_ARM_X0, 90,
+               fill='#ffffff', sw=1.2)
+        s.rect(SLOT_LEG_X0, sy * SLOT_LEG_Y - 45, SLOT_LEG_X1 - SLOT_LEG_X0, 90,
+               fill='#ffffff', sw=1.2)
+
+    # каретки на рельсе + штанги в двух положениях
+    def boom(cx, cy, tx, ty, cradle=False, color='#b3541e', label=''):
+        s.line(cx, cy, tx, ty, w=4.0, color=color)
+        s.circle(tx, ty, 60, stroke=color, sw=1.6)
+        if cradle:
+            s.rect(tx - 55, ty - 26, 110, 52, fill='none', stroke=color, sw=1.2, dash='5 4')
+        if label:
+            s.text(tx + (80 if ty >= 0 else -80), ty + (26 if ty >= 0 else -34), label,
+                   size=10, anchor='start' if ty >= 0 else 'end', color=color)
+
+    # каретки
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            s.rect(sx * rx - 45, sy * ry - 45, 90, 90, fill='#dfe3e7', stroke='#555', sw=1.2)
+
+    # руки: вдоль тела (через прорезь) и в стороны (мимо борта)
+    boom(-rx, -ry, -30, -SLOT_ARM_Y, label='кисть вдоль тела')
+    boom(-rx, ry, -495, -590, label='кисть в стороны', cradle=True)
+    # стопы: вместе (через прорезь) и шпагат (мимо борта)
+    boom(rx, -ry, 782, -SLOT_LEG_Y, label='стопа вместе')
+    boom(rx, ry, -54, 919, label='стопа шпагат 180°', cradle=True)
+
+    # зеркальные точки
+    for tx, ty in ((-30, SLOT_ARM_Y), (-495, 590), (782, SLOT_LEG_Y), (-54, -919)):
+        s.circle(tx, ty, 60, stroke='#b3541e', sw=1.0, dash='6 5')
+
+    s.dim(-PLAT_L / 2, -PLAT_W / 2 - 100, PLAT_L / 2, -PLAT_W / 2 - 100, '1900', off=-16)
     s.dim(PLAT_L / 2 + 90, -PLAT_W / 2, PLAT_L / 2 + 90, PLAT_W / 2, '640', off=-16, vertical=True)
-    s.dim(-SLOT_LEN / 2, PLAT_W / 2 + 70, SLOT_LEN / 2, PLAT_W / 2 + 70, '1560', off=-14)
-    s.dim(-PLAT_L / 2 - 230, -Y_SPLIT, -PLAT_L / 2 - 230, Y_SPLIT, f'{Y_SPLIT * 2} — шпагат',
-          off=-34, vertical=True)
-    s.dim(-SLOT_LEN / 2, -PLAT_W / 2 - 130, SLOT_LEN / 2, -PLAT_W / 2 - 130, '1560', off=-14)
-    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 150,
-           'продольные пазы 1560 × 100 при y=±210 · поперечные открыты до кромки (штанга выходит за габарит)', size=12)
-    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 120,
-           'зелёным — кольца в крайних положениях (сплошной — рабочее, штрих — крайнее)', size=11, color='#555')
+    s.dim(-rx, PLAT_W / 2 + 80, rx, PLAT_W / 2 + 80, f'{int(2 * rx)}', off=16)
+
+    s.text(-PLAT_L / 2, PLAT_W / 2 + 210,
+           'прорези 90 мм только под лежащие конечности: кисти 950 при y=±200, стопы 700 при y=±85',
+           size=12)
+    s.text(-PLAT_L / 2, PLAT_W / 2 + 175,
+           'за борт (руки в стороны ±590, шпагат ±919) штанга уходит мимо прорезей, поворотом на рельсе',
+           size=12)
+    s.text(-PLAT_L / 2, PLAT_W / 2 + 140,
+           'вылет штанги 950 · голова 2 оси (рыскание ±100°, тангаж ±90°) · кольцо ⌀90/⌀120 или люлька',
+           size=12)
     return s.save()
 
 
@@ -246,38 +256,40 @@ def side():
     return s.save()
 
 
-# --- 3. РАЗРЕЗ А-А ----------------------------------------------------------
+# --- 3. РАЗРЕЗ А-А (v2) ------------------------------------------------------
 def section():
-    s = Sheet('m1_section', 1750, 1900, scale=0.7, center=(0, -240),
-              title='ОМНИ-1 · РАЗРЕЗ А-А|М 1:5 · узел крепления|лист 3 из 5')
-    # платформа в разрезе
-    s.rect(-400, 0, 800, PLAT_T, fill='#f2f3f5', sw=1.4)
-    s.rect(-390, PLAT_T, 780, MAT_T, fill='#e9ebec', sw=1.0)
-    # паз
-    s.rect(-SLOT_W / 2, 0, SLOT_W, PLAT_T + MAT_T, fill='#ffffff', sw=1.2)
-    s.text(SLOT_W / 2 + 16, PLAT_T + MAT_T + 26, 'паз 100', size=11)
-    # каретка под пазом
-    s.rect(-110, -70, 220, 70, fill='#dfe3e7', sw=1.2)
-    s.circle(0, -110, 34, fill='#cfd4d8')
-    s.text(130, -90, 'каретка (ход по X)', size=11)
-    # штанга телескоп + кольцо
-    s.rect(-ROD_D1 / 2, -300, ROD_D1, 230, fill='#e1e5e9', sw=1.1)
-    s.rect(-ROD_D2 / 2, -300 + 230, ROD_D2, 0, fill='none', sw=0)
-    s.rect(-ROD_D2 / 2, -540, ROD_D2, 240, fill='#d6dade', sw=1.1)
-    s.circle(0, -590, RING_WRIST / 2 + 6, stroke='#0b6f66', sw=1.6)
-    s.circle(0, -590, RING_WRIST / 2, stroke='#0b6f66', sw=1.0, dash='6 5')
-    s.text(RING_WRIST / 2 + 20, -560, 'кольцо 90 (запястье)', size=11, color='#0b6f66')
-    s.text(ROD_D1 / 2 + 14, -380, 'штанга ⌀32/⌀22', size=11)
-    # шарнир
-    s.circle(0, -300, 30, stroke='#b3541e', sw=1.4)
-    s.text(40, -296, 'шарнир ±75°', size=11, color='#b3541e')
-    # размеры
-    s.dim(-ROD_D1 / 2 - 120, -300, -ROD_D1 / 2 - 120, -540, '240 (ход)', off=-22, vertical=True)
-    s.dim(RING_WRIST / 2 + 90, -590, RING_WRIST / 2 + 90, 0, '590..330', off=26, vertical=True)
-    s.dim(-SLOT_W / 2, PLAT_T + MAT_T + 70, SLOT_W / 2, PLAT_T + MAT_T + 70, '100', off=14)
-    s.text(-400, -700, 'кольцо выходит над плоскостью на 20..300 мм; штанга проходит через паз',
-           size=12)
-    s.text(-400, -740, 'ниже паза — каретка на направляющей 30×30, ход 1560 мм по X и 460 мм по Y',
+    s = Sheet('m1_section', 1900, 2000, scale=0.75, center=(0, -250), tb='br',
+              title='ОМНИ-1 · РАЗРЕЗ А-А|М 1:5 · узел штанги и головы|лист 3 из 6')
+    # платформа + матрас
+    s.rect(-450, 0, 900, PLAT_T, fill='#f2f3f5', sw=1.4)
+    s.rect(-440, PLAT_T, 880, MAT_T, fill='#e9ebec', sw=1.0)
+    # прорезь
+    s.rect(-45, 0, 90, PLAT_T + MAT_T, fill='#ffffff', sw=1.2)
+    s.text(70, PLAT_T + MAT_T + 30, 'прорезь 90', size=11)
+    # периметральный рельс под платформой
+    s.rect(-450, -110, 900, 34, fill='#dfe3e7', stroke='#0b6f66', sw=1.3)
+    s.text(-440, -140, 'периметральный рельс 30×30', size=11, color='#0b6f66')
+    # каретка
+    s.rect(-90, -110, 180, 96, fill='#e6e9ec', sw=1.2)
+    s.circle(0, -62, 30, fill='#cfd4d8')
+    # поворотная штанга: телескоп 150..950
+    s.rect(-16, -62, 32, 300, fill='#e1e5e9', sw=1.0)
+    s.rect(-11, 240, 22, 340, fill='#d6dade', sw=1.0)
+    # голова на двух осях
+    s.circle(0, 590, 42, fill='#cfd4d8', stroke='#b3541e', sw=1.6)
+    s.line(-60, 590, 60, 590, w=1.0, color='#b3541e', dash='6 4')
+    s.line(0, 530, 0, 650, w=1.0, color='#b3541e', dash='6 4')
+    s.text(70, 600, 'голова: 2 оси, быстросъём', size=11, color='#b3541e')
+    # кольцо и люлька
+    s.circle(0, 690, RING_ANKLE / 2 + 6, stroke='#0b6f66', sw=1.6)
+    s.text(90, 700, 'кольцо ⌀120', size=11, color='#0b6f66')
+    s.rect(-150, 720, 300, 40, fill='none', stroke='#0b6f66', sw=1.2, dash='6 4')
+    s.text(170, 800, 'люлька под голень', size=11, color='#0b6f66')
+
+    s.dim(-450, -160, 0, -160, 'вылет до 950', off=-18)
+    s.dim(200, -62, 200, 690, '150…950', off=24, vertical=True)
+    s.dim(-45, PLAT_T + MAT_T + 90, 45, PLAT_T + MAT_T + 90, '90', off=14)
+    s.text(-450, -260, 'штанга выходит через прорезь ИЛИ мимо борта — каретка на рельсе встаёт с любой стороны',
            size=12)
     return s.save()
 
