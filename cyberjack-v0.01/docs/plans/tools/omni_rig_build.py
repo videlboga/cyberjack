@@ -724,6 +724,21 @@ for ad2 in (arm, rig):
 print('KEYS body', len(arm.animation_data.action.fcurves),
       'machine', len(rig.animation_data.action.fcurves))
 
+# ДИАГНОСТИКА: совпадает ли записанное с тем, что снимали
+sc.frame_set(1)
+bpy.context.view_layer.update()
+bm = mach_keys[0][1]
+for bn in ('boom_arm_L', 'post_leg_L'):
+    want = bm[bn]
+    got = (tuple(rig.pose.bones[bn].location), tuple(rig.pose.bones[bn].rotation_euler),
+           tuple(rig.pose.bones[bn].scale))
+    print('KEYCHK', bn, 'want', [round(v, 3) for v in want[1]], [round(v, 3) for v in want[2]],
+          'got', [round(v, 3) for v in got[1]], [round(v, 3) for v in got[2]])
+bw = body_keys[0][1]['J_Bip_L_UpperArm']
+print('KEYCHK body want', [round(v, 3) for v in bw],
+      'got', [round(v, 3) for v in arm.pose.bones['J_Bip_L_UpperArm'].rotation_euler],
+      'mode', arm.pose.bones['J_Bip_L_UpperArm'].rotation_mode)
+
 # --- печём позу тела по кадрам: 2-звенник с ЯВНЫМ базисом (без to_track_quat) --
 def aim_bone(pb, target, pole):
     head = pb.matrix.translation.copy()
