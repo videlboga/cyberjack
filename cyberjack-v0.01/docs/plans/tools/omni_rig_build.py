@@ -169,7 +169,14 @@ def build_module(tag, y0, x0):
     put(cyl(f'boom_{tag}', 0.022, 1.0, (0, 0.5, 0), M_MET, f'boom_{tag}',
             rot=(math.radians(90), 0, 0), seg=16))
     put(box(f'cradle_{tag}', (0.13, 0.42, 0.035), (0, 0.5, 0.055), M_PAD, f'boom_{tag}'))
+    # телескоп: наружная труба фиксированной длины + выдвижная часть
+    put(cyl(f'boom_out_{tag}', 0.030, 0.55, (0, 0.275, 0), M_MET, f'boom_{tag}',
+            rot=(math.radians(90), 0, 0), seg=18))
+    put(cyl(f'boom_collar_{tag}', 0.036, 0.05, (0, 0.55, 0), M_BODY, f'boom_{tag}',
+            rot=(math.radians(90), 0, 0), seg=18))
     put(cyl(f'post_{tag}', 0.018, 1.0, (0, 1.0, 0.5), M_MET, f'post_{tag}', seg=14))
+    put(cyl(f'post_out_{tag}', 0.026, 0.30, (0, 1.0, 0.15), M_MET, f'post_{tag}', seg=16))
+    put(cyl(f'post_collar_{tag}', 0.032, 0.04, (0, 1.0, 0.30), M_BODY, f'post_{tag}', seg=16))
     # проушина под обручем: не перекрывает проём, кольцо сверху
     put(box(f'head_{tag}', (0.055, 0.038, 0.075), (0, 1.0, 0.905), M_BODY, f'head_{tag}'))
     # обруч стоит вертикально: ось кольца вдоль X, конечность проходит сквозь него
@@ -507,6 +514,15 @@ pose('A')
 print('ERR A', fit_rings())
 show('A', (2.3, -2.5, 1.75), (0, 0, 1.05), 50)
 
+def extensions():
+    out = {}
+    for tag in ('arm_L', 'arm_R', 'leg_L', 'leg_R'):
+        b = rig.pose.bones[f'boom_{tag}']
+        p = rig.pose.bones[f'post_{tag}']
+        out[tag] = (round(b.scale.y, 3), round(p.scale.y, 3))
+    return out
+
+
 # поза D: руки в стороны, ноги в шпагате (поворотом бёдер, как в замерах)
 pose('D')
 print('ERR D', fit_rings())
@@ -524,6 +540,37 @@ for ang, nm in ((-45, 'st_tilt45.png'), (-90, 'st_tilt90.png')):
 rig.pose.bones['pitch'].rotation_euler = (0, 0, 0)
 
 show('D_under', (1.5, -1.7, 0.45), (0, 0, 0.95), 50)
+print('EXT 175', extensions())
+
+# --- то же тело, но 1.95 м: станок тот же, штанги выдвигаются длиннее -------
+bpy.ops.object.select_all(action='DESELECT')
+dups = []
+for o in [arm] + [ob for ob in bpy.data.objects if ob.type == 'MESH' and ob.parent == arm]:
+    o.select_set(True)
+    dups.append(o)
+bpy.context.view_layer.objects.active = arm
+bpy.ops.object.duplicate(linked=False)
+new_objs = [o for o in bpy.context.selected_objects]
+big_arm = next(o for o in new_objs if o.type == 'ARMATURE')
+big_arm.scale = (1.95 / 1.75,) * 3
+bpy.context.view_layer.update()
+show('big_check', (2.3, -2.5, 1.75), (0, 0, 1.05), 50, name='st_big_175_tmp.png')
+
+# цели снимаем с большого тела
+def jbig(nm):
+    pb = big_arm.pose.bones.get(nm)
+    return (big_arm.matrix_world @ pb.head) if pb else None
+
+
+errs_big = {}
+for k in ('arm_L', 'arm_R', 'leg_L', 'leg_R'):
+    t = jbig('J_Bip_L_Hand' if k == 'arm_L' else 'J_Bip_R_Hand') if k.startswith('arm') \
+        else jbig('J_Bip_L_Foot' if k == 'leg_L' else 'J_Bip_R_Foot')
+    errs_big[k] = round(place(k, t, None), 3)
+bpy.context.view_layer.update()
+print('ERR_BIG', errs_big)
+print('EXT 195', extensions())
+show('big', (2.3, -2.5, 1.75), (0, 0, 1.05), 50, name='st_big.png')
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'omni_static.blend'))
 print('SAVED omni_static.blend')
