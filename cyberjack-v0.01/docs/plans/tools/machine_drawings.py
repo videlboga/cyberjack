@@ -343,7 +343,61 @@ def ranges():
     return s.save()
 
 
+
+# --- 6. АНАТОМИЧЕСКАЯ КАРТА ---------------------------------------------------
+# Замеры по риг-гуманоиду 1.75 м (tools/anatomy_check.py), оси платформы: X вдоль тела, Y поперёк.
+ANAT = {
+    'кисть: вдоль тела':     (-30, 200),
+    'кисть: за голову':     (-730, -290),
+    'кисть: в стороны':      (-495, 590),
+    'стопа: вместе':         (782, 84),
+    'стопа: шпагат 180°':    (-54, 919),
+}
+
+
+def envelope():
+    s = Sheet('m1_envelope', 3000, 2400, scale=0.55, center=(0, 120), tb='bl',
+              title='ОМНИ-1 · АНАТОМИЧЕСКАЯ КАРТА|М 1:10 · замеры по телу 1.75 м|лист 6 из 6')
+    s.rect(-PLAT_L / 2, -PLAT_W / 2, PLAT_L, PLAT_W, fill='#f5f6f8', sw=1.6)
+    s.rect(-MAT_L / 2, -MAT_W / 2, MAT_L, MAT_W, fill='#eceef1', sw=0.8)
+    s.text(-PLAT_L / 2 + 30, PLAT_W / 2 - 40, 'платформа 1900 × 640', size=12, color='#555')
+
+    # зоны достижимости: дуги выноса 950 от кареток на периметральном рельсе
+    import math
+    for cx_, label in ((-700, 'рельс изголовья'), (700, 'рельс ножного конца')):
+        s.circle(cx_, 0, 950, dash='3 10', color='#c9ced3')
+
+    lab_dx = {'кисть: вдоль тела': 110, 'кисть: за голову': 110, 'кисть: в стороны': 110,
+              'стопа: вместе': -420, 'стопа: шпагат 180°': 120}
+    for name, (x, y) in ANAT.items():
+        for sy in ((-1, 1) if y >= 0 else (1, -1)):
+            yy = y if sy > 0 else -y
+            s.circle(x, yy, 70, stroke='#b3541e', sw=1.6)
+            s.circle(x, yy, 26, fill='#b3541e', stroke='#b3541e')
+        dx = lab_dx.get(name, 110)
+        s.line(x + (60 if dx > 0 else -60), y, x + dx * 0.85, y + (26 if dx > 0 else 26),
+               w=0.7, color='#b3541e')
+        s.text(x + dx, y + 26, name, size=11, anchor='start' if dx > 0 else 'end',
+               color='#b3541e')
+
+    # где стоят крепления сейчас (из первой версии)
+    s.circle(-40, 210, 90, stroke='#9aa2a8', sw=1.0, dash='6 6')
+    s.circle(700, 900, 60, stroke='#9aa2a8', sw=1.0, dash='6 6')
+    s.text(-40, 330, 'старое: кисть y=210', size=10, color='#8c939a')
+    s.text(700, 990, 'старое: стопа y=900 при x=700', size=10, color='#8c939a')
+
+    s.text(-PLAT_L / 2, -PLAT_W / 2 - 120,
+           'ключевое расхождение: в шпагате стопа уходит НЕ к ножному концу, а в сторону от таза (x≈−54, y≈919)',
+           size=13)
+    s.text(-PLAT_L / 2, -PLAT_W / 2 - 160,
+           'поэтому крепление стопы должно работать в поле X −100…+850, Y 0…950, а не в поперечном пазе у торца',
+           size=13)
+    s.dim(-PLAT_L / 2, -PLAT_W / 2 - 40, PLAT_L / 2, -PLAT_W / 2 - 40, '1900', off=-16)
+    s.dim(PLAT_L / 2 + 80, -920, PLAT_L / 2 + 80, 920, '1840 — размах шпагата', off=28, vertical=True)
+    return s.save()
+
+
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
-    plan(); side(); section(); gimbal(); ranges()
+    plan(); side(); section(); gimbal(); ranges(); envelope()
     print('ALL_DRAWINGS_DONE')
