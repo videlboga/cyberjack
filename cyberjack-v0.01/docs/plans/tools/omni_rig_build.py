@@ -472,108 +472,59 @@ def shot(name, loc, aim, lens=42):
     print('SHOT', name)
 
 
-# === две опорные позы машины: A (вдоль тела) и D (шпагат) ===================
-MBONES = [f'{pre}_{t}' for t in ('arm_L', 'arm_R', 'leg_L', 'leg_R')
-          for pre in ('car', 'boom', 'post', 'head')]
+# === статическая проверка: тело в позе, крепления подведены к суставам ======
+# Анимацию и IK не используем: они давали вывернутые позы. Здесь тело ставится
+# поворотом своих костей (как в anatomy_check), а кольца подводятся к суставам.
+
+def key_none():
+    return None
 
 
-def targets_now():
-    return {'arm_L': jb('J_Bip_L_Hand'), 'arm_R': jb('J_Bip_R_Hand'),
-            'leg_L': jb('J_Bip_L_Foot'), 'leg_R': jb('J_Bip_R_Foot')}
-
-
-def snapshot():
-    """снять текущие значения костей машины (без анимации — она бы их перезаписала)"""
-    out = {}
-    for bn in MBONES:
-        pb = rig.pose.bones[bn]
-        out[bn] = (tuple(pb.location), tuple(pb.rotation_euler), tuple(pb.scale))
-    return out
-
-
-def restore(snap):
-    for bn, (loc, rot, scl) in snap.items():
-        pb = rig.pose.bones[bn]
-        pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
-    bpy.context.view_layer.update()
-
-
-# 1) цели и позы машины считаем ДО IK и ДО анимации
-pose('A')
-tA = targets_now()
-pose('D')
-tD = targets_now()
-print('TARGETS A', {k: [round(v.x, 2), round(v.y, 2)] for k, v in tA.items()})
-print('TARGETS D', {k: [round(v.x, 2), round(v.y, 2)] for k, v in tD.items()})
-
-pose('A')
-for k, t in tA.items():
-    place(k, t, limb_dirs().get(k))
-bpy.context.view_layer.update()
-snapA = snapshot()
-shot('sy_A_34.png', (2.3, -2.5, 1.75), (0, 0, 1.05))
-
-for k, t in tD.items():
-    place(k, t, limb_dirs().get(k))
-bpy.context.view_layer.update()
-snapD = snapshot()
-shot('sy_D_34.png', (2.3, -2.5, 1.75), (0, 0, 1.05))
-
-# 2) ключи пишем без промежуточных update — иначе depsgraph возвращает позу с кадра
-sc.frame_set(1)
-for bn, (loc, rot, scl) in snapA.items():
-    pb = rig.pose.bones[bn]
-    pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
-    pb.keyframe_insert('location', frame=1)
-    pb.keyframe_insert('rotation_euler', frame=1)
-    pb.keyframe_insert('scale', frame=1)
-for bn, (loc, rot, scl) in snapD.items():
-    pb = rig.pose.bones[bn]
-    pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
-    pb.keyframe_insert('location', frame=45)
-    pb.keyframe_insert('rotation_euler', frame=45)
-    pb.keyframe_insert('scale', frame=45)
-for bn, (loc, rot, scl) in snapA.items():
-    pb = rig.pose.bones[bn]
-    pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
-    pb.keyframe_insert('location', frame=90)
-    pb.keyframe_insert('rotation_euler', frame=90)
-    pb.keyframe_insert('scale', frame=90)
-print('KEYS', len(rig.animation_data.action.fcurves))
-
-# 3) тело в позе A, конечности — на кольцах через IK
-pose('A')
-add_ik()
-bpy.context.view_layer.update()
-
-sc.frame_start, sc.frame_end = 1, 90
-cam.data.type = 'ORTHO'
-cam.data.ortho_scale = 2.9
-cam.location = (0, 0, 4.2)
-cam.rotation_euler = (0, 0, 0)
-
-IKTIP = {'arm_L': 'J_Bip_L_LowerArm', 'arm_R': 'J_Bip_R_LowerArm',
-         'leg_L': 'J_Bip_L_LowerLeg', 'leg_R': 'J_Bip_R_LowerLeg'}
-for f in (1, 23, 45):
-    sc.frame_set(f)
-    bpy.context.view_layer.update()
-    err = {}
-    pos = {}
-    for k, bn in IKTIP.items():
-        ring = rig.matrix_world @ rig.pose.bones[f'head_{k}'].head
-        tip = arm.matrix_world @ arm.pose.bones[bn].tail
-        err[k] = round((ring - tip).length, 3)
-        pos[k] = [round(ring.x, 2), round(ring.y, 2)]
-    print('SYNC frame', f, 'err', err)
-    print('RINGS frame', f, pos)
-    sc.render.filepath = os.path.join(OUT, f'sy_top_f{f:02d}.png')
+def show(tag, cam_loc, cam_aim, lens=50, ortho=None, name=None):
+    cam.data.type = 'ORTHO' if ortho else 'PERSP'
+    if ortho:
+        cam.data.ortho_scale = ortho
+    cam.data.lens = lens
+    cam.location = cam_loc
+    cam.rotation_euler = (Vector(cam_aim) - Vector(cam_loc)).to_track_quat('-Z', 'Y').to_euler()
+    sc.render.filepath = os.path.join(OUT, name or f'st_{tag}.png')
     bpy.ops.render.render(write_still=True)
-    print('SHOT', f'sy_top_f{f:02d}.png')
+    print('SHOT', name or f'st_{tag}.png')
 
-sc.frame_set(24)
-shot('sy_side_f24.png', (3.0, -0.4, 1.5), (0, 0, 1.05), lens=60)
 
-sc.frame_set(1)
-bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'omni_sync.blend'))
-print('SAVED omni_sync.blend')
+def fit_rings():
+    errs = {}
+    for k in ('arm_L', 'arm_R', 'leg_L', 'leg_R'):
+        t = jb('J_Bip_L_Hand' if k == 'arm_L' else 'J_Bip_R_Hand') if k.startswith('arm') \
+            else jb('J_Bip_L_Foot' if k == 'leg_L' else 'J_Bip_R_Foot')
+        errs[k] = round(place(k, t, limb_dirs().get(k)), 3)
+    bpy.context.view_layer.update()
+    return errs
+
+
+# поза A: руки вдоль тела, ноги вместе
+pose('A')
+print('ERR A', fit_rings())
+show('A', (2.3, -2.5, 1.75), (0, 0, 1.05), 50)
+
+# поза D: руки в стороны, ноги в шпагате (поворотом бёдер, как в замерах)
+pose('D')
+print('ERR D', fit_rings())
+show('D', (2.3, -2.5, 1.75), (0, 0, 1.05), 50)
+show('D_top', (0, 0, 4.2), (0, 0, 1.0), ortho=2.9)
+
+# наклоны платформы
+pose('D')
+fit_rings()
+rig.pose.bones['pitch'].rotation_mode = 'XYZ'
+for ang, nm in ((-45, 'st_tilt45.png'), (-90, 'st_tilt90.png')):
+    rig.pose.bones['pitch'].rotation_euler = (math.radians(ang), 0, 0)
+    bpy.context.view_layer.update()
+    show(nm, (2.4, -2.6, 1.95), (0, 0, 1.1), 45, name=nm)
+rig.pose.bones['pitch'].rotation_euler = (0, 0, 0)
+
+show('D_under', (1.5, -1.7, 0.45), (0, 0, 0.95), 50)
+
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'omni_static.blend'))
+print('SAVED omni_static.blend')
 print('BONES', len(ad.bones))
