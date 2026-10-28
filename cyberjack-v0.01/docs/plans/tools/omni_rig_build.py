@@ -215,6 +215,37 @@ for tag, y0, x0 in (('arm_L', RY, -0.60), ('arm_R', -RY, -0.60),
     bone(f'head_{tag}', (x0, y0 + 1.0, RAIL_Z + 1.0), (x0, y0 + 1.0, RAIL_Z + 1.08), f'post_{tag}')
 bpy.ops.object.mode_set(mode='OBJECT')
 
+# === степени свободы машины (по умолчанию разрешено только своё) ============
+def lock(pb, loc=(True, True, True), rot=(True, True, True), scale=(True, True, True)):
+    pb.lock_location = loc
+    pb.lock_rotation = rot
+    pb.lock_scale = scale
+
+
+for tag in ('arm_L', 'arm_R', 'leg_L', 'leg_R'):
+    lock(rig.pose.bones[f'car_{tag}'], loc=(False, False, True), rot=(True, True, True))
+    lock(rig.pose.bones[f'boom_{tag}'], loc=(True, True, True), rot=(True, True, False),
+         scale=(True, False, True))
+    lock(rig.pose.bones[f'post_{tag}'], loc=(True, True, True), rot=(True, True, True),
+         scale=(True, False, True))
+    lock(rig.pose.bones[f'head_{tag}'], loc=(True, True, True), rot=(True, True, False))
+lock(rig.pose.bones['pitch'], rot=(True, False, True))
+lock(rig.pose.bones['roll'], rot=(False, True, True))
+for nm in ('root', 'base', 'column'):
+    lock(rig.pose.bones[nm], rot=(True, True, True))
+
+# предел наклона платформы: тангаж и крен ±90° (Limit Rotation)
+lim_p = rig.pose.bones['pitch'].constraints.new('LIMIT_ROTATION')
+lim_p.owner_space = 'LOCAL'
+lim_p.use_limit_x = True
+lim_p.min_x, lim_p.max_x = math.radians(-90), math.radians(90)
+lim_p.use_limit_y = lim_p.use_limit_z = False
+lim_r = rig.pose.bones['roll'].constraints.new('LIMIT_ROTATION')
+lim_r.owner_space = 'LOCAL'
+lim_r.use_limit_y = True
+lim_r.min_y, lim_r.max_y = math.radians(-90), math.radians(90)
+lim_r.use_limit_x = lim_r.use_limit_z = False
+
 # === скин ====================================================================
 for o, bname in parts:
     vg = o.vertex_groups.new(name=bname)
@@ -317,10 +348,10 @@ bpy.context.view_layer.update()
 p = body_pts()
 cx = (min(q.x for q in p) + max(q.x for q in p)) / 2
 cy2 = (min(q.y for q in p) + max(q.y for q in p)) / 2
-arm.matrix_world = Matrix.Translation(Vector((-cx, -cy2, PIVOT_TOP - min(q.z for q in p) + 0.004))) @ arm.matrix_world
+arm.matrix_world = Matrix.Translation(Vector((-cx, -cy2, PIVOT_TOP - min(q.z for q in p) - 0.006))) @ arm.matrix_world
 bpy.context.view_layer.update()
-arm.parent = rig
-arm.matrix_parent_inverse = rig.matrix_world.inverted()
+# НЕ родим тело к ригу машины: связь через IK-таргеты, иначе циклическая зависимость
+# и IK молча не решает.
 
 # === позы тела ===============================================================
 def jb(nm):
@@ -388,6 +419,22 @@ def pose(tag):
     bpy.context.view_layer.update()
 
 
+# === синхронизация: конечности следуют за креплениями (IK) ==================
+def add_ik():
+    pairs = [('J_Bip_L_LowerArm', 'arm_L'), ('J_Bip_R_LowerArm', 'arm_R'),
+             ('J_Bip_L_LowerLeg', 'leg_L'), ('J_Bip_R_LowerLeg', 'leg_R')]
+    for bone_name, tag in pairs:
+        pb = arm.pose.bones.get(bone_name)
+        if not pb:
+            continue
+        c = pb.constraints.new('IK')
+        c.target = rig
+        c.subtarget = f'head_{tag}'
+        c.chain_count = 2
+        c.use_tail = True
+    bpy.context.view_layer.update()
+
+
 # === свет/камера/рендер ======================================================
 for nm, vec, e in (('key', (0.4, 0.7, -0.6), 3.0), ('fill', (-0.5, -0.6, -0.3), 1.1)):
     d = bpy.data.lights.new(nm, 'SUN')
@@ -411,12 +458,13 @@ sc.camera = cam
 cd.lens = 42
 sc.render.engine = 'BLENDER_EEVEE_NEXT'
 sc.render.resolution_x, sc.render.resolution_y = 1300, 900
-sc.eevee.taa_render_samples = 20
+sc.eevee.taa_render_samples = 16
 sc.view_settings.view_transform = 'AgX'
 
 
-def shot(name, loc, aim):
+def shot(name, loc, aim, lens=42):
     cam.data.type = 'PERSP'
+    cam.data.lens = lens
     cam.location = loc
     cam.rotation_euler = (Vector(aim) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
     sc.render.filepath = os.path.join(OUT, name)
@@ -424,36 +472,108 @@ def shot(name, loc, aim):
     print('SHOT', name)
 
 
-for tag, aim in (('A', (0, 0, 1.0)), ('C', (0, 0, 1.0)), ('D', (0, 0, 1.0))):
-    pose(tag)
-    tgt = {'arm_L': jb('J_Bip_L_Hand'), 'arm_R': jb('J_Bip_R_Hand'),
-           'leg_L': jb('J_Bip_L_Foot'), 'leg_R': jb('J_Bip_R_Foot')}
-    dirs = limb_dirs()
-    errs = {k: round(place(k, t, dirs.get(k)), 4) for k, t in tgt.items() if t}
-    print('POSE', tag, 'ring_err', errs,
-          'targets', {k: [round(v.x, 2), round(v.y, 2), round(v.z, 2)] for k, v in tgt.items() if v})
-    shot(f'rg_{tag}_34.png', (2.3, -2.5, 1.75), aim)
+# === две опорные позы машины: A (вдоль тела) и D (шпагат) ===================
+MBONES = [f'{pre}_{t}' for t in ('arm_L', 'arm_R', 'leg_L', 'leg_R')
+          for pre in ('car', 'boom', 'post', 'head')]
 
-# шпагат сверху
-pose('D')
-tgt = {'arm_L': jb('J_Bip_L_Hand'), 'arm_R': jb('J_Bip_R_Hand'),
-       'leg_L': jb('J_Bip_L_Foot'), 'leg_R': jb('J_Bip_R_Foot')}
-for k, t in tgt.items():
-    place(k, t, limb_dirs().get(k))
-cam.data.type = 'ORTHO'
-cam.data.ortho_scale = 2.9
-shot('rg_D_top.png', (0, 0, 4.2), (0, 0, 1.0))
 
-# наклоны
-cam.data.type = 'PERSP'
-rig.pose.bones['pitch'].rotation_mode = 'XYZ'
-for ang, nm in ((-45, 'rg_tilt45.png'), (-90, 'rg_tilt90.png')):
-    rig.pose.bones['pitch'].rotation_euler = (math.radians(ang), 0, 0)
+def targets_now():
+    return {'arm_L': jb('J_Bip_L_Hand'), 'arm_R': jb('J_Bip_R_Hand'),
+            'leg_L': jb('J_Bip_L_Foot'), 'leg_R': jb('J_Bip_R_Foot')}
+
+
+def snapshot():
+    """снять текущие значения костей машины (без анимации — она бы их перезаписала)"""
+    out = {}
+    for bn in MBONES:
+        pb = rig.pose.bones[bn]
+        out[bn] = (tuple(pb.location), tuple(pb.rotation_euler), tuple(pb.scale))
+    return out
+
+
+def restore(snap):
+    for bn, (loc, rot, scl) in snap.items():
+        pb = rig.pose.bones[bn]
+        pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
     bpy.context.view_layer.update()
-    shot(nm, (2.4, -2.6, 1.9), (0, 0, 1.1))
-rig.pose.bones['pitch'].rotation_euler = (0, 0, 0)
+
+
+# 1) цели и позы машины считаем ДО IK и ДО анимации
+pose('A')
+tA = targets_now()
+pose('D')
+tD = targets_now()
+print('TARGETS A', {k: [round(v.x, 2), round(v.y, 2)] for k, v in tA.items()})
+print('TARGETS D', {k: [round(v.x, 2), round(v.y, 2)] for k, v in tD.items()})
+
+pose('A')
+for k, t in tA.items():
+    place(k, t, limb_dirs().get(k))
+bpy.context.view_layer.update()
+snapA = snapshot()
+shot('sy_A_34.png', (2.3, -2.5, 1.75), (0, 0, 1.05))
+
+for k, t in tD.items():
+    place(k, t, limb_dirs().get(k))
+bpy.context.view_layer.update()
+snapD = snapshot()
+shot('sy_D_34.png', (2.3, -2.5, 1.75), (0, 0, 1.05))
+
+# 2) ключи пишем без промежуточных update — иначе depsgraph возвращает позу с кадра
+sc.frame_set(1)
+for bn, (loc, rot, scl) in snapA.items():
+    pb = rig.pose.bones[bn]
+    pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
+    pb.keyframe_insert('location', frame=1)
+    pb.keyframe_insert('rotation_euler', frame=1)
+    pb.keyframe_insert('scale', frame=1)
+for bn, (loc, rot, scl) in snapD.items():
+    pb = rig.pose.bones[bn]
+    pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
+    pb.keyframe_insert('location', frame=45)
+    pb.keyframe_insert('rotation_euler', frame=45)
+    pb.keyframe_insert('scale', frame=45)
+for bn, (loc, rot, scl) in snapA.items():
+    pb = rig.pose.bones[bn]
+    pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
+    pb.keyframe_insert('location', frame=90)
+    pb.keyframe_insert('rotation_euler', frame=90)
+    pb.keyframe_insert('scale', frame=90)
+print('KEYS', len(rig.animation_data.action.fcurves))
+
+# 3) тело в позе A, конечности — на кольцах через IK
+pose('A')
+add_ik()
 bpy.context.view_layer.update()
 
-bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'omni_rig.blend'))
-print('SAVED omni_rig.blend')
+sc.frame_start, sc.frame_end = 1, 90
+cam.data.type = 'ORTHO'
+cam.data.ortho_scale = 2.9
+cam.location = (0, 0, 4.2)
+cam.rotation_euler = (0, 0, 0)
+
+IKTIP = {'arm_L': 'J_Bip_L_LowerArm', 'arm_R': 'J_Bip_R_LowerArm',
+         'leg_L': 'J_Bip_L_LowerLeg', 'leg_R': 'J_Bip_R_LowerLeg'}
+for f in (1, 23, 45):
+    sc.frame_set(f)
+    bpy.context.view_layer.update()
+    err = {}
+    pos = {}
+    for k, bn in IKTIP.items():
+        ring = rig.matrix_world @ rig.pose.bones[f'head_{k}'].head
+        tip = arm.matrix_world @ arm.pose.bones[bn].tail
+        err[k] = round((ring - tip).length, 3)
+        pos[k] = [round(ring.x, 2), round(ring.y, 2)]
+    print('SYNC frame', f, 'err', err)
+    print('RINGS frame', f, pos)
+    sc.render.filepath = os.path.join(OUT, f'sy_top_f{f:02d}.png')
+    bpy.ops.render.render(write_still=True)
+    print('SHOT', f'sy_top_f{f:02d}.png')
+
+sc.frame_set(24)
+shot('sy_side_f24.png', (3.0, -0.4, 1.5), (0, 0, 1.05), lens=60)
+
+sc.frame_set(1)
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'omni_sync.blend'))
+print('SAVED omni_sync.blend')
 print('BONES', len(ad.bones))
