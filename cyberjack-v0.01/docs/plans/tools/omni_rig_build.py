@@ -103,6 +103,17 @@ for sy in (-1, 1):
     box(f'yoke_{sy}', (0.10, 0.05, 0.22), (0, sy * 0.115, PIVOT_Z - 0.06), M_DARK, 'roll')
 
 
+# --- детали основания и колонны ---------------------------------------------
+for sx in (-1, 1):
+    for sy in (-1, 1):
+        cyl(f'foot_stem_{sx}_{sy}', 0.018, 0.06, (sx * 0.58, sy * 0.40, 0.075), M_MET, 'base', seg=10)
+        cyl(f'foot_pad_{sx}_{sy}', 0.055, 0.022, (sx * 0.58, sy * 0.40, 0.035), M_DARK, 'base', seg=16)
+for sx in (-1, 1):
+    box(f'base_gusset_{sx}', (0.16, 0.10, 0.09), (sx * 0.30, 0, 0.165), M_BODY, 'base')
+cyl('col_handle_stem', 0.014, 0.10, (0.13, 0, 0.66), M_MET, 'column', rot=(0, math.radians(90), 0), seg=10)
+cyl('col_handle', 0.020, 0.14, (0.20, 0, 0.66), M_ACC, 'column', rot=(0, math.radians(90), 0), seg=12)
+box('col_scale_plate', (0.03, 0.10, 0.24), (0.062, 0, 0.80), M_BODY, 'column')
+
 # === платформа с прорезями ===================================================
 def plate_with_slots():
     bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, PIVOT_Z))
@@ -153,6 +164,40 @@ for sx in (-1, 1):
         box(f'rail_strut_{sx}_{sy}', (0.04, 0.04, RIM_H),
             (sx * RX, sy * RY, RIM_Z), M_MET, 'roll')
 
+# окантовка плиты и губки прорезей
+for sy in (-1, 1):
+    box(f'plat_edge_{sy}', (PLAT_L, 0.02, PLAT_T * 0.9), (0, sy * (PLAT_W / 2 - 0.01), PIVOT_Z),
+        M_MET, 'roll')
+for sx in (-1, 1):
+    box(f'plat_edge_x_{sx}', (0.02, PLAT_W, PLAT_T * 0.9), (sx * (PLAT_L / 2 - 0.01), 0, PIVOT_Z),
+        M_MET, 'roll')
+for hy, hx0, hx1 in ((ARM_Y, ARM_X0, ARM_X1), (-ARM_Y, ARM_X0, ARM_X1),
+                     (LEG_Y, LEG_X0, LEG_X1), (-LEG_Y, LEG_X0, LEG_X1)):
+    for sy2 in (-1, 1):
+        box(f'slot_lip_{hy}_{sy2}', (hx1 - hx0, 0.008, 0.012),
+            ((hx0 + hx1) / 2, hy + sy2 * (SLOT_W / 2 + 0.004), PIVOT_Z + PLAT_T / 2), M_MET, 'roll')
+
+# ремни фиксации тела (часть станка, не персонажа)
+def strap(nm, x, height=0.21):
+    """прижимная дуга НАД телом: две стойки у бортов + перекладина над корпусом"""
+    zc = PIVOT_TOP + height
+    box(f'{nm}_band', (0.075, PLAT_W - 0.12, 0.012), (x, 0, zc), M_DARK, 'roll')
+    for sy in (-1, 1):
+        box(f'{nm}_riser_{sy}', (0.06, 0.03, height),
+            (x, sy * (PLAT_W / 2 - 0.06), PIVOT_TOP + height / 2), M_MET, 'roll')
+        box(f'{nm}_pad_{sy}', (0.07, 0.04, 0.02), (x, sy * 0.16, zc - 0.012), M_PAD, 'roll')
+    box(f'{nm}_buckle', (0.09, 0.045, 0.022), (x, -0.05, zc + 0.008), M_ACC, 'roll')
+
+
+strap('belt_chest', -0.34, 0.21)
+strap('belt_pelvis', 0.16, 0.19)
+
+# угловые бамперы платформы
+for sx in (-1, 1):
+    for sy in (-1, 1):
+        cyl(f'plat_bumper_{sx}_{sy}', 0.035, 0.09, (sx * (PLAT_L / 2 - 0.045), sy * (PLAT_W / 2 - 0.045),
+                                                    PIVOT_Z), M_DARK, 'roll', seg=12)
+
 # === модуль конечности в канонической системе ================================
 # каретка в (0,0,RAIL_Z), штанга 0..1 по +Y на высоте RAIL_Z,
 # стойка 0..1 по +Z в конце штанги, голова на её конце.
@@ -177,11 +222,17 @@ def build_module(tag, y0, x0):
     put(cyl(f'post_{tag}', 0.018, 1.0, (0, 1.0, 0.5), M_MET, f'post_{tag}', seg=14))
     put(cyl(f'post_out_{tag}', 0.026, 0.30, (0, 1.0, 0.15), M_MET, f'post_{tag}', seg=16))
     put(cyl(f'post_collar_{tag}', 0.032, 0.04, (0, 1.0, 0.30), M_BODY, f'post_{tag}', seg=16))
+    put(cyl(f'car_lever_{tag}', 0.012, 0.09, (0.09, 0, 0.02), M_ACC, f'car_{tag}',
+            rot=(0, math.radians(90), 0), seg=10))
+    put(cyl(f'boom_pin_{tag}', 0.008, 0.05, (0, 0.30, 0.032), M_MET, f'boom_{tag}', seg=8))
     # проушина под обручем: не перекрывает проём, кольцо сверху
     put(box(f'head_{tag}', (0.055, 0.038, 0.075), (0, 1.0, 0.905), M_BODY, f'head_{tag}'))
     # обруч стоит вертикально: ось кольца вдоль X, конечность проходит сквозь него
     put(torus(f'ring_{tag}', 0.075, 0.016, (0, 1.0, 1.0), M_ACC, f'head_{tag}',
               rot=(0, math.radians(90), 0)))
+    # замок кольца: петля с одной стороны, язычок с другой
+    put(cyl(f'ring_hinge_{tag}', 0.010, 0.05, (0, 1.0 - 0.075, 1.0), M_MET, f'head_{tag}', seg=10))
+    put(box(f'ring_latch_{tag}', (0.02, 0.05, 0.03), (0, 1.0 + 0.075, 1.0), M_ACC, f'head_{tag}'))
     return g
 
 
@@ -571,7 +622,208 @@ bpy.context.view_layer.update()
 print('ERR_BIG', errs_big)
 print('EXT 195', extensions())
 show('big', (2.3, -2.5, 1.75), (0, 0, 1.05), 50, name='st_big.png')
+for o in new_objs:
+    bpy.data.objects.remove(o, do_unlink=True)
+bpy.context.view_layer.update()
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'omni_static.blend'))
 print('SAVED omni_static.blend')
 print('BONES', len(ad.bones))
+
+# === АНИМАЦИЯ: тело отводится поворотом своих костей, кольца едут за суставами =
+# IK не используем (перещёлкивает суставы). Углы отведения берём как в замерах:
+# бедро и плечо вращаются вокруг найденной оси, тело остаётся анатомичным,
+# а крепления подводятся ровно к суставам и ключуются в тех же кадрах.
+
+MBONES = [f'{pre}_{t}' for t in ('arm_L', 'arm_R', 'leg_L', 'leg_R')
+          for pre in ('car', 'boom', 'post', 'head')]
+
+
+def snapshot():
+    out = {}
+    for bn in MBONES:
+        pb = rig.pose.bones[bn]
+        out[bn] = (tuple(pb.location), tuple(pb.rotation_euler), tuple(pb.scale))
+    return out
+
+
+def apply_snap(snap):
+    for bn, (loc, rot, scl) in snap.items():
+        pb = rig.pose.bones[bn]
+        pb.location, pb.rotation_euler, pb.scale = loc, rot, scl
+
+
+def find_abduction(bone, tip, want='y'):
+    """ось и знак поворота, при котором конечность уходит в сторону"""
+    best = None
+    for axis in range(3):
+        for deg in (60, 90, -60, -90):
+            reset()
+            rb(bone % 'L', deg, axis)
+            rb(bone % 'R', -deg, axis)
+            bpy.context.view_layer.update()
+            t = jb(tip % 'L')
+            if not t:
+                continue
+            score = abs(t.y) - 2.0 * abs(t.z - (jb('J_Bip_L_Hand') or t).z)
+            if best is None or score > best[0]:
+                best = (score, axis, deg)
+    reset()
+    return best[1], best[2]
+
+
+LEG_AXIS, LEG_DEG = find_abduction('J_Bip_%s_UpperLeg', 'J_Bip_%s_Foot')
+ARM_AXIS, ARM_DEG = find_abduction('J_Bip_%s_UpperArm', 'J_Bip_%s_Hand')
+print('ABDUCT leg', LEG_AXIS, LEG_DEG, 'arm', ARM_AXIS, ARM_DEG)
+
+SCHED = [(1, 0.0, 0.0), (16, 0.35, 0.35), (31, 0.7, 0.7), (45, 1.0, 1.0),
+         (60, 0.7, 0.7), (75, 0.35, 0.35), (90, 0.0, 0.0)]
+LEG_FULL = 90.0
+ARM_FULL = abs(ARM_DEG)
+
+body_keys, mach_keys = [], []
+for frame, kleg, karm in SCHED:
+    reset()
+    rb('J_Bip_L_UpperLeg', LEG_FULL * kleg, LEG_AXIS)
+    rb('J_Bip_R_UpperLeg', -LEG_FULL * kleg, LEG_AXIS)
+    rb('J_Bip_L_UpperArm', ARM_DEG * karm, ARM_AXIS)
+    rb('J_Bip_R_UpperArm', -ARM_DEG * karm, ARM_AXIS)
+    bpy.context.view_layer.update()
+    errs = {}
+    for k in ('arm_L', 'arm_R', 'leg_L', 'leg_R'):
+        t = jb('J_Bip_L_Hand' if k == 'arm_L' else 'J_Bip_R_Hand') if k.startswith('arm') \
+            else jb('J_Bip_L_Foot' if k == 'leg_L' else 'J_Bip_R_Foot')
+        errs[k] = round(place(k, t, limb_dirs().get(k)), 3)
+    bpy.context.view_layer.update()
+    body_keys.append((frame, {b: tuple(arm.pose.bones[b].rotation_euler)
+                              for b in ('J_Bip_L_UpperLeg', 'J_Bip_R_UpperLeg',
+                                        'J_Bip_L_UpperArm', 'J_Bip_R_UpperArm')}))
+    mach_keys.append((frame, snapshot()))
+    print('KEY', frame, 'kleg', round(kleg, 2), 'err', errs)
+
+# пишем ключи: сначала скелет тела, потом машина (без update между кадрами)
+for frame, rotations in body_keys:
+    for bn, rot in rotations.items():
+        pb = arm.pose.bones[bn]
+        pb.rotation_mode = 'XYZ'
+        pb.rotation_euler = rot
+        pb.keyframe_insert('rotation_euler', frame=frame)
+for frame, snap in mach_keys:
+    apply_snap(snap)
+    for bn in MBONES:
+        pb = rig.pose.bones[bn]
+        pb.keyframe_insert('location', frame=frame)
+        pb.keyframe_insert('rotation_euler', frame=frame)
+        pb.keyframe_insert('scale', frame=frame)
+
+for ad2 in (arm, rig):
+    if ad2.animation_data and ad2.animation_data.action:
+        for fc in ad2.animation_data.action.fcurves:
+            for kp in fc.keyframe_points:
+                kp.interpolation = 'LINEAR'
+print('KEYS body', len(arm.animation_data.action.fcurves),
+      'machine', len(rig.animation_data.action.fcurves))
+
+# --- печём позу тела по кадрам: 2-звенник с ЯВНЫМ базисом (без to_track_quat) --
+def aim_bone(pb, target, pole):
+    head = pb.matrix.translation.copy()
+    y = target - head
+    if y.length < 1e-6:
+        return
+    y.normalize()
+    x = y.cross(pole)
+    if x.length < 1e-5:
+        x = y.cross(Vector((0, 0, 1)))
+    x.normalize()
+    z = x.cross(y)
+    M = Matrix((x, y, z)).transposed().to_4x4()
+    M.translation = head
+    pb.matrix = M
+    bpy.context.view_layer.update()
+
+
+def solve_limb(tag, pole):
+    cfg = {'arm_L': ('J_Bip_L_UpperArm', 'J_Bip_L_LowerArm'),
+           'arm_R': ('J_Bip_R_UpperArm', 'J_Bip_R_LowerArm'),
+           'leg_L': ('J_Bip_L_UpperLeg', 'J_Bip_L_LowerLeg'),
+           'leg_R': ('J_Bip_R_UpperLeg', 'J_Bip_R_LowerLeg')}[tag]
+    up, lo = cfg
+    S = arm.matrix_world @ arm.pose.bones[up].head
+    T = rig.matrix_world @ rig.pose.bones[f'head_{tag}'].head
+    L1 = (arm.data.bones[up].tail_local - arm.data.bones[up].head_local).length
+    L2 = (arm.data.bones[lo].tail_local - arm.data.bones[lo].head_local).length
+    v = T - S
+    d = min(v.length, (L1 + L2) * 0.999)
+    axis = v.normalized()
+    a = (L1 * L1 - L2 * L2 + d * d) / (2 * d)
+    h = math.sqrt(max(0.0, L1 * L1 - a * a))
+    perp = (pole - axis * pole.dot(axis))
+    perp = perp.normalized() if perp.length > 1e-5 else Vector((0, 1, 0))
+    mid = S + axis * a + perp * h
+    aim_bone(arm.pose.bones[up], mid, perp)
+    aim_bone(arm.pose.bones[lo], T, perp)
+
+
+POLE = {'arm_L': Vector((-0.2, 0.3, 1.0)), 'arm_R': Vector((-0.2, -0.3, 1.0)),
+        'leg_L': Vector((0.2, 0.9, 0.0)), 'leg_R': Vector((0.2, -0.9, 0.0))}
+
+bad = []
+for f in range(1, 91):
+    sc.frame_set(f)
+    bpy.context.view_layer.update()
+    for tag in ('arm_L', 'arm_R', 'leg_L', 'leg_R'):
+        solve_limb(tag, POLE[tag])
+        for bn in ({'arm_L': 'J_Bip_L_UpperArm', 'arm_R': 'J_Bip_R_UpperArm',
+                    'leg_L': 'J_Bip_L_UpperLeg', 'leg_R': 'J_Bip_R_UpperLeg'}[tag],
+                   {'arm_L': 'J_Bip_L_LowerArm', 'arm_R': 'J_Bip_R_LowerArm',
+                    'leg_L': 'J_Bip_L_LowerLeg', 'leg_R': 'J_Bip_R_LowerLeg'}[tag]):
+            pb = arm.pose.bones[bn]
+            pb.rotation_mode = 'XYZ'
+            pb.keyframe_insert('rotation_euler', frame=f)
+    # проверка
+    for tag in ('arm_L', 'arm_R', 'leg_L', 'leg_R'):
+        up = {'arm_L': 'J_Bip_L_UpperArm', 'arm_R': 'J_Bip_R_UpperArm',
+              'leg_L': 'J_Bip_L_UpperLeg', 'leg_R': 'J_Bip_R_UpperLeg'}[tag]
+        lo = {'arm_L': 'J_Bip_L_LowerArm', 'arm_R': 'J_Bip_R_LowerArm',
+              'leg_L': 'J_Bip_L_LowerLeg', 'leg_R': 'J_Bip_R_LowerLeg'}[tag]
+        S = arm.matrix_world @ arm.pose.bones[up].head
+        E = arm.matrix_world @ arm.pose.bones[lo].head
+        T = arm.matrix_world @ arm.pose.bones[lo].tail
+        ring = rig.matrix_world @ rig.pose.bones[f'head_{tag}'].head
+        ang = math.degrees((S - E).angle(T - E, 0))
+        side = 1 if tag.endswith('_L') else -1
+        if ang < 150:
+            bad.append((f, tag, 'пересогнут', round(ang)))
+        if (ring - T).length > 0.04:
+            bad.append((f, tag, 'кольцо не на суставе', round((ring - T).length, 3)))
+        if T.y * side < -0.02:
+            bad.append((f, tag, 'чужая сторона', round(T.y, 3)))
+print('BAKE_BAD', len(bad), bad[:4])
+
+if not bad:
+    cam.data.type = 'PERSP'
+    cam.data.lens = 45
+    cam.location = (2.15, -2.45, 1.75)
+    cam.rotation_euler = (Vector((0, 0, 1.05)) - Vector(cam.location)).to_track_quat('-Z', 'Y').to_euler()
+    sc.render.resolution_x, sc.render.resolution_y = 960, 640
+    sc.eevee.taa_render_samples = 10
+    for f in (1, 23, 45, 68):
+        sc.frame_set(f)
+        bpy.context.view_layer.update()
+        sc.render.filepath = os.path.join(OUT, f'an_f{f:02d}.png')
+        bpy.ops.render.render(write_still=True)
+        print('SHOT', f'an_f{f:02d}.png')
+    sc.frame_set(45)
+    cam.data.type = 'ORTHO'
+    cam.data.ortho_scale = 2.7
+    cam.location = (0, 0, 4.2)
+    cam.rotation_euler = (0, 0, 0)
+    bpy.context.view_layer.update()
+    sc.render.filepath = os.path.join(OUT, 'an_top45.png')
+    bpy.ops.render.render(write_still=True)
+    print('SHOT an_top45.png')
+    sc.frame_set(1)
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, 'omni_anim.blend'))
+    print('SAVED omni_anim.blend')
+else:
+    print('ANIM_REJECTED')
