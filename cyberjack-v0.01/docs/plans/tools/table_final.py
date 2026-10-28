@@ -126,43 +126,60 @@ cyl('tilt_axle', 0.040, 0.30, (0, 0, 0.945), M_METAL, 'tilt', rot=(math.radians(
 box('table_frame', (1.58, 0.58, 0.055), (0, 0, 0.96), M_DARK, 'table')
 for sy in (-1, 1):
     box(f'table_rail_{sy}', (1.54, 0.05, 0.05), (0, sy * 0.25, 0.915), M_WHITE, 'table')
-box('table_mattress', (1.50, 0.52, 0.095), (0, 0, 1.032), M_PAD, 'table')
+box('table_mattress', (1.50, 0.52, 0.120), (0, 0, 1.030), M_PAD, 'table')
 # борт матраса
 for sy in (-1, 1):
-    box(f'rim_side_{sy}', (1.50, 0.025, 0.05), (0, sy * 0.26, 1.075), M_WHITE, 'table')
+    box(f'rim_side_{sy}', (1.52, 0.030, 0.030), (0, sy * 0.265, 1.095), M_WHITE, 'table')
 for sx in (-1, 1):
-    box(f'rim_end_{sx}', (0.025, 0.52, 0.05), (sx * 0.75, 0, 1.075), M_WHITE, 'table')
-box('head_plate', (0.22, 0.36, 0.03), (-0.86, 0, 1.045), M_WHITE, 'table')
-box('foot_plate', (0.42, 0.42, 0.03), (0.96, 0, 1.045), M_WHITE, 'foot_plate')
+    box(f'rim_end_{sx}', (0.030, 0.52, 0.030), (sx * 0.76, 0, 1.095), M_WHITE, 'table')
+box('head_plate', (0.18, 0.36, 0.03), (-0.88, 0, 1.075), M_WHITE, 'table')
+box('foot_plate', (0.34, 0.42, 0.03), (0.96, 0, 1.075), M_WHITE, 'foot_plate')
+box('foot_tongue', (0.20, 0.26, 0.03), (1.22, 0, 1.075), M_WHITE, 'foot_plate')
 
 # --- трубчатая рама по периметру --------------------------------------------
-FZ = 1.09
-RX, RY, RC = 0.78, 0.285, 0.09
+FZ = 1.10
+RX, RY, RC = 0.72, 0.26, 0.085
 for sy in (-1, 1):
-    bar(f'frame_long_{sy}', (-RX + RC, sy * RY, FZ), (RX - RC, sy * RY, FZ), 0.024, M_WHITE, 'table')
+    bar(f'frame_long_{sy}', (-RX + RC, sy * RY, FZ), (RX - RC, sy * RY, FZ), 0.032, M_WHITE, 'table')
 for sx in (-1, 1):
-    bar(f'frame_short_{sx}', (sx * RX, -RY + RC, FZ), (sx * RX, RY - RC, FZ), 0.024, M_WHITE, 'table')
-for sx in (-1, 1):
-    for sy in (-1, 1):
-        bar(f'corner_{sx}_{sy}', (sx * (RX - RC), sy * RY, FZ),
-            (sx * RX, sy * (RY - RC), FZ), 0.024, M_WHITE, 'table')
+    bar(f'frame_short_{sx}', (sx * RX, -RY + RC, FZ), (sx * RX, RY - RC, FZ), 0.032, M_WHITE, 'table')
+def arc_corner(name, cx, cy, a0, a1, steps=6):
+    """скругление рамы: цепочка коротких труб по четверти окружности"""
+    pts = []
+    for k in range(steps + 1):
+        a = math.radians(a0 + (a1 - a0) * k / steps)
+        pts.append((cx + RC * math.cos(a), cy + RC * math.sin(a), FZ))
+    for k in range(steps):
+        bar(f'{name}_{k}', pts[k], pts[k + 1], 0.032, M_WHITE, 'table')
+
+
+arc_corner('c_fl', -RX + RC, -RY + RC, 180, 270)
+arc_corner('c_fr', RX - RC, -RY + RC, 270, 360)
+arc_corner('c_br', RX - RC, RY - RC, 0, 90)
+arc_corner('c_bl', -RX + RC, RY - RC, 90, 180)
 # стойки рамы к столу
 for x in (-0.62, -0.2, 0.2, 0.62):
     for sy in (-1, 1):
-        bar(f'post_{x}_{sy}', (x, sy * RY, FZ), (x, sy * 0.27, 0.985), 0.018, M_WHITE, 'table')
+        bar(f'post_{x}_{sy}', (x, sy * RY, FZ), (x, sy * 0.27, 0.985), 0.020, M_WHITE, 'table')
 
 # --- «крылья»: плоские лопатки на торцах рамы -------------------------------
 for sx in (-1, 1):
     for sy in (-1, 1):
         bone = ('wing_H' if sx < 0 else 'wing_F') + ('L' if sy < 0 else 'R')
-        box(f'wing_{bone}', (0.22, 0.14, 0.016),
-            (sx * (RX + 0.05), sy * (RY + 0.01), FZ + 0.055),
+        box(f'wing_{bone}', (0.16, 0.10, 0.014),
+            (sx * (RX + 0.04), sy * (RY + 0.01), FZ + 0.05),
             M_WHITE, bone, rot=(math.radians(16 * sy), math.radians(-30 * sx), 0))
 
+# --- ручки-скобы на столе ----------------------------------------------------
+for i, hx in enumerate((-0.42, 0.02)):
+    bar(f'hnd_{i}_l', (hx, -0.14, 1.10), (hx, -0.14, 1.24), 0.016, M_WHITE, 'table')
+    bar(f'hnd_{i}_r', (hx, 0.14, 1.10), (hx, 0.14, 1.24), 0.016, M_WHITE, 'table')
+    bar(f'hnd_{i}_t', (hx, -0.14, 1.24), (hx, 0.14, 1.24), 0.016, M_WHITE, 'table')
+
 # --- П-скоба у изголовья -----------------------------------------------------
-bar('loop_l', (-0.88, -0.10, FZ - 0.02), (-0.88, -0.10, FZ + 0.16), 0.018, M_WHITE, 'loop')
-bar('loop_r', (-0.88, 0.10, FZ - 0.02), (-0.88, 0.10, FZ + 0.16), 0.018, M_WHITE, 'loop')
-bar('loop_top', (-0.88, -0.10, FZ + 0.16), (-0.88, 0.10, FZ + 0.16), 0.018, M_WHITE, 'loop')
+bar('loop_l', (-0.96, -0.10, 1.08), (-0.96, -0.10, 1.24), 0.016, M_WHITE, 'loop')
+bar('loop_r', (-0.96, 0.10, 1.08), (-0.96, 0.10, 1.24), 0.016, M_WHITE, 'loop')
+bar('loop_top', (-0.96, -0.10, 1.24), (-0.96, 0.10, 1.24), 0.016, M_WHITE, 'loop')
 
 # --- скелет ------------------------------------------------------------------
 ad = bpy.data.armatures.new('table_rig')
