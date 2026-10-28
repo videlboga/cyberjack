@@ -23,13 +23,18 @@ CROSS_X_HEAD = -700     # поперечные пазы у изголовья
 CROSS_LEN_HEAD = 370
 RING_WRIST, RING_ANKLE = 90, 120
 ROD_D1, ROD_D2 = 32, 22
+BOOM_STROKE = 700       # выносная горизонтальная штанга (шпагат, руки в стороны)
+Y_SPLIT = 900           # полураствор полного шпагата при ноге 900 мм
+Y_ARMS_OUT = 780        # кисти в стороны
+CROSS_Y0, CROSS_Y1 = 60, 320   # поперечный паз открыт до кромки платформы
 
 
 class Sheet:
-    def __init__(self, name, w_mm, h_mm, scale=0.42, title='', center=(0, 0)):
+    def __init__(self, name, w_mm, h_mm, scale=0.42, title='', center=(0, 0), tb='br'):
         self.name, self.scale = name, scale
         self.W, self.H = int(w_mm * scale), int(h_mm * scale)
         self.cx, self.cy = center
+        self.tb = tb
         self.bbox = [1e9, 1e9, -1e9, -1e9]   # x0, y0, x1, y1 в мм
         self.parts = []
         self.title = title
@@ -99,6 +104,8 @@ class Sheet:
         # сбрасываем трекинг от служебных вызовов
         safe_x0, safe_y0 = pad, pad
         safe_x1, safe_y1 = self.W - pad, self.H - pad
+        if self.tb == 'bl':
+            safe_x0 = pad + 380
         w, h = x1 - x0, y1 - y0
         avail_w = safe_x1 - safe_x0
         avail_h = safe_y1 - safe_y0 - tb_h * 0.55
@@ -114,10 +121,12 @@ class Sheet:
         frame = (f'<rect x="8" y="8" width="{self.W - 16}" height="{self.H - 16}" fill="#fdfdfb" '
                  f'stroke="#111" stroke-width="1.6"/>')
         tb_w, tb_h = 380, 96
-        tb = (f'<rect x="{self.W - 16 - tb_w}" y="{self.H - 16 - tb_h}" width="{tb_w}" height="{tb_h}" '
-              f'fill="none" stroke="#111" stroke-width="1.2"/>')
+        tx = 16 if self.tb == 'bl' else self.W - 16 - tb_w
+        ty = self.H - 16 - tb_h
+        tb = (f'<rect x="{tx}" y="{ty}" width="{tb_w}" height="{tb_h}" '
+              f'fill="#fdfdfb" stroke="#111" stroke-width="1.2"/>')
         tt = ''.join(
-            f'<text x="{self.W - 16 - tb_w + 10}" y="{self.H - 16 - tb_h + 22 + i * 22}" '
+            f'<text x="{tx + 10}" y="{ty + 22 + i * 22}" '
             f'font-family="DejaVu Sans" font-size="12" fill="#111">{t}</text>'
             for i, t in enumerate(self.title.split('|')))
         tf = self.fit_transform()
@@ -138,7 +147,7 @@ class Sheet:
 
 # --- 1. ПЛАН -----------------------------------------------------------------
 def plan():
-    s = Sheet('m1_plan', 2600, 1750, scale=0.5, center=(0, 0),
+    s = Sheet('m1_plan', 3000, 2200, scale=0.5, center=(0, 0), tb='bl',
               title='ОМНИ-1 · ПЛАН ПЛАТФОРМЫ|М 1:10 · размеры в мм|лист 1 из 5')
     # платформа
     s.rect(-PLAT_L / 2, -PLAT_W / 2, PLAT_L, PLAT_W, fill='#f2f3f5', sw=1.6)
@@ -148,10 +157,11 @@ def plan():
         s.rect(-SLOT_LEN / 2, sy * SLOT_L_Y - SLOT_W / 2, SLOT_LEN, SLOT_W, fill='#ffffff', sw=1.2)
     # поперечные пазы (ножной конец — шпагат, изголовье — руки вверх)
     for sy in (-1, 1):
-        s.rect(CROSS_X - SLOT_W / 2, sy * 60 if sy > 0 else -(60 + CROSS_LEN),
-               SLOT_W, CROSS_LEN, fill='#ffffff', sw=1.2)
-        s.rect(CROSS_X_HEAD - SLOT_W / 2, sy * 60 if sy > 0 else -(60 + CROSS_LEN_HEAD),
-               SLOT_W, CROSS_LEN_HEAD, fill='#ffffff', sw=1.2)
+        # поперечные пазы открыты до кромки: штанга выходит за габарит
+        s.rect(CROSS_X - SLOT_W / 2, sy * CROSS_Y0, SLOT_W, CROSS_Y1 - CROSS_Y0,
+               fill='#ffffff', sw=1.2)
+        s.rect(CROSS_X_HEAD - SLOT_W / 2, sy * CROSS_Y0, SLOT_W, CROSS_Y1 - CROSS_Y0,
+               fill='#ffffff', sw=1.2)
     # кардан под платформой
     s.circle(0, 0, 150, dash='12 8', color='#666')
     s.circle(0, 0, 60, dash='6 6', color='#666')
@@ -164,18 +174,29 @@ def plan():
                    color='#0b6f66' if not dashed else '#7fb3ad')
 
     for sy, name in ((-1, 'Л'), (1, 'П')):
+        # руки: вдоль тела / вверх / в стороны (выносной штангой)
         ring(-40, sy * SLOT_L_Y, RING_WRIST / 2, f'кисть {name}', dashed=True)
         ring(-690, sy * SLOT_L_Y, RING_WRIST / 2, f'кисть {name} вверх')
+        s.line(-300, sy * SLOT_L_Y, -300, sy * Y_ARMS_OUT, w=1.2, color='#0b6f66')
+        ring(-300, sy * Y_ARMS_OUT, RING_WRIST / 2, f'кисть {name} в стороны')
+        # стопы: вместе / полный шпагат на выносной штанге
         ring(CROSS_X, sy * 120, RING_ANKLE / 2, f'стопа {name}', dashed=True)
-        ring(CROSS_X, sy * 470, RING_ANKLE / 2, f'стопа {name} шпагат')
+        s.line(CROSS_X, sy * 120, CROSS_X, sy * Y_SPLIT, w=1.4, color='#b3541e')
+        s.rect(CROSS_X - 18, sy * 300 if sy > 0 else -sy * 300 - 0, 36, 0,
+               fill='none', sw=0)
+        ring(CROSS_X, sy * Y_SPLIT, RING_ANKLE / 2, '', dashed=False)
+        s.text(CROSS_X, sy * Y_SPLIT + (95 if sy > 0 else -95),
+               f'стопа {name} — шпагат {Y_SPLIT * 2}', size=11, anchor='middle', color='#b3541e')
+        s.text(CROSS_X + 130, sy * 640, 'выносная штанга, ход 700', size=10, color='#b3541e')
     # размеры
     s.dim(-PLAT_L / 2, -PLAT_W / 2 - 90, PLAT_L / 2, -PLAT_W / 2 - 90, '1900', off=-14)
     s.dim(PLAT_L / 2 + 90, -PLAT_W / 2, PLAT_L / 2 + 90, PLAT_W / 2, '640', off=-16, vertical=True)
     s.dim(-SLOT_LEN / 2, PLAT_W / 2 + 70, SLOT_LEN / 2, PLAT_W / 2 + 70, '1560', off=-14)
-    s.dim(CROSS_X, -PLAT_W / 2 - 40, CROSS_X, PLAT_W / 2 + 40, '410 / 370', off=24, vertical=True)
+    s.dim(-PLAT_L / 2 - 230, -Y_SPLIT, -PLAT_L / 2 - 230, Y_SPLIT, f'{Y_SPLIT * 2} — шпагат',
+          off=-34, vertical=True)
     s.dim(-SLOT_LEN / 2, -PLAT_W / 2 - 130, SLOT_LEN / 2, -PLAT_W / 2 - 130, '1560', off=-14)
     s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 150,
-           'пазы 100 мм: продольные 1560 × 2 (y=±210) · поперечные 410 (ножной) / 370 (изголовье)', size=12)
+           'продольные пазы 1560 × 100 при y=±210 · поперечные открыты до кромки (штанга выходит за габарит)', size=12)
     s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 120,
            'зелёным — кольца в крайних положениях (сплошной — рабочее, штрих — крайнее)', size=11, color='#555')
     return s.save()
@@ -305,17 +326,20 @@ def ranges():
     s.text(-620, 0, 'голова', size=10, anchor='middle', color='#666')
     # зоны
     for sy in (-1, 1):
-        s.line(-40, sy * 270, -690, sy * 250, w=1.0, color='#0b6f66', dash='8 6')
-        s.text(-380, sy * 300, 'рука: вдоль тела → вверх', size=11,
+        s.line(-40, sy * SLOT_L_Y, -690, sy * SLOT_L_Y, w=1.0, color='#0b6f66', dash='8 6')
+        s.text(-380, sy * (SLOT_L_Y + 45), 'рука: вдоль тела → вверх', size=11,
                anchor='middle', color='#0b6f66')
-        s.line(620, sy * 80, 700, sy * 420, w=1.0, color='#b3541e', dash='8 6')
-        s.text(760, sy * 380, 'нога: шпагат', size=11, color='#b3541e')
-    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 150,
-           'пределы: кисть X −40…−690 · Y 60…270 · стопа X 300…740 · Y 60…430', size=12)
-    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 115,
-           'кольцо над плоскостью 20…300 мм · телескоп 240 мм · шарнир ±75°', size=12)
-    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 80,
-           'платформа: тангаж ±90°, крен ±90°, рабочая высота 720…1120 мм', size=12)
+        s.line(-300, sy * SLOT_L_Y, -300, sy * Y_ARMS_OUT, w=1.0, color='#0b6f66', dash='8 6')
+        s.line(700, sy * 120, 700, sy * Y_SPLIT, w=1.2, color='#b3541e', dash='8 6')
+        s.text(760, sy * 700, 'нога: шпагат до 1800', size=11, color='#b3541e')
+    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 190,
+           'пределы кистей: X −40…−690 · Y ±210…±780 (в стороны)', size=12)
+    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 155,
+           'пределы стоп: X +600…+740 · Y ±120…±900 — шпагат 1800 на выносных штангах', size=12)
+    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 120,
+           'кольцо над плоскостью 20…300 мм · телескоп 240 · шарнир ±75° · вынос 700', size=12)
+    s.text(-PLAT_L / 2 + 20, PLAT_W / 2 + 85,
+           'платформа: тангаж ±90°, крен ±90°, рабочая высота 820…1220 мм', size=12)
     return s.save()
 
 
