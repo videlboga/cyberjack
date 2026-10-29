@@ -249,14 +249,12 @@ def bolster(nm, size, loc, rot=(0, 0, 0), r=0.012):
     bpy.ops.object.modifier_apply(modifier='bev')
 
 
-bolster('bol_side_L', (1.62, 0.055, 0.030), (-0.06, 0.265, PIVOT_TOP + 0.015))
-bolster('bol_side_R', (1.62, 0.055, 0.030), (-0.06, -0.265, PIVOT_TOP + 0.015))
-bolster('bol_head', (0.05, 0.34, 0.028), (-0.885, 0.0, PIVOT_TOP + 0.014))
-bolster('bol_foot', (0.05, 0.30, 0.024), (0.905, 0.0, PIVOT_TOP + 0.012))
-bolster('bol_leg_div', (0.80, 0.045, 0.022), (0.44, 0.0, PIVOT_TOP + 0.011))
-for sy in (-1, 1):
-    bolster(f'bol_shoulder_{sy}', (0.10, 0.09, 0.026),
-            (-0.62, sy * 0.205, PIVOT_TOP + 0.013), rot=(0, 0, math.radians(12 * sy)))
+bolster('bol_side_L', (1.66, 0.040, 0.026), (-0.02, 0.293, PIVOT_TOP + 0.013))
+bolster('bol_side_R', (1.66, 0.040, 0.026), (-0.02, -0.293, PIVOT_TOP + 0.013))
+bolster('bol_head', (0.045, 0.30, 0.024), (-0.895, 0.0, PIVOT_TOP + 0.012))
+bolster('bol_foot', (0.045, 0.28, 0.022), (0.915, 0.0, PIVOT_TOP + 0.011))
+bolster('bol_leg_div', (0.56, 0.030, 0.012), (0.58, 0.0, PIVOT_TOP + 0.006))
+
 print('CARVE ok')
 
 # окантовка плиты

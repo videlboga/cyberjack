@@ -247,6 +247,38 @@ ev = cbody[0].evaluated_get(dg0); me = ev.to_mesh()
 w = cbody[0].matrix_world
 ys = [(w @ v.co).y for v in me.vertices]
 print('DEFORM y', round(min(ys), 2), round(max(ys), 2))
+
+# проверка: тело не входит в подушки над столом
+def body_hits():
+    gi = {g.index: g.name for g in bpy.data.objects['OMNI_1'].vertex_groups}
+    pad = {}
+    m = bpy.data.objects['OMNI_1']; mw2 = m.matrix_world
+    ev2 = m.evaluated_get(dg0); me2 = ev2.to_mesh()
+    for i, v in enumerate(m.data.vertices):
+        names = [gi[g.group] for g in v.groups if g.weight > 0.3]
+        if not any('bol_' in n for n in names):
+            continue
+        p = mw2 @ me2.vertices[i].co
+        if p.z <= 1.112:
+            continue
+        key = (round(p.x, 2), round(p.y, 2))
+        pad[key] = max(pad.get(key, 0), p.z)
+    ev2.to_mesh_clear()
+    hits = 0
+    bobj = cbody[0]
+    bw = bobj.matrix_world
+    evb = bobj.evaluated_get(dg0); mb = evb.to_mesh()
+    for v in mb.vertices:
+        p = bw @ v.co
+        if p.z < 1.112:
+            continue
+        for (px, py), pz in pad.items():
+            if abs(p.x - px) < 0.03 and abs(p.y - py) < 0.03 and p.z < pz + 0.005:
+                hits += 1
+                break
+    evb.to_mesh_clear()
+    return hits
+print('BODY_IN_PADS', body_hits())
 ev.to_mesh_clear()
 shot('co_D.png', (2.3, -2.5, 1.75), (0, 0, 1.05))
 shot('co_D_top.png', (0, 0, 4.2), (0, 0, 1.0), ortho=2.9)
