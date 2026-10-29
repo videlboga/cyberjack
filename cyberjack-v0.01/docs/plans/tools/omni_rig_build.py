@@ -26,8 +26,8 @@ PLATE_BOT = PIVOT_Z - PLAT_T / 2                  # 0.98
 RAIL_T = 0.035
 RAIL_Z = PLATE_BOT - RAIL_T / 2                   # верх рельса = низ плиты
 MODULE_Z = PIVOT_TOP + 0.05                        # плоскость штанг: над матрасом
-PIVOT_X = {'arm': -0.62, 'leg': -0.05}             # опора у плеча / у бедра
-PIVOT_Y = {'arm': 0.24, 'leg': 0.07}   # опора стоит там, где лежит конечность в «сведено»
+PIVOT_X = {'arm': -0.52, 'leg': 0.62}             # опора у плеча / у бедра
+PIVOT_Y = {'arm': 0.30, 'leg': 0.30}   # опора стоит там, где лежит конечность в «сведено»
 RAIL_INSET = 0.06
 RX = PLAT_L / 2 - RAIL_INSET - 0.03
 RY = PLAT_W / 2 - RAIL_INSET - 0.03
@@ -188,11 +188,11 @@ def holed_slab(name, w, h, t, z, holes, material, bone, step=0.0, step_d=0.015):
 
 
 # --- пазы: узкие сквозные каналы у положения «сведено» (матрас остаётся целым)
-SLOT_SPEC = [   # (tag, x0, x1, y, ширина) — канал вокруг опоры и сведённой конечности
-    ('arm_L', -0.72, 0.12, 0.24, 0.18),
-    ('arm_R', -0.72, 0.12, -0.24, 0.18),
-    ('leg_L', -0.14, 0.86, 0.07, 0.15),
-    ('leg_R', -0.14, 0.86, -0.07, 0.15),
+SLOT_SPEC = [   # (tag, x0, x1, y, ширина) — канал вокруг опоры на краю стола
+    ('arm_L', -0.80, -0.20, 0.30, 0.16),
+    ('arm_R', -0.80, -0.20, -0.30, 0.16),
+    ('leg_L', 0.30, 0.90, 0.30, 0.16),
+    ('leg_R', 0.30, 0.90, -0.30, 0.16),
 ]
 SLOT_GEOM = {}
 for tag, x0, x1, y, w in SLOT_SPEC:
@@ -284,7 +284,7 @@ def arch(nm, x, R=0.27, steps=10, r=0.019):
 
 
 # только грудная арка: нижняя перекрывала разведение ног
-arch('arch_chest', -0.30, 0.27)
+arch('arch_chest', -0.30, 0.305)
 
 # угловые бамперы платформы
 for sx in (-1, 1):
@@ -324,8 +324,8 @@ def build_module(tag, y0, x0, s=1):
     put(box(f'head_{tag}', (0.055, 0.038, 0.075), (0, 1.0, 0.905), M_BODY, f'head_{tag}'))
     # обруч стоит вертикально: ось кольца вдоль X, конечность проходит сквозь него
     put(cuff(f'cuff_{tag}', (0, 1.0, 1.0),
-             r_out=0.118 if tag.startswith('leg') else 0.090,
-             r_in=0.086 if tag.startswith('leg') else 0.063,
+             r_out=0.140 if tag.startswith('leg') else 0.100,
+             r_in=0.112 if tag.startswith('leg') else 0.072,
              width=0.075 if tag.startswith('leg') else 0.060,
              bone=f'head_{tag}', group=g))
     # замок кольца: петля с одной стороны, язычок с другой

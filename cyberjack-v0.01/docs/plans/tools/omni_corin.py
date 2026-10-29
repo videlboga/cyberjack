@@ -159,8 +159,8 @@ def place(tag, target, limb_dir=None):
     """опора у тела: штанга поворачивается и выдвигается наружу, стойка поднимает кольцо"""
     s = 1 if tag.endswith('_L') else -1
     kind = 'arm' if tag.startswith('arm') else 'leg'
-    x0 = -0.62 if kind == 'arm' else -0.05
-    y0 = s * (0.24 if kind == 'arm' else 0.07)
+    x0 = -0.52 if kind == 'arm' else 0.62
+    y0 = s * 0.30
     dx, dy = target[0] - x0, target[1] - y0
     r = max(0.05, math.hypot(dx, dy))
     pbb = rig.pose.bones[f'boom_{tag}']
