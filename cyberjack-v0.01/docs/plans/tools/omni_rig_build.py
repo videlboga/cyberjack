@@ -307,13 +307,13 @@ def build_module(tag, y0, x0):
     # проушина под обручем: не перекрывает проём, кольцо сверху
     put(box(f'head_{tag}', (0.055, 0.038, 0.075), (0, 1.0, 0.905), M_BODY, f'head_{tag}'))
     # обруч стоит вертикально: ось кольца вдоль X, конечность проходит сквозь него
-    put(cuff(f'cuff_{tag}', (0, 1.0, 1.0),
-             r_out=0.095 if tag.startswith('leg') else 0.072,
-             r_in=0.062 if tag.startswith('leg') else 0.048,
-             width=0.070 if tag.startswith('leg') else 0.055,
+    put(cuff(f'cuff_{tag}', (0, 1.0, 0.905),
+             r_out=0.118 if tag.startswith('leg') else 0.090,
+             r_in=0.086 if tag.startswith('leg') else 0.063,
+             width=0.075 if tag.startswith('leg') else 0.060,
              bone=f'head_{tag}', group=g))
     # замок кольца: петля с одной стороны, язычок с другой
-    put(box(f'latch_{tag}', (0.030, 0.028, 0.05), (0, 1.0 - 0.070, 1.0), M_ACC, f'head_{tag}'))
+    put(box(f'latch_{tag}', (0.030, 0.028, 0.05), (0, 1.0 - 0.080, 0.905), M_ACC, f'head_{tag}'))
     return g
 
 
