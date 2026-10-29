@@ -61,29 +61,25 @@ def reg(o, material, bone):
     return o
 
 
-def cuff(name, center, r_out=0.070, r_in=0.048, width=0.050, bone='head', material=None, group=None):
-    """браслет без булевых операций: широкий тор-обойма + мягкое уплотнение внутри.
-    Ось — вдоль X (конечность проходит сквозь)."""
+def cuff(name, center, r_out=0.070, r_in=0.050, width=0.050, bone='head', material=None, group=None):
+    """браслет-обойма: пояс из сегментов вокруг конечности + мягкое уплотнение внутри.
+    Ось обоймы — вдоль X (конечность проходит сквозь)."""
     r_mid = (r_out + r_in) / 2
-    tube = (r_out - r_in) / 2
-    bpy.ops.mesh.primitive_torus_add(major_radius=r_mid, minor_radius=tube,
-                                     location=center, rotation=(0, math.radians(90), 0),
-                                     major_segments=32, minor_segments=12)
-    o = bpy.context.object
-    o.name = name
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    reg(o, material or M_MET, bone)
-    # мягкая прокладка изнутри
-    bpy.ops.mesh.primitive_torus_add(major_radius=r_mid * 0.94, minor_radius=tube * 0.62,
-                                     location=center, rotation=(0, math.radians(90), 0),
-                                     major_segments=28, minor_segments=8)
-    pad = bpy.context.object
-    pad.name = f'{name}_pad'
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    reg(pad, M_PAD, bone)
-    if group is not None:          # иначе уплотнение остаётся в мировых координатах
-        pad.parent = group
-    return o
+    th = (r_out - r_in)
+    n = 20
+    made = []
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        made.append(box(f'{name}_s{i}', (width, 2 * math.pi * r_mid / n * 1.12, th),
+                        (center[0], center[1] + r_mid * math.cos(a), center[2] + r_mid * math.sin(a)),
+                        material or M_MET, bone, rot=(a, 0, 0)))
+        made.append(box(f'{name}_p{i}', (width * 0.92, 2 * math.pi * r_in / n * 1.10, th * 0.55),
+                        (center[0], center[1] + r_in * math.cos(a), center[2] + r_in * math.sin(a)),
+                        M_PAD, bone, rot=(a, 0, 0)))
+    if group is not None:
+        for o in made:
+            o.parent = group
+    return made[0]
 
 
 def box(name, size, loc, material, bone, rot=(0, 0, 0)):
@@ -154,14 +150,27 @@ cyl('col_handle', 0.020, 0.14, (0.20, 0, 0.66), M_ACC, 'column', rot=(0, math.ra
 box('col_scale_plate', (0.03, 0.10, 0.24), (0.062, 0, 0.80), M_BODY, 'column')
 
 # === платформа с прорезями ===================================================
-def holed_slab(name, w, h, t, z, holes, material, bone, chamfer=0.0):
-    """плита с вырезами; chamfer — фаска по кромке выреза (выемка под штангу)"""
+def holed_slab(name, w, h, t, z, holes, material, bone, step=0.0, step_d=0.015):
+    """плита с вырезами; step — ширина уступа по верху (фрезерованная выемка под штангу)"""
     bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, z))
     o = bpy.context.object
     o.name = name
     o.scale = (w, h, t)
     bpy.ops.object.transform_apply(location=True, scale=True)
     for hx, hy, hw, hh in holes:
+        # 1) уступ по верху: широкая выемка глубиной step_d
+        if step > 0:
+            bpy.ops.mesh.primitive_cube_add(size=1, location=(hx, hy, z + t / 2 - step_d / 2))
+            up = bpy.context.object
+            up.scale = (hw + step, hh + step, step_d)
+            bpy.ops.object.transform_apply(location=True, scale=True)
+            m3 = o.modifiers.new('step', 'BOOLEAN')
+            m3.operation = 'DIFFERENCE'
+            m3.object = up
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.modifier_apply(modifier='step')
+            bpy.data.objects.remove(up, do_unlink=True)
+        # 2) сквозной паз
         bpy.ops.mesh.primitive_cube_add(size=1, location=(hx, hy, z))
         cut = bpy.context.object
         cut.scale = (hw, hh, t * 3)
@@ -172,20 +181,6 @@ def holed_slab(name, w, h, t, z, holes, material, bone, chamfer=0.0):
         bpy.context.view_layer.objects.active = o
         bpy.ops.object.modifier_apply(modifier='cut')
         bpy.data.objects.remove(cut, do_unlink=True)
-        if chamfer > 0:
-            # выемка-фаска: срезанный сверху объём по периметру выреза
-            bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=0.0, radius2=1.0, depth=1.0,
-                                           location=(hx, hy, z + t / 2 + chamfer / 2),
-                                           rotation=(0, 0, math.radians(45)))
-            ch = bpy.context.object
-            ch.scale = (max(hw, hh) / 1.41 + chamfer, max(hw, hh) / 1.41 + chamfer, 1)
-            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-            m2 = o.modifiers.new('cham', 'BOOLEAN')
-            m2.operation = 'DIFFERENCE'
-            m2.object = ch
-            bpy.context.view_layer.objects.active = o
-            bpy.ops.object.modifier_apply(modifier='cham')
-            bpy.data.objects.remove(ch, do_unlink=True)
     return reg(o, material, bone)
 
 
@@ -198,7 +193,27 @@ HOLES_WIDE = [(hx, hy, hw + 0.012, hh + 0.012) for hx, hy, hw, hh in HOLES]
 plate = holed_slab('platform', PLAT_L, PLAT_W, PLAT_T, PIVOT_Z, HOLES_WIDE, M_BODY, 'roll')
 # матрас тоже с прорезями (иначе штанга идёт сквозь него), с фаской-выемкой 8 мм
 holed_slab('mattress', PLAT_L - 0.04, PLAT_W - 0.04, MAT_T,
-           PIVOT_TOP - MAT_T / 2, HOLES_WIDE, M_PAD, 'roll')
+           PIVOT_TOP - MAT_T / 2, HOLES_WIDE, M_PAD, 'roll', step=0.050)
+
+# окантовка пазов: узкий буртик заподлицо с матрасом — паз читается как фрезерованный
+def slot_lip(nm, x0, x1, y, w, lip=0.014, h=0.010):
+    xc = (x0 + x1) / 2
+    L = (x1 - x0) + 2 * lip
+    for sy in (-1, 1):
+        box(f'{nm}_lip_y{sy}', (L, lip, h),
+            (xc, y + sy * (w / 2 + lip / 2), PIVOT_TOP - h / 2 + 0.001), M_DARK, 'roll')
+    for sx in (-1, 1):
+        box(f'{nm}_lip_x{sx}', (lip, w + 2 * lip, h),
+            (xc + sx * (L / 2 - lip / 2), y, PIVOT_TOP - h / 2 + 0.001), M_DARK, 'roll')
+    # тёмная гильза паза: даёт глубину, чтобы прорезь читалась сверху
+    box(f'{nm}_liner', (x1 - x0, w, 0.018), (xc, y, PIVOT_Z), M_DARK, 'roll')
+
+
+for nm, xx0, xx1, yy, ww in (('slot_arm_L', ARM_X0, ARM_X1, ARM_Y, SLOT_W + 0.012),
+                             ('slot_arm_R', ARM_X0, ARM_X1, -ARM_Y, SLOT_W + 0.012),
+                             ('slot_leg_L', LEG_X0, LEG_X1, LEG_Y, SLOT_W + 0.012),
+                             ('slot_leg_R', LEG_X0, LEG_X1, -LEG_Y, SLOT_W + 0.012)):
+    slot_lip(nm, xx0, xx1, yy, ww)
 
 # периметральный рельс: верх = низ плиты, плюс стойки-подвесы к плите
 for nm, size, loc in (
@@ -293,9 +308,9 @@ def build_module(tag, y0, x0):
     put(box(f'head_{tag}', (0.055, 0.038, 0.075), (0, 1.0, 0.905), M_BODY, f'head_{tag}'))
     # обруч стоит вертикально: ось кольца вдоль X, конечность проходит сквозь него
     put(cuff(f'cuff_{tag}', (0, 1.0, 1.0),
-             r_out=0.070 if tag.startswith('leg') else 0.058,
-             r_in=0.050 if tag.startswith('leg') else 0.040,
-             width=0.055 if tag.startswith('leg') else 0.045,
+             r_out=0.095 if tag.startswith('leg') else 0.072,
+             r_in=0.062 if tag.startswith('leg') else 0.048,
+             width=0.070 if tag.startswith('leg') else 0.055,
              bone=f'head_{tag}', group=g))
     # замок кольца: петля с одной стороны, язычок с другой
     put(box(f'latch_{tag}', (0.030, 0.028, 0.05), (0, 1.0 - 0.070, 1.0), M_ACC, f'head_{tag}'))
