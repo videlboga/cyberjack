@@ -156,25 +156,17 @@ print('ABDUCT leg', LEG, 'arm', ARM)
 
 # --- крепления по суставам ---------------------------------------------------
 def place(tag, target, limb_dir=None):
-    x, y, z = target
-    RX = 1.90 / 2 - 0.06 - 0.03
-    RY = 0.64 / 2 - 0.06 - 0.03
-    MODULE_Z = 1.11 - 0.05
-    # каретка всегда на боковом рельсе своей стороны — без перескоков
-    side = 1 if tag.endswith('_L') else -1
-    cx2 = max(-RX, min(RX, x))
-    cy2 = side * RY
-    pbc = rig.pose.bones[f'car_{tag}']
-    rest = rig.data.bones[f'car_{tag}'].head_local
-    pbc.location = (cx2 - rest.x, cy2 - rest.y, 0)
-    bpy.context.view_layer.update()
+    """опора у тела: штанга поворачивается и выдвигается наружу, стойка поднимает кольцо"""
+    s = 1 if tag.endswith('_L') else -1
+    x0 = -0.62 if tag.startswith('arm') else -0.05
+    y0 = s * 0.10
+    dx, dy = target[0] - x0, target[1] - y0
+    r = max(0.05, math.hypot(dx, dy))
     pbb = rig.pose.bones[f'boom_{tag}']
-    vec = Vector((x - cx2, y - cy2, 0))
     pbb.rotation_mode = 'XYZ'
-    pbb.rotation_euler = (0, 0, math.atan2(vec.y, vec.x) - math.atan2(1, 0))
-    pbb.scale = (1, max(0.02, vec.length), 1)
-    pbp = rig.pose.bones[f'post_{tag}']
-    pbp.scale = (1, max(0.05, z - MODULE_Z), 1)   # плоскость штанг = столешница - 50 мм
+    pbb.rotation_euler = (0, 0, math.atan2(-dx * s, dy * s))
+    pbb.scale = (1, r, 1)
+    rig.pose.bones[f'post_{tag}'].scale = (1, max(0.05, target[2] - 1.06), 1)
     if limb_dir is not None and limb_dir.length > 1e-6:
         pbh = rig.pose.bones[f'head_{tag}']
         pbh.rotation_mode = 'XYZ'
