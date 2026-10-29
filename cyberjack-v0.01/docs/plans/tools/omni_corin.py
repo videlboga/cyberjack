@@ -45,6 +45,22 @@ for nm in ('c_foot_ik.l', 'c_foot_ik.r', 'c_hand_ik.l', 'c_hand_ik.r'):
 bpy.context.view_layer.update()
 print('APPENDED', [o.name for o in new])
 
+# служебные виджеты ARP (cs_*) — это формы костей, а не геометрия: убрать из рендера
+hidden = 0
+for o in bpy.data.objects:
+    if o.type == 'MESH' and o.name.startswith('cs_'):
+        o.hide_render = True
+        o.hide_viewport = True
+        hidden += 1
+print('HIDDEN_WIDGETS', hidden)
+# всё, что приехало из чужого файла и не привязано к ригам — удалить (виджеты, заготовки)
+for o in list(bpy.data.objects):
+    if o.type != 'MESH':
+        continue
+    if o.name in ('OMNI_1', 'Body-footshape-5'):
+        continue
+    bpy.data.objects.remove(o, do_unlink=True)   # всё чужое, включая приехавшие аксессуары
+print('CLEANED')
 # спрятать лишние тела, если они приехали связями
 for o in bpy.data.objects:
     if o.type == 'MESH' and o.name.startswith('Body-footshape') and o.name != 'Body-footshape-5':

@@ -61,6 +61,31 @@ def reg(o, material, bone):
     return o
 
 
+def cuff(name, center, r_out=0.070, r_in=0.048, width=0.050, bone='head', material=None, group=None):
+    """браслет без булевых операций: широкий тор-обойма + мягкое уплотнение внутри.
+    Ось — вдоль X (конечность проходит сквозь)."""
+    r_mid = (r_out + r_in) / 2
+    tube = (r_out - r_in) / 2
+    bpy.ops.mesh.primitive_torus_add(major_radius=r_mid, minor_radius=tube,
+                                     location=center, rotation=(0, math.radians(90), 0),
+                                     major_segments=32, minor_segments=12)
+    o = bpy.context.object
+    o.name = name
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    reg(o, material or M_MET, bone)
+    # мягкая прокладка изнутри
+    bpy.ops.mesh.primitive_torus_add(major_radius=r_mid * 0.94, minor_radius=tube * 0.62,
+                                     location=center, rotation=(0, math.radians(90), 0),
+                                     major_segments=28, minor_segments=8)
+    pad = bpy.context.object
+    pad.name = f'{name}_pad'
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    reg(pad, M_PAD, bone)
+    if group is not None:          # иначе уплотнение остаётся в мировых координатах
+        pad.parent = group
+    return o
+
+
 def box(name, size, loc, material, bone, rot=(0, 0, 0)):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc, rotation=rot)
     o = bpy.context.object
@@ -129,20 +154,17 @@ cyl('col_handle', 0.020, 0.14, (0.20, 0, 0.66), M_ACC, 'column', rot=(0, math.ra
 box('col_scale_plate', (0.03, 0.10, 0.24), (0.062, 0, 0.80), M_BODY, 'column')
 
 # === платформа с прорезями ===================================================
-def plate_with_slots():
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, PIVOT_Z))
+def holed_slab(name, w, h, t, z, holes, material, bone, chamfer=0.0):
+    """плита с вырезами; chamfer — фаска по кромке выреза (выемка под штангу)"""
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, z))
     o = bpy.context.object
-    o.name = 'platform'
-    o.scale = (PLAT_L, PLAT_W, PLAT_T)
+    o.name = name
+    o.scale = (w, h, t)
     bpy.ops.object.transform_apply(location=True, scale=True)
-    holes = [((ARM_X0 + ARM_X1) / 2, ARM_Y, ARM_X1 - ARM_X0, SLOT_W),
-             ((ARM_X0 + ARM_X1) / 2, -ARM_Y, ARM_X1 - ARM_X0, SLOT_W),
-             ((LEG_X0 + LEG_X1) / 2, LEG_Y, LEG_X1 - LEG_X0, SLOT_W),
-             ((LEG_X0 + LEG_X1) / 2, -LEG_Y, LEG_X1 - LEG_X0, SLOT_W)]
     for hx, hy, hw, hh in holes:
-        bpy.ops.mesh.primitive_cube_add(size=1, location=(hx, hy, PIVOT_Z))
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(hx, hy, z))
         cut = bpy.context.object
-        cut.scale = (hw, hh, PLAT_T * 2)
+        cut.scale = (hw, hh, t * 3)
         bpy.ops.object.transform_apply(location=True, scale=True)
         m = o.modifiers.new('cut', 'BOOLEAN')
         m.operation = 'DIFFERENCE'
@@ -150,11 +172,33 @@ def plate_with_slots():
         bpy.context.view_layer.objects.active = o
         bpy.ops.object.modifier_apply(modifier='cut')
         bpy.data.objects.remove(cut, do_unlink=True)
-    return reg(o, M_BODY, 'roll')
+        if chamfer > 0:
+            # выемка-фаска: срезанный сверху объём по периметру выреза
+            bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=0.0, radius2=1.0, depth=1.0,
+                                           location=(hx, hy, z + t / 2 + chamfer / 2),
+                                           rotation=(0, 0, math.radians(45)))
+            ch = bpy.context.object
+            ch.scale = (max(hw, hh) / 1.41 + chamfer, max(hw, hh) / 1.41 + chamfer, 1)
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            m2 = o.modifiers.new('cham', 'BOOLEAN')
+            m2.operation = 'DIFFERENCE'
+            m2.object = ch
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.modifier_apply(modifier='cham')
+            bpy.data.objects.remove(ch, do_unlink=True)
+    return reg(o, material, bone)
 
 
-plate_with_slots()
-box('mattress', (PLAT_L - 0.04, PLAT_W - 0.04, MAT_T), (0, 0, PIVOT_TOP - MAT_T / 2), M_PAD, 'roll')
+HOLES = [((ARM_X0 + ARM_X1) / 2, ARM_Y, ARM_X1 - ARM_X0, SLOT_W),
+         ((ARM_X0 + ARM_X1) / 2, -ARM_Y, ARM_X1 - ARM_X0, SLOT_W),
+         ((LEG_X0 + LEG_X1) / 2, LEG_Y, LEG_X1 - LEG_X0, SLOT_W),
+         ((LEG_X0 + LEG_X1) / 2, -LEG_Y, LEG_X1 - LEG_X0, SLOT_W)]
+HOLES_WIDE = [(hx, hy, hw + 0.012, hh + 0.012) for hx, hy, hw, hh in HOLES]
+
+plate = holed_slab('platform', PLAT_L, PLAT_W, PLAT_T, PIVOT_Z, HOLES_WIDE, M_BODY, 'roll')
+# матрас тоже с прорезями (иначе штанга идёт сквозь него), с фаской-выемкой 8 мм
+holed_slab('mattress', PLAT_L - 0.04, PLAT_W - 0.04, MAT_T,
+           PIVOT_TOP - MAT_T / 2, HOLES_WIDE, M_PAD, 'roll')
 
 # периметральный рельс: верх = низ плиты, плюс стойки-подвесы к плите
 for nm, size, loc in (
@@ -248,11 +292,13 @@ def build_module(tag, y0, x0):
     # проушина под обручем: не перекрывает проём, кольцо сверху
     put(box(f'head_{tag}', (0.055, 0.038, 0.075), (0, 1.0, 0.905), M_BODY, f'head_{tag}'))
     # обруч стоит вертикально: ось кольца вдоль X, конечность проходит сквозь него
-    put(torus(f'ring_{tag}', 0.075, 0.016, (0, 1.0, 1.0), M_ACC, f'head_{tag}',
-              rot=(0, math.radians(90), 0)))
+    put(cuff(f'cuff_{tag}', (0, 1.0, 1.0),
+             r_out=0.070 if tag.startswith('leg') else 0.058,
+             r_in=0.050 if tag.startswith('leg') else 0.040,
+             width=0.055 if tag.startswith('leg') else 0.045,
+             bone=f'head_{tag}', group=g))
     # замок кольца: петля с одной стороны, язычок с другой
-    put(cyl(f'ring_hinge_{tag}', 0.010, 0.05, (0, 1.0 - 0.075, 1.0), M_MET, f'head_{tag}', seg=10))
-    put(box(f'ring_latch_{tag}', (0.02, 0.05, 0.03), (0, 1.0 + 0.075, 1.0), M_ACC, f'head_{tag}'))
+    put(box(f'latch_{tag}', (0.030, 0.028, 0.05), (0, 1.0 - 0.070, 1.0), M_ACC, f'head_{tag}'))
     return g
 
 
