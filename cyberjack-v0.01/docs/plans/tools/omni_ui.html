@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>ОМНИ‑1 — позы конечностей</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0; font-family: var(--app-font, system-ui, sans-serif); color: var(--foreground, #111);
+         background: transparent; display:flex; gap:14px; align-items:flex-start; }
+  canvas { display:block; border-radius:10px; border:1px solid var(--border, #d5d9dd); cursor:grab; }
+  canvas:active { cursor:grabbing; }
+  .panel { min-width: 260px; max-width: 300px; }
+  h1 { font-size:15px; margin:0 0 4px; font-weight:600; }
+  .hint { font-size:11px; color: var(--muted-foreground, #6b7280); margin:0 0 10px; }
+  .grp { border:1px solid var(--border,#d5d9dd); border-radius:8px; padding:8px 10px; margin-bottom:8px; }
+  .grp h2 { font-size:12px; margin:0 0 6px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+            color: var(--muted-foreground,#6b7280); }
+  .row { display:flex; align-items:center; gap:6px; margin:4px 0; font-size:12px; }
+  .row label { width:56px; flex:none; }
+  input[type=range] { flex:1; min-width:0; accent-color:#2f9e97; }
+  .val { width:44px; text-align:right; font-variant-numeric: tabular-nums; color: var(--muted-foreground,#6b7280); }
+  .bad { color:#c0392b; font-weight:600; }
+  .ok { color:#2f9e97; font-weight:600; }
+  .foot { font-size:11px; color: var(--muted-foreground,#6b7280); margin-top:8px; line-height:1.45; }
+</style>
+</head>
+<body>
+<canvas id="c" width="880" height="560"></canvas>
+
+<div class="panel">
+  <h1>Позы конечностей</h1>
+  <p class="hint">Тяни мышью — поворот камеры. Колесо — масштаб.</p>
+  <div id="groups"></div>
+  <div class="grp">
+    <h2>Проверка</h2>
+    <div class="row"><label>в пазу</label><span id="chk" class="ok">да</span></div>
+    <div class="foot">Паз считается по ходу штанги: если кольцо выходит за паз, каретка подсвечивается красным.</div>
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+cv.width = 880 * DPR; cv.height = 560 * DPR;
+cv.style.width = '880px'; cv.style.height = '560px';
+ctx.scale(DPR, DPR);
+
+// ---------- геометрия стола (м) ----------
+const TABLE = { L: 1.90, W: 0.64, T: 0.13 };
+const TOP = 1.11, BOT = TOP - TABLE.T, RAIL = 0.92;
+const SLOTS = [
+  { id:'arm_L', x0:-0.80, x1:-0.20, y: 0.30 },
+  { id:'arm_R', x0:-0.80, x1:-0.20, y:-0.30 },
+  { id:'leg_L', x0: 0.30, x1: 0.90, y: 0.30 },
+  { id:'leg_R', x0: 0.30, x1: 0.90, y:-0.30 },
+];
+const SHOULDER = { x:-0.62, y: 0.12 };
+const HIP      = { x:-0.05, y: 0.09 };
+
+// ---------- состояние ----------
+const limbs = {
+  arm_L: { a: 8,  r: 0.58, z: 1.26 },
+  arm_R: { a:-8,  r: 0.58, z: 1.26 },
+  leg_L: { a: 4,  r: 0.82, z: 1.27 },
+  leg_R: { a:-4,  r: 0.82, z: 1.27 },
+};
+const NAMES = { arm_L:'левая рука', arm_R:'правая рука', leg_L:'левая нога', leg_R:'правая нога' };
+
+// ---------- камера ----------
+let yaw = -0.62, pitch = 0.52, zoom = 1.0, drag = null;
+
+function project(p) {
+  // поворот вокруг Z, затем наклон
+  const cy = Math.cos(yaw), sy = Math.sin(yaw);
+  let x =  p[0]*cy - p[1]*sy;
+  let y =  p[0]*sy + p[1]*cy;
+  let z =  p[2];
+  const cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const yy = y*cp - z*sp;
+  const zz = y*sp + z*cp;
+  const d = 4.2, f = 760 * zoom;
+  const k = f / (d - zz*0.55);
+  return [440 + x*k, 300 - yy*k, zz];
+}
+
+// ---------- утилиты рисования ----------
+function quad(pts, fill, stroke, lw=1) {
+  const P = pts.map(project);
+  ctx.beginPath();
+  P.forEach((p,i)=> i ? ctx.lineTo(p[0],p[1]) : ctx.moveTo(p[0],p[1]));
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+function box3(x0,x1,y0,y1,z0,z1, fill, stroke) {
+  const c = [[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
+  quad([[c[0][0],c[0][1],z1],[c[1][0],c[1][1],z1],[c[2][0],c[2][1],z1],[c[3][0],c[3][1],z1]], fill, stroke);
+  for (let i=0;i<4;i++){
+    const a=c[i], b=c[(i+1)%4];
+    quad([[a[0],a[1],z1],[b[0],b[1],z1],[b[0],b[1],z0],[a[0],a[1],z0]], shade(fill,-0.12), stroke);
+  }
+}
+function shade(hex, k) {
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  r=Math.max(0,Math.min(255,r + 255*k)); g=Math.max(0,Math.min(255,g + 255*k)); b=Math.max(0,Math.min(255,b + 255*k));
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+function line3(a, b, color, w=4) {
+  const p=project(a), q=project(b);
+  ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(q[0],q[1]);
+  ctx.strokeStyle=color; ctx.lineWidth=w; ctx.lineCap='round'; ctx.stroke();
+}
+function ring3(center, radius, axis, color, w=4) {
+  // ось кольца — единичный вектор; рисуем окружность в плоскости, ему перпендикулярной
+  const n = normalize(axis);
+  let u = normalize(cross(n, [0,0,1]));
+  if (Math.hypot(...u) < 1e-6) u = [1,0,0];
+  const v = cross(n, u);
+  ctx.beginPath();
+  for (let i=0;i<=28;i++) {
+    const t = i/28*Math.PI*2;
+    const pt = [
+      center[0] + radius*(u[0]*Math.cos(t) + v[0]*Math.sin(t)),
+      center[1] + radius*(u[1]*Math.cos(t) + v[1]*Math.sin(t)),
+      center[2] + radius*(u[2]*Math.cos(t) + v[2]*Math.sin(t)),
+    ];
+    const p = project(pt);
+    i ? ctx.lineTo(p[0],p[1]) : ctx.moveTo(p[0],p[1]);
+  }
+  ctx.strokeStyle=color; ctx.lineWidth=w; ctx.stroke();
+}
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];}
+function norm(a){const l=Math.hypot(...a)||1;return [a[0]/l,a[1]/l,a[2]/l];}
+const normalize = norm;
+
+// ---------- модель конечности ----------
+function limbPoint(id) {
+  const s = limbs[id];
+  const base = id.startsWith('arm') ? SHOULDER : HIP;
+  const sgn  = id.endsWith('_L') ? 1 : -1;
+  const a = s.a * Math.PI/180;
+  return [
+    base.x + s.r*Math.cos(a),
+    sgn * (Math.abs(base.y) + s.r*Math.sin(a)) * (id.startsWith('arm') ? 1 : 1),
+    s.z,
+  ];
+}
+function slotOf(id) {
+  // каретка стоит на месте (у края стола) — двигается только штанга
+  if (id.startsWith('arm')) return { cx: -0.52, y: id.endsWith('_L') ? 0.30 : -0.30, lim: [-0.80, -0.20] };
+  return { cx: 0.62, y: id.endsWith('_L') ? 0.30 : -0.30, lim: [0.30, 0.90] };
+}
+function SIGN(){ return 1; }
+
+// ---------- отрисовка ----------
+function draw() {
+  ctx.clearRect(0,0,880,560);
+
+  // пол
+  ctx.save();
+  for (let g=-1.2; g<=1.2; g+=0.2) {
+    line3([g,-0.9,-0.001],[g,0.9,-0.001], 'rgba(120,130,140,.12)', 1);
+    line3([-1.2,g,-0.001],[1.2,g,-0.001], 'rgba(120,130,140,.12)', 1);
+  }
+  ctx.restore();
+
+  // стол
+  box3(-TABLE.L/2, TABLE.L/2, -TABLE.W/2, TABLE.W/2, BOT, TOP, '#dfe4e7', 'rgba(70,80,90,.55)');
+
+  // пазы
+  for (const s of SLOTS) {
+    const w = 0.16;
+    quad([ [s.x0, s.y-w/2, TOP+0.0015], [s.x1, s.y-w/2, TOP+0.0015],
+           [s.x1, s.y+w/2, TOP+0.0015], [s.x0, s.y+w/2, TOP+0.0015] ],
+         'rgba(90,100,110,.55)', 'rgba(50,60,70,.7)', 1);
+  }
+
+  // тело (схематично)
+  body();
+
+  // конечности: каретка под столом, стойка, кольцо
+  for (const id of Object.keys(limbs)) {
+    const p = limbPoint(id);
+    const sl = slotOf(id);
+    const inside = sl.cx >= sl.lim[0]-0.02 && sl.cx <= sl.lim[1]+0.02;
+    const dark = inside ? '#5d666d' : '#c0392b';
+
+    // каретка под столешницей
+    box3(sl.cx-0.07, sl.cx+0.07, sl.y-0.06, sl.y+0.06, RAIL-0.045, RAIL+0.02, dark, 'rgba(30,36,42,.8)');
+
+    // стойка от каретки к кольцу
+    line3([sl.cx, sl.y, RAIL], [p[0], p[1], p[2]], '#8b949a', 5);
+
+    // кольцо на конце
+    const base = id.startsWith('arm') ? SHOULDER : HIP;
+    const sgn2 = id.endsWith('_L') ? 1 : -1;
+    const axis = norm([p[0]-base.x, p[1]-sgn2*Math.abs(base.y), 0]);   // ось конечности
+    ring3([p[0], p[1], p[2]], id.startsWith('leg')?0.14:0.10, axis.length?axis:[1,0,0], '#2f9e97', 4);
+
+    // подпись
+    const L = project([p[0], p[1], p[2]+0.13]);
+    ctx.fillStyle = inside ? 'rgba(90,100,110,.9)' : '#c0392b';
+    ctx.font = '11px system-ui';
+    ctx.fillText((id.endsWith('_L')?'L':'R') + ' ' + (id.startsWith('arm')?'рука':'нога'), L[0]-16, L[1]);
+  }
+
+  // ось стола
+  ctx.fillStyle='rgba(120,130,140,.6)'; ctx.font='11px system-ui';
+  const h = project([-TABLE.L/2, -TABLE.W/2-0.12, BOT]);
+  ctx.fillText('голова', h[0]-24, h[1]);
+
+  // проверка
+  let allIn = true;
+  for (const id of Object.keys(limbs)) {
+    const sl = slotOf(id);
+    if (!(sl.cx >= sl.lim[0]-0.02 && sl.cx <= sl.lim[1]+0.02)) allIn = false;
+  }
+  const chk = document.getElementById('chk');
+  chk.textContent = allIn ? 'да' : 'каретка вне паза';
+  chk.className = allIn ? 'ok' : 'bad';
+}
+
+function body() {
+  // торс
+  capsule([-0.72,0,TOP+0.12],[0.0,0,TOP+0.10],0.14,'#f2ded5');
+  // голова
+  const hd = project([-0.86,0,TOP+0.13]);
+  ctx.beginPath(); ctx.arc(hd[0],hd[1], 18, 0, Math.PI*2);
+  ctx.fillStyle='#f2ded5'; ctx.fill(); ctx.strokeStyle='rgba(138,97,83,.7)'; ctx.stroke();
+  // конечности
+  for (const id of Object.keys(limbs)) {
+    const p = limbPoint(id);
+    const base = id.startsWith('arm') ? SHOULDER : HIP;
+    const sgn = id.endsWith('_L') ? 1 : -1;
+    capsule([base.x, sgn*Math.abs(base.y), TOP+0.14], p, id.startsWith('leg')?0.075:0.055, '#f2ded5');
+  }
+}
+function capsule(a,b,r,color) {
+  const axis = norm([b[0]-a[0], b[1]-a[1], b[2]-a[2]]);
+  let u = norm(cross(axis,[0,0,1])); if (Math.hypot(...u)<1e-6) u=[1,0,0];
+  const v = cross(axis,u);
+  const P=[];
+  for (let i=0;i<16;i++){ const t=i/16*Math.PI*2;
+    P.push(project([a[0]+r*(u[0]*Math.cos(t)+v[0]*Math.sin(t)), a[1]+r*(u[1]*Math.cos(t)+v[1]*Math.sin(t)), a[2]+r*(u[2]*Math.cos(t)+v[2]*Math.sin(t))]));
+  }
+  const Q=[];
+  for (let i=0;i<16;i++){ const t=i/16*Math.PI*2;
+    Q.push(project([b[0]+r*(u[0]*Math.cos(t)+v[0]*Math.sin(t)), b[1]+r*(u[1]*Math.cos(t)+v[1]*Math.sin(t)), b[2]+r*(u[2]*Math.cos(t)+v[2]*Math.sin(t))]));
+  }
+  ctx.beginPath();
+  [...P,...Q].forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+  ctx.closePath(); ctx.fillStyle=color; ctx.fill(); ctx.strokeStyle='rgba(138,97,83,.55)'; ctx.lineWidth=1; ctx.stroke();
+  line3(a,b,'rgba(138,97,83,.5)',1);
+}
+
+// ---------- контролы ----------
+const host = document.getElementById('groups');
+for (const id of Object.keys(limbs)) {
+  const g = document.createElement('div'); g.className='grp';
+  g.innerHTML = `<h2>${NAMES[id]}</h2>
+    <div class="row"><label>угол</label><input type="range" min="-30" max="95" step="1" value="${limbs[id].a}" data-k="a" data-id="${id}"><span class="val" id="v-${id}-a">${limbs[id].a}°</span></div>
+    <div class="row"><label>вынос</label><input type="range" min="0.15" max="1.05" step="0.01" value="${limbs[id].r}" data-k="r" data-id="${id}"><span class="val" id="v-${id}-r">${limbs[id].r.toFixed(2)}</span></div>
+    <div class="row"><label>высота</label><input type="range" min="1.15" max="1.45" step="0.01" value="${limbs[id].z}" data-k="z" data-id="${id}"><span class="val" id="v-${id}-z">${limbs[id].z.toFixed(2)}</span></div>`;
+  host.appendChild(g);
+}
+host.addEventListener('input', e => {
+  const t = e.target;
+  if (!t.dataset.k) return;
+  const id = t.dataset.id, k = t.dataset.k;
+  limbs[id][k] = parseFloat(t.value);
+  const v = document.getElementById(`v-${id}-${k}`);
+  v.textContent = k === 'a' ? `${limbs[id].a}°` : limbs[id][k].toFixed(2);
+  draw();
+});
+
+// ---------- мышь ----------
+cv.addEventListener('pointerdown', e => { drag = {x:e.clientX, y:e.clientY, yaw, pitch}; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  yaw = drag.yaw + (e.clientX - drag.x) * 0.006;
+  pitch = Math.max(0.12, Math.min(1.25, drag.pitch + (e.clientY - drag.y) * 0.004));
+  draw();
+});
+cv.addEventListener('pointerup', () => { drag = null; });
+cv.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(0.55, Math.min(1.9, zoom * (e.deltaY>0?0.94:1.06))); draw(); }, {passive:false});
+
+draw();
+</script>
+</body>
+</html>
