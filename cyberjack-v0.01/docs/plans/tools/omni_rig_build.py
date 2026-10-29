@@ -201,11 +201,10 @@ for tag, x0, x1, y, w in SLOT_SPEC:
 HOLES = [((x0 + x1) / 2, y, x1 - x0, w) for _, x0, x1, y, w in SLOT_SPEC]
 HOLES_WIDE = [(hx, hy, hw, hh) for hx, hy, hw, hh in HOLES]
 
-plate = holed_slab('platform', PLAT_L, PLAT_W, PLAT_T, PIVOT_Z, HOLES_WIDE, M_BODY, 'roll')
-holed_slab('mattress', PLAT_L - 0.04, PLAT_W - 0.04, MAT_T,
-           PIVOT_TOP - MAT_T / 2, HOLES_WIDE, M_PAD, 'roll')
-for tag, x0, x1, y, w in SLOT_SPEC:
-    print('SLOT', tag, 'x', round(x0, 2), round(x1, 2), 'y', y, 'w', w)
+# столешница без матраса: одна плита толщиной до плоскости стола 1.11
+TAB_T = PLAT_T + MAT_T                       # 0.13
+tab_z = PIVOT_TOP - TAB_T / 2
+plate = holed_slab('platform', PLAT_L, PLAT_W, TAB_T, tab_z, HOLES_WIDE, M_BODY, 'roll')
 
 # окантовка плиты
 for sy in (-1, 1):
