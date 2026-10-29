@@ -167,7 +167,7 @@ def place(tag, target, limb_dir=None):
     pbb.rotation_mode = 'XYZ'
     pbb.rotation_euler = (0, 0, math.atan2(-dx * s, dy * s))
     pbb.scale = (1, r, 1)
-    rig.pose.bones[f'post_{tag}'].scale = (1, max(0.05, target[2] - 1.16), 1)
+    rig.pose.bones[f'post_{tag}'].scale = (1, max(0.05, target[2] - 0.92), 1)
     if limb_dir is not None and limb_dir.length > 1e-6:
         pbh = rig.pose.bones[f'head_{tag}']
         pbh.rotation_mode = 'XYZ'

@@ -25,7 +25,7 @@ PIVOT_TOP = PIVOT_Z + PLAT_T / 2 + MAT_T          # 1.11 — плоскость 
 PLATE_BOT = PIVOT_Z - PLAT_T / 2                  # 0.98
 RAIL_T = 0.035
 RAIL_Z = PLATE_BOT - RAIL_T / 2                   # верх рельса = низ плиты
-MODULE_Z = PIVOT_TOP + 0.05                        # плоскость штанг: над матрасом
+MODULE_Z = PIVOT_Z - 0.10                          # каретки под столешницей, в паз идёт стойка
 PIVOT_X = {'arm': -0.52, 'leg': 0.62}             # опора у плеча / у бедра
 PIVOT_Y = {'arm': 0.30, 'leg': 0.30}   # опора стоит там, где лежит конечность в «сведено»
 RAIL_INSET = 0.06
@@ -654,7 +654,7 @@ def rod_in_slot():
             continue
         p = mw @ me.vertices[i].co
         x0, x1, y, w = SLOT_GEOM[tag]
-        if not (PIVOT_Z - 0.10 < p.z < PIVOT_TOP - 0.0015):
+        if not (PIVOT_Z - 0.045 < p.z < PIVOT_TOP - 0.0015):
             continue
         inside = (x0 - 0.01 <= p.x <= x1 + 0.01) and (abs(p.y - y) <= w / 2 + 0.01)
         if not inside:
