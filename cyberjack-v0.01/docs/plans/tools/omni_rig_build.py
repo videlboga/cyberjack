@@ -178,19 +178,20 @@ for hy, hx0, hx1 in ((ARM_Y, ARM_X0, ARM_X1), (-ARM_Y, ARM_X0, ARM_X1),
             ((hx0 + hx1) / 2, hy + sy2 * (SLOT_W / 2 + 0.004), PIVOT_Z + PLAT_T / 2), M_MET, 'roll')
 
 # ремни фиксации тела (часть станка, не персонажа)
-def strap(nm, x, height=0.21):
-    """прижимная дуга НАД телом: две стойки у бортов + перекладина над корпусом"""
-    zc = PIVOT_TOP + height
-    box(f'{nm}_band', (0.075, PLAT_W - 0.12, 0.012), (x, 0, zc), M_DARK, 'roll')
+def strap(nm, x, bar_h=0.20):
+    """прижимная планка над телом: мягкая подушка + балка + короткие стойки у бортов"""
+    zc = PIVOT_TOP + bar_h
+    box(f'{nm}_pad', (0.10, PLAT_W - 0.16, 0.020), (x, 0, zc - 0.014), M_PAD, 'roll')
+    box(f'{nm}_bar', (0.085, PLAT_W - 0.14, 0.030), (x, 0, zc + 0.010), M_BODY, 'roll')
     for sy in (-1, 1):
-        box(f'{nm}_riser_{sy}', (0.06, 0.03, height),
-            (x, sy * (PLAT_W / 2 - 0.06), PIVOT_TOP + height / 2), M_MET, 'roll')
-        box(f'{nm}_pad_{sy}', (0.07, 0.04, 0.02), (x, sy * 0.16, zc - 0.012), M_PAD, 'roll')
-    box(f'{nm}_buckle', (0.09, 0.045, 0.022), (x, -0.05, zc + 0.008), M_ACC, 'roll')
+        box(f'{nm}_post_{sy}', (0.05, 0.028, bar_h - 0.02),
+            (x, sy * (PLAT_W / 2 - 0.055), PIVOT_TOP + (bar_h - 0.02) / 2), M_MET, 'roll')
+    box(f'{nm}_buckle', (0.10, 0.055, 0.034), (x, -0.075, zc + 0.014), M_ACC, 'roll')
+    box(f'{nm}_strap_end', (0.06, 0.09, 0.012), (x, 0.10, zc - 0.020), M_DARK, 'roll')
 
 
-strap('belt_chest', -0.34, 0.21)
-strap('belt_pelvis', 0.16, 0.19)
+strap('belt_chest', -0.34, 0.20)
+strap('belt_pelvis', 0.16, 0.18)
 
 # угловые бамперы платформы
 for sx in (-1, 1):
