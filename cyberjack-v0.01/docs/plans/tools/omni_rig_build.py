@@ -25,6 +25,7 @@ PIVOT_TOP = PIVOT_Z + PLAT_T / 2 + MAT_T          # 1.11 — плоскость 
 PLATE_BOT = PIVOT_Z - PLAT_T / 2                  # 0.98
 RAIL_T = 0.035
 RAIL_Z = PLATE_BOT - RAIL_T / 2                   # верх рельса = низ плиты
+MODULE_Z = PIVOT_TOP - 0.05                        # плоскость штанг: в пазу, 50 мм под матрасом
 RAIL_INSET = 0.06
 RX = PLAT_L / 2 - RAIL_INSET - 0.03
 RY = PLAT_W / 2 - RAIL_INSET - 0.03
@@ -283,7 +284,7 @@ for sx in (-1, 1):
 def build_module(tag, y0, x0):
     g = bpy.data.objects.new(f'g_{tag}', None)
     sc.collection.objects.link(g)
-    g.location = (x0, y0, RAIL_Z)
+    g.location = (x0, y0, MODULE_Z)
 
     def put(o):
         o.parent = g
@@ -307,13 +308,13 @@ def build_module(tag, y0, x0):
     # проушина под обручем: не перекрывает проём, кольцо сверху
     put(box(f'head_{tag}', (0.055, 0.038, 0.075), (0, 1.0, 0.905), M_BODY, f'head_{tag}'))
     # обруч стоит вертикально: ось кольца вдоль X, конечность проходит сквозь него
-    put(cuff(f'cuff_{tag}', (0, 1.0, 0.905),
+    put(cuff(f'cuff_{tag}', (0, 1.0, 1.0),
              r_out=0.118 if tag.startswith('leg') else 0.090,
              r_in=0.086 if tag.startswith('leg') else 0.063,
              width=0.075 if tag.startswith('leg') else 0.060,
              bone=f'head_{tag}', group=g))
     # замок кольца: петля с одной стороны, язычок с другой
-    put(box(f'latch_{tag}', (0.030, 0.028, 0.05), (0, 1.0 - 0.080, 0.905), M_ACC, f'head_{tag}'))
+    put(box(f'latch_{tag}', (0.030, 0.028, 0.05), (0, 1.0 - 0.080, 1.0), M_ACC, f'head_{tag}'))
     return g
 
 
@@ -348,10 +349,10 @@ bone('roll', (0, 0, PIVOT_Z), (0, 0, PIVOT_Z + 0.02), 'pitch')
 
 for tag, y0, x0 in (('arm_L', RY, -0.60), ('arm_R', -RY, -0.60),
                     ('leg_L', RY, 0.60), ('leg_R', -RY, 0.60)):
-    bone(f'car_{tag}', (x0, y0, RAIL_Z), (x0, y0 + 0.02, RAIL_Z), 'roll')
-    bone(f'boom_{tag}', (x0, y0, RAIL_Z), (x0, y0 + 1.0, RAIL_Z), f'car_{tag}')
-    bone(f'post_{tag}', (x0, y0 + 1.0, RAIL_Z), (x0, y0 + 1.0, RAIL_Z + 1.0), f'boom_{tag}')
-    bone(f'head_{tag}', (x0, y0 + 1.0, RAIL_Z + 1.0), (x0, y0 + 1.0, RAIL_Z + 1.08), f'post_{tag}')
+    bone(f'car_{tag}', (x0, y0, MODULE_Z), (x0, y0 + 0.02, MODULE_Z), 'roll')
+    bone(f'boom_{tag}', (x0, y0, MODULE_Z), (x0, y0 + 1.0, MODULE_Z), f'car_{tag}')
+    bone(f'post_{tag}', (x0, y0 + 1.0, MODULE_Z), (x0, y0 + 1.0, MODULE_Z + 1.0), f'boom_{tag}')
+    bone(f'head_{tag}', (x0, y0 + 1.0, MODULE_Z + 1.0), (x0, y0 + 1.0, MODULE_Z + 1.08), f'post_{tag}')
 bpy.ops.object.mode_set(mode='OBJECT')
 
 # === степени свободы машины (по умолчанию разрешено только своё) ============
@@ -429,7 +430,7 @@ def place(tag, target, limb_dir=None):
     pbb.scale = (1, max(0.02, vec.length), 1)
     # высота стойки
     pbp = rig.pose.bones[f'post_{tag}']
-    pbp.scale = (1, max(0.05, z - RAIL_Z), 1)
+    pbp.scale = (1, max(0.05, z - MODULE_Z), 1)
     # ось кольца — по оси конечности (кость головы вращается вокруг мировой Z)
     if limb_dir is not None and limb_dir.length > 1e-6:
         pbh = rig.pose.bones[f'head_{tag}']

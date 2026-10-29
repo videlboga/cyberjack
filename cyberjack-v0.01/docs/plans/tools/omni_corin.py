@@ -159,6 +159,7 @@ def place(tag, target, limb_dir=None):
     x, y, z = target
     RX = 1.90 / 2 - 0.06 - 0.03
     RY = 0.64 / 2 - 0.06 - 0.03
+    MODULE_Z = 1.11 - 0.05
     # каретка всегда на боковом рельсе своей стороны — без перескоков
     side = 1 if tag.endswith('_L') else -1
     cx2 = max(-RX, min(RX, x))
@@ -173,7 +174,7 @@ def place(tag, target, limb_dir=None):
     pbb.rotation_euler = (0, 0, math.atan2(vec.y, vec.x) - math.atan2(1, 0))
     pbb.scale = (1, max(0.02, vec.length), 1)
     pbp = rig.pose.bones[f'post_{tag}']
-    pbp.scale = (1, max(0.05, z - (1.02 - 0.04 - 0.0175)), 1)
+    pbp.scale = (1, max(0.05, z - MODULE_Z), 1)   # плоскость штанг = столешница - 50 мм
     if limb_dir is not None and limb_dir.length > 1e-6:
         pbh = rig.pose.bones[f'head_{tag}']
         pbh.rotation_mode = 'XYZ'
