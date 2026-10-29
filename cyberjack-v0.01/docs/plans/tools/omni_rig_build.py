@@ -206,6 +206,40 @@ TAB_T = PLAT_T + MAT_T                       # 0.13
 tab_z = PIVOT_TOP - TAB_T / 2
 plate = holed_slab('platform', PLAT_L, PLAT_W, TAB_T, tab_z, HOLES_WIDE, M_BODY, 'roll')
 
+# --- анатомическое ложе: неглубокие выемки под тело -------------------------
+def carve(obj, kind, loc, r, depth, length=None, seg=24):
+    """вырезает в столешнице ложе: глубина depth отсчитывается от плоскости стола"""
+    cz = PIVOT_TOP + r - depth
+    if kind == 'sphere':
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=(loc[0], loc[1], cz),
+                                             segments=seg, ring_count=16)
+        cut = bpy.context.object
+        cut.scale = (1.25, 1.0, 0.55)
+    else:
+        bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=length, vertices=seg,
+                                            location=(loc[0], loc[1], cz),
+                                            rotation=(0, math.radians(90), 0))
+        cut = bpy.context.object
+        cut.scale = (1, 1, 0.55)          # приплюснутый желоб
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    m = obj.modifiers.new('carve', 'BOOLEAN')
+    m.operation = 'DIFFERENCE'
+    m.object = cut
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier='carve')
+    bpy.data.objects.remove(cut, do_unlink=True)
+
+
+carve(plate, 'sphere', (-0.79, 0.0), 0.105, 0.030)          # затылок
+carve(plate, 'cyl', (-0.35, 0.0), 0.165, 0.050, 0.78)       # спина
+carve(plate, 'cyl', (-0.34, 0.20), 0.052, 0.028, 0.72)      # плечо/рука L
+carve(plate, 'cyl', (-0.34, -0.20), 0.052, 0.028, 0.72)     # плечо/рука R
+carve(plate, 'sphere', (-0.02, 0.0), 0.135, 0.035)          # таз
+carve(plate, 'cyl', (0.36, 0.09), 0.070, 0.032, 0.92)       # нога L
+carve(plate, 'cyl', (0.36, -0.09), 0.070, 0.032, 0.92)      # нога R
+carve(plate, 'sphere', (0.80, 0.0), 0.075, 0.022)           # опора стоп
+print('CARVE ok')
+
 # окантовка плиты
 for sy in (-1, 1):
     box(f'plat_edge_{sy}', (PLAT_L, 0.02, PLAT_T * 0.9), (0, sy * (PLAT_W / 2 - 0.01), PIVOT_Z),
