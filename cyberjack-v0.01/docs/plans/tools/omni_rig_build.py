@@ -78,6 +78,20 @@ def cyl(name, r, h, loc, material, bone, rot=(0, 0, 0), seg=24):
     return reg(o, material, bone)
 
 
+def bar(name, p1, p2, r, material, bone, seg=12):
+    """труба между двумя точками"""
+    p1, p2 = Vector(p1), Vector(p2)
+    d = p2 - p1
+    bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=d.length, vertices=seg,
+                                        location=(p1 + p2) / 2)
+    o = bpy.context.object
+    o.name = name
+    o.rotation_mode = 'QUATERNION'
+    o.rotation_quaternion = d.to_track_quat('Z', 'Y')
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    return reg(o, material, bone)
+
+
 def torus(name, R, r, loc, material, bone, rot=(0, 0, 0)):
     bpy.ops.mesh.primitive_torus_add(major_radius=R, minor_radius=r, location=loc, rotation=rot,
                                      major_segments=32, minor_segments=10)
@@ -178,20 +192,25 @@ for hy, hx0, hx1 in ((ARM_Y, ARM_X0, ARM_X1), (-ARM_Y, ARM_X0, ARM_X1),
             ((hx0 + hx1) / 2, hy + sy2 * (SLOT_W / 2 + 0.004), PIVOT_Z + PLAT_T / 2), M_MET, 'roll')
 
 # ремни фиксации тела (часть станка, не персонажа)
-def strap(nm, x, bar_h=0.20):
-    """прижимная планка над телом: мягкая подушка + балка + короткие стойки у бортов"""
-    zc = PIVOT_TOP + bar_h
-    box(f'{nm}_pad', (0.10, PLAT_W - 0.16, 0.020), (x, 0, zc - 0.014), M_PAD, 'roll')
-    box(f'{nm}_bar', (0.085, PLAT_W - 0.14, 0.030), (x, 0, zc + 0.010), M_BODY, 'roll')
+def arch(nm, x, R=0.27, steps=10, r=0.019):
+    """металлическая полукруглая арка над корпусом: труба по дуге + пятки у бортов"""
+    pts = []
+    for i in range(steps + 1):
+        a = math.radians(4 + 172 * i / steps)
+        pts.append((x, R * math.cos(a), PIVOT_TOP + R * math.sin(a)))
+    for i in range(steps):
+        bar(f'{nm}_arc{i}', pts[i], pts[i + 1], r, M_MET, 'roll', seg=10)
     for sy in (-1, 1):
-        box(f'{nm}_post_{sy}', (0.05, 0.028, bar_h - 0.02),
-            (x, sy * (PLAT_W / 2 - 0.055), PIVOT_TOP + (bar_h - 0.02) / 2), M_MET, 'roll')
-    box(f'{nm}_buckle', (0.10, 0.055, 0.034), (x, -0.075, zc + 0.014), M_ACC, 'roll')
-    box(f'{nm}_strap_end', (0.06, 0.09, 0.012), (x, 0.10, zc - 0.020), M_DARK, 'roll')
+        box(f'{nm}_foot_{sy}', (0.07, 0.06, 0.03),
+            (x, sy * R * 0.985, PIVOT_TOP + 0.015), M_DARK, 'roll')
+        cyl(f'{nm}_bolt_{sy}', 0.012, 0.02, (x, sy * R * 0.985, PIVOT_TOP + 0.038), M_MET, 'roll', seg=8)
+    # мягкая накладка под аркой и замок сверху
+    box(f'{nm}_pad', (0.10, 0.17, 0.018), (x, 0, PIVOT_TOP + R - 0.035), M_PAD, 'roll')
+    box(f'{nm}_latch', (0.055, 0.06, 0.03), (x, 0.10, PIVOT_TOP + R - 0.012), M_ACC, 'roll')
 
 
-strap('belt_chest', -0.34, 0.20)
-strap('belt_pelvis', 0.16, 0.18)
+# только грудная арка: нижняя перекрывала разведение ног
+arch('arch_chest', -0.30, 0.27)
 
 # угловые бамперы платформы
 for sx in (-1, 1):
