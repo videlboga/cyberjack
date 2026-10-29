@@ -230,14 +230,33 @@ def carve(obj, kind, loc, r, depth, length=None, seg=24):
     bpy.data.objects.remove(cut, do_unlink=True)
 
 
-carve(plate, 'sphere', (-0.79, 0.0), 0.105, 0.030)          # затылок
-carve(plate, 'cyl', (-0.35, 0.0), 0.165, 0.050, 0.78)       # спина
-carve(plate, 'cyl', (-0.34, 0.20), 0.052, 0.028, 0.72)      # плечо/рука L
-carve(plate, 'cyl', (-0.34, -0.20), 0.052, 0.028, 0.72)     # плечо/рука R
-carve(plate, 'sphere', (-0.02, 0.0), 0.135, 0.035)          # таз
-carve(plate, 'cyl', (0.36, 0.09), 0.070, 0.032, 0.92)       # нога L
-carve(plate, 'cyl', (0.36, -0.09), 0.070, 0.032, 0.92)      # нога R
-carve(plate, 'sphere', (0.80, 0.0), 0.075, 0.022)           # опора стоп
+carve(plate, 'sphere', (-0.79, 0.0), 0.105, 0.012)          # затылок
+carve(plate, 'cyl', (-0.35, 0.0), 0.165, 0.018, 0.78)       # спина
+carve(plate, 'cyl', (-0.34, 0.20), 0.052, 0.010, 0.72)      # плечо/рука L
+carve(plate, 'cyl', (-0.34, -0.20), 0.052, 0.010, 0.72)     # плечо/рука R
+carve(plate, 'sphere', (-0.02, 0.0), 0.135, 0.014)          # таз
+carve(plate, 'cyl', (0.36, 0.09), 0.070, 0.012, 0.92)       # нога L
+carve(plate, 'cyl', (0.36, -0.09), 0.070, 0.012, 0.92)      # нога R
+carve(plate, 'sphere', (0.80, 0.0), 0.075, 0.010)           # опора стоп
+
+# --- контурные подушки: держат тело по бокам, не дают утонуть -------------
+def bolster(nm, size, loc, rot=(0, 0, 0), r=0.012):
+    o = box(nm, size, loc, M_PAD, 'roll', rot=rot)
+    b = o.modifiers.new('bev', 'BEVEL')
+    b.width = r
+    b.segments = 3
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.modifier_apply(modifier='bev')
+
+
+bolster('bol_side_L', (1.62, 0.055, 0.030), (-0.06, 0.265, PIVOT_TOP + 0.015))
+bolster('bol_side_R', (1.62, 0.055, 0.030), (-0.06, -0.265, PIVOT_TOP + 0.015))
+bolster('bol_head', (0.05, 0.34, 0.028), (-0.885, 0.0, PIVOT_TOP + 0.014))
+bolster('bol_foot', (0.05, 0.30, 0.024), (0.905, 0.0, PIVOT_TOP + 0.012))
+bolster('bol_leg_div', (0.80, 0.045, 0.022), (0.44, 0.0, PIVOT_TOP + 0.011))
+for sy in (-1, 1):
+    bolster(f'bol_shoulder_{sy}', (0.10, 0.09, 0.026),
+            (-0.62, sy * 0.205, PIVOT_TOP + 0.013), rot=(0, 0, math.radians(12 * sy)))
 print('CARVE ok')
 
 # окантовка плиты
