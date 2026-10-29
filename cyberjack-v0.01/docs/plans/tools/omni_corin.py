@@ -158,15 +158,16 @@ print('ABDUCT leg', LEG, 'arm', ARM)
 def place(tag, target, limb_dir=None):
     """опора у тела: штанга поворачивается и выдвигается наружу, стойка поднимает кольцо"""
     s = 1 if tag.endswith('_L') else -1
-    x0 = -0.62 if tag.startswith('arm') else -0.05
-    y0 = s * 0.10
+    kind = 'arm' if tag.startswith('arm') else 'leg'
+    x0 = -0.62 if kind == 'arm' else -0.05
+    y0 = s * (0.24 if kind == 'arm' else 0.07)
     dx, dy = target[0] - x0, target[1] - y0
     r = max(0.05, math.hypot(dx, dy))
     pbb = rig.pose.bones[f'boom_{tag}']
     pbb.rotation_mode = 'XYZ'
     pbb.rotation_euler = (0, 0, math.atan2(-dx * s, dy * s))
     pbb.scale = (1, r, 1)
-    rig.pose.bones[f'post_{tag}'].scale = (1, max(0.05, target[2] - 1.06), 1)
+    rig.pose.bones[f'post_{tag}'].scale = (1, max(0.05, target[2] - 1.16), 1)
     if limb_dir is not None and limb_dir.length > 1e-6:
         pbh = rig.pose.bones[f'head_{tag}']
         pbh.rotation_mode = 'XYZ'

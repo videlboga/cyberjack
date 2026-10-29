@@ -25,7 +25,9 @@ PIVOT_TOP = PIVOT_Z + PLAT_T / 2 + MAT_T          # 1.11 — плоскость 
 PLATE_BOT = PIVOT_Z - PLAT_T / 2                  # 0.98
 RAIL_T = 0.035
 RAIL_Z = PLATE_BOT - RAIL_T / 2                   # верх рельса = низ плиты
-MODULE_Z = PIVOT_TOP - 0.05                        # плоскость штанг: в пазу, 50 мм под матрасом
+MODULE_Z = PIVOT_TOP + 0.05                        # плоскость штанг: над матрасом
+PIVOT_X = {'arm': -0.62, 'leg': -0.05}             # опора у плеча / у бедра
+PIVOT_Y = {'arm': 0.24, 'leg': 0.07}   # опора стоит там, где лежит конечность в «сведено»
 RAIL_INSET = 0.06
 RX = PLAT_L / 2 - RAIL_INSET - 0.03
 RY = PLAT_W / 2 - RAIL_INSET - 0.03
@@ -185,81 +187,25 @@ def holed_slab(name, w, h, t, z, holes, material, bone, step=0.0, step_d=0.015):
     return reg(o, material, bone)
 
 
-# --- пазы: сектора по фактическому ходу штанг (центр = опора у тела) -------
-PIVOT_X = {'arm': -0.62, 'leg': -0.05}      # опора у плеча / у бедра
-PIVOT_Y = 0.10
-ENVELOPE = {                                 # куда должна доставать конечность (мм)
-    'arm': [(-0.03, 0.20), (-0.50, 0.59), (-0.49, 0.12)],
-    'leg': [(0.78, 0.08), (-0.05, 0.92)],
-}
-
-
-def sector_prism(name, cx, cy, a0, a1, r, z0, z1, segs=36):
-    verts = [(cx, cy, z0), (cx, cy, z1)]
-    for i in range(segs + 1):
-        a = math.radians(a0 + (a1 - a0) * i / segs)
-        verts.append((cx + r * math.cos(a), cy + r * math.sin(a), z0))
-        verts.append((cx + r * math.cos(a), cy + r * math.sin(a), z1))
-    faces = []
-    for i in range(segs):
-        b0 = 2 + 2 * i; t0 = b0 + 1; b1 = b0 + 2; t1 = b0 + 3
-        faces.append((b0, b1, t1, t0))
-        faces.append((0, b0, b1))
-        faces.append((1, t1, t0))
-    faces.append((0, 1, 2, 3))
-    lb = 2 + segs * 2
-    faces.append((0, lb, lb + 1, 1))
-    me = bpy.data.meshes.new(name)
-    me.from_pydata(verts, [], faces)
-    me.validate(); me.update()
-    o = bpy.data.objects.new(name, me)
-    sc.collection.objects.link(o)
-    return o
-
-
+# --- пазы: узкие сквозные каналы у положения «сведено» (матрас остаётся целым)
+SLOT_SPEC = [   # (tag, x0, x1, y, ширина) — канал вокруг опоры и сведённой конечности
+    ('arm_L', -0.72, 0.12, 0.24, 0.18),
+    ('arm_R', -0.72, 0.12, -0.24, 0.18),
+    ('leg_L', -0.14, 0.86, 0.07, 0.15),
+    ('leg_R', -0.14, 0.86, -0.07, 0.15),
+]
 SLOT_GEOM = {}
-CUTTERS = []
-for tag, s in (('arm_L', 1), ('arm_R', -1), ('leg_L', 1), ('leg_R', -1)):
-    kind = tag.split('_')[0]
-    cx, cy = PIVOT_X[kind], s * PIVOT_Y
-    angs, rr = [], 0.0
-    for (tx, ty) in ENVELOPE[kind]:
-        dx, dy = tx - cx, s * (ty - PIVOT_Y)
-        angs.append(math.degrees(math.atan2(dy, dx)))
-        rr = max(rr, math.hypot(dx, dy))
-    a0, a1 = min(angs) - 13, max(angs) + 13
-    r = rr + 0.12
-    SLOT_GEOM[tag] = (cx, cy, a0, a1, r)
-    CUTTERS.append(sector_prism(f'cut_{tag}', cx, cy, a0, a1, r,
-                                PIVOT_Z - 0.16, PIVOT_TOP + 0.05))
-    # гнездо под каретку у вершины сектора
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.30, depth=0.30, vertices=28,
-                                        location=(cx, cy, PIVOT_TOP - 0.13))
-    CUTTERS.append(bpy.context.object)
-    print('SLOT', tag, 'ang', round(a0), round(a1), 'r', round(r, 2))
+for tag, x0, x1, y, w in SLOT_SPEC:
+    SLOT_GEOM[tag] = (x0, x1, y, w)
 
+HOLES = [((x0 + x1) / 2, y, x1 - x0, w) for _, x0, x1, y, w in SLOT_SPEC]
+HOLES_WIDE = [(hx, hy, hw, hh) for hx, hy, hw, hh in HOLES]
 
-def sector_slab(name, w, h, t, z, material, bone):
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, z))
-    o = bpy.context.object
-    o.name = name
-    o.scale = (w, h, t)
-    bpy.ops.object.transform_apply(location=True, scale=True)
-    for cut in CUTTERS:
-        m = o.modifiers.new('cut', 'BOOLEAN')
-        m.operation = 'DIFFERENCE'
-        m.object = cut
-        bpy.context.view_layer.objects.active = o
-        bpy.ops.object.modifier_apply(modifier='cut')
-    return reg(o, material, bone)
-
-
-sector_slab('platform', PLAT_L, PLAT_W, PLAT_T, PIVOT_Z, M_BODY, 'roll')
-sector_slab('mattress', PLAT_L - 0.04, PLAT_W - 0.04, MAT_T,
-            PIVOT_TOP - MAT_T / 2, M_PAD, 'roll')
-for c in list(CUTTERS):
-    bpy.data.objects.remove(c, do_unlink=True)
-CUTTERS.clear()
+plate = holed_slab('platform', PLAT_L, PLAT_W, PLAT_T, PIVOT_Z, HOLES_WIDE, M_BODY, 'roll')
+holed_slab('mattress', PLAT_L - 0.04, PLAT_W - 0.04, MAT_T,
+           PIVOT_TOP - MAT_T / 2, HOLES_WIDE, M_PAD, 'roll')
+for tag, x0, x1, y, w in SLOT_SPEC:
+    print('SLOT', tag, 'x', round(x0, 2), round(x1, 2), 'y', y, 'w', w)
 
 # окантовка плиты
 for sy in (-1, 1):
@@ -339,7 +285,8 @@ def build_module(tag, y0, x0, s=1):
 
 mods = {}
 for tag, s in (('arm_L', 1), ('arm_R', -1), ('leg_L', 1), ('leg_R', -1)):
-    mods[tag] = build_module(tag, PIVOT_Y, PIVOT_X[tag.split('_')[0]], s)
+    kind = tag.split('_')[0]
+    mods[tag] = build_module(tag, PIVOT_Y[kind], PIVOT_X[kind], s)
 
 # === скелет ==================================================================
 ad = bpy.data.armatures.new('OMNI_rig')
@@ -369,7 +316,7 @@ for tag, y0, x0 in (('arm_L', RY, -0.60), ('arm_R', -RY, -0.60),
                     ('leg_L', RY, 0.60), ('leg_R', -RY, 0.60)):
     s = 1 if tag.endswith('_L') else -1
     x0 = PIVOT_X[tag.split('_')[0]]
-    y0 = s * PIVOT_Y
+    y0 = s * PIVOT_Y[tag.split('_')[0]]
     bone(f'car_{tag}', (x0, y0, MODULE_Z), (x0, y0 + s * 0.02, MODULE_Z), 'roll')
     bone(f'boom_{tag}', (x0, y0, MODULE_Z), (x0, y0 + s * 1.0, MODULE_Z), f'car_{tag}')
     bone(f'post_{tag}', (x0, y0 + s * 1.0, MODULE_Z), (x0, y0 + s * 1.0, MODULE_Z + 1.0), f'boom_{tag}')
@@ -431,8 +378,9 @@ machine.parent = rig
 def place(tag, target, limb_dir=None):
     """опора у тела: штанга поворачивается и выдвигается наружу, стойка поднимает кольцо"""
     s = 1 if tag.endswith('_L') else -1
-    x0 = PIVOT_X[tag.split('_')[0]]
-    y0 = s * PIVOT_Y
+    kind = tag.split('_')[0]
+    x0 = PIVOT_X[kind]
+    y0 = s * PIVOT_Y[kind]
     dx, dy = target[0] - x0, target[1] - y0
     r = max(0.05, math.hypot(dx, dy))
     pbb = rig.pose.bones[f'boom_{tag}']
@@ -651,19 +599,16 @@ def rod_in_slot():
     for i, v in enumerate(machine.data.vertices):
         names = [gi[g.group] for g in v.groups if g.weight > 0.3]
         tag = next((n.split('_', 1)[1] for n in names
-                    if n.startswith(('boom_', 'car_', 'cradle_'))), None)
+                    if n.startswith(('boom_', 'car_'))), None)
         if tag is None or tag not in SLOT_GEOM or i >= len(me.vertices):
             continue
         p = mw @ me.vertices[i].co
-        if not (PIVOT_Z - 0.16 < p.z < PIVOT_TOP - 0.002):
+        x0, x1, y, w = SLOT_GEOM[tag]
+        if not (PIVOT_Z - 0.10 < p.z < PIVOT_TOP - 0.0015):
             continue
-        cx, cy, a0, a1, r = SLOT_GEOM[tag]
-        ang = math.degrees(math.atan2(p.y - cy, p.x - cx))
-        dist = math.hypot(p.x - cx, p.y - cy)
-        if dist <= 0.30:
-            continue
-        if not (a0 - 2.0 <= ang <= a1 + 2.0 and dist <= r + 0.02):
-            bad.append((tag, round(ang), round(dist, 2)))
+        inside = (x0 - 0.01 <= p.x <= x1 + 0.01) and (abs(p.y - y) <= w / 2 + 0.01)
+        if not inside:
+            bad.append((tag, round(p.x, 2), round(p.y, 2)))
     ev.to_mesh_clear()
     return bad
 
