@@ -34,6 +34,15 @@ bpy.context.view_layer.update()
 
 carm = bpy.data.objects.get('rig_')
 cbody = [o for o in new if o.type == 'MESH']
+
+# КРИТИЧНО: у ARP деформы следят за FK только если переключить IK→FK.
+# Без этого кости двигаются, а меш стоит — «тело не движется».
+for nm in ('c_foot_ik.l', 'c_foot_ik.r', 'c_hand_ik.l', 'c_hand_ik.r'):
+    pb = carm.pose.bones.get(nm)
+    if pb and 'ik_fk_switch' in pb.keys():
+        pb['ik_fk_switch'] = 1.0
+        print('SWITCH', nm, '= FK')
+bpy.context.view_layer.update()
 print('APPENDED', [o.name for o in new])
 
 # спрятать лишние тела, если они приехали связями
@@ -222,6 +231,13 @@ rb('c_arm_fk.r', ARM_A, ARM[1])
 bpy.context.view_layer.update()
 print('FOOT', [round(v, 2) for v in bt('c_foot_fk.l')], [round(v, 2) for v in bt('c_foot_fk.r')])
 print('ERR_D', fit_all())
+# проверка, что меш реально деформируется
+dg0 = bpy.context.evaluated_depsgraph_get()
+ev = cbody[0].evaluated_get(dg0); me = ev.to_mesh()
+w = cbody[0].matrix_world
+ys = [(w @ v.co).y for v in me.vertices]
+print('DEFORM y', round(min(ys), 2), round(max(ys), 2))
+ev.to_mesh_clear()
 shot('co_D.png', (2.3, -2.5, 1.75), (0, 0, 1.05))
 shot('co_D_top.png', (0, 0, 4.2), (0, 0, 1.0), ortho=2.9)
 
