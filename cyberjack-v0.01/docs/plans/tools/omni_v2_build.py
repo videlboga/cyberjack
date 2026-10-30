@@ -4,10 +4,10 @@ import bpy, math, os
 from mathutils import Vector
 
 # ---------------- параметры (из листов) ----------------
-L, W, TH = 1.90, 0.64, 0.13
+L, W, TH = 1.90, 0.72, 0.13
 TOPZ = 1.11
 BOTZ = TOPZ - TH
-SLOT_W = 0.16
+SLOT_W = 0.14
 SLOTS = [(-0.80, -0.20, 0.30), (-0.80, -0.20, -0.30), (0.30, 0.90, 0.30), (0.30, 0.90, -0.30)]
 PIVOT_X = {'arm': -0.52, 'leg': 0.62}
 PIVOT_Y = 0.30
@@ -159,7 +159,7 @@ def build_mount(tag, sgn):
             rot=(math.radians(90), 0, 0), seg=18))
     put(box(f'clamp_{tag}', (0.05, 0.06, 0.05), (0, 0.03, 1.98), M_BODY, f'arm_{tag}'))
     # внутренняя труба: скользит вместе с кольцом
-    put(cyl(f'arm_in_{tag}', 0.014, 0.58, (0, 0.29, 1.98), M_MET, f'head_{tag}',
+    put(cyl(f'arm_in_{tag}', 0.014, 0.40, (0, 0.20, 1.98), M_MET, f'head_{tag}',
             rot=(math.radians(90), 0, 0), seg=16))
     put(box(f'head_{tag}', (0.05, 0.05, 0.05), (0, 0.55, 1.98), M_BODY, f'head_{tag}'))
     put(cuff(tag, (0, 0.55, 1.945), g, CUFF_R[kind], 0.055 if kind == 'arm' else 0.070))
