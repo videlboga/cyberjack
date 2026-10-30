@@ -152,16 +152,18 @@ def build_mount(tag, sgn):
     # стойка: единичная длина (1 м) от низа стола, масштабируется костью
     put(cyl(f'post_{tag}', 0.020, 1.0, (0, 0, 0.98 + 0.5), M_MET, f'post_{tag}', seg=18))
     put(cyl(f'post_out_{tag}', 0.026, 0.30, (0, 0, 1.10), M_MET, f'post_{tag}', seg=16))
-    # горизонтальная тяга: единичная длина по +Y на верхушке стойки
-    put(cyl(f'arm_{tag}', 0.018, 1.0, (0, 0.5, 1.98), M_MET, f'arm_{tag}',
+    # тяга «труба в трубе»: наружная — на кости arm, внутренняя выдвигается костью head
+    put(cyl(f'arm_{tag}', 0.022, 0.34, (0, 0.17, 1.98), M_MET, f'arm_{tag}',
+            rot=(math.radians(90), 0, 0), seg=18))
+    put(cyl(f'arm_collar_{tag}', 0.030, 0.05, (0, 0.34, 1.98), M_BODY, f'arm_{tag}',
+            rot=(math.radians(90), 0, 0), seg=18))
+    put(box(f'clamp_{tag}', (0.05, 0.06, 0.05), (0, 0.03, 1.98), M_BODY, f'arm_{tag}'))
+    # внутренняя труба: скользит вместе с кольцом
+    put(cyl(f'arm_in_{tag}', 0.014, 0.58, (0, 0.29, 1.98), M_MET, f'head_{tag}',
             rot=(math.radians(90), 0, 0), seg=16))
-    put(cyl(f'arm_collar_{tag}', 0.026, 0.06, (0, 0.10, 1.98), M_BODY, f'arm_{tag}',
-            rot=(math.radians(90), 0, 0), seg=16))
-    put(box(f'clamp_{tag}', (0.05, 0.05, 0.06), (0, 0, 1.96), M_BODY, f'arm_{tag}'))
-    # кольцо на конце тяги
-    put(box(f'head_{tag}', (0.05, 0.05, 0.05), (0, 1.0, 1.98), M_BODY, f'head_{tag}'))
-    put(cuff(tag, (0, 1.0, 1.945), g, CUFF_R[kind], 0.055 if kind == 'arm' else 0.070))
-    put(box(f'latch_{tag}', (0.030, 0.026, 0.055), (0, 1.0 - CUFF_R[kind] - 0.004, 1.945),
+    put(box(f'head_{tag}', (0.05, 0.05, 0.05), (0, 0.55, 1.98), M_BODY, f'head_{tag}'))
+    put(cuff(tag, (0, 0.55, 1.945), g, CUFF_R[kind], 0.055 if kind == 'arm' else 0.070))
+    put(box(f'latch_{tag}', (0.030, 0.026, 0.055), (0, 0.55 - CUFF_R[kind] - 0.004, 1.945),
             M_ACC, f'head_{tag}'))
     return g
 
@@ -193,8 +195,8 @@ for tag, sgn in TAGS:
     px, py = PIVOT_X[kind], sgn * PIVOT_Y
     bone(f'car_{tag}', (px, py, 0.925), (px, py, 0.925 + 0.02), 'table')
     bone(f'post_{tag}', (px, py, 0.98), (px, py, 1.98), f'car_{tag}')
-    bone(f'arm_{tag}', (px, py, 1.98), (px, py + sgn * 1.0, 1.98), f'post_{tag}')
-    bone(f'head_{tag}', (px, py + sgn * 1.0, 1.98), (px, py + sgn * 1.0, 2.03), f'arm_{tag}')
+    bone(f'arm_{tag}', (px, py, 1.98), (px, py + sgn * 0.34, 1.98), f'post_{tag}')
+    bone(f'head_{tag}', (px, py + sgn * 0.34, 1.98), (px, py + sgn * 0.34, 2.03), f'arm_{tag}')
 bpy.ops.object.mode_set(mode='OBJECT')
 
 for tag, sgn in TAGS:
@@ -222,17 +224,32 @@ machine.parent = rig
 mod = machine.modifiers.new('Armature', 'ARMATURE')
 mod.object = rig
 
+def cuff_center(tag):
+    gi = {g.index: g.name for g in machine.vertex_groups}
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = machine.evaluated_get(dg); me = ev.to_mesh(); mw = ev.matrix_world
+    acc = Vector((0, 0, 0)); n = 0
+    for i, v in enumerate(machine.data.vertices):
+        for g in v.groups:
+            if gi[g.group] == f'head_{tag}' and g.weight > 0.3:
+                acc += mw @ me.vertices[i].co; n += 1
+                break
+    ev.to_mesh_clear()
+    return acc / n if n else Vector((0, 0, 0))
+
+
 def place(tag, target):
     """каретка едет по пазу, стойка поднимается, тяга поворачивается и выдвигается"""
     kind = tag.split('_')[0]
     sgn = 1 if tag.endswith('_L') else -1
     px, py = PIVOT_X[kind], sgn * PIVOT_Y
     x0, x1 = SLOT_X[kind]
-    cx = min(max(target[0], x0), x1)
+    cx = min(max(target[0], x0 + 0.08), x1 - 0.08)
     pbc = rig.pose.bones[f'car_{tag}']
     pbc.location = (cx - px, 0, 0)
     pbp = rig.pose.bones[f'post_{tag}']
-    pbp.scale = (1, max(0.05, target[2] - 0.06 - 0.98), 1)
+    # высота стойки: кольцо на 0.035 ниже оси тяги
+    pbp.scale = (1, max(0.05, target[2] + 0.035 - 0.98), 1)
     dx, dy = target[0] - cx, target[1] - py
     r = max(0.05, math.hypot(dx, dy))
     pba = rig.pose.bones[f'arm_{tag}']
@@ -241,16 +258,13 @@ def place(tag, target):
     if sgn < 0:
         yaw += math.pi          # зеркальная сторона: разворот на 180°
     pba.rotation_euler = (0, 0, yaw)
-    pba.scale = (1, r, 1)
-    # голова наследует масштаб тяги — компенсируем, чтобы кольцо не растягивалось
+    pba.scale = (1, 1, 1)
     pbh = rig.pose.bones[f'head_{tag}']
-    pbh.scale = (1, 1.0 / r, 1)
+    pbh.scale = (1, 1, 1)
+    pbh.location = (0, r - 0.55, 0)      # кольцо скользит по внутренней трубе
     bpy.context.view_layer.update()
-    # мерим по ВЫЧИСЛЕННОМУ состоянию, а не по pose_bones
-    dg2 = bpy.context.evaluated_depsgraph_get()
-    er = rig.evaluated_get(dg2)
-    head = er.matrix_world @ er.pose.bones[f'head_{tag}'].head
-    return (head - Vector(target)).length
+    c = cuff_center(tag)
+    return (Vector(c) - Vector(target)).length
 
 
 # рабочая поза: руки вдоль тела, ноги вместе
