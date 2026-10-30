@@ -11,6 +11,7 @@ SLOT_W = 0.16
 SLOTS = [(-0.80, -0.20, 0.30), (-0.80, -0.20, -0.30), (0.30, 0.90, 0.30), (0.30, 0.90, -0.30)]
 PIVOT_X = {'arm': -0.52, 'leg': 0.62}
 PIVOT_Y = 0.30
+SLOT_X = {'arm': (-0.80, -0.20), 'leg': (0.30, 0.90)}
 CUFF_R = {'arm': 0.095, 'leg': 0.112}
 TAGS = (('arm_L', 1), ('arm_R', -1), ('leg_L', 1), ('leg_R', -1))
 COL_D, COL_H0, COL_H1 = 0.17, 0.52, 0.90
@@ -146,14 +147,24 @@ def build_mount(tag, sgn):
     def put(o):
         o.parent = g; return o
 
+    # каретка под столешницей
     put(box(f'car_{tag}', (0.14, 0.13, 0.10), (0, 0, 0.925), M_DARK, f'car_{tag}'))
-    put(cyl(f'post_{tag}', 0.020, 0.34, (0, 0, 1.09), M_MET, f'post_{tag}', seg=18))
-    put(cyl(f'post_inner_{tag}', 0.014, 0.34, (0, 0, 1.26), M_MET, f'post_{tag}', seg=16))
-    put(box(f'head_{tag}', (0.06, 0.06, 0.05), (0, 0, 1.42), M_BODY, f'head_{tag}'))
-    put(cuff(tag, (0, 0, 1.47), g, CUFF_R[kind], 0.055 if kind == 'arm' else 0.070))
-    put(box(f'latch_{tag}', (0.030, 0.026, 0.055), (0, -CUFF_R[kind] - 0.005, 1.47),
+    # стойка: единичная длина (1 м) от низа стола, масштабируется костью
+    put(cyl(f'post_{tag}', 0.020, 1.0, (0, 0, 0.98 + 0.5), M_MET, f'post_{tag}', seg=18))
+    put(cyl(f'post_out_{tag}', 0.026, 0.30, (0, 0, 1.10), M_MET, f'post_{tag}', seg=16))
+    # горизонтальная тяга: единичная длина по +Y на верхушке стойки
+    put(cyl(f'arm_{tag}', 0.018, 1.0, (0, 0.5, 1.98), M_MET, f'arm_{tag}',
+            rot=(math.radians(90), 0, 0), seg=16))
+    put(cyl(f'arm_collar_{tag}', 0.026, 0.06, (0, 0.10, 1.98), M_BODY, f'arm_{tag}',
+            rot=(math.radians(90), 0, 0), seg=16))
+    put(box(f'clamp_{tag}', (0.05, 0.05, 0.06), (0, 0, 1.96), M_BODY, f'arm_{tag}'))
+    # кольцо на конце тяги
+    put(box(f'head_{tag}', (0.05, 0.05, 0.05), (0, 1.0, 1.98), M_BODY, f'head_{tag}'))
+    put(cuff(tag, (0, 1.0, 1.945), g, CUFF_R[kind], 0.055 if kind == 'arm' else 0.070))
+    put(box(f'latch_{tag}', (0.030, 0.026, 0.055), (0, 1.0 - CUFF_R[kind] - 0.004, 1.945),
             M_ACC, f'head_{tag}'))
     return g
+
 
 for tag, sgn in TAGS:
     build_mount(tag, sgn)
@@ -181,9 +192,15 @@ for tag, sgn in TAGS:
     kind = tag.split('_')[0]
     px, py = PIVOT_X[kind], sgn * PIVOT_Y
     bone(f'car_{tag}', (px, py, 0.925), (px, py, 0.925 + 0.02), 'table')
-    bone(f'post_{tag}', (px, py, 1.0), (px, py, 1.34), f'car_{tag}')
-    bone(f'head_{tag}', (px, py, 1.42), (px, py, 1.47), f'post_{tag}')
+    bone(f'post_{tag}', (px, py, 0.98), (px, py, 1.98), f'car_{tag}')
+    bone(f'arm_{tag}', (px, py, 1.98), (px, py + sgn * 1.0, 1.98), f'post_{tag}')
+    bone(f'head_{tag}', (px, py + sgn * 1.0, 1.98), (px, py + sgn * 1.0, 2.03), f'arm_{tag}')
 bpy.ops.object.mode_set(mode='OBJECT')
+
+for tag, sgn in TAGS:
+    for nm in (f'arm_{tag}', f'head_{tag}'):
+        b = rig.data.bones[nm]
+        b.inherit_scale = 'NONE'
 
 # ---------------- объединение и скин ----------------
 for o, b in PARTS:
@@ -205,6 +222,34 @@ machine.name = 'OMNI_1'
 machine.parent = rig
 mod = machine.modifiers.new('Armature', 'ARMATURE')
 mod.object = rig
+
+def place(tag, target):
+    """каретка едет по пазу, стойка поднимается, тяга поворачивается и выдвигается"""
+    kind = tag.split('_')[0]
+    sgn = 1 if tag.endswith('_L') else -1
+    px, py = PIVOT_X[kind], sgn * PIVOT_Y
+    x0, x1 = SLOT_X[kind]
+    cx = min(max(target[0], x0), x1)
+    pbc = rig.pose.bones[f'car_{tag}']
+    pbc.location = (cx - px, 0, 0)
+    pbp = rig.pose.bones[f'post_{tag}']
+    pbp.scale = (1, max(0.05, target[2] - 0.06 - 0.98), 1)
+    dx, dy = target[0] - cx, target[1] - py
+    r = max(0.05, math.hypot(dx, dy))
+    pba = rig.pose.bones[f'arm_{tag}']
+    pba.rotation_mode = 'XYZ'
+    pba.rotation_euler = (0, 0, math.atan2(-dx * sgn, dy * sgn))
+    pba.scale = (1, r, 1)
+    bpy.context.view_layer.update()
+    head = rig.matrix_world @ rig.pose.bones[f'head_{tag}'].head
+    return (head - Vector(target)).length
+
+
+# рабочая поза: руки вдоль тела, ноги вместе
+POSE_A = {'arm_L': (-0.06, 0.20, 1.24), 'arm_R': (-0.06, -0.20, 1.24),
+          'leg_L': (0.78, 0.08, 1.26), 'leg_R': (0.78, -0.08, 1.26)}
+errs = {k: round(place(k, v), 3) for k, v in POSE_A.items()}
+print('FIT_A', errs)
 
 # ---------------- свет/камера/пол ----------------
 for nm, vec, e in (('key', (0.5, 0.8, -0.7), 3.2), ('fill', (-0.6, -0.7, -0.35), 1.1)):
@@ -260,6 +305,20 @@ def rod_out():
             bad += 1
     ev.to_mesh_clear()
     return bad
+
+# --- достижимость требуемых положений ---
+TARGETS = {
+    'рука вниз': (-0.05, 0.20, 'arm'), 'рука вверх': (-0.49, 0.12, 'arm'),
+    'рука в сторону': (-0.50, 0.59, 'arm'), 'ноги вместе': (0.78, 0.08, 'leg'),
+    'шпатат': (-0.05, 0.92, 'leg'),
+}
+ARM_MAX = 0.78
+reach = {}
+for name, (x, y, kind) in TARGETS.items():
+    cx = min(max(x, SLOT_X[kind][0]), SLOT_X[kind][1])
+    d = math.hypot(x - cx, abs(y) - PIVOT_Y)
+    reach[name] = round(d, 3)
+print('REACH', reach, 'ARM_MAX', ARM_MAX, 'OK' if max(reach.values()) <= ARM_MAX else 'FAIL')
 
 print('ROD_OUT', rod_out())
 print('VERTS', len(machine.data.vertices), 'BONES', len(rig.data.bones))
