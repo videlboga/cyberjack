@@ -198,9 +198,8 @@ for tag, sgn in TAGS:
 bpy.ops.object.mode_set(mode='OBJECT')
 
 for tag, sgn in TAGS:
-    for nm in (f'arm_{tag}', f'head_{tag}'):
-        b = rig.data.bones[nm]
-        b.inherit_scale = 'NONE'
+    rig.data.bones[f'arm_{tag}'].inherit_scale = 'NONE'   # тяга не растягивается стойкой
+    rig.data.bones[f'head_{tag}'].inherit_scale = 'FULL'  # кольцо едет на конце тяги
 
 # ---------------- объединение и скин ----------------
 for o, b in PARTS:
@@ -238,10 +237,19 @@ def place(tag, target):
     r = max(0.05, math.hypot(dx, dy))
     pba = rig.pose.bones[f'arm_{tag}']
     pba.rotation_mode = 'XYZ'
-    pba.rotation_euler = (0, 0, math.atan2(-dx * sgn, dy * sgn))
+    yaw = math.atan2(-dx * sgn, dy * sgn)
+    if sgn < 0:
+        yaw += math.pi          # зеркальная сторона: разворот на 180°
+    pba.rotation_euler = (0, 0, yaw)
     pba.scale = (1, r, 1)
+    # голова наследует масштаб тяги — компенсируем, чтобы кольцо не растягивалось
+    pbh = rig.pose.bones[f'head_{tag}']
+    pbh.scale = (1, 1.0 / r, 1)
     bpy.context.view_layer.update()
-    head = rig.matrix_world @ rig.pose.bones[f'head_{tag}'].head
+    # мерим по ВЫЧИСЛЕННОМУ состоянию, а не по pose_bones
+    dg2 = bpy.context.evaluated_depsgraph_get()
+    er = rig.evaluated_get(dg2)
+    head = er.matrix_world @ er.pose.bones[f'head_{tag}'].head
     return (head - Vector(target)).length
 
 
