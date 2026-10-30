@@ -261,7 +261,17 @@ def place(tag, target):
     pba.scale = (1, 1, 1)
     pbh = rig.pose.bones[f'head_{tag}']
     pbh.scale = (1, 1, 1)
-    pbh.location = (0, r - 0.55, 0)      # кольцо скользит по внутренней трубе
+    # кольцо доводим до цели по вычисленному мешу (итерации сходятся за 2-4 шага)
+    inv3 = rig.matrix_world.inverted().to_3x3()
+    for _ in range(5):
+        cur = cuff_center(tag)
+        d = Vector(target) - cur
+        if d.length < 0.002:
+            break
+        m = pbh.matrix.copy()
+        m.translation = m.translation + (inv3 @ d)
+        pbh.matrix = m
+        bpy.context.view_layer.update()
     bpy.context.view_layer.update()
     c = cuff_center(tag)
     return (Vector(c) - Vector(target)).length
