@@ -1,0 +1,78 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_gyn_chair",
+  "name": "Гинекологическое кресло",
+  "subtitle": "gyn / seated recline",
+  "refs": [
+    "vol-04 · 096",
+    "vol-03 · 067",
+    "vol-03 · 073",
+    "vol-03 · 081"
+  ],
+  "body": "Таз на сиденье, спина reclined 30–60°, ноги в стременах и разведены, руки на подлокотниках или над головой.",
+  "summary": "Рама с сиденьем, наклонной спинкой, бедренными упорами и стременами; боковые выносы для рук.",
+  "status": "ready",
+  "built_count": 10,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_post_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_rail_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_cross_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_foot",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_backboard",
+      "qty": 1,
+      "status": "built"
+    },
+    {
+      "id": "fix_tilt",
+      "qty": 1,
+      "status": "built"
+    },
+    {
+      "id": "fix_boom_500",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_pivot",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_carriage",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_cuff_adapter",
+      "qty": 2,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "seat — таз",
+    "backboard — поясница",
+    "thigh supports — бёдра",
+    "ankle — стремена",
+    "wrist — боковые манжеты"
+  ],
+  "effect": "Фронтальная зона под сиденьем; спинка не несёт эффект.",
+  "note": "Общий тип для 067/073/081/096; у 081 акцент на разведении коленей."
+}

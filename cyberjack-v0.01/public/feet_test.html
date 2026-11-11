@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>feet test</title></head>
+<body style="margin:0;background:#141417">
+<canvas id="c" style="width:1000px;height:700px;display:block"></canvas>
+<script type="module">
+import * as THREE from "/node_modules/three/build/three.module.js";
+import { GLTFLoader } from "/node_modules/three/examples/jsm/loaders/GLTFLoader.js";
+
+const c = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true });
+renderer.setSize(1000, 700);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1e);
+const camera = new THREE.PerspectiveCamera(40, 1000/700, 0.01, 100);
+camera.position.set(0, 0.3, 1.0);
+camera.lookAt(0, 0, 0);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x444455, 1.2));
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(0.5, 1, 0.8);
+scene.add(key);
+
+const loader = new GLTFLoader();
+loader.load('/models/evanescia_feet.glb', (gltf) => {
+  const root = gltf.scene;
+  const skinMat = new THREE.MeshStandardMaterial({ color: 0xe8b8a0, roughness: 0.6 });
+  root.traverse(n => { if (n.isMesh) n.material = skinMat; });
+  const box = new THREE.Box3().setFromObject(root);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = 1.4 / maxDim;
+  root.scale.setScalar(scale);
+  root.position.sub(center.multiplyScalar(scale));
+  scene.add(root);
+  // навести на ступни (min y)
+  const feetY = box.min.y * scale + root.position.y;
+  camera.position.set(0, feetY + 0.35, 0.9);
+  camera.lookAt(0, feetY, 0);
+  console.log('LOADED. box', box.min.toArray(), box.max.toArray(), 'feetY', feetY);
+  // count bones
+  let bones = 0;
+  root.traverse(n => { if (n.isBone) bones++; });
+  console.log('BONES', bones);
+  document.title = 'loaded bones=' + bones;
+}, undefined, (e) => { console.error('ERR', e); document.title = 'error'; });
+
+function loop() {
+  requestAnimationFrame(loop);
+  renderer.render(scene, camera);
+}
+loop();
+</script>
+</body>
+</html>

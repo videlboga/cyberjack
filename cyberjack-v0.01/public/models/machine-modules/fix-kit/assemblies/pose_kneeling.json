@@ -1,0 +1,48 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_kneeling",
+  "name": "На коленях",
+  "subtitle": "kneeling",
+  "refs": [
+    "vol-03 · 076"
+  ],
+  "body": "Тело на коленях перед вертикальной стойкой, руки на верхней панели, таз поднят; стопы сзади.",
+  "summary": "Низкая рама/подиум, коленные подушки, chest support и верхний поручень; без подвеса.",
+  "status": "ready",
+  "built_count": 5,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_cross_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_post_600",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_foot",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_pad_adapter",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_cuff_adapter",
+      "qty": 2,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "knees — подушки",
+    "chest — упор",
+    "wrist — поручень"
+  ],
+  "effect": "Фронтальная зона; колени не должны стоять на голом рельсе.",
+  "note": "Только 076; 087 — стоящий наклон, не колени."
+}

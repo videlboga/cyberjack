@@ -1,0 +1,28 @@
+{
+  "models": 24,
+  "glbFiles": 42,
+  "validatorErrors": 0,
+  "validatorWarnings": 0,
+  "originalExportsWithExtraTriangles": 24,
+  "nohumanExports": 18,
+  "nohumanExportsRetainingFigureMesh": 18,
+  "nohumanScaleRangeRelativeToFullSource": [
+    999.9999652673948,
+    1000.0000393679426
+  ],
+  "nohumanMissing": [
+    "SexMachineModel-074",
+    "SexMachineModel-075",
+    "SexMachineModel-076",
+    "SexMachineModel-083",
+    "SexMachineModel-085",
+    "SexMachineModel-086"
+  ],
+  "armaturesInFreshBlenderImport": 0,
+  "animationActionsInFreshBlenderImport": 0,
+  "glbSkins": 0,
+  "glbAnimations": 0,
+  "sourceTexturedMaterialCount": 92,
+  "anchorCount": 19,
+  "anchorsWithNonIdentityParents": 2
+}

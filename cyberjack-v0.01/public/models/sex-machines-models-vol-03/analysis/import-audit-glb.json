@@ -1,0 +1,2100 @@
+{
+  "files": [
+    {
+      "file": "glb/SexMachineModel-065.glb",
+      "bytes": 12411084,
+      "nodes": 1407,
+      "meshes": 344,
+      "meshInstances": 858,
+      "triangles": 533850,
+      "materials": 13,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.4358103573322296,
+          -2.827683448791504,
+          -3.5399935705524364
+        ],
+        "max": [
+          3.3431469202041626,
+          2.3590374956949356,
+          7.219114108078224e-16
+        ],
+        "size": [
+          3.778957277536392,
+          5.1867209444864395,
+          3.5399935705524372
+        ]
+      },
+      "negativeDeterminantInstances": 168,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 16,
+          "name": "1.stl",
+          "mesh": 12,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 397,
+          "name": "1.stl",
+          "mesh": 12,
+          "position": [
+            2.5330874919891357,
+            1.659562587738037,
+            -3.374145269393921
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 909
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-066.glb",
+      "bytes": 2133444,
+      "nodes": 88,
+      "meshes": 14,
+      "meshInstances": 43,
+      "triangles": 91868,
+      "materials": 11,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.31971070170402527,
+          -1.5584299564361572,
+          -5.6968610929199075
+        ],
+        "max": [
+          4.051786611214275,
+          3.0557332017552667,
+          0.45219001173973083
+        ],
+        "size": [
+          4.3714973129183,
+          4.614163158191424,
+          6.149051104659638
+        ]
+      },
+      "negativeDeterminantInstances": 13,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 9,
+          "name": "1.stl",
+          "mesh": 6,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 36,
+          "name": "1.stl",
+          "mesh": 6,
+          "position": [
+            2.8959076404571533,
+            1.835042953491211,
+            -4.908761501312256
+          ]
+        },
+        {
+          "node": 74,
+          "name": "1.stl",
+          "mesh": 6,
+          "position": [
+            3.49038028717041,
+            1.835042953491211,
+            -5.324825763702393
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 114
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-067.glb",
+      "bytes": 3777696,
+      "nodes": 753,
+      "meshes": 32,
+      "meshInstances": 381,
+      "triangles": 275030,
+      "materials": 12,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.40195849537849426,
+          -1.557486653327942,
+          -2.1626636868312774
+        ],
+        "max": [
+          2.0295175313949585,
+          1.2103102612976229,
+          0.05286325514316559
+        ],
+        "size": [
+          2.4314760267734528,
+          2.7677969146255648,
+          2.215526941974443
+        ]
+      },
+      "negativeDeterminantInstances": 170,
+      "duplicatePlacements": 46,
+      "humanNamedNodes": [
+        {
+          "node": 2,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 45,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            1.5105979442596436,
+            0.4088587760925293,
+            -1.4894284009933472
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 465
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-068.glb",
+      "bytes": 3863984,
+      "nodes": 3290,
+      "meshes": 27,
+      "meshInstances": 1644,
+      "triangles": 374041,
+      "materials": 11,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.3255248963832855,
+          -1.4073187112808228,
+          -1.5926807183020197
+        ],
+        "max": [
+          1.6639511585235596,
+          1.1319543741555507,
+          0.10922999680042267
+        ],
+        "size": [
+          1.989476054906845,
+          2.539273085436373,
+          1.7019107151024424
+        ]
+      },
+      "negativeDeterminantInstances": 804,
+      "duplicatePlacements": 72,
+      "humanNamedNodes": [
+        {
+          "node": 3,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 42,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            1.655263900756836,
+            0.3828859329223633,
+            -1.1866472959518433
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 1672
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-069.glb",
+      "bytes": 3405108,
+      "nodes": 182,
+      "meshes": 22,
+      "meshInstances": 73,
+      "triangles": 108745,
+      "materials": 14,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.6877105236053467,
+          -0.8405545949935913,
+          -1.3250700235366821
+        ],
+        "max": [
+          1.5147804021835327,
+          1.4141084641300474,
+          0.18362726271152496
+        ],
+        "size": [
+          2.2024909257888794,
+          2.2546630591236387,
+          1.508697286248207
+        ]
+      },
+      "negativeDeterminantInstances": 3,
+      "duplicatePlacements": 4,
+      "humanNamedNodes": [
+        {
+          "node": 3,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 36,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            0.8879899978637695,
+            0.8756822347640991,
+            -1.2066195011138916
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 122
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-070.glb",
+      "bytes": 3207352,
+      "nodes": 76,
+      "meshes": 14,
+      "meshInstances": 38,
+      "triangles": 93764,
+      "materials": 10,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.5551759004592896,
+          -1.0347261428833008,
+          -2.669949267278498
+        ],
+        "max": [
+          1.420440912246704,
+          2.3266346742660597,
+          0.17153163254261017
+        ],
+        "size": [
+          1.9756168127059937,
+          3.3613608171493605,
+          2.841480899821108
+        ]
+      },
+      "negativeDeterminantInstances": 9,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 2,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 24,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            0.9302543997764587,
+            1.0494121313095093,
+            -2.0049312114715576
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 103
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-071.glb",
+      "bytes": 3132516,
+      "nodes": 110,
+      "meshes": 29,
+      "meshInstances": 62,
+      "triangles": 85770,
+      "materials": 8,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.5545954704284668,
+          -0.5373750925064087,
+          -1.4760811493932515
+        ],
+        "max": [
+          1.436323331437111,
+          1.4431523282404195,
+          0.09686741232872009
+        ],
+        "size": [
+          1.990918801865578,
+          1.9805274207468282,
+          1.5729485617219716
+        ]
+      },
+      "negativeDeterminantInstances": 5,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 2,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 38,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            1.4363232851028442,
+            0.7449975609779358,
+            -1.191870093345642
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 88
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-072.glb",
+      "bytes": 3353108,
+      "nodes": 225,
+      "meshes": 12,
+      "meshInstances": 46,
+      "triangles": 152667,
+      "materials": 10,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.6024149060249329,
+          -2.856558322906494,
+          -1.7128357887268066
+        ],
+        "max": [
+          1.9171870350837708,
+          1.8657166790358346,
+          0.9328582882881165
+        ],
+        "size": [
+          2.5196019411087036,
+          4.722275001942329,
+          2.645694077014923
+        ]
+      },
+      "negativeDeterminantInstances": 15,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 15,
+          "name": "2.stl",
+          "mesh": 1,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 77,
+          "name": "2.stl",
+          "mesh": 1,
+          "position": [
+            1.125083088874817,
+            0.97942054271698,
+            -1.2206565141677856
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 93
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-073.glb",
+      "bytes": 2735384,
+      "nodes": 335,
+      "meshes": 40,
+      "meshInstances": 177,
+      "triangles": 86249,
+      "materials": 16,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.5229862332344055,
+          -0.9040899872779846,
+          -1.5544383473776606
+        ],
+        "max": [
+          1.7291490137577057,
+          1.5532692512047386,
+          0.12285567820072174
+        ],
+        "size": [
+          2.252135246992111,
+          2.457359238482723,
+          1.6772940255783824
+        ]
+      },
+      "negativeDeterminantInstances": 56,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 4,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 55,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            1.2496947050094604,
+            0.9487341046333313,
+            -1.4129493236541748
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 231
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-074.glb",
+      "bytes": 2898444,
+      "nodes": 340,
+      "meshes": 11,
+      "meshInstances": 165,
+      "triangles": 296285,
+      "materials": 18,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.44912177324295044,
+          -1.1757299900054932,
+          -7.01587890492326
+        ],
+        "max": [
+          1.6914849959159852,
+          2.0883102786604546,
+          0.1050756499171257
+        ],
+        "size": [
+          2.1406067691589357,
+          3.2640402686659478,
+          7.120954554840385
+        ]
+      },
+      "negativeDeterminantInstances": 70,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 6,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 44,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            1.2910960912704468,
+            1.0111944675445557,
+            -0.5746216177940369
+          ]
+        },
+        {
+          "node": 90,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            1.2910960912704468,
+            1.0111944675445557,
+            -1.5330616235733032
+          ]
+        },
+        {
+          "node": 136,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            1.2910960912704468,
+            1.0111944675445557,
+            -2.491501569747925
+          ]
+        },
+        {
+          "node": 182,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            1.2910960912704468,
+            1.0111944675445557,
+            -3.449941635131836
+          ]
+        },
+        {
+          "node": 228,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            1.2910960912704468,
+            1.0111944675445557,
+            -4.408381938934326
+          ]
+        },
+        {
+          "node": 274,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            1.2910960912704468,
+            1.0111944675445557,
+            -5.366821765899658
+          ]
+        },
+        {
+          "node": 320,
+          "name": "1.stl#1",
+          "mesh": 4,
+          "position": [
+            1.2910960912704468,
+            1.0111944675445557,
+            -6.325262069702148
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 431
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-075.glb",
+      "bytes": 3811992,
+      "nodes": 1737,
+      "meshes": 37,
+      "meshInstances": 874,
+      "triangles": 538981,
+      "materials": 8,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.9980857372283936,
+          -0.344650000333786,
+          -1.7326622575731259
+        ],
+        "max": [
+          1.9691221828958756,
+          1.4164707167010173,
+          0.5582135319709778
+        ],
+        "size": [
+          2.9672079201242694,
+          1.7611207170348033,
+          2.2908757895441036
+        ]
+      },
+      "negativeDeterminantInstances": 2,
+      "duplicatePlacements": 115,
+      "humanNamedNodes": [
+        {
+          "node": 3,
+          "name": "1.stl#1",
+          "mesh": 1,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 49,
+          "name": "1.stl#1",
+          "mesh": 1,
+          "position": [
+            1.7768305540084839,
+            0.9401717185974121,
+            -0.7345765829086304
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 905
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-076.glb",
+      "bytes": 3089800,
+      "nodes": 53,
+      "meshes": 12,
+      "meshInstances": 25,
+      "triangles": 77988,
+      "materials": 6,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.4930439293384552,
+          -0.6826773881912231,
+          -4.570984767663366
+        ],
+        "max": [
+          2.529053181409836,
+          2.4121753988734373,
+          0.45219001173973083
+        ],
+        "size": [
+          3.022097110748291,
+          3.0948527870646605,
+          5.023174779403097
+        ]
+      },
+      "negativeDeterminantInstances": 1,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 2,
+          "name": "1.stl#8",
+          "mesh": 0,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 21,
+          "name": "1.stl#8",
+          "mesh": 0,
+          "position": [
+            2.1905574798583984,
+            1.4443578720092773,
+            -4.586325168609619
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 37
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-077.glb",
+      "bytes": 3039488,
+      "nodes": 119,
+      "meshes": 17,
+      "meshInstances": 45,
+      "triangles": 81804,
+      "materials": 5,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.5830596685409546,
+          -0.7497997283935547,
+          -4.249674970946408
+        ],
+        "max": [
+          2.917705714702606,
+          2.6041150485914586,
+          0.19945000112056732
+        ],
+        "size": [
+          3.500765383243561,
+          3.3539147769850133,
+          4.449124972066976
+        ]
+      },
+      "negativeDeterminantInstances": 12,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 2,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 31,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            2.3960177898406982,
+            1.6110038757324219,
+            -4.0342936515808105
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 59
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-078.glb",
+      "bytes": 3364488,
+      "nodes": 126,
+      "meshes": 23,
+      "meshInstances": 55,
+      "triangles": 96436,
+      "materials": 7,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -1.9074198007583618,
+          -0.5842000246047974,
+          -4.617028611254591
+        ],
+        "max": [
+          3.1343431570213625,
+          2.130640318436231,
+          0.015200000256299973
+        ],
+        "size": [
+          5.041762957779724,
+          2.714840343041028,
+          4.632228611510891
+        ]
+      },
+      "negativeDeterminantInstances": 10,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 2,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 36,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            2.7100157737731934,
+            1.443215012550354,
+            -4.165772914886475
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 73
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-079.glb",
+      "bytes": 3285324,
+      "nodes": 55,
+      "meshes": 13,
+      "meshInstances": 27,
+      "triangles": 83374,
+      "materials": 12,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.40905219316482544,
+          -0.9295200109481812,
+          -4.0966405038139815
+        ],
+        "max": [
+          2.957722306251526,
+          2.64837452570829,
+          0.45219001173973083
+        ],
+        "size": [
+          3.3667744994163513,
+          3.577894536656471,
+          4.548830515553712
+        ]
+      },
+      "negativeDeterminantInstances": 0,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 11,
+          "name": "2.stl",
+          "mesh": 8,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 43,
+          "name": "2.stl",
+          "mesh": 8,
+          "position": [
+            2.9459609985351562,
+            1.636955738067627,
+            -3.6637978553771973
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 74
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-080.glb",
+      "bytes": 8003728,
+      "nodes": 1219,
+      "meshes": 187,
+      "meshInstances": 688,
+      "triangles": 440273,
+      "materials": 15,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.4757141172885895,
+          -0.717170000076294,
+          -3.9912186379445806
+        ],
+        "max": [
+          2.584488868713379,
+          2.4038748741149902,
+          0.018045900389552116
+        ],
+        "size": [
+          3.0602029860019684,
+          3.121044874191284,
+          4.009264538334133
+        ]
+      },
+      "negativeDeterminantInstances": 165,
+      "duplicatePlacements": 23,
+      "humanNamedNodes": [
+        {
+          "node": 2,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 201,
+          "name": "1.stl",
+          "mesh": 0,
+          "position": [
+            2.4896633625030518,
+            1.6281847953796387,
+            -3.5155045986175537
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 762
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-081.glb",
+      "bytes": 3275544,
+      "nodes": 176,
+      "meshes": 24,
+      "meshInstances": 92,
+      "triangles": 89854,
+      "materials": 12,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.4172108471393585,
+          -3.8566033840179443,
+          -4.021963393204104
+        ],
+        "max": [
+          2.6771584420317307,
+          2.3033710767439852,
+          0.03426121175289154
+        ],
+        "size": [
+          3.094369289171089,
+          6.15997446076193,
+          4.056224604956996
+        ]
+      },
+      "negativeDeterminantInstances": 9,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 3,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 36,
+          "name": "1.stl",
+          "mesh": 1,
+          "position": [
+            2.330899715423584,
+            1.8756049871444702,
+            -3.8785338401794434
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 160
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-082.glb",
+      "bytes": 6791768,
+      "nodes": 225,
+      "meshes": 33,
+      "meshInstances": 101,
+      "triangles": 502637,
+      "materials": 8,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -2.612313747406006,
+          -0.8768460750579834,
+          -7.996365391993335
+        ],
+        "max": [
+          5.333465262355503,
+          5.900065508703608,
+          1.2859791079526837
+        ],
+        "size": [
+          7.945779009761509,
+          6.776911583761591,
+          9.282344499946019
+        ]
+      },
+      "negativeDeterminantInstances": 13,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 41,
+          "name": "1.stl",
+          "mesh": 31,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 201,
+          "name": "1.stl",
+          "mesh": 31,
+          "position": [
+            2.542813301086426,
+            1.4745190143585205,
+            -3.802309989929199
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 121
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-083.glb",
+      "bytes": 2897100,
+      "nodes": 63,
+      "meshes": 9,
+      "meshInstances": 23,
+      "triangles": 73958,
+      "materials": 11,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -2.612313747406006,
+          -0.8768460750579834,
+          -7.996365391993335
+        ],
+        "max": [
+          5.333465262355503,
+          6.80023535809936,
+          0.0180822741240263
+        ],
+        "size": [
+          7.945779009761509,
+          7.677081433157343,
+          8.014447666117361
+        ]
+      },
+      "negativeDeterminantInstances": 6,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 11,
+          "name": "1.stl#1",
+          "mesh": 6,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 53,
+          "name": "1.stl#1",
+          "mesh": 6,
+          "position": [
+            2.039494037628174,
+            1.3194210529327393,
+            -3.729907512664795
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 73
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-084.glb",
+      "bytes": 4677336,
+      "nodes": 7639,
+      "meshes": 34,
+      "meshInstances": 3810,
+      "triangles": 1025499,
+      "materials": 13,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.18248826265335083,
+          -3.5664312839508057,
+          -4.1845140232549305
+        ],
+        "max": [
+          2.6429772418923676,
+          2.1881919192924695,
+          0.10922999680042267
+        ],
+        "size": [
+          2.8254655045457184,
+          5.754623203243275,
+          4.293744020055353
+        ]
+      },
+      "negativeDeterminantInstances": 1228,
+      "duplicatePlacements": 232,
+      "humanNamedNodes": [
+        {
+          "node": 31,
+          "name": "3.stl",
+          "mesh": 24,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 2051,
+          "name": "3.stl",
+          "mesh": 24,
+          "position": [
+            2.535911798477173,
+            1.6565829515457153,
+            -3.7691869735717773
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 3875
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-085.glb",
+      "bytes": 1580084,
+      "nodes": 81,
+      "meshes": 10,
+      "meshInstances": 31,
+      "triangles": 65821,
+      "materials": 7,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.21369022130966187,
+          -3.430323600769043,
+          -3.430323950077247
+        ],
+        "max": [
+          3.114926815032959,
+          2.125363142695852,
+          0.03853999823331833
+        ],
+        "size": [
+          3.328617036342621,
+          5.555686743464895,
+          3.4688639483105654
+        ]
+      },
+      "negativeDeterminantInstances": 7,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 11,
+          "name": "1.stl#1",
+          "mesh": 7,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 47,
+          "name": "1.stl#1",
+          "mesh": 7,
+          "position": [
+            1.918771505355835,
+            1.2553203105926514,
+            -3.146657705307007
+          ]
+        },
+        {
+          "node": 59,
+          "name": "1.stl#1",
+          "mesh": 7,
+          "position": [
+            1.918771505355835,
+            1.7005504369735718,
+            -3.146657705307007
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 47
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-086.glb",
+      "bytes": 1537472,
+      "nodes": 62,
+      "meshes": 13,
+      "meshInstances": 28,
+      "triangles": 43758,
+      "materials": 10,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.42960619926452637,
+          -0.6114799976348877,
+          -4.071263416662429
+        ],
+        "max": [
+          3.454178150743246,
+          2.2407343254590035,
+          1.4438228216156449e-15
+        ],
+        "size": [
+          3.8837843500077724,
+          2.8522143230938912,
+          4.071263416662431
+        ]
+      },
+      "negativeDeterminantInstances": 4,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 4,
+          "name": "1.stl#2",
+          "mesh": 2,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 26,
+          "name": "1.stl#2",
+          "mesh": 2,
+          "position": [
+            2.888523817062378,
+            1.1884326934814453,
+            -3.607598304748535
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 74
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-087.glb",
+      "bytes": 7574324,
+      "nodes": 888,
+      "meshes": 179,
+      "meshInstances": 526,
+      "triangles": 343582,
+      "materials": 10,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.41290000081062317,
+          -0.8291599750518799,
+          -3.1309067457914352
+        ],
+        "max": [
+          2.540283679962159,
+          1.6185224158892688,
+          0.19971999526023865
+        ],
+        "size": [
+          2.9531836807727823,
+          2.4476823909411487,
+          3.330626741051674
+        ]
+      },
+      "negativeDeterminantInstances": 9,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [
+        {
+          "node": 4,
+          "name": "1.stl",
+          "mesh": 2,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 192,
+          "name": "1.stl",
+          "mesh": 2,
+          "position": [
+            2.0625486373901367,
+            0.9341388940811157,
+            -2.4097394943237305
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 560
+      }
+    },
+    {
+      "file": "glb/SexMachineModel-088.glb",
+      "bytes": 2767596,
+      "nodes": 735,
+      "meshes": 25,
+      "meshInstances": 369,
+      "triangles": 248321,
+      "materials": 8,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.26701250672340393,
+          -0.5934401750564575,
+          -3.8430576433248884
+        ],
+        "max": [
+          2.5749172964760447,
+          2.011532089382932,
+          0.22119000554084778
+        ],
+        "size": [
+          2.8419298031994487,
+          2.6049722644393896,
+          4.064247648865736
+        ]
+      },
+      "negativeDeterminantInstances": 169,
+      "duplicatePlacements": 46,
+      "humanNamedNodes": [
+        {
+          "node": 8,
+          "name": "2.stl",
+          "mesh": 5,
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "node": 47,
+          "name": "2.stl",
+          "mesh": 5,
+          "position": [
+            2.5749173164367676,
+            1.2289466857910156,
+            -3.5747406482696533
+          ]
+        }
+      ],
+      "primitiveModes": {
+        "4": 402
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-065.glb",
+      "bytes": 4435372,
+      "nodes": 1110,
+      "meshes": 368,
+      "meshInstances": 541,
+      "triangles": 311788,
+      "materials": 13,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1638.6480503620273,
+          895.1102860240491,
+          -3539.9934448908375
+        ],
+        "max": [
+          3343.146811939647,
+          2359.037285772227,
+          -2808.10913161143
+        ],
+        "size": [
+          1704.4987615776195,
+          1463.9269997481779,
+          731.8843132794077
+        ]
+      },
+      "negativeDeterminantInstances": 173,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 541
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-066.glb",
+      "bytes": 2874904,
+      "nodes": 121,
+      "meshes": 35,
+      "meshInstances": 79,
+      "triangles": 61930,
+      "materials": 11,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          2576.1970250592676,
+          885.7448223135902,
+          -5696.860724582815
+        ],
+        "max": [
+          4051.7867419230724,
+          3055.733117936323,
+          -4397.2051174398575
+        ],
+        "size": [
+          1475.5897168638048,
+          2169.988295622733,
+          1299.6556071429577
+        ]
+      },
+      "negativeDeterminantInstances": 37,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 79
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-067.glb",
+      "bytes": 4401540,
+      "nodes": 783,
+      "meshes": 69,
+      "meshInstances": 396,
+      "triangles": 224069,
+      "materials": 12,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          528.1075370531631,
+          21.410000839232975,
+          -2162.6636096852417
+        ],
+        "max": [
+          2029.5175712328505,
+          1210.31005859375,
+          -854.3747864430542
+        ],
+        "size": [
+          1501.4100341796875,
+          1188.900057754517,
+          1308.2888232421874
+        ]
+      },
+      "negativeDeterminantInstances": 185,
+      "duplicatePlacements": 46,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 396
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-068.glb",
+      "bytes": 4387668,
+      "nodes": 3289,
+      "meshes": 39,
+      "meshInstances": 1633,
+      "triangles": 329727,
+      "materials": 11,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          527.2111297466681,
+          -4.055694761596158,
+          -1592.6806713941014
+        ],
+        "max": [
+          1663.951171875,
+          1131.9542990005573,
+          -1053.6267697217381
+        ],
+        "size": [
+          1136.7400421283319,
+          1136.0099937621535,
+          539.0539016723633
+        ]
+      },
+      "negativeDeterminantInstances": 808,
+      "duplicatePlacements": 72,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 1633
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-069.glb",
+      "bytes": 4096280,
+      "nodes": 180,
+      "meshes": 36,
+      "meshInstances": 86,
+      "triangles": 63474,
+      "materials": 14,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          200.2794897460933,
+          69.53967359999982,
+          -1206.619485550064
+        ],
+        "max": [
+          1514.780405273437,
+          1414.1085474501747,
+          -226.17948310839324
+        ],
+        "size": [
+          1314.5009155273438,
+          1344.568873850175,
+          980.4400024416707
+        ]
+      },
+      "negativeDeterminantInstances": 9,
+      "duplicatePlacements": 6,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 86
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-070.glb",
+      "bytes": 4159024,
+      "nodes": 107,
+      "meshes": 35,
+      "meshInstances": 68,
+      "triangles": 50891,
+      "materials": 10,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          375.0784675682721,
+          0.0,
+          -2669.9491673417633
+        ],
+        "max": [
+          1420.4408943260846,
+          2326.634646440248,
+          -1511.9527399427586
+        ],
+        "size": [
+          1045.3624267578125,
+          2326.634646440248,
+          1157.9964273990047
+        ]
+      },
+      "negativeDeterminantInstances": 27,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 68
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-071.glb",
+      "bytes": 3731796,
+      "nodes": 95,
+      "meshes": 39,
+      "meshInstances": 49,
+      "triangles": 44672,
+      "materials": 8,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          137.93354624360902,
+          -32.25200000000015,
+          -1476.0810900571767
+        ],
+        "max": [
+          1436.3232644100806,
+          1443.1523317807184,
+          -972.4063973150471
+        ],
+        "size": [
+          1298.3897181664715,
+          1475.4043317807186,
+          503.67469274212954
+        ]
+      },
+      "negativeDeterminantInstances": 5,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 49
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-072.glb",
+      "bytes": 4349796,
+      "nodes": 166,
+      "meshes": 28,
+      "meshInstances": 65,
+      "triangles": 109521,
+      "materials": 10,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          278.30822053030164,
+          -37.31433479309078,
+          -1213.154482853092
+        ],
+        "max": [
+          1917.1870061534266,
+          1865.716548995972,
+          -868.3485114222019
+        ],
+        "size": [
+          1638.878785623125,
+          1903.030883789063,
+          344.80597143089017
+        ]
+      },
+      "negativeDeterminantInstances": 27,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 65
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-073.glb",
+      "bytes": 3224948,
+      "nodes": 332,
+      "meshes": 60,
+      "meshInstances": 171,
+      "triangles": 48487,
+      "materials": 16,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          689.4089988415146,
+          2.2741212228948537,
+          -1554.438188777266
+        ],
+        "max": [
+          1729.1490195934678,
+          1553.269298249044,
+          -338.9828438027295
+        ],
+        "size": [
+          1039.7400207519531,
+          1550.9951770261491,
+          1215.4553449745365
+        ]
+      },
+      "negativeDeterminantInstances": 67,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 171
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-077.glb",
+      "bytes": 3916224,
+      "nodes": 75,
+      "meshes": 24,
+      "meshInstances": 35,
+      "triangles": 43493,
+      "materials": 5,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1812.9581797979235,
+          941.1976052976316,
+          -4249.6750384341485
+        ],
+        "max": [
+          2917.70579942683,
+          2604.1148174307777,
+          -3407.4724694133097
+        ],
+        "size": [
+          1104.7476196289062,
+          1662.9172121331462,
+          842.2025690208388
+        ]
+      },
+      "negativeDeterminantInstances": 12,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 35
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-078.glb",
+      "bytes": 4018116,
+      "nodes": 82,
+      "meshes": 32,
+      "meshInstances": 41,
+      "triangles": 51791,
+      "materials": 7,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1535.6469025235908,
+          956.2989717074063,
+          -4617.028519699135
+        ],
+        "max": [
+          3134.343187159415,
+          2130.6401531868314,
+          -3744.170303750859
+        ],
+        "size": [
+          1598.696284635824,
+          1174.3411814794251,
+          872.8582159482762
+        ]
+      },
+      "negativeDeterminantInstances": 10,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 41
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-079.glb",
+      "bytes": 4222312,
+      "nodes": 63,
+      "meshes": 34,
+      "meshInstances": 40,
+      "triangles": 41803,
+      "materials": 12,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1456.9024097355118,
+          1288.7848278067586,
+          -4096.640426890673
+        ],
+        "max": [
+          2957.7223407657852,
+          2648.3745110788836,
+          -3255.41820830089
+        ],
+        "size": [
+          1500.8199310302734,
+          1359.589683272125,
+          841.2222185897826
+        ]
+      },
+      "negativeDeterminantInstances": 0,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 40
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-080.glb",
+      "bytes": 4137376,
+      "nodes": 1096,
+      "meshes": 219,
+      "meshInstances": 543,
+      "triangles": 306447,
+      "materials": 15,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1717.1819186726116,
+          993.9848223135905,
+          -3991.2187013581342
+        ],
+        "max": [
+          2584.4887985554246,
+          2403.874823534294,
+          -3102.5233887521376
+        ],
+        "size": [
+          867.3068798828131,
+          1409.8900012207037,
+          888.6953126059966
+        ]
+      },
+      "negativeDeterminantInstances": 175,
+      "duplicatePlacements": 23,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 543
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-081.glb",
+      "bytes": 4246608,
+      "nodes": 202,
+      "meshes": 40,
+      "meshInstances": 120,
+      "triangles": 48025,
+      "materials": 12,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1984.6146473690503,
+          1349.1698223135909,
+          -4021.963372585918
+        ],
+        "max": [
+          2677.158384856843,
+          2303.3708721182793,
+          -3313.9158127414344
+        ],
+        "size": [
+          692.5437374877927,
+          954.2010498046884,
+          708.0475598444837
+        ]
+      },
+      "negativeDeterminantInstances": 10,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 120
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-082.glb",
+      "bytes": 7898264,
+      "nodes": 170,
+      "meshes": 40,
+      "meshInstances": 81,
+      "triangles": 402564,
+      "materials": 8,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -1733.4023917571128,
+          993.9848223135151,
+          -7996.36545681698
+        ],
+        "max": [
+          5333.465019434183,
+          5900.065353708026,
+          1285.9790495685713
+        ],
+        "size": [
+          7066.867411191296,
+          4906.080531394511,
+          9282.344506385552
+        ]
+      },
+      "negativeDeterminantInstances": 13,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 81
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-084.glb",
+      "bytes": 5076100,
+      "nodes": 7706,
+      "meshes": 63,
+      "meshInstances": 3812,
+      "triangles": 978032,
+      "materials": 13,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1597.9406857098768,
+          1250.8248182120278,
+          -4184.513883379101
+        ],
+        "max": [
+          2642.9772219689758,
+          2188.1918119009915,
+          -3555.255543036126
+        ],
+        "size": [
+          1045.036536259099,
+          937.3669936889637,
+          629.2583403429749
+        ]
+      },
+      "negativeDeterminantInstances": 1228,
+      "duplicatePlacements": 232,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 3812
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-087.glb",
+      "bytes": 4036808,
+      "nodes": 749,
+      "meshes": 195,
+      "meshInstances": 365,
+      "triangles": 216385,
+      "materials": 10,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1751.8561349128165,
+          686.0248210928874,
+          -3130.906680786801
+        ],
+        "max": [
+          2540.2837079666215,
+          1618.5223297392185,
+          -2317.0095091316125
+        ],
+        "size": [
+          788.427573053805,
+          932.4975086463312,
+          813.8971716551887
+        ]
+      },
+      "negativeDeterminantInstances": 11,
+      "duplicatePlacements": 0,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 365
+      }
+    },
+    {
+      "file": "glb-nohuman/SexMachineModel-088.glb",
+      "bytes": 3182364,
+      "nodes": 744,
+      "meshes": 37,
+      "meshInstances": 365,
+      "triangles": 211192,
+      "materials": 8,
+      "images": 0,
+      "embeddedImages": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          1794.984891356541,
+          664.554819872184,
+          -3843.057590495788
+        ],
+        "max": [
+          2574.91732543944,
+          2011.5319316885902,
+          -2818.1531785297134
+        ],
+        "size": [
+          779.9324340828989,
+          1346.9771118164062,
+          1024.9044119660748
+        ]
+      },
+      "negativeDeterminantInstances": 176,
+      "duplicatePlacements": 46,
+      "humanNamedNodes": [],
+      "primitiveModes": {
+        "4": 365
+      }
+    }
+  ]
+}

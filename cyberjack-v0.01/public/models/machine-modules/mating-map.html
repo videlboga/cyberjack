@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Омникрон · карта совмещения</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F1EFEA'/%3E%3Ccircle cx='11' cy='11' r='4' fill='%23E8B9BF' stroke='%232F3135' stroke-width='1.4'/%3E%3Ccircle cx='21' cy='21' r='4' fill='%23E8B9BF' stroke='%232F3135' stroke-width='1.4'/%3E%3Cpath d='M11 11h10v10' stroke='%232F3135' stroke-width='1.4' fill='none'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --milk:#F1EFEA;--ivory:#FAF8F4;--ink:#2F3135;--graphite:#54575A;--silver:#B9BAB7;
+    --blush:#E8B9BF;--pale:#F2D7D9;--line:rgba(47,49,53,.14);--line-strong:rgba(47,49,53,.30);
+    --native:#3F6B57;--adapter:#A9791F;--custom:#A5483F;--orphan:#8A8D90;--media:#41707E;
+    --mono:ui-monospace,"SFMono-Regular","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:"Inter","Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:16px;--shadow:0 18px 45px -28px rgba(47,49,53,.38);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:
+    radial-gradient(1100px 620px at 12% -8%,#FCFAF5 0%,rgba(252,250,245,0) 62%),
+    radial-gradient(900px 520px at 90% 4%,#F7F1EB 0%,rgba(247,241,235,0) 58%),var(--milk);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  button,input,select{font:inherit;color:inherit}
+  ::selection{background:var(--pale)}
+  .page{max-width:1720px;margin:0 auto;padding:0 26px 72px}
+  .topline{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0 15px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.16em}
+  .brand-mark{width:14px;height:14px;border-radius:3px;background:var(--blush);border:1px solid rgba(47,49,53,.28);position:relative;flex:none}
+  .brand-mark::after{content:"";position:absolute;inset:4px;border-radius:1px;background:var(--ink);opacity:.78}
+  .topline-meta{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;text-transform:none;color:var(--graphite);display:flex;gap:14px;flex-wrap:wrap}
+  .topline-meta b{font-weight:500;color:var(--ink)}
+
+  .hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:44px;align-items:end;padding:44px 0 26px}
+  .eyebrow{margin:0 0 16px;font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--graphite);display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:24px;height:1px;background:var(--line-strong)}
+  h1{margin:0;font-size:clamp(34px,4.6vw,62px);line-height:.96;letter-spacing:-.045em;font-weight:620}
+  h1 em{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;letter-spacing:-.03em;color:var(--graphite)}
+  .lede{margin:18px 0 0;max-width:66ch;font-size:14px;line-height:1.6;color:#4B4E52}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .stat{background:rgba(250,248,244,.74);padding:14px 15px 12px;min-height:78px;display:flex;flex-direction:column;justify-content:space-between}
+  .stat-n{font-size:26px;line-height:1;letter-spacing:-.04em;font-weight:600}
+  .stat-l{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--graphite);margin-top:7px}
+  .stat-note{grid-column:1/-1;background:rgba(250,248,244,.74);padding:11px 15px;font-family:var(--mono);font-size:9.5px;line-height:1.5;color:var(--graphite)}
+
+  .callout{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;margin:16px 0 22px;padding:14px 16px;border:1px solid rgba(165,72,63,.32);border-radius:12px;background:rgba(165,72,63,.055)}
+  .callout-i{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#8E3B33;padding-top:2px}
+  .callout p{margin:0;font-size:12.5px;line-height:1.55;color:#5B4643}
+  .callout b{font-weight:650;color:#8E3B33}
+
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;padding:10px 0 0;border-top:1px solid var(--line)}
+  .tab{padding:9px 15px;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;background:rgba(250,248,244,.4);cursor:pointer;font-size:12px;font-weight:560;letter-spacing:.01em;color:var(--graphite)}
+  .tab:hover{background:rgba(250,248,244,.8);color:var(--ink)}
+  .tab.on{background:var(--ivory);color:var(--ink);border-color:var(--line-strong);position:relative}
+  .tab small{font-family:var(--mono);font-size:9px;color:#9A9DA0;margin-left:6px}
+  .panel{border:1px solid var(--line-strong);border-radius:0 12px 12px 12px;background:rgba(250,248,244,.55);padding:14px}
+
+  .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .search{flex:1 1 240px;min-width:210px;display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.55)}
+  .search input{width:100%;border:0;outline:0;background:transparent;font-size:12px}
+  .search svg{opacity:.45;flex:none}
+  select.sel{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.55);font-size:11.5px;max-width:250px}
+  .chk{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;font-size:11px;cursor:pointer;background:rgba(255,255,255,.4);user-select:none}
+  .chk input{margin:0;accent-color:#54575A}
+  .chk.on{border-color:var(--ink);background:rgba(47,49,53,.06)}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid var(--line-strong);border-radius:999px;background:transparent;cursor:pointer;font-size:11.5px;font-weight:550;transition:.15s}
+  .btn:hover{border-color:var(--ink);background:rgba(255,255,255,.5)}
+  .btn-sm{padding:5px 9px;font-size:10.5px}
+
+  .cls-row{display:flex;gap:5px;flex-wrap:wrap;padding:10px 0 4px}
+  .cls{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid var(--line);border-radius:7px;font-size:10px;cursor:pointer;background:rgba(255,255,255,.35);opacity:.45}
+  .cls.on{opacity:1;border-color:rgba(47,49,53,.26);background:rgba(255,255,255,.7)}
+  .cls i{width:7px;height:7px;border-radius:2px;display:block}
+  .cls b{font-weight:600;font-family:var(--mono);font-size:8.5px;color:#8A8D90}
+
+  /* ---------- map ---------- */
+  .map-shell{display:grid;grid-template-columns:minmax(0,1fr) 0;gap:0;transition:grid-template-columns .22s ease}
+  .map-shell.with-card{grid-template-columns:minmax(0,1fr) 372px;gap:14px}
+  .map-scroll{position:relative;overflow:hidden;height:620px;min-height:420px;border:1px solid var(--line);border-radius:10px;background:
+     linear-gradient(rgba(47,49,53,.035) 1px,transparent 1px) 0 0/100% 38px,
+     radial-gradient(700px 400px at 20% 0%,rgba(255,255,255,.6),rgba(255,255,255,0) 70%),#EFEDE7;cursor:grab}
+  .map-scroll.drag{cursor:grabbing}
+  .stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+  .lane{position:absolute;top:0;bottom:0;border-left:1px dashed rgba(47,49,53,.13)}
+  .lane-hd{position:absolute;left:0;top:0;width:100%;padding:7px 8px 6px;font-family:var(--mono);font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:#6E7175;border-bottom:1px solid rgba(47,49,53,.12);display:flex;justify-content:space-between;gap:6px;line-height:1.35}
+  .lane-hd b{font-weight:600;color:#3E4145;display:block;letter-spacing:.09em}
+  .lane-hd span{font-size:8px;color:#9A9DA0}
+  .node{position:absolute;height:28px;display:flex;align-items:center;gap:6px;padding:0 7px;border:1px solid rgba(47,49,53,.18);border-radius:5px;background:rgba(255,255,255,.92);cursor:pointer;font-size:9.5px;line-height:1.15;overflow:hidden;transition:border-color .12s,box-shadow .12s,opacity .12s}
+  .node:hover{border-color:rgba(47,49,53,.55);box-shadow:0 2px 10px -4px rgba(47,49,53,.4);z-index:5}
+  .node .ac{width:3px;align-self:stretch;border-radius:2px;margin:-1px 0 -1px -7px;flex:none}
+  .node .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .node .bg{flex:none;font-family:var(--mono);font-size:8px;color:#8A8D90;display:flex;gap:3px;align-items:center}
+  .node .w{width:5px;height:5px;border-radius:50%;background:var(--custom);display:block}
+  .node.no-fam{border-style:dashed;background:rgba(250,248,244,.72)}
+  .node.sel{border-color:var(--ink);box-shadow:0 0 0 2px rgba(47,49,53,.16);z-index:6}
+  .node.dim{opacity:.16;pointer-events:none}
+  .node.hit{background:#FFF6F3;border-color:rgba(165,72,63,.6)}
+  svg#edges{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+  svg#edges path{fill:none;stroke-linecap:round}
+  .e-native{stroke:var(--native);stroke-width:1.5;opacity:.72}
+  .e-adapter{stroke:var(--adapter);stroke-width:1.5;stroke-dasharray:5 3;opacity:.85}
+  .e-custom{stroke:var(--custom);stroke-width:1.2;stroke-dasharray:1.6 3.2;opacity:.75}
+  .e-dim{opacity:.07 !important}
+  .e-hot{opacity:1 !important;stroke-width:2.2}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:10px 2px 0;font-size:10.5px;color:#5A5D61}
+  .legend b{font-weight:600}
+  .lg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:3px 4px;border-radius:5px}
+  .lg:hover{background:rgba(47,49,53,.05)}
+  .lg.off{opacity:.38}
+  .lg i{width:22px;height:0;border-top-width:2px;border-top-style:solid;display:block}
+  .legend .hint{font-family:var(--mono);font-size:9px;color:#8A8D90;margin-left:auto}
+
+  /* card */
+  .card{border:1px solid var(--line-strong);border-radius:10px;background:var(--ivory);max-height:1180px;overflow:auto;padding:0;display:none}
+  .card.on{display:block}
+  .card-hd{position:sticky;top:0;background:linear-gradient(#FAF8F4 78%,rgba(250,248,244,.86));padding:13px 14px 10px;border-bottom:1px solid var(--line);z-index:2}
+  .card-hd .k{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8A8D90;display:flex;justify-content:space-between;gap:8px}
+  .card-hd h3{margin:6px 0 4px;font-size:19px;letter-spacing:-.03em;line-height:1.1;font-weight:620}
+  .card-hd .sub{font-size:11px;color:var(--graphite);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .x{position:absolute;right:10px;top:10px;border:0;background:transparent;font-size:16px;line-height:1;cursor:pointer;color:#8A8D90}
+  .x:hover{color:var(--ink)}
+  .card-bd{padding:12px 14px 20px}
+  .card p.purpose{margin:0 0 12px;font-size:11.5px;line-height:1.5;color:#4B4E52}
+  .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:12px}
+  .kv div{background:rgba(255,255,255,.55);padding:7px 8px}
+  .kv b{display:block;font-size:14px;font-weight:600;line-height:1.1}
+  .kv span{font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;color:#8A8D90;display:block;margin-top:3px}
+  .sec{margin:14px 0 6px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#7A7E82;display:flex;justify-content:space-between;align-items:center}
+  table.mates{width:100%;border-collapse:collapse;font-size:9.5px}
+  table.mates th{text-align:left;font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;color:#9A9DA0;font-weight:500;padding:3px 4px;border-bottom:1px solid var(--line)}
+  table.mates td{padding:4px;border-bottom:1px solid rgba(47,49,53,.07);vertical-align:top;line-height:1.3}
+  table.mates tr:last-child td{border-bottom:0}
+  .dir{font-family:var(--mono);font-size:9px;color:#6E7175}
+  .pill{display:inline-block;padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:8px;letter-spacing:.02em;border:1px solid transparent;white-space:nowrap}
+  .p-native{color:#2F5B47;background:rgba(63,107,87,.1);border-color:rgba(63,107,87,.25)}
+  .p-adapter{color:#7E5A12;background:rgba(169,121,31,.11);border-color:rgba(169,121,31,.28)}
+  .p-custom{color:#8E3B33;background:rgba(165,72,63,.09);border-color:rgba(165,72,63,.24)}
+  .p-orphan{color:#65686C;background:rgba(138,141,144,.12);border-color:rgba(138,141,144,.3)}
+  .p-media{color:#2F5A67;background:rgba(65,112,126,.1);border-color:rgba(65,112,126,.26)}
+  .p-neutral{color:#5A5D61;background:rgba(47,49,53,.06);border-color:rgba(47,49,53,.16)}
+  .p-arch{color:#7A7D80;background:rgba(138,141,144,.1);border-color:rgba(138,141,144,.32);border-style:dashed}
+  .note{font-size:9.5px;line-height:1.45;color:#75787C;margin:5px 0 0;padding-left:8px;border-left:2px solid rgba(47,49,53,.12)}
+  .note.src{font-family:var(--mono);font-size:8.5px;color:#9A9DA0}
+  .chips{display:flex;flex-wrap:wrap;gap:4px}
+  .chip{font-size:9.5px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.6);cursor:default}
+  .chip.link{cursor:pointer}
+  .chip.link:hover{border-color:var(--ink)}
+  .cf{font-size:10px;line-height:1.4;padding:6px 8px;border-left:2px solid var(--custom);background:rgba(165,72,63,.05);border-radius:0 5px 5px 0;margin-bottom:4px}
+  .cf b{font-family:var(--mono);font-size:9px}
+  .cf.warn{border-left-color:var(--adapter);background:rgba(169,121,31,.06)}
+  .cf.info{border-left-color:var(--orphan);background:rgba(138,141,144,.07)}
+  .empty{font-size:10px;color:#9A9DA0;padding:3px 0}
+
+  /* ---------- families ---------- */
+  .fam-shell{display:grid;grid-template-columns:280px minmax(0,1fr);gap:14px;margin-top:6px}
+  .fam-list{border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:660px;background:rgba(255,255,255,.4)}
+  .fam-item{padding:8px 10px;border-bottom:1px solid rgba(47,49,53,.07);cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 6px;align-items:center}
+  .fam-item:hover{background:rgba(255,255,255,.75)}
+  .fam-item.on{background:#FFFDF8;box-shadow:inset 3px 0 0 var(--ink)}
+  .fam-item .id{font-family:var(--mono);font-size:10px;letter-spacing:-.01em}
+  .fam-item .mt{font-family:var(--mono);font-size:8px;color:#9A9DA0;grid-column:1;letter-spacing:.02em}
+  .verdict{font-family:var(--mono);font-size:7.5px;letter-spacing:.03em;padding:2px 5px;border-radius:4px;white-space:nowrap}
+  .v-two_sided{color:#2F5B47;background:rgba(63,107,87,.12)}
+  .v-offer_only,.v-accept_only{color:#7E5A12;background:rgba(169,121,31,.13)}
+  .v-media{color:#2F5A67;background:rgba(65,112,126,.12)}
+  .v-undirected,.v-empty{color:#65686C;background:rgba(138,141,144,.14)}
+  .fam-body{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.5);padding:16px;min-height:400px;position:relative}
+  .fam-title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .fam-title h3{margin:0;font-family:var(--mono);font-size:20px;letter-spacing:-.03em;font-weight:600}
+  .fam-title .st{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A8D90}
+  .fam-spec{margin:10px 0 0;font-size:12px;line-height:1.55;color:#3F4246;max-width:88ch}
+  .fam-rule{margin:6px 0 0;font-size:11px;line-height:1.5;color:#6E7175;max-width:88ch}
+  .fam-counts{display:flex;gap:16px;margin:14px 0 0;padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:9.5px;color:#6E7175;flex-wrap:wrap}
+  .fam-counts b{font-weight:600;color:var(--ink);font-size:13px;margin-right:3px}
+  .star{position:relative;display:grid;grid-template-columns:1fr 250px 1fr;gap:18px;margin-top:16px;align-items:start}
+  .star svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .side{display:flex;flex-direction:column;gap:6px;position:relative;z-index:2}
+  .side.off{align-items:flex-end}
+  .side-hd{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#8A8D90;margin-bottom:2px}
+  .pt{display:block;width:100%;text-align:left;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.85);font-size:9.5px;line-height:1.25;cursor:pointer}
+  .pt:hover{border-color:var(--ink)}
+  .pt .pid{font-family:var(--mono);font-size:8px;color:#9A9DA0;display:block}
+  .hub{border:1px solid var(--line-strong);border-radius:10px;background:#FFFDF8;padding:12px;text-align:center;position:relative;z-index:2;box-shadow:var(--shadow)}
+  .hub .h-id{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:-.02em}
+  .hub .h-v{font-family:var(--mono);font-size:8px;color:#8A8D90;margin-top:5px;line-height:1.4}
+  .hub .h-bar{height:3px;border-radius:2px;background:var(--silver);margin:8px 0}
+  .fam-conflicts{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+  .fam-note{margin-top:14px;font-size:10.5px;line-height:1.5;color:#75787C;padding:9px 11px;border-radius:8px;background:rgba(65,112,126,.06);border-left:2px solid var(--media)}
+
+  /* ---------- matrix ---------- */
+  .mx-wrap{overflow:auto;margin-top:10px;border:1px solid var(--line);border-radius:10px}
+  table.mx{border-collapse:separate;border-spacing:0;font-size:10px;width:100%}
+  table.mx th,table.mx td{border-bottom:1px solid var(--line);border-right:1px solid rgba(47,49,53,.07);padding:6px 7px;text-align:left;vertical-align:middle}
+  table.mx thead th{position:sticky;top:0;background:#F3F1EB;z-index:2;font-family:var(--mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:#6E7175;font-weight:500}
+  table.mx tbody th{position:sticky;left:0;background:#F8F6F1;font-weight:500;z-index:1;min-width:210px}
+  table.mx tbody th .f{font-family:var(--mono);font-size:8px;color:#9A9DA0;display:block;margin-top:2px}
+  table.mx td.c{text-align:center;cursor:pointer;font-family:var(--mono);font-size:10px;min-width:64px}
+  table.mx td.c:hover{outline:1.5px solid var(--ink);outline-offset:-2px}
+  td.s-native{background:rgba(63,107,87,.14);color:#2F5B47;font-weight:600}
+  td.s-adapter{background:rgba(169,121,31,.15);color:#6E4E0F;font-weight:600}
+  td.s-custom{background:rgba(165,72,63,.07);color:#8E3B33}
+  td.s-on{outline:1.5px solid var(--ink);outline-offset:-2px}
+  .mx-detail{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:12px;background:rgba(255,255,255,.6);font-size:11px;line-height:1.5}
+  .mx-detail h4{margin:0 0 6px;font-size:13px;letter-spacing:-.02em}
+  .ad-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px;margin-top:10px}
+  .ad{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.6);padding:11px 12px}
+  .ad .flow{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:#5A5D61;flex-wrap:wrap}
+  .ad .flow b{font-weight:600;color:var(--ink)}
+  .ad .flow .arr{color:#9A9DA0}
+  .ad p{margin:7px 0 0;font-size:10px;line-height:1.45;color:#75787C}
+  .ad .part{margin-top:6px;font-family:var(--mono);font-size:9.5px;color:#3F4246}
+
+  /* ---------- focus ---------- */
+  .fx{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+  .fx-hd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .fx-hd h3{margin:0;font-size:18px;letter-spacing:-.03em;font-weight:620}
+  .fx-hd .lede{margin:0;font-size:11px;color:#6E7175;max-width:80ch;line-height:1.5;flex:1 1 400px}
+  .fx-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;margin-top:10px}
+  .fx-c{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.62);padding:12px}
+  .fx-c h4{margin:0 0 2px;font-size:14px;letter-spacing:-.02em}
+  .fx-c .code{font-family:var(--mono);font-size:8.5px;color:#9A9DA0}
+  .fx-if{margin:8px 0 0;padding:7px 9px;border-radius:7px;background:rgba(47,49,53,.04);font-family:var(--mono);font-size:9px;line-height:1.45;color:#4C4F53}
+  .fx-l{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#8A8D90;margin:10px 0 4px}
+  .fx-list{display:flex;flex-wrap:wrap;gap:4px}
+  .fx-list .chip{font-size:9px}
+  .fx-no{font-size:10px;color:#8E3B33}
+
+  footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:10px;line-height:1.6;color:#8A8D90;max-width:96ch}
+  footer code{font-family:var(--mono);font-size:9px}
+  @media(max-width:1180px){
+    .hero{grid-template-columns:1fr;gap:20px}
+    .map-shell.with-card{grid-template-columns:1fr}
+    .card{height:auto;max-height:520px}
+    .star{grid-template-columns:1fr}
+    .fam-shell{grid-template-columns:1fr}
+    .fam-list{max-height:260px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topline">
+    <div class="brand"><span class="brand-mark"></span> Omnicron / Mating</div>
+    <div class="topline-meta">
+      <span id="top-src">96 компонентов · 487 точек · 25 семейств</span>
+      <a href="index.html">Каталог</a>
+      <a href="mating-map.json">mating-map.json</a>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">карта логики совмещения · read-only</p>
+      <h1>Что с чем<br><em>соединяется</em></h1>
+      <p class="lede" id="lede">96 компонентов, 487 точек крепления, 25 зарегистрированных семейств коннекторов.
+        Карта строится только по каноническим семействам: там, где посадка описана лишь текстом
+        (<code>connector: custom</code>), связь не рисуется как совместимая.</p>
+    </div>
+    <div class="stats" id="hero-stats"></div>
+  </section>
+
+  <div class="callout" id="caveat"></div>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="map">Карта<small id="t-map"></small></button>
+    <button class="tab" data-tab="fam">Семейства<small id="t-fam"></small></button>
+    <button class="tab" data-tab="mx">Привод → насадка<small id="t-mx"></small></button>
+    <button class="tab" data-tab="fx">Фокус<small id="t-fx"></small></button>
+  </nav>
+
+  <!-- MAP -->
+  <section class="panel" id="view-map">
+    <div class="toolbar">
+      <label class="search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2"/></svg>
+        <input id="q" type="search" placeholder="поиск: id, имя, код" autocomplete="off">
+      </label>
+      <select class="sel" id="fam-filter"><option value="">все семейства</option></select>
+      <label class="chk" id="c-conf"><input type="checkbox" id="onlyConf"> only conflicts</label>
+      <label class="chk" id="c-unused"><input type="checkbox" id="onlyUnused"> only unused</label>
+      <label class="chk" id="c-nofam"><input type="checkbox" id="onlyNoFam"> без семейства</label>
+      <button class="btn btn-sm" id="reset">сброс</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-sm" id="z-out">−</button>
+      <button class="btn btn-sm" id="z-in">+</button>
+      <button class="btn btn-sm" id="z-fit">fit</button>
+    </div>
+    <div class="cls-row" id="cls-row"></div>
+    <div class="map-shell" id="map-shell">
+      <div class="map-scroll" id="map-scroll">
+        <div class="stage" id="stage">
+          <svg id="edges"></svg>
+          <div id="lanes"></div>
+        </div>
+      </div>
+      <aside class="card" id="card"></aside>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <!-- FAMILIES -->
+  <section class="panel" id="view-fam" hidden>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <h2 style="margin:0;font-size:22px;letter-spacing:-.03em;font-weight:620">Семейства коннекторов</h2>
+      <p style="margin:0;font-size:11px;color:#6E7175;max-width:80ch;line-height:1.5">
+        25 семейств реестра. Слева — точки «сдача» (out), справа — «приём» (in). Если одна из сторон пуста,
+        семейство одностороннее: соединения не существует, сколько бы точек ни было.</p>
+    </div>
+    <div class="fam-shell">
+      <div class="fam-list" id="fam-list"></div>
+      <div class="fam-body" id="fam-body"></div>
+    </div>
+  </section>
+
+  <!-- MATRIX -->
+  <section class="panel" id="view-mx" hidden>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <h2 style="margin:0;font-size:22px;letter-spacing:-.03em;font-weight:620">Привод → насадка</h2>
+      <p style="margin:0;font-size:11px;color:#6E7175;max-width:80ch;line-height:1.5">
+        13 выходных интерфейсов MOTION против 6 семейств посадок насадок. <b>native</b> — совпадение семейства,
+        <b>adapter</b> — документированный переходник, <b>custom</b> — пути нет. Ячейка открывает список насадок.</p>
+    </div>
+    <div class="mx-wrap" id="mx-wrap"></div>
+    <div class="mx-detail" id="mx-detail">Клик по ячейке — что именно в неё садится и чего не хватает.</div>
+    <h3 style="margin:22px 0 0;font-size:15px;letter-spacing:-.02em">Переходники в реестре</h3>
+    <div class="ad-cards" id="ad-cards"></div>
+  </section>
+
+  <!-- FOCUS -->
+  <section class="panel" id="view-fx" hidden>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <h2 style="margin:0;font-size:22px;letter-spacing:-.03em;font-weight:620">Фокус: осциллятор, поршни, зонды, переходник</h2>
+      <p style="margin:0;font-size:11px;color:#6E7175;max-width:88ch;line-height:1.5">
+        Четыре узла, на которых ломается вся WORK-ветка: у них нет общей посадки, а документированный
+        переходник только один.</p>
+    </div>
+    <div id="focus-host"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const CONF_RU = { high: "высокая", medium: "средняя", low: "низкая" };
+const VERDICT_RU = {
+  two_sided: "двусторонняя", offer_only: "только сдача", accept_only: "только приём",
+  media: "медиа-шина", undirected: "контакт", empty: "нет точек"
+};
+const STATUS_RU = { native: "native", adapter: "adapter", custom: "custom", orphan: "orphan" };
+const ROLE_ORDER = ["drive", "adapter", "tool", "changer", "magazine", "consumable",
+  "restraint", "surface", "frame", "fluid", "sensory", "control", "utility", "service", "support"];
+
+let D = null, N = {}, F = {}, SEL = null, MXC = null, FAM_SEL = null;
+const state = { tab: "map", q: "", classes: new Set(), fam: "", onlyConf: false, onlyUnused: false, onlyNoFam: false, hidden: new Set(), k: 1, tx: 0, ty: 0 };
+
+const L = { laneW: 166, nodeW: 150, nodeH: 28, row: 34, hdr: 44, pad: 14, gap: 20, top: 10 };
+
+init();
+
+async function init() {
+  try {
+    const res = await fetch("mating-map.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    D = await res.json();
+  } catch (e) {
+    document.body.insertAdjacentHTML("afterbegin",
+      '<div style="padding:16px 28px;background:#FBEDEA;border-bottom:1px solid #A5483F;font:13px/1.5 system-ui;color:#8E3B33">' +
+      "Не удалось загрузить mating-map.json (" + esc(e.message) + "). Откройте страницу через http-сервер " +
+      "из каталога <code>public/</code>, например <code>python3 -m http.server 8088 -d public</code>.</div>");
+    return;
+  }
+  D.nodes.forEach(n => { N[n.id] = n; });
+  D.families.forEach(f => { F[f.id] = f; });
+  state.classes = new Set(D.class_order);
+  renderHero();
+  renderTabs();
+  renderCls();
+  renderFamFilter();
+  renderLegend();
+  renderMap();
+  renderFamList();
+  renderMatrix();
+  renderAdapters();
+  renderFocus();
+  renderFoot();
+  wire();
+}
+
+/* ---------------- hero ---------------- */
+function renderHero() {
+  const s = D.summary;
+  $("#hero-stats").innerHTML = `
+    <div class="stat"><div class="stat-n">${s.components}</div><div class="stat-l">компонентов</div></div>
+    <div class="stat"><div class="stat-n">${s.points}</div><div class="stat-l">точек крепления</div></div>
+    <div class="stat"><div class="stat-n">${s.families_two_sided}<span style="font-size:14px;color:#8A8D90">/${s.families}</span></div><div class="stat-l">семейств с двумя сторонами</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--custom)">${s.verified_joints}</div><div class="stat-l">проверенных стыков</div></div>
+    <div class="stat-note">рёбра: ${s.edges_native} native · ${s.edges_adapter} adapter · ${s.edges_custom} custom<br>custom-точек ${s.custom_points} из ${s.points} · orphan ${s.orphan_points}</div>`;
+
+  $("#caveat").innerHTML = `
+    <div class="callout-i">!</div>
+    <p><b>native здесь — номинальное совпадение семейства, а не проверенный стык.</b>
+    Аудит <code>mounting-audit.json</code> даёт 0 геометрически проверяемых стыков: позиции точек заданы
+    в локальных координатах GLB и не сравнивались. Дополнительно у ${D.summary.edges_native} из ${D.summary.edges_native}
+    native-рёбер обе стороны помечены <code>female</code> — ответной половины в каталоге нет.
+    Поэтому карта показывает не «что собрано», а <b>где совмещение вообще описано и где его нет</b>.</p>`;
+}
+
+function renderTabs() {
+  const s = D.summary;
+  $("#t-map").textContent = s.components + "×" + s.points;
+  $("#t-fam").textContent = s.families;
+  $("#t-mx").textContent = s.drives + "×" + D.matrix.cols.length;
+  $("#t-fx").textContent = "4";
+}
+
+/* ---------------- legend ---------------- */
+function renderLegend() {
+  const items = [
+    ["native", "native — семья совпала", "var(--native)", "solid"],
+    ["adapter", "adapter — нужен переходник", "var(--adapter)", "dashed"],
+    ["custom", "custom — пути нет", "var(--custom)", "dotted"],
+  ];
+  $("#legend").innerHTML = items.map(([k, t, c, style]) =>
+    `<span class="lg" data-hide="${k}"><i style="border-color:${c};border-top-style:${style}"></i>${t}</span>`).join("") +
+    `<span class="lg" data-hide="orphan"><span class="pill p-orphan">orphan</span>нет ответной стороны</span>
+     <span class="hint">клик по линии — скрыть/показать · колесо — зум · перетаскивание — пан</span>`;
+}
+
+/* ---------------- class chips & family filter ---------------- */
+function renderCls() {
+  $("#cls-row").innerHTML = D.class_order.map(c => {
+    const cls = D.classes[c] || {};
+    const n = D.nodes.filter(x => x.class === c).length;
+    return `<span class="cls on" data-cls="${c}" title="${esc(cls.purpose || "")}">
+      <i style="background:${cls.accent || '#B9BAB7'}"></i>${esc(c)} <b>${n}</b></span>`;
+  }).join("");
+}
+
+function renderFamFilter() {
+  const opts = D.families.slice().sort((a, b) => a.id.localeCompare(b.id))
+    .map(f => `<option value="${esc(f.id)}">${esc(f.id)} · ${VERDICT_RU[f.verdict] || f.verdict}</option>`).join("");
+  $("#fam-filter").innerHTML = '<option value="">все семейства</option>' + opts;
+}
+
+/* ---------------- map ---------------- */
+function visibleNodes() {
+  const q = state.q.trim().toLowerCase();
+  return D.nodes.filter(n => {
+    if (!state.classes.has(n.class)) return false;
+    if (state.fam && !(n.families.includes(state.fam) || n.legacy_families.includes(state.fam))) return false;
+    if (state.onlyConf && !(n.conflict_sev === "error" || n.conflict_sev === "warn")) return false;
+    if (state.onlyUnused && n.usage.length) return false;
+    if (state.onlyNoFam && n.canon_count > 0) return false;
+    if (q) {
+      const hay = (n.id + " " + n.name + " " + n.code + " " + n.role_name).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderMap() {
+  const vis = visibleNodes();
+  const visSet = new Set(vis.map(n => n.id));
+  const byClass = {};
+  D.class_order.forEach(c => byClass[c] = []);
+  vis.forEach(n => byClass[n.class].push(n));
+  D.class_order.forEach(c => byClass[c].sort((a, b) => (b.canon_count - a.canon_count) || a.name.localeCompare(b.name, "ru")));
+
+  const lanes = D.class_order.filter(c => byClass[c].length);
+  const maxRows = Math.max(1, ...lanes.map(c => byClass[c].length));
+  const W = L.pad * 2 + lanes.length * (L.laneW + L.gap) - L.gap;
+  const H = L.top + L.hdr + maxRows * L.row + 46;
+
+  const stage = $("#stage");
+  stage.style.width = W + "px";
+  stage.style.height = H + "px";
+
+  const pos = {};
+  let laneHTML = "", nodeHTML = "";
+  lanes.forEach((c, li) => {
+    const x = L.pad + li * (L.laneW + L.gap);
+    const cls = D.classes[c] || {};
+    laneHTML += `<div class="lane" style="left:${x - 8}px;width:${L.laneW + 8}px"></div>
+      <div class="lane-hd" style="left:${x - 8}px;width:${L.laneW + 8}px;top:0">
+        <b>${esc(c)}</b><span>${byClass[c].length}</span></div>`;
+    byClass[c].forEach((n, i) => {
+      const y = L.top + L.hdr + i * L.row;
+      pos[n.id] = { x, y };
+      const isSel = SEL === n.id;
+      const dim = SEL && !isSel ? "" : "";
+      nodeHTML += `<div class="node${n.canon_count === 0 ? " no-fam" : ""}${isSel ? " sel" : ""}${dim}"
+        data-id="${esc(n.id)}" style="left:${x}px;top:${y}px;width:${L.nodeW}px" title="${esc(n.id + " · " + n.name)}">
+        <span class="ac" style="background:${cls.accent || '#B9BAB7'}"></span>
+        <span class="nm">${esc(n.name)}</span>
+        <span class="bg">${n.canon_count ? n.canon_count + "/" + n.mate_count : ""}${n.conflict_sev === "error" ? '<i class="w" title="error-конфликт"></i>' : ""}</span>
+      </div>`;
+    });
+  });
+
+  $("#lanes").innerHTML = laneHTML + nodeHTML;
+
+  // edges
+  const paths = [];
+  D.edges.forEach(e => {
+    if (state.hidden.has(e.status)) return;
+    if (!visSet.has(e.from) || !visSet.has(e.to)) return;
+    const a = pos[e.from], b = pos[e.to];
+    if (!a || !b) return;
+    const ay = a.y + L.nodeH / 2, by = b.y + L.nodeH / 2;
+    let sx, tx, dir;
+    if (b.x > a.x) { sx = a.x + L.nodeW; tx = b.x; dir = 1; }
+    else if (b.x < a.x) { sx = a.x; tx = b.x + L.nodeW; dir = -1; }
+    else { sx = a.x + L.nodeW; tx = b.x + L.nodeW; dir = 1; }
+    const dx = Math.max(34, Math.abs(tx - sx) * 0.45);
+    const d = `M${sx},${ay} C${sx + dir * dx},${ay} ${tx - dir * dx},${by} ${tx},${by}`;
+    const hot = SEL && (e.from === SEL || e.to === SEL);
+    const dim = SEL && !hot;
+    paths.push({ d, cls: "e-" + e.status + (hot ? " e-hot" : "") + (dim ? " e-dim" : ""), id: e.id });
+  });
+  const svg = $("#edges");
+  svg.setAttribute("width", W);
+  svg.setAttribute("height", H);
+  svg.innerHTML = defs() + paths.map(p => `<path id="${p.id}" class="${p.cls}" d="${p.d}"></path>`).join("");
+
+  // selection dimming of nodes
+  if (SEL) {
+    const nb = new Set([SEL]);
+    D.edges.forEach(e => { if (e.from === SEL) nb.add(e.to); if (e.to === SEL) nb.add(e.from); });
+    $$(".node").forEach(el => { if (!nb.has(el.dataset.id)) el.classList.add("dim"); });
+  }
+  if (state.q.trim()) {
+    const q = state.q.trim().toLowerCase();
+    $$(".node").forEach(el => {
+      const n = N[el.dataset.id];
+      if ((n.id + " " + n.name + " " + n.code).toLowerCase().includes(q)) el.classList.add("hit");
+    });
+  }
+  if (!vis.length) {
+    $("#lanes").insertAdjacentHTML("beforeend",
+      `<div style="position:absolute;left:${L.pad}px;top:${L.top + L.hdr}px;font:12px system-ui;color:#8A8D90">
+        Под фильтры не попал ни один компонент.</div>`);
+  }
+  applyTransform();
+}
+
+function defs() {
+  return `<defs>
+    <marker id="ar-native" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L8,4 L0,8 z" fill="#3F6B57"/></marker>
+    <marker id="ar-adapter" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+      <path d="M0,0 L8,4 L0,8 z" fill="#A9791F"/></marker>
+    <marker id="ar-custom" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L8,4 L0,8 z" fill="#A5483F"/></marker>
+  </defs>`;
+}
+
+function applyTransform() {
+  const st = $("#stage"), sc = $("#map-scroll");
+  const H = parseFloat(st.style.height) || 0;
+  const hpx = Math.min(1240, Math.max(430, Math.round(H * state.k + 26)));
+  sc.style.height = hpx + "px";
+  $("#card").style.height = hpx + "px";
+  st.style.transform = `translate(${state.tx}px,${state.ty}px) scale(${state.k})`;
+}
+
+function fit(mode) {
+  const box = $("#map-scroll").getBoundingClientRect();
+  const st = $("#stage");
+  const w = parseFloat(st.style.width), h = parseFloat(st.style.height);
+  if (!w || !h) return;
+  if (mode === "all") {
+    state.k = Math.max(0.2, Math.min((box.width - 18) / w, (box.height - 18) / h, 1.1));
+    state.tx = Math.max(6, (box.width - w * state.k) / 2);
+    state.ty = Math.max(6, (box.height - h * state.k) / 2);
+  } else {
+    state.k = Math.max(0.3, Math.min(1.25, (box.width - 14) / w));
+    state.tx = 7;
+    state.ty = 6;
+  }
+  applyTransform();
+}
+
+/* ---------------- detail card ---------------- */
+function renderCard(id) {
+  const n = N[id];
+  const card = $("#card");
+  if (!n) { card.classList.remove("on"); $("#map-shell").classList.remove("with-card"); return; }
+  const cls = D.classes[n.class] || {};
+  const dirIcon = d => d === "out" ? "→" : d === "in" ? "←" : "·";
+  const famPill = (fam) => {
+    if (!fam || fam === "custom") return `<span class="pill p-custom">custom</span>`;
+    const f = F[fam];
+    const k = f ? (f.media ? "p-media" : f.verdict === "two_sided" ? "p-native" : "p-adapter") : "p-neutral";
+    return `<span class="pill ${k} link" data-gofam="${esc(fam)}" style="cursor:pointer">${esc(fam)}</span>`;
+  };
+  const rows = n.mates.map(m => `
+    <tr>
+      <td><span class="dir">${dirIcon(m.dir)}</span> ${esc(m.p)}<div style="font-family:var(--mono);font-size:7.5px;color:#9A9DA0">${esc(m.role)} · ${esc(m.kind)}</div></td>
+      <td>${famPill(m.family)}<div style="font-size:8.5px;color:#75787C;margin-top:2px">${esc(m.std || "—")}</div>
+        ${m.orphan ? `<div class="pill p-orphan" style="margin-top:3px" title="${esc(m.orphan.detail)}">orphan · ${esc(m.orphan.reason)}</div>` : ""}
+        ${m.conn_note ? `<div class="note" style="border:0;padding:0;margin-top:3px">${esc(m.conn_note)}</div>` : ""}
+      </td>
+      <td style="white-space:nowrap;font-size:8.5px">${esc(m.gender || "—")}<div style="color:#9A9DA0">${esc(CONF_RU[m.conf] || m.conf || "")}</div></td>
+    </tr>`).join("");
+
+  const cf = (n.conflicts || []).map(cid => {
+    const c = D.conflicts.find(x => x.id === cid);
+    if (!c) return "";
+    return `<div class="cf ${c.severity}"><b>${esc(c.id)}</b> ${esc(c.title)}</div>`;
+  }).join("") || '<div class="empty">нет конфликтов, привязанных к компоненту</div>';
+
+  card.innerHTML = `
+    <div class="card-hd">
+      <button class="x" data-close="1">×</button>
+      <div class="k"><span>${esc(n.code)}</span><span>${esc(n.class)}</span></div>
+      <h3>${esc(n.name)}</h3>
+      <div class="sub">
+        <span class="pill p-neutral">${esc(n.role_name)}</span>
+        ${n.motion !== "none" ? `<span class="pill p-neutral">motion: ${esc(n.motion)}</span>` : ""}
+        <span class="pill ${n.status === "archived" ? "p-arch" : "p-neutral"}"${n.status === "archived" ? ' title="архив: запись сохранена, но не используется ни одним устройством"' : ""}>${esc(n.status === "archived" ? "архив" : n.status)}</span>
+      </div>
+    </div>
+    <div class="card-bd">
+      <p class="purpose">${esc(n.purpose)}</p>
+      <div class="kv">
+        <div><b>${n.mate_count}</b><span>точек</span></div>
+        <div><b>${n.canon_count}</b><span>семейство</span></div>
+        <div><b style="color:${n.orphan_points ? "var(--custom)" : "inherit"}">${n.orphan_points}</b><span>orphan</span></div>
+        <div><b>${n.usage.length}</b><span>устройств</span></div>
+      </div>
+      <div class="sec">Интерфейсы<span>${n.families.length ? n.families.map(esc).join(", ") : "канонических нет"}</span></div>
+      <table class="mates"><thead><tr><th>точка</th><th>семейство / стандарт</th><th>пол · conf</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      ${n.dof && n.dof.length ? `<div class="sec">Степени свободы</div><div class="chips">${n.dof.map(d =>
+        `<span class="chip">${esc(d.id)} · ${esc(d.joint)}${d.axis ? " " + esc(d.axis) : ""}${d.stroke_m ? " · " + Math.round(d.stroke_m * 1000) + " мм" : ""}</span>`).join("")}</div>` : ""}
+      ${n.limits ? `<div class="sec">Ограничения</div><div class="note">${esc(n.limits)}</div>` : ""}
+      <div class="sec">Использование в устройствах</div>
+      ${n.usage.length ? `<div class="chips">${n.usage.map(u => `<span class="chip" title="${esc(u.code || "")}">${esc(u.name)}</span>`).join("")}</div>`
+        : '<div class="empty">не входит ни в одно устройство каталога (only unused)</div>'}
+      <div class="sec">Конфликты аудита</div>${cf}
+      ${n.declared_compat && n.declared_compat.length ? `<div class="sec">Декларируемая совместимость<span>не коннектор</span></div>
+        <div class="chips">${n.declared_compat.map(c => `<span class="chip">${esc(c)}</span>`).join("")}</div>` : ""}
+    </div>`;
+  card.classList.add("on");
+  $("#map-shell").classList.add("with-card");
+  $$("[data-gofam]", card).forEach(el => el.onclick = () => { switchTab("fam"); selectFamily(el.dataset.gofam); });
+}
+
+function selectNode(id) {
+  SEL = SEL === id ? null : id;
+  renderMap();
+  if (SEL) renderCard(id); else { $("#card").classList.remove("on"); $("#map-shell").classList.remove("with-card"); }
+}
+
+/* ---------------- families ---------------- */
+function renderFamList() {
+  $("#fam-list").innerHTML = D.families.map(f => `
+    <div class="fam-item${FAM_SEL === f.id ? " on" : ""}" data-fam="${esc(f.id)}">
+      <span class="id">${esc(f.id)}</span>
+      <span class="verdict v-${f.verdict}">${VERDICT_RU[f.verdict] || f.verdict}</span>
+      <span class="mt">${f.points} точек · ${f.offers.length} out / ${f.accepts.length} in</span>
+    </div>`).join("");
+  $$(".fam-item").forEach(el => el.onclick = () => selectFamily(el.dataset.fam));
+  if (!FAM_SEL) selectFamily(D.families[0].id);
+}
+
+function selectFamily(fid) {
+  FAM_SEL = fid;
+  const f = F[fid];
+  $$(".fam-item").forEach(el => el.classList.toggle("on", el.dataset.fam === fid));
+  const note = f.media
+    ? `<div class="fam-note">Медиа-семейство: «сдача» и «приём» — это порты, а не стык. В библиотеке нет ни одного
+       кабеля или шланга как компонента (конфликт MED-04), поэтому пары портов здесь не соединяются:
+       ${f.media_kind === "power" ? "нужен силовой кабель" : f.media_kind === "signal" ? "нужен кабель данных" : "нужен шланг"}.</div>`
+    : f.verdict === "offer_only"
+      ? `<div class="fam-note">Семейство одностороннее: есть точки сдачи, нет ни одной точки приёма.
+         Это не совместимость, а обрыв — ровно то, что фиксируют конфликты TOOL-07/TOOL-08/MTG-01.</div>`
+      : f.verdict === "accept_only"
+        ? `<div class="fam-note">Семейство одностороннее: насадки есть, привода нет. Посадка существует только на бумаге.</div>`
+        : "";
+
+  const chip = (p, side) => `
+    <button class="pt" data-comp="${esc(p.comp)}" title="${esc(p.comp)} · ${esc(p.p)} · ${esc(p.gender || "пол не задан")}">
+      ${esc(N[p.comp] ? N[p.comp].name : p.comp)}
+      <span class="pid">${esc(p.comp)} · ${esc(p.p)}${p.conf ? " · " + esc(p.conf) : ""}</span>
+    </button>`;
+
+  $("#fam-body").innerHTML = `
+    <div class="fam-title">
+      <h3>${esc(f.id)}</h3>
+      <span class="verdict v-${f.verdict}">${VERDICT_RU[f.verdict] || f.verdict}</span>
+      <span class="st">статус реестра: ${esc(f.status)}${f.replaces.length ? " · заменяет " + esc(f.replaces.join(", ")) : ""}</span>
+    </div>
+    <p class="fam-spec">${esc(f.spec || "—")}</p>
+    ${f.rule ? `<p class="fam-rule"><b>правило:</b> ${esc(f.rule)}</p>` : ""}
+    ${f.sides ? `<p class="fam-rule"><b>стороны:</b> ${esc(f.sides)}</p>` : ""}
+    <div class="fam-counts">
+      <span><b>${f.points}</b>точек</span>
+      <span><b>${f.components.length}</b>компонентов</span>
+      <span><b>${f.offers.length}</b>сдача (out)</span>
+      <span><b>${f.accepts.length}</b>приём (in)</span>
+      <span><b>${f.neutral.length}</b>без направления</span>
+      <span><b>${f.direct_mate ? "да" : "нет"}</b>прямой стык</span>
+    </div>
+    <div class="star" id="star">
+      <svg id="star-svg"></svg>
+      <div class="side">
+        <div class="side-hd">сдача · ${f.offers.length}</div>
+        ${f.offers.length ? f.offers.map(p => chip(p)).join("") : '<div class="empty">нет точек сдачи</div>'}
+      </div>
+      <div class="hub">
+        <div class="h-id">${esc(f.id)}</div>
+        <div class="h-bar"></div>
+        <div class="h-v">${f.offers.length} out → ${f.accepts.length} in<br>${esc(f.geometry || "")}</div>
+      </div>
+      <div class="side off">
+        <div class="side-hd">приём · ${f.accepts.length}</div>
+        ${f.accepts.length ? f.accepts.map(p => chip(p)).join("") : '<div class="empty">нет точек приёма</div>'}
+      </div>
+    </div>
+    ${note}
+    ${f.conflicts.length ? `<div class="fam-conflicts"><div class="sec">Связанные конфликты</div>${f.conflicts.map(cid => {
+      const c = D.conflicts.find(x => x.id === cid);
+      return c ? `<div class="cf ${c.severity}"><b>${esc(c.id)}</b> ${esc(c.title)}<div class="note">${esc(c.statement || "")}</div></div>` : "";
+    }).join("")}</div>` : ""}`;
+
+  $$("#fam-body [data-comp]").forEach(el => el.onclick = () => {
+    switchTab("map"); SEL = null; selectNode(el.dataset.comp);
+  });
+  requestAnimationFrame(drawStar);
+}
+
+function drawStar() {
+  const star = $("#star"); if (!star) return;
+  const svg = $("#star-svg");
+  const box = star.getBoundingClientRect();
+  svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+  const hub = star.querySelector(".hub").getBoundingClientRect();
+  const hy = hub.top + hub.height / 2 - box.top;
+  const out = [];
+  $$("#star .side:not(.off) .pt", star).forEach(el => {
+    const r = el.getBoundingClientRect();
+    out.push(`<path d="M${r.right - box.left},${r.top + r.height / 2 - box.top} C${(r.right - box.left + hub.left - box.left) / 2},${r.top + r.height / 2 - box.top} ${(r.right - box.left + hub.left - box.left) / 2},${hy} ${hub.left - box.left},${hy}" stroke="#A9791F" stroke-width="1" fill="none" opacity=".5"/>`);
+  });
+  $$("#star .side.off .pt", star).forEach(el => {
+    const r = el.getBoundingClientRect();
+    out.push(`<path d="M${hub.right - box.left},${hy} C${(hub.right - box.left + r.left - box.left) / 2},${hy} ${(hub.right - box.left + r.left - box.left) / 2},${r.top + r.height / 2 - box.top} ${r.left - box.left},${r.top + r.height / 2 - box.top}" stroke="#3F6B57" stroke-width="1" fill="none" opacity=".5"/>`);
+  });
+  svg.innerHTML = out.join("");
+}
+
+/* ---------------- matrix ---------------- */
+function renderMatrix() {
+  const m = D.matrix;
+  const head = `<thead><tr><th style="position:sticky;left:0;z-index:3">привод / выход</th>${m.cols.map(c =>
+    `<th title="${esc(c.family)}">${esc(c.family.replace("CJ-TOOL-", "").replace("CJ-", ""))}<br><span style="font-size:7.5px;color:#9A9DA0;letter-spacing:0">${c.count} шт</span></th>`).join("")}</tr></thead>`;
+  const rows = m.drives.map(d => {
+    const key = d.comp + "|" + d.p;
+    const tds = m.cols.map(c => {
+      const cell = m.cells.find(x => x.d === key && x.family === c.family);
+      if (!cell) return `<td class="c">·</td>`;
+      const lbl = cell.status === "native" ? "native" : cell.status === "adapter" ? "adp" : "—";
+      return `<td class="c s-${cell.status}" data-cell="${esc(key)}|${esc(c.family)}" title="${esc(cell.note)}">${lbl}${cell.count ? `<span style="font-size:7.5px;opacity:.6">·${cell.count}</span>` : ""}</td>`;
+    }).join("");
+    return `<tr><th>${esc(d.name)}<span class="f">${esc(d.comp)} · ${esc(d.p)} · ${esc(d.family)}</span></th>${tds}</tr>`;
+  }).join("");
+  $("#mx-wrap").innerHTML = `<table class="mx">${head}<tbody>${rows}</tbody></table>`;
+  $$("#mx-wrap td.c[data-cell]").forEach(td => td.onclick = () => showCell(td.dataset.cell, td));
+}
+
+function showCell(key, td) {
+  const [ck, fam] = key.split("|");
+  const [comp, p] = ck.split("|");
+  const cell = D.matrix.cells.find(x => x.d === ck && x.family === fam);
+  const d = D.matrix.drives.find(x => x.comp === comp && x.p === p);
+  if (!cell || !d) return;
+  $$("#mx-wrap td.c").forEach(t => t.classList.remove("s-on"));
+  if (td) td.classList.add("s-on");
+  const col = D.matrix.cols.find(c => c.family === fam);
+  const names = (cell.tools || []).map(t => `<span class="chip">${esc(N[t] ? N[t].name : t)}<span style="font-family:var(--mono);font-size:8px;color:#9A9DA0"> ${esc(t)}</span></span>`);
+  $("#mx-detail").innerHTML = `
+    <h4>${esc(d.name)} → ${esc(fam)} · <span class="pill ${cell.status === "native" ? "p-native" : cell.status === "adapter" ? "p-adapter" : "p-custom"}">${cell.status}</span></h4>
+    <div style="font-size:10.5px;color:#6E7175">привод: <code>${esc(d.comp)} · ${esc(d.p)} · ${esc(d.family)}</code> · ${esc(d.motion)}
+      ${d.std ? " · " + esc(d.std) : ""}<br>${esc(cell.note)}${cell.parts ? " · части: " + esc(cell.parts.join(" + ")) : ""}</div>
+    <div class="sec">насадки в этой колонке (${col.count})</div>
+    <div class="chips">${names.join("") || '<span class="empty">пусто</span>'}</div>
+    ${cell.status === "custom" ? '<div class="note">Совместимость не заявляется: канонического пути между этими семействами нет. Нужен новый переходник — в реестре его нет.</div>' : ""}
+    ${cell.status === "native" ? '<div class="note">Номинально: попарная геометрия не проверялась, и у обеих сторон пол female.</div>' : ""}`;
+}
+
+function renderAdapters() {
+  $("#ad-cards").innerHTML = D.adapters.map(a => {
+    const st = /запрещ/i.test(a.status) ? "custom" : /опцион/i.test(a.status) ? "neutral" : "adapter";
+    return `<div class="ad">
+      <div class="flow"><b>${esc(a.from_)}</b><span class="arr">→</span><b>${esc(a.to)}</b>
+        <span class="pill p-${st}" style="margin-left:auto">${esc(a.status)}</span></div>
+      <div class="part">${esc(a.part)}</div>
+      <p>${esc(a.note)}</p>
+    </div>`;
+  }).join("");
+}
+
+/* ---------------- focus ---------------- */
+function renderFocus() {
+  const titles = {
+    oscillator: ["Осциллятор", "motion_oscillating"],
+    pistons: ["Поршни", "motion_piston_*"],
+    probes: ["Зонды", "work_probe_*"],
+    adapter: ["Переходник", "work_attach_adapter"],
+  };
+  $("#focus-host").innerHTML = Object.keys(D.focus).map(k => {
+    const g = D.focus[k];
+    const [t, sub] = titles[k] || [k, ""];
+    return `<div class="fx"><div class="fx-hd"><h3>${esc(t)}</h3>
+      <p class="lede">${esc(g.lede)}</p></div>
+      <div class="fx-cards">${(g.cards || []).map(c => fxCard(c)).join("")}</div></div>`;
+  }).join("");
+}
+
+function fxCard(c) {
+  const n = N[c.comp] || {};
+  const famPill = f => {
+    if (!f || f === "custom") return `<span class="pill p-custom">custom</span>`;
+    const ff = F[f];
+    return `<span class="pill ${ff && ff.verdict === "two_sided" ? "p-native" : "p-adapter"}">${esc(f)}</span>`;
+  };
+  const can = (c.can || []).map(x => `<span class="chip link" data-comp="${esc(x.comp)}">${esc(x.name)} <span style="font-family:var(--mono);font-size:8px;color:#9A9DA0">${esc(x.family)}</span></span>`).join("");
+  const adp = (c.can_adapted || []).map(x => `<span class="chip">${esc(x.target)} · ${esc((x.parts || []).join(" + "))} · ${x.count} шт</span>`).join("");
+  const no = (c.cannot_families || []).filter(x => x.count).map(x => `<span class="chip" style="border-color:rgba(165,72,63,.3);color:#8E3B33">${esc(x.family)} · ${x.count}</span>`).join("");
+  const mounts = (c.mounts_on || []).length ? `<div class="fx-l">mounts_on</div><div class="fx-list">${[].concat(...c.mounts_on).map(m => `<span class="chip">${esc(m)}</span>`).join("")}</div>` : "";
+  return `<div class="fx-c">
+    <h4>${esc(c.name)}</h4>
+    <div class="code">${esc(c.comp)} · ${esc(n.code || "")} · motion: ${esc(c.motion || n.motion || "—")}</div>
+    <div class="fx-if">${esc(c.iface.dir === "out" ? "выход" : "вход")} ${esc(c.iface.p)} · ${esc(c.iface.family)}<br>${esc(c.iface.std || "")}</div>
+    <div class="fx-l">крепится · native</div>
+    ${can ? `<div class="fx-list">${can}</div>` : '<div class="fx-no">ничего: в каталоге нет ни одного ответного компонента</div>'}
+    <div class="fx-l">крепится через переходник</div>
+    ${adp ? `<div class="fx-list">${adp}</div>` : '<div class="fx-no">переходник не определён (adapter_matrix пуст для этой посадки)</div>'}
+    <div class="fx-l">не крепится</div>
+    <div class="fx-list">${no || '<span class="empty">—</span>'}</div>
+    ${mounts}
+    ${c.verdict ? `<div class="note">${esc(c.verdict)}</div>` : ""}
+    ${c.source ? `<div class="note src">${esc(c.source)}</div>` : ""}
+  </div>`;
+}
+
+/* ---------------- footer ---------------- */
+function renderFoot() {
+  const s = D.summary;
+  $("#foot").innerHTML = `
+    <div><b>Данные.</b> ${D.sources.map(x => `<code>${esc(x.path.split("/").pop())}</code> ${esc(x.sha256_16)}`).join(" · ")} ·
+      сгенерировано ${esc(D.generated)} · режим ${esc(D.mode)}.</div>
+    <div style="margin-top:6px"><b>Правила рёбер.</b> native — ${esc(D.rules.native)} adapter — ${esc(D.rules.adapter)}
+      custom — ${esc(D.rules.custom)} orphan — ${esc(D.rules.orphan)}</div>
+    <div style="margin-top:6px"><b>Ограничения.</b> ${esc(D.rules.geometry)} Точек в каталоге ${s.points_catalog},
+      в аудите ${s.points_audit} — расхождение 1 точку объясняет аудит; карта берёт каталог.
+      ${esc(D.disclaimer)}</div>`;
+}
+
+/* ---------------- wiring ---------------- */
+function switchTab(t) {
+  state.tab = t;
+  $$(".tab").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  ["map", "fam", "mx", "fx"].forEach(v => $("#view-" + v).hidden = v !== t);
+  if (t === "fam") requestAnimationFrame(drawStar);
+  if (t === "map") applyTransform();
+}
+
+function wire() {
+  $$(".tab").forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+  $("#q").addEventListener("input", e => { state.q = e.target.value; renderMap(); });
+  $("#fam-filter").addEventListener("change", e => { state.fam = e.target.value; renderMap(); });
+  $("#onlyConf").addEventListener("change", e => { state.onlyConf = e.target.checked; $("#c-conf").classList.toggle("on", e.target.checked); renderMap(); });
+  $("#onlyUnused").addEventListener("change", e => { state.onlyUnused = e.target.checked; $("#c-unused").classList.toggle("on", e.target.checked); renderMap(); });
+  $("#onlyNoFam").addEventListener("change", e => { state.onlyNoFam = e.target.checked; $("#c-nofam").classList.toggle("on", e.target.checked); renderMap(); });
+  $("#reset").onclick = () => {
+    state.q = ""; state.fam = ""; state.onlyConf = state.onlyUnused = state.onlyNoFam = false;
+    state.classes = new Set(D.class_order); state.hidden.clear(); SEL = null;
+    $("#q").value = ""; $("#fam-filter").value = "";
+    ["#onlyConf", "#onlyUnused", "#onlyNoFam"].forEach(s => { $(s).checked = false; $(s).closest(".chk").classList.remove("on"); });
+    $$(".cls").forEach(c => c.classList.add("on"));
+    $("#card").classList.remove("on"); $("#map-shell").classList.remove("with-card");
+    renderMap(); fit("width");
+  };
+
+  $("#cls-row").addEventListener("click", e => {
+    const el = e.target.closest(".cls"); if (!el) return;
+    const c = el.dataset.cls;
+    if (state.classes.has(c)) state.classes.delete(c); else state.classes.add(c);
+    el.classList.toggle("on", state.classes.has(c));
+    renderMap();
+  });
+
+  $("#legend").addEventListener("click", e => {
+    const el = e.target.closest(".lg"); if (!el) return;
+    const k = el.dataset.hide;
+    if (state.hidden.has(k)) state.hidden.delete(k); else state.hidden.add(k);
+    el.classList.toggle("off", state.hidden.has(k));
+    renderMap();
+  });
+
+  $("#lanes").addEventListener("click", e => {
+    const el = e.target.closest(".node"); if (!el) return;
+    selectNode(el.dataset.id);
+  });
+
+  $("#card").addEventListener("click", e => {
+    if (e.target.closest("[data-close]")) { SEL = null; renderMap(); $("#card").classList.remove("on"); $("#map-shell").classList.remove("with-card"); }
+  });
+
+  $("#z-in").onclick = () => zoom(1.18);
+  $("#z-out").onclick = () => zoom(1 / 1.18);
+  $("#z-fit").onclick = () => fit("all");
+
+  const scroll = $("#map-scroll");
+  scroll.addEventListener("wheel", e => {
+    e.preventDefault();
+    const r = scroll.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const f = Math.exp(-e.deltaY * 0.0016);
+    const k2 = Math.min(2.6, Math.max(0.2, state.k * f));
+    state.tx = mx - (mx - state.tx) * (k2 / state.k);
+    state.ty = my - (my - state.ty) * (k2 / state.k);
+    state.k = k2;
+    applyTransform();
+  }, { passive: false });
+
+  let drag = null;
+  scroll.addEventListener("pointerdown", e => {
+    if (e.target.closest(".node")) return;
+    drag = { x: e.clientX, y: e.clientY, tx: state.tx, ty: state.ty };
+    scroll.classList.add("drag");
+  });
+  window.addEventListener("pointermove", e => {
+    if (!drag) return;
+    state.tx = drag.tx + (e.clientX - drag.x);
+    state.ty = drag.ty + (e.clientY - drag.y);
+    applyTransform();
+  });
+  window.addEventListener("pointerup", () => { drag = null; scroll.classList.remove("drag"); });
+
+  window.addEventListener("resize", () => { if (state.tab === "fam") drawStar(); });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") { SEL = null; renderMap(); $("#card").classList.remove("on"); $("#map-shell").classList.remove("with-card"); }
+  });
+
+  fit("width");
+  setTimeout(() => fit("width"), 60);
+}
+
+function zoom(f) {
+  const scroll = $("#map-scroll"), r = scroll.getBoundingClientRect();
+  const mx = r.width / 2, my = r.height / 2;
+  const k2 = Math.min(2.6, Math.max(0.2, state.k * f));
+  state.tx = mx - (mx - state.tx) * (k2 / state.k);
+  state.ty = my - (my - state.ty) * (k2 / state.k);
+  state.k = k2;
+  applyTransform();
+}
+</script>
+</body>
+</html>

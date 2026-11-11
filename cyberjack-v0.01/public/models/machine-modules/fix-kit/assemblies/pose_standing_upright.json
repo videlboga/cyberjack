@@ -1,0 +1,79 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_standing_upright",
+  "name": "Вертикально / стоя",
+  "subtitle": "standing / upright",
+  "refs": [
+    "vol-04 · 089",
+    "vol-03 · 066",
+    "vol-03 · 070",
+    "vol-03 · 074",
+    "vol-03 · 077",
+    "vol-03 · 088",
+    "vol-04 · 092"
+  ],
+  "body": "Тело вертикально, спина на спинке/панели, одна нога согнута или поднята, руки на поручнях/над головой; колени могут быть полусогнуты.",
+  "summary": "Высокая рама: четыре стойки, спинка 90°, боковые выносы для рук, нижняя поперечина/подставка для стоп.",
+  "status": "ready",
+  "built_count": 10,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_post_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_rail_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_corner_node",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_cross_node",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_foot",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_backboard",
+      "qty": 1,
+      "status": "built"
+    },
+    {
+      "id": "fix_tilt",
+      "qty": 1,
+      "status": "built"
+    },
+    {
+      "id": "fix_boom_500",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_pivot",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_carriage",
+      "qty": 4,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "backboard — спина/таз",
+    "wrist — боковые поручни",
+    "ankle — нижняя поперечина/подставка"
+  ],
+  "effect": "Фронтальная зона; вес тела — на спинке/подставке, не на манжетах.",
+  "note": "089/070/088 — у одной стойки, 066/074/077/092 — у панели/рамы; это не X-контур."
+}

@@ -1,0 +1,869 @@
+{
+ "SexMachineModel-065": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_11",
+    "name": "1.stl",
+    "dims": [
+     0.66,
+     0.81,
+     1.01
+    ],
+    "faces": 33611
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_11",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.5331,
+     1.6596,
+     -3.3741
+    ],
+    "quat_xyzw": [
+     0.70711,
+     0.70711,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     0.7998,
+     0.7998,
+     0.7998
+    ],
+    "dims": [
+     0.66,
+     0.81,
+     1.01
+    ],
+    "faces": 33611
+   }
+  ],
+  "glb_nohuman_bytes": 4435372,
+  "sec": 37.7
+ },
+ "SexMachineModel-066": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_6",
+    "name": "1.stl",
+    "dims": [
+     0.51,
+     0.58,
+     1.17
+    ],
+    "faces": 20088
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_6",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.8959,
+     1.835,
+     -4.9088
+    ],
+    "quat_xyzw": [
+     0.70711,
+     0.70711,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.51,
+     0.58,
+     1.17
+    ],
+    "faces": 20088
+   },
+   {
+    "resource": "mesh_6",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     3.4904,
+     1.835,
+     -5.3248
+    ],
+    "quat_xyzw": [
+     0.70711,
+     0.70711,
+     -0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.51,
+     0.58,
+     1.17
+    ],
+    "faces": 20088
+   }
+  ],
+  "glb_nohuman_bytes": 2874904,
+  "sec": 9.4
+ },
+ "SexMachineModel-067": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.74,
+     0.74,
+     0.89
+    ],
+    "faces": 33239
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     1.5106,
+     0.4089,
+     -1.4894
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.74,
+     0.74,
+     0.89
+    ],
+    "faces": 33239
+   }
+  ],
+  "glb_nohuman_bytes": 4401540,
+  "sec": 12.6
+ },
+ "SexMachineModel-068": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.6,
+     0.97,
+     1.03
+    ],
+    "faces": 33095
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     1.6553,
+     0.3829,
+     -1.1866
+    ],
+    "quat_xyzw": [
+     -0.45417,
+     -0.40536,
+     0.59189,
+     -0.52828
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.6,
+     0.97,
+     1.03
+    ],
+    "faces": 33095
+   }
+  ],
+  "glb_nohuman_bytes": 4387668,
+  "sec": 11.4
+ },
+ "SexMachineModel-069": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.79,
+     0.98,
+     1.31
+    ],
+    "faces": 32556
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     0.888,
+     0.8757,
+     -1.2066
+    ],
+    "quat_xyzw": [
+     0.70711,
+     0.70711,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.79,
+     0.98,
+     1.31
+    ],
+    "faces": 32556
+   }
+  ],
+  "glb_nohuman_bytes": 4096280,
+  "sec": 11.2
+ },
+ "SexMachineModel-070": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.51,
+     1.05,
+     1.45
+    ],
+    "faces": 30978
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     0.9303,
+     1.0494,
+     -2.0049
+    ],
+    "quat_xyzw": [
+     0.81361,
+     0.58141,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.51,
+     1.05,
+     1.45
+    ],
+    "faces": 30978
+   }
+  ],
+  "glb_nohuman_bytes": 4159024,
+  "sec": 10.9
+ },
+ "SexMachineModel-071": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.5,
+     1.03,
+     1.05
+    ],
+    "faces": 31179
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     1.4363,
+     0.745,
+     -1.1919
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.5,
+     1.03,
+     1.05
+    ],
+    "faces": 31179
+   }
+  ],
+  "glb_nohuman_bytes": 3731796,
+  "sec": 11.0
+ },
+ "SexMachineModel-072": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "2.stl",
+    "dims": [
+     0.36,
+     1.14,
+     1.55
+    ],
+    "faces": 32459
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "2.stl",
+    "name": "2.stl",
+    "loc": [
+     1.1251,
+     0.9794,
+     -1.2207
+    ],
+    "quat_xyzw": [
+     0.69717,
+     0.71691,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     0.97,
+     0.97,
+     0.97
+    ],
+    "dims": [
+     0.36,
+     1.14,
+     1.55
+    ],
+    "faces": 32459
+   }
+  ],
+  "glb_nohuman_bytes": 4349796,
+  "sec": 9.6
+ },
+ "SexMachineModel-073": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.63,
+     0.65,
+     0.72
+    ],
+    "faces": 23908
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     1.2497,
+     0.9487,
+     -1.4129
+    ],
+    "quat_xyzw": [
+     0.70711,
+     0.70711,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.35,
+     1.35,
+     1.35
+    ],
+    "dims": [
+     0.63,
+     0.65,
+     0.72
+    ],
+    "faces": 23908
+   }
+  ],
+  "glb_nohuman_bytes": 3224948,
+  "sec": 17.4
+ },
+ "SexMachineModel-074": {
+  "humanoid_defs": [],
+  "anchors": [],
+  "note": "no figure found"
+ },
+ "SexMachineModel-075": {
+  "humanoid_defs": [],
+  "anchors": [],
+  "note": "no figure found"
+ },
+ "SexMachineModel-076": {
+  "humanoid_defs": [],
+  "anchors": [],
+  "note": "no figure found"
+ },
+ "SexMachineModel-077": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.63,
+     1.1,
+     1.42
+    ],
+    "faces": 32714
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.396,
+     1.611,
+     -4.0343
+    ],
+    "quat_xyzw": [
+     0.70711,
+     0.70711,
+     0.0,
+     0.0
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.63,
+     1.1,
+     1.42
+    ],
+    "faces": 32714
+   }
+  ],
+  "glb_nohuman_bytes": 3916224,
+  "sec": 11.3
+ },
+ "SexMachineModel-078": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.69,
+     0.81,
+     0.93
+    ],
+    "faces": 33012
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.71,
+     1.4432,
+     -4.1658
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.69,
+     0.81,
+     0.93
+    ],
+    "faces": 33012
+   }
+  ],
+  "glb_nohuman_bytes": 4018116,
+  "sec": 10.1
+ },
+ "SexMachineModel-079": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_8",
+    "name": "2.stl",
+    "dims": [
+     0.55,
+     0.78,
+     1.35
+    ],
+    "faces": 33393
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_8",
+    "def": "2.stl",
+    "name": "2.stl",
+    "loc": [
+     2.946,
+     1.637,
+     -3.6638
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.55,
+     0.78,
+     1.35
+    ],
+    "faces": 33393
+   }
+  ],
+  "glb_nohuman_bytes": 4222312,
+  "sec": 9.6
+ },
+ "SexMachineModel-080": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.55,
+     0.89,
+     1.21
+    ],
+    "faces": 33501
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.4897,
+     1.6282,
+     -3.5155
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.55,
+     0.89,
+     1.21
+    ],
+    "faces": 33501
+   }
+  ],
+  "glb_nohuman_bytes": 4137376,
+  "sec": 24.2
+ },
+ "SexMachineModel-081": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_0",
+    "name": "1.stl",
+    "dims": [
+     0.68,
+     0.75,
+     0.83
+    ],
+    "faces": 32870
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_0",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.3309,
+     1.8756,
+     -3.8785
+    ],
+    "quat_xyzw": [
+     0.70711,
+     0.70711,
+     -0.0,
+     -0.0
+    ],
+    "scale": [
+     0.83,
+     0.83,
+     0.83
+    ],
+    "dims": [
+     0.68,
+     0.75,
+     0.83
+    ],
+    "faces": 32870
+   }
+  ],
+  "glb_nohuman_bytes": 4246608,
+  "sec": 14.2
+ },
+ "SexMachineModel-082": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_31",
+    "name": "1.stl",
+    "dims": [
+     0.78,
+     0.87,
+     1.25
+    ],
+    "faces": 30939
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_31",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.5428,
+     1.4745,
+     -3.8023
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "dims": [
+     0.78,
+     0.87,
+     1.25
+    ],
+    "faces": 30939
+   }
+  ],
+  "glb_nohuman_bytes": 7898264,
+  "sec": 23.8
+ },
+ "SexMachineModel-083": {
+  "humanoid_defs": [],
+  "anchors": [],
+  "note": "no figure found"
+ },
+ "SexMachineModel-084": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_23",
+    "name": "3.stl",
+    "dims": [
+     0.36,
+     0.6,
+     0.94
+    ],
+    "faces": 33538
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_23",
+    "def": "3.stl",
+    "name": "3.stl",
+    "loc": [
+     2.5359,
+     1.6566,
+     -3.7692
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.36,
+     0.6,
+     0.94
+    ],
+    "faces": 33538
+   }
+  ],
+  "glb_nohuman_bytes": 5076100,
+  "sec": 12.3
+ },
+ "SexMachineModel-085": {
+  "humanoid_defs": [],
+  "anchors": [],
+  "note": "no figure found"
+ },
+ "SexMachineModel-086": {
+  "humanoid_defs": [],
+  "anchors": [],
+  "note": "no figure found"
+ },
+ "SexMachineModel-087": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_2",
+    "name": "1.stl",
+    "dims": [
+     0.67,
+     0.71,
+     0.72
+    ],
+    "faces": 32145
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_2",
+    "def": "1.stl",
+    "name": "1.stl",
+    "loc": [
+     2.0625,
+     0.9341,
+     -2.4097
+    ],
+    "quat_xyzw": [
+     0.0,
+     0.0,
+     -0.70711,
+     0.70711
+    ],
+    "scale": [
+     0.77,
+     0.77,
+     0.77
+    ],
+    "dims": [
+     0.67,
+     0.71,
+     0.72
+    ],
+    "faces": 32145
+   }
+  ],
+  "glb_nohuman_bytes": 4036808,
+  "sec": 23.1
+ },
+ "SexMachineModel-088": {
+  "humanoid_defs": [
+   {
+    "resource": "mesh_5",
+    "name": "2.stl",
+    "dims": [
+     0.53,
+     0.78,
+     1.1
+    ],
+    "faces": 23660
+   }
+  ],
+  "anchors": [
+   {
+    "resource": "mesh_5",
+    "def": "2.stl",
+    "name": "2.stl",
+    "loc": [
+     2.5749,
+     1.2289,
+     -3.5747
+    ],
+    "quat_xyzw": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "scale": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "dims": [
+     0.53,
+     0.78,
+     1.1
+    ],
+    "faces": 23660
+   }
+  ],
+  "glb_nohuman_bytes": 3182364,
+  "sec": 11.2
+ }
+}

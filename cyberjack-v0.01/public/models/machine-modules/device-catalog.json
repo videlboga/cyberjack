@@ -1,0 +1,2369 @@
+{
+  "format": "cyberjack-station-devices-v1",
+  "revision": "0.2",
+  "status": "concept",
+  "units": "metres",
+  "disclaimer": "Вымышленное оборудование для Cyberjack. Не инструкция, не медицинская и не инженерная документация. Все персонажи — взрослые.",
+  "sourceNotes": {
+    "references": [
+      "ikelag Sex Machine Vol.1-4 (механические архетипы и продуктовая подача)",
+      "docs/plans/machine-module-library.md",
+      "docs/plans/sex-machines-3d-placement.md",
+      "docs/plans/core-rooms-devices.md",
+      "src/infrastructure/data/sensory/sensory-matrix.json"
+    ],
+    "legacy": "Существующие 10 модулей и 4 сборки остаются Mk-I; новые имена motion_linear_x/motion_lift_z/work_probe_linear имеют legacyId."
+  },
+  "classes": {
+    "STRUCTURE": {
+      "name": "Несущая геометрия",
+      "purpose": "Станины, порталы, гентри, рамы, кабины, доки.",
+      "accent": "#B9BAB7"
+    },
+    "MOTION": {
+      "name": "Степени свободы",
+      "purpose": "Линейные оси, поршни, подъём, поворот, качание, разведение, лебёдка.",
+      "accent": "#54575A"
+    },
+    "WORK": {
+      "name": "Рабочие головки",
+      "purpose": "Сменные кассеты и насадки: щётки, зонды, роторы, ударники, электроды, форсунки.",
+      "accent": "#E8B9BF"
+    },
+    "RESTRAINT": {
+      "name": "Фиксация",
+      "purpose": "Манжеты, ложементы, стремена, пояса, быстросъём.",
+      "accent": "#34363B"
+    },
+    "SURFACE": {
+      "name": "Поверхности",
+      "purpose": "Ложа, маты, обогрев, охлаждение, антискольжение, дренаж.",
+      "accent": "#F2D7D9"
+    },
+    "FLUID": {
+      "name": "Жидкости",
+      "purpose": "Нанесение, подача, ирригация, отсос, смешивание, сбор.",
+      "accent": "#9FD8D8"
+    },
+    "SENSORY": {
+      "name": "Сенсорика",
+      "purpose": "Капюшоны, визоры, звук, депривация, запах.",
+      "accent": "#E4F4F5"
+    },
+    "CONTROL": {
+      "name": "Контроль",
+      "purpose": "Пульты, телеметрия, стоп, блокировки, профили сессии.",
+      "accent": "#5E7C86"
+    },
+    "UTILITY": {
+      "name": "Инфраструктура",
+      "purpose": "Питание, данные, воздух, вода, слив, трассы.",
+      "accent": "#6B6E70"
+    },
+    "SERVICE": {
+      "name": "Обслуживание",
+      "purpose": "Доки, мойка, диагностика, тележки, замены.",
+      "accent": "#8A8D90"
+    }
+  },
+  "kits": [
+    {
+      "id": "kit_cal",
+      "code": "KIT-CAL",
+      "name": "Калибровка",
+      "purpose": "Измерение, паспорт актива, телеметрия.",
+      "devices": [
+        "lab_diagnostic_table",
+        "lab_sensitivity_arch",
+        "lab_baseline_cell",
+        "lab_data_collector"
+      ]
+    },
+    {
+      "id": "kit_tic",
+      "code": "KIT-TIC",
+      "name": "Щекотка",
+      "purpose": "Мягкие и жёсткие щётки, перья, воздух, стопы, многоточечные арки.",
+      "devices": [
+        "lab_sex_machine_tickling",
+        "lab_foot_cradle",
+        "lab_feather_pod",
+        "lab_tickle_arch",
+        "lab_firm_brush_rig"
+      ]
+    },
+    {
+      "id": "kit_pen",
+      "code": "KIT-PEN",
+      "name": "Проникновение",
+      "purpose": "Линейные, ротационные и осциллирующие стенды, сменные зонды.",
+      "devices": [
+        "lab_sex_machine_vaginal",
+        "lab_sex_machine_anal",
+        "lab_pen_rotary",
+        "lab_pen_dual",
+        "lab_pen_thermal",
+        "lab_pen_piston",
+        "lab_pen_pneumatic",
+        "lab_pen_carousel"
+      ]
+    },
+    {
+      "id": "kit_imp",
+      "code": "KIT-IMP",
+      "name": "Удар, ток, ротация",
+      "purpose": "Дозированный удар, электроконтакт, ротационные насадки.",
+      "devices": [
+        "lab_sex_machine_circularsaw",
+        "lab_attachment_drum",
+        "lab_impact_bench",
+        "lab_electro_bench"
+      ]
+    },
+    {
+      "id": "kit_flu",
+      "code": "KIT-FLU",
+      "name": "Жидкости",
+      "purpose": "Спрей, валик, ирригация, отсос, сбор и выдача.",
+      "devices": [
+        "lab_spray_station",
+        "lab_roller_applicator",
+        "lab_irrigation_station",
+        "lab_fluid_collector"
+      ]
+    },
+    {
+      "id": "kit_res",
+      "code": "KIT-RES",
+      "name": "Фиксация",
+      "purpose": "Позы, конечности, подвес, стремена, кресло позы.",
+      "devices": [
+        "lab_restraint_matrix",
+        "lab_x_cross",
+        "lab_suspension_frame",
+        "lab_stirrup_stand",
+        "lab_neck_yoke",
+        "lab_posture_chair"
+      ]
+    },
+    {
+      "id": "kit_sur",
+      "code": "KIT-SUR",
+      "name": "Поверхности",
+      "purpose": "Термо, антискольжение, сенсорные и контурные ложа.",
+      "devices": [
+        "lab_thermal_bed",
+        "lab_sensor_bed",
+        "lab_contour_bed"
+      ]
+    },
+    {
+      "id": "kit_sen",
+      "code": "KIT-SEN",
+      "name": "Сенсорика",
+      "purpose": "Депривация, визор, звук, ментальная коррекция.",
+      "devices": [
+        "lab_mental_correction_chair",
+        "lab_deprivation_pod",
+        "lab_vision_rig"
+      ]
+    },
+    {
+      "id": "kit_tec",
+      "code": "KIT-TEC",
+      "name": "Технический парк",
+      "purpose": "Гентри, доки, кабины, портативные узлы.",
+      "devices": [
+        "lab_gantry",
+        "lab_service_dock",
+        "lab_stall_row",
+        "lab_portable_unit"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "structure_base",
+      "class": "STRUCTURE",
+      "name": "Станина",
+      "purpose": "Несущая плита для портала, кареток и опор.",
+      "status": "core",
+      "interface": ""
+    },
+    {
+      "id": "structure_portal",
+      "class": "STRUCTURE",
+      "name": "Портал",
+      "purpose": "Двухстоечная рама для вертикальных осей и рабочих головок.",
+      "status": "core",
+      "interface": ""
+    },
+    {
+      "id": "structure_gantry",
+      "class": "STRUCTURE",
+      "name": "Гентри",
+      "purpose": "Потолочная или напольная двухосевая рама для нескольких головок.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "structure_bed_frame",
+      "class": "STRUCTURE",
+      "name": "Рама-ложе",
+      "purpose": "Ложе с боковыми рельсами для фиксации и поверхностей.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "structure_cage",
+      "class": "STRUCTURE",
+      "name": "Каркас-капсула",
+      "purpose": "Замкнутый каркас для изоляции, подвеса и защиты.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "structure_suspension_frame",
+      "class": "STRUCTURE",
+      "name": "Потолочная рама",
+      "purpose": "Балка/рельс для подвеса и лебёдки.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "structure_stall_row",
+      "class": "STRUCTURE",
+      "name": "Ряд кабин",
+      "purpose": "Семь стандартных кабин для потоковых процедур.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "structure_dock",
+      "class": "STRUCTURE",
+      "name": "Док",
+      "purpose": "Быстросъёмная плита для смены модулей и головок.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "support_cradle",
+      "class": "SERVICE",
+      "name": "Опоры-ложементы",
+      "purpose": "Пара регулируемых опор с мягкими ложементами.",
+      "status": "core",
+      "interface": ""
+    },
+    {
+      "id": "motion_linear_x",
+      "class": "MOTION",
+      "name": "X-каретка",
+      "purpose": "Горизонтальный ход каретки по двум рельсам.",
+      "status": "core",
+      "interface": "",
+      "legacyId": "motion_linear"
+    },
+    {
+      "id": "motion_linear_y",
+      "class": "MOTION",
+      "name": "Y-каретка",
+      "purpose": "Подача головки в глубину или к оператору.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "motion_lift_z",
+      "class": "MOTION",
+      "name": "Подъём",
+      "purpose": "Вертикальная регулировка рабочей плоскости.",
+      "status": "core",
+      "interface": "",
+      "legacyId": "motion_lift"
+    },
+    {
+      "id": "motion_rotary",
+      "class": "MOTION",
+      "name": "Поворотный модуль",
+      "purpose": "Непрерывное вращение головки или платформы.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "motion_oscillating",
+      "class": "MOTION",
+      "name": "Осциллятор",
+      "purpose": "Возвратно-поступательный ход с регулируемой амплитудой.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "motion_spreader",
+      "class": "MOTION",
+      "name": "Разведение",
+      "purpose": "Симметричное разведение опор конечностей.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "motion_winch",
+      "class": "MOTION",
+      "name": "Лебёдка",
+      "purpose": "Подъём и удержание подвеса с контролем нагрузки.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "motion_turntable",
+      "class": "MOTION",
+      "name": "Поворотный стол",
+      "purpose": "Ориентация устройства или ложа по азимуту.",
+      "status": "archived",
+      "interface": ""
+    },
+    {
+      "id": "work_tickle_soft",
+      "class": "WORK",
+      "name": "Мягкая щётка",
+      "purpose": "Поверхностная щекотка без давления.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_tickle_firm",
+      "class": "WORK",
+      "name": "Жёсткая щётка",
+      "purpose": "Интенсивная щекотка и аверсивный контакт.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_tickle_radial",
+      "class": "WORK",
+      "name": "Радиальная щётка",
+      "purpose": "Вращающаяся щётка с радиальными пучками.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_feather_fan",
+      "class": "WORK",
+      "name": "Перьевой веер",
+      "purpose": "Мягкая щекотка перьями без жёсткого контакта.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_air_jet",
+      "class": "WORK",
+      "name": "Воздушная форсунка",
+      "purpose": "Точечный воздушный поток без контакта.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_foot_cradle",
+      "class": "WORK",
+      "name": "Стопа-ложе",
+      "purpose": "Держатель стопы с роликами, колпачками и щётками свода.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_tickle_pair",
+      "class": "WORK",
+      "name": "Парные щётки",
+      "purpose": "Два независимых щёточных ротора на общей раме.",
+      "status": "core",
+      "interface": "CJ-TOOL-25",
+      "legacyId": "work_brush_pair"
+    },
+    {
+      "id": "work_probe_linear",
+      "class": "WORK",
+      "name": "Линейный зонд",
+      "purpose": "Сменный зонд для возвратно-поступательного контакта.",
+      "status": "core",
+      "interface": "CJ-TOOL-42",
+      "legacyId": "work_probe"
+    },
+    {
+      "id": "work_probe_rotary",
+      "class": "WORK",
+      "name": "Ротационный зонд",
+      "purpose": "Зонд с вращением и контролем глубины.",
+      "status": "concept",
+      "interface": "CJ-TOOL-58"
+    },
+    {
+      "id": "work_probe_inflatable",
+      "class": "WORK",
+      "name": "Надувной зонд",
+      "purpose": "Регулируемая форма и обхват через мягкую камеру.",
+      "status": "concept",
+      "interface": "CJ-TOOL-58"
+    },
+    {
+      "id": "work_probe_thermal",
+      "class": "WORK",
+      "name": "Термо-зонд",
+      "purpose": "Зонд с управляемой температурой поверхности.",
+      "status": "concept",
+      "interface": "CJ-TOOL-58"
+    },
+    {
+      "id": "work_probe_textured",
+      "class": "WORK",
+      "name": "Текстурированный зонд",
+      "purpose": "Сменные текстуры и рельефы на одном основании.",
+      "status": "archived",
+      "interface": "CJ-TOOL-58"
+    },
+    {
+      "id": "work_rotary_disc",
+      "class": "WORK",
+      "name": "Ротационный диск",
+      "purpose": "Мягкий вращающийся контур с открытой рамкой.",
+      "status": "core",
+      "interface": "CJ-TOOL-25",
+      "legacyId": "work_rotary"
+    },
+    {
+      "id": "work_rotary_drum",
+      "class": "WORK",
+      "name": "Барабан насадок",
+      "purpose": "Один ротор с сегментами: перья, силикон, щётки.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_impact_paddle",
+      "class": "WORK",
+      "name": "Лопатка",
+      "purpose": "Дозированный удар с контролем силы.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_impact_roller",
+      "class": "WORK",
+      "name": "Валик",
+      "purpose": "Контактное давление и прокат.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_electro_pad",
+      "class": "WORK",
+      "name": "Электроплощадка",
+      "purpose": "Контактные электроды с контролем импеданса.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_electro_collar",
+      "class": "WORK",
+      "name": "Шоковый ошейник",
+      "purpose": "Контактный ошейник с ограничением тока и быстросъёмом.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_thermal_pad",
+      "class": "WORK",
+      "name": "Термо-площадка",
+      "purpose": "Локальный нагрев или охлаждение поверхности.",
+      "status": "archived",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_spray",
+      "class": "FLUID",
+      "name": "Форсунка",
+      "purpose": "Дозированное напыление состава.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "work_roller",
+      "class": "FLUID",
+      "name": "Аппликатор-валик",
+      "purpose": "Нанесение геля или состава валиком.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "work_irrigation",
+      "class": "FLUID",
+      "name": "Ирригационная головка",
+      "purpose": "Контролируемая подача жидкости внутрь.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_suction",
+      "class": "FLUID",
+      "name": "Отсос",
+      "purpose": "Сбор жидкости с поверхности или из ёмкости.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "fluid_mixer",
+      "class": "FLUID",
+      "name": "Смеситель",
+      "purpose": "Смешивание и дозирование составов.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_wrist_cuff",
+      "class": "RESTRAINT",
+      "name": "Манжета кисти",
+      "purpose": "Мягкая манжета с быстросъёмом и контролем нагрузки.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_ankle_cuff",
+      "class": "RESTRAINT",
+      "name": "Манжета стопы",
+      "purpose": "Мягкая манжета для щиколотки или стопы.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_thigh_clamp",
+      "class": "RESTRAINT",
+      "name": "Бёдерный зажим",
+      "purpose": "Опорный зажим с регулировкой угла и ширины.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_waist_belt",
+      "class": "RESTRAINT",
+      "name": "Поясной ремень",
+      "purpose": "Фиксация таза без пережима.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_neck_yoke",
+      "class": "RESTRAINT",
+      "name": "Шейный контур",
+      "purpose": "Ограничение подвижности головы и шеи.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_head_frame",
+      "class": "RESTRAINT",
+      "name": "Рама головы",
+      "purpose": "Опоры лба и подбородка с регулировкой.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_stirrup",
+      "class": "RESTRAINT",
+      "name": "Стремя",
+      "purpose": "Опора стопы с регулировкой высоты и разведения.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_spreader",
+      "class": "RESTRAINT",
+      "name": "Раздвижная штанга",
+      "purpose": "Симметричное разведение конечностей.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_suspension_cuff",
+      "class": "RESTRAINT",
+      "name": "Подвесная манжета",
+      "purpose": "Манжета для подвеса с контролем нагрузки.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_quick_release",
+      "class": "RESTRAINT",
+      "name": "Быстросъём",
+      "purpose": "Механический сброс фиксации одним движением.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "restraint_matrix",
+      "class": "RESTRAINT",
+      "name": "Матрица фиксации",
+      "purpose": "Набор кареток и манжет для любой позы.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_soft",
+      "class": "SURFACE",
+      "name": "Мягкое ложе",
+      "purpose": "Съёмный мягкий слой с быстрой мойкой.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_anti_slip",
+      "class": "SURFACE",
+      "name": "Антискольжение",
+      "purpose": "Текстура, удерживающая тело без пережима.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_heated",
+      "class": "SURFACE",
+      "name": "Обогрев",
+      "purpose": "Управляемые зоны тепла с датчиками.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_cooled",
+      "class": "SURFACE",
+      "name": "Охлаждение",
+      "purpose": "Управляемые зоны холода с датчиками.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_fluid_channel",
+      "class": "SURFACE",
+      "name": "Дренаж",
+      "purpose": "Каналы и поддон для жидкости.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_liner",
+      "class": "SURFACE",
+      "name": "Лайнер",
+      "purpose": "Сменный гигиенический слой.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_sensor",
+      "class": "SURFACE",
+      "name": "Сенсорный мат",
+      "purpose": "Карта давления, температуры и влажности.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "surface_contour",
+      "class": "SURFACE",
+      "name": "Контур",
+      "purpose": "Анатомическая форма или вакуумный слой.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "sensory_hood",
+      "class": "SENSORY",
+      "name": "Капюшон",
+      "purpose": "Управляемая свето- и звукоизоляция с дыхательным каналом.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "sensory_visor",
+      "class": "SENSORY",
+      "name": "Визор",
+      "purpose": "Экран/VR-сцена, звук и отслеживание взгляда.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "sensory_audio",
+      "class": "SENSORY",
+      "name": "Направленный звук",
+      "purpose": "Локальное аудиополе и шумовая маска.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "sensory_light",
+      "class": "SENSORY",
+      "name": "Управляемый свет",
+      "purpose": "Световая сцена или изоляция с плавной регулировкой.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "control_console",
+      "class": "CONTROL",
+      "name": "Пульт",
+      "purpose": "Экран, профиль сессии и физический стоп.",
+      "status": "core",
+      "interface": "",
+      "legacyId": "interface_console"
+    },
+    {
+      "id": "control_telemetry",
+      "class": "CONTROL",
+      "name": "Телеметрия",
+      "purpose": "Датчики, журнал и карта отклика.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "control_estop",
+      "class": "CONTROL",
+      "name": "Аварийный стоп",
+      "purpose": "Физический сброс с дублированием.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "control_interlock",
+      "class": "CONTROL",
+      "name": "Блокировки",
+      "purpose": "Концевики, присутствие, пределы и запрет опасных комбинаций.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "utility_power",
+      "class": "UTILITY",
+      "name": "Питание",
+      "purpose": "230/380 В, отдельные линии и УЗО.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "utility_data",
+      "class": "UTILITY",
+      "name": "Данные",
+      "purpose": "Ethernet/USB-C в напольном лотке.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "utility_air",
+      "class": "UTILITY",
+      "name": "Воздух",
+      "purpose": "6–8 бар, влагоотделитель, быстросъём.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "utility_water",
+      "class": "UTILITY",
+      "name": "Вода",
+      "purpose": "Подача жидкости/воды в устройство.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "utility_drain",
+      "class": "UTILITY",
+      "name": "Слив",
+      "purpose": "Дренаж и датчик протечки.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "utility_routing",
+      "class": "UTILITY",
+      "name": "Кабельный контур",
+      "purpose": "Защищённая трасса пульт–станина–привод.",
+      "status": "core",
+      "interface": ""
+    },
+    {
+      "id": "service_dock",
+      "class": "SERVICE",
+      "name": "Сервисный док",
+      "purpose": "Быстросъём и диагностика модулей.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "service_cleaner",
+      "class": "SERVICE",
+      "name": "Мойка",
+      "purpose": "Очистка головок, лайнеров и поддонов.",
+      "status": "archived",
+      "interface": ""
+    },
+    {
+      "id": "motion_piston_rod",
+      "class": "MOTION",
+      "name": "Штоковый поршень",
+      "purpose": "Электрический линейный ход с контролем усилия и положения.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "motion_piston_pneumatic",
+      "class": "MOTION",
+      "name": "Пневматический поршень",
+      "purpose": "Быстрый мягкий ход на сжатом воздухе.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "motion_piston_hydraulic",
+      "class": "MOTION",
+      "name": "Гидравлический поршень",
+      "purpose": "Высокое усилие и плавный ход без рывков.",
+      "status": "archived",
+      "interface": ""
+    },
+    {
+      "id": "motion_piston_telescopic",
+      "class": "MOTION",
+      "name": "Телескопический поршень",
+      "purpose": "Длинный ход в коротком корпусе.",
+      "status": "archived",
+      "interface": ""
+    },
+    {
+      "id": "motion_piston_cam",
+      "class": "MOTION",
+      "name": "Кулачковый поршень",
+      "purpose": "Ритмичный возвратно-поступательный ход.",
+      "status": "archived",
+      "interface": ""
+    },
+    {
+      "id": "motion_piston_servo",
+      "class": "MOTION",
+      "name": "Сервоцилиндр",
+      "purpose": "Точный ход и сложные профили скорости.",
+      "status": "concept",
+      "interface": ""
+    },
+    {
+      "id": "work_attach_smooth",
+      "class": "WORK",
+      "name": "Гладкая насадка",
+      "purpose": "Базовый профиль с низким трением.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_ribbed",
+      "class": "WORK",
+      "name": "Ребристая насадка",
+      "purpose": "Кольцевые рёбра для выраженного контакта.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_spiral",
+      "class": "WORK",
+      "name": "Спиральная насадка",
+      "purpose": "Винтовой рельеф для вращательного контакта.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_nodular",
+      "class": "WORK",
+      "name": "Нодулярная насадка",
+      "purpose": "Мягкие выступы для объёмного контакта.",
+      "status": "archived",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_tapered",
+      "class": "WORK",
+      "name": "Конусная насадка",
+      "purpose": "Плавное расширение от торца к основанию.",
+      "status": "archived",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_bulbous",
+      "class": "WORK",
+      "name": "Насадка с утолщением",
+      "purpose": "Расширенный дистальный объём.",
+      "status": "archived",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_curved",
+      "class": "WORK",
+      "name": "Изогнутая насадка",
+      "purpose": "Угол 15–30° для обхода прямой оси.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_dual_density",
+      "class": "WORK",
+      "name": "Двухплотностная насадка",
+      "purpose": "Мягкая оболочка на упругом сердечнике.",
+      "status": "archived",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_vibrating",
+      "class": "WORK",
+      "name": "Вибро-вставка",
+      "purpose": "Локальная вибрация рабочей зоны базы.",
+      "status": "concept",
+      "interface": "CJ-EFF-VIB"
+    },
+    {
+      "id": "work_attach_inflatable",
+      "class": "WORK",
+      "name": "Форма-камера",
+      "purpose": "Регулируемый объём: обхват, обжатие, тепловая масса.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_sleeve",
+      "class": "WORK",
+      "name": "Оверлей",
+      "purpose": "Тонкий сменный слой поверх формы.",
+      "status": "archived",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_adapter",
+      "class": "WORK",
+      "name": "Переходник Ø20 → Ø25",
+      "purpose": "Стык старой оснастки Ø20 с универсальным байонетом.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_sterile_liner",
+      "class": "WORK",
+      "name": "Стерильная гильза",
+      "purpose": "Одноразовый гигиенический слой.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_attach_carousel",
+      "class": "WORK",
+      "name": "Карусель насадок",
+      "purpose": "Магазин на 6 форм с автоматической сменой.",
+      "status": "concept",
+      "interface": "CJ-TOOL-25"
+    },
+    {
+      "id": "work_probe_combined",
+      "class": "WORK",
+      "name": "Комбинированная база",
+      "purpose": "Несущий вал с вращением и осевым ходом на одной оси.",
+      "status": "concept",
+      "interface": "CJ-TOOL-58A"
+    },
+    {
+      "id": "effect_thermal",
+      "class": "WORK",
+      "name": "Термо-вставка",
+      "purpose": "Нагрев или охлаждение рабочей зоны базы.",
+      "status": "concept",
+      "interface": "CJ-EFF-THM"
+    },
+    {
+      "id": "effect_pneumatic",
+      "class": "WORK",
+      "name": "Пневмо-модуль",
+      "purpose": "Надув и вакуум для формы-камеры.",
+      "status": "concept",
+      "interface": "CJ-EFF-PNE"
+    },
+    {
+      "id": "effect_hydraulic",
+      "class": "WORK",
+      "name": "Гидро-модуль",
+      "purpose": "Подача или отсос жидкости через форму.",
+      "status": "concept",
+      "interface": "CJ-EFF-HYD"
+    },
+    {
+      "id": "effect_electric",
+      "class": "WORK",
+      "name": "Электро-модуль",
+      "purpose": "Контактная электростимуляция с контролем импеданса.",
+      "status": "concept",
+      "interface": "CJ-EFF-ELE"
+    }
+  ],
+  "devices": [
+    {
+      "id": "lab_diagnostic_table",
+      "code": "HD-SC-01",
+      "name": "Калибровочный стол",
+      "family": "calibration",
+      "role": "ASSESS",
+      "zone": "room_calibration",
+      "footprint": "2.0 × 0.9 м",
+      "purpose": "Базовая телеметрия, ручной осмотр и паспорт актива.",
+      "modules": [
+        "structure_bed_frame",
+        "surface_sensor",
+        "control_telemetry",
+        "control_estop"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "clinical",
+        "restraint"
+      ],
+      "modes": [],
+      "motion": "Без привода; ручная регулировка опор.",
+      "limits": "Датчики давления/пульса, мягкие ремни, быстросъём.",
+      "service": "Мойка лайнера, проверка датчиков.",
+      "status": "core",
+      "existingAsset": true
+    },
+    {
+      "id": "lab_sensitivity_arch",
+      "code": "HD-SC-04",
+      "name": "Арка чувствительности",
+      "family": "calibration",
+      "role": "ASSESS",
+      "zone": "room_calibration",
+      "footprint": "1.6 × 1.0 м",
+      "purpose": "Сканирует зоны тела и строит карту отклика без интенсивной стимуляции.",
+      "modules": [
+        "structure_portal",
+        "motion_linear_x",
+        "work_electro_pad",
+        "effect_electric",
+        "control_telemetry"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "clinical",
+        "electronic"
+      ],
+      "modes": [
+        "pulse"
+      ],
+      "motion": "X-ход 0–1.2 м, контактное сканирование.",
+      "limits": "Малые токи/усилия, датчик импеданса, стоп.",
+      "service": "Калибровка датчиков, смена контактных накладок.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_baseline_cell",
+      "code": "HD-SC-07",
+      "name": "Камера базовых измерений",
+      "family": "calibration",
+      "role": "ASSESS",
+      "zone": "room_calibration",
+      "footprint": "1.4 × 1.2 м",
+      "purpose": "Длительная фиксация и замер пределов актива в стандартной позе.",
+      "modules": [
+        "structure_cage",
+        "restraint_matrix",
+        "surface_sensor",
+        "control_telemetry"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "clinical",
+        "restraint"
+      ],
+      "modes": [],
+      "motion": "Без привода; фиксация вручную.",
+      "limits": "Таймер, мониторинг, быстросъём.",
+      "service": "Мойка, проверка ремней.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_data_collector",
+      "code": "HD-SC-12",
+      "name": "Сборщик данных",
+      "family": "calibration",
+      "role": "COLLECT",
+      "zone": "room_calibration",
+      "footprint": "1.8 × 0.9 м",
+      "purpose": "Регистрирует реакцию, темп и предел; ведёт журнал сессии.",
+      "modules": [
+        "structure_bed_frame",
+        "surface_sensor",
+        "control_telemetry",
+        "control_console"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "clinical"
+      ],
+      "modes": [
+        "pulse",
+        "wave"
+      ],
+      "motion": "Без привода; датчики на ложе.",
+      "limits": "Мониторинг, таймер, стоп.",
+      "service": "Проверка датчиков, архивация.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_sex_machine_tickling",
+      "code": "VEIL-TK-02",
+      "name": "Парные щётки",
+      "family": "tickling",
+      "role": "SENSITIZE",
+      "zone": "room_calibration",
+      "footprint": "1.6 × 1.3 м",
+      "purpose": "Базовая щекотка ступней двумя независимыми роторами.",
+      "modules": [
+        "structure_base",
+        "work_tickle_pair",
+        "support_cradle",
+        "control_console"
+      ],
+      "points": [
+        "feet"
+      ],
+      "tags": [
+        "tickling",
+        "feet",
+        "continuous",
+        "machine"
+      ],
+      "modes": [
+        "tickling",
+        "vibration",
+        "random"
+      ],
+      "motion": "Два Y-ротора, непрерывно.",
+      "limits": "Ограничение момента, быстросъём, стоп.",
+      "service": "Замена щёток, мойка.",
+      "status": "core",
+      "existingAsset": true
+    },
+    {
+      "id": "lab_foot_cradle",
+      "code": "VEIL-TK-04",
+      "name": "Стопа-ложе",
+      "family": "tickling",
+      "role": "SENSITIZE",
+      "zone": "room_sensory",
+      "footprint": "1.2 × 0.8 м",
+      "purpose": "Локальная щекотка стопы: пальцы, свод, пятка, ролики.",
+      "modules": [
+        "structure_base",
+        "motion_linear_y",
+        "work_foot_cradle",
+        "restraint_ankle_cuff",
+        "control_console"
+      ],
+      "points": [
+        "feet"
+      ],
+      "tags": [
+        "tickling",
+        "feet",
+        "continuous",
+        "machine"
+      ],
+      "modes": [
+        "tickling",
+        "vibration",
+        "random"
+      ],
+      "motion": "Продольный ход 0–80 мм, ролики 0–90 об/мин, пальцевая вибрация.",
+      "limits": "Угол стопы, усилие, быстросъём.",
+      "service": "Съёмный лоток, замена роликов.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_feather_pod",
+      "code": "VEIL-TK-08",
+      "name": "Перьевая камера",
+      "family": "tickling",
+      "role": "SENSITIZE",
+      "zone": "room_sensory",
+      "footprint": "1.4 × 1.2 м",
+      "purpose": "Мягкая щекотка перьями и воздухом без жёсткого контакта.",
+      "modules": [
+        "structure_portal",
+        "motion_linear_x",
+        "work_feather_fan",
+        "work_air_jet",
+        "effect_pneumatic",
+        "control_console"
+      ],
+      "points": [
+        "feet",
+        "legs",
+        "neck",
+        "face"
+      ],
+      "tags": [
+        "tickling",
+        "sensory",
+        "continuous"
+      ],
+      "modes": [
+        "tickling",
+        "random"
+      ],
+      "motion": "X-обход, веер 0.5–3 Гц, воздух 0.2–2 бар.",
+      "limits": "Без контакта с глазами/дыханием, стоп.",
+      "service": "Смена вееров, фильтр воздуха.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_tickle_arch",
+      "code": "VEIL-TK-12",
+      "name": "Щёточная арка",
+      "family": "tickling",
+      "role": "SENSITIZE",
+      "zone": "room_sensory",
+      "footprint": "2.4 × 1.6 м",
+      "purpose": "4–6 независимых головок на разные зоны в одном цикле.",
+      "modules": [
+        "structure_gantry",
+        "motion_linear_x",
+        "motion_linear_y",
+        "work_tickle_soft",
+        "work_tickle_firm",
+        "work_tickle_radial",
+        "restraint_ankle_cuff",
+        "control_console"
+      ],
+      "points": [
+        "feet",
+        "legs",
+        "inner_thighs",
+        "waist",
+        "chest"
+      ],
+      "tags": [
+        "tickling",
+        "restraint",
+        "continuous",
+        "machine"
+      ],
+      "modes": [
+        "tickling",
+        "vibration",
+        "pulse",
+        "wave",
+        "random"
+      ],
+      "motion": "4 каретки: X/Y, вращение 0–120 об/мин, качание 0.5–4 Гц, ход 0–150 мм.",
+      "limits": "Усилие 2 Н на головку, концевики, быстросъём.",
+      "service": "Кассеты, щётки, фильтр, люфт кареток.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_firm_brush_rig",
+      "code": "VEIL-TK-16",
+      "name": "Жёсткий контур",
+      "family": "tickling",
+      "role": "CONDITION",
+      "zone": "room_sensory",
+      "footprint": "1.6 × 1.2 м",
+      "purpose": "Жёсткая щетина/радиальные щётки для обусловливания и аверсии.",
+      "modules": [
+        "structure_portal",
+        "motion_linear_x",
+        "work_tickle_firm",
+        "work_tickle_radial",
+        "restraint_matrix",
+        "control_console"
+      ],
+      "points": [
+        "feet",
+        "thighs",
+        "back"
+      ],
+      "tags": [
+        "tickling",
+        "pain",
+        "restraint"
+      ],
+      "modes": [
+        "tickling",
+        "random"
+      ],
+      "motion": "X-ход, радиальные щётки 0–150 об/мин.",
+      "limits": "Ограничение усилия, запрет лица/шеи, стоп.",
+      "service": "Замена щёток, контроль износа.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_sex_machine_vaginal",
+      "code": "VEIL-PN-01",
+      "name": "Линейный стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_calibration",
+      "footprint": "1.6 × 1.2 м",
+      "purpose": "Базовая линейная траектория с подъёмом и горизонтальной подачей.",
+      "modules": [
+        "structure_portal",
+        "motion_lift_z",
+        "motion_linear_x",
+        "work_probe_linear",
+        "support_cradle",
+        "control_console"
+      ],
+      "points": [
+        "vagina"
+      ],
+      "tags": [
+        "sexual",
+        "vaginal",
+        "penetration",
+        "continuous",
+        "machine"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "X ±0.22 м, подъём ±0.12 м, ход зонда 0.12 м.",
+      "limits": "Концевые упоры, быстросъём, стоп.",
+      "service": "Стерильные гильзы, проверка привода.",
+      "status": "core",
+      "existingAsset": true
+    },
+    {
+      "id": "lab_sex_machine_anal",
+      "code": "VEIL-PN-02",
+      "name": "Низкий линейный стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "1.5 × 1.1 м",
+      "purpose": "Низкая посадка и контроль глубины для анальной траектории.",
+      "modules": [
+        "structure_base",
+        "motion_linear_x",
+        "work_probe_linear",
+        "restraint_thigh_clamp",
+        "control_console"
+      ],
+      "points": [
+        "anus"
+      ],
+      "tags": [
+        "sexual",
+        "anal",
+        "penetration",
+        "continuous",
+        "machine"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "X ±0.22 м, ограничение глубины.",
+      "limits": "Упоры, быстросъём, стоп.",
+      "service": "Стерильные гильзы, мойка ложемента.",
+      "status": "core",
+      "existingAsset": true
+    },
+    {
+      "id": "lab_pen_rotary",
+      "code": "VEIL-PN-06",
+      "name": "Ротационно-осциллирующий стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "1.8 × 1.3 м",
+      "purpose": "Вращение плюс возвратно-поступательный ход, сменные зонды.",
+      "modules": [
+        "structure_base",
+        "motion_lift_z",
+        "motion_linear_y",
+        "motion_rotary",
+        "work_probe_combined",
+        "work_attach_inflatable",
+        "effect_pneumatic",
+        "restraint_stirrup",
+        "control_console"
+      ],
+      "points": [
+        "vagina",
+        "anus",
+        "prostate"
+      ],
+      "tags": [
+        "sexual",
+        "penetration",
+        "rotary",
+        "continuous"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "Ход 0–120 мм, 0.2–2 Гц; вращение 0–60 об/мин.",
+      "limits": "Только зонды под вращение, стерильная гильза, усилие, стоп.",
+      "service": "Смена зондов, мойка, проверка уплотнений.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_pen_dual",
+      "code": "VEIL-PN-09",
+      "name": "Двухголовый стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "2.2 × 1.4 м",
+      "purpose": "Две независимые головки на две точки или двух активов.",
+      "modules": [
+        "structure_gantry",
+        "motion_linear_x",
+        "motion_linear_y",
+        "work_probe_linear",
+        "work_probe_rotary",
+        "control_console"
+      ],
+      "points": [
+        "vagina",
+        "anus"
+      ],
+      "tags": [
+        "sexual",
+        "penetration",
+        "machine"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "Две каретки X/Y, независимые фазы.",
+      "limits": "Синхронизация/развязка, стоп на каждую головку.",
+      "service": "Двойной комплект гильз, мойка.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_pen_thermal",
+      "code": "VEIL-PN-11",
+      "name": "Термо-стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "1.4 × 1.0 м",
+      "purpose": "Температурная рампа на сменном зонде.",
+      "modules": [
+        "structure_base",
+        "motion_linear_y",
+        "work_probe_linear",
+        "work_attach_smooth",
+        "effect_thermal",
+        "restraint_stirrup",
+        "control_console"
+      ],
+      "points": [
+        "vagina",
+        "anus"
+      ],
+      "tags": [
+        "sexual",
+        "penetration",
+        "temperature"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "Ход 0–100 мм, температура 28–42 °C (игровая).",
+      "limits": "Датчик температуры, рампа, стоп.",
+      "service": "Проверка нагревателя, гильзы.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_sex_machine_circularsaw",
+      "code": "VEIL-RT-01",
+      "name": "Ротационный контур",
+      "family": "rotary",
+      "role": "SENSITIZE",
+      "zone": "room_sensory",
+      "footprint": "1.5 × 1.2 м",
+      "purpose": "Мягкий вращающийся контур с открытой рамкой.",
+      "modules": [
+        "structure_portal",
+        "motion_lift_z",
+        "work_rotary_disc",
+        "control_console"
+      ],
+      "points": [
+        "clitoris"
+      ],
+      "tags": [
+        "sexual",
+        "clitoral",
+        "rotary",
+        "continuous",
+        "silicone",
+        "machine"
+      ],
+      "modes": [
+        "vibration",
+        "wave"
+      ],
+      "motion": "Непрерывное вращение, подъём ±0.12 м.",
+      "limits": "Мягкий контур, кожух, стоп.",
+      "service": "Замена контура, мойка.",
+      "status": "core",
+      "existingAsset": true
+    },
+    {
+      "id": "lab_attachment_drum",
+      "code": "VEIL-RT-05",
+      "name": "Барабан насадок",
+      "family": "rotary",
+      "role": "SENSITIZE",
+      "zone": "room_sensory",
+      "footprint": "1.3 × 1.0 м",
+      "purpose": "Один ротор с сегментами: перья, силикон, щётки.",
+      "modules": [
+        "structure_base",
+        "motion_rotary",
+        "work_rotary_drum",
+        "control_console"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "rotary",
+        "tickling",
+        "silicone"
+      ],
+      "modes": [
+        "vibration",
+        "wave",
+        "random"
+      ],
+      "motion": "0–120 об/мин, смена сегментов.",
+      "limits": "Кожух, ограничение момента, стоп.",
+      "service": "Мойка сегментов, балансировка.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_impact_bench",
+      "code": "OMNI-IM-03",
+      "name": "Ударный стенд",
+      "family": "impact",
+      "role": "CONDITION",
+      "zone": "room_machine_hall",
+      "footprint": "1.6 × 1.2 м",
+      "purpose": "Дозированный удар/давление: лопатка, валик, тейпер.",
+      "modules": [
+        "structure_portal",
+        "motion_linear_x",
+        "motion_lift_z",
+        "work_impact_paddle",
+        "work_impact_roller",
+        "restraint_matrix",
+        "control_console"
+      ],
+      "points": [
+        "buttocks",
+        "inner_thighs",
+        "back"
+      ],
+      "tags": [
+        "impact",
+        "pain",
+        "blunt",
+        "restraint"
+      ],
+      "modes": [
+        "pulse",
+        "random"
+      ],
+      "motion": "X/Z-подача, 0.5–5 Гц, ход 0–200 мм.",
+      "limits": "Ограничение силы, только мягкие зоны, стоп.",
+      "service": "Смена головок, проверка привода.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_electro_bench",
+      "code": "HD-EL-02",
+      "name": "Электро-стенд",
+      "family": "electro",
+      "role": "CONDITION",
+      "zone": "room_machine_hall",
+      "footprint": "1.4 × 1.0 м",
+      "purpose": "Контактные площадки/ошейник с контролем импеданса и тока.",
+      "modules": [
+        "structure_bed_frame",
+        "work_electro_pad",
+        "work_electro_collar",
+        "effect_electric",
+        "restraint_matrix",
+        "control_interlock",
+        "control_console"
+      ],
+      "points": [
+        "thighs",
+        "buttocks",
+        "feet",
+        "neck"
+      ],
+      "tags": [
+        "electronic",
+        "shock",
+        "pain",
+        "restraint"
+      ],
+      "modes": [
+        "pulse",
+        "wave",
+        "random"
+      ],
+      "motion": "Без механического хода; импульс/волна/случайно.",
+      "limits": "Изоляция, лимит тока, импеданс, стоп.",
+      "service": "Проверка электродов, изоляции.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_spray_station",
+      "code": "OMNI-FL-02",
+      "name": "Спрей-станция",
+      "family": "fluid",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "1.6 × 1.0 м",
+      "purpose": "Напыление/нанесение составов с дозированием и сбором.",
+      "modules": [
+        "structure_gantry",
+        "motion_linear_x",
+        "motion_linear_y",
+        "work_spray",
+        "work_roller",
+        "surface_fluid_channel",
+        "control_console"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "chemical",
+        "fluid",
+        "wet"
+      ],
+      "modes": [
+        "wave"
+      ],
+      "motion": "X/Y-обход 10–100 мм/с, давление/расход.",
+      "limits": "Стерильный контур, без глаз/дыхания, стоп.",
+      "service": "Промывка, замена бака, фильтр.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_roller_applicator",
+      "code": "OMNI-FL-03",
+      "name": "Намазывающий валик",
+      "family": "fluid",
+      "role": "SENSITIZE",
+      "zone": "room_calibration",
+      "footprint": "1.2 × 0.8 м",
+      "purpose": "Нанесение геля/состава валиком по поверхности тела.",
+      "modules": [
+        "motion_linear_x",
+        "work_roller",
+        "surface_liner",
+        "control_console"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "chemical",
+        "fluid",
+        "wet"
+      ],
+      "modes": [],
+      "motion": "X-ход, регулируемое давление валика.",
+      "limits": "Доза, давление, стоп.",
+      "service": "Смена валика, мойка.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_irrigation_station",
+      "code": "OMNI-FL-04",
+      "name": "Ирригатор",
+      "family": "fluid",
+      "role": "COLLECT",
+      "zone": "room_medbay",
+      "footprint": "1.2 × 0.8 м",
+      "purpose": "Контролируемая подача жидкости внутрь с температурой/объёмом.",
+      "modules": [
+        "structure_base",
+        "work_irrigation",
+        "effect_hydraulic",
+        "surface_fluid_channel",
+        "control_telemetry",
+        "control_console"
+      ],
+      "points": [
+        "anus"
+      ],
+      "tags": [
+        "fluid",
+        "clinical",
+        "chemical"
+      ],
+      "modes": [],
+      "motion": "Подача/слив, температура, объём.",
+      "limits": "Давление/объём/температура, стерильный контур, стоп.",
+      "service": "Промывка, замена резервуара.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_fluid_collector",
+      "code": "OMNI-FL-07",
+      "name": "Сборщик жидкостей",
+      "family": "fluid",
+      "role": "COLLECT",
+      "zone": "room_medbay",
+      "footprint": "1.4 × 1.0 м",
+      "purpose": "Отсос, разделение, хранение и выдача жидкостей.",
+      "modules": [
+        "structure_base",
+        "work_suction",
+        "fluid_mixer",
+        "effect_hydraulic",
+        "control_telemetry",
+        "control_console"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "fluid",
+        "clinical",
+        "suction"
+      ],
+      "modes": [],
+      "motion": "Вакуум/поток, разделение фракций.",
+      "limits": "Стерильность, датчики уровня, стоп.",
+      "service": "Мойка, замена ёмкостей.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_restraint_matrix",
+      "code": "OMNI-RS-01",
+      "name": "Матрица фиксации",
+      "family": "restraint",
+      "role": "RESTRAIN",
+      "zone": "room_kinematic",
+      "footprint": "2.0 × 1.0 м",
+      "purpose": "Независимые конечности, любая поза, быстросъём.",
+      "modules": [
+        "structure_bed_frame",
+        "motion_spreader",
+        "restraint_wrist_cuff",
+        "restraint_ankle_cuff",
+        "restraint_waist_belt",
+        "restraint_quick_release",
+        "control_console"
+      ],
+      "points": [
+        "hands",
+        "feet",
+        "legs",
+        "waist"
+      ],
+      "tags": [
+        "restraint",
+        "posture"
+      ],
+      "modes": [],
+      "motion": "Независимые каретки, наклон, разведение; без автодожима.",
+      "limits": "Ход суставов, нагрузка, быстросъём, стоп.",
+      "service": "Проверка ремней, кареток, датчиков.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_x_cross",
+      "code": "OMNI-RS-04",
+      "name": "Крест",
+      "family": "restraint",
+      "role": "RESTRAIN",
+      "zone": "room_kinematic",
+      "footprint": "1.8 × 1.8 м",
+      "purpose": "Стоячая растяжка по лучам с доступом спереди.",
+      "modules": [
+        "structure_portal",
+        "restraint_wrist_cuff",
+        "restraint_ankle_cuff",
+        "restraint_spreader",
+        "control_console"
+      ],
+      "points": [
+        "hands",
+        "feet",
+        "legs"
+      ],
+      "tags": [
+        "restraint",
+        "posture"
+      ],
+      "modes": [],
+      "motion": "Ручная регулировка лучей/высоты.",
+      "limits": "Быстросъём, ограничение растяжки, стоп.",
+      "service": "Проверка замков, мойка.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_suspension_frame",
+      "code": "OMNI-RS-06",
+      "name": "Подвес",
+      "family": "restraint",
+      "role": "RESTRAIN",
+      "zone": "room_kinematic",
+      "footprint": "2.4 × 2.0 м",
+      "purpose": "Потолочный рельс/лебёдка на четыре точки.",
+      "modules": [
+        "structure_suspension_frame",
+        "motion_winch",
+        "restraint_suspension_cuff",
+        "control_telemetry",
+        "control_console"
+      ],
+      "points": [
+        "hands",
+        "feet",
+        "body"
+      ],
+      "tags": [
+        "suspension",
+        "restraint"
+      ],
+      "modes": [],
+      "motion": "Лебёдка, 4 точки, контроль нагрузки.",
+      "limits": "Вторая страховка, концевики, стоп.",
+      "service": "Проверка тросов, карабинов.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_stirrup_stand",
+      "code": "OMNI-RS-08",
+      "name": "Стремена",
+      "family": "restraint",
+      "role": "RESTRAIN",
+      "zone": "room_kinematic",
+      "footprint": "1.4 × 1.2 м",
+      "purpose": "Стоячая поза с разведёнными ногами и опорой стоп.",
+      "modules": [
+        "structure_base",
+        "restraint_stirrup",
+        "restraint_waist_belt",
+        "restraint_thigh_clamp",
+        "control_console"
+      ],
+      "points": [
+        "feet",
+        "legs",
+        "waist"
+      ],
+      "tags": [
+        "restraint",
+        "posture"
+      ],
+      "modes": [],
+      "motion": "Высота/разведение стоп, пояс.",
+      "limits": "Быстросъём, ограничение разведения, стоп.",
+      "service": "Мойка, проверка замков.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_neck_yoke",
+      "code": "OMNI-RS-09",
+      "name": "Шейный контур",
+      "family": "restraint",
+      "role": "RESTRAIN",
+      "zone": "room_kinematic",
+      "footprint": "1.0 × 0.8 м",
+      "purpose": "Ограничение головы/шеи и доступ к лицу.",
+      "modules": [
+        "structure_portal",
+        "restraint_neck_yoke",
+        "restraint_head_frame",
+        "control_console"
+      ],
+      "points": [
+        "neck",
+        "head",
+        "face"
+      ],
+      "tags": [
+        "restraint",
+        "clinical"
+      ],
+      "modes": [],
+      "motion": "Регулировка высоты/угла, без сдавливания.",
+      "limits": "Дыхание, быстросъём, стоп.",
+      "service": "Проверка мягких вставок.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_posture_chair",
+      "code": "OMNI-RS-12",
+      "name": "Кресло позы",
+      "family": "restraint",
+      "role": "CONDITION",
+      "zone": "room_kinematic",
+      "footprint": "1.2 × 1.0 м",
+      "purpose": "Удержание позы и сигнал при сходе; тренировка/наказание.",
+      "modules": [
+        "structure_portal",
+        "work_electro_pad",
+        "effect_electric",
+        "restraint_matrix",
+        "control_telemetry",
+        "control_console"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "restraint",
+        "posture",
+        "electronic"
+      ],
+      "modes": [
+        "pulse"
+      ],
+      "motion": "Регулировка сегментов, датчики позы.",
+      "limits": "Быстросъём, ограничение тока, стоп.",
+      "service": "Мойка, проверка датчиков.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_thermal_bed",
+      "code": "ORB-SF-02",
+      "name": "Термо-ложе",
+      "family": "surface",
+      "role": "SENSITIZE",
+      "zone": "room_sensory",
+      "footprint": "2.0 × 0.9 м",
+      "purpose": "Обогрев/охлаждение, антискольжение, дренаж, датчики.",
+      "modules": [
+        "structure_bed_frame",
+        "surface_heated",
+        "surface_cooled",
+        "surface_anti_slip",
+        "surface_fluid_channel",
+        "surface_liner",
+        "surface_sensor",
+        "control_console"
+      ],
+      "points": [
+        "back",
+        "body"
+      ],
+      "tags": [
+        "temperature",
+        "comfort",
+        "stress"
+      ],
+      "modes": [],
+      "motion": "Температурные зоны и рампа.",
+      "limits": "Датчики кожи, предел температуры, стоп.",
+      "service": "Мойка лайнера, проверка нагрева.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_sensor_bed",
+      "code": "ORB-SF-05",
+      "name": "Сенсорное ложе",
+      "family": "surface",
+      "role": "ASSESS",
+      "zone": "room_calibration",
+      "footprint": "2.0 × 0.9 м",
+      "purpose": "Карта давления и отклика, контур тела.",
+      "modules": [
+        "structure_bed_frame",
+        "surface_sensor",
+        "surface_contour",
+        "control_telemetry"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "clinical",
+        "comfort"
+      ],
+      "modes": [],
+      "motion": "Без привода; датчики давления.",
+      "limits": "Калибровка, стоп.",
+      "service": "Проверка мата, архивация.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_contour_bed",
+      "code": "ORB-SF-07",
+      "name": "Контурное ложе",
+      "family": "surface",
+      "role": "RESTORE",
+      "zone": "room_stalls",
+      "footprint": "2.0 × 0.9 м",
+      "purpose": "Мягкий контур, съёмный лайнер, быстрая мойка.",
+      "modules": [
+        "structure_bed_frame",
+        "surface_contour",
+        "surface_liner",
+        "surface_soft"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "comfort",
+        "restraint"
+      ],
+      "modes": [],
+      "motion": "Без привода; вакуум/форма.",
+      "limits": "Быстросъём лайнера, мойка.",
+      "service": "Замена лайнера, дезинфекция.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_mental_correction_chair",
+      "code": "CONT-MC-01",
+      "name": "Кресло коррекции",
+      "family": "sensory",
+      "role": "CONDITION",
+      "zone": "room_cognitive",
+      "footprint": "1.2 × 1.0 м",
+      "purpose": "Визор, направленный звук и тактильные контакты для ментальной сессии.",
+      "modules": [
+        "structure_portal",
+        "sensory_visor",
+        "sensory_audio",
+        "work_electro_pad",
+        "restraint_matrix",
+        "control_console",
+        "effect_electric"
+      ],
+      "points": [
+        "head"
+      ],
+      "tags": [
+        "conditioning",
+        "sensory",
+        "restraint"
+      ],
+      "modes": [
+        "pulse",
+        "wave"
+      ],
+      "motion": "Без механического хода; сцена/звук/тактильный контур.",
+      "limits": "Таймер, паника-сброс, мониторинг.",
+      "service": "Мойка, проверка визора.",
+      "status": "core",
+      "existingAsset": true
+    },
+    {
+      "id": "lab_deprivation_pod",
+      "code": "CONT-MC-04",
+      "name": "Капсула депривации",
+      "family": "sensory",
+      "role": "CONDITION",
+      "zone": "room_cognitive",
+      "footprint": "1.4 × 1.4 м",
+      "purpose": "Свет/звук/тактильная изоляция с паника-сбросом.",
+      "modules": [
+        "structure_cage",
+        "restraint_matrix",
+        "sensory_hood",
+        "sensory_audio",
+        "sensory_light",
+        "control_telemetry",
+        "control_console"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "sensory",
+        "deprivation",
+        "conditioning"
+      ],
+      "modes": [],
+      "motion": "Среда: свет 0–100 %, звук, температура.",
+      "limits": "Дыхание, таймер, паника-сброс.",
+      "service": "Мойка, проверка вентиляции.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_vision_rig",
+      "code": "CONT-MC-06",
+      "name": "Визор",
+      "family": "sensory",
+      "role": "CONDITION",
+      "zone": "room_cognitive",
+      "footprint": "1.0 × 0.8 м",
+      "purpose": "Управляемая сцена, звук и отслеживание взгляда.",
+      "modules": [
+        "sensory_visor",
+        "sensory_audio",
+        "control_telemetry",
+        "control_console"
+      ],
+      "points": [
+        "head"
+      ],
+      "tags": [
+        "conditioning",
+        "sensory"
+      ],
+      "modes": [],
+      "motion": "Без привода; сцена/звук.",
+      "limits": "Таймер, паника-сброс.",
+      "service": "Проверка линз, гигиена.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_gantry",
+      "code": "OMNI-TC-01",
+      "name": "Гентри",
+      "family": "technical",
+      "role": "SERVICE",
+      "zone": "room_machine_hall",
+      "footprint": "3.0 × 2.0 м",
+      "purpose": "Потолочная 2-осевая рама под сменные головки.",
+      "modules": [
+        "structure_gantry",
+        "motion_linear_x",
+        "motion_linear_y",
+        "utility_power",
+        "utility_data"
+      ],
+      "points": [],
+      "tags": [],
+      "modes": [],
+      "motion": "X/Y-ход, подвес головок.",
+      "limits": "Концевики, стоп, нагрузка.",
+      "service": "Проверка рельсов, кабелей.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_service_dock",
+      "code": "OMNI-TC-03",
+      "name": "Док-станция",
+      "family": "technical",
+      "role": "SERVICE",
+      "zone": "room_service_bay",
+      "footprint": "1.2 × 0.8 м",
+      "purpose": "Быстросъём модулей, питание/данные/жидкости, диагностика.",
+      "modules": [
+        "structure_dock",
+        "control_telemetry",
+        "utility_power",
+        "utility_data",
+        "service_dock"
+      ],
+      "points": [],
+      "tags": [],
+      "modes": [],
+      "motion": "Без привода; док-плита.",
+      "limits": "Сброс питания, слив, стоп.",
+      "service": "Чистка, проверка разъёмов.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_stall_row",
+      "code": "OMNI-TC-06",
+      "name": "Ряд кабин",
+      "family": "technical",
+      "role": "SERVICE",
+      "zone": "room_stalls",
+      "footprint": "6.8 × 1.0 м",
+      "purpose": "Семь стандартных кабин для потоковых процедур.",
+      "modules": [
+        "structure_stall_row",
+        "restraint_matrix",
+        "control_console",
+        "utility_power"
+      ],
+      "points": [
+        "body"
+      ],
+      "tags": [
+        "restraint",
+        "clinical"
+      ],
+      "modes": [],
+      "motion": "Ручная фиксация; общая панель.",
+      "limits": "Быстросъём, стоп на секцию.",
+      "service": "Мойка кабин, проверка замков.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_portable_unit",
+      "code": "OMNI-TC-09",
+      "name": "Портативный аппарат",
+      "family": "technical",
+      "role": "SENSITIZE",
+      "zone": "room_calibration",
+      "footprint": "0.8 × 0.6 м",
+      "purpose": "Носимый/поясной узел для точечной работы вне стенда.",
+      "modules": [
+        "motion_linear_x",
+        "work_probe_linear",
+        "work_attach_vibrating",
+        "control_console",
+        "utility_power"
+      ],
+      "points": [
+        "vagina",
+        "anus",
+        "inner_thighs"
+      ],
+      "tags": [
+        "sexual",
+        "penetration",
+        "machine"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "Малый ход, носимый корпус.",
+      "limits": "Батарея/лимит, быстросъём, стоп.",
+      "service": "Зарядка, гильзы, мойка.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_pen_piston",
+      "code": "VEIL-PN-20",
+      "name": "Поршневой стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "1,6 × 1,3 м",
+      "purpose": "Контролируемый ход штокового поршня с быстросменными насадками.",
+      "modules": [
+        "structure_base",
+        "motion_piston_rod",
+        "motion_linear_y",
+        "work_probe_linear",
+        "work_attach_smooth",
+        "work_attach_sterile_liner",
+        "restraint_stirrup",
+        "control_console"
+      ],
+      "points": [
+        "vagina",
+        "anus",
+        "prostate"
+      ],
+      "tags": [
+        "sexual",
+        "penetration",
+        "machine",
+        "linear"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "Ход 0–150 мм, усилие до 300 Н, скорость 0–150 мм/с.",
+      "limits": "Осевая нагрузка; датчик усилия; концевые упоры; стерильная гильза; стоп.",
+      "service": "Смена насадок, гильз, проверка штока.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_pen_pneumatic",
+      "code": "VEIL-PN-22",
+      "name": "Пневмо-стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "1,5 × 1,1 м",
+      "purpose": "Быстрый мягкий ход на воздухе с надувной насадкой.",
+      "modules": [
+        "structure_base",
+        "motion_piston_pneumatic",
+        "work_probe_linear",
+        "work_attach_inflatable",
+        "effect_pneumatic",
+        "restraint_matrix",
+        "control_console",
+        "utility_air"
+      ],
+      "points": [
+        "vagina",
+        "anus"
+      ],
+      "tags": [
+        "sexual",
+        "penetration",
+        "pneumatic",
+        "soft"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "Ход 0–100 мм, 6–8 бар, до 300 Н.",
+      "limits": "Давление/выпуск; датчик давления; сброс при остановке; стоп.",
+      "service": "Фильтр воздуха, уплотнения, проверка камер.",
+      "status": "concept"
+    },
+    {
+      "id": "lab_pen_carousel",
+      "code": "VEIL-PN-24",
+      "name": "Карусельный стенд",
+      "family": "penetration",
+      "role": "SENSITIZE",
+      "zone": "room_machine_hall",
+      "footprint": "2,2 × 1,4 м",
+      "purpose": "Магазин из шести насадок с автоматической сменой на поршневом стенде.",
+      "modules": [
+        "structure_gantry",
+        "motion_piston_servo",
+        "work_attach_smooth",
+        "work_attach_ribbed",
+        "work_attach_spiral",
+        "work_attach_carousel",
+        "restraint_stirrup",
+        "control_console"
+      ],
+      "points": [
+        "vagina",
+        "anus",
+        "prostate"
+      ],
+      "tags": [
+        "sexual",
+        "penetration",
+        "machine",
+        "quick-change"
+      ],
+      "modes": [
+        "penetration"
+      ],
+      "motion": "Ход 0–200 мм, смена насадки 0–30 об/мин.",
+      "limits": "Только совместимые насадки; фиксатор гнезда; стоп.",
+      "service": "Чистка гнёзд, проверка привода, смена насадок.",
+      "status": "concept"
+    }
+  ],
+  "layerWiring": {
+    "rule": "Устройство собирается как привод → база → форма → эффект → оснастка.",
+    "coreProtected": [
+      "lab_diagnostic_table",
+      "lab_mental_correction_chair",
+      "lab_sex_machine_anal",
+      "lab_sex_machine_circularsaw",
+      "lab_sex_machine_tickling",
+      "lab_sex_machine_vaginal"
+    ],
+    "changed": 0
+  }
+}

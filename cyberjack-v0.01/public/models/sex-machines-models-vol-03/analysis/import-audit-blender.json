@@ -1,0 +1,2165 @@
+{
+  "blenderVersion": "4.2.20 LTS",
+  "objects": 881,
+  "meshObjects": 355,
+  "armatures": 0,
+  "actions": 0,
+  "collectionInstances": 526,
+  "collections": [
+    {
+      "name": "Scene Collection",
+      "exclude": false,
+      "hide_viewport": false,
+      "objects": 0
+    },
+    {
+      "name": "SexMachineModel-065",
+      "exclude": false,
+      "hide_viewport": false,
+      "objects": 0
+    },
+    {
+      "name": "SexMachineModel-065 (source geometry)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 0
+    },
+    {
+      "name": "ROOT_MODEL",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "ROOT_MODEL (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group812#1 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group813#1 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#563",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#555",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#58",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#757",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#759",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#758",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#564",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#760",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#752",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#753",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#761 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Component#6",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "1.stl",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "1.stl (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#562",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#741",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#741 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#725",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#711",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#714",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#726",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#712",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#722",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#715",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#724",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#723",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#721",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#707",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#710",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#720",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#719",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#713",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#718",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#717",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#709",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#716",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#708",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#632",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#631",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#630",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#626",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#624",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#623",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#620",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#622",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#625",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#619",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#618",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#629",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#617",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#616",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#613",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#612",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#603",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#614",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#628",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#590",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#611",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#610",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#621",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#627",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#577",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#615",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#566",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#567",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#568",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#569",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#570",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#571",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#572",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#573",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#574",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#575",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#576",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#578",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#579",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#580",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#581",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#582",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#583",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#584",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#585",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#586",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#587",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#588",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#589",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#591",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#592",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#593",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#594",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#595",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#596",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#597",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#598",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#599",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#600",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#601",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#602",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#604",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#605",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#606",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#607",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#608",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#609",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#638",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#637",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#634",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#702",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#703",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#701",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#699",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#639",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#698",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#697",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#635",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#633",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#694",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#700",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#696",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#693",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#691",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#678",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#692",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#641",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#645",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#706",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#665",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#705",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#636",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#704",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#640",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#642",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#695",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#690",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#643",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#644",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#653",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#646",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#647",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#648",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#649",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#650",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#651",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#652",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#654",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#655",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#656",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#657",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#658",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#659",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#660",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#661",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#662",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#663",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#664",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#666",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#667",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#668",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#669",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#670",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#671",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#672",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#673",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#674",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#675",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#676",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#677",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#679",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#680",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#681",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#682",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#683",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#684",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#685",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#686",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#687",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#688",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#689",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#742",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#745",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#745 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#747",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#747 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#746",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#746 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#293",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#294",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#295",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#296",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#297",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#298",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#299",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#300",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#301",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#302",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#303",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#304",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#306",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#307",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#308",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#309",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#310",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#311",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#312",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#313",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#314",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#315",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#316",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#318",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#319",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#320",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#321",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#322",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#323",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#324",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#325",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#326",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#327",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#328",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#329",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#331",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#332",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#333",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#334",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#335",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#336",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#337",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#338",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#339",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#340",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#341",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#343",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#344",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#345",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#346",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#347",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#348",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#349",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#350",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#351",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#352",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#353",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#355",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#356",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#357",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#358",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#359",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#360",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#361",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#362",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#363",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#364",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#365",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#366",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#368",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#369",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#370",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#371",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#372",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#373",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#374",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#375",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#376",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#377",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#378",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#379",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#381",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#382",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#383",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#384",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#385",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#386",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#387",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#388",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#389",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#390",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#391",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#393",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#394",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#395",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#396",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#397",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#398",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#399",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#400",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#401",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#402",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#403",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#404",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#406",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#407",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#408",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#409",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#410",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#411",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#412",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#413",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#414",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#415",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#416",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#418",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#419",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#420",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#421",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#422",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#423",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#424",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#425",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#426",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#427",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#428",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#429",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#431",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#432",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#433",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#434",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#435",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#437",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#438",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#439",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#440",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#441",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#442",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#444",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#445",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#446",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#447",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#448",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#449",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#450",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#451",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#452",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#453",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#454",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#455",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#457",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#458",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#459",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#460",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#461",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#462",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#464",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#465",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#466",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#467",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#468",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#750",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#748",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#748 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#749",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Group#749 (lines)",
+      "exclude": true,
+      "hide_viewport": false,
+      "objects": 1
+    },
+    {
+      "name": "Layer0",
+      "exclude": false,
+      "hide_viewport": false,
+      "objects": 526
+    }
+  ],
+  "originalGlbExporterOptions": "/tmp/skp_glb.py: export_format=GLB, export_yup=True; visibility/export collection filters not set"
+}

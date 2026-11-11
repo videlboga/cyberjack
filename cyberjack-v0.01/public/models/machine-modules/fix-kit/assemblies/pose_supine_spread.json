@@ -1,0 +1,66 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_supine_spread",
+  "name": "Спиной, ноги разведены",
+  "subtitle": "supine / spread-eagle",
+  "refs": [
+    "vol-04 · 094",
+    "vol-04 · 098",
+    "vol-04 · 100"
+  ],
+  "body": "Спина на ложе, таз и грудная клетка на подушках, руки в стороны, ноги подняты и разведены. У 100 — вариант с ногами над головой.",
+  "summary": "Кровать 2×1: длинные рельсы, поперечины, четыре опоры; каретки для запястий и голеней; тазовая/грудная подушки.",
+  "status": "ready",
+  "built_count": 8,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_rail_2000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_cross_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_corner_node",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_foot",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_carriage",
+      "qty": 6,
+      "status": "built"
+    },
+    {
+      "id": "fix_cuff_adapter",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_pad_adapter",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_latch_adapter",
+      "qty": 2,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "wrist.l/r — манжеты",
+    "ankle.l/r — манжеты",
+    "hip — подушка",
+    "chest — подушка"
+  ],
+  "effect": "Центр таза; при 100 — доступ сверху/сзади головы.",
+  "note": "100 — отдельный вариант «ноги над головой», не та же поза, что 094."
+}

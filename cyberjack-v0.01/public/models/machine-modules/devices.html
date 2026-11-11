@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Омникрон · каталог устройств</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F1EFEA'/%3E%3Crect x='7' y='7' width='18' height='18' rx='3' fill='%23E8B9BF' stroke='%232F3135' stroke-width='1.5'/%3E%3Crect x='13' y='13' width='6' height='6' rx='1' fill='%232F3135'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --milk:#F1EFEA; --ivory:#FAF8F4; --ink:#2F3135; --graphite:#54575A;
+    --silver:#B9BAB7; --blush:#E8B9BF; --pale:#F2D7D9; --status:#E4F4F5;
+    --line:rgba(47,49,53,.14); --line-strong:rgba(47,49,53,.30);
+    --mono:ui-monospace,"SFMono-Regular","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:"Inter","Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:18px;
+    --shadow:0 18px 45px -28px rgba(47,49,53,.38);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;color:var(--ink);
+    background:
+      radial-gradient(1100px 620px at 12% -8%, #FCFAF5 0%, rgba(252,250,245,0) 62%),
+      radial-gradient(900px 520px at 90% 4%, #F7F1EB 0%, rgba(247,241,235,0) 58%),
+      var(--milk);
+    font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  body.locked{overflow:hidden}
+  a{color:inherit}
+  button,input,select{font:inherit;color:inherit}
+  ::selection{background:var(--pale)}
+  .page{max-width:1480px;margin:0 auto;padding:0 32px 80px}
+
+  .topline{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0 18px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.16em}
+  .brand-mark{width:14px;height:14px;border-radius:3px;background:var(--blush);border:1px solid rgba(47,49,53,.28);position:relative;flex:none}
+  .brand-mark::after{content:"";position:absolute;inset:4px;border-radius:1px;background:var(--ink);opacity:.78}
+  .topline-meta{font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:none;color:var(--graphite);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .topline-meta span{color:var(--silver)}
+  .topline-meta a{text-decoration:none;border-bottom:1px solid var(--line-strong);padding-bottom:1px;color:#4C4F53}
+  .topline-meta a:hover{color:var(--ink);border-color:var(--ink)}
+
+  .hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.6fr);gap:56px;align-items:end;padding:64px 0 42px}
+  .eyebrow{margin:0 0 22px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--graphite);display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--line-strong)}
+  h1{margin:0;font-size:clamp(40px,5.8vw,78px);line-height:.94;letter-spacing:-.045em;font-weight:620}
+  h1 em{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;letter-spacing:-.03em;color:var(--graphite)}
+  .lede{margin:26px 0 0;max-width:62ch;font-size:15.5px;line-height:1.62;color:#4B4E52}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:11px 17px;border:1px solid var(--line-strong);border-radius:999px;background:transparent;text-decoration:none;cursor:pointer;font-size:13px;font-weight:560;transition:.18s ease}
+  .btn:hover{border-color:var(--ink);transform:translateY(-1px)}
+  .btn-dark{background:var(--ink);color:#F8F6F1;border-color:var(--ink)}
+  .btn-dark:hover{background:#1F2124}
+  .btn .arr{font-family:var(--mono);font-size:12px;opacity:.7}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .stat{background:rgba(250,248,244,.72);padding:20px 18px 18px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+  .stat-n{font-size:34px;line-height:1;letter-spacing:-.04em;font-weight:600}
+  .stat-l{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--graphite)}
+  .stat-note{grid-column:1/-1;background:rgba(250,248,244,.72);margin:0;padding:16px 18px;font-size:11.5px;line-height:1.55;color:var(--graphite)}
+
+  .toolbar{position:sticky;top:0;z-index:40;padding:12px 0;background:rgba(241,239,234,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);margin-bottom:22px}
+  .toolbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .search{flex:1 1 230px;min-width:200px;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(250,248,244,.6)}
+  .search svg{flex:none;opacity:.5}
+  .search input{width:100%;border:0;outline:0;background:transparent;font-size:12.5px}
+  .search input::placeholder{color:#9A9DA0}
+  .select{appearance:none;padding:8px 30px 8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(250,248,244,.6);font-size:12px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,#777 50%),linear-gradient(135deg,#777 50%,transparent 50%);background-position:calc(100% - 15px) 50%,calc(100% - 10px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .count{font-family:var(--mono);font-size:10px;color:var(--graphite);letter-spacing:.04em;white-space:nowrap}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .filter{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid transparent;border-radius:999px;background:transparent;cursor:pointer;font-size:11.5px;color:#5D6064;transition:.15s ease}
+  .filter:hover{background:rgba(250,248,244,.9);color:var(--ink)}
+  .filter.is-on{background:var(--ink);color:#F8F6F1}
+  .filter .n{font-family:var(--mono);font-size:9px;opacity:.62}
+  .filter .sw{width:7px;height:7px;border-radius:2px;background:var(--sw,var(--silver));flex:none}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
+  .card{background:var(--ivory);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;animation:cardIn .45s both;animation-delay:calc(var(--i) * 28ms);scroll-margin-top:90px}
+  @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card:hover{transform:translateY(-3px);border-color:var(--line-strong);box-shadow:0 26px 55px -32px rgba(47,49,53,.5)}
+  .card.hidden{display:none}
+  .card-visual{position:relative;aspect-ratio:16/10;background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 55%),var(--accent-bg,#F2EEE6);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-visual::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(47,49,53,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(47,49,53,.055) 1px,transparent 1px);background-size:22px 22px;mask-image:radial-gradient(circle at 50% 50%,#000 0%,transparent 78%);opacity:.8}
+  .visual-top,.visual-bottom{position:absolute;left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em}
+  .visual-top{top:12px;color:#73767A}
+  .visual-bottom{bottom:12px;color:#73767A}
+  .code{background:rgba(250,248,244,.72);border:1px solid rgba(47,49,53,.1);padding:3px 6px;border-radius:4px}
+  .status{text-transform:uppercase;font-size:8px;letter-spacing:.08em;opacity:.7}
+  .status.core{color:#3E725F;opacity:1}
+  .icon{width:44%;max-width:160px;color:var(--accent,#54575A);opacity:.9;filter:drop-shadow(0 6px 12px rgba(47,49,53,.08))}
+  .icon svg{width:100%;height:auto;display:block}
+  .card-body{padding:16px 16px 14px}
+  .card-body h3{margin:0 0 5px;font-size:19px;line-height:1.15;letter-spacing:-.025em;font-weight:600}
+  .card-body .purpose{margin:0 0 12px;font-size:12px;line-height:1.52;color:#5A5D61;min-height:36px}
+  .quick{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 11px;padding-top:11px;border-top:1px solid var(--line)}
+  .quick dt{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#96999C;margin-bottom:3px}
+  .quick dd{margin:0;font-size:11.5px;line-height:1.35;color:#3F4246;font-weight:520}
+  .chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;max-height:44px;overflow:hidden}
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border-radius:5px;background:#F0EDE6;border:1px solid rgba(47,49,53,.08);font-family:var(--mono);font-size:8px;letter-spacing:.02em;color:#64676B;text-decoration:none;cursor:pointer;transition:.14s ease}
+  .chip:hover{background:#E8E4DB;color:var(--ink)}
+  .chip.ghost{background:transparent;border-color:var(--line);color:#96999C}
+  .open{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 0 0;border:0;border-top:1px solid var(--line);background:transparent;font-size:11px;font-weight:540;color:#4C4F53;cursor:pointer;text-align:left}
+  .open span{font-family:var(--mono);font-size:13px;color:#8E9194;transition:transform .18s ease}
+  .card:hover .open span{transform:translate(2px,-2px);color:var(--ink)}
+
+  .kits{margin-top:68px;scroll-margin-top:80px}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:20px;flex-wrap:wrap}
+  .sec-head h2{margin:0;font-size:clamp(26px,3.2vw,38px);letter-spacing:-.035em;line-height:1;font-weight:600}
+  .sec-head p{margin:0;max-width:54ch;font-size:12.5px;line-height:1.55;color:#6B6E72}
+  .kit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .kit{padding:16px;border:1px solid var(--line);border-radius:12px;background:rgba(250,248,244,.62);transition:.16s ease}
+  .kit:hover{border-color:var(--line-strong);background:var(--ivory)}
+  .kit-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .kit h3{margin:0;font-size:15px;letter-spacing:-.015em;font-weight:600}
+  .kit .k-code{font-family:var(--mono);font-size:8px;color:#96999C}
+  .kit p{margin:0 0 10px;font-size:11px;line-height:1.5;color:#63666A}
+  .kit .chips{max-height:none;margin:0}
+
+  footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:18px;font-size:10.5px;line-height:1.6;color:#8A8D90}
+  footer p{margin:0;max-width:72ch}
+  footer .f-meta{font-family:var(--mono);font-size:9px;letter-spacing:.03em}
+
+  .modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal.open{display:flex}
+  .modal-backdrop{position:absolute;inset:0;background:rgba(35,37,40,.42);backdrop-filter:blur(7px);animation:fadeIn .2s ease both}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-card{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,.9fr) minmax(340px,1.1fr);width:min(1120px,100%);height:min(84vh,820px);background:var(--ivory);border:1px solid rgba(255,255,255,.35);border-radius:20px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(20,22,24,.55);animation:modalIn .25s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+  .detail-visual{position:relative;background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),var(--accent-bg,#F2EEE6);border-right:1px solid var(--line);padding:22px;display:flex;flex-direction:column;overflow:hidden}
+  .detail-visual::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(47,49,53,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(47,49,53,.05) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(circle at 50% 45%,#000 0%,transparent 80%)}
+  .detail-top{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-right:38px;font-family:var(--mono);font-size:9px;color:#73767A}
+  .detail-icon{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:24px 0;color:var(--accent,#54575A)}
+  .detail-icon .icon{width:60%;max-width:280px;opacity:.92}
+  .detail-meta{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+  .detail-meta dt{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#96999C;margin-bottom:3px}
+  .detail-meta dd{margin:0;font-size:11px;line-height:1.35;color:#45484C}
+  .detail-side{padding:30px 28px 24px;overflow:auto;display:flex;flex-direction:column}
+  .modal-x{position:absolute;top:13px;right:13px;z-index:5;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:rgba(250,248,244,.86);cursor:pointer;font-size:13px;display:grid;place-items:center;backdrop-filter:blur(6px)}
+  .modal-x:hover{background:#fff}
+  .detail-side .kicker{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;color:#96999C;margin-bottom:8px;flex-wrap:wrap}
+  .detail-side .kicker .badge{padding:3px 6px;border-radius:4px;background:#F0EDE6;border:1px solid var(--line);color:#5D6064;letter-spacing:.03em}
+  .detail-side h2{margin:2px 0 6px;font-size:clamp(26px,3vw,36px);line-height:1.02;letter-spacing:-.04em;font-weight:620}
+  .detail-side .d-purpose{margin:0 0 16px;font-size:13.5px;line-height:1.55;color:#3F4246}
+  .specs{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 16px;border-top:1px solid var(--line)}
+  .specs div{display:grid;grid-template-columns:104px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .specs dt{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#96999C;padding-top:2px}
+  .specs dd{margin:0;font-size:11.5px;line-height:1.45;color:#45484C}
+  .modules{margin:0 0 16px}
+  .modules h4,.detail-side h4{margin:0 0 7px;font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:#96999C;font-weight:500}
+  .module-list{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto;padding-right:4px}
+  .module-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 7px;border-radius:5px;background:#F4F1EA;border:1px solid rgba(47,49,53,.06);text-decoration:none;color:inherit;transition:.14s ease}
+  .module-row:hover{background:#ECE7DC;border-color:rgba(47,49,53,.16)}
+  .module-row .m-name{font-size:11px;color:#3F4246}
+  .module-row .m-class{font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;color:#96999C;white-space:nowrap}
+  .kit-block{margin:0 0 14px}
+  .kit-block .chips{margin:0;max-height:none}
+  .detail-side .chips{margin-bottom:14px;max-height:none}
+  .detail-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:12px;font-family:var(--mono);font-size:8.5px;color:#96999C}
+
+  .empty{padding:40px 20px;text-align:center;color:#8A8D90;font-size:13px}
+  @media (max-width:1080px){
+    .hero{grid-template-columns:1fr;gap:30px;align-items:start}
+    .stats{max-width:520px}
+    .kit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .modal-card{grid-template-columns:1fr;grid-template-rows:minmax(280px,42vh) 1fr;height:min(90vh,920px);overflow:auto}
+    .detail-visual{border-right:0;border-bottom:1px solid var(--line);min-height:280px}
+    .detail-icon{padding:10px 0}
+    .detail-icon .icon{max-width:180px}
+    .detail-side{overflow:visible}
+  }
+  @media (max-width:720px){
+    .page{padding:0 18px 60px}
+    .topline-meta{display:none}
+    .hero{padding:44px 0 32px}
+    .grid{grid-template-columns:1fr}
+    .toolbar{position:static;padding:10px 0}
+    .toolbar-row{gap:8px}
+    .filters{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:5px;scrollbar-width:none}
+    .filters::-webkit-scrollbar{display:none}
+    .filter{flex:0 0 auto}
+    .kit-grid{grid-template-columns:1fr}
+    .modal{padding:10px}
+    .modal-card{height:94vh}
+    .detail-side{padding:24px 20px 20px}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{animation:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topline">
+    <div class="brand"><span class="brand-mark"></span> Omnicron / Station devices</div>
+    <div class="topline-meta"><span id="top-count">41 устройство · 9 наборов</span><a href="demo.html">3D-модули ↗</a><a href="components.html">Компоненты ↗</a><a href="fix-kit.html">CJ-FIX-KIT ↗</a></div>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">02 — станционный парк</p>
+      <h1>Устройства<br><em>калибровочного блока</em></h1>
+      <p class="lede">
+        Сорок одна позиция станционного оборудования: щекотка, проникновение,
+        удар и ток, жидкости, фиксация, поверхности и сенсорика. Каждое устройство
+        собрано из повторяемых модулей — рама, движение, сменная головка, фиксация,
+        поверхность, контроль и инфраструктура.
+      </p>
+      <div class="hero-actions">
+        <a href="#catalog" class="btn btn-dark">Открыть каталог <span class="arr">↓</span></a>
+        <a href="#kits" class="btn">Наборы модулей <span class="arr">↘</span></a>
+      </div>
+    </div>
+    <aside class="stats">
+      <div class="stat"><span class="stat-n" id="stat-devices">41</span><span class="stat-l">устройств</span></div>
+      <div class="stat"><span class="stat-n" id="stat-kits">9</span><span class="stat-l">наборов</span></div>
+      <div class="stat"><span class="stat-n" id="stat-modules">96</span><span class="stat-l">модулей</span></div>
+      <div class="stat"><span class="stat-n" id="stat-existing">6</span><span class="stat-l">уже в игре</span></div>
+      <p class="stat-note">
+        Концепт-каталог, не инструкция. Все персонажи — взрослые. Габариты и пределы —
+        игровые, не инженерные.
+      </p>
+    </aside>
+  </header>
+
+  <section class="toolbar" id="catalog" aria-label="Фильтры каталога">
+    <div class="toolbar-row">
+      <label class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Поиск: название, код, тег, функция…" autocomplete="off" />
+      </label>
+      <select class="select" id="zone-filter" aria-label="Зона"><option value="ALL">Все зоны</option></select>
+      <select class="select" id="role-filter" aria-label="Роль"><option value="ALL">Все роли</option></select>
+      <span class="count" id="count">41 / 41</span>
+    </div>
+    <div class="filters" id="filters"></div>
+  </section>
+
+  <main class="grid" id="grid" aria-live="polite"></main>
+
+  <section class="kits" id="kits">
+    <div class="sec-head">
+      <h2>Девять наборов<br>для сборки парка</h2>
+      <p>
+        Набор — это не готовая машина, а способ собрать рабочее место под контракт.
+        Один и тот же набор даёт разные устройства при смене головок и фиксации.
+      </p>
+    </div>
+    <div class="kit-grid" id="kit-grid"></div>
+  </section>
+
+  <footer>
+    <p>
+      <b>Омникрон · каталог станционного оборудования.</b> Вымышленный концепт для Cyberjack.
+      Не является инструкцией по изготовлению, медицинской или инженерной документацией.
+      Все персонажи — взрослые; параметры и пределы — игровая абстракция.
+      Иконки — семейные схемы, не финальные силуэты устройств.
+    </p>
+    <div class="f-meta">41 devices · 9 kits · 96 components · metres</div>
+  </footer>
+</div>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="d-title">
+    <button class="modal-x" type="button" data-close aria-label="Закрыть">✕</button>
+    <div class="detail-visual" id="detail-visual">
+      <div class="detail-top"><span class="code" id="d-code"></span><span class="status" id="d-status"></span></div>
+      <div class="detail-icon" id="d-icon"></div>
+      <dl class="detail-meta">
+        <div><dt>Зона</dt><dd id="d-zone"></dd></div>
+        <div><dt>Пятно</dt><dd id="d-footprint"></dd></div>
+        <div><dt>Семейство</dt><dd id="d-family"></dd></div>
+        <div><dt>Роль</dt><dd id="d-role"></dd></div>
+      </dl>
+    </div>
+    <div class="detail-side">
+      <div class="kicker"><span class="badge" id="d-family-badge"></span><span id="d-existing"></span></div>
+      <h2 id="d-title"></h2>
+      <p class="d-purpose" id="d-purpose"></p>
+      <dl class="specs">
+        <div><dt>Движение</dt><dd id="d-motion"></dd></div>
+        <div><dt>Пределы</dt><dd id="d-limits"></dd></div>
+        <div><dt>Режимы</dt><dd id="d-modes"></dd></div>
+        <div><dt>Точки</dt><dd id="d-points"></dd></div>
+        <div><dt>Обслуживание</dt><dd id="d-service"></dd></div>
+      </dl>
+      <div class="modules">
+        <h4>Состав модулей · <span id="d-mod-count"></span></h4>
+        <div class="module-list" id="d-modules"></div>
+      </div>
+      <div class="kit-block">
+        <h4>Входит в наборы</h4>
+        <div class="chips" id="d-kits"></div>
+      </div>
+      <div>
+        <h4>Теги</h4>
+        <div class="chips" id="d-tags"></div>
+      </div>
+      <div class="detail-foot"><span id="d-zone-code"></span><span id="d-code-foot"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const FAMILY = {
+  calibration: { label: 'Калибровка', accent: '#5E7C86', bg: '#E7EEF0' },
+  tickling:    { label: 'Щекотка', accent: '#B4696F', bg: '#F7E6E7' },
+  penetration: { label: 'Проникновение', accent: '#A85B63', bg: '#F6E4E5' },
+  impact:      { label: 'Удар', accent: '#A8783E', bg: '#F2EBDD' },
+  electro:     { label: 'Ток', accent: '#4E7A8A', bg: '#E2EDF0' },
+  rotary:      { label: 'Ротация', accent: '#8A6A7A', bg: '#F0E6EA' },
+  fluid:       { label: 'Жидкости', accent: '#4E8A8A', bg: '#E1EFEF' },
+  restraint:   { label: 'Фиксация', accent: '#54575A', bg: '#E8E8E4' },
+  surface:     { label: 'Поверхности', accent: '#A08A6A', bg: '#F0EADF' },
+  sensory:     { label: 'Сенсорика', accent: '#5E6A7A', bg: '#E5E9ED' },
+  technical:   { label: 'Технические', accent: '#6B6E70', bg: '#E9E9E6' }
+};
+
+const ROLE = {
+  ASSESS: 'Измерение', SENSITIZE: 'Сенсибилизация', CONDITION: 'Обусловливание',
+  RESTRAIN: 'Фиксация', DEPLETE: 'Истощение', COLLECT: 'Сбор',
+  RESTORE: 'Восстановление', SERVICE: 'Сервис'
+};
+
+const ZONE = {
+  room_calibration: 'Калибровочная',
+  room_sensory: 'Оранжерея чувствительности',
+  room_kinematic: 'Матрица ограничения',
+  room_machine_hall: 'Машинный зал',
+  room_stalls: 'Зал кабин',
+  room_cognitive: 'Блок когнитивной лепки',
+  room_medbay: 'Медблок',
+  room_service_bay: 'Сервисный бокс',
+  room_storage: 'Склад'
+};
+
+const STATUS = { core: 'в игре', concept: 'концепт', future: 'следующий слой' };
+
+const POINT_RU = {
+  head: 'голова', hair: 'волосы', face: 'лицо', lips: 'губы', neck: 'шея',
+  shoulders: 'плечи', chest: 'грудь', nipples: 'соски', belly: 'живот',
+  back: 'спина', waist: 'талия', arms: 'руки', hands: 'кисти',
+  inner_thighs: 'внутренняя сторона бёдер', legs: 'ноги', feet: 'ступни',
+  buttocks: 'ягодицы', anus: 'анус', penis: 'член', testicles: 'яички',
+  prostate: 'простата', vulva: 'вульва', vagina: 'влагалище', clitoris: 'клитор',
+  body: 'тело', all: 'всё тело'
+};
+
+const MODE_RU = {
+  penetration: 'проникновение', tickling: 'щекотка', vibration: 'вибрация',
+  pulse: 'импульс', wave: 'волна', random: 'случайно'
+};
+
+const ICONS = {
+  calibration: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 78h84M30 78V38h60v40M24 38h72M42 38v40M78 38v40"/><circle cx="60" cy="58" r="12"/><path d="M60 46v24M48 58h24"/><path d="M30 30h60" stroke-dasharray="3 5"/></svg>`,
+  tickling: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 72h80M38 72V44h44v28M48 44V30h24v14"/><path d="M48 30v-8M60 30v-12M72 30v-8"/><path d="M34 72v8M86 72v8"/><circle cx="60" cy="58" r="7"/><path d="M52 58h16M60 50v16"/></svg>`,
+  penetration: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 76h84M30 76V48h60v28"/><path d="M30 48h60"/><path d="M42 48v-8h36v8"/><path d="M60 40V22M54 22h12"/><path d="M34 76v8M86 76v8"/><path d="M36 86h48" stroke-dasharray="3 5"/></svg>`,
+  impact: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 78h80M32 78V56h34v22"/><path d="M66 56l18-18"/><rect x="78" y="18" width="18" height="28" rx="3" transform="rotate(45 87 32)"/><path d="M24 86h24" stroke-dasharray="3 5"/></svg>`,
+  electro: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M28 78h64M36 78V40h48v38"/><path d="M48 40l8-22h16l-8 22"/><path d="M54 52h12M50 62h20M46 72h28"/></svg>`,
+  rotary: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="60" cy="48" r="26"/><circle cx="60" cy="48" r="9"/><path d="M60 22v10M60 64v10M34 48h10M76 48h10"/><path d="M22 84h76"/></svg>`,
+  fluid: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M28 80h64M36 80V44h48v36"/><path d="M48 44V30h24v14"/><path d="M60 18c6 8 10 13 10 18a10 10 0 0 1-20 0c0-5 4-10 10-18Z"/><path d="M24 88h72" stroke-dasharray="3 5"/></svg>`,
+  restraint: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M22 80h76M32 80V52h56v28"/><path d="M42 52V34h36v18"/><circle cx="42" cy="64" r="8"/><circle cx="78" cy="64" r="8"/><path d="M50 64h20"/><path d="M32 88h56" stroke-dasharray="3 5"/></svg>`,
+  surface: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 70h80M28 70V56h64v14"/><path d="M34 56V44h52v12"/><path d="M40 44v-8h40v8"/><path d="M28 78v8M92 78v8"/><path d="M24 88h72" stroke-dasharray="3 5"/></svg>`,
+  sensory: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M24 78h72M32 78V38h56v40"/><path d="M32 38c0-16 12-26 28-26s28 10 28 26"/><path d="M46 50h28M46 60h28"/><path d="M50 24v-8M70 24v-8"/></svg>`,
+  technical: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 80h84M26 80V32h68v48"/><path d="M26 32h68"/><path d="M40 32v48M80 32v48"/><path d="M40 48h40"/><circle cx="60" cy="48" r="8"/><path d="M26 88h68" stroke-dasharray="3 5"/></svg>`
+};
+
+let DATA = null;
+let devices = [];
+let byId = new Map();
+const state = { family: 'ALL', zone: 'ALL', role: 'ALL', q: '' };
+
+const $ = (s, root = document) => root.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const tag = (t) => `<span class="chip">${esc(t)}</span>`;
+
+function devMatches(d) {
+  if (state.family !== 'ALL' && d.family !== state.family) return false;
+  if (state.zone !== 'ALL' && d.zone !== state.zone) return false;
+  if (state.role !== 'ALL' && d.role !== state.role) return false;
+  if (state.q) {
+    const hay = [d.name, d.code, d.id, d.purpose, d.family, d.role, d.zone, ...(d.tags || [])].join(' ').toLowerCase();
+    if (!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+
+function card(d, i) {
+  const f = FAMILY[d.family] || FAMILY.technical;
+  return `
+    <article class="card" data-id="${esc(d.id)}" style="--i:${i};--accent:${f.accent};--accent-bg:${f.bg}">
+      <div class="card-visual">
+        <div class="visual-top"><span class="code">${esc(d.code)}</span><span class="status ${d.existingAsset ? 'core' : ''}">${d.existingAsset ? 'в игре' : 'концепт'}</span></div>
+        <div class="icon">${ICONS[d.family] || ICONS.technical}</div>
+        <div class="visual-bottom"><span>${esc(f.label)}</span><span>${esc(ROLE[d.role] || d.role)}</span></div>
+      </div>
+      <div class="card-body">
+        <h3>${esc(d.name)}</h3>
+        <p class="purpose">${esc(d.purpose)}</p>
+        <dl class="quick">
+          <div><dt>Зона</dt><dd>${esc(ZONE[d.zone] || d.zone)}</dd></div>
+          <div><dt>Пятно</dt><dd>${esc(d.footprint)}</dd></div>
+        </dl>
+        <div class="chips">${(d.tags || []).slice(0, 5).map(tag).join('')}${(d.tags || []).length > 5 ? `<span class="chip ghost">+${d.tags.length - 5}</span>` : ''}</div>
+        <button class="open" type="button" data-open="${esc(d.id)}">Состав и пределы <span>↗</span></button>
+      </div>
+    </article>`;
+}
+
+function renderGrid() {
+  const list = devices.filter(devMatches);
+  $('#grid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">Ничего не найдено. Сбросьте фильтры.</div>`;
+  $('#count').textContent = `${list.length} / ${devices.length}`;
+}
+
+function renderFilters() {
+  const fams = ['ALL', ...Object.keys(FAMILY).filter(f => devices.some(d => d.family === f))];
+  $('#filters').innerHTML = fams.map(f => {
+    const meta = f === 'ALL' ? { label: 'Все', accent: '#B9BAB7' } : FAMILY[f];
+    const n = f === 'ALL' ? devices.length : devices.filter(d => d.family === f).length;
+    return `<button class="filter${state.family === f ? ' is-on' : ''}" type="button" data-family="${f}"><span class="sw" style="--sw:${meta.accent}"></span>${esc(meta.label)} <span class="n">${n}</span></button>`;
+  }).join('');
+
+  $('#filters').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-family]');
+    if (!b) return;
+    state.family = b.dataset.family;
+    $('#filters').querySelectorAll('.filter').forEach(x => x.classList.toggle('is-on', x === b));
+    renderGrid();
+  });
+}
+
+function fillSelects() {
+  const zones = [...new Set(devices.map(d => d.zone))].sort((a, b) => (ZONE[a] || a).localeCompare(ZONE[b] || b, 'ru'));
+  $('#zone-filter').innerHTML = '<option value="ALL">Все зоны</option>' + zones.map(z => `<option value="${esc(z)}">${esc(ZONE[z] || z)}</option>`).join('');
+  $('#role-filter').innerHTML = '<option value="ALL">Все роли</option>' + Object.keys(ROLE).filter(r => devices.some(d => d.role === r)).map(r => `<option value="${esc(r)}">${esc(ROLE[r])}</option>`).join('');
+  $('#zone-filter').addEventListener('change', (e) => { state.zone = e.target.value; renderGrid(); });
+  $('#role-filter').addEventListener('change', (e) => { state.role = e.target.value; renderGrid(); });
+  $('#q').addEventListener('input', (e) => { state.q = e.target.value.trim().toLowerCase(); renderGrid(); });
+}
+
+function renderKits() {
+  const wrap = $('#kit-grid');
+  wrap.innerHTML = (DATA.kits || []).map(k => {
+    const names = k.devices.map(id => byId.get(id)?.name || id);
+    return `<article class="kit">
+      <div class="kit-top"><h3>${esc(k.name)}</h3><span class="k-code">${esc(k.code)}</span></div>
+      <p>${esc(k.purpose)}</p>
+      <div class="chips">${k.devices.slice(0, 5).map((id, i) => `<button class="chip" type="button" data-open="${esc(id)}">${esc(names[i])}</button>`).join('')}${k.devices.length > 5 ? `<span class="chip ghost">+${k.devices.length - 5}</span>` : ''}</div>
+    </article>`;
+  }).join('');
+}
+
+function openDevice(id) {
+  const d = byId.get(id);
+  if (!d) return;
+  const f = FAMILY[d.family] || FAMILY.technical;
+  const visual = $('#detail-visual');
+  visual.style.setProperty('--accent', f.accent);
+  visual.style.setProperty('--accent-bg', f.bg);
+  $('#d-code').textContent = d.code;
+  $('#d-status').className = 'status' + (d.existingAsset ? ' core' : '');
+  $('#d-status').textContent = STATUS[d.status] || d.status;
+  $('#d-icon').innerHTML = `<div class="icon">${ICONS[d.family] || ICONS.technical}</div>`;
+  $('#d-zone').textContent = ZONE[d.zone] || d.zone;
+  $('#d-footprint').textContent = d.footprint;
+  $('#d-family').textContent = f.label;
+  $('#d-role').textContent = ROLE[d.role] || d.role;
+  $('#d-family-badge').textContent = f.label;
+  $('#d-existing').textContent = d.existingAsset ? '· уже в игре' : '';
+  $('#d-title').textContent = d.name;
+  $('#d-purpose').textContent = d.purpose;
+  $('#d-motion').textContent = d.motion || '—';
+  $('#d-limits').textContent = d.limits || '—';
+  $('#d-modes').textContent = (d.modes || []).length ? d.modes.map(m => MODE_RU[m] || m).join(' · ') : '—';
+  $('#d-points').textContent = (d.points || []).length ? d.points.map(p => POINT_RU[p] || p).join(' · ') : '—';
+  $('#d-service').textContent = d.service || '—';
+  const kits = (DATA.kits || []).filter(k => (k.devices || []).includes(d.id));
+  $('#d-kits').innerHTML = kits.length
+    ? kits.map(k => `<span class="chip">${esc(k.code)} · ${esc(k.name)}</span>`).join('')
+    : '<span class="chip ghost">вне наборов</span>';
+  $('#d-tags').innerHTML = (d.tags || []).map(tag).join('') || '<span class="chip ghost">нет тегов</span>';
+  $('#d-mod-count').textContent = (d.modules || []).length;
+  $('#d-modules').innerHTML = (d.modules || []).map(mid => {
+    const m = DATA.modules.find(x => x.id === mid);
+    return `<a class="module-row" href="components.html?id=${encodeURIComponent(mid)}"><span class="m-name">${esc(m ? m.name : mid)}</span><span class="m-class">${esc(m ? m.class : '')} ↗</span></a>`;
+  }).join('');
+  $('#d-zone-code').textContent = d.zone;
+  $('#d-code-foot').textContent = d.code + ' · ' + d.id;
+  $('#modal').classList.add('open');
+  $('#modal').setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+}
+
+function closeDevice() {
+  $('#modal').classList.remove('open');
+  $('#modal').setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('locked');
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) { closeDevice(); return; }
+  const opener = e.target.closest('[data-open]');
+  if (opener) { openDevice(opener.dataset.open); return; }
+  const card = e.target.closest('.card');
+  if (card) openDevice(card.dataset.id);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDevice();
+});
+
+async function boot() {
+  try {
+    const res = await fetch('./device-catalog.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    DATA = await res.json();
+    devices = DATA.devices || [];
+    byId = new Map(devices.map(d => [d.id, d]));
+    $('#stat-devices').textContent = devices.length;
+    $('#stat-kits').textContent = (DATA.kits || []).length;
+    $('#stat-modules').textContent = (DATA.modules || []).length;
+    $('#stat-existing').textContent = devices.filter(d => d.existingAsset).length;
+    $('#top-count').textContent = `${devices.length} устройств · ${(DATA.kits || []).length} наборов`;
+    const foot = document.querySelector('.f-meta');
+    if (foot) foot.textContent = `${devices.length} devices · ${(DATA.kits || []).length} kits · ${(DATA.modules || []).length} components · metres`;
+    renderFilters();
+    fillSelects();
+    renderGrid();
+    renderKits();
+    const direct = new URLSearchParams(location.search).get('device');
+    if (direct) openDevice(direct);
+  } catch (err) {
+    console.error(err);
+    $('#grid').innerHTML = `<div class="empty">Не удалось прочитать <code>device-catalog.json</code>. Откройте страницу через локальный сервер.</div>`;
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_reclined_legpress",
+  "name": "Полулежа, ноги на упоре",
+  "subtitle": "reclined / leg press",
+  "refs": [
+    "vol-04 · 090",
+    "vol-04 · 091"
+  ],
+  "body": "Таз на сиденье, спина на спинке 30–60°, колени согнуты, стопы на подвижном упоре; руки за головой/на поручнях.",
+  "summary": "Стойки, спинка, сиденье, два боковых выноса и каретки для стоп; упор для ног — отдельный модуль.",
+  "status": "ready",
+  "built_count": 8,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_post_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_rail_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_cross_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_backboard",
+      "qty": 1,
+      "status": "built"
+    },
+    {
+      "id": "fix_tilt",
+      "qty": 1,
+      "status": "built"
+    },
+    {
+      "id": "fix_boom_500",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_carriage",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_foot",
+      "qty": 4,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "seat — таз",
+    "backboard — спина",
+    "foot plate — стопы",
+    "wrist — поручни"
+  ],
+  "effect": "Фронтальная/нижняя зона; ноги остаются на упоре, не висят.",
+  "note": "091 — более вертикальная посадка в клетке; 090 — выраженный leg-press."
+}

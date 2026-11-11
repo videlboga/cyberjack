@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Модули машины · демо-каталог</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F1EFEA'/%3E%3Crect x='7' y='7' width='18' height='18' rx='3' fill='%23E8B9BF' stroke='%232F3135' stroke-width='1.5'/%3E%3Crect x='13' y='13' width='6' height='6' rx='1' fill='%232F3135'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --milk:#F1EFEA;
+    --ivory:#FAF8F4;
+    --ink:#2F3135;
+    --graphite:#54575A;
+    --silver:#B9BAB7;
+    --blush:#E8B9BF;
+    --pale:#F2D7D9;
+    --status:#E4F4F5;
+    --line:rgba(47,49,53,.14);
+    --line-strong:rgba(47,49,53,.30);
+    --mono:ui-monospace,"SFMono-Regular","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:"Inter","Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:18px;
+    --shadow:0 18px 45px -28px rgba(47,49,53,.38);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 620px at 12% -8%, #FCFAF5 0%, rgba(252,250,245,0) 62%),
+      radial-gradient(900px 520px at 90% 4%, #F7F1EB 0%, rgba(247,241,235,0) 58%),
+      var(--milk);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  body.locked{overflow:hidden}
+  a{color:inherit}
+  button{font:inherit;color:inherit}
+  ::selection{background:var(--pale)}
+  .page{max-width:1480px;margin:0 auto;padding:0 32px 80px}
+
+  /* ── top line ─────────────────────────────────────────── */
+  .topline{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    padding:20px 0 18px;border-bottom:1px solid var(--line);
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.16em}
+  .brand-mark{
+    width:14px;height:14px;border-radius:3px;background:var(--blush);
+    border:1px solid rgba(47,49,53,.28);position:relative;flex:none;
+  }
+  .brand-mark::after{
+    content:"";position:absolute;inset:4px;border-radius:1px;background:var(--ink);
+    opacity:.78;
+  }
+  .topline-meta{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:none;color:var(--graphite)}
+  .topline-meta span{color:var(--silver);padding:0 6px}
+
+  /* ── hero ─────────────────────────────────────────────── */
+  .hero{
+    display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.55fr);
+    gap:56px;align-items:end;padding:64px 0 46px;
+  }
+  .eyebrow{
+    margin:0 0 22px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--graphite);
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--line-strong)}
+  h1{
+    margin:0;font-size:clamp(40px,6.2vw,84px);line-height:.94;letter-spacing:-.045em;
+    font-weight:620;
+  }
+  h1 em{
+    font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;
+    letter-spacing:-.03em;color:var(--graphite);
+  }
+  .lede{
+    margin:28px 0 0;max-width:60ch;font-size:16px;line-height:1.62;color:#4B4E52;
+  }
+  .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:11px 17px;border:1px solid var(--line-strong);border-radius:999px;
+    background:transparent;text-decoration:none;cursor:pointer;
+    font-size:13px;font-weight:560;letter-spacing:.01em;transition:.18s ease;
+  }
+  .btn:hover{border-color:var(--ink);transform:translateY(-1px)}
+  .btn-dark{background:var(--ink);color:#F8F6F1;border-color:var(--ink)}
+  .btn-dark:hover{background:#1F2124}
+  .btn .arr{font-family:var(--mono);font-size:12px;opacity:.7}
+  .hero-stats{
+    display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  }
+  .stat{background:rgba(250,248,244,.72);padding:20px 18px 18px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+  .stat-n{font-size:34px;line-height:1;letter-spacing:-.04em;font-weight:600}
+  .stat-l{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--graphite)}
+  .stat-note{
+    grid-column:1/-1;background:rgba(250,248,244,.72);margin:0;padding:16px 18px;
+    font-size:11.5px;line-height:1.55;color:var(--graphite);
+  }
+
+  /* ── palette strip ───────────────────────────────────── */
+  .palette-strip{
+    display:flex;flex-wrap:wrap;align-items:center;gap:6px 26px;
+    padding:14px 0 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    margin-bottom:38px;
+  }
+  .palette-item{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--graphite)}
+  .palette-item i{width:11px;height:11px;border-radius:3px;border:1px solid rgba(47,49,53,.22);flex:none}
+  .palette-item b{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.04em;color:#84878A;text-transform:uppercase}
+  .palette-note{margin:0 0 0 auto;font-size:10.5px;color:#84878A;font-style:italic}
+
+  /* ── toolbar ─────────────────────────────────────────── */
+  .toolbar{
+    position:sticky;top:0;z-index:40;
+    display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap;
+    padding:12px 0;margin-bottom:22px;
+    background:rgba(241,239,234,.86);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .filters{display:flex;flex-wrap:wrap;gap:6px}
+  .filter{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:7px 11px;border:1px solid transparent;border-radius:999px;
+    background:transparent;cursor:pointer;font-size:12px;color:#5D6064;transition:.15s ease;
+  }
+  .filter:hover{background:rgba(250,248,244,.9);color:var(--ink)}
+  .filter.is-on{background:var(--ink);color:#F8F6F1}
+  .filter .n{font-family:var(--mono);font-size:9.5px;opacity:.62}
+  .tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .count{font-family:var(--mono);font-size:10px;color:var(--graphite);margin-right:6px;letter-spacing:.04em}
+  .tool-toggle{
+    display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;
+    border:1px solid var(--line);background:rgba(250,248,244,.5);cursor:pointer;
+    font-size:11.5px;color:#5D6064;transition:.15s ease;
+  }
+  .tool-toggle:hover{border-color:var(--line-strong);color:var(--ink)}
+  .tool-toggle .dot{
+    width:6px;height:6px;border-radius:50%;background:var(--silver);transition:.15s ease;
+  }
+  .tool-toggle.is-on{background:var(--ivory);border-color:var(--line-strong);color:var(--ink)}
+  .tool-toggle.is-on .dot{background:#6FB3A8;box-shadow:0 0 0 3px rgba(111,179,168,.16)}
+
+  /* ── module grid ─────────────────────────────────────── */
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
+    gap:20px;
+  }
+  .card{
+    background:var(--ivory);border:1px solid var(--line);border-radius:var(--r);
+    overflow:hidden;box-shadow:var(--shadow);cursor:pointer;
+    transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+    animation:cardIn .5s both;animation-delay:calc(var(--i) * 45ms);
+    scroll-margin-top:78px;
+  }
+  @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .card:hover{transform:translateY(-3px);border-color:var(--line-strong);box-shadow:0 26px 55px -32px rgba(47,49,53,.5)}
+  .card.hidden{display:none}
+
+  .viewport{
+    position:relative;aspect-ratio:4/3;overflow:hidden;
+    background:
+      radial-gradient(120% 95% at 50% 12%, #FFFDF8 0%, #F5F1E9 52%, #EBE5DA 100%);
+    border-bottom:1px solid var(--line);
+  }
+  .viewport::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(47,49,53,.035),transparent 22%,transparent 78%,rgba(47,49,53,.05));
+  }
+  .viewport canvas{
+    position:absolute;inset:0;width:100%;height:100%;display:block;
+    touch-action:pan-y;cursor:grab;opacity:0;transition:opacity .5s ease;
+  }
+  .viewport canvas.grabbing{cursor:grabbing}
+  .viewport.ready canvas{opacity:1}
+  .vp-top,.vp-bottom{
+    position:absolute;left:0;right:0;z-index:2;display:flex;align-items:center;
+    justify-content:space-between;gap:10px;padding:12px 14px;pointer-events:none;
+  }
+  .vp-top{top:0}
+  .vp-bottom{bottom:0;align-items:flex-end}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;
+    font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--badge-bg,#EDEAE3);color:var(--badge-ink,#3E4145);
+    border:1px solid rgba(47,49,53,.12);backdrop-filter:blur(4px);
+    pointer-events:none;
+  }
+  .vp-num{
+    font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:#8B8E91;
+  }
+  .vp-hint{
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.03em;color:#92959A;
+    opacity:0;transition:opacity .2s ease;pointer-events:none;
+  }
+  .card:hover .vp-hint{opacity:1}
+  .vp-motion{
+    font-family:var(--mono);font-size:9px;letter-spacing:.02em;color:#75787C;
+    background:rgba(250,248,244,.66);border:1px solid rgba(47,49,53,.1);
+    padding:3px 6px;border-radius:4px;pointer-events:none;
+  }
+  .mini{
+    pointer-events:auto;width:26px;height:26px;border-radius:50%;
+    border:1px solid rgba(47,49,53,.2);background:rgba(250,248,244,.85);
+    display:grid;place-items:center;cursor:pointer;font-size:8px;line-height:1;
+    color:#4C4F53;backdrop-filter:blur(6px);transition:.15s ease;
+  }
+  .mini:hover{background:#fff;border-color:rgba(47,49,53,.4)}
+  .vp-load{
+    position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:10px;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:#8A8D90;background:rgba(246,242,235,.72);transition:opacity .3s ease;
+  }
+  .vp-load[hidden]{display:none}
+  .vp-load.done{opacity:0;pointer-events:none}
+  .spinner{
+    width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(47,49,53,.18);
+    border-top-color:#6F7276;animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .vp-error{
+    position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;
+    padding:24px;text-align:center;font-size:11px;line-height:1.55;color:#7C3E43;
+    background:rgba(250,246,244,.94);
+  }
+  .vp-error[hidden]{display:none}
+
+  .body{padding:18px 18px 16px}
+  .title-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .title-row h3{margin:0;font-size:21px;line-height:1.12;letter-spacing:-.025em;font-weight:600}
+  .title-row code{font-family:var(--mono);font-size:9px;color:#96999C;letter-spacing:.02em;white-space:nowrap}
+  .purpose{margin:0 0 14px;font-size:13px;line-height:1.55;color:#56595D;min-height:40px}
+  .stats{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:0 0 13px;
+    padding-top:12px;border-top:1px solid var(--line);
+  }
+  .stats div{min-width:0}
+  .stats dt{
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:#96999C;margin-bottom:3px;
+  }
+  .stats dd{margin:0;font-size:12px;line-height:1.35;color:#3F4246;font-weight:520}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+  .chip{
+    display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:5px;
+    background:#F0EDE6;border:1px solid rgba(47,49,53,.08);
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.02em;color:#64676B;
+    text-decoration:none;cursor:pointer;transition:.14s ease;
+  }
+  .chip:hover{background:#E8E4DB;color:var(--ink)}
+  .chip.ghost{background:transparent;border-color:var(--line);color:#96999C}
+  .open{
+    display:flex;align-items:center;justify-content:space-between;width:100%;
+    padding:9px 0 0;border:0;border-top:1px solid var(--line);background:transparent;
+    font-size:11.5px;font-weight:540;color:#4C4F53;cursor:pointer;text-align:left;
+  }
+  .open span{font-family:var(--mono);font-size:13px;color:#8E9194;transition:transform .18s ease}
+  .card:hover .open span{transform:translate(2px,-2px);color:var(--ink)}
+
+  /* ── assemblies ──────────────────────────────────────── */
+  .assemblies{margin-top:72px;scroll-margin-top:70px}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px;flex-wrap:wrap}
+  .sec-head h2{margin:0;font-size:clamp(26px,3.4vw,40px);letter-spacing:-.035em;line-height:1;font-weight:600}
+  .sec-head p{margin:0;max-width:52ch;font-size:12.5px;line-height:1.55;color:#6B6E72}
+  .assembly-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  .assembly{
+    display:flex;flex-direction:column;gap:12px;padding:18px;
+    background:rgba(250,248,244,.66);border:1px solid var(--line);border-radius:14px;
+    transition:.18s ease;
+  }
+  .assembly:hover{border-color:var(--line-strong);background:var(--ivory)}
+  .assembly .a-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .assembly h3{margin:0;font-size:16px;line-height:1.2;letter-spacing:-.015em;font-weight:600}
+  .assembly .a-id{font-family:var(--mono);font-size:8.5px;color:#96999C}
+  .assembly p{margin:0;font-size:11.5px;line-height:1.55;color:#63666A;flex:1}
+  .assembly .hazards{font-size:10px;line-height:1.45;color:#8B6A46;padding-top:2px}
+  .assembly .a-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:10px}
+  .a-count{font-family:var(--mono);font-size:9px;color:#96999C}
+  .a-link{font-family:var(--mono);font-size:9px;text-decoration:none;color:#5F6266;border-bottom:1px solid var(--line-strong);padding-bottom:1px}
+  .a-link:hover{color:var(--ink)}
+
+  /* ── footer ──────────────────────────────────────────── */
+  footer{
+    margin-top:72px;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:18px;
+    font-size:10.5px;line-height:1.6;color:#8A8D90;
+  }
+  footer .f-meta{font-family:var(--mono);font-size:9px;letter-spacing:.03em}
+  footer p{margin:0;max-width:70ch}
+
+  /* ── modal ───────────────────────────────────────────── */
+  .modal{
+    position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .modal.open{display:flex}
+  .modal-backdrop{
+    position:absolute;inset:0;background:rgba(35,37,40,.42);backdrop-filter:blur(7px);
+    animation:fadeIn .2s ease both;
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-card{
+    position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(330px,.7fr);
+    width:min(1180px,100%);height:min(84vh,800px);
+    background:var(--ivory);border:1px solid rgba(255,255,255,.35);border-radius:20px;
+    overflow:hidden;box-shadow:0 40px 90px -30px rgba(20,22,24,.55);
+    animation:modalIn .25s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+  .modal-stage{position:relative;background:radial-gradient(110% 90% at 50% 10%,#FFFDF8,#F2EDE4 55%,#E7E0D4);min-height:0}
+  .modal-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;opacity:0;transition:opacity .4s ease}
+  .modal-stage canvas.grabbing{cursor:grabbing}
+  .modal-stage.ready canvas{opacity:1}
+  .modal-stage .vp-hint{opacity:.85}
+  .modal-side{padding:34px 30px 26px;overflow:auto;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:0}
+  .modal-x{
+    position:absolute;top:14px;right:14px;z-index:5;width:32px;height:32px;border-radius:50%;
+    border:1px solid var(--line);background:rgba(250,248,244,.86);cursor:pointer;font-size:13px;
+    display:grid;place-items:center;backdrop-filter:blur(6px);
+  }
+  .modal-x:hover{background:#fff}
+  .modal-nav{display:flex;gap:5px;margin-bottom:18px}
+  .modal-nav button{
+    width:28px;height:26px;border-radius:6px;border:1px solid var(--line);background:transparent;
+    cursor:pointer;font-family:var(--mono);font-size:11px;color:#6B6E72;
+  }
+  .modal-nav button:hover{border-color:var(--line-strong);color:var(--ink)}
+  .modal-nav .spacer{flex:1}
+  .modal-nav .m-pos{display:flex;align-items:center;font-family:var(--mono);font-size:9px;color:#96999C}
+  .modal-side h2{margin:12px 0 2px;font-size:clamp(24px,2.7vw,34px);line-height:1.05;letter-spacing:-.035em;font-weight:620}
+  .modal-side .m-id{font-family:var(--mono);font-size:9px;color:#96999C;margin-bottom:14px}
+  .modal-side .m-purpose{margin:0 0 12px;font-size:14px;line-height:1.55;color:#3F4246}
+  .modal-side .m-explain{margin:0 0 18px;font-size:12px;line-height:1.62;color:#66696D}
+  .specs{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 16px;border-top:1px solid var(--line)}
+  .specs div{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .specs dt{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#96999C;padding-top:2px}
+  .specs dd{margin:0;font-size:11.5px;line-height:1.45;color:#45484C}
+  .modal-side .chips{margin-top:2px}
+  .modal-side .chip{font-size:9px;padding:4px 8px}
+  .modal-side .btn{align-self:flex-start;margin-top:auto}
+  .asm-block{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+  .asm-block .asm-title{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#96999C;margin-bottom:7px}
+  .asm-block .chip{background:transparent;border-color:var(--line);color:#66696D;cursor:default}
+  .asm-block .chip:hover{background:transparent;color:#66696D}
+  .modal-side .dl{margin-top:14px}
+
+  .banner{
+    margin:18px 0 0;padding:14px 16px;border:1px solid #D9C6A8;background:#F8F1E3;
+    border-radius:10px;font-size:12px;line-height:1.55;color:#6F5A38;
+  }
+  .banner code{font-family:var(--mono);font-size:10.5px}
+
+  @media (max-width:1080px){
+    .hero{grid-template-columns:1fr;gap:34px;align-items:start}
+    .hero-stats{max-width:520px}
+    .assembly-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .modal-card{grid-template-columns:1fr;grid-template-rows:minmax(300px,46vh) 1fr;height:min(90vh,900px);overflow:auto}
+    .modal-side{border-left:0;border-top:1px solid var(--line)}
+    .modal-stage{min-height:300px}
+  }
+  @media (max-width:720px){
+    .page{padding:0 18px 60px}
+    .topline-meta{display:none}
+    .hero{padding:44px 0 34px}
+    .palette-note{margin-left:0;flex-basis:100%}
+    .grid{grid-template-columns:1fr}
+    .toolbar{position:static;padding:10px 0}
+    .filters{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:5px;scrollbar-width:none}
+    .filters::-webkit-scrollbar{display:none}
+    .filter{flex:0 0 auto}
+    .tools{width:100%;justify-content:space-between}
+    .assembly-grid{grid-template-columns:1fr}
+    .modal{padding:10px}
+    .modal-card{height:94vh}
+    .modal-stage .vp-hint{display:none}
+    .modal-side{padding:24px 20px 22px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .card{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="topline">
+    <div class="brand"><span class="brand-mark"></span> Cyberjack / Machine modules</div>
+    <div class="topline-meta">catalog v1 <span>·</span> metres <span>·</span> Y-up <span>·</span> 10 GLB <span>·</span> 4 assemblies</div>
+  </div>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">01 — интерактивный каталог</p>
+      <h1>Модули машины<br><em>в движении</em></h1>
+      <p class="lede">
+        Десять независимых узлов: несущий каркас, кинематика, рабочие контакты, опоры,
+        пульт и коммутация. Каждый модуль показан отдельно — со своей степенью свободы
+        и коротким пояснением, зачем он нужен и с чем соединяется.
+      </p>
+      <div class="hero-actions">
+        <a href="#modules" class="btn btn-dark">Смотреть модули <span class="arr">↓</span></a>
+        <a href="#assemblies" class="btn">Четыре сборки <span class="arr">↘</span></a>
+      </div>
+    </div>
+    <aside class="hero-stats" aria-label="Сводка каталога">
+      <div class="stat"><span class="stat-n">10</span><span class="stat-l">модулей</span></div>
+      <div class="stat"><span class="stat-n">6</span><span class="stat-l">классов</span></div>
+      <div class="stat"><span class="stat-n">4</span><span class="stat-l">сборки</span></div>
+      <div class="stat"><span class="stat-n">3D</span><span class="stat-l">GLB · real-time</span></div>
+      <p class="stat-note">
+        Все размеры в метрах. Анимация показывает характерное движение модуля,
+        а не рабочий цикл машины. Визуально-механический концепт, не рабочая документация.
+      </p>
+    </aside>
+  </header>
+
+  <section class="palette-strip" aria-label="Палитра и роли материалов">
+    <div class="palette-item"><i style="background:#F1EFEA"></i><span>корпус</span><b>BODY_MILK</b></div>
+    <div class="palette-item"><i style="background:#FAF8F4"></i><span>панели</span><b>BODY_IVORY</b></div>
+    <div class="palette-item"><i style="background:#E8B9BF"></i><span>рабочий узел</span><b>WORK_BLUSH</b></div>
+    <div class="palette-item"><i style="background:#B9BAB7"></i><span>направляющие</span><b>STRUCT_SILVER</b></div>
+    <div class="palette-item"><i style="background:#54575A"></i><span>крепёж и рама</span><b>STRUCT_DARK</b></div>
+    <div class="palette-item"><i style="background:#E4F4F5"></i><span>индикация</span><b>STATUS</b></div>
+    <p class="palette-note">Цвет — функциональная роль, не код безопасности.</p>
+  </section>
+
+  <section class="toolbar" id="modules" aria-label="Фильтры и режимы просмотра">
+    <div class="filters" id="filters"></div>
+    <div class="tools">
+      <span class="count" id="count">10 / 10</span>
+      <button class="tool-toggle is-on" id="toggle-anim" type="button" aria-pressed="true"><span class="dot"></span>Анимация</button>
+      <button class="tool-toggle" id="toggle-wire" type="button" aria-pressed="false">Сетка</button>
+      <button class="tool-toggle" id="reset-views" type="button">Сброс вида</button>
+    </div>
+  </section>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <main class="grid" id="grid" aria-live="polite"></main>
+
+  <section class="assemblies" id="assemblies">
+    <div class="sec-head">
+      <h2>Из этих модулей<br>собираются четыре конфигурации</h2>
+      <p>
+        Состав взят из <code style="font-family:var(--mono);font-size:10px">catalog.json</code>.
+        Каждая сборка — отдельный GLB; ниже — только состав и назначение, без 3D-превью.
+      </p>
+    </div>
+    <div class="assembly-grid" id="assembly-grid"></div>
+  </section>
+
+  <footer>
+    <p>
+      <b>Cyberjack · machine modules.</b> Визуально-механический концепт мягкой модульной машины.
+      Не является рабочей документацией, не проходил оценку безопасности и не описывает
+      сертифицированную конструкцию. Движущиеся узлы показаны условно.
+      <a href="devices.html" style="border-bottom:1px solid var(--line-strong)">Каталог устройств станции →</a>
+      <a href="components.html" style="border-bottom:1px solid var(--line-strong);margin-left:8px">Компоненты станции →</a>
+    </p>
+    <div class="f-meta">units: metres · up: Y (GLB) · files: 10 modules / 4 assemblies · three.js</div>
+  </footer>
+</div>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <button class="modal-x" type="button" data-close aria-label="Закрыть">✕</button>
+    <div class="modal-stage" id="m-stage">
+      <canvas></canvas>
+      <div class="vp-top">
+        <span class="badge" id="m-badge"></span>
+        <span class="vp-num" id="m-num"></span>
+      </div>
+      <div class="vp-bottom">
+        <button class="mini" id="m-play" type="button" title="Пауза">❚❚</button>
+        <span class="vp-hint">потяните · колесо — масштаб · двойной клик — сброс</span>
+      </div>
+      <div class="vp-load" id="m-load"><span class="spinner"></span> загрузка GLB</div>
+      <div class="vp-error" id="m-error" hidden></div>
+    </div>
+    <div class="modal-side">
+      <div class="modal-nav">
+        <button id="m-prev" type="button" aria-label="Предыдущий модуль">←</button>
+        <button id="m-next" type="button" aria-label="Следующий модуль">→</button>
+        <span class="spacer"></span>
+        <span class="m-pos" id="m-pos"></span>
+      </div>
+      <h2 id="m-title"></h2>
+      <div class="m-id" id="m-id"></div>
+      <p class="m-purpose" id="m-purpose"></p>
+      <p class="m-explain" id="m-explain"></p>
+      <dl class="specs" id="m-specs"></dl>
+      <div class="chips" id="m-chips"></div>
+      <div class="asm-block">
+        <div class="asm-title">Входит в сборки</div>
+        <div class="chips" id="m-asm-chips"></div>
+      </div>
+      <a class="btn dl" id="m-dl" download>Скачать GLB <span class="arr">↓</span></a>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
+
+/* ──────────────────────────────────────────────────────────
+   Данные и подписи
+   ────────────────────────────────────────────────────────── */
+
+const CLASS_META = {
+  STRUCTURE: { ru: 'Каркас',       bg: '#E9E6DF', ink: '#3F4246', color: '#54575A' },
+  MOTION:    { ru: 'Кинематика',   bg: '#E2EAED', ink: '#354C55', color: '#3E5A66' },
+  WORK:      { ru: 'Рабочий узел',  bg: '#F7E2E4', ink: '#7A4147', color: '#B4696F' },
+  SERVICE:   { ru: 'Опоры',        bg: '#EFE9DD', ink: '#5E533E', color: '#8A7A5E' },
+  INTERFACE: { ru: 'Интерфейс',    bg: '#E4E4E1', ink: '#383A3D', color: '#34363B' },
+  UTILITY:   { ru: 'Коммутация',   bg: '#E8E8E5', ink: '#414447', color: '#6B6E70' }
+};
+
+const NAME_RU = {
+  structure_base: 'Станина',
+  structure_portal: 'Портал',
+  motion_linear: 'Линейная каретка',
+  motion_lift: 'Подъёмный узел',
+  work_probe: 'Линейный контакт',
+  work_rotary: 'Ротационный контур',
+  work_brush_pair: 'Пара щёток',
+  support_cradle: 'Опоры-ложементы',
+  interface_console: 'Пульт управления',
+  utility_routing: 'Кабельный контур'
+};
+
+const MOTION_RU = {
+  structure_base:   ['Стационарный', 'опоры на полу, z = 0'],
+  structure_portal: ['Стационарный', 'фиксированная перекладина'],
+  motion_linear:    ['Ход по X', '±0,22 м, концевые упоры'],
+  motion_lift:      ['Вертикальный ход', '±0,12 м, концевые кронштейны'],
+  work_probe:       ['Рабочий ход', '0,12 м, следует за кареткой X'],
+  work_rotary:      ['Вращение', 'непрерывное, неподвижная рамка'],
+  work_brush_pair:  ['Два ротора', 'непрерывное, общий носитель'],
+  support_cradle:   ['Настройка по высоте', '0,48–0,96 м'],
+  interface_console:['Стационарный', 'сторона оператора'],
+  utility_routing:  ['Фиксированная трасса', 'условная прокладка']
+};
+
+const MOTION_TAG = {
+  structure_base: 'стационарный',
+  structure_portal: 'стационарный',
+  motion_linear: 'X · ±0,22 м',
+  motion_lift: 'вертикаль · ±0,12 м',
+  work_probe: 'ход · 0,12 м',
+  work_rotary: 'вращение · непрерывно',
+  work_brush_pair: '2 × вращение',
+  support_cradle: 'высота · настройка',
+  interface_console: 'стационарный',
+  utility_routing: 'фиксированная трасса'
+};
+
+const ACCESS_RU = {
+  structure_base: 'снизу открыто',
+  structure_portal: 'спереди и сзади открыто',
+  motion_linear: 'рельсы открыты',
+  motion_lift: 'обслуживание спереди',
+  work_probe: 'быстросъём спереди',
+  work_rotary: 'спереди открыто; сервис сбоку',
+  work_brush_pair: 'замена щёток спереди',
+  support_cradle: 'загрузка спереди; зажимы открыты',
+  interface_console: 'работа спереди; сервис сзади',
+  utility_routing: 'задний короб; разъёмы видны'
+};
+
+const EVIDENCE_RU = {
+  structure_base: 'четыре опоры; сплошная плита',
+  structure_portal: 'две стойки; верхняя перекладина',
+  motion_linear: 'два рельса; разрезная каретка; четыре концевых блока',
+  motion_lift: 'две вертикальные направляющие; разрезная каретка',
+  work_probe: 'розовый кожух; металлическая муфта; скруглённый наконечник',
+  work_rotary: 'розовый привод; бледный тор; неподвижная рамка',
+  work_brush_pair: 'два розовых мотора; радиальная щетина',
+  support_cradle: 'две стойки; ложементы; кольцевые зажимы',
+  interface_console: 'экран; строка статуса; красно-жёлтый стоп',
+  utility_routing: 'задний короб; две трассы; разъёмы'
+};
+
+const EXPLAIN = {
+  structure_base:
+    'Несущее основание всей сборки: сплошная плита на четырёх опорах. Задаёт нулевую отметку пола и принимает вес портала, кареток и опор. Снизу оставлен доступ для обслуживания.',
+  structure_portal:
+    'Двухстоечная рама с верхней перекладиной. Держит вертикальные направляющие и оставляет рабочую зону открытой спереди и сзади — модуль можно навешивать с любой стороны.',
+  motion_linear:
+    'Каретка на двух параллельных рельсах с физическими концевыми упорами. Горизонтальный ход ±0,22 м — грубая установка рабочего узла по продольной оси. Рельсы открыты, чтобы ход читался.',
+  motion_lift:
+    'Две вертикальные направляющие и разрезная каретка между ними. Поднимает и опускает рабочую плоскость в пределах ±0,12 м; концевые кронштейны ограничивают ход сверху и снизу.',
+  work_probe:
+    'Сменный контактный узел на быстросъёмной муфте. Рабочий ход — 0,12 м; наконечник скруглён, а розовый кожух привода отделяет рабочий контур от металлической муфты.',
+  work_rotary:
+    'Мягкий вращающийся контур в открытой рамке ограждения. Вращение непрерывное; рамка защищает с боков и сверху, но не закрывает рабочую зону и не прячет механику.',
+  work_brush_pair:
+    'Два независимых щёточных узла на общем носителе. Розовые моторы читаются отдельно, щетина расходится радиально от колец; каждый ротор можно заменить спереди.',
+  support_cradle:
+    'Пара опор с мягкими съёмными ложементами и кольцевыми зажимами. Высота настраивается в диапазоне 0,48–0,96 м под конкретную конфигурацию; загрузка — спереди.',
+  interface_console:
+    'Локальный пульт оператора: экран со строкой статуса и физическая кнопка стопа с защитным кольцом. Стоит на стороне оператора и связан с приводом кабельным контуром.',
+  utility_routing:
+    'Защищённый кабельный контур: задний короб, две трассы и разъёмы. Связывает пульт, станину и приводы; прокладка показана условно, без расчёта радиусов изгиба.'
+};
+
+const ASSEMBLY_HAZARDS_RU = {
+  lab_sex_machine_vaginal:
+    'Движущаяся каретка и контактный наконечник. Загрузка — только в остановленном состоянии; требуется оценка безопасности.',
+  lab_sex_machine_anal:
+    'Движущаяся каретка и открытые рельсы. Доступ к зоне — после останова; точки защемления не проработаны.',
+  lab_sex_machine_tickling:
+    'Вращающиеся щётки и точки защемления регулировки. Ограждения и блокировки не спроектированы.',
+  lab_sex_machine_circularsaw:
+    'Вращающийся контакт и неподвижное ограждение. Металлических зубьев нет; ограждение требует отдельной проработки.'
+};
+
+const MATERIAL_RU = {
+  BODY_MILK: 'молочный корпус',
+  BODY_IVORY: 'слоновая кость',
+  WORK_BLUSH: 'розовый рабочий',
+  WORK_PALE: 'бледно-розовый',
+  STRUCT_SILVER: 'серебристый металл',
+  STRUCT_DARK: 'графит',
+  INTERFACE: 'графит интерфейса',
+  STATUS: 'статусный голубой'
+};
+
+const STATUS_RU = { specified: 'задан', assumed: 'принят условно' };
+
+const VIEW = {
+  structure_base:    { yaw: 0.70, pitch: 0.30 },
+  structure_portal:  { yaw: 0.62, pitch: 0.26 },
+  motion_linear:     { yaw: 0.72, pitch: 0.28 },
+  motion_lift:       { yaw: 0.55, pitch: 0.24 },
+  work_probe:        { yaw: 0.55, pitch: 0.22 },
+  work_rotary:       { yaw: 0.32, pitch: 0.24 },
+  work_brush_pair:   { yaw: 0.35, pitch: 0.26 },
+  support_cradle:    { yaw: 0.22, pitch: 0.24 },
+  interface_console: { yaw: 0.06, pitch: 0.16 },
+  utility_routing:   { yaw: 0.95, pitch: 0.25 }
+};
+
+const state = {
+  playing: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  wireframe: false,
+  filter: 'ALL'
+};
+
+let modules = [];
+let assemblies = [];
+let byId = new Map();
+let cards = [];
+const viewers = new Set();
+let modalViewer = null;
+let modalIndex = -1;
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+/* ──────────────────────────────────────────────────────────
+   Рендер карточек и сборок
+   ────────────────────────────────────────────────────────── */
+
+function badgeFor(cls, small = false) {
+  const meta = CLASS_META[cls] || CLASS_META.STRUCTURE;
+  return `<span class="badge" style="--badge-bg:${meta.bg};--badge-ink:${meta.ink}">${esc(meta.ru)}</span>`;
+}
+
+function chipsFor(ids, limit = 4) {
+  const shown = ids.slice(0, limit);
+  const rest = ids.length - shown.length;
+  return shown.map((id) => {
+    const m = byId.get(id);
+    return `<button class="chip" type="button" data-open="${esc(id)}">${esc(m ? NAME_RU[id] : id)}</button>`;
+  }).join('') + (rest > 0 ? `<span class="chip ghost">+${rest}</span>` : '');
+}
+
+function renderCards() {
+  const grid = $('#grid');
+  grid.innerHTML = modules.map((m, i) => {
+    const meta = CLASS_META[m.class] || CLASS_META.STRUCTURE;
+    const motion = MOTION_RU[m.id] || [m.motion, m.limits];
+    return `
+      <article class="card" data-id="${esc(m.id)}" data-class="${esc(m.class)}" style="--i:${i};--badge-bg:${meta.bg};--badge-ink:${meta.ink}">
+        <div class="viewport">
+          <canvas aria-label="3D-модель модуля ${esc(NAME_RU[m.id] || m.id)}"></canvas>
+          <div class="vp-top">
+            ${badgeFor(m.class)}
+            <span class="vp-num">${String(i + 1).padStart(2, '0')} / ${String(modules.length).padStart(2, '0')}</span>
+          </div>
+          <div class="vp-bottom">
+            <span class="vp-hint">потяните</span>
+            <span class="vp-motion">${esc(MOTION_TAG[m.id] || m.motion)}</span>
+          </div>
+          <div class="vp-load"><span class="spinner"></span> загрузка GLB</div>
+          <div class="vp-error" hidden></div>
+        </div>
+        <div class="body">
+          <div class="title-row">
+            <h3>${esc(NAME_RU[m.id] || m.id)}</h3>
+            <code>${esc(m.id)}</code>
+          </div>
+          <p class="purpose">${esc(m.purpose)}</p>
+          <dl class="stats">
+            <div><dt>Движение</dt><dd>${esc(motion[0])}</dd></div>
+            <div><dt>Пределы</dt><dd>${esc(motion[1] || m.limits)}</dd></div>
+          </dl>
+          <div class="chips">${chipsFor(m.connects_to, 3)}</div>
+          <button class="open" type="button" data-open="${esc(m.id)}">Подробнее <span>↗</span></button>
+        </div>
+      </article>`;
+  }).join('');
+  cards = Array.from(grid.querySelectorAll('.card'));
+}
+
+function renderAssemblies(data) {
+  const wrap = $('#assembly-grid');
+  wrap.innerHTML = (data.assemblies || []).map((a, i) => {
+    return `
+      <article class="assembly">
+        <div class="a-top">
+          <h3>${esc(a.title)}</h3>
+          <span class="a-id">${String(i + 1).padStart(2, '0')}</span>
+        </div>
+        <p>${esc(a.function)}</p>
+        <div class="chips">${a.modules.slice(0, 4).map((id) =>
+          `<button class="chip" type="button" data-open="${esc(id)}">${esc(NAME_RU[id] || id)}</button>`
+        ).join('')}${a.modules.length > 4 ? `<span class="chip ghost">+${a.modules.length - 4}</span>` : ''}</div>
+        <div class="hazards">${esc(ASSEMBLY_HAZARDS_RU[a.id] || a.hazards)}</div>
+        <div class="a-foot">
+          <span class="a-count">${a.modules.length} модулей</span>
+          <a class="a-link" href="${esc(a.file)}" download>GLB ↓</a>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+function renderFilters() {
+  const bar = $('#filters');
+  const classes = ['ALL', ...Object.keys(CLASS_META).filter((c) => modules.some((m) => m.class === c))];
+  bar.innerHTML = classes.map((c) => {
+    const count = c === 'ALL' ? modules.length : modules.filter((m) => m.class === c).length;
+    const label = c === 'ALL' ? 'Все' : (CLASS_META[c]?.ru || c);
+    return `<button class="filter${c === 'ALL' ? ' is-on' : ''}" type="button" data-filter="${esc(c)}">${esc(label)} <span class="n">${count}</span></button>`;
+  }).join('');
+  bar.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-filter]');
+    if (!btn) return;
+    state.filter = btn.dataset.filter;
+    bar.querySelectorAll('.filter').forEach((b) => b.classList.toggle('is-on', b === btn));
+    applyFilter();
+  });
+}
+
+function applyFilter() {
+  let shown = 0;
+  cards.forEach((card, i) => {
+    const show = state.filter === 'ALL' || modules[i].class === state.filter;
+    card.classList.toggle('hidden', !show);
+    if (show) shown++;
+    const v = viewersByIndex.get(i);
+    if (v) v.setEnabled(show);
+  });
+  $('#count').textContent = `${shown} / ${modules.length}`;
+}
+
+/* ──────────────────────────────────────────────────────────
+   3D-просмотрщик
+   ────────────────────────────────────────────────────────── */
+
+const viewersByIndex = new Map();
+const loader = new GLTFLoader();
+let shadowTexture = null;
+
+function getShadowTexture() {
+  if (shadowTexture) return shadowTexture;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 62);
+  g.addColorStop(0, 'rgba(40,42,44,.34)');
+  g.addColorStop(0.55, 'rgba(40,42,44,.15)');
+  g.addColorStop(1, 'rgba(40,42,44,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  shadowTexture = new THREE.CanvasTexture(c);
+  shadowTexture.colorSpace = THREE.SRGBColorSpace;
+  return shadowTexture;
+}
+
+class Viewer {
+  constructor(canvas, module, opts = {}) {
+    this.canvas = canvas;
+    this.module = module;
+    this.detail = !!opts.detail;
+    this.phase = opts.phase || 0;
+    this.onReady = opts.onReady || (() => {});
+    this.onError = opts.onError || (() => {});
+    this.playing = state.playing;
+    this.wire = state.wireframe;
+    this.inView = false;
+    this.enabled = true;
+    this.alive = true;
+    this.dirty = true;
+    this.time = this.phase;
+    this.animators = [];
+    this.parts = {};
+    const view = VIEW[module.id] || {};
+    this.yaw = view.yaw ?? 0.72;
+    this.homeYaw = this.yaw;
+    this.userYaw = 0;
+    this.autoYaw = 0;
+    this.pitch = view.pitch ?? 0.30;
+    this.homePitch = this.pitch;
+    this.moved = 0;
+    this.dist = 3;
+    this.homeDist = 3;
+    this.target = new THREE.Vector3(0, 0.6, 0);
+    this.dragging = false;
+    this.lastInteract = -1e9;
+    this.px = 0; this.py = 0;
+
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+
+    this.renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+      // Кадр сохраняется, когда карточка уходит за пределы экрана:
+      // иначе браузер может показать пустой canvas при возврате/скролле.
+      preserveDrawingBuffer: true
+    });
+    this.renderer.setClearColor(0x000000, 0);
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.04;
+
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xcfc8bc, 1.55);
+    this.scene.add(hemi);
+    const key = new THREE.DirectionalLight(0xfff6ea, 2.15);
+    key.position.set(3.4, 5.2, 3.8);
+    this.scene.add(key);
+    const fill = new THREE.DirectionalLight(0xdfe9ef, 0.95);
+    fill.position.set(-4.2, 2.2, -2.6);
+    this.scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+    rim.position.set(0.4, 2.8, -5.2);
+    this.scene.add(rim);
+
+    this.ro = new ResizeObserver(() => this.resize());
+    this.ro.observe(canvas.parentElement);
+    this.bindControls();
+    this.resize();
+  }
+
+  async load() {
+    try {
+      const gltf = await loader.loadAsync(new URL(this.module.file, location.href).href);
+      if (!this.alive) return;
+      this.model = gltf.scene;
+      this.scene.add(this.model);
+      this.model.updateMatrixWorld(true);
+
+      this.model.traverse((o) => {
+        if (!o.isMesh) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach((m) => {
+          if (!m) return;
+          m.wireframe = this.wire;
+          if ('envMapIntensity' in m) m.envMapIntensity = 0.7;
+        });
+      });
+
+      this.collectParts();
+      this.frameModel();
+      this.addGround();
+      this.setupAnimation();
+      this.resize();
+      this.canvas.closest('.viewport, .modal-stage')?.classList.add('ready');
+      this.dirty = true;
+      this.onReady();
+    } catch (err) {
+      console.error('GLB load failed', this.module.file, err);
+      this.onError(err);
+    }
+  }
+
+  collectParts() {
+    const prefix = this.module.id + '__';
+    this.model.traverse((o) => {
+      if (!o.isMesh) return;
+      const name = o.name || '';
+      const key = name.startsWith(prefix) ? name.slice(prefix.length) : name;
+      this.parts[key] = o;
+    });
+  }
+
+  frameModel() {
+    const box = new THREE.Box3().setFromObject(this.model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    this.target.copy(center);
+    this.box = box;
+    this.size = size;
+
+    // Подбираем дистанцию по восьми углам bbox и текущему соотношению сторон,
+    // а не по описанной сфере: плоские модули иначе выглядят слишком мелкими.
+    // Учитываем и крайние положения качания камеры, чтобы модель не обрезалась.
+    const swing = this.detail ? 0.46 : 0.38;
+    const yaws = [this.homeYaw - swing, this.homeYaw, this.homeYaw + swing];
+    const vTan = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+    const hTan = vTan * Math.max(0.2, this.camera.aspect);
+    let need = 0.5;
+    for (const yaw of yaws) {
+      const dir = new THREE.Vector3(
+        Math.cos(this.pitch) * Math.sin(yaw),
+        Math.sin(this.pitch),
+        Math.cos(this.pitch) * Math.cos(yaw)
+      ).normalize();
+      const forward = dir.clone().negate();
+      const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+      const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+      for (const x of [box.min.x, box.max.x]) {
+        for (const y of [box.min.y, box.max.y]) {
+          for (const z of [box.min.z, box.max.z]) {
+            const c = new THREE.Vector3(x, y, z).sub(center);
+            const depth = c.dot(dir);
+            need = Math.max(
+              need,
+              Math.abs(c.dot(right)) / hTan + depth,
+              Math.abs(c.dot(up)) / vTan + depth
+            );
+          }
+        }
+      }
+    }
+    this.homeDist = need * (this.detail ? 1.20 : 1.13);
+    this.dist = this.homeDist;
+    this.camera.near = Math.max(0.01, this.homeDist * 0.02);
+    this.camera.far = this.homeDist * 20;
+    this.camera.updateProjectionMatrix();
+
+    this.shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({
+        map: getShadowTexture(), transparent: true, depthWrite: false,
+        opacity: 0.72, toneMapped: false
+      })
+    );
+    const r = Math.max(size.x, size.z) * 1.55;
+    this.shadowPlane.scale.set(r, r, 1);
+    this.shadowPlane.rotation.x = -Math.PI / 2;
+    this.shadowPlane.position.set(center.x, box.min.y - 0.002, center.z);
+    this.scene.add(this.shadowPlane);
+  }
+
+  addGround() {
+    // мягкая тень уже добавлена в frameModel; отдельный пол не нужен
+  }
+
+  pivot(objects, center) {
+    const g = new THREE.Group();
+    g.position.copy(this.model.worldToLocal(center.clone()));
+    this.model.add(g);
+    this.model.updateMatrixWorld(true);
+    objects.filter(Boolean).forEach((o) => g.attach(o));
+    return g;
+  }
+
+  translate(objs, axis, amountFn) {
+    const items = objs.filter(Boolean).map((o) => ({ o, base: o.position.clone(), parent: o.parent }));
+    const q = new THREE.Quaternion();
+    const localAxis = new THREE.Vector3();
+    this.animators.push((t) => {
+      const amount = amountFn(t);
+      for (const it of items) {
+        if (it.parent) it.parent.getWorldQuaternion(q); else q.identity();
+        localAxis.copy(axis).applyQuaternion(q.invert());
+        it.o.position.copy(it.base).addScaledVector(localAxis, amount);
+      }
+    });
+  }
+
+  pulseMaterial(mesh, hex, base, amp, speed, phase = 0) {
+    if (!mesh || Array.isArray(mesh.material)) return;
+    const mat = mesh.material.clone();
+    mesh.material = mat;
+    if (!mat.emissive) return;
+    mat.emissive.setHex(hex);
+    mat.emissiveIntensity = base;
+    this.animators.push((t) => {
+      mat.emissiveIntensity = base + amp * (0.5 + 0.5 * Math.sin(t * speed + phase));
+    });
+  }
+
+  setupAnimation() {
+    const P = this.parts;
+    const A = this.animators;
+    const X = new THREE.Vector3(1, 0, 0);
+    const Y = new THREE.Vector3(0, 1, 0);
+    const Z = new THREE.Vector3(0, 0, 1);
+
+    switch (this.module.id) {
+      case 'motion_linear': {
+        this.translate([
+          P.carriage_bottom, P.carriage_top, P.carriage_cheek_F, P.carriage_cheek_B
+        ], X, (t) => 0.22 * Math.sin(t * 0.82));
+        break;
+      }
+
+      case 'motion_lift': {
+        this.translate([
+          P.carriage_bridge, P.carriage_cheek_L, P.carriage_cheek_R
+        ], Y, (t) => 0.12 * Math.sin(t * 0.78));
+        break;
+      }
+
+      case 'work_probe': {
+        this.translate([P.output_shaft, P.contact_tip], Z, (t) => 0.12 * (0.5 - 0.5 * Math.cos(t * 0.98)));
+        break;
+      }
+
+      case 'work_rotary': {
+        const rotor = P.soft_rotor;
+        if (!rotor) break;
+        const center = new THREE.Box3().setFromObject(rotor).getCenter(new THREE.Vector3());
+        const lobes = Object.keys(P).filter((k) => k.startsWith('soft_lobe_')).map((k) => P[k]);
+        const g = this.pivot([rotor, ...lobes], center);
+        A.push((t) => { g.rotation.z = t * 1.35; });
+        break;
+      }
+
+      case 'work_brush_pair': {
+        for (const i of [0, 1]) {
+          const ring = P[`brush_ring_${i}`];
+          if (!ring) continue;
+          const center = new THREE.Box3().setFromObject(ring).getCenter(new THREE.Vector3());
+          const objs = [
+            P[`motor_${i}`], P[`rotor_${i}`], ring,
+            ...Object.keys(P).filter((k) => k.startsWith(`bristle_${i}_`)).map((k) => P[k])
+          ];
+          const g = this.pivot(objs, center);
+          A.push((t) => { g.rotation.z = t * (i === 0 ? 3.1 : -2.7); });
+        }
+        break;
+      }
+
+      case 'support_cradle': {
+        const st = { d: 0 };
+        const pivots = [];
+        for (const i of [0, 1]) {
+          const post = P[`post_${i}`];
+          if (!post) continue;
+          const b = new THREE.Box3().setFromObject(post);
+          const c = b.getCenter(new THREE.Vector3());
+          const g = new THREE.Group();
+          g.position.copy(this.model.worldToLocal(new THREE.Vector3(c.x, b.min.y, c.z)));
+          this.model.add(g);
+          this.model.updateMatrixWorld(true);
+          g.attach(post);
+          pivots.push({ g, h: Math.max(0.01, b.max.y - b.min.y) });
+        }
+        A.push((t) => {
+          st.d = 0.10 * (0.5 - 0.5 * Math.cos(t * 0.78));
+          pivots.forEach(({ g, h }) => { g.scale.y = (h + st.d) / h; });
+        });
+        this.translate([
+          P.adjuster_0, P.adjuster_1, P.pad_0, P.pad_1, P.clamp_0, P.clamp_1
+        ], Y, () => st.d);
+        break;
+      }
+
+      case 'interface_console': {
+        this.translate([P.stop_button], Z, (t) => -0.010 * Math.pow(Math.max(0, Math.sin(t * 1.35)), 12));
+        this.pulseMaterial(P.display_face, 0xbfeef2, 0.22, 0.34, 2.2);
+        [P.display_uih, P.display_uil0, P.display_uil1, P.display_uil2, P.display_uil3]
+          .forEach((mesh, i) => this.pulseMaterial(mesh, 0x9fe4e8, 0.15, 0.3, 2.3, i * 0.55));
+        break;
+      }
+
+      case 'utility_routing': {
+        this.translate([P.drive_connector, P.connector_mount], Y, (t) => 0.016 * Math.sin(t * 1.05));
+        this.pulseMaterial(P.drive_connector, 0x2f7f86, 0.06, 0.24, 1.5);
+        this.pulseMaterial(P.connector_mount, 0x2f7f86, 0.03, 0.12, 1.5, 0.6);
+        this.pulseMaterial(P.console_supply, 0x1d6f76, 0.05, 0.16, 1.15, 0.2);
+        this.pulseMaterial(P.drive_service_loop, 0x1d6f76, 0.05, 0.16, 1.15, 1.1);
+        break;
+      }
+
+      default:
+        break;
+    }
+  }
+
+  resize() {
+    const parent = this.canvas.parentElement;
+    const w = Math.max(1, parent.clientWidth);
+    const h = Math.max(1, parent.clientHeight);
+    const dpr = Math.min(window.devicePixelRatio || 1, this.detail ? 2 : 1.7);
+    this.renderer.setPixelRatio(dpr);
+    this.renderer.setSize(w, h, false);
+    this.camera.aspect = w / h;
+    this.camera.updateProjectionMatrix();
+    this.dirty = true;
+  }
+
+  bindControls() {
+    const c = this.canvas;
+    c.addEventListener('pointerdown', (e) => {
+      this.dragging = true;
+      this.moved = 0;
+      this.lastInteract = performance.now();
+      this.px = e.clientX; this.py = e.clientY;
+      c.dataset.dragged = '0';
+      c.setPointerCapture(e.pointerId);
+      c.classList.add('grabbing');
+    });
+    c.addEventListener('pointermove', (e) => {
+      if (!this.dragging) return;
+      const dx = e.clientX - this.px;
+      const dy = e.clientY - this.py;
+      this.px = e.clientX; this.py = e.clientY;
+      this.moved += Math.abs(dx) + Math.abs(dy);
+      if (this.moved > 6) c.dataset.dragged = '1';
+      this.userYaw -= dx * 0.0075;
+      this.pitch = clamp(this.pitch + dy * 0.005, 0.02, 1.22);
+      this.lastInteract = performance.now();
+      this.dirty = true;
+    });
+    const end = (e) => {
+      this.dragging = false;
+      c.classList.remove('grabbing');
+      this.lastInteract = performance.now();
+      try { c.releasePointerCapture(e.pointerId); } catch (_) {}
+    };
+    c.addEventListener('pointerup', end);
+    c.addEventListener('pointercancel', end);
+    c.addEventListener('dblclick', () => { this.resetView(); });
+    if (this.detail) {
+      c.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        this.dist = clamp(this.dist * Math.exp(e.deltaY * 0.0011), this.homeDist * 0.45, this.homeDist * 1.9);
+        this.lastInteract = performance.now();
+        this.dirty = true;
+      }, { passive: false });
+    }
+  }
+
+  setInView(v) {
+    if (this.inView === v) return;
+    this.inView = v;
+    if (v) this.dirty = true;
+  }
+
+  setEnabled(v) {
+    this.enabled = v;
+    if (v) this.dirty = true;
+  }
+
+  setPlaying(v) {
+    this.playing = v;
+    this.dirty = true;
+  }
+
+  setWireframe(v) {
+    this.wire = v;
+    if (!this.model) return;
+    this.model.traverse((o) => {
+      if (!o.isMesh) return;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      mats.forEach((m) => { if (m) m.wireframe = v; });
+    });
+    this.dirty = true;
+  }
+
+  resetView() {
+    this.userYaw = 0;
+    this.autoYaw = 0;
+    this.pitch = this.homePitch;
+    this.dist = this.homeDist;
+    this.dirty = true;
+  }
+
+  tick(dt) {
+    if (!this.alive || !this.inView || !this.enabled) return;
+    if (this.playing) {
+      this.time += dt;
+    }
+    // Камера мягко качается вокруг выбранного ракурса, а не уходит в полный оборот:
+    // так рабочий узел остаётся читаемым в любой момент.
+    const swing = this.detail ? 0.46 : 0.38;
+    if (!this.dragging) {
+      this.autoYaw = Math.sin(this.time * 0.27) * swing;
+    }
+    this.yaw = this.homeYaw + this.userYaw + this.autoYaw;
+    for (const fn of this.animators) fn(this.time, dt);
+    const cp = Math.cos(this.pitch);
+    this.camera.position.set(
+      this.target.x + this.dist * cp * Math.sin(this.yaw),
+      this.target.y + this.dist * Math.sin(this.pitch),
+      this.target.z + this.dist * cp * Math.cos(this.yaw)
+    );
+    this.camera.lookAt(this.target);
+    if (this.playing || this.dirty) {
+      const now = performance.now();
+      if (!this.dirty && now - (this.lastRender || 0) < (this.detail ? 25 : 33)) return;
+      this.renderer.render(this.scene, this.camera);
+      this.lastRender = now;
+      this.dirty = false;
+    }
+  }
+
+  dispose() {
+    this.alive = false;
+    this.ro.disconnect();
+    this.renderer.dispose();
+    this.scene.traverse((o) => {
+      if (o.isMesh) {
+        o.geometry?.dispose();
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach((m) => m?.dispose?.());
+      }
+    });
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   Карточки: ленивый 3D и наблюдение за видимостью
+   ────────────────────────────────────────────────────────── */
+
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    const idx = Number(e.target.dataset.index);
+    const canvas = e.target.querySelector('canvas');
+    if (!canvas) continue;
+    let v = viewersByIndex.get(idx);
+    if (!v && e.isIntersecting) {
+      v = createCardViewer(idx, e.target);
+    }
+    if (v) v.setInView(e.isIntersecting);
+  }
+}, { rootMargin: '220px 0px' });
+
+function createCardViewer(idx, card) {
+  const canvas = card.querySelector('canvas');
+  const load = card.querySelector('.vp-load');
+  const err = card.querySelector('.vp-error');
+  const v = new Viewer(canvas, modules[idx], {
+    phase: idx * 0.83,
+    onReady: () => { load.classList.add('done'); setTimeout(() => load.setAttribute('hidden', ''), 380); },
+    onError: () => {
+      load.setAttribute('hidden', '');
+      err.hidden = false;
+      err.textContent = 'Не удалось загрузить GLB. Откройте страницу через локальный сервер.';
+    }
+  });
+  v.setPlaying(state.playing);
+  v.setEnabled(!card.classList.contains('hidden'));
+  v.load();
+  viewersByIndex.set(idx, v);
+  viewers.add(v);
+  return v;
+}
+
+function setupObserver() {
+  cards.forEach((card, i) => {
+    card.dataset.index = String(i);
+    io.observe(card);
+  });
+}
+
+/* ──────────────────────────────────────────────────────────
+   Модальное окно
+   ────────────────────────────────────────────────────────── */
+
+const modal = $('#modal');
+const modalStage = $('#m-stage');
+let modalCanvas = modalStage.querySelector('canvas');
+const modalLoad = $('#m-load');
+const modalError = $('#m-error');
+
+function fillModal(m) {
+  const meta = CLASS_META[m.class] || CLASS_META.STRUCTURE;
+  const idx = modules.findIndex((x) => x.id === m.id);
+  $('#m-title').textContent = NAME_RU[m.id] || m.id;
+  $('#m-id').textContent = m.id;
+  $('#m-purpose').textContent = m.purpose;
+  $('#m-explain').textContent = EXPLAIN[m.id] || '';
+  const badge = $('#m-badge');
+  badge.textContent = meta.ru;
+  badge.style.setProperty('--badge-bg', meta.bg);
+  badge.style.setProperty('--badge-ink', meta.ink);
+  $('#m-num').textContent = `${String(idx + 1).padStart(2, '0')} / ${String(modules.length).padStart(2, '0')}`;
+  $('#m-pos').textContent = `${idx + 1} из ${modules.length}`;
+  $('#m-badge').className = 'badge';
+
+  const specs = [
+    ['Движение', MOTION_RU[m.id]?.[0] || m.motion],
+    ['Пределы', MOTION_RU[m.id]?.[1] || m.limits],
+    ['Доступ', ACCESS_RU[m.id] || m.access],
+    ['Что видно', EVIDENCE_RU[m.id] || m.visible_evidence],
+    ['Материал', MATERIAL_RU[m.material_role] || m.material_role],
+    ['Статус', STATUS_RU[m.status] || m.status],
+    ['Источники', (m.source_models || []).join(' · ')]
+  ];
+  $('#m-specs').innerHTML = specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+  $('#m-chips').innerHTML = (m.connects_to || []).map((id) =>
+    `<button class="chip" type="button" data-open="${esc(id)}">${esc(NAME_RU[id] || id)}</button>`
+  ).join('') + `<span class="chip ghost">${(m.connects_to || []).length} связей</span>`;
+
+  const usedIn = assemblies.filter((a) => (a.modules || []).includes(m.id));
+  $('#m-asm-chips').innerHTML = usedIn.length
+    ? usedIn.map((a) => `<span class="chip">${esc(a.title)}</span>`).join('')
+    : '<span class="chip ghost">не входит в сборки</span>';
+
+  const dl = $('#m-dl');
+  dl.href = m.file;
+  dl.setAttribute('download', m.file.split('/').pop());
+  modalStage.classList.remove('ready');
+  modalLoad.removeAttribute('hidden');
+  modalLoad.classList.remove('done');
+  modalError.hidden = true;
+}
+
+function mountModalViewer() {
+  if (!modal.classList.contains('open')) return;
+  disposeModalViewer();
+  const m = modules[modalIndex];
+  if (!m) return;
+  // Свежий canvas: после dispose() переиспользовать старый WebGL-контекст небезопасно.
+  const fresh = document.createElement('canvas');
+  modalCanvas.replaceWith(fresh);
+  modalCanvas = fresh;
+  const v = new Viewer(modalCanvas, m, {
+    detail: true,
+    phase: 0,
+    onReady: () => {
+      modalLoad.classList.add('done');
+      setTimeout(() => modalLoad.setAttribute('hidden', ''), 380);
+      modalStage.classList.add('ready');
+    },
+    onError: () => {
+      modalLoad.setAttribute('hidden', '');
+      modalError.hidden = false;
+      modalError.textContent = 'Не удалось загрузить GLB. Проверьте, что страница открыта через локальный сервер.';
+    }
+  });
+  v.setInView(true);
+  v.setPlaying(state.playing);
+  v.setWireframe(state.wireframe);
+  v.load();
+  modalViewer = v;
+  viewers.add(v);
+  syncModalPlayButton();
+}
+
+function disposeModalViewer() {
+  if (!modalViewer) return;
+  viewers.delete(modalViewer);
+  modalViewer.dispose();
+  modalViewer = null;
+}
+
+function openModal(id) {
+  const idx = modules.findIndex((m) => m.id === id);
+  if (idx < 0) return;
+  modalIndex = idx;
+  fillModal(modules[idx]);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+  requestAnimationFrame(() => requestAnimationFrame(mountModalViewer));
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('locked');
+  disposeModalViewer();
+  modalStage.classList.remove('ready');
+}
+
+function stepModal(dir) {
+  if (!modal.classList.contains('open')) return;
+  const idx = (modalIndex + dir + modules.length) % modules.length;
+  modalIndex = idx;
+  fillModal(modules[idx]);
+  requestAnimationFrame(() => requestAnimationFrame(mountModalViewer));
+}
+
+function syncModalPlayButton() {
+  const btn = $('#m-play');
+  btn.textContent = state.playing ? '❚❚' : '▶';
+  btn.setAttribute('title', state.playing ? 'Пауза' : 'Продолжить');
+}
+
+/* ──────────────────────────────────────────────────────────
+   Управление страницей
+   ────────────────────────────────────────────────────────── */
+
+function setupUI() {
+  $('#toggle-anim').addEventListener('click', (e) => {
+    state.playing = !state.playing;
+    const btn = e.currentTarget;
+    btn.classList.toggle('is-on', state.playing);
+    btn.setAttribute('aria-pressed', String(state.playing));
+    viewers.forEach((v) => v.setPlaying(state.playing));
+    syncModalPlayButton();
+    document.querySelectorAll('.card .mini').forEach((b) => { b.textContent = state.playing ? '❚❚' : '▶'; });
+  });
+
+  $('#toggle-wire').addEventListener('click', (e) => {
+    state.wireframe = !state.wireframe;
+    const btn = e.currentTarget;
+    btn.classList.toggle('is-on', state.wireframe);
+    btn.setAttribute('aria-pressed', String(state.wireframe));
+    viewers.forEach((v) => v.setWireframe(state.wireframe));
+  });
+
+  $('#reset-views').addEventListener('click', () => {
+    viewers.forEach((v) => v.resetView());
+  });
+
+  $('#grid').addEventListener('click', (e) => {
+    const act = e.target.closest('[data-act]');
+    if (act) {
+      e.stopPropagation();
+      const card = act.closest('.card');
+      const idx = Number(card.dataset.index);
+      const v = viewersByIndex.get(idx);
+      if (v) {
+        v.setPlaying(!v.playing);
+        act.textContent = v.playing ? '❚❚' : '▶';
+      }
+      return;
+    }
+    const opener = e.target.closest('[data-open]');
+    if (opener) {
+      e.stopPropagation();
+      openModal(opener.dataset.open);
+      return;
+    }
+    const card = e.target.closest('.card');
+    if (card) {
+      const canvas = card.querySelector('canvas');
+      if (canvas && canvas.dataset.dragged === '1') {
+        canvas.dataset.dragged = '0';
+        return;
+      }
+      openModal(card.dataset.id);
+    }
+  });
+
+  // маленькие кнопки play в карточках создаются после рендера
+  cards.forEach((card) => {
+    const mini = document.createElement('button');
+    mini.className = 'mini';
+    mini.type = 'button';
+    mini.dataset.act = 'play';
+    mini.textContent = state.playing ? '❚❚' : '▶';
+    mini.title = 'Пауза / продолжить';
+    card.querySelector('.vp-bottom').prepend(mini);
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]')) closeModal();
+    if (e.target.closest('[data-open]')) {
+      e.stopPropagation();
+      const id = e.target.closest('[data-open]').dataset.open;
+      const idx = modules.findIndex((m) => m.id === id);
+      if (idx >= 0) {
+        modalIndex = idx;
+        fillModal(modules[idx]);
+        requestAnimationFrame(() => requestAnimationFrame(mountModalViewer));
+      }
+    }
+  });
+
+  $('#m-prev').addEventListener('click', () => stepModal(-1));
+  $('#m-next').addEventListener('click', () => stepModal(1));
+  $('#m-play').addEventListener('click', () => {
+    state.playing = !state.playing;
+    viewers.forEach((v) => v.setPlaying(state.playing));
+    document.querySelectorAll('.card .mini').forEach((b) => { b.textContent = state.playing ? '❚❚' : '▶'; });
+    $('#toggle-anim').classList.toggle('is-on', state.playing);
+    $('#toggle-anim').setAttribute('aria-pressed', String(state.playing));
+    syncModalPlayButton();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'ArrowLeft') stepModal(-1);
+    if (e.key === 'ArrowRight') stepModal(1);
+  });
+}
+
+/* ──────────────────────────────────────────────────────────
+   Запуск
+   ────────────────────────────────────────────────────────── */
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  for (const v of viewers) v.tick(dt);
+  requestAnimationFrame(frame);
+}
+
+async function boot() {
+  if (location.protocol === 'file:') {
+    const b = $('#banner');
+    b.hidden = false;
+    b.innerHTML = 'Страница открыта как <code>file://</code> — браузер заблокирует загрузку GLB и <code>catalog.json</code>. Запустите локальный сервер из папки <code>public</code> и откройте <code>/models/machine-modules/demo.html</code>.';
+  }
+
+  try {
+    const res = await fetch('./catalog.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`catalog.json: ${res.status}`);
+    const data = await res.json();
+    modules = data.modules || [];
+    assemblies = data.assemblies || [];
+    byId = new Map(modules.map((m) => [m.id, m]));
+    renderCards();
+    renderAssemblies(data);
+    renderFilters();
+    setupUI();
+    setupObserver();
+    applyFilter();
+    $('#count').textContent = `${modules.length} / ${modules.length}`;
+    if (new URLSearchParams(location.search).has('debug')) {
+      window.__MM = { viewersByIndex, modules, state };
+    }
+  } catch (err) {
+    console.error(err);
+    const b = $('#banner');
+    b.hidden = false;
+    b.innerHTML = 'Не удалось прочитать <code>catalog.json</code>. Откройте страницу через локальный сервер: <code>python3 -m http.server 8080 -d public</code>';
+  }
+
+  requestAnimationFrame((t) => { last = t; frame(t); });
+}
+
+boot();
+</script>
+</body>
+</html>

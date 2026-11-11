@@ -1,0 +1,326 @@
+{
+  "format": "cyberjack-machine-modules-v1",
+  "units": "metres",
+  "upAxis": "Y (GLB); Z (Blender)",
+  "status": "visual-mechanical concept; not safety or manufacturing certified",
+  "reference_policy": "actual GLB/SKP geometry under public/models only; no bitmap references",
+  "palette": {
+    "BODY_MILK": "#F1EFEA",
+    "BODY_IVORY": "#FAF8F4",
+    "WORK_BLUSH": "#E8B9BF",
+    "WORK_PALE": "#F2D7D9",
+    "STRUCT_SILVER": "#B9BAB7",
+    "STRUCT_DARK": "#54575A",
+    "INTERFACE": "#34363B",
+    "STATUS": "#E4F4F5"
+  },
+  "modules": [
+    {
+      "id": "structure_base",
+      "class": "STRUCTURE",
+      "purpose": "Нагруженная станина с четырьмя опорами.",
+      "connects_to": [
+        "structure_portal",
+        "motion_linear",
+        "motion_lift",
+        "support_cradle"
+      ],
+      "motion": "stationary",
+      "limits": "floor contact z=0",
+      "access": "open underside",
+      "visible_evidence": "four feet; continuous deck",
+      "material_role": "BODY_MILK",
+      "status": "specified",
+      "source_models": [
+        "073",
+        "079",
+        "087"
+      ],
+      "file": "modules/structure_base.glb"
+    },
+    {
+      "id": "structure_portal",
+      "class": "STRUCTURE",
+      "purpose": "Открытая двухстоечная рама рабочего узла.",
+      "connects_to": [
+        "structure_base",
+        "motion_lift"
+      ],
+      "motion": "stationary",
+      "limits": "fixed crossbeam",
+      "access": "front and rear open",
+      "visible_evidence": "two columns; top beam",
+      "material_role": "BODY_MILK",
+      "status": "specified",
+      "source_models": [
+        "078",
+        "095"
+      ],
+      "file": "modules/structure_portal.glb"
+    },
+    {
+      "id": "motion_linear",
+      "class": "MOTION",
+      "purpose": "Двухрельсовая горизонтальная каретка.",
+      "connects_to": [
+        "structure_portal",
+        "work_probe"
+      ],
+      "motion": "X translation",
+      "limits": "±0.22 m; physical end stops",
+      "access": "rails exposed",
+      "visible_evidence": "two rails; split carriage; four end blocks",
+      "material_role": "STRUCT_SILVER",
+      "status": "specified",
+      "source_models": [
+        "078",
+        "084",
+        "095",
+        "098"
+      ],
+      "file": "modules/motion_linear.glb"
+    },
+    {
+      "id": "motion_lift",
+      "class": "MOTION",
+      "purpose": "Вертикальная регулировка рабочей плоскости.",
+      "connects_to": [
+        "structure_portal",
+        "motion_linear",
+        "work_rotary",
+        "work_brush_pair"
+      ],
+      "motion": "Z translation",
+      "limits": "±0.12 m; end brackets",
+      "access": "front service",
+      "visible_evidence": "twin vertical guides; split carriage",
+      "material_role": "STRUCT_SILVER",
+      "status": "specified",
+      "source_models": [
+        "073",
+        "080",
+        "087"
+      ],
+      "file": "modules/motion_lift.glb"
+    },
+    {
+      "id": "work_probe",
+      "class": "WORK",
+      "purpose": "Сменный линейный контактный узел с быстросъёмной муфтой.",
+      "connects_to": [
+        "motion_linear"
+      ],
+      "motion": "Y stroke; follows X carriage",
+      "limits": "0.12 m nominal visual stroke",
+      "access": "front quick release",
+      "visible_evidence": "pink drive cover; metal coupler; rounded contact tip",
+      "material_role": "WORK_BLUSH",
+      "status": "specified",
+      "source_models": [
+        "073",
+        "079",
+        "089",
+        "090"
+      ],
+      "file": "modules/work_probe.glb"
+    },
+    {
+      "id": "work_rotary",
+      "class": "WORK",
+      "purpose": "Мягкий ротационный контур с открытой рамкой ограждения.",
+      "connects_to": [
+        "motion_lift"
+      ],
+      "motion": "Y-axis rotation",
+      "limits": "continuous; fixed guard",
+      "access": "open front; side service",
+      "visible_evidence": "pink drive; pale torus; fixed guard frame",
+      "material_role": "WORK_BLUSH",
+      "status": "specified",
+      "source_models": [
+        "065",
+        "080",
+        "084",
+        "096"
+      ],
+      "file": "modules/work_rotary.glb"
+    },
+    {
+      "id": "work_brush_pair",
+      "class": "WORK",
+      "purpose": "Два независимо читаемых щёточных контактных узла.",
+      "connects_to": [
+        "motion_lift"
+      ],
+      "motion": "two Y-axis rotors",
+      "limits": "continuous; fixed carrier",
+      "access": "front brush replacement",
+      "visible_evidence": "two pink motors; radial pale bristles",
+      "material_role": "WORK_BLUSH",
+      "status": "specified",
+      "source_models": [
+        "073",
+        "087",
+        "089"
+      ],
+      "file": "modules/work_brush_pair.glb"
+    },
+    {
+      "id": "support_cradle",
+      "class": "SERVICE",
+      "purpose": "Пара регулируемых опор с мягкими съёмными ложементами.",
+      "connects_to": [
+        "structure_base"
+      ],
+      "motion": "Z setup adjustment",
+      "limits": "0.48–0.96 m nominal mounting range",
+      "access": "front loading; open clamps",
+      "visible_evidence": "two grounded posts; pads; clamp rings",
+      "material_role": "WORK_PALE",
+      "status": "specified",
+      "source_models": [
+        "073",
+        "081",
+        "087",
+        "089"
+      ],
+      "file": "modules/support_cradle.glb"
+    },
+    {
+      "id": "interface_console",
+      "class": "INTERFACE",
+      "purpose": "Локальный пульт с экраном и физическим стопом.",
+      "connects_to": [
+        "utility_routing"
+      ],
+      "motion": "stationary",
+      "limits": "operator side -Y",
+      "access": "front operation; rear service",
+      "visible_evidence": "screen; status line; red/yellow stop",
+      "material_role": "BODY_IVORY",
+      "status": "specified",
+      "source_models": [
+        "069",
+        "073",
+        "080",
+        "096"
+      ],
+      "file": "modules/interface_console.glb"
+    },
+    {
+      "id": "utility_routing",
+      "class": "UTILITY",
+      "purpose": "Защищённый кабельный контур пульт–станина–привод.",
+      "connects_to": [
+        "interface_console",
+        "motion_linear",
+        "motion_lift"
+      ],
+      "motion": "fixed service loop",
+      "limits": "conceptual routing only",
+      "access": "rear trunk; visible connectors",
+      "visible_evidence": "rear trunk; two cable runs; connector blocks",
+      "material_role": "STRUCT_DARK",
+      "status": "assumed",
+      "source_models": [
+        "073",
+        "079",
+        "096"
+      ],
+      "file": "modules/utility_routing.glb"
+    }
+  ],
+  "assemblies": [
+    {
+      "id": "lab_sex_machine_vaginal",
+      "title": "M-01 · линейный модуль",
+      "function": "Загрузка на опоры → настройка высоты и положения → линейный контакт → выключение и снятие.",
+      "modules": [
+        "structure_base",
+        "structure_portal",
+        "motion_lift",
+        "motion_linear",
+        "work_probe",
+        "support_cradle",
+        "interface_console",
+        "utility_routing"
+      ],
+      "source_models": [
+        "073",
+        "078",
+        "079",
+        "089",
+        "095"
+      ],
+      "hazards": "moving carriage and contact tip; loading is stopped-state only; safety review required",
+      "file": "assemblies/lab_sex_machine_vaginal.glb",
+      "blendCollection": "ASM_lab_sex_machine_vaginal"
+    },
+    {
+      "id": "lab_sex_machine_anal",
+      "title": "M-02 · низкий линейный модуль",
+      "function": "Настройка опор → установка каретки → линейный контакт → стоп и сервисный доступ.",
+      "modules": [
+        "structure_base",
+        "motion_linear",
+        "work_probe",
+        "support_cradle",
+        "interface_console",
+        "utility_routing"
+      ],
+      "source_models": [
+        "078",
+        "084",
+        "098"
+      ],
+      "hazards": "moving carriage; exposed rail pinch points are conceptually stopped before access",
+      "file": "assemblies/lab_sex_machine_anal.glb",
+      "blendCollection": "ASM_lab_sex_machine_anal"
+    },
+    {
+      "id": "lab_sex_machine_tickling",
+      "title": "M-03 · двойной щёточный модуль",
+      "function": "Установка стоп на опоры → регулировка высоты → два вращающихся контакта → стоп и снятие.",
+      "modules": [
+        "structure_base",
+        "structure_portal",
+        "motion_lift",
+        "work_brush_pair",
+        "support_cradle",
+        "interface_console",
+        "utility_routing"
+      ],
+      "source_models": [
+        "073",
+        "087",
+        "089"
+      ],
+      "hazards": "rotating brushes and adjustment pinch points; guards/interlocks not engineered",
+      "file": "assemblies/lab_sex_machine_tickling.glb",
+      "blendCollection": "ASM_lab_sex_machine_tickling"
+    },
+    {
+      "id": "lab_sex_machine_circularsaw",
+      "title": "M-04 · мягкий ротационный модуль",
+      "function": "Загрузка на опоры → настройка высоты → вращение мягкого контура → стоп и открытие зоны.",
+      "modules": [
+        "structure_base",
+        "structure_portal",
+        "motion_lift",
+        "work_rotary",
+        "support_cradle",
+        "interface_console",
+        "utility_routing"
+      ],
+      "source_models": [
+        "065",
+        "080",
+        "084",
+        "096"
+      ],
+      "hazards": "rotary contact and fixed guard; no metal saw teeth; guarding requires later safety review",
+      "file": "assemblies/lab_sex_machine_circularsaw.glb",
+      "blendCollection": "ASM_lab_sex_machine_circularsaw"
+    }
+  ]
+}

@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Омникрон · компоненты</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F1EFEA'/%3E%3Crect x='7' y='7' width='18' height='18' rx='3' fill='%23E8B9BF' stroke='%232F3135' stroke-width='1.5'/%3E%3Crect x='13' y='13' width='6' height='6' rx='1' fill='%232F3135'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --milk:#F1EFEA;--ivory:#FAF8F4;--ink:#2F3135;--graphite:#54575A;--silver:#B9BAB7;
+    --blush:#E8B9BF;--pale:#F2D7D9;--status:#E4F4F5;--line:rgba(47,49,53,.14);--line-strong:rgba(47,49,53,.30);
+    --mono:ui-monospace,"SFMono-Regular","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:"Inter","Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --r:18px;--shadow:0 18px 45px -28px rgba(47,49,53,.38);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;color:var(--ink);background:radial-gradient(1100px 620px at 12% -8%,#FCFAF5 0%,rgba(252,250,245,0) 62%),radial-gradient(900px 520px at 90% 4%,#F7F1EB 0%,rgba(247,241,235,0) 58%),var(--milk);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body.locked{overflow:hidden}
+  a{color:inherit}
+  button,input,select{font:inherit;color:inherit}
+  ::selection{background:var(--pale)}
+  .page{max-width:1480px;margin:0 auto;padding:0 32px 80px}
+
+  .topline{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0 18px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.16em}
+  .brand-mark{width:14px;height:14px;border-radius:3px;background:var(--blush);border:1px solid rgba(47,49,53,.28);position:relative;flex:none}
+  .brand-mark::after{content:"";position:absolute;inset:4px;border-radius:1px;background:var(--ink);opacity:.78}
+  .topline-meta{font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:none;color:var(--graphite);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .topline-meta a{text-decoration:none;border-bottom:1px solid var(--line-strong);padding-bottom:1px;color:#4C4F53}
+  .topline-meta a:hover{color:var(--ink);border-color:var(--ink)}
+
+  .hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.6fr);gap:56px;align-items:end;padding:64px 0 42px}
+  .eyebrow{margin:0 0 22px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--graphite);display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--line-strong)}
+  h1{margin:0;font-size:clamp(40px,5.8vw,78px);line-height:.94;letter-spacing:-.045em;font-weight:620}
+  h1 em{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;letter-spacing:-.03em;color:var(--graphite)}
+  .lede{margin:26px 0 0;max-width:62ch;font-size:15.5px;line-height:1.62;color:#4B4E52}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:11px 17px;border:1px solid var(--line-strong);border-radius:999px;background:transparent;text-decoration:none;cursor:pointer;font-size:13px;font-weight:560;transition:.18s ease}
+  .btn:hover{border-color:var(--ink);transform:translateY(-1px)}
+  .btn-dark{background:var(--ink);color:#F8F6F1;border-color:var(--ink)}
+  .btn-dark:hover{background:#1F2124}
+  .btn .arr{font-family:var(--mono);font-size:12px;opacity:.7}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .stat{background:rgba(250,248,244,.72);padding:20px 18px 18px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+  .stat-n{font-size:34px;line-height:1;letter-spacing:-.04em;font-weight:600}
+  .stat-l{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--graphite)}
+  .stat-note{grid-column:1/-1;background:rgba(250,248,244,.72);margin:0;padding:16px 18px;font-size:11.5px;line-height:1.55;color:var(--graphite)}
+
+  .formula{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 24px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .formula span{font-family:var(--mono);font-size:9px;letter-spacing:.03em;color:#5D6064;padding:4px 7px;border-radius:4px;background:#ECE8DF;border:1px solid rgba(47,49,53,.08)}
+  .formula b{font-family:var(--mono);font-size:11px;font-weight:400;color:#96999C}
+
+  .toolbar{position:sticky;top:0;z-index:40;padding:12px 0;background:rgba(241,239,234,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);margin-bottom:22px}
+  .toolbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .search{flex:1 1 230px;min-width:200px;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(250,248,244,.6)}
+  .search svg{flex:none;opacity:.5}
+  .search input{width:100%;border:0;outline:0;background:transparent;font-size:12.5px}
+  .search input::placeholder{color:#9A9DA0}
+  .select{appearance:none;padding:8px 30px 8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(250,248,244,.6);font-size:12px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,#777 50%),linear-gradient(135deg,#777 50%,transparent 50%);background-position:calc(100% - 15px) 50%,calc(100% - 10px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .count{font-family:var(--mono);font-size:10px;color:var(--graphite);letter-spacing:.04em;white-space:nowrap}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .filter{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid transparent;border-radius:999px;background:transparent;cursor:pointer;font-size:11.5px;color:#5D6064;transition:.15s ease}
+  .filter:hover{background:rgba(250,248,244,.9);color:var(--ink)}
+  .filter.is-on{background:var(--ink);color:#F8F6F1}
+  .filter .n{font-family:var(--mono);font-size:9px;opacity:.62}
+  .filter .sw{width:7px;height:7px;border-radius:2px;background:var(--sw,var(--silver));flex:none}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+  .card{background:var(--ivory);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;animation:cardIn .45s both;animation-delay:calc(var(--i) * 18ms);scroll-margin-top:100px}
+  @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card:hover{transform:translateY(-3px);border-color:var(--line-strong);box-shadow:0 26px 55px -32px rgba(47,49,53,.5)}
+  .card.hidden{display:none}
+  .card-visual{position:relative;aspect-ratio:16/9;background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 55%),var(--accent-bg,#F2EEE6);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-visual::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(47,49,53,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(47,49,53,.05) 1px,transparent 1px);background-size:20px 20px;mask-image:radial-gradient(circle at 50% 50%,#000 0%,transparent 78%);opacity:.8}
+  .visual-top,.visual-bottom{position:absolute;left:13px;right:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:8px;letter-spacing:.04em}
+  .visual-top{top:11px;color:#73767A}
+  .visual-bottom{bottom:11px;color:#73767A}
+  .code{background:rgba(250,248,244,.72);border:1px solid rgba(47,49,53,.1);padding:3px 6px;border-radius:4px;white-space:nowrap}
+  .status{text-transform:uppercase;font-size:7.5px;letter-spacing:.08em;opacity:.7}
+  .status.core{color:#3E725F;opacity:1}
+  .status.archived{color:#8A8D90;opacity:1;letter-spacing:.1em}
+  .card.is-archived{opacity:.8;border-style:dashed;background:#F3F1EC}
+  .card.is-archived .card-visual{filter:grayscale(.45)}
+  .card.is-archived:hover{opacity:.94}
+  .arch-note{margin:0 0 9px;padding:5px 7px;border:1px dashed rgba(47,49,53,.22);border-radius:5px;background:rgba(236,232,223,.55);font-family:var(--mono);font-size:8px;line-height:1.5;color:#7A7D80;letter-spacing:.02em}
+  .arch-note b{font-weight:600;color:#5D6064}
+  .arch-toggle{border-color:var(--line);border-style:dashed}
+  .arch-toggle:hover{background:rgba(250,248,244,.9)}
+  .arch-toggle.is-on{background:#54575A;color:#F8F6F1;border-color:#54575A;border-style:solid}
+  .arch-toggle.is-on .n{opacity:.8}
+  .d-arch{margin-top:8px;padding:8px 10px;border:1px dashed rgba(47,49,53,.22);border-radius:8px;background:rgba(236,232,223,.45)}
+  .d-arch .row{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+  .icon{width:38%;max-width:130px;color:var(--accent,#54575A);opacity:.9;filter:drop-shadow(0 6px 12px rgba(47,49,53,.08))}
+  .icon svg{width:100%;height:auto;display:block}
+  /* Превью модуля (renders/<id>.webp). Если файла нет — onerror снимает <img>
+     и вешает is-svg, тогда показывается прежняя SVG-иконка класса. */
+  .shot-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none}
+  .shot-wrap .icon{display:none}
+  .shot-wrap.is-svg .icon{display:block}
+  .shot{height:78%;width:auto;max-width:92%;aspect-ratio:1/1;object-fit:contain;display:block;pointer-events:none;filter:drop-shadow(0 10px 20px rgba(47,49,53,.18))}
+  .card-body{padding:15px 15px 13px}
+  .card-kicker{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:#96999C;margin-bottom:5px}
+  .card-body h3{margin:0 0 5px;font-size:18px;line-height:1.18;letter-spacing:-.025em;font-weight:600}
+  .card-body .purpose{margin:0 0 10px;font-size:11.5px;line-height:1.5;color:#5A5D61;min-height:34px}
+  .quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px;padding-top:10px;border-top:1px solid var(--line)}
+  .quick dt{font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:#96999C;margin-bottom:3px}
+  .quick dd{margin:0;font-size:11px;line-height:1.3;color:#3F4246;font-weight:520;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .open{display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 0 0;border:0;border-top:1px solid var(--line);background:transparent;font-size:10.5px;font-weight:540;color:#4C4F53;cursor:pointer;text-align:left}
+  .open span{font-family:var(--mono);font-size:12px;color:#8E9194;transition:transform .18s ease}
+  .card:hover .open span{transform:translate(2px,-2px);color:var(--ink)}
+
+  footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:18px;font-size:10.5px;line-height:1.6;color:#8A8D90}
+  footer p{margin:0;max-width:72ch}
+  footer .f-meta{font-family:var(--mono);font-size:9px;letter-spacing:.03em}
+
+  .modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal.open{display:flex}
+  .modal-backdrop{position:absolute;inset:0;background:rgba(35,37,40,.42);backdrop-filter:blur(7px);animation:fadeIn .2s ease both}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-card{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,.8fr) minmax(360px,1.2fr);width:min(1120px,100%);height:min(86vh,840px);background:var(--ivory);border:1px solid rgba(255,255,255,.35);border-radius:20px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(20,22,24,.55);animation:modalIn .25s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+  .detail-visual{position:relative;background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),var(--accent-bg,#F2EEE6);border-right:1px solid var(--line);padding:22px;display:flex;flex-direction:column;overflow:hidden}
+  .detail-visual::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(47,49,53,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(47,49,53,.05) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(circle at 50% 45%,#000 0%,transparent 80%)}
+  .detail-top{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding-right:38px;font-family:var(--mono);font-size:9px;color:#73767A}
+  .detail-icon{position:relative;flex:1;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;padding:20px 0;color:var(--accent,#54575A)}
+  .detail-icon .icon{width:62%;max-width:270px;opacity:.92}
+  .detail-canvas{position:absolute;left:10px;top:54px;width:calc(100% - 20px);height:calc(100% - 158px);z-index:1;opacity:0;transition:opacity .25s ease;touch-action:none;cursor:grab}
+  .detail-canvas.ready{opacity:1}
+  .detail-visual.has-3d .detail-icon{opacity:0;pointer-events:none}
+  .detail-top,.detail-meta{position:relative;z-index:2}
+  .mate-toggle{position:absolute;right:22px;top:52px;z-index:4;border:1px solid var(--line);background:rgba(250,248,244,.9);color:#54575A;border-radius:999px;padding:5px 10px;font-family:var(--mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(6px)}
+  .mate-toggle:hover{background:#fff}
+  .mate-toggle[aria-pressed="true"]{border-color:#B4696F;color:#8F4E54}
+  .variant-switch{display:inline-flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--line);border-radius:999px;background:rgba(250,248,244,.9);backdrop-filter:blur(6px)}
+  .variant-switch button{border:0;background:transparent;border-radius:999px;padding:3px 9px;font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:#5D6064;cursor:pointer;transition:.15s ease;line-height:1.5}
+  .variant-switch button:hover{color:var(--ink);background:rgba(47,49,53,.06)}
+  .variant-switch button.is-on{background:var(--ink);color:#F8F6F1}
+  .variant-switch button[data-variant="hard"].is-on{background:#34363B}
+  .detail-tags{display:inline-flex;align-items:center;gap:6px}
+  .vbadge{font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;padding:2px 5px;border-radius:4px;background:#34363B;color:#F8F6F1;white-space:nowrap}
+  .vbadge.on-card{position:static}
+  .visual-tags{display:inline-flex;align-items:center;gap:5px}
+  .mate-chip{display:inline-flex;align-items:center;gap:5px}
+  .mate-chip i{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .detail-meta{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+  .detail-meta dt{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#96999C;margin-bottom:3px}
+  .detail-meta dd{margin:0;font-size:11px;line-height:1.35;color:#45484C}
+  .detail-side{padding:30px 28px 24px;overflow:auto;display:flex;flex-direction:column}
+  .modal-x{position:absolute;top:13px;right:13px;z-index:5;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:rgba(250,248,244,.86);cursor:pointer;font-size:13px;display:grid;place-items:center;backdrop-filter:blur(6px)}
+  .modal-x:hover{background:#fff}
+  .detail-side .kicker{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;color:#96999C;margin-bottom:8px;flex-wrap:wrap}
+  .detail-side .kicker .badge{padding:3px 6px;border-radius:4px;background:#F0EDE6;border:1px solid var(--line);color:#5D6064;letter-spacing:.03em}
+  .detail-side h2{margin:2px 0 6px;font-size:clamp(26px,3vw,36px);line-height:1.02;letter-spacing:-.04em;font-weight:620}
+  .detail-side .d-purpose{margin:0;font-size:13.5px;line-height:1.5;color:#3F4246}
+  .detail-side .d-desc{margin:0;font-size:12px;line-height:1.6;color:#63666A}
+  .specs{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 14px;border-top:1px solid var(--line)}
+  .specs div{display:grid;grid-template-columns:112px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .specs dt{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#96999C;padding-top:2px}
+  .specs dd{margin:0;font-size:11.5px;line-height:1.45;color:#45484C}
+  .detail-side h4{margin:0 0 7px;font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:#96999C;font-weight:500}
+  .block{margin:0 0 14px}
+  .block p{margin:0;font-size:11.5px;line-height:1.5;color:#45484C}
+  .chips{display:flex;flex-wrap:wrap;gap:4px}
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border-radius:5px;background:#F0EDE6;border:1px solid rgba(47,49,53,.08);font-family:var(--mono);font-size:8px;letter-spacing:.02em;color:#64676B;text-decoration:none;cursor:pointer;transition:.14s ease}
+  .chip:hover{background:#E8E4DB;color:var(--ink)}
+  .chip.bad{background:#FBEBE9;border-color:rgba(176,72,64,.25);color:#9B4A42}
+  .chip.bad:hover{background:#F6DCD8;color:#8B3A33}
+  .chip.good{background:#EAF2EE;border-color:rgba(62,114,95,.22);color:#3E725F}
+  .chip.warn{background:#FBF3E2;border-color:rgba(160,120,50,.25);color:#8A6A2A}
+  .pending-note{margin-top:10px;font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:#8A8D90}
+  .layer-badge{display:inline-flex;align-items:center;padding:1px 5px;border-radius:4px;border:1px solid rgba(47,49,53,.14);font-family:var(--mono);font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;color:#5D6064;background:#FAF8F4}
+  .chip.ghost{background:transparent;border-color:var(--line);color:#96999C;cursor:default}
+  .chip.link{background:transparent;border-color:var(--line);color:#5D6064}
+  .chip.link:hover{border-color:var(--line-strong);color:var(--ink)}
+  .detail-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:12px;font-family:var(--mono);font-size:8.5px;color:#96999C}
+  .detail-foot a{color:#5E7C86;text-decoration:none;border-bottom:1px solid rgba(94,124,134,.35);white-space:nowrap}
+  .detail-foot a:hover{color:var(--ink);border-color:var(--ink)}
+  .empty{padding:40px 20px;text-align:center;color:#8A8D90;font-size:13px}
+
+  @media (max-width:1080px){
+    .hero{grid-template-columns:1fr;gap:30px;align-items:start}
+    .stats{max-width:520px}
+    .modal-card{grid-template-columns:1fr;grid-template-rows:minmax(320px,44vh) 1fr;height:min(92vh,920px);overflow:auto}
+    .detail-visual{border-right:0;border-bottom:1px solid var(--line);min-height:320px}
+    .detail-canvas{left:6px;top:46px;width:calc(100% - 12px);height:calc(100% - 136px)}
+    .detail-icon{padding:12px 0}
+    .detail-icon .icon{max-width:170px}
+    .detail-side{overflow:visible}
+  }
+  @media (max-width:720px){
+    .page{padding:0 18px 60px}
+    .topline-meta{display:none}
+    .hero{padding:44px 0 32px}
+    .grid{grid-template-columns:1fr}
+    .toolbar{position:static;padding:10px 0}
+    .filters{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:5px;scrollbar-width:none}
+    .filters::-webkit-scrollbar{display:none}
+    .filter{flex:0 0 auto}
+    .modal{padding:10px}
+    .modal-card{height:94vh}
+    .detail-side{padding:24px 20px 20px}
+    .specs div{grid-template-columns:96px 1fr}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{animation:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topline">
+    <div class="brand"><span class="brand-mark"></span> Omnicron / Components</div>
+    <div class="topline-meta"><span id="top-count">96 компонентов · 10 классов</span><a href="fix-kit.html">CJ-FIX-KIT ↗</a><a href="mating-map.html">Карта стыковки ↗</a><a href="devices.html">Каталог устройств ↗</a></div>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">03 — атомарный уровень</p>
+      <h1>Компоненты<br><em>станционного парка</em></h1>
+      <p class="lede">
+        Каждый компонент — отдельный паспорт: назначение, описание, характеристики,
+        пределы, совместимость, варианты и 3D-модель. Устройства собираются из этих
+        узлов, а не рисуются заново.
+      </p>
+      <div class="hero-actions">
+        <a href="#catalog" class="btn btn-dark">Открыть компоненты <span class="arr">↓</span></a>
+        <a href="devices.html" class="btn">Устройства станции <span class="arr">↗</span></a>
+        <a href="mating-map.html" class="btn">Карта стыковки <span class="arr">↗</span></a>
+        <a href="fix-kit.html" class="btn">CJ-FIX-KIT <span class="arr">↗</span></a>
+      </div>
+    </div>
+    <aside class="stats">
+      <div class="stat"><span class="stat-n" id="stat-components">96</span><span class="stat-l">компонентов</span></div>
+      <div class="stat"><span class="stat-n" id="stat-classes">10</span><span class="stat-l">классов</span></div>
+      <div class="stat"><span class="stat-n" id="stat-used">41</span><span class="stat-l">устройств</span></div>
+      <div class="stat"><span class="stat-n" id="stat-core">10</span><span class="stat-l">модулей Mk-I</span></div>
+      <p class="stat-note">
+        Компонент — это один физический узел: рама, ось, головка, манжета, поверхность,
+        датчик или разъём. Параметры — игровые, не инженерные.
+        <b id="stat-arch-note">12 записей в архиве</b> — они скрыты по умолчанию, паспорт и 3D на месте.
+      </p>
+    </aside>
+  </header>
+
+  <div class="formula" aria-label="Формула устройства">
+    <span>STRUCTURE</span><b>+</b><span>MOTION</span><b>+</b><span>WORK</span><b>+</b>
+    <span>RESTRAINT</span><b>+</b><span>SURFACE</span><b>+</b><span>CONTROL</span><b>+</b>
+    <span>UTILITY</span><b>=</b><span>DEVICE</span>
+  </div>
+
+  <section class="toolbar" id="catalog" aria-label="Фильтры компонентов">
+    <div class="toolbar-row">
+      <label class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Поиск: «поршень», «насадка», код, характеристика…" autocomplete="off">
+      </label>
+      <select class="select" id="usage-filter" aria-label="Использование">
+        <option value="ALL">Все компоненты</option>
+        <option value="USED">Только в устройствах</option>
+        <option value="UNUSED">Вне устройств</option>
+      </select>
+      <button class="filter arch-toggle" id="archive-toggle" type="button" aria-pressed="false" title="Показать архивные компоненты (дубли, сохранённые без удаления)">
+        <span class="sw" style="--sw:#8A8D90"></span>Архив <span class="n" id="archive-count">12</span>
+      </button>
+      <span class="count" id="count">84 / 96</span>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="filters" id="layer-filters" aria-label="Фильтр по слою головки"></div>
+  </section>
+
+  <main class="grid" id="grid" aria-live="polite"></main>
+
+  <footer>
+    <p>
+      <b>Омникрон · компоненты.</b> Вымышленный концепт для Cyberjack.
+      Не инструкция, не медицинская и не инженерная документация.
+      Все персонажи — взрослые; параметры — игровая абстракция.
+      Иконки — классовые схемы, не финальные силуэты. 3D-модели — интерактивные
+      блок-ауты: паспорт важнее геометрии.
+    </p>
+    <div class="f-meta" id="foot-meta">96 components · 10 classes · 41 devices · 96 GLB</div>
+  </footer>
+</div>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="d-title">
+    <button class="modal-x" type="button" data-close aria-label="Закрыть">✕</button>
+    <div class="detail-visual" id="detail-visual">
+      <div class="detail-top"><span class="code" id="d-code"></span><div class="variant-switch" id="d-variant-switch" hidden role="group" aria-label="Вариант модели"></div><span class="detail-tags"><span class="vbadge" id="d-variant-badge" hidden>hard</span><span class="status" id="d-status"></span></span></div>
+      <button class="mate-toggle" id="d-mates-toggle" type="button" aria-pressed="true" hidden>Точки крепления</button>
+      <div class="detail-icon" id="d-icon"></div>
+      <dl class="detail-meta">
+        <div><dt>Класс</dt><dd id="d-class"></dd></div>
+        <div><dt>Использование</dt><dd id="d-used"></dd></div>
+        <div><dt>Варианты</dt><dd id="d-variants-count"></dd></div>
+        <div><dt>Статус</dt><dd id="d-status-text"></dd></div>
+      </dl>
+    </div>
+    <div class="detail-side">
+      <div class="kicker"><span class="badge" id="d-class-badge"></span><span class="badge" id="d-layer-badge" hidden></span><span id="d-legacy"></span></div>
+      <h2 id="d-title"></h2>
+      <div class="block"><h4>Назначение</h4><p class="d-purpose" id="d-purpose"></p></div>
+      <div class="block"><h4>Описание</h4><p class="d-desc" id="d-desc"></p></div>
+      <dl class="specs" id="d-specs"></dl>
+      <div class="block"><h4>Пределы</h4><p id="d-limits"></p></div>
+      <div class="block"><h4>Совместимость</h4><div class="chips" id="d-compat"></div></div>
+      <div class="block" id="d-caps-block" hidden><h4>Возможности</h4><div class="chips" id="d-caps"></div></div>
+      <div class="block" id="d-rejects-block" hidden><h4>Несовместимо</h4><div class="chips" id="d-rejects"></div></div>
+      <div class="block" id="d-compose-block" hidden><h4>Состав сборки</h4><div class="chips" id="d-compose"></div></div>
+      <div class="block"><h4>Точки крепления</h4><div class="chips" id="d-mates"></div></div>
+      <div class="block"><h4>Варианты</h4><div class="chips" id="d-variants"></div></div>
+      <div class="block"><h4>Безопасность</h4><p id="d-safety"></p></div>
+      <div class="block"><h4>Обслуживание</h4><p id="d-service"></p></div>
+      <div class="block"><h4>Визуально</h4><p id="d-visual"></p></div>
+      <div class="block" id="d-archive-block" hidden>
+        <h4>Архив</h4>
+        <div class="d-arch">
+          <p id="d-archive-reason"></p>
+          <div class="row" id="d-archive-targets"></div>
+          <div class="row" id="d-archive-meta" style="font-family:var(--mono);font-size:8px;color:#8A8D90"></div>
+        </div>
+      </div>
+      <div class="block"><h4>Входит в устройства</h4><div class="chips" id="d-devices"></div></div>
+      <div class="detail-foot"><span id="d-id-foot"></span><span id="d-code-foot"></span><a id="d-contract" href="component-contracts.json" download hidden>Контракт ↓</a><a id="d-download" href="#" hidden>GLB ↓</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CLASS = {
+  STRUCTURE: { label: 'Каркас', accent: '#54575A', bg: '#E9E6DF' },
+  MOTION: { label: 'Кинематика', accent: '#3E5A66', bg: '#E2EAED' },
+  WORK: { label: 'Рабочая головка', accent: '#B4696F', bg: '#F7E2E4' },
+  RESTRAINT: { label: 'Фиксация', accent: '#34363B', bg: '#E8E8E4' },
+  SURFACE: { label: 'Поверхность', accent: '#A08A6A', bg: '#F0EADF' },
+  FLUID: { label: 'Жидкости', accent: '#4E8A8A', bg: '#E1EFEF' },
+  SENSORY: { label: 'Сенсорика', accent: '#5E6A7A', bg: '#E5E9ED' },
+  CONTROL: { label: 'Контроль', accent: '#5E7C86', bg: '#E7EEF0' },
+  UTILITY: { label: 'Инфраструктура', accent: '#6B6E70', bg: '#E9E9E6' },
+  SERVICE: { label: 'Сервис', accent: '#8A8D90', bg: '#EDEDEA' }
+};
+
+const ICONS = {
+  STRUCTURE: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 80h84M26 80V32h68v48"/><path d="M26 32h68"/><path d="M40 32v48M80 32v48"/><path d="M40 48h40"/><circle cx="60" cy="48" r="8"/><path d="M26 88h68" stroke-dasharray="3 5"/></svg>`,
+  MOTION: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 78h84"/><path d="M30 78V54h60v24"/><path d="M60 54V24"/><path d="m50 34 10-10 10 10"/><path d="M60 24v-6"/><path d="M24 86h72" stroke-dasharray="3 5"/></svg>`,
+  WORK: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 72h80M38 72V44h44v28M48 44V30h24v14"/><path d="M48 30v-8M60 30v-12M72 30v-8"/><path d="M34 72v8M86 72v8"/><circle cx="60" cy="58" r="7"/><path d="M52 58h16M60 50v16"/></svg>`,
+  RESTRAINT: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M22 80h76M32 80V52h56v28"/><path d="M42 52V34h36v18"/><circle cx="42" cy="64" r="8"/><circle cx="78" cy="64" r="8"/><path d="M50 64h20"/><path d="M32 88h56" stroke-dasharray="3 5"/></svg>`,
+  SURFACE: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 70h80M28 70V56h64v14"/><path d="M34 56V44h52v12"/><path d="M40 44v-8h40v8"/><path d="M28 78v8M92 78v8"/><path d="M24 88h72" stroke-dasharray="3 5"/></svg>`,
+  FLUID: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M28 80h64M36 80V44h48v36"/><path d="M48 44V30h24v14"/><path d="M60 18c6 8 10 13 10 18a10 10 0 0 1-20 0c0-5 4-10 10-18Z"/><path d="M24 88h72" stroke-dasharray="3 5"/></svg>`,
+  SENSORY: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M24 78h72M32 78V38h56v40"/><path d="M32 38c0-16 12-26 28-26s28 10 28 26"/><path d="M46 50h28M46 60h28"/><path d="M50 24v-8M70 24v-8"/></svg>`,
+  CONTROL: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="28" y="22" width="64" height="44" rx="4"/><path d="M38 34h44M38 44h28M38 54h18"/><path d="M46 76h28M36 86h48"/><circle cx="82" cy="68" r="6"/></svg>`,
+  UTILITY: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M30 28v22a12 12 0 0 0 12 12h36a12 12 0 0 0 12-12V28"/><path d="M36 28v-8M60 28v-8M84 28v-8"/><path d="M60 62v16M48 78h24"/><path d="M24 88h72" stroke-dasharray="3 5"/></svg>`,
+  SERVICE: `<svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M30 76V44h60v32"/><path d="M30 44h60"/><path d="M44 44V30h32v14"/><circle cx="60" cy="60" r="9"/><path d="M60 51v18M51 60h18"/><path d="M24 86h72" stroke-dasharray="3 5"/></svg>`
+};
+
+// Слой головки: привод / база / форма / эффект / пресет / оснастка.
+// Движение — у привода, ощущение — у формы, физика — у эффекта, стык — у оснастки.
+const LAYER = {
+  drive: { label: 'Привод', accent: '#3E5A66' },
+  base: { label: 'База', accent: '#B4696F' },
+  form: { label: 'Форма', accent: '#A08A6A' },
+  effect: { label: 'Эффект', accent: '#7A5C9E' },
+  preset: { label: 'Пресет', accent: '#5E7C86' },
+  rig: { label: 'Оснастка', accent: '#8A8D90' }
+};
+const LAYER_RU = {
+  linear: 'линейная', rotary: 'ротационная', combined: 'комбинированная', spec: 'спецголовка',
+  smooth: 'гладкая', ribbed: 'ребристая', spiral: 'спиральная', nodular: 'нодулярная',
+  tapered: 'конусная', bulbous: 'с утолщением', curved: 'изогнутая',
+  dual_density: 'двухплотностная', chamber: 'камера', overlay: 'оверлей',
+  vibration: 'вибрация', thermal: 'термо', pneumatic: 'пневматика',
+  hydraulic: 'гидравлика', electric: 'ток', adapter: 'переходник',
+  liner: 'гигиена', magazine: 'магазин', pen: 'зонд'
+};
+
+let COMP = [], DEV = [], devicesById = new Map(), usedBy = new Map();
+const state = { cls: 'ALL', layer: 'ALL', usage: 'ALL', q: '', showArchived: false };
+const STATUS_RU = { core: 'в игре', concept: 'концепт', archived: 'архив' };
+const statusLabel = (s) => STATUS_RU[s] || s || '—';
+const isArchived = (c) => c.status === 'archived';
+const compName = (id) => (COMP.find(x => x.id === id) || {}).name || id;
+const archiveTargets = (c) => [].concat(c.replacedBy || [], c.mergedInto || []).filter(Boolean);
+
+// Варианты модели (гибкий / жёсткий). У большинства компонентов model.variants
+// нет — тогда работает один базовый GLB, как раньше.
+const hasModel = (c) => !!(c && c.model && c.model.file);
+const layerLabel = (c) => (c && c.layer && LAYER[c.layer]) ? LAYER[c.layer].label : '';
+const variantModels = (c) => (c && c.model && Array.isArray(c.model.variants)
+  ? c.model.variants.filter(v => v && v.file) : []);
+const VARIANT_BADGE = { hard: 'hard', universal: 'Mk-II', frame3d: 'Mk-III' };
+const variantBadge = (id) => VARIANT_BADGE[id] || id;
+// Бейджи карточки: все не-базовые варианты (hard, Mk-II, Mk-III).
+const variantBadges = (c) => variantModels(c).filter(v => !v.default).map(v => variantBadge(v.id));
+function activeVariantId(c) {
+  const list = variantModels(c);
+  if (!list.length) return null;
+  if (c.__activeVariant && list.some(v => v.id === c.__activeVariant)) return c.__activeVariant;
+  return (list.find(v => v.default) || list[0]).id;
+}
+function activeModel(c) {
+  const list = variantModels(c);
+  if (!list.length) return c.model;
+  const v = list.find(x => x.id === activeVariantId(c)) || list[0];
+  return Object.assign({}, c.model, {
+    file: v.file,
+    prefix: v.prefix || c.model.prefix,
+    nodes: v.nodes,
+    bytes: v.bytes
+  });
+}
+
+// Фиксированная версия ассетов каталога (не Date.now(), чтобы не ломать кэш
+// на каждый рендер). Менять вручную при правках JSON/вьюера: ?v=...
+const CATALOG_V = '20261111-renders1';
+const withV = (path) => `${path}${path.includes('?') ? '&' : '?'}v=${CATALOG_V}`;
+// Ссылка на скачивание GLB тоже версионируется по метаданным модели
+// (bytes/nodes, иначе — токен сборки), иначе download мог отдать
+// закэшированный старый бинарь.
+const glbUrl = (model) => {
+  const u = new URL(model.file, location.href);
+  const has = (x) => x !== undefined && x !== null && x !== '';
+  const v = [];
+  if (has(model.bytes)) v.push(model.bytes);
+  else v.push(CATALOG_V);
+  if (has(model.nodes)) v.push(model.nodes);
+  u.searchParams.set('v', v.join('-'));
+  return u.href;
+};
+
+const $ = (s, root = document) => root.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const chip = (t) => `<span class="chip">${esc(t)}</span>`;
+const plural = (n, one, few, many) => {
+  const a = Math.abs(n) % 100, b = a % 10;
+  if (a > 10 && a < 20) return many;
+  if (b === 1) return one;
+  if (b >= 2 && b <= 4) return few;
+  return many;
+};
+
+function usageCount(id) { return (usedBy.get(id) || []).length; }
+function specsOf(c) { return Object.entries(c.specs || {}); }
+function firstSpec(c, keys, exclude) {
+  for (const k of keys) if (k !== exclude && c.specs && c.specs[k]) return [k, c.specs[k]];
+  const e = specsOf(c).find(([k]) => k !== exclude);
+  return e || ['—', '—'];
+}
+
+function matches(c) {
+  if (isArchived(c) && !state.showArchived) return false;
+  if (state.cls !== 'ALL' && c.class !== state.cls) return false;
+  if (state.layer !== 'ALL' && c.layer !== state.layer) return false;
+  const n = usageCount(c.id);
+  if (state.usage === 'USED' && n === 0) return false;
+  if (state.usage === 'UNUSED' && n > 0) return false;
+  if (state.q) {
+    const hay = [c.name, c.code, c.id, c.purpose, c.description, c.class, ...(c.variants || []), ...(c.compatibility || []), ...(c.keywords || []), ...Object.values(c.specs || {})].join(' ').toLowerCase();
+    if (!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+
+function card(c, i) {
+  const meta = CLASS[c.class] || CLASS.WORK;
+  const arch = isArchived(c);
+  const s1 = firstSpec(c, ['Габарит', 'Длина', 'Сечение', 'Ø']);
+  const s2 = firstSpec(c, ['Ход', 'Частота', 'Температура', 'Давление', 'Нагрузка', 'Усилие', 'Привод', 'Питание'], s1[0]);
+  return `
+    <article class="card${arch ? ' is-archived' : ''}" data-id="${esc(c.id)}" style="--i:${i};--accent:${meta.accent};--accent-bg:${meta.bg}">
+      <div class="card-visual">
+        <div class="visual-top"><span class="code">${esc(c.code)}${c.layer ? ` <span class="layer-badge">${esc(LAYER[c.layer] ? LAYER[c.layer].label : c.layer)}</span>` : ''}</span><span class="visual-tags">${variantBadges(c).map(b => `<span class="vbadge">${esc(b)}</span>`).join('')}<span class="status ${esc(c.status)}">${esc(statusLabel(c.status))}</span></span></div>
+        <div class="shot-wrap${hasModel(c) ? '' : ' is-svg'}">${hasModel(c) ? `<img class="shot" loading="lazy" decoding="async" alt="" src="renders/${esc(c.id)}.webp?v=${CATALOG_V}" onerror="this.parentNode.classList.add('is-svg');this.remove()">` : ''}<div class="icon">${ICONS[c.class] || ICONS.WORK}</div></div>
+        <div class="visual-bottom"><span>${esc(meta.label)}</span><span>${usageCount(c.id)} устр.${hasModel(c) ? ' · 3D' : ''}${variantModels(c).length > 1 ? ' · ' + variantModels(c).length + ' вар.' : ''}${(c.mates || []).length ? ' · ' + c.mates.length + ' т.' : ''}</span></div>
+      </div>
+      <div class="card-body">
+        <div class="card-kicker"><span>${esc(meta.label)}</span><span>${specsOf(c).length} характ.</span></div>
+        <h3>${esc(c.name)}</h3>
+        <p class="purpose">${esc(c.purpose)}</p>
+        ${arch ? `<p class="arch-note"><b>архив</b> · был: ${esc(c.archivedFromStatus || 'concept')}<br>→ ${esc(archiveTargets(c).map(compName).join(' · ') || 'замена не указана')}</p>` : ''}
+        <dl class="quick">
+          <div><dt>${esc(s1[0])}</dt><dd>${esc(s1[1])}</dd></div>
+          <div><dt>${esc(s2[0])}</dt><dd>${esc(s2[1])}</dd></div>
+        </dl>
+        <button class="open" type="button" data-open="${esc(c.id)}">Паспорт компонента <span>↗</span></button>
+      </div>
+    </article>`;
+}
+
+function renderFilters() {
+  const cls = ['ALL', ...Object.keys(CLASS).filter(k => COMP.some(c => c.class === k))];
+  const visible = (c) => state.showArchived || !isArchived(c);
+  $('#filters').innerHTML = cls.map(k => {
+    const meta = k === 'ALL' ? { label: 'Все', accent: '#B9BAB7' } : CLASS[k];
+    const n = k === 'ALL' ? COMP.filter(visible).length : COMP.filter(c => c.class === k && visible(c)).length;
+    return `<button class="filter${state.cls === k ? ' is-on' : ''}" type="button" data-cls="${k}"><span class="sw" style="--sw:${meta.accent}"></span>${esc(meta.label)} <span class="n">${n}</span></button>`;
+  }).join('');
+}
+
+function renderLayerFilters() {
+  const el = $('#layer-filters');
+  if (!el) return;
+  const visible = (c) => state.showArchived || !isArchived(c);
+  const layers = ['ALL', ...Object.keys(LAYER).filter(k => COMP.some(c => c.layer === k))];
+  el.innerHTML = layers.map(k => {
+    const meta = k === 'ALL' ? { label: 'Все слои', accent: '#B9BAB7' } : LAYER[k];
+    const n = k === 'ALL'
+      ? COMP.filter(visible).length
+      : COMP.filter(c => c.layer === k && visible(c)).length;
+    return `<button class="filter${state.layer === k ? ' is-on' : ''}" type="button" data-layer="${k}"><span class="sw" style="--sw:${meta.accent}"></span>${esc(meta.label)} <span class="n">${n}</span></button>`;
+  }).join('');
+}
+
+function renderGrid() {
+  const list = COMP.filter(matches);
+  $('#grid').innerHTML = list.length ? list.map(card).join('') : `<div class="empty">Ничего не найдено. Сбросьте фильтры${state.showArchived ? '' : ' или включите «Архив»'}.</div>`;
+  const archAll = COMP.filter(isArchived).length;
+  $('#count').textContent = `${list.length} / ${COMP.length}` + (archAll && !state.showArchived ? ` · ${archAll} в архиве` : '');
+}
+
+function openComp(id) {
+  const c = COMP.find(x => x.id === id);
+  if (!c) return;
+  const meta = CLASS[c.class] || CLASS.WORK;
+  const visual = $('#detail-visual');
+  visual.style.setProperty('--accent', meta.accent);
+  visual.style.setProperty('--accent-bg', meta.bg);
+  $('#d-code').textContent = c.code;
+  const arch = isArchived(c);
+  $('#d-status').className = 'status ' + (c.status || 'concept');
+  $('#d-status').textContent = statusLabel(c.status);
+  // Переключатель гибкий / жёсткий (только у компонентов с model.variants)
+  const vlist = variantModels(c);
+  const av = activeVariantId(c);
+  const vsw = $('#d-variant-switch');
+  if (vlist.length > 1) {
+    vsw.hidden = false;
+    vsw.innerHTML = vlist.map(v => {
+      const on = v.id === av;
+      return `<button type="button" data-variant="${esc(v.id)}" data-variant-for="${esc(c.id)}" class="${on ? 'is-on' : ''}" aria-pressed="${on ? 'true' : 'false'}" title="${esc(v.file)}">${esc(v.label || v.id)}</button>`;
+    }).join('');
+  } else {
+    vsw.hidden = true;
+    vsw.innerHTML = '';
+  }
+  const vbadge = $('#d-variant-badge');
+  const curVariant = vlist.find(v => v.id === av);
+  const badgeText = curVariant && !curVariant.default ? variantBadge(av) : '';
+  if (vbadge) {
+    vbadge.hidden = !badgeText;
+    vbadge.textContent = badgeText;
+  }
+  const pending = c.model && c.model.status === 'pending';
+  $('#d-icon').innerHTML = `<div class="icon">${ICONS[c.class] || ICONS.WORK}</div>` +
+    (pending ? '<div class="pending-note">3D-блок-аут в работе</div>' : '');
+  $('#d-class').textContent = meta.label;
+  const usedCount = usageCount(c.id);
+  $('#d-used').textContent = `${usedCount} ${plural(usedCount, 'устройство', 'устройства', 'устройств')}`;
+  $('#d-variants-count').textContent = (c.variants || []).length;
+  $('#d-status-text').textContent = arch
+    ? `архив${c.archivedFromStatus ? ` (был: ${statusLabel(c.archivedFromStatus)})` : ''}`
+    : (c.status === 'core' ? 'ядро Mk-I' : 'концепт');
+  const archBlock = $('#d-archive-block');
+  if (arch) {
+    archBlock.hidden = false;
+    $('#d-archive-reason').textContent = c.archiveReason || 'Причина не указана.';
+    const targets = archiveTargets(c);
+    $('#d-archive-targets').innerHTML = targets.length
+      ? targets.map(id => `<button class="chip link" type="button" data-comp="${esc(id)}">${esc(compName(id))}</button>`).join('')
+      : '<span class="chip ghost">замена не указана</span>';
+    $('#d-archive-meta').innerHTML = `<span>archivedAt: ${esc(c.archivedAt || '—')}</span>${c.archiveBatch ? `<span>· batch: ${esc(c.archiveBatch)}</span>` : ''}<span>· данные (GLB / контракт / mates) сохранены</span>`;
+  } else {
+    archBlock.hidden = true;
+  }
+  $('#d-class-badge').textContent = meta.label;
+  $('#d-legacy').textContent = c.legacyId ? `legacy: ${c.legacyId}` : '';
+  $('#d-title').textContent = c.name;
+  $('#d-purpose').textContent = c.purpose;
+  $('#d-desc').textContent = c.description;
+  $('#d-specs').innerHTML = specsOf(c).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+  $('#d-limits').textContent = c.limits;
+  const lb = $('#d-layer-badge');
+  if (lb) {
+    lb.hidden = !c.layer;
+    lb.textContent = c.layer ? `${layerLabel(c)}${c.subtype ? ' · ' + (LAYER_RU[c.subtype] || c.subtype) : ''}` : '';
+  }
+  const caps = [];
+  const slots = c.slots || {};
+  if (slots.in) caps.push(`вход: ${slots.in}`);
+  if (slots.form) caps.push(`форма: ${slots.form}`);
+  if (slots.slot) caps.push(`гнездо: ${slots.slot}`);
+  if (Array.isArray(slots.effect) && slots.effect.length) caps.push(`гнёзда: ${slots.effect.join(', ')}`);
+  const driveRu = (d) => ({ rotation: 'вращение', stroke: 'ход' }[d] || d);
+  const sup = c.supplies || {}, acc = c.accepts || {};
+  if ((sup.drive || []).length) caps.push(`даёт: ${sup.drive.map(driveRu).join(', ')}`);
+  if ((sup.media || []).length) caps.push(`среда: ${sup.media.join(', ')}`);
+  if ((acc.drive || []).length) caps.push(`требует: ${acc.drive.map(driveRu).join(', ')}`);
+  if ((acc.media || []).length) caps.push(`принимает: ${acc.media.join(', ')}`);
+  if (c.modes) for (const [k, v] of Object.entries(c.modes)) caps.push(`${LAYER_RU[k] || k}: ${v.join(' / ')}`);
+  $('#d-caps-block').hidden = !caps.length;
+  $('#d-caps').innerHTML = caps.map(x => `<span class="chip">${esc(x)}</span>`).join('');
+  const rej = c.rejects || [];
+  $('#d-rejects-block').hidden = !rej.length;
+  $('#d-rejects').innerHTML = rej.map(r => {
+    const val = Array.isArray(r.value) ? r.value.join(', ') : r.value;
+    const mark = r.kind === 'forbid' ? '✕' : '≈';
+    return `<span class="chip ${r.kind === 'forbid' ? 'bad' : 'warn'}" title="${esc(r.reason || '')}">${mark} ${esc(r.target)}: ${esc(val)}</span>`;
+  }).join('');
+  const compose = c.composed_of || [];
+  $('#d-compose-block').hidden = !compose.length;
+  $('#d-compose').innerHTML = compose.map(id => `<button class="chip link" type="button" data-comp="${esc(id)}">${esc(compName(id))}</button>`).join('');
+  $('#d-compat').innerHTML = (c.compatibility || []).map(id => {
+    const x = COMP.find(y => y.id === id);
+    return `<button class="chip link" type="button" data-comp="${esc(id)}">${esc(x ? x.name : id)}</button>`;
+  }).join('') || '<span class="chip ghost">не задана</span>';
+  const mt = $('#d-mates');
+  // Точки варианта показываются только на своей геометрии: Mk-I рисует
+  // flexible-точки, Mk-II — приёмные гнёзда CJ-LATCH-30R (той же логикой
+  // фильтрует и 3D-вьюер, components-viewer.js → buildMateMarkers).
+  const allMates = c.mates || [];
+  const mts = allMates.filter(m => !m.variant || !av || m.variant === av);
+  mt.innerHTML = mts.length ? mts.map(m => {
+    const color = ({input:'#2f7f86',output:'#B4696F',support:'#B08B3E',mount:'#4F6B55',fluid:'#4A7FA5',signal:'#7A5C9E',power:'#A45D4F'})[m.role] || '#54575A';
+    const std = m.standard ? ` · ${esc(m.standard)}` : '';
+    const vtag = (m.variant && m.variant !== 'flexible')
+      ? ` <span class="vbadge">${esc(variantBadge(m.variant))}</span>` : '';
+    return `<span class="chip mate-chip" title="${esc(m.source || '')}"><i style="background:${color}"></i>${esc(m.role)}: ${esc(m.kind)}${std}${vtag}</span>`;
+  }).join('') : '<span class="chip ghost">не размечены</span>';
+  const mbtn = $('#d-mates-toggle');
+  mbtn.hidden = !mts.length;
+  mbtn.setAttribute('aria-pressed', 'true');
+  $('#d-variants').innerHTML = (c.variants || []).map(chip).join('') || '<span class="chip ghost">базовый</span>';
+  $('#d-safety').textContent = c.safety;
+  $('#d-service').textContent = c.service;
+  $('#d-visual').textContent = c.visual;
+  const used = usedBy.get(c.id) || [];
+  $('#d-devices').innerHTML = used.length
+    ? used.map(d => `<a class="chip link" href="devices.html?device=${esc(d.id)}">${esc(d.name)}</a>`).join('')
+    : '<span class="chip ghost">пока не входит в устройства</span>';
+  $('#d-id-foot').textContent = c.id;
+  $('#d-code-foot').textContent = c.code;
+  const dl = $('#d-download');
+  const dc = $('#d-contract');
+  if (dc) dc.hidden = false;
+  const am = activeModel(c);
+  if (am && am.file) {
+    dl.href = glbUrl(am);
+    dl.textContent = av === 'hard' ? 'GLB hard ↓' : 'GLB ↓';
+    dl.hidden = false;
+  } else {
+    dl.hidden = true;
+  }
+  $('#modal').classList.add('open');
+  $('#modal').setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+  window.__CURRENT_COMPONENT = c;
+  window.dispatchEvent(new CustomEvent('component:open', { detail: c }));
+}
+
+function closeComp() {
+  $('#modal').classList.remove('open');
+  $('#modal').setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('locked');
+  window.__CURRENT_COMPONENT = null;
+  window.dispatchEvent(new CustomEvent('component:close'));
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) { closeComp(); return; }
+  const comp = e.target.closest('[data-comp]');
+  if (comp) { openComp(comp.dataset.comp); return; }
+  const opener = e.target.closest('[data-open]');
+  if (opener) { openComp(opener.dataset.open); return; }
+  const card = e.target.closest('.card');
+  if (card) openComp(card.dataset.id);
+});
+document.addEventListener('click', (e) => {
+  const mt = e.target.closest('#d-mates-toggle');
+  if (!mt) return;
+  const on = mt.getAttribute('aria-pressed') !== 'true';
+  mt.setAttribute('aria-pressed', on ? 'true' : 'false');
+  window.__COMPONENT_VIEWER?.setMates?.(on);
+});
+document.addEventListener('click', (e) => {
+  const vb = e.target.closest('#d-variant-switch [data-variant]');
+  if (!vb) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const c = COMP.find(x => x.id === vb.dataset.variantFor);
+  if (!c) return;
+  c.__activeVariant = vb.dataset.variant;
+  // Перерисовка модалки заново открывает компонент: вьюер перезагружает GLB
+  // выбранного варианта (component:open → mount).
+  openComp(c.id);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeComp(); });
+
+async function boot() {
+  try {
+    const [cr, dr] = await Promise.all([
+      fetch(withV('./component-catalog.json'), { cache: 'no-store' }),
+      fetch(withV('./device-catalog.json'), { cache: 'no-store' })
+    ]);
+    if (!cr.ok) throw new Error('component-catalog.json');
+    COMP = (await cr.json()).components || [];
+    if (dr.ok) {
+      DEV = (await dr.json()).devices || [];
+      devicesById = new Map(DEV.map(d => [d.id, d]));
+      usedBy = new Map(COMP.map(c => [c.id, []]));
+      for (const d of DEV) for (const mid of (d.modules || [])) {
+        if (!usedBy.has(mid)) usedBy.set(mid, []);
+        usedBy.get(mid).push(d);
+      }
+    }
+    $('#stat-components').textContent = COMP.length;
+    $('#stat-classes').textContent = new Set(COMP.map(c => c.class)).size;
+    $('#stat-used').textContent = DEV.length || 41;
+    const archCount = COMP.filter(isArchived).length;
+    const activeCount = COMP.length - archCount;
+    $('#stat-core').textContent = COMP.filter(c => c.status === 'core').length;
+    if ($('#archive-count')) $('#archive-count').textContent = archCount;
+    if ($('#stat-arch-note')) $('#stat-arch-note').textContent = archCount ? `${archCount} записей в архиве` : 'Архив пуст';
+    $('#top-count').textContent = `${activeCount} активных · ${archCount} архив · ${new Set(COMP.map(c => c.class)).size} классов`;
+    $('#foot-meta').textContent = `${COMP.length} components · ${activeCount} active · ${archCount} archived · ${new Set(COMP.map(c => c.class)).size} classes · ${DEV.length} devices · ${COMP.reduce((n, c) => n + (variantModels(c).length || (hasModel(c) ? 1 : 0)), 0)} GLB`;
+    renderFilters();
+    renderLayerFilters();
+    renderGrid();
+    const params = new URLSearchParams(location.search);
+    if (['1', 'true', 'all'].includes((params.get('archive') || '').toLowerCase())) setArchive(true);
+    const lay = (params.get('layer') || '').toLowerCase();
+    if (lay && LAYER[lay]) { state.layer = lay; renderLayerFilters(); renderGrid(); }
+    const q = params.get('id');
+    if (q) openComp(q);
+  } catch (err) {
+    console.error(err);
+    $('#grid').innerHTML = `<div class="empty">Не удалось прочитать <code>component-catalog.json</code>. Откройте страницу через локальный сервер.</div>`;
+  }
+}
+
+function setArchive(on) {
+  state.showArchived = !!on;
+  const btn = $('#archive-toggle');
+  if (btn) {
+    btn.classList.toggle('is-on', state.showArchived);
+    btn.setAttribute('aria-pressed', state.showArchived ? 'true' : 'false');
+  }
+  if (COMP.length) { renderFilters(); renderLayerFilters(); renderGrid(); }
+}
+
+$('#filters').onclick = (e) => {
+  const b = e.target.closest('[data-cls]');
+  if (!b) return;
+  state.cls = b.dataset.cls;
+  $('#filters').querySelectorAll('.filter').forEach(x => x.classList.toggle('is-on', x === b));
+  renderGrid();
+};
+$('#layer-filters').onclick = (e) => {
+  const b = e.target.closest('[data-layer]');
+  if (!b) return;
+  state.layer = b.dataset.layer;
+  $('#layer-filters').querySelectorAll('.filter').forEach(x => x.classList.toggle('is-on', x === b));
+  renderGrid();
+};
+$('#archive-toggle').onclick = () => setArchive(!state.showArchived);
+$('#usage-filter').addEventListener('change', (e) => { state.usage = e.target.value; renderGrid(); });
+$('#q').addEventListener('input', (e) => { state.q = e.target.value.trim().toLowerCase(); renderGrid(); });
+
+boot();
+</script>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js" } }
+</script>
+<script type="module" src="./components-viewer.js?v=20261111-hard1"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_upright_x",
+  "name": "Вертикальный X-контур",
+  "subtitle": "upright X / A-frame",
+  "refs": [
+    "vol-03 · 072",
+    "vol-03 · 085"
+  ],
+  "body": "Тело вертикально или подвешено, конечности разведены к четырём углам рамы; вес распределён между верхними и нижними креплениями.",
+  "summary": "X-рама: четыре стойки/наклонные балки, четыре поворотных узла, верхние и нижние манжеты; для 085 — горизонтальный X.",
+  "status": "ready",
+  "built_count": 6,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_post_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_rail_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_boom_500",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_pivot",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_latch_adapter",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_safety_pin",
+      "qty": 4,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "wrist.l/r — верхние манжеты",
+    "ankle.l/r — нижние манжеты",
+    "waist — подвесной пояс"
+  ],
+  "effect": "Центр тела; при 085 тело горизонтально, при 072 — вертикально.",
+  "note": "085 — горизонтальная X-рама, 072 — вертикальная; не смешивать с обычной стойкой."
+}

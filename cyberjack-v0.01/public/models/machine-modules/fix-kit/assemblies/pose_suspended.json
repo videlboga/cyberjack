@@ -1,0 +1,57 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_suspended",
+  "name": "Подвес / колесо",
+  "subtitle": "suspension / wheel",
+  "refs": [
+    "vol-04 · 095",
+    "vol-03 · 065",
+    "vol-03 · 069",
+    "vol-03 · 080",
+    "vol-03 · 083"
+  ],
+  "body": "Тело подвешено или полуподвешено: 065 — горизонтально в колесе, 095 — между двумя башнями, 080 — сидя в подвесе, 083 — в A-раме.",
+  "summary": "Верхняя балка/рама, две телескопические стойки, четыре поворотных узла и suspension-манжеты; secondary safety pins обязательны.",
+  "status": "ready",
+  "built_count": 6,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_post_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_rail_1000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_riser",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_pivot",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_latch_adapter",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_safety_pin",
+      "qty": 4,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "wrist.l/r — suspension cuffs",
+    "ankle.l/r — suspension cuffs",
+    "waist — подвесной пояс"
+  ],
+  "effect": "Центр тела; нагрузка на верхнюю раму и манжеты, не на шею.",
+  "note": "065/069/080/083/095 — разные подвесы; 080 ближе к сидячему, 065 — колесо."
+}

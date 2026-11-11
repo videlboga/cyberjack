@@ -1,0 +1,1603 @@
+{
+  "schema": "cyberjack-fix-kit-catalog/1",
+  "id": "cj-fix-kit",
+  "version": "1.0.0",
+  "updated": "2026-11-11",
+  "title": "CJ-FIX-KIT",
+  "subtitle": "Модульная матрица фиксации",
+  "stats": {
+    "modules": 18,
+    "assemblies": 3,
+    "standards": 3
+  },
+  "standards": [
+    {
+      "id": "CJ-RAIL-45",
+      "name": "структурный профиль",
+      "spec": "45×45, T-паз 10, M8"
+    },
+    {
+      "id": "CJ-NODE-45",
+      "name": "угловой/T-узел",
+      "spec": "120×120, 2 болта + штифт"
+    },
+    {
+      "id": "CJ-LATCH-30",
+      "name": "жёсткое крепление тела",
+      "spec": "окно 48×34, палец Ø12, WLL 5 кН"
+    }
+  ],
+  "modules": [
+    {
+      "id": "fix_rail_1000",
+      "name": "Рельс 1000",
+      "code": "CJ-RAIL-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Базовый профиль 45×45 с четырьмя T-пазами; торцы M8 + Ø6.",
+      "bbox_m": [
+        1.0,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 3.334,
+      "materials": [
+        "CJ_rail_accent_pink",
+        "CJ_rail_insert_graphite",
+        "CJ_rail_matte_ivory",
+        "CJ_rail_slot_graphite",
+        "CJ_rail_steel"
+      ],
+      "glb": "fix-kit/fix_rail_1000.glb",
+      "preview": "fix-kit/renders/fix_rail_1000.webp",
+      "report": "docs/plans/blockout/component-library/fix_rail_1000/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 9
+    },
+    {
+      "id": "fix_cross_1000",
+      "name": "Поперечина 1000",
+      "code": "CJ-RAIL-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Поперечный рельс того же стандарта, без акцентного торца.",
+      "bbox_m": [
+        1.0,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 3.334,
+      "materials": [
+        "CJ_cross_insert_graphite",
+        "CJ_cross_matte_ivory",
+        "CJ_cross_slot_graphite",
+        "CJ_cross_steel"
+      ],
+      "glb": "fix-kit/fix_cross_1000.glb",
+      "preview": "fix-kit/renders/fix_cross_1000.webp",
+      "report": "docs/plans/blockout/component-library/fix_cross_1000/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 10
+    },
+    {
+      "id": "fix_corner_node",
+      "name": "Угловой узел",
+      "code": "CJ-NODE-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "L-узел 90° с двумя монтажными плоскостями.",
+      "bbox_m": [
+        0.12,
+        0.12,
+        0.06
+      ],
+      "mass_kg": null,
+      "materials": [
+        "CJ_dark_100",
+        "CJ_graphite_100",
+        "CJ_ivory_100",
+        "CJ_steel_100"
+      ],
+      "glb": "fix-kit/fix_corner_node.glb",
+      "preview": "fix-kit/renders/fix_corner_node.webp",
+      "report": "docs/plans/blockout/component-library/fix_corner_node/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 11
+    },
+    {
+      "id": "fix_foot",
+      "name": "Опора пола",
+      "code": "CJ-RAIL-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Регулируемое седло под рельс, ±12 мм; поднимает раму на 51 мм.",
+      "bbox_m": [
+        0.1,
+        0.1,
+        0.06
+      ],
+      "mass_kg": 0.561,
+      "materials": [
+        "CJ_foot_accent_pink",
+        "CJ_foot_insert_graphite",
+        "CJ_foot_matte_ivory",
+        "CJ_foot_seat_graphite",
+        "CJ_foot_steel"
+      ],
+      "glb": "fix-kit/fix_foot.glb",
+      "preview": "fix-kit/renders/fix_foot.webp",
+      "report": "docs/plans/blockout/component-library/fix_foot/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 10
+    },
+    {
+      "id": "fix_carriage",
+      "name": "Каретка",
+      "code": "CJ-RAIL-45",
+      "class": "MOTION",
+      "status": "built",
+      "summary": "Каретка с каналом 45.5, четырьмя башмаками и боковым фиксатором.",
+      "bbox_m": [
+        0.12,
+        0.09,
+        0.05
+      ],
+      "mass_kg": 0.679,
+      "materials": [
+        "CJ_carriage_accent_pink",
+        "CJ_carriage_insert_graphite",
+        "CJ_carriage_matte_ivory",
+        "CJ_carriage_steel",
+        "CJ_carriage_wear_graphite"
+      ],
+      "glb": "fix-kit/fix_carriage.glb",
+      "preview": "fix-kit/renders/fix_carriage.webp",
+      "report": "docs/plans/blockout/component-library/fix_carriage/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 15
+    },
+    {
+      "id": "fix_post_1000",
+      "name": "Стойка 1000",
+      "code": "CJ-RAIL-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Вертикальная стойка 1000 мм; торцы M8 + Ø6.",
+      "bbox_m": [
+        0.045,
+        0.045,
+        1.0
+      ],
+      "mass_kg": 3.465,
+      "materials": [
+        "CJ_post_body_ivory",
+        "CJ_post_plate_graphite",
+        "CJ_post_slot_graphite",
+        "CJ_post_steel"
+      ],
+      "glb": "fix-kit/fix_post_1000.glb",
+      "preview": "fix-kit/renders/fix_post_1000.webp",
+      "report": "docs/plans/blockout/component-library/fix_post_1000/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 10
+    },
+    {
+      "id": "fix_latch_adapter",
+      "name": "Адаптер CJ-LATCH-30",
+      "code": "CJ-LATCH-30",
+      "class": "INTERFACE",
+      "status": "built",
+      "summary": "Переходник на CJ-LATCH-30: окно 48×34, палец Ø12, собачка, рычаг.",
+      "bbox_m": [
+        0.08,
+        0.06,
+        0.05
+      ],
+      "mass_kg": 0.458,
+      "materials": [
+        "CJ_latch_accent_pink",
+        "CJ_latch_matte_ivory",
+        "CJ_latch_receiver_graphite",
+        "CJ_latch_steel"
+      ],
+      "glb": "fix-kit/fix_latch_adapter.glb",
+      "preview": "fix-kit/renders/fix_latch_adapter.webp",
+      "report": "docs/plans/blockout/component-library/fix_latch_adapter/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 12
+    },
+    {
+      "id": "fix_rail_2000",
+      "name": "Рельс 2000",
+      "code": "CJ-RAIL-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Длинный рельс 45×45×2000 для кровати 2×1.",
+      "bbox_m": [
+        2.0,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 6.749,
+      "materials": [
+        "CJ_rail2000_insert_graphite",
+        "CJ_rail2000_matte_ivory",
+        "CJ_rail2000_slot_graphite",
+        "CJ_rail2000_steel"
+      ],
+      "glb": "fix-kit/fix_rail_2000.glb",
+      "preview": "fix-kit/renders/fix_rail_2000.webp",
+      "report": "docs/plans/blockout/component-library/fix_rail_2000/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 9
+    },
+    {
+      "id": "fix_cuff_adapter",
+      "name": "Адаптер манжеты",
+      "code": "CJ-RAIL-45",
+      "class": "INTERFACE",
+      "status": "built",
+      "summary": "Переходник с площадки каретки/рельса на мягкую манжету.",
+      "bbox_m": [
+        0.08,
+        0.06,
+        0.03
+      ],
+      "mass_kg": 0.181,
+      "materials": [
+        "CJ_cuff_accent_pink",
+        "CJ_cuff_cradle_graphite",
+        "CJ_cuff_matte_ivory",
+        "CJ_cuff_steel"
+      ],
+      "glb": "fix-kit/fix_cuff_adapter.glb",
+      "preview": "fix-kit/renders/fix_cuff_adapter.webp",
+      "report": "docs/plans/blockout/component-library/fix_cuff_adapter/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 8
+    },
+    {
+      "id": "fix_pad_adapter",
+      "name": "Адаптер подушки",
+      "code": "CJ-RAIL-45",
+      "class": "INTERFACE",
+      "status": "built",
+      "summary": "Переходник с площадки каретки/рельса на подушку/ложемент.",
+      "bbox_m": [
+        0.08,
+        0.06,
+        0.03
+      ],
+      "mass_kg": 0.267,
+      "materials": [
+        "CJ_pad_accent_pink",
+        "CJ_pad_matte_ivory",
+        "CJ_pad_seat_graphite",
+        "CJ_pad_steel"
+      ],
+      "glb": "fix-kit/fix_pad_adapter.glb",
+      "preview": "fix-kit/renders/fix_pad_adapter.webp",
+      "report": "docs/plans/blockout/component-library/fix_pad_adapter/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 10
+    },
+    {
+      "id": "fix_boom_500",
+      "name": "Вынос 500",
+      "code": "CJ-RAIL-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Боковой вынос 500 мм для рук и ног.",
+      "bbox_m": [
+        0.5,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 1.757,
+      "materials": [
+        "CJ_boom_accent_ochre",
+        "CJ_boom_insert_graphite",
+        "CJ_boom_matte_ivory",
+        "CJ_boom_slot_graphite",
+        "CJ_boom_steel"
+      ],
+      "glb": "fix-kit/fix_boom_500.glb",
+      "preview": "fix-kit/renders/fix_boom_500.webp",
+      "report": "docs/plans/blockout/component-library/fix_boom_500/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 9
+    },
+    {
+      "id": "fix_post_600",
+      "name": "Стойка 600",
+      "code": "CJ-RAIL-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Короткая вертикальная стойка 600 мм.",
+      "bbox_m": [
+        0.045,
+        0.045,
+        0.6
+      ],
+      "mass_kg": 2.099,
+      "materials": [
+        "CJ_post_body_ivory",
+        "CJ_post_plate_graphite",
+        "CJ_post_slot_graphite",
+        "CJ_post_steel"
+      ],
+      "glb": "fix-kit/fix_post_600.glb",
+      "preview": "fix-kit/renders/fix_post_600.webp",
+      "report": "docs/plans/blockout/component-library/fix_post_600/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 10
+    },
+    {
+      "id": "fix_cross_node",
+      "name": "Крестовый узел",
+      "code": "CJ-NODE-45",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "4-сторонний узел под рельс 45×45: четыре плоскости, 4×M8 + Ø6.",
+      "bbox_m": [
+        0.14,
+        0.14,
+        0.06
+      ],
+      "mass_kg": null,
+      "materials": [
+        "CJ_dark_100",
+        "CJ_graphite_100",
+        "CJ_ivory_100",
+        "CJ_steel_100"
+      ],
+      "glb": "fix-kit/fix_cross_node.glb",
+      "preview": "fix-kit/renders/fix_cross_node.webp",
+      "report": "docs/plans/blockout/component-library/fix_cross_node/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 22
+    },
+    {
+      "id": "fix_pivot",
+      "name": "Поворотный узел",
+      "code": "CJ-FIX",
+      "class": "MOTION",
+      "status": "built",
+      "summary": "Поворот 0–360° с фиксацией через 15°.",
+      "bbox_m": [
+        0.09,
+        0.09,
+        0.09
+      ],
+      "mass_kg": 1.185,
+      "materials": [
+        "CJ_pivot_accent_pink",
+        "CJ_pivot_insert_graphite",
+        "CJ_pivot_matte_ivory",
+        "CJ_pivot_steel",
+        "CJ_pivot_wear_graphite"
+      ],
+      "glb": "fix-kit/fix_pivot.glb",
+      "preview": "fix-kit/renders/fix_pivot.webp",
+      "report": "docs/plans/blockout/component-library/fix_pivot/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 16
+    },
+    {
+      "id": "fix_tilt",
+      "name": "Наклонный узел",
+      "code": "CJ-FIX",
+      "class": "MOTION",
+      "status": "built",
+      "summary": "Наклон 0–90° с фиксацией через 15°.",
+      "bbox_m": [
+        0.16,
+        0.12,
+        0.12
+      ],
+      "mass_kg": 1.305,
+      "materials": [
+        "CJ_tilt_accent_pink",
+        "CJ_tilt_body_ivory",
+        "CJ_tilt_bush_graphite",
+        "CJ_tilt_frame_graphite",
+        "CJ_tilt_steel"
+      ],
+      "glb": "fix-kit/fix_tilt.glb",
+      "preview": "fix-kit/renders/fix_tilt.webp",
+      "report": "docs/plans/blockout/component-library/fix_tilt/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 17
+    },
+    {
+      "id": "fix_riser",
+      "name": "Телескоп 300–600",
+      "code": "CJ-FIX",
+      "class": "MOTION",
+      "status": "built",
+      "summary": "Телескопическая стойка 300–600 мм, шаг 50.",
+      "bbox_m": [
+        0.06,
+        0.06,
+        0.6
+      ],
+      "mass_kg": null,
+      "materials": [
+        "CJ_riser_pin_pink",
+        "CJ_riser_plate_graphite",
+        "CJ_riser_steel",
+        "CJ_riser_tube_ivory"
+      ],
+      "glb": "fix-kit/fix_riser.glb",
+      "preview": "fix-kit/renders/fix_riser.webp",
+      "report": "docs/plans/blockout/component-library/fix_riser/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 9
+    },
+    {
+      "id": "fix_backboard",
+      "name": "Спинка-ложе",
+      "code": "CJ-FIX",
+      "class": "STRUCTURE",
+      "status": "built",
+      "summary": "Спинка-ложе 700×1200 с подушкой и задним паттерном M8.",
+      "bbox_m": [
+        0.7,
+        0.06,
+        1.2
+      ],
+      "mass_kg": 50.978,
+      "materials": [
+        "CJ_backboard_accent_pink",
+        "CJ_backboard_frame_graphite",
+        "CJ_backboard_pad_soft",
+        "CJ_backboard_shell_ivory",
+        "CJ_backboard_steel"
+      ],
+      "glb": "fix-kit/fix_backboard.glb",
+      "preview": "fix-kit/renders/fix_backboard.webp",
+      "report": "docs/plans/blockout/component-library/fix_backboard/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 8
+    },
+    {
+      "id": "fix_safety_pin",
+      "name": "Страховочный палец",
+      "code": "CJ-FIX",
+      "class": "ACCESSORY",
+      "status": "built",
+      "summary": "Вторичный палец с кольцом, проушиной и шариковым детентом.",
+      "bbox_m": [
+        0.1,
+        0.03,
+        0.02
+      ],
+      "mass_kg": 0.081,
+      "materials": [
+        "CJ_pin_accent_pink",
+        "CJ_pin_graphite",
+        "CJ_pin_matte_ivory",
+        "CJ_pin_steel",
+        "CJ_pin_steel_dark"
+      ],
+      "glb": "fix-kit/fix_safety_pin.glb",
+      "preview": "fix-kit/renders/fix_safety_pin.webp",
+      "report": "docs/plans/blockout/component-library/fix_safety_pin/report.json",
+      "checks": {
+        "all_ok": true,
+        "non_manifold": 0,
+        "degenerate": 0
+      },
+      "nodes": 9
+    }
+  ],
+  "assemblies": [
+    {
+      "id": "asm_supine_3d",
+      "name": "Спиной, ноги разведены — 3D pilot",
+      "image": "fix-kit/assemblies/supine-3d.png",
+      "status": "Unity pass",
+      "note": "Рама 2×1: 4 крепления, опора и грудной импульс. Unity AirAttachments: 32/32 checks, mount 0.409–0.424 мм, J error 0.0%.",
+      "check": "docs/plans/checks/fix-kit-supine-3d.json",
+      "modules": [
+        {
+          "id": "fix_rail_2000",
+          "qty": 2
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 2
+        },
+        {
+          "id": "fix_corner_node",
+          "qty": 4
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 6
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 4
+        },
+        {
+          "id": "fix_pad_adapter",
+          "qty": 2
+        }
+      ],
+      "unity": {
+        "fixture": "Docs/fixtures/fix-kit-supine-001/fixture.json",
+        "result": "outputs/fix-kit-supine-001/device-check.json",
+        "checks": 32,
+        "passed": 32
+      }
+    },
+    {
+      "id": "contour_frame_1x1",
+      "name": "Замкнутый контур 1×1",
+      "status": "verified",
+      "image": "fix-kit/assemblies/frame.webp",
+      "note": "4 рельса, 4 узла, 4 опоры, каретка и адаптер. 0 пересечений.",
+      "check": "docs/plans/checks/fix-kit-frame.md"
+    },
+    {
+      "id": "stack_chain",
+      "name": "Цепочка рельс → опора → каретка → адаптер",
+      "status": "verified",
+      "image": "fix-kit/assemblies/stack.webp",
+      "note": "Минимальный рабочий сегмент. 0 пересечений.",
+      "check": "docs/plans/checks/fix-kit-stack.md"
+    },
+    {
+      "id": "corner_joint",
+      "name": "Угловой стык",
+      "status": "verified",
+      "image": "fix-kit/assemblies/corner.webp",
+      "note": "Два рельса в L-узле; отверстия совпадают до 0.0001 мм.",
+      "check": "docs/plans/checks/fix-kit-corner.md"
+    },
+    {
+      "id": "asm_prone_3d",
+      "name": "Лёжа на животе — 3D layout",
+      "image": "fix-kit/assemblies/prone-3d.png",
+      "status": "3D layout pilot",
+      "note": "Рама 2×1: 2 рельса 2000, 2 перекладины 1000, 4 узла, 4 опоры, 6 кареток, 4 манжеты, 2 подушки.",
+      "check": "docs/plans/checks/fix-kit-prone-3d.json",
+      "modules": [
+        {
+          "id": "fix_rail_2000",
+          "qty": 2
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 2
+        },
+        {
+          "id": "fix_corner_node",
+          "qty": 4
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 6
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 4
+        },
+        {
+          "id": "fix_pad_adapter",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "asm_gyn_3d",
+      "name": "Гинекологическое кресло — 3D layout",
+      "image": "fix-kit/assemblies/gyn-3d.png",
+      "status": "3D layout pilot",
+      "note": "Рама 2×1, спинка-ложе, поворот, наклон, две стойки с манжетами под ноги.",
+      "check": "docs/plans/checks/fix-kit-gyn-3d.json",
+      "modules": [
+        {
+          "id": "fix_rail_2000",
+          "qty": 2
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 2
+        },
+        {
+          "id": "fix_corner_node",
+          "qty": 4
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 6
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 6
+        },
+        {
+          "id": "fix_pivot",
+          "qty": 1
+        },
+        {
+          "id": "fix_tilt",
+          "qty": 1
+        },
+        {
+          "id": "fix_backboard",
+          "qty": 1
+        },
+        {
+          "id": "fix_riser",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "id": "asm_upright_3d",
+      "name": "Стоя у стойки — 3D layout",
+      "image": "fix-kit/assemblies/upright-3d.png",
+      "status": "3D layout pilot",
+      "note": "Две стойки 1000, верхний рельс 2000, каретки, консоль 500, поворот, манжета и страховочный палец.",
+      "check": "docs/plans/checks/fix-kit-upright-3d.json",
+      "modules": [
+        {
+          "id": "fix_post_1000",
+          "qty": 2
+        },
+        {
+          "id": "fix_rail_2000",
+          "qty": 1
+        },
+        {
+          "id": "fix_foot",
+          "qty": 2
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 2
+        },
+        {
+          "id": "fix_boom_500",
+          "qty": 1
+        },
+        {
+          "id": "fix_pivot",
+          "qty": 1
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 1
+        },
+        {
+          "id": "fix_safety_pin",
+          "qty": 1
+        }
+      ]
+    }
+  ],
+  "rules": [
+    "Длина рельсов — 500/1000/2000; не резать под позу.",
+    "Параллельные рельсы под каретки — шаг ≥250 мм.",
+    "Body interface — только через адаптер и каретку/поворот.",
+    "Вокруг защёлки — 100 мм свободной зоны.",
+    "Одновременно активно ≤12 body interfaces.",
+    "Effect-слой в набор не входит."
+  ],
+  "poses": [
+    {
+      "id": "pose_supine_spread",
+      "name": "Спиной, ноги разведены",
+      "subtitle": "supine / spread-eagle",
+      "refs": [
+        "vol-04 · 094",
+        "vol-04 · 098",
+        "vol-04 · 100"
+      ],
+      "image": "fix-kit/poses/pose_supine_spread.webp",
+      "body": "Спина на ложе, таз и грудная клетка на подушках, руки в стороны, ноги подняты и разведены. У 100 — вариант с ногами над головой.",
+      "summary": "Кровать 2×1: длинные рельсы, поперечины, четыре опоры; каретки для запястий и голеней; тазовая/грудная подушки.",
+      "modules": [
+        {
+          "id": "fix_rail_2000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_corner_node",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 6,
+          "status": "built"
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_pad_adapter",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_latch_adapter",
+          "qty": 2,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "wrist.l/r — манжеты",
+        "ankle.l/r — манжеты",
+        "hip — подушка",
+        "chest — подушка"
+      ],
+      "effect": "Центр таза; при 100 — доступ сверху/сзади головы.",
+      "status": "ready",
+      "note": "100 — отдельный вариант «ноги над головой», не та же поза, что 094.",
+      "built_count": 8,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_supine_spread",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_gyn_chair",
+      "name": "Гинекологическое кресло",
+      "subtitle": "gyn / seated recline",
+      "refs": [
+        "vol-04 · 096",
+        "vol-03 · 067",
+        "vol-03 · 073",
+        "vol-03 · 081"
+      ],
+      "image": "fix-kit/poses/pose_gyn_chair.webp",
+      "body": "Таз на сиденье, спина reclined 30–60°, ноги в стременах и разведены, руки на подлокотниках или над головой.",
+      "summary": "Рама с сиденьем, наклонной спинкой, бедренными упорами и стременами; боковые выносы для рук.",
+      "modules": [
+        {
+          "id": "fix_post_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_rail_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_backboard",
+          "qty": 1,
+          "status": "built"
+        },
+        {
+          "id": "fix_tilt",
+          "qty": 1,
+          "status": "built"
+        },
+        {
+          "id": "fix_boom_500",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_pivot",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 2,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "seat — таз",
+        "backboard — поясница",
+        "thigh supports — бёдра",
+        "ankle — стремена",
+        "wrist — боковые манжеты"
+      ],
+      "effect": "Фронтальная зона под сиденьем; спинка не несёт эффект.",
+      "status": "ready",
+      "note": "Общий тип для 067/073/081/096; у 081 акцент на разведении коленей.",
+      "built_count": 10,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_gyn_chair",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_reclined_legpress",
+      "name": "Полулежа, ноги на упоре",
+      "subtitle": "reclined / leg press",
+      "refs": [
+        "vol-04 · 090",
+        "vol-04 · 091"
+      ],
+      "image": "fix-kit/poses/pose_reclined_legpress.webp",
+      "body": "Таз на сиденье, спина на спинке 30–60°, колени согнуты, стопы на подвижном упоре; руки за головой/на поручнях.",
+      "summary": "Стойки, спинка, сиденье, два боковых выноса и каретки для стоп; упор для ног — отдельный модуль.",
+      "modules": [
+        {
+          "id": "fix_post_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_rail_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_backboard",
+          "qty": 1,
+          "status": "built"
+        },
+        {
+          "id": "fix_tilt",
+          "qty": 1,
+          "status": "built"
+        },
+        {
+          "id": "fix_boom_500",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "seat — таз",
+        "backboard — спина",
+        "foot plate — стопы",
+        "wrist — поручни"
+      ],
+      "effect": "Фронтальная/нижняя зона; ноги остаются на упоре, не висят.",
+      "status": "ready",
+      "note": "091 — более вертикальная посадка в клетке; 090 — выраженный leg-press.",
+      "built_count": 8,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_reclined_legpress",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_prone_bench",
+      "name": "Лицом вниз / наклон",
+      "subtitle": "prone / bent over",
+      "refs": [
+        "vol-03 · 071",
+        "vol-03 · 075",
+        "vol-03 · 078",
+        "vol-03 · 079"
+      ],
+      "image": "fix-kit/poses/pose_prone_bench.webp",
+      "body": "Корпус лицом вниз или наклонён, таз/грудь на подушках, руки вперёд, голени подняты или разведены.",
+      "summary": "Кровать 2×1 с высокими подушками; каретки для запястий и голеней; нижние стремена. Для 078 — наклонный упор под грудь.",
+      "modules": [
+        {
+          "id": "fix_rail_2000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_corner_node",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 6,
+          "status": "built"
+        },
+        {
+          "id": "fix_pad_adapter",
+          "qty": 3,
+          "status": "built"
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 4,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "chest — подушка",
+        "hip — подушка",
+        "wrist.l/r — манжеты",
+        "ankle.l/r — манжеты"
+      ],
+      "effect": "Задняя/нижняя зона; живот и грудь не должны лежать на жёсткой раме.",
+      "status": "ready",
+      "note": "Общий тип для 071/075/078/079; 087 — стоящий наклон, ближе к standing.",
+      "built_count": 7,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_prone_bench",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_standing_upright",
+      "name": "Вертикально / стоя",
+      "subtitle": "standing / upright",
+      "refs": [
+        "vol-04 · 089",
+        "vol-03 · 066",
+        "vol-03 · 070",
+        "vol-03 · 074",
+        "vol-03 · 077",
+        "vol-03 · 088",
+        "vol-04 · 092"
+      ],
+      "image": "fix-kit/poses/pose_standing_upright.webp",
+      "body": "Тело вертикально, спина на спинке/панели, одна нога согнута или поднята, руки на поручнях/над головой; колени могут быть полусогнуты.",
+      "summary": "Высокая рама: четыре стойки, спинка 90°, боковые выносы для рук, нижняя поперечина/подставка для стоп.",
+      "modules": [
+        {
+          "id": "fix_post_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_rail_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_corner_node",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_cross_node",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_backboard",
+          "qty": 1,
+          "status": "built"
+        },
+        {
+          "id": "fix_tilt",
+          "qty": 1,
+          "status": "built"
+        },
+        {
+          "id": "fix_boom_500",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_pivot",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 4,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "backboard — спина/таз",
+        "wrist — боковые поручни",
+        "ankle — нижняя поперечина/подставка"
+      ],
+      "effect": "Фронтальная зона; вес тела — на спинке/подставке, не на манжетах.",
+      "status": "ready",
+      "note": "089/070/088 — у одной стойки, 066/074/077/092 — у панели/рамы; это не X-контур.",
+      "built_count": 10,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_standing_upright",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_upright_x",
+      "name": "Вертикальный X-контур",
+      "subtitle": "upright X / A-frame",
+      "refs": [
+        "vol-03 · 072",
+        "vol-03 · 085"
+      ],
+      "image": "fix-kit/poses/pose_upright_x.webp",
+      "body": "Тело вертикально или подвешено, конечности разведены к четырём углам рамы; вес распределён между верхними и нижними креплениями.",
+      "summary": "X-рама: четыре стойки/наклонные балки, четыре поворотных узла, верхние и нижние манжеты; для 085 — горизонтальный X.",
+      "modules": [
+        {
+          "id": "fix_post_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_rail_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_boom_500",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_pivot",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_latch_adapter",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_safety_pin",
+          "qty": 4,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "wrist.l/r — верхние манжеты",
+        "ankle.l/r — нижние манжеты",
+        "waist — подвесной пояс"
+      ],
+      "effect": "Центр тела; при 085 тело горизонтально, при 072 — вертикально.",
+      "status": "ready",
+      "note": "085 — горизонтальная X-рама, 072 — вертикальная; не смешивать с обычной стойкой.",
+      "built_count": 6,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_upright_x",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_suspended",
+      "name": "Подвес / колесо",
+      "subtitle": "suspension / wheel",
+      "refs": [
+        "vol-04 · 095",
+        "vol-03 · 065",
+        "vol-03 · 069",
+        "vol-03 · 080",
+        "vol-03 · 083"
+      ],
+      "image": "fix-kit/poses/pose_suspended.webp",
+      "body": "Тело подвешено или полуподвешено: 065 — горизонтально в колесе, 095 — между двумя башнями, 080 — сидя в подвесе, 083 — в A-раме.",
+      "summary": "Верхняя балка/рама, две телескопические стойки, четыре поворотных узла и suspension-манжеты; secondary safety pins обязательны.",
+      "modules": [
+        {
+          "id": "fix_post_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_rail_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_riser",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_pivot",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_latch_adapter",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_safety_pin",
+          "qty": 4,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "wrist.l/r — suspension cuffs",
+        "ankle.l/r — suspension cuffs",
+        "waist — подвесной пояс"
+      ],
+      "effect": "Центр тела; нагрузка на верхнюю раму и манжеты, не на шею.",
+      "status": "ready",
+      "note": "065/069/080/083/095 — разные подвесы; 080 ближе к сидячему, 065 — колесо.",
+      "built_count": 6,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_suspended",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_side_enclosed",
+      "name": "На боку / в капсуле",
+      "subtitle": "side-lying / enclosed",
+      "refs": [
+        "vol-04 · 097",
+        "vol-03 · 084",
+        "vol-03 · 086",
+        "vol-04 · 099"
+      ],
+      "image": "fix-kit/poses/pose_side_enclosed.webp",
+      "body": "Тело на боку или внутри капсулы/низкого короба; колени подтянуты, руки вдоль/вперёд; 084/099 — закрытый объём.",
+      "summary": "Кровать 2×1 с боковой опорой и подушками; для капсулы нужен отдельный корпус, не просто рама.",
+      "modules": [
+        {
+          "id": "fix_rail_2000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_cross_1000",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_foot",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_carriage",
+          "qty": 4,
+          "status": "built"
+        },
+        {
+          "id": "fix_pad_adapter",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 2,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "hip — боковая подушка",
+        "chest — подушка",
+        "wrist — манжета",
+        "ankle — манжета"
+      ],
+      "effect": "Боковой/задний доступ; капсула ограничивает обзор и требует отдельной двери.",
+      "status": "ready",
+      "note": "097/084/086/099 — не одна поза: 086 — на боку на валиках, 084/099 — внутри короба.",
+      "built_count": 6,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_side_enclosed",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    },
+    {
+      "id": "pose_kneeling",
+      "name": "На коленях",
+      "subtitle": "kneeling",
+      "refs": [
+        "vol-03 · 076"
+      ],
+      "image": "fix-kit/poses/pose_kneeling.webp",
+      "body": "Тело на коленях перед вертикальной стойкой, руки на верхней панели, таз поднят; стопы сзади.",
+      "summary": "Низкая рама/подиум, коленные подушки, chest support и верхний поручень; без подвеса.",
+      "modules": [
+        {
+          "id": "fix_cross_1000",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_post_600",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_foot",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_pad_adapter",
+          "qty": 2,
+          "status": "built"
+        },
+        {
+          "id": "fix_cuff_adapter",
+          "qty": 2,
+          "status": "built"
+        }
+      ],
+      "mounts": [
+        "knees — подушки",
+        "chest — упор",
+        "wrist — поручень"
+      ],
+      "effect": "Фронтальная зона; колени не должны стоять на голом рельсе.",
+      "status": "ready",
+      "note": "Только 076; 087 — стоящий наклон, не колени.",
+      "built_count": 5,
+      "planned_count": 0,
+      "assembly_id": "asm_pose_kneeling",
+      "assembly_status": "ready",
+      "verified": "BOM 100%; Unity not tested"
+    }
+  ],
+  "refAudit": [
+    {
+      "id": "065",
+      "family": "suspended",
+      "source": "vol-03"
+    },
+    {
+      "id": "066",
+      "family": "standing",
+      "source": "vol-03"
+    },
+    {
+      "id": "067",
+      "family": "gyn",
+      "source": "vol-03"
+    },
+    {
+      "id": "068",
+      "family": "reclined",
+      "source": "vol-03"
+    },
+    {
+      "id": "069",
+      "family": "suspended",
+      "source": "vol-03"
+    },
+    {
+      "id": "070",
+      "family": "standing",
+      "source": "vol-03"
+    },
+    {
+      "id": "071",
+      "family": "prone",
+      "source": "vol-03"
+    },
+    {
+      "id": "072",
+      "family": "upright_x",
+      "source": "vol-03"
+    },
+    {
+      "id": "073",
+      "family": "gyn",
+      "source": "vol-03"
+    },
+    {
+      "id": "074",
+      "family": "standing",
+      "source": "vol-03"
+    },
+    {
+      "id": "075",
+      "family": "prone",
+      "source": "vol-03"
+    },
+    {
+      "id": "076",
+      "family": "kneeling",
+      "source": "vol-03"
+    },
+    {
+      "id": "077",
+      "family": "standing",
+      "source": "vol-03"
+    },
+    {
+      "id": "078",
+      "family": "prone",
+      "source": "vol-03"
+    },
+    {
+      "id": "079",
+      "family": "prone",
+      "source": "vol-03"
+    },
+    {
+      "id": "080",
+      "family": "suspended",
+      "source": "vol-03"
+    },
+    {
+      "id": "081",
+      "family": "gyn",
+      "source": "vol-03"
+    },
+    {
+      "id": "082",
+      "family": "standing",
+      "source": "vol-03"
+    },
+    {
+      "id": "083",
+      "family": "suspended",
+      "source": "vol-03"
+    },
+    {
+      "id": "084",
+      "family": "side_enclosed",
+      "source": "vol-03"
+    },
+    {
+      "id": "085",
+      "family": "upright_x",
+      "source": "vol-03"
+    },
+    {
+      "id": "086",
+      "family": "side_enclosed",
+      "source": "vol-03"
+    },
+    {
+      "id": "087",
+      "family": "prone",
+      "source": "vol-03"
+    },
+    {
+      "id": "088",
+      "family": "standing",
+      "source": "vol-03"
+    },
+    {
+      "id": "089",
+      "family": "standing",
+      "source": "vol-04"
+    },
+    {
+      "id": "090",
+      "family": "reclined",
+      "source": "vol-04"
+    },
+    {
+      "id": "091",
+      "family": "reclined",
+      "source": "vol-04"
+    },
+    {
+      "id": "092",
+      "family": "standing",
+      "source": "vol-04"
+    },
+    {
+      "id": "093",
+      "family": "prone",
+      "source": "vol-04"
+    },
+    {
+      "id": "094",
+      "family": "supine",
+      "source": "vol-04"
+    },
+    {
+      "id": "095",
+      "family": "suspended",
+      "source": "vol-04"
+    },
+    {
+      "id": "096",
+      "family": "gyn",
+      "source": "vol-04"
+    },
+    {
+      "id": "097",
+      "family": "side_enclosed",
+      "source": "vol-04"
+    },
+    {
+      "id": "098",
+      "family": "supine",
+      "source": "vol-04"
+    },
+    {
+      "id": "099",
+      "family": "side_enclosed",
+      "source": "vol-04"
+    },
+    {
+      "id": "100",
+      "family": "supine",
+      "source": "vol-04"
+    }
+  ],
+  "families": {
+    "suspended": [
+      65,
+      69,
+      80,
+      83,
+      95
+    ],
+    "standing": [
+      66,
+      70,
+      74,
+      77,
+      82,
+      88,
+      89,
+      92
+    ],
+    "gyn": [
+      67,
+      73,
+      81,
+      96
+    ],
+    "reclined": [
+      68,
+      90,
+      91
+    ],
+    "prone": [
+      71,
+      75,
+      78,
+      79,
+      87,
+      93
+    ],
+    "upright_x": [
+      72,
+      85
+    ],
+    "supine": [
+      94,
+      98,
+      100
+    ],
+    "side_enclosed": [
+      84,
+      86,
+      97,
+      99
+    ],
+    "kneeling": [
+      76
+    ]
+  }
+}

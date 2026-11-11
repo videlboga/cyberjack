@@ -1,0 +1,326 @@
+[
+  {
+    "model": "SexMachineModel-065",
+    "intendedRemoved": [
+      "mesh_11"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_11",
+        "definition_id": "831541",
+        "definition_name": "1.stl",
+        "variant_key": "831541|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_11_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-066",
+    "intendedRemoved": [
+      "mesh_6"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_6",
+        "definition_id": "35593",
+        "definition_name": "1.stl",
+        "variant_key": "35593|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_6_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-067",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "120772",
+        "definition_name": "1.stl",
+        "variant_key": "120772|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-068",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "50574",
+        "definition_name": "1.stl",
+        "variant_key": "50574|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-069",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "112193",
+        "definition_name": "1.stl",
+        "variant_key": "112193|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-070",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "98151",
+        "definition_name": "1.stl",
+        "variant_key": "98151|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-071",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "104451",
+        "definition_name": "1.stl",
+        "variant_key": "104451|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-072",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "45352",
+        "definition_name": "2.stl",
+        "variant_key": "45352|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-073",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "91793",
+        "definition_name": "1.stl",
+        "variant_key": "91793|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-077",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "90190",
+        "definition_name": "1.stl",
+        "variant_key": "90190|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-078",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "43761",
+        "definition_name": "1.stl",
+        "variant_key": "43761|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-079",
+    "intendedRemoved": [
+      "mesh_8"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_8",
+        "definition_id": "27487",
+        "definition_name": "2.stl",
+        "variant_key": "27487|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_8_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-080",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "444582",
+        "definition_name": "1.stl",
+        "variant_key": "444582|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-081",
+    "intendedRemoved": [
+      "mesh_0"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_0",
+        "definition_id": "146987",
+        "definition_name": "1.stl",
+        "variant_key": "146987|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_0_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-082",
+    "intendedRemoved": [
+      "mesh_31"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_31",
+        "definition_id": "424472",
+        "definition_name": "1.stl",
+        "variant_key": "424472|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_31_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-084",
+    "intendedRemoved": [
+      "mesh_23"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_23",
+        "definition_id": "45255",
+        "definition_name": "3.stl",
+        "variant_key": "45255|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_23_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-087",
+    "intendedRemoved": [
+      "mesh_2"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_2",
+        "definition_id": "422766",
+        "definition_name": "1.stl",
+        "variant_key": "422766|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_2_0"
+    ]
+  },
+  {
+    "model": "SexMachineModel-088",
+    "intendedRemoved": [
+      "mesh_5"
+    ],
+    "resourcesStillPresent": [
+      {
+        "id": "mesh_5",
+        "definition_id": "124066",
+        "definition_name": "2.stl",
+        "variant_key": "124066|255,84,84",
+        "primitive_count": 1
+      }
+    ],
+    "glbMeshesStillPresent": [
+      "mesh_5_0"
+    ]
+  }
+]

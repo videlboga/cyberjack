@@ -1,0 +1,62 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_prone_bench",
+  "name": "Лицом вниз / наклон",
+  "subtitle": "prone / bent over",
+  "refs": [
+    "vol-03 · 071",
+    "vol-03 · 075",
+    "vol-03 · 078",
+    "vol-03 · 079"
+  ],
+  "body": "Корпус лицом вниз или наклонён, таз/грудь на подушках, руки вперёд, голени подняты или разведены.",
+  "summary": "Кровать 2×1 с высокими подушками; каретки для запястий и голеней; нижние стремена. Для 078 — наклонный упор под грудь.",
+  "status": "ready",
+  "built_count": 7,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_rail_2000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_cross_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_corner_node",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_foot",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_carriage",
+      "qty": 6,
+      "status": "built"
+    },
+    {
+      "id": "fix_pad_adapter",
+      "qty": 3,
+      "status": "built"
+    },
+    {
+      "id": "fix_cuff_adapter",
+      "qty": 4,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "chest — подушка",
+    "hip — подушка",
+    "wrist.l/r — манжеты",
+    "ankle.l/r — манжеты"
+  ],
+  "effect": "Задняя/нижняя зона; живот и грудь не должны лежать на жёсткой раме.",
+  "note": "Общий тип для 071/075/078/079; 087 — стоящий наклон, ближе к standing."
+}

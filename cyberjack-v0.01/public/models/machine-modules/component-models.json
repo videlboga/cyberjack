@@ -1,0 +1,911 @@
+{
+  "structure_base": {
+    "file": "components/structure_base.glb",
+    "prefix": "structure_base",
+    "class": "STRUCTURE",
+    "status": "core",
+    "bytes": 1306752,
+    "nodes": 170,
+    "motion": "none"
+  },
+  "structure_portal": {
+    "file": "components/structure_portal.glb",
+    "prefix": "structure_portal",
+    "class": "STRUCTURE",
+    "status": "core",
+    "bytes": 1001840,
+    "nodes": 83,
+    "motion": "none"
+  },
+  "structure_gantry": {
+    "file": "components/structure_gantry.glb",
+    "prefix": "structure_gantry",
+    "class": "STRUCTURE",
+    "status": "concept",
+    "bytes": 1278168,
+    "nodes": 172,
+    "motion": "none"
+  },
+  "structure_bed_frame": {
+    "file": "components/structure_bed_frame.glb",
+    "prefix": "structure_bed_frame",
+    "class": "STRUCTURE",
+    "status": "concept",
+    "bytes": 823240,
+    "nodes": 121,
+    "motion": "none"
+  },
+  "structure_cage": {
+    "file": "components/structure_cage.glb",
+    "prefix": "structure_cage",
+    "class": "STRUCTURE",
+    "status": "concept",
+    "bytes": 1832684,
+    "nodes": 146,
+    "motion": "none"
+  },
+  "structure_suspension_frame": {
+    "file": "components/structure_suspension_frame.glb",
+    "prefix": "structure_suspension_frame",
+    "class": "STRUCTURE",
+    "status": "concept",
+    "bytes": 958016,
+    "nodes": 97,
+    "motion": "none"
+  },
+  "structure_stall_row": {
+    "file": "components/structure_stall_row.glb",
+    "prefix": "structure_stall_row",
+    "class": "STRUCTURE",
+    "status": "concept",
+    "bytes": 2521928,
+    "nodes": 41,
+    "motion": "none"
+  },
+  "structure_dock": {
+    "file": "components/structure_dock.glb",
+    "prefix": "structure_dock",
+    "class": "STRUCTURE",
+    "status": "concept",
+    "bytes": 1003964,
+    "nodes": 73,
+    "motion": "none"
+  },
+  "support_cradle": {
+    "file": "components/support_cradle.glb",
+    "prefix": "support_cradle",
+    "class": "SERVICE",
+    "status": "core",
+    "bytes": 1485788,
+    "nodes": 148,
+    "motion": "none"
+  },
+  "motion_linear_x": {
+    "file": "components/motion_linear_x.glb",
+    "prefix": "motion_linear_x",
+    "class": "MOTION",
+    "status": "core",
+    "bytes": 1587608,
+    "nodes": 151,
+    "motion": "slide"
+  },
+  "motion_linear_y": {
+    "file": "components/motion_linear_y.glb",
+    "prefix": "motion_linear_y",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 1054276,
+    "nodes": 120,
+    "motion": "slide"
+  },
+  "motion_lift_z": {
+    "file": "components/motion_lift_z.glb",
+    "prefix": "motion_lift_z",
+    "class": "MOTION",
+    "status": "core",
+    "bytes": 1717096,
+    "nodes": 74,
+    "motion": "slide"
+  },
+  "motion_rotary": {
+    "file": "components/motion_rotary.glb",
+    "prefix": "motion_rotary",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 1050400,
+    "nodes": 91,
+    "motion": "spin"
+  },
+  "motion_oscillating": {
+    "file": "components/motion_oscillating.glb",
+    "prefix": "motion_oscillating",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 609784,
+    "nodes": 82,
+    "motion": "slide"
+  },
+  "motion_spreader": {
+    "file": "components/motion_spreader.glb",
+    "prefix": "motion_spreader",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 492676,
+    "nodes": 57,
+    "motion": "none"
+  },
+  "motion_winch": {
+    "file": "components/motion_winch.glb",
+    "prefix": "motion_winch",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 1446560,
+    "nodes": 101,
+    "motion": "spin"
+  },
+  "motion_turntable": {
+    "file": "components/motion_turntable.glb",
+    "prefix": "motion_turntable",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 808856,
+    "nodes": 38,
+    "motion": "spin"
+  },
+  "work_tickle_soft": {
+    "file": "components/work_tickle_soft.glb",
+    "prefix": "work_tickle_soft",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 897376,
+    "nodes": 35,
+    "motion": "spin"
+  },
+  "work_tickle_firm": {
+    "file": "components/work_tickle_firm.glb",
+    "prefix": "work_tickle_firm",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 524288,
+    "nodes": 28,
+    "motion": "spin"
+  },
+  "work_tickle_radial": {
+    "file": "components/work_tickle_radial.glb",
+    "prefix": "work_tickle_radial",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 921936,
+    "nodes": 37,
+    "motion": "spin"
+  },
+  "work_feather_fan": {
+    "file": "components/work_feather_fan.glb",
+    "prefix": "work_feather_fan",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 599024,
+    "nodes": 33,
+    "motion": "swing"
+  },
+  "work_air_jet": {
+    "file": "components/work_air_jet.glb",
+    "prefix": "work_air_jet",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 326520,
+    "nodes": 31,
+    "motion": "scale"
+  },
+  "work_foot_cradle": {
+    "file": "components/work_foot_cradle.glb",
+    "prefix": "work_foot_cradle",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 705272,
+    "nodes": 55,
+    "motion": "spin"
+  },
+  "work_tickle_pair": {
+    "file": "components/work_tickle_pair.glb",
+    "prefix": "work_tickle_pair",
+    "class": "WORK",
+    "status": "core",
+    "bytes": 550488,
+    "nodes": 51,
+    "motion": "spin"
+  },
+  "work_probe_linear": {
+    "file": "components/work_probe_linear.glb",
+    "prefix": "work_probe_linear",
+    "class": "WORK",
+    "status": "core",
+    "bytes": 506276,
+    "nodes": 32,
+    "motion": "slide"
+  },
+  "work_probe_rotary": {
+    "file": "components/work_probe_rotary.glb",
+    "prefix": "work_probe_rotary",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 874788,
+    "nodes": 37,
+    "motion": "spin"
+  },
+  "work_probe_inflatable": {
+    "file": "components/work_probe_inflatable.glb",
+    "prefix": "work_probe_inflatable",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 397148,
+    "nodes": 24,
+    "motion": "scale"
+  },
+  "work_probe_thermal": {
+    "file": "components/work_probe_thermal.glb",
+    "prefix": "work_probe_thermal",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 542712,
+    "nodes": 36,
+    "motion": "none"
+  },
+  "work_probe_textured": {
+    "file": "components/work_probe_textured.glb",
+    "prefix": "work_probe_textured",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 744604,
+    "nodes": 22,
+    "motion": "spin"
+  },
+  "work_rotary_disc": {
+    "file": "components/work_rotary_disc.glb",
+    "prefix": "work_rotary_disc",
+    "class": "WORK",
+    "status": "core",
+    "bytes": 439492,
+    "nodes": 31,
+    "motion": "spin"
+  },
+  "work_rotary_drum": {
+    "file": "components/work_rotary_drum.glb",
+    "prefix": "work_rotary_drum",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 681752,
+    "nodes": 45,
+    "motion": "spin"
+  },
+  "work_impact_paddle": {
+    "file": "components/work_impact_paddle.glb",
+    "prefix": "work_impact_paddle",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 433820,
+    "nodes": 41,
+    "motion": "swing"
+  },
+  "work_impact_roller": {
+    "file": "components/work_impact_roller.glb",
+    "prefix": "work_impact_roller",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 476716,
+    "nodes": 36,
+    "motion": "spin"
+  },
+  "work_electro_pad": {
+    "file": "components/work_electro_pad.glb",
+    "prefix": "work_electro_pad",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 248408,
+    "nodes": 29,
+    "motion": "none"
+  },
+  "work_electro_collar": {
+    "file": "components/work_electro_collar.glb",
+    "prefix": "work_electro_collar",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 498696,
+    "nodes": 46,
+    "motion": "none"
+  },
+  "work_thermal_pad": {
+    "file": "components/work_thermal_pad.glb",
+    "prefix": "work_thermal_pad",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 311636,
+    "nodes": 31,
+    "motion": "none"
+  },
+  "work_spray": {
+    "file": "components/work_spray.glb",
+    "prefix": "work_spray",
+    "class": "FLUID",
+    "status": "concept",
+    "bytes": 454276,
+    "nodes": 39,
+    "motion": "none"
+  },
+  "work_roller": {
+    "file": "components/work_roller.glb",
+    "prefix": "work_roller",
+    "class": "FLUID",
+    "status": "concept",
+    "bytes": 443072,
+    "nodes": 32,
+    "motion": "spin"
+  },
+  "work_irrigation": {
+    "file": "components/work_irrigation.glb",
+    "prefix": "work_irrigation",
+    "class": "FLUID",
+    "status": "concept",
+    "bytes": 479928,
+    "nodes": 77,
+    "motion": "none"
+  },
+  "work_suction": {
+    "file": "components/work_suction.glb",
+    "prefix": "work_suction",
+    "class": "FLUID",
+    "status": "concept",
+    "bytes": 602888,
+    "nodes": 33,
+    "motion": "none"
+  },
+  "fluid_mixer": {
+    "file": "components/fluid_mixer.glb",
+    "prefix": "fluid_mixer",
+    "class": "FLUID",
+    "status": "concept",
+    "bytes": 436200,
+    "nodes": 38,
+    "motion": "spin"
+  },
+  "restraint_wrist_cuff": {
+    "file": "components/restraint_wrist_cuff.glb",
+    "prefix": "restraint_wrist_cuff",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 735956,
+    "nodes": 33,
+    "motion": "none"
+  },
+  "restraint_ankle_cuff": {
+    "file": "components/restraint_ankle_cuff.glb",
+    "prefix": "restraint_ankle_cuff",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 514004,
+    "nodes": 28,
+    "motion": "none"
+  },
+  "restraint_thigh_clamp": {
+    "file": "components/restraint_thigh_clamp.glb",
+    "prefix": "restraint_thigh_clamp",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 1528936,
+    "nodes": 67,
+    "motion": "none"
+  },
+  "restraint_waist_belt": {
+    "file": "components/restraint_waist_belt.glb",
+    "prefix": "restraint_waist_belt",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 1744920,
+    "nodes": 55,
+    "motion": "none"
+  },
+  "restraint_neck_yoke": {
+    "file": "components/restraint_neck_yoke.glb",
+    "prefix": "restraint_neck_yoke",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 3208972,
+    "nodes": 75,
+    "motion": "none"
+  },
+  "restraint_head_frame": {
+    "file": "components/restraint_head_frame.glb",
+    "prefix": "restraint_head_frame",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 593100,
+    "nodes": 79,
+    "motion": "none"
+  },
+  "restraint_stirrup": {
+    "file": "components/restraint_stirrup.glb",
+    "prefix": "restraint_stirrup",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 252504,
+    "nodes": 39,
+    "motion": "none"
+  },
+  "restraint_spreader": {
+    "file": "components/restraint_spreader.glb",
+    "prefix": "restraint_spreader",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 504152,
+    "nodes": 56,
+    "motion": "none"
+  },
+  "restraint_suspension_cuff": {
+    "file": "components/restraint_suspension_cuff.glb",
+    "prefix": "restraint_suspension_cuff",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 946824,
+    "nodes": 48,
+    "motion": "none"
+  },
+  "restraint_quick_release": {
+    "file": "components/restraint_quick_release.glb",
+    "prefix": "restraint_quick_release",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 436708,
+    "nodes": 35,
+    "motion": "none"
+  },
+  "restraint_matrix": {
+    "file": "components/restraint_matrix.glb",
+    "prefix": "restraint_matrix",
+    "class": "RESTRAINT",
+    "status": "concept",
+    "bytes": 1682516,
+    "nodes": 268,
+    "motion": "none"
+  },
+  "surface_soft": {
+    "file": "components/surface_soft.glb",
+    "prefix": "surface_soft",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 1256152,
+    "nodes": 31,
+    "motion": "none"
+  },
+  "surface_anti_slip": {
+    "file": "components/surface_anti_slip.glb",
+    "prefix": "surface_anti_slip",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 2159052,
+    "nodes": 20,
+    "motion": "none"
+  },
+  "surface_heated": {
+    "file": "components/surface_heated.glb",
+    "prefix": "surface_heated",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 728588,
+    "nodes": 56,
+    "motion": "none"
+  },
+  "surface_cooled": {
+    "file": "components/surface_cooled.glb",
+    "prefix": "surface_cooled",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 581452,
+    "nodes": 44,
+    "motion": "none"
+  },
+  "surface_fluid_channel": {
+    "file": "components/surface_fluid_channel.glb",
+    "prefix": "surface_fluid_channel",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 1029788,
+    "nodes": 83,
+    "motion": "none"
+  },
+  "surface_liner": {
+    "file": "components/surface_liner.glb",
+    "prefix": "surface_liner",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 1702484,
+    "nodes": 42,
+    "motion": "none"
+  },
+  "surface_sensor": {
+    "file": "components/surface_sensor.glb",
+    "prefix": "surface_sensor",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 1090868,
+    "nodes": 37,
+    "motion": "none"
+  },
+  "surface_contour": {
+    "file": "components/surface_contour.glb",
+    "prefix": "surface_contour",
+    "class": "SURFACE",
+    "status": "concept",
+    "bytes": 2497952,
+    "nodes": 53,
+    "motion": "none"
+  },
+  "sensory_hood": {
+    "file": "components/sensory_hood.glb",
+    "prefix": "sensory_hood",
+    "class": "SENSORY",
+    "status": "concept",
+    "bytes": 2002072,
+    "nodes": 32,
+    "motion": "none"
+  },
+  "sensory_visor": {
+    "file": "components/sensory_visor.glb",
+    "prefix": "sensory_visor",
+    "class": "SENSORY",
+    "status": "concept",
+    "bytes": 535752,
+    "nodes": 34,
+    "motion": "none"
+  },
+  "sensory_audio": {
+    "file": "components/sensory_audio.glb",
+    "prefix": "sensory_audio",
+    "class": "SENSORY",
+    "status": "concept",
+    "bytes": 698260,
+    "nodes": 61,
+    "motion": "none"
+  },
+  "sensory_light": {
+    "file": "components/sensory_light.glb",
+    "prefix": "sensory_light",
+    "class": "SENSORY",
+    "status": "concept",
+    "bytes": 481980,
+    "nodes": 30,
+    "motion": "none"
+  },
+  "control_console": {
+    "file": "components/control_console.glb",
+    "prefix": "control_console",
+    "class": "CONTROL",
+    "status": "core",
+    "bytes": 366764,
+    "nodes": 33,
+    "motion": "pulse"
+  },
+  "control_telemetry": {
+    "file": "components/control_telemetry.glb",
+    "prefix": "control_telemetry",
+    "class": "CONTROL",
+    "status": "concept",
+    "bytes": 927204,
+    "nodes": 75,
+    "motion": "none"
+  },
+  "control_estop": {
+    "file": "components/control_estop.glb",
+    "prefix": "control_estop",
+    "class": "CONTROL",
+    "status": "concept",
+    "bytes": 565320,
+    "nodes": 33,
+    "motion": "none"
+  },
+  "control_interlock": {
+    "file": "components/control_interlock.glb",
+    "prefix": "control_interlock",
+    "class": "CONTROL",
+    "status": "concept",
+    "bytes": 1158612,
+    "nodes": 88,
+    "motion": "none"
+  },
+  "utility_power": {
+    "file": "components/utility_power.glb",
+    "prefix": "utility_power",
+    "class": "UTILITY",
+    "status": "concept",
+    "bytes": 1147280,
+    "nodes": 102,
+    "motion": "none"
+  },
+  "utility_data": {
+    "file": "components/utility_data.glb",
+    "prefix": "utility_data",
+    "class": "UTILITY",
+    "status": "concept",
+    "bytes": 911272,
+    "nodes": 51,
+    "motion": "none"
+  },
+  "utility_air": {
+    "file": "components/utility_air.glb",
+    "prefix": "utility_air",
+    "class": "UTILITY",
+    "status": "concept",
+    "bytes": 779048,
+    "nodes": 71,
+    "motion": "none"
+  },
+  "utility_water": {
+    "file": "components/utility_water.glb",
+    "prefix": "utility_water",
+    "class": "UTILITY",
+    "status": "concept",
+    "bytes": 862020,
+    "nodes": 76,
+    "motion": "none"
+  },
+  "utility_drain": {
+    "file": "components/utility_drain.glb",
+    "prefix": "utility_drain",
+    "class": "UTILITY",
+    "status": "concept",
+    "bytes": 625424,
+    "nodes": 47,
+    "motion": "none"
+  },
+  "utility_routing": {
+    "file": "components/utility_routing.glb",
+    "prefix": "utility_routing",
+    "class": "UTILITY",
+    "status": "core",
+    "bytes": 1712824,
+    "nodes": 85,
+    "motion": "pulse"
+  },
+  "service_dock": {
+    "file": "components/service_dock.glb",
+    "prefix": "service_dock",
+    "class": "SERVICE",
+    "status": "concept",
+    "bytes": 1429236,
+    "nodes": 117,
+    "motion": "none"
+  },
+  "service_cleaner": {
+    "file": "components/service_cleaner.glb",
+    "prefix": "service_cleaner",
+    "class": "SERVICE",
+    "status": "concept",
+    "bytes": 1235432,
+    "nodes": 125,
+    "motion": "none"
+  },
+  "motion_piston_rod": {
+    "file": "components/motion_piston_rod.glb",
+    "prefix": "motion_piston_rod",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 713308,
+    "nodes": 49,
+    "motion": "slide"
+  },
+  "motion_piston_pneumatic": {
+    "file": "components/motion_piston_pneumatic.glb",
+    "prefix": "motion_piston_pneumatic",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 745000,
+    "nodes": 58,
+    "motion": "slide"
+  },
+  "motion_piston_hydraulic": {
+    "file": "components/motion_piston_hydraulic.glb",
+    "prefix": "motion_piston_hydraulic",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 534832,
+    "nodes": 47,
+    "motion": "slide"
+  },
+  "motion_piston_telescopic": {
+    "file": "components/motion_piston_telescopic.glb",
+    "prefix": "motion_piston_telescopic",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 716140,
+    "nodes": 42,
+    "motion": "slide"
+  },
+  "motion_piston_cam": {
+    "file": "components/motion_piston_cam.glb",
+    "prefix": "motion_piston_cam",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 971736,
+    "nodes": 74,
+    "motion": "slide"
+  },
+  "motion_piston_servo": {
+    "file": "components/motion_piston_servo.glb",
+    "prefix": "motion_piston_servo",
+    "class": "MOTION",
+    "status": "concept",
+    "bytes": 1321360,
+    "nodes": 114,
+    "motion": "slide"
+  },
+  "work_attach_smooth": {
+    "file": "components/work_attach_smooth.glb",
+    "prefix": "work_attach_smooth",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 307624,
+    "nodes": 12,
+    "motion": "spin"
+  },
+  "work_attach_ribbed": {
+    "file": "components/work_attach_ribbed.glb",
+    "prefix": "work_attach_ribbed",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 953184,
+    "nodes": 12,
+    "motion": "spin"
+  },
+  "work_attach_spiral": {
+    "file": "components/work_attach_spiral.glb",
+    "prefix": "work_attach_spiral",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 406644,
+    "nodes": 15,
+    "motion": "spin"
+  },
+  "work_attach_nodular": {
+    "file": "components/work_attach_nodular.glb",
+    "prefix": "work_attach_nodular",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 208288,
+    "nodes": 16,
+    "motion": "spin"
+  },
+  "work_attach_tapered": {
+    "file": "components/work_attach_tapered.glb",
+    "prefix": "work_attach_tapered",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 322336,
+    "nodes": 13,
+    "motion": "spin"
+  },
+  "work_attach_bulbous": {
+    "file": "components/work_attach_bulbous.glb",
+    "prefix": "work_attach_bulbous",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 367448,
+    "nodes": 15,
+    "motion": "spin"
+  },
+  "work_attach_curved": {
+    "file": "components/work_attach_curved.glb",
+    "prefix": "work_attach_curved",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 327680,
+    "nodes": 16,
+    "motion": "spin"
+  },
+  "work_attach_dual_density": {
+    "file": "components/work_attach_dual_density.glb",
+    "prefix": "work_attach_dual_density",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 264692,
+    "nodes": 14,
+    "motion": "spin"
+  },
+  "work_attach_vibrating": {
+    "file": "components/work_attach_vibrating.glb",
+    "prefix": "work_attach_vibrating",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 257512,
+    "nodes": 28,
+    "motion": "vibrate"
+  },
+  "work_attach_inflatable": {
+    "file": "components/work_attach_inflatable.glb",
+    "prefix": "work_attach_inflatable",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 614000,
+    "nodes": 24,
+    "motion": "scale"
+  },
+  "work_attach_sleeve": {
+    "file": "components/work_attach_sleeve.glb",
+    "prefix": "work_attach_sleeve",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 703412,
+    "nodes": 15,
+    "motion": "none"
+  },
+  "work_attach_adapter": {
+    "file": "components/work_attach_adapter.glb",
+    "prefix": "work_attach_adapter",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 339060,
+    "nodes": 11,
+    "motion": "none"
+  },
+  "work_attach_sterile_liner": {
+    "file": "components/work_attach_sterile_liner.glb",
+    "prefix": "work_attach_sterile_liner",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 520492,
+    "nodes": 10,
+    "motion": "none"
+  },
+  "work_attach_carousel": {
+    "file": "components/work_attach_carousel.glb",
+    "prefix": "work_attach_carousel",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 828548,
+    "nodes": 58,
+    "motion": "spin"
+  },
+  "work_probe_combined": {
+    "file": "components/work_probe_combined.glb",
+    "prefix": "work_probe_combined",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 716796,
+    "nodes": 62,
+    "motion": "spin_slide"
+  },
+  "effect_thermal": {
+    "file": "components/effect_thermal.glb",
+    "prefix": "effect_thermal",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 284028,
+    "nodes": 24,
+    "motion": "none"
+  },
+  "effect_pneumatic": {
+    "file": "components/effect_pneumatic.glb",
+    "prefix": "effect_pneumatic",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 466248,
+    "nodes": 41,
+    "motion": "none"
+  },
+  "effect_hydraulic": {
+    "file": "components/effect_hydraulic.glb",
+    "prefix": "effect_hydraulic",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 936400,
+    "nodes": 66,
+    "motion": "spin"
+  },
+  "effect_electric": {
+    "file": "components/effect_electric.glb",
+    "prefix": "effect_electric",
+    "class": "WORK",
+    "status": "concept",
+    "bytes": 345912,
+    "nodes": 38,
+    "motion": "none"
+  }
+}

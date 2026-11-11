@@ -1,0 +1,2020 @@
+{
+  "models": [
+    {
+      "model": "SexMachineModel-065",
+      "resources": 344,
+      "counts": {
+        "meshInstances": 514,
+        "triangles": 311788,
+        "cleanTriangles": 278177
+      },
+      "boundsMeters": {
+        "min": [
+          1.6386480417789584,
+          0.8951102860240491,
+          -3.539993461103301
+        ],
+        "max": [
+          3.3431468205227155,
+          2.359037309890221,
+          -2.808109131473389
+        ],
+        "size": [
+          1.704498778743757,
+          1.4639270238661717,
+          0.7318843296299118
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.6386480417789584,
+          0.8951102860240491,
+          -3.539993461103301
+        ],
+        "max": [
+          3.3431468205227155,
+          2.359037309890221,
+          -2.808109131473389
+        ],
+        "size": [
+          1.704498778743757,
+          1.4639270238661717,
+          0.7318843296299118
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_11"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_11",
+          "positionErrorMeters": 4.5211639604580967e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 71.199635695507,
+          "parentRotationOrScalePresent": true,
+          "worldScale": [
+            0.7998000000000041,
+            0.7998000000000004,
+            0.7998000000000041
+          ],
+          "storedScale": [
+            0.7998,
+            0.7998,
+            0.7998
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 166.7377933986841
+        }
+      ],
+      "seconds": 30.08,
+      "blenderExport": {
+        "sizeRatios": [
+          2.217048979243942,
+          3.543018784357516,
+          4.836821103059397
+        ],
+        "triangles": 533850,
+        "extraTriangles": 222062,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          999.9999899289235,
+          999.9999835251393,
+          999.9999776597156
+        ],
+        "triangles": 311788,
+        "extraTriangles": 33611,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-066",
+      "resources": 14,
+      "counts": {
+        "meshInstances": 29,
+        "triangles": 61930,
+        "cleanTriangles": 21754
+      },
+      "boundsMeters": {
+        "min": [
+          2.5761970167146173,
+          0.8857448223135902,
+          -5.6968607236970605
+        ],
+        "max": [
+          4.051786732001884,
+          3.0557331220801314,
+          -4.397205119824044
+        ],
+        "size": [
+          1.4755897152872666,
+          2.1699882997665414,
+          1.299655603873017
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          2.6223438089180413,
+          0.8857448223135902,
+          -5.6968607236970605
+        ],
+        "max": [
+          3.8503857491207443,
+          3.0557331220801314,
+          -4.537871769228002
+        ],
+        "size": [
+          1.228041940202703,
+          2.1699882997665414,
+          1.1589889544690584
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_6"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_6",
+          "positionErrorMeters": 4.288711216027252e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 120.00030067202842
+        },
+        {
+          "resource": "mesh_6",
+          "positionErrorMeters": 4.288711216027252e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 89.99964997951083,
+          "parentRotationOrScalePresent": true,
+          "worldScale": [
+            0.9999999999999999,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 91.72760648287591
+        }
+      ],
+      "seconds": 6.43,
+      "blenderExport": {
+        "sizeRatios": [
+          2.9625425466368616,
+          2.126353934114686,
+          4.731292725807715
+        ],
+        "triangles": 91868,
+        "extraTriangles": 29938,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1201.5792527576389,
+          999.9999980904006,
+          1121.3701408727745
+        ],
+        "triangles": 61930,
+        "extraTriangles": 40176,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-067",
+      "resources": 32,
+      "counts": {
+        "meshInstances": 349,
+        "triangles": 224069,
+        "cleanTriangles": 190830
+      },
+      "boundsMeters": {
+        "min": [
+          0.5281075370531632,
+          0.021410000913738785,
+          -2.1626635752385255
+        ],
+        "max": [
+          2.02951754452997,
+          1.2103100118637085,
+          -0.8543747864430542
+        ],
+        "size": [
+          1.5014100074768066,
+          1.1889000109499697,
+          1.3082887887954713
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.5281075370531632,
+          0.021410000913738785,
+          -2.1626635752385255
+        ],
+        "max": [
+          2.02951754452997,
+          1.2103100118637085,
+          -0.8543747864430542
+        ],
+        "size": [
+          1.5014100074768066,
+          1.1889000109499697,
+          1.3082887887954713
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 4.1209716675594255e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0
+        }
+      ],
+      "seconds": 10.04,
+      "blenderExport": {
+        "sizeRatios": [
+          1.6194617157638824,
+          2.3280317008442157,
+          1.6934540454284999
+        ],
+        "triangles": 275030,
+        "extraTriangles": 50961,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1000.0000177852024,
+          1000.0000393679426,
+          1000.0000263295966
+        ],
+        "triangles": 224069,
+        "extraTriangles": 33239,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-068",
+      "resources": 27,
+      "counts": {
+        "meshInstances": 1617,
+        "triangles": 329727,
+        "cleanTriangles": 296632
+      },
+      "boundsMeters": {
+        "min": [
+          0.5272111274816917,
+          -0.004055682791272386,
+          -1.5926806578042425
+        ],
+        "max": [
+          1.6639511585235596,
+          1.1319542989935802,
+          -1.0536267706754125
+        ],
+        "size": [
+          1.1367400310418678,
+          1.1360099817848526,
+          0.53905388712883
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.5272111274816917,
+          0.0,
+          -1.5926806578042425
+        ],
+        "max": [
+          1.6639511585235596,
+          1.1319542989935802,
+          -1.0536267706754125
+        ],
+        "size": [
+          1.1367400310418678,
+          1.1319542989935802,
+          0.53905388712883
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 4.723948504592457e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 165.22526170055883
+        }
+      ],
+      "seconds": 9.11,
+      "blenderExport": {
+        "sizeRatios": [
+          1.7501592277729592,
+          2.235255962669246,
+          3.1572181478318475
+        ],
+        "triangles": 374041,
+        "extraTriangles": 44314,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1000.000009752858,
+          1003.5829138792786,
+          1000.0000269797392
+        ],
+        "triangles": 329727,
+        "extraTriangles": 33095,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-069",
+      "resources": 22,
+      "counts": {
+        "meshInstances": 51,
+        "triangles": 63474,
+        "cleanTriangles": 30918
+      },
+      "boundsMeters": {
+        "min": [
+          0.20027947639465282,
+          0.06953967359999981,
+          -1.206619485550064
+        ],
+        "max": [
+          1.5147804043197626,
+          1.4141085474441744,
+          -0.2261794649885811
+        ],
+        "size": [
+          1.3145009279251099,
+          1.3445688738441746,
+          0.9804400205614829
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.45196736351262157,
+          0.06953967359999981,
+          -1.1526177203972163
+        ],
+        "max": [
+          1.3016673673750025,
+          1.4141085474441744,
+          -0.5258089759834578
+        ],
+        "size": [
+          0.849700003862381,
+          1.3445688738441746,
+          0.6268087444137586
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 1.9485549712427996e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 120.00030116502344
+        }
+      ],
+      "seconds": 11.11,
+      "blenderExport": {
+        "sizeRatios": [
+          1.6755339452406688,
+          1.6768669147289343,
+          1.538796106450448
+        ],
+        "triangles": 108745,
+        "extraTriangles": 45271,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1547.0176645312135,
+          1000.0000000044627,
+          1564.1772888134421
+        ],
+        "triangles": 63474,
+        "extraTriangles": 32556,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-070",
+      "resources": 14,
+      "counts": {
+        "meshInstances": 24,
+        "triangles": 50891,
+        "cleanTriangles": 19913
+      },
+      "boundsMeters": {
+        "min": [
+          0.3750784704292951,
+          0.0,
+          -2.6699491949983183
+        ],
+        "max": [
+          1.42044088335883,
+          2.326634638086724,
+          -1.5119527398887007
+        ],
+        "size": [
+          1.045362412929535,
+          2.326634638086724,
+          1.1579964551096176
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.5239528896340131,
+          0.0,
+          -2.6699491949983183
+        ],
+        "max": [
+          1.2678441019781819,
+          2.326634638086724,
+          -1.5119527398887007
+        ],
+        "size": [
+          0.7438912123441688,
+          2.326634638086724,
+          1.1579964551096176
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 4.5629111415368406e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.07236829967396519,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 123.53580457472921
+        }
+      ],
+      "seconds": 8.86,
+      "blenderExport": {
+        "sizeRatios": [
+          1.8898869791668746,
+          1.444730840899682,
+          2.4537906720553213
+        ],
+        "triangles": 93764,
+        "extraTriangles": 42873,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1405.2625026496012,
+          1000.0000035903893,
+          999.9999760702092
+        ],
+        "triangles": 50891,
+        "extraTriangles": 30978,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-071",
+      "resources": 29,
+      "counts": {
+        "meshInstances": 33,
+        "triangles": 44672,
+        "cleanTriangles": 13493
+      },
+      "boundsMeters": {
+        "min": [
+          0.13793353974532288,
+          -0.03225200000000015,
+          -1.4760810964944784
+        ],
+        "max": [
+          1.4363232644100805,
+          1.4431523265981918,
+          -0.9724063902816991
+        ],
+        "size": [
+          1.2983897246647575,
+          1.475404326598192,
+          0.5036747062127793
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.13793353974532288,
+          -0.03225200000000015,
+          -1.4760810964944784
+        ],
+        "max": [
+          1.315868414619743,
+          1.4431523265981918,
+          -1.0952081056337617
+        ],
+        "size": [
+          1.17793487487442,
+          1.475404326598192,
+          0.3808729908607167
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 2.991860267687052e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0
+        }
+      ],
+      "seconds": 11.64,
+      "blenderExport": {
+        "sizeRatios": [
+          1.5333753525965637,
+          1.3423624867044328,
+          3.1229453103755294
+        ],
+        "triangles": 85770,
+        "extraTriangles": 41098,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1102.2593403603007,
+          1000.0000035126145,
+          1322.421659787162
+        ],
+        "triangles": 44672,
+        "extraTriangles": 31179,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-072",
+      "resources": 12,
+      "counts": {
+        "meshInstances": 34,
+        "triangles": 109521,
+        "cleanTriangles": 77062
+      },
+      "boundsMeters": {
+        "min": [
+          0.27830821337774425,
+          -0.037314346952438404,
+          -1.2131544871446265
+        ],
+        "max": [
+          1.917187013305984,
+          1.8657165611553195,
+          -0.8683485126639672
+        ],
+        "size": [
+          1.6388787999282397,
+          1.9030309081077579,
+          0.3448059744806593
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.27830821337774425,
+          -0.037314346952438404,
+          -1.2131544871446265
+        ],
+        "max": [
+          1.917187013305984,
+          1.8657165611553195,
+          -0.9386870420476107
+        ],
+        "size": [
+          1.6388787999282397,
+          1.9030309081077579,
+          0.2744674450970158
+        ]
+      },
+      "stlDefinitions": [
+        "2.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 4.3467465858926246e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            0.97,
+            0.97,
+            0.97
+          ],
+          "storedScale": [
+            0.97,
+            0.97,
+            0.97
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 120.02571162520881
+        }
+      ],
+      "seconds": 7.64,
+      "blenderExport": {
+        "sizeRatios": [
+          1.537393699411468,
+          2.4814494508856044,
+          7.672993720598435
+        ],
+        "triangles": 152667,
+        "extraTriangles": 43146,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          999.9999912714017,
+          999.999987221072,
+          1256.2727477898584
+        ],
+        "triangles": 109521,
+        "extraTriangles": 32459,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-073",
+      "resources": 40,
+      "counts": {
+        "meshInstances": 137,
+        "triangles": 48487,
+        "cleanTriangles": 24579
+      },
+      "boundsMeters": {
+        "min": [
+          0.6894090000622175,
+          0.0022741212228948537,
+          -1.5544381754258256
+        ],
+        "max": [
+          1.7291489914548206,
+          1.5532693010106582,
+          -0.3389828374612802
+        ],
+        "size": [
+          1.039739991392603,
+          1.5509951797877632,
+          1.2154553379645454
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.6894090000622175,
+          0.0022741212228948537,
+          -1.5544381754258256
+        ],
+        "max": [
+          1.7291489914548206,
+          1.5532693010106582,
+          -0.3389828374612802
+        ],
+        "size": [
+          1.039739991392603,
+          1.5509951797877632,
+          1.2154553379645454
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 4.92743402997764e-05,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.35,
+            1.3499999999999992,
+            1.3499999999999992
+          ],
+          "storedScale": [
+            1.35,
+            1.35,
+            1.35
+          ],
+          "rotationErrorDegreesWhenReadAsXYZW": 120.00030116506927
+        }
+      ],
+      "seconds": 16.3,
+      "blenderExport": {
+        "sizeRatios": [
+          2.1660561925444983,
+          1.584375806260717,
+          1.3799717465450045
+        ],
+        "triangles": 86249,
+        "extraTriangles": 37762,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1000.0000282372038,
+          999.9999982194566,
+          1000.0000057673786
+        ],
+        "triangles": 48487,
+        "extraTriangles": 23908,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-074",
+      "resources": 11,
+      "counts": {
+        "meshInstances": 154,
+        "triangles": 261345,
+        "cleanTriangles": 261345
+      },
+      "boundsMeters": {
+        "min": [
+          0.7656208772477463,
+          0.24519216915177156,
+          -7.015878808892579
+        ],
+        "max": [
+          1.6914848885938993,
+          2.088309971566011,
+          -0.1357700071021487
+        ],
+        "size": [
+          0.925864011346153,
+          1.8431178024142394,
+          6.88010880179043
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.7656208772477463,
+          0.24519216915177156,
+          -7.015878808892579
+        ],
+        "max": [
+          1.6914848885938993,
+          2.088309971566011,
+          -0.1357700071021487
+        ],
+        "size": [
+          0.925864011346153,
+          1.8431178024142394,
+          6.88010880179043
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl#1"
+      ],
+      "removedDefinitions": [],
+      "anchorChecks": [],
+      "seconds": 15.34,
+      "blenderExport": {
+        "sizeRatios": [
+          2.312009909583392,
+          1.7709341553700413,
+          1.0350060965587171
+        ],
+        "triangles": 296285,
+        "extraTriangles": 34940,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-075",
+      "resources": 37,
+      "counts": {
+        "meshInstances": 837,
+        "triangles": 489897,
+        "cleanTriangles": 489897
+      },
+      "boundsMeters": {
+        "min": [
+          0.7527455992457379,
+          -0.032251999999999795,
+          -1.7326623187045893
+        ],
+        "max": [
+          1.9691221812532134,
+          1.416470776045368,
+          0.19819504165804158
+        ],
+        "size": [
+          1.2163765820074754,
+          1.4487227760453678,
+          1.930857360362631
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          0.7527455992457379,
+          -0.032251999999999795,
+          -1.7326623187045893
+        ],
+        "max": [
+          1.9691221812532134,
+          1.416470776045368,
+          0.19819504165804158
+        ],
+        "size": [
+          1.2163765820074754,
+          1.4487227760453678,
+          1.930857360362631
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl#1"
+      ],
+      "removedDefinitions": [],
+      "anchorChecks": [],
+      "seconds": 17.94,
+      "blenderExport": {
+        "sizeRatios": [
+          2.439382641868416,
+          1.2156367982577037,
+          1.1864552175484668
+        ],
+        "triangles": 538981,
+        "extraTriangles": 49084,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-076",
+      "resources": 12,
+      "counts": {
+        "meshInstances": 13,
+        "triangles": 39160,
+        "cleanTriangles": 39160
+      },
+      "boundsMeters": {
+        "min": [
+          1.7929610874994815,
+          0.8690844653197841,
+          -4.570984553931306
+        ],
+        "max": [
+          2.529053178106171,
+          2.4121754958043677,
+          -3.1821485953046147
+        ],
+        "size": [
+          0.7360920906066895,
+          1.5430910304845837,
+          1.3888359586266916
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.7929610874994815,
+          0.8690844653197841,
+          -4.570984553931306
+        ],
+        "max": [
+          2.529053178106171,
+          2.4121754958043677,
+          -3.1821485953046147
+        ],
+        "size": [
+          0.7360920906066895,
+          1.5430910304845837,
+          1.3888359586266916
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl#8"
+      ],
+      "removedDefinitions": [],
+      "anchorChecks": [],
+      "seconds": 6.67,
+      "blenderExport": {
+        "sizeRatios": [
+          4.1055964998312495,
+          2.0056190632465603,
+          3.6168236775566434
+        ],
+        "triangles": 77988,
+        "extraTriangles": 38828,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-077",
+      "resources": 17,
+      "counts": {
+        "meshInstances": 28,
+        "triangles": 43493,
+        "cleanTriangles": 10779
+      },
+      "boundsMeters": {
+        "min": [
+          1.8129582036397816,
+          0.941197578117914,
+          -4.2496750517092945
+        ],
+        "max": [
+          2.917705797042644,
+          2.6041147830985025,
+          -3.4074724775195415
+        ],
+        "size": [
+          1.1047475934028625,
+          1.6629172049805885,
+          0.842202574189753
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          2.013575126459105,
+          0.9467548216782047,
+          -4.2496750517092945
+        ],
+        "max": [
+          2.749103694071276,
+          2.6041147830985025,
+          -3.5366770971643207
+        ],
+        "size": [
+          0.735528567612171,
+          1.6573599614202978,
+          0.7129979545449738
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 1.7872180736233645e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 120.00030017911416,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "seconds": 10.15,
+      "blenderExport": {
+        "sizeRatios": [
+          3.168837301976321,
+          2.016886208729895,
+          5.282725449215455
+        ],
+        "triangles": 81804,
+        "extraTriangles": 38311,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1501.9778541238345,
+          1003.3530740709375,
+          1181.2131628881343
+        ],
+        "triangles": 43493,
+        "extraTriangles": 32714,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-078",
+      "resources": 23,
+      "counts": {
+        "meshInstances": 32,
+        "triangles": 51791,
+        "cleanTriangles": 18779
+      },
+      "boundsMeters": {
+        "min": [
+          1.5356469019562076,
+          0.9562989712603714,
+          -4.617028519679887
+        ],
+        "max": [
+          3.1343432421189203,
+          2.130640156313449,
+          -3.744170303756414
+        ],
+        "size": [
+          1.5986963401627128,
+          1.1743411850530774,
+          0.8728582159234732
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.5356469019562076,
+          0.9562989712603714,
+          -4.617028519679887
+        ],
+        "max": [
+          3.1343432421189203,
+          2.130640156313449,
+          -3.744170303756414
+        ],
+        "size": [
+          1.5986963401627128,
+          1.1743411850530774,
+          0.8728582159234732
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 2.7052903501356695e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "seconds": 7.91,
+      "blenderExport": {
+        "sizeRatios": [
+          3.153671420344017,
+          2.311798630240771,
+          5.3069656984439915
+        ],
+        "triangles": 96436,
+        "extraTriangles": 44645,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          999.9999652673948,
+          999.9999969568876,
+          1000.0000000284158
+        ],
+        "triangles": 51791,
+        "extraTriangles": 33012,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-079",
+      "resources": 13,
+      "counts": {
+        "meshInstances": 14,
+        "triangles": 41803,
+        "cleanTriangles": 8410
+      },
+      "boundsMeters": {
+        "min": [
+          1.4569024064572564,
+          1.2887848270915028,
+          -4.096640418908419
+        ],
+        "max": [
+          2.9577223503025287,
+          2.6483745136457246,
+          -3.2554182080653025
+        ],
+        "size": [
+          1.5008199438452723,
+          1.3595896865542219,
+          0.8412222108431164
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.4569024064572564,
+          1.2887848270915028,
+          -4.096640418908419
+        ],
+        "max": [
+          2.9577223503025287,
+          2.6483745136457246,
+          -3.2554182080653025
+        ],
+        "size": [
+          1.5008199438452723,
+          1.3595896865542219,
+          0.8412222108431164
+        ]
+      },
+      "stlDefinitions": [
+        "2.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_8"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_8",
+          "positionErrorMeters": 4.421874735971443e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "seconds": 10.48,
+      "blenderExport": {
+        "sizeRatios": [
+          2.2432900850119903,
+          2.6315987625092805,
+          5.407406576907473
+        ],
+        "triangles": 83374,
+        "extraTriangles": 41571,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          999.999991461335,
+          999.9999975859652,
+          1000.0000092088227
+        ],
+        "triangles": 41803,
+        "extraTriangles": 33393,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-080",
+      "resources": 187,
+      "counts": {
+        "meshInstances": 501,
+        "triangles": 306447,
+        "cleanTriangles": 272946
+      },
+      "boundsMeters": {
+        "min": [
+          1.7171819153347516,
+          0.9939848223135905,
+          -3.9912187073185987
+        ],
+        "max": [
+          2.584488798555425,
+          2.4038748101828538,
+          -3.102523377784883
+        ],
+        "size": [
+          0.8673068832206732,
+          1.4098899878692632,
+          0.8886953295337157
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.7171819153347516,
+          0.9939848223135905,
+          -3.7972772953457348
+        ],
+        "max": [
+          2.584488798555425,
+          2.4038748101828538,
+          -3.286762561831288
+        ],
+        "size": [
+          0.8673068832206732,
+          1.4098899878692632,
+          0.5105147335144467
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 3.6698106501198424e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "seconds": 28.02,
+      "blenderExport": {
+        "sizeRatios": [
+          3.5283969782854196,
+          2.2136797204355307,
+          4.511404983345338
+        ],
+        "triangles": 440273,
+        "extraTriangles": 133826,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          999.9999961514659,
+          1000.0000094698455,
+          1740.7828888465333
+        ],
+        "triangles": 306447,
+        "extraTriangles": 33501,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-081",
+      "resources": 24,
+      "counts": {
+        "meshInstances": 68,
+        "triangles": 48025,
+        "cleanTriangles": 15155
+      },
+      "boundsMeters": {
+        "min": [
+          1.9846146463796133,
+          1.3491698223135908,
+          -4.021963395416881
+        ],
+        "max": [
+          2.6771583830758563,
+          2.3033708649657214,
+          -3.3139158238231303
+        ],
+        "size": [
+          0.692543736696243,
+          0.9542010426521306,
+          0.7080475715937506
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          2.0962157436725937,
+          1.3491698223135908,
+          -4.021963395416881
+        ],
+        "max": [
+          2.5740432943709672,
+          2.3033708649657214,
+          -3.3968788261127156
+        ],
+        "size": [
+          0.47782755069837357,
+          0.9542010426521306,
+          0.6250845693041653
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_0"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_0",
+          "positionErrorMeters": 3.395116884830074e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 120.00030116515335,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            0.8299999999999997,
+            0.8299999999999997,
+            0.8299999999999998
+          ],
+          "storedScale": [
+            0.83,
+            0.83,
+            0.83
+          ]
+        }
+      ],
+      "seconds": 12.91,
+      "blenderExport": {
+        "sizeRatios": [
+          4.468121109480645,
+          6.455635851791506,
+          5.72874587483833
+        ],
+        "triangles": 89854,
+        "extraTriangles": 41829,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1449.3591599638794,
+          1000.0000074958605,
+          1132.7228260212398
+        ],
+        "triangles": 48025,
+        "extraTriangles": 32870,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-082",
+      "resources": 33,
+      "counts": {
+        "meshInstances": 68,
+        "triangles": 402564,
+        "cleanTriangles": 371625
+      },
+      "boundsMeters": {
+        "min": [
+          -1.7334023917571126,
+          0.9939848223135153,
+          -7.9963654580673
+        ],
+        "max": [
+          5.33346512243101,
+          5.9000653321804215,
+          1.2859790508188909
+        ],
+        "size": [
+          7.0668675141881225,
+          4.906080509866906,
+          9.28234450888619
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          -1.7334023917571126,
+          0.9939848223135153,
+          -7.9963654580673
+        ],
+        "max": [
+          5.33346512243101,
+          5.9000653321804215,
+          1.2859790508188909
+        ],
+        "size": [
+          7.0668675141881225,
+          4.906080509866906,
+          9.28234450888619
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_31"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_31",
+          "positionErrorMeters": 1.9049422136818706e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "storedScale": [
+            0.8,
+            0.8,
+            0.8
+          ]
+        }
+      ],
+      "seconds": 20.02,
+      "blenderExport": {
+        "sizeRatios": [
+          1.1243707333990343,
+          1.3813290609748754,
+          0.9999999990368628
+        ],
+        "triangles": 502637,
+        "extraTriangles": 100073,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          999.9999854253916,
+          1000.0000043879437,
+          999.9999997306028
+        ],
+        "triangles": 402564,
+        "extraTriangles": 30939,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-083",
+      "resources": 9,
+      "counts": {
+        "meshInstances": 14,
+        "triangles": 38436,
+        "cleanTriangles": 38436
+      },
+      "boundsMeters": {
+        "min": [
+          -1.0844950445001422,
+          0.33304622041504217,
+          -7.9963654580673
+        ],
+        "max": [
+          5.33346512243101,
+          6.800235332180422,
+          -0.5077006479182318
+        ],
+        "size": [
+          6.417960166931152,
+          6.4671891117653795,
+          7.488664810149068
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          -1.0844950445001422,
+          0.33304622041504217,
+          -7.9963654580673
+        ],
+        "max": [
+          5.33346512243101,
+          6.800235332180422,
+          -0.5077006479182318
+        ],
+        "size": [
+          6.417960166931152,
+          6.4671891117653795,
+          7.488664810149068
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl#1"
+      ],
+      "removedDefinitions": [],
+      "anchorChecks": [],
+      "seconds": 6.81,
+      "blenderExport": {
+        "sizeRatios": [
+          1.2380536499279813,
+          1.1870816363156718,
+          1.0702104940330246
+        ],
+        "triangles": 73958,
+        "extraTriangles": 35522,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-084",
+      "resources": 34,
+      "counts": {
+        "meshInstances": 3776,
+        "triangles": 978032,
+        "cleanTriangles": 944494
+      },
+      "boundsMeters": {
+        "min": [
+          1.5979407023991772,
+          1.2508248118033365,
+          -4.1845138855248685
+        ],
+        "max": [
+          2.6429772220097525,
+          2.188191813785833,
+          -3.555255542906932
+        ],
+        "size": [
+          1.0450365196105753,
+          0.9373670019824967,
+          0.6292583426179363
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.6923397873667123,
+          1.2508248118033365,
+          -4.1845138855248685
+        ],
+        "max": [
+          2.6429772220097525,
+          2.188191813785833,
+          -3.555255542906932
+        ],
+        "size": [
+          0.9506374346430402,
+          0.9373670019824967,
+          0.6292583426179363
+        ]
+      },
+      "stlDefinitions": [
+        "3.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_23"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_23",
+          "positionErrorMeters": 1.7099073127413433e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "seconds": 9.36,
+      "blenderExport": {
+        "sizeRatios": [
+          2.7037002549907116,
+          6.139135675858505,
+          6.823499553763349
+        ],
+        "triangles": 1025499,
+        "extraTriangles": 47467,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1099.3008461227967,
+          999.9999911523097,
+          999.999996384694
+        ],
+        "triangles": 978032,
+        "extraTriangles": 33538,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-085",
+      "resources": 10,
+      "counts": {
+        "meshInstances": 21,
+        "triangles": 43830,
+        "cleanTriangles": 43830
+      },
+      "boundsMeters": {
+        "min": [
+          1.677852749824524,
+          0.8305083513259888,
+          -3.430323600769043
+        ],
+        "max": [
+          3.114926815032959,
+          2.1253623962402344,
+          -2.8181531755742895
+        ],
+        "size": [
+          1.437074065208435,
+          1.2948540449142456,
+          0.6121704251947535
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.677852749824524,
+          0.8305083513259888,
+          -3.430323600769043
+        ],
+        "max": [
+          3.114926815032959,
+          2.1253623962402344,
+          -2.8181531755742895
+        ],
+        "size": [
+          1.437074065208435,
+          1.2948540449142456,
+          0.6121704251947535
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl#1"
+      ],
+      "removedDefinitions": [],
+      "anchorChecks": [],
+      "seconds": 6.13,
+      "blenderExport": {
+        "sizeRatios": [
+          2.3162459868481684,
+          4.290589171255075,
+          5.666500382155826
+        ],
+        "triangles": 65821,
+        "extraTriangles": 21991,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-086",
+      "resources": 13,
+      "counts": {
+        "meshInstances": 15,
+        "triangles": 22094,
+        "cleanTriangles": 22094
+      },
+      "boundsMeters": {
+        "min": [
+          2.3586553941851296,
+          0.8162983638200789,
+          -4.071263333667475
+        ],
+        "max": [
+          3.4541781352305487,
+          2.24073435721447,
+          -2.8181531755742895
+        ],
+        "size": [
+          1.0955227410454191,
+          1.4244359933943909,
+          1.2531101580931856
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          2.3586553941851296,
+          0.8162983638200789,
+          -4.071263333667475
+        ],
+        "max": [
+          3.4541781352305487,
+          2.24073435721447,
+          -2.8181531755742895
+        ],
+        "size": [
+          1.0955227410454191,
+          1.4244359933943909,
+          1.2531101580931856
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl#2"
+      ],
+      "removedDefinitions": [],
+      "anchorChecks": [],
+      "seconds": 6.55,
+      "blenderExport": {
+        "sizeRatios": [
+          3.545142610459745,
+          2.0023464278638063,
+          3.2489269920671076
+        ],
+        "triangles": 43758,
+        "extraTriangles": 21664,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-087",
+      "resources": 179,
+      "counts": {
+        "meshInstances": 347,
+        "triangles": 216385,
+        "cleanTriangles": 184240
+      },
+      "boundsMeters": {
+        "min": [
+          1.7518561359857001,
+          0.6860248270533519,
+          -3.1309066863896375
+        ],
+        "max": [
+          2.5402837079666214,
+          1.6185223280384555,
+          -2.3170095096084498
+        ],
+        "size": [
+          0.7884275719809213,
+          0.9324975009851036,
+          0.8138971767811878
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.7518561359857001,
+          0.6860248270533519,
+          -3.1309066863896375
+        ],
+        "max": [
+          2.5402837079666214,
+          1.6185223280384555,
+          -2.3170095096084498
+        ],
+        "size": [
+          0.7884275719809213,
+          0.9324975009851036,
+          0.8138971767811878
+        ]
+      },
+      "stlDefinitions": [
+        "1.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_2"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_2",
+          "positionErrorMeters": 4.866199889219658e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 119.99969883591254,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            0.770000000000002,
+            0.7700000000000005,
+            0.7700000000000009
+          ],
+          "storedScale": [
+            0.77,
+            0.77,
+            0.77
+          ]
+        }
+      ],
+      "seconds": 18.62,
+      "blenderExport": {
+        "sizeRatios": [
+          3.745662614706535,
+          2.6248675072645042,
+          4.092195962914731
+        ],
+        "triangles": 343582,
+        "extraTriangles": 127197,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1000.0000013607892,
+          1000.0000082158157,
+          999.9999937019082
+        ],
+        "triangles": 216385,
+        "extraTriangles": 32145,
+        "skinned": false,
+        "animated": false
+      }
+    },
+    {
+      "model": "SexMachineModel-088",
+      "resources": 25,
+      "counts": {
+        "meshInstances": 344,
+        "triangles": 211192,
+        "cleanTriangles": 187532
+      },
+      "boundsMeters": {
+        "min": [
+          1.7949848861113322,
+          0.6645548167727424,
+          -3.843057589741789
+        ],
+        "max": [
+          2.57491732543944,
+          2.0115319612524942,
+          -2.8181531755742895
+        ],
+        "size": [
+          0.7799324393281077,
+          1.3469771444797518,
+          1.0249044141674997
+        ]
+      },
+      "withoutDetectedHumanoidsBoundsMeters": {
+        "min": [
+          1.9365068888278194,
+          0.6645548167727424,
+          -3.843057589741789
+        ],
+        "max": [
+          2.5717068804780663,
+          2.0115319612524942,
+          -2.8181531755742895
+        ],
+        "size": [
+          0.6351999916502469,
+          1.3469771444797518,
+          1.0249044141674997
+        ]
+      },
+      "stlDefinitions": [
+        "2.stl"
+      ],
+      "removedDefinitions": [
+        "mesh_5"
+      ],
+      "anchorChecks": [
+        {
+          "resource": "mesh_5",
+          "positionErrorMeters": 4.6641553353543586e-05,
+          "rotationErrorDegreesWhenReadAsXYZW": 180.0,
+          "rotationErrorDegreesIfReorderedWXYZtoXYZW": 0.0,
+          "parentRotationOrScalePresent": false,
+          "worldScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "storedScale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "seconds": 9.03,
+      "blenderExport": {
+        "sizeRatios": [
+          3.643815361299371,
+          1.9339394696600574,
+          3.9654894570504973
+        ],
+        "triangles": 248321,
+        "extraTriangles": 37129,
+        "skinned": false,
+        "animated": false
+      },
+      "nohumanExport": {
+        "sizeRatios": [
+          1227.8533443563779,
+          999.9999757506312,
+          999.9999978520681
+        ],
+        "triangles": 211192,
+        "extraTriangles": 23660,
+        "skinned": false,
+        "animated": false
+      }
+    }
+  ],
+  "complete": true
+}

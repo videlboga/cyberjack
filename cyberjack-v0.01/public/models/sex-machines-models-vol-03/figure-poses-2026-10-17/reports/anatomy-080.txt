@@ -1,0 +1,346 @@
+### FIGURE 080 dims=(72, 155, 115) spacing=0.0080 mn=[1.936, 1.094, -3.999]
+axis X profile: 00111122233344567889876554445544444333334444322222221112222222221110000
+--- axis X: slices (coord_cm, n_cells, area_cells, centroid of cells)
+ X  0 c= 194.0cm n=  189 span_u=(np.int64(2), np.int64(111)) u_mean= 156.5 v_mean=-359.7
+ X  1 c= 194.8cm n=  292 span_u=(np.int64(1), np.int64(112)) u_mean= 155.4 v_mean=-359.3
+ X  2 c= 195.6cm n=  367 span_u=(np.int64(0), np.int64(112)) u_mean= 154.7 v_mean=-359.3
+ X  3 c= 196.4cm n=  394 span_u=(np.int64(0), np.int64(112)) u_mean= 154.5 v_mean=-359.3
+ X  4 c= 197.2cm n=  444 span_u=(np.int64(0), np.int64(113)) u_mean= 155.0 v_mean=-359.3
+ X  5 c= 198.0cm n=  543 span_u=(np.int64(0), np.int64(113)) u_mean= 154.8 v_mean=-361.4
+ X  6 c= 198.8cm n=  677 span_u=(np.int64(0), np.int64(113)) u_mean= 154.5 v_mean=-363.1
+ X  7 c= 199.6cm n=  789 span_u=(np.int64(0), np.int64(113)) u_mean= 154.6 v_mean=-364.0
+ X  8 c= 200.4cm n=  879 span_u=(np.int64(0), np.int64(113)) u_mean= 154.4 v_mean=-364.1
+ X  9 c= 201.2cm n=  984 span_u=(np.int64(0), np.int64(112)) u_mean= 154.6 v_mean=-364.6
+ X 10 c= 202.0cm n= 1067 span_u=(np.int64(0), np.int64(112)) u_mean= 154.6 v_mean=-364.9
+ X 11 c= 202.8cm n= 1190 span_u=(np.int64(1), np.int64(112)) u_mean= 154.6 v_mean=-365.7
+ X 12 c= 203.6cm n= 1314 span_u=(np.int64(1), np.int64(111)) u_mean= 154.5 v_mean=-365.0
+ X 13 c= 204.4cm n= 1510 span_u=(np.int64(2), np.int64(110)) u_mean= 154.5 v_mean=-362.7
+ X 14 c= 205.2cm n= 1816 span_u=(np.int64(4), np.int64(107)) u_mean= 154.4 v_mean=-358.6
+ X 15 c= 206.0cm n= 2075 span_u=(np.int64(5), np.int64(106)) u_mean= 154.5 v_mean=-355.6
+ X 16 c= 206.8cm n= 2314 span_u=(np.int64(8), np.int64(104)) u_mean= 154.7 v_mean=-352.2
+ X 17 c= 207.6cm n= 2598 span_u=(np.int64(8), np.int64(104)) u_mean= 154.5 v_mean=-351.2
+ X 18 c= 208.4cm n= 2820 span_u=(np.int64(9), np.int64(103)) u_mean= 154.5 v_mean=-351.3
+ X 19 c= 209.2cm n= 2870 span_u=(np.int64(10), np.int64(102)) u_mean= 154.5 v_mean=-351.9
+ X 20 c= 210.0cm n= 2714 span_u=(np.int64(12), np.int64(101)) u_mean= 154.6 v_mean=-352.3
+ X 21 c= 210.8cm n= 2338 span_u=(np.int64(12), np.int64(100)) u_mean= 154.5 v_mean=-351.4
+ X 22 c= 211.6cm n= 2050 span_u=(np.int64(14), np.int64(98)) u_mean= 154.5 v_mean=-349.2
+ X 23 c= 212.4cm n= 1781 span_u=(np.int64(15), np.int64(97)) u_mean= 154.5 v_mean=-346.6
+ X 24 c= 213.2cm n= 1650 span_u=(np.int64(17), np.int64(95)) u_mean= 154.6 v_mean=-342.9
+ X 25 c= 214.0cm n= 1593 span_u=(np.int64(18), np.int64(94)) u_mean= 154.6 v_mean=-336.9
+ X 26 c= 214.8cm n= 1483 span_u=(np.int64(20), np.int64(92)) u_mean= 154.6 v_mean=-328.8
+ X 27 c= 215.6cm n= 1538 span_u=(np.int64(22), np.int64(90)) u_mean= 154.5 v_mean=-327.6
+ X 28 c= 216.4cm n= 1605 span_u=(np.int64(23), np.int64(89)) u_mean= 154.7 v_mean=-325.9
+ X 29 c= 217.2cm n= 1631 span_u=(np.int64(25), np.int64(87)) u_mean= 154.6 v_mean=-325.0
+ X 30 c= 218.0cm n= 1569 span_u=(np.int64(27), np.int64(85)) u_mean= 154.6 v_mean=-323.8
+ X 31 c= 218.8cm n= 1492 span_u=(np.int64(28), np.int64(84)) u_mean= 154.6 v_mean=-323.0
+ X 32 c= 219.6cm n= 1466 span_u=(np.int64(30), np.int64(82)) u_mean= 154.6 v_mean=-322.1
+ X 33 c= 220.4cm n= 1346 span_u=(np.int64(32), np.int64(80)) u_mean= 154.7 v_mean=-321.3
+ X 34 c= 221.2cm n= 1319 span_u=(np.int64(33), np.int64(78)) u_mean= 154.5 v_mean=-320.2
+ X 35 c= 222.0cm n= 1248 span_u=(np.int64(35), np.int64(77)) u_mean= 154.6 v_mean=-318.9
+ X 36 c= 222.8cm n= 1254 span_u=(np.int64(36), np.int64(77)) u_mean= 154.7 v_mean=-318.3
+ X 37 c= 223.6cm n= 1253 span_u=(np.int64(35), np.int64(77)) u_mean= 154.5 v_mean=-318.0
+ X 38 c= 224.4cm n= 1243 span_u=(np.int64(35), np.int64(77)) u_mean= 154.6 v_mean=-317.9
+ X 39 c= 225.2cm n= 1273 span_u=(np.int64(35), np.int64(77)) u_mean= 154.7 v_mean=-318.1
+ X 40 c= 226.0cm n= 1286 span_u=(np.int64(35), np.int64(77)) u_mean= 154.7 v_mean=-318.0
+ X 41 c= 226.8cm n= 1362 span_u=(np.int64(35), np.int64(77)) u_mean= 154.7 v_mean=-319.6
+ X 42 c= 227.6cm n= 1391 span_u=(np.int64(35), np.int64(77)) u_mean= 154.7 v_mean=-321.3
+ X 43 c= 228.4cm n= 1335 span_u=(np.int64(35), np.int64(78)) u_mean= 154.7 v_mean=-322.7
+ X 44 c= 229.2cm n= 1148 span_u=(np.int64(35), np.int64(78)) u_mean= 154.7 v_mean=-321.9
+ X 45 c= 230.0cm n=  868 span_u=(np.int64(35), np.int64(78)) u_mean= 154.7 v_mean=-320.4
+ X 46 c= 230.8cm n=  716 span_u=(np.int64(35), np.int64(78)) u_mean= 154.7 v_mean=-317.5
+ X 47 c= 231.6cm n=  732 span_u=(np.int64(35), np.int64(77)) u_mean= 154.6 v_mean=-317.1
+ X 48 c= 232.4cm n=  777 span_u=(np.int64(35), np.int64(77)) u_mean= 154.6 v_mean=-317.4
+ X 49 c= 233.2cm n=  822 span_u=(np.int64(35), np.int64(77)) u_mean= 154.6 v_mean=-317.8
+ X 50 c= 234.0cm n=  770 span_u=(np.int64(35), np.int64(77)) u_mean= 154.6 v_mean=-317.9
+ X 51 c= 234.8cm n=  660 span_u=(np.int64(36), np.int64(77)) u_mean= 154.7 v_mean=-317.9
+ X 52 c= 235.6cm n=  536 span_u=(np.int64(36), np.int64(77)) u_mean= 154.7 v_mean=-320.5
+ X 53 c= 236.4cm n=  447 span_u=(np.int64(36), np.int64(76)) u_mean= 154.4 v_mean=-329.9
+ X 54 c= 237.2cm n=  554 span_u=(np.int64(36), np.int64(76)) u_mean= 154.6 v_mean=-334.3
+ X 55 c= 238.0cm n=  660 span_u=(np.int64(36), np.int64(77)) u_mean= 154.7 v_mean=-336.4
+ X 56 c= 238.8cm n=  720 span_u=(np.int64(35), np.int64(77)) u_mean= 154.8 v_mean=-336.5
+ X 57 c= 239.6cm n=  815 span_u=(np.int64(35), np.int64(77)) u_mean= 154.7 v_mean=-336.6
+ X 58 c= 240.4cm n=  903 span_u=(np.int64(35), np.int64(77)) u_mean= 154.6 v_mean=-336.1
+ X 59 c= 241.2cm n=  932 span_u=(np.int64(34), np.int64(78)) u_mean= 154.7 v_mean=-335.9
+ X 60 c= 242.0cm n=  889 span_u=(np.int64(34), np.int64(78)) u_mean= 154.6 v_mean=-335.5
+ X 61 c= 242.8cm n=  838 span_u=(np.int64(34), np.int64(78)) u_mean= 154.7 v_mean=-335.0
+ X 62 c= 243.6cm n=  792 span_u=(np.int64(34), np.int64(79)) u_mean= 154.7 v_mean=-334.8
+ X 63 c= 244.4cm n=  671 span_u=(np.int64(34), np.int64(79)) u_mean= 154.9 v_mean=-333.2
+ X 64 c= 245.2cm n=  548 span_u=(np.int64(34), np.int64(79)) u_mean= 154.8 v_mean=-332.1
+ X 65 c= 246.0cm n=  462 span_u=(np.int64(34), np.int64(79)) u_mean= 154.8 v_mean=-330.7
+ X 66 c= 246.8cm n=  352 span_u=(np.int64(34), np.int64(79)) u_mean= 154.8 v_mean=-326.9
+ X 67 c= 247.6cm n=  283 span_u=(np.int64(34), np.int64(78)) u_mean= 154.8 v_mean=-324.8
+ X 68 c= 248.4cm n=  210 span_u=(np.int64(35), np.int64(78)) u_mean= 154.8 v_mean=-324.2
+ X 69 c= 249.2cm n=  127 span_u=(np.int64(35), np.int64(77)) u_mean= 154.5 v_mean=-323.4
+ X 70 c= 250.0cm n=   48 span_u=(np.int64(37), np.int64(76)) u_mean= 155.3 v_mean=-322.9
+axis Y profile: 0001111111111111111121222222211111112222222333333357898887777777766655543333322222222333333333333444433333333222222233333221122222222222211212222222222110
+--- axis Y: slices (coord_cm, n_cells, area_cells, centroid of cells)
+ Y  0 c= 109.8cm n=   29 span_u=(np.int64(56), np.int64(61)) u_mean= 240.8 v_mean=-390.5
+ Y  1 c= 110.6cm n=  105 span_u=(np.int64(48), np.int64(62)) u_mean= 238.1 v_mean=-390.9
+ Y  2 c= 111.4cm n=  147 span_u=(np.int64(48), np.int64(62)) u_mean= 237.9 v_mean=-390.6
+ Y  3 c= 112.2cm n=  171 span_u=(np.int64(48), np.int64(62)) u_mean= 237.9 v_mean=-390.4
+ Y  4 c= 113.0cm n=  183 span_u=(np.int64(48), np.int64(62)) u_mean= 237.9 v_mean=-390.2
+ Y  5 c= 113.8cm n=  183 span_u=(np.int64(48), np.int64(61)) u_mean= 237.8 v_mean=-389.9
+ Y  6 c= 114.6cm n=  189 span_u=(np.int64(48), np.int64(61)) u_mean= 238.0 v_mean=-389.4
+ Y  7 c= 115.4cm n=  195 span_u=(np.int64(48), np.int64(62)) u_mean= 238.4 v_mean=-388.7
+ Y  8 c= 116.2cm n=  174 span_u=(np.int64(49), np.int64(63)) u_mean= 238.6 v_mean=-388.4
+ Y  9 c= 117.0cm n=  200 span_u=(np.int64(48), np.int64(64)) u_mean= 238.8 v_mean=-387.7
+ Y 10 c= 117.8cm n=  202 span_u=(np.int64(47), np.int64(65)) u_mean= 238.8 v_mean=-387.3
+ Y 11 c= 118.6cm n=  201 span_u=(np.int64(46), np.int64(66)) u_mean= 238.7 v_mean=-387.1
+ Y 12 c= 119.4cm n=  220 span_u=(np.int64(46), np.int64(66)) u_mean= 238.8 v_mean=-386.8
+ Y 13 c= 120.2cm n=  227 span_u=(np.int64(45), np.int64(67)) u_mean= 238.8 v_mean=-386.6
+ Y 14 c= 121.0cm n=  232 span_u=(np.int64(44), np.int64(68)) u_mean= 238.8 v_mean=-386.0
+ Y 15 c= 121.8cm n=  255 span_u=(np.int64(43), np.int64(69)) u_mean= 238.8 v_mean=-385.7
+ Y 16 c= 122.6cm n=  272 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-385.2
+ Y 17 c= 123.4cm n=  283 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-384.5
+ Y 18 c= 124.2cm n=  313 span_u=(np.int64(39), np.int64(73)) u_mean= 238.9 v_mean=-384.2
+ Y 19 c= 125.0cm n=  319 span_u=(np.int64(38), np.int64(74)) u_mean= 238.9 v_mean=-383.7
+ Y 20 c= 125.8cm n=  335 span_u=(np.int64(38), np.int64(75)) u_mean= 238.9 v_mean=-383.9
+ Y 21 c= 126.6cm n=  326 span_u=(np.int64(36), np.int64(76)) u_mean= 238.8 v_mean=-383.7
+ Y 22 c= 127.4cm n=  382 span_u=(np.int64(34), np.int64(78)) u_mean= 238.8 v_mean=-384.0
+ Y 23 c= 128.2cm n=  373 span_u=(np.int64(34), np.int64(78)) u_mean= 238.9 v_mean=-383.9
+ Y 24 c= 129.0cm n=  399 span_u=(np.int64(32), np.int64(80)) u_mean= 238.8 v_mean=-383.9
+ Y 25 c= 129.8cm n=  432 span_u=(np.int64(31), np.int64(81)) u_mean= 238.8 v_mean=-384.0
+ Y 26 c= 130.6cm n=  434 span_u=(np.int64(30), np.int64(82)) u_mean= 238.7 v_mean=-383.7
+ Y 27 c= 131.4cm n=  442 span_u=(np.int64(28), np.int64(84)) u_mean= 238.7 v_mean=-384.0
+ Y 28 c= 132.2cm n=  371 span_u=(np.int64(27), np.int64(85)) u_mean= 238.8 v_mean=-384.0
+ Y 29 c= 133.0cm n=  306 span_u=(np.int64(26), np.int64(87)) u_mean= 238.9 v_mean=-385.0
+ Y 30 c= 133.8cm n=  263 span_u=(np.int64(24), np.int64(88)) u_mean= 238.8 v_mean=-385.5
+ Y 31 c= 134.6cm n=  278 span_u=(np.int64(23), np.int64(89)) u_mean= 238.6 v_mean=-385.9
+ Y 32 c= 135.4cm n=  278 span_u=(np.int64(21), np.int64(91)) u_mean= 238.5 v_mean=-386.1
+ Y 33 c= 136.2cm n=  292 span_u=(np.int64(20), np.int64(92)) u_mean= 238.5 v_mean=-386.6
+ Y 34 c= 137.0cm n=  294 span_u=(np.int64(18), np.int64(94)) u_mean= 238.8 v_mean=-386.8
+ Y 35 c= 137.8cm n=  320 span_u=(np.int64(17), np.int64(95)) u_mean= 238.8 v_mean=-387.1
+ Y 36 c= 138.6cm n=  340 span_u=(np.int64(16), np.int64(97)) u_mean= 239.1 v_mean=-387.4
+ Y 37 c= 139.4cm n=  366 span_u=(np.int64(14), np.int64(98)) u_mean= 238.8 v_mean=-387.8
+ Y 38 c= 140.2cm n=  382 span_u=(np.int64(12), np.int64(100)) u_mean= 238.9 v_mean=-388.1
+ Y 39 c= 141.0cm n=  405 span_u=(np.int64(10), np.int64(102)) u_mean= 238.7 v_mean=-388.3
+ Y 40 c= 141.8cm n=  421 span_u=(np.int64(9), np.int64(103)) u_mean= 238.6 v_mean=-388.7
+ Y 41 c= 142.6cm n=  430 span_u=(np.int64(8), np.int64(104)) u_mean= 238.4 v_mean=-389.1
+ Y 42 c= 143.4cm n=  442 span_u=(np.int64(7), np.int64(106)) u_mean= 238.7 v_mean=-389.6
+ Y 43 c= 144.2cm n=  524 span_u=(np.int64(2), np.int64(110)) u_mean= 238.5 v_mean=-390.8
+ Y 44 c= 145.0cm n=  554 span_u=(np.int64(2), np.int64(110)) u_mean= 238.8 v_mean=-391.0
+ Y 45 c= 145.8cm n=  570 span_u=(np.int64(1), np.int64(111)) u_mean= 238.8 v_mean=-391.5
+ Y 46 c= 146.6cm n=  566 span_u=(np.int64(0), np.int64(112)) u_mean= 238.9 v_mean=-391.7
+ Y 47 c= 147.4cm n=  517 span_u=(np.int64(0), np.int64(112)) u_mean= 238.6 v_mean=-391.7
+ Y 48 c= 148.2cm n=  554 span_u=(np.int64(0), np.int64(112)) u_mean= 238.8 v_mean=-390.9
+ Y 49 c= 149.0cm n=  652 span_u=(np.int64(0), np.int64(113)) u_mean= 239.0 v_mean=-390.1
+ Y 50 c= 149.8cm n=  839 span_u=(np.int64(0), np.int64(113)) u_mean= 238.8 v_mean=-387.6
+ Y 51 c= 150.6cm n= 1166 span_u=(np.int64(0), np.int64(113)) u_mean= 238.9 v_mean=-385.1
+ Y 52 c= 151.4cm n= 1343 span_u=(np.int64(0), np.int64(112)) u_mean= 238.5 v_mean=-383.7
+ Y 53 c= 152.2cm n= 1477 span_u=(np.int64(0), np.int64(112)) u_mean= 238.8 v_mean=-383.0
+ Y 54 c= 153.0cm n= 1452 span_u=(np.int64(0), np.int64(112)) u_mean= 238.8 v_mean=-383.0
+ Y 55 c= 153.8cm n= 1398 span_u=(np.int64(1), np.int64(111)) u_mean= 238.9 v_mean=-383.0
+ Y 56 c= 154.6cm n= 1337 span_u=(np.int64(2), np.int64(110)) u_mean= 238.8 v_mean=-382.2
+ Y 57 c= 155.4cm n= 1227 span_u=(np.int64(3), np.int64(109)) u_mean= 238.8 v_mean=-381.3
+ Y 58 c= 156.2cm n= 1201 span_u=(np.int64(3), np.int64(109)) u_mean= 238.8 v_mean=-379.7
+ Y 59 c= 157.0cm n= 1189 span_u=(np.int64(4), np.int64(108)) u_mean= 238.7 v_mean=-378.8
+ Y 60 c= 157.8cm n= 1222 span_u=(np.int64(5), np.int64(107)) u_mean= 238.8 v_mean=-377.7
+ Y 61 c= 158.6cm n= 1240 span_u=(np.int64(8), np.int64(104)) u_mean= 238.7 v_mean=-376.5
+ Y 62 c= 159.4cm n= 1267 span_u=(np.int64(10), np.int64(102)) u_mean= 238.7 v_mean=-375.6
+ Y 63 c= 160.2cm n= 1256 span_u=(np.int64(12), np.int64(100)) u_mean= 238.8 v_mean=-374.9
+ Y 64 c= 161.0cm n= 1212 span_u=(np.int64(14), np.int64(98)) u_mean= 238.8 v_mean=-373.8
+ Y 65 c= 161.8cm n= 1140 span_u=(np.int64(17), np.int64(95)) u_mean= 238.8 v_mean=-373.1
+ Y 66 c= 162.6cm n= 1080 span_u=(np.int64(19), np.int64(93)) u_mean= 238.8 v_mean=-372.4
+ Y 67 c= 163.4cm n= 1010 span_u=(np.int64(21), np.int64(92)) u_mean= 238.8 v_mean=-371.8
+ Y 68 c= 164.2cm n=  975 span_u=(np.int64(22), np.int64(90)) u_mean= 238.8 v_mean=-371.7
+ Y 69 c= 165.0cm n=  887 span_u=(np.int64(24), np.int64(88)) u_mean= 239.0 v_mean=-371.7
+ Y 70 c= 165.8cm n=  821 span_u=(np.int64(25), np.int64(87)) u_mean= 238.9 v_mean=-371.0
+ Y 71 c= 166.6cm n=  710 span_u=(np.int64(28), np.int64(84)) u_mean= 238.8 v_mean=-370.5
+ Y 72 c= 167.4cm n=  584 span_u=(np.int64(37), np.int64(75)) u_mean= 238.8 v_mean=-369.5
+ Y 73 c= 168.2cm n=  556 span_u=(np.int64(38), np.int64(75)) u_mean= 238.8 v_mean=-369.4
+ Y 74 c= 169.0cm n=  552 span_u=(np.int64(38), np.int64(74)) u_mean= 238.9 v_mean=-369.2
+ Y 75 c= 169.8cm n=  524 span_u=(np.int64(39), np.int64(74)) u_mean= 238.9 v_mean=-368.7
+ Y 76 c= 170.6cm n=  532 span_u=(np.int64(39), np.int64(73)) u_mean= 238.7 v_mean=-368.6
+ Y 77 c= 171.4cm n=  490 span_u=(np.int64(39), np.int64(73)) u_mean= 238.9 v_mean=-367.9
+ Y 78 c= 172.2cm n=  475 span_u=(np.int64(38), np.int64(74)) u_mean= 238.9 v_mean=-367.0
+ Y 79 c= 173.0cm n=  461 span_u=(np.int64(38), np.int64(74)) u_mean= 238.8 v_mean=-366.2
+ Y 80 c= 173.8cm n=  445 span_u=(np.int64(38), np.int64(75)) u_mean= 238.9 v_mean=-365.9
+ Y 81 c= 174.6cm n=  443 span_u=(np.int64(37), np.int64(75)) u_mean= 238.7 v_mean=-364.9
+ Y 82 c= 175.4cm n=  451 span_u=(np.int64(37), np.int64(75)) u_mean= 238.8 v_mean=-364.0
+ Y 83 c= 176.2cm n=  465 span_u=(np.int64(36), np.int64(76)) u_mean= 238.7 v_mean=-363.1
+ Y 84 c= 177.0cm n=  486 span_u=(np.int64(35), np.int64(77)) u_mean= 238.7 v_mean=-363.1
+ Y 85 c= 177.8cm n=  499 span_u=(np.int64(35), np.int64(77)) u_mean= 238.9 v_mean=-362.5
+ Y 86 c= 178.6cm n=  526 span_u=(np.int64(35), np.int64(77)) u_mean= 238.8 v_mean=-362.8
+ Y 87 c= 179.4cm n=  567 span_u=(np.int64(35), np.int64(78)) u_mean= 238.9 v_mean=-362.4
+ Y 88 c= 180.2cm n=  575 span_u=(np.int64(34), np.int64(78)) u_mean= 238.9 v_mean=-362.2
+ Y 89 c= 181.0cm n=  594 span_u=(np.int64(34), np.int64(78)) u_mean= 238.8 v_mean=-362.4
+ Y 90 c= 181.8cm n=  574 span_u=(np.int64(34), np.int64(78)) u_mean= 238.7 v_mean=-362.5
+ Y 91 c= 182.6cm n=  578 span_u=(np.int64(34), np.int64(78)) u_mean= 238.7 v_mean=-361.7
+ Y 92 c= 183.4cm n=  576 span_u=(np.int64(34), np.int64(79)) u_mean= 239.0 v_mean=-361.2
+ Y 93 c= 184.2cm n=  579 span_u=(np.int64(34), np.int64(79)) u_mean= 238.9 v_mean=-361.3
+ Y 94 c= 185.0cm n=  605 span_u=(np.int64(34), np.int64(79)) u_mean= 239.1 v_mean=-360.7
+ Y 95 c= 185.8cm n=  633 span_u=(np.int64(34), np.int64(79)) u_mean= 239.0 v_mean=-360.5
+ Y 96 c= 186.6cm n=  652 span_u=(np.int64(34), np.int64(79)) u_mean= 239.0 v_mean=-360.1
+ Y 97 c= 187.4cm n=  690 span_u=(np.int64(34), np.int64(79)) u_mean= 238.9 v_mean=-359.8
+ Y 98 c= 188.2cm n=  714 span_u=(np.int64(34), np.int64(79)) u_mean= 238.8 v_mean=-360.1
+ Y 99 c= 189.0cm n=  707 span_u=(np.int64(34), np.int64(78)) u_mean= 239.0 v_mean=-360.4
+ Y100 c= 189.8cm n=  676 span_u=(np.int64(35), np.int64(77)) u_mean= 239.0 v_mean=-360.9
+ Y101 c= 190.6cm n=  645 span_u=(np.int64(35), np.int64(77)) u_mean= 238.9 v_mean=-361.6
+ Y102 c= 191.4cm n=  599 span_u=(np.int64(35), np.int64(77)) u_mean= 238.9 v_mean=-362.0
+ Y103 c= 192.2cm n=  570 span_u=(np.int64(35), np.int64(77)) u_mean= 238.8 v_mean=-362.9
+ Y104 c= 193.0cm n=  549 span_u=(np.int64(35), np.int64(77)) u_mean= 238.6 v_mean=-363.4
+ Y105 c= 193.8cm n=  524 span_u=(np.int64(35), np.int64(77)) u_mean= 238.8 v_mean=-363.8
+ Y106 c= 194.6cm n=  504 span_u=(np.int64(35), np.int64(77)) u_mean= 238.9 v_mean=-364.2
+ Y107 c= 195.4cm n=  515 span_u=(np.int64(35), np.int64(78)) u_mean= 239.0 v_mean=-364.9
+ Y108 c= 196.2cm n=  496 span_u=(np.int64(35), np.int64(78)) u_mean= 238.8 v_mean=-365.0
+ Y109 c= 197.0cm n=  487 span_u=(np.int64(35), np.int64(78)) u_mean= 239.0 v_mean=-365.6
+ Y110 c= 197.8cm n=  482 span_u=(np.int64(35), np.int64(78)) u_mean= 238.9 v_mean=-365.9
+ Y111 c= 198.6cm n=  460 span_u=(np.int64(35), np.int64(78)) u_mean= 238.9 v_mean=-366.3
+ Y112 c= 199.4cm n=  457 span_u=(np.int64(35), np.int64(78)) u_mean= 238.8 v_mean=-366.4
+ Y113 c= 200.2cm n=  457 span_u=(np.int64(35), np.int64(77)) u_mean= 238.8 v_mean=-366.8
+ Y114 c= 201.0cm n=  455 span_u=(np.int64(35), np.int64(77)) u_mean= 238.7 v_mean=-367.0
+ Y115 c= 201.8cm n=  452 span_u=(np.int64(35), np.int64(77)) u_mean= 238.8 v_mean=-367.4
+ Y116 c= 202.6cm n=  507 span_u=(np.int64(35), np.int64(77)) u_mean= 238.8 v_mean=-368.6
+ Y117 c= 203.4cm n=  606 span_u=(np.int64(36), np.int64(76)) u_mean= 238.8 v_mean=-369.8
+ Y118 c= 204.2cm n=  616 span_u=(np.int64(37), np.int64(76)) u_mean= 238.9 v_mean=-371.1
+ Y119 c= 205.0cm n=  565 span_u=(np.int64(37), np.int64(75)) u_mean= 238.8 v_mean=-372.4
+ Y120 c= 205.8cm n=  504 span_u=(np.int64(39), np.int64(73)) u_mean= 238.8 v_mean=-374.2
+ Y121 c= 206.6cm n=  362 span_u=(np.int64(46), np.int64(66)) u_mean= 238.8 v_mean=-377.1
+ Y122 c= 207.4cm n=  346 span_u=(np.int64(46), np.int64(66)) u_mean= 238.8 v_mean=-377.8
+ Y123 c= 208.2cm n=  319 span_u=(np.int64(45), np.int64(67)) u_mean= 238.8 v_mean=-378.3
+ Y124 c= 209.0cm n=  314 span_u=(np.int64(45), np.int64(67)) u_mean= 238.8 v_mean=-378.6
+ Y125 c= 209.8cm n=  341 span_u=(np.int64(43), np.int64(69)) u_mean= 238.8 v_mean=-378.2
+ Y126 c= 210.6cm n=  370 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-377.3
+ Y127 c= 211.4cm n=  374 span_u=(np.int64(42), np.int64(70)) u_mean= 238.7 v_mean=-377.0
+ Y128 c= 212.2cm n=  358 span_u=(np.int64(42), np.int64(70)) u_mean= 238.7 v_mean=-376.9
+ Y129 c= 213.0cm n=  372 span_u=(np.int64(41), np.int64(72)) u_mean= 239.0 v_mean=-376.5
+ Y130 c= 213.8cm n=  360 span_u=(np.int64(41), np.int64(72)) u_mean= 238.9 v_mean=-376.4
+ Y131 c= 214.6cm n=  362 span_u=(np.int64(40), np.int64(72)) u_mean= 238.7 v_mean=-376.1
+ Y132 c= 215.4cm n=  352 span_u=(np.int64(40), np.int64(72)) u_mean= 238.8 v_mean=-376.2
+ Y133 c= 216.2cm n=  358 span_u=(np.int64(40), np.int64(72)) u_mean= 238.9 v_mean=-376.3
+ Y134 c= 217.0cm n=  368 span_u=(np.int64(40), np.int64(72)) u_mean= 238.8 v_mean=-376.6
+ Y135 c= 217.8cm n=  368 span_u=(np.int64(40), np.int64(72)) u_mean= 238.8 v_mean=-376.4
+ Y136 c= 218.6cm n=  330 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.4
+ Y137 c= 219.4cm n=  325 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.4
+ Y138 c= 220.2cm n=  326 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.4
+ Y139 c= 221.0cm n=  329 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.5
+ Y140 c= 221.8cm n=  328 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.4
+ Y141 c= 222.6cm n=  330 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.5
+ Y142 c= 223.4cm n=  333 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.5
+ Y143 c= 224.2cm n=  348 span_u=(np.int64(42), np.int64(70)) u_mean= 238.8 v_mean=-376.3
+ Y144 c= 225.0cm n=  358 span_u=(np.int64(42), np.int64(70)) u_mean= 238.9 v_mean=-376.5
+ Y145 c= 225.8cm n=  358 span_u=(np.int64(43), np.int64(70)) u_mean= 238.8 v_mean=-376.7
+ Y146 c= 226.6cm n=  364 span_u=(np.int64(43), np.int64(69)) u_mean= 238.8 v_mean=-376.4
+ Y147 c= 227.4cm n=  377 span_u=(np.int64(43), np.int64(69)) u_mean= 238.9 v_mean=-376.1
+ Y148 c= 228.2cm n=  381 span_u=(np.int64(44), np.int64(68)) u_mean= 238.8 v_mean=-376.3
+ Y149 c= 229.0cm n=  382 span_u=(np.int64(45), np.int64(67)) u_mean= 238.8 v_mean=-376.0
+ Y150 c= 229.8cm n=  347 span_u=(np.int64(46), np.int64(67)) u_mean= 239.0 v_mean=-376.2
+ Y151 c= 230.6cm n=  317 span_u=(np.int64(47), np.int64(65)) u_mean= 238.8 v_mean=-375.8
+ Y152 c= 231.4cm n=  212 span_u=(np.int64(49), np.int64(64)) u_mean= 238.9 v_mean=-376.0
+ Y153 c= 232.2cm n=  107 span_u=(np.int64(51), np.int64(61)) u_mean= 238.8 v_mean=-375.5
+axis Z profile: 000000001111111111111111111111111123455567888876666666665666666666788987655543211111111111111111111111111000000000
+--- axis Z: slices (coord_cm, n_cells, area_cells, centroid of cells)
+ Z  0 c=-399.5cm n=   64 span_u=(np.int64(46), np.int64(54)) u_mean= 233.9 v_mean= 114.6
+ Z  1 c=-398.7cm n=  102 span_u=(np.int64(45), np.int64(55)) u_mean= 233.8 v_mean= 114.6
+ Z  2 c=-397.9cm n=  150 span_u=(np.int64(43), np.int64(56)) u_mean= 233.7 v_mean= 114.7
+ Z  3 c=-397.1cm n=  166 span_u=(np.int64(43), np.int64(58)) u_mean= 234.1 v_mean= 114.8
+ Z  4 c=-396.3cm n=  180 span_u=(np.int64(43), np.int64(59)) u_mean= 234.3 v_mean= 115.1
+ Z  5 c=-395.5cm n=  192 span_u=(np.int64(43), np.int64(60)) u_mean= 234.7 v_mean= 115.7
+ Z  6 c=-394.7cm n=  189 span_u=(np.int64(43), np.int64(60)) u_mean= 234.9 v_mean= 116.1
+ Z  7 c=-393.9cm n=  201 span_u=(np.int64(42), np.int64(60)) u_mean= 234.7 v_mean= 116.3
+ Z  8 c=-393.1cm n=  219 span_u=(np.int64(41), np.int64(61)) u_mean= 234.7 v_mean= 116.8
+ Z  9 c=-392.3cm n=  239 span_u=(np.int64(40), np.int64(61)) u_mean= 234.6 v_mean= 117.2
+ Z 10 c=-391.5cm n=  259 span_u=(np.int64(39), np.int64(62)) u_mean= 234.6 v_mean= 117.8
+ Z 11 c=-390.7cm n=  259 span_u=(np.int64(39), np.int64(62)) u_mean= 234.7 v_mean= 118.0
+ Z 12 c=-389.9cm n=  286 span_u=(np.int64(38), np.int64(63)) u_mean= 234.9 v_mean= 118.5
+ Z 13 c=-389.1cm n=  291 span_u=(np.int64(38), np.int64(63)) u_mean= 234.8 v_mean= 118.9
+ Z 14 c=-388.3cm n=  315 span_u=(np.int64(37), np.int64(64)) u_mean= 234.8 v_mean= 119.2
+ Z 15 c=-387.5cm n=  317 span_u=(np.int64(37), np.int64(64)) u_mean= 234.9 v_mean= 119.6
+ Z 16 c=-386.7cm n=  336 span_u=(np.int64(36), np.int64(64)) u_mean= 234.7 v_mean= 120.0
+ Z 17 c=-385.9cm n=  340 span_u=(np.int64(35), np.int64(65)) u_mean= 234.8 v_mean= 120.5
+ Z 18 c=-385.1cm n=  362 span_u=(np.int64(34), np.int64(65)) u_mean= 234.7 v_mean= 121.0
+ Z 19 c=-384.3cm n=  358 span_u=(np.int64(34), np.int64(66)) u_mean= 234.7 v_mean= 121.4
+ Z 20 c=-383.5cm n=  374 span_u=(np.int64(33), np.int64(66)) u_mean= 234.6 v_mean= 121.8
+ Z 21 c=-382.7cm n=  387 span_u=(np.int64(32), np.int64(67)) u_mean= 234.5 v_mean= 122.3
+ Z 22 c=-381.9cm n=  398 span_u=(np.int64(32), np.int64(68)) u_mean= 234.9 v_mean= 122.7
+ Z 23 c=-381.1cm n=  397 span_u=(np.int64(31), np.int64(68)) u_mean= 234.6 v_mean= 123.0
+ Z 24 c=-380.3cm n=  410 span_u=(np.int64(30), np.int64(69)) u_mean= 234.6 v_mean= 123.5
+ Z 25 c=-379.5cm n=  402 span_u=(np.int64(30), np.int64(70)) u_mean= 234.9 v_mean= 123.9
+ Z 26 c=-378.7cm n=  392 span_u=(np.int64(29), np.int64(70)) u_mean= 234.6 v_mean= 124.2
+ Z 27 c=-377.9cm n=  389 span_u=(np.int64(28), np.int64(70)) u_mean= 234.8 v_mean= 124.7
+ Z 28 c=-377.1cm n=  381 span_u=(np.int64(27), np.int64(71)) u_mean= 234.9 v_mean= 125.1
+ Z 29 c=-376.3cm n=  379 span_u=(np.int64(27), np.int64(71)) u_mean= 234.9 v_mean= 125.5
+ Z 30 c=-375.5cm n=  373 span_u=(np.int64(26), np.int64(71)) u_mean= 235.3 v_mean= 125.9
+ Z 31 c=-374.7cm n=  368 span_u=(np.int64(25), np.int64(71)) u_mean= 234.7 v_mean= 126.1
+ Z 32 c=-373.9cm n=  370 span_u=(np.int64(24), np.int64(71)) u_mean= 234.4 v_mean= 126.4
+ Z 33 c=-373.1cm n=  363 span_u=(np.int64(24), np.int64(71)) u_mean= 234.5 v_mean= 126.8
+ Z 34 c=-372.3cm n=  447 span_u=(np.int64(22), np.int64(99)) u_mean= 240.1 v_mean= 132.9
+ Z 35 c=-371.5cm n=  658 span_u=(np.int64(22), np.int64(116)) u_mean= 251.6 v_mean= 139.8
+ Z 36 c=-370.7cm n=  875 span_u=(np.int64(21), np.int64(117)) u_mean= 257.5 v_mean= 143.1
+ Z 37 c=-369.9cm n= 1043 span_u=(np.int64(21), np.int64(119)) u_mean= 259.0 v_mean= 144.4
+ Z 38 c=-369.1cm n= 1166 span_u=(np.int64(19), np.int64(119)) u_mean= 258.1 v_mean= 144.7
+ Z 39 c=-368.3cm n= 1164 span_u=(np.int64(18), np.int64(120)) u_mean= 255.8 v_mean= 144.5
+ Z 40 c=-367.5cm n= 1312 span_u=(np.int64(18), np.int64(135)) u_mean= 256.9 v_mean= 144.5
+ Z 41 c=-366.7cm n= 1500 span_u=(np.int64(18), np.int64(135)) u_mean= 259.2 v_mean= 144.5
+ Z 42 c=-365.9cm n= 1713 span_u=(np.int64(16), np.int64(144)) u_mean= 262.5 v_mean= 143.3
+ Z 43 c=-365.1cm n= 1844 span_u=(np.int64(15), np.int64(147)) u_mean= 265.8 v_mean= 142.1
+ Z 44 c=-364.3cm n= 1813 span_u=(np.int64(14), np.int64(148)) u_mean= 267.5 v_mean= 140.4
+ Z 45 c=-363.5cm n= 1745 span_u=(np.int64(13), np.int64(149)) u_mean= 268.2 v_mean= 139.0
+ Z 46 c=-362.7cm n= 1574 span_u=(np.int64(11), np.int64(150)) u_mean= 267.5 v_mean= 137.3
+ Z 47 c=-361.9cm n= 1415 span_u=(np.int64(10), np.int64(151)) u_mean= 267.0 v_mean= 136.3
+ Z 48 c=-361.1cm n= 1392 span_u=(np.int64(1), np.int64(151)) u_mean= 265.0 v_mean= 134.9
+ Z 49 c=-360.3cm n= 1335 span_u=(np.int64(1), np.int64(152)) u_mean= 264.2 v_mean= 133.3
+ Z 50 c=-359.5cm n= 1365 span_u=(np.int64(1), np.int64(152)) u_mean= 263.0 v_mean= 132.9
+ Z 51 c=-358.7cm n= 1369 span_u=(np.int64(1), np.int64(153)) u_mean= 262.9 v_mean= 132.9
+ Z 52 c=-357.9cm n= 1350 span_u=(np.int64(1), np.int64(153)) u_mean= 262.2 v_mean= 132.8
+ Z 53 c=-357.1cm n= 1317 span_u=(np.int64(1), np.int64(153)) u_mean= 261.7 v_mean= 132.7
+ Z 54 c=-356.3cm n= 1304 span_u=(np.int64(2), np.int64(153)) u_mean= 261.5 v_mean= 132.6
+ Z 55 c=-355.5cm n= 1292 span_u=(np.int64(1), np.int64(153)) u_mean= 260.0 v_mean= 132.3
+ Z 56 c=-354.7cm n= 1214 span_u=(np.int64(0), np.int64(153)) u_mean= 259.6 v_mean= 132.1
+ Z 57 c=-353.9cm n= 1295 span_u=(np.int64(0), np.int64(153)) u_mean= 258.8 v_mean= 132.0
+ Z 58 c=-353.1cm n= 1318 span_u=(np.int64(0), np.int64(153)) u_mean= 259.8 v_mean= 132.2
+ Z 59 c=-352.3cm n= 1340 span_u=(np.int64(0), np.int64(153)) u_mean= 260.4 v_mean= 132.4
+ Z 60 c=-351.5cm n= 1344 span_u=(np.int64(0), np.int64(153)) u_mean= 262.0 v_mean= 132.8
+ Z 61 c=-350.7cm n= 1337 span_u=(np.int64(0), np.int64(153)) u_mean= 263.8 v_mean= 133.1
+ Z 62 c=-349.9cm n= 1309 span_u=(np.int64(1), np.int64(152)) u_mean= 266.4 v_mean= 133.6
+ Z 63 c=-349.1cm n= 1275 span_u=(np.int64(8), np.int64(152)) u_mean= 267.7 v_mean= 134.0
+ Z 64 c=-348.3cm n= 1335 span_u=(np.int64(9), np.int64(152)) u_mean= 267.2 v_mean= 135.2
+ Z 65 c=-347.5cm n= 1405 span_u=(np.int64(10), np.int64(151)) u_mean= 267.1 v_mean= 136.1
+ Z 66 c=-346.7cm n= 1542 span_u=(np.int64(11), np.int64(150)) u_mean= 267.8 v_mean= 137.0
+ Z 67 c=-345.9cm n= 1700 span_u=(np.int64(13), np.int64(150)) u_mean= 268.1 v_mean= 138.8
+ Z 68 c=-345.1cm n= 1815 span_u=(np.int64(14), np.int64(148)) u_mean= 267.8 v_mean= 140.3
+ Z 69 c=-344.3cm n= 1849 span_u=(np.int64(15), np.int64(147)) u_mean= 266.1 v_mean= 141.9
+ Z 70 c=-343.5cm n= 1737 span_u=(np.int64(16), np.int64(145)) u_mean= 263.1 v_mean= 143.0
+ Z 71 c=-342.7cm n= 1512 span_u=(np.int64(18), np.int64(135)) u_mean= 259.2 v_mean= 144.5
+ Z 72 c=-341.9cm n= 1347 span_u=(np.int64(18), np.int64(135)) u_mean= 257.3 v_mean= 144.6
+ Z 73 c=-341.1cm n= 1170 span_u=(np.int64(18), np.int64(120)) u_mean= 255.5 v_mean= 144.4
+ Z 74 c=-340.3cm n= 1174 span_u=(np.int64(19), np.int64(119)) u_mean= 257.9 v_mean= 144.8
+ Z 75 c=-339.5cm n= 1067 span_u=(np.int64(20), np.int64(119)) u_mean= 258.9 v_mean= 144.6
+ Z 76 c=-338.7cm n=  900 span_u=(np.int64(21), np.int64(118)) u_mean= 258.0 v_mean= 143.5
+ Z 77 c=-337.9cm n=  716 span_u=(np.int64(22), np.int64(116)) u_mean= 253.2 v_mean= 140.7
+ Z 78 c=-337.1cm n=  489 span_u=(np.int64(22), np.int64(112)) u_mean= 243.1 v_mean= 134.7
+ Z 79 c=-336.3cm n=  384 span_u=(np.int64(24), np.int64(98)) u_mean= 236.9 v_mean= 129.1
+ Z 80 c=-335.5cm n=  371 span_u=(np.int64(24), np.int64(71)) u_mean= 234.8 v_mean= 126.5
+ Z 81 c=-334.7cm n=  370 span_u=(np.int64(25), np.int64(71)) u_mean= 234.9 v_mean= 126.1
+ Z 82 c=-333.9cm n=  375 span_u=(np.int64(26), np.int64(71)) u_mean= 235.3 v_mean= 125.9
+ Z 83 c=-333.1cm n=  378 span_u=(np.int64(27), np.int64(71)) u_mean= 234.6 v_mean= 125.4
+ Z 84 c=-332.3cm n=  384 span_u=(np.int64(27), np.int64(71)) u_mean= 234.9 v_mean= 125.1
+ Z 85 c=-331.5cm n=  381 span_u=(np.int64(28), np.int64(70)) u_mean= 234.9 v_mean= 124.8
+ Z 86 c=-330.7cm n=  396 span_u=(np.int64(29), np.int64(70)) u_mean= 234.6 v_mean= 124.2
+ Z 87 c=-329.9cm n=  407 span_u=(np.int64(29), np.int64(70)) u_mean= 234.7 v_mean= 123.9
+ Z 88 c=-329.1cm n=  399 span_u=(np.int64(30), np.int64(69)) u_mean= 234.5 v_mean= 123.5
+ Z 89 c=-328.3cm n=  393 span_u=(np.int64(31), np.int64(68)) u_mean= 234.6 v_mean= 122.9
+ Z 90 c=-327.5cm n=  396 span_u=(np.int64(32), np.int64(68)) u_mean= 234.8 v_mean= 122.6
+ Z 91 c=-326.7cm n=  382 span_u=(np.int64(32), np.int64(67)) u_mean= 234.6 v_mean= 122.3
+ Z 92 c=-325.9cm n=  378 span_u=(np.int64(33), np.int64(67)) u_mean= 234.7 v_mean= 121.9
+ Z 93 c=-325.1cm n=  357 span_u=(np.int64(34), np.int64(66)) u_mean= 234.8 v_mean= 121.4
+ Z 94 c=-324.3cm n=  363 span_u=(np.int64(34), np.int64(65)) u_mean= 234.7 v_mean= 121.0
+ Z 95 c=-323.5cm n=  342 span_u=(np.int64(35), np.int64(65)) u_mean= 234.8 v_mean= 120.6
+ Z 96 c=-322.7cm n=  327 span_u=(np.int64(36), np.int64(64)) u_mean= 234.7 v_mean= 119.9
+ Z 97 c=-321.9cm n=  318 span_u=(np.int64(36), np.int64(64)) u_mean= 234.8 v_mean= 119.6
+ Z 98 c=-321.1cm n=  320 span_u=(np.int64(37), np.int64(64)) u_mean= 234.8 v_mean= 119.2
+ Z 99 c=-320.3cm n=  290 span_u=(np.int64(38), np.int64(63)) u_mean= 234.9 v_mean= 118.8
+ Z100 c=-319.5cm n=  288 span_u=(np.int64(38), np.int64(63)) u_mean= 234.9 v_mean= 118.5
+ Z101 c=-318.7cm n=  263 span_u=(np.int64(39), np.int64(62)) u_mean= 234.8 v_mean= 118.0
+ Z102 c=-317.9cm n=  258 span_u=(np.int64(39), np.int64(62)) u_mean= 234.7 v_mean= 117.7
+ Z103 c=-317.1cm n=  235 span_u=(np.int64(40), np.int64(61)) u_mean= 234.7 v_mean= 117.2
+ Z104 c=-316.3cm n=  217 span_u=(np.int64(41), np.int64(61)) u_mean= 234.7 v_mean= 116.8
+ Z105 c=-315.5cm n=  201 span_u=(np.int64(42), np.int64(60)) u_mean= 234.7 v_mean= 116.3
+ Z106 c=-314.7cm n=  194 span_u=(np.int64(42), np.int64(60)) u_mean= 234.9 v_mean= 116.0
+ Z107 c=-313.9cm n=  187 span_u=(np.int64(43), np.int64(60)) u_mean= 234.7 v_mean= 115.6
+ Z108 c=-313.1cm n=  174 span_u=(np.int64(43), np.int64(59)) u_mean= 234.3 v_mean= 115.0
+ Z109 c=-312.3cm n=  163 span_u=(np.int64(43), np.int64(58)) u_mean= 234.0 v_mean= 114.8
+ Z110 c=-311.5cm n=  155 span_u=(np.int64(43), np.int64(56)) u_mean= 233.8 v_mean= 114.7
+ Z111 c=-310.7cm n=  109 span_u=(np.int64(45), np.int64(55)) u_mean= 233.8 v_mean= 114.4
+ Z112 c=-309.9cm n=   71 span_u=(np.int64(46), np.int64(54)) u_mean= 233.9 v_mean= 114.6
+ Z113 c=-309.1cm n=   15 span_u=(np.int64(49), np.int64(51)) u_mean= 234.0 v_mean= 114.6

@@ -1,0 +1,598 @@
+[
+  {
+    "model": "SexMachineModel-065",
+    "materials": 16,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-066",
+    "materials": 70,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-067",
+    "materials": 40,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-068",
+    "materials": 44,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Translucent Glass Safety]1",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-069",
+    "materials": 51,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Translucent Glass Safety]1",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-070",
+    "materials": 52,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Translucent Glass Safety]1",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-071",
+    "materials": 54,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Translucent Glass Safety]1",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-072",
+    "materials": 11,
+    "textures": [
+      {
+        "name": "[Metal Corrugated Shiny]",
+        "filename": "Metal_Corrogated_Shiny.jpg",
+        "bytes": 1806
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-073",
+    "materials": 61,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Translucent Glass Safety]1",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "[Metal Corrugated Shiny]",
+        "filename": "Metal_Corrogated_Shiny.jpg",
+        "bytes": 1806
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-074",
+    "materials": 62,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Translucent Glass Safety]1",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "[Metal Corrugated Shiny]",
+        "filename": "Metal_Corrogated_Shiny.jpg",
+        "bytes": 1806
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-075",
+    "materials": 61,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Translucent Glass Safety]1",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "[Metal Corrugated Shiny]",
+        "filename": "Metal_Corrogated_Shiny.jpg",
+        "bytes": 1806
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-076",
+    "materials": 8,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-077",
+    "materials": 59,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-078",
+    "materials": 9,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-079",
+    "materials": 14,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-080",
+    "materials": 14,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-081",
+    "materials": 73,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "wp_ivy_017",
+        "filename": "D:\\@Sketchup\\so skp material\\theinspiration ivy\\wp_ivy_017.jpg",
+        "bytes": 124275
+      },
+      {
+        "name": "Balll-line",
+        "filename": "D:\\8700K\\Exrea-2022\\Models\\1111.jpg",
+        "bytes": 65771
+      },
+      {
+        "name": "Ball-line02",
+        "filename": "D:\\8700K\\Exrea-2022\\Models\\1111.jpg",
+        "bytes": 65771
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-082",
+    "materials": 76,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "wp_ivy_017",
+        "filename": "D:\\@Sketchup\\so skp material\\theinspiration ivy\\wp_ivy_017.jpg",
+        "bytes": 124275
+      },
+      {
+        "name": "Balll-line",
+        "filename": "D:\\8700K\\Exrea-2022\\Models\\1111.jpg",
+        "bytes": 65771
+      },
+      {
+        "name": "Ball-line02",
+        "filename": "D:\\8700K\\Exrea-2022\\Models\\1111.jpg",
+        "bytes": 65771
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-083",
+    "materials": 11,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-084",
+    "materials": 15,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-085",
+    "materials": 83,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Metal Corrugated Shiny]",
+        "filename": "Metal_Corrogated_Shiny.jpg",
+        "bytes": 1806
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-086",
+    "materials": 100,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Metal Corrugated Shiny]",
+        "filename": "Metal_Corrogated_Shiny.jpg",
+        "bytes": 1806
+      },
+      {
+        "name": "Ball-line02",
+        "filename": "D:\\8700K\\Exrea-2022\\Models\\1111.jpg",
+        "bytes": 65771
+      },
+      {
+        "name": "[Metal Steel Textured White]",
+        "filename": "Metal_Steel_Textured_White.jpg",
+        "bytes": 5823
+      },
+      {
+        "name": "[Metal Steel Textured White]1",
+        "filename": "Metal_Steel_Textured_White.jpg",
+        "bytes": 5823
+      },
+      {
+        "name": "[Metal Steel Textured]",
+        "filename": "Metal_Steel_Textured.jpg",
+        "bytes": 6745
+      },
+      {
+        "name": "[Steel Brushed Stainless]",
+        "filename": "Steel Brushed Stainless.jpg",
+        "bytes": 27544
+      },
+      {
+        "name": "[Metal Embossed]",
+        "filename": "Metal_Embossed.jpg",
+        "bytes": 1152
+      }
+    ]
+  },
+  {
+    "model": "SexMachineModel-087",
+    "materials": 12,
+    "textures": []
+  },
+  {
+    "model": "SexMachineModel-088",
+    "materials": 100,
+    "textures": [
+      {
+        "name": "[Mirror 01]",
+        "filename": "Mirror_01.jpg",
+        "bytes": 11223
+      },
+      {
+        "name": "[Mirror 02]",
+        "filename": "Mirror_02.jpg",
+        "bytes": 2910
+      },
+      {
+        "name": "[Translucent Glass Safety]",
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "bytes": 6047
+      },
+      {
+        "name": "LL",
+        "filename": "C:\\Users\\8700k\\Pictures\\Work-960pro-2020\\pre-line.png",
+        "bytes": 229499
+      },
+      {
+        "name": "[Metal Corrugated Shiny]",
+        "filename": "Metal_Corrogated_Shiny.jpg",
+        "bytes": 1806
+      },
+      {
+        "name": "Ball-line02",
+        "filename": "D:\\8700K\\Exrea-2022\\Models\\1111.jpg",
+        "bytes": 65771
+      },
+      {
+        "name": "[Metal Steel Textured White]",
+        "filename": "Metal_Steel_Textured_White.jpg",
+        "bytes": 5823
+      },
+      {
+        "name": "[Metal Steel Textured White]1",
+        "filename": "Metal_Steel_Textured_White.jpg",
+        "bytes": 5823
+      },
+      {
+        "name": "[Metal Steel Textured]",
+        "filename": "Metal_Steel_Textured.jpg",
+        "bytes": 6745
+      },
+      {
+        "name": "[Steel Brushed Stainless]",
+        "filename": "Steel Brushed Stainless.jpg",
+        "bytes": 27544
+      },
+      {
+        "name": "[Metal Embossed]",
+        "filename": "Metal_Embossed.jpg",
+        "bytes": 1152
+      }
+    ]
+  }
+]

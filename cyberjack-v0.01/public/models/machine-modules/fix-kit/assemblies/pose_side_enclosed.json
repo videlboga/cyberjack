@@ -1,0 +1,57 @@
+{
+  "schema": "cyberjack-fix-assembly/1",
+  "id": "asm_pose_side_enclosed",
+  "name": "На боку / в капсуле",
+  "subtitle": "side-lying / enclosed",
+  "refs": [
+    "vol-04 · 097",
+    "vol-03 · 084",
+    "vol-03 · 086",
+    "vol-04 · 099"
+  ],
+  "body": "Тело на боку или внутри капсулы/низкого короба; колени подтянуты, руки вдоль/вперёд; 084/099 — закрытый объём.",
+  "summary": "Кровать 2×1 с боковой опорой и подушками; для капсулы нужен отдельный корпус, не просто рама.",
+  "status": "ready",
+  "built_count": 6,
+  "planned_count": 0,
+  "modules": [
+    {
+      "id": "fix_rail_2000",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_cross_1000",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_foot",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_carriage",
+      "qty": 4,
+      "status": "built"
+    },
+    {
+      "id": "fix_pad_adapter",
+      "qty": 2,
+      "status": "built"
+    },
+    {
+      "id": "fix_cuff_adapter",
+      "qty": 2,
+      "status": "built"
+    }
+  ],
+  "mounts": [
+    "hip — боковая подушка",
+    "chest — подушка",
+    "wrist — манжета",
+    "ankle — манжета"
+  ],
+  "effect": "Боковой/задний доступ; капсула ограничивает обзор и требует отдельной двери.",
+  "note": "097/084/086/099 — не одна поза: 086 — на боку на валиках, 084/099 — внутри короба."
+}

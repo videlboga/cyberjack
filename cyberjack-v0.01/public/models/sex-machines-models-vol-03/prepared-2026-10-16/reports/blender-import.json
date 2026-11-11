@@ -1,0 +1,218 @@
+[
+  {
+    "model": "SexMachineModel-065",
+    "triangles": 278177,
+    "figureReferences": 1,
+    "objects": 570,
+    "images": 0,
+    "file": "blend/SexMachineModel-065.blend",
+    "seconds": 3.95
+  },
+  {
+    "model": "SexMachineModel-066",
+    "triangles": 21754,
+    "figureReferences": 2,
+    "objects": 44,
+    "images": 0,
+    "file": "blend/SexMachineModel-066.blend",
+    "seconds": 0.32
+  },
+  {
+    "model": "SexMachineModel-067",
+    "triangles": 190782,
+    "figureReferences": 1,
+    "objects": 388,
+    "images": 0,
+    "file": "blend/SexMachineModel-067.blend",
+    "seconds": 0.43
+  },
+  {
+    "model": "SexMachineModel-068",
+    "triangles": 296632,
+    "figureReferences": 1,
+    "objects": 1657,
+    "images": 1,
+    "file": "blend/SexMachineModel-068.blend",
+    "seconds": 1.2
+  },
+  {
+    "model": "SexMachineModel-069",
+    "triangles": 30918,
+    "figureReferences": 1,
+    "objects": 95,
+    "images": 1,
+    "file": "blend/SexMachineModel-069.blend",
+    "seconds": 0.19
+  },
+  {
+    "model": "SexMachineModel-070",
+    "triangles": 19905,
+    "figureReferences": 1,
+    "objects": 40,
+    "images": 0,
+    "file": "blend/SexMachineModel-070.blend",
+    "seconds": 0.13
+  },
+  {
+    "model": "SexMachineModel-071",
+    "triangles": 13493,
+    "figureReferences": 1,
+    "objects": 47,
+    "images": 0,
+    "file": "blend/SexMachineModel-071.blend",
+    "seconds": 0.14
+  },
+  {
+    "model": "SexMachineModel-072",
+    "triangles": 76406,
+    "figureReferences": 1,
+    "objects": 102,
+    "images": 0,
+    "file": "blend/SexMachineModel-072.blend",
+    "seconds": 0.15
+  },
+  {
+    "model": "SexMachineModel-073",
+    "triangles": 24291,
+    "figureReferences": 1,
+    "objects": 162,
+    "images": 0,
+    "file": "blend/SexMachineModel-073.blend",
+    "seconds": 0.17
+  },
+  {
+    "model": "SexMachineModel-074",
+    "triangles": 33264,
+    "figureReferences": 7,
+    "objects": 187,
+    "images": 0,
+    "file": "blend/SexMachineModel-074.blend",
+    "seconds": 0.11
+  },
+  {
+    "model": "SexMachineModel-075",
+    "triangles": 457543,
+    "figureReferences": 1,
+    "objects": 917,
+    "images": 0,
+    "file": "blend/SexMachineModel-075.blend",
+    "seconds": 0.41
+  },
+  {
+    "model": "SexMachineModel-076",
+    "triangles": 7348,
+    "figureReferences": 1,
+    "objects": 22,
+    "images": 0,
+    "file": "blend/SexMachineModel-076.blend",
+    "seconds": 0.15
+  },
+  {
+    "model": "SexMachineModel-077",
+    "triangles": 10779,
+    "figureReferences": 1,
+    "objects": 41,
+    "images": 0,
+    "file": "blend/SexMachineModel-077.blend",
+    "seconds": 0.16
+  },
+  {
+    "model": "SexMachineModel-078",
+    "triangles": 18779,
+    "figureReferences": 1,
+    "objects": 42,
+    "images": 0,
+    "file": "blend/SexMachineModel-078.blend",
+    "seconds": 0.1
+  },
+  {
+    "model": "SexMachineModel-079",
+    "triangles": 8388,
+    "figureReferences": 1,
+    "objects": 24,
+    "images": 0,
+    "file": "blend/SexMachineModel-079.blend",
+    "seconds": 0.07
+  },
+  {
+    "model": "SexMachineModel-080",
+    "triangles": 272828,
+    "figureReferences": 1,
+    "objects": 554,
+    "images": 0,
+    "file": "blend/SexMachineModel-080.blend",
+    "seconds": 0.92
+  },
+  {
+    "model": "SexMachineModel-081",
+    "triangles": 12995,
+    "figureReferences": 1,
+    "objects": 83,
+    "images": 1,
+    "file": "blend/SexMachineModel-081.blend",
+    "seconds": 0.11
+  },
+  {
+    "model": "SexMachineModel-082",
+    "triangles": 371625,
+    "figureReferences": 1,
+    "objects": 90,
+    "images": 0,
+    "file": "blend/SexMachineModel-082.blend",
+    "seconds": 0.38
+  },
+  {
+    "model": "SexMachineModel-083",
+    "triangles": 5404,
+    "figureReferences": 1,
+    "objects": 19,
+    "images": 0,
+    "file": "blend/SexMachineModel-083.blend",
+    "seconds": 0.07
+  },
+  {
+    "model": "SexMachineModel-084",
+    "triangles": 944468,
+    "figureReferences": 1,
+    "objects": 3895,
+    "images": 0,
+    "file": "blend/SexMachineModel-084.blend",
+    "seconds": 3.95
+  },
+  {
+    "model": "SexMachineModel-085",
+    "triangles": 10088,
+    "figureReferences": 2,
+    "objects": 28,
+    "images": 0,
+    "file": "blend/SexMachineModel-085.blend",
+    "seconds": 0.11
+  },
+  {
+    "model": "SexMachineModel-086",
+    "triangles": 6175,
+    "figureReferences": 1,
+    "objects": 23,
+    "images": 1,
+    "file": "blend/SexMachineModel-086.blend",
+    "seconds": 0.08
+  },
+  {
+    "model": "SexMachineModel-087",
+    "triangles": 184240,
+    "figureReferences": 1,
+    "objects": 385,
+    "images": 0,
+    "file": "blend/SexMachineModel-087.blend",
+    "seconds": 0.64
+  },
+  {
+    "model": "SexMachineModel-088",
+    "triangles": 187510,
+    "figureReferences": 1,
+    "objects": 380,
+    "images": 0,
+    "file": "blend/SexMachineModel-088.blend",
+    "seconds": 0.23
+  }
+]
