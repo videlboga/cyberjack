@@ -1,0 +1,84 @@
+{
+  "device": "lab_diagnostic_table",
+  "support_maps": {
+    "structure_bed_frame": {
+      "z_min": 0.0,
+      "grid": 1024,
+      "touch_frac": 0.0,
+      "below_gap_mm": null,
+      "nothing_below_frac": 1.0
+    },
+    "surface_sensor": {
+      "z_min": 0.326,
+      "grid": 1024,
+      "touch_frac": 0.0,
+      "below_gap_mm": {
+        "min": 5.5,
+        "p50": 113.62,
+        "max": 310.0
+      },
+      "nothing_below_frac": 0.492
+    },
+    "control_telemetry": {
+      "z_min": 0.3412,
+      "grid": 1024,
+      "touch_frac": 0.0,
+      "below_gap_mm": {
+        "min": 5.2,
+        "p50": 5.8,
+        "max": 5.8
+      },
+      "nothing_below_frac": 0.0
+    },
+    "control_estop": {
+      "z_min": 0.3412,
+      "grid": 1024,
+      "touch_frac": 0.0,
+      "below_gap_mm": {
+        "min": 5.2,
+        "p50": 5.8,
+        "max": 5.8
+      },
+      "nothing_below_frac": 0.0
+    }
+  },
+  "interior_pairs": [
+    {
+      "a": "structure_bed_frame",
+      "b": "surface_sensor",
+      "aabb_gap": 0.0001,
+      "surface_gap_mm": 0.9,
+      "triangle_pairs": 0
+    },
+    {
+      "a": "structure_bed_frame",
+      "b": "control_telemetry",
+      "aabb_gap": 0.0153,
+      "surface_gap_mm": 16.1,
+      "triangle_pairs": 0
+    },
+    {
+      "a": "structure_bed_frame",
+      "b": "control_estop",
+      "aabb_gap": 0.0153,
+      "surface_gap_mm": 145.58,
+      "triangle_pairs": 0
+    },
+    {
+      "a": "surface_sensor",
+      "b": "control_telemetry",
+      "aabb_gap": -0.0,
+      "surface_gap_mm": 5.2,
+      "triangle_pairs": 0
+    },
+    {
+      "a": "surface_sensor",
+      "b": "control_estop",
+      "aabb_gap": -0.0,
+      "surface_gap_mm": 5.2,
+      "triangle_pairs": 0
+    }
+  ],
+  "contact_planes": {},
+  "mover_nodes": {}
+}

@@ -43,15 +43,24 @@ def bbox_now():
             max(p.z for p in pts) - min(p.z for p in pts),
             min(p.z for p in pts))
 
+import sys
+sys.path.insert(0, '/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/tools')
+import omni_checks as C
+
 best = None
-for rx in (-90, 90):
-    for rz in (0, 90, 180, 270):
-        arm.rotation_euler = (math.radians(rx), 0, math.radians(rz))
-        bpy.context.view_layer.update()
-        dx, dy, dz, mnz = bbox_now()
-        score = dz                      # лежит = низкий габарит по Z
-        if best is None or score < best[0]:
-            best = (score, rx, rz, dx, dy, dz)
+for rz in (0, 90, 180, 270):
+    arm.rotation_euler = (math.radians(-90), 0, math.radians(rz))   # -90 = на спине
+    bpy.context.view_layer.update()
+    ok, toes = C.orientation(dbg=False)
+    if ok is not True:
+        continue
+    dx, dy, dz, mnz = bbox_now()
+    hb = arm.pose.bones.get('head.x') or arm.pose.bones.get('head')
+    hx = (arm.matrix_world @ hb.head).x if hb else 0.0
+    score = (dx - dy) + (1.0 if hx < 0 else 0.0)      # длинной стороной вдоль X, головой к -X
+    print('CANDIDATE rz', rz, 'on_back', ok, 'bbox', [round(v, 2) for v in (dx, dy, dz)], 'head_x', round(hx, 2))
+    if best is None or score > best[0]:
+        best = (score, -90, rz)
 print('LAY', best)
 arm.rotation_euler = (math.radians(best[1]), 0, math.radians(best[2]))
 bpy.context.view_layer.update()
@@ -61,13 +70,15 @@ dx, dy, dz, mnz = bbox_now()
 arm.location.z += (TOPZ + 0.004) - mnz
 bpy.context.view_layer.update()
 
-# центр по X/Y
+# центр по X/Y (пересчёт после укладки)
 dg = bpy.context.evaluated_depsgraph_get()
 ev = body.evaluated_get(dg); me = ev.to_mesh()
 pts = [body.matrix_world @ v.co for v in me.vertices]
 cx = (max(p.x for p in pts) + min(p.x for p in pts)) / 2
+cy = (max(p.y for p in pts) + min(p.y for p in pts)) / 2
 ev.to_mesh_clear()
 arm.location.x += (-0.05) - cx
+arm.location.y += 0.0 - cy
 bpy.context.view_layer.update()
 
 # ---------------- FK, чтобы кости слушались контролов ----------------
@@ -79,7 +90,18 @@ bpy.context.view_layer.update()
 
 # ---------------- ставим кисти и стопы в кольца ----------------
 def cuff_pos(tag):
-    return rig.matrix_world @ rig.pose.bones[f'head_{tag}'].head
+    m = bpy.data.objects['OMNI_1']
+    gi = {g.index: g.name for g in m.vertex_groups}
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = m.evaluated_get(dg); me = ev.to_mesh(); mw = ev.matrix_world
+    from mathutils import Vector as V
+    acc = V((0, 0, 0)); n = 0
+    for i, v in enumerate(m.data.vertices):
+        for g in v.groups:
+            if gi[g.group] == f'head_{tag}' and g.weight > 0.3:
+                acc += mw @ me.vertices[i].co; n += 1; break
+    ev.to_mesh_clear()
+    return acc / n if n else V((0, 0, 0))
 
 def aim_chain(ctl_name, upper, lower, target, pole_up=True):
     """аналитика: ставим контрол так, чтобы кисть/стопа пришла в target (через Blender IK)"""
@@ -105,34 +127,11 @@ for tag, ctl, lower, upper in (('arm_L', 'c_hand_ik.l', 'hand.l', 'forearm.l'),
     d = aim_chain(ctl, upper, lower, cuff_pos(tag))
     print('FIT', tag, round(d, 3) if d is not None else None)
 
-# ---------------- проверка проникновения ----------------
-dg = bpy.context.evaluated_depsgraph_get()
-m = bpy.data.objects['OMNI_1']
-bvh = BVHTree.FromObject(m, dg)
-evb = body.evaluated_get(dg); mb = evb.to_mesh(); mw = body.matrix_world
-dirs = [Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))]
-inside = 0; depth = 0.0
-for v in mb.vertices:
-    p = mw @ v.co
-    votes = 0
-    for d in dirs:
-        cnt = 0; o = p.copy()
-        for _ in range(8):
-            hit = bvh.ray_cast(o, d)
-            if hit[0] is None:
-                break
-            cnt += 1; o = hit[0] + d * 1e-4
-        if cnt % 2 == 1:
-            votes += 1
-    if votes >= 2:
-        inside += 1
-        near = bvh.find_nearest(p)
-        if near[0] is not None:
-            depth = max(depth, (p - near[0]).length)
-n_verts = len(mb.vertices)
-ev.to_mesh_clear() if False else None
-evb.to_mesh_clear()
-print('BODY_INSIDE', inside, 'MAX_DEPTH', round(depth, 3), 'OF', n_verts)
+# ---------------- проверки позы ----------------
+import importlib
+importlib.reload(C)
+bad = C.report()
+print('POSE_BAD', bad)
 
 # ---------------- кадры ----------------
 cam = bpy.data.objects['cam']

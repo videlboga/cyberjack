@@ -1,0 +1,627 @@
+{
+  "schema": "cj-kinematics-oscillating/2",
+  "component": "motion_oscillating",
+  "code": "MOT-OSC-05",
+  "model": "public/models/machine-modules/components/motion_oscillating.glb",
+  "generated_by": "docs/plans/tools/build_motion_oscillating.py",
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "coordinate_system": {
+    "engine": "three.js",
+    "up": "+Y",
+    "handedness": "right",
+    "axis_mapping": "x_gltf = x_blender, y_gltf = z_blender, z_gltf = -y_blender",
+    "note": "все числа ниже — уже в системе GLB (Y-up). Blender-координаты в отчёте получаются обратным отображением: x_b = x, y_b = -z, z_b = y"
+  },
+  "mechanism": "crank-slider (кривошип-ползун), 1 DOF",
+  "motion_plane": {
+    "plane": "XZ модели",
+    "angle_reference": "угол кривошипа theta отсчитывается от +X к -Z (в Blender это +X к +Y), поэтому точка пальца: p = (C.x + R cos theta, *, C.z - R sin theta)",
+    "note": "C.z = -C.y(Blender); линия ползуна z = C.z = 0.012"
+  },
+  "geometry": {
+    "crank_center_m": [
+      -0.15,
+      0.129,
+      0.012
+    ],
+    "crank_radius_m": 0.02,
+    "rod_length_m": 0.204,
+    "rod_rest_yaw_deg": 5.626271,
+    "rod_rest_yaw_rad": 0.098196953,
+    "pin_radius_m": 0.006,
+    "eye_bore_m": 0.0072,
+    "slider_line_m": {
+      "z": 0.012,
+      "y": 0.12
+    },
+    "slider_x_rest_m": 0.053017,
+    "slider_x_range_m": [
+      0.034,
+      0.074
+    ],
+    "stroke_m": 0.04,
+    "rod_local_small_eye_m": [
+      0.203017,
+      0.0,
+      -0.02
+    ],
+    "rod_local_big_eye_m": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "nodes": {
+    "crank": {
+      "name": "motion_oscillating__anim",
+      "parent": null,
+      "role": "кривошип: вращение вокруг Y в центре плиты",
+      "rest_translation_m": [
+        -0.15,
+        0.129,
+        0.012
+      ],
+      "rest_rotation_quat_xyzw": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "rod": {
+      "name": "motion_oscillating__rod_pivot",
+      "parent": "motion_oscillating__anim",
+      "role": "шарнир шатуна, дитя __anim, сидит на пальце",
+      "rest_translation_m": [
+        0,
+        0.033,
+        0.02
+      ],
+      "rest_rotation_quat_xyzw": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "rod_end": {
+      "name": "motion_oscillating__rod_end",
+      "parent": "motion_oscillating__slide",
+      "role": "центр малой проушины, дитя __slide",
+      "rest_translation_m": [
+        0,
+        0.042,
+        0
+      ],
+      "rest_rotation_quat_xyzw": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "slider": {
+      "name": "motion_oscillating__slide",
+      "parent": null,
+      "role": "каретка ползуна, призматика по X",
+      "rest_translation_m": [
+        0.053017,
+        0.12,
+        0.012
+      ],
+      "rest_rotation_quat_xyzw": [
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  },
+  "phase": {
+    "parameter": "phase",
+    "range_rad": [
+      0.0,
+      6.283185307
+    ],
+    "wrap": true,
+    "rest_phase_rad": 4.71238898,
+    "rest_phase_deg": 270.0,
+    "viewer_phase_law": "phase = PI * (1 - cos(t * speed))  // как в components-viewer.js",
+    "crank_offset_rad": 4.71238898,
+    "note": "рабочая фаза 270° — палец смотрит вперёд (-Y Blender); все формулы используют theta = phase"
+  },
+  "drivers": [
+    {
+      "id": "crank",
+      "node": "motion_oscillating__anim",
+      "joint": "revolute",
+      "axis": "y",
+      "law": "phase",
+      "ratio": 1.0,
+      "offset_rad": 4.71238898,
+      "target_property": "rotation.y",
+      "formula": "anim.rotation.y = phase - TH0",
+      "critical": "поворот должен применяться к самому узлу __anim. Текущая ветка components-viewer.js для joint=revolute создаёт Group в bbox-центре members и attach()-ит меши — это НЕ этот узел и не эта ось."
+    },
+    {
+      "id": "rod",
+      "node": "motion_oscillating__rod_pivot",
+      "joint": "revolute",
+      "axis": "y",
+      "law": "link_two_point",
+      "target_node": "motion_oscillating__rod_end",
+      "target_property": "rotation.y",
+      "position_source": "parent __anim (иерархия; в рантайме не трогать)",
+      "formula_closed": "theta = phase; px = C.x + R*cos(theta); pz = C.z - R*sin(theta); sx = C.x + R*cos(theta) + sqrt(L^2 - (R*sin(theta))^2); rod.rotation.y = atan2(pz - C.z, sx - px) - a0 - (phase - TH0) // C = [-0.15, 0.129, 0.012], R = 0.02, L = 0.204, a0 = 0.09819695 rad, TH0 = 4.71238898 rad",
+      "formula_two_point": "p = rod.getWorldPosition(); t = rod_end.getWorldPosition(); d = t - p; rod.rotation.y = atan2(-d.z, d.x) - (phase - TH0)",
+      "note": "two_point не требует знать R/L/C и устойчив к любой реализации ползуна, но требует, чтобы __rod_end стоял ровно в центре малой проушины (он там и стоит). Поправка -(phase - TH0) нужна, потому что узел — дитя вращающегося __anim."
+    },
+    {
+      "id": "slider",
+      "node": "motion_oscillating__slide",
+      "joint": "prismatic",
+      "axis": "x",
+      "law": "crank_slider_full",
+      "target_property": "position.x",
+      "base_x_m": 0.053017,
+      "formula": "slide.position.x = SX0 + R*cos(theta) + sqrt(L^2 - (R*sin(theta))^2) - sqrt(L^2 - R^2)",
+      "warning": "нынешний закон crank_slider в components-viewer.js возвращает R*sin(phase) — это НЕ ход кривошипно-ползунного механизма, амплитуда и форма неверные."
+    }
+  ],
+  "tolerances": {
+    "eye_to_pin_m": 0.0002,
+    "eye_to_slider_m": 0.0002,
+    "rod_length_drift_m": 0.0002,
+    "rod_yaw_deg": 0.05,
+    "slide_rotation_deg": 0.001,
+    "note": "0.2 мм на посадку и постоянство длины — как в задании"
+  },
+  "verification": {
+    "method": "1) Blender: 36 фаз, поза считается формулой, центры проушин берутся как среднее вершин втулок; 2) runtime_sim: те же 36 фаз считаются из rest-трансформов GLB по формулам этого файла (three.js math), без сцены Blender",
+    "samples": 36,
+    "blender": {
+      "eye_pin_mm": 9e-05,
+      "eye_slider_mm": 7.1e-05,
+      "length_drift_mm": 0.000131,
+      "yaw_deg": 2e-05,
+      "samples": 36
+    },
+    "runtime_sim": {
+      "eye_pin_mm": 0.0,
+      "eye_slider_mm": 0.000145,
+      "length_mm": 4.3e-05,
+      "rod_end_mm": 0.000145,
+      "yaw_deg": 4.1e-05,
+      "two_point_deg": 1e-06,
+      "slide_rot_deg": 0.0,
+      "slide_z_mm": 0.000145,
+      "length_mean_m": 0.204
+    },
+    "rod_swing_deg": 11.2526,
+    "rest_pose": "в GLB записана поза theta = 270 deg: anim.rotation.y = 0, rod_pivot.rotation.y = 0, slide.position.x = 0; все формулы отсчитываются от неё",
+    "ok": true
+  },
+  "phase_table": [
+    {
+      "phase_deg": 270.0,
+      "crank_rot_y_deg": 0.0,
+      "pin_m": [
+        -0.15,
+        -0.032
+      ],
+      "slide_x_m": 0.053017,
+      "rod_local_rot_y_deg": -0.0,
+      "rod_yaw_deg": 5.6263
+    },
+    {
+      "phase_deg": 280.0,
+      "crank_rot_y_deg": 10.0,
+      "pin_m": [
+        -0.146527,
+        -0.031696
+      ],
+      "slide_x_m": 0.05652,
+      "rod_local_rot_y_deg": -10.0857,
+      "rod_yaw_deg": 5.5405
+    },
+    {
+      "phase_deg": 290.0,
+      "crank_rot_y_deg": 20.0,
+      "pin_m": [
+        -0.14316,
+        -0.030794
+      ],
+      "slide_x_m": 0.059973,
+      "rod_local_rot_y_deg": -20.3403,
+      "rod_yaw_deg": 5.286
+    },
+    {
+      "phase_deg": 300.0,
+      "crank_rot_y_deg": 30.0,
+      "pin_m": [
+        -0.14,
+        -0.029321
+      ],
+      "slide_x_m": 0.063263,
+      "rod_local_rot_y_deg": -30.7557,
+      "rod_yaw_deg": 4.8705
+    },
+    {
+      "phase_deg": 310.0,
+      "crank_rot_y_deg": 40.0,
+      "pin_m": [
+        -0.137144,
+        -0.027321
+      ],
+      "slide_x_m": 0.06628,
+      "rod_local_rot_y_deg": -41.3192,
+      "rod_yaw_deg": 4.3071
+    },
+    {
+      "phase_deg": 320.0,
+      "crank_rot_y_deg": 50.0,
+      "pin_m": [
+        -0.134679,
+        -0.024856
+      ],
+      "slide_x_m": 0.068915,
+      "rod_local_rot_y_deg": -52.0132,
+      "rod_yaw_deg": 3.6131
+    },
+    {
+      "phase_deg": 330.0,
+      "crank_rot_y_deg": 60.0,
+      "pin_m": [
+        -0.132679,
+        -0.022
+      ],
+      "slide_x_m": 0.071075,
+      "rod_local_rot_y_deg": -62.8165,
+      "rod_yaw_deg": 2.8097
+    },
+    {
+      "phase_deg": 340.0,
+      "crank_rot_y_deg": 70.0,
+      "pin_m": [
+        -0.131206,
+        -0.01884
+      ],
+      "slide_x_m": 0.072679,
+      "rod_local_rot_y_deg": -73.7047,
+      "rod_yaw_deg": 1.9216
+    },
+    {
+      "phase_deg": 350.0,
+      "crank_rot_y_deg": 80.0,
+      "pin_m": [
+        -0.130304,
+        -0.015473
+      ],
+      "slide_x_m": 0.073667,
+      "rod_local_rot_y_deg": -84.6508,
+      "rod_yaw_deg": 0.9755
+    },
+    {
+      "phase_deg": 0.0,
+      "crank_rot_y_deg": 90.0,
+      "pin_m": [
+        -0.13,
+        -0.012
+      ],
+      "slide_x_m": 0.074,
+      "rod_local_rot_y_deg": -95.6263,
+      "rod_yaw_deg": 0.0
+    },
+    {
+      "phase_deg": 10.0,
+      "crank_rot_y_deg": 100.0,
+      "pin_m": [
+        -0.130304,
+        -0.008527
+      ],
+      "slide_x_m": 0.073667,
+      "rod_local_rot_y_deg": -106.6017,
+      "rod_yaw_deg": -0.9755
+    },
+    {
+      "phase_deg": 20.0,
+      "crank_rot_y_deg": 110.0,
+      "pin_m": [
+        -0.131206,
+        -0.00516
+      ],
+      "slide_x_m": 0.072679,
+      "rod_local_rot_y_deg": -117.5478,
+      "rod_yaw_deg": -1.9216
+    },
+    {
+      "phase_deg": 30.0,
+      "crank_rot_y_deg": 120.0,
+      "pin_m": [
+        -0.132679,
+        -0.002
+      ],
+      "slide_x_m": 0.071075,
+      "rod_local_rot_y_deg": -128.436,
+      "rod_yaw_deg": -2.8097
+    },
+    {
+      "phase_deg": 40.0,
+      "crank_rot_y_deg": 130.0,
+      "pin_m": [
+        -0.134679,
+        0.000856
+      ],
+      "slide_x_m": 0.068915,
+      "rod_local_rot_y_deg": -139.2393,
+      "rod_yaw_deg": -3.6131
+    },
+    {
+      "phase_deg": 50.0,
+      "crank_rot_y_deg": 140.0,
+      "pin_m": [
+        -0.137144,
+        0.003321
+      ],
+      "slide_x_m": 0.06628,
+      "rod_local_rot_y_deg": -149.9334,
+      "rod_yaw_deg": -4.3071
+    },
+    {
+      "phase_deg": 60.0,
+      "crank_rot_y_deg": 150.0,
+      "pin_m": [
+        -0.14,
+        0.005321
+      ],
+      "slide_x_m": 0.063263,
+      "rod_local_rot_y_deg": -160.4968,
+      "rod_yaw_deg": -4.8705
+    },
+    {
+      "phase_deg": 70.0,
+      "crank_rot_y_deg": 160.0,
+      "pin_m": [
+        -0.14316,
+        0.006794
+      ],
+      "slide_x_m": 0.059973,
+      "rod_local_rot_y_deg": -170.9122,
+      "rod_yaw_deg": -5.286
+    },
+    {
+      "phase_deg": 80.0,
+      "crank_rot_y_deg": 170.0,
+      "pin_m": [
+        -0.146527,
+        0.007696
+      ],
+      "slide_x_m": 0.05652,
+      "rod_local_rot_y_deg": -181.1668,
+      "rod_yaw_deg": -5.5405
+    },
+    {
+      "phase_deg": 90.0,
+      "crank_rot_y_deg": 180.0,
+      "pin_m": [
+        -0.15,
+        0.008
+      ],
+      "slide_x_m": 0.053017,
+      "rod_local_rot_y_deg": -191.2525,
+      "rod_yaw_deg": -5.6263
+    },
+    {
+      "phase_deg": 100.0,
+      "crank_rot_y_deg": 190.0,
+      "pin_m": [
+        -0.153473,
+        0.007696
+      ],
+      "slide_x_m": 0.049574,
+      "rod_local_rot_y_deg": -201.1668,
+      "rod_yaw_deg": -5.5405
+    },
+    {
+      "phase_deg": 110.0,
+      "crank_rot_y_deg": 200.0,
+      "pin_m": [
+        -0.15684,
+        0.006794
+      ],
+      "slide_x_m": 0.046292,
+      "rod_local_rot_y_deg": -210.9122,
+      "rod_yaw_deg": -5.286
+    },
+    {
+      "phase_deg": 120.0,
+      "crank_rot_y_deg": 210.0,
+      "pin_m": [
+        -0.16,
+        0.005321
+      ],
+      "slide_x_m": 0.043263,
+      "rod_local_rot_y_deg": -220.4968,
+      "rod_yaw_deg": -4.8705
+    },
+    {
+      "phase_deg": 130.0,
+      "crank_rot_y_deg": 220.0,
+      "pin_m": [
+        -0.162856,
+        0.003321
+      ],
+      "slide_x_m": 0.040568,
+      "rod_local_rot_y_deg": -229.9334,
+      "rod_yaw_deg": -4.3071
+    },
+    {
+      "phase_deg": 140.0,
+      "crank_rot_y_deg": 230.0,
+      "pin_m": [
+        -0.165321,
+        0.000856
+      ],
+      "slide_x_m": 0.038274,
+      "rod_local_rot_y_deg": -239.2393,
+      "rod_yaw_deg": -3.6131
+    },
+    {
+      "phase_deg": 150.0,
+      "crank_rot_y_deg": 240.0,
+      "pin_m": [
+        -0.167321,
+        -0.002
+      ],
+      "slide_x_m": 0.036434,
+      "rod_local_rot_y_deg": -248.436,
+      "rod_yaw_deg": -2.8097
+    },
+    {
+      "phase_deg": 160.0,
+      "crank_rot_y_deg": 250.0,
+      "pin_m": [
+        -0.168794,
+        -0.00516
+      ],
+      "slide_x_m": 0.035091,
+      "rod_local_rot_y_deg": -257.5478,
+      "rod_yaw_deg": -1.9216
+    },
+    {
+      "phase_deg": 170.0,
+      "crank_rot_y_deg": 260.0,
+      "pin_m": [
+        -0.169696,
+        -0.008527
+      ],
+      "slide_x_m": 0.034274,
+      "rod_local_rot_y_deg": -266.6017,
+      "rod_yaw_deg": -0.9755
+    },
+    {
+      "phase_deg": 180.0,
+      "crank_rot_y_deg": 270.0,
+      "pin_m": [
+        -0.17,
+        -0.012
+      ],
+      "slide_x_m": 0.034,
+      "rod_local_rot_y_deg": -275.6263,
+      "rod_yaw_deg": -0.0
+    },
+    {
+      "phase_deg": 190.0,
+      "crank_rot_y_deg": 280.0,
+      "pin_m": [
+        -0.169696,
+        -0.015473
+      ],
+      "slide_x_m": 0.034274,
+      "rod_local_rot_y_deg": -284.6508,
+      "rod_yaw_deg": 0.9755
+    },
+    {
+      "phase_deg": 200.0,
+      "crank_rot_y_deg": 290.0,
+      "pin_m": [
+        -0.168794,
+        -0.01884
+      ],
+      "slide_x_m": 0.035091,
+      "rod_local_rot_y_deg": -293.7047,
+      "rod_yaw_deg": 1.9216
+    },
+    {
+      "phase_deg": 210.0,
+      "crank_rot_y_deg": 300.0,
+      "pin_m": [
+        -0.167321,
+        -0.022
+      ],
+      "slide_x_m": 0.036434,
+      "rod_local_rot_y_deg": -302.8165,
+      "rod_yaw_deg": 2.8097
+    },
+    {
+      "phase_deg": 220.0,
+      "crank_rot_y_deg": 310.0,
+      "pin_m": [
+        -0.165321,
+        -0.024856
+      ],
+      "slide_x_m": 0.038274,
+      "rod_local_rot_y_deg": -312.0132,
+      "rod_yaw_deg": 3.6131
+    },
+    {
+      "phase_deg": 230.0,
+      "crank_rot_y_deg": 320.0,
+      "pin_m": [
+        -0.162856,
+        -0.027321
+      ],
+      "slide_x_m": 0.040568,
+      "rod_local_rot_y_deg": -321.3192,
+      "rod_yaw_deg": 4.3071
+    },
+    {
+      "phase_deg": 240.0,
+      "crank_rot_y_deg": 330.0,
+      "pin_m": [
+        -0.16,
+        -0.029321
+      ],
+      "slide_x_m": 0.043263,
+      "rod_local_rot_y_deg": -330.7557,
+      "rod_yaw_deg": 4.8705
+    },
+    {
+      "phase_deg": 250.0,
+      "crank_rot_y_deg": 340.0,
+      "pin_m": [
+        -0.15684,
+        -0.030794
+      ],
+      "slide_x_m": 0.046292,
+      "rod_local_rot_y_deg": -340.3403,
+      "rod_yaw_deg": 5.286
+    },
+    {
+      "phase_deg": 260.0,
+      "crank_rot_y_deg": 350.0,
+      "pin_m": [
+        -0.153473,
+        -0.031696
+      ],
+      "slide_x_m": 0.049574,
+      "rod_local_rot_y_deg": -350.0857,
+      "rod_yaw_deg": 5.5405
+    }
+  ],
+  "viewer_integration": {
+    "status": "модель и данные готовы; код components-viewer.js НЕ менялся",
+    "required": [
+      "Ветка joint=revolute должна вращать сам узел d.node вокруг d.axis (rotation.y), а не создавать Group в bbox-центре members.",
+      "Заменить закон crank_slider на формулу из drivers[slider].formula (позиция относительно base_x_m).",
+      "Добавить драйвер шатуна: law=link_two_point (или formula_closed) и писать результат в rod.rotation.y; position шатуна не трогать.",
+      "Проверять невязки по tolerances: big eye <-> pin, small eye <-> __rod_end, длина звена постоянна."
+    ],
+    "blocked_by": [
+      "component-catalog.json / component-models.json / component-contracts.json / components.html / components-viewer.js не входят в скоуп этой задачи — их правка осталась за владельцем каталога.",
+      "В component-contracts.json у motion_oscillating нет драйвера шатуна (только crank и slider) — контракт нужно дополнить из этого файла."
+    ]
+  },
+  "acceptance": {
+    "big_eye_on_pin_mm": 9e-05,
+    "small_eye_on_slider_mm": 7.1e-05,
+    "rod_length_drift_mm": 0.000131,
+    "rod_yaw_vs_formula_deg": 2e-05,
+    "slide_rotation_deg": 0.0,
+    "intersections": 0,
+    "phases": 36
+  }
+}

@@ -1,0 +1,119 @@
+{
+ "total": 16,
+ "ok": 16,
+ "failed": [],
+ "items": [
+  {
+   "id": "structure_base",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_cage",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_linear_x",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_lift_z",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_rotary",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_oscillating",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_turntable",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_linear",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_rotary",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_inflatable",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_thermal",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_textured",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_rod",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_pneumatic",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_servo",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_adapter",
+   "ready": true,
+   "glb_status": [],
+   "js_errors": [],
+   "http_errors": []
+  }
+ ]
+}

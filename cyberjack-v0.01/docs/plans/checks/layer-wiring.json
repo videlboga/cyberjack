@@ -1,0 +1,57 @@
+{
+  "format": "cj-layer-wiring/1",
+  "devices": 41,
+  "findings": [
+    {
+      "severity": "info",
+      "device": "lab_sex_machine_tickling",
+      "code": "order",
+      "message": "Модули идут не по цепочке слоёв",
+      "detail": {
+        "modules": [
+          "structure_base",
+          "work_tickle_pair",
+          "support_cradle",
+          "control_console"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "device": "lab_sex_machine_vaginal",
+      "code": "order",
+      "message": "Модули идут не по цепочке слоёв",
+      "detail": {
+        "modules": [
+          "structure_portal",
+          "motion_lift_z",
+          "motion_linear_x",
+          "work_probe_linear",
+          "support_cradle",
+          "control_console"
+        ]
+      }
+    },
+    {
+      "severity": "info",
+      "device": "lab_mental_correction_chair",
+      "code": "order",
+      "message": "Модули идут не по цепочке слоёв",
+      "detail": {
+        "modules": [
+          "structure_portal",
+          "sensory_visor",
+          "sensory_audio",
+          "work_electro_pad",
+          "restraint_matrix",
+          "control_console",
+          "effect_electric"
+        ]
+      }
+    }
+  ],
+  "counts": {
+    "info": 3
+  },
+  "status": "pass"
+}

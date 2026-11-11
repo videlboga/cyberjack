@@ -1,0 +1,304 @@
+{
+ "total": 33,
+ "ok": 33,
+ "failed": [],
+ "items": [
+  {
+   "id": "structure_base",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_portal",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_gantry",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_bed_frame",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_cage",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_suspension_frame",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_stall_row",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_dock",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "support_cradle",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_linear_x",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_linear_y",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_lift_z",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_rotary",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_oscillating",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_spreader",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_winch",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_turntable",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_soft",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_anti_slip",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_heated",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_cooled",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_fluid_channel",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_liner",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_sensor",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_contour",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "service_dock",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "service_cleaner",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_rod",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_pneumatic",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_hydraulic",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_telescopic",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_cam",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_servo",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  }
+ ]
+}

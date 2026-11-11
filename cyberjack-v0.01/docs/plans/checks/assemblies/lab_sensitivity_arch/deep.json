@@ -1,0 +1,204 @@
+{
+  "device": "lab_sensitivity_arch",
+  "spec_footprint": [
+    1.6,
+    1.0
+  ],
+  "components": {
+    "structure_portal": {
+      "min": [
+        -0.6,
+        -0.16,
+        0.0
+      ],
+      "max": [
+        0.6,
+        0.16,
+        1.67
+      ],
+      "dim": [
+        1.2,
+        0.32,
+        1.67
+      ],
+      "tris": 26280,
+      "motion": "none",
+      "on_floor": true,
+      "sunk_mm": 0.0,
+      "supported_by": [],
+      "xy_unsupported_frac": 1.0
+    },
+    "motion_linear_x": {
+      "min": [
+        -0.6,
+        -0.15,
+        1.67
+      ],
+      "max": [
+        0.6,
+        0.15,
+        1.87
+      ],
+      "dim": [
+        1.2,
+        0.3,
+        0.2
+      ],
+      "tris": 34356,
+      "motion": "slide",
+      "on_floor": false,
+      "sunk_mm": 0.0,
+      "supported_by": [
+        {
+          "by": "structure_portal",
+          "dz_mm": 0.0,
+          "xy_overlap_frac": 1.0,
+          "kind": "face"
+        }
+      ],
+      "xy_unsupported_frac": 0.333
+    },
+    "work_electro_pad": {
+      "min": [
+        -0.04772,
+        -0.04485,
+        1.87
+      ],
+      "max": [
+        0.04772,
+        0.04485,
+        1.88127
+      ],
+      "dim": [
+        0.09544,
+        0.0897,
+        0.01127
+      ],
+      "tris": 7380,
+      "motion": "none",
+      "on_floor": false,
+      "sunk_mm": 0.0,
+      "supported_by": [
+        {
+          "by": "motion_linear_x",
+          "dz_mm": 0.0,
+          "xy_overlap_frac": 1.0,
+          "kind": "face"
+        }
+      ],
+      "xy_unsupported_frac": 0.0
+    },
+    "control_telemetry": {
+      "min": [
+        0.3998,
+        0.40899,
+        0.0
+      ],
+      "max": [
+        0.7002,
+        0.49101,
+        0.2002
+      ],
+      "dim": [
+        0.3004,
+        0.08202,
+        0.2002
+      ],
+      "tris": 21744,
+      "motion": "none",
+      "on_floor": true,
+      "sunk_mm": 0.0,
+      "supported_by": [],
+      "xy_unsupported_frac": 1.0
+    }
+  },
+  "checks": {
+    "pairs": [
+      {
+        "a": "motion_linear_x",
+        "b": "work_electro_pad",
+        "aabb_gap_m": 0.0,
+        "triangle_pairs": 0,
+        "surface_gap_m": 0.12173
+      },
+      {
+        "a": "structure_portal",
+        "b": "motion_linear_x",
+        "aabb_gap_m": 0.0,
+        "triangle_pairs": 50,
+        "surface_gap_m": null
+      },
+      {
+        "a": "structure_portal",
+        "b": "work_electro_pad",
+        "aabb_gap_m": 0.2,
+        "triangle_pairs": 0,
+        "surface_gap_m": null
+      },
+      {
+        "a": "structure_portal",
+        "b": "control_telemetry",
+        "aabb_gap_m": 0.249,
+        "triangle_pairs": 0,
+        "surface_gap_m": null
+      }
+    ],
+    "slide_sweeps": [
+      {
+        "moving": "motion_linear_x",
+        "static": "structure_portal",
+        "dir": -1,
+        "triangle_pairs": 75,
+        "stroke_m": 0.2
+      },
+      {
+        "moving": "motion_linear_x",
+        "static": "structure_portal",
+        "dir": 1,
+        "triangle_pairs": 75,
+        "stroke_m": 0.2
+      }
+    ],
+    "spin_sweeps": [],
+    "union_static": {
+      "min": [
+        -0.6,
+        -0.16,
+        0.0
+      ],
+      "max": [
+        0.7002,
+        0.49101,
+        1.88127
+      ],
+      "xy": [
+        1.3002,
+        0.65101
+      ],
+      "spec": [
+        1.6,
+        1.0
+      ],
+      "fits": true,
+      "margin_m": [
+        0.2998,
+        0.349
+      ]
+    },
+    "union_with_stroke": {
+      "xy": [
+        1.6,
+        0.65101
+      ],
+      "fits": true
+    },
+    "riders_on_movers": [
+      {
+        "rider": "work_electro_pad",
+        "carried_by": "motion_linear_x",
+        "motion": "slide",
+        "xy_overlap_frac": 1.0
+      }
+    ]
+  }
+}

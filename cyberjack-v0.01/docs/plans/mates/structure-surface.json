@@ -1,0 +1,3869 @@
+{
+  "format": "cj-mate-points/1",
+  "group": "structure-surface",
+  "components": {
+    "structure_base": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 1.195,
+          "load_n": 1471.5,
+          "source": "nodes:structure_base__foot_pad_00..11 (bottom face y=0.000), foot_stem/foot_nut",
+          "confidence": "high",
+          "note": "4 подошвы foot_pad_00.. с центрами x=±0.5975, z=±0.3775 → 1.195 × 0.755 (контракт совпадает). Прежние 1.275 × 0.835 — внешний габарит подошв",
+          "pitch_z_m": 0.755,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "mount_out",
+          "role": "output",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.2243,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 0.6,
+          "load_n": 1471.0,
+          "source": "nodes:structure_base__bolt_boss_00..11 (top y=0.2243) + bolt_pad/bolt_hole",
+          "confidence": "high",
+          "note": "4 бобышки M12 на верхней плите, шаг 0.6 м по контракту mount_out",
+          "pitch_z_m": 0.6,
+          "connector": "CJ-STR-M12"
+        },
+        {
+          "id": "rail_in_left",
+          "role": "input",
+          "kind": "rail",
+          "standard": "T-slot 15",
+          "gender": "female",
+          "position_m": [
+            -0.155,
+            0.2298,
+            0.165
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.015,
+          "count": 1,
+          "pitch_m": 0.796,
+          "source": "nodes:structure_base__mount_slot_left (y=0.2262..0.2298) / mount_rail_left / mount_cap_left",
+          "confidence": "high",
+          "note": "верх рельса mount_rail_left y=0.2298 (паз mount_slot 0.2262…0.2298). Прежняя y=0.228 лежала на 1,8 мм внутри рельса. Номинал T-slot 15 ответной части в каталоге не имеет (P2)",
+          "connector": "CJ-RAIL-15"
+        },
+        {
+          "id": "rail_in_right",
+          "role": "input",
+          "kind": "rail",
+          "standard": "T-slot 15",
+          "gender": "female",
+          "position_m": [
+            -0.155,
+            0.2298,
+            -0.165
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.015,
+          "count": 1,
+          "pitch_m": 0.796,
+          "source": "nodes:structure_base__mount_slot_right (y=0.2262..0.2298) / mount_rail_right / mount_cap_right",
+          "confidence": "high",
+          "note": "верх рельса mount_rail_right y=0.2298; прежняя точка была внутри профиля",
+          "connector": "CJ-RAIL-15"
+        },
+        {
+          "id": "dock_in",
+          "role": "input",
+          "kind": "dock",
+          "standard": "2 guides + 2x8",
+          "gender": "female",
+          "position_m": [
+            0.44,
+            0.2274,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.272,
+          "count": 2,
+          "pitch_x_m": 0.272,
+          "load_n": 500.0,
+          "source": "nodes:structure_base__dock_well (top y=0.2274) / dock_pin_0..1 / dock_connector_pins",
+          "confidence": "high",
+          "note": "гнездо 0.272 x 0.252 м; 2 штыря-ловителя по z=±0.093, разъём 2x8 у x=0.558",
+          "connector": "CJ-DOCK-M"
+        },
+        {
+          "id": "surface_deck",
+          "role": "support",
+          "kind": "surface",
+          "standard": "deck",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.2148,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.224,
+          "pitch_x_m": 1.224,
+          "source": "node:structure_base__deck_top (top face y=0.2148) + deck_edge_front/back",
+          "confidence": "high",
+          "note": "верхняя плита 1.224 x 0.784 м, базовая плоскость для поверхностей",
+          "pitch_z_m": 0.784,
+          "connector": "custom"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "IEC C20",
+          "gender": "female",
+          "position_m": [
+            -0.425,
+            0.1705,
+            0.411
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.04,
+          "source": "nodes:structure_base__ctrl_inlet_flange / ctrl_inlet_body (z=0.411)",
+          "confidence": "high",
+          "note": "ввод 230 В / 16 А на панели ctrl_plate, 3 контакта ctrl_inlet_pin_0..2",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "RJ45",
+          "gender": "female",
+          "position_m": [
+            -0.331,
+            0.1695,
+            0.413
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.021,
+          "source": "nodes:structure_base__ctrl_rj45_body / ctrl_rj45_shell (z=0.413)",
+          "confidence": "high",
+          "note": "Ethernet-порт на панели управления, рядом ctrl_rj45_label",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "earth_stud",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "M6 stud",
+          "gender": "male",
+          "position_m": [
+            -0.293,
+            0.1705,
+            0.414
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.01,
+          "source": "node:structure_base__ctrl_earth_stud (z=0.414) + ctrl_earth_label",
+          "confidence": "high",
+          "note": "болт заземления станины рядом с вводом питания",
+          "connector": "custom"
+        },
+        {
+          "id": "power_out",
+          "role": "power",
+          "kind": "cable",
+          "standard": "IEC C19 (не смоделирован)",
+          "gender": "female",
+          "position_m": [
+            0.566,
+            0.2308,
+            0.36
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.02,
+          "source": "node:structure_base__cable_gland_nut (top y=0.2308) + cable_power",
+          "confidence": "low",
+          "note": "разъёма C19 в GLB нет; кабель выходит через гермоввод у x=0.566, z=0.360",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "cable_tray",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "лоток 370 x 30",
+          "gender": "female",
+          "position_m": [
+            0.4,
+            0.176,
+            0.4145
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.03,
+          "count": 7,
+          "pitch_m": 0.046,
+          "source": "nodes:structure_base__tray_base / tray_lip / tray_hole_0..6",
+          "confidence": "medium",
+          "note": "кабельный лоток под плитой, 7 отверстий под стяжки с шагом 0.046 м",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "structure_portal": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 0.981,
+          "load_n": 1471.0,
+          "source": "nodes:structure_portal__foot_m / foot_p (bottom y=0) + anchor_bolts_m12",
+          "confidence": "high",
+          "note": "анкерные болты anchor_bolts_m12 в x=±0.4905, z=±0.1225 → 0.981 × 0.245 (лапы foot_m/foot_p x=±0.5225 — внешний габарит). Прежние 1.2 × 0.32 — габарит лап, углы шаблона в 526 мм от металла",
+          "pitch_z_m": 0.245,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "mount_out",
+          "role": "output",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            1.4375,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 0.209,
+          "load_n": 1471.0,
+          "source": "nodes:structure_portal__mount_bore (y=1.4375..1.4395) / mount_boss / mount_pad_bolts",
+          "confidence": "medium",
+          "note": "нижняя плита под балкой, 4 болта 0.209 x 0.121 м; шаг 0.6 м из контракта геометрией не подтверждён",
+          "pitch_z_m": 0.121,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "beam_seat",
+          "role": "input",
+          "kind": "surface",
+          "standard": "pad 250 x 140",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            1.465,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.14,
+          "pitch_x_m": 0.25,
+          "source": "node:structure_portal__mount_pad (top face y=1.465)",
+          "confidence": "high",
+          "note": "привалочная площадка 0.25 x 0.14 м под балку/навесной модуль",
+          "pitch_z_m": 0.14,
+          "connector": "custom"
+        },
+        {
+          "id": "rail_left",
+          "role": "output",
+          "kind": "rail",
+          "standard": "guide 10 x 30",
+          "gender": "female",
+          "position_m": [
+            -0.538,
+            0.81,
+            0.006
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.03,
+          "pitch_m": 1.02,
+          "source": "nodes:structure_portal__guide_rail_m / guide_wear_m (y=0.30..1.32)",
+          "confidence": "high",
+          "note": "вертикальная направляющая каретки Z, длина 1.02 м",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "rail_right",
+          "role": "output",
+          "kind": "rail",
+          "standard": "guide 10 x 30",
+          "gender": "female",
+          "position_m": [
+            0.538,
+            0.81,
+            0.006
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.03,
+          "pitch_m": 1.02,
+          "source": "nodes:structure_portal__guide_rail_p / guide_wear_p (y=0.30..1.32)",
+          "confidence": "high",
+          "note": "вторая вертикальная направляющая каретки Z",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "IEC C14",
+          "gender": "female",
+          "position_m": [
+            -0.581,
+            1.072,
+            0.0895
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.03,
+          "source": "node:structure_portal__power_inlet_iec (z=0.0895, блок power_box)",
+          "confidence": "high",
+          "note": "ввод 230 В / 10 А в силовом блоке стойки",
+          "connector": "CJ-PWR-C14"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "RJ45",
+          "gender": "female",
+          "position_m": [
+            -0.547,
+            1.072,
+            0.0887
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.016,
+          "source": "node:structure_portal__net_socket_rj45 (z=0.0887)",
+          "confidence": "high",
+          "note": "Ethernet рядом с сетевым вводом на power_box_lid",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "power_out",
+          "role": "power",
+          "kind": "cable",
+          "standard": "IEC C13 (не смоделирован)",
+          "gender": "female",
+          "position_m": [
+            -0.572,
+            0.9585,
+            0.059
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.023,
+          "source": "node:structure_portal__power_gland (z=0.059, низ power_box)",
+          "confidence": "low",
+          "note": "розетки C13 в GLB нет; кабель выходит через гермоввод снизу блока",
+          "connector": "CJ-PWR-C14"
+        },
+        {
+          "id": "cable_chain",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "кабельная цепь 390 x 144",
+          "gender": "female",
+          "position_m": [
+            -0.3272,
+            1.4701,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.036,
+          "pitch_m": 0.39,
+          "source": "nodes:structure_portal__cable_chain / chain_bracket_m / chain_bracket_p",
+          "confidence": "medium",
+          "note": "кабельный канал подвижной каретки, ход 0.39 м по X, крепления по x=-0.509/-0.144",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "structure_gantry": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 2.72,
+          "load_n": 1962.0,
+          "source": "nodes:structure_gantry__anchor_plate_mm..pp (bottom y=0) + anchor_bolts",
+          "confidence": "high",
+          "note": "4 анкерные плиты anchor_plate_mm/mp/pm/pp 280 × 280 с центрами x=±1.36, z=±0.86 → 2.72 × 1.72. Прежние 3.0 × 2.0 — габарит плит, углы шаблона лежали в 549 мм от металла",
+          "pitch_z_m": 1.72,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "anchor_ceiling",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            2.478,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 2,
+          "pitch_x_m": 2.72,
+          "source": "nodes:structure_gantry__anchor_ceiling_m / anchor_ceiling_p (top y=2.478) + stud_m/stud_p",
+          "confidence": "high",
+          "note": "2 потолочные анкерные пластины 0.19 x 0.19 м на x=±1.36",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "rail_x_pos",
+          "role": "output",
+          "kind": "rail",
+          "standard": "rail 55 x 42",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            2.527,
+            0.86
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.042,
+          "count": 1,
+          "pitch_m": 2.8,
+          "source": "nodes:structure_gantry__rail_x_m / rail_x_wear_m / rail_x_pad_m (y=2.472..2.527)",
+          "confidence": "high",
+          "note": "беговая поверхность рельса rail_x_m: y 2.472…2.527 (накладка rail_x_wear_m до 2.531). Прежняя y=2.4995 — середина профиля, на 27 мм ниже рабочей грани",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "rail_x_neg",
+          "role": "output",
+          "kind": "rail",
+          "standard": "rail 55 x 42",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            2.527,
+            -0.86
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.042,
+          "count": 1,
+          "pitch_m": 2.8,
+          "source": "nodes:structure_gantry__rail_x_p / rail_x_wear_p / rail_x_pad_p (y=2.472..2.527)",
+          "confidence": "high",
+          "note": "зеркальный рельс rail_x_p: беговая поверхность y=2.527 (накладка rail_x_wear_p до 2.531); прежняя точка была в середине профиля",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "rail_x_clamp_bed",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "M12 T-clamp",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            2.46,
+            0.86
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.098,
+          "pitch_m": 2.426,
+          "source": "nodes:structure_gantry__rail_clamps_m (y=2.460..2.471) / rail_x_pad_m",
+          "confidence": "medium",
+          "note": "прижимы рельса на верхней балке, пролёт прижимов 2.426 м; отд. прижимы в один узел не выделены",
+          "connector": "custom"
+        },
+        {
+          "id": "rail_y",
+          "role": "output",
+          "kind": "rail",
+          "standard": "rail 12 x 45",
+          "gender": "female",
+          "position_m": [
+            0.308,
+            2.1745,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.045,
+          "pitch_m": 1.32,
+          "source": "nodes:structure_gantry__rail_y_m / rail_y_pad_m (x=0.296..0.308)",
+          "confidence": "high",
+          "note": "рабочая грань рельса rail_y_m: x 0.296…0.308; прежняя x=0.302 — середина 12-мм профиля",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "tool_flange_a",
+          "role": "output",
+          "kind": "flange",
+          "standard": "Ø84 quick-change",
+          "gender": "female",
+          "position_m": [
+            0.4,
+            1.962,
+            0.44
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.084,
+          "count": 4,
+          "pitch_x_m": 0.17,
+          "source": "nodes:structure_gantry__carriage_y_a_head_disc / _socket / _quick_flange / _qp_bolt",
+          "confidence": "high",
+          "note": "быстросъёмный фланец Y-каретки A (z=+0.440), 4 болта 0.17 x 0.15 м",
+          "pitch_z_m": 0.15,
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "tool_flange_b",
+          "role": "output",
+          "kind": "flange",
+          "standard": "Ø84 quick-change",
+          "gender": "female",
+          "position_m": [
+            0.4,
+            1.962,
+            -0.4
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.084,
+          "count": 4,
+          "pitch_x_m": 0.17,
+          "source": "nodes:structure_gantry__carriage_y_b_head_disc / _socket / _quick_flange / _qp_bolt",
+          "confidence": "high",
+          "note": "быстросъёмный фланец Y-каретки B (z=-0.400), 4 болта 0.17 x 0.15 м",
+          "pitch_z_m": 0.15,
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "panel connector",
+          "gender": "female",
+          "position_m": [
+            -1.276,
+            1.596,
+            -0.634
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.04,
+          "source": "nodes:structure_gantry__junction_connector / junction_face (z=-0.634)",
+          "confidence": "medium",
+          "note": "ввод на клеммной коробке; выделенного IEC C14 в GLB нет",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "RJ45 (не выделен)",
+          "gender": "female",
+          "position_m": [
+            -1.276,
+            1.52,
+            -0.685
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.014,
+          "source": "node:structure_gantry__junction_face (z=-0.685) / junction_box",
+          "confidence": "low",
+          "note": "второго разъёма данных в узле нет — точка на панели клеммной коробки",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "cable_tray",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "лоток 1550 x 100",
+          "gender": "female",
+          "position_m": [
+            -0.455,
+            2.474,
+            -0.934
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.1,
+          "count": 3,
+          "pitch_m": 1.55,
+          "source": "nodes:structure_gantry__cable_tray_base / cable_tray_lip / cable_tray_bracket",
+          "confidence": "high",
+          "note": "кабельный лоток на верхней раме, 3 кронштейна, узел cable_chain/cable_loop рядом",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "structure_bed_frame": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 1.91,
+          "load_n": 1962.0,
+          "source": "nodes:structure_bed_frame__anchor_stud_fl..rr / foot_anchor_* / anchor_recess_* (y=0)",
+          "confidence": "high",
+          "note": "4 анкерные стойки foot_anchor_fl/fr/rl/rr в x=±0.955, z=±0.405 → 1.91 × 0.81. Прежние 1.9256 × 0.8258 — внешний габарит стоек",
+          "pitch_z_m": 0.81,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "mount_out",
+          "role": "output",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.0003,
+            0.3025,
+            0.2
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 0.6,
+          "load_n": 1471.0,
+          "source": "nodes:structure_bed_frame__deck_slat_neg/pos (top y=0.3025) + rail_neg/pos (top y=0.3066)",
+          "confidence": "medium",
+          "note": "точка на слайне палубы deck_slat_neg (z 0.185…0.215, верх y=0.3025). При z=0 между слайнами щель 30 мм — материала нет (прежняя точка была в 10,5 мм от металла)",
+          "pitch_z_m": 0.34,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "surface_support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "pad 300 x 580",
+          "gender": "female",
+          "position_m": [
+            0.695,
+            0.3259,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.3,
+          "count": 2,
+          "pitch_x_m": 0.3,
+          "source": "nodes:structure_bed_frame__pad_head / pad_foot (top face y=0.3259)",
+          "confidence": "medium",
+          "note": "две подушки 0.30 x 0.58 м по x=+0.695/-0.760, верхняя плоскость рамы",
+          "pitch_z_m": 0.58,
+          "connector": "custom"
+        },
+        {
+          "id": "rail_neg",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "rail 50 x 22",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.3066,
+            0.34
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.05,
+          "pitch_m": 1.845,
+          "source": "nodes:structure_bed_frame__rail_neg / rail_endcap_head_neg / rail_scale_neg",
+          "confidence": "high",
+          "note": "продольная направляющая кареток, длина 1.845 м, z=+0.34",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "rail_pos",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "rail 50 x 22",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.3066,
+            -0.34
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.05,
+          "pitch_m": 1.845,
+          "source": "nodes:structure_bed_frame__rail_pos / rail_endcap_head_pos / rail_scale_pos",
+          "confidence": "high",
+          "note": "вторая направляющая кареток, длина 1.845 м, z=-0.34",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "tilt_hinge",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "Ø30 axis",
+          "gender": "female",
+          "position_m": [
+            0.0002,
+            0.21,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.03,
+          "pitch_m": 0.79,
+          "source": "nodes:structure_bed_frame__pivot_shaft / cross_pivot / hinge_boss_neg/pos / hinge_pin_*",
+          "confidence": "high",
+          "note": "ось наклона ложа по Z, длина 0.79 м, шарнирные бобышки по z=±0.402",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø30 — CJ-CLEVIS-8 (вилка штока) не применим"
+        },
+        {
+          "id": "lift_actuator_lower",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "Ø10 pin",
+          "gender": "female",
+          "position_m": [
+            0.43,
+            0.089,
+            -0.3
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0104,
+          "source": "nodes:structure_bed_frame__actuator_mount_lower / actuator_bolt_lower",
+          "confidence": "high",
+          "note": "нижняя проушина подъёмного актуатора (x=0.430, y=0.089, z=-0.300)",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø10 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "lift_actuator_upper",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "Ø10 pin",
+          "gender": "female",
+          "position_m": [
+            0.4704,
+            0.2281,
+            -0.3
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0104,
+          "source": "nodes:structure_bed_frame__actuator_mount_upper / actuator_bolt_upper",
+          "confidence": "high",
+          "note": "верхняя проушина актуатора (x=0.470, y=0.228, z=-0.300)",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø10 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "IEC C14",
+          "gender": "female",
+          "position_m": [
+            0.932,
+            0.052,
+            0.25
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.029,
+          "source": "nodes:structure_bed_frame__power_inlet / inlet_flange / inlet_socket (x=0.932)",
+          "confidence": "high",
+          "note": "ввод 230 В / 10 А на торце рамы",
+          "connector": "CJ-PWR-C14"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "M12 gland",
+          "gender": "female",
+          "position_m": [
+            0.244,
+            0.206,
+            0.274
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.014,
+          "source": "node:structure_bed_frame__cable_gland (y=0.206) / cable_channel",
+          "confidence": "low",
+          "note": "RJ45 в GLB не выделен — точка на гермовводе канала данных",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "cable_outlet",
+          "role": "power",
+          "kind": "cable",
+          "standard": "gland Ø16",
+          "gender": "female",
+          "position_m": [
+            -0.715,
+            0.036,
+            0.3
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "source": "node:structure_bed_frame__cable_outlet (x=-0.715) / cable_channel / cable_clip",
+          "confidence": "medium",
+          "note": "вывод кабеля питания из нижнего лотка",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        }
+      ]
+    },
+    "structure_cage": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 1.164,
+          "load_n": 1471.5,
+          "source": "nodes:structure_cage__foot_1..4 + foot_*_pad (bottom y=0)",
+          "confidence": "high",
+          "note": "4 лапы foot_1..4 (68 × 68 мм, подошвы foot_*_pad 86 × 86) в x=±0.5821, z=±0.5821 → межцентровой 1.164 × 1.164. Прежние 1.2323 × 0.068 — внешний габарит лап и ошибка на порядок (шаблон уходил с лап). Контракт по-прежнему заявляет поле 0.6 м (P2)",
+          "pitch_z_m": 1.164,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "lift_eyes",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "M8 lifting eye",
+          "gender": "female",
+          "position_m": [
+            -0.5623,
+            2.042,
+            -0.5623
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 1.164,
+          "load_n": 1471.0,
+          "source": "nodes:structure_cage__lift_1..4_ring (y=1.9843..2.0997) / lift_*_plate / lift_*_bolt",
+          "confidence": "high",
+          "note": "4 рым-болта: кольца lift_1..4_ring в x=±0.5623, z=±0.5623 (площадки lift_*_plate x/z ±0.5128…±0.6514), центр кольца y=2.042. Точка — на первом кольце; прежняя была в центре поля, 153 мм до ближайшей площадки",
+          "pitch_z_m": 1.164,
+          "connector": "custom"
+        },
+        {
+          "id": "dome_seat",
+          "role": "output",
+          "kind": "flange",
+          "standard": "Ø1400 ring",
+          "gender": "female",
+          "position_m": [
+            0.66,
+            1.97,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.4,
+          "source": "node:structure_cage__ring_top (top face y=1.970) / glass_dome (bottom y=1.9349)",
+          "confidence": "high",
+          "note": "точка перенесена с центра кольца (там 639 мм пустоты и стеклянный купол glass_dome y 1.935…2.046) на тело аннулуса ring_top (r 0.58…0.70, верх 1.970). Посадочное кольцо купола: диаметр 1.32 м, один контур",
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "door_frame",
+          "role": "output",
+          "kind": "flange",
+          "standard": "door 684 x 1719",
+          "gender": "female",
+          "position_m": [
+            -0.33,
+            1.007,
+            0.664
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.044,
+          "source": "nodes:structure_cage__door_frame / hinge_1..3_bracket / lock_housing (z=0.664)",
+          "confidence": "high",
+          "note": "точка на стойке петель (тело рамки x 0…±0.342, z 0.620…0.664); в центре проёма дверного полотна материала нет — прежняя точка была в 342 мм от ближайшей стойки",
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "inner_rail",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "ring rail Ø1233",
+          "gender": "female",
+          "position_m": [
+            0.6163,
+            1.355,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.02,
+          "pcd_m": 1.2326,
+          "source": "node:structure_cage__inner_rail (y=1.335..1.355, r=0.6163)",
+          "confidence": "medium",
+          "note": "беговая поверхность кольцевого рельса — верх y=1.355 (inner_rail y 1.335…1.355). Кольцо r=0.6163 лежит в плоскости XZ, касательная в точке (0.6163, y, 0) равна (0,0,1) — ось качения по кольцу, а не по нормали: axis=(0,1,0) означал «врезание» каретки в рельс",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "vent_back",
+          "role": "fluid",
+          "kind": "flange",
+          "standard": "grille 452 x 250",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            1.69,
+            -0.6
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.25,
+          "pitch_m": 0.026,
+          "source": "nodes:structure_cage__vent_back_recess / vent_back_slat_0..6 / vent_back_bar_*",
+          "confidence": "high",
+          "note": "решётка на задней грани, 7 ламелей с шагом 0.027 м",
+          "connector": "custom",
+          "connector_note": "fluid-порт без номинала быстросъёма"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "gland Ø16",
+          "gender": "female",
+          "position_m": [
+            0.324,
+            0.5891,
+            -0.5045
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "source": "node:structure_cage__cable (x=0.324..0.324, z=-0.5045)",
+          "confidence": "low",
+          "note": "разъёма питания в GLB нет — точка на кабельном вводе у задней стойки",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        }
+      ]
+    },
+    "structure_suspension_frame": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.62,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 1.96,
+          "load_n": 1765.8,
+          "source": "nodes:structure_suspension_frame__anchor_plate_m/p (top y=0.620) + hanger_rod_* / anchor_nuts",
+          "confidence": "high",
+          "note": "центры плит anchor_plate_m/p: x -1.065…-0.895 (центр -0.98) и +0.895…+1.065 (центр +0.98) → pitch_x 1.96; верх y=0.62 в точке верный. Прежние 2.085 — внешний габарит плит",
+          "pitch_z_m": 0.104,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "mount_out_M",
+          "role": "output",
+          "kind": "mount",
+          "standard": "M12 eye",
+          "gender": "female",
+          "position_m": [
+            -0.62,
+            0.206,
+            0.0691
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.057,
+          "count": 2,
+          "load_n": 735.0,
+          "source": "nodes:structure_suspension_frame__load_point_m_eye / _strap / _bolt / _bolt2 / _tag",
+          "confidence": "high",
+          "note": "грузовое ухо M на балке (x=-0.620), 2 болта стропа, z=0.0691",
+          "connector": "custom"
+        },
+        {
+          "id": "mount_out_P",
+          "role": "output",
+          "kind": "mount",
+          "standard": "M12 eye",
+          "gender": "female",
+          "position_m": [
+            0.62,
+            0.206,
+            0.0691
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.057,
+          "count": 2,
+          "load_n": 735.0,
+          "source": "nodes:structure_suspension_frame__load_point_p_eye / _strap / _bolt / _bolt2 / _tag",
+          "confidence": "high",
+          "note": "грузовое ухо P (x=+0.620), шаг между ухами 1.24 м по X",
+          "connector": "custom"
+        },
+        {
+          "id": "rail",
+          "role": "output",
+          "kind": "rail",
+          "standard": "rail 24 x 48",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.238,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.048,
+          "pitch_m": 2.484,
+          "source": "nodes:structure_suspension_frame__rail_body / rail_head / rail_pad / rail_wear_strip",
+          "confidence": "high",
+          "note": "нижняя направляющая каретки, длина 2.484 м, ход по X",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "carriage_hook",
+          "role": "output",
+          "kind": "pivot",
+          "standard": "Ø82 eye",
+          "gender": "female",
+          "position_m": [
+            0.18,
+            0.041,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.082,
+          "source": "nodes:structure_suspension_frame__carriage_eye / carriage_eye_pin (y=0..0.082)",
+          "confidence": "high",
+          "note": "серьга каретки под груз, ось Z, низ каретки на y=0",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø82 — CJ-CLEVIS-8 (вилка штока) не применим"
+        },
+        {
+          "id": "carriage_bolts",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "M10",
+          "gender": "female",
+          "position_m": [
+            0.18,
+            0.2485,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 0.177,
+          "source": "node:structure_suspension_frame__carriage_bolts (y=0.1895..0.2485)",
+          "confidence": "high",
+          "note": "4 болта на плите каретки, 0.177 x 0.131 м",
+          "pitch_z_m": 0.131,
+          "connector": "custom",
+          "connector_note": "мелкий крепёж вне CJ-STR-M12/M8 (M8 — минимум семейства)"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "panel connector",
+          "gender": "female",
+          "position_m": [
+            -1.1,
+            0.41,
+            0.1
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.023,
+          "source": "nodes:structure_suspension_frame__cable_box_connector / cable_box_face",
+          "confidence": "medium",
+          "note": "разъём на клеммной коробке; выделенного IEC C14 в GLB нет",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "cable_inlet",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "gland",
+          "gender": "female",
+          "position_m": [
+            -1.1,
+            0.46,
+            0.07
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.038,
+          "source": "node:structure_suspension_frame__cable_inlet_gland (y=0.460) / cable_inlet",
+          "confidence": "high",
+          "note": "кабельный ввод сверху коробки, cable_chain к каретке",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "end_stop_m",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "stop 52 x 128",
+          "gender": "female",
+          "position_m": [
+            -1.268,
+            0.372,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.1,
+          "source": "nodes:structure_suspension_frame__end_stop_m / end_stop_pad_m / end_stop_bolt_m",
+          "confidence": "high",
+          "note": "концевой упор каретки, x=-1.268 (парный end_stop_p на x=+1.268)",
+          "connector": "custom"
+        }
+      ]
+    },
+    "structure_stall_row": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "surface",
+          "standard": "плита-цоколь 6800 × 891, подошвы pod_shoes",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 7,
+          "pitch_x_m": 0.9714,
+          "load_n": 2943.0,
+          "source": "nodes:structure_stall_row__pod_shoes (bottom y=0) + plinth_core (bottom y=0)",
+          "confidence": "high",
+          "note": "ряд стоит на цоколе plinth_core 6800 × 891 (y 0…0.072) и подошвах pod_shoes 6746 × 1000; болтовых узлов bolt/foot/anchor в GLB нет. 7 подов pod_frame_00..06 с шагом 0.9714 м — это шаг подов, а не болтовое поле; прежние «4 × M12, pitch 0.86» были фикцией",
+          "connector": "custom"
+        },
+        {
+          "id": "mount_out",
+          "role": "output",
+          "kind": "mount",
+          "standard": "pad 940 x 920",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.128,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 7,
+          "pitch_x_m": 0.9714,
+          "load_n": 2943.0,
+          "source": "node:structure_stall_row__pod_pads (top y=0.128) / pod_shoes",
+          "confidence": "high",
+          "note": "7 посадочных площадок под кабины, шаг 0.9714 м, pad 0.94 x 0.92 м",
+          "connector": "custom"
+        },
+        {
+          "id": "pod_door_03",
+          "role": "output",
+          "kind": "flange",
+          "standard": "door 796 x 1613",
+          "gender": "female",
+          "position_m": [
+            -0.0,
+            0.9775,
+            0.496
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.05,
+          "count": 7,
+          "pitch_x_m": 0.9714,
+          "source": "node:structure_stall_row__door_03 (z=0.496), все door_00..06 с шагом 0.9714 м",
+          "confidence": "high",
+          "note": "проём кабины 0.796 x 1.613 м; двери 02 и 05 повёрнуты (открыты) — координаты по door_03",
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "vent",
+          "role": "fluid",
+          "kind": "flange",
+          "standard": "grille 6129 x 66",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            1.7,
+            -0.479
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.066,
+          "pitch_m": 0.9714,
+          "source": "node:structure_stall_row__vent_grilles (z=-0.479, y=1.667..1.733)",
+          "confidence": "high",
+          "note": "общая вентрешётка по 7 кабинам на задней грани",
+          "connector": "custom",
+          "connector_note": "fluid-порт без номинала быстросъёма"
+        },
+        {
+          "id": "cable_tray",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "лоток 6640 x 54",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            1.75,
+            -0.474
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.054,
+          "pitch_m": 6.64,
+          "source": "nodes:structure_stall_row__cable_tray (y=1.636..1.750) / cable_bundle",
+          "confidence": "high",
+          "note": "кабельный лоток по всей линии над кабинами",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "cable_riser",
+          "role": "power",
+          "kind": "cable",
+          "standard": "gland",
+          "gender": "female",
+          "position_m": [
+            -3.385,
+            0.93,
+            -0.4775
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.043,
+          "source": "nodes:structure_stall_row__cable_riser (x=-3.385) / cable_bundle",
+          "confidence": "high",
+          "note": "вертикальный кабельный стояк на торце линии",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "occupancy_signal",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "lamp Ø52",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            1.821,
+            0.4753
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.052,
+          "count": 7,
+          "pitch_x_m": 0.9714,
+          "source": "nodes:structure_stall_row__occupancy_lamp_bodies / occupancy_lenses (y=1.769..1.821)",
+          "confidence": "medium",
+          "note": "7 ламп занятости над дверями, разъём в узле не выделен",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "structure_dock": {
+      "class": "STRUCTURE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0502,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 4,
+          "pitch_x_m": 0.516,
+          "load_n": 1471.0,
+          "source": "nodes:structure_dock__bolt_1..4_washer/_head/_socket (y=0.048..0.062) + label_m12",
+          "confidence": "high",
+          "note": "4 болта bolt_1..4 с шайбами (Ø32) в x=±0.258, z=±0.258 → 0.516 × 0.516. Прежние 0.548 ставили углы шаблона на кромку шайбы",
+          "pitch_z_m": 0.516,
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "dock_out_pins",
+          "role": "output",
+          "kind": "dock",
+          "standard": "2 × Ø23 pin + 2 × Ø32 pad (ответ: 4 × Ø10 × 42.5)",
+          "gender": "male",
+          "position_m": [
+            -0.15,
+            0.088,
+            0.13
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.023,
+          "count": 2,
+          "pitch_x_m": 0.3,
+          "source": "nodes:structure_dock__pin_a_tip / pin_b_tip (y=0.076..0.088) / pin_*_body / pin_*_collar",
+          "confidence": "high",
+          "note": "в геометрии два пальца pin_a/pin_b Ø22,9 (x=±0.15, z=+0.13, y 0.036…0.088) и две подушки pad_1/pad_2 Ø32 (z=-0.14). Ответная часть service_dock объявляет locating_pins 4 × Ø10 × 42.5 — пара не закрывается без переделки одной из сторон; номинал оставлен по геометрии, расхождение зафиксировано",
+          "connector": "custom",
+          "connector_note": "палец/штифт вторичной фиксации — не лоток CJ-DOCK-M"
+        },
+        {
+          "id": "support_pads",
+          "role": "support",
+          "kind": "surface",
+          "standard": "pad Ø32",
+          "gender": "female",
+          "position_m": [
+            -0.15,
+            0.052,
+            -0.14
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.032,
+          "count": 2,
+          "pitch_x_m": 0.3,
+          "source": "nodes:structure_dock__pad_1 / pad_2 / pad_1_ring / pad_2_ring (y=0.036..0.052)",
+          "confidence": "high",
+          "note": "2 опорные пятки на z=-0.140 под ответную плиту модуля",
+          "connector": "custom"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "power connector 2x4",
+          "gender": "female",
+          "position_m": [
+            -0.085,
+            0.059,
+            -0.01
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.086,
+          "source": "nodes:structure_dock__conn_power_body / _flange / _shroud / _pins (y=0.041..0.066)",
+          "confidence": "high",
+          "note": "силовой разъём дока, 4 контакта, шлейф cable_power через grommet_power",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "RJ45",
+          "gender": "female",
+          "position_m": [
+            0.01,
+            0.051,
+            0.011
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.046,
+          "source": "nodes:structure_dock__conn_data_body / _shroud / _contacts (z=0.006..0.011)",
+          "confidence": "high",
+          "note": "сетевой порт дока (label_eth), кабель cable_data через grommet_data",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "Ø10 barb + collar",
+          "gender": "female",
+          "position_m": [
+            0.12,
+            0.0719,
+            -0.08
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "source": "nodes:structure_dock__fluid_a_bore / fluid_a_collar / fluid_a_body (z=-0.080)",
+          "confidence": "high",
+          "note": "вход жидкости (label_fluid), быстросъём с кольцом fluid_a_ring",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "fluid_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "Ø10 barb + collar",
+          "gender": "female",
+          "position_m": [
+            0.12,
+            0.0719,
+            0.02
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "pitch_m": 0.1,
+          "source": "nodes:structure_dock__fluid_b_bore / fluid_b_collar / fluid_b_body (z=+0.020)",
+          "confidence": "high",
+          "note": "выход жидкости, шаг между портами 0.10 м по Z",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "clamp",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "toggle clamp 76 x 34",
+          "gender": "female",
+          "position_m": [
+            0.005,
+            0.0747,
+            -0.181
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.034,
+          "source": "nodes:structure_dock__clamp_hook_cap / clamp_hook / clamp_pivot / clamp_handle",
+          "confidence": "high",
+          "note": "эксцентриковый прижим модуля, рукоять уходит на z=-0.155..-0.164",
+          "connector": "custom"
+        },
+        {
+          "id": "base_bottom",
+          "role": "support",
+          "kind": "surface",
+          "standard": "plate 600 x 600",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.6,
+          "source": "node:structure_dock__base_plate (bottom y=0, 0.6 x 0.6 м)",
+          "confidence": "high",
+          "note": "нижняя плоскость дока, ставится на плиту/поверхность",
+          "connector": "custom"
+        },
+        {
+          "id": "indicator",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "LED Ø30",
+          "gender": "female",
+          "position_m": [
+            0.215,
+            0.0612,
+            0.245
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.03,
+          "source": "nodes:structure_dock__indicator_lens / indicator_ring / indicator_bezel (y=0.0552..0.0612)",
+          "confidence": "medium",
+          "note": "индикатор посадки; электрического разъёма в узле нет",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "grommet_power",
+          "role": "power",
+          "kind": "cable",
+          "standard": "grommet Ø18",
+          "gender": "female",
+          "position_m": [
+            -0.178,
+            0.0335,
+            -0.075
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.018,
+          "source": "nodes:structure_dock__grommet_power (y=0.0335..0.043) / cable_power",
+          "confidence": "medium",
+          "note": "вывод силового кабеля снизу плиты; grommet_data на z=+0.048",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        }
+      ]
+    },
+    "surface_soft": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "deck 2000 x 900",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 2.0,
+          "pitch_x_m": 2.0,
+          "source": "node:surface_soft__backing (bottom y=0, 1.0 x 0.45 half-extents) + welt/piping",
+          "confidence": "high",
+          "note": "опорная плоскость на станину/раму, 2.0 x 0.9 м",
+          "pitch_z_m": 0.9,
+          "connector": "CJ-DECK"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_soft__backing; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "working 1980 x 880",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0583,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.98,
+          "pitch_x_m": 1.98,
+          "source": "node:surface_soft__cover (top y=0.0583) + stitching",
+          "confidence": "high",
+          "note": "мягкая рабочая поверхность 1.98 x 0.88 м, высота 0.059 м",
+          "pitch_z_m": 0.88,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_straps",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "strap 75 x 64",
+          "gender": "female",
+          "position_m": [
+            -0.9551,
+            0.0556,
+            0.356
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.075,
+          "count": 4,
+          "pitch_x_m": 1.9102,
+          "source": "nodes:surface_soft__corner_strap_nn..pp + corner_pad / corner_tack",
+          "confidence": "high",
+          "note": "4 угловых стропа 0.075 x 0.064 м с фиксацией к раме, шаг 1.9102 x 0.712 м",
+          "pitch_z_m": 0.712,
+          "connector": "custom"
+        },
+        {
+          "id": "closure_zip",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "zip 1300",
+          "gender": "female",
+          "position_m": [
+            0.3,
+            0.0312,
+            0.4423
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.018,
+          "pitch_m": 1.3,
+          "source": "nodes:surface_soft__zip_tape / zip_teeth / zip_slider (z=0.4423)",
+          "confidence": "high",
+          "note": "молния по передней кромке, длина 1.30 м, бегунок в x=+0.300",
+          "connector": "custom"
+        },
+        {
+          "id": "pull_handle",
+          "role": "input",
+          "kind": "mount",
+          "standard": "handle 100 x 100",
+          "gender": "female",
+          "position_m": [
+            0.975,
+            0.0555,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.1,
+          "source": "nodes:surface_soft__pull_handle / handle_keeper_l / handle_keeper_r (x=0.975)",
+          "confidence": "medium",
+          "note": "ручка съёма поверхности на правом торце",
+          "connector": "custom"
+        }
+      ]
+    },
+    "surface_anti_slip": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "sheet 2000 x 900",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 2.0,
+          "pitch_x_m": 2.0,
+          "source": "nodes:surface_anti_slip__base_sheet (bottom y=0) / rim (y=0.0001)",
+          "confidence": "high",
+          "note": "опорная плоскость коврика 2.0 x 0.9 м",
+          "pitch_z_m": 0.9,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_anti_slip__base_sheet; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "anti-slip field 1801 x 789",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.02,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.801,
+          "pitch_x_m": 1.801,
+          "source": "nodes:surface_anti_slip__bumps_coarse (top y=0.020) / bumps_fine / field_grid",
+          "confidence": "high",
+          "note": "рабочая противоскользящая плоскость с двумя полями шипов",
+          "pitch_z_m": 0.789,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_tabs",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "velcro tab 34 x 50",
+          "gender": "female",
+          "position_m": [
+            0.968,
+            0.0122,
+            -0.39
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.034,
+          "count": 4,
+          "pitch_x_m": 1.936,
+          "source": "nodes:surface_anti_slip__tab_ne/se/nw/sw_pos + *_velcro (x=±0.968, z=±0.390)",
+          "confidence": "high",
+          "note": "4 липучки по углам, шаг 1.936 x 0.78 м (подошва 2.0 x 0.9)",
+          "pitch_z_m": 0.78,
+          "connector": "custom"
+        }
+      ]
+    },
+    "surface_heated": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "deck 2000 x 900",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 2.0,
+          "pitch_x_m": 1.99,
+          "source": "node:surface_heated__cover (bottom y=0) + edge_binding",
+          "confidence": "high",
+          "note": "нижняя плоскость нагревательного мата 1.99 x 0.90 м",
+          "pitch_z_m": 0.9,
+          "connector": "CJ-DECK"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_heated__cover; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "heated 4 zones",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0442,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.687,
+          "count": 4,
+          "pitch_m": 0.2025,
+          "source": "nodes:surface_heated__heater_track_1..4 (top y=0.0442) / zone_panel_* / zone_frame_*",
+          "confidence": "high",
+          "note": "4 нагревательные зоны 1.687 x 0.160 м, центры по z=±0.101/±0.304",
+          "connector": "custom"
+        },
+        {
+          "id": "mount_straps",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "strap 89 x 60",
+          "gender": "female",
+          "position_m": [
+            -0.9536,
+            0.0422,
+            0.355
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.089,
+          "count": 4,
+          "pitch_x_m": 1.9072,
+          "source": "nodes:surface_heated__corner_strap_nn..pp + corner_velcro / corner_clip",
+          "confidence": "high",
+          "note": "4 угловых стропа с липучкой и клипсой, шаг 1.9072 x 0.71 м",
+          "pitch_z_m": 0.71,
+          "connector": "custom"
+        },
+        {
+          "id": "grommet",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "grommet Ø25",
+          "gender": "female",
+          "position_m": [
+            -0.62,
+            0.0404,
+            0.4215
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.025,
+          "count": 4,
+          "pitch_x_m": 1.24,
+          "source": "nodes:surface_heated__grommet_nn..pp (x=±0.620, z=±0.4215)",
+          "confidence": "medium",
+          "note": "4 гермоввода по углам для кабелей зон",
+          "pitch_z_m": 0.843,
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "connector 32 x 24",
+          "gender": "female",
+          "position_m": [
+            0.917,
+            0.0432,
+            0.3105
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.032,
+          "source": "node:surface_heated__cable_connector (z=0.3105..0.3174) / power_cable / cable_gland",
+          "confidence": "high",
+          "note": "разъём питания мата в x=+0.917, кабель power_cable к controller_body",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "sensor_out",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "NTC Ø20",
+          "gender": "female",
+          "position_m": [
+            0.862,
+            0.0476,
+            -0.3038
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.02,
+          "source": "nodes:surface_heated__sensor_cap / sensor_body / sensor_stem / sensor_lead (x=0.862, z=-0.304)",
+          "confidence": "medium",
+          "note": "датчик температуры зоны, вывод sensor_lead идёт к контроллеру",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "controller",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "panel 72 x 115",
+          "gender": "female",
+          "position_m": [
+            0.915,
+            0.0474,
+            -0.1
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.062,
+          "source": "nodes:surface_heated__controller_body / controller_face / controller_dial / controller_led_*",
+          "confidence": "high",
+          "note": "панель управления с ручкой и 3 светодиодами (x=0.915, z=-0.100)",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "surface_cooled": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "deck 2000 x 900",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 2.0,
+          "pitch_x_m": 1.9664,
+          "source": "node:surface_cooled__base_backing (bottom y=0) + edge_rim",
+          "confidence": "high",
+          "note": "нижняя плоскость охлаждающей плиты, 1.9664 x 0.8664 м опорная подложка",
+          "pitch_z_m": 0.8664,
+          "connector": "CJ-DECK"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_cooled__base_backing; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "working 1932 x 832",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0344,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.932,
+          "pitch_x_m": 1.932,
+          "source": "node:surface_cooled__top_cover (top y=0.0344) / cover_body / coolant_channels",
+          "confidence": "high",
+          "note": "рабочая плоскость 1.932 x 0.832 м над каналами охлаждения",
+          "pitch_z_m": 0.832,
+          "connector": "custom"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "Ø10 barb + clamp",
+          "gender": "female",
+          "position_m": [
+            -0.877,
+            0.0415,
+            0.285
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "source": "nodes:surface_cooled__port_in_collar / port_in_elbow / port_in_riser / port_in_nut / hose_in_clamp",
+          "confidence": "high",
+          "note": "вход теплоносителя в manifold_head, x=-0.877, z=+0.285; hose_in к coupling_in_body",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "fluid_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "Ø10 barb + clamp",
+          "gender": "female",
+          "position_m": [
+            -0.877,
+            0.0415,
+            0.185
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "pitch_m": 0.1,
+          "source": "nodes:surface_cooled__port_out_collar / port_out_elbow / port_out_riser / port_out_nut / hose_out_clamp",
+          "confidence": "high",
+          "note": "выход теплоносителя, z=+0.185 (шаг между портами 0.10 м); coupling_out_body на z=-0.372",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "mount_straps",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "strap 100 x 36",
+          "gender": "female",
+          "position_m": [
+            -0.42,
+            0.0369,
+            -0.4
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.1,
+          "count": 4,
+          "pitch_x_m": 0.84,
+          "source": "nodes:surface_cooled__strap_top_0/1 / strap_bot_0/1 + velcro_* (x=±0.420, z=-0.400/+0.420)",
+          "confidence": "high",
+          "note": "4 стяжных ремня с липучкой по углам, шаг 0.84 x 0.82 м",
+          "pitch_z_m": 0.82,
+          "connector": "custom"
+        },
+        {
+          "id": "sensor_out",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "probe Ø29",
+          "gender": "female",
+          "position_m": [
+            0.905,
+            0.0475,
+            -0.076
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.029,
+          "source": "nodes:surface_cooled__sensor_probe / sensor_body / sensor_led / sensor_cable / sensor_plug",
+          "confidence": "high",
+          "note": "датчик температуры/протечки на x=+0.905, кабель к sensor_plug (z=0.125)",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "grommet_bed",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "grommet set 1787 x 849",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0367,
+            -0.417
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.006,
+          "source": "nodes:surface_cooled__grommets / grommet_holes (y=0.0319..0.0367)",
+          "confidence": "medium",
+          "note": "точка на кромке мата: люверсы grommets идут по периметру (x ±0.8936, z -0.4175…0.4315, верх 0.0367), в центре полотна люверса нет — прежняя точка была в 958 мм от ближайшего",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "surface_fluid_channel": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "tray 1940 x 892",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.94,
+          "pitch_x_m": 1.94,
+          "source": "node:surface_fluid_channel__tray_pan (bottom y=0, 0.97 x 0.446 half-extents)",
+          "confidence": "high",
+          "note": "нижняя плоскость поддона 1.94 x 0.892 м",
+          "pitch_z_m": 0.892,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_fluid_channel__tray_pan; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "field 1600 x 690",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0242,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.6,
+          "count": 5,
+          "pitch_m": 0.145,
+          "source": "nodes:surface_fluid_channel__channel_wall_1..4 (top y=0.0242) / field_wall_l/r / channel_floor",
+          "confidence": "high",
+          "note": "рабочее поле из 5 каналов 1.60 x 0.69 м, шаг стенок 0.145 м",
+          "connector": "custom"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "Ø12 barb + lock ring",
+          "gender": "female",
+          "position_m": [
+            -0.998,
+            0.0152,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0128,
+          "source": "nodes:surface_fluid_channel__inlet_barb / inlet_spout / inlet_coupling / inlet_lock_ring",
+          "confidence": "high",
+          "note": "вход жидкости на x=-0.999, с замковым кольцом и рычагом inlet_lever",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "fluid_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "Ø12 barb + o-ring",
+          "gender": "female",
+          "position_m": [
+            0.995,
+            0.0148,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0128,
+          "source": "nodes:surface_fluid_channel__outlet_spout / outlet_coupling / outlet_oring / outlet_d20",
+          "confidence": "high",
+          "note": "выход жидкости на x=+0.999, уплотнение outlet_oring",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "drain",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "drain Ø60",
+          "gender": "female",
+          "position_m": [
+            0.861,
+            0.019,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.06,
+          "source": "nodes:surface_fluid_channel__drain_grate / drain_grate_ring / sump_mouth / sump_well",
+          "confidence": "high",
+          "note": "сливная горловина в sump 0.112 x 0.112 м на x=+0.861",
+          "connector": "custom",
+          "connector_note": "fluid-порт без номинала быстросъёма"
+        },
+        {
+          "id": "mount_straps",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "strap 145 x 70",
+          "gender": "female",
+          "position_m": [
+            0.9023,
+            0.0284,
+            -0.28
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.145,
+          "count": 8,
+          "pitch_x_m": 1.8046,
+          "source": "nodes:surface_fluid_channel__strap_end_nn..pp (x=±0.902, z=±0.280) + strap_side_* (x=±0.290, z=±0.390)",
+          "confidence": "high",
+          "note": "8 стропов: 4 торцевых (шаг 1.8046 x 0.56) и 4 боковых, все с липучкой velcro_*",
+          "pitch_z_m": 0.56,
+          "connector": "custom"
+        },
+        {
+          "id": "frame_clips",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "clip + M5 screw",
+          "gender": "female",
+          "position_m": [
+            0.62,
+            0.0262,
+            -0.4127
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.048,
+          "count": 4,
+          "pitch_x_m": 1.24,
+          "source": "nodes:surface_fluid_channel__frame_clip_pp/pn/np/nn + clip_screw_*",
+          "confidence": "high",
+          "note": "4 рамных клипсы с винтом, шаг 1.24 x 0.8254 м",
+          "pitch_z_m": 0.8254,
+          "connector": "custom"
+        },
+        {
+          "id": "leak_sensor",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "leak sensor 18 x 18",
+          "gender": "female",
+          "position_m": [
+            0.841,
+            0.0166,
+            -0.13
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.018,
+          "source": "nodes:surface_fluid_channel__leak_sensor / leak_sensor_led (x=0.841, z=-0.130)",
+          "confidence": "medium",
+          "note": "датчик протечки у слива; вывод сигнала в узле не выделен",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "surface_liner": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "deck 1980 x 880",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.98,
+          "pitch_x_m": 1.98,
+          "source": "node:surface_liner__membrane (bottom y=0) + welt / binding",
+          "confidence": "high",
+          "note": "нижняя плоскость вкладыша 1.98 x 0.88 м",
+          "pitch_z_m": 0.88,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_liner__membrane; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "working 1980 x 880",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0075,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.98,
+          "pitch_x_m": 1.98,
+          "source": "node:surface_liner__membrane (top y=0.0075) + seam_cord_l/r",
+          "confidence": "high",
+          "note": "рабочая плоскость вкладыша 1.98 x 0.88 м, толщина 0.0075 м",
+          "pitch_z_m": 0.88,
+          "connector": "custom"
+        },
+        {
+          "id": "studs",
+          "role": "mount",
+          "kind": "flange",
+          "standard": "Ø18 stud",
+          "gender": "female",
+          "position_m": [
+            -0.9464,
+            0.0089,
+            0.3964
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.018,
+          "count": 4,
+          "pitch_x_m": 1.8928,
+          "source": "nodes:surface_liner__stud_nn/np + stud_boss/stud_ring (x=-0.946, z=±0.396), velcro_pad_pn/pp",
+          "confidence": "high",
+          "note": "2 штифта Ø18 (левые углы) + 2 липучки 0.052 x 0.052 (правые), шаг 1.8928 x 0.7928 м",
+          "pitch_z_m": 0.7928,
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "pull_tab",
+          "role": "input",
+          "kind": "mount",
+          "standard": "tab 78 x 58",
+          "gender": "female",
+          "position_m": [
+            0.9998,
+            0.0066,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.078,
+          "source": "nodes:surface_liner__pull_tab / tab_stitch_a / tab_root_bar (x=0.9998)",
+          "confidence": "high",
+          "note": "язычок съёма вкладыша на правом торце",
+          "connector": "custom"
+        }
+      ]
+    },
+    "surface_sensor": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "sheet 2000 x 900",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 2.0,
+          "pitch_x_m": 2.0,
+          "source": "node:surface_sensor__base_sheet (bottom y=0, 1.0 x 0.45 half-extents)",
+          "confidence": "high",
+          "note": "нижняя плоскость сенсорного листа 2.0 x 0.9 м",
+          "pitch_z_m": 0.9,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_sensor__base_sheet; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "sensing field 1700 x 720",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0094,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.7,
+          "pitch_x_m": 1.67,
+          "source": "nodes:surface_sensor__sensor_film (top y=0.0094) / field_frame / sensor_nodes / contact_pads",
+          "confidence": "high",
+          "note": "сенсорное поле 1.67 x 0.72 м, сетка traces + contact_pads",
+          "pitch_z_m": 0.72,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_straps",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "strap 105 x 105",
+          "gender": "female",
+          "position_m": [
+            0.9475,
+            0.0108,
+            -0.3975
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.105,
+          "count": 4,
+          "pitch_x_m": 1.895,
+          "source": "nodes:surface_sensor__strap_pp/np/pn/nn + strap_rivets / velcro_patches",
+          "confidence": "high",
+          "note": "4 угловых ремня 0.105 x 0.105 м с клёпками и липучкой",
+          "pitch_z_m": 0.795,
+          "connector": "custom"
+        },
+        {
+          "id": "controller",
+          "role": "signal",
+          "kind": "flange",
+          "standard": "box 95 x 90",
+          "gender": "female",
+          "position_m": [
+            -0.95,
+            0.0113,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.09,
+          "source": "nodes:surface_sensor__controller_body / controller_lid / screws / led_power / led_link",
+          "confidence": "high",
+          "note": "контроллер сенсорного поля на x=-0.950, 2 индикатора",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "bus_out",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "4-pin + strain relief",
+          "gender": "male",
+          "position_m": [
+            -0.9503,
+            0.012,
+            0.311
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.013,
+          "source": "nodes:surface_sensor__connector_body / connector_ferrule / strain_relief / cable",
+          "confidence": "high",
+          "note": "выходной разъём 4-pin на x=-0.950, z=+0.311, кабель к cable_clips",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        }
+      ]
+    },
+    "surface_contour": {
+      "class": "SURFACE",
+      "mates": [
+        {
+          "id": "support",
+          "role": "support",
+          "kind": "surface",
+          "standard": "pad 1980 x 887",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.98,
+          "pitch_x_m": 1.98,
+          "source": "node:surface_contour__pad (bottom y=0) + mount_rail_n/p / mount_tab_n/p",
+          "confidence": "high",
+          "note": "нижняя плоскость контурной подушки 1.98 x 0.887 м",
+          "pitch_z_m": 0.887,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "deck 6 x M8",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "count": 6,
+          "pitch_m": 0.3,
+          "load_n": 1800.0,
+          "source": "bbox bottom face y=0.000 of node:surface_contour__pad; contract port mount_in",
+          "confidence": "low",
+          "note": "болтовых бобышек в GLB нет: шаблон 6 x M8 с шагом 0.3 м взят из контракта, координата — центр опорной плоскости",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "surface_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "working 1921 x 828",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0934,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 1.921,
+          "pitch_x_m": 1.921,
+          "source": "nodes:surface_contour__stitching (top y=0.0934) / pad / piping / channel_cord_n/p",
+          "confidence": "high",
+          "note": "рабочая плоскость с профилем 1.921 x 0.828 м, высота 0.093 м",
+          "pitch_z_m": 0.828,
+          "connector": "custom"
+        },
+        {
+          "id": "mount_rails",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "rail 1540 x 24",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.29
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.024,
+          "count": 2,
+          "source": "nodes:surface_contour__mount_rail_n / mount_rail_p (z=±0.290) + mount_tab_n/p",
+          "confidence": "high",
+          "note": "2 монтажных рельса 1.54 м снизу (z=±0.290), 2 фиксатора mount_tab",
+          "pitch_z_m": 0.58,
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "mount_straps",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "strap 122 x 60 + buckle",
+          "gender": "female",
+          "position_m": [
+            -0.924,
+            0.0842,
+            0.3
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.122,
+          "count": 4,
+          "pitch_x_m": 1.866,
+          "source": "nodes:surface_contour__strap_nn..pp + velcro_* + buckle_* (x=±0.933, z=±0.300)",
+          "confidence": "high",
+          "note": "4 стропа с пряжкой и липучкой, шаг 1.866 x 0.60 м",
+          "pitch_z_m": 0.6,
+          "connector": "custom"
+        },
+        {
+          "id": "belt_chest",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "belt 64 mm",
+          "gender": "female",
+          "position_m": [
+            0.462,
+            0.0462,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.064,
+          "source": "nodes:surface_contour__belt_chest / belt_keeper_chest_n/p / belt_buckle_chest (x=+0.462)",
+          "confidence": "high",
+          "note": "поясной ремень по контуру, сечение 0.064 x 0.089 м, пряжка belt_buckle_chest",
+          "connector": "custom"
+        },
+        {
+          "id": "belt_shin",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "belt 64 mm",
+          "gender": "female",
+          "position_m": [
+            -0.462,
+            0.0459,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.064,
+          "pitch_m": 0.86,
+          "source": "nodes:surface_contour__belt_shin / belt_keeper_shin_n/p / belt_buckle_shin (x=-0.462)",
+          "confidence": "high",
+          "note": "второй контурный ремень x=-0.462 (шаг между ремнями 0.86 м)",
+          "connector": "custom"
+        },
+        {
+          "id": "valve",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "valve Ø14",
+          "gender": "female",
+          "position_m": [
+            0.848,
+            0.0929,
+            0.352
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.014,
+          "source": "nodes:surface_contour__valve_stem / valve_cap / valve_ring / valve_nub / hose",
+          "confidence": "high",
+          "note": "клапан/ниппель в x=+0.848, z=+0.352, шланг hose и фильтр filter рядом",
+          "connector": "custom",
+          "connector_note": "fluid-порт без номинала быстросъёма"
+        },
+        {
+          "id": "duct_port",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "duct Ø28",
+          "gender": "female",
+          "position_m": [
+            -0.7139,
+            0.0793,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.028,
+          "source": "nodes:surface_contour__duct_ring / duct_port (x=-0.714, z=0.000)",
+          "confidence": "high",
+          "note": "патрубок подачи воздуха/жидкости на левом торце",
+          "connector": "custom",
+          "connector_note": "fluid-порт без номинала быстросъёма"
+        }
+      ]
+    }
+  }
+}

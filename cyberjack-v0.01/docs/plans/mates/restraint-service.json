@@ -1,0 +1,2940 @@
+{
+  "format": "cj-mate-points/1",
+  "group": "restraint-service",
+  "components": {
+    "restraint_wrist_cuff": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "restraint_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "манжета 26 мм, проём Ø45.6",
+          "gender": "female",
+          "position_m": [
+            -0.0228,
+            0.03,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0456,
+          "load_n": 196,
+          "source": "node:restraint_wrist_cuff__pad_cradle (дуга 150°..210°, r=0.0228 по вершинам) + lining (r=0.0252) + pad_rib_a..c (r=0.0238)",
+          "confidence": "high",
+          "note": "Мягкое ложе под ладонную сторону. Ось запястья Z (в Blender Y), центр кольца (0; 0.030). Нормаль — внутрь проёма, к оси.",
+          "connector": "custom"
+        },
+        {
+          "id": "qr_latch",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кам-пряжка 26 мм + рычаг быстросъёма",
+          "gender": "female",
+          "position_m": [
+            0.02961,
+            0.03772,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0304,
+          "load_n": 196,
+          "source": "nodes:restraint_wrist_cuff__qr_pin (z -0.0152..0.0152) + buckle_roller + buckle_frame + qr_lever / qr_lever_tip",
+          "confidence": "high",
+          "note": "Рычаг поднимается по +X, палец Ø2.5 по Z. Кам-пряжка с прижимным валиком Ø6.4.",
+          "connector": "custom"
+        },
+        {
+          "id": "anchor_dring",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring Ø15.2, пруток 3.2",
+          "gender": "female",
+          "position_m": [
+            0.039,
+            0.01733,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0152,
+          "load_n": 196,
+          "source": "nodes:restraint_wrist_cuff__dring (bbox 0.03139..0.04659 × 0.00973..0.02493, толщина 0.00316) + dring_bar + dring_rivet_a/b",
+          "confidence": "high",
+          "note": "Проушина на тканевой петле, карабин вставляется по Z. В контракте вместо этого 4×M12 bolt_pattern — расхождение (болтовой плиты в геометрии нет).",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø15.2 — CJ-CLEVIS-8 (вилка штока) не применим"
+        }
+      ]
+    },
+    "restraint_ankle_cuff": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "restraint_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "манжета 30 мм, проём Ø68",
+          "gender": "female",
+          "position_m": [
+            -0.034,
+            0.04,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.068,
+          "load_n": 294,
+          "source": "node:restraint_ankle_cuff__lining (r=0.034 по вершинам) + pad_rolls (R_ROLL 0.0336, ролики Ø3.8) + pad_bolsters (свод стопы)",
+          "confidence": "high",
+          "note": "Ось щиколотки Z (в Blender Y), центр (0; 0.040). Нормаль внутрь проёма.",
+          "connector": "custom"
+        },
+        {
+          "id": "qr_latch",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кам-пряжка 30 мм + рычаг + ловящий крюк",
+          "gender": "female",
+          "position_m": [
+            0.04224,
+            0.0437,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0286,
+          "load_n": 294,
+          "source": "nodes:restraint_ankle_cuff__buckle_frame / buckle_roller / buckle_pin (ось Z) + qr_lever + qr_catch / qr_catch_pin (z=-0.0158)",
+          "confidence": "high",
+          "note": "Рычаг по +X, крюк-ловушка на -Z; пряжка с прижимным валиком Ø8.",
+          "connector": "custom"
+        },
+        {
+          "id": "anchor_dring",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring Ø22.8, пруток 5.4",
+          "gender": "female",
+          "position_m": [
+            0.0479,
+            0.01272,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0228,
+          "load_n": 294,
+          "source": "nodes:restraint_ankle_cuff__dring (bbox 0.03653..0.05935 × -0.00039..0.02583, толщина 0.0054) + dring_loop / dring_loop_seam",
+          "confidence": "high",
+          "note": "Проушина на петле у нижней кромки ремня; карабин по Z.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø22.8 — CJ-CLEVIS-8 (вилка штока) не применим"
+        }
+      ]
+    },
+    "restraint_thigh_clamp": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "restraint_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "двухщёчный зажим, овальный проём 101.6 × 77.2",
+          "gender": "female",
+          "position_m": [
+            0.0508,
+            0.04,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.1016,
+          "load_n": 490,
+          "source": "node:restraint_thigh_clamp__jaw_a_pad (внутренняя поверхность PAD_IN=0.0508; bbox x 0.00107..0.05419, z -0.03775..0.03899) + jaw_b_pad (зеркально) + pad_rib_a..c",
+          "confidence": "high",
+          "note": "Ось бедра Y (в Blender Z). Рабочие поверхности — силиконовые подушки обеих щёк, овал 101.6 (X) × 77.2 (Z) мм; нормаль к оси.",
+          "connector": "custom"
+        },
+        {
+          "id": "hinge",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "ось Ø7.2, 5 проушин, 74 мм",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.04,
+            0.053
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.074,
+          "load_n": 490,
+          "source": "nodes:restraint_thigh_clamp__hinge_pin (y 0.003..0.077) + hinge_knuckle_a_1..b_4 + hinge_pin_head_top/bot + hinge_web_top/bot",
+          "confidence": "high",
+          "note": "Ось раскрытия щёк на -Y-стороне (glTF +Z). Ход ограничен open_stop (планка с клёпкой на +Z-стороне).",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø7.2 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "rail_dock",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "рельс 14 × 26 мм, стопорный винт",
+          "gender": "female",
+          "position_m": [
+            -0.0782,
+            0.04,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.014,
+          "load_n": 490,
+          "source": "nodes:restraint_thigh_clamp__rail_boss + rail_claw_a/b (z ±0.0122, x -0.0816..-0.0748) + rail_lock_screw (Ø6.8) / rail_lock_knob",
+          "confidence": "high",
+          "note": "Паспорт: док/рельс. Захват надевается радиально со стороны -X, паз 14 мм по Z, длина губ 26.4 мм по оси бедра; винт фиксирует снаружи.",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "qr_release",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кнопка Ø8 + храповик 7 зубьев",
+          "gender": "female",
+          "position_m": [
+            -0.0274,
+            0.0382,
+            -0.0472
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.008,
+          "load_n": 490,
+          "source": "nodes:restraint_thigh_clamp__qr_button / qr_button_ring + ratchet_strap / ratchet_tooth_1..7 / ratchet_root + pawl_housing / pawl_lever / pawl_lever_tip",
+          "confidence": "high",
+          "note": "Кнопка быстросъёма выступает по +Y (ход вниз), рядом рычаг-собачка храповика; храповик ограничивает сжатие.",
+          "connector": "custom"
+        },
+        {
+          "id": "dring_out",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring Ø27.2, пруток 4.6",
+          "gender": "female",
+          "position_m": [
+            0.0775,
+            0.04,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0272,
+          "load_n": 490,
+          "source": "nodes:restraint_thigh_clamp__dring (bbox 0.0639..0.0911 × 0.0264..0.0536, толщина 0.00457) + dring_plate + dring_rivet_a/b",
+          "confidence": "high",
+          "note": "D-полукольцо на клёпаной планке со стороны +X; карабин по Z.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø27.2 — CJ-CLEVIS-8 (вилка штока) не применим"
+        }
+      ]
+    },
+    "restraint_waist_belt": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "pelvis_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "ремень 86 мм + подкладка 104 мм",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.104,
+          "load_n": 785,
+          "source": "node:restraint_waist_belt__pad (нижняя грань y=0, 0.863 × 0.114) + pad_stitch_a/b + strap (y 0.003..0.039)",
+          "confidence": "high",
+          "note": "В разложенном виде подкладка смотрит вниз; при надевании — к тазу. Длина 1.0 м по X, середина x=0, ось обхвата X.",
+          "connector": "custom"
+        },
+        {
+          "id": "buckle_qr",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кам-пряжка 104 мм + рычаг + стропный язычок",
+          "gender": "female",
+          "position_m": [
+            -0.395,
+            0.0146,
+            -0.0045
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0894,
+          "load_n": 785,
+          "source": "nodes:restraint_waist_belt__buckle_frame / buckle_cam (0.0894 по Z) / buckle_lever / buckle_pull / pull_eyelet / buckle_rivet_a/b",
+          "confidence": "high",
+          "note": "Кам с прижимом по Z, рычаг отводится по -X; тянут за стропный язычок (eyelet x=-0.463).",
+          "connector": "custom"
+        },
+        {
+          "id": "dring_a",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 47.7 × 39.5, пруток 14",
+          "gender": "female",
+          "position_m": [
+            -0.24,
+            0.0208,
+            -0.0093
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0477,
+          "load_n": 785,
+          "source": "nodes:restraint_waist_belt__dring_a (bbox -0.26387..-0.21613 × 0.00106..0.04054) + dring_loop_a_top / _side_a / _side_b + dring_rivet_a",
+          "confidence": "high",
+          "note": "Первое из четырёх D-колец на стропных петлях (x=-0.24).",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        },
+        {
+          "id": "dring_b",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 47.7 × 39.5, пруток 14",
+          "gender": "female",
+          "position_m": [
+            -0.1,
+            0.0208,
+            -0.0107
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0477,
+          "load_n": 785,
+          "source": "nodes:restraint_waist_belt__dring_b + dring_loop_b_top / _side_a / _side_b + dring_rivet_b",
+          "confidence": "high",
+          "note": "Второе D-кольцо (x=-0.10).",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        },
+        {
+          "id": "dring_c",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 47.7 × 39.5, пруток 14",
+          "gender": "female",
+          "position_m": [
+            0.04,
+            0.0208,
+            -0.0094
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0477,
+          "load_n": 785,
+          "source": "nodes:restraint_waist_belt__dring_c + dring_loop_c_top / _side_a / _side_b + dring_rivet_c",
+          "confidence": "high",
+          "note": "Третье D-кольцо (x=+0.04).",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        },
+        {
+          "id": "dring_d",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 47.7 × 39.5, пруток 14",
+          "gender": "female",
+          "position_m": [
+            0.18,
+            0.0208,
+            -0.0066
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0477,
+          "load_n": 785,
+          "source": "nodes:restraint_waist_belt__dring_d (bbox 0.15613..0.20387 × 0.00106..0.04054) + dring_loop_d_top / _side_a / _side_b + dring_rivet_d",
+          "confidence": "high",
+          "note": "Четвёртое D-кольцо (x=+0.18). Все четыре — точки подвеса/страховки.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        },
+        {
+          "id": "length_lock",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "слайдер 32 × 103 + винт Ø3.8",
+          "gender": "female",
+          "position_m": [
+            0.245,
+            0.0144,
+            -0.0052
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.032,
+          "load_n": 785,
+          "source": "nodes:restraint_waist_belt__limit_frame (y 0.0104..0.0144) + limit_plate + limit_screw (y 0.0094..0.0184) + length_tick_a..c",
+          "confidence": "high",
+          "note": "Ограничитель длины со стопорным винтом сверху; шкала длины 0.2..0.23 м.",
+          "connector": "custom"
+        }
+      ]
+    },
+    "restraint_neck_yoke": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "neck_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "U-дуга 258 × 164, подушка затылка",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.024,
+            0.0669
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.1358,
+          "load_n": 98,
+          "source": "node:restraint_neck_yoke__pad_back (внутренняя грань z=0.05436, 0.1358 × 0.0387) + pad_roll_back + pad_bead_back",
+          "confidence": "high",
+          "note": "поверхность подушки pad_back при |x|<0.03: z 0.0669…0.0809. Прежняя z=0.0544 (bbox min) — в 12,5 мм от материала",
+          "connector": "custom"
+        },
+        {
+          "id": "side_pad_left",
+          "role": "output",
+          "kind": "surface",
+          "standard": "боковая подушка 87.3 мм",
+          "gender": "female",
+          "position_m": [
+            -0.0966,
+            0.0202,
+            0.0104
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.0873,
+          "load_n": 98,
+          "source": "node:restraint_neck_yoke__pad_left (внутренняя грань x=-0.07461, z -0.03328..0.05404) + pad_roll_left + pad_bead_left + limiter_left",
+          "confidence": "high",
+          "note": "рабочая поверхность подушки pad_left в сечении |y-0.0202|<8 мм, |z-0.0104|<8 мм: x -0.1115…-0.0966. Прежняя x=-0.0746 (bbox max) лежала в полости шеи, в 22 мм от подушки",
+          "connector": "custom"
+        },
+        {
+          "id": "side_pad_right",
+          "role": "output",
+          "kind": "surface",
+          "standard": "боковая подушка 87.3 мм",
+          "gender": "female",
+          "position_m": [
+            0.0966,
+            0.0202,
+            0.0104
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.0873,
+          "load_n": 98,
+          "source": "node:restraint_neck_yoke__pad_right (внутренняя грань x=0.07461) + pad_roll_right + pad_bead_right + limiter_right",
+          "confidence": "high",
+          "note": "зеркальная подушка pad_right: рабочая поверхность x=+0.0966 (bbox 0.0746…0.1118); прежняя точка была на внутренней грани bbox",
+          "connector": "custom"
+        },
+        {
+          "id": "shoulder_seat",
+          "role": "support",
+          "kind": "surface",
+          "standard": "нижняя плоскость дуги 246.5 × 151.1",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0004,
+            0.02
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.2465,
+          "load_n": 98,
+          "source": "node:restraint_neck_yoke__shell_foot (y 0.0004..0.0092, 0.2465 × 0.1511) + shell + shell_rib",
+          "confidence": "high",
+          "note": "Дуга лежит на плечах (в блоке — на полу); высота 32 мм у концов, 58 мм на затылке.",
+          "connector": "custom"
+        },
+        {
+          "id": "hinge",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "палец Ø10.2 + стопорный винт",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0304,
+            0.1162
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.0345,
+          "load_n": 98,
+          "source": "nodes:restraint_neck_yoke__hinge_pin (z 0.1111..0.1213, y 0.0132..0.0477) + hinge_block / hinge_ear_a / hinge_ear_b / hinge_pin_cap + hinge_screw / hinge_screw_knob",
+          "confidence": "high",
+          "note": "Шарнир на затылке с фиксатором (винт с барашком по +X).",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø10.2 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "qr_lock_left",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кам-замок 23 × 25 + палец Ø3.8",
+          "gender": "female",
+          "position_m": [
+            -0.12786,
+            0.0175,
+            -0.03296
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.028,
+          "load_n": 98,
+          "source": "nodes:restraint_neck_yoke__lock_frame_left / lock_cam_left / lock_cam_axle_left / lock_pin_left (x -0.12976..-0.12596) / lock_lever_left + release_tab_left",
+          "confidence": "high",
+          "note": "Быстросъёмный замок переднего левого конца; рядом D-петля dring_front_left для второй страховки.",
+          "connector": "custom"
+        },
+        {
+          "id": "qr_lock_right",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кам-замок 23 × 25 + палец Ø3.8",
+          "gender": "female",
+          "position_m": [
+            0.08235,
+            0.0175,
+            -0.08536
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.028,
+          "load_n": 98,
+          "source": "nodes:restraint_neck_yoke__lock_frame_right / lock_cam_right / lock_cam_axle_right / lock_pin_right (x 0.08045..0.08425) / lock_lever_right + release_tab_right",
+          "confidence": "high",
+          "note": "Правый передний замок; концы дуги разнесены по Z из-за выреза горла.",
+          "connector": "custom"
+        },
+        {
+          "id": "dring_left",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 39.6 × 14.4, пруток 14.4",
+          "gender": "female",
+          "position_m": [
+            0.11749,
+            0.04692,
+            0.01597
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0396,
+          "load_n": 98,
+          "source": "nodes:restraint_neck_yoke__dring_l (x 0.11029..0.12469) + dring_bar_l + dring_rivet_la/lb + dring_loop_l",
+          "confidence": "high",
+          "note": "Боковое D-кольцо на плече; плоскость кольца YZ, карабин по X.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        },
+        {
+          "id": "dring_right",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 39.6 × 14.4, пруток 14.4",
+          "gender": "female",
+          "position_m": [
+            -0.11749,
+            0.04692,
+            0.01597
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0396,
+          "load_n": 98,
+          "source": "nodes:restraint_neck_yoke__dring_r + dring_bar_r + dring_rivet_ra/rb + dring_loop_r",
+          "confidence": "high",
+          "note": "Правое боковое D-кольцо, симметрично левому.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        }
+      ]
+    },
+    "restraint_head_frame": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "occiput_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "затылочная подушка 141 × 51",
+          "gender": "female",
+          "position_m": [
+            0.045,
+            0.098,
+            0.063
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.1411,
+          "load_n": 98,
+          "source": "node:restraint_head_frame__pad_occiput (внутренняя грань z=0.06304, y 0.0725..0.1235) + pad_occiput_rolls + plate_core / plate_rim_lo/hi",
+          "confidence": "high",
+          "note": "тело подушки pad_occiput в обход центрального отверстия: при |x|<0.03 треугольников нет; z 0.063…0.1015, точка на передней грани (нормаль -Z). Прежняя (0, 0.098, 0.06304) была в отверстии",
+          "connector": "custom"
+        },
+        {
+          "id": "brow_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "подушка лба 99.6 × 34",
+          "gender": "female",
+          "position_m": [
+            0.03,
+            0.133,
+            -0.0587
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.0996,
+          "load_n": 49,
+          "source": "node:restraint_head_frame__pad_brow (внутренняя грань z=-0.0587, y 0.116..0.15) + pad_brow_rolls + brow_carrier / brow_link_l/r",
+          "confidence": "high",
+          "note": "тело подушки pad_brow в обход центрального отверстия (|x|<0.03): z -0.0875…-0.0587, точка на грани +Z. Прежняя была в отверстии, 11,3 мм до материала",
+          "connector": "custom"
+        },
+        {
+          "id": "chin_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "чашка подбородка 109.7 × 34.5",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.036,
+            -0.0588
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.1097,
+          "load_n": 49,
+          "source": "node:restraint_head_frame__chin_cup (верхняя грань y=0.036, 0.1097 × 0.03451) + chin_rim / chin_lip / chin_strap / chin_cup_edge",
+          "confidence": "high",
+          "note": "Мягкая чашка подбородка — опорная поверхность, рамка стоит на ней (y=0).",
+          "connector": "custom"
+        },
+        {
+          "id": "ear_clamp_left",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "тарелка Ø37 + барашек",
+          "gender": "female",
+          "position_m": [
+            -0.079,
+            0.1,
+            0.004
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.037,
+          "load_n": 25,
+          "source": "nodes:restraint_head_frame__ear_pad_l (внутренняя грань x=-0.079, 0.037 × 0.037) + ear_housing_l + ear_knob_l / ear_knurl_l0..7 / ear_knob_cap_l",
+          "confidence": "high",
+          "note": "Боковой прижим виска: тарелка на оси X, регулировка барашком Ø25.",
+          "connector": "custom"
+        },
+        {
+          "id": "ear_clamp_right",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "тарелка Ø37 + барашек",
+          "gender": "female",
+          "position_m": [
+            0.079,
+            0.1,
+            0.004
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.037,
+          "load_n": 25,
+          "source": "nodes:restraint_head_frame__ear_pad_r + ear_housing_r + ear_knob_r / ear_knurl_r0..7 / ear_knob_cap_r",
+          "confidence": "high",
+          "note": "Правый прижим виска, симметрично левому.",
+          "connector": "custom"
+        },
+        {
+          "id": "dock_left",
+          "role": "output",
+          "kind": "dock",
+          "standard": "палец Ø8.4, длина 29.5",
+          "gender": "male",
+          "position_m": [
+            -0.0855,
+            0.105,
+            -0.05475
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0084,
+          "load_n": 49,
+          "source": "nodes:restraint_head_frame__node_l (x -0.09425..-0.07675) + node_cap_l + node_pin_l (z -0.0695..-0.040, Ø8.4)",
+          "confidence": "medium",
+          "note": "Паспорт: крепление «док». Узел __node — боковой интерфейсный палец, ответная часть (гнездо) в геометрии отсутствует.",
+          "connector": "custom",
+          "connector_note": "палец/штифт вторичной фиксации — не лоток CJ-DOCK-M"
+        },
+        {
+          "id": "dock_right",
+          "role": "output",
+          "kind": "dock",
+          "standard": "палец Ø8.4, длина 29.5",
+          "gender": "male",
+          "position_m": [
+            0.0855,
+            0.105,
+            -0.05475
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0084,
+          "load_n": 49,
+          "source": "nodes:restraint_head_frame__node_r + node_cap_r + node_pin_r (z -0.0695..-0.040)",
+          "confidence": "medium",
+          "note": "Правый интерфейсный палец, симметрично левому.",
+          "connector": "custom",
+          "connector_note": "палец/штифт вторичной фиксации — не лоток CJ-DOCK-M"
+        },
+        {
+          "id": "tilt_hinge_left",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "палец Ø8, 12 мм",
+          "gender": "female",
+          "position_m": [
+            -0.0855,
+            0.1205,
+            -0.056
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.008,
+          "load_n": 25,
+          "source": "nodes:restraint_head_frame__brow_hinge_pin_l (z -0.063..-0.049) + brow_link_l + brow_carrier",
+          "confidence": "high",
+          "note": "Шарнир наклона надбровной дуги (ось Z) с ограничителем.",
+          "connector": "CJ-CLEVIS-8",
+          "connector_note": "палец Ø8 в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "tilt_hinge_right",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "палец Ø8, 12 мм",
+          "gender": "female",
+          "position_m": [
+            0.0855,
+            0.1205,
+            -0.056
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.008,
+          "load_n": 25,
+          "source": "nodes:restraint_head_frame__brow_hinge_pin_r + brow_link_r + brow_carrier",
+          "confidence": "high",
+          "note": "Правый шарнир наклона, ось Z.",
+          "connector": "CJ-CLEVIS-8",
+          "connector_note": "палец Ø8 в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "dring_out",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 21.1 × 19.5, пруток 5.3",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.13525,
+            0.1102
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0211,
+          "load_n": 98,
+          "source": "nodes:restraint_head_frame__dring (y 0.1247..0.1458, толщина 0.00533) + dring_tab + plate_strap / plate_buckle",
+          "confidence": "high",
+          "note": "Кольцо на затылочной плите; карабин по Z. Пластиковый ремень плиты — вспомогательная фиксация.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        }
+      ]
+    },
+    "restraint_stirrup": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "foot_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "ложе 186 × 97, вкладыш",
+          "gender": "female",
+          "position_m": [
+            0.011,
+            0.0422,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.186,
+          "load_n": 392,
+          "source": "node:restraint_stirrup__sole_liner (верх y=0.0422, 0.186 × 0.0808) + sole_cradle + grip_ribs / tread_pads",
+          "confidence": "high",
+          "note": "Стопа носком в +X, пятка в -X, ложе стоит на протекторах (y=0).",
+          "connector": "custom"
+        },
+        {
+          "id": "heel_surface",
+          "role": "support",
+          "kind": "surface",
+          "standard": "пяточный упор 72 × 30",
+          "gender": "female",
+          "position_m": [
+            -0.0717,
+            0.029,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.072,
+          "load_n": 196,
+          "source": "node:restraint_stirrup__heel_pad (внутренняя грань x=-0.0717, y 0.01405..0.04395) + heel_guard",
+          "confidence": "high",
+          "note": "Пяточная опора: упор работает на сдвиг по -X.",
+          "connector": "custom"
+        },
+        {
+          "id": "ankle_strap",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кам-пряжка 36 × 26 + хвостовик",
+          "gender": "female",
+          "position_m": [
+            0.02,
+            0.0282,
+            0.054
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.036,
+          "load_n": 196,
+          "source": "nodes:restraint_stirrup__buckle_frame (z 0.051..0.057) + buckle_roller (Ø6.4 по X) / buckle_cam / strap / strap_lug_l/r / strap_tail",
+          "confidence": "high",
+          "note": "Ремень через подъём стопы, камы по +Z; стропа крепится к ложу.",
+          "connector": "custom"
+        },
+        {
+          "id": "foot_hinge",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "ось Ø8.9, 137 мм, 2 проушины",
+          "gender": "female",
+          "position_m": [
+            -0.07,
+            0.046,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.137,
+          "load_n": 392,
+          "source": "nodes:restraint_stirrup__hinge_axle (z ±0.0685) + hinge_eye_l/r + hinge_lug_l/r + hinge_cap_l/r + hinge_socket_l/r + arm_l/r + arm_shoe_l/r",
+          "confidence": "high",
+          "note": "Шарнир стопы по Z: ложе качается относительно верхней дуги.",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø8.9 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "tilt_lock",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "сектор 10 отверстий + стопорный винт",
+          "gender": "female",
+          "position_m": [
+            -0.0408,
+            0.0365,
+            -0.0744
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0104,
+          "load_n": 196,
+          "source": "nodes:restraint_stirrup__limiter_arc + limiter_holes (z -0.075..-0.0738) + limiter_lock / limiter_handle",
+          "confidence": "high",
+          "note": "Ограничитель угла: ряд отверстий по дуге, фиксация винтом; позволяет зафиксировать угол стопы.",
+          "connector": "custom"
+        },
+        {
+          "id": "dock_out",
+          "role": "output",
+          "kind": "dock",
+          "standard": "плита 36 × 42, паз 20 × 13",
+          "gender": "female",
+          "position_m": [
+            -0.026,
+            0.0995,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.036,
+          "load_n": 392,
+          "source": "nodes:restraint_stirrup__dock_plate (y 0.0925..0.0995, 0.036 × 0.042) + dock_slot (y 0.099..0.1006, 0.020 × 0.013) + mount_block",
+          "confidence": "high",
+          "note": "Паспорт: док/рельс. Ответный сухарь входит в паз сверху; быстросъём — палец Ø7 по Z.",
+          "connector": "custom",
+          "connector_note": "док без лотка 440 × 520 и штифтов Ø10 (CJ-DOCK-M)"
+        },
+        {
+          "id": "qr_latch",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "палец Ø7 + рычаг 30 мм",
+          "gender": "female",
+          "position_m": [
+            -0.02,
+            0.0945,
+            -0.024
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.007,
+          "load_n": 196,
+          "source": "nodes:restraint_stirrup__qr_pin (z -0.0275..-0.0205) + qr_lever (z -0.054..-0.024) + qr_grip",
+          "confidence": "high",
+          "note": "Рычаг отводится по -Z, палец фиксирует ответную часть в доке.",
+          "connector": "custom"
+        },
+        {
+          "id": "dring_out",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 28.5 × 17.6",
+          "gender": "female",
+          "position_m": [
+            -0.05119,
+            0.08738,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0285,
+          "load_n": 392,
+          "source": "nodes:restraint_stirrup__dring (x -0.06545..-0.03693) + dring_tab",
+          "confidence": "high",
+          "note": "Задняя проушина на дуге, карабин по Z.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        }
+      ]
+    },
+    "restraint_spreader": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "cuff_left",
+          "role": "output",
+          "kind": "surface",
+          "standard": "манжета 79 мм, проём Ø58.4",
+          "gender": "female",
+          "position_m": [
+            -0.3655,
+            0.0112,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0584,
+          "load_n": 589,
+          "source": "node:restraint_spreader__cuff_lining_l (r=0.0292..0.0336 по вершинам) + cuff_shell_l (R_OUT 0.0395) + cuff_roll_rear_l / cuff_roll_front_l",
+          "confidence": "high",
+          "note": "Левая манжета на конце штанги: ось манжеты Z (в Blender Y), центр (-0.3655; 0.0404). Нормаль — вверх, в проём; ремень идёт по +Y.",
+          "connector": "custom"
+        },
+        {
+          "id": "cuff_right",
+          "role": "output",
+          "kind": "surface",
+          "standard": "манжета 79 мм, проём Ø58.4",
+          "gender": "female",
+          "position_m": [
+            0.3655,
+            0.0112,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0584,
+          "load_n": 589,
+          "source": "node:restraint_spreader__cuff_lining_r + cuff_shell_r + cuff_roll_rear_r / cuff_roll_front_r",
+          "confidence": "high",
+          "note": "Правая манжета, симметрично левой.",
+          "connector": "custom"
+        },
+        {
+          "id": "qr_cuff_left",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "быстросъём Ø5.2 палец + кнопка Ø11.2",
+          "gender": "female",
+          "position_m": [
+            -0.315,
+            0.0439,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0052,
+          "load_n": 589,
+          "source": "nodes:restraint_spreader__qr_body_l + qr_pin_l (z ±0.0188) + qr_button_l / qr_button_ring_l + qr_paddle_l + qr_bolts_l + cuff_socket_l",
+          "confidence": "high",
+          "note": "Быстросъём крепится с внутренней стороны манжеты (к центру штанги); кнопка сверху (+Y), палец по Z.",
+          "connector": "custom"
+        },
+        {
+          "id": "qr_cuff_right",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "быстросъём Ø5.2 палец + кнопка Ø11.2",
+          "gender": "female",
+          "position_m": [
+            0.315,
+            0.0439,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0052,
+          "load_n": 589,
+          "source": "nodes:restraint_spreader__qr_body_r + qr_pin_r + qr_button_r / qr_button_ring_r + qr_paddle_r + qr_bolts_r + cuff_socket_r",
+          "confidence": "high",
+          "note": "Правый быстросъём, симметрично левому.",
+          "connector": "custom"
+        },
+        {
+          "id": "bar_lock",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "хомут Ø41 + кулачок + safety pin Ø6",
+          "gender": "female",
+          "position_m": [
+            0.068,
+            0.0404,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.041,
+          "load_n": 589,
+          "source": "nodes:restraint_spreader__lock_collar (x 0.036..0.100) + collar_ring + guide_bushing + cam_lug / cam_disc / cam_lever / cam_grip + safety_pin / safety_ring + lock_wheel / lock_wheel_knurl / lock_wheel_screw",
+          "confidence": "high",
+          "note": "Телескоп Ø37 / Ø26.4: зажим хомута кулачком + страховочный штифт + барашек. Ход 0.60–1.20 м, шкала длины и красная метка предела (x=0.2785).",
+          "connector": "custom"
+        },
+        {
+          "id": "dring_left",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 21.5 × 25, пруток 4",
+          "gender": "female",
+          "position_m": [
+            -0.4122,
+            0.0404,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0215,
+          "load_n": 589,
+          "source": "nodes:restraint_spreader__dring_l (x -0.42295..-0.40145, толщина 0.004) + dring_tab_l",
+          "confidence": "high",
+          "note": "D-ring с наружной стороны левой манжеты, карабин по Z.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        },
+        {
+          "id": "dring_right",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 21.5 × 25, пруток 4",
+          "gender": "female",
+          "position_m": [
+            0.4122,
+            0.0404,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0215,
+          "load_n": 589,
+          "source": "nodes:restraint_spreader__dring_r + dring_tab_r",
+          "confidence": "high",
+          "note": "D-ring с наружной стороны правой манжеты.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        }
+      ]
+    },
+    "restraint_suspension_cuff": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "restraint_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "манжета 50 мм, проём Ø56.8",
+          "gender": "female",
+          "position_m": [
+            -0.0284,
+            0.035,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0568,
+          "load_n": 1471,
+          "source": "node:restraint_suspension_cuff__pad_rib_b (r=0.0284..0.03 по вершинам) + lining (R_PAD 0.0294) + band (R_OUT 0.035)",
+          "confidence": "high",
+          "note": "Ось манжеты Z (в Blender Y), центр (0; 0.035). Нормаль внутрь проёма.",
+          "connector": "custom"
+        },
+        {
+          "id": "suspension_ring",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "кольцо Ø28.7, пруток 6",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0938,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0287,
+          "load_n": 1471,
+          "source": "nodes:restraint_suspension_cuff__suspension_ring (y 0.07116..0.09984, x ±0.01152, толщина 0.006) + strap_fold + strap_leg_a/b + strap_stitch_a1..b2",
+          "confidence": "high",
+          "note": "Подвесное кольцо в прошитой петле стропы: карабин/крюк лебёдки входит по Z, контакт по внутренней вершине кольца (y=0.0938).",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø28.7 — CJ-CLEVIS-8 (вилка штока) не применим"
+        },
+        {
+          "id": "secondary_anchor",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-петля Ø7.4",
+          "gender": "female",
+          "position_m": [
+            0.0225,
+            0.0062,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0074,
+          "load_n": 294,
+          "source": "nodes:restraint_suspension_cuff__anchor_ring (y 0.00304..0.00928) + anchor_tab",
+          "confidence": "high",
+          "note": "Малая D-петля на ремне — вторая страховка (паспортное требование).",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø7.4 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "qr_latch",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "кам-пряжка 40 мм + слайдер",
+          "gender": "female",
+          "position_m": [
+            0.03793,
+            0.041,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0364,
+          "load_n": 1471,
+          "source": "nodes:restraint_suspension_cuff__buckle_frame + buckle_roller / buckle_axle + qr_lever / qr_lever_tip + adjust_slider / adjust_screw",
+          "confidence": "high",
+          "note": "Разъём и пряжка — на +X; рычаг отводится по +X, слайдер регулирует обхват.",
+          "connector": "custom"
+        },
+        {
+          "id": "tension_signal",
+          "role": "output",
+          "kind": "cable",
+          "standard": "датчик натяжения (разъём не смоделирован)",
+          "gender": "female",
+          "position_m": [
+            0.0094,
+            0.0698,
+            -0.0034
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "source": "nodes:restraint_suspension_cuff__tension_link (x 0.0067..0.0093) + tension_led + tension_screw_1/2 + load_label / label_line_a..c",
+          "confidence": "low",
+          "note": "Сигнальный вывод датчика натяжения на стропе; разъёма и кабеля в геометрии нет — координата по узлу индикатора.",
+          "connector": "custom"
+        }
+      ]
+    },
+    "restraint_quick_release": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "socket_in",
+          "role": "input",
+          "kind": "bayonet",
+          "standard": "вилка 16 × 12.8, палец Ø3.4",
+          "gender": "female",
+          "position_m": [
+            0.0178,
+            0.0105,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0128,
+          "load_n": 1471,
+          "source": "nodes:restraint_quick_release__socket_floor (y 0..0.008) + socket_cheek_yneg/ypos (z ±0.0095) + socket_shoulder + throat_collar_yneg/ypos/floor",
+          "confidence": "high",
+          "note": "Приёмное гнездо: ответный язычок с ушком входит по +X до упора в дно (x=0.0035) и фиксируется пальцем.",
+          "connector": "custom",
+          "connector_note": "штифт/фиксатор Ø3.4 — не байонетная посадка"
+        },
+        {
+          "id": "mount_face",
+          "role": "input",
+          "kind": "surface",
+          "standard": "встроенный (в манжету/стремено)",
+          "gender": "female",
+          "position_m": [
+            -0.008,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.023,
+          "load_n": 1471,
+          "source": "node:restraint_quick_release__housing (нижняя грань y=0, 0.023 × 0.025) + id_groove / id_groove_2",
+          "confidence": "medium",
+          "note": "Паспорт: крепление встроенное. Контракт требует 4×M12 bolt_pattern — болтов и плиты в геометрии нет.",
+          "connector": "custom"
+        },
+        {
+          "id": "pin_lock",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "стопорный палец Ø3.4 + пружина",
+          "gender": "male",
+          "position_m": [
+            0.0125,
+            0.0115,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0034,
+          "load_n": 1471,
+          "source": "nodes:restraint_quick_release__lock_pin (z -0.0128..0.0191) + pin_head / pin_tip / pin_boss + spring (z 0.0137..0.0198)",
+          "confidence": "high",
+          "note": "Палец ходит по Z, пружина сзади (+Z), носок пальца уходит в -Z на 12.8 мм.",
+          "connector": "custom"
+        },
+        {
+          "id": "release_lever",
+          "role": "output",
+          "kind": "pivot",
+          "standard": "эксцентриковый кулачок + рычаг 22 мм",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.017,
+            0.0182
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0222,
+          "load_n": 196,
+          "source": "nodes:restraint_quick_release__pivot_boss / pivot_axle_sleeve / pivot_pin / pivot_pin_head (z 0.0138..0.0246) + cam + lever_arm + lever_pad + lever_knurl_0..5",
+          "confidence": "high",
+          "note": "Рычаг поворачивается по Z вокруг оси; кулачок тянет палец — сброс одним движением, рифлёная площадка на -X.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        },
+        {
+          "id": "dring_out",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "D-ring 12.6 × 17.5, пруток 3.4",
+          "gender": "female",
+          "position_m": [
+            0.0313,
+            0.0118,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0175,
+          "load_n": 1471,
+          "source": "nodes:restraint_quick_release__dring (x 0.0250..0.0376, толщина 0.0034) + catch_eye + catch_plate",
+          "confidence": "high",
+          "note": "Ушко D на ответной пластине-язычке: страховка/соединение с манжетой.",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        }
+      ]
+    },
+    "restraint_matrix": {
+      "class": "RESTRAINT",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.0208,
+          "count": 4,
+          "pitch_x_m": 1.756,
+          "pitch_z_m": 0.776,
+          "load_n": 2011,
+          "source": "nodes:restraint_matrix__anchor_bolt_rl/rr/fl/fr (x ±0.878, z ±0.388) + anchor_washer_* / anchor_washer_in_* (низ y=0)",
+          "confidence": "high",
+          "note": "Четыре анкера M12 через шайбы на полу, шаг 1.756 × 0.776 м. Паспорт «4 × M12» ✓; контракт задаёт шаг 0.6 м — расхождение.",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "level_feet",
+          "role": "support",
+          "kind": "surface",
+          "standard": "4 × винтовая опора 116 × 116, ход ~30 мм",
+          "gender": "female",
+          "position_m": [
+            -0.93,
+            0.012,
+            -0.44
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.116,
+          "count": 4,
+          "pitch_x_m": 1.86,
+          "pitch_z_m": 0.88,
+          "load_n": 2011,
+          "source": "nodes:restraint_matrix__foot_pad_rl/rr/fl/fr (x ±0.93, z ±0.44) + jack_barrel / jack_nut / jack_rod / leg / leg_collar",
+          "confidence": "high",
+          "note": "винтовые опоры стоят подошвами foot_pad_fl/fr/rl/rr в x=±0.93, z=±0.44 (pitch 1.86 × 0.88), верх подошвы y=0.012. Точка — на первой подошве; прежняя (0,0,0) была в центре поля, 971 мм до ближайшей опоры",
+          "connector": "custom"
+        },
+        {
+          "id": "rail_long_l",
+          "role": "output",
+          "kind": "rail",
+          "standard": "рельс 56 × 28, ход 1.86",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.292,
+            0.355
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.028,
+          "pitch_m": 1.86,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__rail_long_l + rail_long_way_l + rail_long_ribs_l + rail_long_stop_l_rear/front + rail_long_ticks_l",
+          "confidence": "high",
+          "note": "Продольный рельс z=+0.355; каретки запястья и стопы катаются по нему.",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "rail_long_r",
+          "role": "output",
+          "kind": "rail",
+          "standard": "рельс 56 × 28, ход 1.86",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.292,
+            -0.355
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.028,
+          "pitch_m": 1.86,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__rail_long_r + rail_long_way_r + rail_long_ribs_r + rail_long_stop_r_rear/front + rail_long_ticks_r",
+          "confidence": "high",
+          "note": "Продольный рельс z=-0.355.",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "rail_cross_head",
+          "role": "output",
+          "kind": "rail",
+          "standard": "рельс 56 × 28, ход 0.646",
+          "gender": "female",
+          "position_m": [
+            -0.66,
+            0.292,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.028,
+          "pitch_m": 0.646,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__crossbeam_head (x=-0.66, z ±0.45, верх y=0.266) + rail_cross_head_0 / _1 / _2 + rail_cross_way_head_0..2 + rail_cross_junction_head_l/r + rail_cross_stop_head_l/r + rail_cross_ticks_head",
+          "confidence": "high",
+          "note": "Поперечный рельс головы x=-0.66 (в стыке с продольными).",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "rail_cross_pelvis",
+          "role": "output",
+          "kind": "rail",
+          "standard": "рельс 56 × 28, ход 0.646",
+          "gender": "female",
+          "position_m": [
+            0.5,
+            0.292,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.028,
+          "pitch_m": 0.646,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__crossbeam_pelvis (x=+0.50, z ±0.45) + rail_cross_pelvis_0 / _1 / _2 + rail_cross_way_pelvis_0..2 + rail_cross_junction_pelvis_l/r + rail_cross_stop_pelvis_l/r",
+          "confidence": "high",
+          "note": "Поперечный рельс таза x=+0.50.",
+          "connector": "custom",
+          "connector_note": "профиль не T-slot 15 и не DIN 35 (CJ-RAIL-15)"
+        },
+        {
+          "id": "point_wrist_l",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "манжета-ложе 69 × 42 + QR кнопка",
+          "gender": "female",
+          "position_m": [
+            -0.31,
+            0.3709,
+            0.355
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.069,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__cuff_shell_wrist_l / cuff_lining_wrist_l / cuff_pad_wrist_l / qr_button_wrist_l + carriage_body / carriage_plate / carriage_rollers (на рельсе) + lock_arm / lock_screw",
+          "confidence": "high",
+          "note": "Левая манжета запястья на продольном рельсе z=+0.355. Позиция — центр проёма манжеты (y=0.3709), нормаль вверх; каретка фиксируется рычагом и винтом.",
+          "connector": "custom"
+        },
+        {
+          "id": "point_wrist_r",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "манжета-ложе 69 × 42 + QR кнопка",
+          "gender": "female",
+          "position_m": [
+            -0.268,
+            0.3709,
+            -0.355
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.069,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__cuff_shell_wrist_r / cuff_lining_wrist_r / cuff_pad_wrist_r / qr_button_wrist_r + carriage_body / carriage_plate / carriage_rollers (на рельсе) + lock_arm / lock_screw",
+          "confidence": "high",
+          "note": "Правая манжета запястья на рельсе z=-0.355. Позиция — центр проёма манжеты (y=0.3709), нормаль вверх; каретка фиксируется рычагом и винтом.",
+          "connector": "custom"
+        },
+        {
+          "id": "point_ankle_l",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "манжета-ложе 69 × 42 + QR кнопка",
+          "gender": "female",
+          "position_m": [
+            0.348,
+            0.3709,
+            0.355
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.069,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__cuff_shell_ankle_l / cuff_lining_ankle_l / cuff_pad_ankle_l / qr_button_ankle_l + carriage_body / carriage_plate / carriage_rollers (на рельсе) + lock_arm / lock_screw",
+          "confidence": "high",
+          "note": "Левая манжета стопы (голень/щиколотка) на рельсе z=+0.355. Позиция — центр проёма манжеты (y=0.3709), нормаль вверх; каретка фиксируется рычагом и винтом.",
+          "connector": "custom"
+        },
+        {
+          "id": "point_ankle_r",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "манжета-ложе 69 × 42 + QR кнопка",
+          "gender": "female",
+          "position_m": [
+            0.312,
+            0.3709,
+            -0.355
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.069,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__cuff_shell_ankle_r / cuff_lining_ankle_r / cuff_pad_ankle_r / qr_button_ankle_r + carriage_body / carriage_plate / carriage_rollers (на рельсе) + lock_arm / lock_screw",
+          "confidence": "high",
+          "note": "Правая манжета стопы на рельсе z=-0.355. Позиция — центр проёма манжеты (y=0.3709), нормаль вверх; каретка фиксируется рычагом и винтом.",
+          "connector": "custom"
+        },
+        {
+          "id": "point_head",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "манжета-ложе 69 × 42 + QR кнопка",
+          "gender": "female",
+          "position_m": [
+            -0.66,
+            0.3709,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.069,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__cuff_shell_head / cuff_lining_head / cuff_pad_head / qr_button_head + carriage_body / carriage_plate / carriage_rollers (на рельсе) + lock_arm / lock_screw",
+          "confidence": "high",
+          "note": "Манжета головы на поперечном рельсе x=-0.66 (ось манжеты X). Позиция — центр проёма манжеты (y=0.3709), нормаль вверх; каретка фиксируется рычагом и винтом.",
+          "connector": "custom"
+        },
+        {
+          "id": "point_pelvis_l",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "манжета-ложе 69 × 42 + QR кнопка",
+          "gender": "female",
+          "position_m": [
+            0.5,
+            0.3709,
+            0.168
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.069,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__cuff_shell_pelvis_l / cuff_lining_pelvis_l / cuff_pad_pelvis_l / qr_button_pelvis_l + carriage_body / carriage_plate / carriage_rollers (на рельсе) + lock_arm / lock_screw",
+          "confidence": "high",
+          "note": "Левая тазовая манжета на поперечном рельсе x=+0.50 (ось манжеты X). Позиция — центр проёма манжеты (y=0.3709), нормаль вверх; каретка фиксируется рычагом и винтом.",
+          "connector": "custom"
+        },
+        {
+          "id": "point_pelvis_r",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "манжета-ложе 69 × 42 + QR кнопка",
+          "gender": "female",
+          "position_m": [
+            0.5,
+            0.3709,
+            -0.176
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.069,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__cuff_shell_pelvis_r / cuff_lining_pelvis_r / cuff_pad_pelvis_r / qr_button_pelvis_r + carriage_body / carriage_plate / carriage_rollers (на рельсе) + lock_arm / lock_screw",
+          "confidence": "high",
+          "note": "Правая тазовая манжета на поперечном рельсе x=+0.50. Позиция — центр проёма манжеты (y=0.3709), нормаль вверх; каретка фиксируется рычагом и винтом.",
+          "connector": "custom"
+        },
+        {
+          "id": "bed_surface",
+          "role": "support",
+          "kind": "surface",
+          "standard": "матрас 600 × 1000",
+          "gender": "female",
+          "position_m": [
+            -0.08,
+            0.2775,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.6,
+          "pitch_m": 1.0,
+          "load_n": 1471,
+          "source": "nodes:restraint_matrix__bed_pad_l/r (верх y=0.2775, 0.24 × 0.912) + bed_tray / bed_tray_lip / bed_ribs + head_pillow (y 0.2585..0.2925)",
+          "confidence": "high",
+          "note": "Центральная зона ложа между продольными рельсами — опорная поверхность тела.",
+          "connector": "custom"
+        }
+      ]
+    },
+    "support_cradle": {
+      "class": "SERVICE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.0208,
+          "count": 4,
+          "pitch_x_m": 0.58,
+          "pitch_z_m": 0.552,
+          "load_n": 961,
+          "source": "nodes:support_cradle__anchor_bolt_0_left / anchor_bolt_0_right / anchor_bolt_1_left / anchor_bolt_1_right (x ±0.29, z ±0.276; y 0.055..0.071) + anchor_washer_0_left..anchor_washer_1_right (y 0.05..0.055) + pad_0_left / pad_1_left / pad_0_right / pad_1_right (y 0.014..0.046)",
+          "confidence": "high",
+          "note": "4 × M12 через выносные площадки, шаг 0.58 × 0.552 м (контракт: 0.3 м — расхождение). Головки болтов на y=0.071, анкер в полу.",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "cradle_left",
+          "role": "support",
+          "kind": "surface",
+          "standard": "ложе 172 × 380, подкладка",
+          "gender": "female",
+          "position_m": [
+            -0.29,
+            0.668,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.172,
+          "load_n": 785,
+          "source": "node:support_cradle__pad_lining_left (низ жёлоба y=0.66 по вершинам, x -0.334..-0.246) + pad_left (y 0.65..0.72) + saddle_plate_left / saddle_neck_left / saddle_boss_left",
+          "confidence": "high",
+          "note": "ложе: подкладка pad_lining_left при x=-0.29 имеет верх 0.668 (bbox 0.660…0.691 по кривой). Прежняя y=0.66 — низ подкладки, по ней же лежит saddle_plate 0.640…0.676",
+          "connector": "custom"
+        },
+        {
+          "id": "cradle_right",
+          "role": "support",
+          "kind": "surface",
+          "standard": "ложе 172 × 380, подкладка",
+          "gender": "female",
+          "position_m": [
+            0.29,
+            0.668,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.172,
+          "load_n": 785,
+          "source": "node:support_cradle__pad_lining_right + pad_right + saddle_plate_right / saddle_neck_right / saddle_boss_right",
+          "confidence": "high",
+          "note": "зеркальное ложе: верх подкладки pad_lining_right при x=+0.29 — y=0.668; прежняя точка лежала на низу подкладки",
+          "connector": "custom"
+        },
+        {
+          "id": "strap_left",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "стропа 40 мм + пряжка 22 × 44",
+          "gender": "female",
+          "position_m": [
+            -0.29,
+            0.7175,
+            0.1
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.04,
+          "count": 2,
+          "pitch_z_m": 0.2,
+          "load_n": 196,
+          "source": "nodes:support_cradle__strap_0_left / strap_1_left (верх y=0.71748, z ±0.1) + buckle_0_left / buckle_1_left + buckle_slot_0_left / buckle_slot_1_left + strap_tail_0_left / strap_tail_1_left + loop_0_left / loop_1_left",
+          "confidence": "high",
+          "note": "Две стропы с пряжками поперёк жёлоба (z=±0.1) — фиксация объекта на ложементе.",
+          "connector": "custom"
+        },
+        {
+          "id": "strap_right",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "стропа 40 мм + пряжка 22 × 44",
+          "gender": "female",
+          "position_m": [
+            0.29,
+            0.7175,
+            0.1
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.04,
+          "count": 2,
+          "pitch_z_m": 0.2,
+          "load_n": 196,
+          "source": "nodes:support_cradle__strap_0_right / strap_1_right + buckle_0_right / buckle_1_right + strap_tail_0_right / strap_tail_1_right + loop_0_right / loop_1_right",
+          "confidence": "high",
+          "note": "Стропы правой опоры, симметрично левой.",
+          "connector": "custom"
+        },
+        {
+          "id": "height_lock",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "2 фиксатора + маховик Ø108, шкала",
+          "gender": "female",
+          "position_m": [
+            -0.29,
+            0.415,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.024,
+          "load_n": 785,
+          "source": "nodes:support_cradle__sleeve_collar_left (y 0.404..0.426) + lock_block_a_left / lock_lever_a_left / lock_knob_a_left + lock_block_b_left / lock_lever_b_left / lock_knob_b_left + wheel_rim / wheel_hub / wheel_spokes / wheel_crank + scale_boss / scale_ticks / scale_pointer",
+          "confidence": "high",
+          "note": "Телескопическая стойка (3 ступени, 0.48–0.96 м): два зажима-фиксатора и маховик; ось регулировки Y.",
+          "connector": "custom"
+        },
+        {
+          "id": "cable_in",
+          "role": "input",
+          "kind": "cable",
+          "standard": "кабельный ввод Ø26",
+          "gender": "female",
+          "position_m": [
+            -0.29,
+            0.263,
+            -0.1
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.026,
+          "source": "node:support_cradle__grommet_left (x=-0.29, z=-0.1) + top_plate_left / socket_left / led_left",
+          "confidence": "medium",
+          "note": "гермоввод grommet_left смотрит -Y (нормаль ближайшей грани -Y), точка в 5 мм от него; прежняя нормаль +Y была направлена в тело на 180° от грани. Точка по-прежнему в 5 мм — ввод не смоделирован как отверстие",
+          "connector": "custom"
+        }
+      ]
+    },
+    "service_dock": {
+      "class": "SERVICE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "mount",
+          "standard": "пол, 4 опоры 0.952 × 0.616",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.0145,
+          "count": 4,
+          "pitch_x_m": 0.952,
+          "pitch_z_m": 0.616,
+          "load_n": 1324,
+          "source": "node:service_dock__feet (y 0..0.0145, 0.952 × 0.616) + plinth (y 0.014..0.06, 1.124 × 0.736)",
+          "confidence": "medium",
+          "note": "Паспорт: крепление «пол». Анкерных болтов в геометрии нет — контракт требует 4 × M12 шаг 0.3 м (расхождение).",
+          "connector": "custom"
+        },
+        {
+          "id": "dock_bay",
+          "role": "output",
+          "kind": "dock",
+          "standard": "лоток 438 × 515, 2 рельса",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.6135,
+            0.045
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.438,
+          "pitch_m": 0.515,
+          "load_n": 785,
+          "source": "nodes:service_dock__seat_plate / seat_pads (верх y=0.6135, x ±0.074) + rail_l / rail_r (внутренние грани x ±0.219, верх y=0.642) + rail_l/r_strip",
+          "confidence": "high",
+          "note": "Модуль заезжает с фронта (+Z) между рельсами, садится на подушки y=0.6135. Ось ввода Z.",
+          "connector": "CJ-DOCK-M"
+        },
+        {
+          "id": "locating_pins",
+          "role": "output",
+          "kind": "dock",
+          "standard": "4 × Ø10 × 42.5",
+          "gender": "male",
+          "position_m": [
+            0.0,
+            0.633,
+            0.015
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.01,
+          "count": 4,
+          "pitch_x_m": 0.8,
+          "pitch_z_m": 0.27,
+          "load_n": 196,
+          "source": "nodes:service_dock__locating_pins (y 0.612..0.6545; вершины по x ±0.40, z -0.12 и +0.15, Ø10) + pin_bases",
+          "confidence": "high",
+          "note": "Четыре посадочных штифта по углам лотка; ответные втулки — на модуле.",
+          "connector": "custom",
+          "connector_note": "док без лотка 440 × 520 и штифтов Ø10 (CJ-DOCK-M)"
+        },
+        {
+          "id": "latch_out",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "прижимная пята 62 × 48 + рычаг 114",
+          "gender": "female",
+          "position_m": [
+            -0.33,
+            0.6935,
+            0.352
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.062,
+          "load_n": 785,
+          "source": "nodes:service_dock__latch_bracket + latch_axle (ось X, 80 мм) + latch_arm + latch_grip / latch_grip_cap + latch_pad / latch_pad_grip + latch_link + latch_spring_1..3 + latch_safety_pin / latch_safety_ring",
+          "confidence": "high",
+          "note": "Эксцентриковый фиксатор на фронте: пята прижимает модуль сверху вниз, рычаг с пружинами и страховочным пальцем.",
+          "connector": "custom"
+        },
+        {
+          "id": "power_out",
+          "role": "power",
+          "kind": "flange",
+          "standard": "8 контактов 2 × 4, ключ",
+          "gender": "female",
+          "position_m": [
+            -0.115,
+            0.642,
+            -0.2125
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.13,
+          "count": 8,
+          "source": "nodes:service_dock__connector_body + connector_face (x -0.18..-0.05, y 0.616..0.668, z=-0.2125) + contacts (2 × 4) + connector_bushings + connector_key + connector_latch",
+          "confidence": "high",
+          "note": "Единственный силовой разъём в геометрии. Контракт обещает IEC C20 (вход) и IEC C13 6 A (выход) — расхождение.",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "air_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4 быстросъём, кольцо Ø31.2",
+          "gender": "female",
+          "position_m": [
+            0.1,
+            0.653,
+            -0.22
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.0312,
+          "source": "nodes:service_dock__air_pedestal + air_body + air_collar + air_ring (z -0.22228..-0.21772) + air_nut + air_tail (z -0.313..-0.302)",
+          "confidence": "high",
+          "note": "Пневморазъём на задней стенке: кольцо Ø31.2, хвостовик под шланг до z=-0.313.",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "drain_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "слив Ø66 / G1/2",
+          "gender": "female",
+          "position_m": [
+            0.37,
+            0.599,
+            -0.23
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.066,
+          "source": "nodes:service_dock__drain_pan (y 0.592..0.606) + drain_boss + drain_ring (Ø66.4, z=-0.23) + drain_bar_1..3",
+          "confidence": "high",
+          "note": "Слив поддона с решёткой; контракт: G1/2, гравитационный, свободный слив ≥20 мм — резьбового патрубка в геометрии нет.",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "кабельный ввод Ø21",
+          "gender": "female",
+          "position_m": [
+            -0.089,
+            0.907,
+            -0.348
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.021,
+          "source": "nodes:service_dock__cable_gland (y 0.902..0.912) + cable + cable_boot + beam",
+          "confidence": "medium",
+          "note": "Ввод силового кабеля в перекладину. Контракт: IEC C20 16 A — в геометрии только гермоввод; отдельного Ethernet/RJ45 нет.",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        }
+      ]
+    },
+    "service_cleaner": {
+      "class": "SERVICE",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "mount",
+          "standard": "пол / цоколь 704 × 464",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.704,
+          "load_n": 834,
+          "source": "node:service_cleaner__plinth (y 0..0.07, 0.704 × 0.464) + cabinet",
+          "confidence": "medium",
+          "note": "Паспорт: крепление «пол»; отдельных опор/анкеров в геометрии нет, контракт требует 4 × M12 шаг 0.3 м (расхождение).",
+          "connector": "custom"
+        },
+        {
+          "id": "basin",
+          "role": "output",
+          "kind": "surface",
+          "standard": "ванна 332 × 367, ~60 л",
+          "gender": "female",
+          "position_m": [
+            -0.18,
+            0.503,
+            0.0475
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.367,
+          "load_n": 589,
+          "source": "nodes:service_cleaner__basin (дно y=0.292, борт 0.5) + basin_rim (y 0.496..0.503) + basin_water (y 0.308..0.3115) + drain_strainer",
+          "confidence": "high",
+          "note": "Рабочий объём мойки: горловина по верху борта y=0.503, ось Y.",
+          "connector": "custom"
+        },
+        {
+          "id": "spray_field",
+          "role": "fluid",
+          "kind": "surface",
+          "standard": "3 × форсунка Ø16.4, шаг 0.11",
+          "gender": "female",
+          "position_m": [
+            -0.17,
+            0.5258,
+            0.03
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.0164,
+          "count": 3,
+          "pitch_x_m": 0.11,
+          "source": "nodes:service_cleaner__nozzle_mouth_0/1/2 (y 0.5232..0.5285, x -0.28/-0.17/-0.06) + nozzle_stem/collar/body/tip_* + spray_boom + gantry_post_l/r",
+          "confidence": "high",
+          "note": "Портал с тремя форсунками над ванной, поток вниз. Контракт требует pneumatic air_in G1/4 6–8 бар — пневмоподвода в геометрии нет.",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "fill_in",
+          "role": "input",
+          "kind": "hose",
+          "standard": "патрубок Ø38 / фланец",
+          "gender": "female",
+          "position_m": [
+            -0.3456,
+            0.4698,
+            0.05
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.038,
+          "source": "nodes:service_cleaner__fill_spout_flange (x -0.3456..-0.3334, 0.0383 × 0.038) + fill_spout + fill_spout_tip (x -0.2818..-0.2666)",
+          "confidence": "high",
+          "note": "Заливной патрубок в борту ванны. Контракт: fluid_in G1/4, 2–4 бар — резьбы в геометрии нет.",
+          "connector": "custom"
+        },
+        {
+          "id": "drain_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "слив Ø22",
+          "gender": "female",
+          "position_m": [
+            0.25,
+            0.072,
+            -0.286
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.022,
+          "source": "nodes:service_cleaner__drain_stub_down (y 0.072..0.15, Ø22 — низ патрубка) + drain_stub (y 0.139..0.161) + drain_valve / valve_lever",
+          "confidence": "high",
+          "note": "Слив вниз из задней части, с шаровым краном. Контракт: G1/2, свободный слив ≥20 мм.",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "flange",
+          "standard": "розетка 62 × 36, 230 В",
+          "gender": "female",
+          "position_m": [
+            0.317,
+            0.334,
+            -0.294
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.062,
+          "source": "nodes:service_cleaner__power_socket (x 0.286..0.348, y 0.33..0.338, z=-0.294) + power_led + power_cable + power_connector (y 0.04..0.062)",
+          "confidence": "medium",
+          "note": "Бытовая розетка на задней панели. Контракт: IEC C20 16 A (расхождение).",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "coupler_out",
+          "role": "output",
+          "kind": "hose",
+          "standard": "быстросъём Ø33.4",
+          "gender": "female",
+          "position_m": [
+            0.346,
+            0.532,
+            -0.2193
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0334,
+          "source": "nodes:service_cleaner__coupler_collar (z -0.2257..-0.2193, Ø33.4 — зеркало разъёма) + coupler_neck + coupler_block + hose + hose_gun / hose_holster / hose_gun_tip",
+          "confidence": "high",
+          "note": "Быстросъём со шлангом и пистолетом в держателе на правом борту — сервисная точка мойки.",
+          "connector": "custom"
+        },
+        {
+          "id": "service_niche",
+          "role": "input",
+          "kind": "surface",
+          "standard": "ниша 278 × 238",
+          "gender": "female",
+          "position_m": [
+            -0.18,
+            0.232,
+            0.2395
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.278,
+          "source": "nodes:service_cleaner__niche_back (z 0.234..0.2395) + niche_frame_top/bot + niche_shelf + niche_rail + pump_base / pump_volute / filter_head / filter_bowl / trap_pipe / drain_valve",
+          "confidence": "high",
+          "note": "Сервисный доступ спереди: насос, фильтр, сифон — замена расходников и слив.",
+          "connector": "custom"
+        },
+        {
+          "id": "worktop",
+          "role": "support",
+          "kind": "surface",
+          "standard": "плита 800 × 580",
+          "gender": "female",
+          "position_m": [
+            0.15,
+            0.49,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.58,
+          "load_n": 196,
+          "source": "node:service_cleaner__worktop (верх y=0.49, 0.8 × 0.58) + top_band / top_band_line + backsplash (y 0.49..0.562)",
+          "confidence": "medium",
+          "note": "Свободная часть плиты справа от ванны (x 0.0..0.4); слева занята ванной.",
+          "connector": "custom"
+        }
+      ]
+    }
+  },
+  "notes": [
+    "Контракты: все 11 RESTRAINT-компонентов в component-contracts.json получили один и тот же шаблон mechanical.inputs = mount_in / bolt_pattern / M12 / 4 шт / шаг 0.6 м / load 900 Н, и mechanical.outputs = restraint_surface (padded_surface). Ни у одной манжеты, стремени, пояса, ярма, рамы головы, быстросъёма и раздвижки болтовой плиты в геометрии нет; реальные крепления — быстросъём, док/рельс, стропа, D-ring, карабин. Болтовой шаблон подтверждается только у restraint_matrix (4 × M12, шаг 1.756 × 0.776).",
+    "Внутреннее противоречие контракта: mount_in объявляет standard M12, а compatibility.requires требует mate.anchor.standard eq \"M8\" — эти два условия несовместимы на одном порту.",
+    "SERVICE (support_cradle / service_dock / service_cleaner): mount_in.standard = \"dock\" вместо болтового стандарта, pitch 0.3 м. Геометрия: support_cradle — 4 × M12 шаг 0.58 × 0.552; service_dock и service_cleaner — анкеров нет вовсе (опоры/цоколь).",
+    "service_dock: контракт обещает power_in IEC C20 16 A, power_out IEC C13 6 A, eth_in/eth_out RJ45, air_in G1/4 120 л/мин, fluid_in G1/4, fluid_out G1/2. В геометрии: один 8-контактный силовой разъём, пневморазъём с кольцом Ø31.2 и хвостовиком под шланг, слив Ø66, кабельный ввод Ø21; Ethernet-разъёма нет. Порты названы по геометрии (power_out, air_out, drain_out, power_in), чтобы не выдавать несуществующие разъёмы.",
+    "service_cleaner: контракт power_in IEC C20 16 A / fluid_in G1/4 2–4 бар / fluid_out G1/2; в геометрии бытовая розетка 62 × 36, заливной патрубок Ø38 без резьбы, слив Ø22 и шаровой кран. Пневматического ввода (air_in G1/4) в модели нет.",
+    "Нагрузки: контракт задаёт load_n 900 для всех RESTRAINT, паспортные значения другие (20…150 кг). В шарде в load_n стоят паспортные нагрузки: 196 / 294 / 490 / 589 / 785 / 1471 Н по компоненту, 25–196 Н для отдельных вспомогательных точек.",
+    "restraint_matrix: контракт dof=[] и «phase»-кинематика, но в геометрии 7 кареток на рельсах (4 продольных + 2 тазовых + 1 головная) и телескопических опор; движение не анимировано (motion: none), поэтому каретки размечены как статические точки фиксации.",
+    "restraint_suspension_cuff: датчик натяжения есть геометрически (tension_link, tension_led, load_label), но сигнального разъёма/кабеля нет — точка tension_signal помечена low.",
+    "restraint_head_frame: паспортное крепление «док» реализовано боковыми пальцами Ø8.4 (__node_l / __node_r); ответных гнёзд в геометрии нет, поэтому dock_left/right — medium.",
+    "Координаты пересчитаны из Blender Z-up в glTF Y-up по правилу экспорта export_yup=True: gltf_x = blender_x, gltf_y = blender_z, gltf_z = -blender_y. Все 14 bbox сверены с паспортными габаритами каталога."
+  ]
+}

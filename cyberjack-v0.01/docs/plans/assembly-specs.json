@@ -1,0 +1,178 @@
+{
+  "format": "cj-assembly-spec/1",
+  "revision": "2026-11-10",
+  "units": "m",
+  "devices": [
+    {
+      "id": "lab_diagnostic_table",
+      "footprint": [
+        2.0,
+        0.9
+      ],
+      "components": [
+        {
+          "id": "structure_bed_frame",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "surface_sensor",
+          "position": [
+            0,
+            0,
+            0.326
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "control_telemetry",
+          "position": [
+            0.7,
+            0.3,
+            0.3412
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "control_estop",
+          "position": [
+            -0.7,
+            0.3,
+            0.3412
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "lab_sensitivity_arch",
+      "footprint": [
+        1.6,
+        1.0
+      ],
+      "components": [
+        {
+          "id": "structure_portal",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "motion_linear_x",
+          "position": [
+            0,
+            0,
+            1.67
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_electro_pad",
+          "position": [
+            0,
+            0,
+            1.87
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "control_telemetry",
+          "position": [
+            0.55,
+            0.45,
+            0
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "lab_pen_piston",
+      "footprint": [
+        1.6,
+        1.3
+      ],
+      "components": [
+        {
+          "id": "structure_base",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "motion_piston_rod",
+          "position": [
+            -0.38,
+            0,
+            0.24
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "motion_linear_y",
+          "position": [
+            0.32,
+            0,
+            0.24
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_probe_linear",
+          "position": [
+            0.32,
+            0,
+            0.44
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_smooth",
+          "position": [
+            0.487,
+            0,
+            0.44
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_sterile_liner",
+          "position": [
+            0.652,
+            0,
+            0.44
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "restraint_stirrup",
+          "position": [
+            0,
+            -0.35,
+            0.24
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "control_console",
+          "position": [
+            0.65,
+            0.62,
+            0
+          ],
+          "rotation_z": 0
+        }
+      ]
+    }
+  ]
+}

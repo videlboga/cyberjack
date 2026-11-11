@@ -1,0 +1,139 @@
+{
+ "default": {
+  "cards": 84,
+  "imgs": 84,
+  "loaded": 84,
+  "broken": 0,
+  "svgFallback": 0,
+  "iconVisible": 0,
+  "count": "84 / 96 · 12 в архиве",
+  "firstSrc": "renders/structure_base.webp?v=20261111-renders1",
+  "sizes": [
+   {
+    "w": 143,
+    "h": 143,
+    "vw": 329,
+    "vh": 185
+   },
+   {
+    "w": 143,
+    "h": 143,
+    "vw": 329,
+    "vh": 185
+   },
+   {
+    "w": 143,
+    "h": 143,
+    "vw": 329,
+    "vh": 185
+   },
+   {
+    "w": 143,
+    "h": 143,
+    "vw": 329,
+    "vh": 185
+   },
+   {
+    "w": 143,
+    "h": 143,
+    "vw": 329,
+    "vh": 185
+   }
+  ],
+  "overflow": 0,
+  "docH": 9184,
+  "docW": 1440,
+  "winW": 1440
+ },
+ "allRenders": {
+  "total": 84,
+  "ok": 84,
+  "bad": [],
+  "dims": [
+   "600x600"
+  ]
+ },
+ "hardCard": {
+  "id": "restraint_wrist_cuff",
+  "y": 4249.765625,
+  "cls": "card",
+  "src": "http://127.0.0.1:8088/models/machine-modules/renders/restraint_wrist_cuff.webp?v=20261111-renders1"
+ },
+ "archiveOn": {
+  "cards": 96,
+  "archived": 12,
+  "imgs": 12,
+  "loaded": 3,
+  "count": "96 / 96"
+ },
+ "mobile": {
+  "cards": 96,
+  "imgs": 96,
+  "loaded": 87,
+  "broken": 0,
+  "svgFallback": 0,
+  "iconVisible": 0,
+  "count": "96 / 96",
+  "firstSrc": "renders/structure_base.webp?v=20261111-renders1",
+  "sizes": [
+   {
+    "w": 154,
+    "h": 154,
+    "vw": 352,
+    "vh": 198
+   },
+   {
+    "w": 154,
+    "h": 154,
+    "vw": 352,
+    "vh": 198
+   },
+   {
+    "w": 154,
+    "h": 154,
+    "vw": 352,
+    "vh": 198
+   },
+   {
+    "w": 154,
+    "h": 154,
+    "vw": 352,
+    "vh": 198
+   },
+   {
+    "w": 154,
+    "h": 154,
+    "vw": 352,
+    "vh": 198
+   }
+  ],
+  "overflow": 0,
+  "docH": 40985,
+  "docW": 390,
+  "winW": 390
+ },
+ "modal": {
+  "open": true,
+  "title": "Станина",
+  "canvas": false,
+  "ready": false,
+  "w": 0,
+  "h": 0
+ },
+ "net": {
+  "renderRequests": 87,
+  "renderNon200": {},
+  "bad": {},
+  "failed": [],
+  "console": [],
+  "exceptions": []
+ },
+ "shots": [
+  "/home/cyberkitty/.hermes/profiles/qwen8/cache/scratch/qa-desktop-top.png",
+  "/home/cyberkitty/.hermes/profiles/qwen8/cache/scratch/qa-desktop-hard.png",
+  "/home/cyberkitty/.hermes/profiles/qwen8/cache/scratch/qa-desktop-archived.png",
+  "/home/cyberkitty/.hermes/profiles/qwen8/cache/scratch/qa-mobile-top.png",
+  "/home/cyberkitty/.hermes/profiles/qwen8/cache/scratch/qa-720-top.png",
+  "/home/cyberkitty/.hermes/profiles/qwen8/cache/scratch/qa-modal-3d.png"
+ ]
+}

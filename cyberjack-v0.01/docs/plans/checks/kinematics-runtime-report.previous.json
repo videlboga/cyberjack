@@ -1,0 +1,37 @@
+{
+  "format": "cj-kinematics-runtime/1",
+  "cases": [
+    {
+      "component": "motion_piston_cam",
+      "status": "pass",
+      "law": "cam_cosine",
+      "fit_gain_m": 0.029999999999999995,
+      "expected_gain_m": 0.03,
+      "intercept_m": -0.07991578429937363,
+      "max_residual_m": 6.938893903907228e-18,
+      "samples": 28
+    },
+    {
+      "component": "motion_linear_x",
+      "status": "pass",
+      "law": "screw_lead",
+      "fit_gain_m": 0.0015915494309189533,
+      "expected_gain_m": 0.00159154943,
+      "intercept_m": 2.7755575615628914e-17,
+      "max_residual_m": 2.7755575615628914e-17,
+      "samples": 28
+    },
+    {
+      "component": "motion_oscillating",
+      "status": "pass",
+      "law": "crank_slider",
+      "fit_gain_m": 0.035,
+      "expected_gain_m": 0.035,
+      "intercept_m": 0.11249999701976778,
+      "max_residual_m": 2.7755575615628914e-17,
+      "samples": 28
+    }
+  ],
+  "js_errors": [],
+  "status": "pass"
+}

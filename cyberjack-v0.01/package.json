@@ -12,6 +12,8 @@
     "build:interaction-matrix-expanded": "node scripts/build-interaction-visual-matrix-expanded.mjs",
     "build:visual-index-v4": "node scripts/build-visual-asset-index-v4.mjs",
     "validate:visual-v4": "node scripts/validate-visual-matrices-v4.mjs",
+    "build:machine-modules": "blender -b --factory-startup -noaudio --python docs/plans/tools/build_machine_modules.py",
+    "validate:machine-modules": "node scripts/validate-machine-modules.mjs",
     "build:visual-checklist-v4": "node scripts/build-visual-generation-checklist-v4.mjs",
     "audio:voice-experiments": "node scripts/generate-reaction-voice-experiments.mjs",
     "audio:integrate-emotions": "node scripts/integrate-selected-emotion-audio.mjs",

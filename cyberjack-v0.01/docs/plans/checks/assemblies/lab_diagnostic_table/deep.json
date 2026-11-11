@@ -1,0 +1,196 @@
+{
+  "device": "lab_diagnostic_table",
+  "spec_footprint": [
+    2.0,
+    0.9
+  ],
+  "components": {
+    "structure_bed_frame": {
+      "min": [
+        -0.9925,
+        -0.446,
+        0.0
+      ],
+      "max": [
+        0.9925,
+        0.446,
+        0.32593
+      ],
+      "dim": [
+        1.985,
+        0.892,
+        0.32593
+      ],
+      "tris": 17564,
+      "motion": "none",
+      "on_floor": true,
+      "sunk_mm": 0.0,
+      "supported_by": [],
+      "xy_unsupported_frac": 1.0
+    },
+    "surface_sensor": {
+      "min": [
+        -1.0,
+        -0.45,
+        0.326
+      ],
+      "max": [
+        1.0,
+        0.45,
+        0.3412
+      ],
+      "dim": [
+        2.0,
+        0.9,
+        0.0152
+      ],
+      "tris": 25424,
+      "motion": "none",
+      "on_floor": false,
+      "sunk_mm": 0.0,
+      "supported_by": [
+        {
+          "by": "structure_bed_frame",
+          "dz_mm": 0.07,
+          "xy_overlap_frac": 0.984,
+          "kind": "face"
+        }
+      ],
+      "xy_unsupported_frac": 0.925
+    },
+    "control_telemetry": {
+      "min": [
+        0.5498,
+        0.25899,
+        0.3412
+      ],
+      "max": [
+        0.8502,
+        0.34101,
+        0.5414
+      ],
+      "dim": [
+        0.3004,
+        0.08202,
+        0.2002
+      ],
+      "tris": 21744,
+      "motion": "none",
+      "on_floor": false,
+      "sunk_mm": 0.0,
+      "supported_by": [
+        {
+          "by": "surface_sensor",
+          "dz_mm": -0.0,
+          "xy_overlap_frac": 1.0,
+          "kind": "face"
+        }
+      ],
+      "xy_unsupported_frac": 0.0
+    },
+    "control_estop": {
+      "min": [
+        -0.76045,
+        0.23977,
+        0.3412
+      ],
+      "max": [
+        -0.63955,
+        0.36023,
+        0.4212
+      ],
+      "dim": [
+        0.1209,
+        0.12046,
+        0.08
+      ],
+      "tris": 18328,
+      "motion": "none",
+      "on_floor": false,
+      "sunk_mm": 0.0,
+      "supported_by": [
+        {
+          "by": "surface_sensor",
+          "dz_mm": -0.0,
+          "xy_overlap_frac": 1.0,
+          "kind": "face"
+        }
+      ],
+      "xy_unsupported_frac": 0.0
+    }
+  },
+  "checks": {
+    "pairs": [
+      {
+        "a": "surface_sensor",
+        "b": "control_estop",
+        "aabb_gap_m": 0.0,
+        "triangle_pairs": 0,
+        "surface_gap_m": 0.01129
+      },
+      {
+        "a": "structure_bed_frame",
+        "b": "surface_sensor",
+        "aabb_gap_m": 0.0001,
+        "triangle_pairs": 0,
+        "surface_gap_m": 0.02191
+      },
+      {
+        "a": "surface_sensor",
+        "b": "control_telemetry",
+        "aabb_gap_m": 0.0,
+        "triangle_pairs": 0,
+        "surface_gap_m": 0.03308
+      },
+      {
+        "a": "structure_bed_frame",
+        "b": "control_telemetry",
+        "aabb_gap_m": 0.0153,
+        "triangle_pairs": 0,
+        "surface_gap_m": 0.10654
+      },
+      {
+        "a": "structure_bed_frame",
+        "b": "control_estop",
+        "aabb_gap_m": 0.0153,
+        "triangle_pairs": 0,
+        "surface_gap_m": null
+      }
+    ],
+    "slide_sweeps": [],
+    "spin_sweeps": [],
+    "union_static": {
+      "min": [
+        -1.0,
+        -0.45,
+        0.0
+      ],
+      "max": [
+        1.0,
+        0.45,
+        0.5414
+      ],
+      "xy": [
+        2.0,
+        0.9
+      ],
+      "spec": [
+        2.0,
+        0.9
+      ],
+      "fits": true,
+      "margin_m": [
+        0.0,
+        -0.0
+      ]
+    },
+    "union_with_stroke": {
+      "xy": [
+        2.0,
+        0.9
+      ],
+      "fits": true
+    },
+    "riders_on_movers": []
+  }
+}

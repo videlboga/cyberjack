@@ -1665,7 +1665,7 @@ const DualAvatarStage = memo(function DualAvatarStage({
   mainOnError,
   mainOnLoad,
   activeIsSecondary,
-  onSwap,
+  onSwap
 }: {
   mainSrc: string;
   mainAlt: string;

@@ -1,0 +1,65 @@
+{
+  "module_paths": {
+    "rail": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_rail_1000/fix_rail_1000.glb",
+    "cross": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_cross_1000/fix_cross_1000.glb",
+    "node": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/public/models/machine-modules/components/fix_corner_node.glb",
+    "carriage": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_carriage/fix_carriage.glb",
+    "adapter": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_latch_adapter/fix_latch_adapter.glb",
+    "foot": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_foot/fix_foot.glb"
+  },
+  "placements_m": {
+    "node_roots": [
+      [
+        0,
+        0,
+        0.0436
+      ],
+      [
+        1.002,
+        0,
+        0.0436
+      ],
+      [
+        1.002,
+        1.002,
+        0.0436
+      ],
+      [
+        0,
+        1.002,
+        0.0436
+      ]
+    ],
+    "node_rot_deg": [
+      180,
+      -90,
+      0,
+      90
+    ],
+    "rail_centres_z": 0.0736,
+    "rail_assembly_gap_mm": 1.0,
+    "carriage_z": 0.0511,
+    "adapter_z": 0.1014,
+    "foot_count": 4
+  },
+  "frame_bbox_m": [
+    [
+      -0.12000000476837158,
+      -0.12000002712011337,
+      0.0
+    ],
+    [
+      1.121999979019165,
+      1.121999979019165,
+      0.15139999985694885
+    ]
+  ],
+  "overlaps": {},
+  "checks": {
+    "node_count": 4,
+    "rail_count": 4,
+    "foot_count": 4,
+    "no_overlaps": true,
+    "all_ok": true
+  }
+}

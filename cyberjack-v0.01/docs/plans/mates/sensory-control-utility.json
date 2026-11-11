@@ -1,0 +1,2428 @@
+{
+  "format": "cj-mate-points/1",
+  "group": "sensory-control-utility",
+  "classes": [
+    "SENSORY",
+    "CONTROL",
+    "UTILITY"
+  ],
+  "units": "m",
+  "coordinate_system": "glTF/three.js local model coords, Y-up, relative to GLB root",
+  "method": "Positions derived from GLB node bboxes (numpy parse of POSITION accessor min/max transformed by the node world matrix) plus vertex clustering (eps=3-4 mm, union-find) for hole patterns and port arrays. position_m = centre of the mating face / hole-pattern centre / port mouth, never the component bbox centre. kind/role/standard follow component-contracts.json ports where the geometry has a matching node; where the contract port has no geometry the point is marked low and the mismatch is written in note and in discrepancies.",
+  "sources": [
+    "public/models/machine-modules/components/<id>.glb (nodes, POSITION bboxes, world matrices)",
+    "public/models/machine-modules/component-contracts.json (port ids, standards, pitch, load)",
+    "public/models/machine-modules/component-catalog.json (specs.Крепление, model.motion, compatibility)",
+    "docs/plans/tools/build_<id>.py (design intent: манжета/шарниры/оголовье/плита, 16×RJ45, 4 быстросъёма, 3 кронштейна)"
+  ],
+  "discrepancies": [
+    "component-contracts.json даёт всем шести UTILITY одинаковый шаблонный набор портов (power IEC C20/C19, pneumatic G1/4, fluid G1/4+G1/2, eth RJ45) независимо от назначения узла. В геометрии подтверждены только профильные порты; шаблонные (air/fluid у utility_power, utility_data, utility_routing; air/eth у utility_water, utility_drain; eth у control_estop и control_console) не имеют разъёмов в модели и либо помечены low, либо только описаны в note — отдельные точки не выдумывались.",
+    "pitch_m/pitch_x_m контракта mount_in не совпадает с фактическим шагом отверстий: SENSORY паспорт 0.05 — sensory_light 0.0576×0.0442 (3 шпильки), CONTROL паспорт 0.10 — control_telemetry 0.256×0.140, control_estop 0.1062×0.042, control_console 0.3736×0.277; UTILITY паспорт 0.30 — utility_power 0.25×0.094, utility_air 0.156×0.056, utility_water 0.112×0.052, utility_drain 0.034×0.011, utility_routing 3 кронштейна с шагом 0.42 м по 2 болта.",
+    "Ни у одного SENSORY-компонента нет болтового паттерна head_mount 4×Ø, объявленного в контракте: крепление манжетой (sensory_hood), двумя шарнирами (sensory_visor), оголовьем (sensory_audio), потолочной плитой с тремя шпильками (sensory_light). kind=bolt_pattern оставлен только у sensory_light, остальным — clamp/pivot/surface.",
+    "control_estop: контракт объявляет bus_in/bus_out RJ45, в геометрии только 6 винтовых клемм сухого контакта и кабель — bus_in размечен low на хвосте кабеля.",
+    "utility_power: в геометрии есть розетка 380 В 5P Ø57 (socket_380_*), в контракте только 230 В output (IEC C19). Обе розетки размечены; стандарт 230 В (C19) в геометрии не подтверждён — стоит бытовая розетка Ø46.",
+    "utility_data: в геометрии 16×RJ45 (2 ряда по 8), SFP и 2×USB-C, а в контракте только eth_in/eth_out и power IEC C20. Питание в модели — 3-контактная клемма (power_terminal), не IEC C20.",
+    "utility_air: 4 быстросъёма DN7.2 на манифолде, четвёртый занят шлангом → фактически 3 свободных выхода; питание приходит через контакты дока (dock_socket/dock_contacts), отдельного IEC C20 нет.",
+    "utility_water и utility_drain: электрики в геометрии нет (только status_led / leak_sensor и кабель датчика), power_in 230 В размечен low на стенке корпуса.",
+    "utility_routing: контракт wall 4 болта pitch 0.3, в геометрии 3 опорных кронштейна (x=-0.42/0/+0.42) по 2 болта и 3 гермоввода в торцевой коробке (силовой Ø18.4, сигнальный Ø14.4, шланг Ø18.4).",
+    "sensory_hood breath_port — пассивный дыхательный канал Ø66; в контракте pneumatic отсутствует, поэтому точка не считается пневморазъёмом (role=fluid, kind=hose, без давления).",
+    "sensory_audio: в геометрии только 3,5 мм jack, USB-C media_in из контракта не подтверждён; power_in 24 В — low (кабель без DC jack). sensory_visor: один общий кабель (port + connector + ferrule) на power и media.",
+    "Парные порты in/out из контракта, которые в модели физически один разъём, размечены одной точкой со стороны in: media_out у sensory_hood/visor/audio/light, bus_out у control_console/estop/interlock — это pass-through по тому же кабелю; отдельные точки не создавались, чтобы не плодить несуществующие разъёмы.",
+    "Многопортовые узлы получают id по геометрии, а не по контракту: utility_data bus_ports (16×RJ45 = контрактные eth_in/eth_out), utility_water fluid_out_a/fluid_out_b (контрактный fluid_out G1/2), utility_power power_out + power_out_380 (контрактный power_out IEC C19).",
+    "Точки confidence=high стоят на именованных узлах GLB; medium — координаты выведены из bbox-граней составных узлов (плоскости, паттерны); low — у порта нет геометрии, координата взята с ближайшей грани bbox и помечена в note. Ни одна координата не назначена «на глаз» без указания узла/грани."
+  ],
+  "components": {
+    "sensory_hood": {
+      "class": "SENSORY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "манжета Ø196 + шнуровка (паспорт head_mount 4×Ø, pitch 0.05)",
+          "gender": "female",
+          "position_m": [
+            -0.0,
+            0.046,
+            -0.0111
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.1956,
+          "load_n": 150.0,
+          "source": "node:sensory_hood__collar / bbox top face (y=0.046), центр по XZ",
+          "confidence": "medium",
+          "note": "посадочная плоскость манжеты (collar/collar_roll, ширина 0.196) — обжим на шее, высота манжеты 0.036; болтового паттерна в геометрии нет, паспортный head_mount 4×Ø pitch 50 мм не подтверждён",
+          "connector": "custom"
+        },
+        {
+          "id": "frame_link",
+          "role": "support",
+          "kind": "clamp",
+          "standard": "D-кольцо Ø26.7",
+          "gender": "female",
+          "position_m": [
+            0.0643,
+            0.0235,
+            -0.1047
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.0267,
+          "load_n": 150.0,
+          "source": "node:sensory_hood__d_ring / bbox centre",
+          "confidence": "high",
+          "note": "D-кольцо на ремне collar_strap + пряжка buckle (d_ring_tab) — страховочная привязка капюшона к restraint_head_frame / structure_cage; D-кольцо Ø26.7 внутренним Ø~18",
+          "connector": "custom"
+        },
+        {
+          "id": "breath_port",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "дыхательный канал Ø66 (пассивный)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.1595,
+            0.1248
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0667,
+          "source": "node:sensory_hood__breath_port / bbox +Z face (решётка breath_grille Ø48.8, кольцо breath_ring)",
+          "confidence": "high",
+          "note": "дыхательный канал Ø66 (порт + решётка + циановое кольцо), всегда открыт, пассивный; патрубок breath_stub Ø12.8 уходит внутрь скорлупы. Пневморазъёма в контракте нет — канал не под давлением",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "DC jack 24 В (паспорт)",
+          "gender": "female",
+          "position_m": [
+            -0.0001,
+            0.1862,
+            -0.155
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.006,
+          "source": "node:sensory_hood__shell / bbox -Z face (затылок, y=0.1862)",
+          "confidence": "low",
+          "note": "DC jack 24 В 3 А по контракту, но разъёма в геометрии нет: точка на задней стенке скорлупы как единственное место ввода кабеля (капюшон — мягкий, без электрики)",
+          "connector": "CJ-PWR-DC24"
+        },
+        {
+          "id": "media_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "USB-C (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.1374,
+            0.1862,
+            -0.0137
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.008,
+          "source": "node:sensory_hood__shell / bbox +X face (y=0.1862)",
+          "confidence": "low",
+          "note": "USB-C media_in/media_out по контракту; в геометрии разъёма нет — точка на правой стенке скорлупы рядом с ear_pad_r как место вывода сигнального шлейфа",
+          "connector": "CJ-SIG-USBC"
+        }
+      ]
+    },
+    "sensory_visor": {
+      "class": "SENSORY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "оголовье: 2 шарнира Ø28 (паспорт head_mount 4×Ø, pitch 0.05)",
+          "gender": "female",
+          "position_m": [
+            0.0991,
+            0.065,
+            0.0145
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.011,
+          "count": 2,
+          "load_n": 150.0,
+          "source": "node:sensory_visor__hinge_pin_r / bbox centre (левый — hinge_pin_l, ±0.099)",
+          "confidence": "medium",
+          "note": "два боковых шарнира-диска Ø28 (hinge_boss_l/r + hinge_pin + hinge_yoke) — поворот/подъём визора на оголовье; болтового паттерна head_mount 4×Ø pitch 50 мм в геометрии нет",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø28 — CJ-CLEVIS-8 (вилка штока) не применим"
+        },
+        {
+          "id": "head_strap",
+          "role": "support",
+          "kind": "clamp",
+          "standard": "пряжка 36×40",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0725,
+            -0.0718
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.036,
+          "source": "node:sensory_visor__buckle_bar_0..3 / общий центр рамки пряжки (0, 0.0716, -0.072)",
+          "confidence": "high",
+          "note": "пряжка ремня на затылке (рамка 36×40 из buckle_bar_0..3 + prong + tail), ремень strap шириной 0.194; регулировка длины и затяг на голове",
+          "connector": "custom"
+        },
+        {
+          "id": "face_seal",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            -0.0,
+            0.0522,
+            0.0063
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.193,
+          "source": "node:sensory_visor__obturator / bbox -Z face (сторона лица)",
+          "confidence": "medium",
+          "note": "силиконовый обтюратор по лицу — посадочная поверхность на голову (0.193×0.098), крепежа нет, прижим ремнём; носовой упор nose_pad",
+          "connector": "custom"
+        },
+        {
+          "id": "media_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "USB-C (паспорт), в геометрии кабельный ввод Ø16",
+          "gender": "female",
+          "position_m": [
+            -0.0913,
+            0.0195,
+            0.0378
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "source": "node:sensory_visor__port / bbox -X face (-0.0915) + strain_relief / cable",
+          "confidence": "high",
+          "note": "ввод кабеля слева (port Ø16 + strain_relief Ø12 + cable), USB-C media_in по контракту; медиа-выход media_out идёт тем же шлейфом на sensory_hood",
+          "connector": "CJ-SIG-USBC"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "DC jack 24 В (паспорт)",
+          "gender": "female",
+          "position_m": [
+            -0.0629,
+            0.0125,
+            -0.0622
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.01,
+          "source": "node:sensory_visor__connector_ferrule / bbox -Z face (-0.062), цепочка connector→cable→port",
+          "confidence": "low",
+          "note": "DC jack 24 В по контракту; в геометрии один общий кабель (cable + connector Ø16 + ferrule Ø10) — отдельного силового разъёма нет, питание идёт по шлейфу",
+          "connector": "CJ-PWR-DC24"
+        }
+      ]
+    },
+    "sensory_audio": {
+      "class": "SENSORY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "surface",
+          "standard": "оголовье (паспорт head_mount 4×Ø, pitch 0.05)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.1858,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.157,
+          "load_n": 150.0,
+          "source": "node:sensory_audio__headband_cushion / bbox top face (y=0.186)",
+          "confidence": "medium",
+          "note": "дуга оголовья с подушкой 0.157×0.036 опирается на голову, прижим чашками; болтового паттерна head_mount 4×Ø pitch 50 мм в геометрии нет",
+          "connector": "custom"
+        },
+        {
+          "id": "cup_pivot_l",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "пивот Ø10",
+          "gender": "male",
+          "position_m": [
+            -0.089,
+            0.047,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.01,
+          "count": 2,
+          "source": "node:sensory_audio__pivot_l_f / pivot_l_b / midpoint (-0.089, 0.047, 0)",
+          "confidence": "high",
+          "note": "левая чашка на двух пивотах Ø10 (z=-0.045 и +0.045), ось Z: наклон чашки; вилка yoke_arm_l_f/b + yoke_top_l, ползун slider_l",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø10 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "cup_pivot_r",
+          "role": "mount",
+          "kind": "pivot",
+          "standard": "пивот Ø10",
+          "gender": "male",
+          "position_m": [
+            0.089,
+            0.047,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.01,
+          "count": 2,
+          "source": "node:sensory_audio__pivot_r_f / pivot_r_b / midpoint (0.089, 0.047, 0)",
+          "confidence": "high",
+          "note": "правая чашка на двух пивотах Ø10 (z=-0.045 и +0.045), ось Z: наклон чашки; вилка yoke_arm_r_f/b + yoke_top_r, ползун slider_r",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø10 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "ear_pad_l",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            -0.0501,
+            0.047,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.087,
+          "source": "node:sensory_audio__pad_l / bbox +X face (-0.0505), амбушюр Ø87",
+          "confidence": "high",
+          "note": "посадочная поверхность амбушюра на ухо (pad_l + pad_liner_l + grille_l), прижим оголовьем",
+          "connector": "custom"
+        },
+        {
+          "id": "ear_pad_r",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            0.0501,
+            0.047,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.087,
+          "source": "node:sensory_audio__pad_r / bbox -X face (0.0505), амбушюр Ø87",
+          "confidence": "high",
+          "note": "посадочная поверхность амбушюра на ухо (pad_r + pad_liner_r + grille_r), прижим оголовьем",
+          "connector": "custom"
+        },
+        {
+          "id": "media_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "3.5 мм jack (паспорт USB-C)",
+          "gender": "female",
+          "position_m": [
+            -0.0206,
+            0.004,
+            0.0294
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.008,
+          "source": "node:sensory_audio__jack_tip / bbox +Z face (0.0295), цепочка jack_body→ring→barrel→tip",
+          "confidence": "high",
+          "note": "медиа-вход: разъём 3,5 мм (jack_body Ø8 + ring + barrel + tip) на кабеле снизу-слева, паспорт media_in USB-C — в геометрии только 3,5 мм джек",
+          "connector": "CJ-SIG-USBC"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "DC jack 24 В (паспорт)",
+          "gender": "female",
+          "position_m": [
+            -0.0757,
+            0.0081,
+            -0.012
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.012,
+          "source": "node:sensory_audio__strain_relief / bbox -X face (-0.075), cable идёт следом",
+          "confidence": "low",
+          "note": "питание 24 В по контракту; в геометрии отдельного DC jack нет — только strain_relief Ø12 + cable, точка на выходе кабеля",
+          "connector": "CJ-PWR-DC24"
+        },
+        {
+          "id": "headband_slider",
+          "role": "support",
+          "kind": "clamp",
+          "standard": "ползун + винт Ø5",
+          "gender": "female",
+          "position_m": [
+            -0.0855,
+            0.14,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.022,
+          "count": 2,
+          "source": "node:sensory_audio__band_housing_l / bbox centre (-0.086, 0.140, 0) (справа band_housing_r)",
+          "confidence": "high",
+          "note": "ползун регулировки оголовья (band_housing + slider + slider_notch), фиксация винтом housing_screw Ø5",
+          "connector": "custom"
+        }
+      ]
+    },
+    "sensory_light": {
+      "class": "SENSORY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "плита 100×100, 3×M4 (паспорт head_mount 4×Ø, pitch 0.05)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0995,
+            -0.0365
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.1,
+          "count": 3,
+          "pitch_m": 0.0576,
+          "load_n": 150.0,
+          "source": "node:sensory_light__ceiling_plate / bbox top face (y=0.100); plate_screws — 3 кластера (-0.0288,0.0894,-0.049), (0,0.0894,-0.0048), (0.0288,0.0894,-0.049)",
+          "confidence": "low",
+          "note": "плита ceiling_plate 100 × 100 сплошная; винты plate_screws слиты в один mesh (bbox 66 × 53 мм), отдельных отверстий и бобышек нет — 3 × M4 и шаблон 57,6 мм правдоподобны, но недоказуемы",
+          "connector": "custom",
+          "connector_note": "мелкий крепёж вне CJ-STR-M12/M8 (M8 — минимум семейства)"
+        },
+        {
+          "id": "tilt_pivot",
+          "role": "support",
+          "kind": "pivot",
+          "standard": "шарнир Ø10 + зажим",
+          "gender": "male",
+          "position_m": [
+            0.0,
+            0.0611,
+            -0.0471
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.01,
+          "source": "node:sensory_light__yoke_ear_l / yoke_ear_r / midpoint (0, 0.049, -0.047), pivot_bolt по X",
+          "confidence": "high",
+          "note": "шарнир наклона по X: уши yoke_ear_l/r, болт pivot_bolt Ø10, шайба pivot_washer Ø22, зажим tilt_knob; паспортный наклон головы 10°",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø10 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "swivel",
+          "role": "support",
+          "kind": "pivot",
+          "standard": "муфта Ø39",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0864,
+            -0.0471
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.045,
+          "source": "node:sensory_light__swivel_collar / bbox centre (0, 0.086, -0.047), stem Ø26 + swivel_ring Ø45",
+          "confidence": "high",
+          "note": "поворотная муфта на штанге (swivel_collar Ø39 + ring + stem_ferrule Ø32): азимутальный поворот головы",
+          "connector": "custom",
+          "connector_note": "рым/шарнир Ø39 — CJ-CLEVIS-8 (вилка штока) не применим"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "DC jack 24 В (паспорт), в геометрии cable_connector Ø11",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0359,
+            -0.0866
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.011,
+          "source": "node:sensory_light__cable_connector / bbox centre (0, 0.036, -0.087); cable_gland (0,0.085,-0.048) + cable",
+          "confidence": "medium",
+          "note": "кабельный вывод: гермоввод cable_gland Ø15 сверху + cable + разъём cable_connector Ø11; DC jack 24 В по контракту — в геометрии разъём кабеля, не приборный DC jack",
+          "connector": "CJ-PWR-DC24"
+        },
+        {
+          "id": "media_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "USB-C (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0294,
+            -0.0677
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.012,
+          "source": "node:sensory_light__strain_boss / bbox centre (0, 0.029, -0.068)",
+          "confidence": "low",
+          "note": "USB-C media_in по контракту; в геометрии разъёма нет — точка на разгрузке кабеля рядом с cable, данные идут общим шнуром",
+          "connector": "CJ-SIG-USBC"
+        }
+      ]
+    },
+    "control_console": {
+      "class": "CONTROL",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "панель 4×Ø (паспорт pitch 0.1)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.003
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.376,
+          "count": 4,
+          "pitch_m": 0.3736,
+          "load_n": 300.0,
+          "source": "node:control_console__base_pad / bbox bottom face (y=0); 4 опоры ±0.1868/±0.1378; bezel_screws — 4 винта по углам панели (±0.187, 0.1447/-0.1323)",
+          "confidence": "high",
+          "note": "настольный пульт: 4 опоры base_pad 374×276 мм + 4 винта bezel_screws по углам панели (шаг 374×277 мм); паспорт panel pitch 100 мм — не совпадает; крепление к столу или кронштейну",
+          "connector": "custom",
+          "connector_note": "болтовое поле «панель 4×Ø (паспорт pitch 0.1)» без нормированного поля"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "M12 A-coded 24 В (паспорт), в геометрии гермоввод Ø23",
+          "gender": "female",
+          "position_m": [
+            0.12,
+            0.042,
+            -0.1495
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.023,
+          "source": "node:control_console__cable_gland / bbox -Z face (-0.1495) + cable (0.131, 0.023, -0.148)",
+          "confidence": "high",
+          "note": "кабельный ввод Ø23 в задней стенке справа (cable_gland + cable); M12 A-coded 24 В по контракту — в геометрии гермоввод",
+          "connector": "CJ-PWR-DC24"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "RJ45 (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.1305,
+            0.0228,
+            -0.148
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.02,
+          "source": "node:control_console__cable / bbox -Z face (-0.148)",
+          "confidence": "low",
+          "note": "RJ45 bus_in/bus_out по контракту; разъёма в геометрии нет — Ethernet идёт в общем кабеле через cable_gland, точка на хвосте кабеля",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "operator_face",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.123,
+            0.0048
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.386,
+          "source": "node:control_console__panel / bbox top face (y=0.123), наклон панели 12.8°",
+          "confidence": "high",
+          "note": "рабочая плоскость оператора 0.386×0.290 (экран 10″, E-stop грибок, джойстик, 6 кнопок, 2 тумблера, LED) — не несущая, только интерфейс",
+          "connector": "custom"
+        },
+        {
+          "id": "handle",
+          "role": "support",
+          "kind": "clamp",
+          "standard": "скоба 0.315",
+          "gender": "male",
+          "position_m": [
+            0.0,
+            0.14,
+            -0.1128
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.16,
+          "source": "node:control_console__handle_grip / bbox centre (0, 0.140, -0.113), скоба handle_bail 0.315",
+          "confidence": "high",
+          "note": "ручка-скоба handle_bail/handle_grip шириной 0.315 за задней кромкой: переноска и подвес на кронштейн",
+          "connector": "custom"
+        }
+      ]
+    },
+    "control_telemetry": {
+      "class": "CONTROL",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "панель 4×Ø (паспорт pitch 0.1)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.104,
+            -0.03
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.3,
+          "count": 4,
+          "load_n": 300.0,
+          "source": "node:control_telemetry__housing / bbox -Z face (-0.030); back_screws — 4 кластера (±0.128, 0.030/0.170, -0.0292)",
+          "confidence": "high",
+          "note": "4 винта back_screws кластерами x=±0.128, y=0.030/0.170, z=-0.0292 → 0.256 × 0.14. Прежний pitch_m 0.256 подставлялся в обе оси",
+          "pitch_x_m": 0.256,
+          "pitch_z_m": 0.14,
+          "connector": "custom",
+          "connector_note": "болтовое поле «панель 4×Ø (паспорт pitch 0.1)» без нормированного поля"
+        },
+        {
+          "id": "mount_rail",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "DIN 35×7.5",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.1,
+            -0.0335
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.035,
+          "load_n": 300.0,
+          "source": "node:control_telemetry__din_rail / bbox centre (0, 0.100, -0.033); din_clip_l/r, back_screws",
+          "confidence": "high",
+          "note": "DIN-рейка 35 мм на задней стенке с двумя пружинными клипсами din_clip_l/r — основной монтаж на рейку/в шкаф; рейка 0.280 длиной",
+          "connector": "CJ-RAIL-15"
+        },
+        {
+          "id": "terminal_out",
+          "role": "signal",
+          "kind": "clamp",
+          "standard": "винтовые клеммы 16×",
+          "gender": "female",
+          "position_m": [
+            -0.0555,
+            0.0649,
+            0.0364
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.134,
+          "count": 16,
+          "source": "node:control_telemetry__channel_holes / bbox +Z face (0.035), channel_blocks 0.134×0.037",
+          "confidence": "high",
+          "note": "16 винтовых клеммных каналов (channel_blocks + channel_screws + channel_divider), маркировка CH; паспорт 8–32 канала",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "dock",
+          "standard": "RJ45 8P8C",
+          "gender": "female",
+          "position_m": [
+            0.045,
+            0.056,
+            0.0345
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0164,
+          "source": "node:control_telemetry__eth_frames / eth_pins кластер x=0.045, передняя кромка z=0.0345",
+          "confidence": "high",
+          "note": "RJ45 ETH1 на лицевой панели (eth_frames/cavities/pins/clips, ширина гнезда 16.4 мм); метка port_label_ETH1",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "bus_out",
+          "role": "signal",
+          "kind": "dock",
+          "standard": "RJ45 8P8C",
+          "gender": "female",
+          "position_m": [
+            0.077,
+            0.056,
+            0.0345
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0164,
+          "source": "node:control_telemetry__eth_pins / второй кластер x=0.077 (ETH2), eth_frames x=0.0688..0.0852",
+          "confidence": "high",
+          "note": "RJ45 ETH2 (второй порт, шаг 32 мм по X от ETH1); метка port_label_ETH2",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "usb_in",
+          "role": "signal",
+          "kind": "dock",
+          "standard": "USB-C",
+          "gender": "female",
+          "position_m": [
+            0.108,
+            0.056,
+            0.0321
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.008,
+          "source": "node:control_telemetry__usbc_slot / bbox centre (0.108, 0.056, 0.032)",
+          "confidence": "high",
+          "note": "USB-C порт на панели (usbc_frame + slot), метка port_label_USBC; в контракте порта нет — расхождение в пользу геометрии",
+          "connector": "CJ-SIG-USBC"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "M12 A-coded 24 В (паспорт), в геометрии гермоввод Ø15",
+          "gender": "female",
+          "position_m": [
+            0.095,
+            0.018,
+            -0.0315
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.015,
+          "source": "node:control_telemetry__gland / bbox centre (0.095, 0.018, -0.032); gland_ring, cable, cable_boot",
+          "confidence": "medium",
+          "note": "гермоввод Ø15 снизу-сзади справа с кабелем питания (gland + ring + cable + boot); M12 A-coded 24 В по контракту — в геометрии гермоввод",
+          "connector": "CJ-PWR-DC24"
+        }
+      ]
+    },
+    "control_estop": {
+      "class": "CONTROL",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "панель 4×Ø (паспорт pitch 0.1)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.104,
+          "count": 4,
+          "pitch_m": 0.1062,
+          "load_n": 300.0,
+          "source": "node:control_estop__contact_base / bbox bottom face (y=0); base_screws — 4 кластера (±0.0531, 0.0105, ±0.021)",
+          "confidence": "high",
+          "note": "панель/пол: основание 104×104, 4 винта, шаг 106.2×42 мм; паспорт panel pitch 100 мм — шаг по Z не совпадает; housing_bolts 4×Ø10 фиксируют стакан к основанию",
+          "connector": "custom",
+          "connector_note": "болтовое поле «панель 4×Ø (паспорт pitch 0.1)» без нормированного поля"
+        },
+        {
+          "id": "contact_out",
+          "role": "signal",
+          "kind": "clamp",
+          "standard": "винтовые клеммы 6×, шаг 13 мм",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0095,
+            0.059
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.073,
+          "count": 6,
+          "pitch_m": 0.013,
+          "source": "node:control_estop__contact_screws / bbox +Z face (0.059), 6 кластеров -0.0365…0.0365",
+          "confidence": "high",
+          "note": "сухой контакт: 2 контактных блока (contact_block_a/b) по 3 винтовые клеммы, шаг 13 мм — 6 клемм; паспорт «сухой контакт, 2–3 точки»",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "push_face",
+          "role": "input",
+          "kind": "surface",
+          "standard": "грибок Ø52, ход 5 мм",
+          "gender": "male",
+          "position_m": [
+            0.0,
+            0.08,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.052,
+          "source": "node:control_estop__mushroom / bbox top face (y=0.0805), Ø52",
+          "confidence": "high",
+          "note": "грибковый толкатель Ø52 с фиксацией, сброс поворотом кольца collar_knurl (Ø45) с указателем; защитная скоба cage_posts/cage_ring Ø78",
+          "connector": "custom"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "M12 A-coded 24 В (паспорт), в геометрии гермоввод Ø12",
+          "gender": "female",
+          "position_m": [
+            0.0258,
+            0.0105,
+            -0.06
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.012,
+          "source": "node:control_estop__gland_body / bbox -Z face (-0.060); gland_nut, cable",
+          "confidence": "medium",
+          "note": "гермоввод Ø12 + кабель сзади (gland_nut/body + cable + cable_tie); M12 A-coded 24 В по контракту — в геометрии гермоввод",
+          "connector": "CJ-PWR-DC24"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "RJ45 (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.0418,
+            0.008,
+            -0.0605
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.01,
+          "source": "node:control_estop__cable / bbox -Z face (-0.0605)",
+          "confidence": "low",
+          "note": "RJ45 bus_in/bus_out по контракту; в геометрии Ethernet нет — только сухие контакты и кабель, точка на хвосте cable",
+          "connector": "CJ-SIG-RJ45"
+        }
+      ]
+    },
+    "control_interlock": {
+      "class": "CONTROL",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "DIN 35 TS35 (паспорт panel 4×Ø, pitch 0.1)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0365,
+            -0.0755
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.035,
+          "load_n": 300.0,
+          "source": "node:control_interlock__din_rail / bbox centre (0, 0.037, -0.071); rail_clip_hooks/spring/pad/screw, rail_slots",
+          "confidence": "high",
+          "note": "DIN-рейка din_rail z -0.0755…-0.0672: точка на наружной грани -0.0755 (прежняя -0.0713 — середина толщины). kind rail верен; в контракте порт объявлен panel — расхождение (P2)",
+          "connector": "CJ-RAIL-15"
+        },
+        {
+          "id": "terminal_out",
+          "role": "signal",
+          "kind": "clamp",
+          "standard": "винтовые клеммы 16×, шаг 11 мм",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0205,
+            0.0751
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.176,
+          "count": 16,
+          "pitch_m": 0.011,
+          "source": "node:control_interlock__terminal_slots / bbox +Z face (0.0755); terminal_dividers — 16 ячеек (шаг 11 мм)",
+          "confidence": "high",
+          "note": "16 винтовых клемм в один ряд (terminal_deck/dividers/cups/screws/wire_ports), нумерация channel_numbers + цветовые метки A/B; паспорт 8–16 входов",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "dock",
+          "standard": "RJ45 8P8C",
+          "gender": "female",
+          "position_m": [
+            0.0362,
+            0.0414,
+            0.0726
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.013,
+          "source": "node:control_interlock__eth_mouth / bbox centre (0.036, 0.041, 0.073); eth_body, eth_latch",
+          "confidence": "high",
+          "note": "RJ45 на лицевой панели (eth_body + mouth + latch), метка label_eth; второй порт не заведён — паспорт bus_in/bus_out, в геометрии один разъём",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "M12 A-coded 24 В (паспорт), в геометрии гермоввод Ø16",
+          "gender": "female",
+          "position_m": [
+            -0.0949,
+            0.017,
+            0.008
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.016,
+          "source": "node:control_interlock__cable_gland / bbox centre (-0.095, 0.017, 0.008); gland_nut, cable, cable_plug",
+          "confidence": "medium",
+          "note": "гермоввод Ø16 слева + кабель с вилкой (gland + nut + cable + boot + plug + plug_key); M12 A-coded 24 В по контракту — в геометрии гермоввод",
+          "connector": "CJ-PWR-DC24"
+        },
+        {
+          "id": "key_interface",
+          "role": "input",
+          "kind": "surface",
+          "standard": "ключ Ø26 / лезвие Ø19",
+          "gender": "female",
+          "position_m": [
+            -0.018,
+            0.0988,
+            0.023
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.026,
+          "source": "node:control_interlock__key_shaft / bbox top face (0.0985); key_bezel/collar/barrel/blade",
+          "confidence": "high",
+          "note": "ключ-переключатель AUTO/OFF на верхней панели (bezel Ø26 + collar + barrel + blade Ø19): снятие ключа размыкает цепь блокировки — механический интерфейс безопасности",
+          "connector": "custom"
+        },
+        {
+          "id": "relay_bay",
+          "role": "output",
+          "kind": "dock",
+          "standard": "кассета 2 реле",
+          "gender": "female",
+          "position_m": [
+            -0.0565,
+            0.0708,
+            0.0748
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.111,
+          "count": 2,
+          "pitch_m": 0.049,
+          "source": "node:control_interlock__relay_clip_a / bbox +Z face (0.0745); bay_frame_top/bottom/left/right, relay_b",
+          "confidence": "high",
+          "note": "кассета на 2 съёмных реле (relay_a/b в молочных корпусах, прижимные скобы relay_clip_a/b), посадочные места 0.111×0.031 в рамке bay_frame_*",
+          "connector": "custom",
+          "connector_note": "док без лотка 440 × 520 и штифтов Ø10 (CJ-DOCK-M)"
+        }
+      ]
+    },
+    "utility_power": {
+      "class": "UTILITY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "стена, 4 болта (паспорт pitch 0.3)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0725,
+            -0.1
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.28,
+          "count": 4,
+          "pitch_m": 0.25,
+          "load_n": 600.0,
+          "source": "node:utility_power__wall_plate / bbox -Z face (-0.1005); back_bolts — 4 угла (±0.125, 0.0255/0.1195)",
+          "confidence": "high",
+          "note": "крепёжная плита 280×121 на стену/техшкаф, 4 болта, шаг 250×94 мм (паспорт pitch 300 мм); боковые ушки side_plate_l/r несут плиту",
+          "connector": "custom",
+          "connector_note": "болтовое поле «стена, 4 болта (паспорт pitch 0.3)» без нормированного поля"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "IEC C20 230 В 16 А (паспорт), в геометрии гермоввод Ø18",
+          "gender": "female",
+          "position_m": [
+            -0.105,
+            0.0,
+            -0.056
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.018,
+          "source": "node:utility_power__gland_body / gland_seal / bbox centre (-0.105, 0.000, -0.056); gland_nut Ø18, cable",
+          "confidence": "medium",
+          "note": "вводной кабель снизу-слева: гермоввод Ø18 (gland_body/nut/seal) + cable + cable_clip; IEC C20 230 В 16 А по контракту — в геометрии кабельный ввод",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "power_out",
+          "role": "power",
+          "kind": "flange",
+          "standard": "розетка 230 В Ø46 (паспорт IEC C19)",
+          "gender": "female",
+          "position_m": [
+            0.088,
+            0.0452,
+            0.0986
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.046,
+          "source": "node:utility_power__socket_230_lid / bbox +Z face (0.0985); flange Ø46, collar Ø34, ring Ø33, tag",
+          "confidence": "high",
+          "note": "синяя розетка 230 В на дверце справа (socket_230_flange/collar/ring/lid/tab/screws) Ø46; паспорт power_out IEC C19 16 А — стандарт разъёма в геометрии не подтверждён",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "power_out_380",
+          "role": "power",
+          "kind": "flange",
+          "standard": "CEE 5P 380 В Ø57",
+          "gender": "female",
+          "position_m": [
+            0.088,
+            0.0985,
+            0.1
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.057,
+          "source": "node:utility_power__socket_380_lid / bbox +Z face (0.100); flange Ø57, collar Ø41, ring Ø40",
+          "confidence": "high",
+          "note": "красная 5P розетка 380 В на дверце (socket_380_flange/collar/ring/lid/tab/screws) Ø57, метка socket_380_tag; в контракте только 230 В output — расхождение (паспорт «230/380 В»)",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "bus_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "RJ45 (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.09,
+            0.03,
+            -0.1005
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.012,
+          "source": "node:utility_power__wall_plate / bbox -Z face (z=-0.1005), у кабельного ввода (x=0.09)",
+          "confidence": "low",
+          "note": "Ethernet eth_in/eth_out (RJ45) по контракту; в геометрии RJ45 нет — точка на плите рядом с вводным кабелем, данные идут отдельной линией",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "service_access",
+          "role": "support",
+          "kind": "pivot",
+          "position_m": [
+            -0.1423,
+            0.079,
+            0.0844
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.084,
+          "count": 2,
+          "source": "node:utility_power__door_hinges / bbox centre (-0.142, 0.079, 0.084); door_hinge_pins, lock_body/knob",
+          "confidence": "high",
+          "note": "дверца на петлях (door_hinges + pins) с замком lock_body/knob/handle: доступ к DIN-рейке, рубильнику, УЗО и автоматам — зона обслуживания ~0.5 м перед щитом",
+          "connector": "custom",
+          "connector_note": "рым/шарнир без нормированного пальца"
+        }
+      ]
+    },
+    "utility_data": {
+      "class": "UTILITY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "DIN 35 (паспорт wall 4×Ø, pitch 0.3)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.037,
+            -0.0431
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.042,
+          "load_n": 600.0,
+          "source": "node:utility_data__din_plate / bbox centre (0, 0.037, -0.043); din_hook_riser/top, din_latch, din_release",
+          "confidence": "high",
+          "note": "DIN-рейка 35 мм сзади (din_plate + hooks + пружижная защёлка din_latch/leaf/release), корпус ставится в лоток или на рейку; паспорт wall 4×Ø pitch 300 мм — болтового паттерна в геометрии нет",
+          "connector": "CJ-RAIL-15"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "clamp",
+          "standard": "клемма 3× (паспорт IEC C20)",
+          "gender": "female",
+          "position_m": [
+            -0.0788,
+            0.0448,
+            0.0538
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.021,
+          "count": 3,
+          "pitch_m": 0.006,
+          "source": "node:utility_data__power_screw_-79 / bbox +Z face (0.054); power_terminal, power_contacts, 3 винта -0.085/-0.079/-0.073",
+          "confidence": "high",
+          "note": "3-контактная клемма питания (power_terminal + 3 винта + contacts), метка power_label; паспорт power_in IEC C20 230 В 16 А — в геометрии клемма, не IEC",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "bus_ports",
+          "role": "signal",
+          "kind": "dock",
+          "standard": "RJ45 8P8C, 16× (2×8)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0334,
+            0.0525
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.123,
+          "count": 16,
+          "pitch_m": 0.0156,
+          "source": "node:utility_data__port_frames / bbox +Z face (0.0525); port_cavities — 8 столбцов × 2 ряда, port_pins, port_leds",
+          "confidence": "high",
+          "note": "16 × RJ45 в 2 ряда по 8 (port_frames/cavities/pins/leds, шаг 15.6 мм по X и 18.2 мм по Y), маркировка port_labels; паспорт 8–24 порта",
+          "connector": "CJ-SIG-RJ45"
+        },
+        {
+          "id": "sfp",
+          "role": "signal",
+          "kind": "dock",
+          "standard": "SFP",
+          "gender": "female",
+          "position_m": [
+            0.0788,
+            0.0442,
+            0.0512
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.016,
+          "source": "node:utility_data__sfp_cage / bbox centre (0.079, 0.044, 0.051); sfp_cavity, sfp_latch, sfp_contacts",
+          "confidence": "high",
+          "note": "SFP-порт (cage 16×12, cavity, latch, contacts), метка sfp_label; в контракте порта нет",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "usb_c",
+          "role": "signal",
+          "kind": "dock",
+          "standard": "USB-C, 2×",
+          "gender": "female",
+          "position_m": [
+            0.0788,
+            0.0262,
+            0.0516
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.011,
+          "count": 2,
+          "pitch_m": 0.011,
+          "source": "node:utility_data__usbc_cavities / bbox centre (0.079, 0.026, 0.052); usbc_shells — 2 гнезда",
+          "confidence": "high",
+          "note": "2 × USB-C (usbc_shells + cavities), метка usbc_label; в контракте порта нет",
+          "connector": "CJ-SIG-USBC"
+        },
+        {
+          "id": "service_release",
+          "role": "support",
+          "kind": "clamp",
+          "position_m": [
+            0.0165,
+            0.0128,
+            -0.0485
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.01,
+          "source": "node:utility_data__din_release / bbox centre (0.016, 0.013, -0.049)",
+          "confidence": "high",
+          "note": "рычаг снятия с DIN-рейки (din_release) + reset_hole на панели: обслуживание без демонтажа портов",
+          "connector": "custom"
+        }
+      ]
+    },
+    "utility_air": {
+      "class": "UTILITY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "dock",
+          "standard": "док-плита 4×Ø (паспорт wall, pitch 0.3)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0443,
+            -0.056
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.172,
+          "count": 4,
+          "pitch_m": 0.156,
+          "load_n": 600.0,
+          "source": "node:utility_air__dock_plate / bbox -Z face (-0.056); dock_screws — 4 кластера (±0.078, 0.019/0.075); dock_pins",
+          "confidence": "high",
+          "note": "док-плита dock_plate с 4 отверстиями; в контракте порт объявлен wall — править контракт (P2), kind dock в данных верен",
+          "connector": "CJ-DOCK-M"
+        },
+        {
+          "id": "air_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4 (паспорт), в геометрии штуцер Ø15",
+          "gender": "female",
+          "position_m": [
+            -0.0942,
+            0.0625,
+            0.0
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.015,
+          "source": "node:utility_air__port_in / bbox -X face (-0.0945); port_in_nut Ø21, port_in_ring Ø18",
+          "confidence": "high",
+          "note": "боковой ввод воздуха на корпус фильтра-влагоотделителя (port_in Ø15 + nut Ø21 + ring), резьба G1/4 в геометрии не выражена; 6–8 бар по паспорту",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "air_out",
+          "role": "fluid",
+          "kind": "flange",
+          "standard": "быстросъём DN7.2, 4× (паспорт G1/4)",
+          "gender": "female",
+          "position_m": [
+            0.0355,
+            0.05,
+            0.0657
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.014,
+          "count": 4,
+          "pitch_m": 0.018,
+          "source": "node:utility_air__coupler_tips / bbox centre (0.035, 0.050, 0.065); coupler_sleeves — 4 кластера x=0.008/0.026/0.044/0.062",
+          "confidence": "high",
+          "note": "4 быстросъёма на манифолде (coupler_bosses/sleeves/rings/tips/caps, шаг 18 мм, торец z=0.0725); четвёртый занят шлангом hose + ferrule + clamp — итого 3 свободных выхода",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "condensate_drain",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "слив конденсата Ø9",
+          "gender": "female",
+          "position_m": [
+            -0.057,
+            0.006,
+            0.0238
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.009,
+          "source": "node:utility_air__drain_nozzle / bbox +Z face (0.024); drain_body Ø18, drain_knurl, drain_spout",
+          "confidence": "high",
+          "note": "слив конденсата под колбой (drain_body/knurl/spout/nozzle Ø9) — точка обслуживания, шланг не заведён",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "dock",
+          "standard": "док-контакты (паспорт IEC C20)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.04,
+            -0.073
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.027,
+          "count": 2,
+          "source": "node:utility_air__dock_contacts / bbox -Z face (-0.073); dock_socket, dock_socket_plate",
+          "confidence": "medium",
+          "note": "24 В через контакты дока (dock_socket + plate + contacts) — отдельного разъёма питания нет, питание приходит с док-плиты; IEC C20 по контракту не подтверждён",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "service_access",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            -0.057,
+            0.0457,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.052,
+          "source": "node:utility_air__bowl_collar / bbox centre (-0.057, 0.046, 0); bowl Ø46, filter_element, knob",
+          "confidence": "high",
+          "note": "съёмная колба фильтра (bowl_collar Ø52, knurled) + маховик регулятора knob: обслуживание снизу — слив конденсата, замена фильтроэлемента",
+          "connector": "custom"
+        }
+      ]
+    },
+    "utility_water": {
+      "class": "UTILITY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "dock",
+          "standard": "док-плита 4×Ø (паспорт wall, pitch 0.3)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.05,
+            -0.0285
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.13,
+          "load_n": 600.0,
+          "source": "node:utility_water__dock_plate / bbox -Z face (-0.0285); dock_screw_00/01/10/11 (±0.056, 0.023/0.075)",
+          "confidence": "high",
+          "note": "док-плита dock_plate 135 × 52 мм: болтовых бобышек нет, единственный босс — inlet_boss. kind dock как у utility_air; count/pitch сняты (были фиктивными)",
+          "connector": "CJ-DOCK-M"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4 (паспорт), в геометрии штуцер Ø18",
+          "gender": "female",
+          "position_m": [
+            -0.1098,
+            0.062,
+            0.004
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.018,
+          "source": "node:utility_water__inlet_tail / bbox -X face (-0.1095); inlet_boss, check_valve, sleeve, ring Ø24",
+          "confidence": "high",
+          "note": "ввод воды слева через обратный клапан (inlet_boss + check_valve/cap + sleeve + ring Ø24 + tail Ø18), шланг inlet_hose; 0.2–2 бар по паспорту",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "fluid_out_a",
+          "role": "fluid",
+          "kind": "clamp",
+          "standard": "быстросъём Ø16",
+          "gender": "female",
+          "position_m": [
+            0.038,
+            0.018,
+            0.06
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.016,
+          "source": "node:utility_water__out_a_tail / bbox +Z face (0.0605); out_a_body/sleeve/ring, out_a_hose",
+          "confidence": "high",
+          "note": "быстросъём A (out_a_* Ø16 + бирюзовое ring Ø21) + шланг out_a_hose; выход на work_spray/work_roller",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "fluid_out_b",
+          "role": "fluid",
+          "kind": "clamp",
+          "standard": "быстросъём Ø16",
+          "gender": "female",
+          "position_m": [
+            0.062,
+            0.018,
+            0.06
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.016,
+          "source": "node:utility_water__out_b_tail / bbox +Z face (0.0605); out_b_body/sleeve/ring, out_b_hose",
+          "confidence": "high",
+          "note": "быстросъём B (out_b_* Ø16 + ring Ø21) + шланг out_b_hose; второй потребитель",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "IEC C20 230 В (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.076,
+            0.048,
+            0.004
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.02,
+          "source": "node:utility_water__body / bbox +X face (0.076)",
+          "confidence": "low",
+          "note": "230 В IEC C20 по контракту; в геометрии электрики нет (только status_led и leak_sensor) — точка на правой стенке корпуса как место ввода питания/датчика",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "service_access",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            -0.046,
+            0.02,
+            0.05
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.044,
+          "source": "node:utility_water__filter_collar / bbox centre (-0.046, 0.020, 0.050); filter_glass, cartridge, cap Ø34",
+          "confidence": "high",
+          "note": "съёмная колба фильтра (filter_collar Ø44 + glass Ø38 + cartridge) и маховик редуктора (regulator_knob Ø25): обслуживание спереди-снизу — промывка, замена фильтра",
+          "connector": "custom"
+        }
+      ]
+    },
+    "utility_drain": {
+      "class": "UTILITY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "кронштейн 4×Ø8 (паспорт wall, pitch 0.3)",
+          "gender": "female",
+          "position_m": [
+            0.008,
+            0.0336,
+            -0.0744
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "size_m": 0.048,
+          "count": 4,
+          "pitch_m": 0.034,
+          "load_n": 600.0,
+          "source": "node:utility_drain__wall_bracket / bbox -Z face (-0.0745); bracket_bolts — 4 кластера (0.008, 0.023/0.0452, -0.0732/-0.0622)",
+          "confidence": "high",
+          "note": "кронштейн к стене/стойке с 4 анкерными болтами Ø8, шаг 34×11 мм (паспорт wall pitch 300 мм — узел компактный, плита bracket_plate 0.05×0.038)",
+          "connector": "custom",
+          "connector_note": "болтовое поле «кронштейн 4×Ø8 (паспорт wall, pitch 0.3)» без нормированного поля"
+        },
+        {
+          "id": "floor_seat",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            0.008,
+            0.0,
+            0.002
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.08,
+          "source": "node:utility_drain__floor_feet / bbox bottom face (y=0.0005); sump_body низ 0.008",
+          "confidence": "high",
+          "note": "сумпа стоит на полу на 4 опорах floor_feet 76×80 мм; кронштейн только страхует от сдвига",
+          "connector": "custom"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "flange",
+          "standard": "фланец Ø96, 4×, шаг 60.2 мм",
+          "gender": "female",
+          "position_m": [
+            0.008,
+            0.0692,
+            0.002
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.096,
+          "count": 4,
+          "pitch_m": 0.0602,
+          "source": "node:utility_drain__funnel_flange / bbox top face (y=0.0695); flange_bolts — 4 кластера (x -0.0221/0.0381, z -0.0281/0.0321) на y=0.0715",
+          "confidence": "high",
+          "note": "фланец Ø96 с 4 болтами (шаг 60.2×60.2 мм) под поверхность surface_fluid_channel; приёмная воронка Ø86 с решёткой grate_plate/bars",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "fluid_out",
+          "role": "fluid",
+          "kind": "bayonet",
+          "standard": "DN32 (паспорт Ø32 мм), быстроразъём",
+          "gender": "female",
+          "position_m": [
+            -0.101,
+            0.033,
+            0.004
+          ],
+          "normal": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.046,
+          "source": "node:utility_drain__coupler_body / bbox -X face (-0.101); coupler_rings Ø46, seal, lugs, lever, handle",
+          "confidence": "high",
+          "note": "патрубок DN32 (0.015×0.032×0.032) в быстроразъёмную муфту: корпус Ø42, 2 стопорных кольца Ø46, седло-уплотнение, 2 лужка и рычаг с ручкой; расход до 20 л/мин",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "sensor_link",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "кабель датчика Ø12",
+          "gender": "female",
+          "position_m": [
+            0.0794,
+            0.0072,
+            0.0596
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.012,
+          "source": "node:utility_drain__sensor_cable / bbox +Z face (0.060); sensor_gland Ø8, sensor_box, sensor_window",
+          "confidence": "high",
+          "note": "кабель блока датчика протечки (sensor_box 0.052×0.042×0.062 + gland + cable); питание датчика идёт по тому же кабелю — отдельного power_in в геометрии нет",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "IEC C20 230 В (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.098,
+            0.031,
+            0.001
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.012,
+          "source": "node:utility_drain__sensor_box / bbox +X face (0.098)",
+          "confidence": "low",
+          "note": "230 В IEC C20 по контракту; в геометрии только кабель датчика (sensor_cable) — точка на правой стенке блока датчика как место ввода питания",
+          "connector": "CJ-PWR-C20"
+        },
+        {
+          "id": "service_access",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            -0.052,
+            0.0,
+            0.004
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.032,
+          "source": "node:utility_drain__trap_cleanout_cap / bbox bottom face (y=0.000); trap_cup Ø44, cleanout_nut",
+          "confidence": "high",
+          "note": "ревизионная пробка сифона снизу (trap_cleanout_cap/nut) + съёмная решётка (grate_screw): обслуживание — промывка, чистка гидрозатвора",
+          "connector": "custom"
+        }
+      ]
+    },
+    "utility_routing": {
+      "class": "UTILITY",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "3 кронштейна × 2 болта (паспорт wall 4×Ø, pitch 0.3)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "size_m": 0.054,
+          "count": 3,
+          "pitch_m": 0.42,
+          "load_n": 600.0,
+          "source": "node:utility_routing__bracket_pad_2 / bbox bottom face (y=0.0005); кронштейны _1 (x=-0.42), _2 (x=0), _3 (x=+0.42), bracket_bolts_* — по 2 болта (z=±0.034)",
+          "confidence": "high",
+          "note": "3 кронштейна bracket_*_1..3 в x=-0.42 / 0 / +0.42, в каждом 2 болта (bracket_bolts_N слиты в один mesh, поле 43 × 73 мм). pitch_m 0.42 — шаг кронштейнов, а не болтов; болтовый шаг внутри кронштейна геометрией не читается",
+          "pitch_kind": "bracket_spacing",
+          "connector": "custom",
+          "connector_note": "болтовое поле «3 кронштейна × 2 болта (паспорт wall 4×Ø» без нормированного поля"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "внутрилотковый силовой разъём 230 В",
+          "gender": "female",
+          "position_m": [
+            -0.279,
+            0.0327,
+            0.0312
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "size_m": 0.042,
+          "source": "node:utility_routing__drive_connector / bbox centre (-0.279, 0.033, 0.031); ribs 1..3, drive_strain_relief",
+          "confidence": "medium",
+          "note": "силовой разъём привода в секции B (drive_connector 0.042 + 3 ребра + strain relief) с LED статуса, доступ под крышкой; 230 В по контракту — в геометрии внутрилотковый разъём",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "power_entry",
+          "role": "input",
+          "kind": "cable",
+          "standard": "гермоввод Ø18.4 (силовой)",
+          "gender": "female",
+          "position_m": [
+            0.5,
+            0.0305,
+            0.031
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0184,
+          "source": "node:utility_routing__entry_box_glands / верхний гермоввод (y=0.0305, z=0.031), bbox 0.4955..0.5",
+          "confidence": "high",
+          "note": "силовой гермоввод Ø18.4 в торцевой коробке (entry_box + grommet), пучок cable_pwr_a/b; коробка 0.028×0.019×0.088 с крышкой entry_box_lid",
+          "connector": "custom"
+        },
+        {
+          "id": "signal_entry",
+          "role": "input",
+          "kind": "cable",
+          "standard": "гермоввод Ø14.4 (сигнальный)",
+          "gender": "female",
+          "position_m": [
+            0.5,
+            0.0274,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0144,
+          "source": "node:utility_routing__entry_box_glands / средний гермоввод (y=0.0274, z=0.0)",
+          "confidence": "high",
+          "note": "сигнальный гермоввод Ø14.4 в торцевой коробке, пучок cable_data_a/b/c + cable_signal",
+          "connector": "custom"
+        },
+        {
+          "id": "hose_port",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "шланг Ø19 / гермоввод Ø18.4",
+          "gender": "female",
+          "position_m": [
+            0.5,
+            0.0314,
+            -0.0262
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.0184,
+          "source": "node:utility_routing__entry_box_glands / нижний гермоввод (y=0.0314, z=-0.0262); hose Ø17×19, hose_ferrule",
+          "confidence": "high",
+          "note": "рифлёный шланг Ø17×19 (hose, секция C) выходит через нижний гермоввод Ø18.4; в контракте пневматики нет — шланг транзитный",
+          "connector": "CJ-QD-F16"
+        },
+        {
+          "id": "cable_clamp",
+          "role": "support",
+          "kind": "clamp",
+          "position_m": [
+            0.435,
+            0.0413,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.086,
+          "source": "node:utility_routing__cable_clamp / bbox centre (0.435, 0.041, 0); cable_clamp_bolts",
+          "confidence": "high",
+          "note": "прижимная планка пучка у вводной коробки (cable_clamp 0.010×0.086 + 2 болта) — разгрузка кабелей перед гермовводами",
+          "connector": "custom"
+        },
+        {
+          "id": "service_access",
+          "role": "support",
+          "kind": "surface",
+          "position_m": [
+            0.293,
+            0.0477,
+            0.0
+          ],
+          "normal": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.406,
+          "source": "node:utility_routing__lid_b / bbox centre (0.293, 0.048, 0); lid_a (-0.398), lid_screws",
+          "confidence": "high",
+          "note": "съёмные крышки A (0.196 м) и B (0.406 м) на винтах: зона обслуживания — открытый участок -0.300…0.090 и доступ к пучку по всей длине; паспорт «съёмная крышка, 2–3 секции»",
+          "connector": "custom"
+        }
+      ]
+    }
+  }
+}

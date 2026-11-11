@@ -1,0 +1,3120 @@
+{
+ "format": "cj-restraint-hard-mount-spec/1",
+ "generated": "2026-11-11",
+ "scope": "read-only аудит: каталог, GLB и viewer не изменялись",
+ "source_of_truth": [
+  "public/models/machine-modules/component-catalog.json",
+  "public/models/machine-modules/component-contracts.json",
+  "public/models/machine-modules/component-mates.json",
+  "docs/plans/mates/restraint-service.json",
+  "docs/plans/connector-registry.json",
+  "docs/plans/fixator-requirements.md",
+  "docs/plans/checks/nonmotion-mount-audit.md",
+  "public/models/machine-modules/components/*.glb (bbox по вершинам)"
+ ],
+ "conventions": {
+  "units": "метры",
+  "coords": "glTF/three.js, Y-up, локальные координаты компонента относительно корня GLB",
+  "blender": "b = (gx, −gz, gy) — обратный переход для build_restraint_*.py (Z-up)",
+  "u": "нормаль входа языка (наружу от конечности)",
+  "p": "ось пальца = u × w",
+  "w": "ось конечности (ось манжеты)",
+  "position_m_latch": "центр отверстия языка, не центр кронштейна"
+ },
+ "problem_statement": {
+  "flexible_only": "все 10 носимых фиксаторов держатся за D-ring / кольцо / стропу: 24 кольцевых узла в 10 GLB; жёсткого крепления нет ни у одного",
+  "matrix_not_universal": "restraint_matrix: 4 рельса 56 × 28 (вне стандарта CJ-RAIL-15), 7 кареток, манжеты вклеены в каретку, свободных мест нет; шаг/пазы не заданы",
+  "requirement_conflict": "fixator-requirements п.7–8: крепление удерживает конечность, прижимая к ложу, а не охватывает её; Mk-I держит манжету на каретке сбоку от ложа — hard-вариант обязан быть «прижим + кронштейн», а не «кольцо → скоба»"
+ },
+ "standards": {
+  "CJ-LATCH-30": {
+   "status": "proposed",
+   "kind": "clevis_latch",
+   "spec": "вилка-гнездо: окно 48 × 34 мм, зев 6,4 мм, палец Ø12 h8 (14Х17Н2, HRC 42), собачка на оси Ø6 с пружиной 22 Н, рычаг сброса 70 мм с красной накладкой, концевой ход 26 мм, 4 × M6 на поле 40 × 40 (две сборки: P — палец горизонтально, V — палец вертикально)",
+   "sides": "сдача: язык (tongue) на фиксаторе; приём: гнездо на каретке/кронштейне матрицы",
+   "wll_n": 5000,
+   "breaking_n": 15000,
+   "sf": 3.0,
+   "materials": {
+    "receiver_body": "40Х, 20 мм, цинк",
+    "pin": "14Х17Н2, Ø12 h8, HRC 42",
+    "pawl": "40Х, HRC 40",
+    "spring": "302, 22 Н",
+    "guard": "PA-CF"
+   },
+   "anti_rotation": "2 × Ø5 H7 отверстия на базе гнезда (26 мм между центрами) под штифты языка; момент до 25 Н·м",
+   "safety": "страховочный штифт Ø5 + тросик 200 мм (CJ-LATCH-30S), снятие только двумя движениями",
+   "tongues": [
+    {
+     "id": "T-26",
+     "w_mm": 26,
+     "t_mm": 6,
+     "l_mm": 26,
+     "hole_mm": "Ø12,2 на 14,3 мм от базы",
+     "use": "манжета кисти, рамка головы, быстросъём"
+    },
+    {
+     "id": "T-30",
+     "w_mm": 30,
+     "t_mm": 6,
+     "l_mm": 34,
+     "hole_mm": "Ø12,2 на 18,7 мм от базы",
+     "use": "манжета стопы, шейный контур, стремя, раздвижка, подвес, пояс"
+    },
+    {
+     "id": "T-44",
+     "w_mm": 44,
+     "t_mm": 6,
+     "l_mm": 36,
+     "hole_mm": "Ø12,2 на 19,8 мм от базы",
+     "use": "бёдерный зажим"
+    }
+   ],
+   "why_one_receiver": "10 разных фиксаторов с разными нагрузками (98…1471 Н) получают одну ответную часть: матрица перестаёт зависеть от конкретной манжеты; грузоподъёмность 5 кН перекрывает максимальную потребность с SF≈3,4."
+  },
+  "CJ-LATCH-30S": {
+   "status": "proposed",
+   "spec": "страховочный штифт Ø5 × 22 + тросик 200 мм + бирка; ставится в гнездо после языка"
+  },
+  "CJ-SHELL-140": {
+   "status": "proposed",
+   "spec": "жёсткая полуоболочка: дуга 140°, CFRP 3,0 мм (или PA-CF 4,0 мм), 2 ребра 2 мм, 2 отбортовки 4 мм под нейлоновый ремень; внутренняя поверхность r = r_манжеты + 0,2 мм"
+  }
+ },
+ "materials": {
+  "shell_cfrp": "CFRP 3,0 мм, 2 слоя 2×2 твил + 1 слой UD по дуге, эпоксид; E≈60 ГПа",
+  "bracket_steel": "1.4301 (AISI 304), 3,0 мм, лазер + гибка",
+  "bracket_comp": "CFRP 5,0 мм с алюминиевыми закладными под M5",
+  "tongue": "1.4301, 6,0 мм, лазер, галтовка; втулка Ø12,2/Ø16 × 6,2 (бронза) — опция",
+  "antirot_pin": "1.4301, Ø5 h7 × 12, запрессовка H7/p6",
+  "screws": "M5 × 12 A2, 4 шт, момент 5,5 Н·м (в закладную)",
+  "frame_profile": "алюминий 6063-T6, T-slot 45 × 45, паз 15 мм, анодирование 15 мкм",
+  "carriage": "сталь 40Х (корпус) + алюминий (плита), ролики 608-2RS"
+ },
+ "components": [
+  {
+   "id": "restraint_wrist_cuff",
+   "code": "RST-WR-01",
+   "name": "Манжета кисти",
+   "glb_nodes": 33,
+   "flex_mates": [
+    "restraint_surface",
+    "qr_latch",
+    "anchor_dring"
+   ],
+   "load_n": 196,
+   "passport": "0,08 × 0,03 × 0,06 м; 0,15 кг",
+   "anchor": {
+    "node_ref": "dring_rivet_a/b на dring_bar; база кронштейна — внешняя поверхность ремня r=0,0319",
+    "position_m": [
+     0.032,
+     0.0196,
+     0.0
+    ],
+    "normal_u": [
+     0.951,
+     -0.31,
+     0.0
+    ],
+    "pin_axis_p": [
+     -0.31,
+     -0.951,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "angle_deg": -18.0,
+    "note": "угол −18° от +X в плоскости XY вокруг центра кольца (0; 0,030); совпадает с текущим A_DRING"
+   },
+   "shell": {
+    "type": "CJ-SHELL-140",
+    "r_in": 0.03,
+    "r_out": 0.033,
+    "arc_deg": 140,
+    "arc_from_deg": -88,
+    "arc_to_deg": 52,
+    "width_m": 0.03
+   },
+   "bracket": {
+    "dims_mm": "44 × 32 × 3 (L-образный, полка 14)",
+    "bolts": "4 × M5 в закладные оболочки",
+    "rib_mm": "косынка 2 мм"
+   },
+   "tongue": {
+    "class": "T-30",
+    "hole_pos_m": [
+     0.05,
+     0.014,
+     0.0
+    ],
+    "tip_m": [
+     0.064,
+     0.009,
+     0.0
+    ]
+   },
+   "add_nodes": [
+    "hard_shell",
+    "hard_shell_rib_a",
+    "hard_shell_rib_b",
+    "hard_shell_flange_a",
+    "hard_shell_flange_b",
+    "hard_bracket",
+    "hard_bracket_web",
+    "hard_tongue",
+    "hard_tongue_bush",
+    "hard_antirot_pin_a",
+    "hard_antirot_pin_b",
+    "hard_screw_a",
+    "hard_screw_b",
+    "hard_screw_c",
+    "hard_screw_d"
+   ],
+   "hide_nodes": [
+    "dring",
+    "dring_bar",
+    "dring_rivet_a",
+    "dring_rivet_b"
+   ],
+   "keep_nodes": [
+    "band",
+    "band_bind_outer",
+    "band_end_a",
+    "band_end_b",
+    "band_seam_a",
+    "band_seam_b",
+    "lining",
+    "pad_rib_a",
+    "pad_rib_b",
+    "pad_rib_c",
+    "pad_cradle",
+    "lining_roll_a",
+    "lining_roll_b",
+    "tongue",
+    "tongue_hem_a",
+    "tongue_hem_b",
+    "tongue_tip",
+    "size_tag",
+    "size_tick_a",
+    "size_tick_b",
+    "size_tick_c",
+    "keep_loop",
+    "limit_slider",
+    "limit_screw",
+    "buckle_frame",
+    "buckle_roller",
+    "qr_lever",
+    "qr_lever_tip",
+    "qr_pin"
+   ],
+   "envelope_new": [
+    0.094,
+    0.066,
+    0.03
+   ],
+   "envelope_old": [
+    0.077,
+    0.06,
+    0.03
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-30",
+    "gender": "male",
+    "position_m": [
+     0.05,
+     0.014,
+     0.0
+    ],
+    "normal": [
+     0.951,
+     -0.31,
+     0.0
+    ],
+    "axis": [
+     -0.31,
+     -0.951,
+     0.0
+    ],
+    "size_m": 0.03,
+    "load_n": 196,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана: до сборки hard_tongue — custom"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_ankle_cuff",
+   "code": "RST-AN-02",
+   "name": "Манжета стопы",
+   "glb_nodes": 28,
+   "flex_mates": [
+    "restraint_surface",
+    "qr_latch",
+    "anchor_dring"
+   ],
+   "load_n": 294,
+   "passport": "0,10 × 0,03 × 0,08 м; 0,2 кг",
+   "anchor": {
+    "node_ref": "dring_loop / dring_loop_seam на внешней поверхности ремня r=0,040",
+    "position_m": [
+     0.04,
+     0.0166,
+     0.0
+    ],
+    "normal_u": [
+     0.863,
+     -0.505,
+     0.0
+    ],
+    "pin_axis_p": [
+     -0.505,
+     -0.863,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "angle_deg": -30.0,
+    "note": "угол −30° (текущий D-ring на −29,6°); канал под ахилл остаётся снизу"
+   },
+   "shell": {
+    "type": "CJ-SHELL-140",
+    "r_in": 0.04,
+    "r_out": 0.0434,
+    "arc_deg": 150,
+    "arc_from_deg": -105,
+    "arc_to_deg": 45,
+    "width_m": 0.034
+   },
+   "bracket": {
+    "dims_mm": "48 × 34 × 3",
+    "bolts": "4 × M5",
+    "rib_mm": "косынка 2 мм"
+   },
+   "tongue": {
+    "class": "T-30",
+    "hole_pos_m": [
+     0.058,
+     0.006,
+     0.0
+    ],
+    "tip_m": [
+     0.073,
+     -0.003,
+     0.0
+    ]
+   },
+   "add_nodes": [
+    "hard_shell",
+    "hard_shell_rib_a",
+    "hard_shell_rib_b",
+    "hard_shell_flange_a",
+    "hard_shell_flange_b",
+    "hard_bracket",
+    "hard_bracket_web",
+    "hard_tongue",
+    "hard_tongue_bush",
+    "hard_antirot_pin_a",
+    "hard_antirot_pin_b",
+    "hard_screw_a",
+    "hard_screw_b",
+    "hard_screw_c",
+    "hard_screw_d"
+   ],
+   "hide_nodes": [
+    "dring",
+    "dring_loop",
+    "dring_loop_seam"
+   ],
+   "keep_nodes": [
+    "band",
+    "band_bind_hi",
+    "band_bind_lo",
+    "band_end_a",
+    "band_end_b",
+    "band_seam_hi",
+    "band_seam_lo",
+    "buckle_frame",
+    "buckle_pin",
+    "buckle_roller",
+    "qr_catch",
+    "qr_catch_pin",
+    "qr_lever"
+   ],
+   "envelope_new": [
+    0.113,
+    0.08,
+    0.03
+   ],
+   "envelope_old": [
+    0.099,
+    0.08,
+    0.03
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-30",
+    "gender": "male",
+    "position_m": [
+     0.058,
+     0.006,
+     0.0
+    ],
+    "normal": [
+     0.863,
+     -0.505,
+     0.0
+    ],
+    "axis": [
+     -0.505,
+     -0.863,
+     0.0
+    ],
+    "size_m": 0.03,
+    "load_n": 294,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_thigh_clamp",
+   "code": "RST-TH-03",
+   "name": "Бёдерный зажим",
+   "glb_nodes": 67,
+   "flex_mates": [
+    "restraint_surface",
+    "hinge",
+    "rail_dock",
+    "qr_release",
+    "dring_out"
+   ],
+   "load_n": 490,
+   "passport": "0,18 × 0,12 × 0,08 м; 0,6 кг",
+   "anchor": {
+    "node_ref": "dring_rivet_a/b на dring_plate (x 0,0599…0,0658); внешняя щека jaw_b",
+    "position_m": [
+     0.063,
+     0.04,
+     0.0
+    ],
+    "normal_u": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "pin_axis_p": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "angle_deg": 0.0,
+    "note": "кронштейн на внешней щеке, ось бедра — X (расточка 101,6 × 77,2 по X)"
+   },
+   "shell": {
+    "type": "none (щёки уже жёсткие, CFRP)",
+    "r_in": null,
+    "r_out": null,
+    "arc_deg": null,
+    "width_m": 0.1016
+   },
+   "bracket": {
+    "dims_mm": "56 × 44 × 3 (две полки: на щёку и на язык)",
+    "bolts": "4 × M5 в закладные щеки",
+    "rib_mm": "косынка 3 мм"
+   },
+   "tongue": {
+    "class": "T-44",
+    "hole_pos_m": [
+     0.083,
+     0.04,
+     0.0
+    ],
+    "tip_m": [
+     0.099,
+     0.04,
+     0.0
+    ]
+   },
+   "add_nodes": [
+    "hard_bracket",
+    "hard_bracket_web",
+    "hard_tongue",
+    "hard_tongue_bush",
+    "hard_antirot_pin_a",
+    "hard_antirot_pin_b",
+    "hard_screw_a",
+    "hard_screw_b",
+    "hard_screw_c",
+    "hard_screw_d",
+    "hard_stiffener_plate"
+   ],
+   "hide_nodes": [
+    "dring",
+    "dring_plate",
+    "dring_rivet_a",
+    "dring_rivet_b"
+   ],
+   "keep_key": [
+    "jaw_a_shell",
+    "jaw_b_shell",
+    "hinge_pin",
+    "ratchet_strap",
+    "pawl_lever",
+    "rail_claw_a",
+    "rail_claw_b",
+    "qr_button"
+   ],
+   "envelope_new": [
+    0.187,
+    0.12,
+    0.08
+   ],
+   "envelope_old": [
+    0.179,
+    0.12,
+    0.08
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-44",
+    "gender": "male",
+    "position_m": [
+     0.083,
+     0.04,
+     0.0
+    ],
+    "normal": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "size_m": 0.044,
+    "load_n": 490,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_waist_belt",
+   "code": "RST-WA-04",
+   "name": "Поясной ремень",
+   "glb_nodes": 55,
+   "flex_mates": [
+    "pelvis_surface",
+    "buckle_qr",
+    "dring_a",
+    "dring_b",
+    "dring_c",
+    "dring_d",
+    "length_lock"
+   ],
+   "load_n": 785,
+   "passport": "1,00 × 0,12 × 0,05 м; 0,8 кг",
+   "anchor": {
+    "node_ref": "dring_loop_a…d (нашивка 40 мм) на внешней стороне ремня; кромки по z = ±0,0515…−0,0627",
+    "position_m": [
+     [
+      -0.24,
+      0.014,
+      0.048
+     ],
+     [
+      -0.1,
+      0.014,
+      -0.048
+     ],
+     [
+      0.04,
+      0.014,
+      0.048
+     ],
+     [
+      0.18,
+      0.014,
+      -0.048
+     ]
+    ],
+    "normal_u": [
+     [
+      0,
+      0,
+      1
+     ],
+     [
+      0,
+      0,
+      -1
+     ],
+     [
+      0,
+      0,
+      1
+     ],
+     [
+      0,
+      0,
+      -1
+     ]
+    ],
+    "pin_axis_p": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "limb_axis_w": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "note": "4 кольца в каталоге стоят на верхней грани (u=+Y) — под лежачим телом негодно; языки переносятся на кромки ±Z, палец вертикальный (сборка V). X-позиции колец сохранены"
+   },
+   "shell": {
+    "type": "жёсткая спинка CJ-SHELL-BELT: CFRP 4 мм, 980 × 96, 6 ребер 3 мм, подкладка остаётся",
+    "r_in": null,
+    "r_out": null,
+    "arc_deg": null,
+    "width_m": 0.096
+   },
+   "bracket": {
+    "dims_mm": "40 × 34 × 3, полка под кромку 12 мм",
+    "bolts": "2 × M5 в закладные + 2 × M4 в спинку",
+    "rib_mm": "косынка 3 мм"
+   },
+   "tongue": {
+    "class": "T-30 ×4",
+    "hole_pos_m": [
+     [
+      -0.24,
+      0.014,
+      0.064
+     ],
+     [
+      -0.1,
+      0.014,
+      -0.064
+     ],
+     [
+      0.04,
+      0.014,
+      0.064
+     ],
+     [
+      0.18,
+      0.014,
+      -0.064
+     ]
+    ],
+    "tip_m": [
+     [
+      -0.24,
+      0.014,
+      0.082
+     ],
+     [
+      -0.1,
+      0.014,
+      -0.082
+     ],
+     [
+      0.04,
+      0.014,
+      0.082
+     ],
+     [
+      0.18,
+      0.014,
+      -0.082
+     ]
+    ]
+   },
+   "add_nodes": [
+    "hard_spine",
+    "hard_spine_rib_0",
+    "hard_spine_rib_1",
+    "hard_spine_rib_2",
+    "hard_spine_rib_3",
+    "hard_spine_rib_4",
+    "hard_spine_rib_5",
+    "hard_bracket_a",
+    "hard_bracket_b",
+    "hard_bracket_c",
+    "hard_bracket_d",
+    "hard_tongue_a",
+    "hard_tongue_b",
+    "hard_tongue_c",
+    "hard_tongue_d",
+    "hard_antirot_pin_a1",
+    "hard_antirot_pin_a2",
+    "hard_antirot_pin_b1",
+    "hard_antirot_pin_b2",
+    "hard_antirot_pin_c1",
+    "hard_antirot_pin_c2",
+    "hard_antirot_pin_d1",
+    "hard_antirot_pin_d2",
+    "hard_screw_a1",
+    "hard_screw_a2",
+    "hard_screw_b1",
+    "hard_screw_b2",
+    "hard_screw_c1",
+    "hard_screw_c2",
+    "hard_screw_d1",
+    "hard_screw_d2"
+   ],
+   "hide_nodes": [
+    "dring_a",
+    "dring_b",
+    "dring_c",
+    "dring_d",
+    "dring_loop_a_top",
+    "dring_loop_a_side_a",
+    "dring_loop_a_side_b",
+    "dring_loop_b_top",
+    "dring_loop_b_side_a",
+    "dring_loop_b_side_b",
+    "dring_loop_c_top",
+    "dring_loop_c_side_a",
+    "dring_loop_c_side_b",
+    "dring_loop_d_top",
+    "dring_loop_d_side_a",
+    "dring_loop_d_side_b",
+    "dring_rivet_a",
+    "dring_rivet_b",
+    "dring_rivet_c",
+    "dring_rivet_d"
+   ],
+   "keep_key": [
+    "pad",
+    "strap",
+    "buckle_frame",
+    "buckle_cam",
+    "buckle_lever",
+    "limit_frame",
+    "length_tick_a",
+    "size_tag"
+   ],
+   "envelope_new": [
+    1.0,
+    0.12,
+    0.164
+   ],
+   "envelope_old": [
+    1.0,
+    0.12,
+    0.114
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-30, сборка V (палец вертикально)",
+    "gender": "male",
+    "position_m": [
+     -0.24,
+     0.014,
+     0.064
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "size_m": 0.03,
+    "load_n": 785,
+    "count": 4,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_neck_yoke",
+   "code": "RST-NK-05",
+   "name": "Шейный контур",
+   "glb_nodes": 75,
+   "flex_mates": [
+    "neck_surface",
+    "side_pad_left",
+    "side_pad_right",
+    "shoulder_seat",
+    "hinge",
+    "qr_lock_left",
+    "qr_lock_right",
+    "dring_left",
+    "dring_right"
+   ],
+   "load_n": 98,
+   "passport": "0,29 × 0,24 × 0,07 м; 0,5 кг",
+   "anchor": {
+    "node_ref": "dring_loop_l/r + dring_bar_l/r на борту дуги (x ±0,1103…0,1247)",
+    "position_m": [
+     0.1265,
+     0.0465,
+     0.016
+    ],
+    "normal_u": [
+     0.992,
+     0.129,
+     0.0
+    ],
+    "pin_axis_p": [
+     0.129,
+     -0.992,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "зеркально для правого борта: u = [−0,992; 0,129; 0], p = [−0,129; −0,992; 0]"
+   },
+   "shell": {
+    "type": "none (дуга уже жёсткая)",
+    "r_in": null,
+    "r_out": null,
+    "arc_deg": null,
+    "width_m": 0.07
+   },
+   "bracket": {
+    "dims_mm": "40 × 30 × 3, седло по борту дуги",
+    "bolts": "2 × M5 в борт + 2 × M4 в отбортовку",
+    "rib_mm": "косынка 2,5 мм"
+   },
+   "tongue": {
+    "class": "T-30 ×2",
+    "hole_pos_m": [
+     0.143,
+     0.049,
+     0.016
+    ],
+    "tip_m": [
+     0.156,
+     0.05,
+     0.016
+    ]
+   },
+   "add_nodes": [
+    "hard_bracket_left",
+    "hard_bracket_right",
+    "hard_bracket_web_left",
+    "hard_bracket_web_right",
+    "hard_tongue_left",
+    "hard_tongue_right",
+    "hard_tongue_bush_left",
+    "hard_tongue_bush_right",
+    "hard_antirot_pin_left_a",
+    "hard_antirot_pin_left_b",
+    "hard_antirot_pin_right_a",
+    "hard_antirot_pin_right_b",
+    "hard_screw_left_a",
+    "hard_screw_left_b",
+    "hard_screw_right_a",
+    "hard_screw_right_b",
+    "hard_yoke_stiffener"
+   ],
+   "hide_nodes": [
+    "dring_l",
+    "dring_r",
+    "dring_loop_l",
+    "dring_loop_r",
+    "dring_bar_l",
+    "dring_bar_r",
+    "dring_rivet_la",
+    "dring_rivet_lb",
+    "dring_rivet_ra",
+    "dring_rivet_rb",
+    "dring_front_pad_left",
+    "dring_front_pad_right",
+    "dring_front_left",
+    "dring_front_right"
+   ],
+   "residual_rings": {
+    "removed": [
+     "dring_front_left",
+     "dring_front_right",
+     "dring_front_pad_left",
+     "dring_front_pad_right"
+    ],
+    "what": "D-кольцо-проушина Ø21,6, пруток 2,9, стоит на графитовом паде за рамкой замка (build_restraint_neck_yoke.py, 4 узла на борт)",
+    "why_removed": "под карабин, т.е. полноценный D-ring мягкого варианта; в hard-варианте точка приложения — язык T-30 на кронштейне, мягких колец в цепи крепления быть не должно (checks п.3). Вторая страховка у контура не требуется (limits каталога), её роль выполняет страховочный штифт CJ-LATCH-30S",
+    "left_in_flexible": true
+   },
+   "keep_key": [
+    "shell",
+    "shell_crown_pipe",
+    "pad_liner",
+    "pad_back",
+    "pad_left",
+    "pad_right",
+    "hinge_block",
+    "hinge_pin",
+    "lock_cam_left",
+    "lock_cam_right",
+    "width_slider_left",
+    "width_slider_right"
+   ],
+   "envelope_new": [
+    0.321,
+    0.24,
+    0.07
+   ],
+   "envelope_old": [
+    0.29,
+    0.24,
+    0.07
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-30",
+    "gender": "male",
+    "position_m": [
+     0.143,
+     0.049,
+     0.016
+    ],
+    "normal": [
+     0.992,
+     0.129,
+     0.0
+    ],
+    "axis": [
+     0.129,
+     -0.992,
+     0.0
+    ],
+    "size_m": 0.03,
+    "load_n": 98,
+    "count": 2,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_head_frame",
+   "code": "RST-HD-06",
+   "name": "Рама головы",
+   "glb_nodes": 79,
+   "flex_mates": [
+    "occiput_surface",
+    "brow_surface",
+    "chin_surface",
+    "ear_clamp_left",
+    "ear_clamp_right",
+    "dock_left",
+    "dock_right",
+    "tilt_hinge_left",
+    "tilt_hinge_right",
+    "dring_out"
+   ],
+   "load_n": 98,
+   "passport": "0,29 × 0,22 × 0,15 м; 0,7 кг",
+   "anchor": {
+    "node_ref": "dring_tab (24 × 26 × 4, плоскость YZ) на затылочной плите, x ±0,012",
+    "position_m": [
+     0.0,
+     0.142,
+     0.1102
+    ],
+    "normal_u": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "pin_axis_p": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "язык выходит вверх из затылочной плиты; палец по X — сборка P, поворот на 90° даёт сборку V"
+   },
+   "shell": {
+    "type": "none (плита жёсткая, 6 ребер)",
+    "r_in": null,
+    "r_out": null,
+    "arc_deg": null,
+    "width_m": 0.141
+   },
+   "bracket": {
+    "dims_mm": "34 × 30 × 3 на затылочной плите, 2 ребра",
+    "bolts": "2 × M5 + 2 × M4",
+    "rib_mm": "2,5 мм"
+   },
+   "tongue": {
+    "class": "T-26",
+    "hole_pos_m": [
+     0.0,
+     0.156,
+     0.1102
+    ],
+    "tip_m": [
+     0.0,
+     0.168,
+     0.1102
+    ]
+   },
+   "add_nodes": [
+    "hard_bracket",
+    "hard_bracket_rib_a",
+    "hard_bracket_rib_b",
+    "hard_tongue",
+    "hard_tongue_bush",
+    "hard_antirot_pin_a",
+    "hard_antirot_pin_b",
+    "hard_screw_a",
+    "hard_screw_b",
+    "hard_screw_c",
+    "hard_screw_d",
+    "hard_dock_sleeve_left",
+    "hard_dock_sleeve_right"
+   ],
+   "hide_nodes": [
+    "dring",
+    "dring_tab"
+   ],
+   "keep_key": [
+    "plate_core",
+    "plate_rib_270",
+    "pad_occiput",
+    "pad_brow",
+    "chin_cup",
+    "ear_clamp_left",
+    "ear_clamp_right",
+    "dock_left",
+    "dock_right",
+    "tilt_hinge_left",
+    "tilt_hinge_right",
+    "brow_carrier"
+   ],
+   "envelope_new": [
+    0.29,
+    0.168,
+    0.22
+   ],
+   "envelope_old": [
+    0.29,
+    0.15,
+    0.22
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-26",
+    "gender": "male",
+    "position_m": [
+     0.0,
+     0.156,
+     0.1102
+    ],
+    "normal": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "size_m": 0.026,
+    "load_n": 98,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_stirrup",
+   "code": "RST-ST-07",
+   "name": "Стремя",
+   "glb_nodes": 39,
+   "flex_mates": [
+    "foot_surface",
+    "heel_surface",
+    "ankle_strap",
+    "foot_hinge",
+    "tilt_lock",
+    "dock_out",
+    "qr_latch",
+    "dring_out"
+   ],
+   "load_n": 392,
+   "passport": "0,20 × 0,15 × 0,10 м; 0,9 кг",
+   "anchor": {
+    "node_ref": "dring_tab (16 мм в Z) у пятки, x −0,0512…−0,0397",
+    "position_m": [
+     -0.0455,
+     0.089,
+     0.0
+    ],
+    "normal_u": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_axis_p": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "язык в −X (сторона пятки); существующий dock_out (плита 36 × 42, паз 20 × 13) в hard скрывается — он нестандартный"
+   },
+   "shell": {
+    "type": "none (ложе жёсткое)",
+    "r_in": null,
+    "r_out": null,
+    "arc_deg": null,
+    "width_m": 0.097
+   },
+   "bracket": {
+    "dims_mm": "44 × 34 × 3 на пятке, полка 16 мм",
+    "bolts": "2 × M5 + 2 × M4",
+    "rib_mm": "косынка 3 мм"
+   },
+   "tongue": {
+    "class": "T-30",
+    "hole_pos_m": [
+     -0.062,
+     0.089,
+     0.0
+    ],
+    "tip_m": [
+     -0.076,
+     0.089,
+     0.0
+    ]
+   },
+   "add_nodes": [
+    "hard_bracket",
+    "hard_bracket_web",
+    "hard_tongue",
+    "hard_tongue_bush",
+    "hard_antirot_pin_a",
+    "hard_antirot_pin_b",
+    "hard_screw_a",
+    "hard_screw_b",
+    "hard_screw_c",
+    "hard_screw_d",
+    "hard_base_plate"
+   ],
+   "hide_nodes": [
+    "dring",
+    "dring_tab",
+    "dock_plate",
+    "dock_slot"
+   ],
+   "keep_key": [
+    "sole_cradle",
+    "sole_liner",
+    "heel_guard",
+    "heel_pad",
+    "hinge_axle",
+    "limiter_arc",
+    "limiter_lock",
+    "strap",
+    "buckle_frame",
+    "qr_pin",
+    "qr_lever"
+   ],
+   "envelope_new": [
+    0.2,
+    0.1,
+    0.15
+   ],
+   "envelope_old": [
+    0.195,
+    0.1,
+    0.15
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-30",
+    "gender": "male",
+    "position_m": [
+     -0.062,
+     0.089,
+     0.0
+    ],
+    "normal": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "size_m": 0.03,
+    "load_n": 392,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_spreader",
+   "code": "RST-SP-08",
+   "name": "Раздвижная штанга",
+   "glb_nodes": 56,
+   "flex_mates": [
+    "cuff_left",
+    "cuff_right",
+    "qr_cuff_left",
+    "qr_cuff_right",
+    "bar_lock",
+    "dring_left",
+    "dring_right"
+   ],
+   "load_n": 589,
+   "passport": "0,6–1,2 м; 2,5 кг",
+   "anchor": {
+    "node_ref": "dring_tab_l/r (13 мм в X) на торцах чашек манжет, x ±0,4057",
+    "position_m": [
+     -0.4057,
+     0.0404,
+     0.0
+    ],
+    "normal_u": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_axis_p": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "зеркально: правый торец u = [+1,0,0]"
+   },
+   "shell": {
+    "type": "CJ-SHELL-140 ×2 (полуоболочки чашек, CFRP 3 мм)",
+    "r_in": 0.0292,
+    "r_out": 0.0322,
+    "arc_deg": 150,
+    "width_m": 0.0584
+   },
+   "bracket": {
+    "dims_mm": "40 × 30 × 3 на торце чашки",
+    "bolts": "2 × M5 + 2 × M4",
+    "rib_mm": "косынка 2,5 мм"
+   },
+   "tongue": {
+    "class": "T-30 ×2",
+    "hole_pos_m": [
+     -0.426,
+     0.0404,
+     0.0
+    ],
+    "tip_m": [
+     -0.442,
+     0.0404,
+     0.0
+    ]
+   },
+   "add_nodes": [
+    "hard_shell_l",
+    "hard_shell_r",
+    "hard_shell_rib_l",
+    "hard_shell_rib_r",
+    "hard_bracket_l",
+    "hard_bracket_r",
+    "hard_tongue_l",
+    "hard_tongue_r",
+    "hard_tongue_bush_l",
+    "hard_tongue_bush_r",
+    "hard_antirot_pin_la",
+    "hard_antirot_pin_lb",
+    "hard_antirot_pin_ra",
+    "hard_antirot_pin_rb",
+    "hard_screw_l1",
+    "hard_screw_l2",
+    "hard_screw_r1",
+    "hard_screw_r2"
+   ],
+   "hide_nodes": [
+    "dring_l",
+    "dring_r",
+    "dring_tab_l",
+    "dring_tab_r"
+   ],
+   "keep_key": [
+    "outer_tube",
+    "inner_tube",
+    "lock_collar",
+    "cam_disc",
+    "cam_lever",
+    "safety_pin",
+    "cuff_shell_l",
+    "cuff_shell_r",
+    "qr_button_l",
+    "qr_button_r"
+   ],
+   "envelope_new": [
+    0.884,
+    0.08,
+    0.065
+   ],
+   "envelope_old": [
+    0.846,
+    0.08,
+    0.065
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-30",
+    "gender": "male",
+    "position_m": [
+     -0.426,
+     0.0404,
+     0.0
+    ],
+    "normal": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "size_m": 0.03,
+    "load_n": 589,
+    "count": 2,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P1",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_suspension_cuff",
+   "code": "RST-SU-09",
+   "name": "Подвесная манжета",
+   "glb_nodes": 48,
+   "flex_mates": [
+    "restraint_surface",
+    "suspension_ring",
+    "secondary_anchor",
+    "qr_latch",
+    "tension_signal"
+   ],
+   "load_n": 1471,
+   "passport": "0,10 × 0,08 × 0,05 м; 0,4 кг",
+   "anchor": {
+    "node_ref": "suspension_ring (плоскость XY, пруток 6) на стропе, strap_fold y 0,0735…0,0803",
+    "position_m": [
+     0.0,
+     0.072,
+     0.0
+    ],
+    "normal_u": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "pin_axis_p": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "кольцо — единственный элемент с нагрузкой 1471 Н на прутке 6 мм; заменяется кронштейном-скобой 40 × 24 × 12 из 6 мм стали"
+   },
+   "shell": {
+    "type": "CJ-SHELL-180 (манжета подвеса, CFRP 4 мм, дуга 180°)",
+    "r_in": 0.0284,
+    "r_out": 0.0324,
+    "arc_deg": 180,
+    "width_m": 0.05
+   },
+   "bracket": {
+    "dims_mm": "40 × 24 × 12 (скоба-седло), 6 мм",
+    "bolts": "2 × M8 через стропу + 2 × M5",
+    "rib_mm": "нет (скоба)"
+   },
+   "tongue": {
+    "class": "T-30",
+    "hole_pos_m": [
+     0.0,
+     0.088,
+     0.0
+    ],
+    "tip_m": [
+     0.0,
+     0.102,
+     0.0
+    ]
+   },
+   "add_nodes": [
+    "hard_shell",
+    "hard_shell_rib_a",
+    "hard_shell_rib_b",
+    "hard_shackle",
+    "hard_shackle_bolt_a",
+    "hard_shackle_bolt_b",
+    "hard_tongue",
+    "hard_tongue_bush",
+    "hard_antirot_pin_a",
+    "hard_antirot_pin_b",
+    "hard_thimble"
+   ],
+   "hide_nodes": [
+    "suspension_ring"
+   ],
+   "keep_key": [
+    "band",
+    "lining",
+    "pad_rib_a",
+    "strap_leg_a",
+    "strap_leg_b",
+    "strap_fold",
+    "strap_bartack_a",
+    "strap_bartack_b",
+    "buckle_frame",
+    "qr_lever",
+    "tension_link",
+    "tension_led",
+    "anchor_ring"
+   ],
+   "residual_rings": {
+    "removed": [
+     "suspension_ring"
+    ],
+    "kept": [
+     "anchor_ring"
+    ],
+    "what": "suspension_ring Ø28,7, пруток 6 — несущее подвесное кольцо на 1471 Н; anchor_ring — малая D-петля Ø6,4 (пруток 2,4) на клепаной площадке anchor_tab, R_OUT + 1,6 мм",
+    "why_removed": "несущее кольцо заменено скобой hard_shackle + коушем hard_thimble + языком T-30",
+    "kept_why": "не D-ring: просвет 6,4 мм, карабин не проходит, в силовой цепи не участвует; это вторичный страховочный анкер, которого требует limits каталога («только с второй страховкой»), стоит на ремне вне узла язык-кронштейн. Оставлен осознанно в keep_key, в flexible — тот же узел",
+    "left_in_flexible": true
+   },
+   "envelope_new": [
+    0.1,
+    0.102,
+    0.05
+   ],
+   "envelope_old": [
+    0.1,
+    0.1,
+    0.05
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-30, сборка P",
+    "gender": "male",
+    "position_m": [
+     0.0,
+     0.088,
+     0.0
+    ],
+    "normal": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "size_m": 0.03,
+    "load_n": 1471,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P0",
+   "work": "rebuild"
+  },
+  {
+   "id": "restraint_quick_release",
+   "code": "RST-QR-10",
+   "name": "Быстросъём",
+   "glb_nodes": 35,
+   "flex_mates": [
+    "socket_in",
+    "mount_face",
+    "pin_lock",
+    "release_lever",
+    "dring_out"
+   ],
+   "load_n": 1471,
+   "passport": "0,06 × 0,04 × 0,03 м; 0,12 кг",
+   "anchor": {
+    "node_ref": "dring (пруток 3,4) на корпусе, x 0,0250…0,0377",
+    "position_m": [
+     0.0195,
+     0.0118,
+     0.0
+    ],
+    "normal_u": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "pin_axis_p": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "limb_axis_w": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "note": "модуль становится телом замка: hard-вариант = усиленный корпус под CJ-LATCH-30 (палец Ø12 вместо Ø3,4) + 2 × M4 в mount_face"
+   },
+   "shell": {
+    "type": "none",
+    "r_in": null,
+    "r_out": null,
+    "arc_deg": null,
+    "width_m": 0.023
+   },
+   "bracket": {
+    "dims_mm": "корпус 46 × 32 × 20, 40Х",
+    "bolts": "2 × M4 в mount_face",
+    "rib_mm": "нет"
+   },
+   "tongue": {
+    "class": "T-26",
+    "hole_pos_m": [
+     0.034,
+     0.0118,
+     0.0
+    ],
+    "tip_m": [
+     0.046,
+     0.0118,
+     0.0
+    ]
+   },
+   "add_nodes": [
+    "hard_body",
+    "hard_body_cheek_a",
+    "hard_body_cheek_b",
+    "hard_pin",
+    "hard_paw",
+    "hard_paw_spring",
+    "hard_lever",
+    "hard_lever_guard",
+    "hard_tongue",
+    "hard_antirot_pin_a",
+    "hard_antirot_pin_b",
+    "hard_screw_a",
+    "hard_screw_b"
+   ],
+   "hide_nodes": [
+    "dring"
+   ],
+   "keep_key": [
+    "housing",
+    "socket_floor",
+    "socket_cheek_yneg",
+    "socket_cheek_ypos",
+    "socket_shoulder",
+    "cam",
+    "lever_arm",
+    "spring",
+    "dust_boot_top"
+   ],
+   "envelope_new": [
+    0.06,
+    0.04,
+    0.046
+   ],
+   "envelope_old": [
+    0.06,
+    0.04,
+    0.038
+   ],
+   "mate_added": {
+    "id": "latch_out",
+    "role": "output",
+    "kind": "clamp",
+    "standard": "CJ-LATCH-30 / язык T-26",
+    "gender": "male",
+    "position_m": [
+     0.034,
+     0.0118,
+     0.0
+    ],
+    "normal": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "size_m": 0.026,
+    "load_n": 1471,
+    "connector": "custom",
+    "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+   },
+   "priority": "P2",
+   "work": "rebuild"
+  }
+ ],
+ "matrix": {
+  "mk1": {
+   "id": "restraint_matrix",
+   "code": "RST-MX-11",
+   "status": "concept",
+   "glb": "components/restraint_matrix.glb",
+   "nodes": 268,
+   "carriages": 7,
+   "envelope": [
+    2.0,
+    1.0,
+    0.4001
+   ],
+   "geometry_facts": {
+    "rails": "2 продольных рельса 56 × 28 (glTF z = ±0,355, верх y = 0,292) + 2 поперечных 56 × 28 (x = −0,66 и +0,50, ход 0,646)",
+    "bed": "matras 600 × 1000, верх y = 0,260; head_pillow 0,2585…0,2925",
+    "cuff_mount_plane": "y = 0,3709 (нормаль +Y), 7 точек point_*",
+    "carriage_body": "y 0,276…0,330, габарит 110 × 54 × 78"
+   },
+   "decision": "оставить как есть (Mk-I), не пересобирать; помечать как legacy: рельс 56 × 28 вне стандарта CJ-RAIL-15, 7 точек, манжеты встроены в каретку (не сменные)",
+   "catalog_change": "добавить \"variant_of\": null, \"variant_models\": [{\"id\":\"matrix_universal\",\"label\":\"Универсальная (Mk-II)\",\"component\":\"restraint_matrix_universal\"}]",
+   "legacy_flags": [
+    "rail 56×28 — не T-slot 15 (нужен ADP-RAIL-15 при переносе кареток)",
+    "7 манжет вклеены в каретки: смена манжеты = замена каретки",
+    "нет свободных мест: 4 рельса и фиксированные 7 позиций",
+    "точки point_* не совместимы с CJ-LATCH-30 (манжета-ложе 69 × 42 + QR кнопка)"
+   ]
+  },
+  "universal": {
+   "id": "restraint_matrix_universal",
+   "code": "RST-MX-12",
+   "status": "proposed",
+   "variant_of": "restraint_matrix",
+   "label": "Универсальная (Mk-II)",
+   "glb": "components/restraint_matrix_universal.glb",
+   "nodes_est": 420,
+   "carriages": 8,
+   "carriages_max": 12,
+   "envelope": [
+    2.0,
+    1.0,
+    0.4
+   ],
+   "mass_kg": 82,
+   "frame": {
+    "legs": "4 стойки 72 × 72, y 0,060…0,205 + домкраты 116 × 116 (переносятся из Mk-I без изменений)",
+    "anchor": "4 × M12, поле 1,756 × 0,776 (как Mk-I)",
+    "perimeter": "T-slot 45 × 45 (паз 15), y 0,205…0,250: beam_long_front/rear (x −1,000…+1,000, z = ±0,4775), beam_end_head/pelvis (z −0,500…+0,500, x = ±0,9775), 4 угловых кубика 45 × 45 × 45",
+    "ties": "3 траверсы T-slot 45 × 45, y 0,205…0,245, x = −0,720 / −0,050 / +0,620, z −0,4775…+0,4775, по 4 × M10 T-болт",
+    "material": "алюминий 6063-T6, анодирование 15 мкм"
+   },
+   "slot_field": {
+    "profile": "T-slot 45 × 45, паз 15 мм, глубина паза 15 мм, T-болт M8/M10",
+    "longitudinal_rails": {
+     "count": 6,
+     "z_m": [
+      -0.44,
+      -0.34,
+      -0.24,
+      0.24,
+      0.34,
+      0.44
+     ],
+     "pitch_m": 0.1,
+     "x_m": [
+      -0.93,
+      0.93
+     ],
+     "y_top": 0.285,
+     "note": "z = ±0,240 — внутренняя пара у кромки ложа; центральная полоса |z| < 0,20 свободна под тело"
+    },
+    "cross_ties": {
+     "count": 3,
+     "x_m": [
+      -0.72,
+      -0.05,
+      0.62
+     ],
+     "pitch_m": 0.67,
+     "top": 0.245
+    },
+    "crossings": 18,
+    "crossing_lock": "перекрёстный замок 45 × 45 × 8 + 4 × M8 T-болт (плоский, каретка проезжает)",
+    "t_bolt_positions": "непрерывно по пазу; шаг между пазами 0,100 м по Z и 0,670 м по X; обвязка даёт пазы по периметру (2 по X, 2 по Z)",
+    "free_field_m": {
+     "x": 1.86,
+     "z": 0.88
+    }
+   },
+   "bed": {
+    "tray": "1,420 × 0,400, y 0,225…0,255",
+    "mattress_top": 0.275,
+    "note": "верх ложа на 10 мм ниже верха рельса (Mk-I: 0,260 против 0,292)"
+   },
+   "carriage": {
+    "id_pattern": "carriage_<nn> (c01…c08 в базовом ките)",
+    "body_m": "112 × 44 × 56",
+    "rollers": "4 × 608-2RS по пазу 15",
+    "dof": [
+     {
+      "id": "X",
+      "joint": "prismatic",
+      "axis": "x",
+      "range_m": [
+       -0.9,
+       0.9
+      ],
+      "stroke_m": 1.8,
+      "node": "carriage_<nn>",
+      "lock": "клиновой зажим, рычаг 120 мм, усилие 250 Н → 4,0 кН прижима; 2 × M10 T-болт как страховка"
+     },
+     {
+      "id": "Z",
+      "joint": "prismatic",
+      "axis": "z",
+      "range_m": [
+       -0.045,
+       0.045
+      ],
+      "stroke_m": 0.09,
+      "node": "slide_plate_<nn>",
+      "lock": "винт M12 + маховик Ø60 + контргайка, шкала 1 мм"
+     },
+     {
+      "id": "YAW",
+      "joint": "revolute",
+      "axis": "y",
+      "range_deg": [
+       0,
+       345
+      ],
+      "step_deg": 15,
+      "node": "yaw_plate_<nn>",
+      "lock": "24 паза + подпружиненный фиксатор + рычаг"
+     }
+    ],
+    "coverage_z": [
+     [
+      0.195,
+      0.285
+     ],
+     [
+      0.295,
+      0.385
+     ],
+     [
+      0.395,
+      0.485
+     ]
+    ],
+    "receiver": "CJ-LATCH-30R, сборка P (палец горизонтально), окно 48 × 34; ось пальца y = 0,372 (совпадает с Mk-I 0,3709)",
+    "receiver_height_chain": "рельс 0,285 → каретка 0,285…0,325 → слайд 0,325…0,347 → поворот 0,347…0,361 → гнездо 0,361…0,389, палец 0,372",
+    "home_positions": [
+     {
+      "id": "c01",
+      "zone": "wrist_l",
+      "x": -0.28,
+      "z": 0.34,
+      "yaw_deg": 0
+     },
+     {
+      "id": "c02",
+      "zone": "wrist_r",
+      "x": -0.28,
+      "z": -0.34,
+      "yaw_deg": 180
+     },
+     {
+      "id": "c03",
+      "zone": "ankle_l",
+      "x": 0.52,
+      "z": 0.34,
+      "yaw_deg": 0
+     },
+     {
+      "id": "c04",
+      "zone": "ankle_r",
+      "x": 0.52,
+      "z": -0.34,
+      "yaw_deg": 180
+     },
+     {
+      "id": "c05",
+      "zone": "thigh_l",
+      "x": 0.1,
+      "z": 0.44,
+      "yaw_deg": 0
+     },
+     {
+      "id": "c06",
+      "zone": "thigh_r",
+      "x": 0.1,
+      "z": -0.44,
+      "yaw_deg": 180
+     },
+     {
+      "id": "c07",
+      "zone": "waist_l",
+      "x": 0.34,
+      "z": 0.24,
+      "yaw_deg": 0
+     },
+     {
+      "id": "c08",
+      "zone": "neck",
+      "x": -0.62,
+      "z": 0.24,
+      "yaw_deg": 90
+     }
+    ]
+   },
+   "fixed_sockets": {
+    "count": 6,
+    "kind": "CJ-LATCH-30R, сборка V (палец вертикально) на стойке 60 мм",
+    "positions": [
+     {
+      "id": "s01",
+      "x": -0.72,
+      "z": 0.44
+     },
+     {
+      "id": "s02",
+      "x": -0.72,
+      "z": -0.44
+     },
+     {
+      "id": "s03",
+      "x": -0.05,
+      "z": 0.44
+     },
+     {
+      "id": "s04",
+      "x": -0.05,
+      "z": -0.44
+     },
+     {
+      "id": "s05",
+      "x": 0.62,
+      "z": 0.44
+     },
+     {
+      "id": "s06",
+      "x": 0.62,
+      "z": -0.44
+     }
+    ],
+    "why": "гнёзда на траверсах — под пояс (4 языка, палец вертикально) и под голову/шею; каретки остаются свободными под конечности"
+   },
+   "nodes": {
+    "legs": "foot_pad / foot_ring / jack_barrel / jack_nut / jack_rod / anchor_washer / anchor_washer_in / anchor_bolt / leg / leg_collar × 4 = 40",
+    "frame": "beam_long_front, beam_long_rear, beam_end_head, beam_end_pelvis, corner_fl, corner_fr, corner_rl, corner_rr, beam_slot_lip_a…d = 12",
+    "ties": "tie_body_head/mid/pelvis + tie_bolt_<t>_0…3 = 15",
+    "rails": "rail_body_r0…r5, rail_way_r0…r5, rail_cap_r<n>_rear, rail_cap_r<n>_front, rail_ticks_r<n>, rail_scale_r<n> = 36",
+    "bed": "bed_tray, bed_tray_lip, bed_ribs, bed_pad_l, bed_pad_r, bed_seams, bed_axis_x = 7",
+    "sockets": "socket_body, socket_riser, socket_fork, socket_pin, socket_spring, socket_lever, socket_bolt_row, socket_mark = 8 × 6 = 48",
+    "carriages": "по 31 узлу на каретку (carriage_body, carriage_rollers, carriage_jaw_a/b, carriage_clamp_lever, carriage_clamp_pad, carriage_tbolt_a/b, carriage_index, carriage_scale, slide_base, slide_plate, slide_screw, slide_handwheel, slide_scale, slide_stop, yaw_ring, yaw_plate, yaw_detent, yaw_lever, yaw_marks, recv_body, recv_fork, recv_pin, recv_spring, recv_lever, recv_guard, recv_bolt_row, recv_mark, recv_pad_a, recv_pad_b, recv_stop, recv_axis) × 8 = 248",
+    "misc": "nameplate, nameplate_marks, nameplate_dot = 3",
+    "total": 421
+   },
+   "mates": [
+    {
+     "id": "mount_in",
+     "role": "input",
+     "kind": "bolt_pattern",
+     "standard": "M12",
+     "gender": "female",
+     "position_m": [
+      0,
+      0,
+      0
+     ],
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "axis": [
+      0,
+      1,
+      0
+     ],
+     "count": 4,
+     "pitch_x_m": 1.756,
+     "pitch_z_m": 0.776,
+     "load_n": 2011,
+     "connector": "custom",
+     "connector_note": "поле не 0,600 × 0,600 (CJ-STR-M12) — как у Mk-I"
+    },
+    {
+     "id": "level_feet",
+     "role": "support",
+     "kind": "surface",
+     "standard": "4 × винтовая опора 116 × 116, ход ~30 мм",
+     "gender": "female",
+     "position_m": [
+      -0.93,
+      0.012,
+      -0.44
+     ],
+     "normal": [
+      0,
+      -1,
+      0
+     ],
+     "axis": [
+      0,
+      -1,
+      0
+     ],
+     "size_m": 0.116,
+     "load_n": 2011,
+     "connector": "custom"
+    },
+    {
+     "id": "bed_surface",
+     "role": "support",
+     "kind": "surface",
+     "standard": "ложе 1420 × 400",
+     "gender": "female",
+     "position_m": [
+      -0.11,
+      0.275,
+      0.0
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.4,
+     "load_n": 1471,
+     "connector": "custom"
+    },
+    {
+     "id": "rail_r0",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15, профиль 45 × 45",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.285,
+      -0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 1471,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "rail_r1",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15, профиль 45 × 45",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.285,
+      -0.34
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 1471,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "rail_r2",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15, профиль 45 × 45",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.285,
+      -0.24
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 1471,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "rail_r3",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15, профиль 45 × 45",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.285,
+      0.24
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 1471,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "rail_r4",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15, профиль 45 × 45",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.285,
+      0.34
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 1471,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "rail_r5",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15, профиль 45 × 45",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.285,
+      0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 1471,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "beam_slot_front",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15 по обвязке",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.2325,
+      -0.4775
+     ],
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 981,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "beam_slot_rear",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15 по обвязке",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.2325,
+      0.4775
+     ],
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.015,
+     "load_n": 981,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "tie_slot_head",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15 по траверсе",
+     "gender": "female",
+     "position_m": [
+      -0.72,
+      0.245,
+      0.0
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.015,
+     "load_n": 981,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "tie_slot_mid",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15 по траверсе",
+     "gender": "female",
+     "position_m": [
+      -0.05,
+      0.245,
+      0.0
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.015,
+     "load_n": 981,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "tie_slot_pelvis",
+     "role": "mount",
+     "kind": "rail",
+     "standard": "T-slot 15 по траверсе",
+     "gender": "female",
+     "position_m": [
+      0.62,
+      0.245,
+      0.0
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.015,
+     "load_n": 981,
+     "connector": "CJ-RAIL-15"
+    },
+    {
+     "id": "latch_socket_s01",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка V",
+     "gender": "female",
+     "position_m": [
+      -0.72,
+      0.372,
+      0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom",
+     "connector_note": "CJ-LATCH-30 заявлен, геометрия не собрана"
+    },
+    {
+     "id": "latch_socket_s02",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка V",
+     "gender": "female",
+     "position_m": [
+      -0.72,
+      0.372,
+      -0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_socket_s03",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка V",
+     "gender": "female",
+     "position_m": [
+      -0.05,
+      0.372,
+      0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_socket_s04",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка V",
+     "gender": "female",
+     "position_m": [
+      -0.05,
+      0.372,
+      -0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_socket_s05",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка V",
+     "gender": "female",
+     "position_m": [
+      0.62,
+      0.372,
+      0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_socket_s06",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка V",
+     "gender": "female",
+     "position_m": [
+      0.62,
+      0.372,
+      -0.44
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c01",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      -0.28,
+      0.372,
+      0.34
+     ],
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c02",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      -0.28,
+      0.372,
+      -0.34
+     ],
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c03",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      0.52,
+      0.372,
+      0.34
+     ],
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c04",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      0.52,
+      0.372,
+      -0.34
+     ],
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c05",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      0.1,
+      0.372,
+      0.44
+     ],
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c06",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      0.1,
+      0.372,
+      -0.44
+     ],
+     "normal": [
+      0,
+      0,
+      -1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c07",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      0.34,
+      0.372,
+      0.24
+     ],
+     "normal": [
+      0,
+      0,
+      1
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "latch_c08",
+     "role": "output",
+     "kind": "clamp",
+     "standard": "CJ-LATCH-30R, сборка P",
+     "gender": "female",
+     "position_m": [
+      -0.62,
+      0.372,
+      0.24
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "size_m": 0.048,
+     "load_n": 5000,
+     "connector": "custom"
+    },
+    {
+     "id": "cradle_field",
+     "role": "input",
+     "kind": "bolt_pattern",
+     "standard": "4 × M10 T-болт в паз 15, шаг свободный",
+     "gender": "female",
+     "position_m": [
+      0.0,
+      0.245,
+      0.0
+     ],
+     "normal": [
+      0,
+      1,
+      0
+     ],
+     "axis": [
+      0,
+      1,
+      0
+     ],
+     "count": 4,
+     "pitch_x_m": 0.67,
+     "pitch_z_m": 0.88,
+     "load_n": 961,
+     "connector": "custom",
+     "connector_note": "T-slot 15; поле заменяет M12 0,600 × 0,600 — под support_cradle и накладные адаптеры"
+    }
+   ],
+   "dof_contract": [
+    {
+     "id": "carriage_x",
+     "joint": "prismatic",
+     "axis": "x",
+     "range_m": [
+      -0.9,
+      0.9
+     ],
+     "node": "carriage_<nn>",
+     "law": "manual_set"
+    },
+    {
+     "id": "carriage_z",
+     "joint": "prismatic",
+     "axis": "z",
+     "range_m": [
+      -0.045,
+      0.045
+     ],
+     "node": "slide_plate_<nn>",
+     "law": "manual_set"
+    },
+    {
+     "id": "carriage_yaw",
+     "joint": "revolute",
+     "axis": "y",
+     "range_deg": [
+      0,
+      345
+     ],
+     "step_deg": 15,
+     "node": "yaw_plate_<nn>",
+     "law": "manual_set"
+    }
+   ],
+   "kits": [
+    {
+     "id": "8",
+     "label": "8 точек",
+     "carriages": 8,
+     "sockets": 6
+    },
+    {
+     "id": "10",
+     "label": "10 точек",
+     "carriages": 10,
+     "sockets": 6
+    },
+    {
+     "id": "12",
+     "label": "12 точек",
+     "carriages": 12,
+     "sockets": 6
+    }
+   ]
+  }
+ },
+ "support_cradle": {
+  "id": "support_cradle",
+  "code": "SUP-CRAD-01",
+  "glb_nodes": 148,
+  "envelope": [
+   0.88,
+   0.72,
+   0.6
+  ],
+  "load_n": 785,
+  "current": {
+   "mount": "4 × M12, поле 0,580 × 0,552 (контракт: 0,3 — расхождение)",
+   "height": "0,480…0,960 м",
+   "pads": "ложе 172 × 380, верх y 0,668 (подкладка 0,660…0,691)",
+   "straps": "2 стропы 40 мм + пряжка 22 × 44 на y 0,7175, z = ±0,100",
+   "flex_nodes": [
+    "strap_0_left",
+    "strap_1_left",
+    "strap_0_right",
+    "strap_1_right",
+    "strap_tail_0_left",
+    "strap_tail_0_right",
+    "strap_tail_1_left",
+    "strap_tail_1_right",
+    "buckle_0_left",
+    "buckle_1_left",
+    "buckle_0_right",
+    "buckle_1_right",
+    "buckle_slot_0_left",
+    "buckle_slot_1_left",
+    "buckle_slot_0_right",
+    "buckle_slot_1_right"
+   ]
+  },
+  "hard_variant": {
+   "label": "жёсткое ложе с гнёздами",
+   "concept": "стропы и пряжки не удаляются (flex-вариант), в hard-варианте скрываются; на торцах ложа ставятся 2 жёсткие щеки с гнёздами CJ-LATCH-30R — манжета hard пристёгивается к ложу, а не к раме (требование 7–8 фиксатора: конечность прижата к ложу)",
+   "sockets": [
+    {
+     "id": "cradle_latch_a",
+     "position_m": [
+      -0.29,
+      0.69,
+      0.19
+     ],
+     "normal": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "axis": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    {
+     "id": "cradle_latch_b",
+     "position_m": [
+      -0.29,
+      0.69,
+      -0.19
+     ],
+     "normal": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "axis": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    {
+     "id": "cradle_latch_c",
+     "position_m": [
+      0.29,
+      0.69,
+      0.19
+     ],
+     "normal": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "axis": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    {
+     "id": "cradle_latch_d",
+     "position_m": [
+      0.29,
+      0.69,
+      -0.19
+     ],
+     "normal": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "axis": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    }
+   ],
+   "add_nodes": [
+    "hard_cheek_left",
+    "hard_cheek_right",
+    "hard_cheek_rib_a",
+    "hard_cheek_rib_b",
+    "hard_cheek_rib_c",
+    "hard_cheek_rib_d",
+    "hard_socket_body_left",
+    "hard_socket_body_right",
+    "hard_socket_fork_left",
+    "hard_socket_fork_right",
+    "hard_socket_pin_left",
+    "hard_socket_pin_right",
+    "hard_socket_lever_left",
+    "hard_socket_lever_right",
+    "hard_screw_l1",
+    "hard_screw_l2",
+    "hard_screw_r1",
+    "hard_screw_r2"
+   ],
+   "hide_nodes": [
+    "strap_0_left",
+    "strap_1_left",
+    "strap_0_right",
+    "strap_1_right",
+    "strap_tail_0_left",
+    "strap_tail_0_right",
+    "strap_tail_1_left",
+    "strap_tail_1_right",
+    "buckle_0_left",
+    "buckle_1_left",
+    "buckle_0_right",
+    "buckle_1_right",
+    "buckle_slot_0_left",
+    "buckle_slot_1_left",
+    "buckle_slot_0_right",
+    "buckle_slot_1_right"
+   ],
+   "short_variant": "для установки на матрицу нужны стойки 0,26…0,42 м вместо 0,48…0,96 м (сейчас ложе на 0,69 м — выше кареток 0,372): вводится вариант \"короткие (MX)\"",
+   "priority": "P2",
+   "work": "rebuild"
+  }
+ },
+ "compatibility": [
+  {
+   "pair": "hard-манжета ↔ каретка restraint_matrix_universal",
+   "verdict": "ok",
+   "how": "latch_out (язык) → latch_c01…c08 (CJ-LATCH-30R, сборка P)",
+   "residual": "высота пальца 0,372 = Mk-I 0,3709 ✓; Z-полосы 0,195…0,485 покрывают разведение до 0,97 м между манжетами"
+  },
+  {
+   "pair": "hard-манжета ↔ restraint_matrix (Mk-I)",
+   "verdict": "нет",
+   "how": "у Mk-I точки point_* — манжета-ложе 69 × 42 + QR-кнопка, гнезда под язык нет",
+   "residual": "либо оставить Mk-I только с встроенными манжетами, либо ADP-LATCH-MKI (плита 80 × 80 с гнездом на место cuff_shell)"
+  },
+  {
+   "pair": "hard-манжета ↔ support_cradle (hard)",
+   "verdict": "ok",
+   "how": "cradle_latch_a…d + hard-манжета = прижим к ложу",
+   "residual": "нужны 4 гнезда в щеках ложа (P2) и совпадение высоты: ложе 0,69 против манжеты на каретке 0,372 — совместно только при коротком варианте стоек"
+  },
+  {
+   "pair": "hard-манжета ↔ structure_bed_frame",
+   "verdict": "частично",
+   "how": "рельс 50 × 22 (rail_neg/rail_pos, z = ±0,34) — не T-slot 15",
+   "residual": "ADP-LATCH-RAIL: хомут на 50 × 22 + гнездо CJ-LATCH-30R"
+  },
+  {
+   "pair": "hard-манжета ↔ structure_cage / structure_portal",
+   "verdict": "нет",
+   "how": "болтовых полей под защёлку нет",
+   "residual": "ADP-LATCH-M12 (0,6 × 0,6 M12 → гнездо)"
+  },
+  {
+   "pair": "restraint_matrix_universal ↔ structure_bed_frame",
+   "verdict": "нет",
+   "how": "поле M12 у матрицы 1,756 × 0,776 (4 × M12), у рамы-ложа 1,910 × 0,810 и выход 0,600 × 0,340",
+   "residual": "ADP-STR-XX (уже требуется реестром коннекторов): плита с двумя полями"
+  },
+  {
+   "pair": "restraint_matrix_universal ↔ support_cradle",
+   "verdict": "ok (по креплению)",
+   "how": "cradle_field: 4 × M10 T-болт в паз 15, шаг свободный 0…0,67 × 0…0,88 — поле 0,580 × 0,552 ложится без переходника",
+   "residual": "высота: стойки ложа 0,48…0,96 надо заменить на 0,26…0,42"
+  },
+  {
+   "pair": "latch_out ↔ restraint_quick_release (hard)",
+   "verdict": "дублирование",
+   "how": "и quick_release-hard, и манжета-hard дают язык CJ-LATCH-30",
+   "residual": "quick_release остаётся отдельным модулем только для тех мест, где нужен быстросъём без манжеты; иначе его роль выполняет гнездо"
+  }
+ ],
+ "adapters": [
+  {
+   "id": "ADP-LATCH-BED",
+   "from_": "паз T-slot 15 / 4 × M10",
+   "to": "CJ-LATCH-30R",
+   "status": "нужен",
+   "note": "плита 120 × 120 × 10, низ — 4 × M10 T-болт, верх — гнездо; ставится в любое место поля матрицы"
+  },
+  {
+   "id": "ADP-LATCH-RAIL",
+   "from_": "рельс 50 × 22 (structure_bed_frame)",
+   "to": "CJ-LATCH-30R",
+   "status": "нужен",
+   "note": "хомут 50 × 22 + стойка 60 мм + гнездо"
+  },
+  {
+   "id": "ADP-LATCH-M12",
+   "from_": "4 × M12 поле 0,600 × 0,600",
+   "to": "CJ-LATCH-30R",
+   "status": "опционально",
+   "note": "для станины/портала, если манжету надо ставить на раму, а не на матрицу"
+  },
+  {
+   "id": "ADP-LATCH-MKI",
+   "from_": "место cuff_shell в каретке Mk-I (69 × 42)",
+   "to": "CJ-LATCH-30R",
+   "status": "опционально",
+   "note": "позволяет ставить hard-манжеты на старую матрицу без её пересборки"
+  },
+  {
+   "id": "ADP-RAIL-15",
+   "from_": "рельс 56 × 28 (Mk-I) / 55 × 42 / 50 × 22",
+   "to": "T-slot 15",
+   "status": "нужен (уже в реестре)",
+   "note": "без него каретки Mk-I не переезжают на matrix_universal"
+  },
+  {
+   "id": "ADP-STR-XX",
+   "from_": "M12 0,6 × 0,6",
+   "to": "любое поле",
+   "status": "нужен (уже в реестре)",
+   "note": "27 разных шагов; матрица добавляет ещё один (1,756 × 0,776)"
+  },
+  {
+   "id": "ADP-CRAD-MX",
+   "from_": "support_cradle 4 × M12 0,580 × 0,552",
+   "status": "опционально",
+   "note": "если ставить ложе на матрицу без сверления новых отверстий",
+   "to": "4 × M10 T-болт"
+  }
+ ],
+ "catalog": {
+  "principle": "гибкий вариант не удаляется; hard-вариант — тот же GLB с дополнительными узлами hard_* и скрытием кольцевых узлов",
+  "where_to_put": {
+   "component.variants": "строки: к существующим добавить \"hard (защёлка CJ-LATCH-30)\"",
+   "component.variant_nodes": "НОВЫЙ sibling-ключ (не внутри model): {\"flexible\": {\"hide\": [\"hard_*\"]}, \"hard\": {\"hide\": [\"dring*\", ...], \"show\": [\"hard_*\"]}}",
+   "component.model": "НЕ трогать: docs/plans/tools/wire_component_models.py перезаписывает model целиком (file/prefix/motion/nodes/quality) — любые поля внутри model теряются при повторном запуске",
+   "component.mates": "добавить latch_out рядом с anchor_dring (anchor_dring остаётся для flex)"
+  },
+  "example": {
+   "id": "restraint_wrist_cuff",
+   "variants": [
+    "S",
+    "M",
+    "L",
+    "hard (защёлка CJ-LATCH-30)"
+   ],
+   "variant_nodes": {
+    "flexible": {
+     "hide": [
+      "hard_shell*",
+      "hard_bracket*",
+      "hard_tongue*",
+      "hard_antirot_*",
+      "hard_screw_*"
+     ]
+    },
+    "hard": {
+     "hide": [
+      "dring",
+      "dring_bar",
+      "dring_rivet_a",
+      "dring_rivet_b"
+     ],
+     "show": [
+      "hard_shell",
+      "hard_bracket",
+      "hard_tongue",
+      "hard_antirot_pin_a",
+      "hard_antirot_pin_b"
+     ]
+    }
+   }
+  },
+  "matrix": {
+   "keep": "restraint_matrix без изменений (GLB, 268 узлов) + \"variant_models\": [{\"id\": \"universal\", \"label\": \"Универсальная (Mk-II)\", \"component\": \"restraint_matrix_universal\"}]",
+   "add": "restraint_matrix_universal (RST-MX-12), \"variant_of\": \"restraint_matrix\", свой GLB",
+   "device_links": "добавить restraint_matrix_universal в те же устройства, где сейчас restraint_matrix (public/models/machine-modules/device-catalog.json, 14 ссылок)"
+  },
+  "viewer": "components-viewer.js: при загрузке применять variant_nodes[active]; переключатель варианта в карточке; без этого hard-узлы видны одновременно с кольцами"
+ },
+ "work_packages": [
+  {
+   "id": "W1",
+   "title": "Каталог и точки: variant_nodes, variant_models, latch_out",
+   "priority": "P0",
+   "kind": "data-only",
+   "files": [
+    "public/models/machine-modules/component-catalog.json",
+    "docs/plans/mates/restraint-service.json",
+    "docs/plans/component-contracts.json"
+   ],
+   "detail": "добавить sibling-ключи variant_nodes/variant_models и 10 точек latch_out (connector: custom + connector_note); исправить нормали dring_a…d у пояса (0,0,1 → 0,1,0); у 10 манжет mount_in M12 → surface (см. nonmotion-mount-audit п.1)"
+  },
+  {
+   "id": "W2",
+   "title": "hard-вариант restraint_suspension_cuff",
+   "priority": "P0",
+   "kind": "rebuild",
+   "detail": "единственный компонент, где гибкий элемент (кольцо Ø28,7 из прутка 6 мм) несёт 1471 Н; кронштейн-скоба 6 мм + язык T-30"
+  },
+  {
+   "id": "W3",
+   "title": "hard-варианты остальных 9 манжет/зажимов",
+   "priority": "P1",
+   "kind": "rebuild",
+   "detail": "в каждый build_restraint_*.py добавить флаг --variant=hard (или env CJ_VARIANT), собрать 12…32 узла hard_*, отчёт report.json дополнить блоком variant"
+  },
+  {
+   "id": "W4",
+   "title": "restraint_matrix_universal (Mk-II)",
+   "priority": "P1",
+   "kind": "rebuild",
+   "detail": "новый build_restraint_matrix_universal.py: 6 рельсов T-slot 15, 3 траверсы, 8 кареток XZR, 6 фиксированных гнёзд; ~421 узел; 4 ракурса + report.json"
+  },
+  {
+   "id": "W5",
+   "title": "viewer: переключение вариантов",
+   "priority": "P1",
+   "kind": "code",
+   "files": [
+    "public/models/machine-modules/components-viewer.js",
+    "public/models/machine-modules/components.html"
+   ],
+   "detail": "variant_nodes → visibility; чип варианта в карточке; дефолт flexible"
+  },
+  {
+   "id": "W6",
+   "title": "support_cradle: жёсткие щёки с гнёздами + короткие стойки",
+   "priority": "P2",
+   "kind": "rebuild"
+  },
+  {
+   "id": "W7",
+   "title": "Переходники ADP-LATCH-BED / ADP-LATCH-RAIL / ADP-LATCH-MKI",
+   "priority": "P2",
+   "kind": "new_components"
+  },
+  {
+   "id": "W8",
+   "title": "Проверки и контракты",
+   "priority": "P2",
+   "kind": "checks",
+   "detail": "check_mate_bounds.py на latch_out; qa_components_links.py на variant_nodes; gen_component_contracts.py — порт latch_out; сборка hard-манжета + каретка в assemble_device_check"
+  }
+ ],
+ "risks": [
+  {
+   "id": "R1",
+   "risk": "жёсткий кронштейн на мягком ремне даёт точечную нагрузку и проворот манжеты вокруг конечности",
+   "mitigation": "полуоболочка CJ-SHELL-140 (CFRP 3 мм) как несущий элемент + 2 антипроворотных штифта Ø5",
+   "severity": "high"
+  },
+  {
+   "id": "R2",
+   "risk": "у пояса все 4 кольца стоят на грани +Y (под телом), а подкладка смотрит в −Y; перенос языков на кромки ±Z меняет силуэт ремня (габарит по Z 0,114 → 0,164)",
+   "mitigation": "жёсткая спинка на 4 мм + языки на кромках; паспорт обновить",
+   "severity": "medium"
+  },
+  {
+   "id": "R3",
+   "risk": "нагрузки в каталоге — концепт-значения (98…1471 Н); 1471 Н на прутке 6 мм — заведомо сверх предела",
+   "mitigation": "CJ-LATCH-30 WLL 5 кН с SF 3; пересчитать статику при первой физической проверке",
+   "severity": "high"
+  },
+  {
+   "id": "R4",
+   "risk": "одно гнездо на все 10 компонентов утяжеляет мелкие манжеты (язык T-30 на манжете Ø60)",
+   "mitigation": "лёгкое семейство CJ-LATCH-20 (язык 20 × 5, палец Ø8, WLL 2 кН) как отдельная ветка после первой сборки",
+   "severity": "low"
+  },
+  {
+   "id": "R5",
+   "risk": "421 узел против 268 у Mk-I — вес GLB и время загрузки в viewer",
+   "mitigation": "каретки инстансить (8 одинаковых), LOD для роликов и винтов; держать < 8 МБ",
+   "severity": "medium"
+  },
+  {
+   "id": "R6",
+   "risk": "паз T-slot 15 в ложе собирает грязь и жидкость, профиль не имеет IP",
+   "mitigation": "заглушки паза в зоне ложа, дренажные отверстия в траверсах, съёмный лоток",
+   "severity": "medium"
+  },
+  {
+   "id": "R7",
+   "risk": "клиновой зажим каретки на алюминиевом профиле при 1471 Н и рывке может проскользнуть",
+   "mitigation": "2 × M10 T-болт как страховка + шкала с фиксацией положения; проверить на стенде",
+   "severity": "high"
+  },
+  {
+   "id": "R8",
+   "risk": "расхождение Mk-I и Mk-II: 14 ссылок в device-catalog указывают на старую матрицу",
+   "mitigation": "добавить new id в device-catalog, оставить Mk-I как legacy с пометкой",
+   "severity": "medium"
+  },
+  {
+   "id": "R9",
+   "risk": "wire_component_models.py перезапишет model целиком при повторном запуске",
+   "mitigation": "вариантные данные — только в sibling-ключах; в check добавить assert на наличие variant_nodes после прогона",
+   "severity": "medium"
+  },
+  {
+   "id": "R10",
+   "risk": "реестр коннекторов запрещает заявлять семейство без геометрии",
+   "mitigation": "до сборки hard_tongue держать connector: custom + connector_note \"CJ-LATCH-30 заявлен\"; после сборки — перевести в семейство отдельным прогоном",
+   "severity": "low"
+  }
+ ],
+ "checks": [
+  "latch_out.position_m совпадает с центром отверстия hard_tongue ±0,5 мм (check_mate_bounds.py)",
+  "latch_out.axis совпадает с осью пальца; normal — с направлением входа языка",
+  "в hard-варианте между конечностью и языком нет мягких элементов (band/strap) — проверка по списку узлов",
+  "габарит hard-варианта не превышает passport_new (таблица выше) ±2 мм",
+  "каретка c01…c08 на крайних X (−0,90 / +0,90) и Z (±0,045) не задевает траверсы, рельсы и ложе (BVH)",
+  "язык входит в гнездо на всю глубину 26 мм при yaw 0…345° без заклинивания (проверка 24 позиций)",
+  "restraint_matrix_universal: bbox 2,000 × 1,000 × 0,400 ±2 мм, контакт с полом y = 0",
+  "variant_nodes: переключение flexible/hard скрывает ровно ожидаемые узлы, сумма видимых = nodes − hidden",
+  "device-catalog: restraint_matrix_universal доступна в тех же устройствах, что и restraint_matrix"
+ ]
+}

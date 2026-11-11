@@ -1,0 +1,277 @@
+{
+ "total": 30,
+ "ok": 30,
+ "failed": [],
+ "items": [
+  {
+   "id": "work_spray",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_roller",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_irrigation",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_suction",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "fluid_mixer",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_wrist_cuff",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_ankle_cuff",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_thigh_clamp",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_waist_belt",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_neck_yoke",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_head_frame",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_stirrup",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_spreader",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_suspension_cuff",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_quick_release",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_matrix",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_hood",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_visor",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_audio",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_light",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_console",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_telemetry",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_estop",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_interlock",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_power",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_data",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_air",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_water",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_drain",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_routing",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  }
+ ]
+}

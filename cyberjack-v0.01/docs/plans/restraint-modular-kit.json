@@ -1,0 +1,623 @@
+{
+  "schema": "cyberjack-restraint-kit/1",
+  "id": "cj-fix-kit",
+  "version": "0.1.0",
+  "status": "concept",
+  "principle": "base -> motion -> body interface -> accessory; pose is assembled, not stored",
+  "standards": {
+    "CJ-RAIL-45": {
+      "profile_mm": [
+        45,
+        45
+      ],
+      "slot_mm": 10,
+      "bolt": "M8",
+      "hole_pitch_mm": 50
+    },
+    "CJ-NODE-45": {
+      "plate_mm": [
+        120,
+        120,
+        12
+      ],
+      "bolts": "2xM8",
+      "pin_mm": 6
+    },
+    "CJ-LATCH-30": {
+      "window_mm": [
+        48,
+        34
+      ],
+      "pin_mm": 12,
+      "wll_kn": 5,
+      "tongues": [
+        "T-26",
+        "T-30",
+        "T-44"
+      ]
+    },
+    "CJ-TILT": {
+      "angles_deg": [
+        0,
+        30,
+        60,
+        90
+      ]
+    },
+    "CJ-BRACE": {
+      "tube_mm": [
+        30,
+        30
+      ]
+    },
+    "CJ-CUFF": {
+      "source": "existing soft/hard restraint components"
+    },
+    "CJ-PAD": {
+      "source": "existing support pads"
+    }
+  },
+  "rules": [
+    "rail lengths 500/1000/2000 only",
+    "every rail joint uses a CJ-NODE-45, no bare bolt",
+    "parallel carriage rails pitch >= 250 mm; one carriage per bay if less",
+    "post needs floor foot and at least two connections/braces",
+    "boom 800 requires brace",
+    "body interface only through adapter plus carriage/pivot, never directly on rail",
+    "100 mm free zone around latch release",
+    "max 12 active body interfaces",
+    "cuffs are not structural",
+    "tilt backboard only 0/30/60/90",
+    "no effect actuator in the restraint kit"
+  ],
+  "kits": {
+    "contour_bed_1000x2000": [
+      "fix_rail_2000",
+      "fix_rail_2000",
+      "fix_cross_1000",
+      "fix_cross_1000",
+      "fix_cross_1000",
+      "fix_cross_1000",
+      "fix_corner_node",
+      "fix_corner_node",
+      "fix_corner_node",
+      "fix_corner_node",
+      "fix_foot",
+      "fix_foot",
+      "fix_foot",
+      "fix_foot",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter"
+    ],
+    "contour_bed_min": [
+      "fix_rail_2000",
+      "fix_rail_2000",
+      "fix_cross_1000",
+      "fix_cross_1000",
+      "fix_corner_node",
+      "fix_corner_node",
+      "fix_corner_node",
+      "fix_corner_node",
+      "fix_foot",
+      "fix_foot",
+      "fix_foot",
+      "fix_foot",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_latch_adapter",
+      "fix_latch_adapter"
+    ],
+    "contour_recline": [
+      "fix_post_1000",
+      "fix_post_1000",
+      "fix_post_1000",
+      "fix_post_1000",
+      "fix_rail_1000",
+      "fix_rail_1000",
+      "fix_boom_500",
+      "fix_boom_500",
+      "fix_backboard",
+      "fix_tilt",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_pivot",
+      "fix_pivot",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter"
+    ],
+    "contour_seated": [
+      "fix_cross_1000",
+      "fix_cross_1000",
+      "fix_post_600",
+      "fix_post_600",
+      "fix_backboard",
+      "fix_tilt",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_carriage",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter",
+      "fix_cuff_adapter"
+    ],
+    "contour_spreader": [
+      "fix_spreader_600",
+      "fix_latch_adapter",
+      "fix_latch_adapter",
+      "fix_latch_adapter",
+      "fix_latch_adapter"
+    ]
+  },
+  "mvp": [
+    "fix_rail_1000",
+    "fix_rail_2000",
+    "fix_cross_1000",
+    "fix_corner_node",
+    "fix_foot",
+    "fix_post_1000",
+    "fix_carriage",
+    "fix_latch_adapter"
+  ],
+  "modules": [
+    {
+      "id": "fix_rail_500",
+      "class": "STRUCTURE",
+      "name": "Рельс 500",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.5,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 1.6,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 2.5
+    },
+    {
+      "id": "fix_rail_1000",
+      "class": "STRUCTURE",
+      "name": "Рельс 1000",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        1.0,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 3.2,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 2.5
+    },
+    {
+      "id": "fix_rail_2000",
+      "class": "STRUCTURE",
+      "name": "Рельс 2000",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        2.0,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 6.4,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 2.0
+    },
+    {
+      "id": "fix_cross_500",
+      "class": "STRUCTURE",
+      "name": "Поперечина 500",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.5,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 1.6,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 2.5
+    },
+    {
+      "id": "fix_cross_1000",
+      "class": "STRUCTURE",
+      "name": "Поперечина 1000",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        1.0,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 3.2,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 2.0
+    },
+    {
+      "id": "fix_corner_node",
+      "class": "STRUCTURE",
+      "name": "Угловой узел",
+      "standard": "CJ-NODE-45",
+      "dimensions_m": [
+        0.12,
+        0.12,
+        0.06
+      ],
+      "mass_kg": 1.1,
+      "interfaces": [
+        "CJ-RAIL-45"
+      ],
+      "load_kn": 3.0
+    },
+    {
+      "id": "fix_t_node",
+      "class": "STRUCTURE",
+      "name": "T-узел",
+      "standard": "CJ-NODE-45",
+      "dimensions_m": [
+        0.12,
+        0.12,
+        0.012
+      ],
+      "mass_kg": 1.2,
+      "interfaces": [
+        "CJ-RAIL-45"
+      ],
+      "load_kn": 3.0
+    },
+    {
+      "id": "fix_cross_node",
+      "class": "STRUCTURE",
+      "name": "Крестовый узел",
+      "standard": "CJ-NODE-45",
+      "dimensions_m": [
+        0.14,
+        0.14,
+        0.012
+      ],
+      "mass_kg": 1.4,
+      "interfaces": [
+        "CJ-RAIL-45"
+      ],
+      "load_kn": 3.0
+    },
+    {
+      "id": "fix_foot",
+      "class": "STRUCTURE",
+      "name": "Опора пола",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.1,
+        0.1,
+        0.06
+      ],
+      "mass_kg": 1.4,
+      "interfaces": [
+        "CJ-RAIL-45"
+      ],
+      "load_kn": 4.0,
+      "role": "adjustable rail saddle",
+      "adjust_mm": {
+        "range": [
+          -12,
+          12
+        ],
+        "height_mm": [
+          48,
+          72
+        ]
+      }
+    },
+    {
+      "id": "fix_post_600",
+      "class": "STRUCTURE",
+      "name": "Стойка 600",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.6,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 3.5,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 3.0
+    },
+    {
+      "id": "fix_post_1000",
+      "class": "STRUCTURE",
+      "name": "Стойка 1000",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        1.0,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 5.5,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 2.5
+    },
+    {
+      "id": "fix_boom_500",
+      "class": "STRUCTURE",
+      "name": "Вынос 500",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.5,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 2.2,
+      "interfaces": [
+        "CJ-NODE-45"
+      ],
+      "load_kn": 1.5
+    },
+    {
+      "id": "fix_boom_800",
+      "class": "STRUCTURE",
+      "name": "Вынос 800",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.8,
+        0.045,
+        0.045
+      ],
+      "mass_kg": 3.0,
+      "interfaces": [
+        "CJ-NODE-45",
+        "CJ-BRACE"
+      ],
+      "load_kn": 1.2
+    },
+    {
+      "id": "fix_brace_600",
+      "class": "STRUCTURE",
+      "name": "Раскос 600",
+      "standard": "CJ-BRACE",
+      "dimensions_m": [
+        0.6,
+        0.03,
+        0.03
+      ],
+      "mass_kg": 1.0,
+      "interfaces": [
+        "CJ-RAIL-45"
+      ],
+      "load_kn": 2.0
+    },
+    {
+      "id": "fix_backboard",
+      "class": "STRUCTURE",
+      "name": "Спинка-ложе",
+      "standard": "CJ-PAD",
+      "dimensions_m": [
+        0.7,
+        1.2,
+        0.018
+      ],
+      "mass_kg": 8.0,
+      "interfaces": [
+        "CJ-TILT"
+      ],
+      "load_kn": 1.5
+    },
+    {
+      "id": "fix_carriage",
+      "class": "MOTION",
+      "name": "Каретка",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.12,
+        0.09,
+        0.05
+      ],
+      "mass_kg": 1.8,
+      "dof": {
+        "axis": "X",
+        "travel_m": 0.5
+      },
+      "interfaces": [
+        "CJ-RAIL-45",
+        "CJ-LATCH-30"
+      ],
+      "load_kn": 1.5
+    },
+    {
+      "id": "fix_riser",
+      "class": "MOTION",
+      "name": "Телескоп-стойка",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.6,
+        0.05,
+        0.05
+      ],
+      "mass_kg": 4.2,
+      "dof": {
+        "axis": "Z",
+        "travel_m": [
+          0.3,
+          0.6
+        ],
+        "step_mm": 50
+      },
+      "interfaces": [
+        "CJ-RAIL-45"
+      ],
+      "load_kn": 2.5
+    },
+    {
+      "id": "fix_pivot",
+      "class": "MOTION",
+      "name": "Поворотный узел",
+      "standard": "CJ-LATCH-30",
+      "dimensions_m": [
+        0.09,
+        0.09,
+        0.09
+      ],
+      "mass_kg": 1.2,
+      "dof": {
+        "axis": "yaw",
+        "travel_deg": 360,
+        "step_deg": 15
+      },
+      "interfaces": [
+        "CJ-RAIL-45",
+        "CJ-LATCH-30"
+      ],
+      "load_kn": 1.0
+    },
+    {
+      "id": "fix_tilt",
+      "class": "MOTION",
+      "name": "Наклонный узел",
+      "standard": "CJ-TILT",
+      "dimensions_m": [
+        0.16,
+        0.12,
+        0.12
+      ],
+      "mass_kg": 2.8,
+      "dof": {
+        "axis": "pitch",
+        "travel_deg": 90,
+        "step_deg": 15
+      },
+      "interfaces": [
+        "CJ-RAIL-45",
+        "CJ-PAD"
+      ],
+      "load_kn": 1.5
+    },
+    {
+      "id": "fix_swivel",
+      "class": "MOTION",
+      "name": "Быстрый поворот",
+      "standard": "CJ-RAIL-45",
+      "dimensions_m": [
+        0.08,
+        0.08,
+        0.06
+      ],
+      "mass_kg": 0.9,
+      "dof": {
+        "axis": "yaw",
+        "travel_deg": 360
+      },
+      "interfaces": [
+        "CJ-RAIL-45",
+        "CJ-LATCH-30"
+      ],
+      "load_kn": 0.8
+    },
+    {
+      "id": "fix_latch_adapter",
+      "class": "INTERFACE",
+      "name": "Адаптер защёлки",
+      "standard": "CJ-LATCH-30",
+      "dimensions_m": [
+        0.08,
+        0.06,
+        0.04
+      ],
+      "mass_kg": 0.7,
+      "interfaces": [
+        "CJ-RAIL-45",
+        "CJ-LATCH-30"
+      ],
+      "load_kn": 5.0
+    },
+    {
+      "id": "fix_cuff_adapter",
+      "class": "INTERFACE",
+      "name": "Адаптер манжеты",
+      "standard": "CJ-CUFF",
+      "dimensions_m": [
+        0.06,
+        0.05,
+        0.03
+      ],
+      "mass_kg": 0.4,
+      "interfaces": [
+        "CJ-RAIL-45",
+        "CJ-CUFF"
+      ],
+      "load_kn": 1.5
+    },
+    {
+      "id": "fix_pad_adapter",
+      "class": "INTERFACE",
+      "name": "Адаптер подушки",
+      "standard": "CJ-PAD",
+      "dimensions_m": [
+        0.06,
+        0.06,
+        0.03
+      ],
+      "mass_kg": 0.3,
+      "interfaces": [
+        "CJ-RAIL-45",
+        "CJ-PAD"
+      ],
+      "load_kn": 1.0
+    },
+    {
+      "id": "fix_spreader_600",
+      "class": "INTERFACE",
+      "name": "Распорка 600",
+      "standard": "CJ-LATCH-30",
+      "dimensions_m": [
+        0.6,
+        0.03,
+        0.03
+      ],
+      "mass_kg": 2.1,
+      "interfaces": [
+        "CJ-LATCH-30",
+        "CJ-LATCH-30"
+      ],
+      "load_kn": 2.0
+    },
+    {
+      "id": "fix_spreader_900",
+      "class": "INTERFACE",
+      "name": "Распорка 900",
+      "standard": "CJ-LATCH-30",
+      "dimensions_m": [
+        0.9,
+        0.03,
+        0.03
+      ],
+      "mass_kg": 3.0,
+      "interfaces": [
+        "CJ-LATCH-30",
+        "CJ-LATCH-30"
+      ],
+      "load_kn": 2.0
+    }
+  ]
+}

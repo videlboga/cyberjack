@@ -1,0 +1,4776 @@
+{
+  "format": "cj-archive-candidates/1",
+  "revision": "0.1",
+  "generated": "2026-11-10T23:48:19+03:00",
+  "mode": "audit-read-only",
+  "scope": "component-catalog.json (96), device-catalog.json (41 devices, 9 kits), connector-registry.json, docs/plans/checks/mounting-audit.json, mating-map.json (derived)",
+  "note": "Ничего не изменено в каталоге, моделях и вьюере. Рекомендации без применения.",
+  "summary": {
+    "components": 96,
+    "devices": 41,
+    "kits": 9,
+    "classes": {
+      "STRUCTURE": 8,
+      "SERVICE": 3,
+      "MOTION": 14,
+      "WORK": 33,
+      "FLUID": 5,
+      "RESTRAINT": 11,
+      "SURFACE": 8,
+      "SENSORY": 4,
+      "CONTROL": 4,
+      "UTILITY": 6
+    },
+    "catalogStatuses": {
+      "core": 10,
+      "concept": 86
+    },
+    "used": 77,
+    "zero_use": 19,
+    "core": [
+      "structure_base",
+      "structure_portal",
+      "support_cradle",
+      "motion_linear_x",
+      "motion_lift_z",
+      "work_tickle_pair",
+      "work_probe_linear",
+      "work_rotary_disc",
+      "control_console",
+      "utility_routing"
+    ],
+    "core_zero_use": [
+      "utility_routing"
+    ],
+    "recommendations": {
+      "keep": 80,
+      "archive": 12,
+      "merge": 2,
+      "hold": 2
+    },
+    "archive_zero_risk": 7,
+    "resulting_visible_components": 84
+  },
+  "decision_rules": [
+    {
+      "rule": "archive",
+      "applies": "0 устройств + 0 входящих ссылок совместимости + не core + есть доказанный дубль/перекрытие",
+      "risk": "низкий"
+    },
+    {
+      "rule": "archive (after port)",
+      "applies": "0 использования, но компонент несёт уникальные данные (кинематика, QA-кейс) — сначала перенос",
+      "risk": "средний"
+    },
+    {
+      "rule": "merge",
+      "applies": "функциональный суперсет другого компонента и оба используются — слияние требует правки device-catalog",
+      "risk": "средний"
+    },
+    {
+      "rule": "hold",
+      "applies": "уникальная функция без потребителя — решение продуктовое, не техническое",
+      "risk": "нет"
+    },
+    {
+      "rule": "keep",
+      "applies": "используется в устройствах, либо core, либо хаб совместимости",
+      "risk": "—"
+    }
+  ],
+  "components": [
+    {
+      "id": "structure_base",
+      "code": "STR-BASE-01",
+      "class": "STRUCTURE",
+      "name": "Станина",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 11,
+        "devices": [
+          "lab_sex_machine_tickling",
+          "lab_foot_cradle",
+          "lab_sex_machine_anal",
+          "lab_pen_rotary",
+          "lab_pen_thermal",
+          "lab_attachment_drum",
+          "lab_irrigation_station",
+          "lab_fluid_collector",
+          "lab_stirrup_stand",
+          "lab_pen_piston",
+          "lab_pen_pneumatic"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_portal",
+          "support_cradle",
+          "work_tickle_pair",
+          "utility_power",
+          "utility_routing"
+        ],
+        "outbound": [
+          "structure_portal",
+          "motion_linear_x",
+          "motion_lift_z",
+          "support_cradle"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sex_machine_tickling",
+          "lab_foot_cradle",
+          "lab_sex_machine_anal",
+          "lab_pen_rotary",
+          "lab_pen_thermal",
+          "lab_attachment_drum",
+          "lab_irrigation_station",
+          "lab_fluid_collector",
+          "lab_stirrup_stand",
+          "lab_pen_piston",
+          "lab_pen_pneumatic"
+        ],
+        "kits": [
+          "kit_tic",
+          "kit_pen",
+          "kit_imp",
+          "kit_flu",
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/structure_base.glb",
+          "present": true,
+          "nodes": 170
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "structure_portal",
+      "code": "STR-PORT-02",
+      "class": "STRUCTURE",
+      "name": "Портал",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 10,
+        "devices": [
+          "lab_sensitivity_arch",
+          "lab_feather_pod",
+          "lab_firm_brush_rig",
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_circularsaw",
+          "lab_impact_bench",
+          "lab_x_cross",
+          "lab_neck_yoke",
+          "lab_posture_chair",
+          "lab_mental_correction_chair"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_base",
+          "motion_linear_x",
+          "motion_lift_z",
+          "work_rotary_disc",
+          "work_impact_paddle",
+          "work_impact_roller",
+          "restraint_neck_yoke",
+          "sensory_visor"
+        ],
+        "outbound": [
+          "structure_base",
+          "motion_lift_z",
+          "motion_linear_x",
+          "work_probe_linear"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sensitivity_arch",
+          "lab_feather_pod",
+          "lab_firm_brush_rig",
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_circularsaw",
+          "lab_impact_bench",
+          "lab_x_cross",
+          "lab_neck_yoke",
+          "lab_posture_chair",
+          "lab_mental_correction_chair"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_tic",
+          "kit_pen",
+          "kit_imp",
+          "kit_res",
+          "kit_sen"
+        ],
+        "model": {
+          "file": "components/structure_portal.glb",
+          "present": true,
+          "nodes": 83
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "structure_gantry",
+      "code": "STR-GANT-03",
+      "class": "STRUCTURE",
+      "name": "Гентри",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 5,
+        "devices": [
+          "lab_tickle_arch",
+          "lab_pen_dual",
+          "lab_spray_station",
+          "lab_gantry",
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_dock",
+          "motion_linear_y",
+          "motion_turntable",
+          "work_air_jet"
+        ],
+        "outbound": [
+          "motion_linear_x",
+          "motion_linear_y",
+          "work_tickle_soft",
+          "work_spray"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_tickle_arch",
+          "lab_pen_dual",
+          "lab_spray_station",
+          "lab_gantry",
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_tic",
+          "kit_pen",
+          "kit_flu",
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/structure_gantry.glb",
+          "present": true,
+          "nodes": 172
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "structure_bed_frame",
+      "code": "STR-BED-04",
+      "class": "STRUCTURE",
+      "name": "Рама-ложе",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 7,
+        "devices": [
+          "lab_diagnostic_table",
+          "lab_data_collector",
+          "lab_electro_bench",
+          "lab_restraint_matrix",
+          "lab_thermal_bed",
+          "lab_sensor_bed",
+          "lab_contour_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_spreader",
+          "motion_turntable",
+          "restraint_wrist_cuff",
+          "restraint_thigh_clamp",
+          "restraint_waist_belt",
+          "restraint_head_frame",
+          "restraint_stirrup",
+          "restraint_matrix",
+          "surface_soft",
+          "surface_anti_slip",
+          "surface_sensor",
+          "surface_contour"
+        ],
+        "outbound": [
+          "surface_sensor",
+          "surface_heated",
+          "restraint_matrix",
+          "motion_spreader"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_diagnostic_table",
+          "lab_data_collector",
+          "lab_electro_bench",
+          "lab_restraint_matrix",
+          "lab_thermal_bed",
+          "lab_sensor_bed",
+          "lab_contour_bed"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_imp",
+          "kit_res",
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/structure_bed_frame.glb",
+          "present": true,
+          "nodes": 121
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "structure_cage",
+      "code": "STR-CAGE-05",
+      "class": "STRUCTURE",
+      "name": "Каркас-капсула",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_baseline_cell",
+          "lab_deprivation_pod"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "sensory_hood",
+          "sensory_light"
+        ],
+        "outbound": [
+          "sensory_hood",
+          "sensory_audio",
+          "restraint_matrix",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_baseline_cell",
+          "lab_deprivation_pod"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_sen"
+        ],
+        "model": {
+          "file": "components/structure_cage.glb",
+          "present": true,
+          "nodes": 146
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "structure_suspension_frame",
+      "code": "STR-SUSP-06",
+      "class": "STRUCTURE",
+      "name": "Потолочная рама",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_suspension_frame"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_winch",
+          "restraint_suspension_cuff"
+        ],
+        "outbound": [
+          "motion_winch",
+          "restraint_suspension_cuff"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_suspension_frame"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/structure_suspension_frame.glb",
+          "present": true,
+          "nodes": 97
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "structure_stall_row",
+      "code": "STR-STALL-07",
+      "class": "STRUCTURE",
+      "name": "Ряд кабин",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_stall_row"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "restraint_matrix",
+          "control_console",
+          "utility_power"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_stall_row"
+        ],
+        "kits": [
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/structure_stall_row.glb",
+          "present": true,
+          "nodes": 41
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "structure_dock",
+      "code": "STR-DOCK-08",
+      "class": "STRUCTURE",
+      "name": "Док",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_service_dock"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_probe_linear",
+          "work_probe_rotary",
+          "control_interlock",
+          "utility_air",
+          "service_dock",
+          "motion_piston_telescopic",
+          "work_attach_carousel"
+        ],
+        "outbound": [
+          "work_probe_linear",
+          "work_rotary_disc",
+          "structure_gantry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_service_dock"
+        ],
+        "kits": [
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/structure_dock.glb",
+          "present": true,
+          "nodes": 73
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "support_cradle",
+      "code": "SUP-CRAD-01",
+      "class": "SERVICE",
+      "name": "Опоры-ложементы",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_sex_machine_tickling",
+          "lab_sex_machine_vaginal"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_base",
+          "work_tickle_pair",
+          "restraint_waist_belt"
+        ],
+        "outbound": [
+          "structure_base",
+          "work_tickle_pair",
+          "work_probe_linear"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sex_machine_tickling",
+          "lab_sex_machine_vaginal"
+        ],
+        "kits": [
+          "kit_tic",
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/support_cradle.glb",
+          "present": true,
+          "nodes": 148
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_linear_x",
+      "code": "MOT-X-01",
+      "class": "MOTION",
+      "name": "X-каретка",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 12,
+        "devices": [
+          "lab_sensitivity_arch",
+          "lab_feather_pod",
+          "lab_tickle_arch",
+          "lab_firm_brush_rig",
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_anal",
+          "lab_pen_dual",
+          "lab_impact_bench",
+          "lab_spray_station",
+          "lab_roller_applicator",
+          "lab_gantry",
+          "lab_portable_unit"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_base",
+          "structure_portal",
+          "structure_gantry",
+          "motion_lift_z",
+          "work_probe_linear",
+          "work_impact_roller",
+          "work_spray",
+          "work_roller",
+          "motion_piston_cam"
+        ],
+        "outbound": [
+          "structure_portal",
+          "work_probe_linear",
+          "work_tickle_soft"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sensitivity_arch",
+          "lab_feather_pod",
+          "lab_tickle_arch",
+          "lab_firm_brush_rig",
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_anal",
+          "lab_pen_dual",
+          "lab_impact_bench",
+          "lab_spray_station",
+          "lab_roller_applicator",
+          "lab_gantry",
+          "lab_portable_unit"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_tic",
+          "kit_pen",
+          "kit_imp",
+          "kit_flu",
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/motion_linear_x.glb",
+          "present": true,
+          "nodes": 151
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_linear_y",
+      "code": "MOT-Y-02",
+      "class": "MOTION",
+      "name": "Y-каретка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 8,
+        "devices": [
+          "lab_foot_cradle",
+          "lab_tickle_arch",
+          "lab_pen_rotary",
+          "lab_pen_dual",
+          "lab_pen_thermal",
+          "lab_spray_station",
+          "lab_gantry",
+          "lab_pen_piston"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_gantry",
+          "work_feather_fan",
+          "work_air_jet",
+          "work_foot_cradle",
+          "work_probe_linear",
+          "work_probe_rotary",
+          "work_probe_inflatable",
+          "work_probe_thermal",
+          "motion_piston_rod",
+          "motion_piston_telescopic",
+          "motion_piston_servo"
+        ],
+        "outbound": [
+          "structure_gantry",
+          "work_probe_rotary",
+          "work_spray"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_foot_cradle",
+          "lab_tickle_arch",
+          "lab_pen_rotary",
+          "lab_pen_dual",
+          "lab_pen_thermal",
+          "lab_spray_station",
+          "lab_gantry",
+          "lab_pen_piston"
+        ],
+        "kits": [
+          "kit_tic",
+          "kit_pen",
+          "kit_flu",
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/motion_linear_y.glb",
+          "present": true,
+          "nodes": 120
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_lift_z",
+      "code": "MOT-Z-03",
+      "class": "MOTION",
+      "name": "Подъём",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 4,
+        "devices": [
+          "lab_sex_machine_vaginal",
+          "lab_pen_rotary",
+          "lab_sex_machine_circularsaw",
+          "lab_impact_bench"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_base",
+          "structure_portal",
+          "work_rotary_disc",
+          "work_impact_roller"
+        ],
+        "outbound": [
+          "structure_portal",
+          "motion_linear_x",
+          "work_rotary_disc"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sex_machine_vaginal",
+          "lab_pen_rotary",
+          "lab_sex_machine_circularsaw",
+          "lab_impact_bench"
+        ],
+        "kits": [
+          "kit_pen",
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/motion_lift_z.glb",
+          "present": true,
+          "nodes": 74
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_rotary",
+      "code": "MOT-ROT-04",
+      "class": "MOTION",
+      "name": "Поворотный модуль",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_pen_rotary",
+          "lab_attachment_drum"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_tickle_soft",
+          "work_tickle_firm",
+          "work_tickle_radial",
+          "work_foot_cradle",
+          "work_probe_rotary",
+          "work_rotary_disc",
+          "work_rotary_drum",
+          "work_attach_spiral"
+        ],
+        "outbound": [
+          "work_rotary_disc",
+          "work_rotary_drum",
+          "work_probe_rotary"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_rotary",
+          "lab_attachment_drum"
+        ],
+        "kits": [
+          "kit_pen",
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/motion_rotary.glb",
+          "present": true,
+          "nodes": 91
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_oscillating",
+      "code": "MOT-OSC-05",
+      "class": "MOTION",
+      "name": "Осциллятор",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [
+          "work_tickle_soft",
+          "work_tickle_firm",
+          "work_feather_fan",
+          "work_impact_paddle"
+        ],
+        "outbound": [
+          "work_probe_linear",
+          "work_impact_paddle",
+          "work_tickle_soft"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Владелец функции «ритм»: единственный модуль с проверенной кинематикой crank-slider (cj-kinematics-oscillating/2, QA pass) и 4 входящими ссылками. Кандидат на поглощение cam, не на архив.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/motion_oscillating.glb",
+          "present": true,
+          "nodes": 82
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_spreader",
+      "code": "MOT-SPR-06",
+      "class": "MOTION",
+      "name": "Разведение",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_restraint_matrix"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_bed_frame",
+          "restraint_thigh_clamp",
+          "restraint_stirrup",
+          "restraint_spreader",
+          "restraint_matrix"
+        ],
+        "outbound": [
+          "structure_bed_frame",
+          "restraint_stirrup",
+          "restraint_spreader"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_restraint_matrix"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/motion_spreader.glb",
+          "present": true,
+          "nodes": 57
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_winch",
+      "code": "MOT-WIN-07",
+      "class": "MOTION",
+      "name": "Лебёдка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_suspension_frame"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_suspension_frame",
+          "restraint_suspension_cuff"
+        ],
+        "outbound": [
+          "structure_suspension_frame",
+          "restraint_suspension_cuff"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_suspension_frame"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/motion_winch.glb",
+          "present": true,
+          "nodes": 101
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_turntable",
+      "code": "MOT-TUR-08",
+      "class": "MOTION",
+      "name": "Поворотный стол",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "structure_bed_frame",
+          "structure_gantry"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P4",
+      "reason": "0 устройств и 0 ссылок; функция «разворот ложа по азимуту» не востребована ни одним сценарием станции. 35 кг, 380 В.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/motion_turntable.glb",
+          "present": true,
+          "nodes": 38
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/tools/build_motion_turntable.py"
+        ]
+      }
+    },
+    {
+      "id": "work_tickle_soft",
+      "code": "WRK-TIC-01",
+      "class": "WORK",
+      "name": "Мягкая щётка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_tickle_arch"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_gantry",
+          "motion_linear_x",
+          "motion_oscillating",
+          "work_rotary_drum"
+        ],
+        "outbound": [
+          "motion_rotary",
+          "work_tickle_pair",
+          "motion_oscillating"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_tickle_arch"
+        ],
+        "kits": [
+          "kit_tic"
+        ],
+        "model": {
+          "file": "components/work_tickle_soft.glb",
+          "present": true,
+          "nodes": 35
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_tickle_firm",
+      "code": "WRK-TIC-02",
+      "class": "WORK",
+      "name": "Жёсткая щётка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_tickle_arch",
+          "lab_firm_brush_rig"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_tickle_radial"
+        ],
+        "outbound": [
+          "motion_rotary",
+          "work_tickle_radial",
+          "motion_oscillating"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_tickle_arch",
+          "lab_firm_brush_rig"
+        ],
+        "kits": [
+          "kit_tic"
+        ],
+        "model": {
+          "file": "components/work_tickle_firm.glb",
+          "present": true,
+          "nodes": 28
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_tickle_radial",
+      "code": "WRK-TIC-03",
+      "class": "WORK",
+      "name": "Радиальная щётка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_tickle_arch",
+          "lab_firm_brush_rig"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_tickle_firm"
+        ],
+        "outbound": [
+          "motion_rotary",
+          "work_tickle_firm"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_tickle_arch",
+          "lab_firm_brush_rig"
+        ],
+        "kits": [
+          "kit_tic"
+        ],
+        "model": {
+          "file": "components/work_tickle_radial.glb",
+          "present": true,
+          "nodes": 37
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_feather_fan",
+      "code": "WRK-FEA-04",
+      "class": "WORK",
+      "name": "Перьевой веер",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_feather_pod"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_rotary_drum"
+        ],
+        "outbound": [
+          "motion_oscillating",
+          "motion_linear_y",
+          "work_air_jet"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_feather_pod"
+        ],
+        "kits": [
+          "kit_tic"
+        ],
+        "model": {
+          "file": "components/work_feather_fan.glb",
+          "present": true,
+          "nodes": 33
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_air_jet",
+      "code": "WRK-AIR-05",
+      "class": "WORK",
+      "name": "Воздушная форсунка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_feather_pod"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_feather_fan",
+          "utility_air"
+        ],
+        "outbound": [
+          "motion_linear_y",
+          "structure_gantry",
+          "utility_air"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_feather_pod"
+        ],
+        "kits": [
+          "kit_tic"
+        ],
+        "model": {
+          "file": "components/work_air_jet.glb",
+          "present": true,
+          "nodes": 31
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_foot_cradle",
+      "code": "WRK-FOOT-06",
+      "class": "WORK",
+      "name": "Стопа-ложе",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_foot_cradle"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "motion_linear_y",
+          "motion_rotary",
+          "restraint_ankle_cuff"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_foot_cradle"
+        ],
+        "kits": [
+          "kit_tic"
+        ],
+        "model": {
+          "file": "components/work_foot_cradle.glb",
+          "present": true,
+          "nodes": 55
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_tickle_pair",
+      "code": "WRK-PAIR-07",
+      "class": "WORK",
+      "name": "Парные щётки",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_sex_machine_tickling"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "support_cradle",
+          "work_tickle_soft"
+        ],
+        "outbound": [
+          "structure_base",
+          "support_cradle",
+          "control_console"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sex_machine_tickling"
+        ],
+        "kits": [
+          "kit_tic"
+        ],
+        "model": {
+          "file": "components/work_tickle_pair.glb",
+          "present": true,
+          "nodes": 51
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_probe_linear",
+      "code": "WRK-PEN-01",
+      "class": "WORK",
+      "name": "Линейный зонд",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 6,
+        "devices": [
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_anal",
+          "lab_pen_dual",
+          "lab_portable_unit",
+          "lab_pen_piston",
+          "lab_pen_pneumatic"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_portal",
+          "structure_dock",
+          "support_cradle",
+          "motion_linear_x",
+          "motion_oscillating",
+          "work_probe_textured",
+          "motion_piston_rod",
+          "motion_piston_pneumatic",
+          "motion_piston_hydraulic",
+          "motion_piston_telescopic",
+          "motion_piston_cam",
+          "motion_piston_servo",
+          "work_attach_smooth",
+          "work_attach_ribbed",
+          "work_attach_nodular",
+          "work_attach_tapered",
+          "work_attach_bulbous",
+          "work_attach_curved",
+          "work_attach_dual_density",
+          "work_attach_vibrating",
+          "work_attach_inflatable",
+          "work_attach_adapter",
+          "work_attach_sterile_liner"
+        ],
+        "outbound": [
+          "motion_linear_x",
+          "motion_linear_y",
+          "structure_dock"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_anal",
+          "lab_pen_dual",
+          "lab_portable_unit",
+          "lab_pen_piston",
+          "lab_pen_pneumatic"
+        ],
+        "kits": [
+          "kit_pen",
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/work_probe_linear.glb",
+          "present": true,
+          "nodes": 32
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_probe_rotary",
+      "code": "WRK-PEN-02",
+      "class": "WORK",
+      "name": "Ротационный зонд",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_pen_rotary",
+          "lab_pen_dual"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_linear_y",
+          "motion_rotary",
+          "work_probe_inflatable",
+          "work_probe_textured",
+          "work_attach_smooth",
+          "work_attach_ribbed",
+          "work_attach_spiral",
+          "work_attach_nodular",
+          "work_attach_dual_density",
+          "work_attach_adapter"
+        ],
+        "outbound": [
+          "motion_rotary",
+          "motion_linear_y",
+          "structure_dock"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_rotary",
+          "lab_pen_dual"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_probe_rotary.glb",
+          "present": true,
+          "nodes": 37
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_probe_inflatable",
+      "code": "WRK-PEN-03",
+      "class": "WORK",
+      "name": "Надувной зонд",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_rotary"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "utility_air"
+        ],
+        "outbound": [
+          "utility_air",
+          "motion_linear_y",
+          "work_probe_rotary"
+        ]
+      },
+      "recommendation": "merge",
+      "priority": "P4",
+      "reason": "Идентичные параметры с work_attach_inflatable (0–0,4 бар, +30 % обхвата, силикон/полиуретан, воздух): зонд = база + надувная насадка. Оба используются, слияние отложено.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_rotary"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_probe_inflatable.glb",
+          "present": true,
+          "nodes": 24
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_probe_thermal",
+      "code": "WRK-PEN-04",
+      "class": "WORK",
+      "name": "Термо-зонд",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_thermal"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "motion_linear_y",
+          "surface_heated",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_thermal"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_probe_thermal.glb",
+          "present": true,
+          "nodes": 36
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_probe_textured",
+      "code": "WRK-PEN-05",
+      "class": "WORK",
+      "name": "Текстурированный зонд",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_probe_rotary"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P2",
+      "reason": "По паспорту это «гладкая/ребристая/спиральная» насадки на одном основании, т.е. work_attach_smooth/ribbed/spiral плюс база зонда. 0 устройств, 0 входящих ссылок.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_probe_textured.glb",
+          "present": true,
+          "nodes": 22
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/tools/build_work_probe_textured.py",
+          "docs/plans/tools/render_work_probe_textured.py",
+          "docs/plans/station-device-catalog.md:405"
+        ]
+      }
+    },
+    {
+      "id": "work_rotary_disc",
+      "code": "WRK-ROT-01",
+      "class": "WORK",
+      "name": "Ротационный диск",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_sex_machine_circularsaw"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_dock",
+          "motion_lift_z",
+          "motion_rotary"
+        ],
+        "outbound": [
+          "motion_rotary",
+          "motion_lift_z",
+          "structure_portal"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sex_machine_circularsaw"
+        ],
+        "kits": [
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/work_rotary_disc.glb",
+          "present": true,
+          "nodes": 31
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_rotary_drum",
+      "code": "WRK-ROT-02",
+      "class": "WORK",
+      "name": "Барабан насадок",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_attachment_drum"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_rotary"
+        ],
+        "outbound": [
+          "motion_rotary",
+          "work_feather_fan",
+          "work_tickle_soft"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_attachment_drum"
+        ],
+        "kits": [
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/work_rotary_drum.glb",
+          "present": true,
+          "nodes": 45
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_impact_paddle",
+      "code": "WRK-IMP-01",
+      "class": "WORK",
+      "name": "Лопатка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_impact_bench"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_oscillating"
+        ],
+        "outbound": [
+          "motion_oscillating",
+          "structure_portal",
+          "restraint_matrix"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_impact_bench"
+        ],
+        "kits": [
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/work_impact_paddle.glb",
+          "present": true,
+          "nodes": 41
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_impact_roller",
+      "code": "WRK-IMP-02",
+      "class": "WORK",
+      "name": "Валик",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_impact_bench"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "motion_linear_x",
+          "structure_portal",
+          "motion_lift_z"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_impact_bench"
+        ],
+        "kits": [
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/work_impact_roller.glb",
+          "present": true,
+          "nodes": 36
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_electro_pad",
+      "code": "WRK-EL-01",
+      "class": "WORK",
+      "name": "Электроплощадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 4,
+        "devices": [
+          "lab_sensitivity_arch",
+          "lab_electro_bench",
+          "lab_posture_chair",
+          "lab_mental_correction_chair"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_electro_collar",
+          "control_telemetry"
+        ],
+        "outbound": [
+          "control_interlock",
+          "restraint_matrix",
+          "work_electro_collar"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sensitivity_arch",
+          "lab_electro_bench",
+          "lab_posture_chair",
+          "lab_mental_correction_chair"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_imp",
+          "kit_res",
+          "kit_sen"
+        ],
+        "model": {
+          "file": "components/work_electro_pad.glb",
+          "present": true,
+          "nodes": 29
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_electro_collar",
+      "code": "WRK-EL-02",
+      "class": "WORK",
+      "name": "Шоковый ошейник",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_electro_bench"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_electro_pad"
+        ],
+        "outbound": [
+          "control_interlock",
+          "work_electro_pad",
+          "restraint_matrix"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_electro_bench"
+        ],
+        "kits": [
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/work_electro_collar.glb",
+          "present": true,
+          "nodes": 46
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_thermal_pad",
+      "code": "WRK-TH-01",
+      "class": "WORK",
+      "name": "Термо-площадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "surface_heated",
+          "surface_cooled",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P3",
+      "reason": "Локальный нагрев/охлаждение уже дают surface_heated/cooled (по 1 устройству) и work_probe_thermal (1). 0 устройств, 0 входящих ссылок.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_thermal_pad.glb",
+          "present": true,
+          "nodes": 31
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:409"
+        ]
+      }
+    },
+    {
+      "id": "work_spray",
+      "code": "WRK-FL-01",
+      "class": "FLUID",
+      "name": "Форсунка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_spray_station"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_gantry",
+          "motion_linear_y",
+          "work_roller",
+          "fluid_mixer",
+          "utility_water"
+        ],
+        "outbound": [
+          "utility_water",
+          "motion_linear_x",
+          "surface_fluid_channel"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_spray_station"
+        ],
+        "kits": [
+          "kit_flu"
+        ],
+        "model": {
+          "file": "components/work_spray.glb",
+          "present": true,
+          "nodes": 39
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_roller",
+      "code": "WRK-FL-02",
+      "class": "FLUID",
+      "name": "Аппликатор-валик",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_spray_station",
+          "lab_roller_applicator"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "fluid_mixer",
+          "utility_water"
+        ],
+        "outbound": [
+          "work_spray",
+          "surface_liner",
+          "motion_linear_x"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_spray_station",
+          "lab_roller_applicator"
+        ],
+        "kits": [
+          "kit_flu"
+        ],
+        "model": {
+          "file": "components/work_roller.glb",
+          "present": true,
+          "nodes": 32
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_irrigation",
+      "code": "WRK-FL-03",
+      "class": "FLUID",
+      "name": "Ирригационная головка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_irrigation_station"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "surface_fluid_channel",
+          "utility_water",
+          "utility_drain"
+        ],
+        "outbound": [
+          "utility_water",
+          "utility_drain",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_irrigation_station"
+        ],
+        "kits": [
+          "kit_flu"
+        ],
+        "model": {
+          "file": "components/work_irrigation.glb",
+          "present": true,
+          "nodes": 77
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_suction",
+      "code": "WRK-FL-04",
+      "class": "FLUID",
+      "name": "Отсос",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_fluid_collector"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "surface_contour",
+          "utility_drain"
+        ],
+        "outbound": [
+          "utility_drain",
+          "fluid_mixer",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_fluid_collector"
+        ],
+        "kits": [
+          "kit_flu"
+        ],
+        "model": {
+          "file": "components/work_suction.glb",
+          "present": true,
+          "nodes": 33
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "fluid_mixer",
+      "code": "WRK-FL-05",
+      "class": "FLUID",
+      "name": "Смеситель",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_fluid_collector"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_suction"
+        ],
+        "outbound": [
+          "work_spray",
+          "work_roller",
+          "utility_water"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_fluid_collector"
+        ],
+        "kits": [
+          "kit_flu"
+        ],
+        "model": {
+          "file": "components/fluid_mixer.glb",
+          "present": true,
+          "nodes": 38
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_wrist_cuff",
+      "code": "RST-WR-01",
+      "class": "RESTRAINT",
+      "name": "Манжета кисти",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_restraint_matrix",
+          "lab_x_cross"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "restraint_spreader",
+          "restraint_quick_release",
+          "restraint_matrix"
+        ],
+        "outbound": [
+          "restraint_matrix",
+          "structure_bed_frame",
+          "restraint_quick_release"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_restraint_matrix",
+          "lab_x_cross"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_wrist_cuff.glb",
+          "present": true,
+          "nodes": 33
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_ankle_cuff",
+      "code": "RST-AN-02",
+      "class": "RESTRAINT",
+      "name": "Манжета стопы",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 4,
+        "devices": [
+          "lab_foot_cradle",
+          "lab_tickle_arch",
+          "lab_restraint_matrix",
+          "lab_x_cross"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_foot_cradle",
+          "restraint_stirrup",
+          "restraint_spreader",
+          "restraint_quick_release",
+          "restraint_matrix"
+        ],
+        "outbound": [
+          "restraint_stirrup",
+          "restraint_matrix",
+          "restraint_quick_release"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_foot_cradle",
+          "lab_tickle_arch",
+          "lab_restraint_matrix",
+          "lab_x_cross"
+        ],
+        "kits": [
+          "kit_tic",
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_ankle_cuff.glb",
+          "present": true,
+          "nodes": 28
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_thigh_clamp",
+      "code": "RST-TH-03",
+      "class": "RESTRAINT",
+      "name": "Бёдерный зажим",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_sex_machine_anal",
+          "lab_stirrup_stand"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "restraint_matrix",
+          "structure_bed_frame",
+          "motion_spreader"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sex_machine_anal",
+          "lab_stirrup_stand"
+        ],
+        "kits": [
+          "kit_pen",
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_thigh_clamp.glb",
+          "present": true,
+          "nodes": 67
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_waist_belt",
+      "code": "RST-WA-04",
+      "class": "RESTRAINT",
+      "name": "Поясной ремень",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_restraint_matrix",
+          "lab_stirrup_stand"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "structure_bed_frame",
+          "restraint_matrix",
+          "support_cradle"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_restraint_matrix",
+          "lab_stirrup_stand"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_waist_belt.glb",
+          "present": true,
+          "nodes": 55
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_neck_yoke",
+      "code": "RST-NK-05",
+      "class": "RESTRAINT",
+      "name": "Шейный контур",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_neck_yoke"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "restraint_head_frame"
+        ],
+        "outbound": [
+          "structure_portal",
+          "restraint_head_frame",
+          "restraint_matrix"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_neck_yoke"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_neck_yoke.glb",
+          "present": true,
+          "nodes": 75
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_head_frame",
+      "code": "RST-HD-06",
+      "class": "RESTRAINT",
+      "name": "Рама головы",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_neck_yoke"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "restraint_neck_yoke"
+        ],
+        "outbound": [
+          "restraint_neck_yoke",
+          "structure_bed_frame",
+          "restraint_matrix"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_neck_yoke"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_head_frame.glb",
+          "present": true,
+          "nodes": 79
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_stirrup",
+      "code": "RST-ST-07",
+      "class": "RESTRAINT",
+      "name": "Стремя",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 5,
+        "devices": [
+          "lab_pen_rotary",
+          "lab_pen_thermal",
+          "lab_stirrup_stand",
+          "lab_pen_piston",
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_spreader",
+          "restraint_ankle_cuff"
+        ],
+        "outbound": [
+          "motion_spreader",
+          "restraint_ankle_cuff",
+          "structure_bed_frame"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_rotary",
+          "lab_pen_thermal",
+          "lab_stirrup_stand",
+          "lab_pen_piston",
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_pen",
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_stirrup.glb",
+          "present": true,
+          "nodes": 39
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_spreader",
+      "code": "RST-SP-08",
+      "class": "RESTRAINT",
+      "name": "Раздвижная штанга",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_x_cross"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_spreader"
+        ],
+        "outbound": [
+          "restraint_ankle_cuff",
+          "restraint_wrist_cuff",
+          "motion_spreader"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_x_cross"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_spreader.glb",
+          "present": true,
+          "nodes": 56
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_suspension_cuff",
+      "code": "RST-SU-09",
+      "class": "RESTRAINT",
+      "name": "Подвесная манжета",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_suspension_frame"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_suspension_frame",
+          "motion_winch",
+          "restraint_quick_release"
+        ],
+        "outbound": [
+          "motion_winch",
+          "structure_suspension_frame",
+          "restraint_quick_release"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_suspension_frame"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_suspension_cuff.glb",
+          "present": true,
+          "nodes": 48
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_quick_release",
+      "code": "RST-QR-10",
+      "class": "RESTRAINT",
+      "name": "Быстросъём",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_restraint_matrix"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "restraint_wrist_cuff",
+          "restraint_ankle_cuff",
+          "restraint_suspension_cuff"
+        ],
+        "outbound": [
+          "restraint_wrist_cuff",
+          "restraint_ankle_cuff",
+          "restraint_suspension_cuff"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_restraint_matrix"
+        ],
+        "kits": [
+          "kit_res"
+        ],
+        "model": {
+          "file": "components/restraint_quick_release.glb",
+          "present": true,
+          "nodes": 35
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "restraint_matrix",
+      "code": "RST-MX-11",
+      "class": "RESTRAINT",
+      "name": "Матрица фиксации",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 9,
+        "devices": [
+          "lab_baseline_cell",
+          "lab_firm_brush_rig",
+          "lab_impact_bench",
+          "lab_electro_bench",
+          "lab_posture_chair",
+          "lab_mental_correction_chair",
+          "lab_deprivation_pod",
+          "lab_stall_row",
+          "lab_pen_pneumatic"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_bed_frame",
+          "structure_cage",
+          "structure_stall_row",
+          "work_impact_paddle",
+          "work_electro_pad",
+          "work_electro_collar",
+          "restraint_wrist_cuff",
+          "restraint_ankle_cuff",
+          "restraint_thigh_clamp",
+          "restraint_waist_belt",
+          "restraint_neck_yoke",
+          "restraint_head_frame",
+          "sensory_hood"
+        ],
+        "outbound": [
+          "structure_bed_frame",
+          "restraint_wrist_cuff",
+          "restraint_ankle_cuff",
+          "motion_spreader"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_baseline_cell",
+          "lab_firm_brush_rig",
+          "lab_impact_bench",
+          "lab_electro_bench",
+          "lab_posture_chair",
+          "lab_mental_correction_chair",
+          "lab_deprivation_pod",
+          "lab_stall_row",
+          "lab_pen_pneumatic"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_tic",
+          "kit_pen",
+          "kit_imp",
+          "kit_res",
+          "kit_sen",
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/restraint_matrix.glb",
+          "present": true,
+          "nodes": 268
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_soft",
+      "code": "SRF-SOFT-01",
+      "class": "SURFACE",
+      "name": "Мягкое ложе",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_contour_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "surface_anti_slip",
+          "surface_liner",
+          "surface_sensor"
+        ],
+        "outbound": [
+          "surface_liner",
+          "structure_bed_frame",
+          "surface_anti_slip"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_contour_bed"
+        ],
+        "kits": [
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_soft.glb",
+          "present": true,
+          "nodes": 31
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_anti_slip",
+      "code": "SRF-AS-02",
+      "class": "SURFACE",
+      "name": "Антискольжение",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_thermal_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "surface_soft",
+          "surface_liner"
+        ],
+        "outbound": [
+          "surface_soft",
+          "surface_liner",
+          "structure_bed_frame"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_thermal_bed"
+        ],
+        "kits": [
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_anti_slip.glb",
+          "present": true,
+          "nodes": 20
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_heated",
+      "code": "SRF-HOT-03",
+      "class": "SURFACE",
+      "name": "Обогрев",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_thermal_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_bed_frame",
+          "work_probe_thermal",
+          "work_thermal_pad",
+          "surface_cooled"
+        ],
+        "outbound": [
+          "surface_cooled",
+          "surface_liner",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_thermal_bed"
+        ],
+        "kits": [
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_heated.glb",
+          "present": true,
+          "nodes": 56
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_cooled",
+      "code": "SRF-COLD-04",
+      "class": "SURFACE",
+      "name": "Охлаждение",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_thermal_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_thermal_pad",
+          "surface_heated"
+        ],
+        "outbound": [
+          "surface_heated",
+          "surface_liner",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_thermal_bed"
+        ],
+        "kits": [
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_cooled.glb",
+          "present": true,
+          "nodes": 44
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_fluid_channel",
+      "code": "SRF-DR-05",
+      "class": "SURFACE",
+      "name": "Дренаж",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 3,
+        "devices": [
+          "lab_spray_station",
+          "lab_irrigation_station",
+          "lab_thermal_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_spray",
+          "surface_liner",
+          "utility_drain"
+        ],
+        "outbound": [
+          "surface_liner",
+          "work_irrigation",
+          "utility_drain"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_spray_station",
+          "lab_irrigation_station",
+          "lab_thermal_bed"
+        ],
+        "kits": [
+          "kit_flu",
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_fluid_channel.glb",
+          "present": true,
+          "nodes": 83
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_liner",
+      "code": "SRF-LIN-06",
+      "class": "SURFACE",
+      "name": "Лайнер",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 3,
+        "devices": [
+          "lab_roller_applicator",
+          "lab_thermal_bed",
+          "lab_contour_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_roller",
+          "surface_soft",
+          "surface_anti_slip",
+          "surface_heated",
+          "surface_cooled",
+          "surface_fluid_channel",
+          "surface_contour"
+        ],
+        "outbound": [
+          "surface_soft",
+          "surface_anti_slip",
+          "surface_fluid_channel"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_roller_applicator",
+          "lab_thermal_bed",
+          "lab_contour_bed"
+        ],
+        "kits": [
+          "kit_flu",
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_liner.glb",
+          "present": true,
+          "nodes": 42
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_sensor",
+      "code": "SRF-SENS-07",
+      "class": "SURFACE",
+      "name": "Сенсорный мат",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 5,
+        "devices": [
+          "lab_diagnostic_table",
+          "lab_baseline_cell",
+          "lab_data_collector",
+          "lab_thermal_bed",
+          "lab_sensor_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_bed_frame",
+          "control_telemetry"
+        ],
+        "outbound": [
+          "control_telemetry",
+          "surface_soft",
+          "structure_bed_frame"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_diagnostic_table",
+          "lab_baseline_cell",
+          "lab_data_collector",
+          "lab_thermal_bed",
+          "lab_sensor_bed"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_sensor.glb",
+          "present": true,
+          "nodes": 37
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "surface_contour",
+      "code": "SRF-CONT-08",
+      "class": "SURFACE",
+      "name": "Контур",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_sensor_bed",
+          "lab_contour_bed"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "structure_bed_frame",
+          "surface_liner",
+          "work_suction"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_sensor_bed",
+          "lab_contour_bed"
+        ],
+        "kits": [
+          "kit_sur"
+        ],
+        "model": {
+          "file": "components/surface_contour.glb",
+          "present": true,
+          "nodes": 53
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "sensory_hood",
+      "code": "SNS-HOOD-01",
+      "class": "SENSORY",
+      "name": "Капюшон",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_deprivation_pod"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_cage",
+          "sensory_audio",
+          "sensory_light"
+        ],
+        "outbound": [
+          "structure_cage",
+          "restraint_matrix",
+          "sensory_audio"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_deprivation_pod"
+        ],
+        "kits": [
+          "kit_sen"
+        ],
+        "model": {
+          "file": "components/sensory_hood.glb",
+          "present": true,
+          "nodes": 32
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "sensory_visor",
+      "code": "SNS-VIS-02",
+      "class": "SENSORY",
+      "name": "Визор",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_mental_correction_chair",
+          "lab_vision_rig"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "sensory_audio"
+        ],
+        "outbound": [
+          "sensory_audio",
+          "control_telemetry",
+          "structure_portal"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_mental_correction_chair",
+          "lab_vision_rig"
+        ],
+        "kits": [
+          "kit_sen"
+        ],
+        "model": {
+          "file": "components/sensory_visor.glb",
+          "present": true,
+          "nodes": 34
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "sensory_audio",
+      "code": "SNS-AUD-03",
+      "class": "SENSORY",
+      "name": "Направленный звук",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 3,
+        "devices": [
+          "lab_mental_correction_chair",
+          "lab_deprivation_pod",
+          "lab_vision_rig"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_cage",
+          "sensory_hood",
+          "sensory_visor"
+        ],
+        "outbound": [
+          "sensory_visor",
+          "sensory_hood",
+          "control_console"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_mental_correction_chair",
+          "lab_deprivation_pod",
+          "lab_vision_rig"
+        ],
+        "kits": [
+          "kit_sen"
+        ],
+        "model": {
+          "file": "components/sensory_audio.glb",
+          "present": true,
+          "nodes": 61
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "sensory_light",
+      "code": "SNS-LIGHT-04",
+      "class": "SENSORY",
+      "name": "Управляемый свет",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_deprivation_pod"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "structure_cage",
+          "sensory_hood",
+          "control_console"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_deprivation_pod"
+        ],
+        "kits": [
+          "kit_sen"
+        ],
+        "model": {
+          "file": "components/sensory_light.glb",
+          "present": true,
+          "nodes": 30
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "control_console",
+      "code": "CTL-CON-01",
+      "class": "CONTROL",
+      "name": "Пульт",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 34,
+        "devices": [
+          "lab_data_collector",
+          "lab_sex_machine_tickling",
+          "lab_foot_cradle",
+          "lab_feather_pod",
+          "lab_tickle_arch",
+          "lab_firm_brush_rig",
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_anal",
+          "lab_pen_rotary",
+          "lab_pen_dual",
+          "lab_pen_thermal",
+          "lab_sex_machine_circularsaw",
+          "lab_attachment_drum",
+          "lab_impact_bench",
+          "lab_electro_bench",
+          "lab_spray_station",
+          "lab_roller_applicator",
+          "lab_irrigation_station",
+          "lab_fluid_collector",
+          "lab_restraint_matrix",
+          "lab_x_cross",
+          "lab_suspension_frame",
+          "lab_stirrup_stand",
+          "lab_neck_yoke",
+          "lab_posture_chair",
+          "lab_thermal_bed",
+          "lab_mental_correction_chair",
+          "lab_deprivation_pod",
+          "lab_vision_rig",
+          "lab_stall_row",
+          "lab_portable_unit",
+          "lab_pen_piston",
+          "lab_pen_pneumatic",
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_stall_row",
+          "work_tickle_pair",
+          "sensory_audio",
+          "sensory_light",
+          "control_telemetry",
+          "control_estop",
+          "utility_data",
+          "utility_routing",
+          "work_attach_vibrating"
+        ],
+        "outbound": [
+          "control_telemetry",
+          "control_estop",
+          "utility_data"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_data_collector",
+          "lab_sex_machine_tickling",
+          "lab_foot_cradle",
+          "lab_feather_pod",
+          "lab_tickle_arch",
+          "lab_firm_brush_rig",
+          "lab_sex_machine_vaginal",
+          "lab_sex_machine_anal",
+          "lab_pen_rotary",
+          "lab_pen_dual",
+          "lab_pen_thermal",
+          "lab_sex_machine_circularsaw",
+          "lab_attachment_drum",
+          "lab_impact_bench",
+          "lab_electro_bench",
+          "lab_spray_station",
+          "lab_roller_applicator",
+          "lab_irrigation_station",
+          "lab_fluid_collector",
+          "lab_restraint_matrix",
+          "lab_x_cross",
+          "lab_suspension_frame",
+          "lab_stirrup_stand",
+          "lab_neck_yoke",
+          "lab_posture_chair",
+          "lab_thermal_bed",
+          "lab_mental_correction_chair",
+          "lab_deprivation_pod",
+          "lab_vision_rig",
+          "lab_stall_row",
+          "lab_portable_unit",
+          "lab_pen_piston",
+          "lab_pen_pneumatic",
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_tic",
+          "kit_pen",
+          "kit_imp",
+          "kit_flu",
+          "kit_res",
+          "kit_sur",
+          "kit_sen",
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/control_console.glb",
+          "present": true,
+          "nodes": 33
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "control_telemetry",
+      "code": "CTL-TEL-02",
+      "class": "CONTROL",
+      "name": "Телеметрия",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 12,
+        "devices": [
+          "lab_diagnostic_table",
+          "lab_sensitivity_arch",
+          "lab_baseline_cell",
+          "lab_data_collector",
+          "lab_irrigation_station",
+          "lab_fluid_collector",
+          "lab_suspension_frame",
+          "lab_posture_chair",
+          "lab_sensor_bed",
+          "lab_deprivation_pod",
+          "lab_vision_rig",
+          "lab_service_dock"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_cage",
+          "work_probe_thermal",
+          "work_thermal_pad",
+          "work_irrigation",
+          "work_suction",
+          "surface_heated",
+          "surface_cooled",
+          "surface_sensor",
+          "sensory_visor",
+          "control_console",
+          "control_interlock",
+          "utility_data",
+          "service_dock",
+          "motion_piston_rod",
+          "motion_piston_hydraulic",
+          "motion_piston_servo",
+          "work_attach_inflatable"
+        ],
+        "outbound": [
+          "surface_sensor",
+          "control_console",
+          "work_electro_pad"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_diagnostic_table",
+          "lab_sensitivity_arch",
+          "lab_baseline_cell",
+          "lab_data_collector",
+          "lab_irrigation_station",
+          "lab_fluid_collector",
+          "lab_suspension_frame",
+          "lab_posture_chair",
+          "lab_sensor_bed",
+          "lab_deprivation_pod",
+          "lab_vision_rig",
+          "lab_service_dock"
+        ],
+        "kits": [
+          "kit_cal",
+          "kit_flu",
+          "kit_res",
+          "kit_sur",
+          "kit_sen",
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/control_telemetry.glb",
+          "present": true,
+          "nodes": 75
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "control_estop",
+      "code": "CTL-ESTOP-03",
+      "class": "CONTROL",
+      "name": "Аварийный стоп",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_diagnostic_table"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "control_console",
+          "control_interlock",
+          "utility_power"
+        ],
+        "outbound": [
+          "control_console",
+          "control_interlock",
+          "utility_power"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_diagnostic_table"
+        ],
+        "kits": [
+          "kit_cal"
+        ],
+        "model": {
+          "file": "components/control_estop.glb",
+          "present": true,
+          "nodes": 33
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "control_interlock",
+      "code": "CTL-INT-04",
+      "class": "CONTROL",
+      "name": "Блокировки",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_electro_bench"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_electro_pad",
+          "work_electro_collar",
+          "control_estop",
+          "utility_power",
+          "motion_piston_pneumatic"
+        ],
+        "outbound": [
+          "control_estop",
+          "control_telemetry",
+          "structure_dock"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_electro_bench"
+        ],
+        "kits": [
+          "kit_imp"
+        ],
+        "model": {
+          "file": "components/control_interlock.glb",
+          "present": true,
+          "nodes": 88
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "utility_power",
+      "code": "UTL-PWR-01",
+      "class": "UTILITY",
+      "name": "Питание",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 4,
+        "devices": [
+          "lab_gantry",
+          "lab_service_dock",
+          "lab_stall_row",
+          "lab_portable_unit"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "structure_stall_row",
+          "control_estop",
+          "utility_routing",
+          "service_dock",
+          "motion_piston_hydraulic"
+        ],
+        "outbound": [
+          "control_estop",
+          "control_interlock",
+          "structure_base"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_gantry",
+          "lab_service_dock",
+          "lab_stall_row",
+          "lab_portable_unit"
+        ],
+        "kits": [
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/utility_power.glb",
+          "present": true,
+          "nodes": 102
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "utility_data",
+      "code": "UTL-DATA-02",
+      "class": "UTILITY",
+      "name": "Данные",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_gantry",
+          "lab_service_dock"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "control_console"
+        ],
+        "outbound": [
+          "control_console",
+          "control_telemetry",
+          "service_dock"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_gantry",
+          "lab_service_dock"
+        ],
+        "kits": [
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/utility_data.glb",
+          "present": true,
+          "nodes": 51
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "utility_air",
+      "code": "UTL-AIR-03",
+      "class": "UTILITY",
+      "name": "Воздух",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_pneumatic"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_air_jet",
+          "work_probe_inflatable",
+          "motion_piston_pneumatic",
+          "work_attach_inflatable"
+        ],
+        "outbound": [
+          "work_air_jet",
+          "work_probe_inflatable",
+          "structure_dock"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_pneumatic"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/utility_air.glb",
+          "present": true,
+          "nodes": 71
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "utility_water",
+      "code": "UTL-WATER-04",
+      "class": "UTILITY",
+      "name": "Вода",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [
+          "work_spray",
+          "work_irrigation",
+          "fluid_mixer",
+          "service_cleaner"
+        ],
+        "outbound": [
+          "work_spray",
+          "work_roller",
+          "work_irrigation"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Инфраструктурный хаб: 4 входящие ссылки (spray, irrigation, mixer, cleaner).",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/utility_water.glb",
+          "present": true,
+          "nodes": 76
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "utility_drain",
+      "code": "UTL-DRAIN-05",
+      "class": "UTILITY",
+      "name": "Слив",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [
+          "work_irrigation",
+          "work_suction",
+          "surface_fluid_channel",
+          "service_cleaner"
+        ],
+        "outbound": [
+          "surface_fluid_channel",
+          "work_irrigation",
+          "work_suction"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Инфраструктурный хаб: 4 входящие ссылки (irrigation, suction, surface_fluid_channel, cleaner).",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/utility_drain.glb",
+          "present": true,
+          "nodes": 47
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "utility_routing",
+      "code": "UTL-ROUTE-06",
+      "class": "UTILITY",
+      "name": "Кабельный контур",
+      "catalogStatus": "core",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "structure_base",
+          "control_console",
+          "utility_power"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P1",
+      "reason": "status core, но 0 устройств и 0 ссылок — аномалия «ядро без применения». Не архивировать (ядро Mk-I); отдельным решением либо подключить к станции, либо понизить статус.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/utility_routing.glb",
+          "present": true,
+          "nodes": 85
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "service_dock",
+      "code": "SRV-DOCK-01",
+      "class": "SERVICE",
+      "name": "Сервисный док",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_service_dock"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "utility_data",
+          "service_cleaner"
+        ],
+        "outbound": [
+          "structure_dock",
+          "control_telemetry",
+          "utility_power"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_service_dock"
+        ],
+        "kits": [
+          "kit_tec"
+        ],
+        "model": {
+          "file": "components/service_dock.glb",
+          "present": true,
+          "nodes": 117
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "service_cleaner",
+      "code": "SRV-CLEAN-02",
+      "class": "SERVICE",
+      "name": "Мойка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "utility_water",
+          "utility_drain",
+          "service_dock"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P3",
+      "reason": "Мойка не входит ни в одно устройство; сервисный сценарий закрывает service_dock (1 устройство). 0 входящих ссылок.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/service_cleaner.glb",
+          "present": true,
+          "nodes": 125
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/tools/build_service_cleaner.py"
+        ]
+      }
+    },
+    {
+      "id": "motion_piston_rod",
+      "code": "MOT-PIS-01",
+      "class": "MOTION",
+      "name": "Штоковый поршень",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_piston"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_attach_curved"
+        ],
+        "outbound": [
+          "motion_linear_y",
+          "work_probe_linear",
+          "work_attach_adapter",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_piston"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/motion_piston_rod.glb",
+          "present": true,
+          "nodes": 49
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_piston_pneumatic",
+      "code": "MOT-PIS-02",
+      "class": "MOTION",
+      "name": "Пневматический поршень",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_pneumatic"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "utility_air",
+          "work_probe_linear",
+          "work_attach_inflatable",
+          "control_interlock"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_pneumatic"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/motion_piston_pneumatic.glb",
+          "present": true,
+          "nodes": 58
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "motion_piston_hydraulic",
+      "code": "MOT-PIS-03",
+      "class": "MOTION",
+      "name": "Гидравлический поршень",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "utility_power",
+          "work_probe_linear",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P1",
+      "reason": "Дублирует силовой диапазон servo (400 Н) при кратно большей сложности: насос, 380 В, 12 кг, дренаж и контроль утечек. Ни одно устройство не использует; входящих ссылок совместимости нет.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/motion_piston_hydraulic.glb",
+          "present": true,
+          "nodes": 47
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:366",
+          "docs/plans/tools/build_motion_piston_hydraulic.py"
+        ]
+      }
+    },
+    {
+      "id": "motion_piston_telescopic",
+      "code": "MOT-PIS-04",
+      "class": "MOTION",
+      "name": "Телескопический поршень",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "motion_linear_y",
+          "work_probe_linear",
+          "structure_dock"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P1",
+      "reason": "Ход 250 мм перекрыт вариантами rod (200 мм) и servo (до 300 мм); усилие 150 Н — самое слабое в семействе. 0 устройств, 0 входящих ссылок.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/motion_piston_telescopic.glb",
+          "present": true,
+          "nodes": 42
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:367",
+          "docs/plans/tools/build_motion_piston_telescopic.py"
+        ]
+      }
+    },
+    {
+      "id": "motion_piston_cam",
+      "code": "MOT-PIS-05",
+      "class": "MOTION",
+      "name": "Кулачковый поршень",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_attach_smooth",
+          "motion_linear_x"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P3",
+      "reason": "Функциональный дубль motion_oscillating (кулачок/кривошип, 0,5–5 Гц, 0–60 против 0–50 мм). Уникальные данные — law cam_profile и QA-кейс; архив только после переноса профиля в осциллятор.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/motion_piston_cam.glb",
+          "present": true,
+          "nodes": 74
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "viewer": [
+          "public/models/machine-modules/components-viewer.js:342 (directModels)"
+        ],
+        "qa": [
+          "docs/plans/tools/qa_kinematics_runtime.py",
+          "docs/plans/checks/kinematics-batch1.json",
+          "docs/plans/kinematics-runtime-report.json"
+        ],
+        "data": [
+          "docs/plans/checks/cam_profile_motion_piston_cam.json"
+        ]
+      }
+    },
+    {
+      "id": "motion_piston_servo",
+      "code": "MOT-PIS-06",
+      "class": "MOTION",
+      "name": "Сервоцилиндр",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_attach_carousel"
+        ],
+        "outbound": [
+          "motion_linear_y",
+          "work_probe_linear",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "merge",
+      "priority": "P3",
+      "reason": "Функциональный суперсет rod: тот же шарико-винтовой привод + энкодер, 400 Н / 500 мм/с / 200 мм. Используется lab_pen_carousel, а work_attach_carousel ссылается на него в compatibility → слияние только с правкой устройства и ссылки.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/motion_piston_servo.glb",
+          "present": true,
+          "nodes": 114
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_smooth",
+      "code": "WRK-ATT-01",
+      "class": "WORK",
+      "name": "Гладкая насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_pen_piston",
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_piston_cam",
+          "work_attach_sleeve",
+          "work_attach_adapter",
+          "work_attach_sterile_liner",
+          "work_attach_carousel"
+        ],
+        "outbound": [
+          "work_probe_linear",
+          "work_probe_rotary",
+          "work_attach_adapter"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_piston",
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_attach_smooth.glb",
+          "present": true,
+          "nodes": 12
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_ribbed",
+      "code": "WRK-ATT-02",
+      "class": "WORK",
+      "name": "Ребристая насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 2,
+        "devices": [
+          "lab_pen_pneumatic",
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_attach_sleeve",
+          "work_attach_sterile_liner",
+          "work_attach_carousel"
+        ],
+        "outbound": [
+          "work_probe_linear",
+          "work_probe_rotary",
+          "work_attach_adapter"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_pneumatic",
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_attach_ribbed.glb",
+          "present": true,
+          "nodes": 12
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_spiral",
+      "code": "WRK-ATT-03",
+      "class": "WORK",
+      "name": "Спиральная насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_rotary",
+          "motion_rotary",
+          "work_attach_adapter"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_attach_spiral.glb",
+          "present": true,
+          "nodes": 15
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_nodular",
+      "code": "WRK-ATT-04",
+      "class": "WORK",
+      "name": "Нодулярная насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_probe_rotary",
+          "work_attach_adapter"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P2",
+      "reason": "Профильный вариант той же базы (Ø20–60 × 80–200 мм, силикон Shore 15A, байонет): отличается только рельефом выступов. 0 устройств.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_nodular.glb",
+          "present": true,
+          "nodes": 16
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:378",
+          "docs/plans/station-device-catalog.md:436"
+        ]
+      }
+    },
+    {
+      "id": "work_attach_tapered",
+      "code": "WRK-ATT-05",
+      "class": "WORK",
+      "name": "Конусная насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_attach_adapter",
+          "work_attach_sterile_liner"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P2",
+      "reason": "Профильный вариант (конус) той же базы и посадки. 0 устройств, 0 входящих ссылок.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_tapered.glb",
+          "present": true,
+          "nodes": 13
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:379"
+        ]
+      }
+    },
+    {
+      "id": "work_attach_bulbous",
+      "code": "WRK-ATT-06",
+      "class": "WORK",
+      "name": "Насадка с утолщением",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_attach_adapter"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P2",
+      "reason": "Дубль nodular по смыслу (дистальное утолщение) и tapered по геометрии расширения. 0 устройств.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_bulbous.glb",
+          "present": true,
+          "nodes": 15
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:380"
+        ]
+      }
+    },
+    {
+      "id": "work_attach_curved",
+      "code": "WRK-ATT-07",
+      "class": "WORK",
+      "name": "Изогнутая насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_attach_adapter",
+          "motion_piston_rod"
+        ]
+      },
+      "recommendation": "hold",
+      "priority": "P4",
+      "reason": "Уникальная функция (обход прямой оси 15–30°), дублей нет, но 0 устройств. Держать как концепт.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_curved.glb",
+          "present": true,
+          "nodes": 16
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_dual_density",
+      "code": "WRK-ATT-08",
+      "class": "WORK",
+      "name": "Двухплотностная насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_probe_rotary",
+          "work_attach_adapter"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P3",
+      "reason": "Двухслойная оболочка = sleeve + профиль; собственного потребителя нет. 0 устройств.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_dual_density.glb",
+          "present": true,
+          "nodes": 14
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:382"
+        ]
+      }
+    },
+    {
+      "id": "work_attach_vibrating",
+      "code": "WRK-ATT-09",
+      "class": "WORK",
+      "name": "Вибрирующая насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_probe_linear",
+          "work_attach_adapter",
+          "control_console"
+        ]
+      },
+      "recommendation": "hold",
+      "priority": "P4",
+      "reason": "Активная функция (0,5–6 Гц, 1–3 мм): вибрацию уже даёт motion_oscillating, но это насадка, а не привод. 0 устройств — решение за владельцем линейки.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_vibrating.glb",
+          "present": true,
+          "nodes": 28
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_inflatable",
+      "code": "WRK-ATT-10",
+      "class": "WORK",
+      "name": "Надувная насадка",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_pneumatic"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_piston_pneumatic"
+        ],
+        "outbound": [
+          "utility_air",
+          "work_probe_linear",
+          "control_telemetry"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_pneumatic"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_attach_inflatable.glb",
+          "present": true,
+          "nodes": 24
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_sleeve",
+      "code": "WRK-ATT-11",
+      "class": "WORK",
+      "name": "Мягкий чехол",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "work_attach_smooth",
+          "work_attach_ribbed",
+          "work_attach_sterile_liner"
+        ]
+      },
+      "recommendation": "archive",
+      "priority": "P2",
+      "reason": "Дубль work_attach_sterile_liner (сменный слой поверх насадки); liner используется и закрывает гигиенический сценарий. 0 устройств.",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_sleeve.glb",
+          "present": true,
+          "nodes": 15
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true,
+        "docs": [
+          "docs/plans/station-device-catalog.md:385"
+        ]
+      }
+    },
+    {
+      "id": "work_attach_adapter",
+      "code": "WRK-ATT-12",
+      "class": "WORK",
+      "name": "Переходник",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 0,
+        "devices": []
+      },
+      "compatibility": {
+        "inbound": [
+          "motion_piston_rod",
+          "work_attach_smooth",
+          "work_attach_ribbed",
+          "work_attach_spiral",
+          "work_attach_nodular",
+          "work_attach_tapered",
+          "work_attach_bulbous",
+          "work_attach_curved",
+          "work_attach_dual_density",
+          "work_attach_vibrating"
+        ],
+        "outbound": [
+          "work_probe_linear",
+          "work_probe_rotary",
+          "work_attach_smooth"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Хаб совместимости: 10 входящих ссылок (rod + 9 насадок). 0 устройств, но архивирование обнулит правило стыковки «поршень/зонд → насадка».",
+      "dependencies": {
+        "devices": [],
+        "kits": [],
+        "model": {
+          "file": "components/work_attach_adapter.glb",
+          "present": true,
+          "nodes": 11
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_sterile_liner",
+      "code": "WRK-ATT-13",
+      "class": "WORK",
+      "name": "Стерильная гильза",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_piston"
+        ]
+      },
+      "compatibility": {
+        "inbound": [
+          "work_attach_tapered",
+          "work_attach_sleeve"
+        ],
+        "outbound": [
+          "work_attach_smooth",
+          "work_attach_ribbed",
+          "work_probe_linear"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_piston"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_attach_sterile_liner.glb",
+          "present": true,
+          "nodes": 10
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    },
+    {
+      "id": "work_attach_carousel",
+      "code": "WRK-ATT-14",
+      "class": "WORK",
+      "name": "Карусель насадок",
+      "catalogStatus": "concept",
+      "usage": {
+        "count": 1,
+        "devices": [
+          "lab_pen_carousel"
+        ]
+      },
+      "compatibility": {
+        "inbound": [],
+        "outbound": [
+          "motion_piston_servo",
+          "work_attach_smooth",
+          "work_attach_ribbed",
+          "structure_dock"
+        ]
+      },
+      "recommendation": "keep",
+      "priority": "P0",
+      "reason": "Используется в устройствах: архивирование сломает сборку.",
+      "dependencies": {
+        "devices": [
+          "lab_pen_carousel"
+        ],
+        "kits": [
+          "kit_pen"
+        ],
+        "model": {
+          "file": "components/work_attach_carousel.glb",
+          "present": true,
+          "nodes": 58
+        },
+        "contract": true,
+        "mates": true,
+        "modelsIndex": true
+      }
+    }
+  ],
+  "duplicate_groups": [
+    {
+      "family": "pistons",
+      "members": [
+        "motion_piston_rod",
+        "motion_piston_pneumatic",
+        "motion_piston_hydraulic",
+        "motion_piston_telescopic",
+        "motion_piston_cam",
+        "motion_piston_servo"
+      ],
+      "verdict": "6 -> 3 (+1 вариант)",
+      "keep": [
+        "motion_piston_rod",
+        "motion_piston_pneumatic"
+      ],
+      "keep_as_variant": [
+        "motion_piston_servo"
+      ],
+      "archive": [
+        "motion_piston_hydraulic",
+        "motion_piston_telescopic",
+        "motion_piston_cam"
+      ],
+      "rationale": "Различаются приводом (винт/воздух/гидравлика/серво) и ходом (60–250 мм). Уникальных потребителей у hydraulic/telescopic/cam нет; servo перекрывает rod по функциям, cam перекрывает oscillator по функции."
+    },
+    {
+      "family": "probes",
+      "members": [
+        "work_probe_linear",
+        "work_probe_rotary",
+        "work_probe_inflatable",
+        "work_probe_thermal",
+        "work_probe_textured"
+      ],
+      "verdict": "5 -> 4",
+      "archive": [
+        "work_probe_textured"
+      ],
+      "merge": [
+        "work_probe_inflatable → work_attach_inflatable"
+      ],
+      "rationale": "textured = база + три существующие насадки; inflatable дублирует надувную насадку."
+    },
+    {
+      "family": "attachments",
+      "members": [
+        "work_attach_smooth",
+        "work_attach_ribbed",
+        "work_attach_spiral",
+        "work_attach_nodular",
+        "work_attach_tapered",
+        "work_attach_bulbous",
+        "work_attach_curved",
+        "work_attach_dual_density",
+        "work_attach_vibrating",
+        "work_attach_inflatable",
+        "work_attach_sleeve",
+        "work_attach_adapter",
+        "work_attach_sterile_liner",
+        "work_attach_carousel"
+      ],
+      "verdict": "14 -> 9 видимых",
+      "archive": [
+        "work_attach_nodular",
+        "work_attach_tapered",
+        "work_attach_bulbous",
+        "work_attach_dual_density",
+        "work_attach_sleeve"
+      ],
+      "hold": [
+        "work_attach_curved",
+        "work_attach_vibrating"
+      ],
+      "keep_hub": [
+        "work_attach_adapter"
+      ],
+      "rationale": "Все 14 сидят на одном байонете, в одном габарите Ø20–60 × 70–220 мм и одной шор-твёрдости 15–25A; различаются профилем (вариант-пресет), а не интерфейсом."
+    },
+    {
+      "family": "thermal",
+      "members": [
+        "work_probe_thermal",
+        "work_thermal_pad",
+        "surface_heated",
+        "surface_cooled"
+      ],
+      "verdict": "4 -> 3",
+      "archive": [
+        "work_thermal_pad"
+      ],
+      "rationale": "Нагрев/охлаждение закрывают термо-зонд (локально) и surface_heated/cooled (ложе)."
+    },
+    {
+      "family": "covers",
+      "members": [
+        "work_attach_sleeve",
+        "work_attach_sterile_liner",
+        "surface_liner"
+      ],
+      "verdict": "3 -> 2",
+      "archive": [
+        "work_attach_sleeve"
+      ],
+      "rationale": "Сменный слой поверх расходника = liner; sleeve не используется."
+    },
+    {
+      "family": "rotation",
+      "members": [
+        "motion_rotary",
+        "motion_turntable",
+        "work_rotary_disc",
+        "work_rotary_drum",
+        "work_probe_rotary"
+      ],
+      "verdict": "5 -> 4",
+      "archive": [
+        "motion_turntable"
+      ],
+      "rationale": "turntable (азимут ложа) не нужен ни одному устройству; rotary — вращение головки (2 устройства), disc/drum/probe_rotary — сменные головки на нём."
+    },
+    {
+      "family": "probe_vs_attachment",
+      "members": [
+        "work_probe_inflatable",
+        "work_attach_inflatable"
+      ],
+      "verdict": "дубль параметров",
+      "merge": [
+        "work_probe_inflatable → work_attach_inflatable"
+      ],
+      "rationale": "0–0,4 бар, +30 % обхвата, силикон/полиуретан, воздух — совпадает построчно."
+    }
+  ],
+  "file_level_duplicates": [
+    {
+      "path": "public/models/machine-modules/catalog.json",
+      "kind": "legacy catalog",
+      "detail": "10 модулей и 4 сборки; 6 id отсутствуют в component-catalog (motion_linear, motion_lift, work_probe, work_rotary, work_brush_pair, interface_console). Читается только demo.html:1538.",
+      "recommendation": "не архивировать без решения владельца: либо перевести demo.html на component-catalog.json, либо архивировать catalog.json + demo.html вместе"
+    },
+    {
+      "path": "public/models/machine-modules/component-models.partial.json",
+      "kind": "build leftover",
+      "detail": "1 запись (work_probe_rotary), дублирует component-models.json",
+      "recommendation": "удалить как мусор сборки (отдельным патчем)"
+    },
+    {
+      "path": "public/models/machine-modules/machine_modules.blend1",
+      "kind": "blend backup",
+      "detail": "7,05 МБ, полная копия machine_modules.blend",
+      "recommendation": "архивировать/удалить после проверки, что blend не нужен в поставке"
+    },
+    {
+      "path": "cyberjack.sqlite.bak_*",
+      "kind": "db backups",
+      "detail": "11 файлов, ~1,5 ГБ суммарно",
+      "recommendation": "вынести из рабочего дерева (вне компонентного каталога); влияет на git-вес"
+    },
+    {
+      "path": "device-catalog.json modules[]",
+      "kind": "derived duplication",
+      "detail": "96 записей id/class/name/purpose/status дублируют component-catalog; сейчас синхронны (0 расхождений по status)",
+      "recommendation": "не архивировать, но при введении status: archived синхронизировать или генерировать modules[] из каталога"
+    }
+  ],
+  "mechanism": {
+    "field": "status: \"archived\"",
+    "extra_fields": {
+      "archivedAt": "ISO-дата",
+      "archiveReason": "кратко",
+      "mergedInto": "id целевого компонента (для merge/archive-after-port)"
+    },
+    "principle": "Запись остаётся в component-catalog.json, contracts, mates, model index и GLB. Архивируется только видимость и участие в расчётах.",
+    "consumers": [
+      {
+        "file": "public/models/machine-modules/components.html",
+        "changes": [
+          "matches() ~стр.346: скрывать status===\"archived\" по умолчанию",
+          "#usage-filter ~стр.221: добавить option value=\"ARCHIVED\"",
+          "card() ~стр.365 и openComp() ~стр.412-419: метка статуса через словарь вместо тернарника core/концепт",
+          "boot() ~стр.504-514: считать stat-components/top-count/foot-meta без архивных, добавить счётчик архива"
+        ]
+      },
+      {
+        "file": "public/models/machine-modules/devices.html",
+        "changes": [
+          "STATUS ~стр.334: добавить archived: \"архив\"",
+          "module chips ~стр.481: гасить архивные модули",
+          "stat-modules ~стр.519: не считать архивные"
+        ]
+      },
+      {
+        "file": "public/models/machine-modules/components-viewer.js",
+        "changes": [
+          "ничего не требуется, пока GLB и запись в каталоге на месте (directModels:342 продолжает работать)"
+        ]
+      },
+      {
+        "file": "scripts/build-mating-map.py",
+        "changes": [
+          "исключать status==\"archived\" из components_without_usage/orphan-статистики (~стр.186-200, 649)"
+        ]
+      }
+    ],
+    "guard": "Скрипт-проверка (CI/pre-commit): (1) ни один devices[].modules не содержит archived id; (2) ни один compatibility[] неиспользуемого archived id не остаётся без mergedInto; (3) для каждого archived id существует GLB и запись контракта — архив не удаляет данные.",
+    "rollback": "Обратная замена status на \"concept\" одной правкой JSON; GLB/контракты/mates не затрагивались."
+  }
+}

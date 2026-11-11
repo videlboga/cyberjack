@@ -1,0 +1,3984 @@
+{
+ "format": "cj-matrix-frame3d-spec/1",
+ "generated": "2026-11-11",
+ "component": "restraint_matrix_frame3d",
+ "code": "RST-MX-13",
+ "label": "Каркас 3D (Mk-III)",
+ "status": "proposed",
+ "scope": "проектирование; каталог, GLB и viewer не изменялись",
+ "reference": {
+  "skp": "public/models/sex-machines-models-vol-04/sex-machines-models-vol-04/SexMachineModel-089.skp",
+  "render": "docs/plans/blockout/machines/SexMachineModel-089.png",
+  "what_borrowed": "вертикальная плита-стойка, руки по бокам на боковых плоскостях, ноги ниже кромки плиты, стопы на упоре у пола",
+  "what_changed": "плита стала наклоняемой 0-90° и получила поле T-slot с каретками; основание 2,0 x 1,0 с четырьмя стойками и верхней рамой для устойчивости"
+ },
+ "source_of_truth": [
+  "docs/plans/checks/restraint-hard-mount-spec.json",
+  "docs/plans/connector-registry.json",
+  "docs/plans/mates/restraint-service.json",
+  "docs/plans/fixator-requirements.md",
+  "public/models/machine-modules/components/restraint_matrix_universal.glb (Mk-II, только чтение)",
+  "docs/plans/blockout/component-library/restraint_matrix_universal/report.json"
+ ],
+ "conventions": {
+  "units": "метры, килограммы, градусы",
+  "coords": "glTF/three.js: X — длинная ось (голова −X, ноги +X), Y — вверх, Z — ширина",
+  "blender": "b = (gx, −gz, gy) — как в build_restraint_matrix_universal.py",
+  "panel_frame": "p = (u, v, h): u вдоль тела (+ в сторону ног), v поперёк (Z), h — нормаль привалочной плоскости (+ наружу от щита)",
+  "tilt_rotation": "R_z(−θ) вокруг оси Z в точке (X=0, Y=1,000); θ=0 ложе, θ=90 вертикально",
+  "axis_letters_resolution": "в брифе боковые крылья названы «X ≈ ±0,55»; в принятой системе (как в Mk-II) поперечная ось — Z, поэтому крылья стоят на Z = ±0,545. Буква X в брифе соответствует Z здесь; пересчёт X_brief = Z_here",
+  "position_m_latch": "центр отверстия языка (совпадает с осью пальца гнезда)",
+  "pin_axis": "p = u × w; u — выход языка (наружу от конечности), w — ось конечности"
+ },
+ "brief_resolution": {
+  "base": "2,000 (X) x 1,000 (Z), обвязка T-slot 45 x 45 на 4 домкратах",
+  "posts": "4 стойки T-slot 60 x 60, X = ±0,550, Z = ±0,475, Y 0,100…1,960",
+  "top_frame": "верхняя рама Y 1,900…1,960: 2 балки по Z + 3 по X (в т.ч. серьга подвеса)",
+  "shield": "съёмный наклоняемый щит 1,700 x 0,800 x 0,075 на цапфах Ø40 в разъёмных подшипниках",
+  "wings": "2 крыла на Z = ±0,545, Y 0,300…1,600, X −0,850…+0,850 (4 гнезда + ход под раздвижку)",
+  "lower_crossbar": "нижняя перекладина X = +0,720, Y 0,100…0,180, 2 гнезда стремени",
+  "height_m": 1.96,
+  "stability": "выносные опоры до Z = ±0,60; балласт 40 кг в основании"
+ },
+ "envelope": {
+  "bbox_m": [
+   2.0,
+   1.96,
+   1.09
+  ],
+  "bbox_min": [
+   -1.0,
+   0.0,
+   -0.545
+  ],
+  "bbox_max": [
+   1.0,
+   1.96,
+   0.545
+  ],
+  "base_m": [
+   2.0,
+   1.0
+  ],
+  "height_m": 1.96,
+  "note": "высота на 60 мм больше «~1,9» из брифа: щит 1,700 при оси на Y = 1,000 даёт верх 1,850, верхняя рама должна пройти над зоной разворота (R = 0,870)"
+ },
+ "modes": [
+  {
+   "id": "bed",
+   "theta_deg": 0,
+   "label": "Ложе",
+   "surface_y_m": 0.9625,
+   "entry": "укладка на спину, все 10 гнёзд в горизонтальной плоскости щита",
+   "dof_used": [
+    "traverse",
+    "slide",
+    "lift",
+    "yaw"
+   ]
+  },
+  {
+   "id": "recline",
+   "theta_deg": [
+    30,
+    60
+   ],
+   "label": "Полулёжа",
+   "detents": [
+    30,
+    45,
+    60
+   ],
+   "entry": "наклон рукояткой редуктора, стопор в детент + палец",
+   "dof_used": [
+    "tilt",
+    "traverse",
+    "slide",
+    "lift",
+    "yaw"
+   ]
+  },
+  {
+   "id": "upright",
+   "theta_deg": 90,
+   "label": "Вертикально",
+   "entry": "основной режим посадки как на 089: человек стоит спиной к щиту, руки разведены на крылья (w01/w02), стопы на упор (x01/x02), при необходимости подвес через y01",
+   "dof_used": [
+    "tilt",
+    "traverse",
+    "slide",
+    "lift",
+    "yaw",
+    "wing_ext",
+    "crossbar_lift"
+   ]
+  }
+ ],
+ "structure": {
+  "base": {
+   "perimeter": "2 x 2,000 + 2 x 1,000, T-slot 45 x 45, Y 0,040…0,100",
+   "feet": "4 x домкрат 116 x 116, ход 30 мм, оси X = ±0,930, Z = ±0,440",
+   "ballast": "плита 40 кг 1,20 x 0,60 x 0,030 в основании, крепление 4 x M10",
+   "outriggers": "2 складные опоры до Z = ±0,600 (в работе обязательны)",
+   "anchors": "4 x M12, поле 1,756 x 0,776 (как Mk-I/Mk-II — совместимо с полом)"
+  },
+  "posts": {
+   "profile": "T-slot 60 x 60, паз 15, алюминий 6063-T6",
+   "positions": [
+    [
+     -0.55,
+     0.475
+    ],
+    [
+     0.55,
+     0.475
+    ],
+    [
+     -0.55,
+     -0.475
+    ],
+    [
+     0.55,
+     -0.475
+    ]
+   ],
+   "y": [
+    0.1,
+    1.96
+   ],
+   "note": "стойки стоят по |Z| = 0,475 — вне полосы разворота щита (|Z| <= 0,450), поэтому щит проходит между ними и наклон ничем не ограничен"
+  },
+  "top_frame": {
+   "y": [
+    1.9,
+    1.96
+   ],
+   "members": [
+    "beam_x_front",
+    "beam_x_back",
+    "beam_z_mid",
+    "yoke_beam"
+   ],
+   "clearance_to_sweep_m": 0.03
+  },
+  "mid_beam": {
+   "y": [
+    0.86,
+    0.92
+   ],
+   "note": "траверса под подшипниковую стойку; щит в 0° лежит на 42 мм выше"
+  }
+ },
+ "panel": {
+  "size_m": [
+   1.7,
+   0.8,
+   0.075
+  ],
+  "frame": "обвязка T-slot 45 по периметру + 3 поперечины (X = −0,55 / 0 / +0,55)",
+  "face": "лист 3 мм 6063 + фрезерованное поле T-slot 15 (5 продольных пазов, шаг 0,100)",
+  "side_rail": "рельс 45 x 60 по Z = ±0,400 — несущий, в нём цапфа Ø40",
+  "pivot": {
+   "y": 1.0,
+   "x": 0.0,
+   "shaft": "Ø40 h8, сталь 40Х, в разъёмном подшипнике на 2 x M8",
+   "removable": "снятие щита: 4 болта M8 + страховочная шпилька, масса щита с лучами 47 кг"
+  },
+  "sweep_radius_m": 0.8498,
+  "sweep_worst_point": [
+   -0.83,
+   0.1825
+  ],
+  "bed_surface_y_m": 0.9625,
+  "note": "поверхность ложа на 0,963 — высокая; штатная посадка выполняется в режиме 90° (стоя), затем наклон. Причина: 1,70 м щита не могут быть и ложем на 0,30, и стояком 1,90 в одном габарите"
+ },
+ "rays": {
+  "count": 5,
+  "length_m": 0.92,
+  "profile": "T-slot 45 x 45",
+  "u_home_m": [
+   -0.66,
+   -0.37,
+   -0.17,
+   0.3,
+   0.77
+  ],
+  "ids": [
+   "R1",
+   "R2",
+   "R3",
+   "R4",
+   "R5"
+  ],
+  "zones": [
+   [
+    "head",
+    "neck"
+   ],
+   [
+    "waist"
+   ],
+   [
+    "wrist"
+   ],
+   [
+    "hip"
+   ],
+   [
+    "ankle",
+    "qr"
+   ]
+  ],
+  "travel_u_m": [
+   -0.3,
+   0.3
+  ],
+  "lock": "2 x M10 T-болт + клин, усилие 4 кН",
+  "carriages_per_ray": [
+   3,
+   2,
+   2,
+   2,
+   3
+  ]
+ },
+ "carriages": {
+  "count": 10,
+  "max": 12,
+  "body_m": [
+   0.074,
+   0.064,
+   0.052
+  ],
+  "dof": [
+   "traverse",
+   "slide",
+   "lift",
+   "yaw"
+  ],
+  "partition_rule": "две каретки на луче делят ход по v в середине между home; габарит каретки с гнездом 0,115 по v — минимум 0,190 между home"
+ },
+ "dof": [
+  {
+   "id": "tilt",
+   "node": "restraint_matrix_frame3d__panel_pivot",
+   "joint": "revolute",
+   "axis": "z",
+   "range_deg": [
+    0,
+    90
+   ],
+   "detents_deg": [
+    0,
+    15,
+    30,
+    45,
+    60,
+    75,
+    90
+   ],
+   "drive": "червячный редуктор i=40, самотормозящий, рукоятка 250 мм",
+   "lock": "сектор Ø360 + палец Ø16 в 7 отверстиях + страховочный штифт Ø5",
+   "animated": true,
+   "count": 1
+  },
+  {
+   "id": "traverse",
+   "node": "restraint_matrix_frame3d__carriage_<nn>",
+   "joint": "prismatic",
+   "axis": "u (X щита)",
+   "range_m": [
+    -0.85,
+    0.85
+   ],
+   "animated": true,
+   "count": 10,
+   "note": "групповой ход луча ±0,30 + индивидуальный паз ±0,06"
+  },
+  {
+   "id": "slide",
+   "node": "restraint_matrix_frame3d__slide_<nn>",
+   "joint": "prismatic",
+   "axis": "v (Z щита)",
+   "range_m": [
+    -0.4,
+    0.4
+   ],
+   "animated": true,
+   "count": 10,
+   "note": "по лучу, соседние каретки разграничены серединой между home"
+  },
+  {
+   "id": "lift",
+   "node": "restraint_matrix_frame3d__lift_<nn>",
+   "joint": "prismatic",
+   "axis": "h (нормаль щита)",
+   "range_m": [
+    0.0,
+    0.145
+   ],
+   "animated": true,
+   "count": 10,
+   "note": "винт M10 + маховик Ø42, шкала 1 мм; под толщину конечности"
+  },
+  {
+   "id": "yaw",
+   "node": "restraint_matrix_frame3d__yaw_<nn>",
+   "joint": "revolute",
+   "axis": "h",
+   "range_deg": [
+    -45,
+    45
+   ],
+   "step_deg": 5,
+   "animated": true,
+   "count": 10
+  },
+  {
+   "id": "tilt_adapt",
+   "node": "restraint_matrix_frame3d__adapter_<nn>",
+   "joint": "revolute",
+   "axis": "u",
+   "range_deg": [
+    -20,
+    20
+   ],
+   "animated": false,
+   "count": 10,
+   "note": "наклон привалочной плоскости под скос конечности; ставится и забывается"
+  },
+  {
+   "id": "ray_pitch",
+   "node": "restraint_matrix_frame3d__ray_<n>",
+   "joint": "prismatic",
+   "axis": "u",
+   "range_m": [
+    -0.3,
+    0.3
+   ],
+   "animated": false,
+   "count": 5,
+   "note": "грубый ход луча по боковому рельсу щита, замок 2 x M10"
+  },
+  {
+   "id": "wing_ext",
+   "node": "restraint_matrix_frame3d__wing_slide_<s>",
+   "joint": "prismatic",
+   "axis": "z",
+   "range_m": [
+    0.44,
+    0.6
+   ],
+   "animated": false,
+   "count": 2,
+   "note": "выдвижение крыла под раздвижку до 1,2 м"
+  },
+  {
+   "id": "crossbar_lift",
+   "node": "restraint_matrix_frame3d__crossbar",
+   "joint": "prismatic",
+   "axis": "y",
+   "range_m": [
+    0.1,
+    0.32
+   ],
+   "animated": false,
+   "count": 1,
+   "note": "высота перекладины под стопу в режиме 90°"
+  },
+  {
+   "id": "footplate",
+   "node": "restraint_matrix_frame3d__foot_plate",
+   "joint": "revolute",
+   "axis": "z",
+   "range_deg": [
+    -90,
+    0
+   ],
+   "animated": false,
+   "count": 2,
+   "note": "складная опорная площадка стоп (в 0° убрана)"
+  },
+  {
+   "id": "feet_level",
+   "node": "restraint_matrix_frame3d__foot_jack_<i>",
+   "joint": "prismatic",
+   "axis": "y",
+   "range_m": [
+    -0.03,
+    0.03
+   ],
+   "animated": false,
+   "count": 4
+  },
+  {
+   "id": "outrigger",
+   "node": "restraint_matrix_frame3d__outrigger_<s>",
+   "joint": "revolute",
+   "axis": "x",
+   "range_deg": [
+    0,
+    90
+   ],
+   "animated": false,
+   "count": 2,
+   "note": "выносные опоры до Z = ±0,60"
+  }
+ ],
+ "dof_budget": {
+  "total": 67,
+  "animated": 41,
+  "data_only": 26,
+  "simultaneous_fixtures": 10,
+  "planes": "луч/каретка дают 2 оси в плоскости щита (u, v), подъём — из плоскости (h), поворот — в плоскости, наклон плоскости — 6-я ось; крылья и перекладина добавляют неподвижные точки вне плоскости щита"
+ },
+ "sockets": {
+  "standard": "CJ-LATCH-30R",
+  "count": 19,
+  "on_panel": 12,
+  "on_chassis": 7,
+  "list": [
+   {
+    "id": "r_ankle_l",
+    "ray": "R5",
+    "fixture": "restraint_ankle_cuff",
+    "zone": "ankle",
+    "tongue": "T-30",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     0.77,
+     0.20203,
+     0.07948
+    ],
+    "fixture_origin_panel": [
+     0.77,
+     0.155,
+     0.045
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.0396,
+    "shell_r_m": 0.0434,
+    "mouth_clearance_m": -0.0038,
+    "shim_m": 0.006,
+    "standoff_m": 0.0,
+    "mirror_instance": false,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      0.505104,
+      0.863178,
+      0.0
+     ],
+     [
+      0.863178,
+      -0.505104,
+      0.0
+     ]
+    ],
+    "mount_quat": [
+     0.682491,
+     -0.185022,
+     -0.682491,
+     0.185022
+    ],
+    "mount_note": "обычная посадка, det = +1",
+    "load_n": 294
+   },
+   {
+    "id": "r_ankle_r",
+    "ray": "R5",
+    "fixture": "restraint_ankle_cuff",
+    "zone": "ankle",
+    "tongue": "T-30",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     0.77,
+     -0.20203,
+     0.07948
+    ],
+    "fixture_origin_panel": [
+     0.77,
+     -0.155,
+     0.045
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.0396,
+    "shell_r_m": 0.0434,
+    "mouth_clearance_m": -0.0038,
+    "shim_m": 0.006,
+    "standoff_m": 0.0,
+    "mirror_instance": true,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      0.505104,
+      0.863178,
+      0.0
+     ],
+     [
+      -0.863178,
+      0.505104,
+      0.0
+     ]
+    ],
+    "mount_quat": null,
+    "mount_note": "зеркальный экземпляр: scale -1 по v, матрица с det = -1",
+    "load_n": 294
+   },
+   {
+    "id": "r_head",
+    "ray": "R1",
+    "fixture": "restraint_head_frame",
+    "zone": "head",
+    "tongue": "T-26",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     -0.871,
+     0.0,
+     0.0378
+    ],
+    "fixture_origin_panel": [
+     -0.715,
+     0.0,
+     0.148
+    ],
+    "exit_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "normal_panel": [
+     1.0,
+     -0.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "limb_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "pin_mode": "inplane",
+    "mouth_from_pin_m": -0.0143,
+    "mouth_dist_from_axis_m": 0.1767,
+    "shell_r_m": 0.1102,
+    "mouth_clearance_m": 0.0665,
+    "shim_m": 0.0,
+    "standoff_m": 0.0,
+    "mirror_instance": false,
+    "mount_matrix": [
+     [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      1.0,
+      0.0,
+      0.0
+     ]
+    ],
+    "mount_quat": [
+     0.5,
+     0.5,
+     -0.5,
+     0.5
+    ],
+    "mount_note": "обычная посадка, det = +1",
+    "load_n": 98
+   },
+   {
+    "id": "r_neck_l",
+    "ray": "R1",
+    "fixture": "restraint_neck_yoke",
+    "zone": "neck",
+    "tongue": "T-30",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     -0.616,
+     0.14807,
+     0.08514
+    ],
+    "fixture_origin_panel": [
+     -0.6,
+     0.0,
+     0.055
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.1333,
+    "shell_r_m": 0.035,
+    "mouth_clearance_m": 0.0983,
+    "shim_m": 0.0,
+    "standoff_m": 0.0,
+    "mirror_instance": false,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      -0.128909,
+      0.991301,
+      0.0
+     ],
+     [
+      0.991301,
+      0.128909,
+      0.0
+     ]
+    ],
+    "mount_quat": [
+     0.705567,
+     0.045676,
+     -0.705567,
+     -0.045676
+    ],
+    "mount_note": "обычная посадка, det = +1",
+    "load_n": 98
+   },
+   {
+    "id": "r_neck_r",
+    "ray": "R1",
+    "fixture": "restraint_neck_yoke",
+    "zone": "neck",
+    "tongue": "T-30",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     -0.616,
+     -0.14807,
+     0.08514
+    ],
+    "fixture_origin_panel": [
+     -0.6,
+     0.0,
+     0.055
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.1333,
+    "shell_r_m": 0.035,
+    "mouth_clearance_m": 0.0983,
+    "shim_m": 0.0,
+    "standoff_m": 0.0,
+    "mirror_instance": true,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      -0.128909,
+      0.991301,
+      0.0
+     ],
+     [
+      -0.991301,
+      -0.128909,
+      0.0
+     ]
+    ],
+    "mount_quat": null,
+    "mount_note": "зеркальный экземпляр: scale -1 по v, матрица с det = -1",
+    "load_n": 98
+   },
+   {
+    "id": "r_qr",
+    "ray": "R5",
+    "fixture": "restraint_quick_release",
+    "zone": "qr",
+    "tongue": "T-26",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     0.52,
+     -0.304,
+     0.0732
+    ],
+    "fixture_origin_panel": [
+     0.52,
+     -0.27,
+     0.085
+    ],
+    "exit_panel": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0143,
+    "mouth_dist_from_axis_m": 0.0217,
+    "shell_r_m": 0.023,
+    "mouth_clearance_m": -0.0013,
+    "shim_m": 0.004,
+    "standoff_m": 0.0,
+    "mirror_instance": false,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     [
+      -1.0,
+      0.0,
+      0.0
+     ]
+    ],
+    "mount_quat": [
+     0.0,
+     -0.707107,
+     0.0,
+     0.707107
+    ],
+    "mount_note": "обычная посадка, det = +1",
+    "load_n": 1471
+   },
+   {
+    "id": "r_thigh_l",
+    "ray": "R4",
+    "fixture": "restraint_thigh_clamp",
+    "zone": "hip",
+    "tongue": "T-44",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     0.3,
+     0.195,
+     0.13
+    ],
+    "fixture_origin_panel": [
+     0.3,
+     0.112,
+     0.09
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0198,
+    "mouth_dist_from_axis_m": 0.0723,
+    "shell_r_m": 0.0508,
+    "mouth_clearance_m": 0.0215,
+    "shim_m": 0.0,
+    "standoff_m": 0.0,
+    "mirror_instance": false,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      0.0,
+      1.0,
+      0.0
+     ],
+     [
+      1.0,
+      0.0,
+      0.0
+     ]
+    ],
+    "mount_quat": [
+     0.707107,
+     0.0,
+     -0.707107,
+     0.0
+    ],
+    "mount_note": "обычная посадка, det = +1",
+    "load_n": 490
+   },
+   {
+    "id": "r_thigh_r",
+    "ray": "R4",
+    "fixture": "restraint_thigh_clamp",
+    "zone": "hip",
+    "tongue": "T-44",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     0.3,
+     -0.195,
+     0.13
+    ],
+    "fixture_origin_panel": [
+     0.3,
+     -0.112,
+     0.09
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0198,
+    "mouth_dist_from_axis_m": 0.0723,
+    "shell_r_m": 0.0508,
+    "mouth_clearance_m": 0.0215,
+    "shim_m": 0.0,
+    "standoff_m": 0.0,
+    "mirror_instance": true,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      0.0,
+      1.0,
+      0.0
+     ],
+     [
+      -1.0,
+      0.0,
+      0.0
+     ]
+    ],
+    "mount_quat": null,
+    "mount_note": "зеркальный экземпляр: scale -1 по v, матрица с det = -1",
+    "load_n": 490
+   },
+   {
+    "id": "r_waist_l",
+    "ray": "R2",
+    "fixture": "restraint_waist_belt",
+    "zone": "waist",
+    "tongue": "T-30",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     -0.44,
+     0.17,
+     0.119
+    ],
+    "fixture_origin_panel": [
+     -0.2,
+     0.0,
+     0.105
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "limb_axis_panel": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.2757,
+    "shell_r_m": 0.025,
+    "mouth_clearance_m": 0.2507,
+    "shim_m": 0.0,
+    "standoff_m": 0.106,
+    "mirror_instance": false,
+    "mount_matrix": [
+     [
+      1.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      1.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "mount_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "mount_note": "обычная посадка, det = +1",
+    "load_n": 785
+   },
+   {
+    "id": "r_waist_r",
+    "ray": "R2",
+    "fixture": "restraint_waist_belt",
+    "zone": "waist",
+    "tongue": "T-30",
+    "tongue_index": 1,
+    "host": "panel",
+    "panel_xyz": [
+     -0.3,
+     -0.17,
+     0.091
+    ],
+    "fixture_origin_panel": [
+     -0.2,
+     0.0,
+     0.105
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "limb_axis_panel": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.179,
+    "shell_r_m": 0.025,
+    "mouth_clearance_m": 0.154,
+    "shim_m": 0.0,
+    "standoff_m": 0.106,
+    "mirror_instance": true,
+    "mount_matrix": [
+     [
+      1.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "mount_quat": null,
+    "mount_note": "зеркальный экземпляр: scale -1 по v, матрица с det = -1",
+    "load_n": 785
+   },
+   {
+    "id": "r_wrist_l",
+    "ray": "R3",
+    "fixture": "restraint_wrist_cuff",
+    "zone": "wrist",
+    "tongue": "T-30",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     -0.17,
+     0.26519,
+     0.0668
+    ],
+    "fixture_origin_panel": [
+     -0.17,
+     0.222,
+     0.038
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.0332,
+    "shell_r_m": 0.033,
+    "mouth_clearance_m": 0.0002,
+    "shim_m": 0.002,
+    "standoff_m": 0.0,
+    "mirror_instance": false,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      0.309845,
+      0.950524,
+      0.0
+     ],
+     [
+      0.950524,
+      -0.309845,
+      0.0
+     ]
+    ],
+    "mount_quat": [
+     0.698306,
+     -0.110927,
+     -0.698306,
+     0.110927
+    ],
+    "mount_note": "обычная посадка, det = +1",
+    "load_n": 196
+   },
+   {
+    "id": "r_wrist_r",
+    "ray": "R3",
+    "fixture": "restraint_wrist_cuff",
+    "zone": "wrist",
+    "tongue": "T-30",
+    "tongue_index": 0,
+    "host": "panel",
+    "panel_xyz": [
+     -0.17,
+     -0.26519,
+     0.0668
+    ],
+    "fixture_origin_panel": [
+     -0.17,
+     -0.222,
+     0.038
+    ],
+    "exit_panel": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "normal_panel": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "pin_axis_panel": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "limb_axis_panel": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "normal",
+    "mouth_from_pin_m": -0.0187,
+    "mouth_dist_from_axis_m": 0.0332,
+    "shell_r_m": 0.033,
+    "mouth_clearance_m": 0.0002,
+    "shim_m": 0.002,
+    "standoff_m": 0.0,
+    "mirror_instance": true,
+    "mount_matrix": [
+     [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     [
+      0.309845,
+      0.950524,
+      0.0
+     ],
+     [
+      -0.950524,
+      0.309845,
+      0.0
+     ]
+    ],
+    "mount_quat": null,
+    "mount_note": "зеркальный экземпляр: scale -1 по v, матрица с det = -1",
+    "load_n": 196
+   },
+   {
+    "id": "w01",
+    "fixture": "restraint_wrist_cuff",
+    "zone": "wrist_l_spread",
+    "host": "chassis",
+    "tongue": "T-30",
+    "position_m": [
+     0.03,
+     1.15,
+     0.545
+    ],
+    "normal": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "pin_mode": "inplane",
+    "note": "крыло левое: руки разведены (поза «распятие»), палец горизонтально"
+   },
+   {
+    "id": "w02",
+    "fixture": "restraint_wrist_cuff",
+    "zone": "wrist_r_spread",
+    "host": "chassis",
+    "tongue": "T-30",
+    "position_m": [
+     0.03,
+     1.15,
+     -0.545
+    ],
+    "normal": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "pin_mode": "inplane",
+    "note": "крыло правое"
+   },
+   {
+    "id": "w03",
+    "fixture": "restraint_spreader",
+    "zone": "spreader_l",
+    "host": "chassis",
+    "tongue": "T-30",
+    "position_m": [
+     0.4,
+     0.6,
+     0.545
+    ],
+    "normal": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "pin_mode": "inplane",
+    "note": "крыло левое: раздвижка 0,6-1,2 м"
+   },
+   {
+    "id": "w04",
+    "fixture": "restraint_spreader",
+    "zone": "spreader_r",
+    "host": "chassis",
+    "tongue": "T-30",
+    "position_m": [
+     0.4,
+     0.6,
+     -0.545
+    ],
+    "normal": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "pin_mode": "inplane",
+    "note": "крыло правое"
+   },
+   {
+    "id": "x01",
+    "fixture": "restraint_stirrup",
+    "zone": "stirrup_l",
+    "host": "chassis",
+    "tongue": "T-30",
+    "position_m": [
+     0.76,
+     0.14,
+     0.155
+    ],
+    "normal": [
+     -1.0,
+     -0.0,
+     -0.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "inplane",
+    "note": "нижняя перекладина: стремя, стопа на упор (только 90°)"
+   },
+   {
+    "id": "x02",
+    "fixture": "restraint_stirrup",
+    "zone": "stirrup_r",
+    "host": "chassis",
+    "tongue": "T-30",
+    "position_m": [
+     0.76,
+     0.14,
+     -0.155
+    ],
+    "normal": [
+     -1.0,
+     -0.0,
+     -0.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "pin_mode": "inplane",
+    "note": "нижняя перекладина"
+   },
+   {
+    "id": "y01",
+    "fixture": "restraint_suspension_cuff",
+    "zone": "suspension",
+    "host": "chassis",
+    "tongue": "T-30",
+    "position_m": [
+     -0.3,
+     1.86,
+     0.0
+    ],
+    "normal": [
+     -0.0,
+     1.0,
+     -0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "pin_mode": "inplane",
+    "note": "верхняя серьга: подвес через CJ-LATCH-30S"
+   }
+  ]
+ },
+ "sockets_by_panel_angle": {
+  "0": [
+   {
+    "id": "r_head",
+    "position_m": [
+     -0.871,
+     1.0378,
+     0.0
+    ],
+    "normal": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "exit": [
+     -1.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "id": "r_neck_l",
+    "position_m": [
+     -0.616,
+     1.0851,
+     0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_neck_r",
+    "position_m": [
+     -0.616,
+     1.0851,
+     -0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_l",
+    "position_m": [
+     -0.44,
+     1.119,
+     0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_r",
+    "position_m": [
+     -0.3,
+     1.091,
+     -0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_l",
+    "position_m": [
+     -0.17,
+     1.0668,
+     0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_r",
+    "position_m": [
+     -0.17,
+     1.0668,
+     -0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_l",
+    "position_m": [
+     0.3,
+     1.13,
+     0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_r",
+    "position_m": [
+     0.3,
+     1.13,
+     -0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_l",
+    "position_m": [
+     0.77,
+     1.0795,
+     0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_r",
+    "position_m": [
+     0.77,
+     1.0795,
+     -0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_qr",
+    "position_m": [
+     0.52,
+     1.0732,
+     -0.304
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "axis": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   }
+  ],
+  "30": [
+   {
+    "id": "r_head",
+    "position_m": [
+     -0.7354,
+     1.4682,
+     0.0
+    ],
+    "normal": [
+     0.866,
+     -0.5,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "exit": [
+     -0.866,
+     0.5,
+     0.0
+    ]
+   },
+   {
+    "id": "r_neck_l",
+    "position_m": [
+     -0.4909,
+     1.3817,
+     0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_neck_r",
+    "position_m": [
+     -0.4909,
+     1.3817,
+     -0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_l",
+    "position_m": [
+     -0.3216,
+     1.3231,
+     0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.5,
+     0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_r",
+    "position_m": [
+     -0.2143,
+     1.2288,
+     -0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.5,
+     0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_l",
+    "position_m": [
+     -0.1138,
+     1.1429,
+     0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_r",
+    "position_m": [
+     -0.1138,
+     1.1429,
+     -0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_l",
+    "position_m": [
+     0.3248,
+     0.9626,
+     0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_r",
+    "position_m": [
+     0.3248,
+     0.9626,
+     -0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_l",
+    "position_m": [
+     0.7066,
+     0.6838,
+     0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_r",
+    "position_m": [
+     0.7066,
+     0.6838,
+     -0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.5,
+     -0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_qr",
+    "position_m": [
+     0.4869,
+     0.8034,
+     -0.304
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "axis": [
+     0.5,
+     0.866,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   }
+  ],
+  "60": [
+   {
+    "id": "r_head",
+    "position_m": [
+     -0.4028,
+     1.7732,
+     0.0
+    ],
+    "normal": [
+     0.5,
+     -0.866,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "exit": [
+     -0.5,
+     0.866,
+     0.0
+    ]
+   },
+   {
+    "id": "r_neck_l",
+    "position_m": [
+     -0.2343,
+     1.576,
+     0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_neck_r",
+    "position_m": [
+     -0.2343,
+     1.576,
+     -0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_l",
+    "position_m": [
+     -0.1169,
+     1.4406,
+     0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.866,
+     0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_r",
+    "position_m": [
+     -0.0712,
+     1.3053,
+     -0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     0.866,
+     0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_l",
+    "position_m": [
+     -0.0271,
+     1.1806,
+     0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_r",
+    "position_m": [
+     -0.0271,
+     1.1806,
+     -0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_l",
+    "position_m": [
+     0.2626,
+     0.8052,
+     0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_r",
+    "position_m": [
+     0.2626,
+     0.8052,
+     -0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_l",
+    "position_m": [
+     0.4538,
+     0.3729,
+     0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_r",
+    "position_m": [
+     0.4538,
+     0.3729,
+     -0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -0.866,
+     -0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_qr",
+    "position_m": [
+     0.3234,
+     0.5863,
+     -0.304
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "axis": [
+     0.866,
+     0.5,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   }
+  ],
+  "90": [
+   {
+    "id": "r_head",
+    "position_m": [
+     0.0378,
+     1.871,
+     0.0
+    ],
+    "normal": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "exit": [
+     -0.0,
+     1.0,
+     0.0
+    ]
+   },
+   {
+    "id": "r_neck_l",
+    "position_m": [
+     0.0851,
+     1.616,
+     0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_neck_r",
+    "position_m": [
+     0.0851,
+     1.616,
+     -0.1481
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_l",
+    "position_m": [
+     0.119,
+     1.44,
+     0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_waist_r",
+    "position_m": [
+     0.091,
+     1.3,
+     -0.17
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_l",
+    "position_m": [
+     0.0668,
+     1.17,
+     0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_wrist_r",
+    "position_m": [
+     0.0668,
+     1.17,
+     -0.2652
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_l",
+    "position_m": [
+     0.13,
+     0.7,
+     0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_thigh_r",
+    "position_m": [
+     0.13,
+     0.7,
+     -0.195
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_l",
+    "position_m": [
+     0.0795,
+     0.23,
+     0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_ankle_r",
+    "position_m": [
+     0.0795,
+     0.23,
+     -0.202
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "axis": [
+     -1.0,
+     -0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "id": "r_qr",
+    "position_m": [
+     0.0732,
+     0.48,
+     -0.304
+    ],
+    "normal": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "exit": [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   }
+  ]
+ },
+ "compatibility": [
+  {
+   "pair": "CJ-LATCH-30R на щите ↔ hard-язык фиксатора",
+   "verdict": "ok",
+   "how": "ось гнезда выводится из pose фикстуры (R · hole_pos), палец на 20 мм от привалочной плоскости — совпадает с положением отверстия языка",
+   "residual": "T-26 (голова, быстросъём): отверстие на 14,3 мм от базы → нужна проставка 5,7 мм под гнездо"
+  },
+  {
+   "pair": "щит ↔ стойки каркаса",
+   "verdict": "ok",
+   "how": "полоса разворота щита |Z| <= 0,450, стойки на |Z| = 0,475",
+   "residual": "зазор 25 мм по Z; при установке крыла на Z = 0,505 он остаётся 55 мм"
+  },
+  {
+   "pair": "нижняя перекладина ↔ щит",
+   "verdict": "ok",
+   "how": "перекладина X = +0,720, Y <= 0,180; расстояние от оси наклона 1,07…1,13 м против радиуса разворота 0,87",
+   "residual": "нет"
+  },
+  {
+   "pair": "верхняя рама ↔ щит",
+   "verdict": "ok",
+   "how": "низ верхней рамы 1,900 при верхней точке разворота 1,870",
+   "residual": "30 мм; при замене щита на 1,74 м зазор станет 0"
+  },
+  {
+   "pair": "CJ-LATCH-30R на крыле ↔ раздвижка",
+   "verdict": "conditional",
+   "how": "крыло Z = ±0,545 даёт пролёт 1,09 м; раздвижка 1,2 м требует выдвижения крыла до Z = ±0,600",
+   "residual": "ход выдвижения 40 мм, 2 x M10 T-болт; без него максимум 1,09 м"
+  },
+  {
+   "pair": "Mk-II каретка (CJ-LATCH-30R, сборка P) ↔ Mk-III каретка",
+   "verdict": "reuse",
+   "how": "тот же стандарт гнезда и тот же палец Ø12 на 20 мм от плоскости",
+   "residual": "крепёжное поле 4 x M6 40 x 40 совпадает; отличается только привод DOF (винт M12 + маховик вместо клина)"
+  },
+  {
+   "pair": "подвес (y01) ↔ крылья",
+   "verdict": "ok",
+   "how": "серьга на верхней раме X = −0,300, Y = 1,860, палец по X",
+   "residual": "для подвеса нужен страховочный трос и второй палец (CJ-LATCH-30S)"
+  },
+  {
+   "pair": "стремя (x01/x02) ↔ щит в 0°",
+   "verdict": "by_design",
+   "how": "стремя стоит только в режиме 90° (стопа на упор ниже кромки щита); в 0° стопа держится манжетой r_ankle",
+   "residual": "в 0° гнёзда x01/x02 свободны — это резерв под 11-12-й фиксатор"
+  }
+ ],
+ "fixtures_pose": [
+  {
+   "fixture": "restraint_head_frame",
+   "socket": "r_head",
+   "zone": "head",
+   "panel_xyz": [
+    -0.871,
+    0.0,
+    0.0378
+   ],
+   "mount_quat_wxyz": [
+    0.5,
+    0.5,
+    -0.5,
+    0.5
+   ],
+   "mount_matrix": [
+    [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     1.0,
+     0.0,
+     0.0
+    ]
+   ],
+   "exit": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "limb_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_axis": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "pin_mode": "inplane",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_neck_yoke",
+   "socket": "r_neck_l",
+   "zone": "neck",
+   "panel_xyz": [
+    -0.616,
+    0.14807,
+    0.08514
+   ],
+   "mount_quat_wxyz": [
+    0.705567,
+    0.045676,
+    -0.705567,
+    -0.045676
+   ],
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     -0.128909,
+     0.991301,
+     0.0
+    ],
+    [
+     0.991301,
+     0.128909,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_neck_yoke",
+   "socket": "r_neck_r",
+   "zone": "neck",
+   "panel_xyz": [
+    -0.616,
+    -0.14807,
+    0.08514
+   ],
+   "mount_quat_wxyz": null,
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     -0.128909,
+     0.991301,
+     0.0
+    ],
+    [
+     -0.991301,
+     -0.128909,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_waist_belt",
+   "socket": "r_waist_l",
+   "zone": "waist",
+   "panel_xyz": [
+    -0.44,
+    0.17,
+    0.119
+   ],
+   "mount_quat_wxyz": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "mount_matrix": [
+    [
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_waist_belt",
+   "socket": "r_waist_r",
+   "zone": "waist",
+   "panel_xyz": [
+    -0.3,
+    -0.17,
+    0.091
+   ],
+   "mount_quat_wxyz": null,
+   "mount_matrix": [
+    [
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_wrist_cuff",
+   "socket": "r_wrist_l",
+   "zone": "wrist",
+   "panel_xyz": [
+    -0.17,
+    0.26519,
+    0.0668
+   ],
+   "mount_quat_wxyz": [
+    0.698306,
+    -0.110927,
+    -0.698306,
+    0.110927
+   ],
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     0.309845,
+     0.950524,
+     0.0
+    ],
+    [
+     0.950524,
+     -0.309845,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_wrist_cuff",
+   "socket": "r_wrist_r",
+   "zone": "wrist",
+   "panel_xyz": [
+    -0.17,
+    -0.26519,
+    0.0668
+   ],
+   "mount_quat_wxyz": null,
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     0.309845,
+     0.950524,
+     0.0
+    ],
+    [
+     -0.950524,
+     0.309845,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_thigh_clamp",
+   "socket": "r_thigh_l",
+   "zone": "hip",
+   "panel_xyz": [
+    0.3,
+    0.195,
+    0.13
+   ],
+   "mount_quat_wxyz": [
+    0.707107,
+    0.0,
+    -0.707107,
+    0.0
+   ],
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     1.0,
+     0.0,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_thigh_clamp",
+   "socket": "r_thigh_r",
+   "zone": "hip",
+   "panel_xyz": [
+    0.3,
+    -0.195,
+    0.13
+   ],
+   "mount_quat_wxyz": null,
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     -1.0,
+     0.0,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_ankle_cuff",
+   "socket": "r_ankle_l",
+   "zone": "ankle",
+   "panel_xyz": [
+    0.77,
+    0.20203,
+    0.07948
+   ],
+   "mount_quat_wxyz": [
+    0.682491,
+    -0.185022,
+    -0.682491,
+    0.185022
+   ],
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     0.505104,
+     0.863178,
+     0.0
+    ],
+    [
+     0.863178,
+     -0.505104,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_ankle_cuff",
+   "socket": "r_ankle_r",
+   "zone": "ankle",
+   "panel_xyz": [
+    0.77,
+    -0.20203,
+    0.07948
+   ],
+   "mount_quat_wxyz": null,
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     0.505104,
+     0.863178,
+     0.0
+    ],
+    [
+     -0.863178,
+     0.505104,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  },
+  {
+   "fixture": "restraint_quick_release",
+   "socket": "r_qr",
+   "zone": "qr",
+   "panel_xyz": [
+    0.52,
+    -0.304,
+    0.0732
+   ],
+   "mount_quat_wxyz": [
+    0.0,
+    -0.707107,
+    0.0,
+    0.707107
+   ],
+   "mount_matrix": [
+    [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    [
+     -1.0,
+     0.0,
+     0.0
+    ]
+   ],
+   "exit": [
+    0.0,
+    -1.0,
+    0.0
+   ],
+   "limb_axis": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "pin_axis": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "pin_mode": "normal",
+   "inside_panel": true
+  }
+ ],
+ "checks": {
+  "sweep": {
+   "radius_m": 0.8498,
+   "rows": [
+    {
+     "part": "post_fl",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.52,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "post_fr",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.52,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "post_bl",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.52,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "post_br",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.52,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "base_x",
+     "z_in_panel_band": true,
+     "dist_axis_m": 0.9,
+     "radial_clearance_m": 0.0502,
+     "ok": true
+    },
+    {
+     "part": "base_z_p",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.9,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "base_z_m",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.9,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "top_x_front",
+     "z_in_panel_band": true,
+     "dist_axis_m": 1.0394,
+     "radial_clearance_m": 0.1896,
+     "ok": true
+    },
+    {
+     "part": "top_x_back",
+     "z_in_panel_band": true,
+     "dist_axis_m": 1.0394,
+     "radial_clearance_m": 0.1896,
+     "ok": true
+    },
+    {
+     "part": "top_z_mid",
+     "z_in_panel_band": true,
+     "dist_axis_m": 0.9,
+     "radial_clearance_m": 0.0502,
+     "ok": true
+    },
+    {
+     "part": "midbeam_l",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.08,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "midbeam_r",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.08,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "pedestal_l",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.0,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "pedestal_r",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.0,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "crossbar",
+     "z_in_panel_band": true,
+     "dist_axis_m": 1.0653,
+     "radial_clearance_m": 0.2154,
+     "ok": true
+    },
+    {
+     "part": "wing_l",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.0,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "wing_r",
+     "z_in_panel_band": false,
+     "dist_axis_m": 0.0,
+     "radial_clearance_m": null,
+     "ok": true
+    },
+    {
+     "part": "yoke",
+     "z_in_panel_band": true,
+     "dist_axis_m": 0.8984,
+     "radial_clearance_m": 0.0486,
+     "ok": true
+    }
+   ],
+   "violations": [],
+   "ok": true
+  },
+  "latch_alignment": {
+   "method": "палец гнезда = pose(фикстура) · hole_pos_m; ось пальца = p = u × w по построению матрицы позы (угол 0 по определению), проверяется зазор привалочной плоскости гнезда до оболочки фикстуры",
+   "max_angle_error_deg": 0.0,
+   "shim_set_m": [
+    0.0,
+    0.002,
+    0.004,
+    0.006
+   ],
+   "rows": [
+    {
+     "id": "r_head",
+     "clearance_m": 0.0665,
+     "shim_m": 0.0,
+     "effective_m": 0.0665,
+     "ok": true
+    },
+    {
+     "id": "r_neck_l",
+     "clearance_m": 0.0983,
+     "shim_m": 0.0,
+     "effective_m": 0.0983,
+     "ok": true
+    },
+    {
+     "id": "r_neck_r",
+     "clearance_m": 0.0983,
+     "shim_m": 0.0,
+     "effective_m": 0.0983,
+     "ok": true
+    },
+    {
+     "id": "r_waist_l",
+     "clearance_m": 0.2507,
+     "shim_m": 0.0,
+     "effective_m": 0.2507,
+     "ok": true
+    },
+    {
+     "id": "r_waist_r",
+     "clearance_m": 0.154,
+     "shim_m": 0.0,
+     "effective_m": 0.154,
+     "ok": true
+    },
+    {
+     "id": "r_wrist_l",
+     "clearance_m": 0.0002,
+     "shim_m": 0.002,
+     "effective_m": 0.0022,
+     "ok": true
+    },
+    {
+     "id": "r_wrist_r",
+     "clearance_m": 0.0002,
+     "shim_m": 0.002,
+     "effective_m": 0.0022,
+     "ok": true
+    },
+    {
+     "id": "r_thigh_l",
+     "clearance_m": 0.0215,
+     "shim_m": 0.0,
+     "effective_m": 0.0215,
+     "ok": true
+    },
+    {
+     "id": "r_thigh_r",
+     "clearance_m": 0.0215,
+     "shim_m": 0.0,
+     "effective_m": 0.0215,
+     "ok": true
+    },
+    {
+     "id": "r_ankle_l",
+     "clearance_m": -0.0038,
+     "shim_m": 0.006,
+     "effective_m": 0.0022,
+     "ok": true
+    },
+    {
+     "id": "r_ankle_r",
+     "clearance_m": -0.0038,
+     "shim_m": 0.006,
+     "effective_m": 0.0022,
+     "ok": true
+    },
+    {
+     "id": "r_qr",
+     "clearance_m": -0.0013,
+     "shim_m": 0.004,
+     "effective_m": 0.0027,
+     "ok": true
+    }
+   ],
+   "min_effective_m": 0.0022,
+   "needs_shim": [
+    "r_wrist_l",
+    "r_wrist_r",
+    "r_ankle_l",
+    "r_ankle_r",
+    "r_qr"
+   ],
+   "ok": true
+  },
+  "socket_layout": {
+   "rows": [
+    {
+     "id": "r_head",
+     "u": -0.871,
+     "v": 0.0,
+     "h": 0.0378,
+     "inside_panel": true
+    },
+    {
+     "id": "r_neck_l",
+     "u": -0.616,
+     "v": 0.14807,
+     "h": 0.08514,
+     "inside_panel": true
+    },
+    {
+     "id": "r_neck_r",
+     "u": -0.616,
+     "v": -0.14807,
+     "h": 0.08514,
+     "inside_panel": true
+    },
+    {
+     "id": "r_waist_l",
+     "u": -0.44,
+     "v": 0.17,
+     "h": 0.119,
+     "inside_panel": true
+    },
+    {
+     "id": "r_waist_r",
+     "u": -0.3,
+     "v": -0.17,
+     "h": 0.091,
+     "inside_panel": true
+    },
+    {
+     "id": "r_wrist_l",
+     "u": -0.17,
+     "v": 0.26519,
+     "h": 0.0668,
+     "inside_panel": true
+    },
+    {
+     "id": "r_wrist_r",
+     "u": -0.17,
+     "v": -0.26519,
+     "h": 0.0668,
+     "inside_panel": true
+    },
+    {
+     "id": "r_thigh_l",
+     "u": 0.3,
+     "v": 0.195,
+     "h": 0.13,
+     "inside_panel": true
+    },
+    {
+     "id": "r_thigh_r",
+     "u": 0.3,
+     "v": -0.195,
+     "h": 0.13,
+     "inside_panel": true
+    },
+    {
+     "id": "r_ankle_l",
+     "u": 0.77,
+     "v": 0.20203,
+     "h": 0.07948,
+     "inside_panel": true
+    },
+    {
+     "id": "r_ankle_r",
+     "u": 0.77,
+     "v": -0.20203,
+     "h": 0.07948,
+     "inside_panel": true
+    },
+    {
+     "id": "r_qr",
+     "u": 0.52,
+     "v": -0.304,
+     "h": 0.0732,
+     "inside_panel": true
+    }
+   ],
+   "ok": true
+  },
+  "carriage_pairs": {
+   "rows": [
+    {
+     "pair": [
+      "r_head",
+      "r_neck_l"
+     ],
+     "du_m": 0.255,
+     "dv_m": 0.148,
+     "rule": "du >= 0,190 или dv >= 0,115",
+     "ok": true
+    },
+    {
+     "pair": [
+      "r_head",
+      "r_neck_r"
+     ],
+     "du_m": 0.255,
+     "dv_m": 0.148,
+     "rule": "du >= 0,190 или dv >= 0,115",
+     "ok": true
+    },
+    {
+     "pair": [
+      "r_ankle_r",
+      "r_qr"
+     ],
+     "du_m": 0.25,
+     "dv_m": 0.102,
+     "rule": "du >= 0,190 или dv >= 0,115",
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "stability": {
+   "z_lateral": {
+    "half_base_m": 0.5,
+    "restoring_nm": 1222.6,
+    "overturn_force_n_at_y1_10": 1111.5,
+    "person_lean_200n_nm": 220.0,
+    "sf_vs_200n_push": 5.56,
+    "ok": true,
+    "note": "определяющее направление; выносные опоры до ±0,60 дают +20 %"
+   },
+   "x_long": {
+    "half_base_m": 1.0,
+    "restoring_nm": 2445.3,
+    "overturn_force_n_at_y1_10": 2223.0,
+    "person_lean_200n_nm": 220.0,
+    "sf_vs_200n_push": 11.11,
+    "ok": true
+   }
+  },
+  "tilt": {
+   "rows": [
+    {
+     "theta_deg": 0,
+     "arm_person_m": 0.12,
+     "torque_nm": 143.6
+    },
+    {
+     "theta_deg": 15,
+     "arm_person_m": 0.1314,
+     "torque_nm": 150.9
+    },
+    {
+     "theta_deg": 30,
+     "arm_person_m": 0.1339,
+     "torque_nm": 147.9
+    },
+    {
+     "theta_deg": 45,
+     "arm_person_m": 0.1273,
+     "torque_nm": 134.8
+    },
+    {
+     "theta_deg": 60,
+     "arm_person_m": 0.112,
+     "torque_nm": 112.6
+    },
+    {
+     "theta_deg": 75,
+     "arm_person_m": 0.089,
+     "torque_nm": 82.6
+    },
+    {
+     "theta_deg": 90,
+     "arm_person_m": 0.06,
+     "torque_nm": 47.1
+    }
+   ],
+   "peak_torque_nm": 150.9,
+   "worm_ratio": 40.0,
+   "worm_eta": 0.4,
+   "input_torque_nm": 9.43,
+   "crank_force_n": 75.5,
+   "self_locking": true,
+   "safety_pin": "Ø16, r = 0,160; срез 2 x 201 мм² 40Х (HRC 40) -> > 100 кН",
+   "pin_load_n": 943.0
+  },
+  "strength": {
+   "max_fixture_load_n": 1471,
+   "latch_wll_n": 5000.0,
+   "sf_static": 3.4,
+   "body_weight_n": 784.5,
+   "panel_defl": "консоль 0,85 м при 400 Н на конце: 0,9 мм (обвязка 45 + лист 3)",
+   "ok": true
+  },
+  "do_or_anim": {
+   "animatable": "наклон + 10 x (traverse, slide, lift, yaw) = 41 канал",
+   "data_only": "наклон привалочной плоскости, ход луча, выдвижение крыла, высота перекладины, площадка стоп, домкраты, выносные опоры",
+   "ok": true
+  }
+ },
+ "mass": {
+  "items": [
+   {
+    "item": "base_perimeter",
+    "qty": 12.0,
+    "unit_kg": 1.55,
+    "mass_kg": 18.6,
+    "note": "T-slot 45 x 45, 6,0 м"
+   },
+   {
+    "item": "feet_jacks",
+    "qty": 4,
+    "unit_kg": 0.42,
+    "mass_kg": 1.68,
+    "note": "подошва 116 + домкрат"
+   },
+   {
+    "item": "ballast",
+    "qty": 1,
+    "unit_kg": 25.0,
+    "mass_kg": 25.0,
+    "note": "стальная плита в основании"
+   },
+   {
+    "item": "posts",
+    "qty": 7.44,
+    "unit_kg": 2.3,
+    "mass_kg": 17.11,
+    "note": "T-slot 60 x 60, 7,44 м"
+   },
+   {
+    "item": "top_frame",
+    "qty": 4.3,
+    "unit_kg": 1.55,
+    "mass_kg": 6.67,
+    "note": "T-slot 45, 4,3 м"
+   },
+   {
+    "item": "mid_beam",
+    "qty": 2.4,
+    "unit_kg": 1.55,
+    "mass_kg": 3.72,
+    "note": "траверса подшипника, 2,4 м"
+   },
+   {
+    "item": "panel_frame",
+    "qty": 6.36,
+    "unit_kg": 1.55,
+    "mass_kg": 9.86,
+    "note": "обвязка щита 6,4 м"
+   },
+   {
+    "item": "panel_face",
+    "qty": 1,
+    "unit_kg": 8.6,
+    "mass_kg": 8.6,
+    "note": "лист 1,66 x 0,80 x 2,5 мм + поле T-slot"
+   },
+   {
+    "item": "panel_side_rail",
+    "qty": 3.32,
+    "unit_kg": 2.7,
+    "mass_kg": 8.96,
+    "note": "рельс 45 x 60 с цапфой"
+   },
+   {
+    "item": "rays",
+    "qty": 5,
+    "unit_kg": 3.1,
+    "mass_kg": 15.5,
+    "note": "луч 0,92 м + ходовой замок"
+   },
+   {
+    "item": "carriages",
+    "qty": 10,
+    "unit_kg": 1.45,
+    "mass_kg": 14.5,
+    "note": "каретка 4 DOF"
+   },
+   {
+    "item": "receivers",
+    "qty": 19,
+    "unit_kg": 0.95,
+    "mass_kg": 18.05,
+    "note": "CJ-LATCH-30R"
+   },
+   {
+    "item": "wings",
+    "qty": 2,
+    "unit_kg": 2.6,
+    "mass_kg": 5.2,
+    "note": "крыло 1,70 x 0,09 x 3 мм + ребро"
+   },
+   {
+    "item": "tilt_drive",
+    "qty": 1,
+    "unit_kg": 9.5,
+    "mass_kg": 9.5,
+    "note": "червячный редуктор i=40 + сектор Ø360"
+   },
+   {
+    "item": "locks",
+    "qty": 1,
+    "unit_kg": 2.4,
+    "mass_kg": 2.4,
+    "note": "стопор щита + страховочный палец"
+   },
+   {
+    "item": "misc",
+    "qty": 1,
+    "unit_kg": 4.0,
+    "mass_kg": 4.0,
+    "note": "бирки, кабель-канал, упоры"
+   }
+  ],
+  "total_kg": 169.3
+ },
+ "nodes": {
+  "estimated": 640,
+  "breakdown": {
+   "base": 18,
+   "posts_and_frame": 26,
+   "panel": 54,
+   "rays": 60,
+   "carriages": 220,
+   "receivers": 171,
+   "wings": 28,
+   "crossbar_foot": 14,
+   "yoke": 8,
+   "tilt_drive": 16,
+   "locks": 10,
+   "marks": 6
+  },
+  "naming": "restraint_matrix_frame3d__<group>_<nn>",
+  "prefix": "restraint_matrix_frame3d__"
+ },
+ "materials": {
+  "frame_profile": "алюминий 6063-T6, анодирование 15 мкм (как Mk-II)",
+  "panel_face": "алюминий 3 мм + поле T-slot, анодирование",
+  "steel": "40Х, цинк — цапфы, сектор, пальцы, кронштейны гнёзд",
+  "wing": "алюминий 3 мм + ребро 4 мм",
+  "pads": "TPE 60 Шор A, 8 мм — привалочные накладки",
+  "colors": "cream 0.930/0.917/0.886; graphite 0.098/0.104/0.114; red 0.700/0.075/0.062 (рычаги и стопоры)"
+ },
+ "data_only_vs_model": {
+  "one_glb": true,
+  "why": "каркас — кинематическое дерево из ~640 Object3D без скиннинга; наклон и 4 оси на каретку задаются трансформами, а не костями",
+  "model_required": [
+   "геометрия каркаса, щита, лучей, кареток, 19 гнёзд",
+   "цапфы, подшипниковые стойки, сектор, редуктор (визуально)",
+   "крылья с 4 гнёздами, перекладина со стопором, серьга подвеса"
+  ],
+  "data_only": [
+   "позы 10 фиксаторов на щите (mount_quat + panel_xyz) — в JSON, не в GLB",
+   "пределы и детенты DOF — в extras узлов",
+   "сами 10 фиксаторов — отдельные GLB (hard-варианты), ставятся по данным",
+   "винтовые регулировки (lift, ray_pitch, wing_ext) — только трансформ",
+   "режимы 0/30/45/60/90 — 5 именованных поз, а не 5 клипов"
+  ],
+  "anim": {
+   "clips": [
+    "pose_bed",
+    "pose_recline30",
+    "pose_recline60",
+    "pose_upright",
+    "deploy_wings",
+    "foot_plate"
+   ],
+   "channels": 41,
+   "note": "клипы не нужны: достаточно 5 статических поз + интерполяция в рантайме"
+  }
+ },
+ "work_packages": [
+  {
+   "id": "W1",
+   "title": "Каркас: основание, 4 стойки, верхняя рама, выносные опоры",
+   "priority": "P0",
+   "kind": "model",
+   "files": [
+    "docs/plans/tools/build_restraint_matrix_frame3d.py (новый)"
+   ],
+   "detail": "T-slot 45/60, домкраты 116, балласт 40 кг, 4 x M12 поле 1,756 x 0,776; проверка: bbox 2,000 x 1,960 x 1,090, контакт пола 4 подошвы"
+  },
+  {
+   "id": "W2",
+   "title": "Щит: обвязка, поле T-slot, боковые рельсы с цапфами",
+   "priority": "P0",
+   "kind": "model",
+   "detail": "1,700 x 0,800 x 0,075; 5 продольных пазов шаг 0,100; цапфа Ø40 на Y = 1,000; проверка: радиус разворота <= 0,870, верх 1,850"
+  },
+  {
+   "id": "W3",
+   "title": "Привод наклона и стопор",
+   "priority": "P0",
+   "kind": "model",
+   "detail": "червячный редуктор i=40 на стойке +Z, сектор Ø360 с 7 отверстиями (0/15/30/45/60/75/90), палец Ø16 с пружиной, страховка Ø5 + тросик; проверка: удержание 150 Н·м, люфт <= 0,5°"
+  },
+  {
+   "id": "W4",
+   "title": "4 луча + 10 кареток (traverse/slide/lift/yaw)",
+   "priority": "P0",
+   "kind": "model",
+   "detail": "луч 0,920 на боковом рельсе с замком 2 x M10; каретка 74 x 64 x 52, винт M12 + маховик Ø42 на подъём, детент поворота через 5°; проверка: соседние каретки на луче не ближе 0,190 по v"
+  },
+  {
+   "id": "W5",
+   "title": "19 гнёзд CJ-LATCH-30R по таблице sockets",
+   "priority": "P0",
+   "kind": "model",
+   "detail": "12 на щите, 4 на крыльях, 2 на перекладине, 1 на серьге; позиция = палец на 20 мм от привалочной плоскости; проверка: угол пальца и p = u x w, допуск 0,5 мм / 0,5°"
+  },
+  {
+   "id": "W6",
+   "title": "Крылья и перекладина со стопором стоп",
+   "priority": "P1",
+   "kind": "model",
+   "detail": "крыло Z = ±0,545 c ходом до ±0,600; перекладина X = +0,720 с площадкой стоп и 2 гнёздами стремени; проверка: перекладина вне радиуса разворота"
+  },
+  {
+   "id": "W7",
+   "title": "Каталог: вариант matrix_frame3d у restraint_matrix",
+   "priority": "P1",
+   "kind": "data-only",
+   "files": [
+    "public/models/machine-modules/component-catalog.json",
+    "docs/plans/mates/restraint-service.json",
+    "docs/plans/checks/restraint-hard-mount-spec.json"
+   ],
+   "detail": "variant_models += frame3d (RST-MX-13), mates по таблице sockets; в текущей задаче НЕ выполняется"
+  },
+  {
+   "id": "W8",
+   "title": "Проверки и рендеры: 4 ракурса x 4 позы, sweep, сходимость",
+   "priority": "P1",
+   "kind": "check",
+   "detail": "BVH-прогон 0…90° шаг 1°, 5 поз x 10 фиксаторов на сходимость пальца, рендеры 1600 x 1100 как у Mk-II"
+  }
+ ],
+ "risks": [
+  {
+   "id": "R1",
+   "risk": "высокое ложе 0,963 м: залезть можно только в вертикальном режиме",
+   "severity": "medium",
+   "mitigation": "регламент: посадка в 90°, фиксация, затем наклон; подножка 0,25 м; при необходимости — опускание оси на 0,10 (щит 1,60 м, рост до 1,70)"
+  },
+  {
+   "id": "R2",
+   "risk": "щит 1,70 м не покрывает рост >1,85 — голова выше кромки",
+   "severity": "low",
+   "mitigation": "кронштейн головы вынесен за кромку на 0,06; паспорт: рост 1,50…1,85"
+  },
+  {
+   "id": "R3",
+   "risk": "падение щита при отказе стопора (человек 80 кг, 150 Н·м)",
+   "severity": "high",
+   "mitigation": "самотормозящий червяк i=40 (не даёт самопроизвольного хода) + детентный палец Ø16 (срез >100 кН) + страховочный штифт Ø5 с тросиком; снятие только двумя движениями"
+  },
+  {
+   "id": "R4",
+   "risk": "боковое опрокидывание: база 1,0 м при ЦМ человека на 1,0 м",
+   "severity": "high",
+   "mitigation": "выносные опоры до Z = ±0,60 (SF 2,9 → 3,5), балласт 40 кг; запрет работы без опор"
+  },
+  {
+   "id": "R5",
+   "risk": "10 кареток на 4 лучах: соседние не проходят друг мимо друга",
+   "severity": "medium",
+   "mitigation": "разграничение хода по v серединой между home (как в Mk-II), минимум 0,190 между home, проверка carriages_pairs"
+  },
+  {
+   "id": "R6",
+   "risk": "T-26 (голова, быстросъём) не садится: палец на 20 мм, отверстие 14,3",
+   "severity": "low",
+   "mitigation": "проставка 5,7 мм под гнездо или отдельная сборка гнезда с пазом 25 мм"
+  },
+  {
+   "id": "R7",
+   "risk": "щит на цапфах — консоль 0,85 м; при 400 Н на конце прогиб 0,9 мм",
+   "severity": "low",
+   "mitigation": "обвязка 45 + лист 3 мм + 3 поперечины; при 120 кг добавить 2 диагонали"
+  },
+  {
+   "id": "R8",
+   "risk": "перенос гнёзд между щитом и крыльями в режиме 90° путает оператора",
+   "severity": "medium",
+   "mitigation": "цветовая маркировка: гнёзда щита — графит, крылья/перекладина — красная метка «90°»; в паспорте таблица «что куда»"
+  },
+  {
+   "id": "R9",
+   "risk": "развёрнутый бриф: «крылья X = ±0,55» при поперечной оси Z",
+   "severity": "low",
+   "mitigation": "зафиксировано в conventions.axis_letters_resolution; при сборке использовать Z"
+  },
+  {
+   "id": "R10",
+   "risk": "одним GLB 640 узлов + 41 канал — риск потери имён при экспорте",
+   "severity": "medium",
+   "mitigation": "extras с joint id/limits на каждом узле, проверка bad_names как в Mk-II (0 битых имён), отдельный joints.json для рантайма"
+  }
+ ],
+ "open_questions": [
+  "нужен ли 11-12-й фиксатор (свободные гнёзда x01/x02 в режиме ложа) или 10 достаточно",
+  "допустима ли высота 1,96 вместо 1,90 (следствие щита 1,70 м и оси на 1,00)",
+  "крыло: постоянные Z = ±0,545 или выдвижное до ±0,600 под раздвижку 1,2 м",
+  "нужен ли подвес (y01) в этом каркасе или он остаётся отдельным device"
+ ],
+ "checks_summary": {
+  "sweep_ok": true,
+  "sockets_inside_panel": true,
+  "carriage_pairs_ok": true,
+  "stability_ok": true,
+  "strength_ok": true,
+  "total_sockets": 19,
+  "panel_sockets": 12
+ }
+}

@@ -1,0 +1,506 @@
+{
+  "format": "cj-connector-registry/1",
+  "generated": "2026-11-10",
+  "source": "docs/plans/checks/mounting-audit.json → proposed_unification (families 19 + адаптеры) плюс локальные семейства batch 1, выведенные из проверенной геометрии GLB",
+  "policy": {
+    "field": "connector",
+    "where": "каждая точка в docs/plans/mates/*.json (все роли)",
+    "rule": "семейство ставится только при совпадении геометрии со спецификацией; иначе connector=\"custom\" и connector_note с конкретным расхождением — подгонка запрещена",
+    "pitch": "для CJ-STR-* шаг поля — часть стандарта: точка без pitch_x_m/pitch_z_m недействительна",
+    "local": "статус local — семейство введено в batch 1 по фактической геометрии (плита/патрон/диск), а не предложено аудитом"
+  },
+  "families": [
+    {
+      "id": "CJ-STR-M12",
+      "status": "audit",
+      "replaces": [
+        "BOLT_M12"
+      ],
+      "spec": "4×M12, поле 0,600 × 0,600 м (±2 мм), бобышка Ø30, заход 8 мм, момент 55 Н·м",
+      "sides": "приём: плиты/рамы; сдача: станина, портал, гентри, матрица",
+      "rule": "шаг — часть стандарта; без pitch_x/pitch_z точка недействительна",
+      "points": 1,
+      "components": [
+        "structure_base"
+      ]
+    },
+    {
+      "id": "CJ-STR-M8",
+      "status": "audit",
+      "replaces": [
+        "BOLT_M8",
+        "BOLT_M10",
+        "BOLT_DECK_TEMPLATE"
+      ],
+      "spec": "4×M8, поле 0,240 × 0,240 м, лёгкие модули ≤15 кг",
+      "sides": "поршни Ø25–40, сенсорика",
+      "rule": "M10 и M6 stud выводятся (M6 — только земля)"
+    },
+    {
+      "id": "CJ-DECK",
+      "status": "audit",
+      "replaces": [
+        "CONTACT"
+      ],
+      "spec": "поверхность 2000 × 900 мм, 4 угловых стропа 75 × 64 + 2 рельса; болтов нет",
+      "sides": "8 SURFACE-компонентов ↔ станина/рама-ложе",
+      "rule": "deck — контакт, не болтовое поле; шаблон 6×M8 удалить",
+      "points": 3,
+      "components": [
+        "surface_cooled",
+        "surface_heated",
+        "surface_soft"
+      ]
+    },
+    {
+      "id": "CJ-RAIL-15",
+      "status": "audit",
+      "replaces": [
+        "RAIL"
+      ],
+      "spec": "T-slot 15 (рама) + DIN 35 (шкаф) — две рельсовые системы, каретка входит в стандарт",
+      "sides": "14 компонентов",
+      "rule": "все прочие профили (55×42, 50×22, 56×28, 12×45, 24×48, 10×30) выводятся или становятся частями каретки",
+      "points": 5,
+      "components": [
+        "control_interlock",
+        "control_telemetry",
+        "structure_base",
+        "utility_data"
+      ]
+    },
+    {
+      "id": "CJ-DOCK-M",
+      "status": "audit",
+      "replaces": [
+        "DOCK"
+      ],
+      "spec": "лоток 440 × 520 + 2 рельса + 2 штифта Ø10 + прижим; ввод по +Z, фиксация рычагом",
+      "sides": "service_dock ↔ модули обслуживания",
+      "rule": "dock-палец Ø8,4 и паз 20×13 — не dock, а вторичная фиксация",
+      "points": 5,
+      "components": [
+        "service_dock",
+        "structure_base",
+        "utility_air",
+        "utility_water",
+        "work_rotary_disc"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-ISO50",
+      "status": "audit",
+      "replaces": [
+        "TOOL_ISO9409",
+        "TOOL_QC84"
+      ],
+      "spec": "ISO 9409-1-50-4-M6: Ø50, 4×M6 на PCD 40, центрирующий бурт Ø40 h6, поводок 2×Ø8",
+      "sides": "7 motion-выходов ↔ все насадки через адаптер",
+      "rule": "момент передаётся поводком, не трением; Ø84 quick-change — вариант ISO50 с буртом Ø84"
+    },
+    {
+      "id": "CJ-TOOL-B25",
+      "status": "audit",
+      "replaces": [
+        "TOOL_BAYONET"
+      ],
+      "spec": "байонет Ø25 h6, 3 усика 120°, фиксация 120 Н, привод — шестигранник 8 мм внутри, антипроворот Ø1,6",
+      "sides": "насадки Ø23,6…26,4 ↔ адаптер/привод",
+      "rule": "Ø18…21 → B25 через переходную втулку; Ø31…42 → B40; Ø48…54 → B50; Ø58…94 → D90",
+      "points": 8,
+      "components": [
+        "work_air_jet",
+        "work_attach_adapter",
+        "work_attach_bulbous",
+        "work_attach_curved",
+        "work_irrigation",
+        "work_spray",
+        "work_suction"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-B40",
+      "status": "audit",
+      "replaces": [
+        "TOOL_BAYONET"
+      ],
+      "spec": "байонет Ø40 h6, 3 усика, фиксация 250 Н, шестигранник 12 мм",
+      "sides": "насадки Ø31,6…42,4",
+      "rule": "новый подразмер, геометрию не насилует — 8 насадок попадают в него как есть",
+      "points": 5,
+      "components": [
+        "work_attach_nodular",
+        "work_attach_smooth",
+        "work_attach_spiral",
+        "work_attach_tapered",
+        "work_attach_vibrating"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-B50",
+      "status": "audit",
+      "replaces": [
+        "TOOL_BAYONET"
+      ],
+      "spec": "байонет Ø50 h6, 4 усика, фиксация 400 Н, шестигранник 14 мм",
+      "sides": "насадки Ø48…54",
+      "rule": "5 насадок (textured, inflatable, dual_density, tickle_radial, ribbed)",
+      "points": 5,
+      "components": [
+        "work_attach_dual_density",
+        "work_attach_inflatable",
+        "work_attach_ribbed",
+        "work_probe_textured",
+        "work_tickle_radial"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-D90",
+      "status": "audit",
+      "replaces": [
+        "TOOL_BAYONET"
+      ],
+      "spec": "ротационный док Ø90, фланец + кольцо, фиксация рычагом",
+      "sides": "work_rotary_drum Ø94, work_tickle_radial Ø52 (вариант D50)",
+      "rule": "ротационные доки не сводятся к байонету — оставить отдельной семьёй",
+      "points": 1,
+      "components": [
+        "work_rotary_drum"
+      ]
+    },
+    {
+      "id": "CJ-CLEVIS-8",
+      "status": "audit",
+      "replaces": [
+        "CLEVIS"
+      ],
+      "spec": "вилка 8 мм, палец Ø8 h8, проушина 16 мм, стопор шплинтом",
+      "sides": "5 поршней ↔ серьги/рычаги",
+      "rule": "поршень не отдаёт ISO-фланец; переход CLV→ISO50 — отдельная деталь",
+      "points": 7,
+      "components": [
+        "motion_piston_hydraulic",
+        "motion_piston_rod",
+        "motion_piston_servo",
+        "motion_piston_telescopic",
+        "restraint_head_frame",
+        "work_feather_fan"
+      ]
+    },
+    {
+      "id": "CJ-QD-F10",
+      "status": "audit",
+      "replaces": [
+        "FLUID"
+      ],
+      "spec": "быстросъём Ø10, 0…4 бар, вода/воздух, G1/4 в корпусе",
+      "sides": "spray, roller, irrigation, mixer, probe_inflatable",
+      "rule": "барб Ø8…Ø13 сводится к Ø10; Ø16 — отдельный QD-F16",
+      "points": 23,
+      "components": [
+        "fluid_mixer",
+        "motion_piston_hydraulic",
+        "motion_piston_pneumatic",
+        "service_dock",
+        "structure_dock",
+        "surface_cooled",
+        "surface_fluid_channel",
+        "utility_air",
+        "utility_drain",
+        "work_air_jet",
+        "work_attach_inflatable",
+        "work_irrigation",
+        "work_probe_inflatable",
+        "work_roller",
+        "work_spray",
+        "work_suction"
+      ]
+    },
+    {
+      "id": "CJ-QD-F16",
+      "status": "audit",
+      "replaces": [
+        "FLUID"
+      ],
+      "spec": "быстросъём Ø16, 0…10 бар, слив/подача",
+      "sides": "utility_water ↔ utility_drain, surface_cooled",
+      "rule": "дренаж Ø22…Ø66 — свободный слив, не коннектор",
+      "points": 11,
+      "components": [
+        "fluid_mixer",
+        "sensory_hood",
+        "service_cleaner",
+        "service_dock",
+        "utility_air",
+        "utility_drain",
+        "utility_routing",
+        "utility_water"
+      ]
+    },
+    {
+      "id": "CJ-PWR-C20",
+      "status": "audit",
+      "replaces": [
+        "POWER"
+      ],
+      "spec": "IEC C20 вход 16 А / C19 выход; 230 В 50 Гц",
+      "sides": "станина, utility_power, шкаф",
+      "rule": "C14 — только для ветвей ≤10 А, переход C19→C13 запрещён",
+      "points": 8,
+      "components": [
+        "structure_base",
+        "utility_air",
+        "utility_data",
+        "utility_drain",
+        "utility_power",
+        "utility_water"
+      ]
+    },
+    {
+      "id": "CJ-PWR-C14",
+      "status": "audit",
+      "replaces": [
+        "POWER"
+      ],
+      "spec": "IEC C14 вход 10 А / C13 выход",
+      "sides": "портал, рама-ложе",
+      "rule": "если модуль потребляет >10 А — только C20",
+      "points": 3,
+      "components": [
+        "structure_bed_frame",
+        "structure_portal"
+      ]
+    },
+    {
+      "id": "CJ-PWR-DC24",
+      "status": "audit",
+      "replaces": [
+        "POWER"
+      ],
+      "spec": "M12 A-coded 4-pin, 24 В 3 А, IP67; DC jack выводится",
+      "sides": "4 сенсорных, 4 CONTROL",
+      "rule": "единый разъём для 24 В, гермоввод остаётся только как механический ввод",
+      "points": 9,
+      "components": [
+        "control_console",
+        "control_estop",
+        "control_interlock",
+        "control_telemetry",
+        "sensory_audio",
+        "sensory_hood",
+        "sensory_light",
+        "sensory_visor",
+        "work_attach_vibrating"
+      ]
+    },
+    {
+      "id": "CJ-SIG-RJ45",
+      "status": "audit",
+      "replaces": [
+        "SIGNAL"
+      ],
+      "spec": "RJ45 8P8C, Cat5e, экран, latch",
+      "sides": "structure_*, control_*, utility_data",
+      "rule": "если RJ45 заявлен — гнездо должно быть в геометрии",
+      "points": 11,
+      "components": [
+        "control_console",
+        "control_estop",
+        "control_interlock",
+        "control_telemetry",
+        "structure_base",
+        "structure_dock",
+        "structure_gantry",
+        "structure_portal",
+        "utility_data",
+        "utility_power"
+      ]
+    },
+    {
+      "id": "CJ-SIG-M12D",
+      "status": "audit",
+      "replaces": [
+        "SIGNAL"
+      ],
+      "spec": "M12 D-coded 4-pin, EtherCAT 100 Мбит/с",
+      "sides": "motion_*, control_*",
+      "rule": "для приводов вместо RJ45"
+    },
+    {
+      "id": "CJ-SIG-USBC",
+      "status": "audit",
+      "replaces": [
+        "SIGNAL"
+      ],
+      "spec": "USB-C 3.2, 5 Гбит/с, 3 А",
+      "sides": "сенсорика, utility_data, control_telemetry",
+      "rule": "3,5 мм jack и USB-C несовместимы — sensory_audio перевести на USB-C",
+      "points": 6,
+      "components": [
+        "control_telemetry",
+        "sensory_audio",
+        "sensory_hood",
+        "sensory_light",
+        "sensory_visor",
+        "utility_data"
+      ]
+    },
+    {
+      "id": "CJ-OSC-PLATE",
+      "status": "local",
+      "spec": "плита ползуна 32 × 106 мм, верх y=0.139 (crosshead 0.037…0.069 по X, -0.044…0.062 по Z), хомут + 2 стяжки по 106-мм стороне",
+      "sides": "motion_oscillating.tool_out ↔ насадки/держатели с плоской пятой",
+      "rule": "в центре плиты проходит палец шатуна Ø12 — осевой хвостовик и ISO-фланец Ø50 не размещаются; инструмент только накладной",
+      "geometry": "node motion_oscillating__crosshead (GLB bbox top face)",
+      "points": 1,
+      "components": [
+        "motion_oscillating"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-PLATE",
+      "status": "local",
+      "spec": "плита каретки под хомут/струбцину; размер по модулю (264 × 42 у motion_lift_z, 208 × 252 у motion_linear_x, 150 × 150 на quick_plate 210 × 210 у motion_linear_y); болтовых полей и центрирующего бурта нет",
+      "sides": "motion_lift_z / motion_linear_x / motion_linear_y ↔ накладные насадки",
+      "rule": "если у насадки есть отверстия под болты — нужна переходная плита (ADP-STR-XX), сама плита отверстий не имеет",
+      "geometry": "nodes carriage_bridge / carriage_top / tool_pad (GLB bbox faces)",
+      "points": 3,
+      "components": [
+        "motion_lift_z",
+        "motion_linear_x",
+        "motion_linear_y"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-CHUCK-43",
+      "status": "local",
+      "spec": "3-кулачковый патрон, расточка Ø43 (chuck_bore), кулаки до x=0.150, корпус Ø120 x 0.118…0.140, ось +X",
+      "sides": "motion_rotary.tool_out ↔ насадки с цилиндрическим хвостовиком Ø40…43",
+      "rule": "зажим кулаками, не фланец; ISO 9409 Ø50 перекрыт корпусом патрона",
+      "geometry": "nodes chuck_body / chuck_bore / jaw_1..3 / jaw_*_step",
+      "points": 1,
+      "components": [
+        "motion_rotary"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-BOSS-60",
+      "status": "local",
+      "spec": "бобышка Ø60 на передней грани моста каретки, ось +Z, y=0.630, z=0.124…0.146",
+      "sides": "motion_lift_z.tool_boss_out ↔ насадки с центральным гнездом Ø60",
+      "rule": "центрирование по бобышке, фиксация стяжкой; болтового поля нет",
+      "geometry": "node carriage_bridge (tool_boss в составе моста) + build_motion_lift_z.py",
+      "points": 1,
+      "components": [
+        "motion_lift_z"
+      ]
+    },
+    {
+      "id": "CJ-TABLE-T900",
+      "status": "local",
+      "spec": "рабочий диск Ø900 (верх y=0.1445), 4 радиальных T-паза 210 × 12,5 на r=0.300 (азимут 45°+90°k); концентрично буртик Ø230 и шпиндель Ø144 до y=0.150; 8 болтов диска на PCD 340 — внутренний стык",
+      "sides": "motion_turntable.tool_out ↔ приспособления/фиксаторы на T-пазах",
+      "rule": "T-паз 12,5 мм — не T-slot 15; крепление сухариками в пазах, не фланцем",
+      "geometry": "nodes disc / disc_slots / disc_boss / disc_spigot / disc_bolts",
+      "points": 1,
+      "components": [
+        "motion_turntable"
+      ]
+    },
+    {
+      "id": "CJ-TOOL-D50",
+      "status": "derived",
+      "spec": "ротационный док Ø50 (подразмер D-серии; в аудите упомянут как вариант D90 для work_tickle_radial Ø52)",
+      "sides": "ротационные насадки Ø48…54",
+      "rule": "наследует правила CJ-TOOL-D90; вводится, чтобы не подгонять Ø52…58 под Ø90",
+      "geometry": "—"
+    }
+  ],
+  "custom": {
+    "count": 369,
+    "note": "custom — не «нет крепления», а «нет канонического семейства»: посадка описана в standard/note точки"
+  },
+  "adapter_matrix": [
+    {
+      "from_": "ISO 9409-1-50-4-M6",
+      "to": "bayonet B25",
+      "part": "ADP-ISO50-B25",
+      "status": "нужен",
+      "note": "work_attach_adapter пересобрать: вход — фланец Ø50 4×M6 (female), выход — B25 (male), поводок в канале; сейчас вход — байонет Ø20"
+    },
+    {
+      "from_": "bayonet B25",
+      "to": "ISO 9409-1-50-4-M6",
+      "part": "ADP-B25-ISO50",
+      "status": "нужен",
+      "note": "обратный переход для насадок на поворотных модулях"
+    },
+    {
+      "from_": "clevis Ø8",
+      "to": "ISO 9409-1-50-4-M6",
+      "part": "ADP-CLV8-ISO50",
+      "status": "нужен",
+      "note": "серьга + плита; иначе поршни не несут ни одной насадки"
+    },
+    {
+      "from_": "M12 pitch 0,6",
+      "to": "любой шаг",
+      "part": "ADP-STR-XX",
+      "status": "нужен",
+      "note": "плита с двумя полями: снизу 0,6 × 0,6, сверху — поле модуля; 27 разных шагов иначе не свести"
+    },
+    {
+      "from_": "rail 55×42 / 50×22 / 56×28",
+      "to": "T-slot 15",
+      "part": "ADP-RAIL-15",
+      "status": "нужен",
+      "note": "переходная каретка, иначе 10 профилей остаются без движения"
+    },
+    {
+      "from_": "dock Ø23 pin",
+      "to": "dock 2 guides + 2×8",
+      "part": "ADP-DOCK-M",
+      "status": "пересборка",
+      "note": "проще привести structure_dock к CJ-DOCK-M, чем делать переходник"
+    },
+    {
+      "from_": "Ø84 quick-change",
+      "to": "ISO 9409-1-50-4-M6",
+      "part": "ADP-QC84-ISO50",
+      "status": "опционально",
+      "note": "гентри имеет 2 таких выхода; если оставлять — нужен переход на общий ISO50"
+    },
+    {
+      "from_": "C19",
+      "to": "C14",
+      "part": "-",
+      "status": "запрещено",
+      "note": "16 А в 10 А недопустимо; либо оба конца C20/C19, либо ветвь на C14 с автоматом 10 А"
+    }
+  ],
+  "counts": {
+    "CJ-CLEVIS-8": 7,
+    "CJ-DECK": 3,
+    "CJ-DOCK-M": 5,
+    "CJ-OSC-PLATE": 1,
+    "CJ-PWR-C14": 3,
+    "CJ-PWR-C20": 8,
+    "CJ-PWR-DC24": 9,
+    "CJ-QD-F10": 23,
+    "CJ-QD-F16": 11,
+    "CJ-RAIL-15": 5,
+    "CJ-SIG-RJ45": 11,
+    "CJ-SIG-USBC": 6,
+    "CJ-STR-M12": 1,
+    "CJ-TABLE-T900": 1,
+    "CJ-TOOL-B25": 8,
+    "CJ-TOOL-B40": 5,
+    "CJ-TOOL-B50": 5,
+    "CJ-TOOL-BOSS-60": 1,
+    "CJ-TOOL-CHUCK-43": 1,
+    "CJ-TOOL-D90": 1,
+    "CJ-TOOL-PLATE": 3,
+    "custom": 369
+  },
+  "unregistered": []
+}

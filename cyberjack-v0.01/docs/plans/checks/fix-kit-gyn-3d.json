@@ -1,0 +1,8 @@
+{
+  "id": "asm_gyn_3d",
+  "name": "Гинекологическое кресло — 3D layout",
+  "image": "fix-kit/assemblies/gyn-3d.png",
+  "status": "3D layout pilot",
+  "note": "Рама 2×1, спинка-ложе, поворот, наклон и две стойки с манжетами под ноги.",
+  "modules": 12
+}

@@ -1,0 +1,394 @@
+{
+  "format": "cj-kinematics-check/1",
+  "generated_at": "2026-11-10T15:55:22+03:00",
+  "scope": {
+    "components": [
+      "motion_piston_cam",
+      "motion_linear_x",
+      "motion_oscillating"
+    ],
+    "sources": [
+      "public/models/machine-modules/component-contracts.json",
+      "public/models/machine-modules/component-catalog.json",
+      "public/models/machine-modules/components-viewer.js",
+      "public/models/machine-modules/components/motion_piston_cam.glb",
+      "public/models/machine-modules/components/motion_linear_x.glb",
+      "public/models/machine-modules/components/motion_oscillating.glb",
+      "docs/plans/tools/qa_kinematics_runtime.py"
+    ],
+    "method": "static contract/runtime review + GLB vertex measurement + live page sampling (playwright) + qa_kinematics_runtime.py run as-is",
+    "role": "checker; no repository file was modified; the only writes are this report, the .md twin, evidence screenshots and a copy of the previous runtime report"
+  },
+  "verdict": "fail",
+  "verdict_note": "Runtime QA: 3/3 case pass, 0 JS errors. Phase coupling itself is correct (one phase, no per-driver clock, no double motion). The mechanism is nevertheless inconsistent: two of three revolute axes contradict the model geometry, the declared cam/roller contact constraint is violated by up to 86 mm, and the crank law amplitude does not match the modelled crank throw.",
+  "runtime_summary": {
+    "command": "python3 docs/plans/tools/qa_kinematics_runtime.py",
+    "status": "pass",
+    "js_errors": [],
+    "cases": [
+      {
+        "component": "motion_piston_cam",
+        "status": "pass",
+        "law": "cam_cosine",
+        "fit_gain_m": 0.029999999999999995,
+        "expected_gain_m": 0.03,
+        "intercept_m": -0.07991578429937363,
+        "max_residual_m": 1.3877787807814457e-17,
+        "samples": 28
+      },
+      {
+        "component": "motion_linear_x",
+        "status": "pass",
+        "law": "screw_lead",
+        "fit_gain_m": 0.0015915494309189538,
+        "expected_gain_m": 0.00159154943,
+        "intercept_m": -2.7755575615628914e-17,
+        "max_residual_m": 2.7755575615628914e-17,
+        "samples": 28
+      },
+      {
+        "component": "motion_oscillating",
+        "status": "pass",
+        "law": "crank_slider",
+        "fit_gain_m": 0.034999999999999996,
+        "expected_gain_m": 0.035,
+        "intercept_m": 0.11249999701976776,
+        "max_residual_m": 1.3877787807814457e-17,
+        "samples": 28
+      }
+    ],
+    "previous_run_preserved": "docs/plans/checks/kinematics-runtime-report.previous.json",
+    "note": "The script overwrites docs/plans/kinematics-runtime-report.json by design; the pre-run version was copied before execution."
+  },
+  "axis_check": [
+    {
+      "component": "motion_piston_cam",
+      "joint": "cam",
+      "declared_axis": "x",
+      "geometry_axis": "z",
+      "evidence": "lobe bbox 0.1118 x 0.1243 x 0.0160 m (thin in z); camshaft/hub/flywheel share x=-0.18, y=0.165 and differ only in z; roller centre z=0.020 equal to lobe z=0.020",
+      "ok": false
+    },
+    {
+      "component": "motion_linear_x",
+      "joint": "screw",
+      "declared_axis": "x",
+      "geometry_axis": "x",
+      "evidence": "screw bbox 0.99 x 0.023 x 0.023 m along x",
+      "ok": true
+    },
+    {
+      "component": "motion_oscillating",
+      "joint": "crank",
+      "declared_axis": "y",
+      "geometry_axis": "z",
+      "evidence": "crank disc bbox 0.14 x 0.14 x 0.014 m (thin in z); crank pin is a cylinder 0.028 x 0.028 x 0.013 m along z; rod lies in the xy plane at z=0.039",
+      "ok": false
+    }
+  ],
+  "phase_check": {
+    "ok": true,
+    "drivers_using_single_phase": {
+      "motion_piston_cam": [
+        "cam",
+        "follower"
+      ],
+      "motion_linear_x": [
+        "screw",
+        "carriage"
+      ],
+      "motion_oscillating": [
+        "crank",
+        "slider"
+      ]
+    },
+    "independent_speed_or_clock_keys_found": 0,
+    "components_with_kinematics": 3,
+    "note": "Every driver carries phase='phase'; no driver has speed/clock/omega/rate. The runtime computes one phase per component (components-viewer.js:241) and feeds it to all drivers. The clock itself is taken from the legacy model.motion.speed (1.6 / 0.82 / 1.5 per component) and the phase is a ping-pong cosine, not the declared wrapping 0..2pi (contract phase.wrap=true)."
+  },
+  "law_check": [
+    {
+      "component": "motion_piston_cam",
+      "law": "cam_cosine",
+      "declared_amplitude_m": [
+        0,
+        0.06
+      ],
+      "observed_amplitude_m": [
+        0.0,
+        0.06
+      ],
+      "limit_m": [
+        0,
+        0.06
+      ],
+      "overshoot": false,
+      "formula_ok": true,
+      "comment": "follower = r_lift*0.5*(1-cos phase) reproduces r_base 0.034 / r_lift 0.060 exactly, but the modelled lobe profile (r_base 0.0340, r_max 0.0940, nose at 65.0 deg) is not the cosine profile."
+    },
+    {
+      "component": "motion_linear_x",
+      "law": "screw_lead",
+      "lead_m": 0.01,
+      "ratio": 20,
+      "travel_m": [
+        0,
+        0.2
+      ],
+      "limit_m": [
+        0,
+        0.2
+      ],
+      "overshoot": false,
+      "formula_ok": true,
+      "comment": "x = lead*ratio*phase/(2*pi) equals lead*screw_angle/(2*pi) with screw_angle = ratio*phase; measured live at phase=pi: screw 62.83 rad (10 turns) and carriage 0.100 m -> lead 0.010 m/turn exactly. The contract equation string omits ratio."
+    },
+    {
+      "component": "motion_oscillating",
+      "law": "crank_slider",
+      "crank_radius_m_declared": 0.035,
+      "crank_radius_m_modelled": 0.02,
+      "travel_m": [
+        -0.035,
+        0.035
+      ],
+      "limit_m": [
+        -0.07,
+        0.07
+      ],
+      "declared_stroke_m": 0.14,
+      "overshoot": false,
+      "formula_ok": true,
+      "comment": "x = r*sin(phase) is applied verbatim, but r is 75% larger than the modelled throw and the law amplitude is half the declared stroke."
+    }
+  ],
+  "contact_check": {
+    "component": "motion_piston_cam",
+    "constraint": "distance(cam_center, roller_center) = r_cam(phase) + r_roller",
+    "geometry": {
+      "cam_center_xy": [
+        -0.18,
+        0.165
+      ],
+      "roller_center_xy": [
+        -0.1049,
+        0.165
+      ],
+      "runner_radius_m": 0.015,
+      "base_centre_distance_m": 0.07511,
+      "r_at_0deg_m": 0.0602,
+      "r_max_m": 0.094,
+      "nose_deg": 65.0
+    },
+    "phase0_contact_error_m": -0.0001,
+    "max_separation_m": 0.086,
+    "max_penetration_m": -0.0215,
+    "evaluated_with": "correct z rotation of the lobe about the cam centre; both rotation signs give the same envelope",
+    "table": [
+      {
+        "phase_deg": 0,
+        "follower_m": 0.0,
+        "centre_distance_m": 0.07511,
+        "required_m": 0.07524,
+        "contact_error_m": -0.00013
+      },
+      {
+        "phase_deg": 30,
+        "follower_m": 0.00402,
+        "centre_distance_m": 0.07913,
+        "required_m": 0.05501,
+        "contact_error_m": 0.02412
+      },
+      {
+        "phase_deg": 60,
+        "follower_m": 0.015,
+        "centre_distance_m": 0.09011,
+        "required_m": 0.049,
+        "contact_error_m": 0.04111
+      },
+      {
+        "phase_deg": 90,
+        "follower_m": 0.03,
+        "centre_distance_m": 0.10511,
+        "required_m": 0.049,
+        "contact_error_m": 0.05611
+      },
+      {
+        "phase_deg": 120,
+        "follower_m": 0.045,
+        "centre_distance_m": 0.12011,
+        "required_m": 0.049,
+        "contact_error_m": 0.07111
+      },
+      {
+        "phase_deg": 150,
+        "follower_m": 0.05598,
+        "centre_distance_m": 0.13109,
+        "required_m": 0.049,
+        "contact_error_m": 0.08209
+      },
+      {
+        "phase_deg": 180,
+        "follower_m": 0.06,
+        "centre_distance_m": 0.13511,
+        "required_m": 0.04924,
+        "contact_error_m": 0.08587
+      },
+      {
+        "phase_deg": 210,
+        "follower_m": 0.05598,
+        "centre_distance_m": 0.13109,
+        "required_m": 0.06099,
+        "contact_error_m": 0.0701
+      },
+      {
+        "phase_deg": 240,
+        "follower_m": 0.045,
+        "centre_distance_m": 0.12011,
+        "required_m": 0.08369,
+        "contact_error_m": 0.03642
+      },
+      {
+        "phase_deg": 270,
+        "follower_m": 0.03,
+        "centre_distance_m": 0.10511,
+        "required_m": 0.1027,
+        "contact_error_m": 0.00241
+      },
+      {
+        "phase_deg": 300,
+        "follower_m": 0.015,
+        "centre_distance_m": 0.09011,
+        "required_m": 0.1087,
+        "contact_error_m": -0.01859
+      },
+      {
+        "phase_deg": 330,
+        "follower_m": 0.00402,
+        "centre_distance_m": 0.07913,
+        "required_m": 0.09776,
+        "contact_error_m": -0.01863
+      }
+    ],
+    "ok": false,
+    "note": "The assembly is built so the roller touches the flank at phase 0 (error -0.1 mm). Any cosine lift over a full revolution leaves that flank: the follower separates up to 86 mm and later penetrates the lobe up to 21 mm. The runtime applies the rotation about x, so the lobe leaves the follower plane altogether and the constraint is not evaluable at all; the constraint is declarative only and is never evaluated by components-viewer.js."
+  },
+  "double_motion_check": {
+    "ok": true,
+    "evidence": "components-viewer.js:240-248 returns from applyMotion as soon as api.kin exists, before the legacy slide/spin branches (249-277). The legacy anim/parts transforms are therefore never applied to kinematics-driven nodes. The runtime fit residual of 1e-17 across 28 live samples per component confirms the anim node follows only the declared law; any second writer would break the fit. Cam members (lobe/web/hub/camshaft/flywheel) and the anim group (follower/roller/rod) are disjoint node sets; the crank disc group and the anim group (rod/slider) are disjoint as well.",
+    "latent_risk": "The kin branch sits after the `if (!m || m.type === 'none') return;` guard, so a component with kinematics but without a legacy motion block would never animate. All three current components are motion.type='slide', so the defect is latent."
+  },
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "high",
+      "component": "motion_piston_cam",
+      "kind": "axis",
+      "claim": "The cam revolute axis in both the contract and the runtime is x, while the modelled cam rotates about z.",
+      "evidence": "GLB: lobe 0.1118x0.1243x0.0160 m, camshaft/hub/flywheel aligned along z at x=-0.18, y=0.165, roller at the same z=0.020 as the lobe. components-viewer.js:244 sets pivot.rotation['x']. Live page at phase 90 deg: the flywheel lies flat and the shaft points up (docs/plans/checks/motion_piston_cam-close-phase90.png vs -phase0.png).",
+      "impact": "The lobe tumbles out of the follower plane by up to 90 deg; the cam/roller contact becomes geometrically impossible."
+    },
+    {
+      "id": "F-02",
+      "severity": "high",
+      "component": "motion_piston_cam",
+      "kind": "constraint",
+      "claim": "The declared contact constraint distance = r_cam(phase) + r_roller is not satisfied anywhere except phase 0.",
+      "evidence": "Measured lobe profile (400 vertices, r_base 0.0340, r_max 0.0940 at 65.0 deg) vs follower law 0.03*(1-cos phase): contact error range -0.0215 .. +0.0860 m; table in contact_check.",
+      "impact": "Roller visibly leaves the flank by up to 86 mm and cuts into the lobe by up to 21 mm if the axis is corrected; with the current axis the lobe is out of plane."
+    },
+    {
+      "id": "F-03",
+      "severity": "high",
+      "component": "motion_oscillating",
+      "kind": "axis",
+      "claim": "The crank revolute axis in both the contract and the runtime is y, while the modelled crank rotates about z.",
+      "evidence": "GLB: crank disc 0.14x0.14x0.014 m (thin in z), pin cylinder 0.028x0.028x0.013 m along z, connecting rod in the xy plane at z=0.039. components-viewer.js:244 sets pivot.rotation['y']. Live page at phase 90 deg: the disc is edge-on (docs/plans/checks/motion_oscillating-close-phase90.png).",
+      "impact": "The crank disc tumbles about the wrong axis and the pin leaves the rod/slider plane."
+    },
+    {
+      "id": "F-04",
+      "severity": "high",
+      "component": "motion_oscillating",
+      "kind": "amplitude",
+      "claim": "The crank_slider amplitude 0.035 m does not match the modelled crank throw 0.020 m, and the law stroke 0.07 m is half the declared stroke 0.14 m.",
+      "evidence": "Pin centre (-0.065, 0.15) vs disc centre (-0.085, 0.15) -> throw 0.020 m; rod big-end eye coincides with the pin at (-0.065, 0.15); slider base x=0.1125 = -0.085 + 0.020 + 0.1775 (exact outer dead centre). Runtime slider travel -0.035..+0.035.",
+      "impact": "Slider and crank pin separate by up to ~55 mm; the assembly cannot stay closed. The declared stroke ±0.07 is never reached (50% under-travel)."
+    },
+    {
+      "id": "F-05",
+      "severity": "medium",
+      "component": "motion_linear_x",
+      "kind": "contract_doc",
+      "claim": "The contract constraint equation x_carriage = lead_m*phase/(2*pi) omits ratio=20, contradicting its own drivers.",
+      "evidence": "Drivers: screw ratio 20.0, carriage lead_m 0.01 ratio 20.0. Runtime: 0.01*20*phase/(2*pi) -> 0.2 m per phase cycle; live check at phase=pi gives screw 62.83 rad (10 turns) and carriage 0.100 m, i.e. lead 0.010 m/turn. The equation string would predict 0.05 m at phase=pi.",
+      "impact": "Any consumer that recomputes the carriage from the equation instead of the drivers gets a value 20x too small. The runtime itself is correct and self-consistent."
+    },
+    {
+      "id": "F-06",
+      "severity": "medium",
+      "component": "motion_linear_x",
+      "kind": "model_vs_contract",
+      "claim": "The visible screw pitch is 0.030 m while the declared lead is 0.010 m.",
+      "evidence": "screw_ring_00..28 spaced 0.0300 m (x=-0.4632, -0.4333, -0.4032 ...), screw radius 0.0115 m. Screw rotation of 20 turns advances the carriage 0.2 m, i.e. 0.01 m per turn against a 0.03 m crest spacing.",
+      "impact": "Carriage advances one third of a visible thread turn per revolution; legibility of screw->carriage transmission suffers."
+    },
+    {
+      "id": "F-07",
+      "severity": "low",
+      "component": "all three",
+      "kind": "runtime_phase",
+      "claim": "The runtime phase is a ping-pong cosine 0..2pi driven by the legacy model.motion.speed, not the wrapping phase declared by the contract.",
+      "evidence": "components-viewer.js:241 phase = PI*(1-cos(t*(m.speed||1))); contracts declare phase.range_rad [0,6.283] with wrap=true. Speeds differ per component (1.6 / 0.82 / 1.5), none per driver.",
+      "impact": "Drives reverse direction instead of wrapping; the tempo still depends on the old motion block rather than on kinematics alone. Cosmetic, does not break the phase coupling."
+    },
+    {
+      "id": "F-08",
+      "severity": "low",
+      "component": "all three",
+      "kind": "latent_runtime",
+      "claim": "The kinematics branch is unreachable when model.motion.type is missing or 'none'.",
+      "evidence": "components-viewer.js:239 returns before the kin block at 240. All three components currently carry motion.type='slide', so no impact today.",
+      "impact": "A kinematics-only component added later would render static with no error."
+    },
+    {
+      "id": "F-09",
+      "severity": "medium",
+      "component": "qa tooling",
+      "kind": "test_coverage",
+      "claim": "qa_kinematics_runtime.py passes 3/3 while the mechanism is inconsistent, because it only fits a scalar gain per case.",
+      "evidence": "It compares fit_gain_m to hardcoded expectations (0.030 / 0.0015915 / 0.035) with residual < 0.003 m; it never checks the joint axis, the contact equation, or the declared stroke. Its crank expectation 0.035 encodes the questionable amplitude instead of the contract stroke 0.14.",
+      "impact": "A green run here does not mean the kinematics are consistent; it means the scalar law is applied at the declared gain."
+    },
+    {
+      "id": "F-10",
+      "severity": "low",
+      "component": "motion_linear_x",
+      "kind": "dangling_ref",
+      "claim": "The screw driver lists member 'screw_thread', which does not exist in the model.",
+      "evidence": "No node name contains 'thread' in motion_linear_x.glb (151 nodes); the runtime silently skips missing nodes (components-viewer.js:197-200).",
+      "impact": "None functional; the list misstates which nodes rotate."
+    }
+  ],
+  "passed_checks": [
+    "Single phase parameter: every driver of all three components uses phase='phase', no per-driver speed/clock (0 occurrences).",
+    "Cam amplitude: follower travels exactly 0..0.060 m inside the declared 0..0.06 limit, no overshoot.",
+    "Screw lead/ratio: carriage travel 0..0.200 m exactly at the declared limit, no overshoot; x = lead*screw_angle/(2*pi) holds to 1e-17.",
+    "Crank law form: slider = r*sin(phase) applied verbatim; crank and slider are not independent (one phase, one clock).",
+    "No double motion: legacy slide/spin branches are unreachable while kinematics is active; residual 1e-17 over 28 live samples per component.",
+    "Runtime QA: 3/3 pass, 0 JS errors (docs/plans/kinematics-runtime-report.json)."
+  ],
+  "not_checked": [
+    "Collision/clearance of moving parts against static geometry.",
+    "Whether the follower roller actually stays in the guide bushing over the full stroke.",
+    "Device-level assembly wiring (docs/plans/assembly-specs.json)."
+  ],
+  "evidence_files": [
+    "docs/plans/checks/motion_piston_cam-close-phase0.png",
+    "docs/plans/checks/motion_piston_cam-close-phase90.png",
+    "docs/plans/checks/motion_piston_cam-close-phase180.png",
+    "docs/plans/checks/motion_oscillating-close-phase0.png",
+    "docs/plans/checks/motion_oscillating-close-phase90.png",
+    "docs/plans/checks/kinematics-runtime-report.previous.json"
+  ]
+}

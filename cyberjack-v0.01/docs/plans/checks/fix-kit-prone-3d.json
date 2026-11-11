@@ -1,0 +1,8 @@
+{
+  "id": "asm_prone_3d",
+  "name": "Лёжа на животе — 3D layout",
+  "image": "fix-kit/assemblies/prone-3d.png",
+  "status": "3D layout pilot",
+  "note": "Рама 2×1: 2 рельса, 2 перекладины, 4 узла, 4 опоры, 6 кареток, 4 манжеты, 2 подушки.",
+  "modules": 4
+}

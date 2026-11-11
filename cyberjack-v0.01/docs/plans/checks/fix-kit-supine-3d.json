@@ -1,0 +1,75 @@
+{
+  "id": "asm_pose_supine_spread",
+  "name": "Сборка: спиной, ноги разведены",
+  "reference": [
+    "vol-04 · 094",
+    "vol-04 · 098",
+    "vol-04 · 100"
+  ],
+  "layout": {
+    "frame_m": [
+      2.0,
+      1.0
+    ],
+    "rail_centres_z_m": 0.0736,
+    "rail_bottom_z_m": 0.0511,
+    "node_roots_z_m": 0.0436,
+    "carriages_long": [
+      [
+        -0.6,
+        -0.5
+      ],
+      [
+        -0.6,
+        0.5
+      ],
+      [
+        0.6,
+        -0.5
+      ],
+      [
+        0.6,
+        0.5
+      ]
+    ],
+    "carriages_cross": [
+      [
+        -1.0,
+        -0.25
+      ],
+      [
+        -1.0,
+        0.25
+      ]
+    ],
+    "adapters": 6,
+    "feet": 4
+  },
+  "bbox_m": [
+    [
+      -1.1200000047683716,
+      -0.6200000047683716,
+      0.0
+    ],
+    [
+      1.1200000047683716,
+      0.6200000047683716,
+      0.131400004029274
+    ]
+  ],
+  "overlaps": {
+    "nodes-rails": 820,
+    "rails-crosses": 13454
+  },
+  "joints": {
+    "nodes-rails": 820,
+    "rails-crosses": 13454
+  },
+  "free_overlaps": {},
+  "checks": {
+    "module_count": 268,
+    "joint_contacts": 14274,
+    "free_overlaps": 0,
+    "all_ok": true
+  }
+}

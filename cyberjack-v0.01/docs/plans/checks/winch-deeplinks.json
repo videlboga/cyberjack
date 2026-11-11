@@ -1,0 +1,34 @@
+{
+ "total": 3,
+ "ok": 3,
+ "failed": [],
+ "items": [
+  {
+   "id": "motion_winch",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_console",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_smooth",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  }
+ ]
+}

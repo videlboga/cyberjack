@@ -1,0 +1,1832 @@
+{
+  "format": "cj-mate-points/1",
+  "group": "work-heads",
+  "units": "m",
+  "coordinate_system": "glTF/three.js local model coords, Y-up, relative to GLB root",
+  "method": "Positions derived from GLB node bboxes (numpy parse of POSITION accessor min/max transformed by the node world matrix). kind/role follow component-contracts.json ports tool_in (bayonet 20/25) and work_surface (contact_surface); standard/geometry mismatches are recorded in note, never silently resolved.",
+  "sources": [
+    "public/models/machine-modules/components/<id>.glb",
+    "public/models/machine-modules/component-contracts.json",
+    "public/models/machine-modules/component-catalog.json (specs.Крепление, model.motion)",
+    "docs/plans/tools/build_<id>.py (design intent)"
+  ],
+  "components": {
+    "work_tickle_soft": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "быстросъём (хомут-обойма на моторе; паспорт bayonet 20/25 mm)",
+          "gender": "female",
+          "position_m": [
+            -0.0675,
+            0.042,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.05,
+          "source": "node:work_tickle_soft__clamp_band / bbox centre, ось барабана X",
+          "confidence": "medium",
+          "note": "хомут Ø50 на корпусе мотора (clamp_lug/clamp_lever/clamp_screw), вход по -X; отдельного байонета 20/25 мм в геометрии нет — паспортный стандарт не подтверждён",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.002,
+            0.0195,
+            0.0294
+          ],
+          "normal": [
+            0.0,
+            -0.6086,
+            0.7935
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.074,
+          "count": 16,
+          "source": "node:work_tickle_soft__bristle_tips / оболочка Ø74, середина открытой дуги кожуха 140…325°",
+          "confidence": "high",
+          "note": "контакт — вершины ворса; кожух закрывает дугу -35…+140°, открытая зона спереди-снизу (по build_work_tickle_soft.py)",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_tickle_firm": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "быстросъём (хомут-обойма на моторе; паспорт bayonet 20/25 mm)",
+          "gender": "female",
+          "position_m": [
+            -0.0595,
+            0.045,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.063,
+          "source": "node:work_tickle_firm__clamp_band / bbox centre, ось барабана X",
+          "confidence": "medium",
+          "note": "хомут Ø63 (clamp_tab/clamp_bracket/clamp_screw) на корпусе мотора, вход по -X; байонет 20/25 мм в геометрии не выделен",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.0264,
+            0.0292
+          ],
+          "normal": [
+            0.0,
+            -0.5373,
+            0.8434
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0692,
+          "count": 12,
+          "source": "node:work_tickle_firm__bristle_tips / оболочка Ø69, середина открытой дуги кожуха 145…330°",
+          "confidence": "high",
+          "note": "жёсткий ворс, вершины на Ø69; кожух открыт спереди-снизу",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_tickle_radial": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "bayonet",
+          "standard": "bayonet 20/25 mm (геометрия: обойма Ø52)",
+          "gender": "female",
+          "position_m": [
+            -0.0311,
+            0.08,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0524,
+          "count": 3,
+          "source": "node:work_tickle_radial__dock_collar + dock_lugs / bbox centre (x -0.0350…-0.0272)",
+          "confidence": "high",
+          "note": "ротационный док по -X: обойма с тремя усиками dock_lugs и release_lever; арбор диска входит по +X→-X",
+          "connector": "CJ-TOOL-B50"
+        },
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "4× болт, поле 0,0434×0,0430 м",
+          "position_m": [
+            -0.0682,
+            0.08,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0434,
+          "count": 4,
+          "source": "node:work_tickle_radial__mount_plate / задняя грань x=-0.0682 + mount_bolts (y ±0.0217, z ±0.0215)",
+          "confidence": "high",
+          "note": "монтажная плита дока по -X, 4 болта mount_bolts; прокладка mount_gasket",
+          "connector": "custom",
+          "connector_note": "болтовое поле «4× болт, поле 0,0434×0,0430 м» без нормированного поля"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.08,
+            0.0759
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.1518,
+          "source": "node:work_tickle_radial__bristles_crown / наружный венец Ø152, передняя точка (z=+0.0759)",
+          "confidence": "medium",
+          "note": "кожуха нет — венец открыт по всему диаметру; взята передняя (+Z) точка венца как центр контакта",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_feather_fan": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "flange",
+          "standard": "фланец 0,058×0,046, 4× болт (поле 0,042×0,026)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            -0.004
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.058,
+          "count": 4,
+          "pitch_m": 0.042,
+          "source": "node:work_feather_fan__mount_flange / нижняя грань y=0.000 + bolt_a..bolt_d",
+          "confidence": "high",
+          "note": "опорный фланец на плиту/тумблерный пост; сверху clamp_ring Ø41.2 обжимает шейку drive_housing",
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "swing_pivot",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "шарнир Ø8,2",
+          "position_m": [
+            0.0,
+            0.068,
+            0.0
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0082,
+          "source": "node:work_feather_fan__anim (t=[0,0.068,0]) + hinge_pin z -0.018…+0.018",
+          "confidence": "high",
+          "note": "качание (swing) вокруг Z; anim-пустышка стоит в основании шарнира, не в центре веера",
+          "connector": "CJ-CLEVIS-8",
+          "connector_note": "палец Ø8.2 в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            -0.0007,
+            0.1431,
+            -0.0138
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.105,
+          "source": "node:work_feather_fan__feathers / bbox centre поля опахал (x -0.0535…0.0521, y 0.1034…0.1828)",
+          "confidence": "medium",
+          "note": "веер лежит в плоскости XY и вынесен на -Z (Blender +Y), рабочая сторона — опахала на -Z; контакт — кромка перьев",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_air_jet": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "bayonet",
+          "standard": "bayonet 20/25 mm (геометрия: QD Ø20,8 — совпадает с 20 мм)",
+          "gender": "female",
+          "position_m": [
+            -0.0266,
+            0.02,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0208,
+          "source": "node:work_air_jet__qd_collar + qd_sleeve/qd_release / bbox centre (x -0.0316…-0.0216)",
+          "confidence": "high",
+          "note": "быстроразъёмная обойма Ø20.8 по -X — единственный вход, совпадающий с паспортным байонетом 20 мм",
+          "connector": "CJ-TOOL-B25"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "шланг Ø10, ерш",
+          "position_m": [
+            -0.0438,
+            0.0121,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.01,
+          "source": "node:work_air_jet__hose_ferrule / задняя грань x=-0.0438",
+          "confidence": "high",
+          "note": "пневмовход: короткий шланг hose + феррула; расход 10–40 л/мин, 0,2–2 бар",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "mount_clamp",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "хомут Ø23,8",
+          "position_m": [
+            -0.0149,
+            0.02,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0238,
+          "source": "node:work_air_jet__clamp_band + clamp_ear/clamp_lever / bbox centre",
+          "confidence": "medium",
+          "note": "хомут крепит корпус к штанге/держателю, лепесток снизу (-Y)",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0293,
+            0.02,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0026,
+          "source": "node:work_air_jet__tip_bore / срез сопла x=0.0289…0.0297 (TIP_X=0.0295)",
+          "confidence": "high",
+          "note": "срез сопла Ø0.8/1.2 мм; факел flow_cone идёт до x=0.0505",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_foot_cradle": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "mount",
+          "standard": "4 опорных башмака рамы (паспорт: док)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.048,
+          "count": 4,
+          "pitch_m": 0.348,
+          "source": "nodes:frame_pad_front/back_left/right / нижние грани y=0.000, центры x ±0.174, z ±0.0885",
+          "confidence": "medium",
+          "note": "плиты и дока в геометрии нет: узла байонета/дока не существует, крепление — трубчатая рама на 4 башмаках; паспорт «док» не подтверждён, шаг по X 0,348 м, по Z 0,177 м",
+          "connector": "custom"
+        },
+        {
+          "id": "support_rail_left",
+          "role": "support",
+          "kind": "rail",
+          "standard": "труба рамы 0,020×0,014",
+          "position_m": [
+            0.0,
+            0.024,
+            -0.112
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.02,
+          "source": "node:work_foot_cradle__frame_rail_left / верхняя грань y=0.024",
+          "confidence": "high",
+          "note": "левая продольная балка рамы — посадочная плоскость левой ванночки",
+          "connector": "custom",
+          "connector_note": "рельсовая точка без профиля CJ-RAIL-15"
+        },
+        {
+          "id": "support_rail_right",
+          "role": "support",
+          "kind": "rail",
+          "standard": "труба рамы 0,020×0,014",
+          "position_m": [
+            0.0,
+            0.024,
+            0.112
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.02,
+          "source": "node:work_foot_cradle__frame_rail_right / верхняя грань y=0.024",
+          "confidence": "high",
+          "note": "правая продольная балка рамы",
+          "connector": "custom",
+          "connector_note": "рельсовая точка без профиля CJ-RAIL-15"
+        },
+        {
+          "id": "work_surface_left",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.0791,
+            -0.06
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0432,
+          "source": "node:work_foot_cradle__roller_left_1..3 / вершины валиков y=0.0791 (ось вала y=0.0575, z=-0.060)",
+          "confidence": "high",
+          "note": "левая ванночка: контакт по вершинам 3 валиков Ø43,2 вдоль ложа 0,36 м, ложе bed_heel/toe_left ниже (y 0.031…0.060)",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface_right",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.0791,
+            0.06
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0432,
+          "source": "node:work_foot_cradle__roller_right_1..3 / вершины валиков y=0.0791 (ось вала y=0.0575, z=+0.060)",
+          "confidence": "high",
+          "note": "правая ванночка, симметрично левой",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_tickle_pair": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "flange",
+          "standard": "фланец Ø92 + 4× болт (поле 0,172×0,160)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.224,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.092,
+          "count": 4,
+          "pitch_m": 0.172,
+          "source": "nodes:mount_plate (y 0.210…0.224), flange_collar Ø92 (y 0.224…0.246), flange_bolt_0..3",
+          "confidence": "high",
+          "note": "верхний посадочный фланец траверсы: плита + обойма + 4 болта + status_ring; dock_tab на -Z; паспорт «док»",
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "work_surface_node0",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.165,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.22,
+          "source": "node:work_tickle_pair__node0_bristles / нижняя оболочка y=0.000 (anim_node0 @ 0.165,0.089,0)",
+          "confidence": "high",
+          "note": "правая (+X) головка: ворс на Ø220 смотрит вниз (-Y), диск выше (y 0.046…0.074)",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface_node1",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            -0.165,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.22,
+          "source": "node:work_tickle_pair__node1_bristles / нижняя оболочка y=0.000 (anim_node1 @ -0.165,0.089,0)",
+          "confidence": "high",
+          "note": "левая (-X) головка, независимая ось Z",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_probe_linear": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "быстросъёмная муфта Ø42 + цанга Ø35",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0255,
+            0.0065
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.042,
+          "source": "node:work_probe_linear__coupler + coupler_knurl/coupler_ring / bbox centre (z 0.000…0.013)",
+          "confidence": "high",
+          "note": "вход — стальная быстросъёмная муфта Ø42 с накаткой и рычагом release_lever, далее разрезная цанга Ø35 (collet). Паспортного байонета 20/25 мм в геометрии нет. Ввод по +Z, ось зонда Z",
+          "mounts_on": [
+            "CJ-TOOL-B40 (переходная втулка Ø42→Ø40)",
+            "CJ-TOOL-ISO50 (ADP-ISO50-B40)"
+          ],
+          "tool_function": "линейный зонд: осевое нажатие/пальпация 0…120 мм по +Z, сменный наконечник Ø13,6; насадка привода, не самостоятельная машина",
+          "connector": "custom",
+          "connector_note": "муфта Ø42 + цанга Ø35 — не байонет; ближайший B40 требует втулку Ø42→Ø40"
+        },
+        {
+          "id": "support_face",
+          "role": "support",
+          "kind": "surface",
+          "standard": "плоскость корпуса",
+          "position_m": [
+            0.0,
+            0.0023,
+            -0.038
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0464,
+          "source": "node:work_probe_linear__body_housing / нижняя грань y=0.0023 (ось зонда y=0.0255)",
+          "confidence": "medium",
+          "note": "плиты нет — зонд ложится на плоскость цилиндрическим корпусом Ø46,4",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.0255,
+            0.0974
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0136,
+          "source": "node:work_probe_linear__tip_ball / торец z=0.0974 (ось зонда z, ход +Z)",
+          "confidence": "high",
+          "note": "сменный наконечник: латунная обойма tip_ferrule + силиконовый колпачок Ø13,6; ход 0–120 мм по +Z",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_probe_rotary": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "dock",
+          "standard": "ротационный док Ø58, 4 усика до Ø66,8, 2 паза",
+          "gender": "female",
+          "position_m": [
+            -0.0505,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.058,
+          "count": 4,
+          "source": "nodes:flange (x -0.054…-0.047) + flange_lug_0..3 + flange_slot_0..1 / bbox centre",
+          "confidence": "high",
+          "note": "вход — док-фланец Ø58 с 4 усиками (до Ø66,8) и 2 пазами под штифты, сзади dock_body/dock_ring. Паспортного байонета 20/25 мм нет; ввод по +X, ось вращения X",
+          "mounts_on": [
+            "CJ-TOOL-D90 (кольцо D58→D90)",
+            "work_rotary_drum (D-серия)"
+          ],
+          "tool_function": "ротационный зонд: вращение оболочки Ø51,8 с 5 рёбрами и 4 спиралями вокруг оси X; насадка привода, не самостоятельная машина",
+          "connector": "custom",
+          "connector_note": "ротационный док Ø58 — подразмер D-серии; ближайший D90 не садится без кольца"
+        },
+        {
+          "id": "mount_socket",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "цанговый хомут на штангу Ø8",
+          "position_m": [
+            -0.072,
+            -0.0452,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0164,
+          "source": "nodes:mount_socket + socket_collar_a/b + mount_rod (Ø7,6, z ±0.0245) + clamp_band / bbox centre",
+          "confidence": "medium",
+          "note": "док держится на стальном хомуте с цапфой по -Y (mount_rod идёт вдоль Z), плиты нет",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.1,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0518,
+          "source": "node:work_probe_rotary__sleeve / торец x=0.100 (ось зонда X)",
+          "confidence": "high",
+          "note": "силиконовая насадка Ø51,8 с 5 рёбрами и 4 спиралями; рабочая поверхность — вся оболочка x -0.029…0.100",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_probe_inflatable": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "bayonet",
+          "standard": "байонетное гнездо Ø54, 2 усика до Ø65,5, обойма Ø59",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0074,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.054,
+          "count": 2,
+          "source": "node:work_probe_inflatable__bayonet_lugs / bbox centre (y 0.0048…0.0100) + collar/release_lever",
+          "confidence": "high",
+          "note": "вход снизу (-Y): гнездо socket Ø52 с буртиком Ø54,4, два байонетных усика до Ø65,5 на кольце collar Ø59 с рычагом release_lever. Усики реальные, размер — не паспортные 20/25 мм; B50 требует пересборки обоймы (Ø59 → Ø50)",
+          "mounts_on": [
+            "CJ-TOOL-B50 (пересборка обоймы Ø59→Ø50)"
+          ],
+          "tool_function": "надувной зонд 0…0,4 бар через обратный клапан safety_valve, датчик давления; насадка привода, не самостоятельная машина",
+          "connector": "custom",
+          "connector_note": "обойма Ø59 с 2 усиками — B50 требует пересборки обоймы под Ø50"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "пневмотрубка Ø13",
+          "position_m": [
+            0.0,
+            0.0288,
+            0.0318
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0126,
+          "source": "node:work_probe_inflatable__port_barb + pressure_port/hose / bbox centre (z 0.0308…0.0328)",
+          "confidence": "high",
+          "note": "пневмовход 0–0,4 бар через обратный клапан safety_valve; датчик давления sensor_body",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.1848,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.03,
+          "source": "node:work_probe_inflatable__tip_dome / вершина y=0.1848 (ось зонда Y)",
+          "confidence": "high",
+          "note": "камера chamber Ø45 надувается y 0.040…0.170 (scale по yz), торец tip_dome — дистальный контакт",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_probe_thermal": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "bayonet",
+          "standard": "байонетная плита Ø38, 2 уха до Ø51,6, кольцо Ø32,4",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0097,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0516,
+          "count": 2,
+          "source": "nodes:bayonet_ring (y 0.0052…0.0122) + bayonet_ears (x ±0.0258) / bbox centre",
+          "confidence": "high",
+          "note": "вход снизу (-Y): плита base_plate Ø38 с буртиком, байонетное кольцо Ø32,4 и два уха до Ø51,6 по ±X с рычагом release_lever. Паспортного байонета 20/25 мм нет; B40 требует пересборки кольца",
+          "mounts_on": [
+            "CJ-TOOL-B40 (пересборка кольца Ø38→Ø40)"
+          ],
+          "tool_function": "термозонд: нагревательная гильза Ø9,4 + датчик на кончике (y=0.1775), питание 230 В; насадка привода, не самостоятельная машина",
+          "connector": "custom",
+          "connector_note": "плита Ø38 с 2 ушами до Ø51,6 — B40 требует пересборки кольца под Ø40"
+        },
+        {
+          "id": "seat",
+          "role": "mount",
+          "kind": "surface",
+          "standard": "плита Ø38",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.038,
+          "source": "node:work_probe_thermal__base_plate / нижняя грань y=0.000 (base_seal y 0.0005…0.0021)",
+          "confidence": "high",
+          "note": "основание стоит на плоскости; отдельной плиты-основания у зонда нет",
+          "connector": "custom"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "кабель + разъём, 230 В",
+          "position_m": [
+            -0.014,
+            0.0086,
+            0.0203
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.01,
+          "source": "node:work_probe_thermal__strain_relief + strain_ring / наружная грань z=0.0203",
+          "confidence": "medium",
+          "note": "кабель уходит на +Z (Blender -Y), разъём на хвосте; питание нагревателя 230 В",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.1775,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0022,
+          "source": "node:work_probe_thermal__sensor_bead / вершина y=0.1775 (ось зонда Y)",
+          "confidence": "high",
+          "note": "датчик на кончике; нагревательная гильза heater_sleeve Ø9,4 (y 0.1538…0.1692) — фактическая контактная зона",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_probe_textured": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "QR-обойма Ø48 с фиксатором и штифтом",
+          "gender": "female",
+          "position_m": [
+            -0.0412,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.048,
+          "source": "node:work_probe_textured__qr_collar + qr_groove/qr_latch/qr_pin / bbox centre (x -0.047…-0.0355)",
+          "confidence": "high",
+          "note": "вход (-X): быстросъёмная обойма qr_collar Ø48 с кольцевым пазом qr_groove, фиксатором qr_latch и антипроворотным штифтом qr_pin, далее фланец Ø28. Байонетных усиков нет; ввод по +X",
+          "mounts_on": [
+            "CJ-TOOL-B50"
+          ],
+          "tool_function": "текстурированный зонд: силиконовый чулок Ø48,4 с 5 рёбрами и 4 спиралями; насадка привода, не самостоятельная машина",
+          "connector": "CJ-TOOL-B50",
+          "connector_note": "обойма Ø48 — типоразмер B50 (Ø48…54)"
+        },
+        {
+          "id": "support_face",
+          "role": "support",
+          "kind": "surface",
+          "standard": "плоскость корпуса",
+          "position_m": [
+            -0.0585,
+            -0.022,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.044,
+          "source": "node:work_probe_textured__base_grip / нижняя грань y=-0.022 (ось зонда y=0)",
+          "confidence": "medium",
+          "note": "плиты нет — насадка ложится на плоскость рифлёной рукояткой Ø44",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.08,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0484,
+          "source": "node:work_probe_textured__cap / торец x=0.080 (anim @ 0.040,0,0)",
+          "confidence": "high",
+          "note": "силиконовый чулок cap Ø48,4 (x 0.000…0.080) с 5 рёбрами и 4 спиралями — рабочая оболочка",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_rotary_disc": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "dock",
+          "standard": "ротационный док: ступица Ø48,4",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.185,
+            0.0322
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0484,
+          "source": "node:work_rotary_disc__hub_cap / передняя грань z=+0.0322, Ø48,4 (hub Ø60, вал Ø13,6)",
+          "confidence": "high",
+          "note": "диск вертикальный: сменный ротор садится на ступицу по оси вращения Z (сюда смотрит фронт диска); фиксатор qr_body/qr_pin/qr_knob — на рамке внизу справа",
+          "connector": "CJ-DOCK-M"
+        },
+        {
+          "id": "mount_in",
+          "role": "support",
+          "kind": "mount",
+          "standard": "пьедестал 0,17 × 0,23 (эллипс)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            -0.075
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.17,
+          "source": "node:work_rotary_disc__base_foot / нижняя грань y=0.000, пятно 0,17 × 0,23 (x ±0,085, z −0,190…+0,040)",
+          "confidence": "high",
+          "note": "плиты нет: пьедестал base_foot стоит на полу, стойка bearing_column и барабан держат шпиндель; болтов в геометрии нет",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.185,
+            0.0205
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.2,
+          "source": "node:work_rotary_disc__soft_rotor / передняя плоскость диска z=+0.0205, Ø0,20 (лепестки soft_lobes до r=0,126)",
+          "confidence": "high",
+          "note": "вертикальный диск: контакт — передняя плоскость ротора вокруг ступицы; рабочая поверхность вращается вокруг Z",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_rotary_drum": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "bayonet",
+          "standard": "ротационный док: фланец Ø94, кольцо Ø88",
+          "gender": "female",
+          "position_m": [
+            -0.173,
+            0.15,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.094,
+          "count": 4,
+          "source": "nodes:dock_flange (x -0.174…-0.172) + dock_ring Ø88,2 + dock_body + dock_lever / bbox centre",
+          "confidence": "high",
+          "note": "ротационный док на -X: фланец, кольцо, рычаг dock_lever сверху; шпиндель барабана выходит на -X (shaft_boss_rear)",
+          "connector": "CJ-TOOL-D90"
+        },
+        {
+          "id": "mount_foot",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "2× болт + вилка",
+          "position_m": [
+            0.1505,
+            0.002,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.025,
+          "count": 2,
+          "pitch_m": 0.104,
+          "source": "node:work_rotary_drum__fork_foot / нижняя грань y=0.002 + fork_bolt_l/r (z ±0.052)",
+          "confidence": "high",
+          "note": "опора-вилка барабана на плоскости y=0.002; лапы кожуха guard_foot_l/r на том же уровне",
+          "connector": "custom",
+          "connector_note": "болтовое поле «2× болт + вилка» без нормированного поля"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.299,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.298,
+          "source": "node:work_rotary_drum__bristle_tufts / верхняя точка оболочки y=0.299 (ось барабана y=0.150)",
+          "confidence": "high",
+          "note": "6 сменных сегментов (2 перьевых, 2 силиконовых, 2 щёточных) по окружности; контакт — верхняя образующая барабана",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_impact_paddle": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "flange",
+          "standard": "фланец 0,074×0,029, 2× болт (z ±0,028)",
+          "gender": "female",
+          "position_m": [
+            -0.087,
+            0.0185,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.074,
+          "count": 2,
+          "pitch_m": 0.056,
+          "source": "node:work_impact_paddle__mount_flange / задняя грань x=-0.087 + bolt_a/bolt_b (z ±0.028)",
+          "confidence": "high",
+          "note": "стационарный док с качающим приводом (cam_disc/pushrod) крепится к плите по -X двумя болтами",
+          "connector": "custom",
+          "connector_note": "фланец без стандарта ISO 9409 / байонета"
+        },
+        {
+          "id": "swing_pivot",
+          "role": "input",
+          "kind": "pivot",
+          "standard": "шарнир Ø6,4",
+          "position_m": [
+            -0.035,
+            0.042,
+            0.0
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0064,
+          "source": "node:work_impact_paddle__anim (t=[-0.035,0.042,0]) + hinge_pin (x -0.0382…-0.0318)",
+          "confidence": "high",
+          "note": "качание вокруг Y (swing 0,611 рад), anim-пустышка в оси шарнира, не в центре лопатки",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø6.4 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "clamp_out",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "быстросъёмный зажим лопатки",
+          "position_m": [
+            0.014,
+            0.0405,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.064,
+          "source": "node:work_impact_paddle__arm_clamp + qr_lever/qr_tab / bbox centre (x 0.002…0.026)",
+          "confidence": "medium",
+          "note": "зажим держит сменную лопатку на упругом рычаге arm_leaf; сама лопатка — быстросъёмная",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.09,
+            0.03,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.152,
+          "source": "node:work_impact_paddle__paddle_pad / нижняя грань y=0.030 (paddle_back y 0.042…0.050 сверху)",
+          "confidence": "high",
+          "note": "силиконовая пластина 152×120 мм с рёбрами pad_ribs, графитовая тыльная сторона выше; рабочая сторона -Y",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_impact_roller": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "кулачковый быстросъём qr_block",
+          "gender": "female",
+          "position_m": [
+            -0.0645,
+            0.0385,
+            0.117
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.033,
+          "source": "nodes:qr_block + qr_cam/qr_lever/qr_pin / bbox centre (x -0.069…-0.060, z 0.1005…0.1335)",
+          "confidence": "medium",
+          "note": "кулачковый зажим на задней балке spine (-X) у торца +Z; паспортный байонет 20/25 мм в геометрии отсутствует",
+          "connector": "custom"
+        },
+        {
+          "id": "mount_spine",
+          "role": "mount",
+          "kind": "mount",
+          "standard": "задняя балка spine 0,012×0,058",
+          "position_m": [
+            -0.06,
+            0.056,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.058,
+          "source": "node:work_impact_roller__spine / задняя грань x=-0.060 (z -0.130…0.130)",
+          "confidence": "high",
+          "note": "несущая балка каретки: пружины/штоки rod_*/spring_* (4 шт) и ограничитель limiter_* на ней",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.04,
+            0.056,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.08,
+          "source": "node:work_impact_roller__roller_body / передняя точка оболочки x=0.040 (ось ролика y=0.056)",
+          "confidence": "high",
+          "note": "рифлёный валик Ø80 × 0,220 м, вращение вокруг Z; рабочая сторона +X (балка сзади на -X)",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_electro_pad": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "surface",
+          "standard": "адгезивный манжет (паспорт: липкий/манжета)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.074,
+          "source": "node:work_electro_pad__backing / нижняя грань y=0.000 + adhesive_rim Ø74",
+          "confidence": "low",
+          "note": "байонета и монтажной плоскости в геометрии нет: одноразовая накладка фиксируется адгезивным краем; тыльная сторона прилегает к ложементу",
+          "connector": "custom"
+        },
+        {
+          "id": "qr_tab",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "язычок быстросъёма 0,014×0,006",
+          "position_m": [
+            -0.012,
+            0.0056,
+            0.0455
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.014,
+          "source": "node:work_electro_pad__peel_tab + peel_tab_ribs / передняя грань z=0.0455",
+          "confidence": "medium",
+          "note": "язычок для съёма/укладки накладки (z +0.034…+0.0455); рёбра peel_tab_ribs для захвата",
+          "connector": "custom"
+        },
+        {
+          "id": "signal_out",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "гибкий шлейф + разъём",
+          "position_m": [
+            0.0498,
+            0.0048,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0165,
+          "source": "node:work_electro_pad__strain_relief + flex_tail (x 0.034…0.0492) / грань x=0.0498",
+          "confidence": "medium",
+          "note": "выход кабеля у модуля импеданса sensor_ic/sensor_can на +X",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.0102,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0548,
+          "source": "node:work_electro_pad__hydrogel / верхняя грань y=0.0102 (электроды electrode_pos/neg под ней)",
+          "confidence": "high",
+          "note": "гидрогелевая подушка Ø54,8 — контактная поверхность; встречно-гребёнчатые электроды на y 0.0016…0.0022",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_electro_collar": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "быстросъёмная защёлка buckle (паспорт: быстросъём)",
+          "gender": "female",
+          "position_m": [
+            0.0648,
+            0.0076,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0291,
+          "source": "nodes:buckle_body (x 0.0565…0.0695) + buckle_hinge/buckle_lever / bbox centre",
+          "confidence": "medium",
+          "note": "защёлка с рычагом на +X — единственный механический вход; байонета 20/25 мм нет, ошейник надевается на тело",
+          "connector": "custom"
+        },
+        {
+          "id": "adjust_in",
+          "role": "mount",
+          "kind": "rail",
+          "standard": "регулировочная планка + ремень",
+          "position_m": [
+            -0.0493,
+            0.0,
+            0.0493
+          ],
+          "normal": [
+            -0.7071,
+            0,
+            0.7071
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0345,
+          "source": "nodes:adjuster_plate + adjuster_rail_top/bot + strap_tail/strap_keeper/strap_holes",
+          "confidence": "medium",
+          "note": "регулировка охвата на азимуте ~315° (Blender), ремень с отверстиями под защёлку",
+          "connector": "custom",
+          "connector_note": "рельсовая точка без профиля CJ-RAIL-15"
+        },
+        {
+          "id": "signal_out",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "кабель + разъём, изолированное питание",
+          "position_m": [
+            0.0,
+            -0.0204,
+            0.0656
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0098,
+          "source": "node:work_electro_collar__strain_relief / нижняя грань y=-0.0204 у модуля module_shell",
+          "confidence": "medium",
+          "note": "кабель от модуля импеданса вниз (-Y), короткий хвост с разъёмом",
+          "connector": "custom",
+          "connector_note": "сигнальный порт не RJ45/M12 D/USB-C (клеммы, гермоввод, штифты)"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0514
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0446,
+          "count": 2,
+          "source": "nodes:electrode_contact_l (x -0.0223…-0.0151) + electrode_contact_r (x 0.0151…0.0223) / центры на z=0.0514",
+          "confidence": "high",
+          "note": "два контакта на азимутах ±20° от -Z, утоплены в подкладку liner; контакт смотрит внутрь кольца (-Z)",
+          "connector": "custom"
+        }
+      ]
+    },
+    "work_thermal_pad": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "surface",
+          "standard": "липучка/док (паспорт)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.172,
+          "source": "node:work_thermal_pad__backing / нижняя грань y=0.000 (0,172×0,126) + clamp_frame по периметру",
+          "confidence": "low",
+          "note": "несущей плиты и байонета нет: гибкий слоистый пакет, крепление липучкой/доком; в модели только зажимная рамка clamp_frame",
+          "connector": "custom"
+        },
+        {
+          "id": "qr_tab",
+          "role": "mount",
+          "kind": "clamp",
+          "standard": "язычок быстросъёма 0,010×0,038",
+          "position_m": [
+            -0.096,
+            0.0108,
+            0.02
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.038,
+          "source": "node:work_thermal_pad__pull_tab + pull_tab_ribs / грань x=-0.096",
+          "confidence": "medium",
+          "note": "язычок съёма на -X, симметричен силовому вводу на +X",
+          "connector": "custom"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "силовой ввод со стопором + кабель, 230 В",
+          "position_m": [
+            0.0855,
+            0.0113,
+            0.04
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.023,
+          "source": "node:work_thermal_pad__power_inlet + power_pads + strain_relief (x 0.077…0.094)",
+          "confidence": "high",
+          "note": "ввод на +X рядом с модулем датчика sensor_can; шины bus_plus/bus_minus уходят под рамку",
+          "connector": "custom",
+          "connector_note": "питание не описано ни одним CJ-PWR-* (нет C14/C20/M12 A-coded)"
+        },
+        {
+          "id": "work_surface_warm",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            -0.0413,
+            0.0084,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0709,
+          "source": "node:work_thermal_pad__heater_warm / верхняя грань y=0.0084 (x -0.0767…-0.0058)",
+          "confidence": "high",
+          "note": "янтарная «тёплая» зона дорожек-змейки; контакт +Y, разделитель zone_divider по x=0",
+          "connector": "custom"
+        },
+        {
+          "id": "work_surface_cool",
+          "role": "output",
+          "kind": "surface",
+          "position_m": [
+            0.0413,
+            0.0084,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.0709,
+          "source": "node:work_thermal_pad__heater_cool / верхняя грань y=0.0084 (x 0.0058…0.0767)",
+          "confidence": "high",
+          "note": "циановая «прохладная» зона; вторая независимая зона 2–4 по паспорту",
+          "connector": "custom"
+        }
+      ]
+    }
+  }
+}

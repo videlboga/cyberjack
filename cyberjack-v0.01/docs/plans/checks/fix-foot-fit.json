@@ -1,0 +1,42 @@
+{
+  "inputs": {
+    "foot": "docs/plans/blockout/component-library/fix_foot/fix_foot.glb",
+    "rail": "docs/plans/blockout/component-library/fix_rail_1000/fix_rail_1000.glb"
+  },
+  "gaps": {
+    "opening_mm": 45.5,
+    "rail_width_mm": 45.0,
+    "gap_plus_y_mm": 0.25,
+    "gap_minus_y_mm": 0.25,
+    "gap_below_rail_mm": 0.1,
+    "rail_top_mm": 96.1,
+    "saddle_rim_mm": 60.0,
+    "rail_above_rim_mm": 36.1
+  },
+  "checks": {
+    "foot_loaded_from_glb": true,
+    "foot_bbox_mm": [
+      100.0,
+      100.0,
+      60.0
+    ],
+    "rail_bbox_mm": [
+      1000.0,
+      45.0,
+      45.0
+    ],
+    "no_interference": true,
+    "interference_pairs": 0,
+    "opening_mm": 45.5,
+    "rail_width_mm": 45.0,
+    "side_gap_each_mm": 0.25,
+    "gap_below_rail_mm": 0.1,
+    "clamp_travel_engages": true,
+    "clamp_overlap_pairs_at_0_3mm": 8,
+    "clamp_top_mm": 57.5,
+    "clamp_below_rim": true,
+    "rail_top_above_rim_mm": 36.1,
+    "clamp_does_not_cover_top": true,
+    "all_ok": true
+  }
+}

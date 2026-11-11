@@ -1,0 +1,473 @@
+{
+  "format": "cj-assembly-spec/1",
+  "revision": "2026-11-10",
+  "units": "m",
+  "devices": [
+    {
+      "id": "mech_drive_tool_chain",
+      "footprint": [
+        1.5,
+        0.5
+      ],
+      "components": [
+        {
+          "id": "motion_linear_x",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_adapter",
+          "position": [
+            0,
+            0.062,
+            0.2
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_linear_x"
+        },
+        {
+          "id": "work_attach_smooth",
+          "position": [
+            0.086,
+            0.062,
+            0.2
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_linear_x"
+        }
+      ],
+      "joints": [
+        [
+          "work_attach_adapter",
+          "work_attach_smooth"
+        ]
+      ]
+    },
+    {
+      "id": "mech_piston_tool_chain",
+      "footprint": [
+        0.8,
+        0.3
+      ],
+      "components": [
+        {
+          "id": "motion_piston_rod",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_adapter",
+          "position": [
+            0.27,
+            0.075,
+            0.075
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_piston_rod"
+        },
+        {
+          "id": "work_attach_smooth",
+          "position": [
+            0.356,
+            0.075,
+            0.075
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_piston_rod"
+        }
+      ],
+      "joints": [
+        [
+          "work_attach_adapter",
+          "work_attach_smooth"
+        ]
+      ]
+    },
+    {
+      "id": "mech_rotary_probe",
+      "footprint": [
+        0.5,
+        0.5
+      ],
+      "components": [
+        {
+          "id": "motion_rotary",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_probe_rotary",
+          "position": [
+            0.1,
+            0,
+            0.3
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "mech_turntable_carousel",
+      "footprint": [
+        0.9,
+        0.9
+      ],
+      "components": [
+        {
+          "id": "motion_turntable",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_carousel",
+          "position": [
+            0,
+            0,
+            0.15
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "mech_cradle_pair",
+      "footprint": [
+        0.9,
+        0.85
+      ],
+      "components": [
+        {
+          "id": "support_cradle",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_tickle_pair",
+          "position": [
+            0,
+            0.36,
+            0.72
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "mech_bed_sensor",
+      "footprint": [
+        2.0,
+        0.9
+      ],
+      "components": [
+        {
+          "id": "structure_bed_frame",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "surface_sensor",
+          "position": [
+            0,
+            0,
+            0.326
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "mech_spreader_stirrup",
+      "footprint": [
+        0.8,
+        0.3
+      ],
+      "components": [
+        {
+          "id": "motion_spreader",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "restraint_stirrup",
+          "position": [
+            0,
+            0.069,
+            0.138
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "mech_base_piston",
+      "footprint": [
+        1.3,
+        0.9
+      ],
+      "components": [
+        {
+          "id": "structure_base",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "motion_piston_rod",
+          "position": [
+            -0.38,
+            0.12,
+            0.24
+          ],
+          "rotation_z": 0
+        }
+      ]
+    },
+    {
+      "id": "mech_rotary_probe_adapter",
+      "footprint": [
+        0.5,
+        0.5
+      ],
+      "components": [
+        {
+          "id": "motion_rotary",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_adapter",
+          "position": [
+            0.105,
+            0.15,
+            0.15
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_rotary"
+        },
+        {
+          "id": "work_probe_rotary",
+          "position": [
+            0.155,
+            0.15,
+            0.15
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_rotary",
+          "rotation_y": 180
+        }
+      ],
+      "joints": [
+        [
+          "work_attach_adapter",
+          "work_probe_rotary"
+        ]
+      ]
+    },
+    {
+      "id": "mech_turntable_carousel_adapter",
+      "footprint": [
+        0.9,
+        0.9
+      ],
+      "components": [
+        {
+          "id": "motion_turntable",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_adapter",
+          "position": [
+            0,
+            0,
+            0.15
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_turntable"
+        },
+        {
+          "id": "work_attach_carousel",
+          "position": [
+            0,
+            0,
+            0.18
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_turntable"
+        }
+      ]
+    },
+    {
+      "id": "mech_linear_y_probe",
+      "footprint": [
+        0.5,
+        0.85
+      ],
+      "components": [
+        {
+          "id": "motion_linear_y",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_probe_linear",
+          "position": [
+            0,
+            0.1,
+            0.2
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_linear_y"
+        }
+      ]
+    },
+    {
+      "id": "mech_rotary_disc",
+      "footprint": [
+        0.5,
+        0.5
+      ],
+      "components": [
+        {
+          "id": "motion_rotary",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_rotary_disc",
+          "position": [
+            0,
+            0,
+            0.3
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_rotary"
+        }
+      ]
+    },
+    {
+      "id": "mech_linear_y_probe_adapter",
+      "footprint": [
+        0.5,
+        0.85
+      ],
+      "components": [
+        {
+          "id": "motion_linear_y",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_adapter",
+          "position": [
+            0,
+            0.1,
+            0.2
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_linear_y"
+        },
+        {
+          "id": "work_probe_linear",
+          "position": [
+            0,
+            0.1,
+            0.23
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_linear_y"
+        }
+      ]
+    },
+    {
+      "id": "mech_rotary_disc_adapter",
+      "footprint": [
+        0.5,
+        0.5
+      ],
+      "components": [
+        {
+          "id": "motion_rotary",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation_z": 0
+        },
+        {
+          "id": "work_attach_adapter",
+          "position": [
+            0.105,
+            0.15,
+            0.15
+          ],
+          "rotation_z": 0,
+          "attached_to": "motion_rotary"
+        },
+        {
+          "id": "work_rotary_disc",
+          "position": [
+            0.15,
+            0.15,
+            0.15
+          ],
+          "rotation_z": 90,
+          "attached_to": "motion_rotary",
+          "rotation_y": 90
+        }
+      ]
+    }
+  ]
+}

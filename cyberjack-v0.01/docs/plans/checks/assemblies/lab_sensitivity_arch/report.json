@@ -1,0 +1,70 @@
+{
+  "format": "cj-assembly-check/1",
+  "device": "lab_sensitivity_arch",
+  "components": {
+    "structure_portal": {
+      "bbox_min": [
+        -0.6,
+        -0.16,
+        0.0
+      ],
+      "bbox_max": [
+        0.6,
+        0.16,
+        1.67
+      ]
+    },
+    "motion_linear_x": {
+      "bbox_min": [
+        -0.6,
+        -0.15,
+        1.67
+      ],
+      "bbox_max": [
+        0.6,
+        0.15,
+        1.87
+      ]
+    },
+    "work_electro_pad": {
+      "bbox_min": [
+        -0.04772,
+        -0.04485,
+        1.87
+      ],
+      "bbox_max": [
+        0.04772,
+        0.04485,
+        1.88127
+      ]
+    },
+    "control_telemetry": {
+      "bbox_min": [
+        0.3998,
+        0.40899,
+        0.0
+      ],
+      "bbox_max": [
+        0.7002,
+        0.49101,
+        0.2002
+      ]
+    }
+  },
+  "missing": [],
+  "interference": [],
+  "contacts": [],
+  "sweeps": [],
+  "footprint": {
+    "spec_m": [
+      1.6,
+      1.0
+    ],
+    "actual_m": [
+      1.3002,
+      0.65101
+    ],
+    "ok": true
+  },
+  "status": "pass"
+}

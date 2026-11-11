@@ -1,0 +1,524 @@
+{
+ "url": "http://127.0.0.1:8088/models/machine-modules/components.html?id=motion_winch",
+ "states": [
+  {
+   "payout_m": 0,
+   "turns": 12,
+   "turns_visible": 12,
+   "coil_x_m": [
+    -0.0696,
+    0.048
+   ],
+   "coil_span_m": 0.1176,
+   "helix_len_m": 4.4651,
+   "rope_len_m": 4.4651,
+   "rope_end_y_m": 0.0328,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0,
+   "drum_angle_rad": -5.068,
+   "legacy_total": 13,
+   "legacy_visible": 0,
+   "rope_bbox": {
+    "min": [
+     -0.0741,
+     -0.031,
+     -0.0638
+    ],
+    "max": [
+     0.0526,
+     0.0966,
+     0.0638
+    ]
+   },
+   "rope_end_world_y": 0.0328,
+   "cap_x": -0.0696
+  },
+  {
+   "payout_m": 0.15,
+   "turns": 8,
+   "turns_visible": 8,
+   "coil_x_m": [
+    -0.0304,
+    0.048
+   ],
+   "coil_span_m": 0.0784,
+   "helix_len_m": 2.9767,
+   "rope_len_m": 3.1267,
+   "rope_end_y_m": -0.1172,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.15,
+   "drum_angle_rad": -2.534,
+   "legacy_total": 13,
+   "legacy_visible": 0,
+   "rope_bbox": {
+    "min": [
+     -0.035,
+     -0.1172,
+     -0.0638
+    ],
+    "max": [
+     0.0526,
+     0.0966,
+     0.0638
+    ]
+   },
+   "rope_end_world_y": -0.1172,
+   "cap_x": -0.0304
+  },
+  {
+   "payout_m": 0.3,
+   "turns": 4,
+   "turns_visible": 4,
+   "coil_x_m": [
+    0.0088,
+    0.048
+   ],
+   "coil_span_m": 0.0392,
+   "helix_len_m": 1.4884,
+   "rope_len_m": 1.7884,
+   "rope_end_y_m": -0.2672,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.3,
+   "drum_angle_rad": 0,
+   "legacy_total": 13,
+   "legacy_visible": 0,
+   "rope_bbox": {
+    "min": [
+     0.0042,
+     -0.2672,
+     -0.0638
+    ],
+    "max": [
+     0.0526,
+     0.0966,
+     0.0638
+    ]
+   },
+   "rope_end_world_y": -0.2672,
+   "cap_x": 0.0088
+  }
+ ],
+ "continuity": [
+  {
+   "L": 0,
+   "payout_m": 0,
+   "turns": 12,
+   "turns_visible": 12,
+   "coil_x_m": [
+    -0.0696,
+    0.048
+   ],
+   "coil_span_m": 0.1176,
+   "helix_len_m": 4.4651,
+   "rope_len_m": 4.4651,
+   "rope_end_y_m": 0.0328,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0,
+   "drum_angle_rad": -5.068
+  },
+  {
+   "L": 0.015,
+   "payout_m": 0.015,
+   "turns": 11.6,
+   "turns_visible": 12,
+   "coil_x_m": [
+    -0.0657,
+    0.048
+   ],
+   "coil_span_m": 0.1137,
+   "helix_len_m": 4.3163,
+   "rope_len_m": 4.3313,
+   "rope_end_y_m": 0.0178,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.015,
+   "drum_angle_rad": -4.814
+  },
+  {
+   "L": 0.03,
+   "payout_m": 0.03,
+   "turns": 11.2,
+   "turns_visible": 12,
+   "coil_x_m": [
+    -0.0618,
+    0.048
+   ],
+   "coil_span_m": 0.1098,
+   "helix_len_m": 4.1674,
+   "rope_len_m": 4.1974,
+   "rope_end_y_m": 0.0028,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.03,
+   "drum_angle_rad": -4.561
+  },
+  {
+   "L": 0.045,
+   "payout_m": 0.045,
+   "turns": 10.8,
+   "turns_visible": 11,
+   "coil_x_m": [
+    -0.0578,
+    0.048
+   ],
+   "coil_span_m": 0.1058,
+   "helix_len_m": 4.0186,
+   "rope_len_m": 4.0636,
+   "rope_end_y_m": -0.0122,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.045,
+   "drum_angle_rad": -4.307
+  },
+  {
+   "L": 0.06,
+   "payout_m": 0.06,
+   "turns": 10.4,
+   "turns_visible": 11,
+   "coil_x_m": [
+    -0.0539,
+    0.048
+   ],
+   "coil_span_m": 0.1019,
+   "helix_len_m": 3.8698,
+   "rope_len_m": 3.9298,
+   "rope_end_y_m": -0.0272,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.06,
+   "drum_angle_rad": -4.054
+  },
+  {
+   "L": 0.075,
+   "payout_m": 0.075,
+   "turns": 10,
+   "turns_visible": 10,
+   "coil_x_m": [
+    -0.05,
+    0.048
+   ],
+   "coil_span_m": 0.098,
+   "helix_len_m": 3.7209,
+   "rope_len_m": 3.7959,
+   "rope_end_y_m": -0.0422,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.075,
+   "drum_angle_rad": -3.801
+  },
+  {
+   "L": 0.09,
+   "payout_m": 0.09,
+   "turns": 9.6,
+   "turns_visible": 10,
+   "coil_x_m": [
+    -0.0461,
+    0.048
+   ],
+   "coil_span_m": 0.0941,
+   "helix_len_m": 3.5721,
+   "rope_len_m": 3.6621,
+   "rope_end_y_m": -0.0572,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.09,
+   "drum_angle_rad": -3.547
+  },
+  {
+   "L": 0.105,
+   "payout_m": 0.105,
+   "turns": 9.2,
+   "turns_visible": 10,
+   "coil_x_m": [
+    -0.0422,
+    0.048
+   ],
+   "coil_span_m": 0.0902,
+   "helix_len_m": 3.4233,
+   "rope_len_m": 3.5283,
+   "rope_end_y_m": -0.0722,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.10500000000000001,
+   "drum_angle_rad": -3.294
+  },
+  {
+   "L": 0.12,
+   "payout_m": 0.12,
+   "turns": 8.8,
+   "turns_visible": 9,
+   "coil_x_m": [
+    -0.0382,
+    0.048
+   ],
+   "coil_span_m": 0.0862,
+   "helix_len_m": 3.2744,
+   "rope_len_m": 3.3944,
+   "rope_end_y_m": -0.0872,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.12,
+   "drum_angle_rad": -3.041
+  },
+  {
+   "L": 0.135,
+   "payout_m": 0.135,
+   "turns": 8.4,
+   "turns_visible": 9,
+   "coil_x_m": [
+    -0.0343,
+    0.048
+   ],
+   "coil_span_m": 0.0823,
+   "helix_len_m": 3.1256,
+   "rope_len_m": 3.2606,
+   "rope_end_y_m": -0.1022,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.13499999999999998,
+   "drum_angle_rad": -2.787
+  },
+  {
+   "L": 0.15,
+   "payout_m": 0.15,
+   "turns": 8,
+   "turns_visible": 8,
+   "coil_x_m": [
+    -0.0304,
+    0.048
+   ],
+   "coil_span_m": 0.0784,
+   "helix_len_m": 2.9767,
+   "rope_len_m": 3.1267,
+   "rope_end_y_m": -0.1172,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.15,
+   "drum_angle_rad": -2.534
+  },
+  {
+   "L": 0.165,
+   "payout_m": 0.165,
+   "turns": 7.6,
+   "turns_visible": 8,
+   "coil_x_m": [
+    -0.0265,
+    0.048
+   ],
+   "coil_span_m": 0.0745,
+   "helix_len_m": 2.8279,
+   "rope_len_m": 2.9929,
+   "rope_end_y_m": -0.1322,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.16499999999999998,
+   "drum_angle_rad": -2.28
+  },
+  {
+   "L": 0.18,
+   "payout_m": 0.18,
+   "turns": 7.2,
+   "turns_visible": 8,
+   "coil_x_m": [
+    -0.0226,
+    0.048
+   ],
+   "coil_span_m": 0.0706,
+   "helix_len_m": 2.6791,
+   "rope_len_m": 2.8591,
+   "rope_end_y_m": -0.1472,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.18,
+   "drum_angle_rad": -2.027
+  },
+  {
+   "L": 0.195,
+   "payout_m": 0.195,
+   "turns": 6.8,
+   "turns_visible": 7,
+   "coil_x_m": [
+    -0.0186,
+    0.048
+   ],
+   "coil_span_m": 0.0666,
+   "helix_len_m": 2.5302,
+   "rope_len_m": 2.7252,
+   "rope_end_y_m": -0.1622,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.195,
+   "drum_angle_rad": -1.774
+  },
+  {
+   "L": 0.21,
+   "payout_m": 0.21,
+   "turns": 6.4,
+   "turns_visible": 7,
+   "coil_x_m": [
+    -0.0147,
+    0.048
+   ],
+   "coil_span_m": 0.0627,
+   "helix_len_m": 2.3814,
+   "rope_len_m": 2.5914,
+   "rope_end_y_m": -0.1772,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.21000000000000002,
+   "drum_angle_rad": -1.52
+  },
+  {
+   "L": 0.225,
+   "payout_m": 0.225,
+   "turns": 6,
+   "turns_visible": 6,
+   "coil_x_m": [
+    -0.0108,
+    0.048
+   ],
+   "coil_span_m": 0.0588,
+   "helix_len_m": 2.2326,
+   "rope_len_m": 2.4576,
+   "rope_end_y_m": -0.1922,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.225,
+   "drum_angle_rad": -1.267
+  },
+  {
+   "L": 0.24,
+   "payout_m": 0.24,
+   "turns": 5.6,
+   "turns_visible": 6,
+   "coil_x_m": [
+    -0.0069,
+    0.048
+   ],
+   "coil_span_m": 0.0549,
+   "helix_len_m": 2.0837,
+   "rope_len_m": 2.3237,
+   "rope_end_y_m": -0.2072,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.24,
+   "drum_angle_rad": -1.014
+  },
+  {
+   "L": 0.255,
+   "payout_m": 0.255,
+   "turns": 5.2,
+   "turns_visible": 6,
+   "coil_x_m": [
+    -0.003,
+    0.048
+   ],
+   "coil_span_m": 0.051,
+   "helix_len_m": 1.9349,
+   "rope_len_m": 2.1899,
+   "rope_end_y_m": -0.2222,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.255,
+   "drum_angle_rad": -0.76
+  },
+  {
+   "L": 0.27,
+   "payout_m": 0.27,
+   "turns": 4.8,
+   "turns_visible": 5,
+   "coil_x_m": [
+    0.001,
+    0.048
+   ],
+   "coil_span_m": 0.047,
+   "helix_len_m": 1.786,
+   "rope_len_m": 2.056,
+   "rope_end_y_m": -0.2372,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.26999999999999996,
+   "drum_angle_rad": -0.507
+  },
+  {
+   "L": 0.285,
+   "payout_m": 0.285,
+   "turns": 4.4,
+   "turns_visible": 5,
+   "coil_x_m": [
+    0.0049,
+    0.048
+   ],
+   "coil_span_m": 0.0431,
+   "helix_len_m": 1.6372,
+   "rope_len_m": 1.9222,
+   "rope_end_y_m": -0.2522,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.28500000000000003,
+   "drum_angle_rad": -0.253
+  },
+  {
+   "L": 0.3,
+   "payout_m": 0.3,
+   "turns": 4,
+   "turns_visible": 4,
+   "coil_x_m": [
+    0.0088,
+    0.048
+   ],
+   "coil_span_m": 0.0392,
+   "helix_len_m": 1.4884,
+   "rope_len_m": 1.7884,
+   "rope_end_y_m": -0.2672,
+   "coil_radius_m": 0.0592,
+   "rope_diameter_m": 0.0092,
+   "forced": 0.3,
+   "drum_angle_rad": 0
+  }
+ ],
+ "screenshots": [
+  "docs/plans/checks/winch-rope-L0.00.png",
+  "docs/plans/checks/winch-rope-L0.15.png",
+  "docs/plans/checks/winch-rope-L0.30.png"
+ ],
+ "legacy_visibility": {
+  "frames": 4,
+  "distinct_visible_patterns": [
+   "0000000000000"
+  ],
+  "legacy_visible_any": false
+ },
+ "legacy_visible_writes": {
+  "frames": 200,
+  "visible_writes": 0,
+  "legacy_count": 13,
+  "legacy_all_hidden": true
+ },
+ "live": {
+  "payout_m": 0.2702,
+  "turns": 4.795,
+  "turns_visible": 5,
+  "coil_x_m": [
+   0.001,
+   0.048
+  ],
+  "coil_span_m": 0.047,
+  "helix_len_m": 1.7841,
+  "rope_len_m": 2.0543,
+  "rope_end_y_m": -0.2374,
+  "coil_radius_m": 0.0592,
+  "rope_diameter_m": 0.0092,
+  "forced": null,
+  "drum_angle_rad": -0.503,
+  "rope_vertices": 6171,
+  "rope_meshes": 6
+ },
+ "page_errors": [],
+ "http_errors": [],
+ "console_errors": []
+}

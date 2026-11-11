@@ -1,0 +1,871 @@
+{
+ "total": 96,
+ "ok": 96,
+ "failed": [],
+ "items": [
+  {
+   "id": "structure_base",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_portal",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_gantry",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_bed_frame",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_cage",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_suspension_frame",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_stall_row",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "structure_dock",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "support_cradle",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_linear_x",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_linear_y",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_lift_z",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_rotary",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_oscillating",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_spreader",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_winch",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_turntable",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_soft",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_anti_slip",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_heated",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_cooled",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_fluid_channel",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_liner",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_sensor",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "surface_contour",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "service_dock",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "service_cleaner",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_rod",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_pneumatic",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_hydraulic",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_telescopic",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_cam",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "motion_piston_servo",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_tickle_soft",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_tickle_firm",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_tickle_radial",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_feather_fan",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_air_jet",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_foot_cradle",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_tickle_pair",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_linear",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_rotary",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_inflatable",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_thermal",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_probe_textured",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_rotary_disc",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_rotary_drum",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_impact_paddle",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_impact_roller",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_electro_pad",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_electro_collar",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_thermal_pad",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_smooth",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_ribbed",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_spiral",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_nodular",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_tapered",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_bulbous",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_curved",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_dual_density",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_vibrating",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_inflatable",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_sleeve",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_adapter",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_sterile_liner",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_attach_carousel",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_spray",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_roller",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_irrigation",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "work_suction",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "fluid_mixer",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_wrist_cuff",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_ankle_cuff",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_thigh_clamp",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_waist_belt",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_neck_yoke",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_head_frame",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_stirrup",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_spreader",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_suspension_cuff",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_quick_release",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "restraint_matrix",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_hood",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_visor",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_audio",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "sensory_light",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_console",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_telemetry",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_estop",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "control_interlock",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_power",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_data",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_air",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_water",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_drain",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  },
+  {
+   "id": "utility_routing",
+   "ready": true,
+   "glb_status": [
+    200
+   ],
+   "js_errors": [],
+   "http_errors": []
+  }
+ ]
+}

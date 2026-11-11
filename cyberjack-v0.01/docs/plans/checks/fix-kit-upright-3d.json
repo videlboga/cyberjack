@@ -1,0 +1,8 @@
+{
+  "id": "asm_upright_3d",
+  "name": "Стоя у стойки — 3D layout",
+  "image": "fix-kit/assemblies/upright-3d.png",
+  "status": "3D layout pilot",
+  "note": "Две стойки 1000, верхний рельс 2000, каретки, консоль 500, поворот и манжета.",
+  "modules": 9
+}

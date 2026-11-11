@@ -1,0 +1,88 @@
+{
+  "inputs": {
+    "rail": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_rail_1000/fix_rail_1000.glb",
+    "foot": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_foot/fix_foot.glb",
+    "carriage": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_carriage/fix_carriage.glb",
+    "adapter": "/home/cyberkitty/Projects/cyberjack/cyberjack-v0.01/docs/plans/blockout/component-library/fix_latch_adapter/fix_latch_adapter.glb"
+  },
+  "bbox_m": {
+    "rail": [
+      [
+        -0.5,
+        -0.02250000089406967,
+        0.051100000739097595
+      ],
+      [
+        0.5,
+        0.02250000089406967,
+        0.09610000252723694
+      ]
+    ],
+    "foot": [
+      [
+        0.25,
+        -0.05000000074505806,
+        0.0
+      ],
+      [
+        0.3500000238418579,
+        0.05000000074505806,
+        0.05999999865889549
+      ]
+    ],
+    "carriage": [
+      [
+        -0.05999999865889549,
+        -0.04500000178813934,
+        0.051100000739097595
+      ],
+      [
+        0.05999999865889549,
+        0.04500000178813934,
+        0.10109999775886536
+      ]
+    ],
+    "adapter": [
+      [
+        -0.03999999910593033,
+        -0.029999999329447746,
+        0.10140000283718109
+      ],
+      [
+        0.03999999910593033,
+        0.029999999329447746,
+        0.15139999985694885
+      ]
+    ]
+  },
+  "placements_m": {
+    "rail_root_z": 0.0736,
+    "foot_root_x": 0.3,
+    "carriage_root_z": 0.0511,
+    "adapter_root_z": 0.1014,
+    "rail_bottom_z": 0.0511,
+    "rail_top_z": 0.0961,
+    "carriage_top_z": 0.1011
+  },
+  "pairs": {
+    "rail-foot": {
+      "overlap_pairs": 0,
+      "sample": []
+    },
+    "rail-carriage": {
+      "overlap_pairs": 0,
+      "sample": []
+    },
+    "carriage-adapter": {
+      "overlap_pairs": 0,
+      "sample": []
+    }
+  },
+  "checks": {
+    "rail_foot_no_overlap": true,
+    "rail_carriage_no_overlap": true,
+    "carriage_adapter_no_overlap": true,
+    "adapter_faces_carriage": true,
+    "all_ok": true
+  }
+}

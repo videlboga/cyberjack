@@ -1,0 +1,577 @@
+{
+  "format": "cj-mate-points/1",
+  "group": "work-heads-layers",
+  "components": {
+    "work_probe_combined": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "tool_in",
+          "role": "input",
+          "kind": "dock",
+          "standard": "CJ-TOOL-58: ротационный док Ø58, 4 усика до Ø67, 2 паза",
+          "gender": "female",
+          "position_m": [
+            -0.21,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "size_m": 0.058,
+          "count": 4,
+          "load_n": 250.0,
+          "source": "node:work_probe_combined__dock_flange — задний торец x=-0.210 (bbox x -0.210…-0.196); flange_ears Ø0.067",
+          "confidence": "high",
+          "note": "вход привода: момент + осевой ход. Усики до Ø67, пазы под штифты; глубина посадки 14 мм",
+          "socket": "CJ-TOOL-58A"
+        },
+        {
+          "id": "form_out",
+          "role": "output",
+          "kind": "bayonet",
+          "standard": "CJ-TOOL-25: цанга, разрезное кольцо Ø53,6",
+          "gender": "female",
+          "position_m": [
+            0.21,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.025,
+          "count": 4,
+          "source": "node:work_probe_combined__collet_nose — передний торец x=0.210; release_ring Ø0.0536, 4 лепестка",
+          "confidence": "high",
+          "note": "стык формы; узел стоит на подвижной втулке, поэтому форма едет вместе с ходом",
+          "socket": "CJ-TOOL-25"
+        },
+        {
+          "id": "air_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/8: штуцер Ø9,6",
+          "position_m": [
+            -0.047,
+            0.0311,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0096,
+          "source": "node:work_probe_combined__port_air_fit c=(-0.047, 0.0263, 0), Ø9,6; накидная гайка Ø11,8",
+          "confidence": "high",
+          "note": "воздух 0–0,4 бар через вращающееся уплотнение; линия идёт к форме-камере"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4: штуцер Ø12",
+          "position_m": [
+            -0.038,
+            0.0,
+            0.0314
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.012,
+          "source": "node:work_probe_combined__port_fluid_fit c=(-0.038, 0, 0.0263), Ø12; гайка Ø14,2",
+          "confidence": "high",
+          "note": "жидкость 0–1,5 л/мин; второй порт вращающегося юниона"
+        },
+        {
+          "id": "signal_out",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "M8 4-pin",
+          "position_m": [
+            -0.131,
+            -0.0398,
+            0.014
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0092,
+          "source": "node:work_probe_combined__speed_sensor_connector c=(-0.131, -0.0352, 0.014), Ø9,2; cap 0,0032",
+          "confidence": "high",
+          "note": "телеметрия оборотов, глубины и усилия",
+          "socket": "M8 4-pin"
+        }
+      ]
+    },
+    "effect_thermal": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "effect_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "CJ-EFF-THM: кольцо Ø36, О-ринг и пазы под штифты",
+          "gender": "female",
+          "position_m": [
+            -0.02,
+            0.0165,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.036,
+          "count": 1,
+          "source": "node:effect_thermal__seat_ring c=(-0.02, 0.02265, 0), Ø0.036; нижняя плоскость y=0.0165; seat_oring Ø0.0376",
+          "confidence": "high",
+          "note": "кольцевая посадка на корпус базы; гильза входит между базой и формой",
+          "socket": "CJ-EFF-THM"
+        },
+        {
+          "id": "work_surface",
+          "role": "output",
+          "kind": "surface",
+          "standard": "контактная юбка Ø29,6",
+          "position_m": [
+            -0.02,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0296,
+          "source": "node:effect_thermal__skirt_face c=(-0.02, 0.0008, 0), Ø0.0296; skirt Ø0.032, bore Ø0.0216",
+          "confidence": "high",
+          "note": "тепло передаётся через юбку в форму; воздух тепло не проводит"
+        },
+        {
+          "id": "signal_out",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "PT1000, провод Ø4",
+          "position_m": [
+            -0.023,
+            0.0219,
+            0.021
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.008,
+          "source": "node:effect_thermal__sensor_wire c=(-0.02297, 0.02191, 0.02101); sensor_cap Ø4,2",
+          "confidence": "high",
+          "note": "датчик стоит на юбке, а не на нагревателе — рампа ограничена реальным откликом"
+        }
+      ]
+    },
+    "effect_pneumatic": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "effect_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "CJ-EFF-PNE: кольцо Ø31",
+          "gender": "female",
+          "position_m": [
+            -0.006,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.031,
+          "count": 1,
+          "source": "node:effect_pneumatic__seat_ring c=(-0.006, 0.0035, 0), Ø0.031; seat_face Ø0.026; нижняя плоскость y=0",
+          "confidence": "high",
+          "note": "посадка на корпус базы рядом с гнездом формы",
+          "socket": "CJ-EFF-PNE"
+        },
+        {
+          "id": "air_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/8: быстросъём Ø9",
+          "position_m": [
+            -0.0316,
+            0.0392,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "size_m": 0.009,
+          "source": "node:effect_pneumatic__coupler_rings — общий bbox x -0.0316…0.0196; левый торец; tube_left c=(-0.037, 0.0373, 0.0013)",
+          "confidence": "medium",
+          "note": "левый порт линии 6–8 бар от станции; геометрия пары быстросъёмов слита в один узел, сторона определена по трубке"
+        },
+        {
+          "id": "air_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/8: быстросъём Ø9",
+          "position_m": [
+            0.0196,
+            0.0392,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.009,
+          "source": "node:effect_pneumatic__coupler_rings — правый торец x=0.0196; tube_right c=(0.0306, 0.0373, -0.0013)",
+          "confidence": "medium",
+          "note": "выход 0–0,4 бар к форме-камере; надув и вакуум — одна линия"
+        },
+        {
+          "id": "signal_out",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "датчик давления, провод Ø4",
+          "position_m": [
+            0.0025,
+            0.0462,
+            -0.0211
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "size_m": 0.0052,
+          "source": "node:effect_pneumatic__sensor_cap c=(0.0025, 0.0462, -0.0211); sensor_wire рядом",
+          "confidence": "high",
+          "note": "давление и вакуум в одном канале телеметрии"
+        }
+      ]
+    },
+    "effect_hydraulic": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "effect_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "CJ-EFF-HYD: кольцо Ø52",
+          "gender": "female",
+          "position_m": [
+            -0.024,
+            0.0,
+            0.002
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.052,
+          "count": 1,
+          "source": "node:effect_hydraulic__mount_ring c=(-0.024, 0.0031, 0.002), Ø0.052; нижняя плоскость y=0",
+          "confidence": "high",
+          "note": "посадка на корпус базы; насос висит на кольце",
+          "socket": "CJ-EFF-HYD"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4: барб Ø12,6",
+          "position_m": [
+            -0.046,
+            0.0185,
+            0.0317
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0126,
+          "source": "node:effect_hydraulic__port_a_barb_ring c=(-0.046, 0.0185, 0.031), Ø0.0126; nut Ø14,9",
+          "confidence": "high",
+          "note": "вход контура: подача или отсос в зависимости от направления насоса"
+        },
+        {
+          "id": "fluid_out",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4: барб Ø12,6",
+          "position_m": [
+            -0.002,
+            0.0185,
+            0.0317
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0126,
+          "source": "node:effect_hydraulic__port_b_barb_ring c=(-0.002, 0.0185, 0.031), Ø0.0126",
+          "confidence": "high",
+          "note": "второй порт той же линии; один просвет — одна мода за раз"
+        },
+        {
+          "id": "power_in",
+          "role": "power",
+          "kind": "cable",
+          "standard": "24 В DC 15 Вт, клеммник",
+          "position_m": [
+            0.016,
+            0.033,
+            -0.02
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "size_m": 0.012,
+          "source": "node:effect_hydraulic__motor_terminal c=(0.016, 0.033, -0.014); lid 0.012×0.0085",
+          "confidence": "high",
+          "note": "питание мотор-редуктора; реверс задаёт направление потока"
+        },
+        {
+          "id": "signal_out",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "датчик расхода, провод Ø8",
+          "position_m": [
+            0.024,
+            0.0378,
+            0.0193
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0115,
+          "source": "node:effect_hydraulic__flow_sensor c=(0.024, 0.0378, 0.0135); cap Ø8,7",
+          "confidence": "high",
+          "note": "расход и давление меряются на выходе, а не на насосе"
+        }
+      ]
+    },
+    "effect_electric": {
+      "class": "WORK",
+      "mates": [
+        {
+          "id": "effect_in",
+          "role": "input",
+          "kind": "clamp",
+          "standard": "CJ-EFF-ELE: кольцо Ø40",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.04,
+          "count": 1,
+          "source": "node:effect_electric__mount_ring c=(0, 0.00275, 0), Ø0.04; нижняя плоскость y=0",
+          "confidence": "high",
+          "note": "посадка на неподвижную базу; с вращением несовместима",
+          "socket": "CJ-EFF-ELE"
+        },
+        {
+          "id": "signal_in",
+          "role": "signal",
+          "kind": "cable",
+          "standard": "M8 4-pin",
+          "position_m": [
+            0.0175,
+            0.016,
+            -0.0219
+          ],
+          "normal": [
+            0,
+            0,
+            -1
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "size_m": 0.0148,
+          "source": "node:effect_electric__conn_collar c=(0.0175, 0.016, -0.021), Ø0.0148; conn_body Ø0.0124",
+          "confidence": "high",
+          "note": "питание и шина управления одним разъёмом; изоляция 4 кВ",
+          "socket": "M8 4-pin"
+        },
+        {
+          "id": "contact_a",
+          "role": "output",
+          "kind": "surface",
+          "standard": "никелевая площадка канала A 15 × 19 мм",
+          "position_m": [
+            -0.019,
+            0.0298,
+            0.002
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.015,
+          "source": "node:effect_electric__contact_plate_a c=(-0.019, 0.0292, 0.002), 0.015×0.019; terminal_a0/a1 рядом",
+          "confidence": "high",
+          "note": "канал A; барьер между каналами 2,4 мм, прорези creepage"
+        },
+        {
+          "id": "contact_b",
+          "role": "output",
+          "kind": "surface",
+          "standard": "никелевая площадка канала B 15 × 19 мм",
+          "position_m": [
+            0.019,
+            0.0298,
+            0.002
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.015,
+          "source": "node:effect_electric__contact_plate_b c=(0.019, 0.0292, 0.002), 0.015×0.019",
+          "confidence": "high",
+          "note": "канал B; импеданс меряется до подачи, влажная кожа — отказ"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1405 @@
+{
+  "format": "cj-mate-points/1",
+  "group": "motion",
+  "components": {
+    "motion_linear_x": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in_l",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.492,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0104,
+          "count": 4,
+          "pitch_x_m": 0.044,
+          "pitch_z_m": 0.264,
+          "load_n": 800.0,
+          "source": "node:motion_linear_x__mount_flange_L + nodes mount_bolt_L0..L3 bbox",
+          "confidence": "high",
+          "note": "торцевая опорная плита левого конца, 4 болта; головки на верхней плоскости y=0.012, машина садится плоскостью y=0.000. Шаг отверстий по геометрии 44 x 264 мм; контракт заявляет 4xM12 с шагом 0.6 м, головки в модели 10.4 мм (ближе к M6)",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "mount_in_r",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.492,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0104,
+          "count": 4,
+          "pitch_x_m": 0.044,
+          "pitch_z_m": 0.264,
+          "load_n": 800.0,
+          "source": "node:motion_linear_x__mount_flange_R + nodes mount_bolt_R0..R3 bbox",
+          "confidence": "high",
+          "note": "зеркальная опорная плита правого конца; дублирует mount_in_l, ставить в пару",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "CJ-TOOL-PLATE 208×252",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.2,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.208,
+          "load_n": 11.772,
+          "source": "node:motion_linear_x__carriage_top bbox top face y=0.2000 (0.208 × 0.252 м, толщина 0.024 м, сплошная плита)",
+          "confidence": "high",
+          "note": "верхняя плита каретки без отверстий, бобышек и бурта — инструмент фиксируется хомутом/струбциной по контуру 208 × 252. ISO 9409-1-50-4-M6 (Ø50, 4×M6 PCD 40) в геометрии отсутствует; motor_flange (x=+0.505) — привод, не посадочное место. normal/axis — ввод инструмента по +Y, ход каретки — X",
+          "connector": "CJ-TOOL-PLATE"
+        }
+      ]
+    },
+    "motion_linear_y": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0104,
+          "count": 4,
+          "pitch_x_m": 0.136,
+          "pitch_z_m": 0.64,
+          "load_n": 800.0,
+          "source": "nodes motion_linear_y__foot_0..foot_3 bottom face y=0.000",
+          "confidence": "high",
+          "note": "4 лапы 60 x 70 мм по углам базы: x=±0.068, z=±0.320 → шаг 136 x 640 мм; точка — центр болтового рисунка на опорной плоскости y=0 (между лапами). Контракт заявляет M12 / 0.6 м",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "CJ-TOOL-PLATE 150×150 (quick_plate 210×210)",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.198,
+            -0.004
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.15,
+          "load_n": 11.772,
+          "source": "node:motion_linear_y__tool_pad bbox top face y=0.1980 (150 × 150 мм) на плите quick_plate 210 × 210 с quick_cam_L/R",
+          "confidence": "high",
+          "note": "быстросъёмная плита: площадка 150 × 150 на quick_plate 210 × 210, зажим двумя кулачками quick_cam_L/R с рычагами quick_lever. Болтовых отверстий и ISO-площадки нет. Ось хода Y (stroke 0.08 м)",
+          "connector": "CJ-TOOL-PLATE"
+        }
+      ]
+    },
+    "motion_lift_z": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0166,
+          "count": 4,
+          "pitch_x_m": 0.296,
+          "pitch_z_m": 0.212,
+          "load_n": 800.0,
+          "source": "node:motion_lift_z__base_plate bottom face y=0.000 + nodes anchor_bolt_0..3",
+          "confidence": "high",
+          "note": "опорная плита 400 x 300 мм; анкеры проходят через base_flange (y 0.072..0.092), головки сверху на y=0.092..0.108, центры x=±0.148 / z=±0.106 → шаг 296 x 212 мм (контракт: 4xM12 шаг 0.6 м)",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "CJ-TOOL-PLATE 264×42",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.708,
+            0.103
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.042,
+          "load_n": 11.772,
+          "source": "node:motion_lift_z__carriage_bridge bbox top face y=0.7080 (x ±0.132, z 0.082…0.124); узел в movers — движется вместе с гайкой",
+          "confidence": "high",
+          "note": "выход переставлен со статичного top_flange (y 1.245…1.278, болты flange_bolt_0..3 на поле 200 × 100 — неподвижная колонна) на движущуюся плиту моста carriage_bridge 264 × 156 × 126 (y 0.552…0.708). Свободная верхняя полоса 264 × 42 мм; 4 болта моста bridge_bolt_0..3 стоят на задней грани z ≈ -0.127 (поле ≈ 236 × 104) и верхнюю плоскость не занимают. Отверстий под инструмент нет — крепление хомутом/струбциной. ISO 9409 в геометрии отсутствует",
+          "connector": "CJ-TOOL-PLATE"
+        },
+        {
+          "id": "tool_boss_out",
+          "role": "output",
+          "kind": "flange",
+          "standard": "CJ-TOOL-BOSS-60",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.63,
+            0.146
+          ],
+          "normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.06,
+          "load_n": 11.772,
+          "source": "node:motion_lift_z__carriage_bridge bbox front face z=0.1460 (бобышка tool_boss Ø60 в составе моста, x/y центр 0 / 0.630)",
+          "confidence": "medium",
+          "note": "бобышка Ø60 на передней грани моста — альтернативная посадка инструмента с центрированием по +Z (в GLB слита с мостом, координата из build_motion_lift_z.py: cyl tool_boss Ø30 R)",
+          "connector": "CJ-TOOL-BOSS-60"
+        }
+      ]
+    },
+    "motion_rotary": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.109,
+            0.15,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "size_m": 0.007,
+          "count": 4,
+          "pitch_m": 0.268,
+          "load_n": 800.0,
+          "source": "node:motion_rotary__mount_flange rear face x=-0.109 + nodes mount_bolt_1..4 + mount_lug_1..4",
+          "confidence": "high",
+          "note": "задний фланец Ø244 мм с 4 лапами mount_lug (до Ø300); болты x≈-0.0945 на окружности Ø268 мм крестом: (y=0.284), (y=0.016), (z=±0.134). Контракт: M12 шаг 0.6 м — не подтверждено",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "CJ-TOOL-CHUCK-43",
+          "gender": "female",
+          "position_m": [
+            0.145,
+            0.15,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.043,
+          "count": 3,
+          "load_n": 11.772,
+          "source": "nodes motion_rotary__chuck_body (Ø120, x 0.118…0.140), chuck_bore (расточка Ø43), jaw_1..3 + jaw_*_step (до x=0.150)",
+          "confidence": "high",
+          "note": "реальный выход — трёхкулачковый патрон: расточка Ø43 (chuck_bore), кулаки выходят до x=0.150, ось +X. ISO 9409-1-50-4-M6 не размещается: патрон Ø120 перекрывает центр фланца. count — число кулаков",
+          "connector": "CJ-TOOL-CHUCK-43"
+        },
+        {
+          "id": "flange_out",
+          "role": "output",
+          "kind": "flange",
+          "standard": "фланец Ø144, 6 × Ø8,8 PCD 116",
+          "gender": "female",
+          "position_m": [
+            0.112,
+            0.15,
+            0.0
+          ],
+          "normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.144,
+          "count": 6,
+          "pitch_m": 0.116,
+          "load_n": 11.772,
+          "source": "node:motion_rotary__output_flange front face x=0.112 (Ø144) + flange_bolt_0..5 (PCD ≈116)",
+          "confidence": "high",
+          "note": "альтернативная посадка: фланец Ø144 с 6 болтами на PCD 116. Инструмент с осевым хвостовиком садится в патрон Ø43, кольцевой фланец — на эти болты",
+          "connector": "custom",
+          "connector_note": "фланец Ø144 с 6 болтами PCD 116 — в семействах CJ-TOOL нет; инструмент идёт в патрон"
+        }
+      ]
+    },
+    "motion_oscillating": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "surface",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.034,
+          "count": 4,
+          "pitch_x_m": 0.432,
+          "pitch_z_m": 0.264,
+          "load_n": 800.0,
+          "source": "nodes motion_oscillating__foot_l-216, foot_l216, foot_r-216, foot_r216 bottom face y=0.000 (+ skid_l/skid_r)",
+          "confidence": "medium",
+          "note": "4 опорные лапы 34 x 34 мм по углам скидов: x=±0.216, z=±0.132 → шаг 432 x 264 мм; точка — центр рисунка на плоскости y=0. Отверстий в геометрии нет; контракт обещает bolt_pattern 4xM12 шаг 0.6 м — не подтверждено",
+          "connector": "custom"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "CJ-OSC-PLATE 32×106",
+          "gender": "female",
+          "position_m": [
+            0.053,
+            0.139,
+            0.012
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "size_m": 0.032,
+          "load_n": 11.772,
+          "source": "node:motion_oscillating__crosshead bbox top face y=0.1390 (плита 0.032 × 0.106 м, z -0.044…0.062); палец slider_pin Ø12 выходит выше, до y=0.1755",
+          "confidence": "high",
+          "note": "инструмент крепится хомутом к плите ползуна (crosshead 32 × 106 мм, верх y=0.139); в центре плиты проходит палец шатуна Ø12 (slider_pin → rod_eye_small), ISO-фланец Ø50 на площадке 32 мм физически не размещается. axis — ось хода ползуна X (stroke 0.04 м), normal — вверх. Способ фиксации (хомут) — конструктивное решение, а не элемент геометрии",
+          "connector": "CJ-OSC-PLATE"
+        }
+      ]
+    },
+    "motion_spreader": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "surface",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.73,
+          "load_n": 800.0,
+          "source": "node:motion_spreader__rail_body bottom face y=0.000 (730 x 80 мм)",
+          "confidence": "medium",
+          "note": "направляющая-корпус лежит плоскостью y=0 на ложе/станине; отверстий в геометрии нет (контракт: bolt_pattern 4xM12 шаг 0.6 м). Привод — рукоятка handwheel на x=+0.3755",
+          "connector": "custom"
+        },
+        {
+          "id": "tool_out_l",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "quick-release block + Ø10 pin",
+          "gender": "female",
+          "position_m": [
+            -0.186,
+            0.121,
+            -0.008
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.044,
+          "count": 1,
+          "load_n": 294.3,
+          "source": "node:motion_spreader__qr_block_l top face y=0.121 + qr_pin_l (Ø10.4, z=-0.030)",
+          "confidence": "high",
+          "note": "левый быстросъёмный блок каретки (qr_lever/qr_knob_l): сюда садится стремя или ложемент; каретка ездит по X (±0.0149 м по kinematics)",
+          "connector": "custom"
+        },
+        {
+          "id": "tool_out_r",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "quick-release block + Ø10 pin",
+          "gender": "female",
+          "position_m": [
+            0.186,
+            0.121,
+            -0.008
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.044,
+          "count": 1,
+          "load_n": 294.3,
+          "source": "node:motion_spreader__qr_block_r top face y=0.121 + qr_pin_r (Ø10.4, z=-0.030)",
+          "confidence": "high",
+          "note": "правый быстросъёмный блок; движется симметрично левому (screw_lead_symmetric)",
+          "connector": "custom"
+        }
+      ]
+    },
+    "motion_winch": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.15,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0107,
+          "count": 4,
+          "pitch_x_m": 0.188,
+          "pitch_z_m": 0.26,
+          "load_n": 1471.5,
+          "source": "nodes motion_winch__rail_left/rail_right + rail_cap_left/right top face y=0.150 + anchor_bolt_left_0..1 / anchor_bolt_right_0..1",
+          "confidence": "high",
+          "note": "потолочное крепление: рельсы-полки сверху, 4 анкера x=±0.094, z=±0.130 (шаг 188 x 260 мм), головки y=0.143..0.150; точка — центр рисунка на верхней плоскости y=0.150. Машина висит на раме, барабан снизу",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "rope_payout",
+          "role": "output",
+          "kind": "cable",
+          "standard": "rope Ø9.2",
+          "gender": "male",
+          "position_m": [
+            0.048,
+            0.0328,
+            0.0592
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0092,
+          "count": 1,
+          "load_n": 1471.5,
+          "source": "node:motion_winch__rope_payout (узел payout_node из component-catalog model.payout)",
+          "confidence": "high",
+          "note": "точка схода троса с барабана на y=0.0328 (касание нижней образующей); ветвь rope_branch идёт вниз на 0.300 м до rope_end (y=-0.2672), длина троса 0.3 м, 12 витков rope_turn. Ось хода — минус Y",
+          "connector": "custom"
+        },
+        {
+          "id": "load_hook",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "shackle 8 mm + hook with latch",
+          "gender": "female",
+          "position_m": [
+            0.0575,
+            -0.3429,
+            0.0592
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0235,
+          "count": 1,
+          "load_n": 1471.5,
+          "source": "nodes motion_winch__hook + hook_clevis + shackle_bow + wedge_socket_body (rope_end y=-0.2672)",
+          "confidence": "high",
+          "note": "подвес манжеты: клиновой зажим троса → серьга (shackle_bow, палец на y=-0.2887) → крюк с защёлкой (hook 0.0445..0.0705 по X, y -0.3547..-0.3312). Точка взята по центру тела крюка, низ машины y=-0.3547",
+          "connector": "custom"
+        }
+      ]
+    },
+    "motion_turntable": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "load_n": 1471.5,
+          "source": "node:motion_turntable__base_floor bottom face y=0.000 (Ø796) + node:motion_turntable__anchor_bolts bbox",
+          "confidence": "medium",
+          "note": "напольное крепление; анкерные болты слиты в один mesh (bbox x ±0.386, z ±0.442, y 0.0085..0.0235) — число и шаг не читаются. Контракт: 4xM12 шаг 0.6 м",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "surface",
+          "standard": "CJ-TABLE-T900",
+          "gender": "female",
+          "position_m": [
+            0.2121,
+            0.1447,
+            0.2121
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.9,
+          "load_n": 1471.5,
+          "source": "nodes motion_turntable__disc (Ø900, верх y=0.1445), disc_slots (4 радиальных T-паза 210 × 12,5 на r=0.300, азимут 45°+90°k), disc_boss Ø230 / disc_spigot Ø144 (до y=0.150), disc_bolts 8 × Ø13,6 PCD 340",
+          "confidence": "high",
+          "note": "посадочное поле — сам диск: 4 радиальных T-паза на радиусе 300 мм (первый на 45°), точка — центр первого паза. 8 болтов диска на PCD 340 крепят диск к кольцу (внутренний стык, не инструмент). Концентрично выступают буртик Ø230 и шпиндель Ø144; ISO 9409 Ø50 геометрией не подтверждён. Вращение вокруг Y",
+          "count": 4,
+          "connector": "CJ-TABLE-T900"
+        }
+      ]
+    },
+    "motion_piston_rod": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.25,
+            0.075,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "size_m": 0.006,
+          "count": 4,
+          "pitch_m": 0.1156,
+          "load_n": 800.0,
+          "source": "node:motion_piston_rod__rear_flange rear face x=-0.250 + node:motion_piston_rod__flange_bolts (y/z ±0.0578)",
+          "confidence": "medium",
+          "note": "задний фланец Ø150 мм, 4 болта по квадрату 115.6 x 115.6 мм; головки выступают до x=-0.250. Контракт заявляет M12 шаг 0.6 м — по геометрии мелкий крепёж",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "pivot",
+          "standard": "CJ-CLEVIS-8 (палец Ø7,6)",
+          "gender": "female",
+          "position_m": [
+            0.245,
+            0.075,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0076,
+          "count": 1,
+          "load_n": 300.0,
+          "source": "nodes motion_piston_rod__clevis_cheek_l, clevis_cheek_r, clevis_pin (x=0.245, ось пальца Z)",
+          "confidence": "high",
+          "note": "передний конец штока: вилка (щеки 0.239…0.250) + палец Ø7,6 по Z. Контрактный flange ISO 9409-1-50-4-M6 в геометрии отсутствует; насадка садится на палец или на быстросъёмную муфту rod_coupling",
+          "connector": "CJ-CLEVIS-8"
+        },
+        {
+          "id": "rod_coupling",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "quick-release knurled nut Ø52",
+          "gender": "female",
+          "position_m": [
+            0.23,
+            0.075,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.052,
+          "count": 1,
+          "load_n": 300.0,
+          "source": "nodes motion_piston_rod__rod_coupling + coupling_knurl (x 0.196..0.230)",
+          "confidence": "medium",
+          "note": "быстросъёмная муфта штока (накатка Ø57) перед вилкой — реальная точка стыковки штока с насадкой",
+          "connector": "custom"
+        }
+      ]
+    },
+    "motion_piston_pneumatic": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M8",
+          "gender": "female",
+          "position_m": [
+            -0.062,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.005,
+          "count": 4,
+          "pitch_x_m": 0.0256,
+          "pitch_z_m": 0.0416,
+          "load_n": 300.0,
+          "source": "node:motion_piston_pneumatic__mount_pad_rear bottom y=0.000 + node:motion_piston_pneumatic__mount_bolts_rear bbox",
+          "confidence": "medium",
+          "note": "задняя опорная лапа 30 x 50 мм, болтовое поле по bbox 25.6 x 41.6 мм (4 болта слиты в один mesh). Контракт: M8, шаг 0.04 м",
+          "connector": "custom",
+          "connector_note": "M8, но поле не 0.240 × 0.240 м (CJ-STR-M8)"
+        },
+        {
+          "id": "mount_pad_front",
+          "role": "support",
+          "kind": "surface",
+          "gender": "female",
+          "position_m": [
+            0.01,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.03,
+          "source": "node:motion_piston_pneumatic__mount_pad_front bbox (y 0.000..0.008)",
+          "confidence": "high",
+          "note": "передняя лапа той же высоты — вторая опора цилиндра, идёт в паре с mount_in",
+          "connector": "custom"
+        },
+        {
+          "id": "pivot_rear",
+          "role": "support",
+          "kind": "pivot",
+          "standard": "clevis pin Ø7.1",
+          "gender": "female",
+          "position_m": [
+            -0.1,
+            0.05,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0071,
+          "count": 2,
+          "load_n": 300.0,
+          "source": "nodes motion_piston_pneumatic__clevis_l, clevis_r, clevis_pin (x=-0.100, ось пальца Z)",
+          "confidence": "high",
+          "note": "задняя проушина-вилка цилиндра: альтернатива лапам, качающаяся опора",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø7.1 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "pivot",
+          "standard": "палец Ø6,4 (вне CJ-CLEVIS-8)",
+          "gender": "female",
+          "position_m": [
+            0.0955,
+            0.05,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0064,
+          "count": 1,
+          "load_n": 300.0,
+          "source": "nodes motion_piston_pneumatic__fork_body, fork_cheek_l, fork_cheek_r, fork_pin (x=0.0955)",
+          "confidence": "high",
+          "note": "передний конец штока: вилка fork_body + палец Ø6,4 по Z. Это подразмер CJ-CLEVIS-8 (Ø8): нужна переходная серьга, иначе насадки с проушиной Ø8 не сядут",
+          "connector": "custom",
+          "connector_note": "палец Ø6,4 — подразмер CJ-CLEVIS-8 (Ø8): нужна переходная серьга"
+        },
+        {
+          "id": "air_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4",
+          "gender": "female",
+          "position_m": [
+            -0.072,
+            0.085,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0058,
+          "count": 1,
+          "source": "nodes motion_piston_pneumatic__port_boss_rear, port_nut_rear, port_nipple_rear (y до 0.085)",
+          "confidence": "high",
+          "note": "подвод воздуха 6..8 бар; второй порт (выхлоп) на x=+0.028 — port_nipple_front",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "air_exhaust",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4",
+          "gender": "female",
+          "position_m": [
+            0.028,
+            0.085,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0058,
+          "count": 1,
+          "source": "nodes motion_piston_pneumatic__port_boss_front, port_nut_front, port_nipple_front",
+          "confidence": "high",
+          "note": "выхлоп через дроссель/глушитель; valve_body и regulator сверху рамы",
+          "connector": "CJ-QD-F10"
+        }
+      ]
+    },
+    "motion_piston_hydraulic": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.079,
+            0.045,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "size_m": 0.0078,
+          "count": 4,
+          "pitch_x_m": 0.0468,
+          "pitch_z_m": 0.0459,
+          "load_n": 1177.2,
+          "source": "node:motion_piston_hydraulic__rear_flange rear face x=-0.079 + node:motion_piston_hydraulic__rear_flange_bolts (головки x -0.0847..-0.0769)",
+          "confidence": "medium",
+          "note": "задний фланец Ø52 мм, болтовое поле 46.8 x 45.9 мм, головки выступают до x=-0.0847. Контракт: M12 / 0.6 м — сильно завышено относительно модели",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "pivot_rear",
+          "role": "support",
+          "kind": "pivot",
+          "standard": "eye pin Ø10.8",
+          "gender": "female",
+          "position_m": [
+            -0.0965,
+            0.045,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0108,
+          "count": 2,
+          "load_n": 500.0,
+          "source": "nodes motion_piston_hydraulic__rear_eye, rear_eye_pin, rear_eye_pin_head (x=-0.0965)",
+          "confidence": "high",
+          "note": "задняя проушина — качающаяся опора; крайняя точка машины по X (x=-0.110)",
+          "connector": "custom",
+          "connector_note": "палец/ось Ø10.8 не в номинале CJ-CLEVIS-8 (Ø8 h8)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "pivot",
+          "standard": "CJ-CLEVIS-8 (палец Ø8,8)",
+          "gender": "female",
+          "position_m": [
+            0.0962,
+            0.045,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0088,
+          "count": 1,
+          "load_n": 500.0,
+          "source": "nodes motion_piston_hydraulic__rod_clevis_l, rod_clevis_r, rod_clevis_web, rod_pin (x=0.0962)",
+          "confidence": "high",
+          "note": "передний конец штока: вилка rod_clevis_l/r + web, палец Ø8,8 по Z; резьба rod_thread перед вилкой. Контрактный ISO 9409 не подтверждён",
+          "connector": "CJ-CLEVIS-8"
+        },
+        {
+          "id": "fluid_in",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "G1/4, 20..60 бар",
+          "gender": "female",
+          "position_m": [
+            -0.048,
+            0.0835,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.0112,
+          "count": 1,
+          "source": "nodes motion_piston_hydraulic__port_a_boss, port_a_nut, port_a_stub, port_a_oring",
+          "confidence": "high",
+          "note": "порт A высокого давления; порт B — port_b_stub (x=+0.018) на той же высоте",
+          "connector": "CJ-QD-F10"
+        },
+        {
+          "id": "drain",
+          "role": "fluid",
+          "kind": "hose",
+          "standard": "drain hose Ø12",
+          "gender": "female",
+          "position_m": [
+            -0.0645,
+            0.0345,
+            0.0459
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "size_m": 0.0119,
+          "count": 1,
+          "source": "nodes motion_piston_hydraulic__drain_hose, hose_fitting, hose_fitting_nut",
+          "confidence": "high",
+          "note": "дренаж/слив утечек, выходит вбок по +Z; valve_body и manifold на z=0.021..0.039",
+          "connector": "CJ-QD-F10"
+        }
+      ]
+    },
+    "motion_piston_telescopic": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.2,
+            0.058,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "size_m": 0.115,
+          "count": 4,
+          "pitch_m": 0.0972,
+          "load_n": 800.0,
+          "source": "node:motion_piston_telescopic__rear_flange rear face x=-0.200 (Ø115) + node:motion_piston_telescopic__flange_bolts (y/z ±0.048)",
+          "confidence": "high",
+          "note": "задний фланец Ø115 мм, 4 болта по квадрату 96 x 96 мм; головки на x -0.192..-0.186. Контракт: 4xM12 шаг 0.6 м — завышено",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "foot_mount",
+          "role": "support",
+          "kind": "surface",
+          "gender": "female",
+          "position_m": [
+            -0.16,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.05,
+          "source": "node:motion_piston_telescopic__rear_foot (y 0.000..0.034) + node:motion_piston_telescopic__foot_bolts",
+          "confidence": "high",
+          "note": "альтернативное крепление лапой снизу (bolt-поле foot_bolts 6 x 57.5 мм) вместо заднего фланца",
+          "connector": "custom"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "pivot",
+          "standard": "CJ-CLEVIS-8 (палец Ø7,5)",
+          "gender": "female",
+          "position_m": [
+            0.195,
+            0.058,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0075,
+          "count": 1,
+          "load_n": 150.0,
+          "source": "nodes motion_piston_telescopic__clevis_body, clevis_cheek_l, clevis_cheek_r, clevis_pin (x=0.195)",
+          "confidence": "high",
+          "note": "передний конец последней ступени: вилка + палец Ø7,5 по Z, крайняя точка x=0.200; 3 ступени, ход 0…0.250 м. Контрактный ISO 9409 не подтверждён",
+          "connector": "CJ-CLEVIS-8"
+        }
+      ]
+    },
+    "motion_piston_cam": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "mount",
+          "kind": "surface",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.6,
+          "load_n": 800.0,
+          "source": "nodes motion_piston_cam__frame_rail_front, frame_rail_rear, frame_end_l, frame_end_r bottom y=0.000",
+          "confidence": "medium",
+          "note": "нижняя плоскость рамы 600 x 296 мм — опорная; отверстий в раме нет",
+          "connector": "custom"
+        },
+        {
+          "id": "mount_pads",
+          "role": "mount",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            0.0,
+            0.031,
+            0.0
+          ],
+          "normal": [
+            0,
+            1,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "size_m": 0.04,
+          "count": 4,
+          "pitch_x_m": 0.524,
+          "pitch_z_m": 0.272,
+          "load_n": 800.0,
+          "source": "nodes motion_piston_cam__mount_pad_0..3 (y 0.025..0.031) + node:motion_piston_cam__mount_bolts (y 0.030..0.038)",
+          "confidence": "low",
+          "note": "4 монтажных пада 40 x 20 мм по углам рамы с болтами НАРУЖУ ВВЕРХ (y=0.031) — крепление к ране/плите сверху; ориентация интерфейса неоднозначна, контрактного bolt_pattern 4xM12 шаг 0.6 м в геометрии нет",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "flange",
+          "standard": "фланец Ø50 + площадка Ø30, 4×Ø6 PCD 34",
+          "gender": "female",
+          "position_m": [
+            0.268,
+            0.158,
+            0.03
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.05,
+          "count": 4,
+          "pitch_m": 0.034,
+          "load_n": 100.0,
+          "source": "nodes motion_piston_cam__tool_flange (Ø50, x 0.250…0.264), tool_face (Ø30, x 0.264…0.268), tool_bolts (4 × Ø6 на r=0.017)",
+          "confidence": "high",
+          "note": "торец толкателя по +X: фланец Ø50 с площадкой Ø30 и 4 болтами Ø6 на PCD 34. Это не ISO 9409-1-50-4-M6 (там PCD 40, 4×M6): болтовое поле меньше, крепёж Ø6. Ход follower_rod 0.06 м по X",
+          "connector": "custom",
+          "connector_note": "фланец Ø50, но поле 4×Ø6 PCD 34 ≠ ISO 9409 (PCD 40, 4×M6)"
+        }
+      ]
+    },
+    "motion_piston_servo": {
+      "class": "MOTION",
+      "mates": [
+        {
+          "id": "mount_in",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.087,
+            0.0,
+            0.0
+          ],
+          "normal": [
+            0,
+            -1,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "size_m": 0.0055,
+          "count": 8,
+          "pitch_z_m": 0.154,
+          "load_n": 800.0,
+          "source": "nodes motion_piston_servo__foot_rail_l/foot_rail_r + foot_bolt_l_0..3 / foot_bolt_r_0..3 (x=-0.278,-0.204,-0.060,0.104; z=±0.077)",
+          "confidence": "high",
+          "note": "8 анкеров в двух лапах-рельсах 420 x 26 мм; шаг по X неравномерный (0.074 / 0.144 / 0.164), по Z 154 мм. Контракт: 4xM12 шаг 0.6 м — не подтверждено",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "mount_flange_rear",
+          "role": "input",
+          "kind": "bolt_pattern",
+          "standard": "M12",
+          "gender": "female",
+          "position_m": [
+            -0.214,
+            0.094,
+            0.0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "size_m": 0.0035,
+          "count": 4,
+          "pitch_x_m": 0.128,
+          "pitch_z_m": 0.124,
+          "load_n": 800.0,
+          "source": "node:motion_piston_servo__motor_flange rear face x=-0.214 + nodes flange_bolt_0..3 (y 0.030 / 0.158, z=±0.062)",
+          "confidence": "medium",
+          "note": "альтернатива лапам: задний фланец 164 x 146 мм с 4 болтами, вынесен над лапами (центр по Y=0.094)",
+          "connector": "custom",
+          "connector_note": "M12, но поле не 0.600 × 0.600 м (CJ-STR-M12)"
+        },
+        {
+          "id": "tool_out",
+          "role": "output",
+          "kind": "pivot",
+          "standard": "CJ-CLEVIS-8 (палец Ø8,4)",
+          "gender": "female",
+          "position_m": [
+            0.2945,
+            0.09,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "size_m": 0.0084,
+          "count": 1,
+          "load_n": 400.0,
+          "source": "nodes motion_piston_servo__clevis_block, clevis_cheek_l, clevis_cheek_r, clevis_pin (x=0.2945)",
+          "confidence": "high",
+          "note": "передний конец штока: вилка 0.278…0.300 + палец Ø8,4 по Z, крайняя точка x=0.300; перед вилкой быстросъёмная муфта rod_coupling Ø44 с контргайкой. Контрактный ISO 9409 не подтверждён",
+          "connector": "CJ-CLEVIS-8",
+          "connector_note": "палец Ø8,4 — номинал CJ-CLEVIS-8 Ø8 h8"
+        },
+        {
+          "id": "rod_coupling",
+          "role": "output",
+          "kind": "clamp",
+          "standard": "quick coupling Ø44",
+          "gender": "female",
+          "position_m": [
+            0.276,
+            0.09,
+            0.0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "size_m": 0.044,
+          "count": 1,
+          "load_n": 400.0,
+          "source": "nodes motion_piston_servo__rod_coupling (x 0.268..0.276) + rod_locknut, rod_locknut_knurl",
+          "confidence": "medium",
+          "note": "быстросъёмная муфта с контргайкой перед вилкой — точка стыковки штока с насадкой",
+          "connector": "custom"
+        }
+      ]
+    }
+  }
+}

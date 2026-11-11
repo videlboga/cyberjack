@@ -1,0 +1,83 @@
+{
+  "format": "cj-assembly-check/1",
+  "device": "lab_diagnostic_table",
+  "components": {
+    "structure_bed_frame": {
+      "bbox_min": [
+        -0.9925,
+        -0.446,
+        0.0
+      ],
+      "bbox_max": [
+        0.9925,
+        0.446,
+        0.32593
+      ]
+    },
+    "surface_sensor": {
+      "bbox_min": [
+        -1.0,
+        -0.45,
+        0.326
+      ],
+      "bbox_max": [
+        1.0,
+        0.45,
+        0.3412
+      ]
+    },
+    "control_telemetry": {
+      "bbox_min": [
+        0.5498,
+        0.25899,
+        0.3412
+      ],
+      "bbox_max": [
+        0.8502,
+        0.34101,
+        0.5414
+      ]
+    },
+    "control_estop": {
+      "bbox_min": [
+        -0.76045,
+        0.23977,
+        0.3412
+      ],
+      "bbox_max": [
+        -0.63955,
+        0.36023,
+        0.4212
+      ]
+    }
+  },
+  "missing": [],
+  "interference": [],
+  "contacts": [
+    {
+      "a": "surface_sensor",
+      "b": "control_telemetry",
+      "aabb_overlap_m": 0.0,
+      "triangle_pairs": 0
+    },
+    {
+      "a": "surface_sensor",
+      "b": "control_estop",
+      "aabb_overlap_m": 0.0,
+      "triangle_pairs": 0
+    }
+  ],
+  "sweeps": [],
+  "footprint": {
+    "spec_m": [
+      2.0,
+      0.9
+    ],
+    "actual_m": [
+      2.0,
+      0.9
+    ],
+    "ok": true
+  },
+  "status": "pass"
+}
