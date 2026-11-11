@@ -83,3 +83,161 @@ assets/cc0/models/
 # SKP vol-04 (конвертируется скриптом, не хранится в репозитории)
 assets/3d/converted/vol04/
 assets/3d/converted/vol04_meta.json
+
+# ============================================================================
+# Политика репозитория: в git идут исходники (код, скрипты, доки, конфиги),
+# а не ассеты, датасеты и результаты прогонов. Всё тяжёлое воспроизводится
+# скриптами из assets/ и cyberjack-v0.01/character-work/*/tools.
+# ============================================================================
+
+# --- 3D / моушен-ассеты ---
+*.blend
+*.blend1
+*.blend2
+*.unity3d
+*.vrm
+*.glb
+*.gltf
+*.fbx
+*.obj
+*.mtl
+*.pmx
+*.pmd
+*.vmd
+*.abc
+*.dae
+*.stl
+*.ply
+*.skp
+*.csmo
+*.cs3o
+*.uasset
+*.umap
+*.assets
+*.pzl
+*.transferable
+*.sym
+*.safetensors
+*.psd
+*.exr
+*.hdr
+*.tga
+*.dds
+*.ktx2
+
+# --- датасеты / кэши расчётов ---
+*.npy
+*.npz
+*.pkl
+*.pyc
+*.pyo
+
+# --- аудио ---
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.ogg
+
+# --- архивы и бинарники ---
+*.rar
+*.tar
+*.so
+*.dll
+*.exe
+*.a
+*.o
+
+# --- шрифты ---
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# --- БД и её бэкапы (снапшоты базы локальные) ---
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite.bak_*
+*.db.bak_*
+
+# --- Unity: кэш пакетов и бинарные артефакты проекта ---
+cyberjack-v0.01/Library/
+cyberjack-v0.01/Temp/
+cyberjack-v0.01/Obj/
+cyberjack-v0.01/Build/
+cyberjack-v0.01/UserSettings/
+*/Intermediate/
+*/Binaries/
+*/Saved/
+*/DerivedDataCache/
+**/Intermediate/
+**/Binaries/
+**/Saved/
+**/DerivedDataCache/
+
+# node_modules может быть симлинком (в копии playground) — без слэша
+node_modules
+.vite-vrm-cache/
+
+# --- character-work: сессии — рабочие каталоги, а не репозиторий ---
+# Не версионируем ассеты, датасеты, отчёты прогонов и кэши сессий.
+cyberjack-v0.01/character-work/*/outputs/
+cyberjack-v0.01/character-work/*/work/
+cyberjack-v0.01/character-work/*/session/
+cyberjack-v0.01/character-work/*/artifacts/
+cyberjack-v0.01/character-work/*/snapshots/
+cyberjack-v0.01/character-work/*/cache/
+cyberjack-v0.01/character-work/*/tmp/
+cyberjack-v0.01/character-work/*/*/outputs/
+cyberjack-v0.01/character-work/*/*/work/
+cyberjack-v0.01/character-work/*/*/artifacts/
+cyberjack-v0.01/character-work/*/*/snapshots/
+cyberjack-v0.01/character-work/*/*/cache/
+cyberjack-v0.01/character-work/*/motion-analysis/artifacts/
+cyberjack-v0.01/character-work/*/motion-analysis/data/
+cyberjack-v0.01/character-work/*/motion-analysis/dataset/
+cyberjack-v0.01/character-work/*/motion-analysis/external-library/
+cyberjack-v0.01/character-work/*/motion-analysis/external-library-hips/
+cyberjack-v0.01/character-work/*/motion-analysis/review/performance-fixture.json
+cyberjack-v0.01/character-work/*/animations/sources/
+cyberjack-v0.01/character-work/*/animations/reports/
+cyberjack-v0.01/character-work/*/animations/catalog.json
+cyberjack-v0.01/character-work/*/animations/catalog-*.json
+cyberjack-v0.01/character-work/*/animations/organization.json
+cyberjack-v0.01/character-work/*/animations/ru_names.json
+cyberjack-v0.01/character-work/*/animations/transform_paths.json
+cyberjack-v0.01/character-work/*/animations/avatar_paths.json
+cyberjack-v0.01/character-work/*/animations/payload_audit_index.json
+cyberjack-v0.01/character-work/*/animations/playback-audit.json
+cyberjack-v0.01/character-work/*/animation-links/
+cyberjack-v0.01/character-work/*/scene-objects/sources/
+cyberjack-v0.01/character-work/*/scene-objects/skp-vol03/metadata/
+cyberjack-v0.01/character-work/*/inputs/
+cyberjack-v0.01/character-work/*/character-factory/*/work/
+cyberjack-v0.01/character-work/*/character-factory/*/assets/
+cyberjack-v0.01/character-work/*/character-factory/*/*library.json
+cyberjack-v0.01/character-work/*/character-factory/*/gpu-runtime-fixture.json
+cyberjack-v0.01/character-work/*/character-factory/*/anatomy-rig.js
+cyberjack-v0.01/character-work/*/character-factory/*/evanescia-data.js
+cyberjack-v0.01/character-work/*/character-factory/*/dance-data.js
+cyberjack-v0.01/character-work/*/character-factory/*/vendor/
+cyberjack-v0.01/character-work/*/SHA256SUMS.json
+cyberjack-v0.01/character-work/*/catalog*.json
+cyberjack-v0.01/character-work/*/organization.json
+cyberjack-v0.01/character-work/*/ru_names.json
+cyberjack-v0.01/character-work/*/transform_paths.json
+
+# --- сгенерированные чек-листы и индексы визуальных ассетов ---
+cyberjack-v0.01-vrm-playground/docs/visual-assets/visual-generation-v4-*
+cyberjack-v0.01-vrm-playground/docs/visual-assets/character-image-combinations.csv
+cyberjack-v0.01-vrm-playground/docs/visual-assets/base-avatar-checklist.json
+cyberjack-v0.01-vrm-playground/docs/visual-assets/interaction-visual-expanded-checklist.json
+**/visual-asset-index-v4.generated.json
+cyberjack-v0.01-vrm-playground/src/infrastructure/data/visual/*.generated.json
+
+# --- метаданные конвертации моделей (без самих .glb бесполезны) ---
+cyberjack-v0.01/public/models/sex-machines-models-*/*/metadata/
+cyberjack-v0.01/public/models/sex-machines-models-*/glb-nohuman/*_metadata.json
